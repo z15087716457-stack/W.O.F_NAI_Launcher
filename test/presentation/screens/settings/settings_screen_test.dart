@@ -1,12 +1,16 @@
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/storage/secure_storage_service.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
@@ -48,6 +52,28 @@ class _MemorySettingsStorage extends LocalStorageService {
       _config = value as String;
     }
   }
+}
+
+class _MemoryAssistantSecrets extends SecureStorageService {
+  final Map<String, String> headers = {};
+  @override
+  Future<String?> getPromptAssistantHeaders(String providerId) async =>
+      headers[providerId];
+  @override
+  Future<void> savePromptAssistantHeaders(
+    String providerId,
+    String value,
+  ) async {
+    headers[providerId] = value;
+  }
+
+  @override
+  Future<void> deletePromptAssistantHeaders(String providerId) async {
+    headers.remove(providerId);
+  }
+
+  @override
+  Future<String?> getPromptAssistantApiKey(String providerId) async => null;
 }
 
 void main() {
@@ -181,9 +207,101 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1280, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final storage = _MemorySettingsStorage();
+    final captureKey = GlobalKey();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+        overrides: [
+          localStorageServiceProvider.overrideWith((ref) => storage),
+          secureStorageServiceProvider.overrideWith(
+            (ref) => _MemoryAssistantSecrets(),
+          ),
+        ],
+        child: RepaintBoundary(
+          key: captureKey,
+          child: const MaterialApp(
+            locale: Locale('zh'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: PromptAssistantSettingsSection(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(PromptAssistantSettingsSection)),
+    );
+    await container
+        .read(promptAssistantConfigProvider.notifier)
+        .upsertProvider(
+          const ProviderConfig(
+            id: 'custom',
+            name: '中转服务',
+            baseUrl: 'https://example.test/v1',
+          ),
+        );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('中转服务'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    if (const bool.fromEnvironment('AI_SERVICE_CAPTURE')) {
+      await tester.runAsync(() async {
+        final boundary =
+            captureKey.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        final image = await boundary.toImage(pixelRatio: 1);
+        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        final file = File('build/qa/ai-service-editor.png');
+        await file.parent.create(recursive: true);
+        await file.writeAsBytes(bytes!.buffer.asUint8List());
+      });
+    }
+    await tester.enterText(
+      find.byKey(const Key('ai-service-manual-model-id')),
+      'relay-model-v5',
+    );
+    await tester.pump();
+    await tester.ensureVisible(find.byTooltip('添加自定义模型'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('添加自定义模型'));
+    await tester.pump();
+    await tester.tap(find.text('保存服务'));
+    await tester.pumpAndSettle();
+    await tester.pump();
+
+    final models = container
+        .read(promptAssistantConfigProvider)
+        .modelsForProvider(providerId: 'custom');
+    expect(models.map((model) => model.name), contains('relay-model-v5'));
+    await container
+        .read(promptAssistantConfigProvider.notifier)
+        .setInterfaceProvider(LauncherInterface.translate, 'custom');
+    expect(
+      container
+          .read(promptAssistantConfigProvider)
+          .promptTranslationRoute
+          ?.model
+          .name,
+      'relay-model-v5',
+    );
+  });
+
+  testWidgets('服务高级设置保存超时和安全请求头', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1280, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final storage = _MemorySettingsStorage();
+    final secrets = _MemoryAssistantSecrets();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStorageServiceProvider.overrideWith((ref) => storage),
+          secureStorageServiceProvider.overrideWith((ref) => secrets),
+        ],
         child: const MaterialApp(
           locale: Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -210,29 +328,34 @@ void main() {
           ),
         );
     await tester.pumpAndSettle();
-
-    await tester.tap(find.text('手动添加模型'));
+    await tester.tap(find.text('中转服务'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).first, 'relay-model-v5');
-    await tester.pump();
-    await tester.tap(find.text('保存'));
+    await tester.tap(find.text('高级设置'));
     await tester.pumpAndSettle();
-    await tester.pump();
-
-    final models = container
-        .read(promptAssistantConfigProvider)
-        .modelsForProvider(providerId: 'custom');
-    expect(models.map((model) => model.name), contains('relay-model-v5'));
-    await container
-        .read(promptAssistantConfigProvider.notifier)
-        .setInterfaceProvider(LauncherInterface.translate, 'custom');
+    await tester.enterText(find.widgetWithText(TextField, '请求超时（秒）'), '75');
+    await tester.tap(find.text('添加请求头'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('ai-header-name-0')),
+      'X-Project',
+    );
+    await tester.enterText(
+      find.byKey(const Key('ai-header-value-0')),
+      'studio',
+    );
+    await tester.tap(find.text('应用'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('保存服务'));
+    await tester.pumpAndSettle();
     expect(
       container
           .read(promptAssistantConfigProvider)
-          .promptTranslationRoute
-          ?.model
-          .name,
-      'relay-model-v5',
+          .providers
+          .single
+          .timeoutSeconds,
+      75,
     );
+    expect(jsonDecode(secrets.headers['custom']!), {'X-Project': 'studio'});
+    expect(tester.takeException(), isNull);
   });
 }

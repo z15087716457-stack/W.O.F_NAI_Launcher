@@ -4689,114 +4689,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fixedTags_negativeTitle => '负向固定词';
 
   @override
-  String get promptAssistant_provider => '服务商';
-
-  @override
-  String get promptAssistant_model => '模型';
-
-  @override
-  String get promptAssistant_noModelsPullFirst => '暂无模型，请拉取或手动添加';
-
-  @override
-  String get promptAssistant_addModel => '手动添加模型';
-
-  @override
-  String get promptAssistant_modelId => '模型 ID';
-
-  @override
-  String get promptAssistant_modelIdHint => '填写接口实际接受的模型名';
-
-  @override
-  String get promptAssistant_modelDisplayName => '显示名称（可选）';
-
-  @override
-  String get promptAssistant_providerManagement => '服务商管理';
-
-  @override
-  String get promptAssistant_providerManagementSubtitle =>
-      '支持 OpenAI Chat / Responses、Anthropic、Gemini、DeepSeek、LM Studio、Ollama、Pollinations 和自定义兼容端点';
-
-  @override
-  String get promptAssistant_apiKeyConfigured => 'API Key: 已配置';
-
-  @override
-  String get promptAssistant_apiKeyNotConfigured => 'API Key: 未配置';
-
-  @override
-  String get promptAssistant_supportsImageInput => '支持图片输入';
-
-  @override
-  String get promptAssistant_textOnly => '仅文本';
-
-  @override
-  String get promptAssistant_connectionConfig => '连接配置';
-
-  @override
-  String get promptAssistant_pullModelList => '拉取模型列表';
-
-  @override
-  String get promptAssistant_editProvider => '编辑服务商';
-
-  @override
-  String get promptAssistant_deleteProvider => '删除服务商';
-
-  @override
-  String get promptAssistant_pullingModels => '正在拉取模型列表...';
-
-  @override
-  String get promptAssistant_emptyModelList => '服务返回空模型列表';
-
-  @override
-  String promptAssistant_modelsSynced(Object count) {
-    return '已同步 $count 个模型';
-  }
-
-  @override
-  String promptAssistant_pullModelsFailed(Object error) {
-    return '拉取模型失败: $error';
-  }
-
-  @override
-  String get promptAssistant_addProvider => '新增服务商';
-
-  @override
-  String get promptAssistant_editProviderTitle => '编辑服务商';
-
-  @override
-  String get promptAssistant_name => '名称';
-
-  @override
-  String get promptAssistant_protocol => '协议';
-
-  @override
-  String get promptAssistant_allowImageInput => '允许发送图片输入';
-
-  @override
-  String get promptAssistant_allowImageInputSubtitle => '仅在模型和服务商实际支持视觉输入时启用';
-
-  @override
-  String get promptAssistant_apiKeyLeaveEmpty => 'API Key (留空不改)';
-
-  @override
-  String promptAssistant_connectionTitle(Object name) {
-    return '$name 连接配置';
-  }
-
-  @override
-  String get promptAssistant_baseUrlHint => '例如: https://api.openai.com/v1';
-
-  @override
-  String get promptAssistant_clearCurrentApiKey => '清空当前 API Key';
-
-  @override
-  String get promptAssistant_protocolSupportsImagePayload =>
-      '当前协议支持图片载荷，仍需模型本身支持视觉输入';
-
-  @override
-  String get promptAssistant_protocolTextOnlyWarning =>
-      '当前协议默认仅文本，开启后也可能被服务端拒绝';
-
-  @override
   String autocomplete_resultsCount(Object count) {
     return '$count 个结果';
   }
@@ -9779,22 +9671,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_modelsAndInterfaces => '模型与接口';
-
-  @override
-  String get promptAssistant_launcherInterfaces => '启动器接口';
-
-  @override
-  String get promptAssistant_launcherInterfacesSubtitle =>
-      '提示词翻译需明确选择服务商与模型；词库标签翻译未配置时使用第一个启用的服务商';
-
-  @override
-  String get promptAssistant_interfaceTranslate => '提示词翻译';
-
-  @override
-  String get promptAssistant_interfaceTagTranslate => '词库标签翻译';
-
-  @override
-  String get promptAssistant_noEnabledProviders => '暂无启用的服务商，请先在下方添加并启用';
 
   @override
   String get tips_gen_teach_1 => '在提示词框输入 < 可以拉进块库里的块';

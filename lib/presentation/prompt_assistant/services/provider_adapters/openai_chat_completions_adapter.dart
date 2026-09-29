@@ -23,6 +23,7 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
     if (apiKey != null && apiKey.trim().isNotEmpty) {
       headers['Authorization'] = 'Bearer ${apiKey.trim()}';
     }
+    final requestHeaders = promptAssistantHeaders(provider, headers);
 
     final endpoints = <String>[
       _resolveModelsEndpoint(provider),
@@ -37,9 +38,9 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
         final response = await dio.get<dynamic>(
           endpoint,
           options: Options(
-            headers: headers,
+            headers: requestHeaders,
             sendTimeout: const Duration(seconds: 20),
-            receiveTimeout: const Duration(seconds: 30),
+            receiveTimeout: promptAssistantTimeout(provider),
           ),
         );
         final names = extractModelNames(response.data);
@@ -54,7 +55,7 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
     if (lastError != null) {
       throw lastError;
     }
-    return provider.preset?.defaultModelNames ?? const [];
+    return const [];
   }
 
   @override
@@ -69,6 +70,16 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
       'stream': false,
       'messages': _buildMessages(request),
     };
+    final settings = request.modelConfig;
+    if (settings?.maxOutputTokens case final int limit) {
+      payload[request.provider.preset == ProviderPreset.openaiChat
+              ? 'max_completion_tokens'
+              : 'max_tokens'] =
+          limit;
+    }
+    if (settings?.reasoningEffort case final String effort) {
+      payload['reasoning_effort'] = effort;
+    }
 
     final response = await _postWithFallback(
       dio: dio,
@@ -91,15 +102,16 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
     if (request.apiKey != null && request.apiKey!.trim().isNotEmpty) {
       headers['Authorization'] = 'Bearer ${request.apiKey!.trim()}';
     }
+    final requestHeaders = promptAssistantHeaders(request.provider, headers);
 
     try {
       return await dio.post<dynamic>(
         endpoint,
         data: payload,
         options: Options(
-          headers: headers,
+          headers: requestHeaders,
           sendTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(minutes: 2),
+          receiveTimeout: promptAssistantTimeout(request.provider),
         ),
         cancelToken: cancelToken,
       );
@@ -114,14 +126,16 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
           endpoint.replaceFirst('/v1/chat/completions', '/chat/completions'),
           data: payload,
           options: Options(
-            headers: headers,
+            headers: requestHeaders,
             sendTimeout: const Duration(seconds: 30),
-            receiveTimeout: const Duration(minutes: 2),
+            receiveTimeout: promptAssistantTimeout(request.provider),
           ),
           cancelToken: cancelToken,
         );
       }
-      if (status == 400) {
+      if (status == 400 &&
+          request.modelConfig?.maxOutputTokens == null &&
+          request.modelConfig?.reasoningEffort == null) {
         return dio.post<dynamic>(
           endpoint,
           data: {
@@ -130,9 +144,9 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
             'messages': payload['messages'],
           },
           options: Options(
-            headers: headers,
+            headers: requestHeaders,
             sendTimeout: const Duration(seconds: 30),
-            receiveTimeout: const Duration(minutes: 2),
+            receiveTimeout: promptAssistantTimeout(request.provider),
           ),
           cancelToken: cancelToken,
         );

@@ -14,15 +14,28 @@ class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
     required ProviderConfig provider,
     required String? apiKey,
   }) async {
-    final response = await dio.get<dynamic>(
-      _resolveModelsEndpoint(provider),
-      options: Options(
-        headers: _headers(apiKey),
-        sendTimeout: const Duration(seconds: 20),
-        receiveTimeout: const Duration(seconds: 30),
-      ),
-    );
-    return extractModelNames(response.data);
+    final names = <String>{};
+    String? cursor;
+    for (var page = 0; page < 20; page++) {
+      final response = await dio.get<dynamic>(
+        _resolveModelsEndpoint(provider),
+        queryParameters: {
+          'pageSize': 1000,
+          if (cursor != null) 'pageToken': cursor,
+        },
+        options: Options(
+          headers: promptAssistantHeaders(provider, _headers(apiKey)),
+          sendTimeout: const Duration(seconds: 20),
+          receiveTimeout: promptAssistantTimeout(provider),
+        ),
+      );
+      names.addAll(extractModelNames(response.data));
+      final body = response.data;
+      final next = body is Map ? body['nextPageToken'] : null;
+      if (next is! String || next.isEmpty || next == cursor) break;
+      cursor = next;
+    }
+    return names.toList();
   }
 
   @override
@@ -42,11 +55,22 @@ class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
         'contents': [
           {'role': 'user', 'parts': _parts(request.userParts)},
         ],
+        if (request.modelConfig?.maxOutputTokens != null ||
+            request.modelConfig?.reasoningEffort != null)
+          'generationConfig': {
+            if (request.modelConfig?.maxOutputTokens case final int limit)
+              'maxOutputTokens': limit,
+            if (request.modelConfig?.reasoningEffort case final String effort)
+              'thinkingConfig': {'thinkingLevel': effort.toUpperCase()},
+          },
       },
       options: Options(
-        headers: _headers(request.apiKey),
+        headers: promptAssistantHeaders(
+          request.provider,
+          _headers(request.apiKey),
+        ),
         sendTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(minutes: 2),
+        receiveTimeout: promptAssistantTimeout(request.provider),
       ),
       cancelToken: cancelToken,
     );

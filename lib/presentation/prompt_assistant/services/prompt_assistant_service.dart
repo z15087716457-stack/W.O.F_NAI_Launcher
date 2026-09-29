@@ -77,6 +77,7 @@ return source text, Markdown, code fences, comments or extra fields.
         sessionId: sessionId,
         provider: execution.provider,
         model: execution.model,
+        modelConfig: execution.modelConfig,
         systemPrompt: promptTranslationSystemPrompt,
         userParts: [PromptAssistantContentPart.text(requestJson)],
         apiKey: execution.apiKey,
@@ -100,7 +101,49 @@ return source text, Markdown, code fences, comments or extra fields.
     final apiKey = await _ref
         .read(promptAssistantConfigProvider.notifier)
         .getProviderApiKey(provider.id);
-    return _apiClient.fetchModels(provider: provider, apiKey: apiKey);
+    final headers = await _ref
+        .read(promptAssistantConfigProvider.notifier)
+        .getProviderHeaders(provider.id);
+    return _apiClient.fetchModels(
+      provider: provider.copyWith(requestHeaders: headers),
+      apiKey: apiKey,
+      usePresetFallback: false,
+    );
+  }
+
+  /// Reads a draft service's catalog without changing saved configuration.
+  Future<List<String>> fetchModelsForDraft(
+    ProviderConfig provider,
+    String? apiKey,
+    Map<String, String> headers,
+  ) => _apiClient.fetchModels(
+    provider: provider.copyWith(requestHeaders: headers),
+    apiKey: apiKey,
+    usePresetFallback: false,
+  );
+
+  /// Explicit user action: send a tiny completion to verify the selected model.
+  Future<String> testModelForDraft(
+    ProviderConfig provider,
+    ModelConfig model,
+    String? apiKey,
+    Map<String, String> headers,
+  ) async {
+    final output = StringBuffer();
+    await for (final chunk in _apiClient.complete(
+      request: PromptAssistantRequest(
+        sessionId: 'service-test-${DateTime.now().microsecondsSinceEpoch}',
+        provider: provider.copyWith(requestHeaders: headers),
+        model: model.name,
+        modelConfig: model,
+        systemPrompt: 'Reply with OK only.',
+        userParts: [PromptAssistantContentPart.text('OK')],
+        apiKey: apiKey,
+      ),
+    )) {
+      output.write(chunk.delta);
+    }
+    return output.toString();
   }
 
   static const int tagTranslationPromptVersion = 1;
@@ -139,6 +182,7 @@ Prompt version: $tagTranslationPromptVersion
         sessionId: sessionId,
         provider: execution.provider,
         model: execution.model,
+        modelConfig: execution.modelConfig,
         systemPrompt: systemPrompt,
         userParts: [PromptAssistantContentPart.text(jsonEncode(tags))],
         apiKey: execution.apiKey,
@@ -261,7 +305,14 @@ Prompt version: $tagTranslationPromptVersion
     );
   }
 
-  Future<({ProviderConfig provider, String model, String? apiKey})>
+  Future<
+    ({
+      ProviderConfig provider,
+      String model,
+      String? apiKey,
+      ModelConfig? modelConfig,
+    })
+  >
   _resolveInterfaceExecution(LauncherInterface interface) async {
     final config = _ref.read(promptAssistantConfigProvider);
     if (interface == LauncherInterface.translate) {
@@ -272,10 +323,14 @@ Prompt version: $tagTranslationPromptVersion
       final apiKey = await _ref
           .read(promptAssistantConfigProvider.notifier)
           .getProviderApiKey(selected.provider.id);
+      final headers = await _ref
+          .read(promptAssistantConfigProvider.notifier)
+          .getProviderHeaders(selected.provider.id);
       return (
-        provider: selected.provider,
+        provider: selected.provider.copyWith(requestHeaders: headers),
         model: selected.model.name,
         apiKey: apiKey,
+        modelConfig: selected.model,
       );
     }
     final route = _resolveInterfaceRoute(config, interface);
@@ -287,6 +342,18 @@ Prompt version: $tagTranslationPromptVersion
     final apiKey = await _ref
         .read(promptAssistantConfigProvider.notifier)
         .getProviderApiKey(route.provider.id);
-    return (provider: route.provider, model: route.model, apiKey: apiKey);
+    final headers = await _ref
+        .read(promptAssistantConfigProvider.notifier)
+        .getProviderHeaders(route.provider.id);
+    final modelConfig = config
+        .modelsForProvider(providerId: route.provider.id)
+        .where((item) => item.name == route.model)
+        .firstOrNull;
+    return (
+      provider: route.provider.copyWith(requestHeaders: headers),
+      model: route.model,
+      apiKey: apiKey,
+      modelConfig: modelConfig,
+    );
   }
 }

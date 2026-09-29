@@ -1107,6 +1107,43 @@ void main() {
       expect(defaultModel.source, ModelSource.manual);
     });
 
+    test(
+      'keeps model request settings while excluding secure headers from JSON',
+      () {
+        const state = PromptAssistantConfigState(
+          providers: [
+            ProviderConfig(
+              id: 'relay',
+              name: 'Relay',
+              baseUrl: 'https://relay.test/v1',
+              timeoutSeconds: 90,
+              requestHeaders: {'X-Secret': 'private'},
+            ),
+          ],
+          models: [
+            ModelConfig(
+              providerId: 'relay',
+              name: 'model-a',
+              displayName: 'Fast',
+              contextWindow: 128000,
+              maxOutputTokens: 8192,
+              reasoningEffort: 'low',
+            ),
+          ],
+          interfaces: {},
+          providerHasApiKey: {},
+        );
+        final raw = state.encode();
+        expect(raw, isNot(contains('X-Secret')));
+        expect(raw, isNot(contains('private')));
+        final restored = PromptAssistantConfigState.decode(raw);
+        expect(restored.providers.single.timeoutSeconds, 90);
+        expect(restored.models.single.contextWindow, 128000);
+        expect(restored.models.single.maxOutputTokens, 8192);
+        expect(restored.models.single.reasoningEffort, 'low');
+      },
+    );
+
     test('refresh replaces stale API models and keeps manual models', () async {
       final localStorage = _MockLocalStorageService();
       when(
@@ -1182,6 +1219,64 @@ void main() {
       );
       // 接口槽指向被清理的模型时回落为“使用该服务商首个模型”（空串语义）
       expect(state.interfaceFor(LauncherInterface.tagTranslate).model, isEmpty);
+    });
+
+    test('explicit selection saves only chosen catalog models', () async {
+      final localStorage = _MockLocalStorageService();
+      when(
+        () => localStorage.getSetting<String>(
+          StorageKeys.promptAssistantConfigJson,
+        ),
+      ).thenReturn(null);
+      when(
+        () => localStorage.setSetting<String>(
+          StorageKeys.promptAssistantConfigJson,
+          any(),
+        ),
+      ).thenAnswer((_) async {});
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(localStorage),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(promptAssistantConfigProvider.notifier);
+      await notifier.upsertProvider(
+        const ProviderConfig(
+          id: 'relay',
+          name: 'Relay',
+          baseUrl: 'https://relay.test/v1',
+        ),
+      );
+      await notifier.replaceProviderModels('relay', const [
+        ModelConfig(
+          providerId: 'relay',
+          name: 'selected-a',
+          displayName: 'A',
+          source: ModelSource.api,
+        ),
+      ]);
+      await notifier.setInterfaceModel(
+        LauncherInterface.translate,
+        'relay',
+        'selected-a',
+      );
+      await notifier.replaceProviderModels('relay', const [
+        ModelConfig(
+          providerId: 'relay',
+          name: 'selected-b',
+          displayName: 'B',
+          source: ModelSource.api,
+        ),
+      ]);
+      final state = container.read(promptAssistantConfigProvider);
+      expect(state.modelsForProvider(providerId: 'relay').map((m) => m.name), [
+        'selected-b',
+      ]);
+      expect(
+        state.interfaceFor(LauncherInterface.translate).isConfigured,
+        isFalse,
+      );
     });
 
     test('interface slots persist provider and model choices', () async {
@@ -1309,6 +1404,65 @@ void main() {
   });
 
   group('Prompt assistant API client', () {
+    test('uses selected model limits and secure request headers', () async {
+      final dio = _MockDio();
+      final client = PromptAssistantApiClient(dio: dio);
+      when(
+        () => dio.post<dynamic>(
+          any(),
+          data: any(named: 'data'),
+          options: any(named: 'options'),
+          cancelToken: any(named: 'cancelToken'),
+        ),
+      ).thenAnswer((invocation) async {
+        final payload = Map<String, dynamic>.from(
+          invocation.namedArguments[#data] as Map,
+        );
+        final options = invocation.namedArguments[#options] as Options;
+        expect(payload['max_tokens'], 8192);
+        expect(payload['reasoning_effort'], 'low');
+        expect(options.headers?['X-Project'], 'studio');
+        expect(options.receiveTimeout, const Duration(seconds: 90));
+        return Response<dynamic>(
+          data: const {
+            'choices': [
+              {
+                'message': {'content': 'OK'},
+              },
+            ],
+          },
+          requestOptions: RequestOptions(path: '/v1/chat/completions'),
+          statusCode: 200,
+        );
+      });
+      final chunks = await client
+          .complete(
+            request: PromptAssistantRequest(
+              sessionId: 'limits',
+              provider: const ProviderConfig(
+                id: 'relay',
+                name: 'Relay',
+                baseUrl: 'https://relay.test/v1',
+                requestHeaders: {'X-Project': 'studio'},
+                timeoutSeconds: 90,
+              ),
+              model: 'model-a',
+              modelConfig: const ModelConfig(
+                providerId: 'relay',
+                name: 'model-a',
+                displayName: 'A',
+                maxOutputTokens: 8192,
+                reasoningEffort: 'low',
+              ),
+              systemPrompt: '',
+              userParts: [PromptAssistantContentPart.text('OK')],
+              apiKey: null,
+            ),
+          )
+          .toList();
+      expect(chunks.first.delta, 'OK');
+    });
+
     test('sends chat requests as non-streaming JSON', () async {
       final dio = _MockDio();
       final client = PromptAssistantApiClient(dio: dio);

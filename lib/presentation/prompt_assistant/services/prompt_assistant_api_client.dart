@@ -36,11 +36,14 @@ class PromptAssistantApiClient {
   Future<List<String>> fetchModels({
     required ProviderConfig provider,
     required String? apiKey,
+    bool usePresetFallback = true,
   }) {
     final defaults = provider.preset?.defaultModelNames ?? const [];
     return _adapterFor(provider)
         .fetchModels(dio: _dio, provider: provider, apiKey: apiKey)
-        .then((models) => models.isEmpty ? defaults : models);
+        .then(
+          (models) => models.isEmpty && usePresetFallback ? defaults : models,
+        );
   }
 
   Stream<StreamingChunk> complete({

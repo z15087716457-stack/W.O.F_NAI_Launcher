@@ -30,21 +30,28 @@ class OpenAiResponsesAdapter extends PromptAssistantProviderAdapter {
     if (request.apiKey != null && request.apiKey!.trim().isNotEmpty) {
       headers['Authorization'] = 'Bearer ${request.apiKey!.trim()}';
     }
+    final requestHeaders = promptAssistantHeaders(request.provider, headers);
+
+    final payload = <String, dynamic>{
+      'model': request.model,
+      'stream': false,
+      'instructions': request.systemPrompt,
+      'input': [
+        {'role': 'user', 'content': _inputParts(request.userParts)},
+      ],
+      if (request.modelConfig?.maxOutputTokens case final int limit)
+        'max_output_tokens': limit,
+      if (request.modelConfig?.reasoningEffort case final String effort)
+        'reasoning': {'effort': effort},
+    };
 
     final response = await dio.post<dynamic>(
       _resolveEndpoint(request.provider),
-      data: {
-        'model': request.model,
-        'stream': false,
-        'instructions': request.systemPrompt,
-        'input': [
-          {'role': 'user', 'content': _inputParts(request.userParts)},
-        ],
-      },
+      data: payload,
       options: Options(
-        headers: headers,
+        headers: requestHeaders,
         sendTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(minutes: 2),
+        receiveTimeout: promptAssistantTimeout(request.provider),
       ),
       cancelToken: cancelToken,
     );

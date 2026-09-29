@@ -7,748 +7,412 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
-import '../widgets/settings_card.dart';
+import '../widgets/ai_service_editor_dialog.dart';
 
+/// Default task models and the services that provide them.
 class PromptAssistantSettingsSection extends ConsumerWidget {
   const PromptAssistantSettingsSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(promptAssistantConfigProvider);
-    final notifier = ref.read(promptAssistantConfigProvider.notifier);
-
-    return SettingsCard(
-      title: context.l10n.settings_modelsAndInterfaces,
-      icon: Icons.auto_awesome,
+    final config = ref.watch(promptAssistantConfigProvider);
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildProviders(context, ref, state, notifier),
-          const Divider(),
-          _buildInterfaces(context, state, notifier),
+          Text(
+            context.l10n.settings_modelsAndInterfaces,
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '先添加服务并选定可用模型，再为翻译功能指定模型。',
+            style: TextStyle(color: colors.onSurfaceVariant),
+          ),
+          const SizedBox(height: 28),
+          Text('默认模型', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 10),
+          for (final task in LauncherInterface.values) ...[
+            _RouteCard(
+              task: task,
+              config: config,
+              onTap: () => _chooseRoute(context, ref, task),
+            ),
+            const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Text('AI 服务', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(width: 8),
+              Text(
+                '${config.providers.length}',
+                style: TextStyle(color: colors.onSurfaceVariant),
+              ),
+              const Spacer(),
+              FilledButton.icon(
+                onPressed: () => showAiServiceEditor(context, ref),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('添加服务'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (config.providers.isEmpty)
+            OutlinedButton.icon(
+              onPressed: () => showAiServiceEditor(context, ref),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 28),
+              ),
+              icon: const Icon(Icons.hub_outlined),
+              label: const Text('还没有 AI 服务，点击添加'),
+            )
+          else
+            for (final provider in config.providers) ...[
+              _ServiceRow(provider: provider, config: config),
+              const SizedBox(height: 8),
+            ],
+          const SizedBox(height: 12),
+          Text(
+            '模型目录按需读取；只保存选中的模型。中转服务若不提供目录，可以手动添加模型 ID。',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildInterfaces(
+  Future<void> _chooseRoute(
     BuildContext context,
-    PromptAssistantConfigState state,
-    PromptAssistantConfigNotifier notifier,
-  ) {
-    final enabledProviders = state.providers
-        .where((provider) => provider.enabled)
-        .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-          title: Text(context.l10n.promptAssistant_launcherInterfaces),
-          subtitle: Text(
-            context.l10n.promptAssistant_launcherInterfacesSubtitle,
-          ),
+    WidgetRef ref,
+    LauncherInterface task,
+  ) async {
+    final config = ref.read(promptAssistantConfigProvider);
+    final choices = [
+      for (final provider in config.providers.where((p) => p.enabled))
+        for (final model in config.modelsForProvider(providerId: provider.id))
+          if (!model.isPlaceholder) (provider: provider, model: model),
+    ];
+    if (choices.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请先添加并启用服务，再选定至少一个模型。')));
+      return;
+    }
+    final selected = await showDialog<({String providerId, String model})>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          task == LauncherInterface.translate ? '选择提示词翻译模型' : '选择标签翻译模型',
         ),
-        if (enabledProviders.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Text(
-              context.l10n.promptAssistant_noEnabledProviders,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          )
-        else
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final twoCols = constraints.maxWidth > 860;
-              final cards = LauncherInterface.values
-                  .map(
-                    (interface) => _buildInterfaceCard(
-                      context: context,
-                      state: state,
-                      notifier: notifier,
-                      interface: interface,
-                    ),
-                  )
-                  .toList();
-
-              if (twoCols) {
-                return Wrap(
-                  spacing: 12,
-                  runSpacing: 10,
-                  children: cards
-                      .map(
-                        (card) => SizedBox(
-                          width: (constraints.maxWidth - 12) / 2,
-                          child: card,
-                        ),
-                      )
-                      .toList(),
-                );
-              }
-
-              return Column(
-                children: [
-                  for (var i = 0; i < cards.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 10),
-                    cards[i],
-                  ],
-                ],
+        content: SizedBox(
+          width: 540,
+          height: (choices.length * 58.0).clamp(120.0, 480.0),
+          child: ListView.builder(
+            itemCount: choices.length,
+            itemBuilder: (context, index) {
+              final choice = choices[index];
+              final slot = config.interfaceFor(task);
+              return ListTile(
+                dense: true,
+                title: Text(choice.model.displayName),
+                subtitle: Text(
+                  '${choice.provider.name} · ${choice.model.name}',
+                ),
+                trailing:
+                    slot.providerId == choice.provider.id &&
+                        slot.model == choice.model.name
+                    ? const Icon(Icons.check, color: Colors.blue)
+                    : null,
+                onTap: () => Navigator.pop(dialogContext, (
+                  providerId: choice.provider.id,
+                  model: choice.model.name,
+                )),
               );
             },
           ),
-      ],
-    );
-  }
-
-  Widget _buildInterfaceCard({
-    required BuildContext context,
-    required PromptAssistantConfigState state,
-    required PromptAssistantConfigNotifier notifier,
-    required LauncherInterface interface,
-  }) {
-    final slot = state.interfaceFor(interface);
-    final enabledProviders = state.providers
-        .where((provider) => provider.enabled)
-        .toList();
-    final providerItems = enabledProviders
-        .map(
-          (provider) =>
-              DropdownMenuItem(value: provider.id, child: Text(provider.name)),
-        )
-        .toList();
-    final providerValue =
-        enabledProviders.any((provider) => provider.id == slot.providerId)
-        ? slot.providerId
-        : null;
-    final models = providerValue == null
-        ? const <ModelConfig>[]
-        : state.modelsForProvider(providerId: providerValue);
-    final modelItems = models
-        .map(
-          (model) => DropdownMenuItem(
-            value: model.name,
-            child: Text(model.displayName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('取消'),
           ),
-        )
-        .toList();
-    final modelValue = models.any((model) => model.name == slot.model)
-        ? slot.model
-        : null;
-
-    return KeyedSubtree(
-      key: ValueKey('interface-${interface.name}-$providerValue-$modelValue'),
-      child: _buildTaskRouteCard(
-        context: context,
-        title: _interfaceLabel(context, interface),
-        providerValue: providerValue,
-        providerItems: providerItems,
-        onProviderChanged: (value) {
-          if (value == null) return;
-          unawaited(notifier.setInterfaceProvider(interface, value));
-        },
-        modelValue: modelValue,
-        modelItems: modelItems,
-        onModelChanged: modelItems.isEmpty || providerValue == null
-            ? null
-            : (value) {
-                if (value == null) return;
-                unawaited(
-                  notifier.setInterfaceModel(interface, providerValue, value),
-                );
-              },
+        ],
       ),
     );
-  }
-
-  String _interfaceLabel(BuildContext context, LauncherInterface interface) {
-    switch (interface) {
-      case LauncherInterface.translate:
-        return context.l10n.promptAssistant_interfaceTranslate;
-      case LauncherInterface.tagTranslate:
-        return context.l10n.promptAssistant_interfaceTagTranslate;
+    if (selected != null) {
+      await ref
+          .read(promptAssistantConfigProvider.notifier)
+          .setInterfaceModel(task, selected.providerId, selected.model);
     }
   }
+}
 
-  Widget _buildTaskRouteCard({
-    required BuildContext context,
-    required String title,
-    required String? providerValue,
-    required List<DropdownMenuItem<String>> providerItems,
-    required ValueChanged<String?> onProviderChanged,
-    required String? modelValue,
-    required List<DropdownMenuItem<String>> modelItems,
-    required ValueChanged<String?>? onModelChanged,
-  }) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              initialValue: providerValue,
-              isExpanded: true,
-              items: providerItems,
-              onChanged: onProviderChanged,
-              decoration: InputDecoration(
-                labelText: context.l10n.promptAssistant_provider,
-                isDense: true,
+class _RouteCard extends StatelessWidget {
+  const _RouteCard({
+    required this.task,
+    required this.config,
+    required this.onTap,
+  });
+  final LauncherInterface task;
+  final PromptAssistantConfigState config;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final slot = config.interfaceFor(task);
+    final provider = config.providers
+        .where((p) => p.id == slot.providerId)
+        .firstOrNull;
+    final model = config
+        .modelsForProvider(providerId: slot.providerId)
+        .where((m) => m.name == slot.model && !m.isPlaceholder)
+        .firstOrNull;
+    final available = provider != null && provider.enabled && model != null;
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          child: Row(
+            children: [
+              Icon(
+                Icons.auto_awesome_outlined,
+                color: colors.primary,
+                size: 21,
               ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              initialValue: modelValue,
-              isExpanded: true,
-              hint: Text(context.l10n.promptAssistant_noModelsPullFirst),
-              items: modelItems,
-              onChanged: onModelChanged,
-              decoration: InputDecoration(
-                labelText: context.l10n.promptAssistant_model,
-                isDense: true,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task == LauncherInterface.translate ? '提示词翻译' : '标签翻译',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      available
+                          ? '${provider.name} · ${model.displayName}'
+                          : (slot.isConfigured
+                                ? '原选择不可用，请重新指定'
+                                : task == LauncherInterface.tagTranslate
+                                ? '未指定时自动选用首个可用服务和模型'
+                                : '尚未指定模型'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: colors.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Text(
+                available ? '更改' : '选择模型',
+                style: TextStyle(color: colors.primary, fontSize: 12),
+              ),
+              Icon(Icons.chevron_right, size: 18, color: colors.primary),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildProviders(
-    BuildContext context,
-    WidgetRef ref,
-    PromptAssistantConfigState state,
-    PromptAssistantConfigNotifier notifier,
-  ) {
-    return Column(
-      children: [
-        ListTile(
-          title: Text(context.l10n.promptAssistant_providerManagement),
-          subtitle: Text(
-            context.l10n.promptAssistant_providerManagementSubtitle,
-          ),
-          trailing: IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showProviderDialog(context, notifier, state),
-          ),
-        ),
-        ...state.providers.map((provider) {
-          final hasApiKey = state.providerHasApiKey[provider.id] ?? false;
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Switch(
-                  value: provider.enabled,
-                  onChanged: (value) {
-                    notifier.upsertProvider(provider.copyWith(enabled: value));
-                  },
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        provider.name,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${provider.protocol.label}  ${provider.baseUrl}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        [
-                          hasApiKey
-                              ? context.l10n.promptAssistant_apiKeyConfigured
-                              : context
-                                    .l10n
-                                    .promptAssistant_apiKeyNotConfigured,
-                          provider.allowImageInput
-                              ? context.l10n.promptAssistant_supportsImageInput
-                              : context.l10n.promptAssistant_textOnly,
-                        ].join(' · '),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: 240,
-                    maxWidth: 360,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Wrap(
-                      spacing: 4,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      alignment: WrapAlignment.end,
-                      children: [
-                        TextButton.icon(
-                          onPressed: () => _showConnectionDialog(
-                            context,
-                            notifier,
-                            provider: provider,
-                          ),
-                          icon: const Icon(Icons.link, size: 16),
-                          label: Text(
-                            context.l10n.promptAssistant_connectionConfig,
-                          ),
-                        ),
-                        TextButton.icon(
-                          onPressed: () => _showAddModelDialog(
-                            context,
-                            notifier,
-                            provider.id,
-                          ),
-                          icon: const Icon(Icons.add, size: 16),
-                          label: Text(context.l10n.promptAssistant_addModel),
-                        ),
-                        Icon(hasApiKey ? Icons.key : Icons.key_off, size: 18),
-                        IconButton(
-                          icon: const Icon(Icons.download_for_offline_outlined),
-                          tooltip: context.l10n.promptAssistant_pullModelList,
-                          onPressed: () => _pullProviderModels(
-                            context,
-                            ref,
-                            notifier,
-                            provider.id,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          tooltip: context.l10n.promptAssistant_editProvider,
-                          onPressed: () => _showProviderDialog(
-                            context,
-                            notifier,
-                            state,
-                            provider: provider,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          tooltip: context.l10n.promptAssistant_deleteProvider,
-                          onPressed: () => notifier.deleteProvider(provider.id),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
-    );
-  }
+class _ServiceRow extends ConsumerWidget {
+  const _ServiceRow({required this.provider, required this.config});
+  final ProviderConfig provider;
+  final PromptAssistantConfigState config;
 
-  Future<void> _showAddModelDialog(
-    BuildContext context,
-    PromptAssistantConfigNotifier notifier,
-    String providerId,
-  ) async {
-    var modelId = '';
-    var displayName = '';
-    final input = await showDialog<({String name, String displayName})>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(context.l10n.promptAssistant_addModel),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
+    final modelCount = config
+        .modelsForProvider(providerId: provider.id)
+        .where((m) => !m.isPlaceholder)
+        .length;
+    final hasKey = config.providerHasApiKey[provider.id] ?? false;
+    return Material(
+      color: colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: () => showAiServiceEditor(context, ref, provider: provider),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 10, 10),
+          child: Row(
             children: [
-              TextField(
-                autofocus: true,
-                onChanged: (value) => setState(() => modelId = value),
-                decoration: InputDecoration(
-                  labelText: context.l10n.promptAssistant_modelId,
-                  helperText: context.l10n.promptAssistant_modelIdHint,
+              CircleAvatar(
+                radius: 17,
+                backgroundColor: colors.surface,
+                child: Text(
+                  provider.name.isEmpty ? '?' : provider.name[0].toUpperCase(),
                 ),
               ),
-              const SizedBox(height: 10),
-              TextField(
-                onChanged: (value) => displayName = value,
-                decoration: InputDecoration(
-                  labelText: context.l10n.promptAssistant_modelDisplayName,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            provider.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        if (config
+                                .interfaceFor(LauncherInterface.translate)
+                                .providerId ==
+                            provider.id)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(
+                              '提示词',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colors.primary,
+                              ),
+                            ),
+                          ),
+                        if (config
+                                .interfaceFor(LauncherInterface.tagTranslate)
+                                .providerId ==
+                            provider.id)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Text(
+                              '标签',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colors.primary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    Text(
+                      '${provider.protocol.label} · $modelCount 个模型 · '
+                      '${provider.baseUrl.isEmpty ? '未填接口地址' : provider.baseUrl}'
+                      '${hasKey ? ' · 已配置密钥' : ''}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              Switch.adaptive(
+                value: provider.enabled,
+                onChanged: (value) => unawaited(
+                  ref
+                      .read(promptAssistantConfigProvider.notifier)
+                      .upsertProvider(provider.copyWith(enabled: value)),
+                ),
+              ),
+              PopupMenuButton<String>(
+                tooltip: '服务操作',
+                onSelected: (action) => _handleAction(context, ref, action),
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'edit', child: Text('编辑服务')),
+                  PopupMenuItem(value: 'test', child: Text('测试目录连接')),
+                  PopupMenuItem(value: 'duplicate', child: Text('复制配置')),
+                  PopupMenuDivider(),
+                  PopupMenuItem(value: 'delete', child: Text('删除服务')),
+                ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleAction(
+    BuildContext context,
+    WidgetRef ref,
+    String action,
+  ) async {
+    final notifier = ref.read(promptAssistantConfigProvider.notifier);
+    if (action == 'edit') {
+      await showAiServiceEditor(context, ref, provider: provider);
+    } else if (action == 'test') {
+      try {
+        final names = await ref
+            .read(promptAssistantServiceProvider)
+            .fetchAvailableModels(provider.id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('模型目录连接成功，读取到 ${names.length} 个模型。')),
+          );
+        }
+      } catch (error) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('模型目录不可用：$error。仍可手动添加模型 ID。')),
+          );
+        }
+      }
+    } else if (action == 'duplicate') {
+      final state = ref.read(promptAssistantConfigProvider);
+      var id = '${provider.id}_copy';
+      var suffix = 2;
+      while (state.providers.any((p) => p.id == id)) {
+        id = '${provider.id}_copy${suffix++}';
+      }
+      await notifier.upsertProvider(
+        provider.copyWith(id: id, name: '${provider.name} 副本', enabled: false),
+      );
+      for (final model in state.modelsForProvider(providerId: provider.id)) {
+        if (!model.isPlaceholder) {
+          await notifier.upsertModel(model.copyWith(providerId: id));
+        }
+      }
+      final key = await notifier.getProviderApiKey(provider.id);
+      if (key != null && key.isNotEmpty) {
+        await notifier.setProviderApiKey(id, key);
+      }
+      await notifier.setProviderHeaders(
+        id,
+        await notifier.getProviderHeaders(provider.id),
+      );
+    } else if (action == 'delete') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('删除服务？'),
+          content: Text('“${provider.name}”及其已选模型会删除，关联的翻译模型选择也会清除。'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(context.l10n.common_cancel),
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('取消'),
             ),
             FilledButton(
-              onPressed: modelId.trim().isEmpty
-                  ? null
-                  : () => Navigator.pop(dialogContext, (
-                      name: modelId.trim(),
-                      displayName: displayName.trim(),
-                    )),
-              child: Text(context.l10n.common_save),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('删除'),
             ),
           ],
         ),
-      ),
-    );
-    if (input == null) return;
-    await notifier.upsertModel(
-      ModelConfig(
-        providerId: providerId,
-        name: input.name,
-        displayName: input.displayName.isEmpty ? input.name : input.displayName,
-      ),
-    );
-  }
-
-  Future<void> _pullProviderModels(
-    BuildContext context,
-    WidgetRef ref,
-    PromptAssistantConfigNotifier notifier,
-    String providerId,
-  ) async {
-    final l10n = context.l10n;
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    messenger?.showSnackBar(
-      SnackBar(content: Text(l10n.promptAssistant_pullingModels)),
-    );
-
-    try {
-      final service = ref.read(promptAssistantServiceProvider);
-      final modelNames = await service.fetchAvailableModels(providerId);
-      if (modelNames.isEmpty) {
-        throw StateError(l10n.promptAssistant_emptyModelList);
-      }
-
-      // 以接口返回的最新列表为准同步：新增缺失模型、清理已弃用的 API 模型、
-      // 保留手动/默认模型，并把失效的接口槽模型回落为“首个模型”。
-      await notifier.syncProviderModels(providerId, modelNames);
-
-      messenger?.showSnackBar(
-        SnackBar(
-          content: Text(l10n.promptAssistant_modelsSynced(modelNames.length)),
-        ),
       );
-    } catch (e) {
-      messenger?.showSnackBar(
-        SnackBar(content: Text(l10n.promptAssistant_pullModelsFailed('$e'))),
-      );
-    }
-  }
-
-  Future<void> _showProviderDialog(
-    BuildContext context,
-    PromptAssistantConfigNotifier notifier,
-    PromptAssistantConfigState state, {
-    ProviderConfig? provider,
-  }) async {
-    final nameController = TextEditingController(text: provider?.name ?? '');
-    final baseController = TextEditingController(text: provider?.baseUrl ?? '');
-    final keyController = TextEditingController();
-    var preset =
-        provider?.preset ??
-        (provider == null
-            ? ProviderPreset.openaiChat
-            : provider.protocol == ProviderProtocol.openaiResponses
-            ? ProviderPreset.openaiCompatibleResponses
-            : ProviderPreset.openaiCompatibleChat);
-    var allowImageInput =
-        provider?.allowImageInput ?? preset.defaultAllowImageInput;
-
-    void applyProtocol(ProviderPreset value) {
-      final previousPreset = preset;
-      final currentName = nameController.text.trim();
-      final currentBaseUrl = baseController.text.trim();
-      preset = value;
-      allowImageInput = value.defaultAllowImageInput;
-      if (provider == null) {
-        nameController.text = value.defaultName;
-        baseController.text = value.defaultBaseUrl;
-        return;
-      }
-      if (currentName.isEmpty || currentName == previousPreset.defaultName) {
-        nameController.text = value.defaultName;
-      }
-      if (currentBaseUrl.isEmpty ||
-          currentBaseUrl == previousPreset.defaultBaseUrl) {
-        baseController.text = value.defaultBaseUrl;
-      }
-    }
-
-    if (provider == null) {
-      applyProtocol(preset);
-    }
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(
-                provider == null
-                    ? context.l10n.promptAssistant_addProvider
-                    : context.l10n.promptAssistant_editProviderTitle,
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.promptAssistant_name,
-                      ),
-                    ),
-                    DropdownButtonFormField<ProviderPreset>(
-                      initialValue: preset,
-                      items: ProviderPreset.values
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e,
-                              child: Text(e.label),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => applyProtocol(value));
-                        }
-                      },
-                      decoration: InputDecoration(
-                        labelText: context.l10n.promptAssistant_protocol,
-                      ),
-                    ),
-                    TextField(
-                      controller: baseController,
-                      decoration: const InputDecoration(labelText: 'Base URL'),
-                    ),
-                    SwitchListTile(
-                      value: allowImageInput,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(context.l10n.promptAssistant_allowImageInput),
-                      subtitle: Text(
-                        context.l10n.promptAssistant_allowImageInputSubtitle,
-                      ),
-                      onChanged: (value) {
-                        setState(() => allowImageInput = value);
-                      },
-                    ),
-                    TextField(
-                      controller: keyController,
-                      decoration: InputDecoration(
-                        labelText:
-                            context.l10n.promptAssistant_apiKeyLeaveEmpty,
-                      ),
-                      obscureText: true,
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(context.l10n.common_cancel),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(context.l10n.common_save),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (confirmed != true) return;
-
-    final resolvedName = nameController.text.trim().isEmpty
-        ? preset.defaultName
-        : nameController.text.trim();
-    final resolvedId =
-        provider?.id ??
-        _uniqueProviderId(
-          state,
-          _providerIdFromName(resolvedName, fallback: preset.defaultId),
-        );
-    final next = ProviderConfig(
-      id: resolvedId,
-      name: resolvedName,
-      type: preset.legacyType,
-      protocol: preset.defaultProtocol,
-      preset: preset,
-      baseUrl: baseController.text.trim(),
-      enabled: provider?.enabled ?? true,
-      allowImageInput: allowImageInput,
-    );
-
-    await notifier.upsertProvider(next);
-
-    if (keyController.text.trim().isNotEmpty) {
-      await notifier.setProviderApiKey(resolvedId, keyController.text);
-    }
-
-    final hasModel = state.models.any(
-      (model) => model.providerId == resolvedId,
-    );
-    if (!hasModel) {
-      final defaultModels = next.preset?.defaultModelNames ?? const [];
-      final modelName = defaultModels.isNotEmpty
-          ? defaultModels.first
-          : 'default-model';
-      await notifier.upsertModel(
-        ModelConfig(
-          providerId: resolvedId,
-          name: modelName,
-          displayName: modelName,
-          isDefault: true,
-        ),
-      );
-    }
-  }
-
-  String _uniqueProviderId(PromptAssistantConfigState state, String baseId) {
-    if (!state.providers.any((provider) => provider.id == baseId)) {
-      return baseId;
-    }
-    var index = 2;
-    while (state.providers.any(
-      (provider) => provider.id == '${baseId}_$index',
-    )) {
-      index++;
-    }
-    return '${baseId}_$index';
-  }
-
-  String _providerIdFromName(String name, {required String fallback}) {
-    final normalized = name
-        .trim()
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
-        .replaceAll(RegExp(r'_+'), '_')
-        .replaceAll(RegExp(r'^_|_$'), '');
-    return normalized.isEmpty ? fallback : normalized;
-  }
-
-  Future<void> _showConnectionDialog(
-    BuildContext context,
-    PromptAssistantConfigNotifier notifier, {
-    required ProviderConfig provider,
-  }) async {
-    final baseController = TextEditingController(text: provider.baseUrl);
-    final keyController = TextEditingController();
-    var clearApiKey = false;
-    var allowImageInput = provider.allowImageInput;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(
-                context.l10n.promptAssistant_connectionTitle(provider.name),
-              ),
-              content: SizedBox(
-                width: 460,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: baseController,
-                      decoration: InputDecoration(
-                        labelText: 'Base URL',
-                        hintText: context.l10n.promptAssistant_baseUrlHint,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: keyController,
-                      decoration: InputDecoration(
-                        labelText:
-                            context.l10n.promptAssistant_apiKeyLeaveEmpty,
-                      ),
-                      obscureText: true,
-                    ),
-                    CheckboxListTile(
-                      value: clearApiKey,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        context.l10n.promptAssistant_clearCurrentApiKey,
-                      ),
-                      onChanged: (value) {
-                        setState(() => clearApiKey = value ?? false);
-                      },
-                    ),
-                    SwitchListTile(
-                      value: allowImageInput,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(context.l10n.promptAssistant_allowImageInput),
-                      subtitle: Text(
-                        provider.protocol.supportsImagePayload
-                            ? context
-                                  .l10n
-                                  .promptAssistant_protocolSupportsImagePayload
-                            : context
-                                  .l10n
-                                  .promptAssistant_protocolTextOnlyWarning,
-                      ),
-                      onChanged: (value) {
-                        setState(() => allowImageInput = value);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(context.l10n.common_cancel),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(context.l10n.common_save),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (confirmed != true) return;
-
-    await notifier.upsertProvider(
-      provider.copyWith(
-        baseUrl: baseController.text.trim(),
-        allowImageInput: allowImageInput,
-      ),
-    );
-
-    if (clearApiKey) {
-      await notifier.setProviderApiKey(provider.id, '');
-      return;
-    }
-
-    if (keyController.text.trim().isNotEmpty) {
-      await notifier.setProviderApiKey(provider.id, keyController.text);
+      if (confirmed == true) await notifier.deleteProvider(provider.id);
     }
   }
 }

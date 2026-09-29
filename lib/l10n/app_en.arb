@@ -2436,54 +2436,6 @@
   "statistics_friday": "Fri",
   "statistics_saturday": "Sat",
   "fixedTags_negativeTitle": "Undesired Content Fixed Tags",
-  "promptAssistant_provider": "Provider",
-  "promptAssistant_model": "Model",
-  "promptAssistant_noModelsPullFirst": "No models yet. Pull the list or add one manually",
-  "promptAssistant_addModel": "Add model manually",
-  "promptAssistant_modelId": "Model ID",
-  "promptAssistant_modelIdHint": "Use the exact model name accepted by the API",
-  "promptAssistant_modelDisplayName": "Display name (optional)",
-  "promptAssistant_providerManagement": "Provider Management",
-  "promptAssistant_providerManagementSubtitle": "Supports OpenAI Chat / Responses, Anthropic, Gemini, DeepSeek, LM Studio, Ollama, Pollinations, and custom compatible endpoints",
-  "promptAssistant_apiKeyConfigured": "API Key: configured",
-  "promptAssistant_apiKeyNotConfigured": "API Key: not configured",
-  "promptAssistant_supportsImageInput": "Supports image input",
-  "promptAssistant_textOnly": "Text only",
-  "promptAssistant_connectionConfig": "Connection Config",
-  "promptAssistant_pullModelList": "Pull model list",
-  "promptAssistant_editProvider": "Edit provider",
-  "promptAssistant_deleteProvider": "Delete provider",
-  "promptAssistant_pullingModels": "Pulling model list...",
-  "promptAssistant_emptyModelList": "Provider returned an empty model list",
-  "promptAssistant_modelsSynced": "Synced {count} models",
-  "@promptAssistant_modelsSynced": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "promptAssistant_pullModelsFailed": "Failed to pull models: {error}",
-  "@promptAssistant_pullModelsFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "promptAssistant_addProvider": "Add Provider",
-  "promptAssistant_editProviderTitle": "Edit Provider",
-  "promptAssistant_name": "Name",
-  "promptAssistant_protocol": "Protocol",
-  "promptAssistant_allowImageInput": "Allow image input",
-  "promptAssistant_allowImageInputSubtitle": "Enable only when the model and provider actually support vision input",
-  "promptAssistant_apiKeyLeaveEmpty": "API Key (leave empty to keep unchanged)",
-  "promptAssistant_connectionTitle": "{name} Connection Config",
-  "@promptAssistant_connectionTitle": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "promptAssistant_baseUrlHint": "Example: https://api.openai.com/v1",
-  "promptAssistant_clearCurrentApiKey": "Clear current API Key",
-  "promptAssistant_protocolSupportsImagePayload": "The current protocol supports image payloads; the model itself must still support vision input",
-  "promptAssistant_protocolTextOnlyWarning": "The current protocol is text-only by default; enabling this may still be rejected by the server",
   "autocomplete_resultsCount": "{count} results",
   "@autocomplete_resultsCount": {
     "placeholders": {
@@ -5888,11 +5840,6 @@
   "subscriptionGracePeriod": "Grace period",
   "subscriptionTierNone": "No subscription",
   "settings_modelsAndInterfaces": "Models & APIs",
-  "promptAssistant_launcherInterfaces": "Launcher Interfaces",
-  "promptAssistant_launcherInterfacesSubtitle": "Choose a provider and model explicitly for prompt translation; tag translation falls back to the first enabled provider when unset",
-  "promptAssistant_interfaceTranslate": "Prompt Translation",
-  "promptAssistant_interfaceTagTranslate": "Tag Translation",
-  "promptAssistant_noEnabledProviders": "No enabled providers. Add and enable one below first.",
   "tips_gen_teach_1": "Type < in the prompt box to pull in block-library blocks",
   "tips_gen_teach_2": "Click Seed on the summary bar to pin or re-randomize; the sampler has a menu too",
   "tips_gen_teach_3": "The number box beside Generate sets batch count; the right chip shows Anlas cost",

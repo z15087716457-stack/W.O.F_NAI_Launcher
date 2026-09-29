@@ -2436,54 +2436,6 @@
   "statistics_friday": "金",
   "statistics_saturday": "土",
   "fixedTags_negativeTitle": "除外したい要素固定タグ",
-  "promptAssistant_provider": "プロバイダー",
-  "promptAssistant_model": "モデル",
-  "promptAssistant_noModelsPullFirst": "モデルがありません。リストを取得するか手動で追加してください",
-  "promptAssistant_addModel": "モデルを手動追加",
-  "promptAssistant_modelId": "モデル ID",
-  "promptAssistant_modelIdHint": "API が受け付ける正確なモデル名を入力",
-  "promptAssistant_modelDisplayName": "表示名（任意）",
-  "promptAssistant_providerManagement": "プロバイダー管理",
-  "promptAssistant_providerManagementSubtitle": "OpenAI Chat / Responses、Anthropic、Gemini、DeepSeek、LM Studio、Ollama、Pollinations、カスタム互換エンドポイントをサポート",
-  "promptAssistant_apiKeyConfigured": "API キー: 設定済み",
-  "promptAssistant_apiKeyNotConfigured": "API キー: 設定されていません",
-  "promptAssistant_supportsImageInput": "画像入力をサポート",
-  "promptAssistant_textOnly": "テキストのみ",
-  "promptAssistant_connectionConfig": "接続構成",
-  "promptAssistant_pullModelList": "モデルリストをプルします",
-  "promptAssistant_editProvider": "プロバイダーの編集",
-  "promptAssistant_deleteProvider": "プロバイダーを削除します",
-  "promptAssistant_pullingModels": "モデル リストを取得しています...",
-  "promptAssistant_emptyModelList": "プロバイダーが空のモデル リストを返しました",
-  "promptAssistant_modelsSynced": "同期された {count} モデル",
-  "@promptAssistant_modelsSynced": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "promptAssistant_pullModelsFailed": "モデルのプルに失敗しました: {error}",
-  "@promptAssistant_pullModelsFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "promptAssistant_addProvider": "プロバイダーの追加",
-  "promptAssistant_editProviderTitle": "プロバイダーの編集",
-  "promptAssistant_name": "名前",
-  "promptAssistant_protocol": "プロトコル",
-  "promptAssistant_allowImageInput": "画像入力を許可します",
-  "promptAssistant_allowImageInputSubtitle": "モデルとプロバイダーが実際にビジョン入力をサポートしている場合にのみ有効になります",
-  "promptAssistant_apiKeyLeaveEmpty": "API キー (変更しない場合は空のままにします)",
-  "promptAssistant_connectionTitle": "{name} 接続構成",
-  "@promptAssistant_connectionTitle": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "promptAssistant_baseUrlHint": "例: https://api.openai.com/v1",
-  "promptAssistant_clearCurrentApiKey": "現在の API キーをクリアします",
-  "promptAssistant_protocolSupportsImagePayload": "現在のプロトコルは画像ペイロードをサポートしています。モデル自体は引き続きビジョン入力をサポートする必要があります",
-  "promptAssistant_protocolTextOnlyWarning": "現在のプロトコルはデフォルトではテキストのみです。これを有効にしてもサーバーによって拒否される可能性があります",
   "autocomplete_resultsCount": "{count} 結果",
   "@autocomplete_resultsCount": {
     "placeholders": {
@@ -5888,11 +5840,6 @@
   "subscriptionGracePeriod": "猶予期間",
   "subscriptionTierNone": "未契約",
   "settings_modelsAndInterfaces": "モデルとAPI",
-  "promptAssistant_launcherInterfaces": "ランチャーインターフェース",
-  "promptAssistant_launcherInterfacesSubtitle": "プロンプト翻訳にはプロバイダーとモデルの明示的な選択が必要です。タグ翻訳は未設定時に最初の有効なプロバイダーを使用します",
-  "promptAssistant_interfaceTranslate": "プロンプト翻訳",
-  "promptAssistant_interfaceTagTranslate": "タグ翻訳",
-  "promptAssistant_noEnabledProviders": "有効なプロバイダーがありません。下で追加して有効にしてください。",
   "tips_gen_teach_1": "プロンプト欄で < と入力するとブロックライブラリのブロックを挿入できます",
   "tips_gen_teach_2": "サマリーバーの Seed をクリックで固定/再抽選、Sampler をクリックで切り替えられます",
   "tips_gen_teach_3": "生成ボタン横の数字ボックスがバッチ枚数、右のダーク枠が Anlas 消費です",

@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/storage_keys.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../models/prompt_assistant_models.dart';
@@ -54,6 +57,25 @@ class PromptAssistantConfigNotifier
     return _secure.getPromptAssistantApiKey(providerId);
   }
 
+  Future<Map<String, String>> getProviderHeaders(String providerId) async {
+    final raw = await _secure.getPromptAssistantHeaders(providerId);
+    if (raw == null || raw.isEmpty) return const {};
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) return const {};
+    return decoded.map((key, value) => MapEntry('$key', '$value'));
+  }
+
+  Future<void> setProviderHeaders(
+    String providerId,
+    Map<String, String> headers,
+  ) async {
+    if (headers.isEmpty) {
+      await _secure.deletePromptAssistantHeaders(providerId);
+    } else {
+      await _secure.savePromptAssistantHeaders(providerId, jsonEncode(headers));
+    }
+  }
+
   Future<void> setProviderApiKey(String providerId, String apiKey) async {
     final trimmed = apiKey.trim();
     if (trimmed.isEmpty) {
@@ -95,6 +117,45 @@ class PromptAssistantConfigNotifier
       providerHasApiKey: keys,
     );
     await _secure.deletePromptAssistantApiKey(providerId);
+    try {
+      await _secure.deletePromptAssistantHeaders(providerId);
+    } catch (error) {
+      AppLogger.w(
+        'Failed to delete prompt assistant headers: $error',
+        'PromptAssistant',
+      );
+    }
+    await _save();
+  }
+
+  /// Persist only models explicitly selected by the user. The remote catalog
+  /// is ephemeral and must never silently populate local configuration.
+  Future<void> replaceProviderModels(
+    String providerId,
+    List<ModelConfig> selected,
+  ) async {
+    final names = <String>{};
+    final models = [
+      for (final model in state.models)
+        if (model.providerId != providerId) model,
+      for (final model in selected)
+        if (model.providerId == providerId &&
+            !model.isPlaceholder &&
+            names.add(model.name))
+          model,
+    ];
+    final interfaces = Map<LauncherInterface, InterfaceSlotConfig>.from(
+      state.interfaces,
+    );
+    for (final entry in interfaces.entries.toList()) {
+      final slot = entry.value;
+      if (slot.providerId == providerId &&
+          slot.model.isNotEmpty &&
+          !names.contains(slot.model)) {
+        interfaces[entry.key] = const InterfaceSlotConfig();
+      }
+    }
+    state = state.copyWith(models: models, interfaces: interfaces);
     await _save();
   }
 

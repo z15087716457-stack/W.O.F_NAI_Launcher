@@ -278,12 +278,8 @@ class SecureStorageService {
   ) async {
     final key = _promptAssistantKey(providerId);
     final value = apiKey.trim();
+    await _storage.write(key: key, value: value);
     _memoryCache[key] = value;
-    try {
-      await _storage.write(key: key, value: value);
-    } catch (e) {
-      AppLogger.w('Failed to save prompt assistant key: $e', 'SecureStorage');
-    }
   }
 
   Future<String?> getPromptAssistantApiKey(String providerId) async {
@@ -310,6 +306,33 @@ class SecureStorageService {
     } catch (e) {
       AppLogger.w('Failed to delete prompt assistant key: $e', 'SecureStorage');
     }
+  }
+
+  String _promptAssistantHeadersKey(String providerId) =>
+      '${StorageKeys.promptAssistantHeadersPrefix}$providerId';
+
+  Future<void> savePromptAssistantHeaders(
+    String providerId,
+    String headersJson,
+  ) async {
+    final key = _promptAssistantHeadersKey(providerId);
+    await _storage.write(key: key, value: headersJson);
+    _memoryCache[key] = headersJson;
+  }
+
+  Future<String?> getPromptAssistantHeaders(String providerId) async {
+    final key = _promptAssistantHeadersKey(providerId);
+    final cached = _memoryCache[key];
+    if (cached != null) return cached;
+    final value = await _storage.read(key: key);
+    if (value != null) _memoryCache[key] = value;
+    return value;
+  }
+
+  Future<void> deletePromptAssistantHeaders(String providerId) async {
+    final key = _promptAssistantHeadersKey(providerId);
+    await _storage.delete(key: key);
+    _memoryCache.remove(key);
   }
 
   // ==================== Account Access Key 存储 ====================

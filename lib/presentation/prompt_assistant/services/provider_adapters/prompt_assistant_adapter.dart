@@ -19,6 +19,7 @@ class PromptAssistantRequest {
     required this.systemPrompt,
     required this.userParts,
     required this.apiKey,
+    this.modelConfig,
   });
 
   final String sessionId;
@@ -27,6 +28,7 @@ class PromptAssistantRequest {
   final String systemPrompt;
   final List<PromptAssistantContentPart> userParts;
   final String? apiKey;
+  final ModelConfig? modelConfig;
 }
 
 abstract class PromptAssistantContentPart {
@@ -120,8 +122,26 @@ Future<PromptAssistantRequest> optimizePromptAssistantRequestImagesForUpload(
     systemPrompt: request.systemPrompt,
     userParts: parts,
     apiKey: request.apiKey,
+    modelConfig: request.modelConfig,
   );
 }
+
+Map<String, dynamic> promptAssistantHeaders(
+  ProviderConfig provider,
+  Map<String, dynamic> defaults,
+) {
+  final headers = Map<String, dynamic>.from(defaults);
+  for (final entry in provider.requestHeaders.entries) {
+    headers.removeWhere(
+      (name, _) => name.toLowerCase() == entry.key.toLowerCase(),
+    );
+    headers[entry.key] = entry.value;
+  }
+  return headers;
+}
+
+Duration promptAssistantTimeout(ProviderConfig provider) =>
+    Duration(seconds: provider.timeoutSeconds.clamp(10, 600));
 
 Future<PromptAssistantImagePart> optimizePromptAssistantImagePartForUpload(
   PromptAssistantImagePart part, {

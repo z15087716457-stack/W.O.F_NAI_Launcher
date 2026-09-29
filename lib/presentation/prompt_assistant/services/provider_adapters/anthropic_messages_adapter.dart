@@ -14,16 +14,30 @@ class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
     required ProviderConfig provider,
     required String? apiKey,
   }) async {
-    final headers = _headers(apiKey);
-    final response = await dio.get<dynamic>(
-      _resolveModelsEndpoint(provider),
-      options: Options(
-        headers: headers,
-        sendTimeout: const Duration(seconds: 20),
-        receiveTimeout: const Duration(seconds: 30),
-      ),
-    );
-    return extractModelNames(response.data);
+    final headers = promptAssistantHeaders(provider, _headers(apiKey));
+    final names = <String>{};
+    String? cursor;
+    for (var page = 0; page < 20; page++) {
+      final response = await dio.get<dynamic>(
+        _resolveModelsEndpoint(provider),
+        queryParameters: {
+          'limit': 1000,
+          if (cursor != null) 'after_id': cursor,
+        },
+        options: Options(
+          headers: headers,
+          sendTimeout: const Duration(seconds: 20),
+          receiveTimeout: promptAssistantTimeout(provider),
+        ),
+      );
+      names.addAll(extractModelNames(response.data));
+      final body = response.data;
+      if (body is! Map || body['has_more'] != true) break;
+      final next = body['last_id'];
+      if (next is! String || next.isEmpty || next == cursor) break;
+      cursor = next;
+    }
+    return names.toList();
   }
 
   @override
@@ -36,16 +50,21 @@ class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
       _resolveMessagesEndpoint(request.provider),
       data: {
         'model': request.model,
-        'max_tokens': 2048,
+        'max_tokens': request.modelConfig?.maxOutputTokens ?? 2048,
         'system': request.systemPrompt,
+        if (request.modelConfig?.reasoningEffort case final String effort)
+          'output_config': {'effort': effort},
         'messages': [
           {'role': 'user', 'content': _contentParts(request.userParts)},
         ],
       },
       options: Options(
-        headers: _headers(request.apiKey),
+        headers: promptAssistantHeaders(
+          request.provider,
+          _headers(request.apiKey),
+        ),
         sendTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(minutes: 2),
+        receiveTimeout: promptAssistantTimeout(request.provider),
       ),
       cancelToken: cancelToken,
     );

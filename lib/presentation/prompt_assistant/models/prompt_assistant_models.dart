@@ -287,6 +287,11 @@ class ProviderConfig {
   final String baseUrl;
   final bool enabled;
   final bool allowImageInput;
+  final int timeoutSeconds;
+
+  /// Loaded from secure storage for a request; never serialized with the
+  /// ordinary settings JSON because header values may contain credentials.
+  final Map<String, String> requestHeaders;
 
   const ProviderConfig({
     required this.id,
@@ -297,6 +302,8 @@ class ProviderConfig {
     required this.baseUrl,
     this.enabled = true,
     this.allowImageInput = false,
+    this.timeoutSeconds = 120,
+    this.requestHeaders = const {},
   });
 
   ProviderConfig copyWith({
@@ -309,6 +316,8 @@ class ProviderConfig {
     String? baseUrl,
     bool? enabled,
     bool? allowImageInput,
+    int? timeoutSeconds,
+    Map<String, String>? requestHeaders,
   }) {
     return ProviderConfig(
       id: id ?? this.id,
@@ -319,6 +328,8 @@ class ProviderConfig {
       baseUrl: baseUrl ?? this.baseUrl,
       enabled: enabled ?? this.enabled,
       allowImageInput: allowImageInput ?? this.allowImageInput,
+      timeoutSeconds: timeoutSeconds ?? this.timeoutSeconds,
+      requestHeaders: requestHeaders ?? this.requestHeaders,
     );
   }
 
@@ -331,6 +342,7 @@ class ProviderConfig {
     'baseUrl': baseUrl,
     'enabled': enabled,
     'allowImageInput': allowImageInput,
+    'timeoutSeconds': timeoutSeconds,
   };
 
   factory ProviderConfig.fromJson(Map<String, dynamic> json) {
@@ -355,6 +367,10 @@ class ProviderConfig {
       allowImageInput:
           json['allowImageInput'] as bool? ??
           (preset?.defaultAllowImageInput ?? protocol.supportsImagePayload),
+      timeoutSeconds: ((json['timeoutSeconds'] as num?)?.toInt() ?? 120).clamp(
+        10,
+        600,
+      ),
     );
   }
 
@@ -450,6 +466,13 @@ class ModelConfig {
   final String displayName;
   final bool isDefault;
 
+  /// Reference only: the current client does not truncate input by tokens.
+  final int? contextWindow;
+  final int? maxOutputTokens;
+
+  /// Optional request control. Availability depends on the actual model.
+  final String? reasoningEffort;
+
   /// 该模型是自动拉取（[ModelSource.api]）还是手动/默认（[ModelSource.manual]）。
   /// 默认 [ModelSource.manual]：只有明确从接口拉取的路径才标记为 api，
   /// 因此手动、预设、占位、测试构造的模型天然免于被刷新清理。
@@ -461,6 +484,9 @@ class ModelConfig {
     required this.displayName,
     this.isDefault = false,
     this.source = ModelSource.manual,
+    this.contextWindow,
+    this.maxOutputTokens,
+    this.reasoningEffort,
   });
 
   bool get isPlaceholder =>
@@ -472,6 +498,10 @@ class ModelConfig {
     String? displayName,
     bool? isDefault,
     ModelSource? source,
+    int? contextWindow,
+    int? maxOutputTokens,
+    String? reasoningEffort,
+    bool clearReasoningEffort = false,
   }) {
     return ModelConfig(
       providerId: providerId ?? this.providerId,
@@ -479,6 +509,11 @@ class ModelConfig {
       displayName: displayName ?? this.displayName,
       isDefault: isDefault ?? this.isDefault,
       source: source ?? this.source,
+      contextWindow: contextWindow ?? this.contextWindow,
+      maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
+      reasoningEffort: clearReasoningEffort
+          ? null
+          : reasoningEffort ?? this.reasoningEffort,
     );
   }
 
@@ -488,6 +523,9 @@ class ModelConfig {
     'displayName': displayName,
     'isDefault': isDefault,
     'source': source.name,
+    if (contextWindow != null) 'contextWindow': contextWindow,
+    if (maxOutputTokens != null) 'maxOutputTokens': maxOutputTokens,
+    if (reasoningEffort != null) 'reasoningEffort': reasoningEffort,
   };
 
   factory ModelConfig.fromJson(Map<String, dynamic> json) {
@@ -496,6 +534,9 @@ class ModelConfig {
       name: json['name'] as String,
       displayName: json['displayName'] as String? ?? (json['name'] as String),
       isDefault: json['isDefault'] as bool? ?? false,
+      contextWindow: (json['contextWindow'] as num?)?.toInt(),
+      maxOutputTokens: (json['maxOutputTokens'] as num?)?.toInt(),
+      reasoningEffort: json['reasoningEffort'] as String?,
       // 来源迁移（关键决策点）：
       // - 新数据带有 'source' 键 → 直接采用。
       // - 旧数据（升级前保存，无该键）→ 按 isDefault 推断：默认/占位模型

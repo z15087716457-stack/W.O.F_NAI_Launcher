@@ -202,6 +202,9 @@ class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
     required String content,
     String? folderId,
     String color = '#FF607D8B',
+    String appearance = 'classic',
+    String? readingTranslationZh,
+    bool readingTranslationNeedsReview = false,
     String? iconName,
     String? thumbnail,
     double thumbnailOffsetX = 0.0,
@@ -225,6 +228,9 @@ class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
       content: content,
       folderId: folderId,
       color: color,
+      appearance: appearance,
+      readingTranslationZh: readingTranslationZh,
+      readingTranslationNeedsReview: readingTranslationNeedsReview,
       iconName: iconName,
     );
   }

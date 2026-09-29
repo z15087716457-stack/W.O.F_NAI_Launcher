@@ -2429,54 +2429,6 @@
   "statistics_friday": "周五",
   "statistics_saturday": "周六",
   "fixedTags_negativeTitle": "负向固定词",
-  "promptAssistant_provider": "服务商",
-  "promptAssistant_model": "模型",
-  "promptAssistant_noModelsPullFirst": "暂无模型，请拉取或手动添加",
-  "promptAssistant_addModel": "手动添加模型",
-  "promptAssistant_modelId": "模型 ID",
-  "promptAssistant_modelIdHint": "填写接口实际接受的模型名",
-  "promptAssistant_modelDisplayName": "显示名称（可选）",
-  "promptAssistant_providerManagement": "服务商管理",
-  "promptAssistant_providerManagementSubtitle": "支持 OpenAI Chat / Responses、Anthropic、Gemini、DeepSeek、LM Studio、Ollama、Pollinations 和自定义兼容端点",
-  "promptAssistant_apiKeyConfigured": "API Key: 已配置",
-  "promptAssistant_apiKeyNotConfigured": "API Key: 未配置",
-  "promptAssistant_supportsImageInput": "支持图片输入",
-  "promptAssistant_textOnly": "仅文本",
-  "promptAssistant_connectionConfig": "连接配置",
-  "promptAssistant_pullModelList": "拉取模型列表",
-  "promptAssistant_editProvider": "编辑服务商",
-  "promptAssistant_deleteProvider": "删除服务商",
-  "promptAssistant_pullingModels": "正在拉取模型列表...",
-  "promptAssistant_emptyModelList": "服务返回空模型列表",
-  "promptAssistant_modelsSynced": "已同步 {count} 个模型",
-  "@promptAssistant_modelsSynced": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "promptAssistant_pullModelsFailed": "拉取模型失败: {error}",
-  "@promptAssistant_pullModelsFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "promptAssistant_addProvider": "新增服务商",
-  "promptAssistant_editProviderTitle": "编辑服务商",
-  "promptAssistant_name": "名称",
-  "promptAssistant_protocol": "协议",
-  "promptAssistant_allowImageInput": "允许发送图片输入",
-  "promptAssistant_allowImageInputSubtitle": "仅在模型和服务商实际支持视觉输入时启用",
-  "promptAssistant_apiKeyLeaveEmpty": "API Key (留空不改)",
-  "promptAssistant_connectionTitle": "{name} 连接配置",
-  "@promptAssistant_connectionTitle": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "promptAssistant_baseUrlHint": "例如: https://api.openai.com/v1",
-  "promptAssistant_clearCurrentApiKey": "清空当前 API Key",
-  "promptAssistant_protocolSupportsImagePayload": "当前协议支持图片载荷，仍需模型本身支持视觉输入",
-  "promptAssistant_protocolTextOnlyWarning": "当前协议默认仅文本，开启后也可能被服务端拒绝",
   "autocomplete_resultsCount": "{count} 个结果",
   "@autocomplete_resultsCount": {
     "placeholders": {
@@ -5888,11 +5840,6 @@
   "subscriptionGracePeriod": "宽限期",
   "subscriptionTierNone": "无订阅",
   "settings_modelsAndInterfaces": "模型与接口",
-  "promptAssistant_launcherInterfaces": "启动器接口",
-  "promptAssistant_launcherInterfacesSubtitle": "提示词翻译需明确选择服务商与模型；词库标签翻译未配置时使用第一个启用的服务商",
-  "promptAssistant_interfaceTranslate": "提示词翻译",
-  "promptAssistant_interfaceTagTranslate": "词库标签翻译",
-  "promptAssistant_noEnabledProviders": "暂无启用的服务商，请先在下方添加并启用",
   "tips_gen_teach_1": "在提示词框输入 < 可以拉进块库里的块",
   "tips_gen_teach_2": "摘要条点 Seed 可锁定/重抽，点 Sampler 可直接换采样器",
   "tips_gen_teach_3": "生成键旁边的数字小框定本批张数，右端深色框是 Anlas 消耗",
