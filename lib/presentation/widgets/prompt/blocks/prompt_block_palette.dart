@@ -585,12 +585,17 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final block = widget.block;
-    final title = block.title.trim().isEmpty ? block.content : block.title;
+    final title = block.readingTranslationZh?.trim().isNotEmpty == true
+        ? block.readingTranslationZh!.trim()
+        : block.title.trim().isEmpty
+        ? block.content
+        : block.title;
 
     final chip = PromptBlockPill(
       block: block,
       displayTitle: title,
-      maxWidth: 340,
+      maxWidth: 374,
+      paletteStyle: true,
       multiSelected: widget.selected,
       onTap: widget.onToggleSelected ?? _insertAtCaret,
     );

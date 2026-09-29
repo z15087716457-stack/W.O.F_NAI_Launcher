@@ -327,6 +327,7 @@ class PromptBlockPill extends StatelessWidget {
     this.multiSelected = false,
     this.onSecondaryTap,
     this.showThumbnail = true,
+    this.paletteStyle = false,
   });
 
   final PromptBlock block;
@@ -343,6 +344,9 @@ class PromptBlockPill extends StatelessWidget {
 
   /// 有缩略图时以 22px 圆角头像替换前导图标；无图块仍显示图标。
   final bool showThumbnail;
+
+  /// The floating palette shows full text at a smaller, prompt-like size.
+  final bool paletteStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -378,14 +382,15 @@ class PromptBlockPill extends StatelessWidget {
                 color: blockColor,
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 7,
-                ),
+                padding: paletteStyle
+                    ? const EdgeInsets.fromLTRB(8, 5, 22, 5)
+                    : const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (showThumbnail && thumbnail != null)
+                    if (showThumbnail &&
+                        thumbnail != null &&
+                        !(paletteStyle && block.readingTranslationZh != null))
                       ClipRRect(
                         key: ValueKey('prompt-block-pill-thumb-${block.id}'),
                         borderRadius: BorderRadius.circular(5),
@@ -400,8 +405,10 @@ class PromptBlockPill extends StatelessWidget {
                           ),
                           filterQuality: FilterQuality.medium,
                           errorBuilder: (_, __, ___) => Icon(
-                            promptBlockIconFromName(block.iconName),
-                            size: 16,
+                            paletteStyle && block.readingTranslationZh != null
+                                ? Icons.translate_outlined
+                                : promptBlockIconFromName(block.iconName),
+                            size: paletteStyle ? 13 : 16,
                             color: PromptBlockAppearance.text(
                               block.appearance,
                               blockColor,
@@ -412,22 +419,31 @@ class PromptBlockPill extends StatelessWidget {
                       )
                     else
                       Icon(
-                        promptBlockIconFromName(block.iconName),
-                        size: 16,
+                        paletteStyle && block.readingTranslationZh != null
+                            ? Icons.translate_outlined
+                            : promptBlockIconFromName(block.iconName),
+                        size: paletteStyle ? 13 : 16,
                         color: PromptBlockAppearance.text(
                           block.appearance,
                           blockColor,
                           blockColor,
                         ),
                       ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: paletteStyle ? 5 : 6),
                     Flexible(
                       child: Text(
                         displayTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: paletteStyle ? null : 1,
+                        overflow: paletteStyle
+                            ? TextOverflow.visible
+                            : TextOverflow.ellipsis,
+                        softWrap: paletteStyle,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontSize: paletteStyle ? 12 : null,
+                          height: paletteStyle ? 1.25 : null,
+                          fontWeight: paletteStyle
+                              ? FontWeight.w500
+                              : FontWeight.w600,
                           color: PromptBlockAppearance.text(
                             block.appearance,
                             blockColor,

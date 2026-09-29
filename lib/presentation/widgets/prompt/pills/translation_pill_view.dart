@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../data/models/prompt_block/pill_document.dart';
-import '../blocks/prompt_block_appearance.dart';
 
 class TranslationPillView extends StatefulWidget {
   const TranslationPillView({
@@ -58,54 +57,46 @@ class _TranslationPillViewState extends State<TranslationPillView> {
             decoration: BoxDecoration(
               color: fill,
               borderRadius: BorderRadius.circular(6),
-              border: original ? Border.all(color: accent, width: 1) : null,
+              border: original ? null : Border.all(color: accent, width: 1),
             ),
             foregroundDecoration: original
-                ? null
-                : ShapeDecoration(
+                ? ShapeDecoration(
                     shape: _DashedRoundedBorder(color: accent, radius: 6),
-                  ),
-            child: CustomPaint(
-              painter: PromptBlockPatternPainter(
-                appearance: original
-                    ? PromptBlockAppearance.classic
-                    : PromptBlockAppearance.translation,
-                color: accent,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (original) ...[
-                    Icon(Icons.translate_outlined, size: 13, color: accent),
-                    const SizedBox(width: 5),
-                  ],
-                  Flexible(
-                    child: Text(
-                      text,
-                      softWrap: true,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurface,
-                        height: 1.25,
-                      ),
-                    ),
-                  ),
-                  if (original) ...[
-                    const SizedBox(width: 5),
-                    Tooltip(
-                      message: pill.needsReview ? '编辑双语内容 · 译文待更新' : '编辑原文与译文',
-                      child: InkWell(
-                        onTap: widget.onEdit,
-                        child: Icon(
-                          Icons.build_outlined,
-                          size: 13,
-                          color: accent,
-                        ),
-                      ),
-                    ),
-                  ],
+                  )
+                : null,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (original) ...[
+                  Icon(Icons.translate_outlined, size: 13, color: accent),
+                  const SizedBox(width: 5),
                 ],
-              ),
+                Flexible(
+                  child: Text(
+                    text,
+                    softWrap: true,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurface,
+                      height: 1.25,
+                    ),
+                  ),
+                ),
+                if (pill.needsReview) ...[
+                  const SizedBox(width: 5),
+                  Tooltip(
+                    message: '原文已修改 · 译文待更新',
+                    child: InkWell(
+                      onTap: widget.onEdit,
+                      child: Icon(
+                        Icons.build_outlined,
+                        size: 13,
+                        color: accent,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           );
           return GestureDetector(onTapUp: _handleTap, child: content);

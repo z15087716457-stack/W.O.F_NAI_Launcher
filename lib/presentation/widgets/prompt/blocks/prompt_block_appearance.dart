@@ -25,7 +25,7 @@ abstract final class PromptBlockAppearance {
     dots => '圆点',
     solid => '实心',
     gradient => '渐变',
-    translation => '翻译纹样',
+    translation => '翻译',
     _ => '经典',
   };
 
@@ -54,6 +54,7 @@ class PromptBlockPatternPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (appearance == PromptBlockAppearance.classic ||
         appearance == PromptBlockAppearance.solid ||
+        appearance == PromptBlockAppearance.translation ||
         size.isEmpty) {
       return;
     }
@@ -78,11 +79,8 @@ class PromptBlockPatternPainter extends CustomPainter {
       );
       return;
     }
-    final step = appearance == PromptBlockAppearance.translation ? 14.0 : 9.0;
-    final strength = appearance == PromptBlockAppearance.translation
-        ? .075
-        : .16;
-    paint.color = color.withValues(alpha: strength);
+    const step = 9.0;
+    paint.color = color.withValues(alpha: .16);
     for (var x = -size.height; x < size.width + size.height; x += step) {
       canvas.drawLine(
         Offset(math.max(0, x), math.max(0, -x)),

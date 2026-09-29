@@ -32,13 +32,51 @@ void main() {
     expect(find.text('蓝眼睛'), findsOneWidget);
     expect(find.byIcon(Icons.translate_outlined), findsNothing);
     expect(find.byIcon(Icons.build_outlined), findsNothing);
+    var decoration = tester.widget<Container>(
+      find.descendant(
+        of: find.byType(TranslationPillView),
+        matching: find.byType(Container),
+      ),
+    );
+    expect((decoration.decoration! as BoxDecoration).border, isNotNull);
+    expect(decoration.foregroundDecoration, isNull);
 
     await tester.tap(find.byType(TranslationPillView));
     await tester.pump();
     expect(find.text('blue eyes'), findsOneWidget);
     expect(find.byIcon(Icons.translate_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.build_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.build_outlined), findsNothing);
+    decoration = tester.widget<Container>(
+      find.descendant(
+        of: find.byType(TranslationPillView),
+        matching: find.byType(Container),
+      ),
+    );
+    expect((decoration.decoration! as BoxDecoration).border, isNull);
+    expect(decoration.foregroundDecoration, isNotNull);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('wrench appears only when changed source needs review', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: TranslationPillView(
+            pill: TranslationPill(
+              source: 'edited source',
+              zh: '旧译文',
+              needsReview: true,
+            ),
+            onToggle: _noop,
+            onEdit: _noop,
+          ),
+        ),
+      ),
+    );
+    expect(find.text('edited source'), findsOneWidget);
+    expect(find.byIcon(Icons.build_outlined), findsOneWidget);
   });
 
   testWidgets(
@@ -103,3 +141,5 @@ void main() {
     expect(find.text('蓝眼睛'), findsOneWidget);
   });
 }
+
+void _noop() {}

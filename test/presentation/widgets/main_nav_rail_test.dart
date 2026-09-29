@@ -11,6 +11,7 @@ import 'package:nai_launcher/presentation/providers/account_manager_provider.dar
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/router/app_branch.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/main_nav_rail.dart';
+import 'package:nai_launcher/presentation/widgets/auth/account_avatar.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 class _MockNavigationShell extends Mock implements StatefulNavigationShell {
@@ -70,6 +71,11 @@ void main() {
       ),
     );
     await tester.pump();
+
+    final brandTile = find.byKey(const Key('main-nav-brand-tile'));
+    expect(tester.getTopLeft(brandTile), Offset.zero);
+    expect(tester.getSize(brandTile).height, 60);
+    expect(tester.widget<Container>(brandTile).color, kAvatarBackground);
 
     expect(find.byKey(const Key('main-nav-primary-scroll')), findsOneWidget);
     expect(find.byIcon(StudioIcons.settings), findsOneWidget);
