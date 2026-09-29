@@ -123,6 +123,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.text('官方目录'), findsOneWidget);
+      expect(find.text('视觉特征'), findsOneWidget);
       expect(find.text('blue eyes'), findsWidgets);
       expect(find.text('Blue eyes are visible.'), findsOneWidget);
       expect(find.text('阅读设置'), findsOneWidget);

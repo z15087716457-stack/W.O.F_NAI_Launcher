@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/wiki/wiki_bookmark_store.dart';
 import '../../../core/wiki/wiki_directory.dart';
+import '../../../core/wiki/wiki_directory_labels.dart';
 import '../../widgets/common/themed_input_dialog.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 
@@ -143,6 +144,10 @@ class WikiSidebar extends StatelessWidget {
     int depth,
   ) {
     final id = node.group ?? path;
+    final label = WikiDirectoryLabels.display(
+      node.label,
+      Localizations.localeOf(context).languageCode,
+    );
     final selected =
         selection.kind == WikiScopeKind.directory && selection.id == id;
     final children = node.children;
@@ -152,10 +157,10 @@ class WikiSidebar extends StatelessWidget {
         child: _row(
           context,
           icon: Icons.sell_outlined,
-          label: node.label,
+          label: label,
           selected: selected,
           onTap: () => onSelect(
-            WikiScope(WikiScopeKind.directory, id, node.label, node: node),
+            WikiScope(WikiScopeKind.directory, id, label, node: node),
           ),
         ),
       );
@@ -171,11 +176,10 @@ class WikiSidebar extends StatelessWidget {
         color: selected ? Theme.of(context).colorScheme.primary : null,
       ),
       title: InkWell(
-        onTap: () => onSelect(
-          WikiScope(WikiScopeKind.directory, id, node.label, node: node),
-        ),
+        onTap: () =>
+            onSelect(WikiScope(WikiScopeKind.directory, id, label, node: node)),
         child: Text(
-          node.label,
+          label,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
