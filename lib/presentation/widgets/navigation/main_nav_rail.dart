@@ -458,24 +458,24 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
     }
 
     final avatar = currentAccount != null
-        ? AccountAvatarSmall(account: currentAccount, size: 54)
+        ? AccountAvatarSmall(account: currentAccount, size: 48)
         : Container(
-            width: 54,
-            height: 54,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
-              borderRadius: avatarBorderRadius(54),
+              borderRadius: avatarBorderRadius(48),
             ),
             child: Icon(
               Icons.person,
               color: theme.colorScheme.primary,
-              size: 30,
+              size: 27,
             ),
           );
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(3, 0, 2, 0),
-      height: 56,
+      margin: const EdgeInsets.fromLTRB(5, 0, 6, 0),
+      height: 52,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -483,7 +483,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) => setState(() => _isPressed = false),
           onTapCancel: () => setState(() => _isPressed = false),
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(26),
           child: AnimatedScale(
             scale: _isPressed ? 0.97 : 1.0,
             duration: const Duration(milliseconds: 140),
@@ -498,13 +498,13 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
                 return Row(
                   children: [
                     SizedBox(
-                      width: constraints.maxWidth.clamp(0.0, 54.0),
-                      height: 56,
+                      width: constraints.maxWidth.clamp(0.0, 48.0),
+                      height: 52,
                       child: Center(
                         child: SizedBox(
                           key: const Key('main-nav-avatar'),
-                          width: 54,
-                          height: 54,
+                          width: 48,
+                          height: 48,
                           child: avatar,
                         ),
                       ),

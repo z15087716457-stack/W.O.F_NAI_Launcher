@@ -76,9 +76,9 @@ void main() {
     expect(tester.getTopLeft(avatar).dy, greaterThanOrEqualTo(8));
     expect(
       tester.getSize(find.byKey(const Key('main-nav-avatar'))),
-      const Size(54, 54),
+      const Size(48, 48),
     );
-    expect(tester.widget<Icon>(avatar).size, 30);
+    expect(tester.widget<Icon>(avatar).size, 27);
 
     expect(find.byKey(const Key('main-nav-primary-scroll')), findsOneWidget);
     expect(find.byIcon(StudioIcons.settings), findsOneWidget);
