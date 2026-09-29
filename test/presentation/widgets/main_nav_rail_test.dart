@@ -73,7 +73,11 @@ void main() {
 
     final avatar = find.byIcon(Icons.person);
     expect(tester.getCenter(avatar).dx, closeTo(30, 1));
-    expect(tester.getTopLeft(avatar).dy, greaterThan(12));
+    expect(tester.getTopLeft(avatar).dy, greaterThanOrEqualTo(8));
+    expect(
+      tester.getSize(find.byKey(const Key('main-nav-avatar'))),
+      const Size(46, 46),
+    );
 
     expect(find.byKey(const Key('main-nav-primary-scroll')), findsOneWidget);
     expect(find.byIcon(StudioIcons.settings), findsOneWidget);

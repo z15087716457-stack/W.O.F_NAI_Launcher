@@ -635,7 +635,7 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(6),
               border: _dropHover
                   ? Border.all(color: theme.colorScheme.primary, width: 1.4)
                   : null,

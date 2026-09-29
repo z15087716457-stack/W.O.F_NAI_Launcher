@@ -566,37 +566,42 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
         ),
-        PopupMenuButton<String>(
-          tooltip: '翻译操作',
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 18, height: 28),
-          icon: const Icon(Icons.arrow_drop_down, size: 15),
-          onSelected: (action) {
-            if (action == 'translate') {
-              _runTranslation();
-            } else if (action == 'configure') {
-              _openTranslationSettings();
-            } else if (action == 'undo') {
-              final restored = ref
-                  .read(promptTranslationCoordinatorProvider)
-                  .undoLast();
-              if (restored) AppToast.success(context, '已撤销上次翻译');
-            }
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem<String>(
-              enabled: false,
-              child: Text(
-                route == null
-                    ? '尚未选择翻译模型'
-                    : '${route.provider.name} / ${route.model.displayName}',
+        SizedBox(
+          width: 20,
+          height: 28,
+          child: PopupMenuButton<String>(
+            key: const Key('prompt-translation-actions'),
+            tooltip: '翻译操作',
+            padding: EdgeInsets.zero,
+            position: PopupMenuPosition.under,
+            child: const Center(child: Icon(Icons.arrow_drop_down, size: 15)),
+            onSelected: (action) {
+              if (action == 'translate') {
+                _runTranslation();
+              } else if (action == 'configure') {
+                _openTranslationSettings();
+              } else if (action == 'undo') {
+                final restored = ref
+                    .read(promptTranslationCoordinatorProvider)
+                    .undoLast();
+                if (restored) AppToast.success(context, '已撤销上次翻译');
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem<String>(
+                enabled: false,
+                child: Text(
+                  route == null
+                      ? '尚未选择翻译模型'
+                      : '${route.provider.name} / ${route.model.displayName}',
+                ),
               ),
-            ),
-            const PopupMenuItem(value: 'configure', child: Text('配置翻译模型')),
-            const PopupMenuDivider(),
-            const PopupMenuItem(value: 'translate', child: Text('翻译新增内容')),
-            const PopupMenuItem(value: 'undo', child: Text('撤销上次翻译')),
-          ],
+              const PopupMenuItem(value: 'configure', child: Text('配置翻译模型')),
+              const PopupMenuDivider(),
+              const PopupMenuItem(value: 'translate', child: Text('翻译新增内容')),
+              const PopupMenuItem(value: 'undo', child: Text('撤销上次翻译')),
+            ],
+          ),
         ),
       ],
     );

@@ -364,7 +364,7 @@ class PromptBlockPill extends StatelessWidget {
             dark: theme.brightness == Brightness.dark,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(paletteStyle ? 6 : 18),
             side: BorderSide(
               color: selected
                   ? theme.colorScheme.primary

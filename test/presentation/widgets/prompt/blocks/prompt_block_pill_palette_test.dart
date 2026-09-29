@@ -39,6 +39,17 @@ void main() {
     expect(label.style?.fontSize, 12);
     expect(tester.getSize(find.text(reading)).height, greaterThan(28));
     expect(find.byIcon(Icons.translate_outlined), findsOneWidget);
+    final pillMaterial = tester.widget<Material>(
+      find.ancestor(
+        of: find.byKey(const ValueKey('prompt-block-pill-body-translation-1')),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Material && widget.shape is RoundedRectangleBorder,
+        ),
+      ),
+    );
+    final pillShape = pillMaterial.shape! as RoundedRectangleBorder;
+    expect(pillShape.borderRadius.resolve(TextDirection.ltr).topLeft.x, 6);
     expect(tester.takeException(), isNull);
   });
 }

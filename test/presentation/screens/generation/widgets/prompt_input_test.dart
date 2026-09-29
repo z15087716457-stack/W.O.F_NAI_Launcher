@@ -63,6 +63,17 @@ void main() {
 
     expect(find.text('先配置翻译模型'), findsOneWidget);
     expect(find.text('前往设置'), findsOneWidget);
+    await tester.tap(find.text('稍后'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('prompt-translation-actions')));
+    await tester.pumpAndSettle();
+    expect(find.text('配置翻译模型'), findsOneWidget);
+    expect(find.text('翻译新增内容'), findsOneWidget);
+    expect(find.text('撤销上次翻译'), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(PopupMenuItem<String>).first).width,
+      greaterThan(150),
+    );
     expect(tester.takeException(), isNull);
   });
 

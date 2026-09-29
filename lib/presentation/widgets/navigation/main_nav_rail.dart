@@ -56,7 +56,7 @@ class MainNavRail extends ConsumerWidget {
         child: Column(
           children: [
             // 账户固定在顶部，导航内容单独滚动。
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             _AccountAvatarButton(ref: ref),
             const _NavGroupDivider(),
 
@@ -458,24 +458,24 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
     }
 
     final avatar = currentAccount != null
-        ? AccountAvatarSmall(account: currentAccount, size: 40)
+        ? AccountAvatarSmall(account: currentAccount, size: 46)
         : Container(
-            width: 40,
-            height: 40,
+            width: 46,
+            height: 46,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
-              borderRadius: avatarBorderRadius(40),
+              borderRadius: avatarBorderRadius(46),
             ),
             child: Icon(
               Icons.person,
               color: theme.colorScheme.primary,
-              size: 24,
+              size: 26,
             ),
           );
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      height: 44,
+      margin: const EdgeInsets.fromLTRB(7, 0, 6, 0),
+      height: 50,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -483,7 +483,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
           onTapDown: (_) => setState(() => _isPressed = true),
           onTapUp: (_) => setState(() => _isPressed = false),
           onTapCancel: () => setState(() => _isPressed = false),
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(25),
           child: AnimatedScale(
             scale: _isPressed ? 0.97 : 1.0,
             duration: const Duration(milliseconds: 140),
@@ -498,9 +498,16 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
                 return Row(
                   children: [
                     SizedBox(
-                      width: constraints.maxWidth.clamp(0.0, 40.0),
-                      height: 44,
-                      child: Center(child: avatar),
+                      width: constraints.maxWidth.clamp(0.0, 46.0),
+                      height: 50,
+                      child: Center(
+                        child: SizedBox(
+                          key: const Key('main-nav-avatar'),
+                          width: 46,
+                          height: 46,
+                          child: avatar,
+                        ),
+                      ),
                     ),
                     if (showLabel) ...[
                       const SizedBox(width: 10),
