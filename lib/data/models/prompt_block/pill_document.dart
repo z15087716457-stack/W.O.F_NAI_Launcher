@@ -193,6 +193,7 @@ class PillInstanceSettings {
 class PillInstance {
   const PillInstance({
     required this.blockId,
+    this.translation,
     this.enabled = true,
     this.locked = false,
     this.evolutionEnabled = false,
@@ -206,6 +207,10 @@ class PillInstance {
   });
 
   final String blockId;
+
+  /// Inline bilingual text. When present this instance is independent of the
+  /// block library and always projects [TranslationPill.source].
+  final TranslationPill? translation;
 
   /// 同一块的负面部分。旧存档缺键时仍解析原有正文。
   final bool useNegativeContent;
@@ -244,6 +249,7 @@ class PillInstance {
 
   PillInstance copyWith({
     String? blockId,
+    TranslationPill? translation,
     bool? enabled,
     bool? locked,
     bool? evolutionEnabled,
@@ -257,6 +263,7 @@ class PillInstance {
   }) {
     return PillInstance(
       blockId: blockId ?? this.blockId,
+      translation: translation ?? this.translation,
       enabled: enabled ?? this.enabled,
       locked: locked ?? this.locked,
       evolutionEnabled: evolutionEnabled ?? this.evolutionEnabled,
@@ -272,6 +279,7 @@ class PillInstance {
 
   Map<String, dynamic> toJson() => {
     'blockId': blockId,
+    if (translation != null) 'translation': translation!.toJson(),
     if (useNegativeContent) 'useNegativeContent': true,
     if (bundleId != null) 'bundleId': bundleId,
     if (bundleId != null) 'rollScopeMask': rollScopeMask,
@@ -289,6 +297,11 @@ class PillInstance {
     final rawCursor = json['sequenceCursor'];
     return PillInstance(
       blockId: json['blockId'] as String? ?? '',
+      translation: json['translation'] is Map
+          ? TranslationPill.fromJson(
+              Map<String, dynamic>.from(json['translation'] as Map),
+            )
+          : null,
       useNegativeContent: json['useNegativeContent'] as bool? ?? false,
       bundleId: json['bundleId'] as String?,
       rollScopeMask:
@@ -321,6 +334,7 @@ class PillInstance {
   bool operator ==(Object other) =>
       other is PillInstance &&
       other.blockId == blockId &&
+      other.translation == translation &&
       other.useNegativeContent == useNegativeContent &&
       other.bundleId == bundleId &&
       other.rollScopeMask == rollScopeMask &&
@@ -335,6 +349,7 @@ class PillInstance {
   @override
   int get hashCode => Object.hash(
     blockId,
+    translation,
     useNegativeContent,
     bundleId,
     rollScopeMask,
@@ -346,6 +361,59 @@ class PillInstance {
     sequenceCursor,
     lastRollCount,
   );
+}
+
+/// A reading aid; only [source] participates in image generation.
+class TranslationPill {
+  const TranslationPill({
+    required this.source,
+    required this.zh,
+    this.showOriginal = false,
+    this.needsReview = false,
+  });
+
+  final String source;
+  final String zh;
+  final bool showOriginal;
+  final bool needsReview;
+
+  TranslationPill copyWith({
+    String? source,
+    String? zh,
+    bool? showOriginal,
+    bool? needsReview,
+  }) => TranslationPill(
+    source: source ?? this.source,
+    zh: zh ?? this.zh,
+    showOriginal: showOriginal ?? this.showOriginal,
+    needsReview: needsReview ?? this.needsReview,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'source': source,
+    'zh': zh,
+    if (showOriginal) 'showOriginal': true,
+    if (needsReview) 'needsReview': true,
+  };
+
+  factory TranslationPill.fromJson(Map<String, dynamic> json) =>
+      TranslationPill(
+        source: json['source'] as String? ?? '',
+        zh: json['zh'] as String? ?? '',
+        showOriginal: json['showOriginal'] as bool? ?? false,
+        needsReview: json['needsReview'] as bool? ?? false,
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      other is TranslationPill &&
+      other.source == source &&
+      other.zh == zh &&
+      other.showOriginal == showOriginal &&
+      other.needsReview == needsReview;
+
+  @override
+  int get hashCode => Object.hash(source, zh, showOriginal, needsReview);
 }
 
 /// 药丸工作区文档：文本（含标记字符）+ 实例表。

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
+import '../../../widgets/prompt/blocks/prompt_block_appearance.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 
 enum _PromptBlockCardAction { favorite, copy, addTag, edit, delete }
@@ -353,7 +354,11 @@ class PromptBlockPill extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Material(
-          color: blockColor.withValues(alpha: 0.16),
+          color: PromptBlockAppearance.fill(
+            block.appearance,
+            blockColor,
+            dark: theme.brightness == Brightness.dark,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
             side: BorderSide(
@@ -367,58 +372,80 @@ class PromptBlockPill extends StatelessWidget {
           child: InkWell(
             key: ValueKey('prompt-block-pill-body-${block.id}'),
             onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (showThumbnail && thumbnail != null)
-                    ClipRRect(
-                      key: ValueKey('prompt-block-pill-thumb-${block.id}'),
-                      borderRadius: BorderRadius.circular(5),
-                      child: Image.file(
-                        File(thumbnail),
-                        width: 22,
-                        height: 22,
-                        fit: BoxFit.cover,
-                        alignment: Alignment(
-                          block.thumbnailOffsetX.clamp(-1.0, 1.0),
-                          block.thumbnailOffsetY.clamp(-1.0, 1.0),
+            child: CustomPaint(
+              painter: PromptBlockPatternPainter(
+                appearance: block.appearance,
+                color: blockColor,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 7,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showThumbnail && thumbnail != null)
+                      ClipRRect(
+                        key: ValueKey('prompt-block-pill-thumb-${block.id}'),
+                        borderRadius: BorderRadius.circular(5),
+                        child: Image.file(
+                          File(thumbnail),
+                          width: 22,
+                          height: 22,
+                          fit: BoxFit.cover,
+                          alignment: Alignment(
+                            block.thumbnailOffsetX.clamp(-1.0, 1.0),
+                            block.thumbnailOffsetY.clamp(-1.0, 1.0),
+                          ),
+                          filterQuality: FilterQuality.medium,
+                          errorBuilder: (_, __, ___) => Icon(
+                            promptBlockIconFromName(block.iconName),
+                            size: 16,
+                            color: PromptBlockAppearance.text(
+                              block.appearance,
+                              blockColor,
+                              blockColor,
+                            ),
+                          ),
                         ),
-                        filterQuality: FilterQuality.medium,
-                        errorBuilder: (_, __, ___) => Icon(
-                          promptBlockIconFromName(block.iconName),
-                          size: 16,
-                          color: blockColor,
+                      )
+                    else
+                      Icon(
+                        promptBlockIconFromName(block.iconName),
+                        size: 16,
+                        color: PromptBlockAppearance.text(
+                          block.appearance,
+                          blockColor,
+                          blockColor,
                         ),
                       ),
-                    )
-                  else
-                    Icon(
-                      promptBlockIconFromName(block.iconName),
-                      size: 16,
-                      color: blockColor,
-                    ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      displayTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (multiSelected) ...[
                     const SizedBox(width: 6),
-                    Icon(
-                      Icons.check_circle,
-                      size: 15,
-                      color: theme.colorScheme.primary,
+                    Flexible(
+                      child: Text(
+                        displayTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: PromptBlockAppearance.text(
+                            block.appearance,
+                            blockColor,
+                            theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
                     ),
+                    if (multiSelected) ...[
+                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.check_circle,
+                        size: 15,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

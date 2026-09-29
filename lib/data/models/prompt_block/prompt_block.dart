@@ -67,6 +67,12 @@ class PromptBlock with _$PromptBlock {
     /// 供 Prompt 展开的完整纯文本正文。
     required String content,
 
+    /// Optional Chinese reading text for a copied translation block.
+    @JsonKey(includeIfNull: false) String? readingTranslationZh,
+
+    /// Source changed after the last Chinese reading was reviewed.
+    @Default(false) bool readingTranslationNeedsReview,
+
     /// 与正面内容同属一个块；旧块缺键时为空。
     @Default('') String negativeContent,
 
@@ -91,6 +97,9 @@ class PromptBlock with _$PromptBlock {
 
     /// 稳定保存的显示颜色，例如 #FF607D8B。
     @Default('#FF607D8B') String color,
+
+    /// Visual skin. Old blocks keep the classic appearance.
+    @Default('classic') String appearance,
 
     /// 自定义图标名（预设表键，见 prompt_block_icons.dart）；null 用默认图标。
     @JsonKey(includeIfNull: false) String? iconName,
@@ -146,6 +155,9 @@ class PromptBlock with _$PromptBlock {
     required String content,
     String? folderId,
     String color = '#FF607D8B',
+    String appearance = 'classic',
+    String? readingTranslationZh,
+    bool readingTranslationNeedsReview = false,
     String? iconName,
     String? thumbnail,
     double thumbnailOffsetX = 0.0,
@@ -179,8 +191,11 @@ class PromptBlock with _$PromptBlock {
       lineageId: lineageId,
       title: title.trim(),
       content: content,
+      readingTranslationZh: readingTranslationZh,
+      readingTranslationNeedsReview: readingTranslationNeedsReview,
       folderId: folderId,
       color: color,
+      appearance: appearance,
       iconName: iconName,
       thumbnail: thumbnail,
       thumbnailOffsetX: thumbnailOffsetX,

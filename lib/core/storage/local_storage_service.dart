@@ -765,6 +765,14 @@ class LocalStorageService {
     await setSetting(StorageKeys.blockPaletteToolPinned, pinned);
   }
 
+  bool getTranslationToolPinned() =>
+      getSetting<bool>(StorageKeys.translationToolPinned, defaultValue: true) ??
+      true;
+
+  Future<void> setTranslationToolPinned(bool pinned) async {
+    await setSetting(StorageKeys.translationToolPinned, pinned);
+  }
+
   /// 获取块库面板图标钉住状态 (默认不钉——原来头部无此图标)
   bool getBlockLibraryPanelToolPinned() {
     return getSetting<bool>(

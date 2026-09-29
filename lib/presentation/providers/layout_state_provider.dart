@@ -14,6 +14,7 @@ class LayoutState {
   final bool blockLibraryPanelExpanded;
   final double blockLibraryPanelWidth;
   final bool blockPaletteToolPinned;
+  final bool translationToolPinned;
   final bool blockLibraryPanelToolPinned;
   final double styleExploreRunSidebarWidth;
   final double styleExploreGalleryWidth;
@@ -30,6 +31,7 @@ class LayoutState {
     this.blockLibraryPanelExpanded = false,
     this.blockLibraryPanelWidth = 320.0,
     this.blockPaletteToolPinned = true,
+    this.translationToolPinned = true,
     this.blockLibraryPanelToolPinned = false,
     this.styleExploreRunSidebarWidth = 240.0,
     this.styleExploreGalleryWidth = 360.0,
@@ -46,6 +48,7 @@ class LayoutState {
     bool? blockLibraryPanelExpanded,
     double? blockLibraryPanelWidth,
     bool? blockPaletteToolPinned,
+    bool? translationToolPinned,
     bool? blockLibraryPanelToolPinned,
     double? styleExploreRunSidebarWidth,
     double? styleExploreGalleryWidth,
@@ -63,6 +66,8 @@ class LayoutState {
           blockLibraryPanelWidth ?? this.blockLibraryPanelWidth,
       blockPaletteToolPinned:
           blockPaletteToolPinned ?? this.blockPaletteToolPinned,
+      translationToolPinned:
+          translationToolPinned ?? this.translationToolPinned,
       blockLibraryPanelToolPinned:
           blockLibraryPanelToolPinned ?? this.blockLibraryPanelToolPinned,
       styleExploreRunSidebarWidth:
@@ -92,6 +97,7 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       blockLibraryPanelExpanded: storage.getBlockLibraryPanelExpanded(),
       blockLibraryPanelWidth: storage.getBlockLibraryPanelWidth(),
       blockPaletteToolPinned: storage.getBlockPaletteToolPinned(),
+      translationToolPinned: storage.getTranslationToolPinned(),
       blockLibraryPanelToolPinned: storage.getBlockLibraryPanelToolPinned(),
       styleExploreRunSidebarWidth: storage.getStyleExploreRunSidebarWidth(),
       styleExploreGalleryWidth: storage.getStyleExploreGalleryWidth(),
@@ -186,6 +192,13 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
   /// 切换积木工具钮钉住状态
   Future<void> toggleBlockPaletteToolPinned() async {
     await setBlockPaletteToolPinned(!state.blockPaletteToolPinned);
+  }
+
+  Future<void> toggleTranslationToolPinned() async {
+    state = state.copyWith(translationToolPinned: !state.translationToolPinned);
+    await ref
+        .read(localStorageServiceProvider)
+        .setTranslationToolPinned(state.translationToolPinned);
   }
 
   /// 设置块库面板图标钉住状态（头部"块库"图标位显隐）

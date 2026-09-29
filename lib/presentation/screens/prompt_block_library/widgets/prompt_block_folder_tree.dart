@@ -386,8 +386,9 @@ class _PromptBlockFolderTreeState extends State<PromptBlockFolderTree> {
     ValueChanged<String>? fallback,
   }) {
     return DragTarget<PromptBlockDragData>(
-      onWillAcceptWithDetails: (_) =>
-          widget.onDropBlocks != null || fallback != null,
+      onWillAcceptWithDetails: (details) =>
+          details.data.blockId.isNotEmpty &&
+          (widget.onDropBlocks != null || fallback != null),
       onAcceptWithDetails: (details) {
         HapticFeedback.mediumImpact();
         if (widget.onDropBlocks != null) {

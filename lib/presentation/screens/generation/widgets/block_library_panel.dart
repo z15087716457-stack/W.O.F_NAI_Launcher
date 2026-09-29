@@ -755,6 +755,10 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
               negativeAtoms: result.negativeAtoms,
               generationSettings: result.generationSettings,
               color: result.color,
+              appearance: result.appearance,
+              readingTranslationZh: result.readingTranslationZh,
+              readingTranslationNeedsReview:
+                  result.readingTranslationNeedsReview,
               iconName: result.iconName,
               thumbnail: result.thumbnail,
               thumbnailOffsetX: result.thumbnailOffsetX,

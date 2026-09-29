@@ -512,6 +512,51 @@ void main() {
     expect(doc.instances.length, 2);
   });
 
+  testWidgets('cross-lane translation drop copies despite marker collision', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      pillScope: PillScopes.negative,
+      libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+    );
+    final source = container.read(
+      pillWorkspaceProvider(PillScopes.main).notifier,
+    );
+    final target = container.read(
+      pillWorkspaceProvider(PillScopes.negative).notifier,
+    );
+    source.insertTranslationAt(offset: 0, source: 'blue eyes', zh: '蓝眼睛');
+    target.insertTranslationAt(offset: 0, source: 'bad hands', zh: '坏手');
+    await tester.pump();
+
+    _acceptDrop(
+      tester,
+      const PromptBlockDragData(
+        blockId: '',
+        translation: TranslationPill(source: 'blue eyes', zh: '蓝眼睛'),
+        instanceMarker: PillInstanceDragRef(
+          marker: markerA,
+          occurrence: 0,
+          scope: PillScopes.main,
+        ),
+      ),
+      offset: Offset.zero,
+    );
+    await tester.pump();
+
+    final sourceDoc = container
+        .read(pillWorkspaceProvider(PillScopes.main))
+        .document;
+    final targetDoc = container
+        .read(pillWorkspaceProvider(PillScopes.negative))
+        .document;
+    expect(sourceDoc.instances.length, 1);
+    expect(targetDoc.instances.length, 2);
+    expect(targetDoc.instances[markerA]!.translation!.source, 'bad hands');
+    expect(targetDoc.instances[markerB]!.translation!.source, 'blue eyes');
+  });
+
   testWidgets('typing reconciles text and keeps instances alive', (
     tester,
   ) async {

@@ -122,6 +122,10 @@ abstract final class PillDocumentEditor {
       final marker = String.fromCharCode(codeUnit);
       final instance = document.instances[marker];
       if (instance == null || !instance.enabled) continue;
+      if (instance.translation case final translation?) {
+        buffer.write(translation.source);
+        continue;
+      }
       buffer.write(
         (resolveMarker == null
                 ? resolveInstance(instance)

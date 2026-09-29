@@ -20,6 +20,7 @@ import '../../../providers/image_generation_provider.dart';
 import '../../../providers/layout_state_provider.dart';
 import '../../../providers/prompt_maximize_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
+import '../../../providers/prompt_translation_provider.dart';
 import '../../../providers/prompt_token_counter_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/tips_provider.dart';
@@ -480,6 +481,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final panelToolPinned = ref.watch(
       layoutStateNotifierProvider.select((s) => s.blockLibraryPanelToolPinned),
     );
+    final translationPinned = ref.watch(
+      layoutStateNotifierProvider.select((s) => s.translationToolPinned),
+    );
     return Padding(
       // Tabs and editor share the same inset inside one writing surface.
       padding: const EdgeInsets.fromLTRB(10, 8, 8, 0),
@@ -502,6 +506,10 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             pinned: panelToolPinned,
             child: const BlockLibraryPanelToggleButton(),
           ),
+          _PinnedToolSlot(
+            pinned: translationPinned,
+            child: _buildTranslationToolButton(theme),
+          ),
           _buildChunksMenuButton(theme),
           if (widget.showMaximizeButton)
             IconButton(
@@ -523,6 +531,91 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         ],
       ),
     );
+  }
+
+  Widget _buildTranslationToolButton(ThemeData theme) {
+    final busy = ref.watch(promptTranslationBusyProvider);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          key: const Key('prompt-translation-toggle'),
+          constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+          padding: EdgeInsets.zero,
+          tooltip: busy ? '正在翻译' : '翻译／切换整组原文与译文',
+          onPressed: busy ? null : () => _handleTranslationButton(),
+          icon: busy
+              ? const SizedBox(
+                  width: 15,
+                  height: 15,
+                  child: CircularProgressIndicator(strokeWidth: 1.7),
+                )
+              : Icon(
+                  Icons.translate_outlined,
+                  size: 18,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+        ),
+        PopupMenuButton<String>(
+          tooltip: '翻译操作',
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(width: 18, height: 28),
+          icon: const Icon(Icons.arrow_drop_down, size: 15),
+          onSelected: (action) {
+            if (action == 'translate') {
+              _runTranslation();
+            } else if (action == 'undo') {
+              final restored = ref
+                  .read(promptTranslationCoordinatorProvider)
+                  .undoLast();
+              if (restored) AppToast.success(context, '已撤销上次翻译');
+            }
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(value: 'translate', child: Text('翻译新增内容')),
+            PopupMenuItem(value: 'undo', child: Text('撤销上次翻译')),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _handleTranslationButton() {
+    final coordinator = ref.read(promptTranslationCoordinatorProvider);
+    if (coordinator.hasTranslations(_isNegativeMode)) {
+      coordinator.toggleAll(_isNegativeMode);
+    } else {
+      _runTranslation();
+    }
+  }
+
+  Future<void> _runTranslation() async {
+    try {
+      final result = await ref
+          .read(promptTranslationCoordinatorProvider)
+          .translate(_isNegativeMode);
+      if (!mounted) return;
+      if (result.convertedFields == 0) {
+        AppToast.info(
+          context,
+          result.skippedChangedFields > 0 ? '提示词已变化，未覆盖新编辑' : '当前没有需要翻译的普通文字',
+        );
+        return;
+      }
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      messenger?.showSnackBar(
+        SnackBar(
+          content: Text('已翻译 ${result.convertedFields} 个提示词框'),
+          action: SnackBarAction(
+            label: '撤销',
+            onPressed: () =>
+                ref.read(promptTranslationCoordinatorProvider).undoLast(),
+          ),
+        ),
+      );
+    } catch (error) {
+      if (mounted) AppToast.error(context, '翻译失败：$error');
+    }
   }
 
   /// 「模块与开关」弹层钮（官网 prompt-chunks 钮）：官方 prompt_chunk 图标。
@@ -571,6 +664,17 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           onTap: () => ref
               .read(layoutStateNotifierProvider.notifier)
               .toggleBlockLibraryPanelToolPinned(),
+        ),
+        _buildToolPinMenuItem(
+          pinnedProvider: layoutStateNotifierProvider.select(
+            (s) => s.translationToolPinned,
+          ),
+          icon: Icons.translate_outlined,
+          title: '翻译',
+          theme: theme,
+          onTap: () => ref
+              .read(layoutStateNotifierProvider.notifier)
+              .toggleTranslationToolPinned(),
         ),
         const PopupMenuDivider(),
         _buildSettingsMenuItem(

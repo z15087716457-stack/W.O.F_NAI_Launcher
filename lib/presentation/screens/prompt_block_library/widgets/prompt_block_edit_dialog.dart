@@ -26,6 +26,7 @@ import '../../../widgets/common/thumbnail_display.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../../widgets/prompt/blocks/prompt_block_tag_chip.dart';
+import '../../../widgets/prompt/blocks/prompt_block_appearance.dart';
 import '../../../widgets/common/thumbnail_crop_dialog.dart';
 import '../../../widgets/prompt/prompt_token_count_bar.dart';
 import 'atom_list_editor.dart';
@@ -43,6 +44,9 @@ class PromptBlockEditResult {
     required this.tags,
     required this.folderId,
     required this.color,
+    this.appearance = PromptBlockAppearance.classic,
+    this.readingTranslationZh,
+    this.readingTranslationNeedsReview = false,
     required this.iconName,
     this.thumbnail,
     this.thumbnailOffsetX = 0.0,
@@ -62,6 +66,9 @@ class PromptBlockEditResult {
   final List<String> atoms;
   final String? folderId;
   final String color;
+  final String appearance;
+  final String? readingTranslationZh;
+  final bool readingTranslationNeedsReview;
   final String? iconName;
 
   /// 应用目录内预览图路径；null = 无图。
@@ -168,6 +175,9 @@ class PromptBlockEditDialog extends StatefulWidget {
           tags: result.tags,
           folderId: result.folderId,
           color: result.color,
+          appearance: result.appearance,
+          readingTranslationZh: result.readingTranslationZh,
+          readingTranslationNeedsReview: result.readingTranslationNeedsReview,
           iconName: result.iconName,
           thumbnail: result.thumbnail,
           thumbnailOffsetX: result.thumbnailOffsetX,
@@ -191,6 +201,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   late final TextEditingController _stepsController;
   late final TextEditingController _scaleController;
   late final TextEditingController _cfgRescaleController;
+  late final TextEditingController _readingTranslationController;
   String? _settingsModel;
   String? _settingsSampler;
   String? _settingsNoiseSchedule;
@@ -200,6 +211,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
   late Future<PromptTokenUsage?> _tokenUsage;
   late String? _folderId;
   late Color _selectedColor;
+  late String _selectedAppearance;
   late String? _selectedIconName;
   late List<PromptBlockTag> _tags;
   final List<TextEditingController> _tagDialogControllers = [];
@@ -244,6 +256,9 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     _cfgRescaleController = TextEditingController(
       text: settings?.cfgRescale?.toString(),
     );
+    _readingTranslationController = TextEditingController(
+      text: widget.block?.readingTranslationZh ?? '',
+    );
     _tokenService = widget.tokenCounterService == null
         ? PromptTokenCounterService.createDefault()
         : Future.value(widget.tokenCounterService);
@@ -254,6 +269,8 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     _selectedColor = promptBlockColorFromString(
       widget.block?.color ?? '#FF607D8B',
     );
+    _selectedAppearance =
+        widget.block?.appearance ?? PromptBlockAppearance.classic;
     _selectedIconName = widget.block?.iconName;
     _tags = [...?widget.block?.tags];
     _thumbnailPath = widget.block?.thumbnail;
@@ -297,6 +314,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
     _stepsController.dispose();
     _scaleController.dispose();
     _cfgRescaleController.dispose();
+    _readingTranslationController.dispose();
     for (final controller in _tagDialogControllers) {
       controller.dispose();
     }
@@ -390,6 +408,20 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               _buildThumbnailSection(theme, l10n),
               const SizedBox(height: 12),
               _buildContentPanel(theme, l10n),
+              if (widget.block?.readingTranslationZh != null) ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _readingTranslationController,
+                  minLines: 2,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    labelText: '中文阅读文本',
+                    helperText: widget.block!.readingTranslationNeedsReview
+                        ? '原文已修改，译文待更新'
+                        : '修改原文后请同步校对这里的译文',
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               Text(
                 l10n.promptBlockLibrary_color,
@@ -399,6 +431,28 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               PromptBlockColorPicker(
                 selectedColor: _selectedColor,
                 onChanged: (color) => setState(() => _selectedColor = color),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue:
+                    PromptBlockAppearance.selectable.contains(
+                      _selectedAppearance,
+                    )
+                    ? _selectedAppearance
+                    : PromptBlockAppearance.classic,
+                decoration: const InputDecoration(labelText: '块外观'),
+                items: [
+                  for (final appearance in PromptBlockAppearance.selectable)
+                    DropdownMenuItem(
+                      value: appearance,
+                      child: Text(PromptBlockAppearance.label(appearance)),
+                    ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedAppearance = value);
+                  }
+                },
               ),
               const SizedBox(height: 16),
               Text(
@@ -1184,12 +1238,28 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
       if (!mounted) return;
       final atoms = _atomController.atoms;
       final negativeAtoms = _negativeAtomController.atoms;
+      final readingZh = _readingTranslationController.text.trim();
+      final content = atoms.join(', ');
+      final sourceChanged = content != widget.block?.content;
+      final readingChanged = readingZh != widget.block?.readingTranslationZh;
       Navigator.of(context).pop(
         PromptBlockEditResult(
           title: _titleController.text.trim(),
           // FEAT-79：content 恒为 atoms 的 `, ` 拼接——插入/搜索/预览
           // 路径全部只读 content，抽取路径读显式 atoms。
-          content: atoms.join(', '),
+          content: content,
+          readingTranslationZh: widget.block?.readingTranslationZh == null
+              ? null
+              : readingZh.isEmpty
+              ? null
+              : readingZh,
+          readingTranslationNeedsReview:
+              widget.block?.readingTranslationZh != null &&
+              readingZh.isNotEmpty &&
+              (readingChanged
+                  ? false
+                  : sourceChanged ||
+                        (widget.block?.readingTranslationNeedsReview ?? false)),
           atoms: atoms,
           negativeContent: negativeAtoms.join(', '),
           negativeAtoms: negativeAtoms,
@@ -1197,6 +1267,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
           tags: _tags,
           folderId: _folderId,
           color: promptBlockColorToHex(_selectedColor),
+          appearance: _selectedAppearance,
           iconName: _selectedIconName,
           thumbnail: _thumbnailPath,
           thumbnailOffsetX: _thumbnailOffsetX,

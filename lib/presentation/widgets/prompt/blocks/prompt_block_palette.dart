@@ -12,6 +12,7 @@ import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_block_palette_provider.dart';
 import '../../../utils/prompt_block_bundle_insertion.dart';
+import '../../../utils/translation_palette_drop.dart';
 import '../../../screens/prompt_block_library/widgets/prompt_block_card.dart';
 import '../../../screens/prompt_block_library/widgets/prompt_block_detail.dart';
 import 'prompt_block_drag_data.dart';
@@ -78,9 +79,7 @@ class _PromptBlockPaletteButtonState
       },
       onAcceptWithDetails: (details) {
         setState(() => _dragHover = false);
-        ref
-            .read(promptBlockPaletteNotifierProvider.notifier)
-            .addBlock(details.data.blockId);
+        unawaited(acceptPaletteDrag(ref, details.data));
       },
       builder: (context, _, _) => Tooltip(
         message: context.l10n.promptBlockPalette_tooltip,
@@ -468,7 +467,7 @@ class _PromptBlockPaletteCardState
                   if (paletteIndex != null) {
                     notifier.move(paletteIndex, blocks.length - 1);
                   } else {
-                    notifier.addBlock(details.data.blockId);
+                    unawaited(acceptPaletteDrag(ref, details.data));
                   }
                 },
                 builder: (context, _, _) => LayoutBuilder(
@@ -612,7 +611,7 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
         if (fromIndex != null) {
           notifier.move(fromIndex, widget.index);
         } else {
-          notifier.insertBlock(details.data.blockId, widget.index);
+          unawaited(acceptPaletteDrag(ref, details.data, index: widget.index));
         }
       },
       builder: (context, _, _) => MouseRegion(

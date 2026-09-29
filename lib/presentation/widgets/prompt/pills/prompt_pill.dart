@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import 'dna_icon.dart';
+import '../blocks/prompt_block_appearance.dart';
 
 /// 药丸编辑器中文本流内联渲染的块药丸（P0 原型）。
 ///
@@ -12,6 +13,7 @@ class PromptPill extends StatelessWidget {
     super.key,
     required this.title,
     required this.color,
+    this.appearance = PromptBlockAppearance.classic,
     this.enabled = true,
     this.icon,
     this.locked = false,
@@ -25,6 +27,7 @@ class PromptPill extends StatelessWidget {
 
   final String title;
   final Color color;
+  final String appearance;
   final bool enabled;
 
   /// 随机实例的用户锁定角标；固定、未知和失效块不显示。
@@ -54,9 +57,19 @@ class PromptPill extends StatelessWidget {
     final (borderColor, fillColor, textColor, icon) = switch (variant) {
       PromptPillVariant.normal => (
         color.withValues(alpha: enabled ? 0.85 : 0.35),
-        color.withValues(alpha: enabled ? 0.20 : 0.07),
         enabled
-            ? theme.colorScheme.onSurface
+            ? PromptBlockAppearance.fill(
+                appearance,
+                color,
+                dark: theme.brightness == Brightness.dark,
+              )
+            : color.withValues(alpha: .07),
+        enabled
+            ? PromptBlockAppearance.text(
+                appearance,
+                color,
+                theme.colorScheme.onSurface,
+              )
             : theme.colorScheme.onSurfaceVariant,
         this.icon ?? StudioIcons.promptBlocks,
       ),
@@ -85,56 +98,69 @@ class PromptPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: borderColor, width: 0.9),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: borderColor),
-          if (variant == PromptPillVariant.normal && locked) ...[
-            const SizedBox(width: 2),
-            Icon(Icons.lock_outline, size: 12, color: borderColor),
-          ],
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: textColor,
-                height: 1.1,
-              ),
+      child: CustomPaint(
+        painter: PromptBlockPatternPainter(
+          appearance: appearance,
+          color: color,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 13,
+              color: appearance == PromptBlockAppearance.solid
+                  ? textColor
+                  : borderColor,
             ),
-          ),
-          if (variant == PromptPillVariant.normal && isAttachedUc) ...[
-            const SizedBox(width: 5),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-              decoration: BoxDecoration(
-                color: borderColor.withValues(alpha: .14),
-                borderRadius: BorderRadius.circular(3),
-              ),
+            if (variant == PromptPillVariant.normal && locked) ...[
+              const SizedBox(width: 2),
+              Icon(Icons.lock_outline, size: 12, color: borderColor),
+            ],
+            const SizedBox(width: 4),
+            Flexible(
               child: Text(
-                'UC',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  height: 1,
-                  color: borderColor,
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                  height: 1.1,
                 ),
               ),
             ),
+            if (variant == PromptPillVariant.normal && isAttachedUc) ...[
+              const SizedBox(width: 5),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                decoration: BoxDecoration(
+                  color: borderColor.withValues(alpha: .14),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Text(
+                  'UC',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w800,
+                    height: 1,
+                    color: borderColor,
+                  ),
+                ),
+              ),
+            ],
+            if (variant == PromptPillVariant.normal &&
+                evolutionEnabled &&
+                allowEvolutionToggle) ...[
+              const SizedBox(width: 2),
+              DnaIcon(size: 12, color: color),
+            ] else if (variant == PromptPillVariant.normal &&
+                showRollBadge) ...[
+              const SizedBox(width: 2),
+              Icon(rollBadgeIcon, size: 11, color: borderColor),
+            ],
           ],
-          if (variant == PromptPillVariant.normal &&
-              evolutionEnabled &&
-              allowEvolutionToggle) ...[
-            const SizedBox(width: 2),
-            DnaIcon(size: 12, color: color),
-          ] else if (variant == PromptPillVariant.normal && showRollBadge) ...[
-            const SizedBox(width: 2),
-            Icon(rollBadgeIcon, size: 11, color: borderColor),
-          ],
-        ],
+        ),
       ),
     );
   }
