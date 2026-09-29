@@ -584,6 +584,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               tooltip: '翻译操作',
               padding: EdgeInsets.zero,
               position: PopupMenuPosition.under,
+              constraints: const BoxConstraints.tightFor(width: 188),
+              menuPadding: const EdgeInsets.symmetric(vertical: 4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: const Center(child: Icon(Icons.arrow_drop_down, size: 15)),
               onSelected: (action) {
                 if (action == 'translate') {
@@ -605,28 +610,53 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                 final coordinator = ref.read(
                   promptTranslationCoordinatorProvider,
                 );
+                final modelLabel = route == null
+                    ? '未配置翻译模型'
+                    : '${route.provider.name} / ${route.model.displayName}';
                 return [
                   PopupMenuItem<String>(
-                    enabled: false,
-                    child: Text(
-                      route == null
-                          ? '尚未选择翻译模型'
-                          : '${route.provider.name} / ${route.model.displayName}',
+                    key: const Key('prompt-translation-configure'),
+                    value: 'configure',
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Tooltip(
+                      message: '$modelLabel · 配置翻译模型',
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              modelLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.settings_outlined,
+                            size: 16,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const PopupMenuItem(
-                    value: 'configure',
-                    child: Text('配置翻译模型'),
-                  ),
-                  const PopupMenuDivider(),
                   PopupMenuItem<String>(
                     value: 'translate',
                     enabled: !busy,
-                    child: const Row(
+                    height: 38,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
                       children: [
-                        Icon(Icons.add, size: 18),
-                        SizedBox(width: 8),
-                        Text('翻译新增内容'),
+                        Icon(
+                          Icons.add,
+                          size: 17,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('翻译新增内容'),
                       ],
                     ),
                   ),
@@ -2018,7 +2048,7 @@ class _TranslationMenuFooter extends PopupMenuEntry<String> {
   final bool canClear;
 
   @override
-  double get height => 52;
+  double get height => 39;
 
   @override
   bool represents(String? value) => false;
@@ -2032,7 +2062,7 @@ class _TranslationMenuFooterState extends State<_TranslationMenuFooter> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return SizedBox(
-      width: 208,
+      width: 188,
       height: widget.height,
       child: Column(
         children: [
@@ -2045,20 +2075,36 @@ class _TranslationMenuFooterState extends State<_TranslationMenuFooter> {
                   IconButton(
                     key: const Key('prompt-translation-undo'),
                     tooltip: '撤销上次翻译',
+                    constraints: const BoxConstraints.tightFor(
+                      width: 32,
+                      height: 32,
+                    ),
+                    style: IconButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    padding: EdgeInsets.zero,
                     onPressed: widget.canUndo
                         ? () => Navigator.pop(context, 'undo')
                         : null,
-                    icon: const Icon(Icons.undo, size: 19),
+                    icon: const Icon(Icons.undo, size: 18),
                   ),
                   const Spacer(),
                   IconButton(
                     key: const Key('prompt-translation-clear'),
                     tooltip: '清空当前侧翻译块并还原原文',
+                    constraints: const BoxConstraints.tightFor(
+                      width: 32,
+                      height: 32,
+                    ),
+                    style: IconButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    padding: EdgeInsets.zero,
                     onPressed: widget.canClear
                         ? () => Navigator.pop(context, 'clear')
                         : null,
                     color: scheme.error,
-                    icon: const Icon(Icons.delete_outline, size: 19),
+                    icon: const Icon(Icons.delete_outline, size: 18),
                   ),
                 ],
               ),

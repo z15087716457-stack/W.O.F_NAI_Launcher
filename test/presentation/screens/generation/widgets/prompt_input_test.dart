@@ -85,7 +85,8 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('prompt-translation-actions')));
     await tester.pumpAndSettle();
-    expect(find.text('配置翻译模型'), findsOneWidget);
+    expect(find.text('未配置翻译模型'), findsOneWidget);
+    expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     expect(find.text('翻译新增内容'), findsOneWidget);
     expect(find.byKey(const Key('prompt-translation-undo')), findsOneWidget);
     expect(find.byKey(const Key('prompt-translation-clear')), findsOneWidget);
@@ -99,9 +100,31 @@ void main() {
       ),
       findsOneWidget,
     );
+    final menu = tester.widget<PopupMenuButton<String>>(
+      find.byKey(const Key('prompt-translation-actions')),
+    );
+    expect(menu.constraints!.maxWidth, 188);
+    expect(menu.menuPadding, const EdgeInsets.symmetric(vertical: 4));
     expect(
-      tester.getSize(find.byType(PopupMenuItem<String>).first).width,
-      greaterThan(150),
+      tester
+          .getSize(find.byKey(const Key('prompt-translation-configure')))
+          .height,
+      lessThanOrEqualTo(40),
+    );
+    expect(
+      tester
+          .getSize(
+            find.ancestor(
+              of: find.text('翻译新增内容'),
+              matching: find.byType(PopupMenuItem<String>),
+            ),
+          )
+          .height,
+      lessThanOrEqualTo(40),
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('prompt-translation-clear'))),
+      const Size(32, 32),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
