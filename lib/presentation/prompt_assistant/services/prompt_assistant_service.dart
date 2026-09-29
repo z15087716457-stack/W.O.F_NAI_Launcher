@@ -264,6 +264,20 @@ Prompt version: $tagTranslationPromptVersion
   Future<({ProviderConfig provider, String model, String? apiKey})>
   _resolveInterfaceExecution(LauncherInterface interface) async {
     final config = _ref.read(promptAssistantConfigProvider);
+    if (interface == LauncherInterface.translate) {
+      final selected = config.promptTranslationRoute;
+      if (selected == null) {
+        throw StateError('请先在「设置 → 集成 → 模型与接口 → 提示词翻译」选择服务商和模型。');
+      }
+      final apiKey = await _ref
+          .read(promptAssistantConfigProvider.notifier)
+          .getProviderApiKey(selected.provider.id);
+      return (
+        provider: selected.provider,
+        model: selected.model.name,
+        apiKey: apiKey,
+      );
+    }
     final route = _resolveInterfaceRoute(config, interface);
     if (route == null) {
       throw StateError(

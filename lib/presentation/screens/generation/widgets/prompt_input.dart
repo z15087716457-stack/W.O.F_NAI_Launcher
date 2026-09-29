@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/autocomplete/autocomplete_settings.dart'
@@ -21,6 +22,8 @@ import '../../../providers/layout_state_provider.dart';
 import '../../../providers/prompt_maximize_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_translation_provider.dart';
+import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
+import '../../../router/app_router.dart';
 import '../../../providers/prompt_token_counter_provider.dart';
 import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/tips_provider.dart';
@@ -535,6 +538,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
 
   Widget _buildTranslationToolButton(ThemeData theme) {
     final busy = ref.watch(promptTranslationBusyProvider);
+    final route = ref
+        .watch(promptAssistantConfigProvider)
+        .promptTranslationRoute;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -542,7 +548,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           key: const Key('prompt-translation-toggle'),
           constraints: const BoxConstraints.tightFor(width: 28, height: 28),
           padding: EdgeInsets.zero,
-          tooltip: busy ? '正在翻译' : '翻译／切换整组原文与译文',
+          tooltip: busy
+              ? '正在翻译'
+              : route == null
+              ? '翻译 · 先配置模型'
+              : '翻译 · ${route.provider.name} / ${route.model.displayName}',
           onPressed: busy ? null : () => _handleTranslationButton(),
           icon: busy
               ? const SizedBox(
@@ -564,6 +574,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           onSelected: (action) {
             if (action == 'translate') {
               _runTranslation();
+            } else if (action == 'configure') {
+              _openTranslationSettings();
             } else if (action == 'undo') {
               final restored = ref
                   .read(promptTranslationCoordinatorProvider)
@@ -571,9 +583,19 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               if (restored) AppToast.success(context, '已撤销上次翻译');
             }
           },
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'translate', child: Text('翻译新增内容')),
-            PopupMenuItem(value: 'undo', child: Text('撤销上次翻译')),
+          itemBuilder: (_) => [
+            PopupMenuItem<String>(
+              enabled: false,
+              child: Text(
+                route == null
+                    ? '尚未选择翻译模型'
+                    : '${route.provider.name} / ${route.model.displayName}',
+              ),
+            ),
+            const PopupMenuItem(value: 'configure', child: Text('配置翻译模型')),
+            const PopupMenuDivider(),
+            const PopupMenuItem(value: 'translate', child: Text('翻译新增内容')),
+            const PopupMenuItem(value: 'undo', child: Text('撤销上次翻译')),
           ],
         ),
       ],
@@ -590,6 +612,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   }
 
   Future<void> _runTranslation() async {
+    if (ref.read(promptAssistantConfigProvider).promptTranslationRoute ==
+        null) {
+      _showTranslationSetupDialog();
+      return;
+    }
     try {
       final result = await ref
           .read(promptTranslationCoordinatorProvider)
@@ -616,6 +643,33 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     } catch (error) {
       if (mounted) AppToast.error(context, '翻译失败：$error');
     }
+  }
+
+  Future<void> _showTranslationSetupDialog() async {
+    final openSettings = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('先配置翻译模型'),
+        content: const Text(
+          '翻译需要明确选择服务商和模型。前往「设置 → 集成 → 模型与接口」，先添加服务商并取得模型列表，再在「提示词翻译」卡片中完成选择。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('稍后'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('前往设置'),
+          ),
+        ],
+      ),
+    );
+    if (mounted && openSettings == true) _openTranslationSettings();
+  }
+
+  void _openTranslationSettings() {
+    context.go('${AppRoutes.settings}?section=integrations');
   }
 
   /// 「模块与开关」弹层钮（官网 prompt-chunks 钮）：官方 prompt_chunk 图标。

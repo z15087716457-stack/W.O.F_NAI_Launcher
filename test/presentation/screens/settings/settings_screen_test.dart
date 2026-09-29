@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
@@ -14,6 +15,8 @@ import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/integrations_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/prompt_assistant_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/settings_screen.dart';
+import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
+import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 
 class _FakeAuthNotifier extends AuthNotifier {
   @override
@@ -28,6 +31,23 @@ class _FakeAccountManagerNotifier extends AccountManagerNotifier {
 class _FakeSubscriptionNotifier extends SubscriptionNotifier {
   @override
   SubscriptionState build() => const SubscriptionStateInitial();
+}
+
+class _MemorySettingsStorage extends LocalStorageService {
+  String? _config;
+
+  @override
+  T? getSetting<T>(String key, {T? defaultValue}) =>
+      key == StorageKeys.promptAssistantConfigJson
+      ? _config as T?
+      : defaultValue;
+
+  @override
+  Future<void> setSetting<T>(String key, T value) async {
+    if (key == StorageKeys.promptAssistantConfigJson) {
+      _config = value as String;
+    }
+  }
 }
 
 void main() {
@@ -155,5 +175,64 @@ void main() {
       findsOneWidget,
     );
     expect(segmentLabels, const ['模型与接口', 'ComfyUI', 'Krita']);
+  });
+
+  testWidgets('第三方接口可手动添加模型 ID', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1280, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final storage = _MemorySettingsStorage();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: PromptAssistantSettingsSection(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(PromptAssistantSettingsSection)),
+    );
+    await container
+        .read(promptAssistantConfigProvider.notifier)
+        .upsertProvider(
+          const ProviderConfig(
+            id: 'custom',
+            name: '中转服务',
+            baseUrl: 'https://example.test/v1',
+          ),
+        );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('手动添加模型'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'relay-model-v5');
+    await tester.pump();
+    await tester.tap(find.text('保存'));
+    await tester.pumpAndSettle();
+    await tester.pump();
+
+    final models = container
+        .read(promptAssistantConfigProvider)
+        .modelsForProvider(providerId: 'custom');
+    expect(models.map((model) => model.name), contains('relay-model-v5'));
+    await container
+        .read(promptAssistantConfigProvider.notifier)
+        .setInterfaceProvider(LauncherInterface.translate, 'custom');
+    expect(
+      container
+          .read(promptAssistantConfigProvider)
+          .promptTranslationRoute
+          ?.model
+          .name,
+      'relay-model-v5',
+    );
   });
 }

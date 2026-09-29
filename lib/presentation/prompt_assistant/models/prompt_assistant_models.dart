@@ -513,7 +513,7 @@ class ModelConfig {
 /// 启动器级 LLM 接口槽。每个槽独立选择服务商与模型，
 /// 未配置时执行端回落到第一个启用的服务商及其首个模型。
 enum LauncherInterface {
-  /// 提示词翻译接口（FEAT-18/19 消费，当前仅持久化配置）。
+  /// 提示词翻译接口。
   translate,
 
   /// 词库标签翻译接口（自动补全的 LLM 翻译消费）。
@@ -584,6 +584,23 @@ class PromptAssistantConfigState {
 
   InterfaceSlotConfig interfaceFor(LauncherInterface interface) {
     return interfaces[interface] ?? const InterfaceSlotConfig();
+  }
+
+  /// Prompt translation is user initiated: require an explicit, enabled
+  /// provider and a real selected model instead of silently using the first
+  /// provider configured for unrelated tasks.
+  ({ProviderConfig provider, ModelConfig model})? get promptTranslationRoute {
+    final slot = interfaceFor(LauncherInterface.translate);
+    if (!slot.isConfigured || slot.model.trim().isEmpty) return null;
+    final provider = providers
+        .where((item) => item.enabled && item.id == slot.providerId)
+        .firstOrNull;
+    if (provider == null) return null;
+    final model = modelsForProvider(providerId: provider.id)
+        .where((item) => !item.isPlaceholder && item.name == slot.model)
+        .firstOrNull;
+    if (model == null) return null;
+    return (provider: provider, model: model);
   }
 
   PromptAssistantConfigState copyWith({

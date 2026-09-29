@@ -4695,7 +4695,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptAssistant_model => '模型';
 
   @override
-  String get promptAssistant_noModelsPullFirst => '暂无模型，请先拉取';
+  String get promptAssistant_noModelsPullFirst => '暂无模型，请拉取或手动添加';
+
+  @override
+  String get promptAssistant_addModel => '手动添加模型';
+
+  @override
+  String get promptAssistant_modelId => '模型 ID';
+
+  @override
+  String get promptAssistant_modelIdHint => '填写接口实际接受的模型名';
+
+  @override
+  String get promptAssistant_modelDisplayName => '显示名称（可选）';
 
   @override
   String get promptAssistant_providerManagement => '服务商管理';
@@ -9773,7 +9785,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptAssistant_launcherInterfacesSubtitle =>
-      '提示词翻译与词库标签翻译可分别绑定服务商与模型；未配置时使用第一个启用的服务商';
+      '提示词翻译需明确选择服务商与模型；词库标签翻译未配置时使用第一个启用的服务商';
 
   @override
   String get promptAssistant_interfaceTranslate => '提示词翻译';

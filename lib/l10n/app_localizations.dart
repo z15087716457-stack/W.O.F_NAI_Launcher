@@ -8746,8 +8746,32 @@ abstract class AppLocalizations {
   /// No description provided for @promptAssistant_noModelsPullFirst.
   ///
   /// In en, this message translates to:
-  /// **'No models yet. Pull the model list first'**
+  /// **'No models yet. Pull the list or add one manually'**
   String get promptAssistant_noModelsPullFirst;
+
+  /// No description provided for @promptAssistant_addModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add model manually'**
+  String get promptAssistant_addModel;
+
+  /// No description provided for @promptAssistant_modelId.
+  ///
+  /// In en, this message translates to:
+  /// **'Model ID'**
+  String get promptAssistant_modelId;
+
+  /// No description provided for @promptAssistant_modelIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the exact model name accepted by the API'**
+  String get promptAssistant_modelIdHint;
+
+  /// No description provided for @promptAssistant_modelDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name (optional)'**
+  String get promptAssistant_modelDisplayName;
 
   /// No description provided for @promptAssistant_providerManagement.
   ///
@@ -17718,7 +17742,7 @@ abstract class AppLocalizations {
   /// No description provided for @promptAssistant_launcherInterfacesSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Bind providers and models for the prompt and tag translators; unconfigured slots fall back to the first enabled provider'**
+  /// **'Choose a provider and model explicitly for prompt translation; tag translation falls back to the first enabled provider when unset'**
   String get promptAssistant_launcherInterfacesSubtitle;
 
   /// No description provided for @promptAssistant_interfaceTranslate.

@@ -4758,7 +4758,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptAssistant_model => 'モデル';
 
   @override
-  String get promptAssistant_noModelsPullFirst => 'モデルはまだありません。まずモデルリストを取得します';
+  String get promptAssistant_noModelsPullFirst =>
+      'モデルがありません。リストを取得するか手動で追加してください';
+
+  @override
+  String get promptAssistant_addModel => 'モデルを手動追加';
+
+  @override
+  String get promptAssistant_modelId => 'モデル ID';
+
+  @override
+  String get promptAssistant_modelIdHint => 'API が受け付ける正確なモデル名を入力';
+
+  @override
+  String get promptAssistant_modelDisplayName => '表示名（任意）';
 
   @override
   String get promptAssistant_providerManagement => 'プロバイダー管理';
@@ -9906,7 +9919,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptAssistant_launcherInterfacesSubtitle =>
-      'プロンプト翻訳とタグ翻訳にプロバイダーとモデルを個別に割り当てます。未設定の場合は最初の有効なプロバイダーを使用します';
+      'プロンプト翻訳にはプロバイダーとモデルの明示的な選択が必要です。タグ翻訳は未設定時に最初の有効なプロバイダーを使用します';
 
   @override
   String get promptAssistant_interfaceTranslate => 'プロンプト翻訳';

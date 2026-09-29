@@ -23,6 +23,49 @@ void main() {
     expect(usesRichPromptTypeTooltip(TargetPlatform.windows), isFalse);
   });
 
+  testWidgets('未配置翻译模型时显示设置引导，不发送翻译请求', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          promptBlockLibraryNotifierProvider.overrideWith(
+            _EmptyPromptBlockLibraryNotifier.new,
+          ),
+          localStorageServiceProvider.overrideWith(
+            (ref) => _TestLocalStorageService(),
+          ),
+          characterPromptNotifierProvider.overrideWith(
+            _TestCharacterPromptNotifier.new,
+          ),
+          promptTokenUsageProvider(
+            PromptTokenCountTarget.positive,
+          ).overrideWith(
+            (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+          ),
+          promptTokenUsageProvider(
+            PromptTokenCountTarget.negative,
+          ).overrideWith(
+            (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+          ),
+        ],
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SizedBox(width: 960, height: 420, child: PromptInputWidget()),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('prompt-translation-toggle')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('先配置翻译模型'), findsOneWidget);
+    expect(find.text('前往设置'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('冷启动时切换到负面提示词不会抛出异常', (tester) async {
     await tester.pumpWidget(
       ProviderScope(

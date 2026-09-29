@@ -138,25 +138,28 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
         ? slot.model
         : null;
 
-    return _buildTaskRouteCard(
-      context: context,
-      title: _interfaceLabel(context, interface),
-      providerValue: providerValue,
-      providerItems: providerItems,
-      onProviderChanged: (value) {
-        if (value == null) return;
-        unawaited(notifier.setInterfaceProvider(interface, value));
-      },
-      modelValue: modelValue,
-      modelItems: modelItems,
-      onModelChanged: modelItems.isEmpty || providerValue == null
-          ? null
-          : (value) {
-              if (value == null) return;
-              unawaited(
-                notifier.setInterfaceModel(interface, providerValue, value),
-              );
-            },
+    return KeyedSubtree(
+      key: ValueKey('interface-${interface.name}-$providerValue-$modelValue'),
+      child: _buildTaskRouteCard(
+        context: context,
+        title: _interfaceLabel(context, interface),
+        providerValue: providerValue,
+        providerItems: providerItems,
+        onProviderChanged: (value) {
+          if (value == null) return;
+          unawaited(notifier.setInterfaceProvider(interface, value));
+        },
+        modelValue: modelValue,
+        modelItems: modelItems,
+        onModelChanged: modelItems.isEmpty || providerValue == null
+            ? null
+            : (value) {
+                if (value == null) return;
+                unawaited(
+                  notifier.setInterfaceModel(interface, providerValue, value),
+                );
+              },
+      ),
     );
   }
 
@@ -307,6 +310,15 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
                             context.l10n.promptAssistant_connectionConfig,
                           ),
                         ),
+                        TextButton.icon(
+                          onPressed: () => _showAddModelDialog(
+                            context,
+                            notifier,
+                            provider.id,
+                          ),
+                          icon: const Icon(Icons.add, size: 16),
+                          label: Text(context.l10n.promptAssistant_addModel),
+                        ),
                         Icon(hasApiKey ? Icons.key : Icons.key_off, size: 18),
                         IconButton(
                           icon: const Icon(Icons.download_for_offline_outlined),
@@ -342,6 +354,66 @@ class PromptAssistantSettingsSection extends ConsumerWidget {
           );
         }),
       ],
+    );
+  }
+
+  Future<void> _showAddModelDialog(
+    BuildContext context,
+    PromptAssistantConfigNotifier notifier,
+    String providerId,
+  ) async {
+    var modelId = '';
+    var displayName = '';
+    final input = await showDialog<({String name, String displayName})>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(context.l10n.promptAssistant_addModel),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                autofocus: true,
+                onChanged: (value) => setState(() => modelId = value),
+                decoration: InputDecoration(
+                  labelText: context.l10n.promptAssistant_modelId,
+                  helperText: context.l10n.promptAssistant_modelIdHint,
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                onChanged: (value) => displayName = value,
+                decoration: InputDecoration(
+                  labelText: context.l10n.promptAssistant_modelDisplayName,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(context.l10n.common_cancel),
+            ),
+            FilledButton(
+              onPressed: modelId.trim().isEmpty
+                  ? null
+                  : () => Navigator.pop(dialogContext, (
+                      name: modelId.trim(),
+                      displayName: displayName.trim(),
+                    )),
+              child: Text(context.l10n.common_save),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (input == null) return;
+    await notifier.upsertModel(
+      ModelConfig(
+        providerId: providerId,
+        name: input.name,
+        displayName: input.displayName.isEmpty ? input.name : input.displayName,
+      ),
     );
   }
 

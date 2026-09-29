@@ -4863,7 +4863,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptAssistant_noModelsPullFirst =>
-      'No models yet. Pull the model list first';
+      'No models yet. Pull the list or add one manually';
+
+  @override
+  String get promptAssistant_addModel => 'Add model manually';
+
+  @override
+  String get promptAssistant_modelId => 'Model ID';
+
+  @override
+  String get promptAssistant_modelIdHint =>
+      'Use the exact model name accepted by the API';
+
+  @override
+  String get promptAssistant_modelDisplayName => 'Display name (optional)';
 
   @override
   String get promptAssistant_providerManagement => 'Provider Management';
@@ -10127,7 +10140,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptAssistant_launcherInterfacesSubtitle =>
-      'Bind providers and models for the prompt and tag translators; unconfigured slots fall back to the first enabled provider';
+      'Choose a provider and model explicitly for prompt translation; tag translation falls back to the first enabled provider when unset';
 
   @override
   String get promptAssistant_interfaceTranslate => 'Prompt Translation';
