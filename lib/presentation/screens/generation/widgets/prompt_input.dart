@@ -584,10 +584,16 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               tooltip: '翻译操作',
               padding: EdgeInsets.zero,
               position: PopupMenuPosition.under,
-              constraints: const BoxConstraints.tightFor(width: 188),
-              menuPadding: const EdgeInsets.symmetric(vertical: 4),
+              constraints: const BoxConstraints.tightFor(width: 176),
+              menuPadding: EdgeInsets.zero,
+              offset: const Offset(0, 6),
+              color: theme.colorScheme.surfaceContainerLow,
+              surfaceTintColor: Colors.transparent,
+              shadowColor: Colors.black.withValues(alpha: 0.14),
+              elevation: 8,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: outline),
               ),
               child: const Center(child: Icon(Icons.arrow_drop_down, size: 15)),
               itemBuilder: (_) => [
@@ -1983,7 +1989,7 @@ class _TranslationMenuContents extends PopupMenuEntry<String> {
   final VoidCallback onConfigure;
 
   @override
-  double get height => 113;
+  double get height => 94;
 
   @override
   bool represents(String? value) => false;
@@ -2024,124 +2030,178 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
         final restores = coordinator.canRestoreTranslations(widget.negative);
         final canConvert = coordinator.hasAnyTranslations(widget.negative);
         final modelLabel = route == null
-            ? '未配置翻译模型'
+            ? '未配置模型'
             : '${route.provider.name} / ${route.model.displayName}';
         return SizedBox(
-          width: 188,
+          key: const Key('prompt-translation-menu'),
+          width: 176,
           height: widget.height,
-          child: Column(
-            children: [
-              InkWell(
-                key: const Key('prompt-translation-configure'),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onConfigure();
-                },
-                child: SizedBox(
-                  height: 36,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Tooltip(
-                      message: '$modelLabel · 配置翻译模型',
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              modelLabel,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 26,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Tooltip(
+                          message: modelLabel,
+                          child: Text(
+                            route?.model.displayName ?? '未配置模型',
+                            key: const Key('prompt-translation-model'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 11,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.settings_outlined,
-                            size: 16,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 6),
+                      IconButton(
+                        key: const Key('prompt-translation-configure'),
+                        tooltip: '配置翻译模型',
+                        constraints: const BoxConstraints.tightFor(
+                          width: 26,
+                          height: 26,
+                        ),
+                        padding: EdgeInsets.zero,
+                        style: IconButton.styleFrom(
+                          foregroundColor: theme.colorScheme.onSurfaceVariant,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          widget.onConfigure();
+                        },
+                        icon: const Icon(Icons.settings_outlined, size: 15),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              InkWell(
-                key: const Key('prompt-translation-add'),
-                onTap: busy ? null : widget.onTranslate,
-                child: SizedBox(
-                  height: 38,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.add,
-                          size: 17,
-                          color: busy
-                              ? theme.disabledColor
-                              : theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '翻译新增内容',
-                          style: busy
-                              ? TextStyle(color: theme.disabledColor)
-                              : null,
-                        ),
-                      ],
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _TranslationMenuAction(
+                        buttonKey: const Key('prompt-translation-add'),
+                        tooltip: '翻译新增内容',
+                        primary: true,
+                        onPressed: busy ? null : widget.onTranslate,
+                        icon: busy
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.7,
+                                ),
+                              )
+                            : Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  const Icon(
+                                    Icons.translate_outlined,
+                                    size: 21,
+                                  ),
+                                  Positioned(
+                                    right: -5,
+                                    bottom: -3,
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: theme
+                                            .colorScheme
+                                            .surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                      child: const Icon(Icons.add, size: 11),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      key: const Key('prompt-translation-plain-text'),
-                      tooltip: restores ? '撤销原文还原，恢复翻译块' : '全部翻译块还原为原文文本',
-                      constraints: const BoxConstraints.tightFor(
-                        width: 32,
-                        height: 32,
-                      ),
-                      style: IconButton.styleFrom(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      padding: EdgeInsets.zero,
-                      onPressed: !busy && (restores || canConvert)
-                          ? () {
-                              if (coordinator.canRestoreTranslations(
-                                widget.negative,
-                              )) {
-                                coordinator.restoreTranslations(
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _TranslationMenuAction(
+                        buttonKey: const Key('prompt-translation-plain-text'),
+                        tooltip: restores ? '撤销原文还原，恢复翻译块' : '全部翻译块还原为原文文本',
+                        onPressed: !busy && (restores || canConvert)
+                            ? () {
+                                if (coordinator.canRestoreTranslations(
                                   widget.negative,
-                                );
-                              } else {
-                                coordinator.clearTranslations(widget.negative);
+                                )) {
+                                  coordinator.restoreTranslations(
+                                    widget.negative,
+                                  );
+                                } else {
+                                  coordinator.clearTranslations(
+                                    widget.negative,
+                                  );
+                                }
                               }
-                            }
-                          : null,
-                      icon: restores
-                          ? const Icon(Icons.undo, size: 18)
-                          : const Text(
-                              'A',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                            : null,
+                        icon: restores
+                            ? const Icon(Icons.undo, size: 21)
+                            : const Text(
+                                'A',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+}
+
+class _TranslationMenuAction extends StatelessWidget {
+  const _TranslationMenuAction({
+    required this.buttonKey,
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+    this.primary = false,
+  });
+
+  final Key buttonKey;
+  final String tooltip;
+  final Widget icon;
+  final VoidCallback? onPressed;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return SizedBox(
+      height: 40,
+      child: IconButton(
+        key: buttonKey,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        style: IconButton.styleFrom(
+          foregroundColor: primary ? colors.primary : colors.onSurface,
+          disabledForegroundColor: colors.onSurface.withValues(alpha: 0.24),
+          backgroundColor: colors.surfaceContainerHighest,
+          disabledBackgroundColor: colors.surfaceContainerHighest.withValues(
+            alpha: 0.6,
+          ),
+          hoverColor: colors.onSurface.withValues(alpha: 0.06),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        icon: icon,
+      ),
     );
   }
 }

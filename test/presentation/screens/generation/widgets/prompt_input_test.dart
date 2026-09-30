@@ -21,6 +21,8 @@ import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
+import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
+import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
@@ -49,6 +51,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          promptAssistantConfigProvider.overrideWith(
+            _TestPromptAssistantConfigNotifier.new,
+          ),
           zhDictionaryServiceProvider.overrideWith(
             (ref) => ZhDictionaryService(),
           ),
@@ -120,9 +125,10 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('prompt-translation-actions')));
     await tester.pumpAndSettle();
-    expect(find.text('未配置翻译模型'), findsOneWidget);
+    expect(find.text('未配置模型'), findsOneWidget);
     expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
-    expect(find.text('翻译新增内容'), findsOneWidget);
+    expect(find.text('翻译新增内容'), findsNothing);
+    expect(find.byTooltip('翻译新增内容'), findsOneWidget);
     expect(find.byKey(const Key('prompt-translation-undo')), findsNothing);
     expect(find.byTooltip('撤销上次翻译'), findsNothing);
     expect(
@@ -140,8 +146,12 @@ void main() {
     final menu = tester.widget<PopupMenuButton<String>>(
       find.byKey(const Key('prompt-translation-actions')),
     );
-    expect(menu.constraints!.maxWidth, 188);
-    expect(menu.menuPadding, const EdgeInsets.symmetric(vertical: 4));
+    expect(menu.constraints!.maxWidth, 176);
+    expect(menu.menuPadding, EdgeInsets.zero);
+    expect(
+      tester.getSize(find.byKey(const Key('prompt-translation-menu'))),
+      const Size(176, 94),
+    );
     expect(
       tester
           .getSize(find.byKey(const Key('prompt-translation-configure')))
@@ -154,14 +164,18 @@ void main() {
     );
     expect(
       tester.getSize(find.byKey(const Key('prompt-translation-plain-text'))),
-      const Size(32, 32),
+      const Size(74, 40),
     );
-    await tester.tap(find.text('翻译新增内容'));
+    expect(
+      tester.getSize(find.byKey(const Key('prompt-translation-add'))),
+      const Size(74, 40),
+    );
+    await tester.tap(find.byKey(const Key('prompt-translation-add')));
     await tester.pumpAndSettle();
     expect(find.text('先配置翻译模型'), findsOneWidget);
     await tester.tap(find.text('稍后'));
     await tester.pumpAndSettle();
-    expect(find.text('翻译新增内容'), findsOneWidget);
+    expect(find.byKey(const Key('prompt-translation-menu')), findsOneWidget);
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
 
@@ -180,10 +194,16 @@ void main() {
     final before = container
         .read(pillWorkspaceProvider(PillScopes.main))
         .document;
+    final config =
+        container.read(promptAssistantConfigProvider.notifier)
+            as _TestPromptAssistantConfigNotifier;
+    config.selectModelForTest('deepseek-flash');
     await tester.pump();
 
     await tester.tap(find.byKey(const Key('prompt-translation-actions')));
     await tester.pumpAndSettle();
+    expect(find.text('deepseek-flash'), findsOneWidget);
+    expect(find.byTooltip('DS / deepseek-flash'), findsOneWidget);
     expect(
       tester
           .widget<IconButton>(
@@ -212,7 +232,7 @@ void main() {
           .length,
       1,
     );
-    expect(find.text('翻译新增内容'), findsOneWidget);
+    expect(find.byKey(const Key('prompt-translation-menu')), findsOneWidget);
     final restoreButton = tester.widget<IconButton>(
       find.byKey(const Key('prompt-translation-plain-text')),
     );
@@ -220,21 +240,31 @@ void main() {
     expect((restoreButton.icon as Icon).icon, Icons.undo);
     expect(restoreButton.onPressed, isNotNull);
     await _captureTranslationMenu(tester, captureBoundary, 'original');
+    config.selectModelForTest(
+      'a-very-long-model-name-that-must-fit-in-this-popover',
+    );
+    await tester.pumpAndSettle();
+    final modelText = tester.widget<Text>(
+      find.byKey(const Key('prompt-translation-model')),
+    );
+    expect(modelText.maxLines, 1);
+    expect(modelText.overflow, TextOverflow.ellipsis);
+    expect(tester.takeException(), isNull);
     await tester.tap(find.byKey(const Key('prompt-translation-plain-text')));
     await tester.pumpAndSettle();
     expect(
       container.read(pillWorkspaceProvider(PillScopes.main)).document,
       before,
     );
-    expect(find.text('翻译新增内容'), findsOneWidget);
+    expect(find.byKey(const Key('prompt-translation-menu')), findsOneWidget);
     expect(find.text('A'), findsOneWidget);
 
     container.read(promptTranslationBusyProvider.notifier).state = true;
     await tester.pump();
     expect(
       tester
-          .widget<InkWell>(find.byKey(const Key('prompt-translation-add')))
-          .onTap,
+          .widget<IconButton>(find.byKey(const Key('prompt-translation-add')))
+          .onPressed,
       isNull,
     );
     expect(
@@ -249,8 +279,8 @@ void main() {
     await tester.pump();
     expect(
       tester
-          .widget<InkWell>(find.byKey(const Key('prompt-translation-add')))
-          .onTap,
+          .widget<IconButton>(find.byKey(const Key('prompt-translation-add')))
+          .onPressed,
       isNotNull,
     );
     await tester.tap(find.byKey(const Key('prompt-translation-plain-text')));
@@ -271,17 +301,17 @@ void main() {
       tester.getCenter(find.byKey(const Key('prompt-translation-actions'))),
     );
     await tester.pumpAndSettle();
-    expect(find.text('翻译新增内容'), findsNothing);
+    expect(find.byKey(const Key('prompt-translation-menu')), findsNothing);
     expect(
       container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
       'new edit',
     );
     await tester.tap(find.byKey(const Key('prompt-translation-actions')));
     await tester.pumpAndSettle();
-    expect(find.text('翻译新增内容'), findsOneWidget);
+    expect(find.byKey(const Key('prompt-translation-menu')), findsOneWidget);
     await tester.tapAt(const Offset(10, 450));
     await tester.pumpAndSettle();
-    expect(find.text('翻译新增内容'), findsNothing);
+    expect(find.byKey(const Key('prompt-translation-menu')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -850,19 +880,61 @@ Future<void> _captureTranslationMenu(
   String state,
 ) async {
   if (Platform.environment['CAPTURE_TRANSLATION_MENU'] != '1') return;
-  await tester.runAsync(() async {
-    final render =
-        boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-    final image = await render.toImage(pixelRatio: 1.5);
-    final png = await image.toByteData(format: ui.ImageByteFormat.png);
-    image.dispose();
-    final appearance = Platform.environment['STUDIO_APPEARANCE'] ?? 'light';
-    final file = File(
-      '.dart_tool/translation-toggle-captures/$appearance-$state.png',
+  final previousShadows = debugDisableShadows;
+  try {
+    debugDisableShadows = false;
+    for (final render
+        in tester.allRenderObjects.whereType<RenderPhysicalShape>()) {
+      render.markNeedsPaint();
+    }
+    await tester.pump();
+    await tester.runAsync(() async {
+      final render =
+          boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+      final image = await render.toImage(pixelRatio: 1.5);
+      final png = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      final appearance = Platform.environment['STUDIO_APPEARANCE'] ?? 'light';
+      final file = File(
+        '.dart_tool/translation-toggle-captures/$appearance-$state.png',
+      );
+      await file.parent.create(recursive: true);
+      await file.writeAsBytes(png!.buffer.asUint8List());
+    });
+  } finally {
+    debugDisableShadows = previousShadows;
+    for (final render
+        in tester.allRenderObjects.whereType<RenderPhysicalShape>()) {
+      render.markNeedsPaint();
+    }
+    await tester.pump();
+  }
+}
+
+class _TestPromptAssistantConfigNotifier extends PromptAssistantConfigNotifier {
+  _TestPromptAssistantConfigNotifier(super.ref);
+
+  void selectModelForTest(String displayName) {
+    state = PromptAssistantConfigState(
+      providers: const [
+        ProviderConfig(id: 'test', name: 'DS', baseUrl: 'https://example.test'),
+      ],
+      models: [
+        ModelConfig(
+          providerId: 'test',
+          name: 'model',
+          displayName: displayName,
+        ),
+      ],
+      interfaces: const {
+        LauncherInterface.translate: InterfaceSlotConfig(
+          providerId: 'test',
+          model: 'model',
+        ),
+      },
+      providerHasApiKey: const {},
     );
-    await file.parent.create(recursive: true);
-    await file.writeAsBytes(png!.buffer.asUint8List());
-  });
+  }
 }
 
 class _TestLocalStorageService extends LocalStorageService {
