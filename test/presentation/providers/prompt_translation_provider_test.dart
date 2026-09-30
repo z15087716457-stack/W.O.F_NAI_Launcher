@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +19,129 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
 
 void main() {
+  for (final edit in ['display', 'source', 'reading']) {
+    test(
+      'retranslation handles concurrent $edit changes without losing review state',
+      () async {
+        final response = Completer<String>();
+        final service = _TranslationService();
+        when(
+          () => service.translatePromptGroup(
+            any(),
+            sessionId: any(named: 'sessionId'),
+          ),
+        ).thenAnswer((_) => response.future);
+        final container = ProviderContainer(
+          overrides: [
+            characterPromptNotifierProvider.overrideWith(_Characters.new),
+            promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+            promptAssistantServiceProvider.overrideWith((ref) => service),
+            unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+            tagTranslationLookupProvider.overrideWith((ref) => _Translations()),
+          ],
+        );
+        addTearDown(container.dispose);
+        final lane = container.read(
+          pillWorkspaceProvider(PillScopes.main).notifier,
+        );
+        lane.insertTranslationAt(
+          offset: 0,
+          source: 'blue eyes',
+          zh: '旧译文',
+          needsReview: true,
+        );
+        const marker = '\uE000';
+        final initial = container
+            .read(pillWorkspaceProvider(PillScopes.main))
+            .document
+            .instances[marker]!
+            .translation!;
+        final result = container
+            .read(promptTranslationCoordinatorProvider)
+            .retranslateSingle(PillScopes.main, marker);
+        lane.updateTranslation(marker, switch (edit) {
+          'display' => initial.copyWith(showOriginal: !initial.showOriginal),
+          'source' => initial.copyWith(source: 'green eyes'),
+          _ => initial.copyWith(zh: '手工润色'),
+        });
+        response.complete(
+          jsonEncode({
+            'fields': [
+              {
+                'id': 'single',
+                'groups': [
+                  {
+                    'ids': ['single:0'],
+                    'zh': '新译文',
+                  },
+                ],
+              },
+            ],
+          }),
+        );
+        expect(await result, edit == 'display');
+        final current = container
+            .read(pillWorkspaceProvider(PillScopes.main))
+            .document
+            .instances[marker]!
+            .translation!;
+        expect(current.needsReview, edit != 'display');
+        expect(
+          current.zh,
+          edit == 'display'
+              ? '新译文'
+              : edit == 'reading'
+              ? '手工润色'
+              : '旧译文',
+        );
+        expect(current.source, edit == 'source' ? 'green eyes' : 'blue eyes');
+        expect(container.read(promptTranslationBusyProvider), isFalse);
+      },
+    );
+  }
+
+  test('failed retranslation retains the wrench state and source', () async {
+    final service = _TranslationService();
+    when(
+      () => service.translatePromptGroup(
+        any(),
+        sessionId: any(named: 'sessionId'),
+      ),
+    ).thenThrow(StateError('offline'));
+    final container = ProviderContainer(
+      overrides: [
+        characterPromptNotifierProvider.overrideWith(_Characters.new),
+        promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+        promptAssistantServiceProvider.overrideWith((ref) => service),
+        unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+        tagTranslationLookupProvider.overrideWith((ref) => _Translations()),
+      ],
+    );
+    addTearDown(container.dispose);
+    container
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .insertTranslationAt(
+          offset: 0,
+          source: 'blue eyes',
+          zh: '旧译文',
+          needsReview: true,
+        );
+    final before = container
+        .read(pillWorkspaceProvider(PillScopes.main))
+        .document;
+    await expectLater(
+      container
+          .read(promptTranslationCoordinatorProvider)
+          .retranslateSingle(PillScopes.main, '\uE000'),
+      throwsStateError,
+    );
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document,
+      before,
+    );
+    expect(container.read(promptTranslationBusyProvider), isFalse);
+  });
+
   test(
     'model proposal is marked only after local catalog verification',
     () async {

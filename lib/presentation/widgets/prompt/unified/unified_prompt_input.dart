@@ -43,6 +43,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
 
   /// 焦点节点（可选）
   final FocusNode? focusNode;
+  final bool? showCursor;
 
   /// 输入装饰
   final InputDecoration? decoration;
@@ -81,6 +82,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
     this.config = const UnifiedPromptConfig(),
     this.controller,
     this.focusNode,
+    this.showCursor,
     this.decoration,
     this.onChanged,
     this.onSubmitted,
@@ -1082,6 +1084,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
           : StrutStyle.disabled,
       controller: _effectiveController,
       focusNode: _effectiveFocusNode,
+      showCursor: widget.showCursor,
       decoration: effectiveDecoration,
       maxLines: widget.expands ? null : widget.maxLines,
       minLines: widget.expands ? null : (widget.minLines ?? 1),

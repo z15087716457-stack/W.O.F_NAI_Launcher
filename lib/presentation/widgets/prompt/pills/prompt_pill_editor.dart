@@ -100,7 +100,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     final document = ref.read(_workspace).document;
     _controller = TextEditingController(text: document.text)
       ..addListener(_handleControllerChanged);
-    _focusNode = FocusNode();
+    _focusNode = FocusNode()..addListener(_handleFocusChanged);
     _lastValidOffset = document.text.length;
     _armSeedIfFresh(document);
     // 挂载即对齐一次投影（库内容可能在停机构间被编辑过）；
@@ -168,8 +168,14 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     _controller
       ..removeListener(_handleControllerChanged)
       ..dispose();
-    _focusNode.dispose();
+    _focusNode
+      ..removeListener(_handleFocusChanged)
+      ..dispose();
     super.dispose();
+  }
+
+  void _handleFocusChanged() {
+    if (mounted) setState(() {});
   }
 
   // ==================== L1 实例卡 ====================
@@ -248,6 +254,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
             child: UnifiedPromptInput(
               controller: _controller,
               focusNode: _focusNode,
+              // A source field inside a WidgetSpan owns its own caret.
+              showCursor: _focusNode.hasPrimaryFocus ? null : false,
               config: effectiveConfig,
               decoration: widget.decoration,
               onComfyuiImport: widget.onComfyuiImport == null
@@ -326,7 +334,37 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     }
 
     if (instance.translation case final translation?) {
+      Widget draggable(Widget child) => Draggable<PromptBlockDragData>(
+        data: PromptBlockDragData(
+          blockId: '',
+          translation: translation,
+          instanceMarker: PillInstanceDragRef(
+            marker: marker,
+            occurrence: occurrence,
+            scope: widget.pillScope,
+          ),
+        ),
+        rootOverlay: true,
+        dragAnchorStrategy: pointerDragAnchorStrategy,
+        feedback: Material(
+          color: Colors.transparent,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 300),
+            child: TranslationPillView(
+              pill: translation,
+              highlightEnabled: widget.config.enableSyntaxHighlight,
+              numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
+              autoFormat: widget.config.enableAutoFormat,
+              onToggle: () {},
+              onEdit: (_) {},
+            ),
+          ),
+        ),
+        childWhenDragging: Opacity(opacity: .35, child: child),
+        child: child,
+      );
       final pill = TranslationPillView(
+        key: ValueKey('translation-pill-$marker-$occurrence'),
         pill: translation,
         highlightEnabled: widget.config.enableSyntaxHighlight,
         numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
@@ -338,40 +376,32 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
               translation.copyWith(showOriginal: !translation.showOriginal),
             ),
         onEdit: (position) => _editTranslation(marker, translation, position),
+        onSourceChanged: (source) {
+          final current = ref
+              .read(_workspace)
+              .document
+              .instances[marker]
+              ?.translation;
+          if (current == null || current.source == source) return;
+          ref
+              .read(_workspace.notifier)
+              .updateTranslation(
+                marker,
+                current.copyWith(
+                  source: source,
+                  marks: const [],
+                  needsReview: true,
+                ),
+              );
+        },
+        sourceHandleBuilder: (handle) => MouseRegion(
+          cursor: SystemMouseCursors.grab,
+          child: draggable(handle),
+        ),
       );
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: _withPillGap(
-          Draggable<PromptBlockDragData>(
-            data: PromptBlockDragData(
-              blockId: '',
-              translation: translation,
-              instanceMarker: PillInstanceDragRef(
-                marker: marker,
-                occurrence: occurrence,
-                scope: widget.pillScope,
-              ),
-            ),
-            rootOverlay: true,
-            dragAnchorStrategy: pointerDragAnchorStrategy,
-            feedback: Material(
-              color: Colors.transparent,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 300),
-                child: TranslationPillView(
-                  pill: translation,
-                  highlightEnabled: widget.config.enableSyntaxHighlight,
-                  numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
-                  autoFormat: widget.config.enableAutoFormat,
-                  onToggle: () {},
-                  onEdit: (_) {},
-                ),
-              ),
-            ),
-            childWhenDragging: Opacity(opacity: .35, child: pill),
-            child: pill,
-          ),
-        ),
+        child: _withPillGap(translation.showOriginal ? pill : draggable(pill)),
       );
     }
 

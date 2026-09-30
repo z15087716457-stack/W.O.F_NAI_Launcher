@@ -312,6 +312,48 @@ void main() {
     await tester.tapAt(const Offset(10, 450));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('prompt-translation-menu')), findsNothing);
+    positive.replaceWithPlainText('before, after');
+    positive.insertTranslationAt(offset: 8, source: 'blue eyes', zh: '蓝眼睛');
+    positive.showAllTranslations(original: true);
+    await tester.pumpAndSettle();
+    final sourceInput = find.byKey(const Key('translation-pill-source-input'));
+    await tester.tap(sourceInput);
+    await tester.enterText(sourceInput, 'green eyes,\nsoft lighting');
+    await tester.pump();
+    await tester.pump();
+    final inlineEditable = tester.state<EditableTextState>(
+      find.descendant(of: sourceInput, matching: find.byType(EditableText)),
+    );
+    expect(
+      inlineEditable.renderEditable
+          .getLocalRectForCaret(const TextPosition(offset: 25))
+          .top,
+      closeTo(
+        inlineEditable.renderEditable
+            .getLocalRectForCaret(const TextPosition(offset: 12))
+            .top,
+        0.5,
+      ),
+    );
+    expect(find.byIcon(Icons.build_outlined), findsOneWidget);
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document
+          .instances
+          .values
+          .single
+          .translation!
+          .source,
+      'green eyes,\nsoft lighting',
+    );
+    await _captureTranslationMenu(tester, captureBoundary, 'inline-source');
+    await tester.tap(find.byKey(const Key('prompt-translation-toggle')));
+    await tester.pumpAndSettle();
+    expect(sourceInput, findsNothing);
+    expect(find.text('蓝眼睛'), findsOneWidget);
+    expect(find.byIcon(Icons.build_outlined), findsOneWidget);
+    await _captureTranslationMenu(tester, captureBoundary, 'inline-reading');
     expect(tester.takeException(), isNull);
   });
 

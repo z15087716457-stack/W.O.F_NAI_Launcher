@@ -104,6 +104,7 @@ class ThemedInput extends StatefulWidget {
 
   /// 光标颜色
   final Color? cursorColor;
+  final bool? showCursor;
 
   /// 点击输入框外部时的回调
   final TapRegionCallback? onTapOutside;
@@ -170,6 +171,7 @@ class ThemedInput extends StatefulWidget {
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
     this.cursorColor,
+    this.showCursor,
     this.onTapOutside,
     this.decoration,
     this.showClearButton = false,
@@ -214,6 +216,7 @@ class ThemedInput extends StatefulWidget {
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
     this.cursorColor,
+    this.showCursor,
     this.onTapOutside,
     this.decoration,
     this.showClearButton = false,
@@ -387,6 +390,7 @@ class _ThemedInputState extends State<ThemedInput> {
       textAlign: widget.textAlign,
       textAlignVertical: widget.textAlignVertical,
       cursorColor: widget.cursorColor,
+      showCursor: widget.showCursor,
       decoration: inputDecoration,
       // 不传时用带主题字体的默认实现：Flutter 自带的工具栏按钮会绕开
       // 主题字体，右键菜单会一直是系统默认字体。

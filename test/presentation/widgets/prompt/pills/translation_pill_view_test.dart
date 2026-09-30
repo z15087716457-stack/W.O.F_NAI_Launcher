@@ -301,24 +301,36 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('wrench appears only when changed source needs review', (
-    tester,
-  ) async {
+  testWidgets('review wrench remains visible on either face', (tester) async {
+    var pill = const TranslationPill(
+      source: 'edited source',
+      zh: '旧译文',
+      needsReview: true,
+    );
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
-          body: TranslationPillView(
-            pill: TranslationPill(
-              source: 'edited source',
-              zh: '旧译文',
-              needsReview: true,
+          body: StatefulBuilder(
+            builder: (context, setState) => TranslationPillView(
+              pill: pill,
+              onToggle: () => setState(
+                () => pill = pill.copyWith(showOriginal: !pill.showOriginal),
+              ),
+              onEdit: _noopPosition,
             ),
-            onToggle: _noop,
-            onEdit: _noopPosition,
           ),
         ),
       ),
     );
+    expect(find.text('旧译文'), findsOneWidget);
+    expect(find.byIcon(Icons.build_outlined), findsOneWidget);
+    final middle = await tester.startGesture(
+      tester.getCenter(find.byType(TranslationPillView)),
+      kind: PointerDeviceKind.mouse,
+      buttons: kMiddleMouseButton,
+    );
+    await middle.up();
+    await tester.pump();
     expect(find.text('edited source'), findsOneWidget);
     expect(find.byIcon(Icons.build_outlined), findsOneWidget);
   });
@@ -566,6 +578,41 @@ void main() {
     expect(result.zh, '青色眼睛');
     expect(result.marks, isEmpty);
     expect(result.source, 'blue eyes');
+    expect(result.needsReview, isFalse);
+  });
+
+  testWidgets('polishing the reading keeps an existing review flag', (
+    tester,
+  ) async {
+    BuildContext? editorContext;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              editorContext = context;
+              return const SizedBox.expand();
+            },
+          ),
+        ),
+      ),
+    );
+    final editor = showTranslationPillEditor(
+      context: editorContext!,
+      initial: const TranslationPill(
+        source: 'edited source',
+        zh: '旧译文',
+        needsReview: true,
+      ),
+      globalPosition: const Offset(120, 80),
+    );
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).last, '手工润色');
+    await tester.tap(find.byKey(const Key('translation-pill-save')));
+    final result = await editor.result as TranslationPill;
+    expect(result.zh, '手工润色');
+    expect(result.source, 'edited source');
+    expect(result.needsReview, isTrue);
   });
 
   testWidgets('plain text action returns the visible source', (tester) async {

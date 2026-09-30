@@ -641,6 +641,153 @@ void main() {
   );
 
   testWidgets(
+    'original translation edits at the clicked caret and retains IME composition',
+    (tester) async {
+      final emissions = <String>[];
+      final container = await _pump(
+        tester,
+        editorWidth: 320,
+        onChanged: emissions.add,
+        autoFormat: true,
+        libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+      );
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+      notifier.insertTranslationAt(offset: 0, source: 'blue eyes', zh: '蓝眼睛');
+      notifier.showAllTranslations(original: true);
+      await tester.pumpAndSettle();
+      final field = find.byKey(const Key('translation-pill-source-input'));
+      final editable = tester.state<EditableTextState>(
+        find.descendant(of: field, matching: find.byType(EditableText)),
+      );
+      final caret = editable.renderEditable.getLocalRectForCaret(
+        const TextPosition(offset: 5),
+      );
+      await tester.tapAt(editable.renderEditable.localToGlobal(caret.center));
+      await tester.pump();
+      expect(editable.widget.focusNode.hasFocus, isTrue);
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText).first).showCursor,
+        isFalse,
+      );
+      expect(editable.widget.controller.selection.baseOffset, 5);
+      expect(
+        find.byKey(const Key('translation-pill-editor-popover')),
+        findsNothing,
+      );
+
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'blue green eyes',
+          selection: TextSelection.collapsed(offset: 11),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      var workspace = container.read(pillWorkspaceNotifierProvider);
+      expect(workspace.document.text, markerA);
+      expect(workspace.projection, 'blue green eyes');
+      expect(
+        workspace.document.instances[markerA]!.translation!.needsReview,
+        isTrue,
+      );
+      expect(workspace.document.instances[markerA]!.translation!.zh, '蓝眼睛');
+      expect(emissions.last, 'blue green eyes');
+      final controller = tester.widget<TextField>(field).controller!;
+      expect(controller.selection.baseOffset, 11);
+      expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'blue green 眼睛',
+          selection: TextSelection.collapsed(offset: 13),
+          composing: TextRange(start: 11, end: 13),
+        ),
+      );
+      await tester.pump();
+      expect(tester.widget<TextField>(field).controller, same(controller));
+      expect(controller.value.composing, const TextRange(start: 11, end: 13));
+      expect(controller.selection.baseOffset, 13);
+      expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'blue green 眼睛',
+          selection: TextSelection.collapsed(offset: 13),
+        ),
+      );
+      await tester.pump();
+      final middle = await tester.startGesture(
+        tester.getCenter(field),
+        kind: PointerDeviceKind.mouse,
+        buttons: kMiddleMouseButton,
+      );
+      await middle.up();
+      await tester.pumpAndSettle();
+      expect(field, findsNothing);
+      expect(find.text('蓝眼睛'), findsOneWidget);
+      expect(find.byIcon(Icons.build_outlined), findsOneWidget);
+      workspace = container.read(pillWorkspaceNotifierProvider);
+      expect(workspace.projection, 'blue green 眼睛');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('original text selection is separate from the icon drag handle', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+    );
+    final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    notifier.insertTranslationAt(offset: 0, source: 'blue eyes', zh: '蓝眼睛');
+    notifier.showAllTranslations(original: true);
+    await tester.pumpAndSettle();
+    final field = find.byKey(const Key('translation-pill-source-input'));
+    final editable = tester.state<EditableTextState>(
+      find.descendant(of: field, matching: find.byType(EditableText)),
+    );
+    Offset position(int offset) => editable.renderEditable.localToGlobal(
+      editable.renderEditable
+          .getLocalRectForCaret(TextPosition(offset: offset))
+          .center,
+    );
+    final selecting = await tester.startGesture(
+      position(0),
+      kind: PointerDeviceKind.mouse,
+    );
+    await selecting.moveTo(position(4));
+    await selecting.up();
+    await tester.pump();
+    expect(
+      tester.widget<TextField>(field).controller!.selection.isCollapsed,
+      isFalse,
+    );
+    expect(find.byType(TranslationPillView), findsOneWidget);
+    final handle = find.descendant(
+      of: find.byType(TranslationPillView),
+      matching: find.byIcon(Icons.translate_outlined),
+    );
+    final dragging = await tester.startGesture(
+      tester.getCenter(handle),
+      kind: PointerDeviceKind.mouse,
+    );
+    await dragging.moveBy(const Offset(120, 70));
+    await tester.pump();
+    expect(find.byType(TranslationPillView), findsWidgets);
+    await dragging.up();
+    await tester.pumpAndSettle();
+    expect(
+      container.read(pillWorkspaceNotifierProvider).document.instances.length,
+      1,
+    );
+    expect(
+      container.read(pillWorkspaceNotifierProvider).projection,
+      'blue eyes',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
     'existing translation pill displays clean 1x source when enabled',
     (tester) async {
       final container = await _pump(
@@ -658,14 +805,11 @@ void main() {
           );
       await tester.pump();
       expect(find.text('blue eyes'), findsOneWidget);
-      await tester.tap(find.byType(TranslationPillView));
+      final sourceField = find.byKey(
+        const Key('translation-pill-source-input'),
+      );
+      await tester.tap(sourceField);
       await tester.pump();
-      final sourceField = find
-          .descendant(
-            of: find.byKey(const Key('translation-pill-editor-popover')),
-            matching: find.byType(TextField),
-          )
-          .first;
       expect(
         tester.widget<TextField>(sourceField).controller!.text,
         'blue eyes',

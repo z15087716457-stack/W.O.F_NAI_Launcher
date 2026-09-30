@@ -1,4 +1,6 @@
 import 'package:flutter/gestures.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -91,6 +93,7 @@ class _WeightAdjustToolbarWrapperState
   late FocusNode _focusNode;
   bool _ownsFocusNode = false;
   bool _isInteractingWithToolbar = false;
+  Timer? _focusHideTimer;
 
   @override
   void initState() {
@@ -118,6 +121,7 @@ class _WeightAdjustToolbarWrapperState
       _hideToolbar();
     }
     if (oldWidget.focusNode != widget.focusNode) {
+      _focusHideTimer?.cancel();
       _hideToolbar();
       _focusNode.removeListener(_onFocusChanged);
       if (_ownsFocusNode) {
@@ -134,6 +138,7 @@ class _WeightAdjustToolbarWrapperState
 
   @override
   void dispose() {
+    _focusHideTimer?.cancel();
     _hideToolbar();
     widget.controller.removeListener(_onSelectionChanged);
     _focusNode.removeListener(_onFocusChanged);
@@ -144,8 +149,9 @@ class _WeightAdjustToolbarWrapperState
   }
 
   void _onFocusChanged() {
+    _focusHideTimer?.cancel();
     if (!_focusNode.hasFocus && !_isInteractingWithToolbar) {
-      Future.delayed(const Duration(milliseconds: 200), () {
+      _focusHideTimer = Timer(const Duration(milliseconds: 200), () {
         if (mounted && !_focusNode.hasFocus && !_isInteractingWithToolbar) {
           _hideToolbar();
         }

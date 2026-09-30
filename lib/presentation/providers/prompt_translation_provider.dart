@@ -270,7 +270,10 @@ class PromptTranslationCoordinator {
           .document
           .instances[marker]
           ?.translation;
-      if (current != initial) return false;
+      if (current == null ||
+          current.copyWith(showOriginal: initial.showOriginal) != initial) {
+        return false;
+      }
       _ref
           .read(pillWorkspaceProvider(scope).notifier)
           .updateTranslation(
