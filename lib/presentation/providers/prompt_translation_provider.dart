@@ -30,6 +30,8 @@ class PromptTranslationCoordinator {
   PromptTranslationCoordinator(this._ref);
   final Ref _ref;
   Map<String, ({PillDocument before, PillDocument after})> _lastUndo = {};
+  final Map<bool, Map<String, ({PillDocument before, PillDocument after})>>
+  _plainTextUndo = {};
 
   List<String> _scopes(bool negative, {bool includeDisabled = false}) {
     final characters = _ref.read(characterPromptNotifierProvider).characters;
@@ -89,16 +91,48 @@ class PromptTranslationCoordinator {
   int clearTranslations(bool negative) {
     if (_ref.read(promptTranslationBusyProvider)) return 0;
     var cleared = 0;
+    final undo = <String, ({PillDocument before, PillDocument after})>{};
     final scopes = _scopes(negative, includeDisabled: true);
     for (final scope in scopes) {
-      cleared += _ref
-          .read(pillWorkspaceProvider(scope).notifier)
-          .unwrapAllTranslations();
+      final lane = pillWorkspaceProvider(scope);
+      final before = _ref.read(lane).document;
+      final count = _ref.read(lane.notifier).unwrapAllTranslations();
+      if (count == 0) continue;
+      undo[scope] = (before: before, after: _ref.read(lane).document);
+      cleared += count;
     }
     if (cleared > 0) {
-      _lastUndo.removeWhere((scope, _) => scopes.contains(scope));
+      _plainTextUndo[negative] = undo;
     }
     return cleared;
+  }
+
+  bool canRestoreTranslations(bool negative) {
+    final scopes = _scopes(negative, includeDisabled: true).toSet();
+    return _plainTextUndo[negative]?.entries.any((entry) {
+          return scopes.contains(entry.key) &&
+              _ref.read(pillWorkspaceProvider(entry.key)).document ==
+                  entry.value.after;
+        }) ??
+        false;
+  }
+
+  /// Restore only untouched fields; never replace newer edits or deleted roles.
+  bool restoreTranslations(bool negative) {
+    if (_ref.read(promptTranslationBusyProvider)) return false;
+    final undo = _plainTextUndo.remove(negative);
+    if (undo == null) return false;
+    final scopes = _scopes(negative, includeDisabled: true).toSet();
+    var restored = false;
+    for (final entry in undo.entries) {
+      if (!scopes.contains(entry.key)) continue;
+      restored =
+          _ref
+              .read(pillWorkspaceProvider(entry.key).notifier)
+              .replaceIfCurrent(entry.value.after, entry.value.before) ||
+          restored;
+    }
+    return restored;
   }
 
   void toggleAll(bool negative) {

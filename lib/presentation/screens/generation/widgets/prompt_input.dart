@@ -600,10 +600,15 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                       .read(promptTranslationCoordinatorProvider)
                       .undoLast();
                   if (restored) AppToast.success(context, '已撤销上次翻译');
-                } else if (action == 'clear') {
-                  ref
-                      .read(promptTranslationCoordinatorProvider)
-                      .clearTranslations(negativeSide);
+                } else if (action == 'plain-text') {
+                  final coordinator = ref.read(
+                    promptTranslationCoordinatorProvider,
+                  );
+                  if (coordinator.canRestoreTranslations(negativeSide)) {
+                    coordinator.restoreTranslations(negativeSide);
+                  } else {
+                    coordinator.clearTranslations(negativeSide);
+                  }
                 }
               },
               itemBuilder: (_) {
@@ -662,8 +667,14 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                   ),
                   _TranslationMenuFooter(
                     canUndo: !busy && coordinator.canUndoLast,
-                    canClear:
+                    canConvertToPlainText:
                         !busy && coordinator.hasAnyTranslations(negativeSide),
+                    restoresTranslations: coordinator.canRestoreTranslations(
+                      negativeSide,
+                    ),
+                    canRestore:
+                        !busy &&
+                        coordinator.canRestoreTranslations(negativeSide),
                   ),
                 ];
               },
@@ -2042,10 +2053,17 @@ class _CopyIconButtonState extends State<_CopyIconButton> {
 
 /// 翻译菜单底部的两个独立操作入口。
 class _TranslationMenuFooter extends PopupMenuEntry<String> {
-  const _TranslationMenuFooter({required this.canUndo, required this.canClear});
+  const _TranslationMenuFooter({
+    required this.canUndo,
+    required this.canConvertToPlainText,
+    required this.restoresTranslations,
+    required this.canRestore,
+  });
 
   final bool canUndo;
-  final bool canClear;
+  final bool canConvertToPlainText;
+  final bool restoresTranslations;
+  final bool canRestore;
 
   @override
   double get height => 39;
@@ -2060,7 +2078,6 @@ class _TranslationMenuFooter extends PopupMenuEntry<String> {
 class _TranslationMenuFooterState extends State<_TranslationMenuFooter> {
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: 188,
       height: widget.height,
@@ -2090,8 +2107,10 @@ class _TranslationMenuFooterState extends State<_TranslationMenuFooter> {
                   ),
                   const Spacer(),
                   IconButton(
-                    key: const Key('prompt-translation-clear'),
-                    tooltip: '清空当前侧翻译块并还原原文',
+                    key: const Key('prompt-translation-plain-text'),
+                    tooltip: widget.restoresTranslations
+                        ? '撤销原文还原，恢复翻译块'
+                        : '全部翻译块还原为原文文本',
                     constraints: const BoxConstraints.tightFor(
                       width: 32,
                       height: 32,
@@ -2100,11 +2119,18 @@ class _TranslationMenuFooterState extends State<_TranslationMenuFooter> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     padding: EdgeInsets.zero,
-                    onPressed: widget.canClear
-                        ? () => Navigator.pop(context, 'clear')
+                    onPressed: widget.canRestore || widget.canConvertToPlainText
+                        ? () => Navigator.pop(context, 'plain-text')
                         : null,
-                    color: scheme.error,
-                    icon: const Icon(Icons.delete_outline, size: 18),
+                    icon: widget.restoresTranslations
+                        ? const Icon(Icons.undo, size: 18)
+                        : const Text(
+                            'A',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ],
               ),

@@ -1,8 +1,15 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
+import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
@@ -17,16 +24,33 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_inpu
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/presentation/themes/app_theme.dart';
+
+import '../../../../helpers/studio_capture_fonts.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  setUpAll(() async {
+    if (Platform.environment['CAPTURE_TRANSLATION_MENU'] != '1') return;
+    await loadStudioCaptureFonts();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+  });
+
   test('Windows 下提示词切换按钮不使用富文本 Tooltip', () {
     expect(usesRichPromptTypeTooltip(TargetPlatform.windows), isFalse);
   });
 
   testWidgets('未配置翻译模型时显示设置引导，不发送翻译请求', (tester) async {
+    final captureBoundary = GlobalKey();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          zhDictionaryServiceProvider.overrideWith(
+            (ref) => ZhDictionaryService(),
+          ),
           promptBlockLibraryNotifierProvider.overrideWith(
             _EmptyPromptBlockLibraryNotifier.new,
           ),
@@ -47,11 +71,21 @@ void main() {
             (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
           ),
         ],
-        child: const MaterialApp(
-          locale: Locale('zh'),
+        child: MaterialApp(
+          theme: Platform.environment['CAPTURE_TRANSLATION_MENU'] == '1'
+              ? AppTheme.getTheme(
+                  AppStyle.geist,
+                  Platform.environment['STUDIO_APPEARANCE'] == 'dark'
+                      ? Brightness.dark
+                      : Brightness.light,
+                )
+              : null,
+          builder: (_, child) =>
+              RepaintBoundary(key: captureBoundary, child: child!),
+          locale: const Locale('zh'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: Scaffold(
+          home: const Scaffold(
             body: SizedBox(width: 960, height: 420, child: PromptInputWidget()),
           ),
         ),
@@ -89,7 +123,11 @@ void main() {
     expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     expect(find.text('翻译新增内容'), findsOneWidget);
     expect(find.byKey(const Key('prompt-translation-undo')), findsOneWidget);
-    expect(find.byKey(const Key('prompt-translation-clear')), findsOneWidget);
+    expect(
+      find.byKey(const Key('prompt-translation-plain-text')),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.delete_outline), findsNothing);
     expect(
       find.descendant(
         of: find.ancestor(
@@ -123,7 +161,7 @@ void main() {
       lessThanOrEqualTo(40),
     );
     expect(
-      tester.getSize(find.byKey(const Key('prompt-translation-clear'))),
+      tester.getSize(find.byKey(const Key('prompt-translation-plain-text'))),
       const Size(32, 32),
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -141,17 +179,24 @@ void main() {
     positive.replaceWithPlainText('before, after');
     positive.insertTranslationAt(offset: 8, source: 'blue eyes', zh: '蓝眼睛');
     negative.insertTranslationAt(offset: 0, source: 'bad hands', zh: '坏手');
+    final before = container
+        .read(pillWorkspaceProvider(PillScopes.main))
+        .document;
     await tester.pump();
 
     await tester.tap(find.byKey(const Key('prompt-translation-actions')));
     await tester.pumpAndSettle();
     expect(
       tester
-          .widget<IconButton>(find.byKey(const Key('prompt-translation-clear')))
+          .widget<IconButton>(
+            find.byKey(const Key('prompt-translation-plain-text')),
+          )
           .onPressed,
       isNotNull,
     );
-    await tester.tap(find.byKey(const Key('prompt-translation-clear')));
+    expect(find.text('A'), findsOneWidget);
+    await _captureTranslationMenu(tester, captureBoundary, 'blocks');
+    await tester.tap(find.byKey(const Key('prompt-translation-plain-text')));
     await tester.pumpAndSettle();
     expect(
       container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
@@ -169,6 +214,26 @@ void main() {
           .length,
       1,
     );
+    await tester.tap(find.byKey(const Key('prompt-translation-actions')));
+    await tester.pumpAndSettle();
+    final restoreButton = tester.widget<IconButton>(
+      find.byKey(const Key('prompt-translation-plain-text')),
+    );
+    expect(restoreButton.tooltip, '撤销原文还原，恢复翻译块');
+    expect((restoreButton.icon as Icon).icon, Icons.undo);
+    expect(restoreButton.onPressed, isNotNull);
+    await _captureTranslationMenu(tester, captureBoundary, 'original');
+    await tester.tap(find.byKey(const Key('prompt-translation-plain-text')));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document,
+      before,
+    );
+    await tester.tap(find.byKey(const Key('prompt-translation-actions')));
+    await tester.pumpAndSettle();
+    expect(find.text('A'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 
@@ -728,6 +793,27 @@ void main() {
     expect(pillState.document.instances, isEmpty);
     expect(pillState.projection, 'flattened replacement');
     expect(tester.takeException(), isNull);
+  });
+}
+
+Future<void> _captureTranslationMenu(
+  WidgetTester tester,
+  GlobalKey boundary,
+  String state,
+) async {
+  if (Platform.environment['CAPTURE_TRANSLATION_MENU'] != '1') return;
+  await tester.runAsync(() async {
+    final render =
+        boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+    final image = await render.toImage(pixelRatio: 1.5);
+    final png = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    final appearance = Platform.environment['STUDIO_APPEARANCE'] ?? 'light';
+    final file = File(
+      '.dart_tool/translation-toggle-captures/$appearance-$state.png',
+    );
+    await file.parent.create(recursive: true);
+    await file.writeAsBytes(png!.buffer.asUint8List());
   });
 }
 
