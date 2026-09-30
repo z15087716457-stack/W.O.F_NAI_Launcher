@@ -20,6 +20,7 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
@@ -122,7 +123,8 @@ void main() {
     expect(find.text('未配置翻译模型'), findsOneWidget);
     expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     expect(find.text('翻译新增内容'), findsOneWidget);
-    expect(find.byKey(const Key('prompt-translation-undo')), findsOneWidget);
+    expect(find.byKey(const Key('prompt-translation-undo')), findsNothing);
+    expect(find.byTooltip('撤销上次翻译'), findsNothing);
     expect(
       find.byKey(const Key('prompt-translation-plain-text')),
       findsOneWidget,
@@ -130,10 +132,7 @@ void main() {
     expect(find.byIcon(Icons.delete_outline), findsNothing);
     expect(
       find.descendant(
-        of: find.ancestor(
-          of: find.text('翻译新增内容'),
-          matching: find.byType(PopupMenuItem<String>),
-        ),
+        of: find.byKey(const Key('prompt-translation-add')),
         matching: find.byIcon(Icons.add),
       ),
       findsOneWidget,
@@ -150,20 +149,19 @@ void main() {
       lessThanOrEqualTo(40),
     );
     expect(
-      tester
-          .getSize(
-            find.ancestor(
-              of: find.text('翻译新增内容'),
-              matching: find.byType(PopupMenuItem<String>),
-            ),
-          )
-          .height,
+      tester.getSize(find.byKey(const Key('prompt-translation-add'))).height,
       lessThanOrEqualTo(40),
     );
     expect(
       tester.getSize(find.byKey(const Key('prompt-translation-plain-text'))),
       const Size(32, 32),
     );
+    await tester.tap(find.text('翻译新增内容'));
+    await tester.pumpAndSettle();
+    expect(find.text('先配置翻译模型'), findsOneWidget);
+    await tester.tap(find.text('稍后'));
+    await tester.pumpAndSettle();
+    expect(find.text('翻译新增内容'), findsOneWidget);
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
 
@@ -214,8 +212,7 @@ void main() {
           .length,
       1,
     );
-    await tester.tap(find.byKey(const Key('prompt-translation-actions')));
-    await tester.pumpAndSettle();
+    expect(find.text('翻译新增内容'), findsOneWidget);
     final restoreButton = tester.widget<IconButton>(
       find.byKey(const Key('prompt-translation-plain-text')),
     );
@@ -229,11 +226,62 @@ void main() {
       container.read(pillWorkspaceProvider(PillScopes.main)).document,
       before,
     );
-    await tester.tap(find.byKey(const Key('prompt-translation-actions')));
+    expect(find.text('翻译新增内容'), findsOneWidget);
+    expect(find.text('A'), findsOneWidget);
+
+    container.read(promptTranslationBusyProvider.notifier).state = true;
+    await tester.pump();
+    expect(
+      tester
+          .widget<InkWell>(find.byKey(const Key('prompt-translation-add')))
+          .onTap,
+      isNull,
+    );
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byKey(const Key('prompt-translation-plain-text')),
+          )
+          .onPressed,
+      isNull,
+    );
+    container.read(promptTranslationBusyProvider.notifier).state = false;
+    await tester.pump();
+    expect(
+      tester
+          .widget<InkWell>(find.byKey(const Key('prompt-translation-add')))
+          .onTap,
+      isNotNull,
+    );
+    await tester.tap(find.byKey(const Key('prompt-translation-plain-text')));
+    await tester.pumpAndSettle();
+    positive.replaceWithPlainText('new edit');
     await tester.pumpAndSettle();
     expect(find.text('A'), findsOneWidget);
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byKey(const Key('prompt-translation-plain-text')),
+          )
+          .onPressed,
+      isNull,
+    );
+    // 菜单外的箭头命中弹层屏障，关闭菜单而不再次打开。
+    await tester.tapAt(
+      tester.getCenter(find.byKey(const Key('prompt-translation-actions'))),
+    );
     await tester.pumpAndSettle();
+    expect(find.text('翻译新增内容'), findsNothing);
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+      'new edit',
+    );
+    await tester.tap(find.byKey(const Key('prompt-translation-actions')));
+    await tester.pumpAndSettle();
+    expect(find.text('翻译新增内容'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 450));
+    await tester.pumpAndSettle();
+    expect(find.text('翻译新增内容'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
