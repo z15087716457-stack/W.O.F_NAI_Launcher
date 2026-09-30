@@ -37,6 +37,54 @@ class TranslationPillView extends StatefulWidget {
 class _TranslationPillViewState extends State<TranslationPillView> {
   late final NaiSyntaxController _syntaxController;
   final FocusNode _sourceFocus = FocusNode();
+  // EditableText actions are overridable. A field inside a WidgetSpan would
+  // otherwise inherit the containing editor's delete, selection and history
+  // actions, which operate on its marker text instead of this source.
+  final Map<Type, Action<Intent>> _sourceActions = {
+    DeleteCharacterIntent: _LocalTextEditingAction<DeleteCharacterIntent>(),
+    DeleteToNextWordBoundaryIntent:
+        _LocalTextEditingAction<DeleteToNextWordBoundaryIntent>(),
+    DeleteToLineBreakIntent: _LocalTextEditingAction<DeleteToLineBreakIntent>(),
+    ExtendSelectionByCharacterIntent:
+        _LocalTextEditingAction<ExtendSelectionByCharacterIntent>(),
+    ExtendSelectionToNextWordBoundaryIntent:
+        _LocalTextEditingAction<ExtendSelectionToNextWordBoundaryIntent>(),
+    ExtendSelectionToNextParagraphBoundaryIntent:
+        _LocalTextEditingAction<ExtendSelectionToNextParagraphBoundaryIntent>(),
+    ExtendSelectionToLineBreakIntent:
+        _LocalTextEditingAction<ExtendSelectionToLineBreakIntent>(),
+    ExtendSelectionVerticallyToAdjacentLineIntent:
+        _LocalTextEditingAction<
+          ExtendSelectionVerticallyToAdjacentLineIntent
+        >(),
+    ExtendSelectionVerticallyToAdjacentPageIntent:
+        _LocalTextEditingAction<
+          ExtendSelectionVerticallyToAdjacentPageIntent
+        >(),
+    ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent:
+        _LocalTextEditingAction<
+          ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent
+        >(),
+    ExtendSelectionToDocumentBoundaryIntent:
+        _LocalTextEditingAction<ExtendSelectionToDocumentBoundaryIntent>(),
+    ExtendSelectionToNextWordBoundaryOrCaretLocationIntent:
+        _LocalTextEditingAction<
+          ExtendSelectionToNextWordBoundaryOrCaretLocationIntent
+        >(),
+    ScrollToDocumentBoundaryIntent:
+        _LocalTextEditingAction<ScrollToDocumentBoundaryIntent>(),
+    ExpandSelectionToLineBreakIntent:
+        _LocalTextEditingAction<ExpandSelectionToLineBreakIntent>(),
+    ExpandSelectionToDocumentBoundaryIntent:
+        _LocalTextEditingAction<ExpandSelectionToDocumentBoundaryIntent>(),
+    SelectAllTextIntent: _LocalTextEditingAction<SelectAllTextIntent>(),
+    CopySelectionTextIntent: _LocalTextEditingAction<CopySelectionTextIntent>(),
+    PasteTextIntent: _LocalTextEditingAction<PasteTextIntent>(),
+    TransposeCharactersIntent:
+        _LocalTextEditingAction<TransposeCharactersIntent>(),
+    UndoTextIntent: _LocalTextEditingAction<UndoTextIntent>(),
+    RedoTextIntent: _LocalTextEditingAction<RedoTextIntent>(),
+  };
 
   String _displayText(TranslationPill pill) {
     if (!pill.showOriginal) return pill.zh;
@@ -154,32 +202,35 @@ class _TranslationPillViewState extends State<TranslationPillView> {
             painter.dispose();
             text = SizedBox(
               width: width,
-              child: TextField(
-                key: const Key('translation-pill-source-input'),
-                controller: _syntaxController,
-                focusNode: _sourceFocus,
-                style: textStyle,
-                minLines: 1,
-                maxLines: null,
-                scrollPadding: EdgeInsets.zero,
-                decoration: const InputDecoration(
-                  isCollapsed: true,
-                  isDense: true,
-                  filled: false,
-                  contentPadding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  disabledBorder: InputBorder.none,
-                  errorBorder: InputBorder.none,
-                  focusedErrorBorder: InputBorder.none,
+              child: Actions(
+                actions: _sourceActions,
+                child: TextField(
+                  key: const Key('translation-pill-source-input'),
+                  controller: _syntaxController,
+                  focusNode: _sourceFocus,
+                  style: textStyle,
+                  minLines: 1,
+                  maxLines: null,
+                  scrollPadding: EdgeInsets.zero,
+                  decoration: const InputDecoration(
+                    isCollapsed: true,
+                    isDense: true,
+                    filled: false,
+                    contentPadding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                  ),
+                  onTapOutside: (_) => _sourceFocus.unfocus(),
+                  onChanged: (source) {
+                    setState(() {});
+                    widget.onSourceChanged!(source);
+                  },
                 ),
-                onTapOutside: (_) => _sourceFocus.unfocus(),
-                onChanged: (source) {
-                  setState(() {});
-                  widget.onSourceChanged!(source);
-                },
               ),
             );
           } else {
@@ -252,6 +303,29 @@ class _TranslationPillViewState extends State<TranslationPillView> {
       ),
     );
   }
+}
+
+/// Keeps an inner EditableText's native action instead of its ancestor's.
+class _LocalTextEditingAction<T extends Intent> extends ContextAction<T> {
+  @override
+  bool get isActionEnabled => callingAction?.isActionEnabled ?? false;
+
+  @override
+  bool isEnabled(T intent, [BuildContext? context]) => switch (callingAction) {
+    final ContextAction<T> action => action.isEnabled(intent, context),
+    final Action<T> action => action.isEnabled(intent),
+    null => false,
+  };
+
+  @override
+  bool consumesKey(T intent) => callingAction?.consumesKey(intent) ?? false;
+
+  @override
+  Object? invoke(T intent, [BuildContext? context]) => switch (callingAction) {
+    final ContextAction<T> action => action.invoke(intent, context),
+    final Action<T> action => action.invoke(intent),
+    null => null,
+  };
 }
 
 class _DashedRoundedBorder extends ShapeBorder {

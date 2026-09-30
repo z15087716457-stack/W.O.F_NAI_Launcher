@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
@@ -731,6 +732,234 @@ void main() {
     },
   );
 
+  testWidgets(
+    'original keyboard deletion keeps the block and neighbors',
+    (tester) async {
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+      );
+      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+      notifier.setText('before, after');
+      notifier.insertTranslationAt(offset: 8, source: 'blue eyes', zh: '蓝眼睛');
+      notifier.insertTranslationAt(offset: 9, source: 'red hair', zh: '红发');
+      notifier.showAllTranslations(original: true);
+      await tester.pumpAndSettle();
+      final originalDocument = container
+          .read(pillWorkspaceNotifierProvider)
+          .document;
+      final outer = tester.widget<EditableText>(
+        find.byType(EditableText).first,
+      );
+      outer.controller.selection = const TextSelection.collapsed(offset: 9);
+      final field = find
+          .byKey(const Key('translation-pill-source-input'))
+          .first;
+      await tester.tap(field);
+      await tester.pump();
+      final input = tester.widget<TextField>(field).controller!;
+      input.selection = TextSelection.collapsed(offset: input.text.length);
+
+      Future<void> press(LogicalKeyboardKey key, String source) async {
+        await tester.sendKeyEvent(key);
+        await tester.pump();
+        final workspace = container.read(pillWorkspaceNotifierProvider);
+        expect(workspace.document.text, originalDocument.text);
+        expect(
+          workspace.document.instances.keys,
+          originalDocument.instances.keys,
+        );
+        expect(
+          workspace.document.instances[markerA]!.translation!.source,
+          source,
+        );
+        expect(
+          workspace.document.instances[markerB],
+          originalDocument.instances[markerB],
+        );
+        expect(workspace.projection, 'before, ${source}red hairafter');
+        expect(
+          tester.widget<TextField>(field).focusNode!.hasPrimaryFocus,
+          isTrue,
+        );
+        expect(tester.takeException(), isNull);
+      }
+
+      await press(LogicalKeyboardKey.backspace, 'blue eye');
+      input.selection = const TextSelection.collapsed(offset: 4);
+      await press(LogicalKeyboardKey.delete, 'blueeye');
+      input.selection = const TextSelection.collapsed(offset: 0);
+      await press(LogicalKeyboardKey.backspace, 'blueeye');
+      input.selection = TextSelection.collapsed(offset: input.text.length);
+      await press(LogicalKeyboardKey.delete, 'blueeye');
+      input.selection = const TextSelection(baseOffset: 1, extentOffset: 4);
+      await press(LogicalKeyboardKey.backspace, 'beye');
+      input.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: input.text.length,
+      );
+      await press(LogicalKeyboardKey.delete, '');
+      await press(LogicalKeyboardKey.backspace, '');
+      await press(LogicalKeyboardKey.delete, '');
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: '眼睛👩‍🎨',
+          selection: TextSelection.collapsed(offset: 7),
+        ),
+      );
+      await tester.pump();
+      await press(LogicalKeyboardKey.backspace, '眼睛');
+      input.selection = const TextSelection.collapsed(offset: 0);
+      await press(LogicalKeyboardKey.delete, '睛');
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+
+  testWidgets(
+    'original keyboard navigation and word deletion stay local',
+    (tester) async {
+      final (container, outer, input) = await _pumpOriginalKeyboardEditor(
+        tester,
+      );
+      final document = container.read(pillWorkspaceNotifierProvider).document;
+      final outerValue = outer.value;
+      input.selection = const TextSelection.collapsed(offset: 5);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+      expect(input.selection, const TextSelection.collapsed(offset: 4));
+      await _controlKey(tester, LogicalKeyboardKey.arrowLeft);
+      expect(input.selection, const TextSelection.collapsed(offset: 0));
+      await tester.sendKeyEvent(LogicalKeyboardKey.end);
+      await tester.pump();
+      expect(
+        input.selection,
+        const TextSelection.collapsed(
+          offset: 9,
+          affinity: TextAffinity.upstream,
+        ),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pump();
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 9, extentOffset: 8),
+      );
+      await _controlKey(tester, LogicalKeyboardKey.keyA);
+      expect(
+        input.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 9),
+      );
+      input.selection = const TextSelection.collapsed(offset: 9);
+      await _controlKey(tester, LogicalKeyboardKey.backspace);
+      expect(input.text, 'blue ');
+      input.selection = const TextSelection.collapsed(offset: 0);
+      await _controlKey(tester, LogicalKeyboardKey.delete);
+      expect(input.text, ' ');
+      await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+      await tester.pump();
+      expect(input.text, isEmpty);
+      final workspace = container.read(pillWorkspaceNotifierProvider);
+      expect(workspace.document.text, document.text);
+      expect(
+        workspace.document.instances[markerB],
+        document.instances[markerB],
+      );
+      expect(outer.value, outerValue);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+
+  testWidgets(
+    'original clipboard shortcuts only copy cut and paste source',
+    (tester) async {
+      String? clipboard;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboard = (call.arguments as Map)['text'] as String;
+          } else if (call.method == 'Clipboard.getData') {
+            return {'text': clipboard};
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+      final (container, outer, input) = await _pumpOriginalKeyboardEditor(
+        tester,
+      );
+      final document = container.read(pillWorkspaceNotifierProvider).document;
+      final outerValue = outer.value;
+      await _controlKey(tester, LogicalKeyboardKey.keyA);
+      await _controlKey(tester, LogicalKeyboardKey.keyC);
+      expect(clipboard, 'blue eyes');
+      await _controlKey(tester, LogicalKeyboardKey.keyX);
+      expect(input.text, isEmpty);
+      expect(clipboard, 'blue eyes');
+      await _controlKey(tester, LogicalKeyboardKey.keyV);
+      expect(input.text, 'blue eyes');
+      await Clipboard.setData(const ClipboardData(text: 'green eyes'));
+      await _controlKey(tester, LogicalKeyboardKey.keyA);
+      await _controlKey(tester, LogicalKeyboardKey.keyV);
+      final workspace = container.read(pillWorkspaceNotifierProvider);
+      expect(input.text, 'green eyes');
+      expect(
+        workspace.document.instances[markerA]!.translation!.source,
+        'green eyes',
+      );
+      expect(
+        workspace.document.instances[markerB],
+        document.instances[markerB],
+      );
+      expect(workspace.document.text, document.text);
+      expect(outer.value, outerValue);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+
+  testWidgets(
+    'original undo and redo do not touch the outer document',
+    (tester) async {
+      final (container, outer, input) = await _pumpOriginalKeyboardEditor(
+        tester,
+      );
+      final document = container.read(pillWorkspaceNotifierProvider).document;
+      final outerValue = outer.value;
+      await tester.pump(const Duration(milliseconds: 600));
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'green eyes',
+          selection: TextSelection.collapsed(offset: 10),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await _controlKey(tester, LogicalKeyboardKey.keyZ);
+      expect(input.text, 'blue eyes');
+      await _controlKey(tester, LogicalKeyboardKey.keyY);
+      expect(input.text, 'green eyes');
+      final workspace = container.read(pillWorkspaceNotifierProvider);
+      expect(workspace.document.text, document.text);
+      expect(
+        workspace.document.instances[markerB],
+        document.instances[markerB],
+      );
+      expect(
+        workspace.document.instances[markerA]!.translation!.needsReview,
+        isTrue,
+      );
+      expect(outer.value, outerValue);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+
   testWidgets('original text selection is separate from the icon drag handle', (
     tester,
   ) async {
@@ -1004,6 +1233,35 @@ void main() {
     final pill = tester.widget<PromptPill>(find.byType(PromptPill));
     expect(pill.variant, PromptPillVariant.missing);
   });
+}
+
+Future<(ProviderContainer, TextEditingController, TextEditingController)>
+_pumpOriginalKeyboardEditor(WidgetTester tester) async {
+  final container = await _pump(
+    tester,
+    libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+  );
+  final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+  notifier.setText('before, after');
+  notifier.insertTranslationAt(offset: 8, source: 'blue eyes', zh: '蓝眼睛');
+  notifier.insertTranslationAt(offset: 9, source: 'red hair', zh: '红发');
+  notifier.showAllTranslations(original: true);
+  await tester.pumpAndSettle();
+  final outer = tester
+      .widget<EditableText>(find.byType(EditableText).first)
+      .controller;
+  outer.selection = const TextSelection.collapsed(offset: 9);
+  final field = find.byKey(const Key('translation-pill-source-input')).first;
+  await tester.tap(field);
+  await tester.pump();
+  return (container, outer, tester.widget<TextField>(field).controller!);
+}
+
+Future<void> _controlKey(WidgetTester tester, LogicalKeyboardKey key) async {
+  await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+  await tester.sendKeyEvent(key);
+  await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+  await tester.pump();
 }
 
 Future<ProviderContainer> _pump(
