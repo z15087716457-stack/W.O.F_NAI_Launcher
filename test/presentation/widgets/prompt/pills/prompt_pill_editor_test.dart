@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -994,7 +995,7 @@ void main() {
     expect(find.byType(TranslationPillView), findsOneWidget);
     final handle = find.descendant(
       of: find.byType(TranslationPillView),
-      matching: find.byIcon(Icons.translate_outlined),
+      matching: find.byType(TranslationIcon),
     );
     final dragging = await tester.startGesture(
       tester.getCenter(handle),

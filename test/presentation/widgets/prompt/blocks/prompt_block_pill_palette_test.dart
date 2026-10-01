@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_card.dart';
+import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 
 void main() {
   testWidgets('palette translation block shows complete wrapped reading', (
@@ -43,7 +44,7 @@ void main() {
     expect(label.overflow, TextOverflow.visible);
     expect(label.style?.fontSize, 12);
     expect(tester.getSize(find.text(reading)).height, greaterThan(28));
-    expect(find.byIcon(Icons.translate_outlined), findsOneWidget);
+    expect(find.byType(TranslationIcon), findsOneWidget);
     final pillMaterial = tester.widget<Material>(
       find.ancestor(
         of: find.byKey(const ValueKey('prompt-block-pill-body-translation-1')),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -263,7 +264,7 @@ void main() {
     );
 
     expect(find.text('蓝眼睛'), findsOneWidget);
-    expect(find.byIcon(Icons.translate_outlined), findsNothing);
+    expect(find.byType(TranslationIcon), findsNothing);
     expect(find.byIcon(Icons.build_outlined), findsNothing);
     var decoration = tester.widget<Container>(
       find.descendant(
@@ -288,7 +289,7 @@ void main() {
     await middle.up();
     await tester.pump();
     expect(find.text('blue eyes'), findsOneWidget);
-    expect(find.byIcon(Icons.translate_outlined), findsOneWidget);
+    expect(find.byType(TranslationIcon), findsOneWidget);
     expect(find.byIcon(Icons.build_outlined), findsNothing);
     decoration = tester.widget<Container>(
       find.descendant(

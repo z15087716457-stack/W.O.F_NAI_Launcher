@@ -12,6 +12,7 @@ import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../tag_expansion/tag_expansion_wrapper.dart';
 import '../../common/translation_modified_badge.dart';
 import 'translation_editing_controller.dart';
+import '../../common/translation_icon.dart';
 
 class TranslationPillEditHandle {
   const TranslationPillEditHandle({
@@ -520,7 +521,11 @@ class _TranslationPillEditPopoverState
           children: [
             Row(
               children: [
-                Icon(Icons.translate_outlined, size: 17, color: scheme.primary),
+                TranslationIcon(
+                  size: 17,
+                  color: scheme.primary,
+                  busy: _busy != null,
+                ),
                 const SizedBox(width: 7),
                 Expanded(
                   child: Text(
@@ -714,11 +719,7 @@ class _TranslationPillEditPopoverState
           ? null
           : () => _convert(direction),
       icon: _busy == direction
-          ? const SizedBox(
-              width: 13,
-              height: 13,
-              child: CircularProgressIndicator(strokeWidth: 1.5),
-            )
+          ? const TranslationIcon(size: 16, busy: true)
           : Icon(chinese ? Icons.arrow_downward : Icons.arrow_upward, size: 17),
     );
   }

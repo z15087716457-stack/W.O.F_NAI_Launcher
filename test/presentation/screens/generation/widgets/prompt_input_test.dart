@@ -110,6 +110,10 @@ void main() {
     );
     expect((control.decoration! as BoxDecoration).border, isNotNull);
     expect(
+      tester.getSize(find.byKey(const Key('prompt-translation-control'))),
+      const Size(44, 24),
+    );
+    expect(
       find.descendant(
         of: find.byKey(const Key('prompt-translation-control')),
         matching: find.byKey(const Key('prompt-translation-toggle')),

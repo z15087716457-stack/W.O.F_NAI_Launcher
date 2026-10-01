@@ -7,6 +7,7 @@ import '../../../core/autocomplete/zh_dictionary_service.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import 'tag_category_visuals.dart';
+import '../common/translation_icon.dart';
 
 const double autocompleteCandidateExtent = 35;
 
@@ -652,22 +653,21 @@ class _CandidateSecondary extends StatelessWidget {
           width: 14,
           height: 14,
           child: Center(
-            child: isTranslating
-                ? SizedBox(
-                    width: 11,
-                    height: 11,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
-                      color: theme.colorScheme.primary,
-                    ),
+            child: isTranslating || translationMissing
+                ? TranslationIcon(
+                    size: 14,
+                    busy: isTranslating,
+                    color: isTranslating
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: .48,
+                          ),
                   )
                 : Icon(
-                    translationMissing
-                        ? Icons.translate_rounded
-                        : Icons.menu_book_rounded,
+                    Icons.menu_book_rounded,
                     size: 14,
                     color: theme.colorScheme.onSurfaceVariant.withValues(
-                      alpha: translationMissing ? 0.48 : 0.82,
+                      alpha: .82,
                     ),
                   ),
           ),
@@ -916,7 +916,7 @@ class _CompletionFooter extends StatelessWidget {
       final progress = (dictionaryState.progress * 100).round().clamp(0, 100);
       return _StatusDescriptor(
         key: 'autocomplete-status-dictionary',
-        icon: Icons.translate_rounded,
+        translationIcon: true,
         label: context.l10n.autocomplete_statusDictionary,
         value: context.l10n.autocomplete_statusDownloading(progress),
         tone: _StatusTone.loading,
@@ -926,7 +926,7 @@ class _CompletionFooter extends StatelessWidget {
     if (dictionaryState.error?.isNotEmpty == true) {
       return _StatusDescriptor(
         key: 'autocomplete-status-dictionary',
-        icon: Icons.translate_rounded,
+        translationIcon: true,
         label: context.l10n.autocomplete_statusDictionary,
         value: context.l10n.autocomplete_statusError,
         tone: _StatusTone.error,
@@ -936,7 +936,7 @@ class _CompletionFooter extends StatelessWidget {
     if (!dictionaryState.isInstalled) {
       return _StatusDescriptor(
         key: 'autocomplete-status-dictionary',
-        icon: Icons.translate_rounded,
+        translationIcon: true,
         label: context.l10n.autocomplete_statusDictionary,
         value: context.l10n.autocomplete_statusNotInstalled,
         tone: _StatusTone.warning,
@@ -946,7 +946,7 @@ class _CompletionFooter extends StatelessWidget {
     if (dictionaryState.updateAvailable) {
       return _StatusDescriptor(
         key: 'autocomplete-status-dictionary',
-        icon: Icons.translate_rounded,
+        translationIcon: true,
         label: context.l10n.autocomplete_statusDictionary,
         value: context.l10n.autocomplete_statusUpdateAvailable,
         tone: _StatusTone.warning,
@@ -958,7 +958,7 @@ class _CompletionFooter extends StatelessWidget {
     final totalCount = state.candidates.length;
     return _StatusDescriptor(
       key: 'autocomplete-status-dictionary',
-      icon: Icons.translate_rounded,
+      translationIcon: true,
       label: context.l10n.autocomplete_statusDictionary,
       value: totalCount == 0
           ? context.l10n.autocomplete_statusReady
@@ -1017,7 +1017,7 @@ class _CompletionFooter extends StatelessWidget {
     if (!settings.llmTranslationEnabled) {
       return _StatusDescriptor(
         key: 'autocomplete-status-ai',
-        icon: Icons.auto_awesome_outlined,
+        translationIcon: true,
         label: context.l10n.autocomplete_statusAi,
         value: context.l10n.autocomplete_statusDisabled,
         tone: _StatusTone.inactive,
@@ -1026,7 +1026,7 @@ class _CompletionFooter extends StatelessWidget {
     if (state.candidates.any((candidate) => candidate.isTranslating)) {
       return _StatusDescriptor(
         key: 'autocomplete-status-ai',
-        icon: Icons.auto_awesome_rounded,
+        translationIcon: true,
         label: context.l10n.autocomplete_statusAi,
         value: context.l10n.autocomplete_statusTranslating,
         tone: _StatusTone.loading,
@@ -1036,7 +1036,7 @@ class _CompletionFooter extends StatelessWidget {
     if (state.translationError?.isNotEmpty == true) {
       return _StatusDescriptor(
         key: 'autocomplete-status-ai',
-        icon: Icons.auto_awesome_outlined,
+        translationIcon: true,
         label: context.l10n.autocomplete_statusAi,
         value: context.l10n.autocomplete_statusError,
         tone: _StatusTone.error,
@@ -1045,7 +1045,7 @@ class _CompletionFooter extends StatelessWidget {
     }
     return _StatusDescriptor(
       key: 'autocomplete-status-ai',
-      icon: Icons.auto_awesome_rounded,
+      translationIcon: true,
       label: context.l10n.autocomplete_statusAi,
       value: context.l10n.autocomplete_statusReady,
       tone: _StatusTone.ready,
@@ -1058,16 +1058,18 @@ enum _StatusTone { ready, loading, warning, error, inactive }
 class _StatusDescriptor {
   const _StatusDescriptor({
     required this.key,
-    required this.icon,
+    this.icon,
+    this.translationIcon = false,
     required this.label,
     required this.value,
     required this.tone,
     this.loading = false,
     this.tooltip,
-  });
+  }) : assert(icon != null || translationIcon);
 
   final String key;
-  final IconData icon;
+  final IconData? icon;
+  final bool translationIcon;
   final String label;
   final String value;
   final _StatusTone tone;
@@ -1105,7 +1107,15 @@ class _StatusIndicator extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (descriptor.loading)
+            if ((descriptor.translationIcon && !descriptor.loading) ||
+                (descriptor.loading &&
+                    descriptor.key == 'autocomplete-status-ai'))
+              TranslationIcon(
+                size: 14,
+                color: toneColor,
+                busy: descriptor.loading,
+              )
+            else if (descriptor.loading)
               SizedBox(
                 width: 12,
                 height: 12,

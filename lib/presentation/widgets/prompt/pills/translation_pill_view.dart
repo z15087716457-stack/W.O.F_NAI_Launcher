@@ -6,6 +6,7 @@ import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../../core/utils/prompt_input_normalization.dart';
 import '../nai_syntax_controller.dart';
 import 'translation_tag_span.dart';
+import '../../common/translation_icon.dart';
 
 export 'translation_pill_editor.dart';
 
@@ -268,9 +269,9 @@ class _TranslationPillViewState extends State<TranslationPillView> {
               children: [
                 if (original) ...[
                   widget.sourceHandleBuilder?.call(
-                        Icon(Icons.translate_outlined, size: 13, color: accent),
+                        TranslationIcon(size: 13, color: accent),
                       ) ??
-                      Icon(Icons.translate_outlined, size: 13, color: accent),
+                      TranslationIcon(size: 13, color: accent),
                   const SizedBox(width: 5),
                 ],
                 Flexible(child: text),

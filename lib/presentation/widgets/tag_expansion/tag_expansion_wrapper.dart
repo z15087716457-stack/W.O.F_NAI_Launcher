@@ -20,6 +20,7 @@ import '../../../core/wiki/tag_wiki_repository.dart';
 import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../autocomplete/tag_category_visuals.dart';
 import '../../router/app_router.dart';
+import '../common/translation_icon.dart';
 
 /// Explicit, local-only tag search for editable tag fields. It does not listen
 /// to typed text and never enters the old autocomplete query pipeline.
@@ -1043,8 +1044,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                   : '$label · ${translation.lastError}',
               onPressed: () =>
                   unawaited(translation.setEnabled(!translation.enabled)),
-              icon: Icon(
-                Icons.translate,
+              icon: TranslationIcon(
+                busy: translation.activeRequests > 0,
                 size: 16,
                 color: translation.lastError != null
                     ? Theme.of(context).colorScheme.error

@@ -19,6 +19,7 @@ import '../../providers/data_source_cache_provider.dart';
 import '../../providers/prompt_block_library_provider.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import 'wiki_sidebar.dart';
+import '../../widgets/common/translation_icon.dart';
 
 class TagWikiScreen extends ConsumerStatefulWidget {
   const TagWikiScreen({super.key, this.initialTag, this.directory});
@@ -519,8 +520,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                       final auto = ref.read(autoTagTranslationProvider);
                       unawaited(auto.setEnabled(!auto.enabled));
                     },
-                    icon: Icon(
-                      Icons.translate,
+                    icon: TranslationIcon(
+                      busy:
+                          ref.read(autoTagTranslationProvider).activeRequests >
+                          0,
                       size: 18,
                       color:
                           ref.read(autoTagTranslationProvider).lastError != null

@@ -87,6 +87,8 @@ class _Auto extends ChangeNotifier implements AutoTagTranslationController {
   @override
   bool get enabled => false;
   @override
+  int get activeRequests => 0;
+  @override
   Object? noSuchMethod(Invocation invocation) => null;
 }
 

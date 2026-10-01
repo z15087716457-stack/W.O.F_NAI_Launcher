@@ -12,6 +12,7 @@ import '../../../providers/generation/generation_settings_notifiers.dart'
     as generation_settings;
 import '../../../widgets/common/app_toast.dart';
 import 'settings_card.dart';
+import '../../../widgets/common/translation_icon.dart';
 
 class DataSourceCacheSettings extends ConsumerWidget {
   const DataSourceCacheSettings({super.key});
@@ -174,7 +175,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
                           );
                         }
                       },
-                      icon: const Icon(Icons.translate_outlined),
+                      icon: const TranslationIcon(),
                       label: Text(context.l10n.autocomplete_clearAiCache),
                     ),
                   ],
@@ -245,11 +246,9 @@ class _ZhDictionaryStatus extends ConsumerWidget {
                 value: state.progress > 0 ? state.progress : null,
               ),
             )
-          : Icon(
-              state.isInstalled
-                  ? Icons.translate_outlined
-                  : Icons.download_outlined,
-            ),
+          : state.isInstalled
+          ? const TranslationIcon()
+          : const Icon(Icons.download_outlined),
       title: Text(context.l10n.autocomplete_zhDictionary),
       subtitle: Text(
         state.error ??

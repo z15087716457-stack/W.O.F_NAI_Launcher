@@ -6,6 +6,7 @@ import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/autocomplete/completion_overlay.dart';
+import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 
 void main() {
   testWidgets(
@@ -400,5 +401,12 @@ void main() {
       findsWidgets,
     );
     expect(find.text('solo'), findsOne);
+    expect(
+      tester
+          .widgetList<TranslationIcon>(find.byType(TranslationIcon))
+          .where((icon) => icon.busy),
+      hasLength(2),
+    );
+    expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
   });
 }

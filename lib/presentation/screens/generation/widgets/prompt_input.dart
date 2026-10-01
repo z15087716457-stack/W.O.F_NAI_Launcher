@@ -42,6 +42,7 @@ import '../../../widgets/prompt/block_library_panel_toggle.dart';
 import '../../../widgets/character/character_prompt_button.dart';
 import '../../../providers/pending_prompt_provider.dart';
 import 'generation_sidebar_style.dart';
+import '../../../widgets/common/translation_icon.dart';
 
 /// 提示词页签是否使用富文本 Tooltip。当前仅维护 Windows，
 /// 恒为 false；保留签名以兼容既有调用与测试。
@@ -548,7 +549,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       key: const Key('prompt-translation-control'),
       decoration: BoxDecoration(
         border: Border.all(color: outline),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       clipBehavior: Clip.antiAlias,
       child: Row(
@@ -556,7 +557,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         children: [
           IconButton(
             key: const Key('prompt-translation-toggle'),
-            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+            constraints: const BoxConstraints.tightFor(width: 24, height: 22),
             padding: EdgeInsets.zero,
             tooltip: busy
                 ? '正在翻译'
@@ -564,22 +565,21 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                 ? '翻译 · 先配置模型'
                 : '翻译 · ${route.provider.name} / ${route.model.displayName}',
             onPressed: busy ? null : () => _handleTranslationButton(),
-            icon: busy
-                ? const SizedBox(
-                    width: 15,
-                    height: 15,
-                    child: CircularProgressIndicator(strokeWidth: 1.7),
-                  )
-                : Icon(
-                    Icons.translate_outlined,
-                    size: 18,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+            style: IconButton.styleFrom(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            icon: TranslationIcon(
+              size: 16,
+              busy: busy,
+              color: busy
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
           ),
-          Container(width: 1, height: 16, color: outline),
+          Container(width: 1, height: 11, color: outline),
           SizedBox(
-            width: 20,
-            height: 28,
+            width: 17,
+            height: 22,
             child: PopupMenuButton<String>(
               key: const Key('prompt-translation-actions'),
               tooltip: '翻译操作',
@@ -596,7 +596,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(color: outline),
               ),
-              child: const Center(child: Icon(Icons.arrow_drop_down, size: 15)),
+              child: const Center(child: Icon(Icons.arrow_drop_down, size: 13)),
               itemBuilder: (_) => [
                 _TranslationMenuContents(
                   negative: negativeSide,
@@ -721,7 +721,10 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           pinnedProvider: layoutStateNotifierProvider.select(
             (s) => s.translationToolPinned,
           ),
-          icon: Icons.translate_outlined,
+          iconWidget: TranslationIcon(
+            size: 18,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
           title: '翻译',
           theme: theme,
           onTap: () => ref
@@ -828,7 +831,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
   /// 与下方「开关」区复选框行造型刻意区分：这里点击 = 切换头部图标钉住态。
   _StayOpenPopupMenuItem<String> _buildToolPinMenuItem({
     required ProviderListenable<bool> pinnedProvider,
-    required IconData icon,
+    IconData? icon,
+    Widget? iconWidget,
     required String title,
     required ThemeData theme,
     required VoidCallback onTap,
@@ -840,7 +844,12 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           final pinned = ref.watch(pinnedProvider);
           return Row(
             children: [
-              Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+              iconWidget ??
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
               const SizedBox(width: 12),
               Expanded(child: Text(title)),
               Icon(
@@ -2104,40 +2113,28 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
                               tooltip: '翻译新增内容',
                               primary: true,
                               onPressed: busy ? null : widget.onTranslate,
-                              icon: busy
-                                  ? const SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 1.7,
-                                      ),
-                                    )
-                                  : Stack(
-                                      clipBehavior: Clip.none,
-                                      children: [
-                                        const Icon(
-                                          Icons.translate_outlined,
-                                          size: 21,
-                                        ),
-                                        Positioned(
-                                          right: -5,
-                                          bottom: -3,
-                                          child: DecoratedBox(
-                                            decoration: BoxDecoration(
-                                              color: theme
-                                                  .colorScheme
-                                                  .surfaceContainerHighest,
-                                              borderRadius:
-                                                  BorderRadius.circular(3),
-                                            ),
-                                            child: const Icon(
-                                              Icons.add,
-                                              size: 11,
-                                            ),
+                              icon: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  TranslationIcon(size: 21, busy: busy),
+                                  if (!busy)
+                                    Positioned(
+                                      right: -5,
+                                      bottom: -3,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: theme
+                                              .colorScheme
+                                              .surfaceContainerHighest,
+                                          borderRadius: BorderRadius.circular(
+                                            3,
                                           ),
                                         ),
-                                      ],
+                                        child: const Icon(Icons.add, size: 11),
+                                      ),
                                     ),
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),

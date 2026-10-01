@@ -11,6 +11,7 @@ import '../../../widgets/prompt/blocks/prompt_block_appearance.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../../widgets/prompt/nai_syntax_controller.dart';
 import '../../../widgets/prompt/pills/translation_tag_span.dart';
+import '../../../widgets/common/translation_icon.dart';
 
 enum _PromptBlockCardAction { favorite, copy, addTag, edit, delete }
 
@@ -456,31 +457,12 @@ class PromptBlockPill extends StatelessWidget {
                             block.thumbnailOffsetY.clamp(-1.0, 1.0),
                           ),
                           filterQuality: FilterQuality.medium,
-                          errorBuilder: (_, __, ___) => Icon(
-                            paletteStyle && block.readingTranslationZh != null
-                                ? Icons.translate_outlined
-                                : promptBlockIconFromName(block.iconName),
-                            size: paletteStyle ? 13 : 16,
-                            color: PromptBlockAppearance.text(
-                              block.appearance,
-                              blockColor,
-                              blockColor,
-                            ),
-                          ),
+                          errorBuilder: (_, __, ___) =>
+                              _blockIcon(paletteStyle, blockColor),
                         ),
                       )
                     else
-                      Icon(
-                        paletteStyle && block.readingTranslationZh != null
-                            ? Icons.translate_outlined
-                            : promptBlockIconFromName(block.iconName),
-                        size: paletteStyle ? 13 : 16,
-                        color: PromptBlockAppearance.text(
-                          block.appearance,
-                          blockColor,
-                          blockColor,
-                        ),
-                      ),
+                      _blockIcon(paletteStyle, blockColor),
                     SizedBox(width: paletteStyle ? 5 : 6),
                     Flexible(
                       child: paletteStyle
@@ -513,5 +495,21 @@ class PromptBlockPill extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _blockIcon(bool paletteStyle, Color blockColor) {
+    final color = PromptBlockAppearance.text(
+      block.appearance,
+      blockColor,
+      blockColor,
+    );
+    final size = paletteStyle ? 13.0 : 16.0;
+    return paletteStyle && block.readingTranslationZh != null
+        ? TranslationIcon(size: size, color: color)
+        : Icon(
+            promptBlockIconFromName(block.iconName),
+            size: size,
+            color: color,
+          );
   }
 }
