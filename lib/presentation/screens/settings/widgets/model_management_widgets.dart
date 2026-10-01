@@ -37,17 +37,22 @@ class ManagementTabs extends StatelessWidget {
                 onPressed: () => onSelected(i),
                 style: TextButton.styleFrom(
                   foregroundColor: i == selected
-                      ? Theme.of(context).colorScheme.primary
+                      ? Theme.of(context).colorScheme.onSurface
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 18,
+                    horizontal: 14,
+                    vertical: 14,
                   ),
                   shape: const RoundedRectangleBorder(),
                 ),
                 child: Text(
                   labels[i],
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontWeight: i == selected
+                        ? FontWeight.w500
+                        : FontWeight.w400,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ),
@@ -69,7 +74,7 @@ class ManagementHeading extends StatelessWidget {
   final List<Widget> actions;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+    padding: const EdgeInsets.fromLTRB(28, 24, 28, 18),
     child: LayoutBuilder(
       builder: (context, constraints) {
         final heading = Column(
@@ -77,9 +82,10 @@ class ManagementHeading extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 22,
+              ),
             ),
             if (description != null) ...[
               const SizedBox(height: 5),
@@ -143,7 +149,7 @@ class ManagementListItem extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             child: Row(
               children: [
                 IconTheme(
@@ -163,7 +169,7 @@ class ManagementListItem extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -173,6 +179,7 @@ class ManagementListItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: colors.onSurfaceVariant,
+                          fontSize: 11,
                         ),
                       ),
                     ],
@@ -202,7 +209,7 @@ class ManagementSplit extends StatelessWidget {
         ? Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(width: 218, child: list),
+              SizedBox(width: 184, child: list),
               const VerticalDivider(width: 1),
               Expanded(child: detail),
             ],

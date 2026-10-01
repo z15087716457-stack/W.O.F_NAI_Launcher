@@ -9,8 +9,9 @@ import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import '../../../prompt_assistant/models/prompt_task_definitions.dart';
-import 'model_management_widgets.dart';
 import 'model_parameter_fields.dart';
+
+part 'ai_service_overview.dart';
 
 Future<void> showAiServiceEditor(
   BuildContext context,
@@ -67,7 +68,10 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   int _timeoutSeconds = 120;
   int _maxConcurrentRequests = 5;
   int _retryAttempts = 0;
-  int _tab = 0;
+  bool _editingConnection = false;
+  bool _manualVisible = false;
+  bool _catalogVisible = false;
+  bool _advancedExpanded = false;
   bool _enabled = true;
   late String _initialDraft;
   String _initialHeaders = '{}';
@@ -93,6 +97,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   void initState() {
     super.initState();
     final provider = widget.provider;
+    _editingConnection = provider == null;
     _preset =
         provider?.preset ??
         widget.initialPreset ??
@@ -238,7 +243,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       if (validation != null) {
         setState(() {
           _error = '${model.displayName}：$validation';
-          _tab = 1;
           _expandedModel = model.name;
         });
         return false;
@@ -611,8 +615,9 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     );
   }
 
+  void _updateOverview(VoidCallback action) => setState(action);
+
   Widget _buildEmbedded(BuildContext context) {
-    final theme = Theme.of(context);
     final dirty =
         _fingerprint != _initialDraft ||
         jsonEncode(_headers) != _initialHeaders ||
@@ -623,205 +628,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         if (mounted) widget.onDirtyChanged?.call(dirty);
       });
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ManagementHeading(
-          widget.provider?.name ?? '添加服务商',
-          description: dirty ? '有未保存的修改' : '连接配置与模型目录',
-          actions: [
-            TextButton.icon(
-              onPressed: _busy ? null : _testModel,
-              icon: const Icon(Icons.network_check, size: 16),
-              label: const Text('测试连接'),
-            ),
-            FilledButton(
-              onPressed: _busy || !_headersLoaded || _headersLoadFailed
-                  ? null
-                  : _save,
-              child: const Text('保存'),
-            ),
-          ],
-        ),
-        ManagementTabs(
-          labels: const ['连接', '模型', '高级设置'],
-          selected: _tab,
-          onSelected: (value) => setState(() => _tab = value),
-        ),
-        if (_busy) const LinearProgressIndicator(minHeight: 2),
-        if (_error != null || _catalogMessage != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 10, 24, 0),
-            child: Text(
-              _error ?? _catalogMessage!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: _error == null
-                    ? theme.colorScheme.onSurfaceVariant
-                    : theme.colorScheme.error,
-              ),
-            ),
-          ),
-        Expanded(
-          child: _tab == 1
-              ? LayoutBuilder(
-                  builder: (context, constraints) => Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: constraints.maxWidth >= 620
-                        ? Row(
-                            children: [
-                              Expanded(child: _selectedPanel()),
-                              const SizedBox(width: 12),
-                              Expanded(child: _availablePanel()),
-                            ],
-                          )
-                        : DefaultTabController(
-                            length: 2,
-                            child: Column(
-                              children: [
-                                const TabBar(
-                                  tabs: [
-                                    Tab(text: '已选模型'),
-                                    Tab(text: '模型目录'),
-                                  ],
-                                ),
-                                Expanded(
-                                  child: TabBarView(
-                                    children: [
-                                      _selectedPanel(),
-                                      _availablePanel(),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: _tab == 0
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _connectionFields(),
-                            const SizedBox(height: 20),
-                            SwitchListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('启用此服务'),
-                              subtitle: const Text('启用后可供功能接口选择。'),
-                              value: _enabled,
-                              onChanged: _busy
-                                  ? null
-                                  : (value) => setState(() => _enabled = value),
-                            ),
-                            const SizedBox(height: 24),
-                            Text('正在用于', style: theme.textTheme.titleSmall),
-                            const SizedBox(height: 8),
-                            for (final task in LauncherInterface.values)
-                              if (ref
-                                      .watch(promptAssistantConfigProvider)
-                                      .interfaceFor(task)
-                                      .providerId ==
-                                  widget.provider?.id)
-                                ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  dense: true,
-                                  title: Text(task.title),
-                                  subtitle: Text(
-                                    ref
-                                        .read(promptAssistantConfigProvider)
-                                        .interfaceFor(task)
-                                        .model,
-                                  ),
-                                  trailing: const Icon(
-                                    Icons.chevron_right,
-                                    size: 18,
-                                  ),
-                                  onTap: () =>
-                                      widget.onTaskSelected?.call(task),
-                                ),
-                          ],
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text('请求控制', style: theme.textTheme.titleSmall),
-                            const SizedBox(height: 18),
-                            TextFormField(
-                              initialValue: '$_timeoutSeconds',
-                              decoration: const InputDecoration(
-                                labelText: '请求超时（秒）',
-                                helperText: '10–600 秒',
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) => setState(
-                                () =>
-                                    _timeoutSeconds = int.tryParse(value) ?? -1,
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            DropdownButtonFormField<int>(
-                              initialValue: _maxConcurrentRequests,
-                              decoration: const InputDecoration(
-                                labelText: '此服务最大并发请求',
-                              ),
-                              items: [
-                                for (var i = 1; i <= 20; i++)
-                                  DropdownMenuItem(
-                                    value: i,
-                                    child: Text('$i 个'),
-                                  ),
-                              ],
-                              onChanged: (value) => setState(
-                                () => _maxConcurrentRequests = value!,
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            DropdownButtonFormField<int>(
-                              initialValue: _retryAttempts,
-                              decoration: const InputDecoration(
-                                labelText: '失败重试',
-                                helperText: '连接失败或服务繁忙时重试；默认关闭。',
-                              ),
-                              items: [
-                                for (var i = 0; i <= 3; i++)
-                                  DropdownMenuItem(
-                                    value: i,
-                                    child: Text(i == 0 ? '不自动重试' : '$i 次'),
-                                  ),
-                              ],
-                              onChanged: (value) =>
-                                  setState(() => _retryAttempts = value!),
-                            ),
-                            const SizedBox(height: 24),
-                            SwitchListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('允许图片输入'),
-                              value: _allowImageInput,
-                              onChanged: _protocol.supportsImagePayload
-                                  ? (value) =>
-                                        setState(() => _allowImageInput = value)
-                                  : null,
-                            ),
-                            const SizedBox(height: 18),
-                            ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('自定义请求头'),
-                              subtitle: Text(
-                                '已设置 ${_headers.length} 项 · 独立保存在安全存储中',
-                              ),
-                              trailing: const Icon(
-                                Icons.chevron_right,
-                                size: 18,
-                              ),
-                              onTap: _busy ? null : _showAdvanced,
-                            ),
-                          ],
-                        ),
-                ),
-        ),
-      ],
-    );
+    return _buildServiceOverview(context, dirty);
   }
 
   Widget _connectionFields() {
@@ -829,8 +636,10 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('服务连接', style: theme.textTheme.titleSmall),
-        const SizedBox(height: 10),
+        if (!widget.embedded) ...[
+          Text('服务连接', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 10),
+        ],
         DropdownButtonFormField<ProviderPreset>(
           isExpanded: true,
           initialValue: _preset,
@@ -941,69 +750,70 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     final filtered = query.isEmpty
         ? _catalog
         : _catalog.where((id) => id.toLowerCase().contains(query)).toList();
-    return Container(
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Text('服务模型目录', style: Theme.of(context).textTheme.titleSmall),
-              const Spacer(),
-              Text(
-                '${_catalog.length}',
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-              IconButton(
-                tooltip: '刷新目录',
-                onPressed: _busy ? null : _fetchCatalog,
-                icon: const Icon(Icons.refresh, size: 18),
-              ),
-            ],
-          ),
-          TextField(
-            controller: _catalogSearch,
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.search, size: 18),
-              hintText: '搜索模型 ID',
-              isDense: true,
+    return Material(
+      color: colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text('服务模型目录', style: Theme.of(context).textTheme.titleSmall),
+                const Spacer(),
+                Text(
+                  '${_catalog.length}',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                IconButton(
+                  tooltip: '刷新目录',
+                  onPressed: _busy ? null : _fetchCatalog,
+                  icon: const Icon(Icons.refresh, size: 18),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 6),
-          Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Text(
-                      _catalog.isEmpty ? '点击刷新获取目录，也可手动添加模型 ID。' : '没有匹配的模型',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: colors.onSurfaceVariant),
+            TextField(
+              controller: _catalogSearch,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search, size: 18),
+                hintText: '搜索模型 ID',
+                isDense: true,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Expanded(
+              child: filtered.isEmpty
+                  ? Center(
+                      child: Text(
+                        _catalog.isEmpty ? '点击刷新获取目录，也可手动添加模型 ID。' : '没有匹配的模型',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: colors.onSurfaceVariant),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: filtered.length,
+                      itemExtent: 42,
+                      itemBuilder: (context, index) {
+                        final id = filtered[index];
+                        return CheckboxListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          title: Text(
+                            id,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          value: _selected.containsKey(id),
+                          onChanged: (value) =>
+                              _toggleModel(id, value ?? false),
+                        );
+                      },
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: filtered.length,
-                    itemExtent: 42,
-                    itemBuilder: (context, index) {
-                      final id = filtered[index];
-                      return CheckboxListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        title: Text(
-                          id,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        value: _selected.containsKey(id),
-                        onChanged: (value) => _toggleModel(id, value ?? false),
-                      );
-                    },
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1100,6 +910,9 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
 
   Widget _selectedTile(ModelConfig model) {
     final expanded = _expandedModel == model.name;
+    if (widget.embedded) {
+      return _overviewModelRow(model, _modelParameters(model));
+    }
     return Card(
       margin: const EdgeInsets.only(bottom: 5),
       elevation: 0,
@@ -1137,88 +950,85 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
               ],
             ),
           ),
-          if (expanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    '模型 ID：${model.name}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    key: ValueKey('alias-${model.name}'),
-                    initialValue: model.displayName,
-                    decoration: const InputDecoration(
-                      labelText: '显示名称 / 别名',
-                      isDense: true,
-                    ),
-                    onChanged: (value) => _updateModel(
-                      _selected[model.name]!,
-                      displayName: value,
-                      contextWindow: _selected[model.name]!.contextWindow,
-                      maxOutputTokens: _selected[model.name]!.maxOutputTokens,
-                      reasoningEffort: _selected[model.name]!.reasoningEffort,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    key: ValueKey('context-${model.name}'),
-                    initialValue: model.contextWindow?.toString() ?? '',
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: '上下文窗口（参考）',
-                      isDense: true,
-                    ),
-                    onChanged: (value) => setState(() {
-                      final number = int.tryParse(value);
-                      _modelInputErrors['context:${model.name}'] =
-                          value.trim().isNotEmpty &&
-                              (number == null || number <= 0)
-                          ? '上下文窗口应为正整数。'
-                          : null;
-                      _selected[model.name] = _selected[model.name]!.copyWith(
-                        contextWindow: number,
-                        clearContextWindow: number == null,
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 18),
-                  ModelParameterFields(
-                    key: ValueKey(
-                      'model-parameters-${model.name}-${_protocol.name}',
-                    ),
-                    value: RequestParameters.fromModel(model),
-                    protocol: _protocol,
-                    onValidationChanged: (error) =>
-                        _modelInputErrors[model.name] = error,
-                    onChanged: (value) => setState(() {
-                      _selected[model.name] = _selected[model.name]!.copyWith(
-                        temperature: value.temperature,
-                        clearTemperature: value.temperature == null,
-                        topP: value.topP,
-                        clearTopP: value.topP == null,
-                        maxOutputTokens: value.maxOutputTokens,
-                        clearMaxOutputTokens: value.maxOutputTokens == null,
-                        reasoningEffort: value.reasoningEffort,
-                        clearReasoningEffort: value.reasoningEffort == null,
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    '上下文窗口只作参考；参数会发送给接口，留空使用服务默认。',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
+          if (expanded) _modelParameters(model),
         ],
       ),
     );
   }
+
+  Widget _modelParameters(ModelConfig model) => Padding(
+    padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          '模型 ID：${model.name}',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          key: ValueKey('alias-${model.name}'),
+          initialValue: model.displayName,
+          decoration: const InputDecoration(
+            labelText: '显示名称 / 别名',
+            isDense: true,
+          ),
+          onChanged: (value) => _updateModel(
+            _selected[model.name]!,
+            displayName: value,
+            contextWindow: _selected[model.name]!.contextWindow,
+            maxOutputTokens: _selected[model.name]!.maxOutputTokens,
+            reasoningEffort: _selected[model.name]!.reasoningEffort,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          key: ValueKey('context-${model.name}'),
+          initialValue: model.contextWindow?.toString() ?? '',
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: '上下文窗口（参考）',
+            isDense: true,
+          ),
+          onChanged: (value) => setState(() {
+            final number = int.tryParse(value);
+            _modelInputErrors['context:${model.name}'] =
+                value.trim().isNotEmpty && (number == null || number <= 0)
+                ? '上下文窗口应为正整数。'
+                : null;
+            _selected[model.name] = _selected[model.name]!.copyWith(
+              contextWindow: number,
+              clearContextWindow: number == null,
+            );
+          }),
+        ),
+        const SizedBox(height: 18),
+        ModelParameterFields(
+          key: ValueKey('model-parameters-${model.name}-${_protocol.name}'),
+          value: RequestParameters.fromModel(model),
+          protocol: _protocol,
+          onValidationChanged: (error) => _modelInputErrors[model.name] = error,
+          onChanged: (value) => setState(() {
+            _selected[model.name] = _selected[model.name]!.copyWith(
+              temperature: value.temperature,
+              clearTemperature: value.temperature == null,
+              topP: value.topP,
+              clearTopP: value.topP == null,
+              maxOutputTokens: value.maxOutputTokens,
+              clearMaxOutputTokens: value.maxOutputTokens == null,
+              reasoningEffort: value.reasoningEffort,
+              clearReasoningEffort: value.reasoningEffort == null,
+            );
+          }),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          '上下文窗口只作参考；参数会发送给接口，留空使用服务默认。',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    ),
+  );
 }
 
 typedef _AdvancedResult = ({

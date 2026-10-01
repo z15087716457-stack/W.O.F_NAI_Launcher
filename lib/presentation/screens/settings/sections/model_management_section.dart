@@ -12,6 +12,42 @@ import '../widgets/model_management_widgets.dart';
 import '../widgets/model_task_editor.dart';
 import '../widgets/model_preset_editor.dart';
 
+class _ProviderMonogram extends StatelessWidget {
+  const _ProviderMonogram(this.provider, {required this.selected});
+  final ProviderConfig provider;
+  final bool selected;
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final name = provider.name.trim();
+    final mark = switch (provider.preset) {
+      ProviderPreset.deepseek => 'DS',
+      ProviderPreset.openaiChat || ProviderPreset.openaiResponses => 'AI',
+      ProviderPreset.lmStudioChat ||
+      ProviderPreset.lmStudioResponses ||
+      ProviderPreset.ollama => 'LM',
+      _ => name.isEmpty ? 'AI' : name.characters.first.toUpperCase(),
+    };
+    return Container(
+      width: 29,
+      height: 29,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: selected ? colors.primary : colors.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Text(
+        mark,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: selected ? colors.onPrimary : colors.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
 class ModelManagementSection extends ConsumerStatefulWidget {
   const ModelManagementSection({super.key});
   @override
@@ -359,7 +395,7 @@ class ModelManagementSectionState
               children: [
                 ManagementHeading(
                   '模型与接口',
-                  description: '连接模型服务，配置各项翻译功能。',
+                  description: '管理服务连接与翻译偏好。',
                   actions: [
                     PopupMenuButton<String>(
                       tooltip: '配置管理',
@@ -432,8 +468,13 @@ class ModelManagementSectionState
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        '已配置 · ${config.providers.length}',
-                                        style: theme.textTheme.labelMedium,
+                                        '服务商 · ${config.providers.length}',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
                                       ),
                                     ),
                                     IconButton(
@@ -452,31 +493,38 @@ class ModelManagementSectionState
                                       ManagementListItem(
                                         title: item.name,
                                         subtitle:
-                                            '${config.modelsForProvider(providerId: item.id).where((m) => !m.isPlaceholder).length} 个模型 · ${item.enabled ? '已启用' : '未启用'}',
+                                            '${config.modelsForProvider(providerId: item.id).where((m) => !m.isPlaceholder).length} 个模型${item.enabled ? '' : ' · 未启用'}',
                                         selected: provider?.id == item.id,
-                                        icon: const Icon(Icons.cloud_outlined),
+                                        icon: _ProviderMonogram(
+                                          item,
+                                          selected: provider?.id == item.id,
+                                        ),
                                         onTap: () => _switch(() {
                                           _providerId = item.id;
                                           _addingService = false;
                                         }),
-                                        trailing: PopupMenuButton<String>(
-                                          tooltip: '管理 ${item.name}',
-                                          padding: EdgeInsets.zero,
-                                          iconSize: 16,
-                                          onSelected: (value) =>
-                                              value == 'clone'
-                                              ? _cloneProvider(item)
-                                              : _deleteProvider(item),
-                                          itemBuilder: (_) => const [
-                                            PopupMenuItem(
-                                              value: 'clone',
-                                              child: Text('复制服务配置'),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'delete',
-                                              child: Text('删除服务'),
-                                            ),
-                                          ],
+                                        trailing: SizedBox(
+                                          width: 26,
+                                          height: 32,
+                                          child: PopupMenuButton<String>(
+                                            tooltip: '管理 ${item.name}',
+                                            padding: EdgeInsets.zero,
+                                            iconSize: 16,
+                                            onSelected: (value) =>
+                                                value == 'clone'
+                                                ? _cloneProvider(item)
+                                                : _deleteProvider(item),
+                                            itemBuilder: (_) => const [
+                                              PopupMenuItem(
+                                                value: 'clone',
+                                                child: Text('复制服务配置'),
+                                              ),
+                                              PopupMenuItem(
+                                                value: 'delete',
+                                                child: Text('删除服务'),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                   ],

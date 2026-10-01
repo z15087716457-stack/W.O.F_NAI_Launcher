@@ -326,7 +326,8 @@ void main() {
         await file.writeAsBytes(bytes!.buffer.asUint8List());
       });
     }
-    await tester.tap(find.text('模型').first);
+    await tester.ensureVisible(find.byKey(const Key('service-add-model')));
+    await tester.tap(find.byKey(const Key('service-add-model')));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('ai-service-manual-model-id')),

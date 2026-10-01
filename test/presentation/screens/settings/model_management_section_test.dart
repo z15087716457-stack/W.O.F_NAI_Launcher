@@ -11,6 +11,7 @@ import 'package:nai_launcher/core/storage/secure_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
+import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_task_definitions.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/model_management_section.dart';
 import '../../../helpers/studio_capture_fonts.dart';
@@ -106,6 +107,13 @@ const sampleConfig = PromptAssistantConfigState(
 );
 
 final captureKey = GlobalKey();
+Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(finder);
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
+}
+
 Future<void> capture(WidgetTester tester, String name) async {
   if (Platform.environment['CAPTURE_MODEL_MANAGEMENT'] != '1') return;
   debugDisableShadows = false;
@@ -182,19 +190,22 @@ void main() {
     (tester) async {
       final container = await pumpManagement(tester);
       expect(find.text('DeepSeek'), findsWidgets);
+      expect(find.byType(TextField), findsNothing);
       await capture(tester, 'provider');
-      await tester.tap(find.text('模型').first);
-      await tester.pumpAndSettle();
       await capture(tester, 'models');
-      await tester.tap(find.text('DeepSeek Chat').first);
-      await tester.pumpAndSettle();
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-model-parameters-deepseek-chat')),
+      );
       await capture(tester, 'model-parameters');
+      await tester.ensureVisible(
+        find.byKey(const Key('parameter-temperature')),
+      );
       await tester.enterText(
         find.byKey(const Key('parameter-temperature')),
         '0.4',
       );
-      await tester.tap(find.text('保存').first);
-      await tester.pumpAndSettle();
+      await tapVisible(tester, find.byKey(const Key('service-save')));
       expect(
         container
             .read(promptAssistantConfigProvider)
@@ -203,11 +214,16 @@ void main() {
             .temperature,
         0.4,
       );
-      await tester.tap(find.text('高级设置').first);
-      await tester.pumpAndSettle();
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-advanced-toggle')),
+      );
       await capture(tester, 'advanced');
-      await tester.tap(find.text('连接').first);
-      await tester.pumpAndSettle();
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-edit-connection')),
+      );
+      await capture(tester, 'connection-edit');
       final name = find.byWidgetPredicate(
         (widget) =>
             widget is TextField && widget.controller?.text == 'DeepSeek',
@@ -223,8 +239,10 @@ void main() {
         container.read(promptAssistantConfigProvider).providers.first.name,
         'DeepSeek',
       );
-      await tester.tap(find.text('保存').first);
-      await tester.pumpAndSettle();
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-connection-save')),
+      );
       expect(
         container.read(promptAssistantConfigProvider).providers.first.name,
         '我的服务',
@@ -288,10 +306,57 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+  testWidgets(
+    'collapsing a connection preserves its draft and guards linked navigation',
+    (tester) async {
+      final container = await pumpManagement(tester);
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-edit-connection')),
+      );
+      final name = find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField && widget.controller?.text == 'DeepSeek',
+      );
+      await tester.enterText(name, '未保存的名称');
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-edit-connection')),
+      );
+      expect(find.byType(TextField), findsNothing);
+      expect(
+        container.read(promptAssistantConfigProvider).providers.first.name,
+        'DeepSeek',
+      );
+      await tapVisible(tester, find.text(LauncherInterface.translate.title));
+      expect(find.text('保留当前编辑？'), findsOneWidget);
+      await tester.tap(find.text('继续编辑'));
+      await tester.pumpAndSettle();
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-edit-connection')),
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is TextField && widget.controller?.text == '未保存的名称',
+        ),
+        findsOneWidget,
+      );
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-connection-save')),
+      );
+      expect(
+        container.read(promptAssistantConfigProvider).providers.first.name,
+        '未保存的名称',
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets('short windows keep model editing scrollable', (tester) async {
     await pumpManagement(tester, size: const Size(1000, 500));
-    await tester.tap(find.text('模型').first);
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('service-add-model')));
     await tester.ensureVisible(
       find.byKey(const Key('ai-service-manual-model-id')),
     );
@@ -302,6 +367,7 @@ void main() {
     tester,
   ) async {
     final container = await pumpManagement(tester);
+    await tapVisible(tester, find.byKey(const Key('service-edit-connection')));
     final name = find.byWidgetPredicate(
       (widget) => widget is TextField && widget.controller?.text == 'DeepSeek',
     );
@@ -311,8 +377,7 @@ void main() {
         .read(promptAssistantConfigProvider.notifier)
         .upsertProvider(sampleConfig.providers.first.copyWith(name: '新的已保存名称'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('保存').first);
-    await tester.pumpAndSettle();
+    await tapVisible(tester, find.byKey(const Key('service-connection-save')));
     expect(
       container.read(promptAssistantConfigProvider).providers.first.name,
       '新的已保存名称',
