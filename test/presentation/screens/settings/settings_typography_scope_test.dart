@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/presentation/widgets/common/workspace_typography_scope.dart';
 import 'package:nai_launcher/presentation/providers/settings_font_scale_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
 
@@ -20,7 +22,7 @@ void main() {
   testWidgets(
     'settings scale follows dialogs and menus without enlarging workspace or nested dialogs twice',
     (tester) async {
-      final storage = _Storage();
+      final storage = _Storage()..values[StorageKeys.fontScale] = 1.1;
       await tester.pumpWidget(
         ProviderScope(
           overrides: [localStorageServiceProvider.overrideWithValue(storage)],
@@ -28,8 +30,8 @@ void main() {
             builder: (context, child) => MediaQuery(
               data: MediaQuery.of(
                 context,
-              ).copyWith(textScaler: const TextScaler.linear(1)),
-              child: child!,
+              ).copyWith(textScaler: TextScaler.linear(storage.getFontScale())),
+              child: WorkspaceTypographyScope(child: child!),
             ),
             home: Scaffold(
               body: Column(
@@ -121,7 +123,56 @@ void main() {
       await tester.pumpAndSettle();
       expect(scale(const Key('settings')), closeTo(1.43, .001));
       expect(scale(const Key('workspace')), 1);
+      expect(storage.values[StorageKeys.fontScale], 1.1);
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'workspace ignores every legacy global percentage and keeps stored data intact',
+    (tester) async {
+      for (final legacy in [1.0, 1.1, 1.3]) {
+        final storage = _Storage()..values[StorageKeys.fontScale] = legacy;
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [localStorageServiceProvider.overrideWithValue(storage)],
+            child: MaterialApp(
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(storage.getFontScale()),
+                ),
+                child: WorkspaceTypographyScope(child: child!),
+              ),
+              home: const Scaffold(
+                body: Column(
+                  children: [
+                    Text('Main prompt', key: Key('main-prompt')),
+                    SettingsTypographyScope(
+                      child: Text('Settings text', key: Key('settings-text')),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          MediaQuery.textScalerOf(
+            tester.element(find.byKey(const Key('main-prompt'))),
+          ).scale(14),
+          14,
+          reason: 'Legacy $legacy must not enlarge main prompt',
+        );
+        expect(
+          MediaQuery.textScalerOf(
+            tester.element(find.byKey(const Key('settings-text'))),
+          ).scale(14),
+          closeTo(15.4, .001),
+        );
+        expect(storage.values, {StorageKeys.fontScale: legacy});
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
     },
   );
 }

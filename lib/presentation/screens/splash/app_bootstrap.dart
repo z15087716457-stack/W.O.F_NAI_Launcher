@@ -14,7 +14,7 @@ import '../../providers/update_provider.dart';
 import '../../providers/warmup_provider.dart';
 import 'splash_screen.dart';
 import '../../providers/theme_provider.dart';
-import '../../providers/font_scale_provider.dart';
+import '../../widgets/common/workspace_typography_scope.dart';
 import '../../widgets/navigation/integrated_title_bar.dart';
 
 /// 应用启动引导器
@@ -88,10 +88,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
       themeMode: ref.watch(themeNotifierProvider) == Brightness.dark
           ? ThemeMode.dark
           : ThemeMode.light,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          textScaler: TextScaler.linear(ref.watch(fontScaleNotifierProvider)),
-        ),
+      builder: (context, child) => WorkspaceTypographyScope(
         child: IntegratedTitleBarShell(
           deferToRoute: true,
           immersive: true,

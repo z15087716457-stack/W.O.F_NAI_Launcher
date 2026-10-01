@@ -13,7 +13,7 @@ import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/guest_session_provider.dart';
 import 'presentation/router/app_router.dart';
 import 'presentation/providers/theme_provider.dart';
-import 'presentation/providers/font_scale_provider.dart';
+import 'presentation/widgets/common/workspace_typography_scope.dart';
 import 'presentation/providers/locale_provider.dart';
 import 'presentation/providers/background_refresh_provider.dart';
 import 'presentation/providers/krita/krita_bridge_notifier.dart';
@@ -106,7 +106,6 @@ class NAILauncherApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final brightness = ref.watch(themeNotifierProvider);
-    final fontScale = ref.watch(fontScaleNotifierProvider);
     final locale = ref.watch(localeNotifierProvider);
     final router = ref.watch(appRouterProvider);
 
@@ -170,16 +169,13 @@ class NAILauncherApp extends ConsumerWidget {
           // 路由
           routerConfig: router,
 
-          // 字体缩放全局应用 + FEAT-23 内置一体标题栏（Windows）
+          // 工作区保持 100% 字号；设置页面在自身范围内独立缩放。
           builder: (context, child) {
             // builder 只下发窗口配置；窗口按钮在各页面内绘制，
             // 让 Navigator 的菜单、提示与对话框位于按钮上方。
             // child 作为普通子组件直传，保证 element 在 MaterialApp
             // rebuild 时原地更新、不拆树重建。
-            return MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: TextScaler.linear(fontScale)),
+            return WorkspaceTypographyScope(
               child: _RouteAwareTitleBar(
                 router: router,
                 // 首个路由解析前按认证状态先行判断，未登录时不先闪 Logo 标题栏；
