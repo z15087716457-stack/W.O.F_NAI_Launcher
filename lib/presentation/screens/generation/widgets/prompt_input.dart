@@ -569,7 +569,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             icon: TranslationIcon(
-              size: 16,
+              size: 18,
               busy: busy,
               color: busy
                   ? theme.colorScheme.primary

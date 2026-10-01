@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 Future<void> loadStudioCaptureFonts() async {
   for (final entry in const {
+    'StudioIcons': ['StudioIcons.ttf'],
     'Geist': [
       'Geist-Regular.ttf',
       'Geist-Medium.ttf',
