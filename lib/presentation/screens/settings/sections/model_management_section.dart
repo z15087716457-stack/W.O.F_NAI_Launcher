@@ -35,6 +35,8 @@ class ModelManagementSection extends ConsumerStatefulWidget {
 class ModelManagementSectionState
     extends ConsumerState<ModelManagementSection> {
   Future<bool> confirmLeave() => _leave();
+  Future<void> openSearchTab(String tab) =>
+      _switch(() => _tab = tab == 'presets' ? 2 : 1);
   int _tab = 0, _editorRevision = 0;
   String? _providerId;
   LauncherInterface _task = LauncherInterface.translate;

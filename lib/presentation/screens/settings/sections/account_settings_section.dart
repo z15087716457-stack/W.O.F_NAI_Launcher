@@ -1,74 +1,197 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../router/app_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:nai_launcher/core/utils/localization_extension.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/account_manager_provider.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../../widgets/auth/add_account_dialog.dart';
+import '../../../widgets/auth/subscription_expiry_text.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/settings/account_detail_tile.dart';
 import '../../../widgets/settings/account_profile_sheet.dart';
 import '../../../widgets/settings/saved_accounts_section.dart';
 import '../widgets/settings_card.dart';
+import '../widgets/settings_tile.dart';
+import '../widgets/settings_ui_theme.dart';
 
-/// 账户设置板块
-///
-/// 分为两个区块：当前账号卡片（点击编辑资料）和已保存账号列表
-/// （切换、删除、添加账号）。
-class AccountSettingsSection extends ConsumerStatefulWidget {
+final accountAutoLoginProvider = FutureProvider<bool>(
+  (ref) async =>
+      (await SharedPreferences.getInstance()).getBool(
+        AuthNotifier.autoLoginPreferenceKey,
+      ) ??
+      true,
+);
+
+class AccountSettingsSection extends ConsumerWidget {
   const AccountSettingsSection({super.key});
-
   @override
-  ConsumerState<AccountSettingsSection> createState() =>
-      _AccountSettingsSectionState();
-}
-
-class _AccountSettingsSectionState
-    extends ConsumerState<AccountSettingsSection> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    String text(String zh, String en, String ja) =>
+        settingsText(context, zh, en, ja);
+    final auth = ref.watch(authNotifierProvider);
+    final accounts = ref.watch(accountManagerNotifierProvider).accounts;
+    final account = accounts.where((a) => a.id == auth.accountId).firstOrNull;
+    final manager = ref.read(accountManagerNotifierProvider.notifier);
+    final loggedIn = auth.isAuthenticated && account != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsCard(
-          // 移除默认padding，因为AccountDetailTile内部已有margin
-          child: Padding(
-            padding: EdgeInsets.zero,
-            child: AccountDetailTile(
-              onEdit: () => _showProfileSheet(context),
-              onLogin: () => _navigateToLogin(context),
+          title: text('当前账号', 'Current account', '現在のアカウント'),
+          child: AccountDetailTile(
+            showExpiry: false,
+            onEdit: () => AccountProfileBottomSheet.show(
+              context: context,
+              account: account!,
             ),
+            onLogin: () => AddAccountDialog.show(context, ref),
           ),
         ),
-        const SavedAccountsSection(),
+        if (loggedIn)
+          SettingsCard(
+            child: Column(
+              children: [
+                ref
+                    .watch(subscriptionNotifierProvider)
+                    .maybeWhen(
+                      loaded: (subscription) =>
+                          subscription.tier > 0 &&
+                              subscription.expiresAt != null
+                          ? SettingsTile(
+                              title: Text(
+                                text(
+                                  '订阅有效期',
+                                  'Subscription expiry',
+                                  'サブスクリプション有効期限',
+                                ),
+                              ),
+                              subtitle: Text(
+                                text(
+                                  '账号到期后仍保留本地数据。',
+                                  'Local data stays available after expiry.',
+                                  '有効期限後もローカルデータは保持されます。',
+                                ),
+                              ),
+                              trailing: SubscriptionExpiryText(
+                                expiresAt: subscription.expiresAt!,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      orElse: () => const SizedBox.shrink(),
+                    ),
+                SettingsTile(
+                  title: Text(text('账号资料', 'Account profile', 'アカウント情報')),
+                  subtitle: Text(
+                    text(
+                      '管理昵称与头像。',
+                      'Manage your name and avatar.',
+                      '表示名とアイコンを管理します。',
+                    ),
+                  ),
+                  trailing: OutlinedButton(
+                    onPressed: () => AccountProfileBottomSheet.show(
+                      context: context,
+                      account: account,
+                    ),
+                    child: Text(text('管理', 'Manage', '管理')),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        const SavedAccountsSection(showAddButton: false),
+        SettingsCard(
+          title: text('登录偏好', 'Login preferences', 'ログイン設定'),
+          child: Column(
+            children: [
+              SettingsTile(
+                title: Text(text('默认账号', 'Default account', '既定のアカウント')),
+                subtitle: Text(
+                  text(
+                    '在登录页优先选中此账号。',
+                    'Preselected on the sign-in page.',
+                    'ログイン画面で優先的に選択します。',
+                  ),
+                ),
+                trailing: SizedBox(
+                  key: const ValueKey('settings-default-account'),
+                  width: 160,
+                  child: DropdownButtonFormField<String>(
+                    key: ValueKey(manager.defaultAccount?.id),
+                    initialValue: manager.defaultAccount?.id,
+                    isExpanded: true,
+                    itemHeight: 48,
+                    hint: Text(text('暂无账号', 'No accounts', 'アカウントなし')),
+                    items: accounts
+                        .map(
+                          (a) => DropdownMenuItem(
+                            value: a.id,
+                            child: Text(
+                              a.displayName,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: accounts.isEmpty
+                        ? null
+                        : (id) async {
+                            if (id != null) {
+                              await manager.setDefaultAccount(id);
+                            }
+                          },
+                  ),
+                ),
+              ),
+              ref
+                  .watch(accountAutoLoginProvider)
+                  .when(
+                    data: (value) => SettingsSwitchTile(
+                      title: Text(
+                        text('启动时自动登录', 'Sign in automatically', '起動時に自動ログイン'),
+                      ),
+                      subtitle: Text(
+                        text(
+                          '使用上次的登录凭据；关闭后，下次启动进入登录页。',
+                          'Use the last session. When off, the next launch opens sign-in.',
+                          '前回の認証情報を使用します。オフにすると次回はログイン画面を開きます。',
+                        ),
+                      ),
+                      value: value,
+                      onChanged: (enabled) async {
+                        try {
+                          await (await SharedPreferences.getInstance()).setBool(
+                            AuthNotifier.autoLoginPreferenceKey,
+                            enabled,
+                          );
+                          ref.invalidate(accountAutoLoginProvider);
+                        } catch (_) {
+                          if (context.mounted) {
+                            AppToast.error(
+                              context,
+                              text(
+                                '登录偏好未保存，请重试。',
+                                'Could not save the login preference.',
+                                'ログイン設定を保存できませんでした。',
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                    loading: () => const SizedBox(height: 32),
+                    error: (_, _) => Text(
+                      text(
+                        '无法读取登录偏好。',
+                        'Login preferences are unavailable.',
+                        'ログイン設定を読み込めません。',
+                      ),
+                    ),
+                  ),
+            ],
+          ),
+        ),
       ],
     );
-  }
-
-  /// 显示账号资料编辑底部面板
-  void _showProfileSheet(BuildContext context) {
-    final authState = ref.read(authNotifierProvider);
-    final accountId = authState.accountId;
-
-    if (accountId == null) {
-      AppToast.info(context, context.l10n.settings_pleaseLoginFirst);
-      return;
-    }
-
-    final accounts = ref.read(accountManagerNotifierProvider).accounts;
-    final account = accounts.where((a) => a.id == accountId).firstOrNull;
-
-    if (account == null) {
-      AppToast.info(context, context.l10n.settings_accountNotFound);
-      return;
-    }
-
-    AccountProfileBottomSheet.show(context: context, account: account);
-  }
-
-  /// 导航到登录页面
-  void _navigateToLogin(BuildContext context) {
-    context.go(AppRoutes.login);
   }
 }

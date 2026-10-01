@@ -171,7 +171,7 @@ class AddAccountResult {
 /// 认证状态 Notifier
 @Riverpod(keepAlive: true)
 class AuthNotifier extends _$AuthNotifier {
-  static const String _autoLoginKey = 'auto_login';
+  static const String autoLoginPreferenceKey = 'auto_login';
 
   @override
   AuthState build() {
@@ -184,7 +184,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _checkExistingAuth() async {
     // 0. 检查自动登录设置（默认启用，确保重启后自动恢复登录）
     final prefs = await SharedPreferences.getInstance();
-    final autoLogin = prefs.getBool(_autoLoginKey) ?? true;
+    final autoLogin = prefs.getBool(autoLoginPreferenceKey) ?? true;
 
     if (!autoLogin) {
       AppLogger.i(
@@ -1032,8 +1032,8 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> _enableAutoLoginForSavedSession() async {
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool(_autoLoginKey) != true) {
-      await prefs.setBool(_autoLoginKey, true);
+    if (prefs.getBool(autoLoginPreferenceKey) != true) {
+      await prefs.setBool(autoLoginPreferenceKey, true);
       AppLogger.i(
         'Auto-login enabled after successful saved session login',
         'Auth',

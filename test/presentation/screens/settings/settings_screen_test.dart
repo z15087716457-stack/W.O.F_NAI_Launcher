@@ -9,6 +9,7 @@ import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/database/database_providers.dart';
 import 'package:nai_launcher/core/cache/gallery_cache_manager.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/cache_statistics_tile.dart';
+import 'package:nai_launcher/presentation/screens/settings/sections/account_settings_section.dart';
 import 'package:nai_launcher/presentation/providers/data_source_cache_provider.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'dart:io';
@@ -97,6 +98,9 @@ class _DesignSubscription extends SubscriptionNotifier {
   @override
   SubscriptionState build() => const SubscriptionStateLoaded(
     UserSubscription(
+      tier: 3,
+      active: true,
+      expiresAt: 1798761600,
       trainingStepsLeft: TrainingStepsInfo(fixedTrainingStepsLeft: 29600),
     ),
   );
@@ -204,6 +208,267 @@ void main() {
     }
   });
 
+  Future<ProviderContainer> pumpPolish(
+    WidgetTester tester, {
+    double width = 1280,
+  }) async {
+    tester.view.physicalSize = Size(width, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.binding.setSurfaceSize(Size(width, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final storage = _MemorySettingsStorage()
+      .._config = const PromptAssistantConfigState(
+        providers: [
+          ProviderConfig(
+            id: 'deepseek',
+            name: 'DeepSeek',
+            baseUrl: 'https://example.test/v1',
+            preset: ProviderPreset.deepseek,
+          ),
+        ],
+        models: [
+          ModelConfig(
+            providerId: 'deepseek',
+            name: 'deepseek-chat',
+            displayName: 'DeepSeek Chat',
+          ),
+        ],
+        interfaces: {},
+        providerHasApiKey: {},
+      ).encode();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(storage),
+          secureStorageServiceProvider.overrideWithValue(
+            _MemoryAssistantSecrets(),
+          ),
+          authNotifierProvider.overrideWith(_DesignAuth.new),
+          accountManagerNotifierProvider.overrideWith(_DesignAccounts.new),
+          subscriptionNotifierProvider.overrideWith(_DesignSubscription.new),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.getTheme(AppStyle.geist, Brightness.light),
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const IntegratedTitleBarShell(child: SettingsScreen()),
+          builder: (context, child) =>
+              RepaintBoundary(key: settingsCaptureKey, child: child!),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return ProviderScope.containerOf(
+      tester.element(find.byType(SettingsScreen)),
+    );
+  }
+
+  Future<void> capturePolish(WidgetTester tester, String name) async {
+    if (Platform.environment['CAPTURE_SETTINGS_REDESIGN'] != '1') return;
+    await tester.runAsync(() async {
+      final image =
+          await (settingsCaptureKey.currentContext!.findRenderObject()!
+                  as RenderRepaintBoundary)
+              .toImage(pixelRatio: 1.5);
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      final file = File(
+        '${Platform.environment['SETTINGS_CAPTURE_DIR'] ?? '.dart_tool/settings-redesign-captures'}/$name.png',
+      );
+      await file.parent.create(recursive: true);
+      await file.writeAsBytes(bytes!.buffer.asUint8List());
+      image.dispose();
+    });
+  }
+
+  testWidgets('search respects unsaved model connection edits', (tester) async {
+    await pumpPolish(tester);
+    await tester.tap(find.byKey(const ValueKey('settings-nav-models')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('service-edit-connection')),
+    );
+    await tester.tap(find.byKey(const Key('service-edit-connection')));
+    await tester.pumpAndSettle();
+    final name = find.byWidgetPredicate(
+      (widget) => widget is TextField && widget.controller?.text == 'DeepSeek',
+    );
+    await tester.enterText(name, '未保存的服务');
+    await tester.tap(find.byKey(const Key('settings-open-search')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('settings-search-input')),
+      '自动登录',
+    );
+    await tester.pump();
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(find.text('保留当前编辑？'), findsOneWidget);
+    await tester.tap(find.text('继续编辑'));
+    await tester.pumpAndSettle();
+    expect(find.text('未保存的服务'), findsOneWidget);
+    expect(find.byType(AccountSettingsSection), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'wide settings center in their pane, unified surfaces and full blank header drag',
+    (tester) async {
+      final windowCalls = <String>[];
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('window_manager'),
+        (call) async {
+          windowCalls.add(call.method);
+          return call.method == 'isMaximized' || call.method == 'isFullScreen'
+              ? false
+              : null;
+        },
+      );
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('com.nailauncher/titlebar'),
+        (_) async => null,
+      );
+      addTearDown(() {
+        messenger.setMockMethodCallHandler(
+          const MethodChannel('window_manager'),
+          null,
+        );
+        messenger.setMockMethodCallHandler(
+          const MethodChannel('com.nailauncher/titlebar'),
+          null,
+        );
+      });
+      await pumpPolish(tester, width: 2400);
+      final pane = tester.getRect(
+        find.byKey(const Key('settings-content-pane')),
+      );
+      final content = tester.getRect(
+        find.byKey(const Key('settings-main-content')),
+      );
+      expect(content.width, 850);
+      expect(content.center.dx, closeTo(pane.center.dx, 1));
+      final material = tester.widget<Material>(
+        find.byKey(const Key('settings-sidebar-surface')),
+      );
+      expect(
+        material.color,
+        Theme.of(
+          tester.element(find.byType(SettingsScreen)),
+        ).colorScheme.surface,
+      );
+      await tester.dragFrom(const Offset(800, 22), const Offset(50, 20));
+      await tester.pumpAndSettle();
+      expect(windowCalls, contains('startDragging'));
+      windowCalls.clear();
+      await tester.tapAt(const Offset(800, 22));
+      await tester.pump(const Duration(milliseconds: 80));
+      await tester.tapAt(const Offset(800, 22));
+      await tester.pumpAndSettle();
+      expect(windowCalls, contains('maximize'));
+      windowCalls.clear();
+      await tester.tap(find.byKey(const Key('settings-open-search')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('settings-search-input')), findsOneWidget);
+      expect(windowCalls, isNot(contains('startDragging')));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'search jumps to settings and model tasks with compact form typography',
+    (tester) async {
+      await pumpPolish(tester);
+      await tester.tap(find.byKey(const Key('settings-open-search')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('settings-search-input')),
+        '翻译功能',
+      );
+      await tester.pump();
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.text('原文 → 阅读语言'), findsWidgets);
+      await capturePolish(tester, 'model-task-form');
+      final fields = find.byWidgetPredicate(
+        (widget) => widget is DropdownButtonFormField,
+      );
+      expect(fields, findsWidgets);
+      final element = tester.element(fields.first);
+      expect(Theme.of(element).textTheme.titleMedium?.fontSize, 13);
+      expect(
+        Theme.of(element).textTheme.titleMedium?.fontWeight,
+        FontWeight.w400,
+      );
+      await tester.tap(fields.at(1));
+      await tester.pumpAndSettle();
+      await capturePolish(tester, 'model-task-dropdown');
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('settings-search-input')),
+        '自动登录',
+      );
+      await tester.pump();
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountSettingsSection), findsOneWidget);
+      expect(find.text('启动时自动登录'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'account actions set an explicit default and auto-login without changing active account',
+    (tester) async {
+      final container = await pumpPolish(tester);
+      await tester.tap(find.byKey(const ValueKey('settings-nav-account')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('settings-account-menu-fish')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('settings-account-menu-fish')),
+      );
+      await tester.pumpAndSettle();
+      await capturePolish(tester, 'account-actions');
+      await tester.tap(find.text('设为默认账号'));
+      await tester.pumpAndSettle();
+      expect(
+        container
+            .read(accountManagerNotifierProvider.notifier)
+            .defaultAccount
+            ?.id,
+        'fish',
+      );
+      expect(container.read(authNotifierProvider).accountId, 'pd');
+      final automatic = find.widgetWithText(Row, '启动时自动登录');
+      await tester.ensureVisible(find.text('启动时自动登录'));
+      await tester.pumpAndSettle();
+      final toggle = find.descendant(
+        of: automatic,
+        matching: find.byType(Switch),
+      );
+      await tester.tap(toggle.first);
+      await tester.pumpAndSettle();
+      expect(
+        (await SharedPreferences.getInstance()).getBool(
+          AuthNotifier.autoLoginPreferenceKey,
+        ),
+        false,
+      );
+      expect(container.read(authNotifierProvider).accountId, 'pd');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'redesigned settings pages remain usable at desktop and compact widths with enlarged type',
     (tester) async {
@@ -212,7 +477,12 @@ void main() {
           Platform.environment['CAPTURE_SETTINGS_REDESIGN'] == '1';
       final styles = shouldCapture ? Brightness.values : [Brightness.light];
       for (final brightness in styles) {
-        for (final layout in [(1280.0, 1.0), (740.0, 1.3), (360.0, 1.3)]) {
+        for (final layout in [
+          (1280.0, 1.0),
+          (2400.0, 1.0),
+          (740.0, 1.3),
+          (360.0, 1.3),
+        ]) {
           final width = layout.$1, scale = layout.$2;
           tester.view.physicalSize = Size(width, 900);
           tester.view.devicePixelRatio = 1;
@@ -378,7 +648,7 @@ void main() {
                   format: ui.ImageByteFormat.png,
                 );
                 final file = File(
-                  '.dart_tool/settings-redesign-captures/${destination.name}-${brightness.name}-${width.toInt()}.png',
+                  '${Platform.environment['SETTINGS_CAPTURE_DIR'] ?? '.dart_tool/settings-redesign-captures'}/${destination.name}-${brightness.name}-${width.toInt()}.png',
                 );
                 await file.parent.create(recursive: true);
                 await file.writeAsBytes(bytes!.buffer.asUint8List());

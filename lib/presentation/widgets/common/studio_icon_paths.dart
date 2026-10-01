@@ -697,272 +697,221 @@ final studioIconPaths = <int, List<StudioIconPart>>{
   ],
   0xe90e: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
-        ..moveTo(4.0, 5.0)
-        ..lineTo(20.0, 5.0)
-        ..lineTo(20.0, 19.0)
-        ..lineTo(4.0, 19.0)
-        ..lineTo(4.0, 5.0)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
-        ..moveTo(4.0, 9.0)
-        ..lineTo(20.0, 9.0),
-      1.7,
-    ),
-    StudioIconPart(
-      'part2',
-      Path()
-        ..moveTo(7.0, 7.0)
-        ..lineTo(7.01, 7.0)
-        ..moveTo(10.0, 7.0)
-        ..lineTo(10.01, 7.0),
-      1.7,
-    ),
-    StudioIconPart(
-      'part3',
-      Path()
-        ..moveTo(8.0, 13.0)
-        ..lineTo(12.0, 13.0)
-        ..moveTo(8.0, 16.0)
-        ..lineTo(16.0, 16.0),
-      1.7,
+        ..moveTo(4.0, 16.5)
+        ..cubicTo(4.0, 9.6, 8.5, 4.0, 15.0, 4.0)
+        ..lineTo(20.0, 4.0)
+        ..lineTo(20.0, 9.0)
+        ..cubicTo(20.0, 15.5, 14.4, 20.0, 7.5, 20.0)
+        ..lineTo(4.0, 20.0)
+        ..lineTo(4.0, 16.5)
+        ..close()
+        ..moveTo(4.0, 20.0)
+        ..lineTo(13.0, 11.0)
+        ..moveTo(11.0, 9.0)
+        ..lineTo(15.0, 13.0),
+      1.6,
     ),
   ],
   0xe90f: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
-        ..moveTo(3.0, 7.0)
-        ..lineTo(21.0, 7.0)
-        ..lineTo(21.0, 18.0)
-        ..lineTo(3.0, 18.0)
-        ..lineTo(3.0, 7.0)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
-        ..moveTo(6.0, 10.0)
-        ..lineTo(7.0, 10.0)
-        ..moveTo(10.0, 10.0)
-        ..lineTo(11.0, 10.0)
-        ..moveTo(14.0, 10.0)
-        ..lineTo(15.0, 10.0)
-        ..moveTo(18.0, 10.0)
-        ..lineTo(18.01, 10.0),
-      1.7,
-    ),
-    StudioIconPart(
-      'part2',
-      Path()
-        ..moveTo(6.0, 13.0)
-        ..lineTo(7.0, 13.0)
-        ..moveTo(10.0, 13.0)
-        ..lineTo(11.0, 13.0)
-        ..moveTo(14.0, 13.0)
-        ..lineTo(15.0, 13.0)
-        ..moveTo(18.0, 13.0)
-        ..lineTo(18.01, 13.0),
-      1.7,
-    ),
-    StudioIconPart(
-      'part3',
-      Path()
-        ..moveTo(8.0, 16.0)
-        ..lineTo(16.0, 16.0),
-      1.7,
+        ..moveTo(5.5, 5.0)
+        ..lineTo(18.5, 5.0)
+        ..cubicTo(19.60457, 5.0, 20.5, 5.89543, 20.5, 7.0)
+        ..lineTo(20.5, 16.0)
+        ..cubicTo(20.5, 17.10457, 19.60457, 18.0, 18.5, 18.0)
+        ..lineTo(5.5, 18.0)
+        ..cubicTo(4.39543, 18.0, 3.5, 17.10457, 3.5, 16.0)
+        ..lineTo(3.5, 7.0)
+        ..cubicTo(3.5, 5.89543, 4.39543, 5.0, 5.5, 5.0)
+        ..close()
+        ..moveTo(7.0, 9.0)
+        ..lineTo(7.1, 9.0)
+        ..moveTo(11.0, 9.0)
+        ..lineTo(11.1, 9.0)
+        ..moveTo(15.0, 9.0)
+        ..lineTo(15.1, 9.0)
+        ..moveTo(7.0, 12.0)
+        ..lineTo(7.1, 12.0)
+        ..moveTo(11.0, 12.0)
+        ..lineTo(11.1, 12.0)
+        ..moveTo(15.0, 12.0)
+        ..lineTo(15.1, 12.0)
+        ..moveTo(8.0, 15.0)
+        ..lineTo(16.0, 15.0),
+      1.6,
     ),
   ],
   0xe910: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
-        ..moveTo(4.0, 4.0)
-        ..lineTo(20.0, 4.0)
-        ..lineTo(20.0, 20.0)
-        ..lineTo(4.0, 20.0)
-        ..lineTo(4.0, 4.0)
+        ..moveTo(4.0, 7.0)
+        ..lineTo(8.0, 7.0)
+        ..moveTo(11.0, 7.0)
+        ..lineTo(20.0, 7.0)
+        ..moveTo(4.0, 12.0)
+        ..lineTo(14.0, 12.0)
+        ..moveTo(17.0, 12.0)
+        ..lineTo(20.0, 12.0)
+        ..moveTo(4.0, 17.0)
+        ..lineTo(7.0, 17.0)
+        ..moveTo(10.0, 17.0)
+        ..lineTo(20.0, 17.0)
+        ..moveTo(8.0, 5.0)
+        ..lineTo(11.0, 5.0)
+        ..lineTo(11.0, 9.0)
+        ..lineTo(8.0, 9.0)
+        ..lineTo(8.0, 5.0)
+        ..close()
+        ..moveTo(14.0, 10.0)
+        ..lineTo(17.0, 10.0)
+        ..lineTo(17.0, 14.0)
+        ..lineTo(14.0, 14.0)
+        ..lineTo(14.0, 10.0)
+        ..close()
+        ..moveTo(7.0, 15.0)
+        ..lineTo(10.0, 15.0)
+        ..lineTo(10.0, 19.0)
+        ..lineTo(7.0, 19.0)
+        ..lineTo(7.0, 15.0)
         ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
-        ..moveTo(8.0, 16.0)
-        ..lineTo(9.0, 12.0)
-        ..lineTo(15.0, 6.0)
-        ..lineTo(18.0, 9.0)
-        ..lineTo(12.0, 15.0)
-        ..lineTo(8.0, 16.0)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part2',
-      Path()
-        ..moveTo(13.0, 8.0)
-        ..lineTo(16.0, 11.0),
-      1.7,
+      1.6,
     ),
   ],
   0xe911: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
-        ..moveTo(3.0, 6.0)
-        ..lineTo(10.0, 6.0)
-        ..lineTo(12.0, 8.0)
-        ..lineTo(21.0, 8.0)
-        ..lineTo(21.0, 20.0)
-        ..lineTo(3.0, 20.0)
-        ..lineTo(3.0, 6.0)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
-        ..moveTo(7.0, 12.0)
-        ..lineTo(17.0, 12.0)
-        ..moveTo(7.0, 16.0)
-        ..lineTo(13.0, 16.0),
-      1.7,
+        ..moveTo(4.0, 7.0)
+        ..lineTo(4.0, 5.5)
+        ..cubicTo(4.0, 4.67157, 4.67157, 4.0, 5.5, 4.0)
+        ..lineTo(10.0, 4.0)
+        ..lineTo(12.0, 7.0)
+        ..lineTo(18.5, 7.0)
+        ..cubicTo(19.32843, 7.0, 20.0, 7.67157, 20.0, 8.5)
+        ..lineTo(20.0, 18.0)
+        ..cubicTo(20.0, 19.10457, 19.10457, 20.0, 18.0, 20.0)
+        ..lineTo(6.0, 20.0)
+        ..cubicTo(4.89543, 20.0, 4.0, 19.10457, 4.0, 18.0)
+        ..lineTo(4.0, 7.0)
+        ..close()
+        ..moveTo(4.0, 11.0)
+        ..lineTo(20.0, 11.0)
+        ..moveTo(8.0, 15.0)
+        ..lineTo(13.0, 15.0),
+      1.6,
     ),
   ],
   0xe912: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
-        ..moveTo(15.5, 7.5)
-        ..cubicTo(15.5, 9.433, 13.933, 11.0, 12.0, 11.0)
-        ..cubicTo(10.067, 11.0, 8.5, 9.433, 8.5, 7.5)
-        ..cubicTo(8.5, 5.567, 10.067, 4.0, 12.0, 4.0)
-        ..cubicTo(13.933, 4.0, 15.5, 5.567, 15.5, 7.5)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
+        ..moveTo(15.2, 7.5)
+        ..cubicTo(15.2, 9.26731, 13.76731, 10.7, 12.0, 10.7)
+        ..cubicTo(10.23269, 10.7, 8.8, 9.26731, 8.8, 7.5)
+        ..cubicTo(8.8, 5.73269, 10.23269, 4.3, 12.0, 4.3)
+        ..cubicTo(13.76731, 4.3, 15.2, 5.73269, 15.2, 7.5)
         ..moveTo(5.0, 20.0)
         ..lineTo(5.0, 18.0)
         ..cubicTo(5.0, 14.13401, 8.13401, 11.0, 12.0, 11.0)
         ..cubicTo(15.86599, 11.0, 19.0, 14.13401, 19.0, 18.0)
-        ..lineTo(19.0, 20.0),
-      1.7,
+        ..lineTo(19.0, 20.0)
+        ..moveTo(8.0, 20.0)
+        ..lineTo(16.0, 20.0),
+      1.6,
     ),
   ],
   0xe913: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
-        ..moveTo(4.0, 5.0)
-        ..lineTo(9.0, 5.0)
-        ..lineTo(9.0, 10.0)
-        ..lineTo(4.0, 10.0)
-        ..lineTo(4.0, 5.0)
+        ..moveTo(10.0, 8.0)
+        ..lineTo(14.0, 8.0)
+        ..cubicTo(15.10457, 8.0, 16.0, 8.89543, 16.0, 10.0)
+        ..lineTo(16.0, 14.0)
+        ..cubicTo(16.0, 15.10457, 15.10457, 16.0, 14.0, 16.0)
+        ..lineTo(10.0, 16.0)
+        ..cubicTo(8.89543, 16.0, 8.0, 15.10457, 8.0, 14.0)
+        ..lineTo(8.0, 10.0)
+        ..cubicTo(8.0, 8.89543, 8.89543, 8.0, 10.0, 8.0)
         ..close()
-        ..moveTo(15.0, 14.0)
+        ..moveTo(8.0, 10.0)
+        ..lineTo(4.0, 10.0)
+        ..lineTo(4.0, 6.0)
+        ..moveTo(16.0, 14.0)
         ..lineTo(20.0, 14.0)
-        ..lineTo(20.0, 19.0)
-        ..lineTo(15.0, 19.0)
-        ..lineTo(15.0, 14.0)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
-        ..moveTo(9.0, 7.5)
-        ..lineTo(14.0, 7.5)
-        ..cubicTo(15.933, 7.5, 17.5, 9.067, 17.5, 11.0)
-        ..lineTo(17.5, 14.0)
-        ..moveTo(15.0, 16.5)
-        ..lineTo(10.0, 16.5)
-        ..cubicTo(8.067, 16.5, 6.5, 14.933, 6.5, 13.0)
-        ..lineTo(6.5, 10.0),
-      1.7,
+        ..lineTo(20.0, 18.0)
+        ..moveTo(5.5, 4.5)
+        ..cubicTo(5.5, 5.32843, 4.82843, 6.0, 4.0, 6.0)
+        ..cubicTo(3.17157, 6.0, 2.5, 5.32843, 2.5, 4.5)
+        ..cubicTo(2.5, 3.67157, 3.17157, 3.0, 4.0, 3.0)
+        ..cubicTo(4.82843, 3.0, 5.5, 3.67157, 5.5, 4.5)
+        ..moveTo(21.5, 19.5)
+        ..cubicTo(21.5, 20.32843, 20.82843, 21.0, 20.0, 21.0)
+        ..cubicTo(19.17157, 21.0, 18.5, 20.32843, 18.5, 19.5)
+        ..cubicTo(18.5, 18.67157, 19.17157, 18.0, 20.0, 18.0)
+        ..cubicTo(20.82843, 18.0, 21.5, 18.67157, 21.5, 19.5),
+      1.6,
     ),
   ],
   0xe914: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
-        ..moveTo(8.0, 4.0)
+        ..moveTo(8.0, 3.0)
         ..lineTo(8.0, 8.0)
-        ..moveTo(16.0, 4.0)
-        ..lineTo(16.0, 8.0),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
-        ..moveTo(5.0, 8.0)
-        ..lineTo(19.0, 8.0)
-        ..lineTo(19.0, 11.0)
-        ..cubicTo(19.0, 14.86599, 15.86599, 18.0, 12.0, 18.0)
-        ..cubicTo(8.13401, 18.0, 5.0, 14.86599, 5.0, 11.0)
-        ..lineTo(5.0, 8.0)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part2',
-      Path()
-        ..moveTo(12.0, 18.0)
-        ..lineTo(12.0, 21.0),
-      1.7,
+        ..moveTo(16.0, 3.0)
+        ..lineTo(16.0, 8.0)
+        ..moveTo(6.0, 8.0)
+        ..lineTo(18.0, 8.0)
+        ..lineTo(18.0, 11.0)
+        ..cubicTo(18.0, 14.31371, 15.31371, 17.0, 12.0, 17.0)
+        ..cubicTo(8.68629, 17.0, 6.0, 14.31371, 6.0, 11.0)
+        ..lineTo(6.0, 8.0)
+        ..close()
+        ..moveTo(12.0, 17.0)
+        ..lineTo(12.0, 21.0)
+        ..moveTo(9.0, 21.0)
+        ..lineTo(15.0, 21.0),
+      1.6,
     ),
   ],
   0xe915: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
         ..moveTo(12.0, 3.0)
-        ..lineTo(20.0, 6.0)
+        ..cubicTo(14.4, 4.8, 17.0, 5.5, 20.0, 6.0)
         ..lineTo(20.0, 12.0)
-        ..cubicTo(20.0, 16.0, 16.0, 19.0, 12.0, 21.0)
-        ..cubicTo(8.0, 19.0, 4.0, 16.0, 4.0, 12.0)
+        ..cubicTo(20.0, 16.2, 16.7, 19.4, 12.0, 21.0)
+        ..cubicTo(7.3, 19.4, 4.0, 16.2, 4.0, 12.0)
         ..lineTo(4.0, 6.0)
-        ..lineTo(12.0, 3.0)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
-        ..moveTo(8.5, 12.0)
-        ..lineTo(11.0, 14.5)
-        ..lineTo(15.5, 9.5),
-      1.7,
+        ..cubicTo(7.0, 5.5, 9.6, 4.8, 12.0, 3.0)
+        ..close()
+        ..moveTo(8.5, 11.5)
+        ..lineTo(11.0, 14.0)
+        ..lineTo(15.5, 9.0),
+      1.6,
     ),
   ],
   0xe916: [
     StudioIconPart(
-      'part0',
+      'outline',
       Path()
         ..moveTo(21.0, 12.0)
         ..cubicTo(21.0, 16.97056, 16.97056, 21.0, 12.0, 21.0)
         ..cubicTo(7.02944, 21.0, 3.0, 16.97056, 3.0, 12.0)
         ..cubicTo(3.0, 7.02944, 7.02944, 3.0, 12.0, 3.0)
         ..cubicTo(16.97056, 3.0, 21.0, 7.02944, 21.0, 12.0)
-        ..close(),
-      1.7,
-    ),
-    StudioIconPart(
-      'part1',
-      Path()
-        ..moveTo(12.0, 11.0)
-        ..lineTo(12.0, 17.0)
-        ..moveTo(12.0, 7.0)
-        ..lineTo(12.01, 7.0),
-      1.7,
+        ..moveTo(12.0, 10.5)
+        ..lineTo(12.0, 16.5)
+        ..moveTo(12.0, 7.5)
+        ..lineTo(12.01, 7.5),
+      1.6,
     ),
   ],
 };

@@ -344,9 +344,13 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
     return accounts;
   }
 
-  /// 默认账号（最近使用的账号）
+  /// 使用用户指定的默认账号；尚未指定时回退到最近使用的账号。
   SavedAccount? get defaultAccount {
     if (state.accounts.isEmpty) return null;
+    final chosen = state.accounts
+        .where((account) => account.isDefault)
+        .firstOrNull;
+    if (chosen != null) return chosen;
 
     // 按最后使用时间排序，返回最近使用的账号
     final sorted = List<SavedAccount>.from(state.accounts);

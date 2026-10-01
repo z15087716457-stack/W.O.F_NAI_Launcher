@@ -18,10 +18,12 @@ class IntegrationsSettingsSection extends StatefulWidget {
   final List<WidgetBuilder>? panelBuilders;
 
   final bool initialNetwork;
+  final int? initialTab;
   const IntegrationsSettingsSection({
     super.key,
     this.panelBuilders,
     this.initialNetwork = false,
+    this.initialTab,
   }) : assert(
          panelBuilders == null || panelBuilders.length == 2,
          'panelBuilders must contain exactly two builders.',
@@ -39,6 +41,10 @@ class _IntegrationsSettingsSectionState
   @override
   void initState() {
     super.initState();
+    if (widget.initialTab != null && widget.panelBuilders == null) {
+      _selectedIndex = widget.initialTab!;
+      return;
+    }
     if (widget.initialNetwork && widget.panelBuilders == null) {
       _selectedIndex = 2;
     }
@@ -47,6 +53,12 @@ class _IntegrationsSettingsSectionState
   @override
   void didUpdateWidget(covariant IntegrationsSettingsSection oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.initialTab != oldWidget.initialTab &&
+        widget.initialTab != null &&
+        widget.panelBuilders == null) {
+      _selectedIndex = widget.initialTab!;
+      return;
+    }
     if (oldWidget.initialNetwork != widget.initialNetwork &&
         widget.panelBuilders == null) {
       _selectedIndex = widget.initialNetwork ? 2 : 0;

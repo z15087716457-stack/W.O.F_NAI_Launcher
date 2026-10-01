@@ -7,9 +7,16 @@ import '../../providers/subscription_provider.dart';
 import '../auth/account_avatar.dart';
 import '../auth/subscription_expiry_text.dart';
 import '../common/studio_icons.dart';
+import '../../screens/settings/widgets/settings_ui_theme.dart';
 
 class AccountDetailTile extends ConsumerWidget {
-  const AccountDetailTile({super.key, this.onEdit, this.onLogin});
+  const AccountDetailTile({
+    super.key,
+    this.onEdit,
+    this.onLogin,
+    this.showExpiry = true,
+  });
+  final bool showExpiry;
   final VoidCallback? onEdit, onLogin;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,10 +28,18 @@ class AccountDetailTile extends ConsumerWidget {
         .where((a) => a.id == auth.accountId)
         .firstOrNull;
     final loaded = auth.isAuthenticated && account != null;
+    final currentSubscription = ref
+        .watch(subscriptionNotifierProvider)
+        .maybeWhen(loaded: (value) => value, orElse: () => null);
     Widget overview({bool showArrow = true}) => Row(
       children: [
         if (loaded)
-          AccountAvatar(account: account, size: 41)
+          AccountAvatar(
+            account: account,
+            size: 42,
+            muted: true,
+            showEditBadge: false,
+          )
         else
           Icon(
             StudioIcons.settingsAccount,
@@ -36,13 +51,39 @@ class AccountDetailTile extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                loaded
-                    ? account.displayName
-                    : context.l10n.settings_notLoggedIn,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    loaded
+                        ? account.displayName
+                        : context.l10n.settings_notLoggedIn,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (loaded && currentSubscription != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.onSurface.withValues(alpha: .055),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        currentSubscription.hasActiveSubscription
+                            ? currentSubscription.tierName
+                            : context.l10n.subscriptionTierNone,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 5),
               if (loaded)
@@ -61,22 +102,49 @@ class AccountDetailTile extends ConsumerWidget {
                       loaded: (subscription) => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            subscription.hasActiveSubscription
-                                ? subscription.tierName
-                                : context.l10n.subscriptionTierNone,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colors.onSurfaceVariant,
+                          if (!showExpiry)
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.check_rounded,
+                                  size: 12,
+                                  color: theme.brightness == Brightness.dark
+                                      ? Colors.green.shade400
+                                      : Colors.green.shade700,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    settingsText(
+                                      context,
+                                      subscription.hasActiveSubscription
+                                          ? '已登录 · 订阅有效'
+                                          : '已登录',
+                                      subscription.hasActiveSubscription
+                                          ? 'Signed in · Subscription active'
+                                          : 'Signed in',
+                                      subscription.hasActiveSubscription
+                                          ? 'ログイン済み · 有効なサブスクリプション'
+                                          : 'ログイン済み',
+                                    ),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.brightness == Brightness.dark
+                                          ? Colors.green.shade400
+                                          : Colors.green.shade700,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          if (subscription.isGracePeriod)
+                          if (showExpiry && subscription.isGracePeriod)
                             Text(
                               context.l10n.subscriptionGracePeriod,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.orange,
                               ),
                             )
-                          else if (subscription.expiresAt != null &&
+                          else if (showExpiry &&
+                              subscription.expiresAt != null &&
                               subscription.tier > 0)
                             SubscriptionExpiryText(
                               expiresAt: subscription.expiresAt!,
@@ -135,8 +203,11 @@ class AccountDetailTile extends ConsumerWidget {
               )
         : const SizedBox.shrink();
     return Material(
-      color: colors.onSurface.withValues(alpha: .035),
-      borderRadius: BorderRadius.circular(10),
+      color: colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
       child: InkWell(
         onTap: loaded ? onEdit : onLogin,
         borderRadius: BorderRadius.circular(10),

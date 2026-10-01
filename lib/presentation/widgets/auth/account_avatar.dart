@@ -25,12 +25,14 @@ class AccountAvatar extends StatelessWidget {
     this.size = 48,
     this.onTap,
     this.showEditBadge = true,
+    this.muted = false,
   });
 
   final SavedAccount account;
   final double size;
   final VoidCallback? onTap;
   final bool showEditBadge;
+  final bool muted;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +103,9 @@ class AccountAvatar extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: kAvatarBackground,
+        color: muted
+            ? theme.colorScheme.primary.withValues(alpha: .12)
+            : kAvatarBackground,
         borderRadius: avatarBorderRadius(size),
       ),
       child: Center(
@@ -110,7 +114,7 @@ class AccountAvatar extends StatelessWidget {
           style: TextStyle(
             fontSize: size * 0.4,
             fontWeight: FontWeight.bold,
-            color: kAvatarForeground,
+            color: muted ? theme.colorScheme.primary : kAvatarForeground,
           ),
         ),
       ),
