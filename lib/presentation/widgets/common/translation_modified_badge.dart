@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 
 /// A single flat caution label; only the right edge carries warning stripes.
 class TranslationModifiedBadge extends StatelessWidget {
-  const TranslationModifiedBadge({super.key});
+  const TranslationModifiedBadge({
+    super.key,
+    this.prefix = '原',
+    this.label = '被修改',
+    this.tooltip = '原文已修改，中文待同步',
+  });
+
+  final String prefix;
+  final String label;
+  final String tooltip;
 
   @override
   Widget build(BuildContext context) => Tooltip(
-    message: '原文已修改，中文待同步',
+    message: tooltip,
     child: Semantics(
-      label: '被修改，原文已修改，中文待同步',
+      label: '$prefix，$label，$tooltip',
       child: ClipRRect(
         borderRadius: BorderRadius.circular(3),
         child: ColoredBox(
@@ -22,6 +31,10 @@ class TranslationModifiedBadge extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    _BadgePrefix(
+                      prefix: prefix,
+                      color: const Color(0xFF272922),
+                    ),
                     const Icon(
                       Icons.build_outlined,
                       size: 11,
@@ -29,7 +42,7 @@ class TranslationModifiedBadge extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '被修改',
+                      label,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         fontSize: 11,
                         height: 1.2,
@@ -45,6 +58,87 @@ class TranslationModifiedBadge extends StatelessWidget {
         ),
       ),
     ),
+  );
+}
+
+/// Translation polish is recorded quietly, without a wrench or warning color.
+class TranslationEditedBadge extends StatelessWidget {
+  const TranslationEditedBadge({
+    super.key,
+    required this.prefix,
+    required this.label,
+    required this.tooltip,
+  });
+
+  final String prefix;
+  final String label;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        label: '$prefix，$label，$tooltip',
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(3),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _BadgePrefix(prefix: prefix, color: scheme.onSurfaceVariant),
+              Icon(
+                Icons.edit_outlined,
+                size: 11,
+                color: scheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: 11,
+                  height: 1.2,
+                  fontWeight: FontWeight.w500,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BadgePrefix extends StatelessWidget {
+  const _BadgePrefix({required this.prefix, required this.color});
+  final String prefix;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        prefix,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontSize: 11,
+          height: 1.2,
+          color: color,
+        ),
+      ),
+      Container(
+        width: 1,
+        height: 10,
+        margin: const EdgeInsets.symmetric(horizontal: 5),
+        color: color.withValues(alpha: .3),
+      ),
+    ],
   );
 }
 

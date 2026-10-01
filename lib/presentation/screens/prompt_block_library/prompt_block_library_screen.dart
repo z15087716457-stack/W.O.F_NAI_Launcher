@@ -2590,6 +2590,9 @@ class _PromptBlockLibraryScreenState
             readingTranslationZh: result.readingTranslationZh,
             readingTranslationMarks: result.readingTranslationMarks,
             readingTranslationNeedsReview: result.readingTranslationNeedsReview,
+            readingTranslationLanguageCode:
+                result.readingTranslationLanguageCode,
+            readingTranslationEdited: result.readingTranslationEdited,
             iconName: result.iconName,
             thumbnail: result.thumbnail,
             thumbnailOffsetX: result.thumbnailOffsetX,
@@ -2628,6 +2631,9 @@ class _PromptBlockLibraryScreenState
               readingTranslationMarks: result.readingTranslationMarks,
               readingTranslationNeedsReview:
                   result.readingTranslationNeedsReview,
+              readingTranslationLanguageCode:
+                  result.readingTranslationLanguageCode,
+              readingTranslationEdited: result.readingTranslationEdited,
               iconName: result.iconName,
               thumbnail: result.thumbnail,
               thumbnailOffsetX: result.thumbnailOffsetX,

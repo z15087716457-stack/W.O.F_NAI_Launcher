@@ -4,6 +4,7 @@ import '../../data/models/prompt_block/pill_document.dart';
 import 'nai_prompt_syntax.dart';
 import 'tag_normalizer.dart';
 import 'prompt_translation_document.dart';
+import 'prompt_translation_language.dart';
 
 enum PromptTranslationDirection { toChinese, toSource }
 
@@ -15,6 +16,8 @@ class PromptTranslationEditRequest {
     required this.baselineSource,
     required this.baselineZh,
     this.selectedTerms = const [],
+    this.languageCode = 'zh',
+    this.targetLanguageCode = 'zh',
   });
 
   final PromptTranslationDirection direction;
@@ -23,12 +26,18 @@ class PromptTranslationEditRequest {
   final String baselineSource;
   final String baselineZh;
   final List<PromptSelectedTerm> selectedTerms;
+  final String languageCode;
+  final String targetLanguageCode;
 
   String get input =>
       direction == PromptTranslationDirection.toChinese ? source : zh;
 
   String requestJson(List<Map<String, String>> glossary) => jsonEncode({
     'direction': direction.name,
+    'reading_language': PromptTranslationLanguage.fromCode(languageCode).code,
+    'target_language': direction == PromptTranslationDirection.toSource
+        ? 'en'
+        : PromptTranslationLanguage.fromCode(targetLanguageCode).code,
     'original_source': baselineSource,
     'original_zh': baselineZh,
     'current_source': source,

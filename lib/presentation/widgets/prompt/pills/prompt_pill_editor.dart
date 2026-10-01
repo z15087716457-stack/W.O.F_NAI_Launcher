@@ -630,6 +630,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
               source: translation.source,
               zh: translation.zh,
               marks: translation.marks,
+              needsReview: translation.needsReview,
+              languageCode: translation.languageCode,
+              translationEdited: translation.translationEdited,
             );
       }
       return;

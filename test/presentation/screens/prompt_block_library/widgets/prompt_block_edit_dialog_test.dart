@@ -54,6 +54,46 @@ void main() {
     );
   }
 
+  testWidgets('reading polish retains source warning and stored language', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1000, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    PromptBlockEditResult? captured;
+    await tester.pumpWidget(
+      wrap(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () async => captured = await PromptBlockEditDialog.show(
+              context: context,
+              block: makeBlock().copyWith(
+                readingTranslationZh: '元の訳文',
+                readingTranslationLanguageCode: 'ja',
+                readingTranslationNeedsReview: true,
+              ),
+              folders: const [],
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    final field = find.byWidgetPredicate(
+      (widget) => widget is TextField && widget.controller?.text == '元の訳文',
+    );
+    await tester.enterText(field, '編集した訳文');
+    await tester.tap(find.widgetWithText(FilledButton, '保存'));
+    await tester.pumpAndSettle();
+    expect(captured?.readingTranslationLanguageCode, 'ja');
+    expect(captured?.readingTranslationEdited, isTrue);
+    expect(captured?.readingTranslationNeedsReview, isTrue);
+    expect(captured?.content, 'content');
+  });
+
   testWidgets('block without thumbnail shows the add-image placeholder box', (
     tester,
   ) async {

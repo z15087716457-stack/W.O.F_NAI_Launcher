@@ -176,6 +176,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
           'marks': block.readingTranslationMarks,
         }).marks,
         needsReview: block.readingTranslationNeedsReview,
+        languageCode: block.readingTranslationLanguageCode,
+        translationEdited: block.readingTranslationEdited,
       );
       if (countUse) {
         unawaited(
@@ -213,6 +215,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     required String zh,
     List<TranslationTagMark> marks = const [],
     bool needsReview = false,
+    String languageCode = 'zh',
+    bool translationEdited = false,
   }) {
     final before = state.document;
     final marker = PillDocumentEditor.allocateMarker(before);
@@ -226,6 +230,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
           marks: marks,
           showOriginal: needsReview,
           needsReview: needsReview,
+          languageCode: languageCode,
+          translationEdited: translationEdited,
         ),
       );
     _apply(

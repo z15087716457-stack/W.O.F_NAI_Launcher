@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'prompt_translation_language.dart';
+
 import '../../data/models/prompt_block/pill_document.dart';
 import 'nai_prompt_syntax.dart';
 import 'pill_document_editor.dart';
@@ -187,7 +189,11 @@ class PromptTranslationBatch {
     return result;
   }
 
-  String requestJson(List<Map<String, String>> glossary) => jsonEncode({
+  String requestJson(
+    List<Map<String, String>> glossary, {
+    String languageCode = 'zh',
+  }) => jsonEncode({
+    'target_language': PromptTranslationLanguage.fromCode(languageCode).code,
     'fields': [
       for (final entry in segments.entries)
         if (entry.value.isNotEmpty)
@@ -344,6 +350,7 @@ class PromptTranslationBatch {
   Map<String, PillDocument> buildFromGroups(
     Map<String, List<PromptTranslationGroup>> allGroups, {
     bool autoFormat = false,
+    String languageCode = 'zh',
   }) {
     final result = <String, PillDocument>{};
     for (final entry in allGroups.entries) {
@@ -364,6 +371,7 @@ class PromptTranslationBatch {
             ).text,
             zh: group.zh,
             marks: group.marks,
+            languageCode: PromptTranslationLanguage.fromCode(languageCode).code,
           ),
         );
         text = text.replaceRange(group.start, group.end, marker);
@@ -378,7 +386,9 @@ class PromptTranslationBatch {
     String raw, {
     List<Map<String, String>> glossary = const [],
     Map<String, String> verifiedTags = const {},
+    String languageCode = 'zh',
   }) => buildFromGroups(
     parseGroups(raw, glossary: glossary, verifiedTags: verifiedTags),
+    languageCode: languageCode,
   );
 }

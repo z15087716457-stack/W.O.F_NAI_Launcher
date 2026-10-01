@@ -29,6 +29,8 @@ import '../../../widgets/prompt/blocks/prompt_block_tag_chip.dart';
 import '../../../widgets/prompt/blocks/prompt_block_appearance.dart';
 import '../../../widgets/common/thumbnail_crop_dialog.dart';
 import '../../../widgets/prompt/prompt_token_count_bar.dart';
+import '../../../../core/utils/prompt_translation_language.dart';
+import '../../../widgets/prompt/pills/translation_editor_labels.dart';
 import 'atom_list_editor.dart';
 import 'compact_parameter_number_field.dart';
 import 'prompt_block_color_picker.dart';
@@ -48,6 +50,8 @@ class PromptBlockEditResult {
     this.readingTranslationZh,
     this.readingTranslationMarks,
     this.readingTranslationNeedsReview = false,
+    this.readingTranslationLanguageCode = 'zh',
+    this.readingTranslationEdited = false,
     required this.iconName,
     this.thumbnail,
     this.thumbnailOffsetX = 0.0,
@@ -71,6 +75,8 @@ class PromptBlockEditResult {
   final String? readingTranslationZh;
   final List<Map<String, dynamic>>? readingTranslationMarks;
   final bool readingTranslationNeedsReview;
+  final String readingTranslationLanguageCode;
+  final bool readingTranslationEdited;
   final String? iconName;
 
   /// 应用目录内预览图路径；null = 无图。
@@ -181,6 +187,8 @@ class PromptBlockEditDialog extends StatefulWidget {
           readingTranslationZh: result.readingTranslationZh,
           readingTranslationMarks: result.readingTranslationMarks,
           readingTranslationNeedsReview: result.readingTranslationNeedsReview,
+          readingTranslationLanguageCode: result.readingTranslationLanguageCode,
+          readingTranslationEdited: result.readingTranslationEdited,
           iconName: result.iconName,
           thumbnail: result.thumbnail,
           thumbnailOffsetX: result.thumbnailOffsetX,
@@ -418,7 +426,14 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                   minLines: 2,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    labelText: '中文阅读文本',
+                    labelText:
+                        TranslationEditorLabels(
+                          Localizations.localeOf(context).languageCode,
+                        ).readingFieldTitle(
+                          PromptTranslationLanguage.fromCode(
+                            widget.block!.readingTranslationLanguageCode,
+                          ),
+                        ),
                     helperText: widget.block!.readingTranslationNeedsReview
                         ? '原文已修改，译文待更新'
                         : '修改原文后请同步校对这里的译文',
@@ -1262,10 +1277,15 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
           readingTranslationNeedsReview:
               widget.block?.readingTranslationZh != null &&
               readingZh.isNotEmpty &&
-              (readingChanged
-                  ? false
-                  : sourceChanged ||
-                        (widget.block?.readingTranslationNeedsReview ?? false)),
+              (sourceChanged ||
+                  (widget.block?.readingTranslationNeedsReview ?? false)),
+          readingTranslationLanguageCode:
+              widget.block?.readingTranslationLanguageCode ?? 'zh',
+          readingTranslationEdited:
+              widget.block?.readingTranslationZh != null &&
+              readingZh.isNotEmpty &&
+              (readingChanged ||
+                  (widget.block?.readingTranslationEdited ?? false)),
           atoms: atoms,
           negativeContent: negativeAtoms.join(', '),
           negativeAtoms: negativeAtoms,

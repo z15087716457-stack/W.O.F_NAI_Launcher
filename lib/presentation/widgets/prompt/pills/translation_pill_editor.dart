@@ -7,11 +7,13 @@ import 'package:flutter/services.dart';
 import '../../../../core/autocomplete/completion_models.dart';
 import '../../../../core/autocomplete/prompt_token_parser.dart';
 import '../../../../core/utils/prompt_translation_edit.dart';
+import '../../../../core/utils/prompt_translation_language.dart';
 import '../../../../core/utils/tag_normalizer.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../tag_expansion/tag_expansion_wrapper.dart';
 import '../../common/translation_modified_badge.dart';
 import 'translation_editing_controller.dart';
+import 'translation_editor_labels.dart';
 import '../../common/translation_icon.dart';
 
 class TranslationPillEditHandle {
@@ -216,10 +218,17 @@ class _TranslationPillEditPopoverState
   late String? _synchronizedSource = widget.initial.needsReview
       ? null
       : widget.initial.source;
+  late String? _synchronizedReading = widget.initial.translationEdited
+      ? null
+      : widget.initial.zh;
+  late PromptTranslationLanguage _language = PromptTranslationLanguage.fromCode(
+    widget.initial.languageCode,
+  );
   List<TranslationTagMark> _marks = const [];
   List<PromptSelectedTerm> _pickedTerms = const [];
   final Map<String, List<PromptSelectedTerm>> _termVersions = {};
   final Map<String, List<TranslationTagMark>> _markVersions = {};
+  final Map<String, PromptTranslationLanguage> _readingLanguages = {};
   PromptTranslationDirection? _busy;
   int _revision = 0;
   bool _applyingResult = false;
@@ -228,6 +237,10 @@ class _TranslationPillEditPopoverState
   late final String _sessionId = 'prompt-edit-${identityHashCode(this)}';
   bool get _needsReview =>
       _synchronizedSource == null || _source.text != _synchronizedSource;
+  bool get _translationEdited =>
+      _synchronizedReading == null || _zh.text != _synchronizedReading;
+  TranslationEditorLabels get _labels =>
+      TranslationEditorLabels(Localizations.localeOf(context).languageCode);
 
   @override
   void initState() {
@@ -235,6 +248,7 @@ class _TranslationPillEditPopoverState
     _sourceHistory = _DraftHistory(_source);
     _zhHistory = _DraftHistory(_zh);
     _marks = widget.initial.marks;
+    _rememberReadingLanguage();
     _source.addListener(_sourceChanged);
     _zh.addListener(_zhChanged);
     _zh.updateMarks(_marks);
@@ -260,6 +274,8 @@ class _TranslationPillEditPopoverState
 
   void _zhChanged() {
     if (_applyingResult || _lastZh == _zh.text) return;
+    _language = _readingLanguages[_zh.text] ?? _language;
+    _rememberReadingLanguage();
     _rememberTerms(_lastZh, _pickedTerms);
     _pickedTerms =
         _termVersions[_zh.text] ??
@@ -314,6 +330,8 @@ class _TranslationPillEditPopoverState
       baselineSource: _baselineSource,
       baselineZh: _baselineZh,
       selectedTerms: List.unmodifiable(_pickedTerms),
+      languageCode: _language.code,
+      targetLanguageCode: _labels.language.code,
     );
     if (request.input.trim().isEmpty) return;
     final revision = _revision;
@@ -353,6 +371,13 @@ class _TranslationPillEditPopoverState
           ? result.marks
           : const [];
       _synchronizedSource = _source.text;
+      _synchronizedReading = _zh.text;
+      if (direction == PromptTranslationDirection.toChinese) {
+        _language = PromptTranslationLanguage.fromCode(
+          request.targetLanguageCode,
+        );
+      }
+      _rememberReadingLanguage();
       _baselineSource = _source.text;
       _baselineZh = _zh.text;
       _revision++;
@@ -394,7 +419,10 @@ class _TranslationPillEditPopoverState
       try {
         final results = await Future.wait([
           widget.annotations!(source, false),
-          widget.annotations!(zh, true),
+          widget.annotations!(
+            zh,
+            _language == PromptTranslationLanguage.chinese,
+          ),
         ]);
         if (!mounted ||
             version != _annotationVersion ||
@@ -426,7 +454,7 @@ class _TranslationPillEditPopoverState
     final caret = selected.isValid
         ? selected.extentOffset
         : controller.text.length;
-    final label = chinese
+    final label = chinese && _language == PromptTranslationLanguage.chinese
         ? (candidate.translation?.trim().isNotEmpty == true
               ? candidate.translation!.trim()
               : TagNormalizer.toDisplay(candidate.canonicalTag))
@@ -470,6 +498,13 @@ class _TranslationPillEditPopoverState
     }
   }
 
+  void _rememberReadingLanguage() {
+    _readingLanguages[_zh.text] = _language;
+    if (_readingLanguages.length > 100) {
+      _readingLanguages.remove(_readingLanguages.keys.first);
+    }
+  }
+
   @override
   void dispose() {
     if (_busy != null) widget.cancelConversion?.call(_sessionId);
@@ -496,6 +531,8 @@ class _TranslationPillEditPopoverState
         marks: _marks,
         showOriginal: sourceChanged || widget.initial.showOriginal,
         needsReview: _needsReview,
+        languageCode: _language.code,
+        translationEdited: _translationEdited,
       ),
     );
   }
@@ -529,14 +566,14 @@ class _TranslationPillEditPopoverState
                 const SizedBox(width: 7),
                 Expanded(
                   child: Text(
-                    '翻译块',
+                    _labels.title,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 IconButton(
-                  tooltip: '关闭',
+                  tooltip: _labels.close,
                   onPressed: () => widget.onComplete(null),
                   icon: const Icon(Icons.close),
                   iconSize: 17,
@@ -557,21 +594,19 @@ class _TranslationPillEditPopoverState
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(child: _fieldLabel(context, '原文', '生图使用')),
-                        if (_needsReview)
-                          const TranslationModifiedBadge(
-                            key: Key('translation-pill-modified'),
-                          ),
-                      ],
-                    ),
+                    _sourceHeader(context),
                     const SizedBox(height: 4),
                     _field(_source),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Expanded(child: _fieldLabel(context, '中文', '可改写')),
+                        Expanded(
+                          child: _fieldLabel(
+                            context,
+                            _labels.reading(_language),
+                            _labels.editable,
+                          ),
+                        ),
                         _directionButton(PromptTranslationDirection.toSource),
                         const SizedBox(width: 6),
                         _directionButton(PromptTranslationDirection.toChinese),
@@ -608,7 +643,7 @@ class _TranslationPillEditPopoverState
                                   }
                                 },
                           icon: const Icon(Icons.settings_outlined, size: 14),
-                          label: const Text('配置翻译模型'),
+                          label: Text(_labels.configure),
                         ),
                       ),
                   ],
@@ -622,7 +657,7 @@ class _TranslationPillEditPopoverState
               children: [
                 IconButton(
                   key: const Key('translation-pill-delete'),
-                  tooltip: '删除整块',
+                  tooltip: _labels.delete,
                   onPressed: () => widget.onComplete('delete'),
                   icon: const Icon(Icons.delete_outline),
                   color: scheme.error,
@@ -637,7 +672,7 @@ class _TranslationPillEditPopoverState
                 const SizedBox(width: 4),
                 IconButton(
                   key: const Key('translation-pill-plain-text'),
-                  tooltip: '还原为原文文本',
+                  tooltip: _labels.restore,
                   onPressed: _source.text.isEmpty
                       ? null
                       : () => widget.onComplete(
@@ -664,7 +699,7 @@ class _TranslationPillEditPopoverState
                       ? null
                       : _save,
                   icon: const Icon(Icons.check, size: 16),
-                  label: const Text('保存'),
+                  label: Text(_labels.save),
                   style: FilledButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     minimumSize: const Size(72, 32),
@@ -679,7 +714,84 @@ class _TranslationPillEditPopoverState
     );
   }
 
-  Widget _fieldLabel(BuildContext context, String title, String hint) => Row(
+  Widget _sourceHeader(BuildContext context) {
+    final label = _fieldLabel(context, _labels.source, _labels.generation);
+    if (!_needsReview && !_translationEdited) return label;
+    final badges = [
+      if (_needsReview)
+        TranslationModifiedBadge(
+          key: const Key('translation-pill-modified'),
+          prefix: _labels.sourcePrefix,
+          label: _labels.modified,
+          tooltip: _labels.sourceWarning(_language),
+        ),
+      if (_translationEdited)
+        TranslationEditedBadge(
+          key: const Key('translation-pill-edited'),
+          prefix: _language.badgePrefix,
+          label: _labels.edited,
+          tooltip: _labels.editHint,
+        ),
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Keep the statuses paired above the source field even with long labels
+        // or large accessibility text; never insert a status row over the reading.
+        final style = Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(fontSize: 11);
+        double width(String text) {
+          final painter = TextPainter(
+            text: TextSpan(text: text, style: style),
+            textDirection: Directionality.of(context),
+            textScaler: MediaQuery.textScalerOf(context),
+          )..layout();
+          final result = painter.width;
+          painter.dispose();
+          return result;
+        }
+
+        final badgeWidth =
+            (_needsReview
+                ? width(_labels.sourcePrefix) + width(_labels.modified) + 46
+                : 0) +
+            (_translationEdited
+                ? width(_language.badgePrefix) + width(_labels.edited) + 40
+                : 0) +
+            (badges.length > 1 ? 6 : 0);
+        final statuses = Wrap(
+          key: const Key('translation-pill-statuses'),
+          alignment: WrapAlignment.end,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 6,
+          runSpacing: 4,
+          children: badges,
+        );
+        if (badgeWidth + 80 > constraints.maxWidth) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              label,
+              const SizedBox(height: 4),
+              Align(alignment: Alignment.centerRight, child: statuses),
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: label),
+            const SizedBox(width: 6),
+            statuses,
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _fieldLabel(BuildContext context, String title, String hint) => Wrap(
+    crossAxisAlignment: WrapCrossAlignment.center,
+    spacing: 5,
+    runSpacing: 2,
     children: [
       Text(
         title,
@@ -687,7 +799,6 @@ class _TranslationPillEditPopoverState
           context,
         ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
-      const SizedBox(width: 5),
       Text(
         '· $hint',
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -704,7 +815,9 @@ class _TranslationPillEditPopoverState
       key: Key(
         chinese ? 'translation-pill-to-chinese' : 'translation-pill-to-source',
       ),
-      tooltip: chinese ? '原文 → 中文' : '中文 → 原文',
+      tooltip: chinese
+          ? '${_labels.source} → ${_labels.reading(_labels.language)}'
+          : '${_labels.reading(_language)} → ${_labels.source}',
       constraints: const BoxConstraints.tightFor(width: 34, height: 28),
       padding: EdgeInsets.zero,
       style: IconButton.styleFrom(

@@ -759,6 +759,9 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
               readingTranslationZh: result.readingTranslationZh,
               readingTranslationNeedsReview:
                   result.readingTranslationNeedsReview,
+              readingTranslationLanguageCode:
+                  result.readingTranslationLanguageCode,
+              readingTranslationEdited: result.readingTranslationEdited,
               iconName: result.iconName,
               thumbnail: result.thumbnail,
               thumbnailOffsetX: result.thumbnailOffsetX,

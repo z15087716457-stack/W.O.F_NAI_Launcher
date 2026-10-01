@@ -424,6 +424,8 @@ class TranslationPill {
     this.marks = const [],
     this.showOriginal = false,
     this.needsReview = false,
+    this.languageCode = 'zh',
+    this.translationEdited = false,
   });
 
   final String source;
@@ -432,18 +434,28 @@ class TranslationPill {
   final bool showOriginal;
   final bool needsReview;
 
+  /// Legacy blocks without metadata contain Chinese readings.
+  final String languageCode;
+
+  /// A quiet edit record; it does not request source review.
+  final bool translationEdited;
+
   TranslationPill copyWith({
     String? source,
     String? zh,
     List<TranslationTagMark>? marks,
     bool? showOriginal,
     bool? needsReview,
+    String? languageCode,
+    bool? translationEdited,
   }) => TranslationPill(
     source: source ?? this.source,
     zh: zh ?? this.zh,
     marks: marks ?? this.marks,
     showOriginal: showOriginal ?? this.showOriginal,
     needsReview: needsReview ?? this.needsReview,
+    languageCode: languageCode ?? this.languageCode,
+    translationEdited: translationEdited ?? this.translationEdited,
   );
 
   Map<String, dynamic> toJson() => {
@@ -452,6 +464,8 @@ class TranslationPill {
     if (marks.isNotEmpty) 'marks': marks.map((mark) => mark.toJson()).toList(),
     if (showOriginal) 'showOriginal': true,
     if (needsReview) 'needsReview': true,
+    if (languageCode != 'zh') 'languageCode': languageCode,
+    if (translationEdited) 'translationEdited': true,
   };
 
   factory TranslationPill.fromJson(Map<String, dynamic> json) {
@@ -476,6 +490,11 @@ class TranslationPill {
       marks: List.unmodifiable(marks),
       showOriginal: json['showOriginal'] as bool? ?? false,
       needsReview: json['needsReview'] as bool? ?? false,
+      languageCode:
+          const ['zh', 'en', 'ja', 'ko'].contains(json['languageCode'])
+          ? json['languageCode'] as String
+          : 'zh',
+      translationEdited: json['translationEdited'] == true,
     );
   }
 
@@ -486,11 +505,20 @@ class TranslationPill {
       other.zh == zh &&
       _sameMarks(other.marks, marks) &&
       other.showOriginal == showOriginal &&
-      other.needsReview == needsReview;
+      other.needsReview == needsReview &&
+      other.languageCode == languageCode &&
+      other.translationEdited == translationEdited;
 
   @override
-  int get hashCode =>
-      Object.hash(source, zh, Object.hashAll(marks), showOriginal, needsReview);
+  int get hashCode => Object.hash(
+    source,
+    zh,
+    Object.hashAll(marks),
+    showOriginal,
+    needsReview,
+    languageCode,
+    translationEdited,
+  );
 
   static bool _sameMarks(
     List<TranslationTagMark> a,

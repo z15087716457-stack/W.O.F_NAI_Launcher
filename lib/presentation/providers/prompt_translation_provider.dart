@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../core/autocomplete/tag_translation_lookup.dart';
+import '../../core/autocomplete/chinese_term_matcher.dart';
 import '../../core/utils/prompt_translation_document.dart';
 import '../../core/utils/prompt_translation_edit.dart';
+import '../../core/utils/prompt_translation_language.dart';
 import '../../core/utils/tag_normalizer.dart';
 import '../../core/utils/nai_prompt_syntax.dart';
 import '../../data/models/prompt_block/pill_document.dart';
@@ -11,6 +13,7 @@ import '../prompt_assistant/services/prompt_assistant_service.dart';
 import 'character_prompt_provider.dart';
 import 'image_generation_provider.dart';
 import 'pill_workspace_provider.dart';
+import 'locale_provider.dart';
 
 /// Only verified, unambiguous category metadata becomes an editor decoration.
 final promptTranslationAnnotationProvider =
@@ -153,13 +156,14 @@ class PromptTranslationCoordinator {
           byTag[candidate.canonicalTag] = {
             'tag': candidate.canonicalTag,
             'title': TagNormalizer.toDisplay(candidate.canonicalTag),
-            'zh': term.text,
+            if (request.languageCode == 'zh') 'zh': term.text,
+            'matched_text': term.text,
             'icon_id': candidate.category.name,
           };
         }
-        final hits = await _ref.read(chinesePromptTermLookupProvider)(
-          request.zh,
-        );
+        final hits = request.languageCode == 'zh'
+            ? await _ref.read(chinesePromptTermLookupProvider)(request.zh)
+            : const <ChineseTermHit>[];
         for (final hit in hits) {
           final candidate = hit.candidate;
           byTag.putIfAbsent(
@@ -340,6 +344,9 @@ class PromptTranslationCoordinator {
       }
       final batch = PromptTranslationBatch.prepare(snapshots);
       if (batch.isEmpty) return const PromptTranslationResult(0, 0);
+      final languageCode = PromptTranslationLanguage.fromCode(
+        _ref.read(localeNotifierProvider).languageCode,
+      ).code;
 
       final groups = <String, List<PromptTranslationGroup>>{};
       for (final part in batch.partitions()) {
@@ -347,7 +354,7 @@ class PromptTranslationCoordinator {
         final raw = await _ref
             .read(promptAssistantServiceProvider)
             .translatePromptGroup(
-              part.requestJson(glossary),
+              part.requestJson(glossary, languageCode: languageCode),
               sessionId: 'prompt-translation-${negative ? 'neg' : 'pos'}',
             );
         final parsed = part.parseGroups(
@@ -362,6 +369,7 @@ class PromptTranslationCoordinator {
       final replacements = batch.buildFromGroups(
         groups,
         autoFormat: _ref.read(autoFormatPromptSettingsProvider),
+        languageCode: languageCode,
       );
       var converted = 0;
       var changed = 0;
@@ -400,6 +408,9 @@ class PromptTranslationCoordinator {
     if (initial == null) return false;
     _ref.read(promptTranslationBusyProvider.notifier).state = true;
     try {
+      final languageCode = PromptTranslationLanguage.fromCode(
+        _ref.read(localeNotifierProvider).languageCode,
+      ).code;
       final batch = PromptTranslationBatch.prepare({
         'single': PillDocument(text: initial.source, instances: const {}),
       });
@@ -408,20 +419,23 @@ class PromptTranslationCoordinator {
       final raw = await _ref
           .read(promptAssistantServiceProvider)
           .translatePromptGroup(
-            batch.requestJson(glossary),
+            batch.requestJson(glossary, languageCode: languageCode),
             sessionId: 'prompt-translation-single',
           );
       final rebuilt = batch.parseAndBuild(
         raw,
         glossary: glossary,
         verifiedTags: await _verifyProposedTags(batch, raw, glossary),
+        languageCode: languageCode,
       )['single']!;
       final reading = StringBuffer();
       final marks = <TranslationTagMark>[];
       for (final marker in rebuilt.text.split('')) {
         final part = rebuilt.instances[marker]?.translation;
         if (part == null) continue;
-        if (reading.isNotEmpty) reading.write('，');
+        if (reading.isNotEmpty) {
+          reading.write(languageCode == 'en' ? ', ' : '，');
+        }
         final offset = reading.length;
         reading.write(part.zh);
         marks.addAll([
@@ -454,6 +468,8 @@ class PromptTranslationCoordinator {
               marks: List.unmodifiable(marks),
               showOriginal: false,
               needsReview: false,
+              languageCode: languageCode,
+              translationEdited: false,
             ),
           );
       return true;

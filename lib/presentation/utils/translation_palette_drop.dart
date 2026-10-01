@@ -24,6 +24,8 @@ Future<void> acceptPaletteDrag(
         for (final mark in translation.marks) mark.toJson(),
       ],
       readingTranslationNeedsReview: translation.needsReview,
+      readingTranslationLanguageCode: translation.languageCode,
+      readingTranslationEdited: translation.translationEdited,
       appearance: 'translation',
       color: '#FF7187BD',
     );

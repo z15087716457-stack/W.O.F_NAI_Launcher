@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,8 +21,136 @@ import 'package:nai_launcher/presentation/providers/character_prompt_provider.da
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
+import 'package:nai_launcher/presentation/providers/locale_provider.dart';
 
 void main() {
+  for (final language in ['zh', 'en', 'ja', 'ko']) {
+    test(
+      '$language translation uses locale snapshot, persists language and clears edit states',
+      () async {
+        final service = _TranslationService();
+        final pending = Completer<String>();
+        final dispatched = Completer<void>();
+        String? sent;
+        when(
+          () => service.translatePromptGroup(
+            any(),
+            sessionId: any(named: 'sessionId'),
+          ),
+        ).thenAnswer((call) {
+          sent = call.positionalArguments.single as String;
+          dispatched.complete();
+          return pending.future;
+        });
+        final container = ProviderContainer(
+          overrides: [
+            characterPromptNotifierProvider.overrideWith(_Characters.new),
+            promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+            promptAssistantServiceProvider.overrideWith((ref) => service),
+            unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+            tagTranslationLookupProvider.overrideWith((ref) => _Translations()),
+            localeNotifierProvider.overrideWith(() => _Locale(language)),
+          ],
+        );
+        addTearDown(container.dispose);
+        final workspace = container.read(
+          pillWorkspaceProvider(PillScopes.main).notifier,
+        );
+        workspace.insertTranslationAt(
+          offset: 0,
+          source: 'blue eyes',
+          zh: '旧译文',
+          needsReview: true,
+        );
+        const marker = '\uE000';
+        final initial = container
+            .read(pillWorkspaceProvider(PillScopes.main))
+            .document
+            .instances[marker]!
+            .translation!;
+        workspace.updateTranslation(
+          marker,
+          initial.copyWith(translationEdited: true),
+        );
+        final result = container
+            .read(promptTranslationCoordinatorProvider)
+            .retranslateSingle(PillScopes.main, marker);
+        await dispatched.future;
+        expect((jsonDecode(sent!) as Map)['target_language'], language);
+        await container
+            .read(localeNotifierProvider.notifier)
+            .setLocale(language == 'en' ? 'ja' : 'en');
+        pending.complete(
+          jsonEncode({
+            'fields': [
+              {
+                'id': 'single',
+                'groups': [
+                  {
+                    'ids': ['single:0'],
+                    'zh': 'new reading',
+                  },
+                ],
+              },
+            ],
+          }),
+        );
+        expect(await result, isTrue);
+        final updated = container
+            .read(pillWorkspaceProvider(PillScopes.main))
+            .document
+            .instances[marker]!
+            .translation!;
+        expect(updated.languageCode, language);
+        expect(updated.source, initial.source);
+        expect(updated.needsReview, isFalse);
+        expect(updated.translationEdited, isFalse);
+
+        // New batches also carry the selected UI language, independently of old
+        // blocks; switching it does not silently relabel existing readings.
+        workspace.setText('blue eyes');
+        when(
+          () => service.translatePromptGroup(
+            any(),
+            sessionId: any(named: 'sessionId'),
+          ),
+        ).thenAnswer((call) async {
+          sent = call.positionalArguments.single as String;
+          return jsonEncode({
+            'fields': [
+              {
+                'id': 'main',
+                'groups': [
+                  {
+                    'ids': ['main:0'],
+                    'zh': 'batch reading',
+                  },
+                ],
+              },
+            ],
+          });
+        });
+        final nextLanguage = container
+            .read(localeNotifierProvider)
+            .languageCode;
+        await container
+            .read(promptTranslationCoordinatorProvider)
+            .translate(false);
+        expect((jsonDecode(sent!) as Map)['target_language'], nextLanguage);
+        expect(
+          container
+              .read(pillWorkspaceProvider(PillScopes.main))
+              .document
+              .instances
+              .values
+              .single
+              .translation!
+              .languageCode,
+          nextLanguage,
+        );
+      },
+    );
+  }
   group('bilingual editor draft conversion', () {
     const request = PromptTranslationEditRequest(
       direction: PromptTranslationDirection.toSource,
@@ -718,6 +847,16 @@ ProviderContainer _testContainer() {
 }
 
 class _TranslationService extends Mock implements PromptAssistantService {}
+
+class _Locale extends LocaleNotifier {
+  _Locale(this.code);
+  final String code;
+  @override
+  Locale build() => Locale(code);
+  @override
+  Future<void> setLocale(String languageCode) async =>
+      state = Locale(languageCode);
+}
 
 class _LocalTags extends Mock implements LocalTagExpansionService {}
 

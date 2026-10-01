@@ -4,6 +4,24 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
 
 void main() {
+  test('saved translation keeps its language and independent edit states', () {
+    final block = PromptBlock.create(
+      title: '青い目',
+      content: 'blue eyes',
+      readingTranslationZh: '青い目',
+      readingTranslationLanguageCode: 'ja',
+      readingTranslationNeedsReview: true,
+      readingTranslationEdited: true,
+    );
+    final restored = PromptBlock.fromJson(block.toJson());
+    expect(restored, block);
+    expect(restored.content, 'blue eyes');
+    final old = Map<String, dynamic>.from(block.toJson())
+      ..remove('readingTranslationLanguageCode')
+      ..remove('readingTranslationEdited');
+    expect(PromptBlock.fromJson(old).readingTranslationLanguageCode, 'zh');
+    expect(PromptBlock.fromJson(old).readingTranslationEdited, isFalse);
+  });
   test('legacy block uses its own id as lineage', () {
     final block = PromptBlock.create(id: 'original', title: 'a', content: 'b');
     final json = Map<String, dynamic>.from(block.toJson())..remove('lineageId');

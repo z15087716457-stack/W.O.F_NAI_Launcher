@@ -28,6 +28,7 @@ const upKey = Key('translation-pill-to-source');
 const downKey = Key('translation-pill-to-chinese');
 const saveKey = Key('translation-pill-save');
 const badgeKey = Key('translation-pill-modified');
+const editedKey = Key('translation-pill-edited');
 final _boundary = GlobalKey();
 
 String fieldText(WidgetTester tester, Key key) =>
@@ -49,6 +50,8 @@ Future<TranslationPillEditHandle> openEditor(
   Future<void> Function()? onConfigure,
   bool enableTags = false,
   Future<List<TranslationTagMark>> Function(String, bool)? annotations,
+  Locale locale = const Locale('zh'),
+  double textScale = 1,
 }) async {
   late TranslationPillEditHandle handle;
   await tester.pumpWidget(
@@ -58,7 +61,7 @@ Future<TranslationPillEditHandle> openEditor(
         tagWikiRepositoryProvider.overrideWithValue(_Wiki()),
       ],
       child: MaterialApp(
-        locale: const Locale('zh'),
+        locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         theme: AppTheme.getTheme(
@@ -67,7 +70,12 @@ Future<TranslationPillEditHandle> openEditor(
               ? Brightness.dark
               : Brightness.light,
         ),
-        builder: (_, child) => RepaintBoundary(key: _boundary, child: child!),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: RepaintBoundary(key: _boundary, child: child!),
+        ),
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(
@@ -257,7 +265,9 @@ void main() {
         converter: (_, __) async => const PromptTranslationEditResult('绿眼睛，微笑'),
       );
       await tester.enterText(find.byKey(zhKey), '蓝眼睛，露出微笑');
+      await tester.pump();
       expect(find.byKey(badgeKey), findsNothing);
+      expect(find.byKey(editedKey), findsOneWidget);
       await tester.enterText(find.byKey(sourceKey), 'green eyes, smile');
       await tester.pump();
       expect(find.byKey(badgeKey), findsOneWidget);
@@ -265,6 +275,7 @@ void main() {
       await settleConversion(tester);
       expect(fieldText(tester, zhKey), '绿眼睛，微笑');
       expect(find.byKey(badgeKey), findsNothing);
+      expect(find.byKey(editedKey), findsNothing);
       await tester.enterText(find.byKey(sourceKey), 'green eyes, long hair');
       await tester.pump();
       expect(find.byKey(badgeKey), findsOneWidget);
@@ -277,6 +288,148 @@ void main() {
     },
   );
 
+  testWidgets(
+    'both statuses share the source title row and persist after save',
+    (tester) async {
+      final handle = await openEditor(tester);
+      await tester.enterText(find.byKey(sourceKey), 'green eyes, smile');
+      await tester.enterText(find.byKey(zhKey), '绿眼睛，微笑');
+      await tester.pump();
+      final sourceStatus = tester.getRect(find.byKey(badgeKey));
+      final readingStatus = tester.getRect(find.byKey(editedKey));
+      expect(readingStatus.center.dy, closeTo(sourceStatus.center.dy, .1));
+      expect(readingStatus.left, greaterThan(sourceStatus.right));
+      expect(
+        readingStatus.bottom,
+        lessThan(tester.getRect(find.byKey(sourceKey)).top),
+      );
+      await tester.tap(find.byKey(saveKey));
+      await tester.pump();
+      final saved = await handle.result as TranslationPill;
+      expect(saved.needsReview, isTrue);
+      expect(saved.translationEdited, isTrue);
+      final reopened = await openEditor(
+        tester,
+        initial: TranslationPill.fromJson(saved.toJson()),
+      );
+      expect(find.byKey(badgeKey), findsOneWidget);
+      expect(find.byKey(editedKey), findsOneWidget);
+      reopened.dismiss();
+      await tester.pump();
+    },
+  );
+
+  for (final locale in ['en', 'ja']) {
+    testWidgets(
+      '$locale locale preserves old Chinese until confirmed conversion',
+      (tester) async {
+        final requests = <PromptTranslationEditRequest>[];
+        final handle = await openEditor(
+          tester,
+          locale: Locale(locale),
+          converter: (request, _) async {
+            requests.add(request);
+            return PromptTranslationEditResult(
+              locale == 'en' ? 'blue eyes, smile' : '青い目、笑顔',
+            );
+          },
+        );
+        expect(find.text(locale == 'en' ? 'Chinese' : '中国語'), findsOneWidget);
+        await tester.tap(find.byKey(downKey));
+        await settleConversion(tester);
+        expect(requests.single.languageCode, 'zh');
+        expect(requests.single.targetLanguageCode, locale);
+        expect(find.text(locale == 'en' ? 'English' : '日本語'), findsOneWidget);
+        expect(find.byKey(badgeKey), findsNothing);
+        expect(find.byKey(editedKey), findsNothing);
+        await tester.enterText(find.byKey(zhKey), 'manual reading');
+        await tester.pump();
+        expect(find.byKey(editedKey), findsOneWidget);
+        await tester.tap(find.byKey(upKey));
+        await settleConversion(tester);
+        expect(requests.last.languageCode, locale);
+        expect(find.byKey(editedKey), findsNothing);
+        await tester.tap(find.byKey(saveKey));
+        await tester.pump();
+        expect((await handle.result as TranslationPill).languageCode, locale);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('undoing translation polish clears only its quiet edit record', (
+    tester,
+  ) async {
+    final handle = await openEditor(
+      tester,
+      initial: const TranslationPill(
+        source: 'blue eyes',
+        zh: '蓝眼睛',
+        needsReview: true,
+      ),
+    );
+    await tester.enterText(find.byKey(zhKey), '蓝眼睛，微笑');
+    await tester.pump();
+    expect(find.byKey(editedKey), findsOneWidget);
+    await _control(tester, LogicalKeyboardKey.keyZ);
+    expect(find.byKey(editedKey), findsNothing);
+    expect(find.byKey(badgeKey), findsOneWidget);
+    handle.dismiss();
+    await tester.pump();
+  });
+
+  testWidgets(
+    'conversion undo and redo restore the reading language with its text',
+    (tester) async {
+      final handle = await openEditor(
+        tester,
+        locale: const Locale('en'),
+        converter: (_, __) async =>
+            const PromptTranslationEditResult('blue eyes, smile'),
+      );
+      await tester.tap(find.byKey(downKey));
+      await settleConversion(tester);
+      expect(find.text('English'), findsOneWidget);
+      await _control(tester, LogicalKeyboardKey.keyZ);
+      expect(fieldText(tester, zhKey), '蓝眼睛，微笑');
+      expect(find.text('Chinese'), findsOneWidget);
+      await _control(tester, LogicalKeyboardKey.keyY);
+      expect(fieldText(tester, zhKey), 'blue eyes, smile');
+      expect(find.text('English'), findsOneWidget);
+      await tester.tap(find.byKey(saveKey));
+      await tester.pump();
+      expect((await handle.result as TranslationPill).languageCode, 'en');
+    },
+  );
+
+  testWidgets(
+    'narrow English layout and enlarged text keep statuses above fields',
+    (tester) async {
+      tester.view.physicalSize = const Size(300, 360);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final handle = await openEditor(
+        tester,
+        locale: const Locale('en'),
+        textScale: 1.3,
+        initial: const TranslationPill(
+          source: 'blue eyes',
+          zh: '蓝眼睛',
+          needsReview: true,
+          translationEdited: true,
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.getRect(find.byKey(editedKey)).bottom,
+        lessThan(tester.getRect(find.byKey(sourceKey)).top),
+      );
+      handle.dismiss();
+      await tester.pump();
+    },
+  );
+
   testWidgets('initial modified capsule renders and survives Chinese-only save', (
     tester,
   ) async {
@@ -286,6 +439,7 @@ void main() {
         source: '1.4::blue eyes::, {long hair}, artist:asteroid_ill',
         zh: '1.4::蓝眼睛::，{长发}，画师：asteroid ill',
         needsReview: true,
+        translationEdited: true,
         marks: [
           TranslationTagMark(
             start: 19,

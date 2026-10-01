@@ -23,6 +23,40 @@ void main() {
   const markerA = '\uE000';
   const markerB = '\uE001';
 
+  testWidgets(
+    'reinserted library reading keeps language and both edit states',
+    (tester) async {
+      final block = PromptBlock.create(
+        id: 'ja-reading',
+        title: '青い目',
+        content: 'blue eyes',
+        readingTranslationZh: '青い目',
+        readingTranslationLanguageCode: 'ja',
+        readingTranslationNeedsReview: true,
+        readingTranslationEdited: true,
+      );
+      final restored = PromptBlock.fromJson(block.toJson());
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: [restored],
+          folders: const [],
+        ),
+      );
+      container
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .insertBlockAt(offset: 0, blockId: block.id);
+      await tester.pump();
+      final state = container.read(pillWorkspaceNotifierProvider);
+      final reading = state.document.instances.values.single.translation!;
+      expect(reading.languageCode, 'ja');
+      expect(reading.needsReview, isTrue);
+      expect(reading.translationEdited, isTrue);
+      expect(state.projection, 'blue eyes');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('block inserted via provider renders a pill and projects', (
     tester,
   ) async {
@@ -538,7 +572,13 @@ void main() {
       tester,
       const PromptBlockDragData(
         blockId: '',
-        translation: TranslationPill(source: 'blue eyes', zh: '蓝眼睛'),
+        translation: TranslationPill(
+          source: 'blue eyes',
+          zh: '青い目',
+          languageCode: 'ja',
+          needsReview: true,
+          translationEdited: true,
+        ),
         instanceMarker: PillInstanceDragRef(
           marker: markerA,
           occurrence: 0,
@@ -559,6 +599,10 @@ void main() {
     expect(targetDoc.instances.length, 2);
     expect(targetDoc.instances[markerA]!.translation!.source, 'bad hands');
     expect(targetDoc.instances[markerB]!.translation!.source, 'blue eyes');
+    final copied = targetDoc.instances[markerB]!.translation!;
+    expect(copied.languageCode, 'ja');
+    expect(copied.needsReview, isTrue);
+    expect(copied.translationEdited, isTrue);
   });
 
   testWidgets('long translation reserves its full height in the prompt field', (
