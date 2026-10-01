@@ -173,6 +173,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Widget _buildSettings(BuildContext context) {
     final theme = Theme.of(context), scheme = theme.colorScheme;
+    final captionHeight = WindowChromeScope.heightOf(context);
+    final headerHeight = captionHeight > 44 ? captionHeight : 44.0;
     final language = Localizations.localeOf(context).languageCode;
     String text(String zh, String en, String ja) => language == 'zh'
         ? zh
@@ -388,9 +390,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Scaffold(
           backgroundColor: scheme.surface,
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(44),
+            preferredSize: Size.fromHeight(headerHeight),
             child: SizedBox(
-              height: 44,
+              height: headerHeight,
               child: Stack(
                 children: [
                   Positioned(
@@ -402,33 +404,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       key: Key('settings-header-drag'),
                     ),
                   ),
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 22),
-                        child: IgnorePointer(
-                          child: Text(
-                            context.l10n.settings_title,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                  SizedBox(
+                    height: captionHeight,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22),
+                          child: IgnorePointer(
+                            child: Text(
+                              context.l10n.settings_title,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                      TextButton.icon(
-                        key: const Key('settings-open-search'),
-                        onPressed: () => _search(context, sections),
-                        icon: const Icon(Icons.search, size: 16),
-                        label: Text(text('搜索设置', 'Search settings', '設定を検索')),
-                        style: TextButton.styleFrom(
-                          foregroundColor: scheme.onSurfaceVariant,
+                        const Spacer(),
+                        TextButton.icon(
+                          key: const Key('settings-open-search'),
+                          onPressed: () => _search(context, sections),
+                          icon: const Icon(Icons.search, size: 16),
+                          label: Text(text('搜索设置', 'Search settings', '設定を検索')),
+                          style: TextButton.styleFrom(
+                            minimumSize: Size(0, captionHeight),
+                            fixedSize: Size.fromHeight(captionHeight),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            foregroundColor: scheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        width: WindowChromeScope.reservedWidthOf(context) + 12,
-                      ),
-                    ],
+                        SizedBox(
+                          width:
+                              WindowChromeScope.reservedWidthOf(context) + 12,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -343,6 +343,22 @@ void main() {
         );
       });
       await pumpPolish(tester, width: 2400);
+      final search = tester.getRect(
+        find.byKey(const Key('settings-open-search')),
+      );
+      final captions = tester.getRect(
+        find.byKey(const Key('window-caption-controls')),
+      );
+      expect(search.center.dy, captions.center.dy);
+      expect(search.height, captions.height);
+      await capturePolish(tester, 'settings-header-aligned');
+      final hover = await tester.createGesture(
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      await hover.addPointer(location: search.center);
+      await tester.pumpAndSettle();
+      await capturePolish(tester, 'settings-header-hover');
+      await hover.removePointer();
       final pane = tester.getRect(
         find.byKey(const Key('settings-content-pane')),
       );
@@ -638,7 +654,7 @@ void main() {
               reason:
                   '${destination.name}/${width.toInt()}/$scale/${brightness.name}',
             );
-            if (shouldCapture)
+            if (shouldCapture) {
               await tester.runAsync(() async {
                 final image =
                     await (capture.currentContext!.findRenderObject()!
@@ -654,6 +670,7 @@ void main() {
                 await file.writeAsBytes(bytes!.buffer.asUint8List());
                 image.dispose();
               });
+            }
           }
           await tester.pumpWidget(const SizedBox.shrink());
           await tester.pump();
