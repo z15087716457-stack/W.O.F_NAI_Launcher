@@ -839,7 +839,7 @@ void main() {
           .getSize(find.byKey(const Key('tag-expansion-wiki-panel')))
           .height;
       expect(longHeight, greaterThan(shortHeight));
-      expect(longHeight, lessThanOrEqualTo(230));
+      expect(longHeight, lessThanOrEqualTo(280));
       expect(
         find.byKey(const Key('tag-expansion-wiki-scroll')),
         findsOneWidget,

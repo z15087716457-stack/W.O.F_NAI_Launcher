@@ -1263,9 +1263,17 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                             if (translated != null)
                               Align(
                                 alignment: Alignment.centerRight,
-                                child: WikiRetranslateButton(
+                                child: WikiArticleActions(
                                   tag: tag,
                                   surface: _articleSurface,
+                                  showTranslation: _showTranslation,
+                                  onToggle: () {
+                                    setState(
+                                      () =>
+                                          _showTranslation = !_showTranslation,
+                                    );
+                                    _saveReadingSettings();
+                                  },
                                 ),
                               ),
                             if (_showTranslation &&

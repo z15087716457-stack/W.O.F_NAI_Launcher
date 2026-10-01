@@ -290,6 +290,56 @@ void main() {
         tester.widget<Text>(find.textContaining('标签小百科 ·')).maxLines,
         isNull,
       );
+      final toggle = find.byKey(const ValueKey('wiki-reading-toggle-$longTag'));
+      expect(
+        find.descendant(of: toggle, matching: find.text('译文')),
+        findsOneWidget,
+      );
+      final retry = find.byKey(const ValueKey('wiki-retranslate-$longTag'));
+      expect(
+        tester.getRect(toggle).right,
+        lessThan(tester.getRect(retry).left),
+      );
+      expect(tester.getCenter(toggle).dy, tester.getCenter(retry).dy);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: toggle, matching: find.text('原文')),
+        findsOneWidget,
+      );
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        startsWith('See '),
+      );
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        startsWith('See '),
+      );
+      // A new article inherits the reading choice; going back restores the
+      // version saved with the visit even if it changed on the new article.
+      tester
+          .widget<WikiLinkedBody>(find.byType(WikiLinkedBody))
+          .onTagTap(tags[3]);
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('wiki-reading-toggle-blue_eyes')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('tag-expansion-back')));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: toggle, matching: find.text('原文')),
+        findsOneWidget,
+      );
+      await capture(tester, 'preview-original');
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        auto.wikiFor(longTag),
+      );
       expect(tester.takeException(), isNull);
       await capture(tester, 'preview');
       auto.busy = 1;
@@ -345,6 +395,37 @@ void main() {
       expect(
         find.byKey(const ValueKey('wiki-retranslate-$longTag')),
         findsOneWidget,
+      );
+      final toggle = find.byKey(const ValueKey('wiki-reading-toggle-$longTag'));
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        startsWith('See '),
+      );
+      expect(
+        tester
+            .widget<SegmentedButton<bool>>(
+              find.byKey(const Key('wiki-reading-language')),
+            )
+            .selected,
+        {false},
+      );
+      expect(
+        (await SharedPreferences.getInstance()).getBool(
+          'wiki_show_translation',
+        ),
+        isFalse,
+      );
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SegmentedButton<bool>>(
+              find.byKey(const Key('wiki-reading-language')),
+            )
+            .selected,
+        {true},
       );
       expect(tester.takeException(), isNull);
       final longTitle = find.descendant(
@@ -483,6 +564,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('fate testarossa'));
       await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('wiki-reading-toggle-fate_testarossa')),
+        findsNothing,
+      );
       final navigate = tester
           .widget<WikiLinkedBody>(find.byType(WikiLinkedBody))
           .onTagTap;
@@ -509,6 +594,49 @@ void main() {
         'Old slow article.',
       );
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'larger preview stays within a compact viewport at enlarged text size',
+    (tester) async {
+      tester.view.physicalSize = const Size(420, 620);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final auto = _Auto()
+        ..bodyOverride = List.filled(30, '正文说明，保留标签与分段。').join('\n\n');
+      await _pump(
+        tester,
+        Center(
+          child: SizedBox(
+            width: 300,
+            child: TagExpansionWrapper(
+              controller: controller,
+              child: TextField(key: const Key('host'), controller: controller),
+            ),
+          ),
+        ),
+        auto,
+        scale: 1.3,
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('host')));
+      await tester.pumpAndSettle();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.text('fate testarossa'));
+      await tester.pumpAndSettle();
+      final panel = tester.getRect(
+        find.byKey(const Key('tag-expansion-wiki-panel')),
+      );
+      expect(panel.height, 280);
+      expect(panel.left, greaterThanOrEqualTo(8));
+      expect(panel.right, lessThanOrEqualTo(412));
+      expect(panel.bottom, lessThanOrEqualTo(612));
+      expect(tester.takeException(), isNull);
+      await capture(tester, 'preview-compact');
     },
   );
 

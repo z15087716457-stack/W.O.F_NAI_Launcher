@@ -40,6 +40,7 @@ class _ExpansionVisit {
     required this.searchOffset,
     required this.relatedOffset,
     required this.wikiOffset,
+    required this.showWikiTranslation,
     required this.searchLoading,
     required this.relatedLoading,
     required this.wikiLoading,
@@ -54,6 +55,7 @@ class _ExpansionVisit {
   final TagWikiEntry? wikiEntry;
   final bool usingContext, searchLoading, relatedLoading, wikiLoading;
   final bool searchFailed, relatedFailed, wikiFailed;
+  final bool showWikiTranslation;
   final int selectedIndex;
   final double searchOffset, relatedOffset, wikiOffset;
 }
@@ -159,6 +161,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   TagWikiEntry? _wikiEntry;
   bool _wikiLoading = false;
   bool _wikiFailed = false;
+  bool _showWikiTranslation = true;
   String? _hoveredId;
   String? _focusedId;
   String? _contextTag;
@@ -431,6 +434,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         searchOffset: _searchScroll.hasClients ? _searchScroll.offset : 0,
         relatedOffset: _relatedScroll.hasClients ? _relatedScroll.offset : 0,
         wikiOffset: _wikiScroll.hasClients ? _wikiScroll.offset : 0,
+        showWikiTranslation: _showWikiTranslation,
         searchLoading: _searchLoading,
         relatedLoading: _relatedLoading,
         wikiLoading: _wikiLoading,
@@ -469,6 +473,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _selectedIndex = visit.selectedIndex;
     _wikiCandidate = visit.wikiCandidate;
     _wikiEntry = visit.wikiEntry;
+    _showWikiTranslation = visit.showWikiTranslation;
     _searchLoading = false;
     _relatedLoading = false;
     _wikiLoading = false;
@@ -1005,7 +1010,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
               .read(autoTagTranslationProvider)
               .wikiFor(_wikiCandidate!.canonicalTag);
     final wikiBody =
-        translatedWiki ??
+        (_showWikiTranslation ? translatedWiki : null) ??
         _wikiEntry?.body ??
         (_wikiFailed
             ? overlayContext.l10n.common_error
@@ -1021,27 +1026,34 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final headerHeight = math.max(28.0, titleMeasure.height) + 10;
     titleMeasure.dispose();
     final footerHeight = translatedWiki == null ? 0.0 : 36.0;
-    final minimumWiki = headerHeight + footerHeight + 56;
-    final height = math.min(
-      desiredHeight,
-      availableHeight - (hasWiki ? minimumWiki + _panelGap : 0),
-    );
-    if (width <= 0 || height <= 0) return const SizedBox.shrink();
+    final minimumWiki = headerHeight + footerHeight + 80;
     final bodyMeasure = TextPainter(
       text: TextSpan(text: wikiBody, style: theme.textTheme.bodySmall),
       textDirection: Directionality.of(overlayContext),
       textScaler: MediaQuery.textScalerOf(overlayContext),
     )..layout(maxWidth: math.max(1, width - 32));
-    final wikiHeight = hasWiki
-        ? math.min(
-            (headerHeight + footerHeight + 22 + bodyMeasure.height).clamp(
-              minimumWiki,
-              math.max(230.0, minimumWiki),
-            ),
-            math.max(0.0, availableHeight - height - _panelGap),
+    final desiredWikiHeight = hasWiki
+        ? (headerHeight + footerHeight + 22 + bodyMeasure.height).clamp(
+            minimumWiki,
+            math.max(280.0, minimumWiki),
           )
         : 0.0;
     bodyMeasure.dispose();
+    // Reserve the article's preferred space before sizing the result list.
+    // On short screens the list can scroll, while both panels stay visible.
+    final reservedWikiHeight = math.min(
+      desiredWikiHeight,
+      math.max(minimumWiki, availableHeight - 200),
+    );
+    final height = math.min(
+      desiredHeight,
+      availableHeight - (hasWiki ? reservedWikiHeight + _panelGap : 0),
+    );
+    if (width <= 0 || height <= 0) return const SizedBox.shrink();
+    final wikiHeight = math.min(
+      desiredWikiHeight,
+      math.max(0.0, availableHeight - height - _panelGap),
+    );
     final totalHeight = height + (hasWiki ? wikiHeight + _panelGap : 0);
     final below = anchor.dy + 8;
     final top =
@@ -1688,6 +1700,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final theme = Theme.of(context);
     final candidate = _wikiCandidate!;
     final autoTranslation = ref.read(autoTagTranslationProvider);
+    final translated = autoTranslation.wikiFor(candidate.canonicalTag);
     return Material(
       key: const ValueKey('tag-expansion-wiki-panel'),
       elevation: 14,
@@ -1760,7 +1773,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     padding: const EdgeInsets.fromLTRB(12, 9, 12, 12),
                     child: WikiLinkedBody(
                       body:
-                          autoTranslation.wikiFor(candidate.canonicalTag) ??
+                          (_showWikiTranslation ? translated : null) ??
                           _wikiEntry?.body ??
                           (_wikiFailed
                               ? context.l10n.common_error
@@ -1770,14 +1783,19 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     ),
                   ),
           ),
-          if (autoTranslation.wikiFor(candidate.canonicalTag) != null)
+          if (translated != null && !_wikiLoading)
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: const EdgeInsets.only(right: 6, bottom: 4),
-                child: WikiRetranslateButton(
+                child: WikiArticleActions(
                   tag: candidate.canonicalTag,
                   surface: _wikiSurface,
+                  showTranslation: _showWikiTranslation,
+                  onToggle: () {
+                    _showWikiTranslation = !_showWikiTranslation;
+                    _markNeedsBuild();
+                  },
                 ),
               ),
             ),
