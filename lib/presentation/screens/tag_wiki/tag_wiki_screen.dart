@@ -22,6 +22,7 @@ import 'wiki_sidebar.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/common/wiki_linked_body.dart';
 import '../../widgets/common/wiki_retranslate_button.dart';
+import '../../widgets/autocomplete/tag_candidate_title.dart';
 
 class _WikiVisit {
   const _WikiVisit({
@@ -981,10 +982,12 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          TagNormalizer.toDisplay(tag),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                        TagCandidateTitle(
+                                          title: TagNormalizer.toDisplay(tag),
+                                          category: candidate.category,
+                                          iconKey: ValueKey(
+                                            'wiki-category-${candidate.category.name}-$tag',
+                                          ),
                                           style: const TextStyle(
                                             fontSize: 12.5,
                                             fontWeight: FontWeight.w600,
@@ -1009,6 +1012,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                       ],
                                     ),
                                   ),
+                                  const SizedBox(width: 6),
                                   Text(
                                     _postCount(candidate.postCount),
                                     style: TextStyle(

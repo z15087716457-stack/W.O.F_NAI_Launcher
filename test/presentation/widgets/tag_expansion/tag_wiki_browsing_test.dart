@@ -24,6 +24,7 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
+import 'package:nai_launcher/presentation/widgets/autocomplete/tag_candidate_title.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -31,10 +32,22 @@ import '../../../helpers/studio_capture_fonts.dart';
 
 const longTag = 'artoria_pendragon_(swimsuit_ruler)_(first_ascension)_(fate)';
 final tags = [
-  for (final name in ['fate_testarossa', longTag, 'saber_(fate)', 'blue_eyes'])
+  for (final name in [
+    'fate_testarossa',
+    longTag,
+    'saber_(fate)',
+    'blue_eyes',
+    'artist_name',
+    'fate_(series)',
+  ])
     CompletionCandidate(
       canonicalTag: name,
-      category: TagCategory.character,
+      category: switch (name) {
+        'blue_eyes' => TagCategory.general,
+        'artist_name' => TagCategory.artist,
+        'fate_(series)' => TagCategory.copyright,
+        _ => TagCategory.character,
+      },
       postCount: 1300,
       translation: name == longTag ? '阿尔托莉雅·潘德拉贡（泳装 Ruler）（第一阶段）（Fate）' : null,
       matchKind: CompletionMatchKind.englishExact,
@@ -330,6 +343,47 @@ void main() {
       );
       expect(
         find.byKey(const ValueKey('wiki-retranslate-$longTag')),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      final longTitle = find.descendant(
+        of: find.byWidgetPredicate(
+          (widget) =>
+              widget is TagCandidateTitle &&
+              widget.title ==
+                  'artoria pendragon (swimsuit ruler) (first ascension) (fate)',
+        ),
+        matching: find.byType(Text),
+      );
+      final longIcon = find.byKey(
+        const ValueKey('wiki-category-character-$longTag'),
+      );
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: longTitle, matching: find.byType(RichText)),
+      );
+      expect(paragraph.didExceedMaxLines, isTrue);
+      final titleRect = tester.getRect(longTitle);
+      final iconRect = tester.getRect(longIcon);
+      expect(iconRect.left - titleRect.right, closeTo(3, .01));
+      expect(
+        iconRect.right,
+        lessThan(tester.getRect(find.text('1.3k').at(1)).left),
+      );
+      final shortRect = tester.getRect(find.text('fate testarossa'));
+      final shortIcon = tester.getRect(
+        find.byKey(const ValueKey('wiki-category-character-fate_testarossa')),
+      );
+      expect(shortIcon.left - shortRect.right, closeTo(3, .01));
+      expect(
+        find.byKey(const ValueKey('wiki-category-general-blue_eyes')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('wiki-category-artist-artist_name')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('wiki-category-copyright-fate_(series)')),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);

@@ -19,6 +19,7 @@ import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
 import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../autocomplete/tag_category_visuals.dart';
+import '../autocomplete/tag_candidate_title.dart';
 import '../../router/app_router.dart';
 import '../common/translation_icon.dart';
 import '../common/related_tags_icon.dart';
@@ -1584,48 +1585,20 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Flexible(
-                                  fit: FlexFit.loose,
-                                  child: Text(
-                                    TagNormalizer.toDisplay(
-                                      candidate.canonicalTag,
-                                    ),
-                                    softWrap: true,
-                                    style: _tagTitleStyle(context)?.copyWith(
-                                      color: candidate.isExisting
-                                          ? theme.colorScheme.onSurfaceVariant
-                                          : null,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 2),
-                                Tooltip(
-                                  message: TagCategoryVisuals.label(
-                                    context,
-                                    candidate.category,
-                                  ),
-                                  child: SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: Icon(
-                                      TagCategoryVisuals.icon(
-                                        candidate.category,
-                                      ),
-                                      key: ValueKey(
-                                        'tag-expansion-category-${candidate.category.name}',
-                                      ),
-                                      size: 12,
-                                      color: TagCategoryVisuals.color(
-                                        context,
-                                        candidate.category,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            child: TagCandidateTitle(
+                              title: TagNormalizer.toDisplay(
+                                candidate.canonicalTag,
+                              ),
+                              category: candidate.category,
+                              maxLines: null,
+                              iconKey: ValueKey(
+                                'tag-expansion-category-${candidate.category.name}',
+                              ),
+                              style: _tagTitleStyle(context)?.copyWith(
+                                color: candidate.isExisting
+                                    ? theme.colorScheme.onSurfaceVariant
+                                    : null,
+                              ),
                             ),
                           ),
                           if (candidate.postCount > 0) ...[

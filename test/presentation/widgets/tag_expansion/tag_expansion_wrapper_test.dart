@@ -735,17 +735,17 @@ void main() {
     final copyrightIcon = find.byKey(
       const Key('tag-expansion-category-copyright'),
     );
-    expect(generalIcon, findsOneWidget);
+    expect(generalIcon, findsNothing);
     expect(characterIcon, findsOneWidget);
     expect(copyrightIcon, findsOneWidget);
     expect(find.byTooltip('Character'), findsOneWidget);
     expect(find.byTooltip('Copyright'), findsOneWidget);
     expect(
-      tester.widget<Icon>(generalIcon).color,
+      tester.widget<Icon>(copyrightIcon).color,
       isNot(tester.widget<Icon>(characterIcon).color),
     );
-    final title = tester.getRect(find.text('white background'));
-    final icon = tester.getRect(generalIcon);
+    final title = tester.getRect(find.text('hakurei reimu'));
+    final icon = tester.getRect(characterIcon);
     expect(icon.left - title.right, inInclusiveRange(0, 6));
 
     final mouse = await _hover(tester, find.text('white background'));

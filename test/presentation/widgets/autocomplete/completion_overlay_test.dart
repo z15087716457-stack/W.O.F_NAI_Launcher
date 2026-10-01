@@ -111,14 +111,19 @@ void main() {
       expect(find.textContaining('2/2', findRichText: true), findsOneWidget);
       expect(
         find.byKey(const ValueKey('autocomplete-category-general')),
-        findsOne,
+        findsNothing,
       );
       expect(
         find.byKey(const ValueKey('autocomplete-category-character')),
         findsOne,
       );
-      expect(find.byIcon(Icons.sell_rounded), findsOne);
+      expect(find.byIcon(Icons.sell_rounded), findsNothing);
       expect(find.byIcon(Icons.person_rounded), findsOne);
+      final characterTitle = tester.getRect(find.text('blue hair'));
+      final characterIcon = tester.getRect(
+        find.byKey(const ValueKey('autocomplete-category-character')),
+      );
+      expect(characterIcon.left - characterTitle.right, closeTo(3, .01));
 
       expect(find.byKey(const ValueKey('autocomplete-popup-footer')), findsOne);
       expect(find.byKey(const ValueKey('autocomplete-status-base')), findsOne);

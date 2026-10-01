@@ -7,6 +7,7 @@ import '../../../core/autocomplete/zh_dictionary_service.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import 'tag_category_visuals.dart';
+import 'tag_candidate_title.dart';
 import '../common/translation_icon.dart';
 import '../common/related_tags_icon.dart';
 
@@ -508,31 +509,18 @@ class _CompletionTile extends StatelessWidget {
               opacity: candidate.isExisting ? 0.46 : 1,
               child: Row(
                 children: [
-                  if (showCategory) ...[
-                    Tooltip(
-                      message: TagCategoryVisuals.label(
-                        context,
-                        candidate.category,
-                      ),
-                      child: Icon(
-                        TagCategoryVisuals.icon(candidate.category),
-                        key: ValueKey(
-                          'autocomplete-category-${candidate.category.name}',
-                        ),
-                        size: 15,
-                        color: categoryColor,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
                   Expanded(
                     flex: showTranslations ? 5 : 8,
-                    child: Text(
-                      candidate.category == TagCategory.library
+                    child: TagCandidateTitle(
+                      title: candidate.category == TagCategory.library
                           ? candidate.canonicalTag
                           : TagNormalizer.toDisplay(candidate.canonicalTag),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      category: candidate.category,
+                      showCategory: showCategory,
+                      iconSize: 15,
+                      iconKey: ValueKey(
+                        'autocomplete-category-${candidate.category.name}',
+                      ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: categoryColor,
                         fontWeight: FontWeight.w600,
