@@ -10,12 +10,13 @@ import '../../../data/models/auth/saved_account.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/layout_state_provider.dart';
+import '../../providers/settings_navigation_provider.dart';
 import '../../providers/update_provider.dart';
 import '../../router/app_branch.dart';
 import '../auth/account_avatar.dart';
 import '../auth/account_switch_helper.dart';
 import '../auth/add_account_dialog.dart';
-import '../auth/subscription_expiry_text.dart';
+import '../auth/account_popover.dart';
 
 class MainNavRail extends ConsumerWidget {
   static const double collapsedWidth = 48;
@@ -472,18 +473,18 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
     }
 
     final avatar = currentAccount != null
-        ? AccountAvatarSmall(account: currentAccount, size: 36)
+        ? AccountAvatarSmall(account: currentAccount, size: 40)
         : Container(
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
-              borderRadius: avatarBorderRadius(36),
+              borderRadius: avatarBorderRadius(40),
             ),
             child: Icon(
               Icons.person,
               color: theme.colorScheme.primary,
-              size: 22,
+              size: 24,
             ),
           );
 
@@ -496,7 +497,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => _showAccountMenu(context, currentAccount),
+            onTap: () => _showAccountMenu(context),
             onTapDown: (_) => setState(() => _isPressed = true),
             onTapUp: (_) => setState(() => _isPressed = false),
             onTapCancel: () => setState(() => _isPressed = false),
@@ -504,7 +505,7 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
             hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.06),
             focusColor: theme.colorScheme.primary.withValues(alpha: 0.12),
             child: Padding(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(2),
               child: AnimatedScale(
                 scale: _isPressed ? 0.97 : 1.0,
                 duration: const Duration(milliseconds: 140),
@@ -517,13 +518,13 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
                     return Row(
                       children: [
                         SizedBox(
-                          width: constraints.maxWidth.clamp(0.0, 36.0),
-                          height: 36,
+                          width: constraints.maxWidth.clamp(0.0, 40.0),
+                          height: 40,
                           child: Center(
                             child: SizedBox(
                               key: const Key('main-nav-avatar'),
-                              width: 36,
-                              height: 36,
+                              width: 40,
+                              height: 40,
                               child: avatar,
                             ),
                           ),
@@ -566,145 +567,53 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
     );
   }
 
-  /// 显示账户菜单
-  Future<void> _showAccountMenu(
-    BuildContext context,
-    SavedAccount? currentAccount,
-  ) async {
-    final theme = Theme.of(context);
-    final accounts = widget.ref.read(accountManagerNotifierProvider).accounts;
-    final authState = widget.ref.read(authNotifierProvider);
-
-    // 获取按钮的位置用于定位菜单
-    final RenderBox button = context.findRenderObject() as RenderBox;
-    final Offset offset = button.localToGlobal(Offset.zero);
-    final screenSize = MediaQuery.of(context).size;
-
-    // 使用 Rect 定义菜单弹出的锚点位置
+  Future<void> _showAccountMenu(BuildContext context) async {
+    final button = context.findRenderObject()! as RenderBox;
+    final navigatorBox =
+        Navigator.of(context, rootNavigator: true).context.findRenderObject()!
+            as RenderBox;
+    final offset = navigatorBox.globalToLocal(
+      button.localToGlobal(Offset.zero),
+    );
     final railWidth = _NavRailExpansionScope.isExpandedOf(context)
         ? MainNavRail.expandedWidth
         : MainNavRail.collapsedWidth;
-    final menuAnchor = Rect.fromLTWH(
-      railWidth + 8,
-      offset.dy,
-      1,
-      button.size.height,
+    final value = await showAccountPopover(
+      context,
+      anchor: Offset(offset.dx + railWidth + 8, offset.dy),
     );
-
-    final value = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromRect(menuAnchor, Offset.zero & screenSize),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      items: [
-        // 当前账号标题
-        if (currentAccount != null)
-          PopupMenuItem<String>(
-            enabled: false,
-            height: 40,
-            child: Text(
-              '${context.l10n.auth_currentAccount}: ${currentAccount.displayName}',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-          ),
-
-        // 分割线
-        if (currentAccount != null && accounts.length > 1)
-          const PopupMenuDivider(),
-
-        // 账号列表
-        ...accounts.map(
-          (account) => PopupMenuItem<String>(
-            value: 'switch_${account.id}',
-            height: account.subscriptionExpiresAt != null ? 56 : 48,
-            child: Row(
-              children: [
-                AccountAvatarSmall(account: account, size: 32),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        account.displayName,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (account.subscriptionExpiresAt != null)
-                        SubscriptionExpiryText(
-                          expiresAt: account.subscriptionExpiresAt!,
-                        ),
-                    ],
-                  ),
-                ),
-                if (account.id == authState.accountId)
-                  Icon(Icons.check, color: theme.colorScheme.primary, size: 20),
-              ],
-            ),
-          ),
-        ),
-
-        const PopupMenuDivider(),
-
-        // 添加账号
-        PopupMenuItem<String>(
-          value: 'add',
-          child: Row(
-            children: [
-              Icon(Icons.add, color: theme.colorScheme.onSurface, size: 20),
-              const SizedBox(width: 12),
-              Text(context.l10n.auth_addAccount),
-            ],
-          ),
-        ),
-
-        // 退出登录
-        PopupMenuItem<String>(
-          value: 'logout',
-          child: Row(
-            children: [
-              Icon(Icons.logout, color: theme.colorScheme.error, size: 20),
-              const SizedBox(width: 12),
-              Text(
-                context.l10n.auth_logout,
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-
-    if (value == null || !mounted) return;
-
-    if (value == 'add') {
-      if (mounted) {
-        // ignore: use_build_context_synchronously
+    if (value == null || !mounted || !context.mounted) return;
+    // Finish removing the dialog before auth listeners can change routes.
+    await SchedulerBinding.instance.endOfFrame;
+    if (!mounted || !context.mounted) return;
+    if (value.command != AccountPopoverCommand.manage &&
+        widget.ref.read(authNotifierProvider).isLoading) {
+      return;
+    }
+    switch (value.command) {
+      case AccountPopoverCommand.add:
         _showAddAccountDialog(context);
-      }
-    } else if (value == 'logout') {
-      // Use SchedulerBinding.endOfFrame to ensure logout happens AFTER the menu is fully disposed
-      // This prevents the "ref.listen can only be used within build method" error that occurs when
-      // ref.listen in app_router.dart is triggered during menu disposal. endOfFrame is more reliable
-      // than addPostFrameCallback because it waits for the entire frame to complete, including all
-      // post-frame callbacks and microtasks, ensuring the widget tree is stable.
-      SchedulerBinding.instance.endOfFrame.then((_) {
-        if (mounted) {
-          widget.ref.read(authNotifierProvider.notifier).logout();
-        }
-      });
-    } else if (value.startsWith('switch_')) {
-      final accountId = value.substring(7);
-      _switchAccount(accountId);
+      case AccountPopoverCommand.manage:
+        widget.ref.read(settingsAccountOpenRequestProvider.notifier).state++;
+        context.go('/settings');
+      case AccountPopoverCommand.logout:
+        widget.ref.read(authNotifierProvider.notifier).logout();
+      case AccountPopoverCommand.switchAccount:
+        final id = value.accountId;
+        if (id != null) await _switchAccount(id);
     }
   }
 
   /// 切换账号
   Future<void> _switchAccount(String accountId) async {
     final accounts = widget.ref.read(accountManagerNotifierProvider).accounts;
-    final account = accounts.firstWhere((a) => a.id == accountId);
-    if (!mounted) return;
+    final account = accounts.where((a) => a.id == accountId).firstOrNull;
+    final auth = widget.ref.read(authNotifierProvider);
+    if (!mounted ||
+        account == null ||
+        (auth.isAuthenticated && auth.accountId == accountId)) {
+      return;
+    }
     await AccountSwitchHelper.switchToAccount(context, widget.ref, account);
   }
 

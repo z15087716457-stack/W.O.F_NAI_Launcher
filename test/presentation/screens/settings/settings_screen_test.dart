@@ -1,4 +1,5 @@
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/providers/settings_navigation_provider.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/presentation/providers/font_provider.dart';
 import 'package:nai_launcher/presentation/providers/settings_font_scale_provider.dart';
@@ -321,6 +322,51 @@ void main() {
       image.dispose();
     });
   }
+
+  testWidgets(
+    'account menu request opens accounts from an existing settings section',
+    (tester) async {
+      final container = await pumpPolish(tester);
+      await tester.tap(find.text('常规与外观'));
+      await tester.pumpAndSettle();
+      expect(find.text('风格'), findsOneWidget);
+      container.read(settingsAccountOpenRequestProvider.notifier).state++;
+      await tester.pumpAndSettle();
+      expect(find.text('当前账号'), findsOneWidget);
+      expect(find.text('风格'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'account menu navigation retains the unsaved model confirmation',
+    (tester) async {
+      final container = await pumpPolish(tester);
+      await tester.tap(find.byKey(const ValueKey('settings-nav-models')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const Key('service-edit-connection')),
+      );
+      await tester.tap(find.byKey(const Key('service-edit-connection')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is TextField && widget.controller?.text == 'DeepSeek',
+        ),
+        '未保存的服务',
+      );
+      await tester.pumpAndSettle();
+      container.read(settingsAccountOpenRequestProvider.notifier).state++;
+      await tester.pumpAndSettle();
+      expect(find.text('保留当前编辑？'), findsOneWidget);
+      await tester.tap(find.text('继续编辑'));
+      await tester.pumpAndSettle();
+      expect(find.text('未保存的服务'), findsOneWidget);
+      expect(find.byType(AccountSettingsSection), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('search respects unsaved model connection edits', (tester) async {
     await pumpPolish(tester);

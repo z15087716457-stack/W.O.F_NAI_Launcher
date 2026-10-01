@@ -51,6 +51,14 @@ class _FakeMainNavStorage extends LocalStorageService {
   }
 }
 
+class _CaptureAuthNotifier extends AuthNotifier {
+  @override
+  AuthState build() => const AuthState(
+    status: AuthStatus.authenticated,
+    accountId: 'offline-rail-account',
+  );
+}
+
 class _CaptureAccountNotifier extends AccountManagerNotifier {
   @override
   AccountManagerState build() => AccountManagerState(
@@ -60,6 +68,19 @@ class _CaptureAccountNotifier extends AccountManagerNotifier {
         email: 'preview@example.test',
         nickname: 'PD',
         createdAt: DateTime(2026),
+        subscriptionExpiresAt:
+            DateTime(2026, 1, 1).millisecondsSinceEpoch ~/ 1000,
+      ),
+      SavedAccount(
+        id: 'offline-secondary',
+        email: 'second@example.test',
+        nickname: '鳄鱼',
+        createdAt: DateTime(2026),
+        subscriptionExpiresAt:
+            DateTime.now()
+                .add(const Duration(days: 4))
+                .millisecondsSinceEpoch ~/
+            1000,
       ),
     ],
   );
@@ -82,7 +103,7 @@ Future<void> _capture(
                 as RenderRepaintBoundary)
             .toImage(pixelRatio: 2);
     final bytes = (await image.toByteData(format: ui.ImageByteFormat.png))!;
-    final file = File('.dart_tool/main-nav-compact-captures/$name.png');
+    final file = File('.dart_tool/account-popover-captures/rail-$name.png');
     await file.parent.create(recursive: true);
     await file.writeAsBytes(bytes.buffer.asUint8List());
     image.dispose();
@@ -132,9 +153,9 @@ void main() {
     expect(tester.getTopLeft(avatar).dy, greaterThanOrEqualTo(8));
     expect(
       tester.getSize(find.byKey(const Key('main-nav-avatar'))),
-      const Size(36, 36),
+      const Size(40, 40),
     );
-    expect(tester.widget<Icon>(avatar).size, 22);
+    expect(tester.widget<Icon>(avatar).size, 24);
 
     expect(find.byKey(const Key('main-nav-primary-scroll')), findsOneWidget);
     expect(find.byIcon(StudioIcons.settings), findsOneWidget);
@@ -210,7 +231,7 @@ void main() {
     await tester.pumpAndSettle();
     final addAccount = find.text('添加账号');
     expect(addAccount, findsOneWidget);
-    expect(tester.getTopLeft(addAccount).dy, lessThan(150));
+    expect(tester.getTopLeft(find.byKey(const Key('account-popover'))).dy, 8);
     expect(
       tester.getTopLeft(addAccount).dx,
       greaterThan(MainNavRail.collapsedWidth),
@@ -293,7 +314,7 @@ void main() {
         ProviderScope(
           overrides: [
             localStorageServiceProvider.overrideWith((ref) => storage),
-            authNotifierProvider.overrideWith(_FakeAuthNotifier.new),
+            authNotifierProvider.overrideWith(_CaptureAuthNotifier.new),
             accountManagerNotifierProvider.overrideWith(
               _CaptureAccountNotifier.new,
             ),

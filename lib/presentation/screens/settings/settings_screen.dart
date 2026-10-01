@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../widgets/auth/add_account_dialog.dart';
+import '../../providers/settings_navigation_provider.dart';
 import 'widgets/settings_search.dart';
 import 'widgets/settings_tile.dart';
 import 'widgets/settings_ui_theme.dart';
@@ -168,10 +169,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Theme(
-    data: settingsUiTheme(Theme.of(context)),
-    child: SettingsTypographyScope(child: Builder(builder: _buildSettings)),
-  );
+  Widget build(BuildContext context) {
+    ref.listen(settingsAccountOpenRequestProvider, (previous, next) {
+      if (previous != next) _select(SettingsDestination.account);
+    });
+    return Theme(
+      data: settingsUiTheme(Theme.of(context)),
+      child: SettingsTypographyScope(child: Builder(builder: _buildSettings)),
+    );
+  }
 
   Widget _buildSettings(BuildContext context) {
     final theme = Theme.of(context), scheme = theme.colorScheme;
