@@ -30,10 +30,7 @@ class GalleryCacheActions extends ConsumerStatefulWidget {
       _GalleryCacheActionsState();
 }
 
-class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
-    with TickerProviderStateMixin {
-  late AnimationController _scanController;
-
+class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
   bool _isScanning = false;
 
   // 扫描进度（来自全局 ScanStateManager）
@@ -44,21 +41,6 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
 
   // 缩略图缓存清理进行中标志（防重入）
   bool _isEvictingThumbnails = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scanController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    );
-  }
-
-  @override
-  void dispose() {
-    _scanController.dispose();
-    super.dispose();
-  }
 
   /// 重新扫描
   ///
@@ -72,7 +54,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        icon: const Icon(Icons.refresh_rounded, color: Colors.green, size: 48),
+        icon: const Icon(Icons.refresh_rounded, size: 22),
         title: Text(context.l10n.galleryCache_rescanTitle),
         content: Text(context.l10n.galleryCache_rescanContent),
         actions: [
@@ -106,7 +88,6 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
       _processedCount = 0;
       _totalCount = 0;
     });
-    _scanController.repeat();
 
     try {
       // 主源 + 全部存在的额外源
@@ -165,8 +146,6 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
       if (!mounted) return;
       AppToast.error(context, context.l10n.galleryCache_scanFailed(e));
     } finally {
-      _scanController.stop();
-      _scanController.reset();
       if (mounted) {
         setState(() {
           _isScanning = false;
@@ -254,57 +233,11 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+    final colors = Theme.of(context).colorScheme;
     return Column(
       children: [
-        // 重新扫描按钮（与自动扫描使用同一套逻辑）
         SettingsTile(
-          leading: AnimatedBuilder(
-            animation: _scanController,
-            builder: (context, child) {
-              return RotationTransition(
-                turns: _isScanning
-                    ? _scanController
-                    : const AlwaysStoppedAnimation(0),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.green.withValues(alpha: 0.2),
-                        Colors.lightGreen.withValues(alpha: 0.1),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: _isScanning
-                          ? Colors.green
-                          : Colors.green.withValues(alpha: 0.3),
-                      width: _isScanning ? 2 : 1,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.refresh_rounded,
-                    color: _isScanning
-                        ? Colors.green
-                        : Colors.green.withValues(alpha: 0.8),
-                    size: 22,
-                  ),
-                ),
-              );
-            },
-          ),
-          title: Text(
-            context.l10n.galleryCache_rescan,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          title: Text(context.l10n.galleryCache_rescan),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -312,167 +245,39 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
                 _isScanning
                     ? (_scanPhase ?? context.l10n.galleryCache_scanning)
                     : context.l10n.galleryCache_rescanSubtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
               ),
               if (_isScanning && _scanProgress != null) ...[
                 const SizedBox(height: 8),
                 LinearProgressIndicator(
                   value: _scanProgress,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    colorScheme.primary,
-                  ),
-                  borderRadius: BorderRadius.circular(4),
+                  color: colors.primary,
                 ),
-                if (_totalCount > 0) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '$_processedCount / $_totalCount',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ],
+                if (_totalCount > 0) Text('$_processedCount / $_totalCount'),
               ],
             ],
           ),
-          trailing: _isScanning
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                  ),
-                )
-              : Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colorScheme.primary.withValues(alpha: 0.1),
-                        colorScheme.primary.withValues(alpha: 0.05),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.refresh, size: 16, color: colorScheme.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        context.l10n.galleryCache_scanAction,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-          onTap: _isScanning ? null : _rescanGallery,
+          trailing: OutlinedButton.icon(
+            onPressed: _isScanning ? null : _rescanGallery,
+            icon: const Icon(Icons.refresh),
+            label: Text(
+              _isScanning
+                  ? context.l10n.galleryCache_scanning
+                  : context.l10n.galleryCache_scanAction,
+            ),
+          ),
         ),
-        const Divider(height: 24),
-        // 缩略图缓存清理（P7：按 LRU 淘汰超限的 .thumbs 缓存）
         SettingsTile(
-          leading: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.blue.withValues(alpha: 0.2),
-                  Colors.lightBlue.withValues(alpha: 0.1),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _isEvictingThumbnails
-                    ? Colors.blue
-                    : Colors.blue.withValues(alpha: 0.3),
-                width: _isEvictingThumbnails ? 2 : 1,
-              ),
-            ),
-            child: Icon(
-              Icons.cleaning_services_rounded,
-              color: _isEvictingThumbnails
-                  ? Colors.blue
-                  : Colors.blue.withValues(alpha: 0.8),
-              size: 22,
-            ),
-          ),
-          title: Text(
-            context.l10n.galleryCache_evictThumbnailsTitle,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          title: Text(context.l10n.galleryCache_evictThumbnailsTitle),
           subtitle: Text(
             _isEvictingThumbnails
                 ? context.l10n.galleryCache_evictThumbnailsRunning
                 : context.l10n.galleryCache_evictThumbnailsSubtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
           ),
-          trailing: _isEvictingThumbnails
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                  ),
-                )
-              : Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colorScheme.tertiary.withValues(alpha: 0.1),
-                        colorScheme.tertiary.withValues(alpha: 0.05),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: colorScheme.tertiary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.cleaning_services_rounded,
-                        size: 16,
-                        color: colorScheme.tertiary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        context.l10n.galleryCache_evictThumbnailsStart,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.tertiary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-          onTap: _isEvictingThumbnails ? null : _evictThumbnailCache,
+          trailing: OutlinedButton.icon(
+            onPressed: _isEvictingThumbnails ? null : _evictThumbnailCache,
+            icon: const Icon(Icons.cleaning_services_outlined),
+            label: Text(context.l10n.galleryCache_evictThumbnailsStart),
+          ),
         ),
       ],
     );

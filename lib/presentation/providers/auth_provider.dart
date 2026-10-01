@@ -442,6 +442,53 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
+  /// Validate replacement credentials before updating the existing saved ID.
+  /// A response for a superseded account/session cannot overwrite a newer one.
+  Future<void> replaceSavedAccountCredential(
+    String accountId,
+    String token,
+  ) async {
+    final manager = ref.read(accountManagerNotifierProvider.notifier);
+    final account = ref
+        .read(accountManagerNotifierProvider)
+        .accounts
+        .where((a) => a.id == accountId)
+        .firstOrNull;
+    if (account == null) throw StateError('Account no longer exists');
+    final session = state;
+    final endpoint = manager.getAccountApiEndpoint(accountId);
+    final previousToken = await manager.getAccountToken(accountId);
+    final info = await ref
+        .read(naiAuthApiServiceProvider)
+        .validateToken(
+          token.trim(),
+          endpoint: endpoint,
+          allowAnyTokenFormat:
+              endpoint.isThirdParty ||
+              account.accountType == AccountType.credentials,
+        );
+    if (!identical(state, session) ||
+        !ref
+            .read(accountManagerNotifierProvider)
+            .accounts
+            .any((a) => a.id == accountId) ||
+        await manager.getAccountToken(accountId) != previousToken ||
+        manager.getAccountApiEndpoint(accountId) != endpoint) {
+      throw StateError('Account changed while checking credentials. Retry.');
+    }
+    await manager.updateAccountToken(accountId, token.trim());
+    if (session.isAuthenticated &&
+        session.accountId == accountId &&
+        identical(state, session)) {
+      await ref
+          .read(secureStorageServiceProvider)
+          .saveAccessToken(token.trim());
+      if (identical(state, session)) {
+        state = session.copyWith(subscriptionInfo: info);
+      }
+    }
+  }
+
   /// 使用 Token 登录
   ///
   /// [token] Persistent API Token (格式: pst-xxxx)

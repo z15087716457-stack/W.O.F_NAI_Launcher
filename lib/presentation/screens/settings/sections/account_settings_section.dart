@@ -8,6 +8,7 @@ import '../../../widgets/auth/add_account_dialog.dart';
 import '../../../widgets/auth/subscription_expiry_text.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/settings/account_detail_tile.dart';
+import '../../../widgets/settings/account_credentials_dialog.dart';
 import '../../../widgets/settings/account_profile_sheet.dart';
 import '../../../widgets/settings/saved_accounts_section.dart';
 import '../widgets/settings_card.dart';
@@ -80,20 +81,29 @@ class AccountSettingsSection extends ConsumerWidget {
                       orElse: () => const SizedBox.shrink(),
                     ),
                 SettingsTile(
-                  title: Text(text('账号资料', 'Account profile', 'アカウント情報')),
+                  title: Text(text('登录凭据', 'Sign-in credentials', 'ログイン認証')),
                   subtitle: Text(
                     text(
-                      '管理昵称与头像。',
-                      'Manage your name and avatar.',
-                      '表示名とアイコンを管理します。',
+                      '验证并更新此账号的登录令牌。',
+                      'Validate and update this account’s sign-in token.',
+                      'ログイントークンを確認して更新します。',
                     ),
                   ),
                   trailing: OutlinedButton(
-                    onPressed: () => AccountProfileBottomSheet.show(
-                      context: context,
-                      account: account,
-                    ),
-                    child: Text(text('管理', 'Manage', '管理')),
+                    onPressed: () async {
+                      final changed = await showDialog<bool>(
+                        context: context,
+                        builder: (_) =>
+                            AccountCredentialsDialog(account: account),
+                      );
+                      if (changed == true && context.mounted) {
+                        AppToast.success(
+                          context,
+                          text('登录凭据已更新', 'Credentials updated', '認証情報を更新しました'),
+                        );
+                      }
+                    },
+                    child: Text(text('更新凭据', 'Update', '更新')),
                   ),
                 ),
               ],

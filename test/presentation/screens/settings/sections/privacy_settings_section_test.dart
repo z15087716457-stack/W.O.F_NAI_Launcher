@@ -61,10 +61,10 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('包含保护模式与在线画廊黑名单', (tester) async {
+  testWidgets('独立保护功能与在线画廊黑名单', (tester) async {
     await pumpSection(tester);
 
-    expect(find.text('保护模式'), findsOneWidget);
+    expect(find.text('保护模式'), findsNothing);
     expect(find.text('保护功能'), findsOneWidget);
     expect(find.text('复制/拖拽时移除全部元数据'), findsOneWidget);
     expect(find.text('限制生图频率'), findsNothing);
@@ -73,7 +73,7 @@ void main() {
     expect(find.byType(OnlineGalleryBlacklistSettingsPanel), findsOneWidget);
   });
 
-  testWidgets('保护模式关闭时子开关不可用', (tester) async {
+  testWidgets('子开关直接可用，附属参数跟随自己的开关', (tester) async {
     await pumpSection(tester);
 
     final stripTile = tester.widget<SettingsSwitchTile>(
@@ -82,7 +82,7 @@ void main() {
         matching: find.byType(SettingsSwitchTile),
       ),
     );
-    expect(stripTile.onChanged, isNull);
+    expect(stripTile.onChanged, isNotNull);
 
     await pumpSection(tester, generationOnly: true);
     final intervalSwitch = tester.widget<SettingsSwitchTile>(
@@ -91,7 +91,7 @@ void main() {
         matching: find.byType(SettingsSwitchTile),
       ),
     );
-    expect(intervalSwitch.onChanged, isNull);
+    expect(intervalSwitch.onChanged, isNotNull);
 
     final intervalTile = tester.widget<SettingsTile>(
       find.ancestor(of: find.text('生图间隔'), matching: find.byType(SettingsTile)),

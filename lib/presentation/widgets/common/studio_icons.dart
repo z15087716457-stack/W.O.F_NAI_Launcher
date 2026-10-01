@@ -32,6 +32,7 @@ abstract final class StudioIcons {
   static const settingsIntegrations = IconData(0xe914, fontFamily: _family);
   static const settingsPrivacy = IconData(0xe915, fontFamily: _family);
   static const settingsAbout = IconData(0xe916, fontFamily: _family);
+  static const settingsData = IconData(0xe917, fontFamily: _family);
 
   static bool supportsMotion(IconData icon) =>
       icon.fontFamily == _family &&

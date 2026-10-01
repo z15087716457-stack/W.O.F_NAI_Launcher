@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'settings_toggle.dart';
+export 'settings_toggle.dart';
 
 /// A setting row: readable labels on the left, its value or action on the right.
 class SettingsTile extends StatelessWidget {
@@ -14,12 +16,14 @@ class SettingsTile extends StatelessWidget {
     this.dense = false,
     this.contentPadding,
     this.isThreeLine = false,
+    this.controlWrapWidth = 520,
   });
   final Widget title;
   final Widget? subtitle, leading, trailing;
   final VoidCallback? onTap;
   final bool enabled, selected, dense, isThreeLine;
   final EdgeInsetsGeometry? contentPadding;
+  final double controlWrapWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +83,7 @@ class SettingsTile extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              if (constraints.maxWidth < 370 && control != null) {
+              if (constraints.maxWidth < controlWrapWidth && control != null) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -127,6 +131,7 @@ class SettingsSwitchTile extends StatelessWidget {
     dense: dense,
     contentPadding: contentPadding,
     onTap: onChanged == null ? null : () => onChanged!(!value),
-    trailing: Switch(value: value, onChanged: onChanged),
+    trailing: SettingsToggle(value: value, onChanged: onChanged),
+    controlWrapWidth: 0,
   );
 }

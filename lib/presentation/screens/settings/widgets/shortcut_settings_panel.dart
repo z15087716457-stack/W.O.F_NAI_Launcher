@@ -1,3 +1,5 @@
+import 'settings_ui_theme.dart';
+import 'settings_toggle.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,18 +17,17 @@ class ShortcutSettingsPanel extends ConsumerStatefulWidget {
   const ShortcutSettingsPanel({super.key});
 
   static Future<void> show(BuildContext context) {
-    return showModalBottomSheet(
+    return showDialog<void>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) {
-          return const ShortcutSettingsPanel();
-        },
+      builder: (dialogContext) => Theme(
+        data: settingsUiTheme(Theme.of(context)),
+        child: Dialog(
+          child: SizedBox(
+            width: 760,
+            height: (MediaQuery.sizeOf(context).height - 96).clamp(200, 720),
+            child: const ShortcutSettingsPanel(),
+          ),
+        ),
       ),
     );
   }
@@ -85,25 +86,16 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
           ),
           child: Column(
             children: [
-              // 拖动条
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 12),
               Row(
                 children: [
                   Icon(Icons.keyboard, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
-                  Text(
-                    context.l10n.shortcut_settings_title,
-                    style: theme.textTheme.titleLarge,
+                  Expanded(
+                    child: Text(
+                      context.l10n.shortcut_settings_title,
+                      style: theme.textTheme.titleLarge,
+                    ),
                   ),
-                  const Spacer(),
                   // 帮助按钮
                   IconButton(
                     icon: const Icon(Icons.help_outline),
@@ -154,7 +146,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
                         style: theme.textTheme.bodySmall,
                       ),
                       const SizedBox(width: 4),
-                      Switch(
+                      SettingsToggle(
                         value: config.enableShortcuts,
                         onChanged: (value) {
                           ref
@@ -168,7 +160,10 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
               ),
               const SizedBox(height: 8),
               // 其他设置
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   // 显示在Tooltip中
                   FilterChip(
@@ -210,7 +205,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
                           }
                         : null,
                   ),
-                  const Spacer(),
                   // 重置所有按钮
                   TextButton.icon(
                     onPressed: _showResetConfirmDialog,
@@ -266,13 +260,17 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
           dense: true,
           leading: Icon(
             isExpanded ? Icons.expand_less : Icons.expand_more,
-            color: theme.colorScheme.primary,
+            color: isExpanded
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
           ),
           title: Text(
             _getContextDisplayName(shortcutContext),
             style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w500,
+              color: isExpanded
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface,
             ),
           ),
           trailing: Text(

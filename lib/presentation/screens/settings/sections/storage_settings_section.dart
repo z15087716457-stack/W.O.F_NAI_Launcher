@@ -22,6 +22,7 @@ import '../widgets/data_source_cache_settings.dart';
 import '../widgets/gallery_cache_actions.dart';
 import '../widgets/gallery_thumbnail_quality_settings_tile.dart';
 import '../widgets/settings_card.dart';
+import '../widgets/settings_ui_theme.dart';
 
 /// 存储设置板块
 class StorageSettingsSection extends ConsumerStatefulWidget {
@@ -138,28 +139,42 @@ class _StorageSettingsSectionState
                       .setAutoSave(value);
                 },
               ),
-              const Divider(height: 24),
-              // Vibe库保存路径设置
               const VibeLibraryPathTile(),
-              // Hive 数据存储路径设置
-              const HiveStoragePathTile(),
-              const Divider(height: 32),
-              // 缓存统计
-              const CacheStatisticsTile(),
-              const Divider(height: 32),
               const GalleryThumbnailQualitySettingsTile(),
-              const Divider(height: 32),
-              // 画廊缓存操作（清除缓存 + 重建索引）
-              const GalleryCacheActions(),
             ],
           ),
         ),
-        const DataSourceCacheSettings(cacheOnly: true),
         // 图库源管理（主源 + 额外图库源）
         const GalleryExtraRootsCard(),
       ],
     );
   }
+}
+
+class StorageMaintenanceSection extends StatelessWidget {
+  const StorageMaintenanceSection({super.key});
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      SettingsCard(
+        title: settingsText(
+          context,
+          '索引与缩略图',
+          'Indexes & thumbnails',
+          '索引とサムネイル',
+        ),
+        child: const Column(
+          children: [CacheStatisticsTile(), GalleryCacheActions()],
+        ),
+      ),
+      const DataSourceCacheSettings(cacheOnly: true),
+      SettingsCard(
+        title: settingsText(context, '应用数据', 'Application data', 'アプリデータ'),
+        child: const HiveStoragePathTile(),
+      ),
+    ],
+  );
 }
 
 /// 图库源管理
@@ -283,7 +298,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
             child: Text(
               context.l10n.settings_extraRootsHint,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -293,7 +308,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
           ),
           if (_extraRoots.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 context.l10n.settings_extraRootsEmpty,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -321,22 +336,27 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
             ),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
-            child: OutlinedButton.icon(
-              onPressed: _addExtraRoot,
-              icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-              label: Text(context.l10n.settings_extraRootsAdd),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: _addExtraRoot,
+                icon: const Icon(Icons.create_new_folder_outlined, size: 18),
+                label: Text(context.l10n.settings_extraRootsAdd),
+              ),
             ),
           ),
-          const Divider(height: 8),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 4, 0, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                OutlinedButton.icon(
-                  onPressed: importState.isImporting ? null : _importTagIndex,
-                  icon: const Icon(Icons.upload_file_outlined, size: 18),
-                  label: Text(context.l10n.settings_importTagIndex),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton.icon(
+                    onPressed: importState.isImporting ? null : _importTagIndex,
+                    icon: const Icon(Icons.upload_file_outlined, size: 18),
+                    label: Text(context.l10n.settings_importTagIndex),
+                  ),
                 ),
                 if (importState.isImporting) ...[
                   const SizedBox(height: 10),

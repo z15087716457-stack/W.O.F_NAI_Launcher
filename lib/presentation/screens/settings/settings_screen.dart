@@ -4,6 +4,7 @@ import '../../widgets/auth/add_account_dialog.dart';
 import 'widgets/settings_search.dart';
 import 'widgets/settings_tile.dart';
 import 'widgets/settings_ui_theme.dart';
+import 'widgets/settings_typography_scope.dart';
 import 'widgets/settings_preferences_panel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/localization_extension.dart';
@@ -25,6 +26,7 @@ enum SettingsDestination {
   controls,
   generation,
   storage,
+  data,
   account,
   models,
   integrations,
@@ -168,7 +170,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) => Theme(
     data: settingsUiTheme(Theme.of(context)),
-    child: Builder(builder: _buildSettings),
+    child: SettingsTypographyScope(child: Builder(builder: _buildSettings)),
   );
 
   Widget _buildSettings(BuildContext context) {
@@ -223,10 +225,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             const GenerationSettingsSection(),
             const DataSourceCacheSettings(controlsOnly: true),
-            PrivacySettingsSection(
-              generationOnly: true,
-              onOpenProtection: () => _select(SettingsDestination.privacy),
-            ),
+            const PrivacySettingsSection(generationOnly: true),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(
@@ -247,13 +246,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _SettingsSection(
         SettingsDestination.storage,
         StudioIcons.settingsStorage,
-        text('图库与存储', 'Gallery & storage', 'ギャラリーと保存'),
+        text('图库与文件', 'Gallery & files', 'ギャラリーとファイル'),
         text(
           '图片保存位置、图库来源与本地缓存。',
           'Image locations, gallery sources and local caches.',
           '画像の保存先、ギャラリーとキャッシュ。',
         ),
         const StorageSettingsSection(),
+      ),
+      _SettingsSection(
+        SettingsDestination.data,
+        StudioIcons.settingsData,
+        text('词库与缓存', 'Dictionaries & cache', '辞書とキャッシュ'),
+        text(
+          '管理标签词库、索引与缓存维护。',
+          'Manage tag dictionaries, indexes and cache maintenance.',
+          'タグ辞書、索引とキャッシュを管理。',
+        ),
+        const StorageMaintenanceSection(),
       ),
       _SettingsSection(
         SettingsDestination.account,
@@ -459,16 +469,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         group(
                           text('创作与资源', 'CREATION & RESOURCES', '制作とリソース'),
-                          sections.skip(2).take(2),
+                          sections.skip(2).take(3),
                         ),
                         group(
                           text('服务与连接', 'SERVICES & CONNECTIONS', 'サービスと接続'),
-                          sections.skip(4).take(3),
+                          sections.skip(5).take(3),
                         ),
                         const SizedBox(height: 24),
                         Divider(height: 1, color: scheme.outlineVariant),
                         const SizedBox(height: 12),
-                        ...sections.skip(7).map(navItem),
+                        ...sections.skip(8).map(navItem),
                       ],
                     ),
                   ),

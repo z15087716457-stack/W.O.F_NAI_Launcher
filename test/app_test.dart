@@ -836,7 +836,7 @@ void main() {
   });
 
   group('Protection mode settings', () {
-    test('gates individual protection features behind the master switch', () {
+    test('retired master cannot disable independently enabled protection', () {
       const disabled = ShareImageSettings(
         protectionMode: false,
         stripMetadataForCopyAndDrag: true,
@@ -850,13 +850,13 @@ void main() {
         generationIntervalJitterPercent: 30,
       );
 
-      expect(disabled.effectiveStripMetadataForCopyAndDrag, isFalse);
-      expect(disabled.effectiveConfirmDangerousActions, isFalse);
-      expect(disabled.effectiveWarnExternalImageSend, isFalse);
-      expect(disabled.effectivePreventOverwrite, isFalse);
-      expect(disabled.effectiveWarnHighAnlasCost, isFalse);
-      expect(disabled.effectiveGenerationIntervalSeconds, 0);
-      expect(disabled.effectiveGenerationIntervalJitterPercent, 0);
+      expect(disabled.effectiveStripMetadataForCopyAndDrag, isTrue);
+      expect(disabled.effectiveConfirmDangerousActions, isTrue);
+      expect(disabled.effectiveWarnExternalImageSend, isTrue);
+      expect(disabled.effectivePreventOverwrite, isTrue);
+      expect(disabled.effectiveWarnHighAnlasCost, isTrue);
+      expect(disabled.effectiveGenerationIntervalSeconds, 15);
+      expect(disabled.effectiveGenerationIntervalJitterPercent, 30);
 
       final enabled = disabled.copyWith(protectionMode: true);
       expect(enabled.effectiveStripMetadataForCopyAndDrag, isTrue);

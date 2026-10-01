@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/providers/notification_settings_provider.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_toggle.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,8 +34,11 @@ void main() {
     expect(tileFinder, findsOneWidget);
     expect(
       tester
-          .widget<Switch>(
-            find.descendant(of: tileFinder, matching: find.byType(Switch)),
+          .widget<SettingsToggle>(
+            find.descendant(
+              of: tileFinder,
+              matching: find.byType(SettingsToggle),
+            ),
           )
           .value,
       isTrue,
@@ -41,14 +46,17 @@ void main() {
     expect(find.textContaining('按住所选修饰键'), findsOneWidget);
 
     await tester.tap(
-      find.descendant(of: tileFinder, matching: find.byType(Switch)),
+      find.descendant(of: tileFinder, matching: find.byType(SettingsToggle)),
     );
     await tester.pump();
 
     expect(
       tester
-          .widget<Switch>(
-            find.descendant(of: tileFinder, matching: find.byType(Switch)),
+          .widget<SettingsToggle>(
+            find.descendant(
+              of: tileFinder,
+              matching: find.byType(SettingsToggle),
+            ),
           )
           .value,
       isFalse,
@@ -80,15 +88,18 @@ void main() {
 
     final tileFinder = find.widgetWithText(SettingsTile, '滚轮调整提示词权重');
     await tester.tap(
-      find.descendant(of: tileFinder, matching: find.byType(Switch)),
+      find.descendant(of: tileFinder, matching: find.byType(SettingsToggle)),
     );
     await tester.pump();
     await tester.pump();
 
     expect(
       tester
-          .widget<Switch>(
-            find.descendant(of: tileFinder, matching: find.byType(Switch)),
+          .widget<SettingsToggle>(
+            find.descendant(
+              of: tileFinder,
+              matching: find.byType(SettingsToggle),
+            ),
           )
           .value,
       isTrue,
@@ -135,7 +146,7 @@ void main() {
 
     // 关掉开关 → 菜单置灰
     await tester.tap(
-      find.descendant(of: tileFinder, matching: find.byType(Switch)),
+      find.descendant(of: tileFinder, matching: find.byType(SettingsToggle)),
     );
     await tester.pump();
     expect(tester.widget<PopupMenuButton<String>>(menuFinder).enabled, isFalse);
@@ -167,7 +178,55 @@ void main() {
     expect(find.text('完成音效'), findsNothing);
   });
 
-  testWidgets('音效开关关闭时隐藏自定义音效入口', (tester) async {
+  testWidgets('试听使用当前默认或自定义音效，关闭通知不会阻止试听', (tester) async {
+    final storage = _MemoryLocalStorageService();
+    final played = <String?>[];
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(storage),
+          notificationSoundPreviewProvider.overrideWithValue((path) async {
+            played.add(path);
+            return true;
+          }),
+        ],
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: GenerationSettingsSection(feedbackOnly: true),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(GenerationSettingsSection)),
+    );
+    await container
+        .read(notificationSettingsNotifierProvider.notifier)
+        .setSoundEnabled(false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('settings-preview-sound')));
+    await tester.pumpAndSettle();
+    expect(played, [null]);
+    await container
+        .read(notificationSettingsNotifierProvider.notifier)
+        .setCustomSoundPath('fixture.wav');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('settings-preview-sound')));
+    await tester.pumpAndSettle();
+    expect(played, [null, 'fixture.wav']);
+    expect(
+      container.read(notificationSettingsNotifierProvider).soundEnabled,
+      false,
+    );
+  });
+
+  testWidgets('音效关闭仍可选择声音并试听', (tester) async {
     final storage = _MemoryLocalStorageService();
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -194,7 +253,7 @@ void main() {
     await tester.tap(find.text('完成音效'));
     await tester.pumpAndSettle();
 
-    expect(find.text('自定义音效'), findsNothing);
+    expect(find.text('自定义音效'), findsOneWidget);
   });
 }
 

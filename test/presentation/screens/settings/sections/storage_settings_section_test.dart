@@ -74,7 +74,7 @@ void main() {
         '数据与存储标题': 0,
         '保护模式标题': 0,
         '移除元数据子项': 0,
-        'DataSourceCacheSettings': 1,
+        'DataSourceCacheSettings': 0,
       },
     );
   });
@@ -88,11 +88,11 @@ void main() {
     await tester.pump();
 
     final settingsCards = find.byType(SettingsCard);
-    expect(settingsCards, findsNWidgets(3));
+    expect(settingsCards, findsNWidgets(2));
 
     final primaryRect = tester.getRect(settingsCards.at(0));
 
-    for (var i = 1; i < 3; i++) {
+    for (var i = 1; i < 2; i++) {
       final cardRect = tester.getRect(settingsCards.at(i));
       expect(cardRect.left, primaryRect.left);
       expect(cardRect.right, primaryRect.right);

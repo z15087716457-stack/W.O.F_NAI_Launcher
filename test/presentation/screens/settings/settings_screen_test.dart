@@ -1,3 +1,9 @@
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:nai_launcher/presentation/providers/font_provider.dart';
+import 'package:nai_launcher/presentation/providers/settings_font_scale_provider.dart';
+import 'package:nai_launcher/presentation/widgets/settings/account_credentials_dialog.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_toggle.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -39,6 +45,18 @@ import 'package:nai_launcher/presentation/screens/settings/settings_screen.dart'
 import 'package:nai_launcher/presentation/screens/settings/widgets/model_management_widgets.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
+
+class _DesignShortcuts extends ShortcutConfigNotifier {
+  @override
+  Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
+}
+
+class _DesignSettingsScale extends SettingsFontScaleNotifier {
+  _DesignSettingsScale(this.scale);
+  final double scale;
+  @override
+  double build() => scale;
+}
 
 class _FakeAuthNotifier extends AuthNotifier {
   @override
@@ -211,6 +229,8 @@ void main() {
   Future<ProviderContainer> pumpPolish(
     WidgetTester tester, {
     double width = 1280,
+    double scale = 1,
+    Brightness brightness = Brightness.light,
   }) async {
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
@@ -241,6 +261,18 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          shortcutConfigNotifierProvider.overrideWith(_DesignShortcuts.new),
+          settingsFontScaleProvider.overrideWith(
+            () => _DesignSettingsScale(scale),
+          ),
+          themeNotifierProvider.overrideWith(() => _DesignTheme(brightness)),
+          allFontsProvider.overrideWith(
+            (ref) async => {
+              '应用默认': [FontConfig.defaultFont],
+              '内置字体': bundledPresets,
+              'Google Fonts': GoogleFontPresets.all,
+            },
+          ),
           localStorageServiceProvider.overrideWithValue(storage),
           secureStorageServiceProvider.overrideWithValue(
             _MemoryAssistantSecrets(),
@@ -250,13 +282,20 @@ void main() {
           subscriptionNotifierProvider.overrideWith(_DesignSubscription.new),
         ],
         child: MaterialApp(
-          theme: AppTheme.getTheme(AppStyle.geist, Brightness.light),
+          theme: AppTheme.getTheme(AppStyle.geist, brightness),
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const IntegratedTitleBarShell(child: SettingsScreen()),
-          builder: (context, child) =>
-              RepaintBoundary(key: settingsCaptureKey, child: child!),
+          builder: (context, child) => RepaintBoundary(
+            key: settingsCaptureKey,
+            child: MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(1)),
+              child: child!,
+            ),
+          ),
         ),
       ),
     );
@@ -470,7 +509,7 @@ void main() {
       await tester.pumpAndSettle();
       final toggle = find.descendant(
         of: automatic,
-        matching: find.byType(Switch),
+        matching: find.byType(SettingsToggle),
       );
       await tester.tap(toggle.first);
       await tester.pumpAndSettle();
@@ -506,6 +545,9 @@ void main() {
           await tester.pumpWidget(
             ProviderScope(
               overrides: [
+                settingsFontScaleProvider.overrideWith(
+                  () => _DesignSettingsScale(scale),
+                ),
                 themeNotifierProvider.overrideWith(
                   () => _DesignTheme(brightness),
                 ),
@@ -591,7 +633,7 @@ void main() {
                   child: MediaQuery(
                     data: MediaQuery.of(
                       context,
-                    ).copyWith(textScaler: TextScaler.linear(scale)),
+                    ).copyWith(textScaler: const TextScaler.linear(1)),
                     child: child!,
                   ),
                 ),
@@ -626,7 +668,8 @@ void main() {
                 SettingsDestination.appearance => '常规与外观',
                 SettingsDestination.controls => '操作与快捷键',
                 SettingsDestination.generation => '生成与提示词',
-                SettingsDestination.storage => '图库与存储',
+                SettingsDestination.storage => '图库与文件',
+                SettingsDestination.data => '词库与缓存',
                 SettingsDestination.account => 'NovelAI 账号',
                 SettingsDestination.models => '模型与接口',
                 SettingsDestination.integrations => '连接与集成',
@@ -682,7 +725,99 @@ void main() {
     },
   );
 
-  testWidgets('设置页按九个工作流分类，旧模型入口仍可使用', (tester) async {
+  testWidgets('settings dialogs and account actions use the new design', (
+    tester,
+  ) async {
+    Future<void> navigate(SettingsDestination destination, String label) async {
+      if (find
+          .byKey(ValueKey('settings-nav-${destination.name}'))
+          .evaluate()
+          .isNotEmpty) {
+        final nav = find.byKey(ValueKey('settings-nav-${destination.name}'));
+        await tester.ensureVisible(nav);
+        await tester.tap(nav);
+      } else {
+        await tester.tap(
+          find.byWidgetPredicate(
+            (widget) => widget is DropdownButtonFormField<SettingsDestination>,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text(label).last);
+        await tester.tap(find.text(label).last);
+      }
+      await tester.pumpAndSettle();
+    }
+
+    for (final brightness in Brightness.values) {
+      for (final layout in [(1280.0, 1.0), (360.0, 1.3)]) {
+        await pumpPolish(
+          tester,
+          width: layout.$1,
+          scale: layout.$2,
+          brightness: brightness,
+        );
+
+        await navigate(SettingsDestination.appearance, '常规与外观');
+        await tester.tap(find.text('字体').last);
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('settings-font-preview')), findsOneWidget);
+        await capturePolish(
+          tester,
+          'dialog-font-${brightness.name}-${layout.$1.toInt()}',
+        );
+        await tester.enterText(
+          find.byKey(const Key('settings-font-search')),
+          'Geist',
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Geist + HarmonyOS Sans'), findsOneWidget);
+        await tester.tap(find.byTooltip('关闭').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('语言').last);
+        await tester.pumpAndSettle();
+        await capturePolish(
+          tester,
+          'dialog-language-${brightness.name}-${layout.$1.toInt()}',
+        );
+        await tester.tap(find.byTooltip('关闭').last);
+        await tester.pumpAndSettle();
+        await navigate(SettingsDestination.account, 'NovelAI 账号');
+        expect(find.text('账号资料'), findsNothing);
+        await tester.tap(find.text('PD').first);
+        await tester.pumpAndSettle();
+        expect(find.text('账号详情'), findsOneWidget);
+        expect(find.text('token_fixture'), findsNothing);
+        await capturePolish(
+          tester,
+          'dialog-account-${brightness.name}-${layout.$1.toInt()}',
+        );
+        await tester.tap(find.byTooltip('关闭').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('更新凭据'));
+        await tester.pumpAndSettle();
+        expect(find.byType(AccountCredentialsDialog), findsOneWidget);
+        await capturePolish(
+          tester,
+          'dialog-credentials-${brightness.name}-${layout.$1.toInt()}',
+        );
+        await tester.tap(find.byTooltip('关闭').last);
+        await tester.pumpAndSettle();
+        await navigate(SettingsDestination.controls, '操作与快捷键');
+        await tester.tap(find.text('键盘快捷键').last);
+        await tester.pumpAndSettle();
+        await capturePolish(
+          tester,
+          'dialog-shortcuts-${brightness.name}-${layout.$1.toInt()}',
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    }
+  });
+
+  testWidgets('设置页按十个工作流分类，旧模型入口仍可使用', (tester) async {
     tester.view.physicalSize = const Size(1280, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -737,8 +872,15 @@ void main() {
                 ? Brightness.dark
                 : Brightness.light,
           ),
-          builder: (context, child) =>
-              RepaintBoundary(key: settingsCaptureKey, child: child!),
+          builder: (context, child) => RepaintBoundary(
+            key: settingsCaptureKey,
+            child: MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(1.1)),
+              child: child!,
+            ),
+          ),
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -758,7 +900,8 @@ void main() {
       '常规与外观',
       '操作与快捷键',
       '生成与提示词',
-      '图库与存储',
+      '图库与文件',
+      '词库与缓存',
       'NovelAI 账号',
       '模型与接口',
       '连接与集成',

@@ -1,3 +1,4 @@
+import 'settings_tile.dart';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -1190,7 +1191,7 @@ class _AdvancedSettingsDialogState extends State<_AdvancedSettingsDialog> {
                 helperText: '10～600；用于模型目录与翻译请求',
               ),
             ),
-            SwitchListTile(
+            SettingsSwitchTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('服务支持图像输入'),
               subtitle: Text(

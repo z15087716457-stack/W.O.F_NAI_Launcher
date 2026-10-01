@@ -67,11 +67,6 @@ void main() {
 
     expect(find.text('单击历史图片直接打开详情'), findsOneWidget);
     expect(find.textContaining('单击切换中央预览'), findsOneWidget);
-    final group = tester.widget<RadioGroup<HistoryClickBehavior>>(
-      find.byType(RadioGroup<HistoryClickBehavior>),
-    );
-    expect(group.groupValue, HistoryClickBehavior.openDetail);
-
     await tester.tap(find.text('官网式联动'));
     await tester.pumpAndSettle();
 

@@ -58,18 +58,17 @@ List<SettingsSearchEntry> settingsSearchEntries(
       l.settings_enablePromptWeightScroll,
       'weight scroll 权重 滚轮',
     ),
-    item('generation', l.autocomplete_enable, 'autocomplete 输入 自动补全'),
     item(
       'generation',
-      settingsText(context, '结果数量', 'Result limit', '候補数'),
-      'autocomplete limit 补全',
+      settingsText(context, '标签扩展', 'Tag expansion', 'タグ検索'),
+      'tags 标签 扩展 Ctrl',
     ),
     item('generation', l.settings_warnHighAnlasCostTitle, 'Anlas cost 消耗 额度'),
     item('generation', l.settings_generationIntervalTitle, 'interval 间隔 节奏'),
     item('storage', l.settings_imageSavePath, 'path 保存 路径'),
     item('storage', l.settings_autoSave, 'save 自动保存'),
     item(
-      'storage',
+      'data',
       settingsText(context, '词库与缓存', 'Dictionaries & cache', '辞書とキャッシュ'),
       'dictionary tags cache 中文 汉化 词典 数据源',
     ),
@@ -85,8 +84,8 @@ List<SettingsSearchEntry> settingsSearchEntries(
     ),
     item(
       'account',
-      settingsText(context, '账号资料', 'Account profile', 'アカウント情報'),
-      'avatar profile nickname 资料 头像 昵称',
+      settingsText(context, '登录凭据', 'Sign-in credentials', 'ログイン認証'),
+      'token credentials 登录 凭据 账号 头像 昵称',
     ),
     item(
       'models',
@@ -113,7 +112,6 @@ List<SettingsSearchEntry> settingsSearchEntries(
       'network proxy endpoint 网络 代理 第三方',
       'network',
     ),
-    item('privacy', l.settings_protectionMode, 'protection 安全 保护'),
     item('privacy', l.settings_stripMetadataTitle, 'metadata 脱敏 元数据 分享'),
     item(
       'about',

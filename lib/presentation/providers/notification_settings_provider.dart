@@ -9,6 +9,13 @@ import 'image_generation_provider.dart';
 
 part 'notification_settings_provider.g.dart';
 
+final notificationSoundPreviewProvider =
+    Provider<Future<bool> Function(String?)>(
+      (ref) =>
+          (path) =>
+              NotificationService.instance.playSound(customSoundPath: path),
+    );
+
 /// 音效设置状态
 class NotificationSettings {
   final bool soundEnabled;

@@ -20,6 +20,7 @@ class SettingsPreferencesService {
       StorageKeys.studioThemeMode,
       StorageKeys.fontFamily,
       StorageKeys.fontScale,
+      StorageKeys.settingsFontScale,
       StorageKeys.locale,
       StorageKeys.historyClickBehavior,
       StorageKeys.simpleOutputViewer,
@@ -31,19 +32,10 @@ class SettingsPreferencesService {
     PreferenceGroup.input: [
       StorageKeys.enablePromptWeightScroll,
       StorageKeys.promptWeightScrollModifier,
-      StorageKeys.enableAutocomplete,
-      StorageKeys.autocompleteResultLimit,
       StorageKeys.tagExpansionResultLimit,
-      StorageKeys.autocompleteShowAliases,
-      StorageKeys.autocompleteShowTranslations,
-      StorageKeys.autocompleteAutoComma,
-      StorageKeys.autocompleteDanbooruEnabled,
       StorageKeys.enableCooccurrenceRecommendation,
-      StorageKeys.autocompleteLlmTranslationEnabled,
     ],
     PreferenceGroup.protection: [
-      StorageKeys.protectionMode,
-      StorageKeys.assetProtectionMode,
       StorageKeys.shareStripMetadata,
       StorageKeys.protectionConfirmDangerousActions,
       StorageKeys.protectionWarnExternalImageSend,
@@ -65,7 +57,7 @@ class SettingsPreferencesService {
     if (key == StorageKeys.fontFamily) {
       return value is String && value.isNotEmpty && value.length <= 128;
     }
-    if (key == StorageKeys.fontScale) {
+    if (key == StorageKeys.fontScale || key == StorageKeys.settingsFontScale) {
       return value is num && value.isFinite && value >= .8 && value <= 1.5;
     }
     if (key == StorageKeys.historyClickBehavior) {

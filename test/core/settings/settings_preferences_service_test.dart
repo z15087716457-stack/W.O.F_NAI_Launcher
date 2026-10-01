@@ -40,17 +40,17 @@ void main() {
   });
   tearDown(() async => dir.delete(recursive: true));
   test(
-    'round trip includes exhaustive autocomplete and excludes accounts, model bindings and paths',
+    'round trip includes tag expansion preferences and excludes accounts, model bindings and paths',
     () {
       storage.values.addAll({
-        StorageKeys.autocompleteResultLimit: CompletionResultLimits.all,
+        StorageKeys.tagExpansionResultLimit: CompletionResultLimits.all,
         StorageKeys.fontScale: 1.3,
         'token': 'fake_secret',
         StorageKeys.promptAssistantConfigJson: 'fake_model_config',
         StorageKeys.imageSavePath: 'fake_path',
       });
       final values = service.decode(service.encode(service.capture()));
-      expect(values[StorageKeys.autocompleteResultLimit], 300000);
+      expect(values[StorageKeys.tagExpansionResultLimit], 300000);
       expect(values[StorageKeys.fontScale], 1.3);
       expect(values.keys, isNot(contains('token')));
       expect(values.keys, isNot(contains(StorageKeys.imageSavePath)));
@@ -71,8 +71,8 @@ void main() {
         }),
         service.encode({'api_key': 'fake'}),
         service.encode({StorageKeys.fontScale: 10}),
-        service.encode({StorageKeys.autocompleteResultLimit: 0}),
-        service.encode({StorageKeys.enableAutocomplete: 'true'}),
+        service.encode({StorageKeys.tagExpansionResultLimit: 0}),
+        service.encode({StorageKeys.enableCooccurrenceRecommendation: 'true'}),
       ]) {
         expect(() => service.decode(raw), throwsFormatException);
       }
@@ -85,7 +85,7 @@ void main() {
     () async {
       storage.values.addAll({
         StorageKeys.studioThemeMode: 'light',
-        StorageKeys.enableAutocomplete: false,
+        StorageKeys.enableCooccurrenceRecommendation: false,
         'token': 'fake_secret',
       });
       final before = service.capture();
@@ -94,7 +94,10 @@ void main() {
         expected: before,
       );
       expect(storage.values[StorageKeys.studioThemeMode], isNull);
-      expect(storage.values[StorageKeys.enableAutocomplete], false);
+      expect(
+        storage.values[StorageKeys.enableCooccurrenceRecommendation],
+        false,
+      );
       expect(storage.values['token'], 'fake_secret');
       expect(service.decode(await file.readAsString()), before);
       await service.apply(
@@ -108,12 +111,12 @@ void main() {
     'write failure rolls back previous touched preferences and keeps backup',
     () async {
       storage.values[StorageKeys.studioThemeMode] = 'light';
-      storage.failKey = StorageKeys.enableAutocomplete;
+      storage.failKey = StorageKeys.enableCooccurrenceRecommendation;
       final before = service.capture();
       await expectLater(
         service.apply({
           StorageKeys.studioThemeMode: 'dark',
-          StorageKeys.enableAutocomplete: false,
+          StorageKeys.enableCooccurrenceRecommendation: false,
         }, expected: before),
         throwsStateError,
       );
@@ -133,15 +136,15 @@ void main() {
   });
   test('rollback preserves another later write during failed import', () async {
     storage.values[StorageKeys.studioThemeMode] = 'light';
-    storage.failKey = StorageKeys.enableAutocomplete;
+    storage.failKey = StorageKeys.enableCooccurrenceRecommendation;
     storage.beforeWrite = (key) {
-      if (key == StorageKeys.enableAutocomplete)
+      if (key == StorageKeys.enableCooccurrenceRecommendation)
         storage.values[StorageKeys.studioThemeMode] = 'light';
     };
     await expectLater(
       service.apply({
         StorageKeys.studioThemeMode: 'dark',
-        StorageKeys.enableAutocomplete: false,
+        StorageKeys.enableCooccurrenceRecommendation: false,
       }, expected: service.capture()),
       throwsStateError,
     );

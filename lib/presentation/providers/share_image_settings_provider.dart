@@ -33,22 +33,19 @@ class ShareImageSettings {
   /// 0 表示关闭抖动，间隔保持固定。
   final int generationIntervalJitterPercent;
 
-  bool get effectiveStripMetadataForCopyAndDrag =>
-      protectionMode && stripMetadataForCopyAndDrag;
+  bool get effectiveStripMetadataForCopyAndDrag => stripMetadataForCopyAndDrag;
 
-  bool get effectiveConfirmDangerousActions =>
-      protectionMode && confirmDangerousActions;
+  bool get effectiveConfirmDangerousActions => confirmDangerousActions;
 
-  bool get effectiveWarnExternalImageSend =>
-      protectionMode && warnExternalImageSend;
+  bool get effectiveWarnExternalImageSend => warnExternalImageSend;
 
-  bool get effectivePreventOverwrite => protectionMode && preventOverwrite;
+  bool get effectivePreventOverwrite => preventOverwrite;
 
   bool get effectiveWarnHighAnlasCost =>
-      protectionMode && warnHighAnlasCost && highAnlasCostThreshold > 0;
+      warnHighAnlasCost && highAnlasCostThreshold > 0;
 
   int get effectiveGenerationIntervalSeconds =>
-      protectionMode && limitGenerationInterval ? generationIntervalSeconds : 0;
+      limitGenerationInterval ? generationIntervalSeconds : 0;
 
   int get effectiveGenerationIntervalJitterPercent =>
       effectiveGenerationIntervalSeconds > 0
@@ -87,7 +84,8 @@ class ShareImageSettings {
       generationIntervalSeconds:
           generationIntervalSeconds ?? this.generationIntervalSeconds,
       generationIntervalJitterPercent:
-          generationIntervalJitterPercent ?? this.generationIntervalJitterPercent,
+          generationIntervalJitterPercent ??
+          this.generationIntervalJitterPercent,
     );
   }
 }

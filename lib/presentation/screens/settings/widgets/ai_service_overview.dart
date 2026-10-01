@@ -642,7 +642,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
           onChanged: (value) => _updateOverview(() => _retryAttempts = value!),
         ),
         const SizedBox(height: 16),
-        SwitchListTile(
+        SettingsSwitchTile(
           contentPadding: EdgeInsets.zero,
           title: const Text('允许图片输入'),
           value: _allowImageInput,

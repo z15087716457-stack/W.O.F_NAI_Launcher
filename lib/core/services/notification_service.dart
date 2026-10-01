@@ -16,7 +16,7 @@ class NotificationService {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   /// 播放完成音效
-  Future<void> playSound({String? customSoundPath}) async {
+  Future<bool> playSound({String? customSoundPath}) async {
     try {
       if (customSoundPath != null && File(customSoundPath).existsSync()) {
         await _audioPlayer.play(DeviceFileSource(customSoundPath));
@@ -28,9 +28,11 @@ class NotificationService {
         await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
         AppLogger.d('Playing default sound', 'NotificationService');
       }
+      return true;
     } catch (e) {
       // 音效播放失败不阻塞
       AppLogger.e('Failed to play sound: $e', 'NotificationService');
+      return false;
     }
   }
 

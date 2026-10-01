@@ -15,9 +15,6 @@ class AssetProtectionGuard {
   static ShareImageSettings settings(WidgetRef ref) =>
       ref.read(shareImageSettingsProvider);
 
-  static bool isEnabled(WidgetRef ref) =>
-      ref.read(shareImageSettingsProvider).protectionMode;
-
   static bool shouldPreventOverwrite(WidgetRef ref) =>
       ref.read(shareImageSettingsProvider).effectivePreventOverwrite;
 

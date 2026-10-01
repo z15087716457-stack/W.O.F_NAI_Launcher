@@ -15,6 +15,8 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_task_de
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/model_management_section.dart';
 import '../../../helpers/studio_capture_fonts.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
 
 class MemorySettings extends LocalStorageService {
   final values = <String, Object?>{};
@@ -144,7 +146,8 @@ Future<ProviderContainer> pumpManagement(
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   final storage = MemorySettings()
-    ..values[StorageKeys.promptAssistantConfigJson] = sampleConfig.encode();
+    ..values[StorageKeys.promptAssistantConfigJson] = sampleConfig.encode()
+    ..values[StorageKeys.settingsFontScale] = scale;
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -155,16 +158,15 @@ Future<ProviderContainer> pumpManagement(
         locale: const Locale('zh'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        theme: AppTheme.getTheme(
-          AppStyle.geist,
-          Platform.environment['STUDIO_APPEARANCE'] == 'dark'
-              ? Brightness.dark
-              : Brightness.light,
+        theme: settingsUiTheme(
+          AppTheme.getTheme(
+            AppStyle.geist,
+            Platform.environment['STUDIO_APPEARANCE'] == 'dark'
+                ? Brightness.dark
+                : Brightness.light,
+          ),
         ),
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.linear(scale)),
+        builder: (context, child) => SettingsTypographyScope(
           child: RepaintBoundary(key: captureKey, child: child!),
         ),
         home: const Scaffold(body: ModelManagementSection()),

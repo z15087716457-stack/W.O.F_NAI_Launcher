@@ -6,15 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/canvas_settings_provider.dart';
 import '../../../providers/font_provider.dart';
-import '../../../providers/font_scale_provider.dart';
+import '../../../providers/settings_font_scale_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../widgets/settings/studio_theme_picker.dart';
-import '../../../widgets/common/themed_divider.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_tile.dart';
+import '../widgets/settings_dialog.dart';
+import '../widgets/settings_font_dialog.dart';
+import '../widgets/settings_ui_theme.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'generation_settings_section.dart';
 
@@ -37,7 +39,7 @@ class _AppearanceSettingsSectionState
     final currentTheme = ref.watch(themeNotifierProvider);
     final currentFont = ref.watch(fontNotifierProvider);
     final currentLocale = ref.watch(localeNotifierProvider);
-    final fontScale = ref.watch(fontScaleNotifierProvider);
+    final fontScale = ref.watch(settingsFontScaleProvider);
     final historyClickBehavior = ref.watch(
       historyClickBehaviorNotifierProvider,
     );
@@ -89,7 +91,14 @@ class _AppearanceSettingsSectionState
             SettingsTile(
               leading: const Icon(Icons.format_size),
               title: Text(context.l10n.settings_fontScale),
-              subtitle: Text(context.l10n.settings_fontScale_description),
+              subtitle: Text(
+                settingsText(
+                  context,
+                  '仅调整设置页面与设置弹窗的字号',
+                  'Adjust settings pages and dialogs only',
+                  '設定画面と設定ダイアログの文字サイズ',
+                ),
+              ),
               trailing: valueControl('${(fontScale * 100).round()}%'),
               onTap: () => _showFontScaleDialog(context, fontScale),
             ),
@@ -186,53 +195,34 @@ class _AppearanceSettingsSectionState
     );
   }
 
-  void _showOutputViewerDialog(BuildContext context, bool simpleCurrent) {
-    showDialog(
+  Future<void> _showOutputViewerDialog(
+    BuildContext context,
+    bool simpleCurrent,
+  ) async {
+    final value = await showSettingsChoice<bool>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(context.l10n.settings_outputViewer),
-          content: SizedBox(
-            width: 380,
-            child: RadioGroup<bool>(
-              groupValue: simpleCurrent,
-              onChanged: (value) async {
-                if (value == null) return;
-                await ref
-                    .read(simpleOutputViewerNotifierProvider.notifier)
-                    .setSimple(value);
-                if (dialogContext.mounted) Navigator.pop(dialogContext);
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RadioListTile<bool>(
-                    title: Text(context.l10n.settings_outputViewer_canvas),
-                    subtitle: Text(
-                      context.l10n.settings_outputViewer_canvasDescription,
-                    ),
-                    value: false,
-                  ),
-                  RadioListTile<bool>(
-                    title: Text(context.l10n.settings_outputViewer_simple),
-                    subtitle: Text(
-                      context.l10n.settings_outputViewer_simpleDescription,
-                    ),
-                    value: true,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(context.l10n.common_cancel),
-            ),
-          ],
-        );
-      },
+      title: context.l10n.settings_outputViewer,
+      value: simpleCurrent,
+      choices: [
+        SettingsChoice(
+          false,
+          context.l10n.settings_outputViewer_canvas,
+          description: context.l10n.settings_outputViewer_canvasDescription,
+          icon: Icons.dashboard_outlined,
+        ),
+        SettingsChoice(
+          true,
+          context.l10n.settings_outputViewer_simple,
+          description: context.l10n.settings_outputViewer_simpleDescription,
+          icon: Icons.image_outlined,
+        ),
+      ],
     );
+    if (value != null && mounted) {
+      await ref
+          .read(simpleOutputViewerNotifierProvider.notifier)
+          .setSimple(value);
+    }
   }
 
   void _showThemeDialog(BuildContext context) {
@@ -251,274 +241,66 @@ class _AppearanceSettingsSectionState
     );
   }
 
-  void _showFontDialog(BuildContext context, FontConfig currentFont) {
-    showDialog(
+  Future<void> _showFontDialog(
+    BuildContext context,
+    FontConfig currentFont,
+  ) async {
+    final font = await showDialog<FontConfig>(
       context: context,
-      builder: (dialogContext) {
-        return Consumer(
-          builder: (consumerContext, ref, child) {
-            final allFontsAsync = ref.watch(allFontsProvider);
-
-            return AlertDialog(
-              title: Text(context.l10n.settings_selectFont),
-              content: SizedBox(
-                width: 500,
-                height: 600,
-                child: allFontsAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (err, stack) => Center(
-                    child: Text(
-                      context.l10n.settings_loadFailed(err.toString()),
-                    ),
-                  ),
-                  data: (fontGroups) {
-                    return RadioGroup<FontConfig>(
-                      groupValue: currentFont,
-                      onChanged: (value) {
-                        if (value != null) {
-                          ref
-                              .read(fontNotifierProvider.notifier)
-                              .setFont(value);
-                          Navigator.pop(dialogContext);
-                        }
-                      },
-                      child: ListView.builder(
-                        itemCount: fontGroups.length,
-                        itemBuilder: (context, groupIndex) {
-                          final groupName = fontGroups.keys.elementAt(
-                            groupIndex,
-                          );
-                          final fonts = fontGroups[groupName]!;
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // 分组标题
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
-                                child: Text(
-                                  '$groupName (${fonts.length})',
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                              ),
-                              // 字体列表
-                              ...fonts.map((font) {
-                                final isSelected = font == currentFont;
-                                return InkWell(
-                                  onTap: () {
-                                    ref
-                                        .read(fontNotifierProvider.notifier)
-                                        .setFont(font);
-                                    Navigator.pop(dialogContext);
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.primaryContainer
-                                          : null,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Radio<FontConfig>(value: font),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            font.displayName,
-                                            style: TextStyle(
-                                              fontFamily:
-                                                  font.fontFamily.isEmpty
-                                                  ? null
-                                                  : font.fontFamily,
-                                              fontSize: 16,
-                                              color: isSelected
-                                                  ? Theme.of(context)
-                                                        .colorScheme
-                                                        .onPrimaryContainer
-                                                  : null,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        if (font.source == FontSource.google)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 2,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.secondaryContainer,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: Text(
-                                              'Google',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSecondaryContainer,
-                                              ),
-                                            ),
-                                          ),
-                                        if (isSelected)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 8,
-                                            ),
-                                            child: Icon(
-                                              Icons.check,
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.onPrimaryContainer,
-                                              size: 20,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }),
-                              if (groupIndex < fontGroups.length - 1)
-                                const ThemedDivider(height: 1),
-                            ],
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: Text(context.l10n.common_cancel),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (_) => SettingsFontDialog(current: currentFont),
     );
+    if (font != null && mounted) {
+      ref.read(fontNotifierProvider.notifier).setFont(font);
+    }
   }
 
-  void _showLanguageDialog(BuildContext context, Locale currentLocale) {
-    showDialog(
+  Future<void> _showLanguageDialog(
+    BuildContext context,
+    Locale currentLocale,
+  ) async {
+    final language = await showSettingsChoice<String>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(context.l10n.settings_selectLanguage),
-          content: RadioGroup<String>(
-            groupValue: currentLocale.languageCode,
-            onChanged: (value) {
-              if (value != null) {
-                ref.read(localeNotifierProvider.notifier).setLocale(value);
-                Navigator.pop(dialogContext);
-              }
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile<String>(
-                  title: Text(context.l10n.settings_languageChinese),
-                  value: 'zh',
-                ),
-                RadioListTile<String>(
-                  title: Text(context.l10n.settings_languageEnglish),
-                  value: 'en',
-                ),
-                RadioListTile<String>(
-                  title: Text(context.l10n.settings_languageJapanese),
-                  value: 'ja',
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(context.l10n.common_cancel),
-            ),
-          ],
-        );
-      },
+      title: context.l10n.settings_selectLanguage,
+      value: currentLocale.languageCode,
+      choices: const [
+        SettingsChoice('zh', '中文', description: '简体中文'),
+        SettingsChoice('en', 'English', description: 'English'),
+        SettingsChoice('ja', '日本語', description: '日本語'),
+      ],
     );
+    if (language != null && mounted) {
+      ref.read(localeNotifierProvider.notifier).setLocale(language);
+    }
   }
 
-  void _showHistoryClickBehaviorDialog(
+  Future<void> _showHistoryClickBehaviorDialog(
     BuildContext context,
     HistoryClickBehavior currentBehavior,
-  ) {
-    showDialog(
+  ) async {
+    final value = await showSettingsChoice<HistoryClickBehavior>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(context.l10n.settings_historyClickBehavior),
-          content: SizedBox(
-            width: 360,
-            child: RadioGroup<HistoryClickBehavior>(
-              groupValue: currentBehavior,
-              onChanged: (value) async {
-                if (value == null) return;
-                await ref
-                    .read(historyClickBehaviorNotifierProvider.notifier)
-                    .setBehavior(value);
-                if (dialogContext.mounted) Navigator.pop(dialogContext);
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RadioListTile<HistoryClickBehavior>(
-                    title: Text(
-                      context.l10n.settings_historyClickBehavior_classic,
-                    ),
-                    subtitle: Text(
-                      context
-                          .l10n
-                          .settings_historyClickBehavior_classicDescription,
-                    ),
-                    value: HistoryClickBehavior.openDetail,
-                  ),
-                  RadioListTile<HistoryClickBehavior>(
-                    title: Text(
-                      context.l10n.settings_historyClickBehavior_linked,
-                    ),
-                    subtitle: Text(
-                      context
-                          .l10n
-                          .settings_historyClickBehavior_linkedDescription,
-                    ),
-                    value: HistoryClickBehavior.selectPreview,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(context.l10n.common_cancel),
-            ),
-          ],
-        );
-      },
+      title: context.l10n.settings_historyClickBehavior,
+      value: currentBehavior,
+      choices: [
+        SettingsChoice(
+          HistoryClickBehavior.openDetail,
+          context.l10n.settings_historyClickBehavior_classic,
+          description:
+              context.l10n.settings_historyClickBehavior_classicDescription,
+        ),
+        SettingsChoice(
+          HistoryClickBehavior.selectPreview,
+          context.l10n.settings_historyClickBehavior_linked,
+          description:
+              context.l10n.settings_historyClickBehavior_linkedDescription,
+        ),
+      ],
     );
+    if (value != null && mounted) {
+      await ref
+          .read(historyClickBehaviorNotifierProvider.notifier)
+          .setBehavior(value);
+    }
   }
 
   String _languageLabel(BuildContext context, String languageCode) {
@@ -532,134 +314,97 @@ class _AppearanceSettingsSectionState
     }
   }
 
-  void _showFontScaleDialog(BuildContext context, double currentScale) {
-    showDialog(
+  Future<void> _showFontScaleDialog(
+    BuildContext context,
+    double currentScale,
+  ) async {
+    var draft = currentScale;
+    final result = await showDialog<double>(
       context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final theme = Theme.of(context);
-            final textTheme = theme.textTheme;
-            final scalePercent = (currentScale * 100).round();
-
-            return AlertDialog(
-              title: Text(context.l10n.settings_fontScale),
-              content: SizedBox(
-                width: 320,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // 预览区域
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.settings_fontScale_previewSmall,
-                            style: textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            context.l10n.settings_fontScale_previewMedium,
-                            style: textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            context.l10n.settings_fontScale_previewLarge,
-                            style: textTheme.titleMedium,
-                          ),
-                        ],
-                      ),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, update) => SettingsDialogFrame(
+          title: context.l10n.settings_fontScale,
+          actions: [
+            TextButton(
+              onPressed: () => update(() => draft = 1),
+              child: Text(context.l10n.common_reset),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, draft),
+              child: Text(context.l10n.settings_fontScale_done),
+            ),
+          ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: .035),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(
+                      SettingsFontScaleNotifier.effectiveScale(draft),
                     ),
-                    const SizedBox(height: 24),
-
-                    // 滑块区域
-                    Row(
-                      children: [
-                        Text(
-                          '80%',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                        Expanded(
-                          child: SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              activeTrackColor: theme.colorScheme.primary,
-                              inactiveTrackColor:
-                                  theme.colorScheme.surfaceContainerHighest,
-                              thumbColor: theme.colorScheme.primary,
-                              overlayColor: theme.colorScheme.primary
-                                  .withValues(alpha: 0.12),
-                            ),
-                            child: Slider(
-                              value: currentScale,
-                              min: 0.8,
-                              max: 1.5,
-                              divisions: 7,
-                              label: '$scalePercent%',
-                              onChanged: (value) {
-                                setState(() {
-                                  currentScale = value;
-                                });
-                                ref
-                                    .read(fontScaleNotifierProvider.notifier)
-                                    .setFontScale(value);
-                              },
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '150%',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
-                    // 当前值显示
-                    Center(
-                      child: Text(
-                        '$scalePercent%',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.primary,
-                        ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.settings_fontScale_previewLarge,
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Text(
+                        context.l10n.settings_fontScale_previewMedium,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        context.l10n.settings_fontScale_previewSmall,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              actions: [
-                // 重置按钮
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      currentScale = 1.0;
-                    });
-                    ref.read(fontScaleNotifierProvider.notifier).reset();
-                  },
-                  icon: const Icon(Icons.refresh),
-                  label: Text(context.l10n.settings_fontScale_reset),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Text('80%'),
+                  Expanded(
+                    child: Slider(
+                      value: draft,
+                      min: .8,
+                      max: 1.5,
+                      divisions: 7,
+                      label: '${(draft * 100).round()}%',
+                      onChanged: (value) => update(() => draft = value),
+                    ),
+                  ),
+                  const Text('150%'),
+                ],
+              ),
+              Center(
+                child: Text(
+                  '${(draft * 100).round()}%',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
-                // 完成按钮
-                FilledButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: Text(context.l10n.settings_fontScale_done),
-                ),
-              ],
-            );
-          },
-        );
-      },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+    if (result != null && mounted) {
+      await ref.read(settingsFontScaleProvider.notifier).setFontScale(result);
+    }
   }
 }

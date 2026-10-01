@@ -13,13 +13,8 @@ import '../widgets/settings_section_label.dart';
 /// 集中管理保护模式（分享脱敏、危险操作确认、高消耗警告等）
 /// 与在线画廊内容屏蔽。
 class PrivacySettingsSection extends ConsumerStatefulWidget {
-  const PrivacySettingsSection({
-    super.key,
-    this.generationOnly = false,
-    this.onOpenProtection,
-  });
+  const PrivacySettingsSection({super.key, this.generationOnly = false});
   final bool generationOnly;
-  final VoidCallback? onOpenProtection;
 
   @override
   ConsumerState<PrivacySettingsSection> createState() =>
@@ -180,30 +175,17 @@ class _PrivacySettingsSectionState
           child: Column(
             children: [
               if (!widget.generationOnly) ...[
-                SettingsSwitchTile(
-                  secondary: const Icon(Icons.shield_outlined),
-                  title: Text(context.l10n.settings_protectionMode),
-                  subtitle: Text(context.l10n.settings_protectionModeSubtitle),
-                  value: shareSettings.protectionMode,
-                  onChanged: (value) async {
-                    await ref
-                        .read(shareImageSettingsProvider.notifier)
-                        .setProtectionMode(value);
-                  },
-                ),
                 SettingsSectionLabel(context.l10n.settings_protectionFeatures),
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.cleaning_services_outlined),
                   title: Text(context.l10n.settings_stripMetadataTitle),
                   subtitle: Text(context.l10n.settings_stripMetadataSubtitle),
                   value: shareSettings.stripMetadataForCopyAndDrag,
-                  onChanged: shareSettings.protectionMode
-                      ? (value) async {
-                          await ref
-                              .read(shareImageSettingsProvider.notifier)
-                              .setStripMetadataForCopyAndDrag(value);
-                        }
-                      : null,
+                  onChanged: (value) async {
+                    await ref
+                        .read(shareImageSettingsProvider.notifier)
+                        .setStripMetadataForCopyAndDrag(value);
+                  },
                 ),
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.warning_amber_rounded),
@@ -214,13 +196,11 @@ class _PrivacySettingsSectionState
                     context.l10n.settings_confirmDangerousActionsSubtitle,
                   ),
                   value: shareSettings.confirmDangerousActions,
-                  onChanged: shareSettings.protectionMode
-                      ? (value) async {
-                          await ref
-                              .read(shareImageSettingsProvider.notifier)
-                              .setConfirmDangerousActions(value);
-                        }
-                      : null,
+                  onChanged: (value) async {
+                    await ref
+                        .read(shareImageSettingsProvider.notifier)
+                        .setConfirmDangerousActions(value);
+                  },
                 ),
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.cloud_upload_outlined),
@@ -229,13 +209,11 @@ class _PrivacySettingsSectionState
                     context.l10n.settings_warnExternalImageSendSubtitle,
                   ),
                   value: shareSettings.warnExternalImageSend,
-                  onChanged: shareSettings.protectionMode
-                      ? (value) async {
-                          await ref
-                              .read(shareImageSettingsProvider.notifier)
-                              .setWarnExternalImageSend(value);
-                        }
-                      : null,
+                  onChanged: (value) async {
+                    await ref
+                        .read(shareImageSettingsProvider.notifier)
+                        .setWarnExternalImageSend(value);
+                  },
                 ),
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.file_copy_outlined),
@@ -244,33 +222,14 @@ class _PrivacySettingsSectionState
                     context.l10n.settings_preventOverwriteSubtitle,
                   ),
                   value: shareSettings.preventOverwrite,
-                  onChanged: shareSettings.protectionMode
-                      ? (value) async {
-                          await ref
-                              .read(shareImageSettingsProvider.notifier)
-                              .setPreventOverwrite(value);
-                        }
-                      : null,
+                  onChanged: (value) async {
+                    await ref
+                        .read(shareImageSettingsProvider.notifier)
+                        .setPreventOverwrite(value);
+                  },
                 ),
               ],
               if (widget.generationOnly) ...[
-                if (!shareSettings.protectionMode)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      context.l10n.settings_protectionModeSubtitle,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                if (!shareSettings.protectionMode &&
-                    widget.onOpenProtection != null)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      onPressed: widget.onOpenProtection,
-                      child: Text(context.l10n.settings_protectionMode),
-                    ),
-                  ),
                 SettingsSectionLabel(context.l10n.settings_protectionFeatures),
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.toll_outlined),
@@ -281,18 +240,14 @@ class _PrivacySettingsSectionState
                     ),
                   ),
                   value: shareSettings.warnHighAnlasCost,
-                  onChanged: shareSettings.protectionMode
-                      ? (value) async {
-                          await ref
-                              .read(shareImageSettingsProvider.notifier)
-                              .setWarnHighAnlasCost(value);
-                        }
-                      : null,
+                  onChanged: (value) async {
+                    await ref
+                        .read(shareImageSettingsProvider.notifier)
+                        .setWarnHighAnlasCost(value);
+                  },
                 ),
                 SettingsTile(
-                  enabled:
-                      shareSettings.protectionMode &&
-                      shareSettings.warnHighAnlasCost,
+                  enabled: shareSettings.warnHighAnlasCost,
                   leading: const Icon(Icons.speed_outlined),
                   title: Text(
                     context.l10n.settings_highAnlasCostThresholdTitle,
@@ -301,9 +256,7 @@ class _PrivacySettingsSectionState
                     '${shareSettings.highAnlasCostThreshold} Anlas',
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap:
-                      shareSettings.protectionMode &&
-                          shareSettings.warnHighAnlasCost
+                  onTap: shareSettings.warnHighAnlasCost
                       ? _editHighAnlasThreshold
                       : null,
                 ),
@@ -316,18 +269,14 @@ class _PrivacySettingsSectionState
                     context.l10n.settings_limitGenerationIntervalSubtitle,
                   ),
                   value: shareSettings.limitGenerationInterval,
-                  onChanged: shareSettings.protectionMode
-                      ? (value) async {
-                          await ref
-                              .read(shareImageSettingsProvider.notifier)
-                              .setLimitGenerationInterval(value);
-                        }
-                      : null,
+                  onChanged: (value) async {
+                    await ref
+                        .read(shareImageSettingsProvider.notifier)
+                        .setLimitGenerationInterval(value);
+                  },
                 ),
                 SettingsTile(
-                  enabled:
-                      shareSettings.protectionMode &&
-                      shareSettings.limitGenerationInterval,
+                  enabled: shareSettings.limitGenerationInterval,
                   leading: const Icon(Icons.hourglass_bottom_outlined),
                   title: Text(context.l10n.settings_generationIntervalTitle),
                   subtitle: Text(
@@ -336,16 +285,12 @@ class _PrivacySettingsSectionState
                     ),
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap:
-                      shareSettings.protectionMode &&
-                          shareSettings.limitGenerationInterval
+                  onTap: shareSettings.limitGenerationInterval
                       ? _editGenerationInterval
                       : null,
                 ),
                 SettingsTile(
-                  enabled:
-                      shareSettings.protectionMode &&
-                      shareSettings.limitGenerationInterval,
+                  enabled: shareSettings.limitGenerationInterval,
                   leading: const Icon(Icons.shuffle_outlined),
                   title: Text(
                     context.l10n.settings_generationIntervalJitterTitle,
@@ -356,9 +301,7 @@ class _PrivacySettingsSectionState
                     ),
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap:
-                      shareSettings.protectionMode &&
-                          shareSettings.limitGenerationInterval
+                  onTap: shareSettings.limitGenerationInterval
                       ? _editGenerationIntervalJitter
                       : null,
                 ),
