@@ -18,7 +18,7 @@ import '../auth/add_account_dialog.dart';
 import '../auth/subscription_expiry_text.dart';
 
 class MainNavRail extends ConsumerWidget {
-  static const double collapsedWidth = 60;
+  static const double collapsedWidth = 48;
   static const double expandedWidth = 196;
   static const Duration animationDuration = Duration(milliseconds: 240);
 
@@ -47,10 +47,14 @@ class MainNavRail extends ConsumerWidget {
         width: isExpanded ? expandedWidth : collapsedWidth,
         height: double.infinity,
         clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+        decoration: BoxDecoration(color: theme.colorScheme.surface),
+        // 分隔线只绘制，不挤占图标的居中空间。
+        foregroundDecoration: BoxDecoration(
           border: Border(
-            right: BorderSide(color: theme.dividerColor, width: 1),
+            right: BorderSide(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.55),
+              width: 1,
+            ),
           ),
         ),
         child: Column(
@@ -177,7 +181,7 @@ class MainNavRail extends ConsumerWidget {
               showBadge: showUpdateBadge,
               onTap: () => navigationShell.goBranch(AppBranch.settings.index),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -190,13 +194,11 @@ class _NavGroupDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Divider(
-    height: 17,
+    height: 16,
     thickness: 1,
     indent: 16,
     endIndent: 16,
-    color: Theme.of(context).brightness == Brightness.light
-        ? Theme.of(context).colorScheme.outline
-        : Theme.of(context).dividerColor,
+    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
   );
 }
 
@@ -234,54 +236,52 @@ class _NavRailToggle extends StatelessWidget {
         ? context.l10n.nav_collapseSidebar
         : context.l10n.nav_expandSidebar;
 
-    return SizedBox(
-      height: 40,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 160),
-          transitionBuilder: (child, animation) =>
-              FadeTransition(opacity: animation, child: child),
-          child: isExpanded
-              ? Align(
-                  key: const ValueKey('expanded-nav-toggle'),
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    key: const Key('main-nav-toggle'),
-                    onPressed: onTap,
-                    style: TextButton.styleFrom(
-                      foregroundColor: theme.colorScheme.onSurfaceVariant,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      minimumSize: const Size(0, 36),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                    icon: const Icon(
-                      Icons.keyboard_double_arrow_left,
-                      size: 18,
-                    ),
-                    label: Text(label),
-                  ),
-                )
-              : Center(
-                  key: const ValueKey('collapsed-nav-toggle'),
-                  child: IconButton(
-                    key: const Key('main-nav-toggle'),
-                    onPressed: onTap,
-                    tooltip: label,
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(
-                      foregroundColor: theme.colorScheme.onSurfaceVariant,
-                      hoverColor: theme.colorScheme.surfaceContainerHighest,
-                      highlightColor: theme.colorScheme.primary.withValues(
-                        alpha: 0.1,
+    return Tooltip(
+      message: label,
+      preferBelow: false,
+      child: Container(
+        height: 44,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: const Key('main-nav-toggle'),
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+            focusColor: theme.colorScheme.primary.withValues(alpha: 0.12),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: LayoutBuilder(
+                builder: (context, constraints) => Row(
+                  children: [
+                    SizedBox(
+                      width: constraints.maxWidth.clamp(0.0, 36.0),
+                      height: 36,
+                      child: Icon(
+                        isExpanded
+                            ? Icons.keyboard_double_arrow_left
+                            : Icons.keyboard_double_arrow_right,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        size: 18,
                       ),
                     ),
-                    icon: const Icon(
-                      Icons.keyboard_double_arrow_right,
-                      size: 20,
-                    ),
-                  ),
+                    if (constraints.maxWidth > 60)
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -314,12 +314,13 @@ class _NavIcon extends StatefulWidget {
 
 class _NavIconState extends State<_NavIcon> {
   bool _isPressed = false;
+  bool _isHovered = false;
+  bool _isFocused = false;
   int _motionTrigger = 0;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isExpanded = _NavRailExpansionScope.isExpandedOf(context);
     final color = widget.isSelected
         ? theme.colorScheme.primary
         : theme.iconTheme.color?.withValues(alpha: 0.9);
@@ -328,92 +329,105 @@ class _NavIconState extends State<_NavIcon> {
         color ?? IconTheme.of(context).color ?? theme.colorScheme.onSurface;
 
     final backgroundColor = widget.isSelected
-        ? theme.colorScheme.primary.withValues(alpha: 0.1)
+        ? theme.colorScheme.primary.withValues(alpha: _isHovered ? 0.16 : 0.1)
+        : (_isHovered || _isFocused)
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.06)
         : Colors.transparent;
 
-    return Tooltip(
-      message: isExpanded ? '' : widget.label,
-      preferBelow: false,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        height: 48,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              setState(() => _motionTrigger++);
-              widget.onTap();
-            },
-            onTapDown: (_) => setState(() => _isPressed = true),
-            onTapUp: (_) => setState(() => _isPressed = false),
-            onTapCancel: () => setState(() => _isPressed = false),
-            borderRadius: BorderRadius.circular(8),
-            child: AnimatedScale(
-              scale: _isPressed ? 0.97 : 1.0,
-              duration: const Duration(milliseconds: 140),
-              curve: Curves.easeOutCubic,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(8),
-                  border: widget.isSelected
-                      ? Border.all(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.5,
-                          ),
-                          width: 1,
-                        )
-                      : null,
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final showLabel = constraints.maxWidth > 60;
-                    final labelOpacity = ((constraints.maxWidth - 60) / 48)
-                        .clamp(0.0, 1.0);
-                    return Row(
-                      children: [
-                        SizedBox(
-                          width: constraints.maxWidth.clamp(0.0, 48.0),
-                          height: 48,
-                          child: Center(
-                            child: Badge(
-                              isLabelVisible: widget.showBadge,
-                              smallSize: 7,
-                              child: widget.customIcon != null
-                                  ? widget.customIcon!(resolvedColor)
-                                  : StudioAnimatedIcon(
-                                      icon: widget.icon!,
-                                      trigger: _motionTrigger,
-                                      color: color,
-                                      size: 24,
-                                    ),
-                            ),
-                          ),
-                        ),
-                        if (showLabel)
-                          Expanded(
-                            child: Opacity(
-                              opacity: labelOpacity,
-                              child: Text(
-                                widget.label,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: widget.isSelected
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.onSurface,
-                                  fontWeight: widget.isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w500,
+    return Semantics(
+      selected: widget.isSelected,
+      child: Tooltip(
+        message: widget.label,
+        preferBelow: false,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+          height: 44,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                setState(() => _motionTrigger++);
+                widget.onTap();
+              },
+              onTapDown: (_) => setState(() => _isPressed = true),
+              onTapUp: (_) => setState(() => _isPressed = false),
+              onTapCancel: () => setState(() => _isPressed = false),
+              onHover: (value) => setState(() => _isHovered = value),
+              onFocusChange: (value) => setState(() => _isFocused = value),
+              borderRadius: BorderRadius.circular(12),
+              hoverColor: Colors.transparent,
+              focusColor: Colors.transparent,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: AnimatedScale(
+                  scale: _isPressed ? 0.97 : 1.0,
+                  duration: const Duration(milliseconds: 140),
+                  curve: Curves.easeOutCubic,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    foregroundDecoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: _isFocused
+                          ? Border.all(
+                              color: theme.colorScheme.primary,
+                              width: 1.5,
+                            )
+                          : null,
+                    ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final showLabel = constraints.maxWidth > 60;
+                        final labelOpacity = ((constraints.maxWidth - 60) / 48)
+                            .clamp(0.0, 1.0);
+                        return Row(
+                          children: [
+                            SizedBox(
+                              width: constraints.maxWidth.clamp(0.0, 36.0),
+                              height: 36,
+                              child: Center(
+                                child: Badge(
+                                  isLabelVisible: widget.showBadge,
+                                  smallSize: 7,
+                                  child: widget.customIcon != null
+                                      ? widget.customIcon!(resolvedColor)
+                                      : StudioAnimatedIcon(
+                                          icon: widget.icon!,
+                                          trigger: _motionTrigger,
+                                          color: color,
+                                          size: 20,
+                                        ),
                                 ),
                               ),
                             ),
-                          ),
-                        if (showLabel) const SizedBox(width: 12),
-                      ],
-                    );
-                  },
+                            if (showLabel)
+                              Expanded(
+                                child: Opacity(
+                                  opacity: labelOpacity,
+                                  child: Text(
+                                    widget.label,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: widget.isSelected
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.onSurface,
+                                      fontWeight: widget.isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (showLabel) const SizedBox(width: 12),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -458,86 +472,93 @@ class _AccountAvatarButtonState extends State<_AccountAvatarButton> {
     }
 
     final avatar = currentAccount != null
-        ? AccountAvatarSmall(account: currentAccount, size: 48)
+        ? AccountAvatarSmall(account: currentAccount, size: 36)
         : Container(
-            width: 48,
-            height: 48,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
-              borderRadius: avatarBorderRadius(48),
+              borderRadius: avatarBorderRadius(36),
             ),
             child: Icon(
               Icons.person,
               color: theme.colorScheme.primary,
-              size: 27,
+              size: 22,
             ),
           );
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(5, 0, 6, 0),
-      height: 52,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _showAccountMenu(context, currentAccount),
-          onTapDown: (_) => setState(() => _isPressed = true),
-          onTapUp: (_) => setState(() => _isPressed = false),
-          onTapCancel: () => setState(() => _isPressed = false),
-          borderRadius: BorderRadius.circular(26),
-          child: AnimatedScale(
-            scale: _isPressed ? 0.97 : 1.0,
-            duration: const Duration(milliseconds: 140),
-            curve: Curves.easeOutCubic,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final showLabel = constraints.maxWidth > 80;
-                final labelOpacity = ((constraints.maxWidth - 80) / 48).clamp(
-                  0.0,
-                  1.0,
-                );
-                return Row(
-                  children: [
-                    SizedBox(
-                      width: constraints.maxWidth.clamp(0.0, 48.0),
-                      height: 52,
-                      child: Center(
-                        child: SizedBox(
-                          key: const Key('main-nav-avatar'),
-                          width: 48,
-                          height: 48,
-                          child: avatar,
-                        ),
-                      ),
-                    ),
-                    if (showLabel) ...[
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Opacity(
-                          opacity: labelOpacity,
-                          child: Text(
-                            currentAccount?.displayName ??
-                                context.l10n.settings_account,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+    return Tooltip(
+      message: currentAccount?.displayName ?? context.l10n.settings_account,
+      preferBelow: false,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        height: 44,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showAccountMenu(context, currentAccount),
+            onTapDown: (_) => setState(() => _isPressed = true),
+            onTapUp: (_) => setState(() => _isPressed = false),
+            onTapCancel: () => setState(() => _isPressed = false),
+            borderRadius: BorderRadius.circular(12),
+            hoverColor: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+            focusColor: theme.colorScheme.primary.withValues(alpha: 0.12),
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: AnimatedScale(
+                scale: _isPressed ? 0.97 : 1.0,
+                duration: const Duration(milliseconds: 140),
+                curve: Curves.easeOutCubic,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final showLabel = constraints.maxWidth > 80;
+                    final labelOpacity = ((constraints.maxWidth - 80) / 48)
+                        .clamp(0.0, 1.0);
+                    return Row(
+                      children: [
+                        SizedBox(
+                          width: constraints.maxWidth.clamp(0.0, 36.0),
+                          height: 36,
+                          child: Center(
+                            child: SizedBox(
+                              key: const Key('main-nav-avatar'),
+                              width: 36,
+                              height: 36,
+                              child: avatar,
                             ),
                           ),
                         ),
-                      ),
-                      Opacity(
-                        opacity: labelOpacity,
-                        child: Icon(
-                          Icons.expand_more,
-                          size: 18,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                  ],
-                );
-              },
+                        if (showLabel) ...[
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Opacity(
+                              opacity: labelOpacity,
+                              child: Text(
+                                currentAccount?.displayName ??
+                                    context.l10n.settings_account,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Opacity(
+                            opacity: labelOpacity,
+                            child: Icon(
+                              Icons.expand_more,
+                              size: 18,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
