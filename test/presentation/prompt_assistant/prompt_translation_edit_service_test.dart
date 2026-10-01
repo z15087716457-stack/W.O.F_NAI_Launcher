@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,6 +75,14 @@ void main() {
       final result = await service.translateVisibleTag(
         tag: 'blue_eyes',
         wikiBody: 'Description. Includes blue_eyes.',
+        glossary: const [
+          {
+            'tag': 'blue_eyes',
+            'category': 'general',
+            'zh': '蓝眼睛',
+            'matched_texts': ['blue_eyes'],
+          },
+        ],
         includeWikiTranslation: true,
         sessionId: 'wiki',
       );
@@ -84,8 +93,18 @@ void main() {
         request.systemPrompt,
         contains('canonical English tag references exactly as written'),
       );
-      expect(request.systemPrompt, contains('Do not invent tags or links'));
+      expect(request.systemPrompt, contains('Do not invent tags or'));
       expect(request.model, 'translate-model');
+      final data =
+          jsonDecode((request.userParts.single as PromptAssistantTextPart).text)
+              as Map<String, dynamic>;
+      expect((data['glossary'] as List).single['category'], 'general');
+      expect((data['glossary'] as List).single['zh'], '蓝眼睛');
+      expect(request.systemPrompt, contains('NOT article-wide deduplication'));
+      expect(request.systemPrompt, contains('examples, enumerations'));
+      expect(request.systemPrompt, contains('wof-tag:TAG'));
+      expect(request.systemPrompt, contains('A match is not evidence'));
+      expect(api.requests, hasLength(1));
     },
   );
 }

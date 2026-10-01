@@ -12,6 +12,7 @@ import '../autocomplete/tag_translation_lookup.dart';
 import '../utils/tag_normalizer.dart';
 import 'tag_wiki_repository.dart';
 import 'visible_tag_translation_cache.dart';
+import 'wiki_tag_links.dart';
 
 final autoTagTranslationProvider =
     ChangeNotifierProvider<AutoTagTranslationController>((ref) {
@@ -20,6 +21,7 @@ final autoTagTranslationProvider =
         localNames: ref.read(tagTranslationLookupProvider),
         wiki: ref.read(tagWikiRepositoryProvider),
         cache: VisibleTagTranslationCache(),
+        wikiLinks: ref.read(wikiTagLinksProvider),
       );
       ref.listen(promptAssistantConfigProvider, (_, __) {
         controller.routeChanged();
@@ -59,17 +61,20 @@ class AutoTagTranslationController extends ChangeNotifier {
     required TagTranslationLookup localNames,
     required TagWikiRepository wiki,
     required VisibleTagTranslationCache cache,
+    WikiTagLinks? wikiLinks,
     this.maxConcurrentRequests = 5,
   }) : _assistant = assistant,
        _localNames = localNames,
        _wiki = wiki,
-       _cache = cache;
+       _cache = cache,
+       _wikiLinks = wikiLinks;
 
   static const _preferenceKey = 'auto_visible_tag_translation_enabled';
   final PromptAssistantService _assistant;
   final TagTranslationLookup _localNames;
   final TagWikiRepository _wiki;
   final VisibleTagTranslationCache _cache;
+  final WikiTagLinks? _wikiLinks;
   final int maxConcurrentRequests;
   final Map<String, Set<String>> _visibleBySurface = {};
   final Map<String, String> _wikiBySurface = {};
@@ -322,6 +327,7 @@ class AutoTagTranslationController extends ChangeNotifier {
               promptVersion:
                   PromptAssistantService.visibleTagTranslationPromptVersion,
               wikiHash: hash,
+              allowEarlierVersion: true,
             );
       if (_disposed ||
           epoch != _routeEpoch ||
@@ -370,6 +376,16 @@ class AutoTagTranslationController extends ChangeNotifier {
           return;
         }
         final chunk = chunks[index];
+        final glossary = task.wiki
+            ? await _wikiLinks?.glossaryFor(chunk.text) ??
+                  const <Map<String, Object>>[]
+            : const <Map<String, Object>>[];
+        if (_disposed ||
+            epoch != _routeEpoch ||
+            (!_enabled && !task.force) ||
+            !_isVisible(task.tag)) {
+          return;
+        }
         final sessionId =
             'visible-tag-${DateTime.now().microsecondsSinceEpoch}-${task.tag}-$index';
         _sessions[task.tag] = sessionId;
@@ -382,6 +398,7 @@ class AutoTagTranslationController extends ChangeNotifier {
           aliases: tagContext?.aliases ?? const [],
           postCount: tagContext?.postCount,
           relatedTo: tagContext?.relatedTo,
+          glossary: glossary,
           sessionId: sessionId,
         );
         _sessions.remove(task.tag);
@@ -397,7 +414,19 @@ class AutoTagTranslationController extends ChangeNotifier {
           route != _assistant.translateRouteFingerprint()) {
         return;
       }
-      final wikiZh = task.wiki ? translatedWiki.toString().trim() : null;
+      String? wikiZh;
+      if (task.wiki) {
+        final body = translatedWiki.toString().trim();
+        wikiZh = _wikiLinks == null
+            ? WikiTagLinks.withoutLocalLinks(body)
+            : (await _wikiLinks.resolve(body)).markdown;
+      }
+      if (_disposed ||
+          epoch != _routeEpoch ||
+          (!_enabled && !task.force) ||
+          route != _assistant.translateRouteFingerprint()) {
+        return;
+      }
       await _cache.put(
         tag: task.tag,
         route: route,

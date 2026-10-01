@@ -59,13 +59,16 @@ class VisibleTagTranslationCache {
     required String route,
     required int promptVersion,
     required String wikiHash,
+    bool allowEarlierVersion = false,
   }) async {
     final db = await _open();
     final rows = await db.query(
       'tag_translations',
       columns: ['name_zh', 'wiki_zh', 'wiki_hash'],
-      where: 'tag = ? AND route = ? AND prompt_version = ?',
+      where:
+          'tag = ? AND route = ? AND prompt_version ${allowEarlierVersion ? '<=' : '='} ?',
       whereArgs: [tag, route, promptVersion],
+      orderBy: 'prompt_version DESC',
       limit: 1,
     );
     if (rows.isEmpty) return null;

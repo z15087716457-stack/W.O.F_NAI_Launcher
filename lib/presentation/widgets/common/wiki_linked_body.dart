@@ -29,7 +29,7 @@ class WikiLinkedBody extends ConsumerWidget {
             ? snapshot.data
             : null;
         return MarkdownBody(
-          data: document?.markdown ?? body,
+          data: document?.markdown ?? WikiTagLinks.withoutLocalLinks(body),
           selectable: true,
           fitContent: false,
           imageBuilder: (_, _, alt) => Text(alt ?? '', style: textStyle),

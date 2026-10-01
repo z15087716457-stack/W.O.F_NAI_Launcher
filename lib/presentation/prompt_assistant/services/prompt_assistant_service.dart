@@ -233,7 +233,7 @@ icon characters or additional blocks. Never modify the other field.
   }
 
   static const int tagTranslationPromptVersion = 1;
-  static const int visibleTagTranslationPromptVersion = 2;
+  static const int visibleTagTranslationPromptVersion = 3;
 
   /// Translate one tag as a semantic unit. The English wiki is included as
   /// context for a name-only request, but its Chinese body is requested only
@@ -247,6 +247,7 @@ icon characters or additional blocks. Never modify the other field.
     List<String> aliases = const [],
     int? postCount,
     String? relatedTo,
+    List<Map<String, Object>> glossary = const [],
     required String sessionId,
   }) async {
     final execution = await _resolveInterfaceExecution(
@@ -261,6 +262,7 @@ icon characters or additional blocks. Never modify the other field.
       if (relatedTo != null) 'related_to': relatedTo,
       'wiki_en': wikiBody,
       'include_wiki_translation': includeWikiTranslation,
+      if (includeWikiTranslation && glossary.isNotEmpty) 'glossary': glossary,
       if (existingNameZh != null) 'existing_name_zh': existingNameZh,
     });
     await for (final chunk in _apiClient.complete(
@@ -283,7 +285,24 @@ Markdown bullet lists; preserve existing headings and their hierarchy. Do not
 add headings, claims or relationships that are not supported by the source.
 Keep canonical English tag references exactly as written, alongside their
 Chinese explanation when useful, so the reader can navigate to the exact tag.
-Preserve URLs and existing link destinations. Do not invent tags or links.
+Preserve source URLs and external link destinations. Do not invent tags or
+external links. The glossary contains optional candidate tags, categories,
+readings and matched fragments. A match is not evidence of the intended meaning:
+ordinary words, conjunctions (e.g. "and" / "以及"), clothing parts (e.g. "visor")
+must not become unrelated copyright or character links. Use context to decide.
+Choose meaningful inline tag hyperlinks inside wiki_zh: [reading](wof-tag:TAG),
+where TAG is the complete canonical tag, URI-percent-encoded (including spaces
+and parentheses). Link a complete tag phrase rather than pieces of its name.
+You need not use any glossary candidates. You may propose a known tag absent
+from the glossary if the source clearly identifies it; the app verifies targets
+against its local catalog. Leave uncertain phrases unlinked. Do not create
+links merely because a word matches, and avoid needless links back to this tag.
+In continuous explanatory prose, usually link the first meaningful mention of
+a target and avoid repetitive clutter. This is NOT article-wide deduplication:
+examples, enumerations, related-tag lists and new sections may repeat a target
+as a complete clickable link, even if it was linked earlier. In bilingual
+parenthetical equivalents usually link only one of the equivalent phrases.
+Use inline links only, not reference-style or automatic bare tag hyperlinks.
 Use Markdown only inside wiki_zh; do not use HTML or fenced code blocks.
 Return exactly one JSON object with keys tag, name_zh, and wiki_zh. Copy the
 input tag exactly. wiki_zh must be null when translation was not requested,

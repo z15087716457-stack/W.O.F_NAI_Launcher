@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:crypto/crypto.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/autocomplete/tag_translation_lookup.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
+import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
+import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/wiki/visible_tag_translation_cache.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +37,7 @@ class _Cache extends VisibleTagTranslationCache {
     required String route,
     required int promptVersion,
     required String wikiHash,
+    bool allowEarlierVersion = false,
   }) async => records[tag];
 
   @override
@@ -63,6 +69,202 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  test(
+    'one Wiki request sends candidate context and caches only model-selected validated links',
+    () async {
+      final assistant = _Assistant();
+      final names = _Names();
+      final cache = _Cache();
+      final entries = {
+        for (final name in ['hat', 'visor', 'blue_eyes', 'peaked_cap'])
+          name: CompletionCandidate(
+            canonicalTag: name,
+            category: name == 'visor'
+                ? TagCategory.copyright
+                : TagCategory.general,
+            postCount: 1,
+            matchKind: CompletionMatchKind.englishExact,
+            sources: const {CompletionSourceKind.base},
+          ),
+      };
+      final links = WikiTagLinks(
+        exactLookup: (keys) async => {
+          for (final name in keys)
+            if (entries[name] case final item?) name: item,
+        },
+        chineseLookup: (_) async => [],
+        readingsLookup: (_) async => {'hat': '帽子', 'visor': '作品名'},
+      );
+      when(() => assistant.translateRouteFingerprint()).thenReturn('route');
+      when(() => names.translate('visor_cap')).thenAnswer((_) async => '遮阳帽');
+      var requests = 0;
+      when(
+        () => assistant.translateVisibleTag(
+          tag: any(named: 'tag'),
+          wikiBody: any(named: 'wikiBody'),
+          includeWikiTranslation: any(named: 'includeWikiTranslation'),
+          existingNameZh: any(named: 'existingNameZh'),
+          category: any(named: 'category'),
+          aliases: any(named: 'aliases'),
+          postCount: any(named: 'postCount'),
+          relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((invocation) async {
+        requests++;
+        final glossary =
+            invocation.namedArguments[#glossary] as List<Map<String, Object>>;
+        final visor = glossary.singleWhere((item) => item['tag'] == 'visor');
+        expect(visor['category'], 'copyright');
+        expect(visor['zh'], '作品名');
+        expect(visor['matched_texts'], ['visor']);
+        return const VisibleTagTranslationResult(
+          nameZh: '遮阳帽',
+          wikiZh:
+              '[帽子](wof-tag:hat) 的部件叫 visor。帽子只是普通重复文字。'
+              '示例：[帽子](wof-tag:hat) 和 [鸭舌帽](wof-tag:peaked_cap)。[无效](wof-tag:missing)',
+        );
+      });
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        localNames: names,
+        wiki: _Wiki('A hat has a visor. Blue eyes.'),
+        cache: cache,
+        wikiLinks: links,
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.requestWiki(surface: 'article', tag: 'visor_cap');
+      await _until(() => controller.wikiFor('visor_cap') != null);
+      expect(requests, 1);
+      final result = controller.wikiFor('visor_cap')!;
+      expect(result, contains('的部件叫 visor。帽子只是普通重复文字。'));
+      expect(result, endsWith('无效'));
+      expect(result, isNot(contains('wof-tag:missing')));
+      expect(
+        (await links.resolve(
+          result,
+        )).links.map((link) => link.candidate.canonicalTag),
+        ['hat', 'hat', 'peaked_cap'],
+      );
+      expect(cache.records['visor_cap']!.wikiZh, result);
+    },
+  );
+
+  test(
+    'a previous prompt-version article loads without another model call',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'legacy_wiki_queue_',
+      );
+      final cache = VisibleTagTranslationCache(
+        databasePath: () async => '${directory.path}/cache.db',
+      );
+      const source = 'Blue eyes.';
+      await cache.put(
+        tag: 'blue_eyes',
+        route: 'route',
+        promptVersion: 2,
+        wikiHash: sha256.convert(utf8.encode(source)).toString(),
+        nameZh: '蓝眼',
+        wikiZh: '帽子以及 visor。blue_eyes',
+      );
+      final assistant = _Assistant();
+      final names = _Names();
+      when(() => assistant.translateRouteFingerprint()).thenReturn('route');
+      when(() => names.translate('blue_eyes')).thenAnswer((_) async => '蓝眼');
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        localNames: names,
+        wiki: _Wiki(source),
+        cache: cache,
+      );
+      addTearDown(() async {
+        await cache.close();
+        controller.dispose();
+        await directory.delete(recursive: true);
+      });
+      await controller.setEnabled(true);
+      controller.requestWiki(surface: 'article', tag: 'blue_eyes');
+      await _until(
+        () =>
+            controller.activeRequests == 0 &&
+            controller.wikiFor('blue_eyes') != null,
+      );
+      expect(controller.wikiFor('blue_eyes'), '帽子以及 visor。blue_eyes');
+      expect(
+        await cache.get(
+          tag: 'blue_eyes',
+          route: 'route',
+          promptVersion: 3,
+          wikiHash: sha256.convert(utf8.encode(source)).toString(),
+        ),
+        isNull,
+      );
+      verifyNever(
+        () => assistant.translateVisibleTag(
+          tag: any(named: 'tag'),
+          wikiBody: any(named: 'wikiBody'),
+          includeWikiTranslation: any(named: 'includeWikiTranslation'),
+          existingNameZh: any(named: 'existingNameZh'),
+          category: any(named: 'category'),
+          aliases: any(named: 'aliases'),
+          postCount: any(named: 'postCount'),
+          relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      );
+    },
+  );
+  test(
+    'closing while terminology loads prevents delayed model dispatch',
+    () async {
+      final assistant = _Assistant();
+      final names = _Names();
+      final cache = _Cache();
+      final pending = Completer<Map<String, CompletionCandidate>>();
+      var started = false;
+      final links = WikiTagLinks(
+        exactLookup: (_) {
+          started = true;
+          return pending.future;
+        },
+        chineseLookup: (_) async => [],
+      );
+      when(() => assistant.translateRouteFingerprint()).thenReturn('route');
+      when(() => names.translate('blue_eyes')).thenAnswer((_) async => '蓝眼');
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        localNames: names,
+        wiki: _Wiki('Blue eyes.'),
+        cache: cache,
+        wikiLinks: links,
+      );
+      await controller.setEnabled(true);
+      controller.requestWiki(surface: 'article', tag: 'blue_eyes');
+      await _until(() => started);
+      controller.dispose();
+      pending.complete({});
+      await _until(() => controller.activeRequests == 0);
+      expect(cache.writes, 0);
+      verifyNever(
+        () => assistant.translateVisibleTag(
+          tag: any(named: 'tag'),
+          wikiBody: any(named: 'wikiBody'),
+          includeWikiTranslation: any(named: 'includeWikiTranslation'),
+          existingNameZh: any(named: 'existingNameZh'),
+          category: any(named: 'category'),
+          aliases: any(named: 'aliases'),
+          postCount: any(named: 'postCount'),
+          relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      );
+    },
+  );
   test('already Chinese wiki text does not need a model translation', () {
     expect(
       AutoTagTranslationController.shouldTranslateWiki(
@@ -102,6 +304,7 @@ void main() {
           aliases: any(named: 'aliases'),
           postCount: any(named: 'postCount'),
           relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
           sessionId: any(named: 'sessionId'),
         ),
       ).thenAnswer((_) {
@@ -166,6 +369,7 @@ void main() {
           aliases: any(named: 'aliases'),
           postCount: any(named: 'postCount'),
           relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
           sessionId: any(named: 'sessionId'),
         ),
       ).thenAnswer(
@@ -196,6 +400,7 @@ void main() {
           aliases: any(named: 'aliases'),
           postCount: any(named: 'postCount'),
           relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
           sessionId: any(named: 'sessionId'),
         ),
       );
@@ -215,6 +420,7 @@ void main() {
           aliases: any(named: 'aliases'),
           postCount: any(named: 'postCount'),
           relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
           sessionId: any(named: 'sessionId'),
         ),
       ).called(1);
@@ -240,6 +446,7 @@ void main() {
           aliases: any(named: 'aliases'),
           postCount: any(named: 'postCount'),
           relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
           sessionId: any(named: 'sessionId'),
         ),
       ).thenAnswer((invocation) async {
@@ -305,6 +512,7 @@ void main() {
         aliases: any(named: 'aliases'),
         postCount: any(named: 'postCount'),
         relatedTo: any(named: 'relatedTo'),
+        glossary: any(named: 'glossary'),
         sessionId: any(named: 'sessionId'),
       ),
     ).thenAnswer((invocation) {
@@ -363,6 +571,7 @@ void main() {
         aliases: any(named: 'aliases'),
         postCount: any(named: 'postCount'),
         relatedTo: any(named: 'relatedTo'),
+        glossary: any(named: 'glossary'),
         sessionId: any(named: 'sessionId'),
       ),
     ).thenAnswer((invocation) {
@@ -413,6 +622,7 @@ void main() {
         aliases: const [],
         postCount: null,
         relatedTo: null,
+        glossary: any(named: 'glossary'),
         sessionId: any(named: 'sessionId'),
       ),
     ).thenAnswer((invocation) {

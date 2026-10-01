@@ -89,7 +89,8 @@ class _Wiki implements TagWikiRepository {
       Future.value(
         TagWikiEntry(
           tag: tag,
-          body: 'See saber_(fate) and blue_eyes.',
+          body:
+              'See [saber_(fate)](https://danbooru.donmai.us/wiki_pages/saber_%28fate%29) and [blue_eyes](https://danbooru.donmai.us/wiki_pages/blue_eyes).',
           sourceUrl: '',
         ),
       );
@@ -125,7 +126,7 @@ class _Auto extends ChangeNotifier implements AutoTagTranslationController {
   String? wikiFor(String tag) => !cachedBodies
       ? null
       : bodyOverride ??
-            '这是角色的外观说明，相关标签如下：\n\n- saber_(fate)\n- blue_eyes\n\n保留原始标签，点击蓝字可以继续查阅。';
+            '这是角色的外观说明，相关标签如下：\n\n- [saber_(fate)](wof-tag:saber_%28fate%29)\n- [blue_eyes](wof-tag:blue_eyes)\n\n保留原始标签，点击蓝字可以继续查阅。';
   @override
   String? nameFor(String tag) =>
       tags.where((item) => item.canonicalTag == tag).firstOrNull?.translation;
@@ -392,6 +393,54 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
       expect(find.byKey(const Key('wiki-article-back')), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'only selected links are blue, and repeated example links stay clickable',
+    (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auto = _Auto()
+        ..bodyOverride = '''帽子以及 visor 是普通说明。[blue_eyes](wof-tag:blue_eyes)。
+
+示例
+- [blue_eyes](wof-tag:blue_eyes)
+
+[未知](wof-tag:unknown)''';
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          directory: WikiDirectory(roots: [], groups: {}),
+          initialTag: longTag,
+        ),
+        auto,
+      );
+      final body = find.byType(WikiLinkedBody);
+      final labels = <String>[];
+      for (final text in tester.widgetList<SelectableText>(
+        find.descendant(of: body, matching: find.byType(SelectableText)),
+      )) {
+        text.textSpan?.visitChildren((span) {
+          if (span is TextSpan && span.recognizer != null) {
+            labels.add(span.toPlainText());
+          }
+          return true;
+        });
+      }
+      expect(labels, ['blue_eyes', 'blue_eyes']);
+      expect(
+        find.textContaining('帽子以及 visor', findRichText: true),
+        findsOneWidget,
+      );
+      await capture(tester, 'model-links');
+      await tester.tap(find.text('blue_eyes', findRichText: true).last);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
+      expect(find.byKey(const Key('wiki-article-back')), findsOneWidget);
+      expect(tester.takeException(), isNull);
     },
   );
 
