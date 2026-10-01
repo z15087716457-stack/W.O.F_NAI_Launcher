@@ -5,10 +5,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class CachedVisibleTagTranslation {
-  const CachedVisibleTagTranslation({required this.nameZh, this.wikiZh});
+  const CachedVisibleTagTranslation({
+    required this.nameZh,
+    this.wikiZh,
+    this.wikiOriginal,
+  });
 
   final String nameZh;
   final String? wikiZh;
+  final String? wikiOriginal;
 }
 
 /// User-owned sidecar cache. The bundled catalog and wiki remain read-only.
@@ -34,7 +39,14 @@ class VisibleTagTranslationCache {
       final database = await databaseFactoryFfi.openDatabase(
         path,
         options: OpenDatabaseOptions(
-          version: 1,
+          version: 2,
+          onUpgrade: (db, oldVersion, _) async {
+            if (oldVersion < 2) {
+              await db.execute(
+                'ALTER TABLE tag_translations ADD COLUMN wiki_original TEXT',
+              );
+            }
+          },
           onCreate: (db, _) => db.execute('''
             CREATE TABLE tag_translations(
               tag TEXT NOT NULL,
@@ -43,6 +55,7 @@ class VisibleTagTranslationCache {
               wiki_hash TEXT NOT NULL,
               name_zh TEXT NOT NULL,
               wiki_zh TEXT,
+              wiki_original TEXT,
               updated_at INTEGER NOT NULL,
               PRIMARY KEY(tag, route, prompt_version)
             )
@@ -64,7 +77,7 @@ class VisibleTagTranslationCache {
     final db = await _open();
     final rows = await db.query(
       'tag_translations',
-      columns: ['name_zh', 'wiki_zh', 'wiki_hash'],
+      columns: ['name_zh', 'wiki_zh', 'wiki_original', 'wiki_hash'],
       where:
           'tag = ? AND route = ? AND prompt_version ${allowEarlierVersion ? '<=' : '='} ?',
       whereArgs: [tag, route, promptVersion],
@@ -76,6 +89,9 @@ class VisibleTagTranslationCache {
     return CachedVisibleTagTranslation(
       nameZh: row['name_zh'] as String,
       wikiZh: row['wiki_hash'] == wikiHash ? row['wiki_zh'] as String? : null,
+      wikiOriginal: row['wiki_hash'] == wikiHash
+          ? row['wiki_original'] as String?
+          : null,
     );
   }
 
@@ -86,6 +102,7 @@ class VisibleTagTranslationCache {
     required String wikiHash,
     required String nameZh,
     String? wikiZh,
+    String? wikiOriginal,
   }) async {
     final db = await _open();
     await db.insert('tag_translations', {
@@ -95,6 +112,7 @@ class VisibleTagTranslationCache {
       'wiki_hash': wikiHash,
       'name_zh': nameZh,
       'wiki_zh': wikiZh,
+      'wiki_original': wikiOriginal,
       'updated_at': DateTime.now().toUtc().millisecondsSinceEpoch,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }

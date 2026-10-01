@@ -1,3 +1,4 @@
+import '../widgets/settings_tile.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -66,7 +67,7 @@ class _StorageSettingsSectionState
           child: Column(
             children: [
               // 图片保存路径设置
-              ListTile(
+              SettingsTile(
                 leading: const Icon(Icons.folder_outlined),
                 title: Text(context.l10n.settings_imageSavePath),
                 subtitle: Text(
@@ -126,7 +127,7 @@ class _StorageSettingsSectionState
                 onTap: () => _selectSaveDirectory(context),
               ),
               // 自动保存开关
-              SwitchListTile(
+              SettingsSwitchTile(
                 secondary: const Icon(Icons.save_outlined),
                 title: Text(context.l10n.settings_autoSave),
                 subtitle: Text(context.l10n.settings_autoSaveSubtitle),
@@ -153,7 +154,7 @@ class _StorageSettingsSectionState
             ],
           ),
         ),
-        const DataSourceCacheSettings(),
+        const DataSourceCacheSettings(cacheOnly: true),
         // 图库源管理（主源 + 额外图库源）
         const GalleryExtraRootsCard(),
       ],
@@ -302,7 +303,7 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
             )
           else
             ..._extraRoots.map(
-              (path) => ListTile(
+              (path) => SettingsTile(
                 dense: true,
                 leading: const Icon(Icons.folder_outlined, size: 20),
                 title: Text(
@@ -319,8 +320,8 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
               ),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: FilledButton.tonalIcon(
+            padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
+            child: OutlinedButton.icon(
               onPressed: _addExtraRoot,
               icon: const Icon(Icons.create_new_folder_outlined, size: 18),
               label: Text(context.l10n.settings_extraRootsAdd),
@@ -328,11 +329,11 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
           ),
           const Divider(height: 8),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            padding: const EdgeInsets.fromLTRB(0, 4, 0, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FilledButton.tonalIcon(
+                OutlinedButton.icon(
                   onPressed: importState.isImporting ? null : _importTagIndex,
                   icon: const Icon(Icons.upload_file_outlined, size: 18),
                   label: Text(context.l10n.settings_importTagIndex),
@@ -414,7 +415,7 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
     final customPath = _pathHelper.getCustomPath();
     final hasCustomPath = _pathHelper.hasCustomPath;
 
-    return ListTile(
+    return SettingsTile(
       leading: const Icon(StudioIcons.vibeLibrary),
       title: Text(context.l10n.settings_vibeLibraryPath),
       subtitle: FutureBuilder<String>(
@@ -561,7 +562,7 @@ class _HiveStoragePathTileState extends State<HiveStoragePathTile> {
   Widget build(BuildContext context) {
     final hasCustomPath = _hiveHelper.hasCustomPath;
 
-    return ListTile(
+    return SettingsTile(
       leading: const Icon(Icons.storage_outlined),
       title: Text(context.l10n.settings_hiveStoragePath),
       subtitle: Text(

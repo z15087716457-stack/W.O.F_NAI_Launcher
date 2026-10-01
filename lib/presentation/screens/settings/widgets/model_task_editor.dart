@@ -269,8 +269,17 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                       children: [
                         TextButton.icon(
                           onPressed: () => widget.onEditPreset(preset.id),
-                          icon: const Icon(Icons.edit_outlined, size: 16),
-                          label: const Text('查看与编辑预设'),
+                          icon: Icon(
+                            preset.id.startsWith('builtin:')
+                                ? Icons.lock_outline
+                                : Icons.edit_outlined,
+                            size: 16,
+                          ),
+                          label: Text(
+                            preset.id.startsWith('builtin:')
+                                ? '查看内置规则'
+                                : '查看与编辑预设',
+                          ),
                         ),
                         if (!preset.id.startsWith('builtin:'))
                           TextButton(

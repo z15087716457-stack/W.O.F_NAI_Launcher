@@ -22,7 +22,7 @@ extension PromptTaskDefinition on LauncherInterface {
     LauncherInterface.tagTranslate =>
       '''Translate complete Danbooru tags into concise, natural labels in the requested reading language. Use category, aliases and wiki context to distinguish characters, artists, works and ordinary terms. Preserve an existing supplied label exactly. Do not add explanations or invent a different entity.''',
     LauncherInterface.wikiTranslate =>
-      '''Translate the full wiki faithfully into the requested reading language. Preserve existing headings, separate explanations by topic and format long enumerations as Markdown lists. Keep canonical tag references intact. Glossary matches are optional evidence: use context to decide meaningful tag hyperlinks and leave uncertain ordinary words unlinked. Usually link the first meaningful mention in continuous prose; examples, related-tag lists and new sections may repeat a complete clickable link. Preserve source URLs and do not invent claims, relationships or external links.''',
+      '''Translate the full wiki faithfully into the requested reading language. Preserve existing headings, separate explanations by topic and format long enumerations as Markdown lists. Keep canonical tag references intact. Glossary matches are optional evidence: use context to decide meaningful tag hyperlinks and leave uncertain ordinary words unlinked. Include meaningful current-article references in examples and classifications. Return a source-language presentation preserving original wording with matching layout and contextual links. Usually link the first meaningful mention in continuous prose; examples, related-tag lists and new sections may repeat a complete clickable link. Preserve source URLs and do not invent claims, relationships or external links.''',
   };
   TaskPresetConfig get builtinPreset => TaskPresetConfig(
     id: builtinId,
@@ -37,6 +37,7 @@ TaskPresetConfig presetFor(
   LauncherInterface task,
 ) {
   final id = config.interfaceFor(task).presetId;
+  if (id == null || id.startsWith('builtin:')) return task.builtinPreset;
   return config.presets
           .where((preset) => preset.id == id && preset.task == task)
           .firstOrNull ??

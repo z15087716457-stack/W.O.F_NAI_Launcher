@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'provider_logo.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -646,7 +647,16 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
           decoration: const InputDecoration(labelText: '服务类型', isDense: true),
           items: [
             for (final preset in ProviderPreset.values)
-              DropdownMenuItem(value: preset, child: Text(preset.label)),
+              DropdownMenuItem(
+                value: preset,
+                child: Row(
+                  children: [
+                    ProviderLogo(preset, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(preset.label)),
+                  ],
+                ),
+              ),
           ],
           onChanged: (value) {
             if (value != null) _changePreset(value);

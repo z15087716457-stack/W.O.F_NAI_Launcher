@@ -20,12 +20,8 @@ class SavedAccountsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final accountState = ref.watch(accountManagerNotifierProvider);
+    ref.watch(accountManagerNotifierProvider);
     final currentAccountId = ref.watch(authNotifierProvider).accountId;
-
-    if (accountState.accounts.isEmpty) {
-      return const SizedBox.shrink();
-    }
 
     // 当前账号置顶，其余按最近使用排序
     final notifier = ref.read(accountManagerNotifierProvider.notifier);
@@ -51,9 +47,7 @@ class SavedAccountsSection extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           // 添加账号
-          _AddAccountTile(
-            onTap: () => AddAccountDialog.show(context, ref),
-          ),
+          _AddAccountTile(onTap: () => AddAccountDialog.show(context, ref)),
         ],
       ),
     );
@@ -76,101 +70,89 @@ class _SavedAccountTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isCurrent
-              ? theme.colorScheme.primary
-              : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-          width: isCurrent ? 2 : 1,
-        ),
-      ),
+    final colors = theme.colorScheme;
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: isCurrent
             ? null
             : () => AccountSwitchHelper.switchToAccount(context, ref, account),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: colors.outlineVariant.withValues(alpha: .5),
+              ),
+            ),
+          ),
           child: Row(
             children: [
-              AccountAvatar(account: account, size: 40),
+              AccountAvatar(account: account, size: 30),
               const SizedBox(width: 12),
-              // 名称、邮箱、到期
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      spacing: 7,
+                      runSpacing: 3,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Flexible(
-                          child: Text(
-                            account.displayName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: isCurrent
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          account.displayName,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 13,
+                            fontWeight: isCurrent
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                           ),
                         ),
-                        if (isDefault) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              context.l10n.settings_defaultAccount,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer,
-                              ),
+                        if (isCurrent)
+                          Text(
+                            context.l10n.auth_currentAccount,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontSize: 10,
+                              color: colors.primary,
                             ),
                           ),
-                        ],
+                        if (isDefault)
+                          Text(
+                            context.l10n.settings_defaultAccount,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontSize: 10,
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
                       ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      account.email,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                     if (account.subscriptionExpiresAt != null)
-                      SubscriptionExpiryText(
-                        expiresAt: account.subscriptionExpiresAt!,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: SubscriptionExpiryText(
+                          expiresAt: account.subscriptionExpiresAt!,
+                        ),
                       ),
                   ],
                 ),
               ),
-              // 当前账号标识 + 删除
-              if (isCurrent)
-                Icon(
-                  Icons.check_circle,
-                  color: theme.colorScheme.primary,
-                  size: 20,
+              if (!isDefault)
+                IconButton(
+                  icon: const Icon(Icons.star_outline, size: 17),
+                  tooltip: context.l10n.settings_defaultAccount,
+                  onPressed: () => ref
+                      .read(accountManagerNotifierProvider.notifier)
+                      .setDefaultAccount(account.id),
                 ),
               IconButton(
                 icon: Icon(
                   Icons.delete_outline,
-                  size: 20,
-                  color: theme.colorScheme.error.withValues(alpha: 0.7),
+                  size: 17,
+                  color: colors.onSurfaceVariant,
                 ),
+                tooltip: context.l10n.auth_deleteAccount,
                 onPressed: () =>
                     AccountSwitchHelper.removeAccount(context, ref, account),
-                tooltip: context.l10n.auth_deleteAccount,
               ),
             ],
           ),
@@ -194,14 +176,10 @@ class _AddAccountTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 14),
         child: Row(
           children: [
-            Icon(
-              Icons.add,
-              size: 20,
-              color: theme.colorScheme.primary,
-            ),
+            Icon(Icons.add, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 12),
             Text(
               context.l10n.auth_addAccount,

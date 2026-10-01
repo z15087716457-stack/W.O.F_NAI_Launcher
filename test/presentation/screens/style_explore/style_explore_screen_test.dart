@@ -206,6 +206,8 @@ class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
     String? readingTranslationZh,
     List<Map<String, dynamic>>? readingTranslationMarks,
     bool readingTranslationNeedsReview = false,
+    bool readingTranslationEdited = false,
+    String readingTranslationLanguageCode = 'zh',
     String? iconName,
     String? thumbnail,
     double thumbnailOffsetX = 0.0,

@@ -76,6 +76,7 @@ ButtonStyle _wikiActionStyle(BuildContext context) => TextButton.styleFrom(
   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
   minimumSize: const Size(0, 28),
   visualDensity: VisualDensity.compact,
+  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
   textStyle: Theme.of(context).textTheme.labelSmall,
 );
 

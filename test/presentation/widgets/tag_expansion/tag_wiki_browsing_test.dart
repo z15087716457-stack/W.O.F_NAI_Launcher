@@ -116,6 +116,9 @@ class _Auto extends ChangeNotifier implements AutoTagTranslationController {
   int busy = 0;
   bool cachedBodies = true;
   String? bodyOverride;
+  String? originalOverride;
+  @override
+  String? wikiOriginalFor(String tag) => cachedBodies ? originalOverride : null;
   @override
   bool get enabled => true;
   @override
@@ -236,6 +239,113 @@ void main() {
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
+
+  testWidgets(
+    'formatted original keeps current-article links, list layout and a compact centered preview header',
+    (tester) async {
+      tester.view.physicalSize = const Size(1000, 780);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final editor = TextEditingController();
+      addTearDown(editor.dispose);
+      final auto = _Auto()
+        ..bodyOverride =
+            '示例\n\n- [菲特](wof-tag:fate_testarossa)\n- [蓝眼](wof-tag:blue_eyes)'
+        ..originalOverride =
+            'Examples\n\n- [Fate Testarossa](wof-tag:fate_testarossa)\n- [Blue eyes](wof-tag:blue_eyes)';
+      await _pump(
+        tester,
+        Center(
+          child: SizedBox(
+            width: 400,
+            child: TagExpansionWrapper(
+              controller: editor,
+              child: TextField(key: const Key('host'), controller: editor),
+            ),
+          ),
+        ),
+        auto,
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('host')));
+      await tester.pumpAndSettle();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.text('fate testarossa'));
+      await tester.pumpAndSettle();
+      final panel = find.byKey(const Key('tag-expansion-wiki-panel'));
+      final title = find.descendant(
+        of: panel,
+        matching: find.textContaining('标签小百科 ·'),
+      );
+      final icon = find.descendant(
+        of: panel,
+        matching: find.byIcon(Icons.open_in_new),
+      );
+      expect(
+        tester.getCenter(title).dy,
+        closeTo(tester.getCenter(icon).dy, .1),
+      );
+      expect(tester.getSize(panel).height, lessThan(230));
+      expect(
+        tester.getSize(find.byKey(const Key('tag-expansion-search'))).height,
+        36,
+      );
+      await tester.tap(
+        find.byKey(const Key('wiki-reading-toggle-fate_testarossa')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        auto.originalOverride,
+      );
+      expect(find.text('Fate Testarossa', findRichText: true), findsOneWidget);
+      final scroll = tester.widget<SingleChildScrollView>(
+        find.byKey(const ValueKey('tag-expansion-wiki-scroll')),
+      );
+      expect(scroll.controller!.position.maxScrollExtent, lessThan(1));
+      expect(find.text('Blue eyes', findRichText: true), findsOneWidget);
+      final document = await links.resolve(auto.originalOverride!);
+      expect(document.links.map((link) => link.candidate.canonicalTag), [
+        'fate_testarossa',
+        'blue_eyes',
+      ]);
+      await capture(tester, 'paired-original');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'full Wiki uses the same formatted original after switching reading mode',
+    (tester) async {
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auto = _Auto()
+        ..originalOverride =
+            'Examples\n\n- [Fate Testarossa](wof-tag:fate_testarossa)\n- [Blue eyes](wof-tag:blue_eyes)';
+      await _pump(
+        tester,
+        TagWikiScreen(
+          initialTag: 'fate_testarossa',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        auto,
+      );
+      await tester.tap(
+        find.byKey(const Key('wiki-reading-toggle-fate_testarossa')),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        auto.originalOverride,
+      );
+      expect(find.text('Fate Testarossa', findRichText: true), findsOneWidget);
+      await capture(tester, 'wiki-paired-original');
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'Studio preview has wrapping title, link history, retry footer and busy tooltip',

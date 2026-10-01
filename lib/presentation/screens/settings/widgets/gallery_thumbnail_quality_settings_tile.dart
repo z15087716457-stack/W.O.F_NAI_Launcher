@@ -1,3 +1,4 @@
+import 'settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,7 +47,7 @@ class _GalleryThumbnailQualitySettingsTileState
       localGalleryNotifierProvider.select((state) => state.thumbnailQuality),
     );
 
-    return ListTile(
+    return SettingsTile(
       leading: const Icon(Icons.image_outlined),
       title: Text(context.l10n.settings_galleryThumbnailQuality),
       subtitle: Text(context.l10n.settings_galleryThumbnailQualitySubtitle),

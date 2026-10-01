@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../router/app_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
@@ -32,7 +34,7 @@ class _AccountSettingsSectionState
         SettingsCard(
           // 移除默认padding，因为AccountDetailTile内部已有margin
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+            padding: EdgeInsets.zero,
             child: AccountDetailTile(
               onEdit: () => _showProfileSheet(context),
               onLogin: () => _navigateToLogin(context),
@@ -67,6 +69,6 @@ class _AccountSettingsSectionState
 
   /// 导航到登录页面
   void _navigateToLogin(BuildContext context) {
-    AppToast.info(context, context.l10n.settings_goToLoginPage);
+    context.go(AppRoutes.login);
   }
 }

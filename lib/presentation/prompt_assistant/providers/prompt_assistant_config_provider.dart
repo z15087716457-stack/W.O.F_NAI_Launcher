@@ -377,6 +377,7 @@ class PromptAssistantConfigNotifier
   }
 
   Future<void> deletePreset(String id) async {
+    if (id.startsWith('builtin:')) throw StateError('内置规则不可删除。');
     final interfaces = {
       for (final entry in state.interfaces.entries)
         entry.key: entry.value.presetId == id
@@ -395,6 +396,13 @@ class PromptAssistantConfigNotifier
     final data = jsonDecode(raw);
     if (data is! Map || data['providers'] is! List || data['models'] is! List) {
       throw const FormatException('请粘贴完整的模型配置 JSON。');
+    }
+    if (data['presets'] case final List presets) {
+      if (presets.any(
+        (preset) => preset is Map && '${preset['id']}'.startsWith('builtin:'),
+      )) {
+        throw const FormatException('内置方案不可覆盖，请复制为自定义预设。');
+      }
     }
     final imported = PromptAssistantConfigState.decode(raw);
     final ids = <String>{};

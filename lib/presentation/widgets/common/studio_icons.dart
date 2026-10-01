@@ -23,6 +23,16 @@ abstract final class StudioIcons {
   static const styleTransfer = IconData(0xe90c, fontFamily: _family);
   static const referenceFocus = IconData(0xe90d, fontFamily: _family);
 
+  static const settingsAppearance = IconData(0xe90e, fontFamily: _family);
+  static const settingsControls = IconData(0xe90f, fontFamily: _family);
+  static const settingsGeneration = IconData(0xe910, fontFamily: _family);
+  static const settingsStorage = IconData(0xe911, fontFamily: _family);
+  static const settingsAccount = IconData(0xe912, fontFamily: _family);
+  static const settingsModels = IconData(0xe913, fontFamily: _family);
+  static const settingsIntegrations = IconData(0xe914, fontFamily: _family);
+  static const settingsPrivacy = IconData(0xe915, fontFamily: _family);
+  static const settingsAbout = IconData(0xe916, fontFamily: _family);
+
   static bool supportsMotion(IconData icon) =>
       icon.fontFamily == _family &&
       icon.codePoint >= 0xe900 &&

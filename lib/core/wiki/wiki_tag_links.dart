@@ -203,6 +203,7 @@ class WikiTagLinks {
   Future<List<Map<String, Object>>> glossaryFor(
     String body, {
     int limit = 64,
+    String? currentTag,
   }) async {
     if (limit <= 0 || body.isEmpty) return const [];
     final protected = [
@@ -258,6 +259,7 @@ class WikiTagLinks {
         if (_target(link.url) case final tag?) link: tag,
     };
     terms.addAll(sourceLinks.values);
+    if (currentTag != null) terms.add(_normalize(currentTag));
     Map<String, CompletionCandidate> exact;
     try {
       exact = await exactLookup(terms);
@@ -279,6 +281,9 @@ class WikiTagLinks {
       if (reading != null) readings[item.canonicalTag] = reading;
     }
 
+    if (currentTag != null) {
+      add(_normalize(currentTag), currentTag);
+    }
     for (final entry in sourceLinks.entries) {
       add(entry.value, entry.key.label);
     }
@@ -311,6 +316,8 @@ class WikiTagLinks {
           'tag': item.canonicalTag,
           'title': TagNormalizer.toDisplay(item.canonicalTag),
           'category': item.category.name,
+          if (item.canonicalTag == _normalize(currentTag ?? ''))
+            'current_article': true,
           if (readings[item.canonicalTag] ?? item.translation
               case final reading?)
             'zh': reading,

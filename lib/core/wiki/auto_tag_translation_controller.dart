@@ -93,6 +93,7 @@ class AutoTagTranslationController extends ChangeNotifier {
   final Map<String, String> _sessions = {};
   final Map<String, String> _names = {};
   final Map<String, String> _wikiBodies = {};
+  final Map<String, String> _wikiOriginals = {};
   final Map<String, AutoTagTranslationContext> _contexts = {};
   final Set<String> _failed = {};
   int _priority = 0;
@@ -108,6 +109,8 @@ class AutoTagTranslationController extends ChangeNotifier {
   int get activeRequests => _active;
   String? nameFor(String tag) => _names[TagNormalizer.normalize(tag)];
   String? wikiFor(String tag) => _wikiBodies[TagNormalizer.normalize(tag)];
+  String? wikiOriginalFor(String tag) =>
+      _wikiOriginals[TagNormalizer.normalize(tag)];
   String? wikiErrorFor(String tag) =>
       _failed.contains(TagNormalizer.normalize(tag)) ? lastError : null;
   bool isTranslating(String tag) =>
@@ -142,6 +145,7 @@ class AutoTagTranslationController extends ChangeNotifier {
     _route = null;
     _names.clear();
     _wikiBodies.clear();
+    _wikiOriginals.clear();
     _failed.clear();
     lastError = null;
     notifyListeners();
@@ -184,7 +188,8 @@ class AutoTagTranslationController extends ChangeNotifier {
     if (canonical.isEmpty) return;
     final tags = _visibleBySurface.putIfAbsent(surface, () => <String>{});
     if (tagContext != null) _contexts[canonical] = tagContext;
-    if (_readingLanguage() == 'zh' && existingNameZh?.trim().isNotEmpty == true) {
+    if (_readingLanguage() == 'zh' &&
+        existingNameZh?.trim().isNotEmpty == true) {
       _names[canonical] = existingNameZh!.trim();
     }
     if (visible) {
@@ -324,6 +329,7 @@ class AutoTagTranslationController extends ChangeNotifier {
         _route = route;
         _names.clear();
         _wikiBodies.clear();
+        _wikiOriginals.clear();
       }
       final entry = await _wiki.find(task.tag);
       final body = entry?.body ?? '';
@@ -348,6 +354,9 @@ class AutoTagTranslationController extends ChangeNotifier {
       final name = localName ?? cached?.nameZh ?? _names[task.tag];
       if (name != null) _names[task.tag] = name;
       if (cached?.wikiZh case final wikiZh?) _wikiBodies[task.tag] = wikiZh;
+      if (cached?.wikiOriginal case final source?) {
+        _wikiOriginals[task.tag] = source;
+      }
       if (!_disposed) notifyListeners();
       if (task.wiki && body.trim().isEmpty) return;
       if ((task.wiki && cached?.wikiZh != null) ||
@@ -359,6 +368,8 @@ class AutoTagTranslationController extends ChangeNotifier {
       }
       var translatedName = name;
       final translatedWiki = StringBuffer();
+      final originalWiki = StringBuffer();
+      var completeOriginal = true;
       final chunks = task.wiki
           ? _wikiChunks(body)
           : <({String text, String separator})>[(text: body, separator: '')];
@@ -388,7 +399,7 @@ class AutoTagTranslationController extends ChangeNotifier {
         }
         final chunk = chunks[index];
         final glossary = task.wiki
-            ? await _wikiLinks?.glossaryFor(chunk.text) ??
+            ? await _wikiLinks?.glossaryFor(chunk.text, currentTag: task.tag) ??
                   const <Map<String, Object>>[]
             : const <Map<String, Object>>[];
         if (_disposed ||
@@ -416,7 +427,15 @@ class AutoTagTranslationController extends ChangeNotifier {
         translatedName = result.nameZh;
         if (task.wiki) {
           translatedWiki.write(result.wikiZh);
-          if (chunk.separator.isNotEmpty) translatedWiki.write('\n\n');
+          if (result.wikiOriginal case final source?) {
+            originalWiki.write(source);
+          } else {
+            completeOriginal = false;
+          }
+          if (chunk.separator.isNotEmpty) {
+            translatedWiki.write('\n\n');
+            originalWiki.write('\n\n');
+          }
         }
       }
       if (_disposed ||
@@ -426,11 +445,18 @@ class AutoTagTranslationController extends ChangeNotifier {
         return;
       }
       String? wikiZh;
+      String? wikiOriginal;
       if (task.wiki) {
         final body = translatedWiki.toString().trim();
         wikiZh = _wikiLinks == null
             ? WikiTagLinks.withoutLocalLinks(body)
             : (await _wikiLinks.resolve(body)).markdown;
+        if (completeOriginal && originalWiki.toString().trim().isNotEmpty) {
+          final source = originalWiki.toString().trim();
+          wikiOriginal = _wikiLinks == null
+              ? WikiTagLinks.withoutLocalLinks(source)
+              : (await _wikiLinks.resolve(source)).markdown;
+        }
       }
       if (_disposed ||
           epoch != _routeEpoch ||
@@ -446,10 +472,18 @@ class AutoTagTranslationController extends ChangeNotifier {
         wikiHash: hash,
         nameZh: translatedName!,
         wikiZh: wikiZh ?? cached?.wikiZh,
+        wikiOriginal: task.wiki ? wikiOriginal : cached?.wikiOriginal,
       );
       if (_disposed || epoch != _routeEpoch) return;
       _names[task.tag] = translatedName;
-      if (wikiZh != null) _wikiBodies[task.tag] = wikiZh;
+      if (wikiZh != null) {
+        _wikiBodies[task.tag] = wikiZh;
+        if (wikiOriginal != null) {
+          _wikiOriginals[task.tag] = wikiOriginal;
+        } else {
+          _wikiOriginals.remove(task.tag);
+        }
+      }
       if (!_disposed) notifyListeners();
     } catch (error) {
       if ((!_enabled && !task.force) || _disposed || epoch != _routeEpoch) {

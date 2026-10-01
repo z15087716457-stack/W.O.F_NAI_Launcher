@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <path id="part0" d="M3 7h18v11H3Z"/>
+  <path id="part1" d="M6 10h1 M10 10h1 M14 10h1 M18 10h.01"/>
+  <path id="part2" d="M6 13h1 M10 13h1 M14 13h1 M18 13h.01"/>
+  <path id="part3" d="M8 16h8"/>
+</svg>

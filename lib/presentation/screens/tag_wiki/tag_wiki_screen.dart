@@ -1248,7 +1248,12 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                               body: article?.body.trim().isNotEmpty == true
                                   ? (_showTranslation
                                         ? translated ?? article!.body
-                                        : article!.body)
+                                        : ref
+                                                  .read(
+                                                    autoTagTranslationProvider,
+                                                  )
+                                                  .wikiOriginalFor(tag) ??
+                                              article!.body)
                                   : context.l10n.wiki_articleMissing,
                               style: TextStyle(
                                 fontSize: _fontSize,

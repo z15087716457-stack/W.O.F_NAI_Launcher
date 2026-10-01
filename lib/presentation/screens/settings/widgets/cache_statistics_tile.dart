@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/cache/gallery_cache_manager.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../widgets/common/app_toast.dart';
+import 'settings_tile.dart';
 
 /// 缓存统计 Provider
 ///
@@ -90,12 +91,12 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
 
     return statsAsync.when(
       data: (stats) => _buildContent(context, ref, stats),
-      loading: () => ListTile(
+      loading: () => SettingsTile(
         leading: const Icon(Icons.analytics_outlined),
         title: Text(context.l10n.cacheStats_title),
         subtitle: const LinearProgressIndicator(),
       ),
-      error: (error, _) => ListTile(
+      error: (error, _) => SettingsTile(
         leading: const Icon(Icons.error_outline, color: Colors.red),
         title: Text(context.l10n.cacheStats_title),
         subtitle: Text(context.l10n.settings_loadFailed(error.toString())),
@@ -113,7 +114,7 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
 
     return Column(
       children: [
-        ListTile(
+        SettingsTile(
           leading: const Icon(Icons.analytics_outlined),
           title: Text(context.l10n.cacheStats_title),
           subtitle: Text(
@@ -154,25 +155,19 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
           onTap: _refreshStats,
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.only(bottom: 8),
           child: Column(
             children: [
               _CacheLevelIndicator(
                 label: context.l10n.cacheStats_l1Memory,
                 count: stats.l1MemorySize,
                 hitRate: stats.l1HitRate,
-                color: Colors.blue,
-                icon: Icons.memory,
               ),
-              const SizedBox(height: 12),
               _CacheLevelIndicator(
                 label: context.l10n.cacheStats_l2Hive,
                 count: stats.l2HiveSize,
                 hitRate: stats.l2HitRate,
-                color: Colors.orange,
-                icon: Icons.storage,
               ),
-              const SizedBox(height: 12),
               _DatabaseIndicator(
                 imageCount: stats.l3DatabaseImageCount,
                 metadataCount: stats.l3DatabaseMetadataCount,
@@ -235,15 +230,11 @@ class _CacheLevelIndicator extends StatelessWidget {
   final String label;
   final int count;
   final double hitRate;
-  final Color color;
-  final IconData icon;
 
   const _CacheLevelIndicator({
     required this.label,
     required this.count,
     required this.hitRate,
-    required this.color,
-    required this.icon,
   });
 
   @override
@@ -251,8 +242,6 @@ class _CacheLevelIndicator extends StatelessWidget {
     return _CacheIndicator(
       label: label,
       value: context.l10n.cacheStats_recordCount(count),
-      icon: icon,
-      color: color,
       subValue: '${(hitRate * 100).toStringAsFixed(1)}%',
     );
   }
@@ -272,8 +261,6 @@ class _DatabaseIndicator extends StatelessWidget {
     return _CacheIndicator(
       label: context.l10n.cacheStats_l3Sqlite,
       value: context.l10n.cacheStats_databaseValue(imageCount, metadataCount),
-      icon: Icons.table_chart,
-      color: Colors.purple,
     );
   }
 }
@@ -281,15 +268,11 @@ class _DatabaseIndicator extends StatelessWidget {
 class _CacheIndicator extends StatelessWidget {
   final String label;
   final String value;
-  final IconData icon;
-  final Color color;
   final String? subValue;
 
   const _CacheIndicator({
     required this.label,
     required this.value,
-    required this.icon,
-    required this.color,
     this.subValue,
   });
 
@@ -297,25 +280,10 @@ class _CacheIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,6 +291,7 @@ class _CacheIndicator extends StatelessWidget {
                 Text(
                   label,
                   style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -341,7 +310,8 @@ class _CacheIndicator extends StatelessWidget {
               subValue!,
               style: theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: color,
+                fontSize: 13,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
         ],

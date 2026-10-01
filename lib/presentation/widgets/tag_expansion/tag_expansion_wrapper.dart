@@ -112,6 +112,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   final _searchScroll = ScrollController();
   final _relatedScroll = ScrollController();
   final _wikiScroll = ScrollController();
+  Object? _wikiMeasurementKey;
+  double? _wikiMeasuredHeight;
   final _history = <_ExpansionVisit>[];
   late final AutoTagTranslationController _autoTranslation;
   bool _visibilityScheduled = false;
@@ -1001,7 +1003,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final hasWiki = _wikiCandidate != null;
     final availableHeight = math.max(0.0, screen.height - 16);
     final desiredHeight =
-        (111.0 + _rowHeights.fold<double>(0, (total, row) => total + row))
+        (103.0 + _rowHeights.fold<double>(0, (total, row) => total + row))
             .clamp(320.0, 460.0);
     final theme = Theme.of(overlayContext);
     final translatedWiki = _wikiCandidate == null
@@ -1011,6 +1013,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
               .wikiFor(_wikiCandidate!.canonicalTag);
     final wikiBody =
         (_showWikiTranslation ? translatedWiki : null) ??
+        (_wikiCandidate == null
+            ? null
+            : _autoTranslation.wikiOriginalFor(_wikiCandidate!.canonicalTag)) ??
         _wikiEntry?.body ??
         (_wikiFailed
             ? overlayContext.l10n.common_error
@@ -1026,17 +1031,26 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final headerHeight = math.max(28.0, titleMeasure.height) + 10;
     titleMeasure.dispose();
     final footerHeight = translatedWiki == null ? 0.0 : 36.0;
-    final minimumWiki = headerHeight + footerHeight + 80;
+    final minimumWiki = headerHeight + footerHeight + 44;
+    final measurementKey = (
+      wikiBody,
+      width - 24,
+      MediaQuery.textScalerOf(overlayContext).scale(14),
+      theme.textTheme.bodySmall,
+    );
     final bodyMeasure = TextPainter(
       text: TextSpan(text: wikiBody, style: theme.textTheme.bodySmall),
       textDirection: Directionality.of(overlayContext),
       textScaler: MediaQuery.textScalerOf(overlayContext),
     )..layout(maxWidth: math.max(1, width - 32));
     final desiredWikiHeight = hasWiki
-        ? (headerHeight + footerHeight + 22 + bodyMeasure.height).clamp(
-            minimumWiki,
-            math.max(280.0, minimumWiki),
-          )
+        ? (headerHeight +
+                  footerHeight +
+                  22 +
+                  (_wikiMeasurementKey == measurementKey
+                      ? _wikiMeasuredHeight!
+                      : bodyMeasure.height))
+              .clamp(minimumWiki, math.max(280.0, minimumWiki))
         : 0.0;
     bodyMeasure.dispose();
     // Reserve the article's preferred space before sizing the result list.
@@ -1094,19 +1108,34 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                   _buildHeader(overlayContext),
                   const Divider(height: 1),
                   SizedBox(
-                    height: 44,
+                    height: math.max(
+                      36,
+                      MediaQuery.textScalerOf(
+                            overlayContext,
+                          ).scale(theme.textTheme.bodyMedium?.fontSize ?? 14) +
+                          16,
+                    ),
                     child: TextField(
                       key: const ValueKey('tag-expansion-search'),
                       controller: _searchController,
                       focusNode: _searchFocus,
                       onChanged: _onSearchChanged,
                       style: theme.textTheme.bodyMedium,
+                      textAlignVertical: TextAlignVertical.center,
                       decoration: InputDecoration(
                         hintText: overlayContext.l10n.tagExpansion_searchHint,
                         hintStyle: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                         prefixIcon: const Icon(Icons.search, size: 18),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 36,
+                          minHeight: 36,
+                        ),
+                        suffixIconConstraints: const BoxConstraints(
+                          minWidth: 36,
+                          minHeight: 36,
+                        ),
                         suffixIcon: _history.isEmpty
                             ? null
                             : IconButton(
@@ -1117,9 +1146,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                               ),
                         border: InputBorder.none,
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                     ),
                   ),
@@ -1715,7 +1742,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(width: 12),
                 Expanded(
@@ -1736,6 +1763,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     router.go(route);
                   },
                   icon: const Icon(Icons.open_in_new, size: 15),
+                  style: const ButtonStyle(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   constraints: const BoxConstraints.tightFor(
                     width: 32,
                     height: 28,
@@ -1754,6 +1784,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     _markNeedsBuild();
                   },
                   icon: const Icon(Icons.close, size: 16),
+                  style: const ButtonStyle(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   constraints: const BoxConstraints.tightFor(
                     width: 32,
                     height: 28,
@@ -1771,15 +1804,42 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     key: const ValueKey('tag-expansion-wiki-scroll'),
                     controller: _wikiScroll,
                     padding: const EdgeInsets.fromLTRB(12, 9, 12, 12),
-                    child: WikiLinkedBody(
-                      body:
-                          (_showWikiTranslation ? translated : null) ??
-                          _wikiEntry?.body ??
-                          (_wikiFailed
-                              ? context.l10n.common_error
-                              : context.l10n.tagExpansion_wikiUnavailable),
-                      style: theme.textTheme.bodySmall,
-                      onTagTap: _visitTag,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final body =
+                            (_showWikiTranslation ? translated : null) ??
+                            autoTranslation.wikiOriginalFor(
+                              candidate.canonicalTag,
+                            ) ??
+                            _wikiEntry?.body ??
+                            (_wikiFailed
+                                ? context.l10n.common_error
+                                : context.l10n.tagExpansion_wikiUnavailable);
+                        final key = (
+                          body,
+                          constraints.maxWidth,
+                          MediaQuery.textScalerOf(context).scale(14),
+                          theme.textTheme.bodySmall,
+                        );
+                        return _WikiBodySizeReporter(
+                          key: ValueKey(key),
+                          onSize: (size) {
+                            if (!mounted ||
+                                (_wikiMeasurementKey == key &&
+                                    _wikiMeasuredHeight == size.height)) {
+                              return;
+                            }
+                            _wikiMeasurementKey = key;
+                            _wikiMeasuredHeight = size.height;
+                            _markNeedsBuild();
+                          },
+                          child: WikiLinkedBody(
+                            body: body,
+                            style: theme.textTheme.bodySmall,
+                            onTagTap: _visitTag,
+                          ),
+                        );
+                      },
                     ),
                   ),
           ),
@@ -1858,5 +1918,41 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _searchFocus.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+}
+
+/// Measures the rendered Markdown, including heading and list spacing.
+class _WikiBodySizeReporter extends SingleChildRenderObjectWidget {
+  const _WikiBodySizeReporter({
+    super.key,
+    required this.onSize,
+    required super.child,
+  });
+  final ValueChanged<Size> onSize;
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _WikiBodySizeRender(onSize);
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _WikiBodySizeRender renderObject,
+  ) {
+    renderObject.onSize = onSize;
+  }
+}
+
+class _WikiBodySizeRender extends RenderProxyBox {
+  _WikiBodySizeRender(this.onSize);
+  ValueChanged<Size> onSize;
+  Size? _last;
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (size == _last) return;
+    _last = size;
+    final measured = size, callback = onSize;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (attached) callback(measured);
+    });
   }
 }

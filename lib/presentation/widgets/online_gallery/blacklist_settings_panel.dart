@@ -6,14 +6,17 @@ import '../../../data/services/danbooru_auth_service.dart';
 import '../../providers/online_gallery_blacklist_provider.dart';
 import '../tag_expansion/tag_expansion_wrapper.dart';
 import '../danbooru_login_dialog.dart';
+import '../../screens/settings/widgets/settings_card.dart';
 
 class OnlineGalleryBlacklistSettingsPanel extends ConsumerStatefulWidget {
   final bool compact;
+  final bool flat;
   final bool showSyncStatus;
 
   const OnlineGalleryBlacklistSettingsPanel({
     super.key,
     this.compact = false,
+    this.flat = false,
     this.showSyncStatus = true,
   });
 
@@ -42,6 +45,130 @@ class _OnlineGalleryBlacklistSettingsPanelState
 
     final localTags = state.localTags.toList()..sort();
 
+    final content = Padding(
+      padding: widget.flat
+          ? EdgeInsets.zero
+          : const EdgeInsets.fromLTRB(12, 14, 12, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (!widget.flat) ...[
+                const Icon(Icons.block, size: 20),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  context.l10n.onlineGallery_blacklistTitle,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: widget.flat
+                        ? theme.colorScheme.onSurface
+                        : theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+              FilledButton.tonalIcon(
+                onPressed: state.isSyncing ? null : () => notifier.syncNow(),
+                icon: state.isSyncing
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.sync, size: 16),
+                label: Text(context.l10n.dataSource_syncNow),
+                style: FilledButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n.onlineGallery_blacklistSubtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TagExpansionWrapper(
+                  controller: _tagController,
+                  focusNode: _tagFocusNode,
+                  onTagSelected: (tag) {
+                    _tagController.text = tag;
+                    _addTag();
+                  },
+                  child: TextField(
+                    controller: _tagController,
+                    focusNode: _tagFocusNode,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      border: const OutlineInputBorder(),
+                      hintText: context.l10n.onlineGallery_addBlacklistTagHint,
+                    ),
+                    onSubmitted: (_) => _addTag(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                tooltip: context.l10n.common_add,
+                onPressed: _addTag,
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (localTags.isEmpty)
+            Text(
+              context.l10n.onlineGallery_noLocalBlacklistTags,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            )
+          else
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: localTags
+                  .map(
+                    (tag) => InputChip(
+                      label: Text(tag),
+                      onDeleted: () {
+                        ref
+                            .read(
+                              onlineGalleryBlacklistNotifierProvider.notifier,
+                            )
+                            .removeLocalTag(tag);
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+          const SizedBox(height: 8),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            title: Text(context.l10n.onlineGallery_autoSyncOnStartup),
+            subtitle: Text(
+              context.l10n.onlineGallery_autoSyncOnStartupSubtitle,
+            ),
+            value: state.autoSyncOnStartup,
+            onChanged: notifier.setAutoSyncOnStartup,
+          ),
+          if (widget.showSyncStatus) ...[
+            const SizedBox(height: 4),
+            _buildSyncStatus(theme, state),
+          ],
+        ],
+      ),
+    );
+    if (widget.flat) return SettingsCard(child: content);
     return Card(
       margin: widget.compact
           ? EdgeInsets.zero
@@ -50,127 +177,10 @@ class _OnlineGalleryBlacklistSettingsPanelState
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+          color: theme.colorScheme.outline.withValues(alpha: .2),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.block, size: 20, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    context.l10n.onlineGallery_blacklistTitle,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: state.isSyncing ? null : () => notifier.syncNow(),
-                  icon: state.isSyncing
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.sync, size: 16),
-                  label: Text(context.l10n.dataSource_syncNow),
-                  style: FilledButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.onlineGallery_blacklistSubtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TagExpansionWrapper(
-                    controller: _tagController,
-                    focusNode: _tagFocusNode,
-                    onTagSelected: (tag) {
-                      _tagController.text = tag;
-                      _addTag();
-                    },
-                    child: TextField(
-                      controller: _tagController,
-                      focusNode: _tagFocusNode,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: const OutlineInputBorder(),
-                        hintText:
-                            context.l10n.onlineGallery_addBlacklistTagHint,
-                      ),
-                      onSubmitted: (_) => _addTag(),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  tooltip: context.l10n.common_add,
-                  onPressed: _addTag,
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            if (localTags.isEmpty)
-              Text(
-                context.l10n.onlineGallery_noLocalBlacklistTags,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              )
-            else
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: localTags
-                    .map(
-                      (tag) => InputChip(
-                        label: Text(tag),
-                        onDeleted: () {
-                          ref
-                              .read(
-                                onlineGalleryBlacklistNotifierProvider.notifier,
-                              )
-                              .removeLocalTag(tag);
-                        },
-                      ),
-                    )
-                    .toList(),
-              ),
-            const SizedBox(height: 8),
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              dense: true,
-              title: Text(context.l10n.onlineGallery_autoSyncOnStartup),
-              subtitle: Text(
-                context.l10n.onlineGallery_autoSyncOnStartupSubtitle,
-              ),
-              value: state.autoSyncOnStartup,
-              onChanged: notifier.setAutoSyncOnStartup,
-            ),
-            if (widget.showSyncStatus) ...[
-              const SizedBox(height: 4),
-              _buildSyncStatus(theme, state),
-            ],
-          ],
-        ),
-      ),
+      child: content,
     );
   }
 

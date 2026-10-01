@@ -48,9 +48,14 @@ class _Cache extends VisibleTagTranslationCache {
     required String wikiHash,
     required String nameZh,
     String? wikiZh,
+    String? wikiOriginal,
   }) async {
     writes++;
-    records[tag] = CachedVisibleTagTranslation(nameZh: nameZh, wikiZh: wikiZh);
+    records[tag] = CachedVisibleTagTranslation(
+      nameZh: nameZh,
+      wikiZh: wikiZh,
+      wikiOriginal: wikiOriginal,
+    );
   }
 
   @override
@@ -124,6 +129,8 @@ void main() {
           wikiZh:
               '[帽子](wof-tag:hat) 的部件叫 visor。帽子只是普通重复文字。'
               '示例：[帽子](wof-tag:hat) 和 [鸭舌帽](wof-tag:peaked_cap)。[无效](wof-tag:missing)',
+          wikiOriginal:
+              'A [hat](wof-tag:hat) has a visor.\n\nExamples\n- [Hat](wof-tag:hat)\n- [Unknown](wof-tag:missing)',
         );
       });
       final controller = AutoTagTranslationController(
@@ -149,6 +156,17 @@ void main() {
         ['hat', 'hat', 'peaked_cap'],
       );
       expect(cache.records['visor_cap']!.wikiZh, result);
+      final source = controller.wikiOriginalFor('visor_cap')!;
+      expect(source, endsWith('- Unknown'));
+      expect(
+        (await links.resolve(
+          source,
+        )).links.map((link) => link.candidate.canonicalTag),
+        ['hat', 'hat'],
+      );
+      expect(cache.records['visor_cap']!.wikiOriginal, source);
+      controller.routeChanged();
+      expect(controller.wikiOriginalFor('visor_cap'), isNull);
     },
   );
 
@@ -289,6 +307,7 @@ void main() {
       cache.records['blue_eyes'] = const CachedVisibleTagTranslation(
         nameZh: '蓝眼',
         wikiZh: '旧译文',
+        wikiOriginal: 'Old formatted original.',
       );
       when(() => assistant.translateRouteFingerprint()).thenReturn('route');
       when(() => names.translate(any())).thenAnswer((_) async => '蓝眼');
@@ -335,6 +354,10 @@ void main() {
       await _until(() => controller.activeRequests == 0);
       expect(controller.wikiFor('blue_eyes'), '旧译文');
       expect(cache.writes, 0);
+      expect(
+        controller.wikiOriginalFor('blue_eyes'),
+        'Old formatted original.',
+      );
       expect(controller.lastError, contains('retry failed'));
       pending = Completer<VisibleTagTranslationResult>();
       controller.retranslateWiki(surface: 'article', tag: 'blue_eyes');
@@ -345,6 +368,8 @@ void main() {
       await _until(() => controller.activeRequests == 0);
       expect(controller.wikiFor('blue_eyes'), '新译文');
       expect(cache.records['blue_eyes']!.wikiZh, '新译文');
+      expect(controller.wikiOriginalFor('blue_eyes'), isNull);
+      expect(cache.records['blue_eyes']!.wikiOriginal, isNull);
       expect(cache.writes, 1);
       expect(controller.enabled, isFalse);
       controller.dispose();

@@ -1,3 +1,4 @@
+import 'settings_tile.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -259,7 +260,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
     return Column(
       children: [
         // 重新扫描按钮（与自动扫描使用同一套逻辑）
-        ListTile(
+        SettingsTile(
           leading: AnimatedBuilder(
             animation: _scanController,
             builder: (context, child) {
@@ -383,7 +384,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions>
         ),
         const Divider(height: 24),
         // 缩略图缓存清理（P7：按 LRU 淘汰超限的 .thumbs 缓存）
-        ListTile(
+        SettingsTile(
           leading: Container(
             width: 40,
             height: 40,

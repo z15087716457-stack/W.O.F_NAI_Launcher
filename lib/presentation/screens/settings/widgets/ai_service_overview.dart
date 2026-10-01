@@ -12,22 +12,30 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
-              final title = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              final title = Row(
                 children: [
-                  Text(
-                    widget.provider?.name ?? '添加服务商',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _protocol.label,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                      fontSize: 12,
+                  ProviderLogo(_preset, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.provider?.name ?? '添加服务商',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 19,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          _protocol.label,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

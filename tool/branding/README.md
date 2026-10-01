@@ -1,5 +1,13 @@
 # W.O.F NAI Studio · 品牌素材
 
+## 设置导航与服务商标识
+
+设置页按使用偏好、创作与资源、服务与连接分组，隐私与分享、关于与诊断位于导航底部。九个入口使用 `studio_icons/settings_*.svg` 自绘线性图标，追加至 StudioIcons 字体的 e90e–e916，已有码位保持稳定；字体和 `studio_icon_paths.dart` 由 `generate_studio_icons.py` 同步生成。
+
+服务商标识根据用户选择的 `ProviderPreset` 显示，兼容协议不推断厂商。OpenAI、Anthropic、Gemini、DeepSeek、LM Studio、Ollama、Pollinations 标识离线随包提供，来自 Lobe Icons 1.95.1 的 SVG 资源；固定来源与 SHA-256 见 `provider_logos.json`，MIT 许可见 `assets/licenses/LobeIcons-LICENSE.txt`，应用许可页同步登记。品牌标识仍归各厂商所有。单色标识随深浅主题调整，彩色标识保留原色；自定义兼容服务显示 Studio 自绘模型图标。
+
+`CAPTURE_SETTINGS_REDESIGN=1` 运行设置页测试可导出实际字体的九页、深浅色、1280 / 740 / 360px 宽度及窄窗口 130% 字号实绘；同变量运行 AppToast 测试导出通知卡片。测试只使用临时存储与模拟服务，不读取用户账号或调用模型。
+
 ## 字体
 
 | 用途 | 字体 |

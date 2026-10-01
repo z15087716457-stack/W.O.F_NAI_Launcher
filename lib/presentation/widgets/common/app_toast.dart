@@ -1,421 +1,275 @@
+import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 
-/// Toast 类型
 enum ToastType { success, error, warning, info, progress }
 
-/// Toast 控制器接口，用于控制持久化 Toast（如进度条）
 abstract class ToastController {
-  /// 更新进度
-  /// [progress] 0.0-1.0，null 表示不确定进度
   void updateProgress(double? progress, {String? message, String? subtitle});
-
-  /// 完成，变为 success 并自动消失
   void complete({String? message});
-
-  /// 失败，变为 error 并自动消失
   void fail({String? message});
-
-  /// 直接关闭
   void dismiss();
 }
 
-/// 真实的 Toast 控制器实现
-class _RealToastController implements ToastController {
-  final _ProgressToastWidgetState _state;
-
-  _RealToastController._(this._state);
-
-  @override
-  void updateProgress(double? progress, {String? message, String? subtitle}) {
-    _state._updateProgress(progress, message: message, subtitle: subtitle);
-  }
-
-  @override
-  void complete({String? message}) {
-    _state._complete(message: message);
-  }
-
-  @override
-  void fail({String? message}) {
-    _state._fail(message: message);
-  }
-
-  @override
-  void dismiss() {
-    _state._dismiss();
-  }
-}
-
-/// 代理控制器，允许在真实控制器创建前就返回
-class _ProxyToastController implements ToastController {
-  ToastController? _real;
-  final List<void Function(ToastController)> _pendingCalls = [];
-
-  void _setReal(ToastController real) {
-    _real = real;
-    for (final call in _pendingCalls) {
-      call(real);
-    }
-    _pendingCalls.clear();
-  }
-
-  void _enqueue(void Function(ToastController) call) {
-    if (_real != null) {
-      call(_real!);
-    } else {
-      _pendingCalls.add(call);
-    }
-  }
-
-  @override
-  void updateProgress(double? progress, {String? message, String? subtitle}) {
-    _enqueue(
-      (c) => c.updateProgress(progress, message: message, subtitle: subtitle),
-    );
-  }
-
-  @override
-  void complete({String? message}) {
-    _enqueue((c) => c.complete(message: message));
-  }
-
-  @override
-  void fail({String? message}) {
-    _enqueue((c) => c.fail(message: message));
-  }
-
-  @override
-  void dismiss() {
-    _enqueue((c) => c.dismiss());
-  }
-}
-
-/// 空操作控制器，当没有 Overlay 时使用
 class _NoOpToastController implements ToastController {
   @override
   void updateProgress(double? progress, {String? message, String? subtitle}) {}
-
   @override
   void complete({String? message}) {}
-
   @override
   void fail({String? message}) {}
-
   @override
   void dismiss() {}
 }
 
-/// 全局 Toast 通知服务
-/// 桌面端显示右上角可堆叠toast，移动端显示底部SnackBar
+/// One measured stack per overlay keeps long messages and progress aligned.
 class AppToast {
-  static OverlayEntry? _progressEntry;
-  static final List<_ActiveToast> _activeToasts = [];
+  static final _stacks = <OverlayState, _ToastStackManager>{};
+  static void success(BuildContext context, String message) =>
+      _show(context, message, ToastType.success);
+  static void error(BuildContext context, String message) =>
+      _show(context, message, ToastType.error);
+  static void warning(BuildContext context, String message) =>
+      _show(context, message, ToastType.warning);
+  static void info(BuildContext context, String message) =>
+      _show(context, message, ToastType.info);
+  static void successOnOverlay(OverlayState? overlay, String message) =>
+      _onOverlay(overlay, message, ToastType.success);
+  static void errorOnOverlay(OverlayState? overlay, String message) =>
+      _onOverlay(overlay, message, ToastType.error);
 
-  /// 判断是否为桌面端
-  static bool get _isDesktop => Platform.isWindows;
-
-  /// 显示成功通知
-  static void success(BuildContext context, String message) {
-    _show(context, message, ToastType.success);
+  static _ToastStackManager? _manager(OverlayState? overlay) {
+    if (overlay == null || !overlay.mounted) return null;
+    return _stacks.putIfAbsent(
+      overlay,
+      () => _ToastStackManager(overlay, () => _stacks.remove(overlay)),
+    );
   }
 
-  /// 显示错误通知
-  static void error(BuildContext context, String message) {
-    _show(context, message, ToastType.error);
-  }
-
-  static void successOnOverlay(OverlayState? overlay, String message) {
-    _showOnOverlay(overlay, message, ToastType.success);
-  }
-
-  static void errorOnOverlay(OverlayState? overlay, String message) {
-    _showOnOverlay(overlay, message, ToastType.error);
-  }
-
-  /// 显示警告通知
-  static void warning(BuildContext context, String message) {
-    _show(context, message, ToastType.warning);
-  }
-
-  /// 显示信息通知
-  static void info(BuildContext context, String message) {
-    _show(context, message, ToastType.info);
-  }
-
-  /// 显示持久化进度 Toast
-  /// 返回 ToastController 用于更新进度或关闭
-  /// [progress] 0.0-1.0，null 表示不确定进度
   static ToastController showProgress(
     BuildContext context,
     String message, {
     double? progress,
     String? subtitle,
   }) {
-    // 如果已有进度 Toast，先移除
-    _progressEntry?.remove();
-    _progressEntry = null;
-
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
-    if (overlay == null) {
-      // 如果没有 Overlay，返回一个空操作的控制器
-      return _NoOpToastController();
+    final manager = _manager(Overlay.maybeOf(context, rootOverlay: true));
+    if (manager == null) return _NoOpToastController();
+    // A replaced controller owns only its own record, never the next task.
+    for (final record in manager.records.toList()) {
+      if (record.type == ToastType.progress) record.dismiss();
     }
-
-    // 创建一个同步可用的控制器
-    final proxyController = _ProxyToastController();
-
-    _progressEntry = OverlayEntry(
-      builder: (context) => _ProgressToastWidget(
-        initialMessage: message,
-        initialProgress: progress,
-        initialSubtitle: subtitle,
-        onControllerCreated: (c) => proxyController._setReal(c),
-        onDismiss: () {
-          _progressEntry?.remove();
-          _progressEntry = null;
-        },
-      ),
+    return manager.add(
+      message,
+      ToastType.progress,
+      progress: progress,
+      subtitle: subtitle,
     );
-
-    overlay.insert(_progressEntry!);
-    return proxyController;
   }
 
-  static void _show(BuildContext context, String message, ToastType type) {
-    if (_isDesktop) {
-      _showDesktopToast(context, message, type);
-    } else {
-      _showMobileSnackBar(context, message, type);
-    }
-  }
-
-  static void _showOnOverlay(
+  static void _onOverlay(
     OverlayState? overlay,
     String message,
     ToastType type,
-  ) {
-    if (overlay == null || !overlay.mounted) {
+  ) => _manager(overlay)?.add(message, type);
+  static void _show(BuildContext context, String message, ToastType type) {
+    if (Platform.isWindows) {
+      _onOverlay(Overlay.maybeOf(context, rootOverlay: true), message, type);
       return;
     }
-    _showDesktopToastInOverlay(overlay, message, type);
-  }
-
-  /// 用于生成唯一 toast ID 的计数器
-  static int _toastIdCounter = 0;
-
-  /// 桌面端：右上角堆叠toast
-  static void _showDesktopToast(
-    BuildContext context,
-    String message,
-    ToastType type,
-  ) {
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
-    if (overlay == null) {
-      return;
-    }
-    _showDesktopToastInOverlay(overlay, message, type);
-  }
-
-  static void _showDesktopToastInOverlay(
-    OverlayState overlay,
-    String message,
-    ToastType type,
-  ) {
-    // 使用递增计数器确保 ID 唯一，避免同一毫秒内创建的 toast 有相同 ID
-    final id = _toastIdCounter++;
-
-    // 先创建 ActiveToast，entry 先为占位符
-    final activeToast = _ActiveToast(
-      id: id,
-      entry: OverlayEntry(builder: (_) => const SizedBox.shrink()),
-    );
-    _activeToasts.add(activeToast);
-
-    // 创建真正的 entry
-    late OverlayEntry entry;
-    entry = OverlayEntry(
-      builder: (context) {
-        // 动态计算当前 index，确保在 markNeedsBuild 后位置能正确更新
-        final currentIndex = _activeToasts.indexWhere((t) => t.id == id);
-        return _SingleToastWidget(
-          key: ValueKey(id),
-          message: message,
-          type: type,
-          index: currentIndex,
-          onDismiss: () {
-            entry.remove();
-            _activeToasts.remove(activeToast);
-            // 更新其他 toast 的位置
-            for (final toast in _activeToasts) {
-              toast.entry.markNeedsBuild();
-            }
-          },
-        );
-      },
-    );
-
-    // 更新 ActiveToast 的 entry
-    activeToast.entry = entry;
-
-    overlay.insert(entry);
-  }
-
-  /// 移动端：底部SnackBar
-  static void _showMobileSnackBar(
-    BuildContext context,
-    String message,
-    ToastType type,
-  ) {
-    final (icon, color) = _getTypeStyle(Theme.of(context), type);
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final scheme = Theme.of(context).colorScheme;
+    final (icon, color) = _style(scheme, type);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        backgroundColor: scheme.surfaceContainerLow,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9),
+          side: BorderSide(color: scheme.outlineVariant),
+        ),
         content: Row(
           children: [
-            Icon(icon, color: Colors.white, size: 20),
-            const SizedBox(width: 12),
+            Icon(icon, size: 19, color: color),
+            const SizedBox(width: 10),
             Expanded(
-              child: Text(message, style: const TextStyle(color: Colors.white)),
+              child: Text(message, style: TextStyle(color: scheme.onSurface)),
             ),
           ],
         ),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(12),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 4),
       ),
     );
   }
 }
 
-class _ActiveToast {
-  final int id;
-  OverlayEntry entry;
-
-  _ActiveToast({required this.id, required this.entry});
-}
-
-/// 单个 Toast Widget（桌面端纯色背景样式）
-class _SingleToastWidget extends StatefulWidget {
-  final String message;
-  final ToastType type;
-  final VoidCallback onDismiss;
-  final int index;
-
-  const _SingleToastWidget({
-    super.key,
-    required this.message,
-    required this.type,
-    required this.onDismiss,
-    required this.index,
-  });
-
-  @override
-  State<_SingleToastWidget> createState() => _SingleToastWidgetState();
-}
-
-class _SingleToastWidgetState extends State<_SingleToastWidget>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _controller.forward();
-
-    // 自动消失
-    Future.delayed(const Duration(seconds: 3), _dismiss);
+class _ToastStackManager {
+  _ToastStackManager(this.overlay, this.onDispose) {
+    entry = OverlayEntry(builder: (context) => _ToastStack(this));
+    overlay.insert(entry);
+  }
+  final OverlayState overlay;
+  final VoidCallback onDispose;
+  late final OverlayEntry entry;
+  final records = <_ToastRecord>[];
+  bool disposed = false;
+  _ToastRecord add(
+    String message,
+    ToastType type, {
+    double? progress,
+    String? subtitle,
+  }) {
+    final record = _ToastRecord(this, message, type, progress, subtitle);
+    records.add(record);
+    if (type != ToastType.progress) record.scheduleClose();
+    changed();
+    return record;
   }
 
-  void _dismiss() {
-    if (!mounted) return;
-    _controller.reverse().then((_) {
-      if (mounted) widget.onDismiss();
-    });
+  void changed() {
+    if (!disposed && overlay.mounted) entry.markNeedsBuild();
   }
 
+  void remove(_ToastRecord record) {
+    if (disposed || !records.remove(record)) return;
+    record.close();
+    if (records.isEmpty) {
+      dispose();
+      entry.remove();
+      entry.dispose();
+    } else {
+      changed();
+    }
+  }
+
+  void dispose() {
+    if (disposed) return;
+    disposed = true;
+    for (final record in records) {
+      record.close();
+    }
+    records.clear();
+    onDispose();
+  }
+}
+
+class _ToastRecord implements ToastController {
+  _ToastRecord(
+    this.manager,
+    this.message,
+    this.type,
+    double? value,
+    this.subtitle,
+  ) : progress = value?.clamp(0, 1).toDouble();
+  final _ToastStackManager manager;
+  String message;
+  String? subtitle;
+  ToastType type;
+  double? progress;
+  bool closing = false, closed = false, hovered = false;
+  Timer? timer;
+  DateTime? expiresAt;
+  Duration remaining = const Duration(seconds: 4);
+  void scheduleClose() {
+    timer?.cancel();
+    remaining = const Duration(seconds: 4);
+    expiresAt = null;
+    if (!hovered) resume();
+  }
+
+  void pause() {
+    hovered = true;
+    timer?.cancel();
+    if (expiresAt case final date?) {
+      remaining = date.difference(DateTime.now());
+      if (remaining.isNegative) remaining = Duration.zero;
+    }
+    expiresAt = null;
+  }
+
+  void resume() {
+    hovered = false;
+    if (type == ToastType.progress || closed || closing) return;
+    timer?.cancel();
+    expiresAt = DateTime.now().add(remaining);
+    timer = Timer(remaining, dismiss);
+  }
+
+  @override
+  void updateProgress(double? value, {String? message, String? subtitle}) {
+    if (closed || closing || type != ToastType.progress) return;
+    progress = value?.clamp(0, 1).toDouble();
+    if (message != null) this.message = message;
+    if (subtitle != null) this.subtitle = subtitle;
+    manager.changed();
+  }
+
+  void finish(ToastType type, String? message) {
+    if (closed || closing || this.type != ToastType.progress) return;
+    this.type = type;
+    progress = null;
+    if (message != null) this.message = message;
+    scheduleClose();
+    manager.changed();
+  }
+
+  @override
+  void complete({String? message}) => finish(ToastType.success, message);
+  @override
+  void fail({String? message}) => finish(ToastType.error, message);
+  @override
+  void dismiss() {
+    if (closed || closing) return;
+    timer?.cancel();
+    closing = true;
+    manager.changed();
+  }
+
+  void close() {
+    closed = true;
+    timer?.cancel();
+  }
+}
+
+class _ToastStack extends StatefulWidget {
+  const _ToastStack(this.manager);
+  final _ToastStackManager manager;
+  @override
+  State<_ToastStack> createState() => _ToastStackState();
+}
+
+class _ToastStackState extends State<_ToastStack> {
   @override
   void dispose() {
-    _controller.dispose();
+    widget.manager.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final (icon, color) = _getTypeStyle(Theme.of(context), widget.type);
-    final topOffset = 16.0 + (widget.index >= 0 ? widget.index : 0) * 64.0;
-
+    final media = MediaQuery.of(context);
     return Positioned(
-      top: topOffset,
-      right: 16,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 360),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                    spreadRadius: 2,
+      top: media.padding.top + 14,
+      right: 14,
+      child: SizedBox(
+        width: (media.size.width - 28).clamp(0, 350).toDouble(),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: (media.size.height - media.padding.vertical - 28).clamp(
+              0,
+              double.infinity,
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final record in widget.manager.records)
+                  Padding(
+                    key: ObjectKey(record),
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _ToastCard(record),
                   ),
-                ],
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(icon, color: Colors.white, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      widget.message,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  InkWell(
-                    onTap: _dismiss,
-                    borderRadius: BorderRadius.circular(12),
-                    child: const Padding(
-                      padding: EdgeInsets.all(4),
-                      child: Icon(Icons.close, size: 18, color: Colors.white70),
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -424,237 +278,224 @@ class _SingleToastWidgetState extends State<_SingleToastWidget>
   }
 }
 
-/// 进度 Toast Widget（持久化，需要手动关闭）
-class _ProgressToastWidget extends StatefulWidget {
-  final String initialMessage;
-  final double? initialProgress;
-  final String? initialSubtitle;
-  final void Function(ToastController) onControllerCreated;
-  final VoidCallback onDismiss;
-
-  const _ProgressToastWidget({
-    required this.initialMessage,
-    required this.initialProgress,
-    required this.initialSubtitle,
-    required this.onControllerCreated,
-    required this.onDismiss,
-  });
-
+class _ToastCard extends StatefulWidget {
+  const _ToastCard(this.record);
+  final _ToastRecord record;
   @override
-  State<_ProgressToastWidget> createState() => _ProgressToastWidgetState();
+  State<_ToastCard> createState() => _ToastCardState();
 }
 
-class _ProgressToastWidgetState extends State<_ProgressToastWidget>
+class _ToastCardState extends State<_ToastCard>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-
-  late String _message;
-  double? _progress;
-  String? _subtitle;
-  ToastType _type = ToastType.progress;
-  bool _autoClose = false;
+  late final AnimationController _animation = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 180),
+  );
+  bool _dismissing = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_dismissing) {
+      if (widget.record.closing) {
+        _dismiss();
+      } else if (MediaQuery.disableAnimationsOf(context)) {
+        _animation.value = 1;
+      } else {
+        _animation.forward();
+      }
+    }
+  }
 
   @override
-  void initState() {
-    super.initState();
-    _message = widget.initialMessage;
-    _progress = widget.initialProgress;
-    _subtitle = widget.initialSubtitle;
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _controller.forward();
-
-    // 创建控制器
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.onControllerCreated(_RealToastController._(this));
-    });
-  }
-
-  void _updateProgress(double? progress, {String? message, String? subtitle}) {
-    if (!mounted) return;
-    setState(() {
-      _progress = progress;
-      if (message != null) _message = message;
-      if (subtitle != null) _subtitle = subtitle;
-    });
-  }
-
-  void _complete({String? message}) {
-    if (!mounted) return;
-    setState(() {
-      _type = ToastType.success;
-      _progress = 1.0;
-      if (message != null) _message = message;
-      _autoClose = true;
-    });
-    Future.delayed(const Duration(seconds: 2), _dismiss);
-  }
-
-  void _fail({String? message}) {
-    if (!mounted) return;
-    setState(() {
-      _type = ToastType.error;
-      _progress = null;
-      _subtitle = null;
-      if (message != null) _message = message;
-      _autoClose = true;
-    });
-    Future.delayed(const Duration(seconds: 3), _dismiss);
+  void didUpdateWidget(covariant _ToastCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.record.closing) _dismiss();
   }
 
   void _dismiss() {
-    if (!mounted) return;
-    _controller.reverse().then((_) {
-      if (mounted) widget.onDismiss();
+    if (_dismissing) return;
+    _dismissing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      if (!MediaQuery.disableAnimationsOf(context)) await _animation.reverse();
+      if (mounted) widget.record.manager.remove(widget.record);
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _animation.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final (icon, color) = _getTypeStyle(theme, _type);
-
-    return Positioned(
-      bottom: 16,
-      right: 16,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 360, minWidth: 240),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: _type == ToastType.progress
-                    ? theme.colorScheme.surfaceContainerHigh
-                    : color,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: (_type == ToastType.progress ? Colors.black : color)
-                        .withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                    spreadRadius: 2,
-                  ),
-                ],
+    final record = widget.record,
+        theme = Theme.of(context),
+        scheme = theme.colorScheme;
+    final (icon, color) = _style(scheme, record.type);
+    final language = Localizations.localeOf(context).languageCode;
+    String label(String zh, String en, String ja) => language == 'zh'
+        ? zh
+        : language == 'ja'
+        ? ja
+        : en;
+    final title = switch (record.type) {
+      ToastType.success => label('已完成', 'Completed', '完了'),
+      ToastType.error => label('操作失败', 'Action failed', '操作失敗'),
+      ToastType.warning => label('请留意', 'Please note', 'ご注意'),
+      ToastType.info => label('提示', 'Notice', 'お知らせ'),
+      ToastType.progress => label('正在处理', 'In progress', '処理中'),
+    };
+    final card = MouseRegion(
+      onEnter: (_) => record.pause(),
+      onExit: (_) => record.resume(),
+      child: Semantics(
+        liveRegion: true,
+        child: Material(
+          color: scheme.surfaceContainerLow,
+          elevation: 0,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: scheme.outlineVariant.withValues(alpha: .75),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(
+                    alpha: theme.brightness == Brightness.dark ? .2 : .09,
+                  ),
+                  blurRadius: 20,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(13, 12, 9, 13),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 27,
+                  height: 27,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: .09),
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Icon(icon, size: 16, color: color),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (_type == ToastType.progress)
-                        Icon(Icons.downloading_rounded, color: color, size: 20)
-                      else
-                        Icon(icon, color: Colors.white, size: 20),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          _message,
-                          style: TextStyle(
-                            color: _type == ToastType.progress
-                                ? theme.colorScheme.onSurface
-                                : Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      Text(
+                        title,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
                         ),
                       ),
-                      if (!_autoClose) ...[
-                        const SizedBox(width: 8),
-                        InkWell(
-                          onTap: _dismiss,
-                          borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Icon(
-                              Icons.close,
-                              size: 18,
-                              color: _type == ToastType.progress
-                                  ? theme.colorScheme.onSurfaceVariant
-                                  : Colors.white70,
-                            ),
+                      const SizedBox(height: 4),
+                      Text(
+                        record.message,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 11.5,
+                          height: 1.55,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (record.subtitle?.isNotEmpty == true) ...[
+                        const SizedBox(height: 5),
+                        Text(
+                          record.subtitle!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 10.5,
+                            height: 1.4,
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                       ],
+                      if (record.type == ToastType.progress) ...[
+                        const SizedBox(height: 10),
+                        if (MediaQuery.disableAnimationsOf(context) &&
+                            record.progress == null)
+                          Container(
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: .15),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          )
+                        else
+                          LinearProgressIndicator(
+                            value: record.progress,
+                            minHeight: 3,
+                            borderRadius: BorderRadius.circular(2),
+                            color: color,
+                            backgroundColor: color.withValues(alpha: .1),
+                          ),
+                        if (record.progress != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                '${(record.progress! * 100).round()}%',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontSize: 10,
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ],
                   ),
-                  if (_subtitle != null) ...[
-                    const SizedBox(height: 4),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 32),
-                      child: Text(
-                        _subtitle!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _type == ToastType.progress
-                              ? theme.colorScheme.onSurfaceVariant
-                              : Colors.white70,
-                        ),
-                      ),
+                ),
+                const SizedBox(width: 5),
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: IconButton(
+                    key: const Key('toast-dismiss'),
+                    padding: EdgeInsets.zero,
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).closeButtonTooltip,
+                    onPressed: record.dismiss,
+                    icon: Icon(
+                      Icons.close,
+                      size: 14,
+                      color: scheme.onSurfaceVariant,
                     ),
-                  ],
-                  if (_type == ToastType.progress && _progress != null) ...[
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: _progress,
-                        backgroundColor: color.withValues(alpha: 0.2),
-                        valueColor: AlwaysStoppedAnimation<Color>(color),
-                        minHeight: 4,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
+    if (MediaQuery.disableAnimationsOf(context)) return card;
+    return FadeTransition(
+      opacity: _animation,
+      child: SlideTransition(
+        position: Tween(begin: const Offset(.08, 0), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animation, curve: Curves.easeOutCubic),
+        ),
+        child: card,
+      ),
+    );
   }
 }
 
-/// 获取类型对应的图标和颜色
-(IconData, Color) _getTypeStyle(ThemeData theme, ToastType type) {
-  switch (type) {
-    case ToastType.success:
-      return (Icons.check_circle_rounded, const Color(0xFF4CAF50));
-    case ToastType.error:
-      return (Icons.cancel_rounded, const Color(0xFFE53935));
-    case ToastType.warning:
-      return (Icons.warning_rounded, const Color(0xFFFF9800));
-    case ToastType.info:
-      return (Icons.info_rounded, const Color(0xFF2196F3));
-    case ToastType.progress:
-      return (Icons.hourglass_empty_rounded, theme.colorScheme.primary);
-  }
-}
+(IconData, Color) _style(ColorScheme scheme, ToastType type) => switch (type) {
+  ToastType.success => (Icons.check_rounded, const Color(0xff26825f)),
+  ToastType.error => (Icons.priority_high_rounded, scheme.error),
+  ToastType.warning => (Icons.warning_amber_rounded, const Color(0xffb47a16)),
+  ToastType.info => (Icons.info_outline_rounded, scheme.primary),
+  ToastType.progress => (Icons.sync_rounded, scheme.primary),
+};

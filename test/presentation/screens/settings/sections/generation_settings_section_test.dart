@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,7 +28,7 @@ void main() {
     );
     await tester.pump();
 
-    final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
+    final tileFinder = find.widgetWithText(SettingsTile, '滚轮调整提示词权重');
     expect(tileFinder, findsOneWidget);
     expect(
       tester
@@ -77,7 +78,7 @@ void main() {
     );
     await tester.pump();
 
-    final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
+    final tileFinder = find.widgetWithText(SettingsTile, '滚轮调整提示词权重');
     await tester.tap(
       find.descendant(of: tileFinder, matching: find.byType(Switch)),
     );
@@ -114,7 +115,7 @@ void main() {
     );
     await tester.pump();
 
-    final tileFinder = find.widgetWithText(ListTile, '滚轮调整提示词权重');
+    final tileFinder = find.widgetWithText(SettingsTile, '滚轮调整提示词权重');
     final menuFinder = find.descendant(
       of: tileFinder,
       matching: find.byType(PopupMenuButton<String>),
@@ -161,9 +162,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('输入'), findsOneWidget);
-    expect(find.text('完成提醒'), findsOneWidget);
+    expect(find.text('完成提醒'), findsNothing);
     expect(find.text('滚轮调整提示词权重'), findsOneWidget);
-    expect(find.text('完成音效'), findsOneWidget);
+    expect(find.text('完成音效'), findsNothing);
   });
 
   testWidgets('音效开关关闭时隐藏自定义音效入口', (tester) async {
@@ -179,7 +180,9 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
-            body: SingleChildScrollView(child: GenerationSettingsSection()),
+            body: SingleChildScrollView(
+              child: GenerationSettingsSection(feedbackOnly: true),
+            ),
           ),
         ),
       ),

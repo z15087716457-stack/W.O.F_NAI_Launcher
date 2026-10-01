@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/screens/settings/widgets/model_management_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -115,7 +116,7 @@ void main() {
     final disposedPanels = <String>[];
     await pumpSection(tester, disposedPanels, locale: const Locale('en'));
 
-    final segmentedButton = find.byType(SegmentedButton<int>);
+    final segmentedButton = find.byType(ManagementTabs);
     final promptAssistantWidth = tester.getSize(segmentedButton).width;
 
     await tester.tap(find.text('ComfyUI'));
@@ -145,12 +146,10 @@ void main() {
     testWidgets('分段导航按 ${entry.key} 显示精确文案', (tester) async {
       await pumpSection(tester, <String>[], locale: Locale(entry.key));
 
-      final segmentedButton = tester.widget<SegmentedButton<int>>(
-        find.byType(SegmentedButton<int>),
+      final segmentedButton = tester.widget<ManagementTabs>(
+        find.byType(ManagementTabs),
       );
-      final labels = segmentedButton.segments
-          .map((segment) => (segment.label as Text).data)
-          .toList();
+      final labels = segmentedButton.labels;
 
       expect(labels, entry.value, reason: 'locale=${entry.key}');
     });

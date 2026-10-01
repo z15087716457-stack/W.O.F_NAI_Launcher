@@ -1,3 +1,4 @@
+import '../widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,7 +21,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
       icon: Icons.brush_outlined,
       child: Column(
         children: [
-          SwitchListTile(
+          SettingsSwitchTile(
             secondary: Icon(_statusIcon(state.status)),
             title: Text(l10n.settings_kritaBridgeEnable),
             subtitle: Text(_statusText(context, state)),
@@ -33,7 +34,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
           ),
           if (state.enabled) ...[
             const Divider(height: 1),
-            ListTile(
+            SettingsTile(
               leading: Icon(
                 Icons.circle,
                 size: 12,
@@ -52,7 +53,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
               ),
             ),
             if (state.discoveryFilePath != null)
-              ListTile(
+              SettingsTile(
                 leading: const Icon(Icons.description_outlined),
                 title: Text(l10n.settings_kritaBridgeDiscoveryFile),
                 subtitle: SelectableText(state.discoveryFilePath!),

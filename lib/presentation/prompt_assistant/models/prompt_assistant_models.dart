@@ -912,7 +912,8 @@ class PromptAssistantConfigState {
       presets: [
         if (json['presets'] is List)
           for (final preset in json['presets'] as List)
-            if (preset is Map<String, dynamic>)
+            if (preset is Map<String, dynamic> &&
+                !(preset['id'] as String? ?? '').startsWith('builtin:'))
               TaskPresetConfig.fromJson(preset),
       ],
     );

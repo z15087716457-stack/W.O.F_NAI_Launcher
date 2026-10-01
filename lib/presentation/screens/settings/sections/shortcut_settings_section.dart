@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../widgets/settings_card.dart';
+import '../widgets/settings_tile.dart';
 import '../widgets/shortcut_settings_panel.dart';
 
 /// 快捷键设置板块
@@ -21,7 +22,7 @@ class _ShortcutSettingsSectionState
   @override
   Widget build(BuildContext context) {
     return SettingsCard(
-      child: ListTile(
+      child: SettingsTile(
         leading: const Icon(Icons.keyboard_outlined),
         title: Text(context.l10n.shortcut_settings_title),
         subtitle: Text(context.l10n.settings_shortcutsSubtitle),

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_tile.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -32,7 +33,10 @@ void main() {
     }
   });
 
-  Future<void> pumpSection(WidgetTester tester) async {
+  Future<void> pumpSection(
+    WidgetTester tester, {
+    bool generationOnly = false,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(1000, 2000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -42,12 +46,14 @@ void main() {
             (ref) => Completer<DanbooruTagsLazyService>().future,
           ),
         ],
-        child: const MaterialApp(
+        child: MaterialApp(
           locale: Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
-            body: SingleChildScrollView(child: PrivacySettingsSection()),
+            body: SingleChildScrollView(
+              child: PrivacySettingsSection(generationOnly: generationOnly),
+            ),
           ),
         ),
       ),
@@ -61,40 +67,41 @@ void main() {
     expect(find.text('保护模式'), findsOneWidget);
     expect(find.text('保护功能'), findsOneWidget);
     expect(find.text('复制/拖拽时移除全部元数据'), findsOneWidget);
-    expect(find.text('限制生图频率'), findsOneWidget);
-    expect(find.text('生图间隔'), findsOneWidget);
-    expect(find.text('间隔随机抖动'), findsOneWidget);
+    expect(find.text('限制生图频率'), findsNothing);
+    expect(find.text('生图间隔'), findsNothing);
+    expect(find.text('间隔随机抖动'), findsNothing);
     expect(find.byType(OnlineGalleryBlacklistSettingsPanel), findsOneWidget);
   });
 
   testWidgets('保护模式关闭时子开关不可用', (tester) async {
     await pumpSection(tester);
 
-    final stripTile = tester.widget<SwitchListTile>(
+    final stripTile = tester.widget<SettingsSwitchTile>(
       find.ancestor(
         of: find.text('复制/拖拽时移除全部元数据'),
-        matching: find.byType(SwitchListTile),
+        matching: find.byType(SettingsSwitchTile),
       ),
     );
     expect(stripTile.onChanged, isNull);
 
-    final intervalSwitch = tester.widget<SwitchListTile>(
+    await pumpSection(tester, generationOnly: true);
+    final intervalSwitch = tester.widget<SettingsSwitchTile>(
       find.ancestor(
         of: find.text('限制生图频率'),
-        matching: find.byType(SwitchListTile),
+        matching: find.byType(SettingsSwitchTile),
       ),
     );
     expect(intervalSwitch.onChanged, isNull);
 
-    final intervalTile = tester.widget<ListTile>(
-      find.ancestor(of: find.text('生图间隔'), matching: find.byType(ListTile)),
+    final intervalTile = tester.widget<SettingsTile>(
+      find.ancestor(of: find.text('生图间隔'), matching: find.byType(SettingsTile)),
     );
     expect(intervalTile.onTap, isNull);
 
-    final jitterTile = tester.widget<ListTile>(
+    final jitterTile = tester.widget<SettingsTile>(
       find.ancestor(
         of: find.text('间隔随机抖动'),
-        matching: find.byType(ListTile),
+        matching: find.byType(SettingsTile),
       ),
     );
     expect(jitterTile.onTap, isNull);
@@ -103,10 +110,10 @@ void main() {
   testWidgets('复制/拖拽移除元数据默认关闭（空存储走默认值）', (tester) async {
     await pumpSection(tester);
 
-    final stripTile = tester.widget<SwitchListTile>(
+    final stripTile = tester.widget<SettingsSwitchTile>(
       find.ancestor(
         of: find.text('复制/拖拽时移除全部元数据'),
-        matching: find.byType(SwitchListTile),
+        matching: find.byType(SettingsSwitchTile),
       ),
     );
     expect(stripTile.value, isFalse);
@@ -115,16 +122,12 @@ void main() {
   testWidgets('在线画廊黑名单与主设置卡片宽度一致', (tester) async {
     await pumpSection(tester);
 
-    final primaryCard = find.descendant(
-      of: find.byType(SettingsCard),
-      matching: find.byType(Card),
+    final primaryCard = find.byType(SettingsCard).first;
+    final blacklistCard = find.byType(OnlineGalleryBlacklistSettingsPanel);
+    expect(
+      find.descendant(of: blacklistCard, matching: find.byType(Card)),
+      findsNothing,
     );
-    final blacklistCard = find.descendant(
-      of: find.byType(OnlineGalleryBlacklistSettingsPanel),
-      matching: find.byType(Card),
-    );
-    expect(primaryCard, findsOneWidget);
-    expect(blacklistCard, findsOneWidget);
 
     final primaryRect = tester.getRect(primaryCard);
     final blacklistRect = tester.getRect(blacklistCard);

@@ -14,12 +14,16 @@ import '../../../providers/theme_provider.dart';
 import '../../../widgets/settings/studio_theme_picker.dart';
 import '../../../widgets/common/themed_divider.dart';
 import '../widgets/settings_card.dart';
+import '../widgets/settings_tile.dart';
+import '../../../widgets/common/app_toast.dart';
+import 'generation_settings_section.dart';
 
 /// 外观设置板块
 ///
 /// 包含主题选择、字体选择、语言选择三个设置项。
 class AppearanceSettingsSection extends ConsumerStatefulWidget {
-  const AppearanceSettingsSection({super.key});
+  const AppearanceSettingsSection({super.key, this.controlsOnly = false});
+  final bool controlsOnly;
 
   @override
   ConsumerState<AppearanceSettingsSection> createState() =>
@@ -39,93 +43,144 @@ class _AppearanceSettingsSectionState
     );
     final simpleOutputViewer = ref.watch(simpleOutputViewerNotifierProvider);
 
+    Widget valueControl(String value) => ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 220),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, size: 16),
+        ],
+      ),
+    );
     return SettingsCard(
       child: Column(
         children: [
-          // 主题选择
-          ListTile(
-            leading: const Icon(Icons.palette_outlined),
-            title: Text(context.l10n.settings_style),
-            subtitle: Text(
-              currentTheme == Brightness.dark
-                  ? context.l10n.settings_geistDark
-                  : context.l10n.settings_geistLight,
+          if (!widget.controlsOnly) ...[
+            // 主题选择
+            SettingsTile(
+              leading: const Icon(Icons.palette_outlined),
+              title: Text(context.l10n.settings_style),
+              trailing: valueControl(
+                currentTheme == Brightness.dark
+                    ? context.l10n.settings_geistDark
+                    : context.l10n.settings_geistLight,
+              ),
+              onTap: () => _showThemeDialog(context),
             ),
-            onTap: () => _showThemeDialog(context),
-          ),
 
-          // 字体选择
-          ListTile(
-            leading: const Icon(Icons.text_fields),
-            title: Text(context.l10n.settings_font),
-            subtitle: Text(currentFont.displayName),
-            onTap: () => _showFontDialog(context, currentFont),
-          ),
-
-          // 字体大小选择
-          ListTile(
-            leading: const Icon(Icons.format_size),
-            title: Text(context.l10n.settings_fontScale),
-            subtitle: Text(context.l10n.settings_fontScale_description),
-            trailing: Text('${(fontScale * 100).round()}%'),
-            onTap: () => _showFontScaleDialog(context, fontScale),
-          ),
-
-          // 语言选择
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: Text(context.l10n.settings_language),
-            subtitle: Text(_languageLabel(context, currentLocale.languageCode)),
-            onTap: () => _showLanguageDialog(context, currentLocale),
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.photo_library_outlined),
-            title: Text(context.l10n.settings_historyClickBehavior),
-            subtitle: Text(
-              historyClickBehavior == HistoryClickBehavior.selectPreview
-                  ? context.l10n.settings_historyClickBehavior_linked
-                  : context.l10n.settings_historyClickBehavior_classic,
+            // 字体选择
+            SettingsTile(
+              leading: const Icon(Icons.text_fields),
+              title: Text(context.l10n.settings_font),
+              trailing: valueControl(currentFont.displayName),
+              onTap: () => _showFontDialog(context, currentFont),
             ),
-            onTap: () =>
-                _showHistoryClickBehaviorDialog(context, historyClickBehavior),
-          ),
 
-          // 输出查看器模式（G11 自由画布 / 简单视图）
-          ListTile(
-            leading: const Icon(Icons.dashboard_outlined),
-            title: Text(context.l10n.settings_outputViewer),
-            subtitle: Text(
-              simpleOutputViewer
-                  ? context.l10n.settings_outputViewer_simple
-                  : context.l10n.settings_outputViewer_canvas,
+            // 字体大小选择
+            SettingsTile(
+              leading: const Icon(Icons.format_size),
+              title: Text(context.l10n.settings_fontScale),
+              subtitle: Text(context.l10n.settings_fontScale_description),
+              trailing: valueControl('${(fontScale * 100).round()}%'),
+              onTap: () => _showFontScaleDialog(context, fontScale),
             ),
-            onTap: () => _showOutputViewerDialog(context, simpleOutputViewer),
-          ),
 
-          // 画布门控（官网 canvasLockCamera / canvasReducedMotion）
-          SwitchListTile(
-            secondary: const Icon(Icons.lock_outline),
-            title: Text(context.l10n.settings_canvasLockCamera),
-            subtitle: Text(context.l10n.settings_canvasLockCameraDescription),
-            value: ref.watch(canvasLockCameraNotifierProvider),
-            onChanged: (v) => unawaited(
-              ref.read(canvasLockCameraNotifierProvider.notifier).setLocked(v),
+            // 语言选择
+            SettingsTile(
+              leading: const Icon(Icons.language),
+              title: Text(context.l10n.settings_language),
+              trailing: valueControl(
+                _languageLabel(context, currentLocale.languageCode),
+              ),
+              onTap: () => _showLanguageDialog(context, currentLocale),
             ),
-          ),
-          SwitchListTile(
-            secondary: const Icon(Icons.motion_photos_off_outlined),
-            title: Text(context.l10n.settings_canvasReducedMotion),
-            subtitle: Text(
-              context.l10n.settings_canvasReducedMotionDescription,
+          ],
+          if (widget.controlsOnly) ...[
+            SettingsTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(context.l10n.settings_historyClickBehavior),
+              subtitle: Text(
+                historyClickBehavior == HistoryClickBehavior.selectPreview
+                    ? context.l10n.settings_historyClickBehavior_linked
+                    : context.l10n.settings_historyClickBehavior_classic,
+              ),
+              onTap: () => _showHistoryClickBehaviorDialog(
+                context,
+                historyClickBehavior,
+              ),
             ),
-            value: ref.watch(canvasReducedMotionNotifierProvider),
-            onChanged: (v) => unawaited(
-              ref
-                  .read(canvasReducedMotionNotifierProvider.notifier)
-                  .setReduced(v),
+
+            // 输出查看器模式（G11 自由画布 / 简单视图）
+            SettingsTile(
+              leading: const Icon(Icons.dashboard_outlined),
+              title: Text(context.l10n.settings_outputViewer),
+              subtitle: Text(
+                simpleOutputViewer
+                    ? context.l10n.settings_outputViewer_simple
+                    : context.l10n.settings_outputViewer_canvas,
+              ),
+              onTap: () => _showOutputViewerDialog(context, simpleOutputViewer),
             ),
-          ),
+
+            // 画布门控（官网 canvasLockCamera / canvasReducedMotion）
+            SettingsSwitchTile(
+              secondary: const Icon(Icons.lock_outline),
+              title: Text(context.l10n.settings_canvasLockCamera),
+              subtitle: Text(context.l10n.settings_canvasLockCameraDescription),
+              value: ref.watch(canvasLockCameraNotifierProvider),
+              onChanged: (v) => unawaited(
+                ref
+                    .read(canvasLockCameraNotifierProvider.notifier)
+                    .setLocked(v),
+              ),
+            ),
+          ],
+          if (!widget.controlsOnly) ...[
+            SettingsSwitchTile(
+              secondary: const Icon(Icons.motion_photos_off_outlined),
+              title: Text(context.l10n.settings_canvasReducedMotion),
+              subtitle: Text(
+                context.l10n.settings_canvasReducedMotionDescription,
+              ),
+              value: ref.watch(canvasReducedMotionNotifierProvider),
+              onChanged: (v) => unawaited(
+                ref
+                    .read(canvasReducedMotionNotifierProvider.notifier)
+                    .setReduced(v),
+              ),
+            ),
+            const GenerationSettingsSection(feedbackOnly: true),
+            SettingsTile(
+              title: Text(
+                Localizations.localeOf(context).languageCode == 'zh'
+                    ? '通知样式'
+                    : 'Notification style',
+              ),
+              trailing: OutlinedButton.icon(
+                onPressed: () => AppToast.info(
+                  context,
+                  Localizations.localeOf(context).languageCode == 'zh'
+                      ? '通知会显示在右上角，长文本自动换行，进度任务完成后自动收起。'
+                      : 'Notifications appear at the upper right, wrap long messages, and close when progress tasks finish.',
+                ),
+                icon: const Icon(Icons.info_outline, size: 16),
+                label: Text(
+                  Localizations.localeOf(context).languageCode == 'zh'
+                      ? '预览'
+                      : 'Preview',
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

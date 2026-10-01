@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'comfyui_settings_section.dart';
 import 'krita_bridge_settings_section.dart';
+import 'network_settings_section.dart';
+import '../widgets/model_management_widgets.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 /// 集成设置板块
 ///
@@ -14,11 +17,15 @@ class IntegrationsSettingsSection extends StatefulWidget {
   @visibleForTesting
   final List<WidgetBuilder>? panelBuilders;
 
-  const IntegrationsSettingsSection({super.key, this.panelBuilders})
-    : assert(
-        panelBuilders == null || panelBuilders.length == 2,
-        'panelBuilders must contain exactly two builders.',
-      );
+  final bool initialNetwork;
+  const IntegrationsSettingsSection({
+    super.key,
+    this.panelBuilders,
+    this.initialNetwork = false,
+  }) : assert(
+         panelBuilders == null || panelBuilders.length == 2,
+         'panelBuilders must contain exactly two builders.',
+       );
 
   @override
   State<IntegrationsSettingsSection> createState() =>
@@ -29,34 +36,48 @@ class _IntegrationsSettingsSectionState
     extends State<IntegrationsSettingsSection> {
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialNetwork && widget.panelBuilders == null) {
+      _selectedIndex = 2;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant IntegrationsSettingsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialNetwork != widget.initialNetwork &&
+        widget.panelBuilders == null) {
+      _selectedIndex = widget.initialNetwork ? 2 : 0;
+    }
+  }
+
   List<WidgetBuilder> get _builders =>
       widget.panelBuilders ??
       [
         (_) => const ComfyUISettingsSection(),
         (_) => const KritaBridgeSettingsSection(),
+        (_) => const NetworkSettingsSection(),
       ];
 
   @override
   Widget build(BuildContext context) {
-    final labels = ['ComfyUI', 'Krita'];
+    final labels = [
+      'ComfyUI',
+      'Krita',
+      if (widget.panelBuilders == null) context.l10n.settings_network,
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Center(
-            child: SegmentedButton<int>(
-              segments: [
-                for (var i = 0; i < labels.length; i++)
-                  ButtonSegment(value: i, label: Text(labels[i])),
-              ],
-              selected: {_selectedIndex},
-              showSelectedIcon: false,
-              onSelectionChanged: (selection) {
-                setState(() => _selectedIndex = selection.first);
-              },
-            ),
+          child: ManagementTabs(
+            labels: labels,
+            selected: _selectedIndex,
+            onSelected: (index) => setState(() => _selectedIndex = index),
           ),
         ),
         _builders[_selectedIndex](context),

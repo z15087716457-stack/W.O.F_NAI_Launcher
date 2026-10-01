@@ -1,367 +1,178 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:nai_launcher/core/utils/localization_extension.dart';
-
-import '../../../core/utils/subscription_expiry_utils.dart';
-import '../../../data/models/user/user_subscription.dart';
+import '../../../core/utils/localization_extension.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../auth/account_avatar.dart';
+import '../auth/subscription_expiry_text.dart';
+import '../common/studio_icons.dart';
 
-/// 账号信息设置项
-///
-/// 用于在设置页面显示账号信息，包括头像、昵称、邮箱等
-/// 支持编辑功能（点击编辑按钮触发回调）
 class AccountDetailTile extends ConsumerWidget {
-  /// 编辑按钮点击回调
-  final VoidCallback? onEdit;
-
-  /// 登录按钮点击回调（未登录状态）
-  final VoidCallback? onLogin;
-
   const AccountDetailTile({super.key, this.onEdit, this.onLogin});
-
+  final VoidCallback? onEdit, onLogin;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authNotifierProvider);
-
-    if (authState.isAuthenticated && authState.accountId != null) {
-      // 已登录状态
-      return _buildAuthenticatedContent(context, ref, authState.accountId!);
-    } else {
-      // 未登录状态
-      return _buildUnauthenticatedContent(context);
-    }
-  }
-
-  /// 构建已登录状态的内容 - 极简单行式
-  Widget _buildAuthenticatedContent(
-    BuildContext context,
-    WidgetRef ref,
-    String accountId,
-  ) {
-    final theme = Theme.of(context);
-    final accounts = ref.watch(accountManagerNotifierProvider).accounts;
-    final account = accounts.where((a) => a.id == accountId).firstOrNull;
-    final subscriptionState = ref.watch(subscriptionNotifierProvider);
-
-    if (account == null) {
-      return _buildUnauthenticatedContent(context);
-    }
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        // 使用主题颜色，无边框
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onEdit,
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                // 头像
-                AccountAvatar(account: account, size: 44),
-                const SizedBox(width: 12),
-                // 用户信息
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 名字 + 徽章
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              account.displayName,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // 订阅徽章
-                          _buildCompactBadges(context, subscriptionState),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        account.email,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.5,
-                          ),
-                          fontSize: 12,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // 编辑箭头
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  size: 20,
-                ),
-              ],
-            ),
+    final theme = Theme.of(context), colors = theme.colorScheme;
+    final auth = ref.watch(authNotifierProvider);
+    final account = ref
+        .watch(accountManagerNotifierProvider)
+        .accounts
+        .where((a) => a.id == auth.accountId)
+        .firstOrNull;
+    final loaded = auth.isAuthenticated && account != null;
+    Widget overview({bool showArrow = true}) => Row(
+      children: [
+        if (loaded)
+          AccountAvatar(account: account, size: 41)
+        else
+          Icon(
+            StudioIcons.settingsAccount,
+            size: 32,
+            color: colors.onSurfaceVariant,
           ),
-        ),
-      ),
-    );
-  }
-
-  /// 构建紧凑徽章区域
-  Widget _buildCompactBadges(
-    BuildContext context,
-    SubscriptionState subscriptionState,
-  ) {
-    final theme = Theme.of(context);
-
-    return subscriptionState.when(
-      initial: () => const SizedBox.shrink(),
-      loading: () => SizedBox(
-        width: 14,
-        height: 14,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: theme.colorScheme.outline,
-        ),
-      ),
-      loaded: (subscription) {
-        final hasActiveTier =
-            subscription.tier > 0 && subscription.hasActiveSubscription;
-        final tierColor = hasActiveTier
-            ? _getTierColor(subscription.tier)
-            : Colors.grey;
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Tier 徽章
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: tierColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                hasActiveTier
-                    ? subscription.tierName
-                    : context.l10n.subscriptionTierNone,
-                style: TextStyle(
-                  color: tierColor,
-                  fontSize: 11,
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                loaded
+                    ? account.displayName
+                    : context.l10n.settings_notLoggedIn,
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
-            if (subscription.expiresAt != null && subscription.tier > 0) ...[
-              const SizedBox(width: 6),
-              _buildExpiryBadge(context, subscription),
+              const SizedBox(height: 5),
+              if (loaded)
+                ref
+                    .watch(subscriptionNotifierProvider)
+                    .when(
+                      initial: () => Text(
+                        context.l10n.settings_account,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      loading: () => const SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(strokeWidth: 1.5),
+                      ),
+                      loaded: (subscription) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            subscription.hasActiveSubscription
+                                ? subscription.tierName
+                                : context.l10n.subscriptionTierNone,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                          if (subscription.isGracePeriod)
+                            Text(
+                              context.l10n.subscriptionGracePeriod,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.orange,
+                              ),
+                            )
+                          else if (subscription.expiresAt != null &&
+                              subscription.tier > 0)
+                            SubscriptionExpiryText(
+                              expiresAt: subscription.expiresAt!,
+                              includeDate: false,
+                            ),
+                        ],
+                      ),
+                      error: (_) => Icon(
+                        Icons.error_outline,
+                        size: 15,
+                        color: colors.error,
+                      ),
+                    ),
             ],
-            const SizedBox(width: 6),
-            // Anlas
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.tertiary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    'assets/icons/nai-icon-anlas.svg',
-                    height: 12,
-                    colorFilter: ColorFilter.mode(
-                      theme.colorScheme.tertiary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatNumber(subscription.anlasBalance),
-                    style: TextStyle(
-                      color: theme.colorScheme.tertiary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-      error: (_) =>
-          Icon(Icons.error_outline, size: 16, color: theme.colorScheme.error),
-    );
-  }
-
-  /// 构建订阅到期徽章
-  Widget _buildExpiryBadge(
-    BuildContext context,
-    UserSubscription subscription,
-  ) {
-    final theme = Theme.of(context);
-    final expiresAt = subscription.expiresAt;
-    if (expiresAt == null || subscription.tier <= 0) {
-      return const SizedBox.shrink();
-    }
-
-    final expiryInfo = getSubscriptionExpiryInfo(expiresAt);
-
-    final String text;
-    final Color badgeColor;
-
-    if (subscription.isGracePeriod) {
-      text = context.l10n.subscriptionGracePeriod;
-      badgeColor = Colors.orange;
-    } else {
-      switch (expiryInfo.status) {
-        case SubscriptionExpiryStatus.expired:
-          text = context.l10n.subscriptionExpired;
-          badgeColor = theme.colorScheme.error;
-          break;
-        case SubscriptionExpiryStatus.expiringSoon:
-          text = context.l10n.subscriptionDaysLeft(expiryInfo.daysLeft);
-          badgeColor = Colors.orange;
-          break;
-        case SubscriptionExpiryStatus.normal:
-          text = context.l10n.subscriptionDaysLeft(expiryInfo.daysLeft);
-          badgeColor = theme.colorScheme.onSurfaceVariant;
-          break;
-      }
-    }
-
-    final date = expiryInfo.displayDate;
-
-    return Tooltip(
-      message: date == null
-          ? context.l10n.subscriptionExpired
-          : context.l10n.subscriptionExpiresOn(date),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: badgeColor.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: badgeColor,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
           ),
         ),
-      ),
+        const SizedBox(width: 12),
+        if (!loaded)
+          OutlinedButton(
+            onPressed: onLogin,
+            child: Text(context.l10n.settings_goToLogin),
+          )
+        else if (showArrow)
+          Icon(Icons.chevron_right, size: 18, color: colors.onSurfaceVariant),
+      ],
     );
-  }
-
-  /// 格式化数字 (1000 -> 1K)
-  String _formatNumber(int number) {
-    if (number >= 10000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    }
-    return number.toString();
-  }
-
-  /// 获取订阅等级对应的颜色
-  Color _getTierColor(int tier) {
-    switch (tier) {
-      case 0:
-        return Colors.grey;
-      case 1:
-        return Colors.blue;
-      case 2:
-        return Colors.purple;
-      case 3:
-        return Colors.amber;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  /// 构建未登录状态 - 紧凑版
-  Widget _buildUnauthenticatedContent(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onLogin,
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                // 头像占位（FEAT-30：与账户头像同形微圆角方形）
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    borderRadius: avatarBorderRadius(44),
-                    color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                  ),
-                  child: Icon(
-                    Icons.person_outline_rounded,
-                    size: 24,
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // 提示文本
-                Expanded(
-                  child: Text(
-                    context.l10n.settings_notLoggedIn,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+    final balance = loaded
+        ? ref
+              .watch(subscriptionNotifierProvider)
+              .when(
+                initial: () => const SizedBox.shrink(),
+                loading: () => const SizedBox.shrink(),
+                error: (_) => const SizedBox.shrink(),
+                loaded: (subscription) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Anlas',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ),
-                // 登录按钮
-                FilledButton.tonal(
-                  onPressed: onLogin,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                    const SizedBox(height: 4),
+                    Text(
+                      subscription.anlasBalance.toString().replaceAllMapped(
+                        RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+                        (m) => '${m[1]},',
+                      ),
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 25,
+                      ),
                     ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    context.l10n.settings_goToLogin,
-                    style: const TextStyle(fontSize: 13),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              )
+        : const SizedBox.shrink();
+    return Material(
+      color: colors.onSurface.withValues(alpha: .035),
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: loaded ? onEdit : onLogin,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 440) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    overview(),
+                    if (loaded)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: balance,
+                      ),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: overview(showArrow: false)),
+                  if (loaded) ...[
+                    const SizedBox(width: 32),
+                    balance,
+                    const SizedBox(width: 24),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
         ),
       ),

@@ -15,6 +15,31 @@ CompletionCandidate tag(
 );
 
 void main() {
+  test(
+    'the current article is a prioritized glossary candidate even when not named in the source',
+    () async {
+      final links = WikiTagLinks(
+        exactLookup: (names) async => {
+          for (final name in names)
+            if (name == 'medium_hair' || name == 'long_hair') name: tag(name),
+        },
+        chineseLookup: (_) async => [],
+        readingsLookup: (_) async => {'medium_hair': '中发'},
+      );
+      final glossary = await links.glossaryFor(
+        'Hair down to the shoulders. long hair.',
+        currentTag: 'medium_hair',
+        limit: 1,
+      );
+      expect(glossary.single['tag'], 'medium_hair');
+      expect(glossary.single['current_article'], isTrue);
+      expect(glossary.single['zh'], '中发');
+      expect(
+        (await links.resolve('Hair down to the shoulders.')).links,
+        isEmpty,
+      );
+    },
+  );
   WikiTagLinks matcher(
     Map<String, CompletionCandidate> entries, {
     List<ChineseTermHit> hits = const [],

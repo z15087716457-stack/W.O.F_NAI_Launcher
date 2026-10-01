@@ -12,10 +12,16 @@ import '../../../providers/generation/generation_settings_notifiers.dart'
     as generation_settings;
 import '../../../widgets/common/app_toast.dart';
 import 'settings_card.dart';
+import 'settings_tile.dart';
 import '../../../widgets/common/translation_icon.dart';
 
 class DataSourceCacheSettings extends ConsumerWidget {
-  const DataSourceCacheSettings({super.key});
+  const DataSourceCacheSettings({
+    super.key,
+    this.controlsOnly = false,
+    this.cacheOnly = false,
+  }) : assert(!(controlsOnly && cacheOnly));
+  final bool controlsOnly, cacheOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +29,9 @@ class DataSourceCacheSettings extends ConsumerWidget {
     final autocompleteEnabled = ref.watch(
       generation_settings.autocompleteSettingsProvider,
     );
-    final zh = ref.watch(zhDictionaryServiceProvider).state;
+    final zh = controlsOnly
+        ? null
+        : ref.watch(zhDictionaryServiceProvider).state;
     final notifier = ref.read(autocompleteSettingsProvider.notifier);
     final route = ref
         .watch(promptAssistantServiceProvider)
@@ -35,151 +43,163 @@ class DataSourceCacheSettings extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SettingsCard(
-            title: context.l10n.autocomplete_settingsTitle,
+            title: controlsOnly
+                ? context.l10n.autocomplete_settingsTitle
+                : context.l10n.autocomplete_dataSourcesTitle,
             icon: Icons.auto_awesome,
             child: Column(
               children: [
-                SwitchListTile.adaptive(
-                  title: Text(context.l10n.autocomplete_enable),
-                  value: autocompleteEnabled,
-                  onChanged: (value) {
-                    ref
-                        .read(
-                          generation_settings
-                              .autocompleteSettingsProvider
-                              .notifier,
-                        )
-                        .set(value);
-                    notifier.setEnabled(value);
-                  },
-                ),
-                ListTile(
-                  title: Text(context.l10n.autocomplete_resultLimit),
-                  trailing: DropdownButton<int>(
-                    value: settings.resultLimit,
-                    items: [
-                      ...const [10, 15, 20, 30, 50, 75, 100].map(
-                        (value) => DropdownMenuItem(
-                          value: value,
-                          child: Text('$value'),
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: CompletionResultLimits.all,
-                        child: Text(context.l10n.autocomplete_allResults),
-                      ),
-                    ],
+                if (!cacheOnly) ...[
+                  SettingsSwitchTile(
+                    title: Text(context.l10n.autocomplete_enable),
+                    value: autocompleteEnabled,
                     onChanged: (value) {
-                      if (value != null) notifier.setResultLimit(value);
+                      ref
+                          .read(
+                            generation_settings
+                                .autocompleteSettingsProvider
+                                .notifier,
+                          )
+                          .set(value);
+                      notifier.setEnabled(value);
                     },
                   ),
-                ),
-                SwitchListTile.adaptive(
-                  title: Text(context.l10n.autocomplete_showAliases),
-                  value: settings.showAliases,
-                  onChanged: notifier.setShowAliases,
-                ),
-                SwitchListTile.adaptive(
-                  title: Text(context.l10n.autocomplete_showTranslations),
-                  value: settings.showTranslations,
-                  onChanged: notifier.setShowTranslations,
-                ),
-                SwitchListTile.adaptive(
-                  title: Text(context.l10n.autocomplete_autoComma),
-                  value: settings.autoInsertComma,
-                  onChanged: notifier.setAutoInsertComma,
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.storage_outlined),
-                  title: Text(context.l10n.autocomplete_dataSourcesTitle),
-                ),
-                _CatalogStatus(ref: ref),
-                const Divider(),
-                _ZhDictionaryStatus(state: zh),
-                const Divider(),
-                SwitchListTile.adaptive(
-                  title: Text(context.l10n.autocomplete_relatedTagsTitle),
-                  subtitle: Text(context.l10n.autocomplete_relatedTagsSubtitle),
-                  value: settings.relatedTagsEnabled,
-                  onChanged: notifier.setRelatedTagsEnabled,
-                ),
-                SwitchListTile.adaptive(
-                  title: Text(context.l10n.autocomplete_danbooruApi),
-                  subtitle: Text(context.l10n.autocomplete_danbooruPrivacy),
-                  value: settings.danbooruEnabled,
-                  onChanged: notifier.setDanbooruEnabled,
-                ),
-                SwitchListTile.adaptive(
-                  title: Text(context.l10n.autocomplete_llmTranslation),
-                  subtitle: Text(
-                    route.isEmpty
-                        ? context.l10n.autocomplete_llmRouteMissing
-                        : context.l10n.autocomplete_llmRoute(route),
+                  SettingsTile(
+                    title: Text(context.l10n.autocomplete_resultLimit),
+                    trailing: DropdownButton<int>(
+                      value: settings.resultLimit,
+                      items: [
+                        ...const [10, 15, 20, 30, 50, 75, 100].map(
+                          (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text('$value'),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: CompletionResultLimits.all,
+                          child: Text(context.l10n.autocomplete_allResults),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) notifier.setResultLimit(value);
+                      },
+                    ),
                   ),
-                  value: settings.llmTranslationEnabled,
-                  onChanged: (value) {
-                    if (value && route.isEmpty) {
-                      AppToast.warning(
-                        context,
-                        context.l10n.autocomplete_llmRouteMissing,
-                      );
-                      return;
-                    }
-                    notifier.setLlmTranslationEnabled(value);
-                  },
-                ),
-                FutureBuilder<int>(
-                  future: _loadCooccurrenceCount(ref),
-                  builder: (context, snapshot) => ListTile(
-                    leading: const Icon(Icons.hub_outlined),
-                    title: Text(context.l10n.autocomplete_cooccurrence),
+                  SettingsSwitchTile(
+                    title: Text(context.l10n.autocomplete_showAliases),
+                    value: settings.showAliases,
+                    onChanged: notifier.setShowAliases,
+                  ),
+                  SettingsSwitchTile(
+                    title: Text(context.l10n.autocomplete_showTranslations),
+                    value: settings.showTranslations,
+                    onChanged: notifier.setShowTranslations,
+                  ),
+                  SettingsSwitchTile(
+                    title: Text(context.l10n.autocomplete_autoComma),
+                    value: settings.autoInsertComma,
+                    onChanged: notifier.setAutoInsertComma,
+                  ),
+                  SettingsSwitchTile(
+                    title: Text(context.l10n.autocomplete_relatedTagsTitle),
                     subtitle: Text(
-                      context.l10n.autocomplete_entryCount(snapshot.data ?? 0),
+                      context.l10n.autocomplete_relatedTagsSubtitle,
+                    ),
+                    value: settings.relatedTagsEnabled,
+                    onChanged: notifier.setRelatedTagsEnabled,
+                  ),
+                  SettingsSwitchTile(
+                    title: Text(context.l10n.autocomplete_danbooruApi),
+                    subtitle: Text(context.l10n.autocomplete_danbooruPrivacy),
+                    value: settings.danbooruEnabled,
+                    onChanged: notifier.setDanbooruEnabled,
+                  ),
+                  SettingsSwitchTile(
+                    title: Text(context.l10n.autocomplete_llmTranslation),
+                    subtitle: Text(
+                      route.isEmpty
+                          ? context.l10n.autocomplete_llmRouteMissing
+                          : context.l10n.autocomplete_llmRoute(route),
+                    ),
+                    value: settings.llmTranslationEnabled,
+                    onChanged: (value) {
+                      if (value && route.isEmpty) {
+                        AppToast.warning(
+                          context,
+                          context.l10n.autocomplete_llmRouteMissing,
+                        );
+                        return;
+                      }
+                      notifier.setLlmTranslationEnabled(value);
+                    },
+                  ),
+                ],
+                if (!controlsOnly) ...[
+                  const Divider(),
+                  SettingsTile(
+                    leading: const Icon(Icons.storage_outlined),
+                    title: Text(context.l10n.autocomplete_dataSourcesTitle),
+                  ),
+                  _CatalogStatus(ref: ref),
+                  const Divider(),
+                  _ZhDictionaryStatus(state: zh!),
+                  const Divider(),
+                  FutureBuilder<int>(
+                    future: _loadCooccurrenceCount(ref),
+                    builder: (context, snapshot) => SettingsTile(
+                      leading: const Icon(Icons.hub_outlined),
+                      title: Text(context.l10n.autocomplete_cooccurrence),
+                      subtitle: Text(
+                        context.l10n.autocomplete_entryCount(
+                          snapshot.data ?? 0,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.cleaning_services_outlined),
-                  title: Text(context.l10n.autocomplete_cacheTitle),
-                ),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        final count = await ref
-                            .read(autocompleteCacheDatabaseProvider)
-                            .clearDanbooruCache();
-                        if (context.mounted) {
-                          AppToast.success(
-                            context,
-                            context.l10n.autocomplete_cacheCleared(count),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.cloud_off_outlined),
-                      label: Text(context.l10n.autocomplete_clearDanbooruCache),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        final count = await ref
-                            .read(autocompleteCacheDatabaseProvider)
-                            .clearAiTranslationCache();
-                        if (context.mounted) {
-                          AppToast.success(
-                            context,
-                            context.l10n.autocomplete_cacheCleared(count),
-                          );
-                        }
-                      },
-                      icon: const TranslationIcon(),
-                      label: Text(context.l10n.autocomplete_clearAiCache),
-                    ),
-                  ],
-                ),
+                  const Divider(),
+                  SettingsTile(
+                    leading: const Icon(Icons.cleaning_services_outlined),
+                    title: Text(context.l10n.autocomplete_cacheTitle),
+                  ),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final count = await ref
+                              .read(autocompleteCacheDatabaseProvider)
+                              .clearDanbooruCache();
+                          if (context.mounted) {
+                            AppToast.success(
+                              context,
+                              context.l10n.autocomplete_cacheCleared(count),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.cloud_off_outlined),
+                        label: Text(
+                          context.l10n.autocomplete_clearDanbooruCache,
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final count = await ref
+                              .read(autocompleteCacheDatabaseProvider)
+                              .clearAiTranslationCache();
+                          if (context.mounted) {
+                            AppToast.success(
+                              context,
+                              context.l10n.autocomplete_cacheCleared(count),
+                            );
+                          }
+                        },
+                        icon: const TranslationIcon(),
+                        label: Text(context.l10n.autocomplete_clearAiCache),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -209,7 +229,7 @@ class _CatalogStatus extends StatelessWidget {
       future: ref.read(tagCatalogRepositoryProvider).metadata(),
       builder: (context, snapshot) {
         final metadata = snapshot.data;
-        return ListTile(
+        return SettingsTile(
           leading: Icon(
             metadata == null ? Icons.hourglass_top : Icons.check_circle_outline,
           ),
@@ -236,7 +256,7 @@ class _ZhDictionaryStatus extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final service = ref.read(zhDictionaryServiceProvider);
-    return ListTile(
+    return SettingsTile(
       leading: state.isBusy
           ? SizedBox(
               width: 24,

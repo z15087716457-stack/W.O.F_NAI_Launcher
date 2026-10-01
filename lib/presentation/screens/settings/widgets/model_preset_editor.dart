@@ -198,12 +198,15 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ManagementHeading(
-            _builtin ? 'Studio 内置方案' : '自定义预设',
+            _builtin ? 'Studio 内置方案 · 只读' : '自定义预设',
             description: widget.preset.task.title,
             actions: [
               TextButton.icon(
                 onPressed: _compare,
-                icon: const Icon(Icons.compare_arrows, size: 16),
+                icon: Icon(
+                  _builtin ? Icons.lock_outline : Icons.compare_arrows,
+                  size: 16,
+                ),
                 label: const Text('对照默认'),
               ),
               if (_builtin)
@@ -263,7 +266,7 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                     const SizedBox(height: 8),
                     Text(
                       _builtin
-                          ? '内置方案随应用维护，复制后可自由调整。'
+                          ? '内置规则已锁定，始终保留默认内容。复制为自定义后可编辑。'
                           : '此处修改翻译偏好；返回格式由应用单独维护。',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,

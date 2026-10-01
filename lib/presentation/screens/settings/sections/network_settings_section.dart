@@ -1,3 +1,4 @@
+import '../widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,7 +60,7 @@ class NetworkSettingsSectionState
       child: Column(
         children: [
           // 启用代理开关
-          SwitchListTile(
+          SettingsSwitchTile(
             secondary: const Icon(Icons.wifi_tethering),
             title: Text(l10n.settings_enableProxy),
             subtitle: Text(
@@ -84,11 +85,11 @@ class NetworkSettingsSectionState
 
           // 代理模式选择（仅在启用时显示）
           if (proxySettings.enabled) ...[
-            ListTile(
+            SettingsTile(
               leading: const Icon(Icons.security_outlined),
               title: Text(l10n.settings_proxyTrafficDisclosure),
             ),
-            ListTile(
+            SettingsTile(
               leading: const Icon(Icons.settings_ethernet),
               title: Text(l10n.settings_proxyMode),
               subtitle: Text(
@@ -161,7 +162,7 @@ class NetworkSettingsSectionState
               ),
 
             // 测试连接按钮
-            ListTile(
+            SettingsTile(
               leading: const Icon(Icons.network_check),
               title: Text(l10n.settings_testConnection),
               subtitle: Text(_testResult ?? l10n.settings_testConnectionHint),

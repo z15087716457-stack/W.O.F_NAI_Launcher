@@ -1,3 +1,4 @@
+import '../widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,7 +55,7 @@ class _ComfyUISettingsSectionState
           icon: Icons.auto_fix_high,
           child: Column(
             children: [
-              SwitchListTile(
+              SettingsSwitchTile(
                 secondary: const Icon(Icons.power),
                 title: Text(context.l10n.settings_comfyUiEnable),
                 subtitle: Text(
@@ -145,7 +146,7 @@ class _ComfyUISettingsSectionState
                     ),
                   ),
                 if (connStatus == ComfyUIConnectionStatus.connected)
-                  ListTile(
+                  SettingsTile(
                     leading: const Icon(
                       Icons.circle,
                       color: Colors.green,
@@ -270,7 +271,7 @@ class _ComfyUISettingsSectionState
     final categoryLabel = template.category.localizedLabel(context);
     final description = template.localizedDescription(context);
 
-    return ListTile(
+    return SettingsTile(
       leading: Icon(
         template.isBuiltin ? Icons.inventory_2 : Icons.account_tree,
         color: template.isBuiltin

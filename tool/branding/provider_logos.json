@@ -1,0 +1,42 @@
+{
+  "source": "https://github.com/lobehub/lobe-icons",
+  "version": "1.95.1",
+  "license": "MIT; brand marks remain the property of their respective owners",
+  "assets": [
+    {
+      "asset": "openai.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/openai.svg",
+      "sha256": "a595df6b423920c67a7f8f73c063e4bfb72d415948097b6cac063a2366bb5186"
+    },
+    {
+      "asset": "anthropic.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/anthropic.svg",
+      "sha256": "e833fdfa7e7187a86a05b870925067556a506dcd4239089aed73e1e58c9366a3"
+    },
+    {
+      "asset": "gemini-color.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/gemini-color.svg",
+      "sha256": "8ab0a9bafec11f7e69bcb9fc4ffd8f1bc927d1ddcbbb6ff36dee5ae8b5a9d602"
+    },
+    {
+      "asset": "deepseek-color.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/deepseek-color.svg",
+      "sha256": "deba5f98a5c1796e20fcac3149bcd7eb8a32f0bdd04d048819400b1f28bd1439"
+    },
+    {
+      "asset": "lmstudio.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/lmstudio.svg",
+      "sha256": "4a575e8382b52ce742ac5d21d361a7d2a08cea7c12390ee1bbb755ef7d3cc25b"
+    },
+    {
+      "asset": "ollama.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/ollama.svg",
+      "sha256": "3a268218fb2e6e81fa31df70f70b51331625047794db81db21d35359428fae7a"
+    },
+    {
+      "asset": "pollinations.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/pollinations.svg",
+      "sha256": "f1a4a256ed110b13eb3cfb5dfda889ff1a91e5014fdff8e4862026f3950df53b"
+    }
+  ]
+}

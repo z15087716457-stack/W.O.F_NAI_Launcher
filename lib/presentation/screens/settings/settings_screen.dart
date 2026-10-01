@@ -1,57 +1,78 @@
-import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/common/studio_icons.dart';
+import '../../widgets/navigation/window_chrome_layout.dart';
 import 'sections/account_settings_section.dart';
 import 'sections/appearance_settings_section.dart';
 import 'sections/generation_settings_section.dart';
+import 'widgets/data_source_cache_settings.dart';
 import 'sections/storage_settings_section.dart';
 import 'sections/privacy_settings_section.dart';
-import 'sections/network_settings_section.dart';
 import 'sections/shortcut_settings_section.dart';
 import 'sections/integrations_settings_section.dart';
 import 'sections/about_settings_section.dart';
 import 'sections/model_management_section.dart';
 
-/// 设置页面 Section 数据模型
-class _SettingsSection {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-  final Widget widget;
-
-  const _SettingsSection({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-    required this.widget,
-  });
+enum SettingsDestination {
+  appearance,
+  controls,
+  generation,
+  storage,
+  account,
+  models,
+  integrations,
+  privacy,
+  about,
 }
 
-/// 设置页面 - 使用 NavigationRail 侧边栏导航布局
+class _SettingsSection {
+  const _SettingsSection(
+    this.destination,
+    this.icon,
+    this.label,
+    this.description,
+    this.widget,
+  );
+  final SettingsDestination destination;
+  final IconData icon;
+  final String label, description;
+  final Widget widget;
+}
+
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key, this.initialSectionIndex = 0});
 
+  /// Keep existing deep links stable while redistributing the settings pages.
   final int initialSectionIndex;
-
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  late int _selectedIndex;
-  final _contentScrollController = ScrollController();
-  bool _isContentScrolled = false;
-  final _modelManagementKey = GlobalKey<ModelManagementSectionState>();
+  late SettingsDestination _destination;
+  final _scroll = ScrollController();
+  final _modelsKey = GlobalKey<ModelManagementSectionState>();
   bool _leavingModels = false;
+  int _navigationRevision = 0;
+
+  SettingsDestination _legacyDestination(int value) => switch (value) {
+    0 => SettingsDestination.account,
+    1 => SettingsDestination.appearance,
+    2 => SettingsDestination.generation,
+    3 => SettingsDestination.storage,
+    4 => SettingsDestination.privacy,
+    5 || 8 => SettingsDestination.integrations,
+    6 => SettingsDestination.controls,
+    7 => SettingsDestination.models,
+    9 => SettingsDestination.about,
+    _ => SettingsDestination.appearance,
+  };
 
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialSectionIndex.clamp(0, 9);
-    _contentScrollController.addListener(_onContentScroll);
+    _destination = _legacyDestination(widget.initialSectionIndex);
   }
 
   @override
@@ -59,129 +80,244 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialSectionIndex != widget.initialSectionIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _onSectionSelected(widget.initialSectionIndex.clamp(0, 9));
+        if (mounted) _select(_legacyDestination(widget.initialSectionIndex));
       });
     }
   }
 
-  List<_SettingsSection> _buildSections(BuildContext context) {
-    return [
-      _SettingsSection(
-        icon: Icons.person_outline,
-        selectedIcon: Icons.person,
-        label: context.l10n.settings_account,
-        widget: const AccountSettingsSection(),
-      ),
-      _SettingsSection(
-        icon: Icons.palette_outlined,
-        selectedIcon: Icons.palette,
-        label: context.l10n.settings_appearance,
-        widget: const AppearanceSettingsSection(),
-      ),
-      _SettingsSection(
-        icon: Icons.tune_outlined,
-        selectedIcon: Icons.tune,
-        label: context.l10n.settings_generation,
-        widget: const GenerationSettingsSection(),
-      ),
-      _SettingsSection(
-        icon: Icons.storage_outlined,
-        selectedIcon: Icons.storage,
-        label: context.l10n.settings_dataStorage,
-        widget: const StorageSettingsSection(),
-      ),
-      _SettingsSection(
-        icon: Icons.shield_outlined,
-        selectedIcon: Icons.shield,
-        label: context.l10n.settings_privacySharing,
-        widget: const PrivacySettingsSection(),
-      ),
-      _SettingsSection(
-        icon: Icons.network_check_outlined,
-        selectedIcon: Icons.network_check,
-        label: context.l10n.settings_network,
-        widget: const NetworkSettingsSection(),
-      ),
-      _SettingsSection(
-        icon: Icons.keyboard_outlined,
-        selectedIcon: Icons.keyboard,
-        label: context.l10n.settings_shortcuts,
-        widget: const ShortcutSettingsSection(),
-      ),
-      _SettingsSection(
-        icon: Icons.hub_outlined,
-        selectedIcon: Icons.hub,
-        label: context.l10n.settings_modelsAndInterfaces,
-        widget: ModelManagementSection(key: _modelManagementKey),
-      ),
-      _SettingsSection(
-        icon: Icons.extension_outlined,
-        selectedIcon: Icons.extension,
-        label: context.l10n.settings_integrations,
-        widget: const IntegrationsSettingsSection(),
-      ),
-      _SettingsSection(
-        icon: Icons.info_outlined,
-        selectedIcon: Icons.info,
-        label: context.l10n.settings_about,
-        widget: const AboutSettingsSection(),
-      ),
-    ];
-  }
-
   @override
   void dispose() {
-    _contentScrollController.removeListener(_onContentScroll);
-    _contentScrollController.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
-  void _onContentScroll() {
-    final scrolled = _contentScrollController.offset > 0;
-    if (scrolled != _isContentScrolled) {
-      setState(() => _isContentScrolled = scrolled);
-    }
-  }
-
-  Future<void> _onSectionSelected(int index) async {
-    if (_leavingModels || index == _selectedIndex) return;
-    if (_selectedIndex == 7) {
+  Future<void> _select(SettingsDestination destination) async {
+    if (_leavingModels || _destination == destination) return;
+    if (_destination == SettingsDestination.models) {
       _leavingModels = true;
-      final canLeave =
-          await (_modelManagementKey.currentState?.confirmLeave() ??
-              Future.value(true));
+      final allowed =
+          await (_modelsKey.currentState?.confirmLeave() ?? Future.value(true));
       _leavingModels = false;
-      if (!canLeave || !mounted) return;
-    }
-    setState(() {
-      _selectedIndex = index;
-      // 切换 section 时重置滚动位置
-      if (_contentScrollController.hasClients) {
-        _contentScrollController.jumpTo(0);
+      if (!mounted) return;
+      if (!allowed) {
+        setState(() => _navigationRevision++);
+        return;
       }
-      _isContentScrolled = false;
-    });
+    }
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+    setState(() => _destination = destination);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final sections = _buildSections(context);
-    if (_selectedIndex >= sections.length) {
-      _selectedIndex = sections.length - 1;
+    final theme = Theme.of(context), scheme = theme.colorScheme;
+    final language = Localizations.localeOf(context).languageCode;
+    String text(String zh, String en, String ja) => language == 'zh'
+        ? zh
+        : language == 'ja'
+        ? ja
+        : en;
+    final sections = [
+      _SettingsSection(
+        SettingsDestination.appearance,
+        StudioIcons.settingsAppearance,
+        text('常规与外观', 'General & appearance', '一般と外観'),
+        text(
+          '让工作台符合你的阅读与使用习惯。',
+          'Make the workspace comfortable to read and use.',
+          '使いやすく読みやすいワークスペースに。',
+        ),
+        const AppearanceSettingsSection(),
+      ),
+      _SettingsSection(
+        SettingsDestination.controls,
+        StudioIcons.settingsControls,
+        text('操作与快捷键', 'Controls & shortcuts', '操作とショートカット'),
+        text(
+          '设置交互方式、画布操作和键盘快捷键。',
+          'Choose interaction, canvas controls and keyboard shortcuts.',
+          '操作方法とキーボードショートカットを設定。',
+        ),
+        const Column(
+          children: [
+            AppearanceSettingsSection(controlsOnly: true),
+            ShortcutSettingsSection(),
+          ],
+        ),
+      ),
+      _SettingsSection(
+        SettingsDestination.generation,
+        StudioIcons.settingsGeneration,
+        text('生成与提示词', 'Generation & prompts', '生成とプロンプト'),
+        text(
+          '管理提示词输入、生成提醒与请求节奏。',
+          'Manage prompt input, generation reminders and request pacing.',
+          'プロンプト入力と生成の動作を管理。',
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const GenerationSettingsSection(),
+            const DataSourceCacheSettings(controlsOnly: true),
+            PrivacySettingsSection(
+              generationOnly: true,
+              onOpenProtection: () => _select(SettingsDestination.privacy),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => _select(SettingsDestination.models),
+                icon: const Icon(StudioIcons.settingsModels, size: 17),
+                label: Text(
+                  text(
+                    '管理翻译模型与规则',
+                    'Manage translation models & rules',
+                    '翻訳モデルとルールを管理',
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      _SettingsSection(
+        SettingsDestination.storage,
+        StudioIcons.settingsStorage,
+        text('图库与存储', 'Gallery & storage', 'ギャラリーと保存'),
+        text(
+          '图片保存位置、图库来源与本地缓存。',
+          'Image locations, gallery sources and local caches.',
+          '画像の保存先、ギャラリーとキャッシュ。',
+        ),
+        const StorageSettingsSection(),
+      ),
+      _SettingsSection(
+        SettingsDestination.account,
+        StudioIcons.settingsAccount,
+        text('NovelAI 账号', 'NovelAI accounts', 'NovelAI アカウント'),
+        text(
+          '查看当前账号，管理登录与默认账号。',
+          'View your account and manage sign-in and the default account.',
+          'アカウントとログインを管理。',
+        ),
+        const AccountSettingsSection(),
+      ),
+      _SettingsSection(
+        SettingsDestination.models,
+        StudioIcons.settingsModels,
+        context.l10n.settings_modelsAndInterfaces,
+        '',
+        ModelManagementSection(key: _modelsKey),
+      ),
+      _SettingsSection(
+        SettingsDestination.integrations,
+        StudioIcons.settingsIntegrations,
+        text('连接与集成', 'Connections & integrations', '接続と連携'),
+        text(
+          '管理外部工具、桥接连接与网络设置。',
+          'Manage external tools, bridges and network settings.',
+          '外部ツール、ブリッジとネットワーク。',
+        ),
+        IntegrationsSettingsSection(
+          initialNetwork: widget.initialSectionIndex == 5,
+        ),
+      ),
+      _SettingsSection(
+        SettingsDestination.privacy,
+        StudioIcons.settingsPrivacy,
+        text('隐私与分享', 'Privacy & sharing', 'プライバシーと共有'),
+        text(
+          '控制分享信息与需要确认的操作。',
+          'Control shared information and confirmation before sensitive actions.',
+          '共有する情報と確認が必要な操作。',
+        ),
+        const PrivacySettingsSection(),
+      ),
+      _SettingsSection(
+        SettingsDestination.about,
+        StudioIcons.settingsAbout,
+        text('关于与诊断', 'About & diagnostics', '情報と診断'),
+        text(
+          '版本更新、日志与项目资料。',
+          'Updates, logs and project information.',
+          '更新、ログとプロジェクト情報。',
+        ),
+        const AboutSettingsSection(),
+      ),
+    ];
+    final section = sections.firstWhere(
+      (item) => item.destination == _destination,
+    );
+    final narrow = MediaQuery.sizeOf(context).width < 650;
+    Widget navItem(_SettingsSection item) {
+      final selected = item.destination == _destination;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        child: Material(
+          color: selected
+              ? scheme.primary.withValues(alpha: .08)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(7),
+          child: InkWell(
+            key: ValueKey('settings-nav-${item.destination.name}'),
+            borderRadius: BorderRadius.circular(7),
+            onTap: () => _select(item.destination),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+              child: Row(
+                children: [
+                  Icon(
+                    item.icon,
+                    size: 19,
+                    color: selected ? scheme.primary : scheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      item.label,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: 12,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: selected
+                            ? scheme.primary
+                            : scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
-    // 响应式断点
-    // >800px: 扩展模式（显示标签）
-    // 600-800px: 图标模式（仅图标）
-    // <600px: 使用 Drawer
-    final isExtended = screenWidth > 800;
-    final isMobile = screenWidth < 600;
-
+    Widget group(String title, Iterable<_SettingsSection> items) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(22, 22, 16, 8),
+          child: Text(
+            title,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontSize: 10,
+              color: scheme.onSurfaceVariant.withValues(alpha: .65),
+            ),
+          ),
+        ),
+        ...items.map(navItem),
+      ],
+    );
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.l10n.settings_title),
+        toolbarHeight: 44,
+        title: Text(
+          context.l10n.settings_title,
+          style: theme.textTheme.titleSmall,
+        ),
+        surfaceTintColor: Colors.transparent,
         actions: [
           if (WindowChromeScope.activeOf(context))
             SizedBox(
@@ -192,191 +328,138 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: const WindowDragArea(),
             ),
         ],
-        // 滚动后变暗色
-        backgroundColor: _isContentScrolled
-            ? theme.colorScheme.surfaceContainerHighest
-            : null,
-        surfaceTintColor: Colors.transparent,
-        // 移动端显示抽屉菜单按钮
-        leading: isMobile
-            ? Builder(
-                builder: (context) {
-                  return IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                  );
-                },
-              )
-            : null,
       ),
-      // 移动端使用 Drawer
-      drawer: isMobile ? _buildDrawer(context, sections) : null,
       body: Row(
         children: [
-          // 桌面/平板端显示 NavigationRail
-          if (!isMobile) _buildNavigationRail(context, isExtended, sections),
-          if (!isMobile) const VerticalDivider(thickness: 1, width: 1),
-          // 内容区 - 置顶排列，限制最大宽度
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                if (_selectedIndex == 7) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1400),
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: theme.colorScheme.outlineVariant,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: sections[_selectedIndex].widget,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return SingleChildScrollView(
-                  controller: _contentScrollController,
-                  padding: const EdgeInsets.all(24),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                      maxWidth: 900,
-                    ),
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: sections[_selectedIndex].widget,
-                    ),
+          if (!narrow)
+            SizedBox(
+              width: 190,
+              child: Material(
+                color: Color.alphaBlend(
+                  scheme.onSurface.withValues(
+                    alpha: theme.brightness == Brightness.dark ? .025 : .018,
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 构建 NavigationRail 侧边栏
-  Widget _buildNavigationRail(
-    BuildContext context,
-    bool isExtended,
-    List<_SettingsSection> sections,
-  ) {
-    final theme = Theme.of(context);
-
-    return NavigationRail(
-      selectedIndex: _selectedIndex,
-      onDestinationSelected: _onSectionSelected,
-      extended: isExtended,
-      minExtendedWidth: 180,
-      backgroundColor: theme.colorScheme.surface,
-      selectedIconTheme: IconThemeData(color: theme.colorScheme.primary),
-      // 必须从 textTheme 派生：NavigationRail 对这两项是整体替换而非合并，
-      // 传裸 TextStyle 会把默认的 labelMedium 连同用户字体一起顶掉。
-      selectedLabelTextStyle: theme.textTheme.labelMedium?.copyWith(
-        color: theme.colorScheme.primary,
-        fontWeight: FontWeight.w600,
-      ),
-      unselectedIconTheme: IconThemeData(
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-      ),
-      unselectedLabelTextStyle: theme.textTheme.labelMedium?.copyWith(
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-      ),
-      destinations: sections.map((section) {
-        return NavigationRailDestination(
-          icon: Icon(section.icon),
-          selectedIcon: Icon(section.selectedIcon),
-          label: Text(section.label),
-        );
-      }).toList(),
-    );
-  }
-
-  /// 构建移动端 Drawer
-  Widget _buildDrawer(BuildContext context, List<_SettingsSection> sections) {
-    final theme = Theme.of(context);
-
-    return Drawer(
-      child: SafeArea(
-        child: Column(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(
-                  alpha: 0.3,
+                  scheme.surface,
                 ),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: ListView(
                   children: [
-                    Icon(
-                      StudioIcons.settings,
-                      size: 48,
-                      color: theme.colorScheme.primary,
+                    group(text('使用偏好', 'PREFERENCES', '使い方'), sections.take(2)),
+                    group(
+                      text('创作与资源', 'CREATION & RESOURCES', '制作とリソース'),
+                      sections.skip(2).take(2),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.l10n.settings_title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    group(
+                      text('服务与连接', 'SERVICES & CONNECTIONS', 'サービスと接続'),
+                      sections.skip(4).take(3),
                     ),
+                    const SizedBox(height: 24),
+                    Divider(height: 1, color: scheme.outlineVariant),
+                    const SizedBox(height: 12),
+                    ...sections.skip(7).map(navItem),
                   ],
                 ),
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: sections.length,
-                itemBuilder: (context, index) {
-                  final section = sections[index];
-                  final isSelected = _selectedIndex == index;
-
-                  return ListTile(
-                    leading: Icon(
-                      isSelected ? section.selectedIcon : section.icon,
-                      color: isSelected
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                    title: Text(
-                      section.label,
-                      style: TextStyle(
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
-                    ),
-                    selected: isSelected,
-                    selectedTileColor: theme.colorScheme.primaryContainer
-                        .withValues(alpha: 0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    onTap: () {
-                      _onSectionSelected(index);
-                      Navigator.of(context).pop();
-                    },
-                  );
-                },
-              ),
+          if (!narrow)
+            VerticalDivider(
+              width: 1,
+              color: scheme.outlineVariant.withValues(alpha: .5),
             ),
-          ],
-        ),
+          Expanded(
+            child: Column(
+              children: [
+                if (narrow)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    child: DropdownButtonFormField<SettingsDestination>(
+                      key: ValueKey(
+                        'settings-category-picker-${_destination.name}-$_navigationRevision',
+                      ),
+                      initialValue: _destination,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      items: sections
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item.destination,
+                              child: Row(
+                                children: [
+                                  Icon(item.icon, size: 18),
+                                  const SizedBox(width: 10),
+                                  Expanded(child: Text(item.label)),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) _select(value);
+                      },
+                    ),
+                  ),
+                Expanded(
+                  child: _destination == SettingsDestination.models
+                      ? Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            narrow ? 12 : 24,
+                            8,
+                            narrow ? 12 : 28,
+                            24,
+                          ),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1400),
+                              child: section.widget,
+                            ),
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          controller: _scroll,
+                          padding: EdgeInsets.fromLTRB(
+                            narrow ? 18 : 34,
+                            26,
+                            narrow ? 18 : 34,
+                            36,
+                          ),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 850),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    section.label,
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          fontSize: 23,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 7),
+                                  Text(
+                                    section.description,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 28),
+                                  section.widget,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

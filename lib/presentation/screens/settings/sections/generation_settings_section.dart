@@ -7,13 +7,15 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../providers/generation/generation_settings_notifiers.dart';
 import '../../../providers/notification_settings_provider.dart';
 import '../widgets/settings_card.dart';
+import '../widgets/settings_tile.dart';
 import '../widgets/settings_section_label.dart';
 
 /// 生成设置板块
 ///
 /// 按生成任务流组织：输入行为 → 完成提醒。
 class GenerationSettingsSection extends ConsumerStatefulWidget {
-  const GenerationSettingsSection({super.key});
+  const GenerationSettingsSection({super.key, this.feedbackOnly = false});
+  final bool feedbackOnly;
 
   @override
   ConsumerState<GenerationSettingsSection> createState() =>
@@ -110,73 +112,77 @@ class _GenerationSettingsSectionState
     return SettingsCard(
       child: Column(
         children: [
-          SettingsSectionLabel(l10n.settings_generationInputSection),
-          ListTile(
-            leading: const Icon(Icons.mouse_outlined),
-            title: Text(l10n.settings_enablePromptWeightScroll),
-            subtitle: Text(l10n.settings_enablePromptWeightScrollSubtitle),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildModifierMenu(context, l10n, promptWeightScrollEnabled),
-                Switch(
-                  value: promptWeightScrollEnabled,
-                  onChanged: (value) async {
-                    final messenger = ScaffoldMessenger.maybeOf(context);
-                    try {
-                      await ref
-                          .read(promptWeightScrollSettingsProvider.notifier)
-                          .set(value);
-                    } catch (error) {
-                      messenger?.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            l10n.globalSettings_saveFailed('$error'),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          SettingsSectionLabel(l10n.settings_generationFeedbackSection),
-          SwitchListTile(
-            secondary: const Icon(Icons.volume_up_outlined),
-            title: Text(l10n.settings_notificationSound),
-            subtitle: Text(l10n.settings_notificationSoundSubtitle),
-            value: notificationSettings.soundEnabled,
-            onChanged: (value) => notificationNotifier.setSoundEnabled(value),
-          ),
-          if (notificationSettings.soundEnabled)
-            ListTile(
-              leading: const Icon(Icons.audiotrack_outlined),
-              title: Text(l10n.settings_notificationCustomSound),
-              subtitle: Text(
-                notificationSettings.customSoundPath != null
-                    ? Uri.file(
-                        notificationSettings.customSoundPath!,
-                      ).pathSegments.last
-                    : l10n.settings_notificationSelectSound,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+          if (!widget.feedbackOnly) ...[
+            SettingsSectionLabel(l10n.settings_generationInputSection),
+            SettingsTile(
+              leading: const Icon(Icons.mouse_outlined),
+              title: Text(l10n.settings_enablePromptWeightScroll),
+              subtitle: Text(l10n.settings_enablePromptWeightScrollSubtitle),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (notificationSettings.customSoundPath != null)
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 20),
-                      tooltip: l10n.settings_notificationResetSound,
-                      onPressed: () =>
-                          notificationNotifier.setCustomSoundPath(null),
-                    ),
-                  const Icon(Icons.chevron_right),
+                  _buildModifierMenu(context, l10n, promptWeightScrollEnabled),
+                  Switch(
+                    value: promptWeightScrollEnabled,
+                    onChanged: (value) async {
+                      final messenger = ScaffoldMessenger.maybeOf(context);
+                      try {
+                        await ref
+                            .read(promptWeightScrollSettingsProvider.notifier)
+                            .set(value);
+                      } catch (error) {
+                        messenger?.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              l10n.globalSettings_saveFailed('$error'),
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
-              onTap: () => _selectCustomSound(notificationNotifier),
             ),
+          ],
+          if (widget.feedbackOnly) ...[
+            SettingsSectionLabel(l10n.settings_generationFeedbackSection),
+            SettingsSwitchTile(
+              secondary: const Icon(Icons.volume_up_outlined),
+              title: Text(l10n.settings_notificationSound),
+              subtitle: Text(l10n.settings_notificationSoundSubtitle),
+              value: notificationSettings.soundEnabled,
+              onChanged: (value) => notificationNotifier.setSoundEnabled(value),
+            ),
+            if (notificationSettings.soundEnabled)
+              SettingsTile(
+                leading: const Icon(Icons.audiotrack_outlined),
+                title: Text(l10n.settings_notificationCustomSound),
+                subtitle: Text(
+                  notificationSettings.customSoundPath != null
+                      ? Uri.file(
+                          notificationSettings.customSoundPath!,
+                        ).pathSegments.last
+                      : l10n.settings_notificationSelectSound,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (notificationSettings.customSoundPath != null)
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 20),
+                        tooltip: l10n.settings_notificationResetSound,
+                        onPressed: () =>
+                            notificationNotifier.setCustomSoundPath(null),
+                      ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+                onTap: () => _selectCustomSound(notificationNotifier),
+              ),
+          ],
         ],
       ),
     );

@@ -76,6 +76,63 @@ Response<dynamic> _response({String text = 'OK', int status = 200}) =>
     );
 
 void main() {
+  test(
+    'built-in rules remain canonical after injected configuration and cannot be saved, removed or imported',
+    () async {
+      final builtin = LauncherInterface.wikiTranslate.builtinPreset;
+      final injected = TaskPresetConfig(
+        id: builtin.id,
+        name: 'Changed default',
+        task: builtin.task,
+        prompt: 'Discard source and links',
+      );
+      final config = PromptAssistantConfigState(
+        providers: const [],
+        models: const [],
+        interfaces: {
+          LauncherInterface.wikiTranslate: InterfaceSlotConfig(
+            presetId: builtin.id,
+          ),
+        },
+        providerHasApiKey: const {},
+        presets: [injected],
+      );
+      expect(
+        presetFor(config, LauncherInterface.wikiTranslate).prompt,
+        builtin.prompt,
+      );
+      expect(
+        PromptAssistantConfigState.decode(config.encode()).presets,
+        isEmpty,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(_Local()),
+          secureStorageServiceProvider.overrideWithValue(_Secrets()),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(promptAssistantConfigProvider.notifier);
+      await expectLater(notifier.savePreset(injected), throwsStateError);
+      await expectLater(notifier.deletePreset(builtin.id), throwsStateError);
+      await expectLater(
+        notifier.importConfiguration(config.encode()),
+        throwsFormatException,
+      );
+      await notifier.savePreset(
+        TaskPresetConfig(
+          id: 'custom-wiki',
+          name: '我的百科',
+          task: builtin.task,
+          prompt: builtin.prompt,
+        ),
+      );
+      expect(
+        container.read(promptAssistantConfigProvider).presets.single.id,
+        'custom-wiki',
+      );
+    },
+  );
   setUpAll(() {
     registerFallbackValue(Options());
     registerFallbackValue(CancelToken());

@@ -30,7 +30,7 @@ void main() {
     }
   });
 
-  testWidgets('历史点击行为默认经典并可从外观设置切换和持久化', (tester) async {
+  testWidgets('历史点击行为默认经典并可从操作设置切换和持久化', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 1600));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final storage = _FakeStorage();
@@ -43,7 +43,9 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
-            body: SingleChildScrollView(child: AppearanceSettingsSection()),
+            body: SingleChildScrollView(
+              child: AppearanceSettingsSection(controlsOnly: true),
+            ),
           ),
         ),
       ),

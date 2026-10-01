@@ -11,41 +11,18 @@ import '../widgets/ai_service_editor_dialog.dart';
 import '../widgets/model_management_widgets.dart';
 import '../widgets/model_task_editor.dart';
 import '../widgets/model_preset_editor.dart';
+import '../widgets/provider_logo.dart';
 
 class _ProviderMonogram extends StatelessWidget {
   const _ProviderMonogram(this.provider, {required this.selected});
   final ProviderConfig provider;
   final bool selected;
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final name = provider.name.trim();
-    final mark = switch (provider.preset) {
-      ProviderPreset.deepseek => 'DS',
-      ProviderPreset.openaiChat || ProviderPreset.openaiResponses => 'AI',
-      ProviderPreset.lmStudioChat ||
-      ProviderPreset.lmStudioResponses ||
-      ProviderPreset.ollama => 'LM',
-      _ => name.isEmpty ? 'AI' : name.characters.first.toUpperCase(),
-    };
-    return Container(
-      width: 29,
-      height: 29,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: selected ? colors.primary : colors.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(7),
-      ),
-      child: Text(
-        mark,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: selected ? colors.onPrimary : colors.onSurfaceVariant,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SizedBox(
+    width: 29,
+    height: 29,
+    child: Center(child: ProviderLogo(provider.preset, size: 24)),
+  );
 }
 
 class ModelManagementSection extends ConsumerStatefulWidget {
@@ -435,9 +412,17 @@ class ModelManagementSectionState
                                     for (final item in config.providers)
                                       DropdownMenuItem(
                                         value: item.id,
-                                        child: Text(
-                                          item.name,
-                                          overflow: TextOverflow.ellipsis,
+                                        child: Row(
+                                          children: [
+                                            ProviderLogo(item.preset, size: 20),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(
+                                                item.name,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                   ],

@@ -1,3 +1,4 @@
+import '../widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -28,21 +29,22 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
   Widget build(BuildContext context) {
     final updateState = ref.watch(updateStateProvider);
     final updateNotifier = ref.read(updateStateProvider.notifier);
-    final updateService = ref.watch(updateCheckServiceProvider);
+    final updateServiceState = ref.watch(updateCheckServiceReadyProvider);
+    final updateService = updateServiceState.valueOrNull;
     final localStorageService = ref.watch(localStorageServiceProvider);
     final fileLoggingEnabled = localStorageService.getFileLoggingEnabled();
 
     return SettingsCard(
       child: Column(
         children: [
-          ListTile(
+          SettingsTile(
             leading: const Icon(Icons.info_outline),
             title: Text(context.l10n.app_title),
             subtitle: Text(
               context.l10n.settings_version(AppVersion.versionName),
             ),
           ),
-          ListTile(
+          SettingsTile(
             leading: const Icon(Icons.text_fields),
             title: Text(context.l10n.settings_visualAssets),
             subtitle: const Text(
@@ -55,7 +57,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
               applicationVersion: AppVersion.versionName,
             ),
           ),
-          SwitchListTile(
+          SettingsSwitchTile(
             secondary: const Icon(Icons.article_outlined),
             title: Text(context.l10n.settings_fileLogging),
             subtitle: Text(context.l10n.settings_fileLoggingSubtitle),
@@ -72,10 +74,10 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
           ),
           // 检查更新按钮
           FutureBuilder<DateTime?>(
-            future: updateService.getLastCheckTime(),
+            future: updateService?.getLastCheckTime() ?? Future.value(null),
             builder: (context, snapshot) {
               final lastCheckTime = snapshot.data;
-              return ListTile(
+              return SettingsTile(
                 leading: Badge(
                   isLabelVisible: updateState.hasNewVersion,
                   smallSize: 7,
@@ -100,7 +102,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.chevron_right),
-                onTap: updateState.isChecking
+                onTap: updateState.isChecking || updateService == null
                     ? null
                     : () async {
                         if (updateState.hasNewVersion ||
@@ -118,26 +120,33 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
           ),
           // 包含预发布版本开关
           FutureBuilder<bool>(
-            future: Future.value(updateService.shouldIncludePrerelease()),
+            future: Future.value(
+              updateService?.shouldIncludePrerelease() ??
+                  localStorageService.getIncludePrereleaseUpdates(),
+            ),
             builder: (context, snapshot) {
               final includePrerelease = snapshot.data ?? false;
-              return SwitchListTile(
+              return SettingsSwitchTile(
                 secondary: const Icon(Icons.new_releases_outlined),
                 title: Text(context.l10n.includePrereleaseUpdates),
                 subtitle: Text(
                   context.l10n.includePrereleaseUpdatesDescription,
                 ),
                 value: includePrerelease,
-                onChanged: (value) async {
-                  await updateNotifier.setIncludePrerelease(value);
-                  if (mounted) {
-                    setState(() {}); // Force widget rebuild to refresh value
-                  }
-                },
+                onChanged: updateService == null
+                    ? null
+                    : (value) async {
+                        await updateNotifier.setIncludePrerelease(value);
+                        if (mounted) {
+                          setState(
+                            () {},
+                          ); // Force widget rebuild to refresh value
+                        }
+                      },
               );
             },
           ),
-          ListTile(
+          SettingsTile(
             leading: const GitHubIcon(),
             title: Text(context.l10n.settings_openSource),
             subtitle: Text(context.l10n.settings_openSourceSubtitle),
