@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// One vector glyph for every translation surface. The two upright characters
-/// exchange positions while busy; neither glyph changes editable text offsets.
+/// One vector glyph for every translation surface. While busy, the arrows
+/// rotate around a fixed upright A without affecting editable text offsets.
 class TranslationIcon extends StatefulWidget {
   const TranslationIcon({super.key, this.size, this.color, this.busy = false});
   final double? size;
@@ -81,37 +81,38 @@ class TranslationIconPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.save();
     canvas.scale(size.width / 24, size.height / 24);
-    final phase = math.sin(motion.value * math.pi * 2);
-    final progress = (1 - math.cos(motion.value * math.pi * 2)) / 2;
-    const latinHome = Offset(6.7, 8.5);
-    const chineseHome = Offset(16, 13.7);
-    final arc = Offset(-1.8 * phase, 3.2 * phase);
-    final latin = Offset.lerp(latinHome, chineseHome, progress)! + arc;
-    final chinese = Offset.lerp(chineseHome, latinHome, progress)! - arc;
-    final alpha = 1 - .65 * 4 * progress * (1 - progress);
     final paint = Paint()
-      ..color = color.withValues(alpha: color.a * alpha)
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-    final a = Path()
-      ..moveTo(-3.2, 4.5)
-      ..lineTo(0, -4.5)
-      ..lineTo(3.2, 4.5)
-      ..moveTo(-2.1, 1.5)
-      ..lineTo(2, 1.5);
-    final wen = Path()
-      ..moveTo(-1.2, -6.3)
-      ..lineTo(-1.2, -4.3)
-      ..moveTo(-5.2, -4.3)
-      ..lineTo(5.2, -4.3)
-      ..moveTo(-3.3, -2.3)
-      ..cubicTo(-2.2, 1.7, .4, 4.5, 4.6, 6.3)
-      ..moveTo(2.8, -2.3)
-      ..cubicTo(1.8, 1.5, -.9, 4.4, -5.3, 6.3);
-    canvas.drawPath(a.shift(latin), paint);
-    canvas.drawPath(wen.shift(chinese), paint);
+    final ring = Path()
+      ..moveTo(4.4, 8)
+      ..arcToPoint(const Offset(19.2, 6.2), radius: const Radius.circular(8.2))
+      ..moveTo(19.2, 3.4)
+      ..lineTo(19.2, 6.2)
+      ..lineTo(16.4, 6.2)
+      ..moveTo(19.6, 16)
+      ..arcToPoint(const Offset(4.8, 17.8), radius: const Radius.circular(8.2))
+      ..moveTo(4.8, 20.6)
+      ..lineTo(4.8, 17.8)
+      ..lineTo(7.6, 17.8);
+    canvas.save();
+    canvas.translate(12, 12);
+    canvas.rotate(motion.value * math.pi * 2);
+    canvas.translate(-12, -12);
+    canvas.drawPath(ring, paint);
+    canvas.restore();
+    canvas.drawPath(
+      Path()
+        ..moveTo(8.8, 15.4)
+        ..lineTo(12, 8.1)
+        ..lineTo(15.2, 15.4)
+        ..moveTo(10, 12.8)
+        ..lineTo(14, 12.8),
+      paint,
+    );
     canvas.restore();
   }
 

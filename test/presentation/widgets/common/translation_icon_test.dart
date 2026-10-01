@@ -43,7 +43,42 @@ Widget sample({bool busy = false, bool reduced = false, bool ticking = true}) =>
     );
 
 void main() {
-  testWidgets('busy exchanges upright glyphs in a loop and completion resets', (
+  test(
+    'rotating arrows leave the central letter upright and stationary',
+    () async {
+      Future<List<int>> render(double phase) async {
+        final recorder = ui.PictureRecorder();
+        TranslationIconPainter(
+          Colors.blue,
+          AlwaysStoppedAnimation(phase),
+        ).paint(Canvas(recorder), const Size(96, 96));
+        final picture = recorder.endRecording();
+        final image = await picture.toImage(96, 96);
+        final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+        final pixels = data!.buffer.asUint8List().toList();
+        image.dispose();
+        picture.dispose();
+        return pixels;
+      }
+
+      List<int> center(List<int> pixels) => [
+        for (var y = 32; y < 64; y++)
+          for (var x = 34; x < 64; x++)
+            ...pixels.sublist((y * 96 + x) * 4, (y * 96 + x) * 4 + 4),
+      ];
+
+      final idle = await render(0);
+      final idleCenter = center(idle);
+      expect(idleCenter.any((byte) => byte != 0), isTrue);
+      for (final phase in [.125, .25, .375]) {
+        final moving = await render(phase);
+        expect(moving, isNot(idle));
+        expect(center(moving), idleCenter);
+      }
+    },
+  );
+
+  testWidgets('busy cycles the arrow ring and completion resets', (
     tester,
   ) async {
     await tester.pumpWidget(sample());
@@ -113,7 +148,7 @@ Future<void> _captureMotion(WidgetTester tester) async {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  TranslationIcon(size: 16, color: Colors.grey, busy: busy),
+                  TranslationIcon(size: 18, color: Colors.grey, busy: busy),
                   TranslationIcon(size: 64, color: Colors.blue, busy: busy),
                   const TranslationModifiedBadge(),
                 ],
@@ -135,7 +170,7 @@ Future<void> _captureMotion(WidgetTester tester) async {
       final image = await boundary.toImage(pixelRatio: 2);
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
       final file = File(
-        '.dart_tool/translation-icon-captures/frame-${i.toString().padLeft(2, '0')}.png',
+        '.dart_tool/translation-cycle-icon-captures/frame-${i.toString().padLeft(2, '0')}.png',
       );
       await file.parent.create(recursive: true);
       await file.writeAsBytes(data!.buffer.asUint8List());
