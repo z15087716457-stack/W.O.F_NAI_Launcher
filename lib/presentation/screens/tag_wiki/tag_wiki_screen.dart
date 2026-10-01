@@ -20,6 +20,44 @@ import '../../providers/prompt_block_library_provider.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import 'wiki_sidebar.dart';
 import '../../widgets/common/translation_icon.dart';
+import '../../widgets/common/wiki_linked_body.dart';
+import '../../widgets/common/wiki_retranslate_button.dart';
+
+class _WikiVisit {
+  const _WikiVisit({
+    required this.query,
+    required this.scope,
+    required this.category,
+    required this.hasArticle,
+    required this.alphabetical,
+    required this.searchAll,
+    required this.selected,
+    required this.items,
+    required this.article,
+    required this.translation,
+    required this.total,
+    required this.more,
+    required this.loading,
+    required this.loadError,
+    required this.listOffset,
+    required this.articleOffset,
+    required this.showTranslation,
+    required this.linkedCandidate,
+  });
+  final TextEditingValue query;
+  final WikiScope? scope;
+  final TagCategory? category;
+  final bool? hasArticle;
+  final bool alphabetical, searchAll, more, loading, showTranslation;
+  final String selected;
+  final String? loadError;
+  final List<CompletionCandidate> items;
+  final Future<TagWikiEntry?>? article;
+  final Future<String?>? translation;
+  final int? total;
+  final double listOffset, articleOffset;
+  final CompletionCandidate? linkedCandidate;
+}
 
 class TagWikiScreen extends ConsumerStatefulWidget {
   const TagWikiScreen({super.key, this.initialTag, this.directory});
@@ -35,6 +73,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   static const _pageSize = 80;
   final _search = TextEditingController();
   final _listScroll = ScrollController();
+  final _articleScroll = ScrollController();
+  final _history = <_WikiVisit>[];
+  CompletionCandidate? _linkedCandidate;
+  double? _restoreArticleOffset;
   late final AutoTagTranslationController _autoTranslation;
   bool _visibilityScheduled = false;
   Set<String> _listVisible = {};
@@ -86,7 +128,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       if (widget.initialTag case final tag?) {
         final normalized = TagNormalizer.normalize(tag);
         _search.text = TagNormalizer.toDisplay(normalized);
-        _selectTag(normalized);
+        _selectTag(normalized, remember: false);
       }
       await _load();
     } catch (error) {
@@ -107,7 +149,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _scope = WikiScope(WikiScopeKind.all, null, context.l10n.wiki_allTags);
     _category = null;
     _hasArticle = null;
-    _selectTag(tag);
+    _history.clear();
+    _selectTag(tag, remember: false);
     _load();
   }
 
@@ -118,6 +161,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _searchTimer?.cancel();
     _search.dispose();
     _listScroll.dispose();
+    _articleScroll.dispose();
     super.dispose();
   }
 
@@ -135,8 +179,39 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _load();
   }
 
-  void _selectTag(String tag) {
+  void _selectTag(
+    String tag, {
+    bool remember = true,
+    CompletionCandidate? linkedCandidate,
+  }) {
     if (_selected == tag) return;
+    if (remember && _selected != null) {
+      _history.add(
+        _WikiVisit(
+          query: _search.value,
+          scope: _scope,
+          category: _category,
+          hasArticle: _hasArticle,
+          alphabetical: _alphabetical,
+          searchAll: _searchAll,
+          selected: _selected!,
+          items: _items,
+          article: _article,
+          translation: _translation,
+          total: _total,
+          more: _more,
+          loading: _loading,
+          loadError: _loadError,
+          showTranslation: _showTranslation,
+          listOffset: _listScroll.hasClients ? _listScroll.offset : 0,
+          articleOffset: _articleScroll.hasClients ? _articleScroll.offset : 0,
+          linkedCandidate: _linkedCandidate,
+        ),
+      );
+    }
+    _linkedCandidate = linkedCandidate;
+    _restoreArticleOffset = null;
+    if (_articleScroll.hasClients) _articleScroll.jumpTo(0);
     ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
     final article = ref.read(tagWikiRepositoryProvider).find(tag);
     setState(() {
@@ -169,6 +244,55 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             );
       }, onError: (Object _) {}),
     );
+  }
+
+  void _goBack() {
+    if (_history.isEmpty) return;
+    final visit = _history.removeLast();
+    _searchTimer?.cancel();
+    _epoch++;
+    _autoTranslation.clearSurface(_listSurface);
+    _autoTranslation.clearSurface(_articleSurface);
+    _listVisible.clear();
+    setState(() {
+      _search.value = visit.query;
+      _scope = visit.scope;
+      _category = visit.category;
+      _hasArticle = visit.hasArticle;
+      _alphabetical = visit.alphabetical;
+      _searchAll = visit.searchAll;
+      _selected = visit.selected;
+      _items = visit.items;
+      _article = visit.article;
+      _translation = visit.translation;
+      _total = visit.total;
+      _more = visit.more;
+      _loading = false;
+      _loadError = visit.loadError;
+      _showTranslation = visit.showTranslation;
+      _linkedCandidate = visit.linkedCandidate;
+      _restoreArticleOffset = visit.articleOffset;
+    });
+    if (visit.loading) _load();
+    _saveReadingSettings();
+    _article?.then((entry) {
+      if (mounted && _selected == visit.selected && entry != null) {
+        _autoTranslation.requestWiki(
+          surface: _articleSurface,
+          tag: visit.selected,
+        );
+      }
+    }, onError: (Object _) {});
+    final epoch = _epoch;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || epoch != _epoch || _selected != visit.selected) return;
+      if (_listScroll.hasClients) {
+        _listScroll.jumpTo(
+          visit.listOffset.clamp(0, _listScroll.position.maxScrollExtent),
+        );
+      }
+      _scheduleVisibleUpdate();
+    });
   }
 
   Set<String>? _scopeTags() {
@@ -307,7 +431,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         _loading = false;
       });
       if (!append && _selected == null && page.isNotEmpty) {
-        _selectTag(page.first.canonicalTag);
+        _selectTag(page.first.canonicalTag, remember: false);
       }
     } catch (error) {
       if (!mounted || epoch != _epoch) return;
@@ -512,10 +636,13 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                   IconButton(
                     key: const ValueKey('wiki-auto-translate'),
                     tooltip:
-                        ref.read(autoTagTranslationProvider).lastError ??
-                        (Localizations.localeOf(context).languageCode == 'zh'
-                            ? '自动翻译可见标签与打开的百科'
-                            : 'Auto-translate visible tags and open articles'),
+                        ref.read(autoTagTranslationProvider).activeRequests > 0
+                        ? wikiTranslatingLabel(context)
+                        : ref.read(autoTagTranslationProvider).lastError ??
+                              (Localizations.localeOf(context).languageCode ==
+                                      'zh'
+                                  ? '自动翻译可见标签与打开的百科'
+                                  : 'Auto-translate visible tags and open articles'),
                     onPressed: () {
                       final auto = ref.read(autoTagTranslationProvider);
                       unawaited(auto.setEnabled(!auto.enabled));
@@ -867,6 +994,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                         Text(
                                           translatedName ??
                                               _categoryName(candidate.category),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontSize: 10.5,
                                             color: translatedName == null
@@ -928,9 +1057,9 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     final tag = _selected;
     if (tag == null) return Center(child: Text(context.l10n.wiki_noSelection));
     final scheme = Theme.of(context).colorScheme;
-    final candidate = _items
-        .where((item) => item.canonicalTag == tag)
-        .firstOrNull;
+    final candidate =
+        _linkedCandidate ??
+        _items.where((item) => item.canonicalTag == tag).firstOrNull;
     return Container(
       color: scheme.surface,
       child: Column(
@@ -945,6 +1074,13 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (_history.isNotEmpty)
+                  IconButton(
+                    key: const ValueKey('wiki-article-back'),
+                    tooltip: wikiBackLabel(context),
+                    onPressed: _goBack,
+                    icon: const Icon(Icons.arrow_back, size: 20),
+                  ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1057,6 +1193,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           ),
           Expanded(
             child: SingleChildScrollView(
+              controller: _articleScroll,
               child: Align(
                 alignment: Alignment.topCenter,
                 child: ConstrainedBox(
@@ -1078,14 +1215,33 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                         }
                         if (snapshot.hasError) return Text('${snapshot.error}');
                         final article = snapshot.data;
+                        if (_restoreArticleOffset case final offset?) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (!mounted ||
+                                _selected != tag ||
+                                _restoreArticleOffset != offset) {
+                              return;
+                            }
+                            _restoreArticleOffset = null;
+                            if (_articleScroll.hasClients) {
+                              _articleScroll.jumpTo(
+                                offset.clamp(
+                                  0,
+                                  _articleScroll.position.maxScrollExtent,
+                                ),
+                              );
+                            }
+                          });
+                        }
                         final translated = ref
                             .read(autoTagTranslationProvider)
                             .wikiFor(tag);
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SelectableText(
-                              article?.body.trim().isNotEmpty == true
+                            WikiLinkedBody(
+                              key: ValueKey('wiki-body-$tag'),
+                              body: article?.body.trim().isNotEmpty == true
                                   ? (_showTranslation
                                         ? translated ?? article!.body
                                         : article!.body)
@@ -1095,7 +1251,19 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                 height: 1.68,
                                 color: scheme.onSurface,
                               ),
+                              onTagTap: (candidate) => _selectTag(
+                                candidate.canonicalTag,
+                                linkedCandidate: candidate,
+                              ),
                             ),
+                            if (translated != null)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: WikiRetranslateButton(
+                                  tag: tag,
+                                  surface: _articleSurface,
+                                ),
+                              ),
                             if (_showTranslation &&
                                 translated == null &&
                                 article?.body.trim().isNotEmpty == true)

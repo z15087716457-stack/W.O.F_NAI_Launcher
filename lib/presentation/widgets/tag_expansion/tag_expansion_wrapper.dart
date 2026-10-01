@@ -21,6 +21,41 @@ import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../autocomplete/tag_category_visuals.dart';
 import '../../router/app_router.dart';
 import '../common/translation_icon.dart';
+import '../common/related_tags_icon.dart';
+import '../common/wiki_linked_body.dart';
+import '../common/wiki_retranslate_button.dart';
+
+class _ExpansionVisit {
+  const _ExpansionVisit({
+    required this.query,
+    required this.results,
+    required this.relatedResults,
+    required this.relatedTag,
+    required this.wikiCandidate,
+    required this.wikiEntry,
+    required this.contextTag,
+    required this.usingContext,
+    required this.selectedIndex,
+    required this.searchOffset,
+    required this.relatedOffset,
+    required this.wikiOffset,
+    required this.searchLoading,
+    required this.relatedLoading,
+    required this.wikiLoading,
+    required this.searchFailed,
+    required this.relatedFailed,
+    required this.wikiFailed,
+  });
+  final TextEditingValue query;
+  final List<CompletionCandidate> results, relatedResults;
+  final String? relatedTag, contextTag;
+  final CompletionCandidate? wikiCandidate;
+  final TagWikiEntry? wikiEntry;
+  final bool usingContext, searchLoading, relatedLoading, wikiLoading;
+  final bool searchFailed, relatedFailed, wikiFailed;
+  final int selectedIndex;
+  final double searchOffset, relatedOffset, wikiOffset;
+}
 
 /// Explicit, local-only tag search for editable tag fields. It does not listen
 /// to typed text and never enters the old autocomplete query pipeline.
@@ -73,6 +108,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   final _searchFocus = FocusNode();
   final _searchScroll = ScrollController();
   final _relatedScroll = ScrollController();
+  final _wikiScroll = ScrollController();
+  final _history = <_ExpansionVisit>[];
   late final AutoTagTranslationController _autoTranslation;
   bool _visibilityScheduled = false;
   Set<String> _searchVisible = {};
@@ -108,6 +145,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   int _gridColumns = 2;
   int _resultLimit = 40;
   List<double> _rowHeights = const [];
+  final _rowKeys = <int, GlobalKey>{};
+  final _relatedRowKeys = <int, GlobalKey>{};
   bool _searchLoading = false;
   bool _relatedLoading = false;
   bool _searchFailed = false;
@@ -310,6 +349,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final caret = _caretOffset(anchor!, anchorBox);
     _anchorGlobal = anchorBox.localToGlobal(caret);
     _searchController.text = TagNormalizer.toDisplay(query);
+    _history.clear();
     _selectedIndex = 0;
     _results = const [];
     _relatedResults = const [];
@@ -368,6 +408,103 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _wikiCandidate = null;
     _wikiEntry = null;
     _queueSearch();
+  }
+
+  void _visitTag(CompletionCandidate candidate) {
+    if (_wikiCandidate?.canonicalTag == candidate.canonicalTag &&
+        TagNormalizer.normalize(_searchController.text) ==
+            candidate.canonicalTag) {
+      return;
+    }
+    _history.add(
+      _ExpansionVisit(
+        query: _searchController.value,
+        results: _results,
+        relatedResults: _relatedResults,
+        relatedTag: _relatedTag,
+        wikiCandidate: _wikiCandidate,
+        wikiEntry: _wikiEntry,
+        contextTag: _contextTag,
+        usingContext: _usingContext,
+        selectedIndex: _selectedIndex,
+        searchOffset: _searchScroll.hasClients ? _searchScroll.offset : 0,
+        relatedOffset: _relatedScroll.hasClients ? _relatedScroll.offset : 0,
+        wikiOffset: _wikiScroll.hasClients ? _wikiScroll.offset : 0,
+        searchLoading: _searchLoading,
+        relatedLoading: _relatedLoading,
+        wikiLoading: _wikiLoading,
+        searchFailed: _searchFailed,
+        relatedFailed: _relatedFailed,
+        wikiFailed: _wikiFailed,
+      ),
+    );
+    _searchController.text = TagNormalizer.toDisplay(candidate.canonicalTag);
+    _onSearchChanged(_searchController.text);
+    _results = const [];
+    _queueSearch(immediate: true);
+    if (_searchScroll.hasClients) _searchScroll.jumpTo(0);
+    _openWiki(candidate);
+  }
+
+  void _goBack() {
+    if (_history.isEmpty) return;
+    final visit = _history.removeLast();
+    _debounce?.cancel();
+    _searchSequence++;
+    _relatedSequence++;
+    _wikiSequence++;
+    _surfaceEpoch++;
+    _autoTranslation.clearSurface(_searchSurface);
+    _autoTranslation.clearSurface(_relatedSurface);
+    _autoTranslation.clearSurface(_wikiSurface);
+    _searchVisible.clear();
+    _relatedVisible.clear();
+    _searchController.value = visit.query;
+    _results = visit.results;
+    _relatedResults = visit.relatedResults;
+    _relatedTag = visit.relatedTag;
+    _contextTag = visit.contextTag;
+    _usingContext = visit.usingContext;
+    _selectedIndex = visit.selectedIndex;
+    _wikiCandidate = visit.wikiCandidate;
+    _wikiEntry = visit.wikiEntry;
+    _searchLoading = false;
+    _relatedLoading = false;
+    _wikiLoading = false;
+    _searchFailed = visit.searchFailed;
+    _relatedFailed = visit.relatedFailed;
+    _wikiFailed = visit.wikiFailed;
+    _hoveredId = null;
+    _focusedId = null;
+    if (visit.searchLoading) _queueSearch(immediate: true);
+    if (visit.relatedLoading && visit.relatedTag != null) {
+      _loadRelated(visit.relatedTag!);
+    }
+    if (visit.wikiLoading && visit.wikiCandidate != null) {
+      _openWiki(visit.wikiCandidate!);
+    } else if (visit.wikiEntry != null && visit.wikiCandidate != null) {
+      _autoTranslation.requestWiki(
+        surface: _wikiSurface,
+        tag: visit.wikiCandidate!.canonicalTag,
+      );
+    }
+    _markNeedsBuild();
+    final sequence = _searchSequence;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_active || sequence != _searchSequence) return;
+      void restore(ScrollController controller, double offset) {
+        if (controller.hasClients) {
+          controller.jumpTo(
+            offset.clamp(0, controller.position.maxScrollExtent),
+          );
+        }
+      }
+
+      restore(_searchScroll, visit.searchOffset);
+      restore(_relatedScroll, visit.relatedOffset);
+      restore(_wikiScroll, visit.wikiOffset);
+      _scheduleVisibleUpdate();
+    });
   }
 
   void _setResultLimit(int limit) {
@@ -588,6 +725,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _wikiEntry = null;
     _wikiLoading = true;
     _wikiFailed = false;
+    if (_wikiScroll.hasClients) _wikiScroll.jumpTo(0);
     final sequence = ++_wikiSequence;
     _markNeedsBuild();
     unawaited(() async {
@@ -785,7 +923,12 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     painter.dispose();
     final detailPainter = TextPainter(
       text: TextSpan(
-        text: 'Ag中文',
+        text:
+            candidate.translation ??
+            _autoTranslation.nameFor(candidate.canonicalTag) ??
+            (candidate.matchedAlias == null
+                ? TagCategoryVisuals.label(context, candidate.category)
+                : TagNormalizer.toDisplay(candidate.matchedAlias!)),
         style: Theme.of(context).textTheme.labelSmall,
       ),
       maxLines: 1,
@@ -798,7 +941,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     // have taller metrics than the former fixed 16 px line assumption.
     return math.max(
           _compactRowHeight,
-          math.max(lineHeight, detailHeight) + 2 + detailHeight + 10,
+          math.max(lineHeight, detailHeight) + 2 + detailHeight + 14,
         ) +
         lineHeight * math.max(0, lines - 1);
   }
@@ -854,11 +997,6 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final desiredHeight =
         (111.0 + _rowHeights.fold<double>(0, (total, row) => total + row))
             .clamp(320.0, 460.0);
-    final height = math.min(
-      desiredHeight,
-      availableHeight - (hasWiki ? 96 : 0),
-    );
-    if (width <= 0 || height <= 0) return const SizedBox.shrink();
     final theme = Theme.of(overlayContext);
     final translatedWiki = _wikiCandidate == null
         ? null
@@ -871,6 +1009,23 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         (_wikiFailed
             ? overlayContext.l10n.common_error
             : overlayContext.l10n.tagExpansion_wikiUnavailable);
+    final titleMeasure = TextPainter(
+      text: TextSpan(
+        text: hasWiki ? _wikiTitle(overlayContext) : '',
+        style: theme.textTheme.labelMedium,
+      ),
+      textDirection: Directionality.of(overlayContext),
+      textScaler: MediaQuery.textScalerOf(overlayContext),
+    )..layout(maxWidth: math.max(1, width - 76));
+    final headerHeight = math.max(28.0, titleMeasure.height) + 10;
+    titleMeasure.dispose();
+    final footerHeight = translatedWiki == null ? 0.0 : 36.0;
+    final minimumWiki = headerHeight + footerHeight + 56;
+    final height = math.min(
+      desiredHeight,
+      availableHeight - (hasWiki ? minimumWiki + _panelGap : 0),
+    );
+    if (width <= 0 || height <= 0) return const SizedBox.shrink();
     final bodyMeasure = TextPainter(
       text: TextSpan(text: wikiBody, style: theme.textTheme.bodySmall),
       textDirection: Directionality.of(overlayContext),
@@ -878,7 +1033,10 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     )..layout(maxWidth: math.max(1, width - 32));
     final wikiHeight = hasWiki
         ? math.min(
-            (68 + bodyMeasure.height).clamp(90.0, 230.0),
+            (headerHeight + footerHeight + 22 + bodyMeasure.height).clamp(
+              minimumWiki,
+              math.max(230.0, minimumWiki),
+            ),
             math.max(0.0, availableHeight - height - _panelGap),
           )
         : 0.0;
@@ -936,6 +1094,14 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                         prefixIcon: const Icon(Icons.search, size: 18),
+                        suffixIcon: _history.isEmpty
+                            ? null
+                            : IconButton(
+                                key: const ValueKey('tag-expansion-back'),
+                                tooltip: wikiBackLabel(overlayContext),
+                                onPressed: _goBack,
+                                icon: const Icon(Icons.undo, size: 18),
+                              ),
                         border: InputBorder.none,
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
@@ -1008,7 +1174,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             left: left,
             top: top + height + _panelGap,
             width: width,
-            height: wikiHeight,
+            height: wikiHeight.toDouble(),
             child: _buildWikiPanel(overlayContext),
           ),
       ],
@@ -1039,7 +1205,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                 : 'Auto-translate visible tags';
             return IconButton(
               key: const ValueKey('tag-expansion-auto-translate'),
-              tooltip: translation.lastError == null
+              tooltip: translation.activeRequests > 0
+                  ? wikiTranslatingLabel(context)
+                  : translation.lastError == null
                   ? label
                   : '$label · ${translation.lastError}',
               onPressed: () =>
@@ -1058,6 +1226,13 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
               padding: EdgeInsets.zero,
             );
           },
+        ),
+        Container(
+          key: const ValueKey('tag-expansion-header-separator'),
+          width: 1,
+          height: 13,
+          margin: const EdgeInsets.only(left: 6, right: 8),
+          color: Theme.of(context).colorScheme.outlineVariant,
         ),
         Text(
           context.l10n.tagExpansion_localOnly,
@@ -1182,32 +1357,35 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       controller: _searchScroll,
       padding: const EdgeInsets.symmetric(horizontal: _listInset, vertical: 2),
       itemCount: _rowHeights.length,
-      itemBuilder: (context, row) => SizedBox(
-        height: _rowHeights[row],
+      itemBuilder: (context, row) => ConstrainedBox(
+        key: _rowKeys.putIfAbsent(row, GlobalKey.new),
+        constraints: const BoxConstraints(minHeight: _compactRowHeight + 2),
         child: Padding(
           padding: const EdgeInsets.only(bottom: 2),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (var column = 0; column < _gridColumns; column++) ...[
-                if (column > 0) const SizedBox(width: _columnGap),
-                Expanded(
-                  child: row * _gridColumns + column < _results.length
-                      ? _candidateRow(
-                          context,
-                          _results[row * _gridColumns + column],
-                          selected:
-                              row * _gridColumns + column == _selectedIndex,
-                          onTap: () {
-                            final index = row * _gridColumns + column;
-                            _selectedIndex = index;
-                            _openWiki(_results[index]);
-                          },
-                        )
-                      : const SizedBox.shrink(),
-                ),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var column = 0; column < _gridColumns; column++) ...[
+                  if (column > 0) const SizedBox(width: _columnGap),
+                  Expanded(
+                    child: row * _gridColumns + column < _results.length
+                        ? _candidateRow(
+                            context,
+                            _results[row * _gridColumns + column],
+                            selected:
+                                row * _gridColumns + column == _selectedIndex,
+                            onTap: () {
+                              final index = row * _gridColumns + column;
+                              _selectedIndex = index;
+                              _openWiki(_results[index]);
+                            },
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -1232,14 +1410,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
           vertical: 2,
         ),
         itemCount: _relatedResults.length,
-        itemBuilder: (context, index) => SizedBox(
-          height:
-              _candidateHeight(
-                context,
-                _relatedResults[index],
-                constraints.maxWidth - _listInset * 2,
-              ) +
-              2,
+        itemBuilder: (context, index) => ConstrainedBox(
+          key: _relatedRowKeys.putIfAbsent(index, GlobalKey.new),
+          constraints: const BoxConstraints(minHeight: _compactRowHeight + 2),
           child: Padding(
             padding: const EdgeInsets.only(bottom: 2),
             child: _candidateRow(
@@ -1267,6 +1440,10 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
 
   void _refreshVisible() {
     if (_searchScroll.hasClients && _rowHeights.isNotEmpty) {
+      _rowHeights = [
+        for (var row = 0; row < _rowHeights.length; row++)
+          _rowKeys[row]?.currentContext?.size?.height ?? _rowHeights[row],
+      ];
       final position = _searchScroll.position;
       final top = position.pixels;
       final bottom = top + position.viewportDimension;
@@ -1315,12 +1492,16 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       final visible = <String>{};
       for (final candidate in _relatedResults) {
         final height =
-            _candidateHeight(
-              context,
-              candidate,
-              _relatedWidth - _listInset * 2,
-            ) +
-            2;
+            _relatedRowKeys[_relatedResults.indexOf(candidate)]
+                ?.currentContext
+                ?.size
+                ?.height ??
+            (_candidateHeight(
+                  context,
+                  candidate,
+                  _relatedWidth - _listInset * 2,
+                ) +
+                2);
         final next = cursor + height;
         if (next > top && cursor < bottom) {
           visible.add(candidate.canonicalTag);
@@ -1395,6 +1576,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
               child: Stack(
                 children: [
                   Column(
+                    mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1487,13 +1669,13 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                           children: [
                             _rowAction(
                               tooltip: context.l10n.tagExpansion_showRelated,
-                              icon: Icons.hub_outlined,
+                              icon: const RelatedTagsIcon(size: 14),
                               onPressed: () =>
                                   _loadRelated(candidate.canonicalTag),
                             ),
                             _rowAction(
                               tooltip: context.l10n.tagExpansion_insert,
-                              icon: Icons.add,
+                              icon: const Icon(Icons.add, size: 13),
                               onPressed: candidate.isExisting
                                   ? null
                                   : () => _insert(candidate),
@@ -1514,7 +1696,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
 
   Widget _rowAction({
     required String tooltip,
-    required IconData icon,
+    required Widget icon,
     required VoidCallback? onPressed,
   }) => SizedBox(
     width: 20,
@@ -1525,7 +1707,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(width: 20, height: 18),
       iconSize: 13,
-      icon: Icon(icon),
+      icon: icon,
     ),
   );
 
@@ -1533,9 +1715,6 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final theme = Theme.of(context);
     final candidate = _wikiCandidate!;
     final autoTranslation = ref.read(autoTagTranslationProvider);
-    final translatedName =
-        candidate.translation ??
-        autoTranslation.nameFor(candidate.canonicalTag);
     return Material(
       key: const ValueKey('tag-expansion-wiki-panel'),
       elevation: 14,
@@ -1547,16 +1726,15 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       ),
       child: Column(
         children: [
-          SizedBox(
-            height: 42,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    '${context.l10n.tagExpansion_wikiTitle} · ${TagNormalizer.toDisplay(candidate.canonicalTag)}${translatedName == null || translatedName.isEmpty ? '' : ' · $translatedName'}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    _wikiTitle(context),
                     style: theme.textTheme.labelMedium,
                   ),
                 ),
@@ -1572,6 +1750,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     router.go(route);
                   },
                   icon: const Icon(Icons.open_in_new, size: 15),
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 28,
+                  ),
+                  padding: EdgeInsets.zero,
                 ),
                 IconButton(
                   tooltip: context.l10n.common_close,
@@ -1585,6 +1768,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                     _markNeedsBuild();
                   },
                   icon: const Icon(Icons.close, size: 16),
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 28,
+                  ),
+                  padding: EdgeInsets.zero,
                 ),
               ],
             ),
@@ -1595,20 +1783,42 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                 ? _loadingIndicator()
                 : SingleChildScrollView(
                     key: const ValueKey('tag-expansion-wiki-scroll'),
+                    controller: _wikiScroll,
                     padding: const EdgeInsets.fromLTRB(12, 9, 12, 12),
-                    child: SelectableText(
-                      autoTranslation.wikiFor(candidate.canonicalTag) ??
+                    child: WikiLinkedBody(
+                      body:
+                          autoTranslation.wikiFor(candidate.canonicalTag) ??
                           _wikiEntry?.body ??
                           (_wikiFailed
                               ? context.l10n.common_error
                               : context.l10n.tagExpansion_wikiUnavailable),
                       style: theme.textTheme.bodySmall,
+                      onTagTap: _visitTag,
                     ),
                   ),
           ),
+          if (autoTranslation.wikiFor(candidate.canonicalTag) != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 6, bottom: 4),
+                child: WikiRetranslateButton(
+                  tag: candidate.canonicalTag,
+                  surface: _wikiSurface,
+                ),
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  String _wikiTitle(BuildContext context) {
+    final candidate = _wikiCandidate!;
+    final translatedName =
+        candidate.translation ??
+        _autoTranslation.nameFor(candidate.canonicalTag);
+    return '${context.l10n.tagExpansion_wikiTitle} · ${TagNormalizer.toDisplay(candidate.canonicalTag)}${translatedName == null || translatedName.isEmpty ? '' : ' · $translatedName'}';
   }
 
   static String _formatCount(int count) => count >= 1000000
@@ -1653,6 +1863,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _close(notify: false);
     _searchScroll.dispose();
     _relatedScroll.dispose();
+    _wikiScroll.dispose();
     _searchFocus.dispose();
     _searchController.dispose();
     super.dispose();

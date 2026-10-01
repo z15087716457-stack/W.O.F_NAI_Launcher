@@ -12,11 +12,13 @@ import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/utils/prompt_input_normalization.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
+import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/common/weight_adjust_toolbar.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_input.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
+import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
 
 void main() {
   setUp(() async {
@@ -80,6 +82,141 @@ void main() {
     await tester.pump();
     expect(controller.text, 'solo, blue hair, ');
     expect(find.byKey(const Key('tag-expansion-popup')), findsNothing);
+  });
+
+  testWidgets(
+    'linked browsing searches once, syncs Wiki and restores the chain',
+    (tester) async {
+      final controller = TextEditingController(text: 'untouched draft');
+      final focusNode = FocusNode();
+      addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
+      final source = _Source([
+        _tag('first_tag'),
+        _tag('second_tag'),
+        _tag('third_tag'),
+      ]);
+      final entries = {
+        for (final item in source.results) item.canonicalTag: item,
+      };
+      await _pumpEditor(
+        tester,
+        controller,
+        focusNode,
+        source,
+        links: WikiTagLinks(
+          exactLookup: (names) async => {
+            for (final name in names)
+              if (entries[name] case final item?) name: item,
+          },
+          chineseLookup: (_) async => [],
+        ),
+        wiki: _Wiki({
+          'first_tag': 'See second_tag.',
+          'second_tag': 'See third_tag.',
+          'third_tag': 'Third article.',
+        }),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('prompt-editor')));
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'tag',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pump();
+      await tester.tap(find.text('first tag'));
+      await tester.pump();
+      await tester.pump();
+      final before = source.queries.length;
+      tester
+          .widget<WikiLinkedBody>(find.byType(WikiLinkedBody))
+          .onTagTap(entries['second_tag']!);
+      await tester.pump();
+      await tester.pump();
+      expect(source.queries.length, before + 1);
+      expect(source.queries.last.token, 'second_tag');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('tag-expansion-search')))
+            .controller!
+            .text,
+        'second tag',
+      );
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        'See third_tag.',
+      );
+      tester
+          .widget<WikiLinkedBody>(find.byType(WikiLinkedBody))
+          .onTagTap(entries['third_tag']!);
+      await tester.pump();
+      await tester.pump();
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        'Third article.',
+      );
+      final searches = source.queries.length;
+      await tester.tap(find.byKey(const Key('tag-expansion-back')));
+      await tester.pump();
+      await tester.pump();
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        'See third_tag.',
+      );
+      await tester.tap(find.byKey(const Key('tag-expansion-back')));
+      await tester.pump();
+      await tester.pump();
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('tag-expansion-search')))
+            .controller!
+            .text,
+        'tag',
+      );
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        'See second_tag.',
+      );
+      expect(source.queries.length, searches);
+      expect(find.byKey(const Key('tag-expansion-back')), findsNothing);
+      expect(controller.text, 'untouched draft');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('long Wiki titles wrap and retain aligned action buttons', (
+    tester,
+  ) async {
+    final controller = TextEditingController();
+    final focusNode = FocusNode();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+    const longTag =
+        'artoria_pendragon_(swimsuit_ruler)_(first_ascension)_(fate)';
+    await _pumpEditor(tester, controller, focusNode, _Source([_tag(longTag)]));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.tap(find.byKey(const Key('prompt-editor')));
+    await tester.pump();
+    await tester.pump();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.enterText(
+      find.byKey(const Key('tag-expansion-search')),
+      'artoria',
+    );
+    await tester.pump(const Duration(milliseconds: 170));
+    await tester.pump();
+    await tester.tap(find.text(longTag.replaceAll('_', ' ')));
+    await tester.pump();
+    await tester.pump();
+    final title = find.textContaining('Tag wiki ·');
+    expect(tester.widget<Text>(title).maxLines, isNull);
+    expect(tester.getSize(title).height, greaterThan(20));
+    expect(find.byTooltip('Open in Tag Wiki'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('gallery hosts receive a canonical tag without prompt syntax', (
@@ -1006,6 +1143,7 @@ Future<void> _pumpEditor(
   CompletionSource catalog, {
   CompletionSource? related,
   TagWikiRepository? wiki,
+  WikiTagLinks? links,
   bool enabled = true,
   bool splitOnSpaces = false,
   bool includeWeightToolbar = false,
@@ -1039,6 +1177,13 @@ Future<void> _pumpEditor(
       overrides: [
         localTagExpansionServiceProvider.overrideWithValue(service),
         tagWikiRepositoryProvider.overrideWithValue(wiki ?? _Wiki()),
+        wikiTagLinksProvider.overrideWithValue(
+          links ??
+              WikiTagLinks(
+                exactLookup: (_) async => {},
+                chineseLookup: (_) async => [],
+              ),
+        ),
       ],
       child: MaterialApp(
         locale: const Locale('en'),

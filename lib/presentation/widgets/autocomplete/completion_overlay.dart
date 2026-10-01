@@ -8,6 +8,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import 'tag_category_visuals.dart';
 import '../common/translation_icon.dart';
+import '../common/related_tags_icon.dart';
 
 const double autocompleteCandidateExtent = 35;
 
@@ -1124,6 +1125,8 @@ class _StatusIndicator extends StatelessWidget {
                   color: toneColor,
                 ),
               )
+            else if (descriptor.key == 'autocomplete-status-related')
+              RelatedTagsIcon(size: 14, color: toneColor)
             else
               Icon(descriptor.icon, size: 14, color: toneColor),
             const SizedBox(width: 5),

@@ -93,6 +93,16 @@ void main() {
     expect(counts[TagCategory.lore], 1);
   });
 
+  test('wiki alias resolution is exact and never a prefix', () async {
+    final aliases = await repository.exactAliases([
+      'aqua_eyes',
+      'aqua',
+      'missing',
+    ]);
+    expect(aliases.keys, ['aqua_eyes']);
+    expect(aliases['aqua_eyes']!.canonicalTag, 'blue_eyes');
+  });
+
   test('escapes special input and respects the result limit', () async {
     final special = await repository.search(_query('blue" OR *', limit: 1));
     final limited = await repository.search(_query('blue', limit: 1));

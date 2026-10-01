@@ -63,16 +63,42 @@ void main() {
       expect(api.canceled, ['closed']);
     },
   );
+
+  test(
+    'Wiki request formats reading text while preserving canonical references',
+    () async {
+      final api = _Api()
+        ..response =
+            '{"tag":"blue_eyes","name_zh":"蓝眼","wiki_zh":"说明。\\n\\n- blue_eyes"}';
+      final service = container(api).read(promptAssistantServiceProvider);
+      final result = await service.translateVisibleTag(
+        tag: 'blue_eyes',
+        wikiBody: 'Description. Includes blue_eyes.',
+        includeWikiTranslation: true,
+        sessionId: 'wiki',
+      );
+      expect(result.wikiZh, '说明。\n\n- blue_eyes');
+      final request = api.requests.single;
+      expect(request.systemPrompt, contains('Markdown bullet lists'));
+      expect(
+        request.systemPrompt,
+        contains('canonical English tag references exactly as written'),
+      );
+      expect(request.systemPrompt, contains('Do not invent tags or links'));
+      expect(request.model, 'translate-model');
+    },
+  );
 }
 
 class _Api extends PromptAssistantApiClient {
   _Api() : super(dio: Dio());
   final requests = <PromptAssistantRequest>[];
   final canceled = <String?>[];
+  String response = '{"text":"green eyes"}';
   @override
   Stream<StreamingChunk> complete({required PromptAssistantRequest request}) {
     requests.add(request);
-    return Stream.value(const StreamingChunk(delta: '{"text":"green eyes"}'));
+    return Stream.value(StreamingChunk(delta: response));
   }
 
   @override

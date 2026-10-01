@@ -10,10 +10,12 @@ import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory.dart';
+import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
+import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _Tags extends UnifiedTagRepository {
@@ -89,6 +91,8 @@ class _Auto extends ChangeNotifier implements AutoTagTranslationController {
   @override
   int get activeRequests => 0;
   @override
+  bool isWikiTranslating(String tag) => false;
+  @override
   Object? noSuchMethod(Invocation invocation) => null;
 }
 
@@ -111,6 +115,16 @@ void main() {
           overrides: [
             autoTagTranslationProvider.overrideWith((ref) => auto),
             unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+            wikiTagLinksProvider.overrideWithValue(
+              WikiTagLinks(
+                exactLookup: (names) async => {
+                  for (final item in _Tags.entries)
+                    if (names.contains(item.canonicalTag))
+                      item.canonicalTag: item,
+                },
+                chineseLookup: (_) async => [],
+              ),
+            ),
             tagWikiRepositoryProvider.overrideWith((ref) => _Wiki()),
             tagTranslationLookupProvider.overrideWith((ref) => _Translation()),
             promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
@@ -161,6 +175,26 @@ void main() {
       auto.notifyListeners();
       await tester.pumpAndSettle();
       expect(find.text('Blue eyes are visible.'), findsOneWidget);
+
+      for (var i = 0; i < 8; i++) {
+        tester
+            .widget<WikiLinkedBody>(find.byType(WikiLinkedBody))
+            .onTagTap(_Tags.entries[(i + 1) % 2]);
+        await tester.pumpAndSettle();
+      }
+      for (var i = 0; i < 8; i++) {
+        await tester.tap(find.byKey(const Key('wiki-article-back')));
+        await tester.pumpAndSettle();
+      }
+      expect(find.byKey(const Key('wiki-article-back')), findsNothing);
+      expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
+      expect(find.text('Blue eyes are visible.'), findsOneWidget);
+      expect(
+        (await SharedPreferences.getInstance()).getBool(
+          'wiki_show_translation',
+        ),
+        isFalse,
+      );
 
       tester.view.physicalSize = const Size(900, 780);
       await tester.pump();

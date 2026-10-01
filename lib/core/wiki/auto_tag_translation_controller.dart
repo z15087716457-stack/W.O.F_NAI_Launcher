@@ -29,10 +29,11 @@ final autoTagTranslationProvider =
     });
 
 class _VisibleTask {
-  const _VisibleTask(this.tag, this.wiki, this.priority);
+  const _VisibleTask(this.tag, this.wiki, this.priority, {this.force = false});
   final String tag;
   final bool wiki;
   final int priority;
+  final bool force;
 }
 
 class AutoTagTranslationContext {
@@ -74,12 +75,14 @@ class AutoTagTranslationController extends ChangeNotifier {
   final Map<String, String> _wikiBySurface = {};
   final Map<String, _VisibleTask> _pending = {};
   final Set<String> _inFlight = {};
+  final Set<String> _wikiInFlight = {};
   final Map<String, String> _sessions = {};
   final Map<String, String> _names = {};
   final Map<String, String> _wikiBodies = {};
   final Map<String, AutoTagTranslationContext> _contexts = {};
   final Set<String> _failed = {};
   int _priority = 0;
+  int _routeEpoch = 0;
   int _active = 0;
   bool _enabled = false;
   bool _preferenceChanged = false;
@@ -91,10 +94,37 @@ class AutoTagTranslationController extends ChangeNotifier {
   int get activeRequests => _active;
   String? nameFor(String tag) => _names[TagNormalizer.normalize(tag)];
   String? wikiFor(String tag) => _wikiBodies[TagNormalizer.normalize(tag)];
+  String? wikiErrorFor(String tag) =>
+      _failed.contains(TagNormalizer.normalize(tag)) ? lastError : null;
   bool isTranslating(String tag) =>
       _inFlight.contains(TagNormalizer.normalize(tag));
+  bool isWikiTranslating(String tag) {
+    final canonical = TagNormalizer.normalize(tag);
+    return _wikiInFlight.contains(canonical) ||
+        _pending[canonical]?.wiki == true;
+  }
+
+  /// An explicit retry works even with automatic translation turned off.
+  /// The old body stays visible until the complete new request succeeds.
+  void retranslateWiki({required String surface, required String tag}) {
+    final canonical = TagNormalizer.normalize(tag);
+    if (canonical.isEmpty || isWikiTranslating(canonical)) return;
+    _visibleBySurface.putIfAbsent(surface, () => <String>{}).add(canonical);
+    _wikiBySurface[surface] = canonical;
+    _failed.remove(canonical);
+    lastError = null;
+    _pending[canonical] = _VisibleTask(
+      canonical,
+      true,
+      ++_priority,
+      force: true,
+    );
+    notifyListeners();
+    _pump();
+  }
 
   void routeChanged() {
+    _routeEpoch++;
     _route = null;
     _names.clear();
     _wikiBodies.clear();
@@ -212,17 +242,19 @@ class AutoTagTranslationController extends ChangeNotifier {
       tag,
       wiki || previous?.wiki == true,
       ++_priority,
+      force: previous?.force ?? false,
     );
     _pump();
   }
 
   void _pump() {
-    if (!_enabled || _disposed) return;
+    if (_disposed) return;
     while (_active < maxConcurrentRequests) {
       final eligible =
           _pending.values
               .where(
                 (task) =>
+                    (_enabled || task.force) &&
                     _isVisible(task.tag) &&
                     !_inFlight.contains(task.tag) &&
                     !_failed.contains(task.tag),
@@ -236,12 +268,14 @@ class AutoTagTranslationController extends ChangeNotifier {
       final task = eligible.first;
       _pending.remove(task.tag);
       _inFlight.add(task.tag);
+      if (task.wiki) _wikiInFlight.add(task.tag);
       _active++;
       notifyListeners();
       unawaited(
         _run(task).whenComplete(() {
           _active--;
           _inFlight.remove(task.tag);
+          _wikiInFlight.remove(task.tag);
           if (!_disposed) {
             notifyListeners();
             _pump();
@@ -252,6 +286,7 @@ class AutoTagTranslationController extends ChangeNotifier {
   }
 
   Future<void> _run(_VisibleTask task) async {
+    final epoch = _routeEpoch;
     try {
       String? localName;
       try {
@@ -259,6 +294,7 @@ class AutoTagTranslationController extends ChangeNotifier {
       } catch (_) {
         // The optional installed dictionary must not block model translation.
       }
+      if (_disposed || epoch != _routeEpoch) return;
       if (localName != null) {
         _names[task.tag] = localName;
         if (!_disposed) notifyListeners();
@@ -276,15 +312,22 @@ class AutoTagTranslationController extends ChangeNotifier {
       final entry = await _wiki.find(task.tag);
       final body = entry?.body ?? '';
       final tagContext = _contexts[task.tag];
-      if (task.wiki && !shouldTranslateWiki(body)) return;
+      if (task.wiki && !task.force && !shouldTranslateWiki(body)) return;
       final hash = sha256.convert(utf8.encode(body)).toString();
-      final cached = await _cache.get(
-        tag: task.tag,
-        route: route,
-        promptVersion:
-            PromptAssistantService.visibleTagTranslationPromptVersion,
-        wikiHash: hash,
-      );
+      final cached = task.force
+          ? null
+          : await _cache.get(
+              tag: task.tag,
+              route: route,
+              promptVersion:
+                  PromptAssistantService.visibleTagTranslationPromptVersion,
+              wikiHash: hash,
+            );
+      if (_disposed ||
+          epoch != _routeEpoch ||
+          route != _assistant.translateRouteFingerprint()) {
+        return;
+      }
       final name = localName ?? cached?.nameZh ?? _names[task.tag];
       if (name != null) _names[task.tag] = name;
       if (cached?.wikiZh case final wikiZh?) _wikiBodies[task.tag] = wikiZh;
@@ -294,7 +337,9 @@ class AutoTagTranslationController extends ChangeNotifier {
           (!task.wiki && name != null)) {
         return;
       }
-      if (!_enabled || !_isVisible(task.tag)) return;
+      if ((!_enabled && !task.force) || !_isVisible(task.tag) || _disposed) {
+        return;
+      }
       var translatedName = name;
       final translatedWiki = StringBuffer();
       final chunks = task.wiki
@@ -318,7 +363,12 @@ class AutoTagTranslationController extends ChangeNotifier {
         translatedName = nameResult.nameZh;
       }
       for (var index = 0; index < chunks.length; index++) {
-        if (!_enabled || !_isVisible(task.tag)) return;
+        if ((!_enabled && !task.force) ||
+            !_isVisible(task.tag) ||
+            _disposed ||
+            epoch != _routeEpoch) {
+          return;
+        }
         final chunk = chunks[index];
         final sessionId =
             'visible-tag-${DateTime.now().microsecondsSinceEpoch}-${task.tag}-$index';
@@ -338,25 +388,33 @@ class AutoTagTranslationController extends ChangeNotifier {
         translatedName = result.nameZh;
         if (task.wiki) {
           translatedWiki.write(result.wikiZh);
-          translatedWiki.write(chunk.separator);
+          if (chunk.separator.isNotEmpty) translatedWiki.write('\n\n');
         }
       }
-      if (route != _assistant.translateRouteFingerprint()) return;
-      _names[task.tag] = translatedName!;
+      if (_disposed ||
+          epoch != _routeEpoch ||
+          (!_enabled && !task.force) ||
+          route != _assistant.translateRouteFingerprint()) {
+        return;
+      }
       final wikiZh = task.wiki ? translatedWiki.toString().trim() : null;
-      if (wikiZh != null) _wikiBodies[task.tag] = wikiZh;
       await _cache.put(
         tag: task.tag,
         route: route,
         promptVersion:
             PromptAssistantService.visibleTagTranslationPromptVersion,
         wikiHash: hash,
-        nameZh: translatedName,
+        nameZh: translatedName!,
         wikiZh: wikiZh ?? cached?.wikiZh,
       );
+      if (_disposed || epoch != _routeEpoch) return;
+      _names[task.tag] = translatedName;
+      if (wikiZh != null) _wikiBodies[task.tag] = wikiZh;
       if (!_disposed) notifyListeners();
     } catch (error) {
-      if (!_enabled || _disposed) return;
+      if ((!_enabled && !task.force) || _disposed || epoch != _routeEpoch) {
+        return;
+      }
       _failed.add(task.tag);
       _pending.remove(task.tag);
       lastError = '$error';

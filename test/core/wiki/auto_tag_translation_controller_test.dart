@@ -79,6 +79,76 @@ void main() {
   });
 
   test(
+    'manual Wiki retry bypasses cache, deduplicates and retains old body on failure',
+    () async {
+      final assistant = _Assistant();
+      final names = _Names();
+      final cache = _Cache();
+      cache.records['blue_eyes'] = const CachedVisibleTagTranslation(
+        nameZh: '蓝眼',
+        wikiZh: '旧译文',
+      );
+      when(() => assistant.translateRouteFingerprint()).thenReturn('route');
+      when(() => names.translate(any())).thenAnswer((_) async => '蓝眼');
+      var pending = Completer<VisibleTagTranslationResult>();
+      var calls = 0;
+      when(
+        () => assistant.translateVisibleTag(
+          tag: any(named: 'tag'),
+          wikiBody: any(named: 'wikiBody'),
+          includeWikiTranslation: any(named: 'includeWikiTranslation'),
+          existingNameZh: any(named: 'existingNameZh'),
+          category: any(named: 'category'),
+          aliases: any(named: 'aliases'),
+          postCount: any(named: 'postCount'),
+          relatedTo: any(named: 'relatedTo'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((_) {
+        calls++;
+        return pending.future;
+      });
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        localNames: names,
+        wiki: _Wiki('English wiki.'),
+        cache: cache,
+      );
+      await controller.setEnabled(true);
+      controller.requestWiki(surface: 'article', tag: 'blue_eyes');
+      await _until(
+        () =>
+            controller.wikiFor('blue_eyes') != null &&
+            controller.activeRequests == 0,
+      );
+      expect(calls, 0);
+      await controller.setEnabled(false);
+      controller.retranslateWiki(surface: 'article', tag: 'blue_eyes');
+      controller.retranslateWiki(surface: 'article', tag: 'blue_eyes');
+      await _until(() => calls == 1);
+      expect(controller.isWikiTranslating('blue_eyes'), isTrue);
+      expect(controller.wikiFor('blue_eyes'), '旧译文');
+      pending.completeError(StateError('retry failed'));
+      await _until(() => controller.activeRequests == 0);
+      expect(controller.wikiFor('blue_eyes'), '旧译文');
+      expect(cache.writes, 0);
+      expect(controller.lastError, contains('retry failed'));
+      pending = Completer<VisibleTagTranslationResult>();
+      controller.retranslateWiki(surface: 'article', tag: 'blue_eyes');
+      await _until(() => calls == 2);
+      pending.complete(
+        const VisibleTagTranslationResult(nameZh: '蓝眼', wikiZh: '新译文'),
+      );
+      await _until(() => controller.activeRequests == 0);
+      expect(controller.wikiFor('blue_eyes'), '新译文');
+      expect(cache.records['blue_eyes']!.wikiZh, '新译文');
+      expect(cache.writes, 1);
+      expect(controller.enabled, isFalse);
+      controller.dispose();
+    },
+  );
+
+  test(
     'known Chinese names skip AI; wiki translates only when opened',
     () async {
       final assistant = _Assistant();

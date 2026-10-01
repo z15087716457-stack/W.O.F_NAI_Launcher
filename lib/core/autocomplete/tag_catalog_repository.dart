@@ -200,6 +200,42 @@ class TagCatalogRepository implements CompletionSource {
     return records[canonicalTag.trim().toLowerCase()]?.postCount;
   }
 
+  /// Exact alias lookup only; never use a prefix search to create wiki links.
+  Future<Map<String, CompletionCandidate>> exactAliases(
+    Iterable<String> terms,
+  ) async {
+    final names = terms.toSet().toList();
+    if (names.isEmpty) return const {};
+    await initialize();
+    final matches = <String, Map<String, CompletionCandidate>>{};
+    for (var offset = 0; offset < names.length; offset += 400) {
+      final chunk = names.skip(offset).take(400).toList();
+      final rows = await _database!.rawQuery(
+        'SELECT a.alias, t.name, t.category, t.post_count FROM aliases a '
+        'JOIN tags t ON t.id = a.tag_id WHERE a.alias IN (${List.filled(chunk.length, '?').join(',')})',
+        chunk,
+      );
+      for (final row in rows) {
+        final category = TagCategory.fromCatalog(
+          (row['category'] as num).toInt(),
+        );
+        if (category == null) continue;
+        final name = row['name'] as String;
+        (matches[row['alias'] as String] ??= {})[name] = CompletionCandidate(
+          canonicalTag: name,
+          category: category,
+          postCount: (row['post_count'] as num).toInt(),
+          matchKind: CompletionMatchKind.aliasExact,
+          sources: const {CompletionSourceKind.base},
+        );
+      }
+    }
+    return {
+      for (final entry in matches.entries)
+        if (entry.value.length == 1) entry.key: entry.value.values.single,
+    };
+  }
+
   Future<Map<String, TagCatalogRecord>> recordsByCanonicalTag(
     Iterable<String> canonicalTags,
   ) async {

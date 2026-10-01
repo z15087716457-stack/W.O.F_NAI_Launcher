@@ -230,6 +230,23 @@ class UnifiedTagRepository implements CompletionSource {
     }
   }
 
+  Future<Map<String, CompletionCandidate>> resolveExact(
+    Iterable<String> terms,
+  ) async {
+    final names = terms
+        .map(
+          (term) => term.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '_'),
+        )
+        .toSet();
+    final canonical = await byNames(names);
+    final result = {for (final item in canonical) item.canonicalTag: item};
+    final aliases = await _catalog.exactAliases(
+      names.difference(result.keys.toSet()),
+    );
+    result.addAll(aliases);
+    return result;
+  }
+
   static CompletionCandidate? _fromRow(Map<String, Object?> row) {
     final category = TagCategory.fromCatalog((row['category'] as num).toInt());
     if (category == null) return null;
