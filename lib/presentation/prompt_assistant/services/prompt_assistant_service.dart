@@ -128,10 +128,10 @@ use current_source and original_source as context for the existing prompt.
 Apply explicit Chinese changes, including deletions. Preserve unrelated names,
 artist tags, relationships, counts, NAI numeric weights, groups, escaping and
 prompt style unless the Chinese explicitly changes them. Produce an English
-generation prompt, not an explanation. Prefer the exact canonical tags for
-active selected_terms when their inserted phrase is still present. A glossary
-is terminology guidance, not a list of tags to add; ambiguous candidates are
-only hints. Do not restore deleted phrases or add unrequested subject matter.
+generation prompt, not an explanation. All glossary entries and selected_terms
+are optional reference material, never mandatory replacements or tags to add.
+Decide terminology from the Chinese intent and original prompt context; account
+for negation and ambiguity even when a dictionary phrase matches. Do not restore deleted phrases or add unrequested subject matter.
 Return exactly one JSON object {"text":"target field text"}. For toChinese
 you may include parts: [{"text":"reading fragment","tag":"exact glossary tag"}].
 Parts must concatenate to text; mark only a complete, unambiguous source tag

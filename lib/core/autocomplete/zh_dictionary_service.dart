@@ -10,6 +10,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../utils/app_logger.dart';
 import 'completion_models.dart';
+import 'chinese_term_matcher.dart';
 
 const ffdkjRepositoryUrl =
     'https://github.com/ffdkj/ffdkj-Danbooru_Tag-Chinese-English-Translation-Table';
@@ -77,7 +78,9 @@ class ZhDictionaryService extends ChangeNotifier
 
   final Dio _dio;
   Database? _database;
+  Future<ChineseTermMatcher>? _phraseIndex;
   CancelToken? _cancelToken;
+  Future<void>? _initializing;
   String? _databasePath;
   String? _metadataPath;
   ZhDictionaryState _state = const ZhDictionaryState();
@@ -85,6 +88,16 @@ class ZhDictionaryService extends ChangeNotifier
   ZhDictionaryState get state => _state;
 
   Future<void> initialize() async {
+    final pending = _initializing ??= _initialize();
+    try {
+      await pending;
+    } catch (_) {
+      if (identical(_initializing, pending)) _initializing = null;
+      rethrow;
+    }
+  }
+
+  Future<void> _initialize() async {
     if (_databasePath != null) return;
     final appDir = await getApplicationSupportDirectory();
     final directory = Directory(p.join(appDir.path, 'autocomplete', 'ffdkj'));
@@ -182,6 +195,7 @@ class ZhDictionaryService extends ChangeNotifier
       final count = await _validate(temp.path);
 
       await _database?.close();
+      _phraseIndex = null;
       _database = null;
       await backup.deleteIfExists();
       if (await target.exists()) await target.rename(backup.path);
@@ -231,6 +245,7 @@ class ZhDictionaryService extends ChangeNotifier
   Future<void> remove() async {
     await initialize();
     await _database?.close();
+    _phraseIndex = null;
     _database = null;
     await File(_databasePath!).deleteIfExists();
     await File(_metadataPath!).deleteIfExists();
@@ -314,6 +329,28 @@ class ZhDictionaryService extends ChangeNotifier
           );
         })
         .toList(growable: false);
+  }
+
+  /// Reads only the installed Chinese definitions; no remote lookup.
+  Future<List<ChineseTermHit>> matchInText(
+    String text, {
+    int limit = 64,
+  }) async {
+    if (text.trim().isEmpty || !await _openIfInstalled()) return const [];
+    final index = _phraseIndex ??= _loadPhraseIndex();
+    try {
+      return (await index).match(text, limit: limit);
+    } catch (_) {
+      if (identical(_phraseIndex, index)) _phraseIndex = null;
+      rethrow;
+    }
+  }
+
+  Future<ChineseTermMatcher> _loadPhraseIndex() async {
+    final rows = await _database!.rawQuery(
+      "SELECT name, category, cn_name, post_count FROM tags WHERE cn_name IS NOT NULL AND TRIM(cn_name) <> ''",
+    );
+    return compute(buildChineseTermMatcher, rows);
   }
 
   Future<bool> _openIfInstalled() async {

@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqlite3/sqlite3.dart' as native;
 
@@ -26,6 +28,38 @@ void main() {
 
     expect(await service.validateDatabaseFile(file.path), 1000);
   });
+
+  test(
+    'concurrent cold lookup waits for installed dictionary and remove clears phrase cache',
+    () async {
+      final folder = Directory(p.join(temp.path, 'autocomplete', 'ffdkj'));
+      await folder.create(recursive: true);
+      final file = _createDictionary(
+        p.join(folder.path, 'tag.sqlite'),
+        rows: 1000,
+      );
+      final db = native.sqlite3.open(file.path);
+      db.execute("UPDATE tags SET cn_name = '长发；长头发' WHERE name = 'tag_1'");
+      db.dispose();
+      final previous = PathProviderPlatform.instance;
+      final gate = Completer<String>();
+      PathProviderPlatform.instance = _Paths(gate);
+      addTearDown(() => PathProviderPlatform.instance = previous);
+      final loading = service.initialize();
+      final lookup = service.matchInText('把她改成长头发');
+      gate.complete(temp.path);
+      await loading;
+      final hits = await lookup;
+      expect(hits.single.candidate.canonicalTag, 'tag_1');
+      expect(hits.single.start, 4);
+      expect(
+        (await service.matchInText('长发')).single.candidate.canonicalTag,
+        'tag_1',
+      );
+      await service.remove();
+      expect(await service.matchInText('长发'), isEmpty);
+    },
+  );
 
   test('rejects a corrupt SQLite file', () async {
     final file = File('${temp.path}/corrupt.sqlite');
@@ -76,4 +110,11 @@ File _createDictionary(String path, {required int rows}) {
   statement.dispose();
   db.dispose();
   return File(path);
+}
+
+class _Paths extends PathProviderPlatform {
+  _Paths(this.gate);
+  final Completer<String> gate;
+  @override
+  Future<String?> getApplicationSupportPath() => gate.future;
 }

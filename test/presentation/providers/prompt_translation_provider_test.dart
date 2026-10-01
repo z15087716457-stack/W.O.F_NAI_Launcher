@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/autocomplete/chinese_term_matcher.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
 import 'package:nai_launcher/core/autocomplete/tag_translation_lookup.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
@@ -36,6 +37,7 @@ void main() {
       _TranslationService service, {
       UnifiedTagRepository? tags,
       _LocalTags? local,
+      Future<List<ChineseTermHit>> Function(String)? chineseLookup,
     }) {
       final search = local ?? _LocalTags();
       if (local == null) {
@@ -55,6 +57,9 @@ void main() {
           unifiedTagRepositoryProvider.overrideWith((ref) => tags ?? _Tags()),
           tagTranslationLookupProvider.overrideWith((ref) => _Translations()),
           localTagExpansionServiceProvider.overrideWithValue(search),
+          chinesePromptTermLookupProvider.overrideWithValue(
+            chineseLookup ?? (_) async => const [],
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -123,7 +128,12 @@ void main() {
             sessionId: any(named: 'sessionId'),
           ),
         ).thenAnswer((_) async => '{"text":"green eyes"}');
-        final container = draftContainer(service, local: local);
+        final container = draftContainer(
+          service,
+          local: local,
+          chineseLookup: (_) async =>
+              throw StateError("dictionary unavailable"),
+        );
         expect(
           (await container
                   .read(promptTranslationCoordinatorProvider)
@@ -131,6 +141,89 @@ void main() {
               .text,
           'green eyes',
         );
+      },
+    );
+
+    test(
+      'reverse draft sends Chinese spans as optional candidates including negation',
+      () async {
+        final service = _TranslationService();
+        String? sent;
+        when(
+          () => service.translatePromptEdit(
+            any(),
+            sessionId: any(named: 'sessionId'),
+          ),
+        ).thenAnswer((invocation) async {
+          sent = invocation.positionalArguments.single as String;
+          return '{"text":"long hair"}';
+        });
+        final matcher = ChineseTermMatcher([
+          {
+            'name': 'long_hair',
+            'cn_name': '长发',
+            'category': 0,
+            'post_count': 100,
+          },
+          {
+            'name': 'blue_eyes',
+            'cn_name': '蓝眼睛',
+            'category': 0,
+            'post_count': 100,
+          },
+        ]);
+        final container = draftContainer(
+          service,
+          chineseLookup: (text) async => matcher.match(text),
+        );
+        await container
+            .read(promptTranslationCoordinatorProvider)
+            .convertDraft(
+              const PromptTranslationEditRequest(
+                direction: PromptTranslationDirection.toSource,
+                source: 'smile',
+                zh: '改成长发，不要蓝眼睛',
+                baselineSource: 'smile',
+                baselineZh: '微笑',
+              ),
+              sessionId: 'chinese-spans',
+            );
+        final data = jsonDecode(sent!) as Map;
+        final terms = data['glossary'] as List;
+        expect(
+          terms.where((t) => t['tag'] == 'long_hair').single['matched_text'],
+          '长发',
+        );
+        expect(
+          terms.where((t) => t['tag'] == 'blue_eyes').single['match'],
+          'candidate',
+        );
+        expect(data['current_zh'], '改成长发，不要蓝眼睛');
+        expect(
+          PromptAssistantService.promptEditTranslationSystemPrompt,
+          contains('optional reference material'),
+        );
+        expect(
+          PromptAssistantService.promptEditTranslationSystemPrompt,
+          isNot(contains('Prefer the exact')),
+        );
+      },
+    );
+
+    test(
+      'editor annotates verified tags inside weights and groups without changing text',
+      () async {
+        final container = draftContainer(_TranslationService());
+        final annotate = container.read(promptTranslationAnnotationProvider);
+        const text = '{1.4::kagamine_rin::, blue eyes}, [kagamine rin]';
+        final marks = await annotate(text, false);
+        expect(
+          marks
+              .where((m) => m.iconId == 'character')
+              .map((m) => text.substring(m.start, m.end)),
+          ['kagamine_rin', 'kagamine rin'],
+        );
+        expect(await annotate('unknown_new_tag', false), isEmpty);
       },
     );
 

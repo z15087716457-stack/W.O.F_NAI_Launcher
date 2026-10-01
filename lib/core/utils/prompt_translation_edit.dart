@@ -50,10 +50,12 @@ class PromptSelectedTerm {
     required this.start,
     required this.text,
     required this.tag,
+    this.iconId,
   });
   final int start;
   final String text;
   final String tag;
+  final String? iconId;
   int get end => start + text.length;
   Map<String, Object> toJson() => {'text': text, 'tag': tag, 'start': start};
 
@@ -88,6 +90,7 @@ class PromptSelectedTerm {
                 start: term.start + delta,
                 text: term.text,
                 tag: term.tag,
+                iconId: term.iconId,
               ),
         ]
         .where(

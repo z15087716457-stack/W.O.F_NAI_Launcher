@@ -51,6 +51,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   bool _more = false;
   bool _railOpen = true;
   bool _wideArticle = false;
+  bool _showTranslation = true;
   double _fontSize = 14;
   int _epoch = 0;
   int? _total;
@@ -79,6 +80,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         _scope = WikiScope(WikiScopeKind.all, null, context.l10n.wiki_allTags);
         _fontSize = prefs.getDouble('wiki_text_size') ?? 14;
         _wideArticle = prefs.getBool('wiki_wide_article') ?? false;
+        _showTranslation = prefs.getBool('wiki_show_translation') ?? true;
       });
       if (widget.initialTag case final tag?) {
         final normalized = TagNormalizer.normalize(tag);
@@ -376,6 +378,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('wiki_text_size', _fontSize);
     await prefs.setBool('wiki_wide_article', _wideArticle);
+    await prefs.setBool('wiki_show_translation', _showTranslation);
   }
 
   bool _isInBlockLibrary(String tag) {
@@ -1072,15 +1075,17 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                         }
                         if (snapshot.hasError) return Text('${snapshot.error}');
                         final article = snapshot.data;
+                        final translated = ref
+                            .read(autoTagTranslationProvider)
+                            .wikiFor(tag);
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SelectableText(
                               article?.body.trim().isNotEmpty == true
-                                  ? (ref
-                                            .read(autoTagTranslationProvider)
-                                            .wikiFor(tag) ??
-                                        article!.body)
+                                  ? (_showTranslation
+                                        ? translated ?? article!.body
+                                        : article!.body)
                                   : context.l10n.wiki_articleMissing,
                               style: TextStyle(
                                 fontSize: _fontSize,
@@ -1088,6 +1093,20 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                 color: scheme.onSurface,
                               ),
                             ),
+                            if (_showTranslation &&
+                                translated == null &&
+                                article?.body.trim().isNotEmpty == true)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  '暂未翻译',
+                                  key: const Key('wiki-untranslated'),
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ),
                             const SizedBox(height: 26),
                             if (article != null && article.sourceUrl.isNotEmpty)
                               TextButton.icon(
@@ -1191,10 +1210,35 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
               _saveReadingSettings();
             },
           ),
+          const SizedBox(height: 22),
+          _readingLanguage(),
         ],
       ),
     );
   }
+
+  Widget _readingLanguage({VoidCallback? refreshDialog}) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text('阅读内容', style: Theme.of(context).textTheme.labelMedium),
+      const SizedBox(height: 8),
+      SegmentedButton<bool>(
+        key: const Key('wiki-reading-language'),
+        showSelectedIcon: false,
+        segments: const [
+          ButtonSegment(value: false, label: Text('原文')),
+          ButtonSegment(value: true, label: Text('译文')),
+        ],
+        selected: {_showTranslation},
+        onSelectionChanged: (values) {
+          setState(() => _showTranslation = values.first);
+          refreshDialog?.call();
+          _saveReadingSettings();
+        },
+      ),
+    ],
+  );
 
   Future<void> _showReadingDialog() async {
     await showDialog<void>(
@@ -1247,6 +1291,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                   _saveReadingSettings();
                 },
               ),
+              const SizedBox(height: 18),
+              _readingLanguage(refreshDialog: () => update(() {})),
             ],
           ),
         ),

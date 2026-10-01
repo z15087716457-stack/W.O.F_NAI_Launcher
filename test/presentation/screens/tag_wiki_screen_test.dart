@@ -8,6 +8,7 @@ import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
 import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
+import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -79,6 +80,16 @@ class _Blocks extends PromptBlockLibraryNotifier {
       PromptBlockLibraryState(blocks: <PromptBlock>[], folders: []);
 }
 
+class _Auto extends ChangeNotifier implements AutoTagTranslationController {
+  final Map<String, String> translations = {};
+  @override
+  String? wikiFor(String tag) => translations[tag];
+  @override
+  bool get enabled => false;
+  @override
+  Object? noSuchMethod(Invocation invocation) => null;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -92,9 +103,11 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
+      final auto = _Auto();
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            autoTagTranslationProvider.overrideWith((ref) => auto),
             unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
             tagWikiRepositoryProvider.overrideWith((ref) => _Wiki()),
             tagTranslationLookupProvider.overrideWith((ref) => _Translation()),
@@ -127,10 +140,50 @@ void main() {
       expect(find.text('blue eyes'), findsWidgets);
       expect(find.text('Blue eyes are visible.'), findsOneWidget);
       expect(find.text('阅读设置'), findsOneWidget);
+      expect(find.byKey(const Key('wiki-untranslated')), findsOneWidget);
+      auto.translations['blue_eyes'] = '蓝眼睛清晰可见。';
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      expect(find.text('蓝眼睛清晰可见。'), findsOneWidget);
+      await tester.tap(find.text('原文'));
+      await tester.pumpAndSettle();
+      expect(find.text('Blue eyes are visible.'), findsOneWidget);
+      expect(find.text('蓝眼睛清晰可见。'), findsNothing);
+      expect(
+        (await SharedPreferences.getInstance()).getBool(
+          'wiki_show_translation',
+        ),
+        isFalse,
+      );
+      auto.translations['blue_eyes'] = '重新翻译的中文';
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      expect(find.text('Blue eyes are visible.'), findsOneWidget);
 
       tester.view.physicalSize = const Size(900, 780);
       await tester.pump();
       expect(tester.takeException(), isNull);
+      await tester.tap(find.byTooltip('阅读设置'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SegmentedButton<bool>>(
+              find.byKey(const Key('wiki-reading-language')),
+            )
+            .selected,
+        {false},
+      );
+      await tester.tap(find.text('译文'));
+      await tester.pumpAndSettle();
+      expect(find.text('重新翻译的中文'), findsOneWidget);
+      expect(
+        (await SharedPreferences.getInstance()).getBool(
+          'wiki_show_translation',
+        ),
+        isTrue,
+      );
+      await tester.tap(find.text('隐藏').last);
+      await tester.pumpAndSettle();
     },
   );
 }

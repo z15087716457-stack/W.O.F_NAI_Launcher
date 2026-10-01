@@ -42,7 +42,7 @@ void main() {
       expect(request.model, 'translate-model');
       expect(request.systemPrompt, contains('including deletions'));
       expect(request.systemPrompt, contains('NAI numeric weights'));
-      expect(request.systemPrompt, contains('active selected_terms'));
+      expect(request.systemPrompt, contains('optional reference material'));
     },
   );
   test(

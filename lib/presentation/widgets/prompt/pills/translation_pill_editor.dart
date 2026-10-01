@@ -11,6 +11,7 @@ import '../../../../core/utils/tag_normalizer.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../tag_expansion/tag_expansion_wrapper.dart';
 import '../../common/translation_modified_badge.dart';
+import 'translation_editing_controller.dart';
 
 class TranslationPillEditHandle {
   const TranslationPillEditHandle({
@@ -42,6 +43,9 @@ TranslationPillEditHandle showTranslationPillEditor({
   PromptDraftConverter? converter,
   ValueChanged<String>? cancelConversion,
   bool enableTagExpansion = false,
+  bool highlightEnabled = true,
+  bool numericEmphasisEnabled = true,
+  Future<List<TranslationTagMark>> Function(String, bool)? annotations,
   bool Function()? isModelConfigured,
   Future<void> Function()? onConfigure,
 }) {
@@ -88,6 +92,9 @@ TranslationPillEditHandle showTranslationPillEditor({
                       converter: converter,
                       cancelConversion: cancelConversion,
                       enableTagExpansion: enableTagExpansion,
+                      highlightEnabled: highlightEnabled,
+                      numericEmphasisEnabled: numericEmphasisEnabled,
+                      annotations: annotations,
                       isModelConfigured: isModelConfigured,
                       onConfigure: onConfigure == null
                           ? null
@@ -156,6 +163,9 @@ class _TranslationPillEditPopover extends StatefulWidget {
     this.converter,
     this.cancelConversion,
     this.enableTagExpansion = false,
+    this.highlightEnabled = true,
+    this.numericEmphasisEnabled = true,
+    this.annotations,
     this.isModelConfigured,
     this.onConfigure,
   });
@@ -165,6 +175,9 @@ class _TranslationPillEditPopover extends StatefulWidget {
   final PromptDraftConverter? converter;
   final ValueChanged<String>? cancelConversion;
   final bool enableTagExpansion;
+  final bool highlightEnabled;
+  final bool numericEmphasisEnabled;
+  final Future<List<TranslationTagMark>> Function(String, bool)? annotations;
   final bool Function()? isModelConfigured;
   final Future<void> Function()? onConfigure;
 
@@ -175,12 +188,23 @@ class _TranslationPillEditPopover extends StatefulWidget {
 
 class _TranslationPillEditPopoverState
     extends State<_TranslationPillEditPopover> {
-  late final TextEditingController _source = TextEditingController(
-    text: widget.initial.source,
-  );
-  late final TextEditingController _zh = TextEditingController(
+  late final TranslationEditingController _source =
+      TranslationEditingController(
+        text: widget.initial.source,
+        highlightEnabled: widget.highlightEnabled,
+        numericEmphasisEnabled: widget.numericEmphasisEnabled,
+      );
+  late final TranslationEditingController _zh = TranslationEditingController(
     text: widget.initial.zh,
+    highlightEnabled: widget.highlightEnabled,
+    numericEmphasisEnabled: widget.numericEmphasisEnabled,
   );
+  final _sourcePaintKey = GlobalKey();
+  final _zhPaintKey = GlobalKey();
+  final _sourceScroll = ScrollController();
+  final _zhScroll = ScrollController();
+  Timer? _annotationTimer;
+  int _annotationVersion = 0;
   final _sourceFocus = FocusNode();
   final _zhFocus = FocusNode();
   late final _DraftHistory _sourceHistory;
@@ -194,6 +218,7 @@ class _TranslationPillEditPopoverState
   List<TranslationTagMark> _marks = const [];
   List<PromptSelectedTerm> _pickedTerms = const [];
   final Map<String, List<PromptSelectedTerm>> _termVersions = {};
+  final Map<String, List<TranslationTagMark>> _markVersions = {};
   PromptTranslationDirection? _busy;
   int _revision = 0;
   bool _applyingResult = false;
@@ -211,6 +236,8 @@ class _TranslationPillEditPopoverState
     _marks = widget.initial.marks;
     _source.addListener(_sourceChanged);
     _zh.addListener(_zhChanged);
+    _zh.updateMarks(_marks);
+    _scheduleAnnotations();
   }
 
   void _sourceChanged() {
@@ -221,6 +248,10 @@ class _TranslationPillEditPopoverState
     _lastSource = _source.text;
     _revision++;
     _marks = const [];
+    _markVersions.clear();
+    _source.updateMarks(const []);
+    _zh.updateMarks(const []);
+    _scheduleAnnotations();
     if (mounted) setState(() {});
   }
 
@@ -233,9 +264,43 @@ class _TranslationPillEditPopoverState
         _termVersions[_zh.text] ??
         PromptSelectedTerm.afterEdit(_pickedTerms, _lastZh, _zh.text);
     _rememberTerms(_zh.text, _pickedTerms);
+    _markVersions[_lastZh] = _marks;
+    _marks =
+        _markVersions[_zh.text] ??
+        PromptSelectedTerm.afterEdit(
+              [
+                for (final mark in _marks)
+                  if (mark.start >= 0 &&
+                      mark.end <= _lastZh.length &&
+                      mark.end > mark.start)
+                    PromptSelectedTerm(
+                      start: mark.start,
+                      text: _lastZh.substring(mark.start, mark.end),
+                      tag: mark.tag,
+                      iconId: mark.iconId,
+                    ),
+              ],
+              _lastZh,
+              _zh.text,
+            )
+            .map(
+              (term) => TranslationTagMark(
+                start: term.start,
+                end: term.end,
+                tag: term.tag,
+                iconId: term.iconId!,
+              ),
+            )
+            .toList();
+    _markVersions[_zh.text] = _marks;
+    if (_markVersions.length > 100) {
+      _markVersions.remove(_markVersions.keys.first);
+    }
     _lastZh = _zh.text;
     _revision++;
-    _marks = const [];
+    _source.updateMarks(const []);
+    _zh.updateMarks(_marks);
+    _scheduleAnnotations();
     if (mounted) setState(() {});
   }
 
@@ -291,12 +356,64 @@ class _TranslationPillEditPopoverState
       _baselineZh = _zh.text;
       _revision++;
       _applyingResult = false;
+      _source.updateMarks(const []);
+      _zh.updateMarks(_marks);
+      _scheduleAnnotations();
       setState(() {});
     } catch (error) {
       if (mounted) setState(() => _message = '转换失败，草稿已保留：$error');
     } finally {
       if (mounted) setState(() => _busy = null);
     }
+  }
+
+  void _scheduleAnnotations() {
+    _annotationTimer?.cancel();
+    final version = ++_annotationVersion;
+    final pickedMarks = [
+      for (final term in _pickedTerms)
+        if (term.iconId != null)
+          TranslationTagMark(
+            start: term.start,
+            end: term.end,
+            tag: term.tag,
+            iconId: term.iconId!,
+          ),
+    ];
+    final knownMarks = [
+      ..._marks,
+      for (final mark in pickedMarks)
+        if (!_marks.any((m) => mark.start < m.end && mark.end > m.start)) mark,
+    ];
+    _zh.updateMarks(knownMarks);
+    if (widget.annotations == null) return;
+    _annotationTimer = Timer(const Duration(milliseconds: 160), () async {
+      final source = _source.text;
+      final zh = _zh.text;
+      try {
+        final results = await Future.wait([
+          widget.annotations!(source, false),
+          widget.annotations!(zh, true),
+        ]);
+        if (!mounted ||
+            version != _annotationVersion ||
+            _source.text != source ||
+            _zh.text != zh) {
+          return;
+        }
+        _source.updateMarks(results[0]);
+        _zh.updateMarks([
+          ...knownMarks,
+          for (final mark in results[1])
+            if (!knownMarks.any(
+              (m) => mark.start < m.end && mark.end > m.start,
+            ))
+              mark,
+        ]);
+      } catch (_) {
+        // Optional local decoration must never interrupt editing.
+      }
+    });
   }
 
   void _insertCandidate(
@@ -335,9 +452,11 @@ class _TranslationPillEditPopoverState
             start: start,
             text: label,
             tag: candidate.canonicalTag,
+            iconId: candidate.category.name,
           ),
         ];
         _rememberTerms(_zh.text, _pickedTerms);
+        _scheduleAnnotations();
       }
     }
     (chinese ? _zhFocus : _sourceFocus).requestFocus();
@@ -353,6 +472,9 @@ class _TranslationPillEditPopoverState
   @override
   void dispose() {
     if (_busy != null) widget.cancelConversion?.call(_sessionId);
+    _annotationTimer?.cancel();
+    _sourceScroll.dispose();
+    _zhScroll.dispose();
     _source.removeListener(_sourceChanged);
     _zh.removeListener(_zhChanged);
     _sourceHistory.dispose();
@@ -441,20 +563,15 @@ class _TranslationPillEditPopoverState
                     ),
                     const SizedBox(height: 4),
                     _field(_source),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _directionButton(PromptTranslationDirection.toSource),
-                          const SizedBox(width: 10),
-                          _directionButton(
-                            PromptTranslationDirection.toChinese,
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(child: _fieldLabel(context, '中文', '可改写')),
+                        _directionButton(PromptTranslationDirection.toSource),
+                        const SizedBox(width: 6),
+                        _directionButton(PromptTranslationDirection.toChinese),
+                      ],
                     ),
-                    _fieldLabel(context, '中文', '可改写'),
                     const SizedBox(height: 4),
                     _field(_zh),
                     if (_message != null)
@@ -606,7 +723,7 @@ class _TranslationPillEditPopoverState
     );
   }
 
-  Widget _field(TextEditingController controller) {
+  Widget _field(TranslationEditingController controller) {
     final chinese = identical(controller, _zh);
     final focus = chinese ? _zhFocus : _sourceFocus;
     final history = chinese ? _zhHistory : _sourceHistory;
@@ -639,6 +756,7 @@ class _TranslationPillEditPopoverState
           ),
           controller: controller,
           focusNode: focus,
+          scrollController: chinese ? _zhScroll : _sourceScroll,
           minLines: 1,
           maxLines: null,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.3),
@@ -652,6 +770,12 @@ class _TranslationPillEditPopoverState
           ),
         ),
       ),
+    );
+    field = TranslationFieldIcons(
+      controller: controller,
+      scrollController: chinese ? _zhScroll : _sourceScroll,
+      fieldKey: chinese ? _zhPaintKey : _sourcePaintKey,
+      child: field,
     );
     if (widget.enableTagExpansion) {
       field = TagExpansionWrapper(

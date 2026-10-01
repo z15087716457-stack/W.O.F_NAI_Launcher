@@ -2034,10 +2034,13 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
         final modelLabel = route == null
             ? '未配置模型'
             : '${route.provider.name} / ${route.model.displayName}';
-        return SizedBox(
+        return Container(
           key: const Key('prompt-translation-menu'),
           width: 176,
-          height: _showGuide ? 340 : widget.height,
+          height: _showGuide ? null : widget.height,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height - 32,
+          ),
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: _showGuide

@@ -18,6 +18,7 @@ import 'package:nai_launcher/core/utils/prompt_translation_edit.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/translation_pill_editor.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/translation_editing_controller.dart';
 
 import '../../../../helpers/studio_capture_fonts.dart';
 
@@ -47,6 +48,7 @@ Future<TranslationPillEditHandle> openEditor(
   bool Function()? configured,
   Future<void> Function()? onConfigure,
   bool enableTags = false,
+  Future<List<TranslationTagMark>> Function(String, bool)? annotations,
 }) async {
   late TranslationPillEditHandle handle;
   await tester.pumpWidget(
@@ -78,6 +80,7 @@ Future<TranslationPillEditHandle> openEditor(
                 isModelConfigured: configured,
                 onConfigure: onConfigure,
                 enableTagExpansion: enableTags,
+                annotations: annotations,
               ),
               child: const Text('open'),
             ),
@@ -103,6 +106,117 @@ void main() {
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+  });
+
+  testWidgets(
+    'decorated fields preserve offsets, IME, plain copy and right alignment',
+    (tester) async {
+      final handle = await openEditor(
+        tester,
+        initial: const TranslationPill(
+          source: '1.4::kagamine_rin::, {blue eyes}',
+          zh: '1.4::镜音铃::，{蓝眼睛}',
+          marks: [
+            TranslationTagMark(
+              start: 5,
+              end: 8,
+              tag: 'kagamine_rin',
+              iconId: 'character',
+            ),
+          ],
+        ),
+        converter: (_, __) async => const PromptTranslationEditResult('unused'),
+        annotations: (text, chinese) async => chinese
+            ? []
+            : [
+                const TranslationTagMark(
+                  start: 5,
+                  end: 17,
+                  tag: 'kagamine_rin',
+                  iconId: 'character',
+                ),
+              ],
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
+      final field = tester.widget<TextField>(find.byKey(sourceKey));
+      final controller = field.controller! as TranslationEditingController;
+      var span = controller.buildTextSpan(
+        context: tester.element(find.byKey(sourceKey)),
+        withComposing: true,
+      );
+      expect(span.toPlainText(), controller.text);
+      expect(span.children!.whereType<WidgetSpan>(), isEmpty);
+      expect(
+        span.children!.whereType<TextSpan>().any(
+          (s) => s.style?.decoration == TextDecoration.underline,
+        ),
+        isTrue,
+      );
+      expect(
+        tester.getRect(find.byKey(downKey)).right,
+        closeTo(tester.getRect(find.byKey(zhKey)).right, 1),
+      );
+      expect(
+        tester.getRect(find.byKey(upKey)).center.dy,
+        closeTo(tester.getRect(find.text('中文')).center.dy, 1),
+      );
+      await tester.tap(find.byKey(zhKey));
+      final zh = tester.widget<TextField>(find.byKey(zhKey)).controller!;
+      zh.value = const TextEditingValue(
+        text: '镜音铃，长发',
+        selection: TextSelection.collapsed(offset: 6),
+        composing: TextRange(start: 4, end: 6),
+      );
+      await tester.pump();
+      span = zh.buildTextSpan(
+        context: tester.element(find.byKey(zhKey)),
+        withComposing: true,
+      );
+      expect(span.toPlainText(), '镜音铃，长发');
+      expect(
+        span.children!.whereType<TextSpan>().last.style!.decoration,
+        TextDecoration.underline,
+      );
+      zh.value = zh.value.copyWith(composing: TextRange.empty);
+      await tester.tap(find.byKey(saveKey));
+      await tester.pump();
+      final saved = await handle.result as TranslationPill;
+      expect(saved.source, '1.4::kagamine_rin::, {blue eyes}');
+      expect(saved.zh, '镜音铃，长发');
+    },
+  );
+
+  testWidgets('stale annotation lookup cannot decorate newer input', (
+    tester,
+  ) async {
+    final stale = Completer<List<TranslationTagMark>>();
+    final handle = await openEditor(
+      tester,
+      annotations: (text, chinese) async {
+        if (!chinese && text == 'blue eyes, smile') return stale.future;
+        return [];
+      },
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.enterText(find.byKey(sourceKey), 'new source');
+    await tester.pump(const Duration(milliseconds: 200));
+    stale.complete([
+      const TranslationTagMark(
+        start: 0,
+        end: 4,
+        tag: 'old',
+        iconId: 'character',
+      ),
+    ]);
+    await tester.pumpAndSettle();
+    final controller =
+        tester.widget<TextField>(find.byKey(sourceKey)).controller!
+            as TranslationEditingController;
+    expect(controller.marks, isEmpty);
+    expect(controller.text, 'new source');
+    handle.dismiss();
+    await tester.pump();
   });
 
   testWidgets('up changes draft only; save commits the confirmed pair', (
@@ -172,9 +286,29 @@ void main() {
         source: '1.4::blue eyes::, {long hair}, artist:asteroid_ill',
         zh: '1.4::蓝眼睛::，{长发}，画师：asteroid ill',
         needsReview: true,
+        marks: [
+          TranslationTagMark(
+            start: 19,
+            end: 31,
+            tag: 'asteroid_ill',
+            iconId: 'artist',
+          ),
+        ],
       ),
+      annotations: (text, chinese) async => chinese
+          ? []
+          : [
+              const TranslationTagMark(
+                start: 38,
+                end: 50,
+                tag: 'asteroid_ill',
+                iconId: 'artist',
+              ),
+            ],
       converter: (_, __) async => const PromptTranslationEditResult('unused'),
     );
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
     expect(find.byKey(badgeKey), findsOneWidget);
     if (Platform.environment['CAPTURE_TRANSLATION_EDITOR'] == '1') {
       debugDisableShadows = false;

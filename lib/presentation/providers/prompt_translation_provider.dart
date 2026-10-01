@@ -5,11 +5,94 @@ import '../../core/autocomplete/tag_translation_lookup.dart';
 import '../../core/utils/prompt_translation_document.dart';
 import '../../core/utils/prompt_translation_edit.dart';
 import '../../core/utils/tag_normalizer.dart';
+import '../../core/utils/nai_prompt_syntax.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../prompt_assistant/services/prompt_assistant_service.dart';
 import 'character_prompt_provider.dart';
 import 'image_generation_provider.dart';
 import 'pill_workspace_provider.dart';
+
+/// Only verified, unambiguous category metadata becomes an editor decoration.
+final promptTranslationAnnotationProvider =
+    Provider<Future<List<TranslationTagMark>> Function(String, bool)>((ref) {
+      final tags = ref.read(unifiedTagRepositoryProvider);
+      final chineseLookup = ref.read(chinesePromptTermLookupProvider);
+      return (text, chinese) async {
+        if (chinese) {
+          final hits = await chineseLookup(text);
+          return [
+            for (final hit in hits)
+              if (hits
+                      .where(
+                        (other) =>
+                            other.start == hit.start && other.end == hit.end,
+                      )
+                      .length ==
+                  1)
+                TranslationTagMark(
+                  start: hit.start,
+                  end: hit.end,
+                  tag: hit.candidate.canonicalTag,
+                  iconId: hit.candidate.category.name,
+                ),
+          ];
+        }
+        final candidates = await tags.byNames(_editorTagCandidates(text));
+        final marks = <TranslationTagMark>[];
+        final boundary = RegExp(r'[a-zA-Z0-9_@]');
+        for (final candidate in candidates) {
+          final pattern = RegExp(
+            candidate.canonicalTag.split('_').map(RegExp.escape).join(r'[ _]+'),
+            caseSensitive: false,
+          );
+          for (final match in pattern.allMatches(text)) {
+            if ((match.start > 0 && boundary.hasMatch(text[match.start - 1])) ||
+                (match.end < text.length &&
+                    boundary.hasMatch(text[match.end]))) {
+              continue;
+            }
+            marks.add(
+              TranslationTagMark(
+                start: match.start,
+                end: match.end,
+                tag: candidate.canonicalTag,
+                iconId: candidate.category.name,
+              ),
+            );
+          }
+        }
+        marks.sort((a, b) => a.start.compareTo(b.start));
+        return marks;
+      };
+    });
+
+Set<String> _editorTagCandidates(String text) {
+  final result = PromptTranslationBatch.prepare({
+    'draft': PillDocument(text: text, instances: const {}),
+  }).tagCandidates;
+  void collect(String value) {
+    for (final token in NaiPromptSyntax.scan(value)) {
+      if (token.kind != NaiPromptTokenKind.group ||
+          (token.start > 0 &&
+              !RegExp(r'[\s,，:{}\[\]]').hasMatch(value[token.start - 1]))) {
+        continue;
+      }
+      final inner = token
+          .source(value)
+          .substring(1, token.end - token.start - 1);
+      result.addAll(
+        PromptTranslationBatch.prepare({
+          'draft': PillDocument(text: inner, instances: const {}),
+        }).tagCandidates,
+      );
+      if (result.length >= 160) return;
+      collect(inner);
+    }
+  }
+
+  collect(text);
+  return result.take(160).toSet();
+}
 
 final promptTranslationBusyProvider = StateProvider<bool>((ref) => false);
 
@@ -74,31 +157,24 @@ class PromptTranslationCoordinator {
             'icon_id': candidate.category.name,
           };
         }
-        final phrases = request.zh
-            .split(RegExp(r'[,，。；;\r\n]'))
-            .map((text) => text.trim())
-            .where(
-              (text) =>
-                  RegExp(r'[\u3400-\u9fff]').hasMatch(text) &&
-                  text.length <= 48,
-            )
-            .take(12);
-        for (final phrase in phrases) {
-          final candidates = await _ref
-              .read(localTagExpansionServiceProvider)
-              .search(phrase, locale: 'zh-CN', limit: 4);
-          for (final candidate in candidates) {
-            byTag.putIfAbsent(
-              candidate.canonicalTag,
-              () => {
-                'tag': candidate.canonicalTag,
-                'title': TagNormalizer.toDisplay(candidate.canonicalTag),
-                if (candidate.translation != null) 'zh': candidate.translation!,
-                'icon_id': candidate.category.name,
-                'match': 'candidate',
-              },
-            );
-          }
+        final hits = await _ref.read(chinesePromptTermLookupProvider)(
+          request.zh,
+        );
+        for (final hit in hits) {
+          final candidate = hit.candidate;
+          byTag.putIfAbsent(
+            candidate.canonicalTag,
+            () => {
+              'tag': candidate.canonicalTag,
+              'title': TagNormalizer.toDisplay(candidate.canonicalTag),
+              'zh':
+                  candidate.translation ??
+                  request.zh.substring(hit.start, hit.end),
+              'matched_text': request.zh.substring(hit.start, hit.end),
+              'icon_id': candidate.category.name,
+              'match': 'candidate',
+            },
+          );
         }
       } catch (_) {
         // Optional local terminology never blocks natural-language conversion.

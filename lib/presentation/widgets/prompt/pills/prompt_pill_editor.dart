@@ -528,6 +528,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           : initial,
       globalPosition: position,
       enableTagExpansion: true,
+      highlightEnabled: widget.config.enableSyntaxHighlight,
+      numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
+      annotations: ref.read(promptTranslationAnnotationProvider),
       converter: (request, sessionId) =>
           coordinator.convertDraft(request, sessionId: sessionId),
       cancelConversion: (sessionId) {

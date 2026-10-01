@@ -6,6 +6,7 @@ class PromptTranslationGuide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
     children: [
       Row(
         children: [
@@ -27,7 +28,8 @@ class PromptTranslationGuide extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 8),
-      const Expanded(
+      const Flexible(
+        fit: FlexFit.loose,
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -60,6 +62,7 @@ class PromptTranslationGuide extends StatelessWidget {
                 icon: Icon(Icons.undo, size: 20),
                 title: 'A / 恢复',
                 text: '整组还原原文 / 恢复翻译块',
+                bottomGap: 0,
               ),
             ],
           ),
@@ -74,15 +77,17 @@ class _GuideRow extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.text,
+    this.bottomGap = 13,
   });
   final Widget icon;
   final String title;
   final String text;
+  final double bottomGap;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 13),
+      padding: EdgeInsets.only(bottom: bottomGap),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

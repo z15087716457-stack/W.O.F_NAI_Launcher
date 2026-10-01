@@ -204,6 +204,7 @@ class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
     String color = '#FF607D8B',
     String appearance = 'classic',
     String? readingTranslationZh,
+    List<Map<String, dynamic>>? readingTranslationMarks,
     bool readingTranslationNeedsReview = false,
     String? iconName,
     String? thumbnail,
@@ -230,6 +231,7 @@ class _RecordingLibraryNotifier extends PromptBlockLibraryNotifier {
       color: color,
       appearance: appearance,
       readingTranslationZh: readingTranslationZh,
+      readingTranslationMarks: readingTranslationMarks,
       readingTranslationNeedsReview: readingTranslationNeedsReview,
       iconName: iconName,
     );
