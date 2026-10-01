@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/prompt_input_normalization.dart';
+import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
+import '../../../prompt_assistant/services/prompt_assistant_service.dart';
+import '../../../screens/settings/sections/prompt_assistant_settings_section.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
@@ -510,6 +513,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   ) async {
     _dismissInstanceCard();
     _translationEditor?.dismiss();
+    final coordinator = ref.read(promptTranslationCoordinatorProvider);
+    final service = ref.read(promptAssistantServiceProvider);
     final editor = showTranslationPillEditor(
       context: context,
       initial: widget.config.enableAutoFormat
@@ -522,6 +527,43 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
             )
           : initial,
       globalPosition: position,
+      enableTagExpansion: true,
+      converter: (request, sessionId) =>
+          coordinator.convertDraft(request, sessionId: sessionId),
+      cancelConversion: (sessionId) {
+        coordinator.cancelDraft(sessionId);
+        service.cancelCurrentTask(sessionId: sessionId);
+      },
+      isModelConfigured: () =>
+          ref.read(promptAssistantConfigProvider).promptTranslationRoute !=
+          null,
+      onConfigure: () => showDialog<void>(
+        context: context,
+        builder: (dialogContext) => Dialog(
+          child: SizedBox(
+            width: 720,
+            height: MediaQuery.sizeOf(dialogContext).height * .85,
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    tooltip: '返回编辑',
+                    onPressed: () => Navigator.pop(dialogContext),
+                    icon: const Icon(Icons.close),
+                  ),
+                ),
+                const Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: PromptAssistantSettingsSection(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
     _translationEditor = editor;
     final result = await editor.result;

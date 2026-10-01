@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../core/autocomplete/tag_translation_lookup.dart';
 import '../../core/utils/prompt_translation_document.dart';
+import '../../core/utils/prompt_translation_edit.dart';
 import '../../core/utils/tag_normalizer.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../prompt_assistant/services/prompt_assistant_service.dart';
@@ -29,6 +30,100 @@ class PromptTranslationResult {
 class PromptTranslationCoordinator {
   PromptTranslationCoordinator(this._ref);
   final Ref _ref;
+  final Map<String, bool> _draftRequests = {};
+
+  void cancelDraft(String sessionId) {
+    if (_draftRequests.containsKey(sessionId)) _draftRequests[sessionId] = true;
+  }
+
+  /// Produces an editor draft only. Saving remains the host editor's job.
+  Future<PromptTranslationEditResult> convertDraft(
+    PromptTranslationEditRequest request, {
+    required String sessionId,
+  }) async {
+    _draftRequests[sessionId] = false;
+    try {
+      if (request.input.trim().isEmpty) {
+        throw const FormatException('请先输入需要转换的内容');
+      }
+      final batch = PromptTranslationBatch.prepare({
+        'draft': PillDocument(text: request.source, instances: const {}),
+      });
+      final glossary = await _glossaryFor(batch);
+      final byTag = {for (final item in glossary) item['tag']!: item};
+      final activeTerms = request.selectedTerms
+          .where(
+            (term) =>
+                term.start >= 0 &&
+                term.end <= request.zh.length &&
+                request.zh.substring(term.start, term.end) == term.text,
+          )
+          .toList();
+      try {
+        final picked = await _ref
+            .read(unifiedTagRepositoryProvider)
+            .byNames(activeTerms.map((term) => term.tag).toList());
+        for (final candidate in picked) {
+          final term = activeTerms.firstWhere(
+            (term) => term.tag == candidate.canonicalTag,
+          );
+          byTag[candidate.canonicalTag] = {
+            'tag': candidate.canonicalTag,
+            'title': TagNormalizer.toDisplay(candidate.canonicalTag),
+            'zh': term.text,
+            'icon_id': candidate.category.name,
+          };
+        }
+        final phrases = request.zh
+            .split(RegExp(r'[,，。；;\r\n]'))
+            .map((text) => text.trim())
+            .where(
+              (text) =>
+                  RegExp(r'[\u3400-\u9fff]').hasMatch(text) &&
+                  text.length <= 48,
+            )
+            .take(12);
+        for (final phrase in phrases) {
+          final candidates = await _ref
+              .read(localTagExpansionServiceProvider)
+              .search(phrase, locale: 'zh-CN', limit: 4);
+          for (final candidate in candidates) {
+            byTag.putIfAbsent(
+              candidate.canonicalTag,
+              () => {
+                'tag': candidate.canonicalTag,
+                'title': TagNormalizer.toDisplay(candidate.canonicalTag),
+                if (candidate.translation != null) 'zh': candidate.translation!,
+                'icon_id': candidate.category.name,
+                'match': 'candidate',
+              },
+            );
+          }
+        }
+      } catch (_) {
+        // Optional local terminology never blocks natural-language conversion.
+      }
+      if (_draftRequests[sessionId] == true) throw StateError('转换已取消');
+      final pickedTags = activeTerms.map((term) => term.tag).toSet();
+      final terms = [
+        for (final tag in pickedTags)
+          if (byTag[tag] != null) byTag[tag]!,
+        for (final item in byTag.values)
+          if (!pickedTags.contains(item['tag'])) item,
+      ].take(64).toList(growable: false);
+      final raw = await _ref
+          .read(promptAssistantServiceProvider)
+          .translatePromptEdit(
+            request.requestJson(terms),
+            sessionId: sessionId,
+          );
+      if (_draftRequests[sessionId] == true) throw StateError('转换已取消');
+      return PromptTranslationEditResult.parse(raw, request, terms);
+    } finally {
+      _draftRequests.remove(sessionId);
+    }
+  }
+
   Map<String, ({PillDocument before, PillDocument after})> _lastUndo = {};
   final Map<bool, Map<String, ({PillDocument before, PillDocument after})>>
   _plainTextUndo = {};

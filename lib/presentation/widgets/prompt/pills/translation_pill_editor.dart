@@ -1,0 +1,742 @@
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../../../core/autocomplete/completion_models.dart';
+import '../../../../core/autocomplete/prompt_token_parser.dart';
+import '../../../../core/utils/prompt_translation_edit.dart';
+import '../../../../core/utils/tag_normalizer.dart';
+import '../../../../data/models/prompt_block/pill_document.dart';
+import '../../tag_expansion/tag_expansion_wrapper.dart';
+import '../../common/translation_modified_badge.dart';
+
+class TranslationPillEditHandle {
+  const TranslationPillEditHandle({
+    required this.result,
+    required this.dismiss,
+  });
+
+  final Future<Object?> result;
+  final VoidCallback dismiss;
+}
+
+class TranslationPillPlainText {
+  const TranslationPillPlainText(this.source);
+
+  final String source;
+}
+
+typedef PromptDraftConverter =
+    Future<PromptTranslationEditResult> Function(
+      PromptTranslationEditRequest request,
+      String sessionId,
+    );
+
+/// Open a compact editor at the click position, without dimming the canvas.
+TranslationPillEditHandle showTranslationPillEditor({
+  required BuildContext context,
+  required TranslationPill initial,
+  required Offset globalPosition,
+  PromptDraftConverter? converter,
+  ValueChanged<String>? cancelConversion,
+  bool enableTagExpansion = false,
+  bool Function()? isModelConfigured,
+  Future<void> Function()? onConfigure,
+}) {
+  final overlay = Overlay.of(context, rootOverlay: true);
+  final completer = Completer<Object?>();
+  final visibility = ValueNotifier(true);
+  late final OverlayEntry entry;
+
+  void finish(Object? value) {
+    if (completer.isCompleted) return;
+    entry.remove();
+    entry.dispose();
+    visibility.dispose();
+    completer.complete(value);
+  }
+
+  entry = OverlayEntry(
+    builder: (overlayContext) {
+      final overlayBox = overlay.context.findRenderObject()! as RenderBox;
+      final localPosition = overlayBox.globalToLocal(globalPosition);
+      final screen = overlayBox.size;
+      final cardWidth = math.min(380.0, math.max(0.0, screen.width - 16));
+      return ValueListenableBuilder<bool>(
+        valueListenable: visibility,
+        builder: (_, visible, __) => Visibility(
+          visible: visible,
+          maintainState: true,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => finish(null),
+                ),
+              ),
+              Positioned.fill(
+                child: CustomSingleChildLayout(
+                  delegate: _TranslationPopoverLayout(localPosition),
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: _TranslationPillEditPopover(
+                      initial: initial,
+                      onComplete: finish,
+                      converter: converter,
+                      cancelConversion: cancelConversion,
+                      enableTagExpansion: enableTagExpansion,
+                      isModelConfigured: isModelConfigured,
+                      onConfigure: onConfigure == null
+                          ? null
+                          : () async {
+                              visibility.value = false;
+                              try {
+                                await onConfigure();
+                              } finally {
+                                if (!completer.isCompleted) {
+                                  visibility.value = true;
+                                }
+                              }
+                            },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+  overlay.insert(entry);
+  return TranslationPillEditHandle(
+    result: completer.future,
+    dismiss: () => finish(null),
+  );
+}
+
+class _TranslationPopoverLayout extends SingleChildLayoutDelegate {
+  const _TranslationPopoverLayout(this.anchor);
+
+  final Offset anchor;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints(
+        maxWidth: math.max(0, constraints.maxWidth - 16),
+        maxHeight: math.max(0, constraints.maxHeight - 16),
+      );
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final left = anchor.dx
+        .clamp(8.0, math.max(8.0, size.width - childSize.width - 8))
+        .toDouble();
+    final below = anchor.dy + 10;
+    final top = below + childSize.height <= size.height - 8
+        ? below
+        : (anchor.dy - childSize.height - 10)
+              .clamp(8.0, math.max(8.0, size.height - childSize.height - 8))
+              .toDouble();
+    return Offset(left, top);
+  }
+
+  @override
+  bool shouldRelayout(_TranslationPopoverLayout oldDelegate) =>
+      oldDelegate.anchor != anchor;
+}
+
+class _TranslationPillEditPopover extends StatefulWidget {
+  const _TranslationPillEditPopover({
+    required this.initial,
+    required this.onComplete,
+    this.converter,
+    this.cancelConversion,
+    this.enableTagExpansion = false,
+    this.isModelConfigured,
+    this.onConfigure,
+  });
+
+  final TranslationPill initial;
+  final ValueChanged<Object?> onComplete;
+  final PromptDraftConverter? converter;
+  final ValueChanged<String>? cancelConversion;
+  final bool enableTagExpansion;
+  final bool Function()? isModelConfigured;
+  final Future<void> Function()? onConfigure;
+
+  @override
+  State<_TranslationPillEditPopover> createState() =>
+      _TranslationPillEditPopoverState();
+}
+
+class _TranslationPillEditPopoverState
+    extends State<_TranslationPillEditPopover> {
+  late final TextEditingController _source = TextEditingController(
+    text: widget.initial.source,
+  );
+  late final TextEditingController _zh = TextEditingController(
+    text: widget.initial.zh,
+  );
+  final _sourceFocus = FocusNode();
+  final _zhFocus = FocusNode();
+  late final _DraftHistory _sourceHistory;
+  late final _DraftHistory _zhHistory;
+  late String _lastZh = widget.initial.zh;
+  late String _baselineSource = widget.initial.source;
+  late String _baselineZh = widget.initial.zh;
+  late String? _synchronizedSource = widget.initial.needsReview
+      ? null
+      : widget.initial.source;
+  List<TranslationTagMark> _marks = const [];
+  List<PromptSelectedTerm> _pickedTerms = const [];
+  final Map<String, List<PromptSelectedTerm>> _termVersions = {};
+  PromptTranslationDirection? _busy;
+  int _revision = 0;
+  bool _applyingResult = false;
+  bool _configuring = false;
+  String? _message;
+  late final String _sessionId = 'prompt-edit-${identityHashCode(this)}';
+  bool get _needsReview =>
+      _synchronizedSource == null || _source.text != _synchronizedSource;
+
+  @override
+  void initState() {
+    super.initState();
+    _sourceHistory = _DraftHistory(_source);
+    _zhHistory = _DraftHistory(_zh);
+    _marks = widget.initial.marks;
+    _source.addListener(_sourceChanged);
+    _zh.addListener(_zhChanged);
+  }
+
+  void _sourceChanged() {
+    if (_applyingResult) return;
+    // Controller listeners also see selection changes. Only text changes
+    // invalidate an outstanding request or its annotations.
+    if (_lastSource == _source.text) return;
+    _lastSource = _source.text;
+    _revision++;
+    _marks = const [];
+    if (mounted) setState(() {});
+  }
+
+  late String _lastSource = widget.initial.source;
+
+  void _zhChanged() {
+    if (_applyingResult || _lastZh == _zh.text) return;
+    _rememberTerms(_lastZh, _pickedTerms);
+    _pickedTerms =
+        _termVersions[_zh.text] ??
+        PromptSelectedTerm.afterEdit(_pickedTerms, _lastZh, _zh.text);
+    _rememberTerms(_zh.text, _pickedTerms);
+    _lastZh = _zh.text;
+    _revision++;
+    _marks = const [];
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _convert(PromptTranslationDirection direction) async {
+    if (_busy != null || widget.converter == null) return;
+    final request = PromptTranslationEditRequest(
+      direction: direction,
+      source: _source.text,
+      zh: _zh.text,
+      baselineSource: _baselineSource,
+      baselineZh: _baselineZh,
+      selectedTerms: List.unmodifiable(_pickedTerms),
+    );
+    if (request.input.trim().isEmpty) return;
+    final revision = _revision;
+    setState(() {
+      _busy = direction;
+      _message = null;
+    });
+    try {
+      final result = await widget.converter!(request, _sessionId);
+      if (!mounted) return;
+      if (revision != _revision) {
+        setState(() => _message = '内容已修改，请重新转换；新草稿已保留');
+        return;
+      }
+      (direction == PromptTranslationDirection.toChinese
+              ? _zhFocus
+              : _sourceFocus)
+          .requestFocus();
+      _applyingResult = true;
+      _rememberTerms(_zh.text, _pickedTerms);
+      (direction == PromptTranslationDirection.toChinese
+              ? _zhHistory
+              : _sourceHistory)
+          .replace(
+            TextEditingValue(
+              text: result.text,
+              selection: TextSelection.collapsed(offset: result.text.length),
+            ),
+          );
+      _lastSource = _source.text;
+      _lastZh = _zh.text;
+      _pickedTerms = direction == PromptTranslationDirection.toChinese
+          ? const []
+          : _pickedTerms;
+      _rememberTerms(_zh.text, _pickedTerms);
+      _marks = direction == PromptTranslationDirection.toChinese
+          ? result.marks
+          : const [];
+      _synchronizedSource = _source.text;
+      _baselineSource = _source.text;
+      _baselineZh = _zh.text;
+      _revision++;
+      _applyingResult = false;
+      setState(() {});
+    } catch (error) {
+      if (mounted) setState(() => _message = '转换失败，草稿已保留：$error');
+    } finally {
+      if (mounted) setState(() => _busy = null);
+    }
+  }
+
+  void _insertCandidate(
+    CompletionCandidate candidate, {
+    required bool chinese,
+  }) {
+    final controller = chinese ? _zh : _source;
+    final selected = controller.selection;
+    final caret = selected.isValid
+        ? selected.extentOffset
+        : controller.text.length;
+    final label = chinese
+        ? (candidate.translation?.trim().isNotEmpty == true
+              ? candidate.translation!.trim()
+              : TagNormalizer.toDisplay(candidate.canonicalTag))
+        : candidate.canonicalTag;
+    final result = PromptTokenParser.insertAtCaret(
+      text: controller.text,
+      cursorPosition: caret,
+      canonicalTag: label,
+      autoInsertComma: true,
+    );
+    if (result.text == controller.text) return;
+    (chinese ? _zhHistory : _sourceHistory).replace(
+      TextEditingValue(
+        text: result.text,
+        selection: TextSelection.collapsed(offset: result.cursorPosition),
+      ),
+    );
+    if (chinese) {
+      final start = result.text.lastIndexOf(label, result.cursorPosition);
+      if (start >= 0) {
+        _pickedTerms = [
+          ..._pickedTerms,
+          PromptSelectedTerm(
+            start: start,
+            text: label,
+            tag: candidate.canonicalTag,
+          ),
+        ];
+        _rememberTerms(_zh.text, _pickedTerms);
+      }
+    }
+    (chinese ? _zhFocus : _sourceFocus).requestFocus();
+  }
+
+  void _rememberTerms(String text, List<PromptSelectedTerm> terms) {
+    _termVersions[text] = List.unmodifiable(terms);
+    if (_termVersions.length > 100) {
+      _termVersions.remove(_termVersions.keys.first);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_busy != null) widget.cancelConversion?.call(_sessionId);
+    _source.removeListener(_sourceChanged);
+    _zh.removeListener(_zhChanged);
+    _sourceHistory.dispose();
+    _zhHistory.dispose();
+    _source.dispose();
+    _zh.dispose();
+    _sourceFocus.dispose();
+    _zhFocus.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final sourceChanged = _source.text != widget.initial.source;
+    widget.onComplete(
+      TranslationPill(
+        source: _source.text,
+        zh: _zh.text.trim(),
+        marks: _marks,
+        showOriginal: sourceChanged || widget.initial.showOriginal,
+        needsReview: _needsReview,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      key: const Key('translation-pill-editor-popover'),
+      elevation: 5,
+      color: scheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .7)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.translate_outlined, size: 17, color: scheme.primary),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    '翻译块',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: '关闭',
+                  onPressed: () => widget.onComplete(null),
+                  icon: const Icon(Icons.close),
+                  iconSize: 17,
+                  visualDensity: VisualDensity.compact,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 28,
+                    height: 28,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Flexible(
+              fit: FlexFit.loose,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: _fieldLabel(context, '原文', '生图使用')),
+                        if (_needsReview)
+                          const TranslationModifiedBadge(
+                            key: Key('translation-pill-modified'),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    _field(_source),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _directionButton(PromptTranslationDirection.toSource),
+                          const SizedBox(width: 10),
+                          _directionButton(
+                            PromptTranslationDirection.toChinese,
+                          ),
+                        ],
+                      ),
+                    ),
+                    _fieldLabel(context, '中文', '可改写'),
+                    const SizedBox(height: 4),
+                    _field(_zh),
+                    if (_message != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          _message!,
+                          key: const Key('translation-pill-message'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.error,
+                          ),
+                        ),
+                      ),
+                    if (widget.isModelConfigured?.call() == false)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          key: const Key('translation-pill-configure'),
+                          onPressed: _configuring || widget.onConfigure == null
+                              ? null
+                              : () async {
+                                  setState(() => _configuring = true);
+                                  try {
+                                    await widget.onConfigure!();
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() => _configuring = false);
+                                    }
+                                  }
+                                },
+                          icon: const Icon(Icons.settings_outlined, size: 14),
+                          label: const Text('配置翻译模型'),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Divider(height: 1, color: scheme.outlineVariant),
+            const SizedBox(height: 7),
+            Row(
+              children: [
+                IconButton(
+                  key: const Key('translation-pill-delete'),
+                  tooltip: '删除整块',
+                  onPressed: () => widget.onComplete('delete'),
+                  icon: const Icon(Icons.delete_outline),
+                  color: scheme.error,
+                  iconSize: 19,
+                  visualDensity: VisualDensity.compact,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 32,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  key: const Key('translation-pill-plain-text'),
+                  tooltip: '还原为原文文本',
+                  onPressed: _source.text.isEmpty
+                      ? null
+                      : () => widget.onComplete(
+                          TranslationPillPlainText(_source.text),
+                        ),
+                  icon: const Text(
+                    'A',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 32,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+                const Spacer(),
+                FilledButton.icon(
+                  key: const Key('translation-pill-save'),
+                  onPressed:
+                      _busy != null ||
+                          _source.text.trim().isEmpty ||
+                          _zh.text.trim().isEmpty
+                      ? null
+                      : _save,
+                  icon: const Icon(Icons.check, size: 16),
+                  label: const Text('保存'),
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    minimumSize: const Size(72, 32),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _fieldLabel(BuildContext context, String title, String hint) => Row(
+    children: [
+      Text(
+        title,
+        style: Theme.of(
+          context,
+        ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(width: 5),
+      Text(
+        '· $hint',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    ],
+  );
+
+  Widget _directionButton(PromptTranslationDirection direction) {
+    final chinese = direction == PromptTranslationDirection.toChinese;
+    final input = chinese ? _source : _zh;
+    return IconButton.filledTonal(
+      key: Key(
+        chinese ? 'translation-pill-to-chinese' : 'translation-pill-to-source',
+      ),
+      tooltip: chinese ? '原文 → 中文' : '中文 → 原文',
+      constraints: const BoxConstraints.tightFor(width: 34, height: 28),
+      padding: EdgeInsets.zero,
+      style: IconButton.styleFrom(
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+      ),
+      onPressed:
+          _busy != null ||
+              input.text.trim().isEmpty ||
+              widget.converter == null ||
+              widget.isModelConfigured?.call() == false
+          ? null
+          : () => _convert(direction),
+      icon: _busy == direction
+          ? const SizedBox(
+              width: 13,
+              height: 13,
+              child: CircularProgressIndicator(strokeWidth: 1.5),
+            )
+          : Icon(chinese ? Icons.arrow_downward : Icons.arrow_upward, size: 17),
+    );
+  }
+
+  Widget _field(TextEditingController controller) {
+    final chinese = identical(controller, _zh);
+    final focus = chinese ? _zhFocus : _sourceFocus;
+    final history = chinese ? _zhHistory : _sourceHistory;
+    Widget field = Shortcuts(
+      shortcuts: const {
+        SingleActivator(LogicalKeyboardKey.keyY, control: true): RedoTextIntent(
+          SelectionChangedCause.keyboard,
+        ),
+      },
+      child: Actions(
+        actions: {
+          UndoTextIntent: CallbackAction<UndoTextIntent>(
+            onInvoke: (_) {
+              history.undo();
+              return null;
+            },
+          ),
+          RedoTextIntent: CallbackAction<RedoTextIntent>(
+            onInvoke: (_) {
+              history.redo();
+              return null;
+            },
+          ),
+        },
+        child: TextField(
+          key: Key(
+            chinese
+                ? 'translation-pill-zh-field'
+                : 'translation-pill-source-field',
+          ),
+          controller: controller,
+          focusNode: focus,
+          minLines: 1,
+          maxLines: null,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.3),
+          decoration: InputDecoration(
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 8,
+            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+      ),
+    );
+    if (widget.enableTagExpansion) {
+      field = TagExpansionWrapper(
+        controller: controller,
+        focusNode: focus,
+        onCandidateSelected: (candidate) =>
+            _insertCandidate(candidate, chinese: chinese),
+        child: field,
+      );
+    }
+    return field;
+  }
+}
+
+/// Independent field histories make a model replacement one immediate undo
+/// step. Flutter's throttled text history can otherwise lose redo when undo is
+/// pressed before the replacement's 500 ms timer has flushed.
+class _DraftHistory {
+  _DraftHistory(this.controller) : _values = [controller.value] {
+    controller.addListener(_record);
+  }
+  final TextEditingController controller;
+  final List<TextEditingValue> _values;
+  int _index = 0;
+  bool _applying = false;
+  bool _groupOpen = false;
+  Timer? _groupTimer;
+
+  void _record() {
+    if (_applying ||
+        !controller.value.composing.isCollapsed &&
+            controller.value.composing.isValid) {
+      return;
+    }
+    final value = controller.value.copyWith(composing: TextRange.empty);
+    if (value.text == _values[_index].text) {
+      _values[_index] = value;
+      return;
+    }
+    _values.removeRange(_index + 1, _values.length);
+    if (_groupOpen && _index > 0) {
+      _values[_index] = value;
+    } else {
+      _values.add(value);
+      _index++;
+    }
+    _groupOpen = true;
+    _groupTimer?.cancel();
+    _groupTimer = Timer(const Duration(milliseconds: 500), _closeGroup);
+  }
+
+  void _closeGroup() {
+    _groupTimer?.cancel();
+    _groupOpen = false;
+  }
+
+  void replace(TextEditingValue value) {
+    _closeGroup();
+    controller.value = value;
+    _closeGroup();
+  }
+
+  void undo() {
+    _closeGroup();
+    if (_index > 0) _restore(--_index);
+  }
+
+  void redo() {
+    _closeGroup();
+    if (_index + 1 < _values.length) _restore(++_index);
+  }
+
+  void _restore(int index) {
+    _applying = true;
+    final value = _values[index];
+    controller.value = value.copyWith(
+      selection: value.selection.isValid
+          ? value.selection
+          : TextSelection.collapsed(offset: value.text.length),
+    );
+    _applying = false;
+  }
+
+  void dispose() {
+    _groupTimer?.cancel();
+    controller.removeListener(_record);
+  }
+}

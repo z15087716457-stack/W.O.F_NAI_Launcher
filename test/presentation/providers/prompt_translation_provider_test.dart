@@ -10,6 +10,8 @@ import 'package:nai_launcher/core/autocomplete/tag_translation_lookup.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
 import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
+import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
+import 'package:nai_launcher/core/utils/prompt_translation_edit.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
@@ -19,6 +21,160 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
 
 void main() {
+  group('bilingual editor draft conversion', () {
+    const request = PromptTranslationEditRequest(
+      direction: PromptTranslationDirection.toSource,
+      source: 'blue eyes',
+      zh: '镜音铃，绿眼睛',
+      baselineSource: 'blue eyes, smile',
+      baselineZh: '蓝眼睛，微笑',
+      selectedTerms: [
+        PromptSelectedTerm(start: 0, text: '镜音铃', tag: 'kagamine_rin'),
+      ],
+    );
+    ProviderContainer draftContainer(
+      _TranslationService service, {
+      UnifiedTagRepository? tags,
+      _LocalTags? local,
+    }) {
+      final search = local ?? _LocalTags();
+      if (local == null) {
+        when(
+          () => search.search(
+            any(),
+            locale: any(named: 'locale'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenAnswer((_) async => const []);
+      }
+      final container = ProviderContainer(
+        overrides: [
+          characterPromptNotifierProvider.overrideWith(_Characters.new),
+          promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+          promptAssistantServiceProvider.overrideWith((ref) => service),
+          unifiedTagRepositoryProvider.overrideWith((ref) => tags ?? _Tags()),
+          tagTranslationLookupProvider.overrideWith((ref) => _Translations()),
+          localTagExpansionServiceProvider.overrideWithValue(search),
+        ],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    test(
+      'send current and reference text with picked terms; do not commit workspace',
+      () async {
+        final service = _TranslationService();
+        String? sent;
+        when(
+          () => service.translatePromptEdit(
+            any(),
+            sessionId: any(named: 'sessionId'),
+          ),
+        ).thenAnswer((invocation) async {
+          sent = invocation.positionalArguments.single as String;
+          return '{"text":"kagamine rin, green eyes"}';
+        });
+        final container = draftContainer(service);
+        final before = container
+            .read(pillWorkspaceProvider(PillScopes.main))
+            .document;
+        final result = await container
+            .read(promptTranslationCoordinatorProvider)
+            .convertDraft(request, sessionId: 'draft');
+        final json = jsonDecode(sent!) as Map;
+        expect(json['original_zh'], '蓝眼睛，微笑');
+        expect(json['current_zh'], '镜音铃，绿眼睛');
+        expect(
+          (json['glossary'] as List).first,
+          containsPair('tag', 'kagamine_rin'),
+        );
+        expect((json['glossary'] as List).first, containsPair('zh', '镜音铃'));
+        expect(result.text, 'kagamine rin, green eyes');
+        expect(
+          container.read(pillWorkspaceProvider(PillScopes.main)).document,
+          before,
+        );
+        expect(container.read(promptTranslationBusyProvider), isFalse);
+        verifyNever(
+          () => service.translatePromptGroup(
+            any(),
+            sessionId: any(named: 'sessionId'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'optional Chinese dictionary failure keeps conversion available',
+      () async {
+        final service = _TranslationService();
+        final local = _LocalTags();
+        when(
+          () => local.search(
+            any(),
+            locale: any(named: 'locale'),
+            limit: any(named: 'limit'),
+          ),
+        ).thenThrow(StateError('dictionary unavailable'));
+        when(
+          () => service.translatePromptEdit(
+            any(),
+            sessionId: any(named: 'sessionId'),
+          ),
+        ).thenAnswer((_) async => '{"text":"green eyes"}');
+        final container = draftContainer(service, local: local);
+        expect(
+          (await container
+                  .read(promptTranslationCoordinatorProvider)
+                  .convertDraft(request, sessionId: 'draft'))
+              .text,
+          'green eyes',
+        );
+      },
+    );
+
+    test('closing during glossary lookup prevents an API request', () async {
+      final service = _TranslationService();
+      final tags = _PausedTags();
+      final container = draftContainer(service, tags: tags);
+      final coordinator = container.read(promptTranslationCoordinatorProvider);
+      final pending = coordinator.convertDraft(request, sessionId: 'closed');
+      coordinator.cancelDraft('closed');
+      final failure = expectLater(pending, throwsStateError);
+      tags.response.complete(const []);
+      await failure;
+      verifyNever(
+        () => service.translatePromptEdit(
+          any(),
+          sessionId: any(named: 'sessionId'),
+        ),
+      );
+    });
+
+    test('canceling after API dispatch discards response', () async {
+      final service = _TranslationService();
+      final started = Completer<void>();
+      final response = Completer<String>();
+      when(
+        () => service.translatePromptEdit(
+          any(),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((_) {
+        started.complete();
+        return response.future;
+      });
+      final container = draftContainer(service);
+      final coordinator = container.read(promptTranslationCoordinatorProvider);
+      final pending = coordinator.convertDraft(request, sessionId: 'closed');
+      await started.future;
+      coordinator.cancelDraft('closed');
+      final failure = expectLater(pending, throwsStateError);
+      response.complete('{"text":"late"}');
+      await failure;
+    });
+  });
   for (final edit in ['display', 'source', 'reading']) {
     test(
       'retranslation handles concurrent $edit changes without losing review state',
@@ -469,6 +625,15 @@ ProviderContainer _testContainer() {
 }
 
 class _TranslationService extends Mock implements PromptAssistantService {}
+
+class _LocalTags extends Mock implements LocalTagExpansionService {}
+
+class _PausedTags extends _Tags {
+  final response = Completer<List<CompletionCandidate>>();
+  @override
+  Future<List<CompletionCandidate>> byNames(Iterable<String> names) =>
+      response.future;
+}
 
 class _Tags extends UnifiedTagRepository {
   _Tags()

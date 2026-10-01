@@ -29,6 +29,7 @@ import '../../../providers/quality_preset_provider.dart';
 import '../../../providers/tips_provider.dart';
 import '../../../providers/uc_preset_provider.dart';
 import '../../../widgets/common/app_toast.dart';
+import '../../../widgets/common/prompt_translation_guide.dart';
 import '../../../widgets/prompt/pills/prompt_pill_editor.dart';
 import '../../../widgets/prompt/unified/unified_prompt_config.dart';
 import '../../../widgets/prompt/nai_syntax_controller.dart';
@@ -1989,7 +1990,7 @@ class _TranslationMenuContents extends PopupMenuEntry<String> {
   final VoidCallback onConfigure;
 
   @override
-  double get height => 94;
+  double get height => 126;
 
   @override
   bool represents(String? value) => false;
@@ -2000,6 +2001,7 @@ class _TranslationMenuContents extends PopupMenuEntry<String> {
 }
 
 class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
+  bool _showGuide = false;
   @override
   Widget build(BuildContext context) {
     return Consumer(
@@ -2035,128 +2037,165 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
         return SizedBox(
           key: const Key('prompt-translation-menu'),
           width: 176,
-          height: widget.height,
+          height: _showGuide ? 340 : widget.height,
           child: Padding(
             padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 26,
-                  child: Row(
+            child: _showGuide
+                ? PromptTranslationGuide(
+                    key: const Key('prompt-translation-guide'),
+                    onBack: () => setState(() => _showGuide = false),
+                  )
+                : Column(
                     children: [
-                      Expanded(
-                        child: Tooltip(
-                          message: modelLabel,
-                          child: Text(
-                            route?.model.displayName ?? '未配置模型',
-                            key: const Key('prompt-translation-model'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                      SizedBox(
+                        height: 26,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Tooltip(
+                                message: modelLabel,
+                                child: Text(
+                                  route?.model.displayName ?? '未配置模型',
+                                  key: const Key('prompt-translation-model'),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontSize: 11,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            IconButton(
+                              key: const Key('prompt-translation-configure'),
+                              tooltip: '配置翻译模型',
+                              constraints: const BoxConstraints.tightFor(
+                                width: 26,
+                                height: 26,
+                              ),
+                              padding: EdgeInsets.zero,
+                              style: IconButton.styleFrom(
+                                foregroundColor:
+                                    theme.colorScheme.onSurfaceVariant,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                widget.onConfigure();
+                              },
+                              icon: const Icon(
+                                Icons.settings_outlined,
+                                size: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _TranslationMenuAction(
+                              buttonKey: const Key('prompt-translation-add'),
+                              tooltip: '翻译新增内容',
+                              primary: true,
+                              onPressed: busy ? null : widget.onTranslate,
+                              icon: busy
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1.7,
+                                      ),
+                                    )
+                                  : Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        const Icon(
+                                          Icons.translate_outlined,
+                                          size: 21,
+                                        ),
+                                        Positioned(
+                                          right: -5,
+                                          bottom: -3,
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              color: theme
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                            ),
+                                            child: const Icon(
+                                              Icons.add,
+                                              size: 11,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _TranslationMenuAction(
+                              buttonKey: const Key(
+                                'prompt-translation-plain-text',
+                              ),
+                              tooltip: restores
+                                  ? '撤销原文还原，恢复翻译块'
+                                  : '全部翻译块还原为原文文本',
+                              onPressed: !busy && (restores || canConvert)
+                                  ? () {
+                                      if (coordinator.canRestoreTranslations(
+                                        widget.negative,
+                                      )) {
+                                        coordinator.restoreTranslations(
+                                          widget.negative,
+                                        );
+                                      } else {
+                                        coordinator.clearTranslations(
+                                          widget.negative,
+                                        );
+                                      }
+                                    }
+                                  : null,
+                              icon: restores
+                                  ? const Icon(Icons.undo, size: 21)
+                                  : const Text(
+                                      'A',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        height: 26,
+                        width: double.infinity,
+                        child: TextButton.icon(
+                          key: const Key('prompt-translation-tutorial'),
+                          onPressed: () => setState(() => _showGuide = true),
+                          icon: const Icon(Icons.info_outline, size: 13),
+                          label: const Text('操作教程'),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            foregroundColor: theme.colorScheme.onSurfaceVariant,
+                            textStyle: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 11,
-                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      IconButton(
-                        key: const Key('prompt-translation-configure'),
-                        tooltip: '配置翻译模型',
-                        constraints: const BoxConstraints.tightFor(
-                          width: 26,
-                          height: 26,
-                        ),
-                        padding: EdgeInsets.zero,
-                        style: IconButton.styleFrom(
-                          foregroundColor: theme.colorScheme.onSurfaceVariant,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          widget.onConfigure();
-                        },
-                        icon: const Icon(Icons.settings_outlined, size: 15),
-                      ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _TranslationMenuAction(
-                        buttonKey: const Key('prompt-translation-add'),
-                        tooltip: '翻译新增内容',
-                        primary: true,
-                        onPressed: busy ? null : widget.onTranslate,
-                        icon: busy
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1.7,
-                                ),
-                              )
-                            : Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  const Icon(
-                                    Icons.translate_outlined,
-                                    size: 21,
-                                  ),
-                                  Positioned(
-                                    right: -5,
-                                    bottom: -3,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        color: theme
-                                            .colorScheme
-                                            .surfaceContainerHighest,
-                                        borderRadius: BorderRadius.circular(3),
-                                      ),
-                                      child: const Icon(Icons.add, size: 11),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _TranslationMenuAction(
-                        buttonKey: const Key('prompt-translation-plain-text'),
-                        tooltip: restores ? '撤销原文还原，恢复翻译块' : '全部翻译块还原为原文文本',
-                        onPressed: !busy && (restores || canConvert)
-                            ? () {
-                                if (coordinator.canRestoreTranslations(
-                                  widget.negative,
-                                )) {
-                                  coordinator.restoreTranslations(
-                                    widget.negative,
-                                  );
-                                } else {
-                                  coordinator.clearTranslations(
-                                    widget.negative,
-                                  );
-                                }
-                              }
-                            : null,
-                        icon: restores
-                            ? const Icon(Icons.undo, size: 21)
-                            : const Text(
-                                'A',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
         );
       },

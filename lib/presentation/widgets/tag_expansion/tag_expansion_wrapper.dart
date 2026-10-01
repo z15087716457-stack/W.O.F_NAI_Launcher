@@ -32,6 +32,7 @@ class TagExpansionWrapper extends ConsumerStatefulWidget {
     this.enabled = true,
     this.splitOnSpaces = false,
     this.onTagSelected,
+    this.onCandidateSelected,
     this.onApplied,
     this.onActiveChanged,
   });
@@ -47,6 +48,9 @@ class TagExpansionWrapper extends ConsumerStatefulWidget {
   /// Commits a canonical tag using the host field's own input semantics.
   /// Prompt editors use the default caret insertion when this is omitted.
   final ValueChanged<String>? onTagSelected;
+
+  /// Bilingual editors need the reading and category as well as the tag ID.
+  final ValueChanged<CompletionCandidate>? onCandidateSelected;
   final ValueChanged<String>? onApplied;
   final ValueChanged<bool>? onActiveChanged;
 
@@ -59,7 +63,6 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     with WidgetsBindingObserver {
   static const _limitOptions = [12, 24, 40, 80];
   static const _compactRowHeight = 44.0;
-  static const _wrappedLineHeight = 16.0;
   static const _columnGap = 2.0;
   static const _listInset = 4.0;
   static const _panelGap = 3.0;
@@ -702,6 +705,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       _close();
       return;
     }
+    if (widget.onCandidateSelected case final selectCandidate?) {
+      _close(restoreFocus: true);
+      selectCandidate(candidate);
+      return;
+    }
     if (widget.onTagSelected case final selectTag?) {
       _close(restoreFocus: true);
       selectTag(candidate.canonicalTag);
@@ -769,8 +777,29 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       textScaler: MediaQuery.textScalerOf(context),
     )..layout(maxWidth: titleWidth);
     final lines = painter.computeLineMetrics().length;
+    final lineHeight = math.max(
+      16.0,
+      (painter.height / math.max(1, lines)).ceilToDouble(),
+    );
     painter.dispose();
-    return _compactRowHeight + _wrappedLineHeight * math.max(0, lines - 1);
+    final detailPainter = TextPainter(
+      text: TextSpan(
+        text: 'Ag中文',
+        style: Theme.of(context).textTheme.labelSmall,
+      ),
+      maxLines: 1,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: titleWidth);
+    final detailHeight = detailPainter.height;
+    detailPainter.dispose();
+    // Match the two actual text lines, row gap and padding. Theme fonts can
+    // have taller metrics than the former fixed 16 px line assumption.
+    return math.max(
+          _compactRowHeight,
+          math.max(lineHeight, detailHeight) + 2 + detailHeight + 10,
+        ) +
+        lineHeight * math.max(0, lines - 1);
   }
 
   List<double> _measureSearchRows(BuildContext context, double panelWidth) {

@@ -150,7 +150,7 @@ void main() {
     expect(menu.menuPadding, EdgeInsets.zero);
     expect(
       tester.getSize(find.byKey(const Key('prompt-translation-menu'))),
-      const Size(176, 94),
+      const Size(176, 126),
     );
     expect(
       tester
@@ -170,6 +170,17 @@ void main() {
       tester.getSize(find.byKey(const Key('prompt-translation-add'))),
       const Size(74, 40),
     );
+    expect(find.text('操作教程'), findsOneWidget);
+    await _captureTranslationMenu(tester, captureBoundary, 'menu');
+    await tester.tap(find.byKey(const Key('prompt-translation-tutorial')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('prompt-translation-guide')), findsOneWidget);
+    expect(find.byKey(const Key('prompt-translation-add')), findsNothing);
+    expect(tester.takeException(), isNull);
+    await _captureTranslationMenu(tester, captureBoundary, 'guide');
+    await tester.tap(find.byKey(const Key('translation-guide-back')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('prompt-translation-add')), findsOneWidget);
     await tester.tap(find.byKey(const Key('prompt-translation-add')));
     await tester.pumpAndSettle();
     expect(find.text('先配置翻译模型'), findsOneWidget);

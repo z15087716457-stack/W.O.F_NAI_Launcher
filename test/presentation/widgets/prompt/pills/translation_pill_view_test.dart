@@ -446,44 +446,57 @@ void main() {
     long.dismiss();
   });
 
-  testWidgets('editor icon actions return delete and retranslate', (
-    tester,
-  ) async {
-    BuildContext? editorContext;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) {
-              editorContext = context;
-              return const SizedBox.expand();
-            },
+  testWidgets(
+    'editor icon actions return delete and offer both conversion directions',
+    (tester) async {
+      BuildContext? editorContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                editorContext = context;
+                return const SizedBox.expand();
+              },
+            ),
           ),
         ),
-      ),
-    );
-    TranslationPillEditHandle open() => showTranslationPillEditor(
-      context: editorContext!,
-      initial: const TranslationPill(source: 'source', zh: '译文'),
-      globalPosition: const Offset(120, 80),
-    );
+      );
+      TranslationPillEditHandle open() => showTranslationPillEditor(
+        context: editorContext!,
+        initial: const TranslationPill(source: 'source', zh: '译文'),
+        globalPosition: const Offset(120, 80),
+      );
 
-    final first = open();
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('translation-pill-retranslate')));
-    expect(await first.result, 'retranslate');
-    await tester.pump();
+      final first = open();
+      await tester.pump();
+      expect(
+        find.byKey(const Key('translation-pill-to-source')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('translation-pill-to-chinese')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('translation-pill-retranslate')),
+        findsNothing,
+      );
+      first.dismiss();
+      expect(await first.result, isNull);
+      await tester.pump();
 
-    final second = open();
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('translation-pill-delete')));
-    expect(await second.result, 'delete');
-    await tester.pump();
-    expect(
-      find.byKey(const Key('translation-pill-editor-popover')),
-      findsNothing,
-    );
-  });
+      final second = open();
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('translation-pill-delete')));
+      expect(await second.result, 'delete');
+      await tester.pump();
+      expect(
+        find.byKey(const Key('translation-pill-editor-popover')),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('saving a changed source marks its reading for review', (
     tester,
