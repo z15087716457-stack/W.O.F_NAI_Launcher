@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import '../../presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
+import '../../presentation/prompt_assistant/models/prompt_assistant_models.dart';
+import '../../presentation/providers/locale_provider.dart';
 import '../autocomplete/tag_translation_lookup.dart';
 import '../utils/tag_normalizer.dart';
 import 'tag_wiki_repository.dart';
@@ -22,10 +24,14 @@ final autoTagTranslationProvider =
         wiki: ref.read(tagWikiRepositoryProvider),
         cache: VisibleTagTranslationCache(),
         wikiLinks: ref.read(wikiTagLinksProvider),
+        readingLanguage: () => ref
+            .read(promptAssistantServiceProvider)
+            .targetLanguageFor(LauncherInterface.tagTranslate),
       );
       ref.listen(promptAssistantConfigProvider, (_, __) {
         controller.routeChanged();
       });
+      ref.listen(localeNotifierProvider, (_, __) => controller.routeChanged());
       unawaited(controller.loadPreference());
       return controller;
     });
@@ -63,11 +69,13 @@ class AutoTagTranslationController extends ChangeNotifier {
     required VisibleTagTranslationCache cache,
     WikiTagLinks? wikiLinks,
     this.maxConcurrentRequests = 5,
+    String Function()? readingLanguage,
   }) : _assistant = assistant,
        _localNames = localNames,
        _wiki = wiki,
        _cache = cache,
-       _wikiLinks = wikiLinks;
+       _wikiLinks = wikiLinks,
+       _readingLanguage = readingLanguage ?? (() => 'zh');
 
   static const _preferenceKey = 'auto_visible_tag_translation_enabled';
   final PromptAssistantService _assistant;
@@ -76,6 +84,7 @@ class AutoTagTranslationController extends ChangeNotifier {
   final VisibleTagTranslationCache _cache;
   final WikiTagLinks? _wikiLinks;
   final int maxConcurrentRequests;
+  final String Function() _readingLanguage;
   final Map<String, Set<String>> _visibleBySurface = {};
   final Map<String, String> _wikiBySurface = {};
   final Map<String, _VisibleTask> _pending = {};
@@ -175,7 +184,7 @@ class AutoTagTranslationController extends ChangeNotifier {
     if (canonical.isEmpty) return;
     final tags = _visibleBySurface.putIfAbsent(surface, () => <String>{});
     if (tagContext != null) _contexts[canonical] = tagContext;
-    if (existingNameZh?.trim().isNotEmpty == true) {
+    if (_readingLanguage() == 'zh' && existingNameZh?.trim().isNotEmpty == true) {
       _names[canonical] = existingNameZh!.trim();
     }
     if (visible) {
@@ -295,7 +304,9 @@ class AutoTagTranslationController extends ChangeNotifier {
     try {
       String? localName;
       try {
-        localName = await _localNames.translate(task.tag);
+        if (_readingLanguage() == 'zh') {
+          localName = await _localNames.translate(task.tag);
+        }
       } catch (_) {
         // The optional installed dictionary must not block model translation.
       }

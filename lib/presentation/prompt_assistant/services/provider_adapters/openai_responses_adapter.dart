@@ -36,6 +36,9 @@ class OpenAiResponsesAdapter extends PromptAssistantProviderAdapter {
       'model': request.model,
       'stream': false,
       'instructions': request.systemPrompt,
+      if (request.modelConfig?.temperature case final value?)
+        'temperature': value,
+      if (request.modelConfig?.topP case final value?) 'top_p': value,
       'input': [
         {'role': 'user', 'content': _inputParts(request.userParts)},
       ],

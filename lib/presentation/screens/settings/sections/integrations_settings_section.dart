@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/localization_extension.dart';
 import 'comfyui_settings_section.dart';
 import 'krita_bridge_settings_section.dart';
-import 'prompt_assistant_settings_section.dart';
 
 /// 集成设置板块
 ///
-/// 汇总外部工具集成（Prompt Assistant / ComfyUI / Krita）。
+/// 汇总外部工具集成（ComfyUI / Krita）。
 /// 顶部子导航切换，一次只渲染一个面板，避免长滚动页。
 class IntegrationsSettingsSection extends StatefulWidget {
-  /// 测试注入用面板构造器；非 null 时必须恰好包含三个构造器。
+  /// 测试注入用面板构造器；非 null 时必须恰好包含两个构造器。
   ///
   /// 生产环境保持 null 使用默认三面板。
   @visibleForTesting
@@ -18,8 +16,8 @@ class IntegrationsSettingsSection extends StatefulWidget {
 
   const IntegrationsSettingsSection({super.key, this.panelBuilders})
     : assert(
-        panelBuilders == null || panelBuilders.length == 3,
-        'panelBuilders must contain exactly three builders.',
+        panelBuilders == null || panelBuilders.length == 2,
+        'panelBuilders must contain exactly two builders.',
       );
 
   @override
@@ -34,18 +32,13 @@ class _IntegrationsSettingsSectionState
   List<WidgetBuilder> get _builders =>
       widget.panelBuilders ??
       [
-        (_) => const PromptAssistantSettingsSection(),
         (_) => const ComfyUISettingsSection(),
         (_) => const KritaBridgeSettingsSection(),
       ];
 
   @override
   Widget build(BuildContext context) {
-    final labels = [
-      context.l10n.settings_modelsAndInterfaces,
-      'ComfyUI',
-      'Krita',
-    ];
+    final labels = ['ComfyUI', 'Krita'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -7,6 +7,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../models/prompt_assistant_models.dart';
+import '../models/prompt_task_definitions.dart';
 
 final promptAssistantConfigProvider =
     StateNotifierProvider<
@@ -38,12 +39,15 @@ class PromptAssistantConfigNotifier
       }
     }
 
+    final observed = state;
     final keyMap = <String, bool>{};
-    for (final provider in state.providers) {
+    for (final provider in observed.providers) {
       final key = await _secure.getPromptAssistantApiKey(provider.id);
       keyMap[provider.id] = key != null && key.isNotEmpty;
     }
-    state = state.copyWith(providerHasApiKey: keyMap);
+    if (identical(state, observed)) {
+      state = state.copyWith(providerHasApiKey: keyMap);
+    }
   }
 
   Future<void> _save() async {
@@ -107,7 +111,12 @@ class PromptAssistantConfigNotifier
         .toList();
     final interfaces = Map<LauncherInterface, InterfaceSlotConfig>.from(
       state.interfaces,
-    )..removeWhere((_, slot) => slot.providerId == providerId);
+    );
+    for (final entry in interfaces.entries.toList()) {
+      if (entry.value.providerId == providerId) {
+        interfaces[entry.key] = entry.value.copyWith(providerId: '', model: '');
+      }
+    }
     final keys = Map<String, bool>.from(state.providerHasApiKey)
       ..remove(providerId);
     state = state.copyWith(
@@ -152,7 +161,7 @@ class PromptAssistantConfigNotifier
       if (slot.providerId == providerId &&
           slot.model.isNotEmpty &&
           !names.contains(slot.model)) {
-        interfaces[entry.key] = const InterfaceSlotConfig();
+        interfaces[entry.key] = slot.copyWith(providerId: '', model: '');
       }
     }
     state = state.copyWith(models: models, interfaces: interfaces);
@@ -249,7 +258,15 @@ class PromptAssistantConfigNotifier
       ..removeWhere(
         (m) => m.providerId == model.providerId && m.name == model.name,
       );
-    state = state.copyWith(models: models);
+    final interfaces = {
+      for (final entry in state.interfaces.entries)
+        entry.key:
+            entry.value.providerId == model.providerId &&
+                entry.value.model == model.name
+            ? entry.value.copyWith(model: '')
+            : entry.value,
+    };
+    state = state.copyWith(models: models, interfaces: interfaces);
     await _save();
   }
 
@@ -266,7 +283,9 @@ class PromptAssistantConfigNotifier
     );
     _setInterfaceSlot(
       interface,
-      InterfaceSlotConfig(providerId: providerId, model: firstReal?.name ?? ''),
+      state
+          .interfaceFor(interface)
+          .copyWith(providerId: providerId, model: firstReal?.name ?? ''),
     );
     await _save();
   }
@@ -278,7 +297,9 @@ class PromptAssistantConfigNotifier
   ) async {
     _setInterfaceSlot(
       interface,
-      InterfaceSlotConfig(providerId: providerId, model: model),
+      state
+          .interfaceFor(interface)
+          .copyWith(providerId: providerId, model: model),
     );
     await _save();
   }
@@ -290,11 +311,146 @@ class PromptAssistantConfigNotifier
     final interfaces = Map<LauncherInterface, InterfaceSlotConfig>.from(
       state.interfaces,
     );
-    if (slot.isConfigured) {
-      interfaces[interface] = slot;
-    } else {
-      interfaces.remove(interface);
-    }
+    interfaces[interface] = slot;
     state = state.copyWith(interfaces: interfaces);
+  }
+
+  Future<void> saveInterface(
+    LauncherInterface task,
+    InterfaceSlotConfig slot,
+  ) async {
+    if (slot.parameters.validationError case final error?) {
+      throw FormatException(error);
+    }
+    final preset = presetFor(
+      state.copyWith(interfaces: {...state.interfaces, task: slot}),
+      task,
+    );
+    if (slot.presetId != null && preset.id != slot.presetId) {
+      throw StateError('所选预设已变化，请重新选择。');
+    }
+    final provider = state.providers
+        .where((item) => item.id == slot.providerId && item.enabled)
+        .firstOrNull;
+    if (slot.isConfigured && provider == null) {
+      throw StateError('所选服务已停用，请重新选择。');
+    }
+    if (slot.isConfigured &&
+        !state.models.any(
+          (model) =>
+              model.providerId == slot.providerId &&
+              model.name == slot.model &&
+              !model.isPlaceholder,
+        )) {
+      throw StateError('所选模型已变化，请重新选择。');
+    }
+    if (provider != null) {
+      final model = state.models.firstWhere(
+        (item) => item.providerId == provider.id && item.name == slot.model,
+      );
+      final error = RequestParameters.fromModel(
+        slot.parameters.applyTo(preset.parameters.applyTo(model)),
+      ).validateFor(provider.protocol);
+      if (error != null) throw FormatException(error);
+    }
+    _setInterfaceSlot(task, slot);
+    await _save();
+  }
+
+  Future<void> savePreset(TaskPresetConfig preset) async {
+    if (preset.id.trim().isEmpty) throw const FormatException('预设 ID 不能为空。');
+    if (preset.id.startsWith('builtin:')) throw StateError('请将内置方案另存为自定义预设。');
+    if (preset.name.trim().isEmpty || preset.prompt.trim().isEmpty) {
+      throw const FormatException('名称和提示词不能为空。');
+    }
+    if (preset.parameters.validationError case final error?) {
+      throw FormatException(error);
+    }
+    state = state.copyWith(
+      presets: [
+        for (final item in state.presets)
+          if (item.id != preset.id) item,
+        preset,
+      ],
+    );
+    await _save();
+  }
+
+  Future<void> deletePreset(String id) async {
+    final interfaces = {
+      for (final entry in state.interfaces.entries)
+        entry.key: entry.value.presetId == id
+            ? entry.value.copyWith(presetId: 'builtin:${entry.key.name}')
+            : entry.value,
+    };
+    state = state.copyWith(
+      presets: state.presets.where((item) => item.id != id).toList(),
+      interfaces: interfaces,
+    );
+    await _save();
+  }
+
+  Future<void> importConfiguration(String raw) async {
+    final observed = state;
+    final data = jsonDecode(raw);
+    if (data is! Map || data['providers'] is! List || data['models'] is! List) {
+      throw const FormatException('请粘贴完整的模型配置 JSON。');
+    }
+    final imported = PromptAssistantConfigState.decode(raw);
+    final ids = <String>{};
+    for (final provider in imported.providers) {
+      final uri = Uri.tryParse(provider.baseUrl);
+      if (provider.id.trim().isEmpty ||
+          !ids.add(provider.id) ||
+          provider.name.trim().isEmpty ||
+          uri == null ||
+          !uri.hasAuthority ||
+          !['http', 'https'].contains(uri.scheme)) {
+        throw const FormatException('服务商 ID、名称或地址无效。');
+      }
+    }
+    for (final model in imported.models) {
+      if (!ids.contains(model.providerId)) {
+        throw const FormatException('模型对应的服务商不存在。');
+      }
+      final provider = imported.providers.firstWhere(
+        (item) => item.id == model.providerId,
+      );
+      if (RequestParameters.fromModel(model).validateFor(provider.protocol)
+          case final error?) {
+        throw FormatException(error);
+      }
+    }
+    for (final slot in imported.interfaces.values) {
+      if (slot.parameters.validationError case final error?) {
+        throw FormatException(error);
+      }
+    }
+    final presetIds = <String>{};
+    for (final preset in imported.presets) {
+      if (preset.id.trim().isEmpty ||
+          !presetIds.add(preset.id) ||
+          preset.id.startsWith('builtin:') ||
+          preset.name.trim().isEmpty ||
+          preset.prompt.trim().isEmpty) {
+        throw const FormatException('自定义预设的 ID、名称或提示词无效。');
+      }
+      if (preset.parameters.validationError case final error?) {
+        throw FormatException(error);
+      }
+    }
+    final keys = <String, bool>{};
+    for (final provider in imported.providers) {
+      final key = await _secure.getPromptAssistantApiKey(provider.id);
+      keys[provider.id] = key != null && key.isNotEmpty;
+    }
+    if (!identical(state, observed)) throw StateError('配置已变化，请重新导入。');
+    await _local.setSetting(
+      '${StorageKeys.promptAssistantConfigJson}_before_import',
+      observed.encode(),
+    );
+    if (!identical(state, observed)) throw StateError('配置已变化，请重新导入。');
+    state = imported.copyWith(providerHasApiKey: keys);
+    await _save();
   }
 }

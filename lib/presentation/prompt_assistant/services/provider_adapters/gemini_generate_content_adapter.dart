@@ -56,8 +56,13 @@ class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
           {'role': 'user', 'parts': _parts(request.userParts)},
         ],
         if (request.modelConfig?.maxOutputTokens != null ||
-            request.modelConfig?.reasoningEffort != null)
+            request.modelConfig?.reasoningEffort != null ||
+            request.modelConfig?.temperature != null ||
+            request.modelConfig?.topP != null)
           'generationConfig': {
+            if (request.modelConfig?.temperature case final value?)
+              'temperature': value,
+            if (request.modelConfig?.topP case final value?) 'topP': value,
             if (request.modelConfig?.maxOutputTokens case final int limit)
               'maxOutputTokens': limit,
             if (request.modelConfig?.reasoningEffort case final String effort)

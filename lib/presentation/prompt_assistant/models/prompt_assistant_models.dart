@@ -288,6 +288,8 @@ class ProviderConfig {
   final bool enabled;
   final bool allowImageInput;
   final int timeoutSeconds;
+  final int maxConcurrentRequests;
+  final int retryAttempts;
 
   /// Loaded from secure storage for a request; never serialized with the
   /// ordinary settings JSON because header values may contain credentials.
@@ -303,6 +305,8 @@ class ProviderConfig {
     this.enabled = true,
     this.allowImageInput = false,
     this.timeoutSeconds = 120,
+    this.maxConcurrentRequests = 5,
+    this.retryAttempts = 0,
     this.requestHeaders = const {},
   });
 
@@ -317,6 +321,8 @@ class ProviderConfig {
     bool? enabled,
     bool? allowImageInput,
     int? timeoutSeconds,
+    int? maxConcurrentRequests,
+    int? retryAttempts,
     Map<String, String>? requestHeaders,
   }) {
     return ProviderConfig(
@@ -329,6 +335,9 @@ class ProviderConfig {
       enabled: enabled ?? this.enabled,
       allowImageInput: allowImageInput ?? this.allowImageInput,
       timeoutSeconds: timeoutSeconds ?? this.timeoutSeconds,
+      maxConcurrentRequests:
+          maxConcurrentRequests ?? this.maxConcurrentRequests,
+      retryAttempts: retryAttempts ?? this.retryAttempts,
       requestHeaders: requestHeaders ?? this.requestHeaders,
     );
   }
@@ -343,6 +352,8 @@ class ProviderConfig {
     'enabled': enabled,
     'allowImageInput': allowImageInput,
     'timeoutSeconds': timeoutSeconds,
+    'maxConcurrentRequests': maxConcurrentRequests,
+    'retryAttempts': retryAttempts,
   };
 
   factory ProviderConfig.fromJson(Map<String, dynamic> json) {
@@ -370,6 +381,12 @@ class ProviderConfig {
       timeoutSeconds: ((json['timeoutSeconds'] as num?)?.toInt() ?? 120).clamp(
         10,
         600,
+      ),
+      maxConcurrentRequests:
+          ((json['maxConcurrentRequests'] as num?)?.toInt() ?? 5).clamp(1, 20),
+      retryAttempts: ((json['retryAttempts'] as num?)?.toInt() ?? 0).clamp(
+        0,
+        3,
       ),
     );
   }
@@ -472,6 +489,8 @@ class ModelConfig {
 
   /// Optional request control. Availability depends on the actual model.
   final String? reasoningEffort;
+  final double? temperature;
+  final double? topP;
 
   /// 该模型是自动拉取（[ModelSource.api]）还是手动/默认（[ModelSource.manual]）。
   /// 默认 [ModelSource.manual]：只有明确从接口拉取的路径才标记为 api，
@@ -487,6 +506,8 @@ class ModelConfig {
     this.contextWindow,
     this.maxOutputTokens,
     this.reasoningEffort,
+    this.temperature,
+    this.topP,
   });
 
   bool get isPlaceholder =>
@@ -502,6 +523,12 @@ class ModelConfig {
     int? maxOutputTokens,
     String? reasoningEffort,
     bool clearReasoningEffort = false,
+    double? temperature,
+    double? topP,
+    bool clearTemperature = false,
+    bool clearTopP = false,
+    bool clearMaxOutputTokens = false,
+    bool clearContextWindow = false,
   }) {
     return ModelConfig(
       providerId: providerId ?? this.providerId,
@@ -509,11 +536,17 @@ class ModelConfig {
       displayName: displayName ?? this.displayName,
       isDefault: isDefault ?? this.isDefault,
       source: source ?? this.source,
-      contextWindow: contextWindow ?? this.contextWindow,
-      maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
+      contextWindow: clearContextWindow
+          ? null
+          : contextWindow ?? this.contextWindow,
+      maxOutputTokens: clearMaxOutputTokens
+          ? null
+          : maxOutputTokens ?? this.maxOutputTokens,
       reasoningEffort: clearReasoningEffort
           ? null
           : reasoningEffort ?? this.reasoningEffort,
+      temperature: clearTemperature ? null : temperature ?? this.temperature,
+      topP: clearTopP ? null : topP ?? this.topP,
     );
   }
 
@@ -526,6 +559,8 @@ class ModelConfig {
     if (contextWindow != null) 'contextWindow': contextWindow,
     if (maxOutputTokens != null) 'maxOutputTokens': maxOutputTokens,
     if (reasoningEffort != null) 'reasoningEffort': reasoningEffort,
+    if (temperature != null) 'temperature': temperature,
+    if (topP != null) 'topP': topP,
   };
 
   factory ModelConfig.fromJson(Map<String, dynamic> json) {
@@ -537,6 +572,8 @@ class ModelConfig {
       contextWindow: (json['contextWindow'] as num?)?.toInt(),
       maxOutputTokens: (json['maxOutputTokens'] as num?)?.toInt(),
       reasoningEffort: json['reasoningEffort'] as String?,
+      temperature: (json['temperature'] as num?)?.toDouble(),
+      topP: (json['topP'] as num?)?.toDouble(),
       // 来源迁移（关键决策点）：
       // - 新数据带有 'source' 键 → 直接采用。
       // - 旧数据（升级前保存，无该键）→ 按 isDefault 推断：默认/占位模型
@@ -556,9 +593,11 @@ class ModelConfig {
 enum LauncherInterface {
   /// 提示词翻译接口。
   translate,
+  promptReverse,
 
   /// 词库标签翻译接口（自动补全的 LLM 翻译消费）。
-  tagTranslate;
+  tagTranslate,
+  wikiTranslate;
 
   static LauncherInterface fromName(String? value) =>
       LauncherInterface.values.firstWhere(
@@ -572,26 +611,158 @@ class InterfaceSlotConfig {
 
   /// 选中的模型名；空串 = 使用该服务商的首个模型。
   final String model;
+  final String? presetId;
+  final String targetLanguage;
+  final RequestParameters parameters;
 
-  const InterfaceSlotConfig({this.providerId = '', this.model = ''});
+  const InterfaceSlotConfig({
+    this.providerId = '',
+    this.model = '',
+    this.presetId,
+    this.targetLanguage = 'auto',
+    this.parameters = const RequestParameters(),
+  });
 
   bool get isConfigured => providerId.trim().isNotEmpty;
 
-  InterfaceSlotConfig copyWith({String? providerId, String? model}) {
+  InterfaceSlotConfig copyWith({
+    String? providerId,
+    String? model,
+    String? presetId,
+    String? targetLanguage,
+    RequestParameters? parameters,
+  }) {
     return InterfaceSlotConfig(
       providerId: providerId ?? this.providerId,
       model: model ?? this.model,
+      presetId: presetId ?? this.presetId,
+      targetLanguage: targetLanguage ?? this.targetLanguage,
+      parameters: parameters ?? this.parameters,
     );
   }
 
-  Map<String, dynamic> toJson() => {'providerId': providerId, 'model': model};
+  Map<String, dynamic> toJson() => {
+    'providerId': providerId,
+    'model': model,
+    if (presetId != null) 'presetId': presetId,
+    'targetLanguage': targetLanguage,
+    'parameters': parameters.toJson(),
+  };
 
   factory InterfaceSlotConfig.fromJson(Map<String, dynamic> json) {
     return InterfaceSlotConfig(
       providerId: (json['providerId'] as String? ?? '').trim(),
       model: (json['model'] as String? ?? '').trim(),
+      presetId: json['presetId'] as String?,
+      targetLanguage:
+          const [
+            'auto',
+            'zh',
+            'en',
+            'ja',
+            'ko',
+          ].contains(json['targetLanguage'])
+          ? json['targetLanguage'] as String
+          : 'auto',
+      parameters: RequestParameters.fromJson(json['parameters']),
     );
   }
+}
+
+class RequestParameters {
+  const RequestParameters({
+    this.temperature,
+    this.topP,
+    this.maxOutputTokens,
+    this.reasoningEffort,
+  });
+  final double? temperature, topP;
+  final int? maxOutputTokens;
+  final String? reasoningEffort;
+  Map<String, dynamic> toJson() => {
+    if (temperature != null) 'temperature': temperature,
+    if (topP != null) 'topP': topP,
+    if (maxOutputTokens != null) 'maxOutputTokens': maxOutputTokens,
+    if (reasoningEffort != null) 'reasoningEffort': reasoningEffort,
+  };
+  factory RequestParameters.fromJson(Object? value) {
+    final json = value is Map ? value : const {};
+    return RequestParameters(
+      temperature: (json['temperature'] as num?)?.toDouble(),
+      topP: (json['topP'] as num?)?.toDouble(),
+      maxOutputTokens: (json['maxOutputTokens'] as num?)?.toInt(),
+      reasoningEffort: json['reasoningEffort'] as String?,
+    );
+  }
+  String? get validationError {
+    if (temperature != null &&
+        (!temperature!.isFinite || temperature! < 0 || temperature! > 2)) {
+      return 'Temperature 应在 0–2 之间。';
+    }
+    if (topP != null && (!topP!.isFinite || topP! <= 0 || topP! > 1)) {
+      return 'Top P 应大于 0 且不超过 1。';
+    }
+    if (maxOutputTokens != null && maxOutputTokens! <= 0) {
+      return '最大输出 token 必须大于 0。';
+    }
+    return null;
+  }
+
+  ModelConfig applyTo(ModelConfig base) => base.copyWith(
+    temperature: temperature,
+    topP: topP,
+    maxOutputTokens: maxOutputTokens,
+    reasoningEffort: reasoningEffort,
+  );
+
+  String? validateFor(ProviderProtocol protocol) {
+    final general = validationError;
+    if (general != null) return general;
+    if (protocol == ProviderProtocol.anthropicMessages) {
+      if (temperature != null && temperature! > 1) {
+        return 'Anthropic 的 Temperature 应在 0–1 之间。';
+      }
+      if (temperature != null && topP != null) {
+        return 'Anthropic 的 Temperature 与 Top P 请选择一项；请检查模型、预设和功能参数。';
+      }
+    }
+    return null;
+  }
+
+  factory RequestParameters.fromModel(ModelConfig model) => RequestParameters(
+    temperature: model.temperature,
+    topP: model.topP,
+    maxOutputTokens: model.maxOutputTokens,
+    reasoningEffort: model.reasoningEffort,
+  );
+}
+
+class TaskPresetConfig {
+  const TaskPresetConfig({
+    required this.id,
+    required this.name,
+    required this.task,
+    required this.prompt,
+    this.parameters = const RequestParameters(),
+  });
+  final String id, name, prompt;
+  final LauncherInterface task;
+  final RequestParameters parameters;
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'task': task.name,
+    'prompt': prompt,
+    'parameters': parameters.toJson(),
+  };
+  factory TaskPresetConfig.fromJson(Map<String, dynamic> json) =>
+      TaskPresetConfig(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        task: LauncherInterface.fromName(json['task'] as String?),
+        prompt: json['prompt'] as String? ?? '',
+        parameters: RequestParameters.fromJson(json['parameters']),
+      );
 }
 
 class StreamingChunk {
@@ -606,12 +777,14 @@ class PromptAssistantConfigState {
   final List<ModelConfig> models;
   final Map<LauncherInterface, InterfaceSlotConfig> interfaces;
   final Map<String, bool> providerHasApiKey;
+  final List<TaskPresetConfig> presets;
 
   const PromptAssistantConfigState({
     required this.providers,
     required this.models,
     required this.interfaces,
     required this.providerHasApiKey,
+    this.presets = const [],
   });
 
   factory PromptAssistantConfigState.defaults() {
@@ -624,7 +797,15 @@ class PromptAssistantConfigState {
   }
 
   InterfaceSlotConfig interfaceFor(LauncherInterface interface) {
-    return interfaces[interface] ?? const InterfaceSlotConfig();
+    return interfaces[interface] ??
+        switch (interface) {
+          LauncherInterface.promptReverse =>
+            interfaces[LauncherInterface.translate],
+          LauncherInterface.wikiTranslate =>
+            interfaces[LauncherInterface.tagTranslate],
+          _ => null,
+        } ??
+        const InterfaceSlotConfig();
   }
 
   /// Prompt translation is user initiated: require an explicit, enabled
@@ -649,22 +830,25 @@ class PromptAssistantConfigState {
     List<ModelConfig>? models,
     Map<LauncherInterface, InterfaceSlotConfig>? interfaces,
     Map<String, bool>? providerHasApiKey,
+    List<TaskPresetConfig>? presets,
   }) {
     return PromptAssistantConfigState(
       providers: providers ?? this.providers,
       models: models ?? this.models,
       interfaces: interfaces ?? this.interfaces,
       providerHasApiKey: providerHasApiKey ?? this.providerHasApiKey,
+      presets: presets ?? this.presets,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': 2,
+    'schemaVersion': 3,
+    'presets': presets.map((e) => e.toJson()).toList(),
     'providers': providers.map((e) => e.toJson()).toList(),
     'models': models.map((e) => e.toJson()).toList(),
     'interfaces': {
       for (final entry in interfaces.entries)
-        if (entry.value.isConfigured) entry.key.name: entry.value.toJson(),
+        entry.key.name: entry.value.toJson(),
     },
   };
 
@@ -725,6 +909,12 @@ class PromptAssistantConfigState {
       models: models,
       interfaces: interfaces,
       providerHasApiKey: const {},
+      presets: [
+        if (json['presets'] is List)
+          for (final preset in json['presets'] as List)
+            if (preset is Map<String, dynamic>)
+              TaskPresetConfig.fromJson(preset),
+      ],
     );
   }
 
@@ -753,6 +943,9 @@ class PromptAssistantConfigState {
     if (interfacesRaw is Map) {
       for (final entry in interfacesRaw.entries) {
         if (entry.value is! Map) continue;
+        if (!LauncherInterface.values.any((task) => task.name == entry.key)) {
+          continue;
+        }
         final slot = InterfaceSlotConfig.fromJson(
           (entry.value as Map).cast<String, dynamic>(),
         );
@@ -773,9 +966,19 @@ class PromptAssistantConfigState {
     }
 
     final providerIds = providers.map((provider) => provider.id).toSet();
-    interfaces.removeWhere(
-      (_, slot) => slot.isConfigured && !providerIds.contains(slot.providerId),
-    );
+    for (final entry in interfaces.entries.toList()) {
+      if (entry.value.isConfigured &&
+          !providerIds.contains(entry.value.providerId)) {
+        final slot = entry.value;
+        if (slot.presetId == null &&
+            slot.targetLanguage == 'auto' &&
+            slot.parameters.toJson().isEmpty) {
+          interfaces.remove(entry.key);
+        } else {
+          interfaces[entry.key] = slot.copyWith(providerId: '', model: '');
+        }
+      }
+    }
     return interfaces;
   }
 

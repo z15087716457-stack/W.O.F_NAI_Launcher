@@ -52,6 +52,11 @@ class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
         'model': request.model,
         'max_tokens': request.modelConfig?.maxOutputTokens ?? 2048,
         'system': request.systemPrompt,
+        if (request.modelConfig?.temperature case final value?)
+          'temperature': value,
+        if (request.modelConfig?.temperature == null &&
+            request.modelConfig?.topP != null)
+          'top_p': request.modelConfig!.topP,
         if (request.modelConfig?.reasoningEffort case final String effort)
           'output_config': {'effort': effort},
         'messages': [

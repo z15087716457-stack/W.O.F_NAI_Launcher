@@ -13,6 +13,7 @@ import 'sections/network_settings_section.dart';
 import 'sections/shortcut_settings_section.dart';
 import 'sections/integrations_settings_section.dart';
 import 'sections/about_settings_section.dart';
+import 'sections/model_management_section.dart';
 
 /// 设置页面 Section 数据模型
 class _SettingsSection {
@@ -43,11 +44,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late int _selectedIndex;
   final _contentScrollController = ScrollController();
   bool _isContentScrolled = false;
+  final _modelManagementKey = GlobalKey<ModelManagementSectionState>();
+  bool _leavingModels = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialSectionIndex.clamp(0, 8);
+    _selectedIndex = widget.initialSectionIndex.clamp(0, 9);
     _contentScrollController.addListener(_onContentScroll);
   }
 
@@ -55,7 +58,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void didUpdateWidget(covariant SettingsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialSectionIndex != widget.initialSectionIndex) {
-      _selectedIndex = widget.initialSectionIndex.clamp(0, 8);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onSectionSelected(widget.initialSectionIndex.clamp(0, 9));
+      });
     }
   }
 
@@ -104,6 +109,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         widget: const ShortcutSettingsSection(),
       ),
       _SettingsSection(
+        icon: Icons.hub_outlined,
+        selectedIcon: Icons.hub,
+        label: context.l10n.settings_modelsAndInterfaces,
+        widget: ModelManagementSection(key: _modelManagementKey),
+      ),
+      _SettingsSection(
         icon: Icons.extension_outlined,
         selectedIcon: Icons.extension,
         label: context.l10n.settings_integrations,
@@ -132,11 +143,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _onSectionSelected(int index) {
+  Future<void> _onSectionSelected(int index) async {
+    if (_leavingModels || index == _selectedIndex) return;
+    if (_selectedIndex == 7) {
+      _leavingModels = true;
+      final canLeave =
+          await (_modelManagementKey.currentState?.confirmLeave() ??
+              Future.value(true));
+      _leavingModels = false;
+      if (!canLeave || !mounted) return;
+    }
     setState(() {
       _selectedIndex = index;
       // 切换 section 时重置滚动位置
-      _contentScrollController.jumpTo(0);
+      if (_contentScrollController.hasClients) {
+        _contentScrollController.jumpTo(0);
+      }
       _isContentScrolled = false;
     });
   }
@@ -198,6 +220,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
+                if (_selectedIndex == 7) {
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1400),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: theme.colorScheme.outlineVariant,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: sections[_selectedIndex].widget,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
                 return SingleChildScrollView(
                   controller: _contentScrollController,
                   padding: const EdgeInsets.all(24),

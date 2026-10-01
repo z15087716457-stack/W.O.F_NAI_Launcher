@@ -3,10 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/integrations_settings_section.dart';
 
-const _promptAssistantPanelKey = ValueKey<String>('panel-prompt-assistant');
 const _comfyUiPanelKey = ValueKey<String>('panel-comfyui');
 const _kritaPanelKey = ValueKey<String>('panel-krita');
-const _panelKeys = [_promptAssistantPanelKey, _comfyUiPanelKey, _kritaPanelKey];
+const _panelKeys = [_comfyUiPanelKey, _kritaPanelKey];
 
 class _PanelProbe extends StatefulWidget {
   const _PanelProbe({
@@ -48,11 +47,6 @@ void main() {
           body: IntegrationsSettingsSection(
             panelBuilders: [
               (_) => _PanelProbe(
-                key: _promptAssistantPanelKey,
-                label: 'panel-prompt-assistant',
-                onDispose: () => disposedPanels.add('prompt-assistant'),
-              ),
-              (_) => _PanelProbe(
                 key: _comfyUiPanelKey,
                 label: 'panel-comfyui',
                 onDispose: () => disposedPanels.add('comfyui'),
@@ -79,10 +73,10 @@ void main() {
     }
   }
 
-  test('测试注入面板数量必须恰好为三项', () {
+  test('测试注入面板数量必须恰好为两项', () {
     Widget buildPanel(BuildContext _) => const SizedBox.shrink();
 
-    for (final invalidLength in [0, 1, 2, 4]) {
+    for (final invalidLength in [0, 1, 3, 4]) {
       expect(
         () => IntegrationsSettingsSection(
           panelBuilders: List<WidgetBuilder>.filled(invalidLength, buildPanel),
@@ -94,35 +88,27 @@ void main() {
 
     expect(
       () => IntegrationsSettingsSection(
-        panelBuilders: List<WidgetBuilder>.filled(3, buildPanel),
+        panelBuilders: List<WidgetBuilder>.filled(2, buildPanel),
       ),
       returnsNormally,
     );
     expect(() => const IntegrationsSettingsSection(), returnsNormally);
   });
 
-  testWidgets('默认显示第一个面板且三段可切换', (tester) async {
+  testWidgets('默认显示第一个面板且两段可切换', (tester) async {
     final disposedPanels = <String>[];
     await pumpSection(tester, disposedPanels);
 
-    // 三段子导航
-    expect(find.text('模型与接口'), findsOneWidget);
+    expect(find.text('模型与接口'), findsNothing);
     expect(find.text('ComfyUI'), findsOneWidget);
     expect(find.text('Krita'), findsOneWidget);
-
-    // 从完整元素树确认默认只挂载第一个面板。
-    expectOnlyPanel(_promptAssistantPanelKey);
-    expect(disposedPanels, isEmpty);
-
-    await tester.tap(find.text('ComfyUI'));
-    await tester.pumpAndSettle();
     expectOnlyPanel(_comfyUiPanelKey);
-    expect(disposedPanels, ['prompt-assistant']);
+    expect(disposedPanels, isEmpty);
 
     await tester.tap(find.text('Krita'));
     await tester.pumpAndSettle();
     expectOnlyPanel(_kritaPanelKey);
-    expect(disposedPanels, ['prompt-assistant', 'comfyui']);
+    expect(disposedPanels, ['comfyui']);
   });
 
   testWidgets('英文环境切换集成面板时分段导航总宽度保持不变', (tester) async {
@@ -150,9 +136,9 @@ void main() {
   });
 
   const expectedLabels = <String, List<String>>{
-    'en': ['Models & APIs', 'ComfyUI', 'Krita'],
-    'zh': ['模型与接口', 'ComfyUI', 'Krita'],
-    'ja': ['モデルとAPI', 'ComfyUI', 'Krita'],
+    'en': ['ComfyUI', 'Krita'],
+    'zh': ['ComfyUI', 'Krita'],
+    'ja': ['ComfyUI', 'Krita'],
   };
 
   for (final entry in expectedLabels.entries) {

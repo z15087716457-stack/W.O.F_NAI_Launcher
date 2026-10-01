@@ -69,6 +69,9 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
       'model': request.model,
       'stream': false,
       'messages': _buildMessages(request),
+      if (request.modelConfig?.temperature case final value?)
+        'temperature': value,
+      if (request.modelConfig?.topP case final value?) 'top_p': value,
     };
     final settings = request.modelConfig;
     if (settings?.maxOutputTokens case final int limit) {
@@ -135,7 +138,9 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
       }
       if (status == 400 &&
           request.modelConfig?.maxOutputTokens == null &&
-          request.modelConfig?.reasoningEffort == null) {
+          request.modelConfig?.reasoningEffort == null &&
+          request.modelConfig?.temperature == null &&
+          request.modelConfig?.topP == null) {
         return dio.post<dynamic>(
           endpoint,
           data: {

@@ -2,6 +2,9 @@ import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_ba
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:nai_launcher/presentation/themes/app_theme.dart';
+import '../../../helpers/studio_capture_fonts.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -78,8 +81,15 @@ class _MemoryAssistantSecrets extends SecureStorageService {
 
 void main() {
   late Directory hiveDir;
+  final settingsCaptureKey = GlobalKey();
 
   setUpAll(() async {
+    if (Platform.environment['CAPTURE_MODEL_MANAGEMENT'] == '1') {
+      await loadStudioCaptureFonts();
+      await (FontLoader(
+        'MaterialIcons',
+      )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+    }
     hiveDir = Directory.systemTemp.createTempSync('settings_screen_hive_');
     Hive.init(hiveDir.path);
     await Hive.openBox(StorageKeys.settingsBox);
@@ -96,13 +106,46 @@ void main() {
     }
   });
 
-  testWidgets('设置页导航为 9 个分类', (tester) async {
+  testWidgets('设置页导航为 10 个分类', (tester) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.binding.setSurfaceSize(const Size(1280, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
+    final settings = _MemorySettingsStorage()
+      .._config = const PromptAssistantConfigState(
+        providers: [
+          ProviderConfig(
+            id: 'deepseek',
+            name: 'DeepSeek',
+            baseUrl: 'https://example.test/v1',
+            preset: ProviderPreset.deepseek,
+          ),
+        ],
+        models: [
+          ModelConfig(
+            providerId: 'deepseek',
+            name: 'deepseek-chat',
+            displayName: 'DeepSeek Chat',
+          ),
+        ],
+        interfaces: {
+          LauncherInterface.translate: InterfaceSlotConfig(
+            providerId: 'deepseek',
+            model: 'deepseek-chat',
+          ),
+        },
+        providerHasApiKey: {},
+      ).encode();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          localStorageServiceProvider.overrideWithValue(settings),
+          secureStorageServiceProvider.overrideWithValue(
+            _MemoryAssistantSecrets(),
+          ),
           authNotifierProvider.overrideWith(_FakeAuthNotifier.new),
           accountManagerNotifierProvider.overrideWith(
             _FakeAccountManagerNotifier.new,
@@ -111,18 +154,26 @@ void main() {
             _FakeSubscriptionNotifier.new,
           ),
         ],
-        child: const MaterialApp(
-          locale: Locale('zh'),
+        child: MaterialApp(
+          theme: AppTheme.getTheme(
+            AppStyle.geist,
+            Platform.environment['STUDIO_APPEARANCE'] == 'dark'
+                ? Brightness.dark
+                : Brightness.light,
+          ),
+          builder: (context, child) =>
+              RepaintBoundary(key: settingsCaptureKey, child: child!),
+          locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: IntegratedTitleBarShell(child: SettingsScreen()),
+          home: const IntegratedTitleBarShell(child: SettingsScreen()),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
     final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-    expect(rail.destinations.length, 9);
+    expect(rail.destinations.length, 10);
 
     final labels = rail.destinations
         .map((destination) => (destination.label as Text).data)
@@ -135,6 +186,7 @@ void main() {
       '安全与分享',
       '网络',
       '快捷键',
+      '模型与接口',
       '集成',
       '关于',
     ]);
@@ -150,6 +202,7 @@ void main() {
       Icons.shield_outlined,
       Icons.network_check_outlined,
       Icons.keyboard_outlined,
+      Icons.hub_outlined,
       Icons.extension_outlined,
       Icons.info_outlined,
     ]);
@@ -165,6 +218,7 @@ void main() {
       Icons.shield,
       Icons.network_check,
       Icons.keyboard,
+      Icons.hub,
       Icons.extension,
       Icons.info,
     ]);
@@ -194,13 +248,28 @@ void main() {
         .map((segment) => (segment.label as Text).data)
         .toList();
 
-    final promptAssistantSection = find.byType(PromptAssistantSettingsSection);
-    expect(promptAssistantSection, findsOneWidget);
-    expect(
-      find.descendant(of: promptAssistantSection, matching: find.text('模型与接口')),
-      findsOneWidget,
-    );
-    expect(segmentLabels, const ['模型与接口', 'ComfyUI', 'Krita']);
+    expect(find.byType(PromptAssistantSettingsSection), findsNothing);
+    expect(segmentLabels, const ['ComfyUI', 'Krita']);
+    await tester.tap(find.byIcon(Icons.hub_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('服务商'), findsOneWidget);
+    expect(find.text('功能接口'), findsOneWidget);
+    if (Platform.environment['CAPTURE_MODEL_MANAGEMENT'] == '1') {
+      await tester.runAsync(() async {
+        final image =
+            await (settingsCaptureKey.currentContext!.findRenderObject()!
+                    as RenderRepaintBoundary)
+                .toImage(pixelRatio: 1.5);
+        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+        final file = File(
+          '.dart_tool/model-management-captures/settings-${Platform.environment['STUDIO_APPEARANCE'] ?? 'light'}.png',
+        );
+        await file.parent.create(recursive: true);
+        await file.writeAsBytes(bytes!.buffer.asUint8List());
+        image.dispose();
+      });
+    }
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('第三方接口可手动添加模型 ID', (tester) async {
@@ -222,11 +291,7 @@ void main() {
             locale: Locale('zh'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: PromptAssistantSettingsSection(),
-              ),
-            ),
+            home: Scaffold(body: PromptAssistantSettingsSection()),
           ),
         ),
       ),
@@ -246,7 +311,7 @@ void main() {
         );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('中转服务'));
+    await tester.tap(find.text('中转服务').first);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     if (const bool.fromEnvironment('AI_SERVICE_CAPTURE')) {
@@ -261,6 +326,8 @@ void main() {
         await file.writeAsBytes(bytes!.buffer.asUint8List());
       });
     }
+    await tester.tap(find.text('模型').first);
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('ai-service-manual-model-id')),
       'relay-model-v5',
@@ -270,7 +337,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('添加自定义模型'));
     await tester.pump();
-    await tester.tap(find.text('保存服务'));
+    await tester.ensureVisible(find.text('保存').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('保存').first);
     await tester.pumpAndSettle();
     await tester.pump();
 
@@ -306,11 +375,7 @@ void main() {
           locale: Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: PromptAssistantSettingsSection(),
-            ),
-          ),
+          home: Scaffold(body: PromptAssistantSettingsSection()),
         ),
       ),
     );
@@ -328,11 +393,15 @@ void main() {
           ),
         );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('中转服务'));
+    await tester.tap(find.text('中转服务').first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('高级设置'));
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextField, '请求超时（秒）'), '75');
+    await tester.ensureVisible(find.text('自定义请求头').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('自定义请求头').first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('添加请求头'));
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -345,7 +414,9 @@ void main() {
     );
     await tester.tap(find.text('应用'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('保存服务'));
+    await tester.ensureVisible(find.text('保存').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('保存').first);
     await tester.pumpAndSettle();
     expect(
       container

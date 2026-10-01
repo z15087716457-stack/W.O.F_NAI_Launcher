@@ -540,33 +540,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       isModelConfigured: () =>
           ref.read(promptAssistantConfigProvider).promptTranslationRoute !=
           null,
-      onConfigure: () => showDialog<void>(
-        context: context,
-        builder: (dialogContext) => Dialog(
-          child: SizedBox(
-            width: 720,
-            height: MediaQuery.sizeOf(dialogContext).height * .85,
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    tooltip: '返回编辑',
-                    onPressed: () => Navigator.pop(dialogContext),
-                    icon: const Icon(Icons.close),
-                  ),
-                ),
-                const Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: PromptAssistantSettingsSection(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      onConfigure: () => showModelManagementDialog(context),
     );
     _translationEditor = editor;
     final result = await editor.result;

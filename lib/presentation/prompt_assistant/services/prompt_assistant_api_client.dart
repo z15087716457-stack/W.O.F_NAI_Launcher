@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:dio/dio.dart';
 
 import '../../../core/utils/app_logger.dart';
 import '../models/prompt_assistant_models.dart';
+import '../providers/model_request_history_provider.dart';
 import 'provider_adapters/anthropic_messages_adapter.dart';
 import 'provider_adapters/gemini_generate_content_adapter.dart';
 import 'provider_adapters/openai_chat_completions_adapter.dart';
@@ -14,9 +16,12 @@ class PromptAssistantApiClient {
   PromptAssistantApiClient({
     required Dio dio,
     this.imageUploadMaxBytes = promptAssistantImageUploadMaxBytes,
+    this.history,
   }) : _dio = dio;
 
   final Dio _dio;
+  final ModelRequestHistory? history;
+  final _gates = <String, _RequestGate>{};
   final int imageUploadMaxBytes;
   final Map<String, CancelToken> _cancelTokens = {};
 
@@ -52,39 +57,96 @@ class PromptAssistantApiClient {
     _cancelTokens.remove(request.sessionId)?.cancel('replaced by new request');
     final cancelToken = CancelToken();
     _cancelTokens[request.sessionId] = cancelToken;
-
+    final record = history?.begin(request);
+    final watch = Stopwatch()..start();
+    final gate = _gates.putIfAbsent(request.provider.id, _RequestGate.new);
+    var acquired = false;
+    var attempts = 0;
     try {
-      AppLogger.d(
-        'request start provider=${request.provider.id} '
-            'protocol=${request.provider.protocol.name} model=${request.model}',
-        'PromptAssistant',
+      final parameters = request.modelConfig;
+      if (parameters != null) {
+        final error = RequestParameters.fromModel(
+          parameters,
+        ).validateFor(request.provider.protocol);
+        if (error != null) throw FormatException(error);
+      }
+      await gate.acquire(
+        request.provider.maxConcurrentRequests.clamp(1, 20),
+        cancelToken,
       );
-
-      final uploadRequest = await optimizePromptAssistantRequestImagesForUpload(
+      acquired = true;
+      if (record != null) history?.update(record, '请求中');
+      final upload = await optimizePromptAssistantRequestImagesForUpload(
         request,
         maxBytes: imageUploadMaxBytes,
       );
-      final content = await _adapterFor(
-        uploadRequest.provider,
-      ).complete(dio: _dio, request: uploadRequest, cancelToken: cancelToken);
-      final trimmed = content.trim();
-      if (trimmed.isEmpty) {
-        throw StateError(
-          'LLM service returned empty content: provider=${request.provider.name}, model=${request.model}',
-        );
+      String content;
+      while (true) {
+        if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+        attempts++;
+        try {
+          content = await _adapterFor(
+            upload.provider,
+          ).complete(dio: _dio, request: upload, cancelToken: cancelToken);
+          break;
+        } on DioException catch (error) {
+          final status = error.response?.statusCode;
+          final retryable =
+              error.type == DioExceptionType.connectionError ||
+              const [429, 502, 503, 504].contains(status);
+          if (!retryable ||
+              attempts > request.provider.retryAttempts ||
+              cancelToken.isCancelled) {
+            rethrow;
+          }
+          await Future.any([
+            Future<void>.delayed(Duration(milliseconds: 400 * attempts)),
+            cancelToken.whenCancel.then<void>((error) => throw error),
+          ]);
+        }
       }
-
+      final trimmed = content.trim();
+      if (trimmed.isEmpty) throw StateError('模型返回了空内容。');
       AppLogger.d(
-        'response done provider=${request.provider.id} '
-            'model=${request.model} outputLen=${trimmed.length} '
-            'output=${_previewBody(trimmed)}',
+        'response done provider=${request.provider.id} model=${request.model} outputLen=${trimmed.length}',
         'PromptAssistant',
       );
+      if (record != null) {
+        history?.update(
+          record,
+          '成功',
+          elapsedMs: watch.elapsedMilliseconds,
+          attempts: attempts,
+        );
+      }
       yield StreamingChunk(delta: trimmed);
       yield const StreamingChunk(delta: '', done: true);
-    } on DioException catch (e) {
-      throw StateError(_formatDioException(e, request));
+    } on DioException catch (error) {
+      if (record != null) {
+        history?.update(
+          record,
+          cancelToken.isCancelled ? '已取消' : '失败',
+          elapsedMs: watch.elapsedMilliseconds,
+          attempts: attempts,
+          error: error.response?.statusCode == null
+              ? error.type.name
+              : 'HTTP ${error.response!.statusCode}',
+        );
+      }
+      throw StateError(_formatDioException(error, request));
+    } catch (error) {
+      if (record != null) {
+        history?.update(
+          record,
+          '失败',
+          elapsedMs: watch.elapsedMilliseconds,
+          attempts: attempts,
+          error: error.runtimeType.toString(),
+        );
+      }
+      rethrow;
     } finally {
+      if (acquired) gate.release();
       if (identical(_cancelTokens[request.sessionId], cancelToken)) {
         _cancelTokens.remove(request.sessionId);
       }
@@ -261,5 +323,33 @@ class PromptAssistantApiClient {
     }
     final query = uri.hasQuery ? '?<redacted>' : '';
     return '${uri.path}$query';
+  }
+}
+
+class _RequestGate {
+  int active = 0;
+  final waiting = <Completer<void>>[];
+  Future<void> acquire(int limit, CancelToken token) async {
+    while (active >= limit) {
+      final waiter = Completer<void>();
+      waiting.add(waiter);
+      try {
+        await Future.any([
+          waiter.future,
+          token.whenCancel.then<void>((error) => throw error),
+        ]);
+      } finally {
+        waiting.remove(waiter);
+      }
+    }
+    if (token.isCancelled) throw token.cancelError!;
+    active++;
+  }
+
+  void release() {
+    active--;
+    for (final waiter in waiting.toList()) {
+      if (!waiter.isCompleted) waiter.complete();
+    }
   }
 }

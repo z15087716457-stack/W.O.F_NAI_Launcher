@@ -20,6 +20,7 @@ class PromptAssistantRequest {
     required this.userParts,
     required this.apiKey,
     this.modelConfig,
+    this.taskName = '模型连接测试',
   });
 
   final String sessionId;
@@ -29,6 +30,7 @@ class PromptAssistantRequest {
   final List<PromptAssistantContentPart> userParts;
   final String? apiKey;
   final ModelConfig? modelConfig;
+  final String taskName;
 }
 
 abstract class PromptAssistantContentPart {
@@ -123,6 +125,7 @@ Future<PromptAssistantRequest> optimizePromptAssistantRequestImagesForUpload(
     userParts: parts,
     apiKey: request.apiKey,
     modelConfig: request.modelConfig,
+    taskName: request.taskName,
   );
 }
 

@@ -261,8 +261,10 @@ GoRouter appRouter(Ref ref) {
                     initialSectionIndex:
                         state.uri.queryParameters['section'] == 'storage'
                         ? 3
-                        : state.uri.queryParameters['section'] == 'integrations'
+                        : state.uri.queryParameters['section'] == 'models'
                         ? 7
+                        : state.uri.queryParameters['section'] == 'integrations'
+                        ? 8
                         : 0,
                   ),
                 ),
