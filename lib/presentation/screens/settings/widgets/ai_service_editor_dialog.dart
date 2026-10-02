@@ -4,6 +4,7 @@ import '../../../themes/studio_typography.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'provider_logo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -67,7 +68,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   late final TextEditingController _selectedSearch;
   late final TextEditingController _manualId;
   final _selectedScroll = ScrollController();
-  final _selectedPanelKey = GlobalKey();
   final _selectedRowKeys = <String, GlobalKey>{};
   late final LinkedHashMap<String, ModelConfig> _selected;
   Map<String, String> _headers = {};
@@ -572,19 +572,52 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     if (!opening) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _expandedModel != name) return;
-      final panel = _selectedPanelKey.currentContext;
-      final panelBox = panel?.findRenderObject();
-      if (panel != null && panelBox != null) {
-        Scrollable.maybeOf(
-          panel,
-        )?.position.ensureVisible(panelBox, alignment: 0);
-      }
       final row = _selectedRowKeys[name]?.currentContext;
-      final rowBox = row?.findRenderObject();
-      if (row != null && rowBox != null) {
-        Scrollable.maybeOf(row)?.position.ensureVisible(rowBox, alignment: 0);
+      final box = row?.findRenderObject();
+      final inner = row == null ? null : Scrollable.maybeOf(row);
+      if (inner == null || box is! RenderBox) return;
+      final before = inner.position.pixels;
+      _revealAdvancedRow(inner, box, box);
+      void revealOuter() {
+        if (!mounted || _expandedModel != name || !box.attached) return;
+        final outer = Scrollable.maybeOf(inner.context);
+        final anchor = inner.context.findRenderObject();
+        if (outer != null && anchor != null) {
+          _revealAdvancedRow(outer, anchor, box);
+        }
+      }
+
+      if (inner.position.pixels == before) {
+        revealOuter();
+      } else {
+        // Read the outer coordinates after the inner viewport has laid out.
+        WidgetsBinding.instance.addPostFrameCallback((_) => revealOuter());
+        WidgetsBinding.instance.ensureVisualUpdate();
       }
     });
+  }
+
+  void _revealAdvancedRow(
+    ScrollableState scrollable,
+    RenderObject anchor,
+    RenderBox row,
+  ) {
+    final viewport = RenderAbstractViewport.maybeOf(anchor);
+    if (viewport is! RenderBox) return;
+    final top = row.localToGlobal(Offset.zero, ancestor: viewport).dy;
+    final height = scrollable.position.viewportDimension;
+    final policy = top < 0 || row.size.height > height
+        ? ScrollPositionAlignmentPolicy.keepVisibleAtStart
+        : top + row.size.height > height
+        ? ScrollPositionAlignmentPolicy.keepVisibleAtEnd
+        : null;
+    if (policy != null) {
+      scrollable.position.ensureVisible(
+        anchor,
+        targetRenderObject: row,
+        alignmentPolicy: policy,
+      );
+    }
   }
 
   void _addManual() {
@@ -1130,7 +1163,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       ],
     );
     return Material(
-      key: _selectedPanelKey,
       color: colors.surfaceContainerLow,
       borderRadius: BorderRadius.circular(10),
       child: Padding(

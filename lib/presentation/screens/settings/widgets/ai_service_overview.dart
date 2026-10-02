@@ -133,9 +133,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                     const SizedBox(height: 16),
                     _modelsOverview(
                       context,
-                      _expandedModel == null
-                          ? (viewport.maxHeight - 250).clamp(320.0, 460.0)
-                          : (bodyViewport.maxHeight - 8).clamp(360.0, 680.0),
+                      (bodyViewport.maxHeight - 8).clamp(360.0, 680.0),
                     ),
                     const SizedBox(height: 24),
                     _usageOverview(context),

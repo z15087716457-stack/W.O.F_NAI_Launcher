@@ -43,6 +43,13 @@ void _expectWholeCard(WidgetTester tester) {
     find.byKey(const Key('service-selected-list')),
   );
   final card = tester.getRect(find.byType(ModelConfigurationCard));
+  final page = tester.getRect(find.byKey(const Key('service-overview-scroll')));
+  expect(
+    card.top,
+    greaterThanOrEqualTo(page.top - .5),
+    reason: 'card=$card, list=$viewport, page=$page',
+  );
+  expect(card.bottom, lessThanOrEqualTo(page.bottom + .5));
   expect(card.top, greaterThanOrEqualTo(viewport.top - .5));
   expect(
     card.bottom,
@@ -89,7 +96,24 @@ void main() {
           config: _config,
         );
         final before = container.read(promptAssistantConfigProvider).encode();
+        final selectedPanel = find
+            .ancestor(
+              of: find.byKey(const Key('service-selected-list')),
+              matching: find.byType(Material),
+            )
+            .first;
+        final catalogPanel = find
+            .ancestor(
+              of: find.byKey(const Key('service-catalog-list')),
+              matching: find.byType(Material),
+            )
+            .first;
+        final selectedHeight = tester.getSize(selectedPanel).height;
+        final catalogHeight = tester.getSize(catalogPanel).height;
+        await harness.capture(tester, 'fixed-height-${entry.$3}-collapsed');
         await _tap(tester, 'service-model-parameters-$_id');
+        expect(tester.getSize(selectedPanel).height, selectedHeight);
+        expect(tester.getSize(catalogPanel).height, catalogHeight);
         _expectWholeCard(tester);
         expect(find.text('思考设置'), findsNothing);
         expect(find.text('支持的等级'), findsNothing);
@@ -116,7 +140,7 @@ void main() {
         ).colorScheme;
         expect(advanced.style!.foregroundColor!.resolve({}), colors.onSurface);
         expect(container.read(promptAssistantConfigProvider).encode(), before);
-        await harness.capture(tester, 'density-${entry.$3}-advanced');
+        await harness.capture(tester, 'fixed-height-${entry.$3}-advanced');
         if (entry.$3 == 'regular') {
           final square = find.byKey(const ValueKey('capability-box-原生网络搜索'));
           final mouse = await tester.createGesture(
@@ -125,16 +149,70 @@ void main() {
           await mouse.addPointer(location: Offset.zero);
           await mouse.moveTo(tester.getCenter(square));
           await tester.pump();
-          await harness.capture(tester, 'density-capability-hover');
+          await harness.capture(tester, 'fixed-height-capability-hover');
           await tester.tap(square);
           await tester.pumpAndSettle();
-          await harness.capture(tester, 'density-capability-selected');
+          await harness.capture(tester, 'fixed-height-capability-selected');
           await mouse.removePointer();
         }
+        await _tap(tester, 'service-model-parameters-$_id');
+        expect(tester.getSize(selectedPanel).height, selectedHeight);
+        expect(tester.getSize(catalogPanel).height, catalogHeight);
         expect(tester.takeException(), isNull);
       },
     );
   }
+
+  testWidgets(
+    'visible advanced options keep the outer page and panel geometry unchanged',
+    (tester) async {
+      await harness.pumpManagement(
+        tester,
+        size: const Size(1600, 1000),
+        config: _config,
+      );
+      final selectedPanel = find
+          .ancestor(
+            of: find.byKey(const Key('service-selected-list')),
+            matching: find.byType(Material),
+          )
+          .first;
+      final catalogPanel = find
+          .ancestor(
+            of: find.byKey(const Key('service-catalog-list')),
+            matching: find.byType(Material),
+          )
+          .first;
+      final selectedBefore = tester.getRect(selectedPanel);
+      final catalogBefore = tester.getRect(catalogPanel);
+      final outer = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('service-overview-scroll')),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      final pageBefore = outer.pixels;
+      await tester.tap(find.byKey(const Key('service-model-parameters-$_id')));
+      await tester.pumpAndSettle();
+      _expectWholeCard(tester);
+      expect(tester.getRect(selectedPanel), selectedBefore);
+      expect(tester.getRect(catalogPanel), catalogBefore);
+      expect(outer.pixels, pageBefore);
+      expect(
+        tester.getRect(find.byType(ModelConfigurationCard)).bottom,
+        lessThanOrEqualTo(
+          tester
+              .getRect(find.byKey(const Key('service-overview-scroll')))
+              .bottom,
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'advanced focus reveals a model below many preceding rows without changing their order',
@@ -161,6 +239,7 @@ void main() {
       await tester.scrollUntilVisible(target, 220, scrollable: scrollable);
       await tester.tap(target);
       await tester.pumpAndSettle();
+      await harness.capture(tester, 'fixed-height-later-model');
       _expectWholeCard(tester);
       final viewport = tester.getRect(
         find.byKey(const Key('service-selected-list')),
@@ -170,7 +249,6 @@ void main() {
         container.read(promptAssistantConfigProvider).models.map((m) => m.name),
         config.models.map((m) => m.name),
       );
-      await harness.capture(tester, 'density-later-model');
       expect(tester.takeException(), isNull);
     },
   );
@@ -200,7 +278,7 @@ void main() {
       expect(find.byKey(const Key('model-headers-editor')), findsNothing);
       expect(background('model-custom-headers'), colors.onSurface);
       expect(background('model-custom-body'), isNot(colors.onSurface));
-      await harness.capture(tester, 'density-headers-configured');
+      await harness.capture(tester, 'fixed-height-headers-configured');
       await _tap(tester, 'model-custom-body');
       await _tap(tester, 'model-add-body-field');
       await tester.enterText(find.byKey(const Key('body-key-0')), 'metadata');
@@ -212,7 +290,7 @@ void main() {
       expect(background('model-custom-body'), colors.onSurface);
       await _tap(tester, 'model-custom-body');
       _expectWholeCard(tester);
-      await harness.capture(tester, 'density-both-configured');
+      await harness.capture(tester, 'fixed-height-both-configured');
       await _tap(tester, 'model-custom-body');
       await _tap(tester, 'body-remove-0');
       expect(background('model-custom-body'), isNot(colors.onSurface));
@@ -363,7 +441,7 @@ void main() {
       expect((material.shape! as RoundedRectangleBorder).side, BorderSide.none);
       expect(find.text('自定义端点'), findsOneWidget);
       expect(tester.getSize(custom).height, lessThan(75));
-      await harness.capture(tester, 'density-provider-picker');
+      await harness.capture(tester, 'fixed-height-provider-picker');
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpWidget(const SizedBox.shrink());
       await harness.pumpManagement(
@@ -379,7 +457,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('choose-provider-ollama')), findsOneWidget);
-      await harness.capture(tester, 'density-provider-picker-compact');
+      await harness.capture(tester, 'fixed-height-provider-picker-compact');
       await tester.tap(find.byKey(const Key('choose-provider-ollama')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('provider-search')), findsNothing);
