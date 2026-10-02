@@ -8,6 +8,7 @@ import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import 'model_management_widgets.dart';
 import 'model_reasoning_button.dart';
 import 'model_draft_save_controller.dart';
+import 'model_compact_dropdown.dart';
 
 typedef _ModelRoute = ({ProviderConfig provider, ModelConfig model});
 
@@ -99,14 +100,14 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
   }
 
   Future<void> _test(TaskPresetConfig preset) async {
-    if (!_validate()) return;
+    if (_busy || !_validate()) return;
     setState(() {
       _busy = true;
+      _testSession = 'profile-test-${DateTime.now().microsecondsSinceEpoch}';
       _testResult = null;
       _message = null;
     });
     try {
-      _testSession = 'profile-test-${DateTime.now().microsecondsSinceEpoch}';
       final result = await _service.testTaskDraft(
         widget.task,
         _slot,
@@ -291,31 +292,27 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
           first: _property(
             label: '服务商与模型',
             help: '仅列出启用服务中的已选模型',
-            control: DropdownButtonFormField<String>(
+            control: ModelCompactDropdown<String>(
               key: ValueKey(
                 'task-route-${widget.task.name}-${selected?.model.name}',
               ),
-              initialValue: selected == null
+              value: selected == null
                   ? null
                   : jsonEncode([selected.provider.id, selected.model.name]),
-              isExpanded: true,
               decoration: decoration,
-              style: valueStyle,
-              hint: const Text('选择服务商与模型'),
-              items: [
+              textStyle: valueStyle,
+              hint: '选择服务商与模型',
+              choices: [
                 for (final item in choices)
-                  DropdownMenuItem(
-                    value: jsonEncode([item.provider.id, item.model.name]),
-                    child: Text(
-                      '${item.provider.name} · ${item.model.displayName}',
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  ModelDropdownChoice(
+                    jsonEncode([item.provider.id, item.model.name]),
+                    '${item.provider.name} · ${item.model.displayName}',
                   ),
               ],
               onChanged: _busy
                   ? null
                   : (value) {
-                      final route = (jsonDecode(value!) as List).cast<String>();
+                      final route = (jsonDecode(value) as List).cast<String>();
                       _edit(
                         _slot.copyWith(
                           providerId: route[0],
@@ -349,18 +346,14 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
           first: _property(
             label: '使用预设',
             actions: presetActions,
-            control: DropdownButtonFormField<String>(
+            control: ModelCompactDropdown<String>(
               key: ValueKey('task-preset-${preset.id}'),
-              initialValue: preset.id,
-              isExpanded: true,
+              value: preset.id,
               decoration: decoration,
-              style: valueStyle,
-              items: [
+              textStyle: valueStyle,
+              choices: [
                 for (final item in presets)
-                  DropdownMenuItem(
-                    value: item.id,
-                    child: Text(item.name, overflow: TextOverflow.ellipsis),
-                  ),
+                  ModelDropdownChoice(item.id, item.name),
               ],
               onChanged: _busy
                   ? null
@@ -378,18 +371,14 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                 )
               : _property(
                   label: '目标语言',
-                  control: DropdownButtonFormField<String>(
+                  control: ModelCompactDropdown<String>(
                     key: const Key('task-language'),
-                    initialValue: _slot.targetLanguage,
-                    isExpanded: true,
+                    value: _slot.targetLanguage,
                     decoration: decoration,
-                    style: valueStyle,
-                    items: [
+                    textStyle: valueStyle,
+                    choices: [
                       for (final entry in languages.entries)
-                        DropdownMenuItem(
-                          value: entry.key,
-                          child: Text(entry.value),
-                        ),
+                        ModelDropdownChoice(entry.key, entry.value),
                     ],
                     onChanged: _busy
                         ? null
@@ -496,9 +485,9 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
           ManagementTabs(
             labels: const ['模型与预设', '提示词与输出'],
             selected: _tab,
+            inProgress: _testSession != null,
             onSelected: (value) => setState(() => _tab = value),
           ),
-          if (_busy) const LinearProgressIndicator(minHeight: 2),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),

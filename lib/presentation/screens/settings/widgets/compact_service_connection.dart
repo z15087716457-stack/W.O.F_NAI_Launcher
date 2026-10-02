@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'model_compact_dropdown.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import 'provider_logo.dart';
 
@@ -78,6 +79,9 @@ class CompactServiceConnection extends StatelessWidget {
     final format = field(
       '接口协议',
       DropdownButtonFormField<ProviderProtocol>(
+        borderRadius: modelMenuRadius,
+        elevation: 3,
+        dropdownColor: theme.colorScheme.surfaceContainerLow,
         key: ValueKey('service-protocol-${protocol.name}'),
         initialValue: protocol,
         isExpanded: true,

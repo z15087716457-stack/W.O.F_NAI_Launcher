@@ -11,6 +11,7 @@ import '../../../prompt_assistant/providers/provider_connection_health_provider.
 import '../widgets/ai_service_editor.dart';
 import '../widgets/model_management_widgets.dart';
 import '../widgets/model_task_editor.dart';
+import '../widgets/model_compact_dropdown.dart';
 import '../widgets/model_preset_editor.dart';
 import '../widgets/model_request_details_dialog.dart';
 import '../widgets/provider_logo.dart';
@@ -416,6 +417,9 @@ class ModelManagementSectionState
                   description: '管理服务连接与翻译偏好。',
                   actions: [
                     PopupMenuButton<String>(
+                      shape: modelMenuShape,
+                      elevation: 3,
+                      clipBehavior: Clip.antiAlias,
                       tooltip: '配置管理',
                       icon: const Icon(Icons.more_horiz),
                       onSelected: (value) =>
@@ -440,6 +444,10 @@ class ModelManagementSectionState
                             children: [
                               Expanded(
                                 child: DropdownButtonFormField<String>(
+                                  borderRadius: modelMenuRadius,
+                                  elevation: 3,
+                                  dropdownColor:
+                                      theme.colorScheme.surfaceContainerLow,
                                   key: ValueKey(
                                     'provider-picker-${provider?.id}',
                                   ),
@@ -622,6 +630,10 @@ class ModelManagementSectionState
                       ? ManagementSplit(
                           compactPicker:
                               DropdownButtonFormField<LauncherInterface>(
+                                borderRadius: modelMenuRadius,
+                                elevation: 3,
+                                dropdownColor:
+                                    theme.colorScheme.surfaceContainerLow,
                                 initialValue: _task,
                                 isExpanded: true,
                                 decoration: const InputDecoration(
@@ -666,6 +678,10 @@ class ModelManagementSectionState
                       : _tab == 2
                       ? ManagementSplit(
                           compactPicker: DropdownButtonFormField<String>(
+                            borderRadius: modelMenuRadius,
+                            elevation: 3,
+                            dropdownColor:
+                                theme.colorScheme.surfaceContainerLow,
                             key: ValueKey('preset-picker-${preset.id}'),
                             initialValue: preset.id,
                             isExpanded: true,

@@ -1,6 +1,9 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+const modelMenuRadius = BorderRadius.all(Radius.circular(12));
+const modelMenuShape = RoundedRectangleBorder(borderRadius: modelMenuRadius);
+
 class ModelDropdownChoice<T> {
   const ModelDropdownChoice(this.value, this.label, {this.enabled = true});
   final T value;
@@ -17,11 +20,17 @@ class ModelCompactDropdown<T> extends StatelessWidget {
     required this.choices,
     required this.onChanged,
     this.compact = false,
+    this.decoration,
+    this.textStyle,
+    this.hint = '',
   });
-  final T value;
+  final T? value;
   final List<ModelDropdownChoice<T>> choices;
   final ValueChanged<T>? onChanged;
   final bool compact;
+  final InputDecoration? decoration;
+  final TextStyle? textStyle;
+  final String hint;
 
   Future<void> _open(BuildContext context) async {
     final box = context.findRenderObject()! as RenderBox;
@@ -39,14 +48,15 @@ class ModelCompactDropdown<T> extends StatelessWidget {
       constraints: BoxConstraints(
         minWidth: rect.width,
         maxWidth: rect.width,
-        maxHeight: math.max(40, overlay.size.height - rect.bottom - 16),
+        maxHeight: math.min(360, math.max(40, overlay.size.height - 32)),
       ),
-      elevation: 5,
-      color: colors.surfaceContainer,
+      elevation: 3,
+      shadowColor: colors.shadow.withValues(alpha: .14),
+      color: colors.surfaceContainerLow,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: modelMenuShape,
       clipBehavior: Clip.antiAlias,
-      menuPadding: const EdgeInsets.symmetric(vertical: 5),
+      menuPadding: const EdgeInsets.symmetric(vertical: 6),
       popUpAnimationStyle: AnimationStyle.noAnimation,
       requestFocus: true,
       items: [
@@ -54,24 +64,25 @@ class ModelCompactDropdown<T> extends StatelessWidget {
           PopupMenuItem<T>(
             value: choice.value,
             enabled: choice.enabled,
-            height: 34,
-            padding: const EdgeInsets.symmetric(horizontal: 5),
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 color: choice.value == value
-                    ? colors.onSurface.withValues(alpha: .08)
+                    ? colors.primary.withValues(alpha: .08)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(7),
               ),
               child: Text(
                 choice.label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: choice.enabled
-                      ? colors.onSurface
-                      : colors.onSurfaceVariant.withValues(alpha: .4),
-                ),
+                style: (textStyle ?? Theme.of(context).textTheme.bodySmall)
+                    ?.copyWith(
+                      color: choice.enabled
+                          ? colors.onSurface
+                          : colors.onSurfaceVariant.withValues(alpha: .4),
+                    ),
               ),
             ),
           ),
@@ -83,38 +94,65 @@ class ModelCompactDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final canChoose = onChanged != null && choices.isNotEmpty;
     final label =
-        choices.where((c) => c.value == value).firstOrNull?.label ?? '';
+        choices.where((c) => c.value == value).firstOrNull?.label ?? hint;
     return Builder(
-      builder: (context) => TextButton(
-        onPressed: onChanged == null ? null : () => _open(context),
-        style: TextButton.styleFrom(
-          alignment: Alignment.centerLeft,
-          foregroundColor: colors.onSurface,
-          backgroundColor: colors.surfaceContainerHighest.withValues(
-            alpha: .55,
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 7 : 10,
-            vertical: compact ? 6 : 9,
-          ),
-          minimumSize: Size(0, compact ? 28 : 33),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.standard,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          textStyle: compact
-              ? Theme.of(context).textTheme.labelSmall
-              : Theme.of(context).textTheme.bodySmall,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+      builder: (context) {
+        final button = TextButton(
+          onPressed: canChoose ? () => _open(context) : null,
+          style: TextButton.styleFrom(
+            alignment: Alignment.centerLeft,
+            foregroundColor: colors.onSurface,
+            backgroundColor: decoration != null
+                ? Colors.transparent
+                : colors.surfaceContainerHighest.withValues(alpha: .55),
+            padding: decoration != null
+                ? EdgeInsets.zero
+                : EdgeInsets.symmetric(
+                    horizontal: compact ? 7 : 10,
+                    vertical: compact ? 6 : 9,
+                  ),
+            minimumSize: Size(
+              0,
+              decoration != null
+                  ? 24
+                  : compact
+                  ? 28
+                  : 33,
             ),
-            const Icon(Icons.expand_more, size: 15),
-          ],
-        ),
-      ),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.standard,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+            textStyle:
+                textStyle ??
+                (compact
+                    ? Theme.of(context).textTheme.labelSmall
+                    : Theme.of(context).textTheme.bodySmall),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const Icon(Icons.expand_more, size: 15),
+            ],
+          ),
+        );
+        return decoration == null
+            ? button
+            : InputDecorator(
+                decoration: decoration!.copyWith(enabled: canChoose),
+                isEmpty: value == null,
+                child: button,
+              );
+      },
     );
   }
 }

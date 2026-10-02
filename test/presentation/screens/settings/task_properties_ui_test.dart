@@ -8,6 +8,7 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_task_de
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/model_management_widgets.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/model_compact_dropdown.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'model_management_section_test.dart' as harness;
@@ -46,7 +47,7 @@ final _config = harness.sampleConfig.copyWith(
 
 Finder get _route => find.byWidgetPredicate(
   (widget) =>
-      widget is DropdownButtonFormField<String> &&
+      widget is ModelCompactDropdown<String> &&
       widget.key.toString().contains('task-route-'),
 );
 String _reasoning(WidgetTester tester) =>
@@ -83,8 +84,8 @@ void main() {
     expect(language.top, closeTo(preset.top, .01));
     for (final picker in [_route, find.byKey(const Key('task-language'))]) {
       final decoration = tester
-          .widget<DropdownButtonFormField<String>>(picker)
-          .decoration;
+          .widget<ModelCompactDropdown<String>>(picker)
+          .decoration!;
       expect(decoration.enabledBorder, isA<UnderlineInputBorder>());
       expect(decoration.filled, isFalse);
     }
@@ -223,6 +224,14 @@ void main() {
       );
       await _open(tester);
       expect(find.text('尚未选择可用模型'), findsOneWidget);
+      final modelButton = find.descendant(
+        of: _route,
+        matching: find.byType(TextButton),
+      );
+      expect(tester.widget<TextButton>(modelButton).onPressed, isNull);
+      await tester.tap(modelButton);
+      await tester.pumpAndSettle();
+      expect(find.byType(PopupMenuItem<String>), findsNothing);
       expect(
         tester.widget<TextButton>(find.byKey(const Key('task-test'))).onPressed,
         isNull,

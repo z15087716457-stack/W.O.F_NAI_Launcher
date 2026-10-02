@@ -27,6 +27,7 @@ import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/model_compact_dropdown.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -504,7 +505,7 @@ void main() {
       expect(find.text('原文 → 阅读语言'), findsWidgets);
       await capturePolish(tester, 'model-task-form');
       final fields = find.byWidgetPredicate(
-        (widget) => widget is DropdownButtonFormField,
+        (widget) => widget is ModelCompactDropdown<String>,
       );
       expect(fields, findsWidgets);
       final element = tester.element(fields.first);

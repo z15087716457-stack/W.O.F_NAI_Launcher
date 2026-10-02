@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/models/prompt_task_definitions.dart';
+import 'model_compact_dropdown.dart';
 
 class ModelReasoningButton extends StatelessWidget {
   const ModelReasoningButton({
@@ -33,6 +34,12 @@ class ModelReasoningButton extends StatelessWidget {
       key: const Key('task-reasoning'),
       tooltip: unsupported ? '此模型不支持思考调节' : '思考强度',
       shadowColor: colors.shadow.withValues(alpha: .14),
+      elevation: 3,
+      shape: modelMenuShape,
+      color: colors.surfaceContainerLow,
+      surfaceTintColor: Colors.transparent,
+      clipBehavior: Clip.antiAlias,
+      menuPadding: const EdgeInsets.symmetric(vertical: 6),
       enabled: canChoose,
       position: PopupMenuPosition.under,
       onSelected: (v) => onChanged(v == 'inherit' ? null : v),
@@ -114,6 +121,7 @@ class ModelReasoningButton extends StatelessWidget {
     return PopupMenuItem<String>(
       key: ValueKey('task-reasoning-$value'),
       value: value,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(

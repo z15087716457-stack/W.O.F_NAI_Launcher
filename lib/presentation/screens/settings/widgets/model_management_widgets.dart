@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/models/prompt_task_definitions.dart';
+import 'model_compact_dropdown.dart';
 
 IconData interfaceIcon(LauncherInterface task) => switch (task) {
   LauncherInterface.translate => Icons.south,
@@ -20,6 +21,9 @@ Future<LauncherInterface?> showInterfacePresetMenu(
   );
   return showMenu<LauncherInterface>(
     context: context,
+    shape: modelMenuShape,
+    elevation: 3,
+    clipBehavior: Clip.antiAlias,
     shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: .14),
     position: RelativeRect.fromSize(
       Rect.fromLTWH(position.dx, position.dy, 0, 0),
@@ -47,10 +51,12 @@ class ManagementTabs extends StatelessWidget {
     required this.labels,
     required this.selected,
     required this.onSelected,
+    this.inProgress = false,
   });
   final List<String> labels;
   final int selected;
   final ValueChanged<int> onSelected;
+  final bool inProgress;
   @override
   Widget build(BuildContext context) => Container(
     decoration: BoxDecoration(
@@ -63,41 +69,112 @@ class ManagementTabs extends StatelessWidget {
       child: Row(
         children: [
           for (var i = 0; i < labels.length; i++)
-            Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: i == selected
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.transparent,
-                    width: 2,
+            Stack(
+              children: [
+                TextButton(
+                  onPressed: () => onSelected(i),
+                  style: TextButton.styleFrom(
+                    foregroundColor: i == selected
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    shape: const RoundedRectangleBorder(),
+                  ),
+                  child: Text(
+                    labels[i],
+                    style: TextStyle(
+                      fontWeight: i == selected
+                          ? FontWeight.w500
+                          : FontWeight.w400,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ),
-              child: TextButton(
-                onPressed: () => onSelected(i),
-                style: TextButton.styleFrom(
-                  foregroundColor: i == selected
-                      ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 14,
+                if (i == selected)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: _TabUnderline(inProgress: inProgress),
                   ),
-                  shape: const RoundedRectangleBorder(),
-                ),
-                child: Text(
-                  labels[i],
-                  style: TextStyle(
-                    fontWeight: i == selected
-                        ? FontWeight.w500
-                        : FontWeight.w400,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
+              ],
             ),
         ],
+      ),
+    ),
+  );
+}
+
+/// The existing tab marker carries activity without adding layout height.
+class _TabUnderline extends StatefulWidget {
+  const _TabUnderline({required this.inProgress});
+  final bool inProgress;
+  @override
+  State<_TabUnderline> createState() => _TabUnderlineState();
+}
+
+class _TabUnderlineState extends State<_TabUnderline>
+    with SingleTickerProviderStateMixin {
+  late final _motion = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+  bool _animate = false;
+
+  void _syncMotion() {
+    final animate =
+        widget.inProgress &&
+        !MediaQuery.disableAnimationsOf(context) &&
+        TickerMode.valuesOf(context).enabled;
+    if (animate == _animate) return;
+    _animate = animate;
+    if (animate) {
+      _motion.repeat(reverse: true);
+    } else {
+      _motion.stop();
+      _motion.value = 0;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncMotion();
+  }
+
+  @override
+  void didUpdateWidget(covariant _TabUnderline oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncMotion();
+  }
+
+  @override
+  void dispose() {
+    _motion.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: widget.inProgress ? '正在测试预设' : null,
+    child: AnimatedBuilder(
+      animation: _motion,
+      builder: (context, _) => AnimatedAlign(
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 160),
+        alignment: Alignment(_animate ? -1 + 2 * _motion.value : 0, 0),
+        child: FractionallySizedBox(
+          widthFactor: _animate ? .42 : 1,
+          child: SizedBox(
+            key: const Key('management-tab-underline'),
+            height: 2,
+            child: ColoredBox(color: Theme.of(context).colorScheme.primary),
+          ),
+        ),
       ),
     ),
   );
