@@ -157,15 +157,9 @@ class StorageMaintenanceSection extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      SettingsCard(
-        title: settingsText(
-          context,
-          '索引与缩略图',
-          'Indexes & thumbnails',
-          '索引とサムネイル',
-        ),
-        child: const Column(
-          children: [CacheStatisticsTile(), GalleryCacheActions()],
+      const SettingsCard(
+        child: Column(
+          children: [CacheStatisticsTile(), Divider(), GalleryCacheActions()],
         ),
       ),
       const DataSourceCacheSettings(cacheOnly: true),

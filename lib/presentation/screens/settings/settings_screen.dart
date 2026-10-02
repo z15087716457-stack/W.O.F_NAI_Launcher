@@ -13,8 +13,7 @@ import '../../widgets/common/studio_icons.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import 'sections/account_settings_section.dart';
 import 'sections/appearance_settings_section.dart';
-import 'sections/generation_settings_section.dart';
-import 'widgets/data_source_cache_settings.dart';
+import 'sections/generation_preferences_section.dart';
 import 'sections/storage_settings_section.dart';
 import 'sections/privacy_settings_section.dart';
 import 'sections/shortcut_settings_section.dart';
@@ -226,27 +225,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           'Manage prompt input, generation reminders and request pacing.',
           'プロンプト入力と生成の動作を管理。',
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const GenerationSettingsSection(),
-            const DataSourceCacheSettings(controlsOnly: true),
-            const PrivacySettingsSection(generationOnly: true),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: () => _select(SettingsDestination.models),
-                icon: const Icon(StudioIcons.settingsModels, size: 17),
-                label: Text(
-                  text(
-                    '管理翻译模型与规则',
-                    'Manage translation models & rules',
-                    '翻訳モデルとルールを管理',
-                  ),
-                ),
-              ),
-            ),
-          ],
+        GenerationPreferencesSection(
+          onManageModels: () => _select(SettingsDestination.models),
         ),
       ),
       _SettingsSection(

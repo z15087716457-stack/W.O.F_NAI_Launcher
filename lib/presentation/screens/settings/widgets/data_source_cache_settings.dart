@@ -9,6 +9,7 @@ import '../../../../core/database/database_providers.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'settings_card.dart';
+import 'settings_columns.dart';
 import 'settings_tile.dart';
 import 'settings_ui_theme.dart';
 
@@ -17,98 +18,93 @@ class DataSourceCacheSettings extends ConsumerWidget {
     super.key,
     this.controlsOnly = false,
     this.cacheOnly = false,
+    this.showHeading = true,
   }) : assert(!(controlsOnly && cacheOnly));
-  final bool controlsOnly, cacheOnly;
+  final bool controlsOnly, cacheOnly, showHeading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(autocompleteSettingsProvider);
-    final zh = controlsOnly
-        ? null
-        : ref.watch(zhDictionaryServiceProvider).state;
-    final notifier = ref.read(autocompleteSettingsProvider.notifier);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SettingsCard(
-            title: controlsOnly
-                ? settingsText(context, '标签扩展', 'Tag expansion', 'タグ検索')
-                : context.l10n.autocomplete_dataSourcesTitle,
-            icon: Icons.auto_awesome,
-            child: Column(
-              children: [
-                if (!cacheOnly) ...[
-                  SettingsSwitchTile(
-                    title: Text(context.l10n.autocomplete_relatedTagsTitle),
-                    subtitle: Text(
-                      context.l10n.autocomplete_relatedTagsSubtitle,
-                    ),
-                    value: settings.relatedTagsEnabled,
-                    onChanged: notifier.setRelatedTagsEnabled,
+    final relatedTags = SettingsSwitchTile(
+      title: Text(context.l10n.autocomplete_relatedTagsTitle),
+      subtitle: Text(context.l10n.autocomplete_relatedTagsSubtitle),
+      value: settings.relatedTagsEnabled,
+      onChanged: ref
+          .read(autocompleteSettingsProvider.notifier)
+          .setRelatedTagsEnabled,
+    );
+    if (controlsOnly) {
+      return SettingsCard(
+        title: showHeading
+            ? settingsText(context, '标签扩展', 'Tag expansion', 'タグ検索')
+            : null,
+        bottomSpacing: showHeading ? 26 : 0,
+        child: relatedTags,
+      );
+    }
+    final zh = ref.watch(zhDictionaryServiceProvider).state;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsCard(
+          title: settingsText(context, '标签词库', 'Tag dictionaries', 'タグ辞書'),
+          child: Column(
+            children: [
+              if (!cacheOnly) relatedTags,
+              _CatalogStatus(ref: ref),
+              _ZhDictionaryStatus(state: zh),
+              FutureBuilder<int>(
+                future: _loadCooccurrenceCount(ref),
+                builder: (context, snapshot) => SettingsTile(
+                  hoverFeedback: false,
+                  title: Text(context.l10n.autocomplete_cooccurrence),
+                  subtitle: Text(
+                    context.l10n.autocomplete_entryCount(snapshot.data ?? 0),
                   ),
-                ],
-                if (!controlsOnly) ...[
-                  _CatalogStatus(ref: ref),
-                  _ZhDictionaryStatus(state: zh!),
-                  FutureBuilder<int>(
-                    future: _loadCooccurrenceCount(ref),
-                    builder: (context, snapshot) => SettingsTile(
-                      leading: const Icon(Icons.hub_outlined),
-                      title: Text(context.l10n.autocomplete_cooccurrence),
-                      subtitle: Text(
-                        context.l10n.autocomplete_entryCount(
-                          snapshot.data ?? 0,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SettingsTile(
-                    title: Text(context.l10n.autocomplete_clearDanbooruCache),
-                    trailing: OutlinedButton.icon(
-                      onPressed: () async {
-                        final count = await ref
-                            .read(autocompleteCacheDatabaseProvider)
-                            .clearDanbooruCache();
-                        if (context.mounted) {
-                          AppToast.success(
-                            context,
-                            context.l10n.autocomplete_cacheCleared(count),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.delete_outline),
-                      label: Text(settingsText(context, '清理', 'Clear', '消去')),
-                    ),
-                  ),
-                  SettingsTile(
-                    title: Text(context.l10n.autocomplete_clearAiCache),
-                    trailing: OutlinedButton.icon(
-                      onPressed: () async {
-                        final count = await ref
-                            .read(autocompleteCacheDatabaseProvider)
-                            .clearAiTranslationCache();
-                        if (context.mounted) {
-                          AppToast.success(
-                            context,
-                            context.l10n.autocomplete_cacheCleared(count),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.delete_outline),
-                      label: Text(settingsText(context, '清理', 'Clear', '消去')),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        SettingsCard(
+          title: settingsText(context, '缓存维护', 'Cache maintenance', 'キャッシュの管理'),
+          child: SettingsColumns(
+            left: _clearCache(context, ref, ai: false),
+            right: _clearCache(context, ref, ai: true),
+          ),
+        ),
+      ],
     );
   }
+
+  Widget _clearCache(BuildContext context, WidgetRef ref, {required bool ai}) =>
+      SettingsTile(
+        controlWrapWidth: 300 * MediaQuery.textScalerOf(context).scale(1),
+        title: Text(
+          ai
+              ? context.l10n.autocomplete_clearAiCache
+              : context.l10n.autocomplete_clearDanbooruCache,
+        ),
+        trailing: OutlinedButton.icon(
+          key: Key(
+            ai ? 'settings-clear-ai-cache' : 'settings-clear-danbooru-cache',
+          ),
+          onPressed: () async {
+            final database = ref.read(autocompleteCacheDatabaseProvider);
+            final count = ai
+                ? await database.clearAiTranslationCache()
+                : await database.clearDanbooruCache();
+            if (context.mounted) {
+              AppToast.success(
+                context,
+                context.l10n.autocomplete_cacheCleared(count),
+              );
+            }
+          },
+          icon: const Icon(Icons.delete_outline),
+          label: Text(settingsText(context, '清理', 'Clear', '消去')),
+        ),
+      );
 }
 
 Future<int> _loadCooccurrenceCount(WidgetRef ref) async {

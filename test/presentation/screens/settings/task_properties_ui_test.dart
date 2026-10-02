@@ -80,6 +80,19 @@ void main() {
           scale: spec.$2,
         );
         await _open(tester);
+        void verifyHeading(LauncherInterface task) {
+          final title = tester.widget<Text>(
+            find.descendant(
+              of: find.byType(ManagementHeading),
+              matching: find.text(task.title),
+            ),
+          );
+          expect(title.style!.fontSize, 16);
+          expect(title.style!.fontWeight, FontWeight.w600);
+        }
+
+        verifyHeading(LauncherInterface.translate);
+        await harness.capture(tester, 'task-title-translate-${spec.$3}');
         for (final label in ['服务商与模型', '思考', '使用预设', '目标语言']) {
           expect(
             tester.widget<Text>(find.text(label)).style!.fontWeight,
@@ -123,6 +136,8 @@ void main() {
               find.widgetWithText(ManagementListItem, task.title),
             );
           }
+          verifyHeading(task);
+          await harness.capture(tester, 'task-title-${task.name}-${spec.$3}');
           final hint = find.byKey(const Key('task-format-hint'));
           if (task == LauncherInterface.promptReverse) {
             expect(hint, findsOneWidget);

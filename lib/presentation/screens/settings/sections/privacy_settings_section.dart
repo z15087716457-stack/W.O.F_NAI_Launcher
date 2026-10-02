@@ -5,6 +5,7 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/share_image_settings_provider.dart';
 import '../../../widgets/online_gallery/blacklist_settings_panel.dart';
 import '../widgets/settings_card.dart';
+import '../widgets/settings_ui_theme.dart';
 import '../widgets/settings_number_dialog.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/settings_section_label.dart';
@@ -46,46 +47,20 @@ class _PrivacySettingsSectionState
 
   Future<void> _editGenerationInterval() async {
     final settings = ref.read(shareImageSettingsProvider);
-    final controller = TextEditingController(
-      text: settings.generationIntervalSeconds.toString(),
-    );
     final result = await showDialog<int>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.settings_setGenerationIntervalTitle),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: context.l10n.settings_generationIntervalTitle,
-            suffixText: context.l10n.unit_seconds,
-            helperText: context.l10n.settings_generationIntervalHelper,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(context.l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              final value = int.tryParse(controller.text.trim());
-              if (value != null && value >= 1 && value <= 3600) {
-                Navigator.of(dialogContext).pop(value);
-              }
-            },
-            child: Text(context.l10n.common_save),
-          ),
-        ],
+      builder: (_) => SettingsNumberDialog(
+        title: context.l10n.settings_setGenerationIntervalTitle,
+        label: context.l10n.settings_generationIntervalTitle,
+        description: context.l10n.settings_generationIntervalHelper,
+        invalidValueText: context.l10n.settings_generationIntervalHelper,
+        value: settings.generationIntervalSeconds,
+        minValue: 1,
+        maxValue: 3600,
+        suffix: context.l10n.unit_seconds,
       ),
     );
-
-    controller.dispose();
-    if (result == null) {
-      return;
-    }
+    if (result == null || !mounted) return;
     await ref
         .read(shareImageSettingsProvider.notifier)
         .setGenerationIntervalSeconds(result);
@@ -93,46 +68,20 @@ class _PrivacySettingsSectionState
 
   Future<void> _editGenerationIntervalJitter() async {
     final settings = ref.read(shareImageSettingsProvider);
-    final controller = TextEditingController(
-      text: settings.generationIntervalJitterPercent.toString(),
-    );
     final result = await showDialog<int>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.settings_setGenerationIntervalJitterTitle),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: context.l10n.settings_generationIntervalJitterTitle,
-            suffixText: '%',
-            helperText: context.l10n.settings_generationIntervalJitterHelper,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(context.l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              final value = int.tryParse(controller.text.trim());
-              if (value != null && value >= 0 && value <= 50) {
-                Navigator.of(dialogContext).pop(value);
-              }
-            },
-            child: Text(context.l10n.common_save),
-          ),
-        ],
+      builder: (_) => SettingsNumberDialog(
+        title: context.l10n.settings_setGenerationIntervalJitterTitle,
+        label: context.l10n.settings_generationIntervalJitterTitle,
+        description: context.l10n.settings_generationIntervalJitterHelper,
+        invalidValueText: context.l10n.settings_generationIntervalJitterHelper,
+        value: settings.generationIntervalJitterPercent,
+        minValue: 0,
+        maxValue: 50,
+        suffix: '%',
       ),
     );
-
-    controller.dispose();
-    if (result == null) {
-      return;
-    }
+    if (result == null || !mounted) return;
     await ref
         .read(shareImageSettingsProvider.notifier)
         .setGenerationIntervalJitterPercent(result);
@@ -146,6 +95,9 @@ class _PrivacySettingsSectionState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsCard(
+          title: widget.generationOnly
+              ? settingsText(context, '消耗提醒', 'Cost reminders', '消費の通知')
+              : null,
           child: Column(
             children: [
               if (!widget.generationOnly) ...[
@@ -204,7 +156,6 @@ class _PrivacySettingsSectionState
                 ),
               ],
               if (widget.generationOnly) ...[
-                SettingsSectionLabel(context.l10n.settings_protectionFeatures),
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.toll_outlined),
                   title: Text(context.l10n.settings_warnHighAnlasCostTitle),
@@ -221,6 +172,7 @@ class _PrivacySettingsSectionState
                   },
                 ),
                 SettingsTile(
+                  controlWrapWidth: 0,
                   enabled: shareSettings.warnHighAnlasCost,
                   leading: const Icon(Icons.speed_outlined),
                   title: Text(
@@ -233,6 +185,9 @@ class _PrivacySettingsSectionState
                   onTap: shareSettings.warnHighAnlasCost
                       ? _editHighAnlasThreshold
                       : null,
+                ),
+                SettingsSectionLabel(
+                  settingsText(context, '请求节奏', 'Request pacing', 'リクエスト間隔'),
                 ),
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.timer_outlined),
@@ -250,6 +205,7 @@ class _PrivacySettingsSectionState
                   },
                 ),
                 SettingsTile(
+                  controlWrapWidth: 0,
                   enabled: shareSettings.limitGenerationInterval,
                   leading: const Icon(Icons.hourglass_bottom_outlined),
                   title: Text(context.l10n.settings_generationIntervalTitle),
@@ -264,6 +220,7 @@ class _PrivacySettingsSectionState
                       : null,
                 ),
                 SettingsTile(
+                  controlWrapWidth: 0,
                   enabled: shareSettings.limitGenerationInterval,
                   leading: const Icon(Icons.shuffle_outlined),
                   title: Text(

@@ -9,9 +9,15 @@ class SettingsNumberDialog extends StatefulWidget {
     required this.description,
     required this.value,
     this.suffix = '',
+    this.minValue = 1,
+    this.maxValue,
+    this.invalidValueText,
   });
   final String title, label, description, suffix;
   final int value;
+  final int minValue;
+  final int? maxValue;
+  final String? invalidValueText;
   @override
   State<SettingsNumberDialog> createState() => _SettingsNumberDialogState();
 }
@@ -27,8 +33,10 @@ class _SettingsNumberDialogState extends State<SettingsNumberDialog> {
 
   void _save() {
     final number = int.tryParse(_controller.text.trim());
-    if (number == null || number <= 0) {
-      setState(() => _error = '请输入大于 0 的整数');
+    if (number == null ||
+        number < widget.minValue ||
+        (widget.maxValue != null && number > widget.maxValue!)) {
+      setState(() => _error = widget.invalidValueText ?? '请输入大于 0 的整数');
       return;
     }
     Navigator.pop(context, number);

@@ -186,10 +186,12 @@ class ManagementHeading extends StatelessWidget {
     super.key,
     this.description,
     this.actions = const [],
+    this.titleSize = 22,
   });
   final String title;
   final String? description;
   final List<Widget> actions;
+  final double titleSize;
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.fromLTRB(28, 24, 28, 18),
@@ -202,7 +204,7 @@ class ManagementHeading extends StatelessWidget {
               title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
-                fontSize: 22,
+                fontSize: titleSize,
               ),
             ),
             if (description != null) ...[

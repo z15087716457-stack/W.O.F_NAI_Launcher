@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/cache/gallery_cache_manager.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'settings_tile.dart';
+import 'settings_ui_theme.dart';
 
 /// 缓存统计 Provider
 ///
@@ -110,30 +112,56 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
     CacheStatistics stats,
   ) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    String text(String zh, String en, String ja) =>
+        settingsText(context, zh, en, ja);
+    final metrics = [
+      _CacheMetric(
+        key: const Key('settings-cache-l1'),
+        label: context.l10n.cacheStats_l1Memory,
+        count: stats.l1MemorySize,
+        unit: text('条记录', 'records', '件'),
+        detail:
+            '${text('命中率', 'Hit rate', 'ヒット率')} ${(stats.l1HitRate * 100).toStringAsFixed(1)}%',
+      ),
+      _CacheMetric(
+        key: const Key('settings-cache-l2'),
+        label: context.l10n.cacheStats_l2Hive,
+        count: stats.l2HiveSize,
+        unit: text('条记录', 'records', '件'),
+        detail:
+            '${text('命中率', 'Hit rate', 'ヒット率')} ${(stats.l2HitRate * 100).toStringAsFixed(1)}%',
+      ),
+      _CacheMetric(
+        key: const Key('settings-cache-l3'),
+        label: context.l10n.cacheStats_l3Sqlite,
+        count: stats.l3DatabaseImageCount,
+        unit: text('张图片', 'images', '画像'),
+        detail:
+            '${text('元数据', 'Metadata', 'メタデータ')} ${NumberFormat.decimalPattern(Localizations.localeOf(context).languageCode).format(stats.l3DatabaseMetadataCount)}',
+      ),
+    ];
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsTile(
-          leading: const Icon(Icons.analytics_outlined),
-          title: Text(context.l10n.cacheStats_title),
+          title: Text(
+            text('缓存概览', 'Cache overview', 'キャッシュの概要'),
+            style: theme.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           subtitle: Text(
             context.l10n.cacheStats_autoRefreshUpdated(
               _getTimeSinceLastRefresh(),
             ),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
           ),
+          controlWrapWidth: 320 * scale,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 自动刷新指示器
-              _AutoRefreshIndicator(
-                key: ValueKey(_lastRefreshTime.millisecondsSinceEpoch),
-              ),
-              const SizedBox(width: 8),
               IconButton(
+                key: const Key('settings-refresh-cache-statistics'),
                 icon: const Icon(Icons.refresh, size: 20),
                 tooltip: context.l10n.cacheStats_refreshNow,
                 onPressed: () {
@@ -141,9 +169,13 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
                   AppToast.success(context, context.l10n.cacheStats_refreshed);
                 },
               ),
-              IconButton(
-                icon: const Icon(Icons.delete_sweep, size: 20),
-                tooltip: context.l10n.cacheStats_resetStats,
+              TextButton.icon(
+                key: const Key('settings-reset-cache-statistics'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.onSurfaceVariant,
+                ),
+                icon: const Icon(Icons.delete_sweep_outlined, size: 18),
+                label: Text(context.l10n.cacheStats_resetStats),
                 onPressed: () {
                   GalleryCacheManager().resetStatistics();
                   _refreshStats();
@@ -155,24 +187,48 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
           onTap: _refreshStats,
         ),
         Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Column(
-            children: [
-              _CacheLevelIndicator(
-                label: context.l10n.cacheStats_l1Memory,
-                count: stats.l1MemorySize,
-                hitRate: stats.l1HitRate,
-              ),
-              _CacheLevelIndicator(
-                label: context.l10n.cacheStats_l2Hive,
-                count: stats.l2HiveSize,
-                hitRate: stats.l2HitRate,
-              ),
-              _DatabaseIndicator(
-                imageCount: stats.l3DatabaseImageCount,
-                metadataCount: stats.l3DatabaseMetadataCount,
-              ),
-            ],
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          child: LayoutBuilder(
+            builder: (context, constraints) =>
+                constraints.maxWidth >= 600 * scale
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var i = 0; i < metrics.length; i++)
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.only(
+                              left: i == 0 ? 0 : 24,
+                              right: i == 2 ? 0 : 24,
+                            ),
+                            decoration: BoxDecoration(
+                              border: i == 0
+                                  ? null
+                                  : Border(
+                                      left: BorderSide(
+                                        color: theme.colorScheme.outlineVariant
+                                            .withValues(alpha: .5),
+                                      ),
+                                    ),
+                            ),
+                            child: metrics[i],
+                          ),
+                        ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < metrics.length; i++) ...[
+                        if (i > 0)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            child: Divider(),
+                          ),
+                        metrics[i],
+                      ],
+                    ],
+                  ),
           ),
         ),
       ],
@@ -180,142 +236,54 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
   }
 }
 
-/// 自动刷新指示器动画
-class _AutoRefreshIndicator extends StatefulWidget {
-  const _AutoRefreshIndicator({super.key});
-
-  @override
-  State<_AutoRefreshIndicator> createState() => _AutoRefreshIndicatorState();
-}
-
-class _AutoRefreshIndicatorState extends State<_AutoRefreshIndicator>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(
-            value: _controller.value,
-            strokeWidth: 2,
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _CacheLevelIndicator extends StatelessWidget {
-  final String label;
-  final int count;
-  final double hitRate;
-
-  const _CacheLevelIndicator({
+class _CacheMetric extends StatelessWidget {
+  const _CacheMetric({
+    super.key,
     required this.label,
     required this.count,
-    required this.hitRate,
+    required this.unit,
+    required this.detail,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return _CacheIndicator(
-      label: label,
-      value: context.l10n.cacheStats_recordCount(count),
-      subValue: '${(hitRate * 100).toStringAsFixed(1)}%',
-    );
-  }
-}
-
-class _DatabaseIndicator extends StatelessWidget {
-  final int imageCount;
-  final int metadataCount;
-
-  const _DatabaseIndicator({
-    required this.imageCount,
-    required this.metadataCount,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _CacheIndicator(
-      label: context.l10n.cacheStats_l3Sqlite,
-      value: context.l10n.cacheStats_databaseValue(imageCount, metadataCount),
-    );
-  }
-}
-
-class _CacheIndicator extends StatelessWidget {
-  final String label;
-  final String value;
-  final String? subValue;
-
-  const _CacheIndicator({
-    required this.label,
-    required this.value,
-    this.subValue,
-  });
+  final String label, unit, detail;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (subValue != null)
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: theme.textTheme.bodyMedium),
+        const SizedBox(height: 9),
+        Wrap(
+          spacing: 7,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
             Text(
-              subValue!,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
+              NumberFormat.decimalPattern(
+                Localizations.localeOf(context).languageCode,
+              ).format(count),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontSize: 26,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              unit,
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-        ],
-      ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          detail,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

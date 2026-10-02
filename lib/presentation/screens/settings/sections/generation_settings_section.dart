@@ -16,8 +16,12 @@ import '../../../widgets/common/app_toast.dart';
 ///
 /// 按生成任务流组织：输入行为 → 完成提醒。
 class GenerationSettingsSection extends ConsumerStatefulWidget {
-  const GenerationSettingsSection({super.key, this.feedbackOnly = false});
-  final bool feedbackOnly;
+  const GenerationSettingsSection({
+    super.key,
+    this.feedbackOnly = false,
+    this.showHeading = true,
+  });
+  final bool feedbackOnly, showHeading;
 
   @override
   ConsumerState<GenerationSettingsSection> createState() =>
@@ -137,12 +141,14 @@ class _GenerationSettingsSectionState
     );
 
     return SettingsCard(
-      bottomSpacing: widget.feedbackOnly ? 0 : 26,
+      bottomSpacing: widget.feedbackOnly || !widget.showHeading ? 0 : 26,
       child: Column(
         children: [
           if (!widget.feedbackOnly) ...[
-            SettingsSectionLabel(l10n.settings_generationInputSection),
+            if (widget.showHeading)
+              SettingsSectionLabel(l10n.settings_generationInputSection),
             SettingsTile(
+              controlWrapWidth: 300 * MediaQuery.textScalerOf(context).scale(1),
               leading: const Icon(Icons.mouse_outlined),
               title: Text(l10n.settings_enablePromptWeightScroll),
               subtitle: Text(l10n.settings_enablePromptWeightScrollSubtitle),

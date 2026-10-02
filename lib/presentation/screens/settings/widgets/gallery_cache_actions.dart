@@ -13,6 +13,7 @@ import '../../../../data/services/thumbnail_service.dart';
 import '../../../providers/local_gallery_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'cache_statistics_tile.dart';
+import 'settings_columns.dart';
 
 /// 画廊重新扫描按钮
 ///
@@ -234,54 +235,54 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        SettingsTile(
-          hoverFeedback: !_isScanning,
-          title: Text(context.l10n.galleryCache_rescan),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _isScanning
-                    ? (_scanPhase ?? context.l10n.galleryCache_scanning)
-                    : context.l10n.galleryCache_rescanSubtitle,
-              ),
-              if (_isScanning && _scanProgress != null) ...[
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: _scanProgress,
-                  color: colors.primary,
-                ),
-                if (_totalCount > 0) Text('$_processedCount / $_totalCount'),
-              ],
-            ],
-          ),
-          trailing: OutlinedButton.icon(
-            onPressed: _isScanning ? null : _rescanGallery,
-            icon: const Icon(Icons.refresh),
-            label: Text(
+    return SettingsColumns(
+      left: SettingsTile(
+        controlWrapWidth: 300 * MediaQuery.textScalerOf(context).scale(1),
+        hoverFeedback: !_isScanning,
+        title: Text(context.l10n.galleryCache_rescan),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
               _isScanning
-                  ? context.l10n.galleryCache_scanning
-                  : context.l10n.galleryCache_scanAction,
+                  ? (_scanPhase ?? context.l10n.galleryCache_scanning)
+                  : context.l10n.galleryCache_rescanSubtitle,
             ),
+            if (_isScanning && _scanProgress != null) ...[
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: _scanProgress,
+                color: colors.primary,
+              ),
+              if (_totalCount > 0) Text('$_processedCount / $_totalCount'),
+            ],
+          ],
+        ),
+        trailing: OutlinedButton.icon(
+          onPressed: _isScanning ? null : _rescanGallery,
+          icon: const Icon(Icons.refresh),
+          label: Text(
+            _isScanning
+                ? context.l10n.galleryCache_scanning
+                : context.l10n.galleryCache_scanAction,
           ),
         ),
-        SettingsTile(
-          hoverFeedback: !_isEvictingThumbnails,
-          title: Text(context.l10n.galleryCache_evictThumbnailsTitle),
-          subtitle: Text(
-            _isEvictingThumbnails
-                ? context.l10n.galleryCache_evictThumbnailsRunning
-                : context.l10n.galleryCache_evictThumbnailsSubtitle,
-          ),
-          trailing: OutlinedButton.icon(
-            onPressed: _isEvictingThumbnails ? null : _evictThumbnailCache,
-            icon: const Icon(Icons.cleaning_services_outlined),
-            label: Text(context.l10n.galleryCache_evictThumbnailsStart),
-          ),
+      ),
+      right: SettingsTile(
+        controlWrapWidth: 300 * MediaQuery.textScalerOf(context).scale(1),
+        hoverFeedback: !_isEvictingThumbnails,
+        title: Text(context.l10n.galleryCache_evictThumbnailsTitle),
+        subtitle: Text(
+          _isEvictingThumbnails
+              ? context.l10n.galleryCache_evictThumbnailsRunning
+              : context.l10n.galleryCache_evictThumbnailsSubtitle,
         ),
-      ],
+        trailing: OutlinedButton.icon(
+          onPressed: _isEvictingThumbnails ? null : _evictThumbnailCache,
+          icon: const Icon(Icons.cleaning_services_outlined),
+          label: Text(context.l10n.galleryCache_evictThumbnailsStart),
+        ),
+      ),
     );
   }
 }

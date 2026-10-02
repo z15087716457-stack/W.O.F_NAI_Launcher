@@ -535,6 +535,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
         children: [
           ManagementHeading(
             widget.task.title,
+            titleSize: 16,
             description: changed ? '有未保存的修改' : widget.task.description,
             actions: [
               TextButton.icon(
