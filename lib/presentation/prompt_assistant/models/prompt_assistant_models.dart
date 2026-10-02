@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'model_catalog_entry.dart';
 
 // Legacy storage/UI type. New code should prefer ProviderProtocol and
 // ProviderPreset, but this remains to decode existing saved configs.
@@ -553,6 +554,15 @@ class ModelConfig {
   final List<String>? reasoningEfforts;
   final double? temperature;
   final double? topP;
+  final ModelReasoningProtocol reasoningProtocol;
+  final String? reasoningFormat;
+  final bool? supportsNativeSearch;
+
+  /// Null marks legacy data; explicit fields survive future catalog updates.
+  final Set<String>? customFields;
+
+  /// Loaded locally, never serialized as a mutable user setting.
+  final ModelCatalogEntry? catalogEntry;
 
   /// User-confirmed capabilities; null means unknown.
   final bool? supportsVision, supportsTools, supportsStructuredOutput;
@@ -574,6 +584,11 @@ class ModelConfig {
     this.reasoningEfforts,
     this.temperature,
     this.topP,
+    this.reasoningProtocol = ModelReasoningProtocol.standard,
+    this.reasoningFormat,
+    this.supportsNativeSearch,
+    this.customFields,
+    this.catalogEntry,
     this.supportsVision,
     this.supportsTools,
     this.supportsStructuredOutput,
@@ -585,6 +600,26 @@ class ModelConfig {
   List<String> get availableReasoningEfforts => List.unmodifiable(
     reasoningEfforts ?? [if (reasoningEffort != null) reasoningEffort!],
   );
+
+  bool get allowsSampling =>
+      catalogEntry?.supportsTemperature != false &&
+      reasoningProtocol != ModelReasoningProtocol.adaptive &&
+      !(reasoningFormat == 'anthropicBudget' &&
+          reasoningEffort != null &&
+          reasoningEffort != 'none');
+
+  Set<String> get preservedFields =>
+      customFields ??
+      {
+        if (displayName != name) 'displayName',
+        if (contextWindow != null) 'contextWindow',
+        if (maxOutputTokens != null) 'maxOutputTokens',
+        if (reasoningEffort != null) 'reasoningEffort',
+        if (reasoningEfforts != null) 'reasoningEfforts',
+        if (supportsVision != null) 'supportsVision',
+        if (supportsNativeSearch != null) 'supportsNativeSearch',
+        if (reasoningFormat != null) 'reasoningProtocol',
+      };
 
   ModelConfig copyWith({
     String? providerId,
@@ -610,6 +645,12 @@ class ModelConfig {
     bool clearSupportsVision = false,
     bool clearSupportsTools = false,
     bool clearSupportsStructuredOutput = false,
+    ModelReasoningProtocol? reasoningProtocol,
+    String? reasoningFormat,
+    bool? supportsNativeSearch,
+    bool clearSupportsNativeSearch = false,
+    Set<String>? customFields,
+    ModelCatalogEntry? catalogEntry,
   }) {
     return ModelConfig(
       providerId: providerId ?? this.providerId,
@@ -631,6 +672,13 @@ class ModelConfig {
           : reasoningEfforts ?? this.reasoningEfforts,
       temperature: clearTemperature ? null : temperature ?? this.temperature,
       topP: clearTopP ? null : topP ?? this.topP,
+      reasoningProtocol: reasoningProtocol ?? this.reasoningProtocol,
+      reasoningFormat: reasoningFormat ?? this.reasoningFormat,
+      supportsNativeSearch: clearSupportsNativeSearch
+          ? null
+          : supportsNativeSearch ?? this.supportsNativeSearch,
+      customFields: customFields ?? this.customFields,
+      catalogEntry: catalogEntry ?? this.catalogEntry,
       supportsVision: clearSupportsVision
           ? null
           : supportsVision ?? this.supportsVision,
@@ -655,6 +703,11 @@ class ModelConfig {
     if (reasoningEfforts != null) 'reasoningEfforts': reasoningEfforts,
     if (temperature != null) 'temperature': temperature,
     if (topP != null) 'topP': topP,
+    'reasoningProtocol': reasoningProtocol.name,
+    if (reasoningFormat != null) 'reasoningFormat': reasoningFormat,
+    if (supportsNativeSearch != null)
+      'supportsNativeSearch': supportsNativeSearch,
+    if (customFields != null) 'customFields': customFields!.toList(),
     if (supportsVision != null) 'supportsVision': supportsVision,
     if (supportsTools != null) 'supportsTools': supportsTools,
     if (supportsStructuredOutput != null)
@@ -677,6 +730,16 @@ class ModelConfig {
           : null,
       temperature: (json['temperature'] as num?)?.toDouble(),
       topP: (json['topP'] as num?)?.toDouble(),
+      reasoningProtocol: json['reasoningProtocol'] == 'adaptive'
+          ? ModelReasoningProtocol.adaptive
+          : ModelReasoningProtocol.standard,
+      reasoningFormat: json['reasoningFormat'] as String?,
+      supportsNativeSearch: json['supportsNativeSearch'] as bool?,
+      customFields: json['customFields'] is List
+          ? Set<String>.unmodifiable(
+              (json['customFields'] as List).cast<String>(),
+            )
+          : null,
       supportsVision: json['supportsVision'] as bool?,
       supportsTools: json['supportsTools'] as bool?,
       supportsStructuredOutput: json['supportsStructuredOutput'] as bool?,
@@ -841,8 +904,8 @@ class RequestParameters {
   }
 
   factory RequestParameters.fromModel(ModelConfig model) => RequestParameters(
-    temperature: model.temperature,
-    topP: model.topP,
+    temperature: model.allowsSampling ? model.temperature : null,
+    topP: model.allowsSampling ? model.topP : null,
     maxOutputTokens: model.maxOutputTokens,
     reasoningEffort: model.reasoningEffort,
   );
@@ -949,7 +1012,7 @@ class PromptAssistantConfigState {
   }
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': 5,
+    'schemaVersion': 6,
     'presets': presets.map((e) => e.toJson()).toList(),
     'providers': providers.map((e) => e.toJson()).toList(),
     'models': models.map((e) => e.toJson()).toList(),
@@ -969,15 +1032,10 @@ class PromptAssistantConfigState {
       if (!names.add(model.name)) continue;
       candidates.add(model);
     }
-    candidates.sort((a, b) {
-      final aPlaceholder = a.isPlaceholder;
-      final bPlaceholder = b.isPlaceholder;
-      if (aPlaceholder != bPlaceholder) {
-        return aPlaceholder ? 1 : -1;
-      }
-      return a.displayName.compareTo(b.displayName);
-    });
-    return candidates;
+    return [
+      ...candidates.where((model) => !model.isPlaceholder),
+      ...candidates.where((model) => model.isPlaceholder),
+    ];
   }
 
   factory PromptAssistantConfigState.decode(String raw) {

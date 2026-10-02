@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
-import '../../../prompt_assistant/models/prompt_task_definitions.dart';
-import 'model_parameter_fields.dart';
+import '../../../prompt_assistant/models/model_catalog_entry.dart';
+import 'model_parameter_fields.dart' show reasoningChoices;
 
-/// All request controls belong to this model. Empty values use server defaults.
 class ModelConfigurationCard extends StatefulWidget {
   const ModelConfigurationCard({
     super.key,
@@ -24,14 +23,14 @@ class ModelConfigurationCard extends StatefulWidget {
 
 class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
   late ModelConfig _model;
-  late final TextEditingController _context, _output;
-  bool _advanced = false;
-  bool _editingReasoning = false;
-  String? _samplingError;
+  late final TextEditingController _alias, _context, _output;
   @override
   void initState() {
     super.initState();
     _model = widget.value;
+    _alias = TextEditingController(
+      text: _model.displayName == _model.name ? '' : _model.displayName,
+    );
     _context = TextEditingController(
       text: _model.contextWindow?.toString() ?? '',
     );
@@ -41,34 +40,127 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
   }
 
   @override
+  void didUpdateWidget(covariant ModelConfigurationCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _model = widget.value;
+  }
+
+  @override
   void dispose() {
+    _alias.dispose();
     _context.dispose();
     _output.dispose();
     super.dispose();
   }
 
-  String? _numberError(TextEditingController controller) =>
-      controller.text.trim().isEmpty ||
-          (int.tryParse(controller.text.trim()) ?? 0) > 0
-      ? null
-      : '请输入正整数';
-  void _emit(ModelConfig next) {
+  String? _capacityError(TextEditingController controller, int? limit) {
+    if (controller.text.trim().isEmpty) return null;
+    final value = int.tryParse(controller.text.trim());
+    if (value == null || value <= 0) return '请输入正整数';
+    if (limit != null && value > limit) return '目录上限 ${modelTokenLabel(limit)}';
+    if (controller == _output &&
+        _model.contextWindow != null &&
+        value > _model.contextWindow!) {
+      return '输出不能超过上下文窗口';
+    }
+    return null;
+  }
+
+  void _emit(ModelConfig next, String field) {
+    next = next.copyWith(
+      customFields: {
+        ..._model.preservedFields,
+        field,
+        if (field == 'reasoningEfforts' &&
+            next.reasoningEffort != _model.reasoningEffort)
+          'reasoningEffort',
+      },
+    );
     setState(() => _model = next);
     widget.onValidationChanged(
-      _numberError(_context) ??
-          _numberError(_output) ??
-          _samplingError ??
+      _capacityError(_context, next.catalogEntry?.contextLimit) ??
+          _capacityError(_output, next.catalogEntry?.outputLimit) ??
           RequestParameters.fromModel(next).validateFor(widget.protocol),
     );
     widget.onChanged(next);
   }
 
-  Widget _tokenField(
-    String label,
-    TextEditingController controller,
-    List<int> presets,
-    bool contextWindow,
-  ) {
+  Widget _label(String text, [String? help]) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(text, style: Theme.of(context).textTheme.labelSmall),
+      if (help != null) ...[
+        const SizedBox(width: 4),
+        Tooltip(
+          message: help,
+          triggerMode: TooltipTriggerMode.tap,
+          child: Icon(
+            Icons.help_outline,
+            size: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    ],
+  );
+  InputDecoration _decoration({String? hint, String? error}) => InputDecoration(
+    isDense: true,
+    filled: true,
+    fillColor: Theme.of(
+      context,
+    ).colorScheme.surfaceContainerHighest.withValues(alpha: .55),
+    hintText: hint,
+    errorText: error,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(9),
+      borderSide: BorderSide.none,
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(9),
+      borderSide: BorderSide.none,
+    ),
+  );
+  Widget _segment(String label, bool selected, VoidCallback? action) {
+    final colors = Theme.of(context).colorScheme;
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: TextButton(
+          onPressed: widget.enabled ? action : null,
+          style: TextButton.styleFrom(
+            minimumSize: const Size(0, 27),
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+            foregroundColor: selected
+                ? colors.surface
+                : colors.onSurfaceVariant,
+            backgroundColor: selected ? colors.onSurface : Colors.transparent,
+            disabledForegroundColor: colors.onSurfaceVariant.withValues(
+              alpha: .3,
+            ),
+            textStyle: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(fontSize: 10.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+          ),
+          child: Text(label, maxLines: 1),
+        ),
+      ),
+    );
+  }
+
+  Widget _tokenField(bool contextWindow) {
+    final controller = contextWindow ? _context : _output;
+    final limit = contextWindow
+        ? _model.catalogEntry?.contextLimit
+        : _model.catalogEntry?.outputLimit;
+    final presets = contextWindow
+        ? [128000, 256000, 312000, 500000, 1000000]
+        : [4000, 8000, 16000, 32000, 128000];
     void update() => _emit(
       contextWindow
           ? _model.copyWith(
@@ -79,56 +171,48 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
               maxOutputTokens: int.tryParse(controller.text.trim()),
               clearMaxOutputTokens: controller.text.trim().isEmpty,
             ),
+      contextWindow ? 'contextWindow' : 'maxOutputTokens',
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(label, style: Theme.of(context).textTheme.labelSmall),
-        const SizedBox(height: 7),
-        Wrap(
-          spacing: 4,
-          runSpacing: 4,
-          children: [
-            for (final n in [0, ...presets])
-              ChoiceChip(
-                label: Text(n == 0 ? '默认' : '${n ~/ 1000}K'),
-                selected: controller.text == (n == 0 ? '' : '$n'),
-                visualDensity: VisualDensity.compact,
-                showCheckmark: false,
-                color: WidgetStateProperty.resolveWith(
-                  (states) => states.contains(WidgetState.selected)
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: .09)
-                      : Theme.of(context).colorScheme.surface,
+        _label(contextWindow ? '上下文窗口' : '最大输出'),
+        const SizedBox(height: 4),
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: .35),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Row(
+            children: [
+              for (final n in presets)
+                _segment(
+                  modelTokenLabel(n).toLowerCase(),
+                  controller.text == '$n',
+                  limit != null && n > limit
+                      ? null
+                      : () {
+                          controller.text = '$n';
+                          update();
+                        },
                 ),
-                labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: controller.text == (n == 0 ? '' : '$n')
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-                onSelected: widget.enabled
-                    ? (_) {
-                        controller.text = n == 0 ? '' : '$n';
-                        update();
-                      }
-                    : null,
-              ),
-          ],
+            ],
+          ),
         ),
-        const SizedBox(height: 7),
+        const SizedBox(height: 4),
         TextField(
           key: contextWindow
               ? ValueKey('context-${_model.name}')
               : const Key('parameter-max-tokens'),
           controller: controller,
           enabled: widget.enabled,
+          style: Theme.of(context).textTheme.bodySmall,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: '使用服务默认值',
-            errorText: _numberError(controller),
+          decoration: _decoration(
+            hint: '默认',
+            error: _capacityError(controller, limit),
           ),
           onChanged: (_) => update(),
         ),
@@ -136,264 +220,236 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
     );
   }
 
+  Widget _thinkingHeader(List<String> choices) {
+    final current = _model.reasoningEffort;
+    final defaults = {if (current != null) current, ...choices}.toList();
+    final protocol = SizedBox(
+      width: 82,
+      child: DropdownButtonFormField<ModelReasoningProtocol>(
+        key: ValueKey('reasoning-protocol-${_model.name}'),
+        initialValue: _model.reasoningProtocol,
+        isExpanded: true,
+        style: Theme.of(context).textTheme.labelSmall,
+        decoration: _decoration(),
+        iconSize: 15,
+        items: [
+          const DropdownMenuItem(
+            value: ModelReasoningProtocol.standard,
+            child: Text('标准', maxLines: 1, softWrap: false),
+          ),
+          DropdownMenuItem(
+            value: ModelReasoningProtocol.adaptive,
+            enabled: widget.protocol == ProviderProtocol.anthropicMessages,
+            child: const Text('自适应', maxLines: 1, softWrap: false),
+          ),
+        ],
+        onChanged: widget.enabled
+            ? (value) => _emit(
+                _model.copyWith(reasoningProtocol: value!),
+                'reasoningProtocol',
+              )
+            : null,
+      ),
+    );
+    final effort = SizedBox(
+      width: 88,
+      child: DropdownButtonFormField<String>(
+        key: ValueKey('default-effort-${_model.name}-${choices.join('-')}'),
+        initialValue: current ?? '',
+        isExpanded: true,
+        style: Theme.of(context).textTheme.labelSmall,
+        decoration: _decoration(),
+        iconSize: 15,
+        items: [
+          const DropdownMenuItem(value: '', child: Text('默认')),
+          for (final value in defaults)
+            DropdownMenuItem(
+              value: value,
+              child: Text(
+                value == 'none' ? 'off' : value,
+                maxLines: 1,
+                softWrap: false,
+              ),
+            ),
+        ],
+        onChanged: widget.enabled
+            ? (value) => _emit(
+                _model.copyWith(
+                  reasoningEffort: value,
+                  clearReasoningEffort: value == '',
+                ),
+                'reasoningEffort',
+              )
+            : null,
+      ),
+    );
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 5,
+      children: [
+        _label(
+          '思考等级',
+          _model.catalogEntry?.reasoningEfforts == null
+              ? '目录未标注，可手动开启'
+              : '已按本地目录勾选支持的等级；可按实际接口调整。',
+        ),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 5,
+          runSpacing: 5,
+          children: [
+            _label('思考协议'),
+            const SizedBox(width: 5),
+            protocol,
+            const SizedBox(width: 9),
+            _label('默认思考等级'),
+            const SizedBox(width: 5),
+            effort,
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final protocolChoices = reasoningChoices(widget.protocol);
-    final choices = _model.reasoningEfforts ?? protocolChoices;
+    final possible = reasoningChoices(widget.protocol);
+    final choices = _model.reasoningEfforts ?? const <String>[];
+    final colors = Theme.of(context).colorScheme;
+    Widget capability(
+      String label,
+      bool? value,
+      ValueChanged<bool> change, [
+      String? help,
+    ]) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 18,
+          height: 24,
+          child: Checkbox(
+            value: value == true,
+            onChanged: widget.enabled ? (v) => change(v!) : null,
+            activeColor: colors.onSurface,
+            checkColor: colors.surface,
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+        const SizedBox(width: 4),
+        _label(label, help),
+      ],
+    );
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+      padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Divider(height: 18),
-          TextFormField(
-            key: ValueKey('alias-${_model.name}'),
-            initialValue: _model.displayName,
-            enabled: widget.enabled,
-            decoration: const InputDecoration(labelText: '显示名称 / 别名'),
-            onChanged: (value) => _emit(_model.copyWith(displayName: value)),
-          ),
-          const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final fields = [
-                _tokenField('上下文窗口 · 参考', _context, [128000, 256000], true),
-                _tokenField('最大输出 · token', _output, [8000, 16000], false),
-              ];
-              return constraints.maxWidth <
-                      310 * MediaQuery.textScalerOf(context).scale(1)
-                  ? Column(
-                      children: [
-                        fields[0],
-                        const SizedBox(height: 14),
-                        fields[1],
-                      ],
-                    )
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: fields[0]),
-                        const SizedBox(width: 12),
-                        Expanded(child: fields[1]),
-                      ],
-                    );
-            },
-          ),
-          const SizedBox(height: 14),
-          if (protocolChoices.isNotEmpty)
-            DropdownButtonFormField<String>(
-              key: ValueKey(
-                'parameter-reasoning-${_model.reasoningEffort}-${choices.join(',')}',
-              ),
-              initialValue: _model.reasoningEffort ?? '',
-              isExpanded: true,
-              decoration: const InputDecoration(labelText: '模型默认思考强度'),
-              items: [
-                const DropdownMenuItem(value: '', child: Text('使用服务默认值')),
-                for (final value in {
-                  ...choices,
-                  if (_model.reasoningEffort != null) _model.reasoningEffort!,
-                })
-                  DropdownMenuItem(
-                    value: value,
-                    child: Text(reasoningEffortLabel(value)),
-                  ),
-              ],
-              onChanged: widget.enabled
-                  ? (value) => _emit(
-                      _model.copyWith(
-                        reasoningEffort: value,
-                        clearReasoningEffort: value == '',
-                        reasoningEfforts:
-                            value != null &&
-                                value.isNotEmpty &&
-                                _model.reasoningEfforts == null
-                            ? [value]
-                            : _model.reasoningEfforts,
-                      ),
-                    )
-                  : null,
-            ),
-          const SizedBox(height: 10),
-          Text(
-            '快捷数值可编辑；请按模型实际限制设置。上下文用于记录容量，留空参数由服务决定。',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 11,
-            ),
-          ),
+          _label('别名', '在显示模型名称的地方生效；请求仍使用模型 ID。'),
           const SizedBox(height: 4),
-          TextButton.icon(
-            key: const Key('model-advanced-toggle'),
-            onPressed: () => setState(() => _advanced = !_advanced),
-            icon: Icon(
-              _advanced ? Icons.expand_less : Icons.expand_more,
-              size: 16,
+          TextField(
+            key: ValueKey('alias-${_model.name}'),
+            controller: _alias,
+            enabled: widget.enabled,
+            style: Theme.of(context).textTheme.bodySmall,
+            decoration: _decoration(hint: '例如 fast'),
+            onChanged: (value) => _emit(
+              _model.copyWith(
+                displayName: value.trim().isEmpty ? _model.name : value,
+              ),
+              'displayName',
             ),
-            label: const Text('采样与能力'),
           ),
-          if (_advanced) ...[
-            const SizedBox(height: 8),
-            ModelParameterFields(
-              value: RequestParameters.fromModel(_model),
-              protocol: widget.protocol,
-              samplingOnly: true,
-              readOnly: !widget.enabled,
-              onValidationChanged: (error) => _samplingError = error,
-              onChanged: (value) => _emit(
-                _model.copyWith(
-                  temperature: value.temperature,
-                  topP: value.topP,
-                  clearTemperature: value.temperature == null,
-                  clearTopP: value.topP == null,
-                ),
-              ),
+          const SizedBox(height: 9),
+          LayoutBuilder(
+            builder: (context, constraints) =>
+                constraints.maxWidth <
+                    300 * MediaQuery.textScalerOf(context).scale(1)
+                ? Column(
+                    children: [
+                      _tokenField(true),
+                      const SizedBox(height: 8),
+                      _tokenField(false),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _tokenField(true)),
+                      const SizedBox(width: 8),
+                      Expanded(child: _tokenField(false)),
+                    ],
+                  ),
+          ),
+          const SizedBox(height: 9),
+          _thinkingHeader(choices),
+          const SizedBox(height: 5),
+          Container(
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHighest.withValues(alpha: .35),
+              borderRadius: BorderRadius.circular(9),
             ),
-            const SizedBox(height: 16),
-            if (protocolChoices.isNotEmpty) ...[
-              DropdownButtonFormField<int>(
-                key: ValueKey(
-                  'model-reasoning-capability-${_model.reasoningEfforts}-$_editingReasoning',
-                ),
-                initialValue: _editingReasoning
-                    ? 1
-                    : _model.reasoningEfforts == null
-                    ? 0
-                    : _model.reasoningEfforts!.isEmpty
-                    ? 2
-                    : 1,
-                decoration: const InputDecoration(labelText: '思考能力'),
-                items: const [
-                  DropdownMenuItem(value: 0, child: Text('未确认')),
-                  DropdownMenuItem(value: 1, child: Text('支持调节')),
-                  DropdownMenuItem(value: 2, child: Text('不支持')),
-                ],
-                onChanged: widget.enabled
-                    ? (value) {
-                        _editingReasoning = value == 1;
-                        _emit(
-                          _model.copyWith(
-                            reasoningEfforts: value == 1
-                                ? _model.availableReasoningEfforts
-                                : const [],
-                            clearReasoningEfforts: value == 0,
-                            clearReasoningEffort: value != 1,
-                          ),
-                        );
-                      }
-                    : null,
-              ),
-              if (_editingReasoning ||
-                  (_model.reasoningEfforts?.isNotEmpty ?? false)) ...[
-                const SizedBox(height: 10),
-                Text(
-                  '勾选模型实际支持的档位，功能接口只会显示这些选项。',
-                  style: theme.textTheme.bodySmall,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    for (final value in protocolChoices)
-                      FilterChip(
-                        key: ValueKey('model-supports-reasoning-$value'),
-                        label: Text(reasoningEffortLabel(value)),
-                        selected: _model.availableReasoningEfforts.contains(
-                          value,
-                        ),
-                        onSelected: widget.enabled
-                            ? (selected) {
-                                final values = {
-                                  ..._model.availableReasoningEfforts,
-                                };
-                                if (selected) {
-                                  values.add(value);
-                                } else {
-                                  values.remove(value);
-                                }
-                                _emit(
-                                  _model.copyWith(
-                                    reasoningEfforts: [
-                                      for (final choice in protocolChoices)
-                                        if (values.contains(choice)) choice,
-                                    ],
-                                    clearReasoningEffort: !values.contains(
-                                      _model.reasoningEffort,
-                                    ),
-                                  ),
-                                );
-                              }
-                            : null,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ],
-            ],
-            Text('模型能力', style: theme.textTheme.labelMedium),
-            const SizedBox(height: 5),
-            Text('按实际模型手动标注，未标注不会视为已支持。', style: theme.textTheme.bodySmall),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
+            child: Row(
               children: [
-                _capability(
-                  '图片输入',
-                  _model.supportsVision,
-                  (value) => _model.copyWith(
-                    supportsVision: value,
-                    clearSupportsVision: value == null,
+                for (final effort in [
+                  'none',
+                  'minimal',
+                  'low',
+                  'medium',
+                  'high',
+                  'xhigh',
+                  'max',
+                ])
+                  _segment(
+                    effort == 'none' ? 'off' : effort,
+                    choices.contains(effort),
+                    possible.contains(effort)
+                        ? () {
+                            final next = [...choices];
+                            choices.contains(effort)
+                                ? next.remove(effort)
+                                : next.add(effort);
+                            _emit(
+                              _model.copyWith(
+                                reasoningEfforts: next,
+                                clearReasoningEffort:
+                                    _model.reasoningEffort != null &&
+                                    !next.contains(_model.reasoningEffort),
+                              ),
+                              'reasoningEfforts',
+                            );
+                          }
+                        : null,
                   ),
-                ),
-                _capability(
-                  '工具调用',
-                  _model.supportsTools,
-                  (value) => _model.copyWith(
-                    supportsTools: value,
-                    clearSupportsTools: value == null,
-                  ),
-                ),
-                _capability(
-                  '结构化输出',
-                  _model.supportsStructuredOutput,
-                  (value) => _model.copyWith(
-                    supportsStructuredOutput: value,
-                    clearSupportsStructuredOutput: value == null,
-                  ),
-                ),
               ],
             ),
-          ],
+          ),
+          const SizedBox(height: 9),
+          _label('能力'),
+          Wrap(
+            spacing: 16,
+            children: [
+              capability(
+                '图片',
+                _model.supportsVision,
+                (v) =>
+                    _emit(_model.copyWith(supportsVision: v), 'supportsVision'),
+              ),
+              capability(
+                '原生网络搜索',
+                _model.supportsNativeSearch,
+                (v) => _emit(
+                  _model.copyWith(supportsNativeSearch: v),
+                  'supportsNativeSearch',
+                ),
+                '应用尚未适配此连接的原生搜索；不代表厂商网站或其他 API 不支持搜索。',
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
-
-  Widget _capability(
-    String label,
-    bool? value,
-    ModelConfig Function(bool?) update,
-  ) => SizedBox(
-    width: 145,
-    child: DropdownButtonFormField<int>(
-      initialValue: value == null
-          ? 0
-          : value
-          ? 1
-          : 2,
-      isExpanded: true,
-      decoration: InputDecoration(labelText: label),
-      items: const [
-        DropdownMenuItem(value: 0, child: Text('未标注')),
-        DropdownMenuItem(value: 1, child: Text('支持')),
-        DropdownMenuItem(value: 2, child: Text('不支持')),
-      ],
-      onChanged: widget.enabled
-          ? (value) => _emit(update(value == 0 ? null : value == 1))
-          : null,
-    ),
-  );
 }

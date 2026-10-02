@@ -8,6 +8,7 @@ import '../../../core/storage/local_storage_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../models/prompt_assistant_models.dart';
 import '../models/prompt_task_definitions.dart';
+import '../services/model_catalog_repository.dart';
 
 final promptAssistantConfigProvider =
     StateNotifierProvider<
@@ -23,31 +24,61 @@ class PromptAssistantConfigNotifier
   }
 
   final Ref _ref;
+  ModelCatalogRepository? _catalog;
 
   LocalStorageService get _local => _ref.read(localStorageServiceProvider);
   SecureStorageService get _secure => _ref.read(secureStorageServiceProvider);
 
   Future<void> _load() async {
+    var loaded = state;
     final raw = _local.getSetting<String>(
       StorageKeys.promptAssistantConfigJson,
     );
     if (raw != null && raw.isNotEmpty) {
       try {
-        state = PromptAssistantConfigState.decode(raw);
+        loaded = PromptAssistantConfigState.decode(raw);
       } catch (_) {
-        state = PromptAssistantConfigState.defaults();
+        loaded = PromptAssistantConfigState.defaults();
       }
     }
+
+    state = loaded;
+    try {
+      _catalog =
+          ModelCatalogRepository.cached ?? await ModelCatalogRepository.load();
+    } catch (error) {
+      AppLogger.w('Local model catalog unavailable: $error', 'PromptAssistant');
+    }
+    if (!mounted) return;
+    final current = state;
+    state = current.copyWith(
+      models: [
+        for (final model in current.models) _enrich(model, current.providers),
+      ],
+    );
 
     final observed = state;
     final keyMap = <String, bool>{};
     for (final provider in observed.providers) {
       final key = await _secure.getPromptAssistantApiKey(provider.id);
+      if (!mounted) return;
       keyMap[provider.id] = key != null && key.isNotEmpty;
     }
-    if (identical(state, observed)) {
+    if (mounted && identical(state, observed)) {
       state = state.copyWith(providerHasApiKey: keyMap);
     }
+  }
+
+  ModelConfig _enrich(ModelConfig model, [List<ProviderConfig>? providers]) {
+    final provider = (providers ?? state.providers)
+        .where((p) => p.id == model.providerId)
+        .firstOrNull;
+    return _catalog?.enrich(
+          model,
+          provider?.preset,
+          protocol: provider?.protocol,
+        ) ??
+        model;
   }
 
   Future<void> _save() async {
@@ -151,7 +182,7 @@ class PromptAssistantConfigNotifier
         if (model.providerId == providerId &&
             !model.isPlaceholder &&
             names.add(model.name))
-          model,
+          _enrich(model),
     ];
     final interfaces = Map<LauncherInterface, InterfaceSlotConfig>.from(
       state.interfaces,
@@ -169,6 +200,7 @@ class PromptAssistantConfigNotifier
   }
 
   Future<void> upsertModel(ModelConfig model) async {
+    model = _enrich(model);
     final models = [...state.models];
     final idx = models.indexWhere(
       (m) => m.providerId == model.providerId && m.name == model.name,
@@ -224,11 +256,13 @@ class PromptAssistantConfigNotifier
       );
       if (!exists) {
         models.add(
-          ModelConfig(
-            providerId: providerId,
-            name: name,
-            displayName: name,
-            source: ModelSource.api,
+          _enrich(
+            ModelConfig(
+              providerId: providerId,
+              name: name,
+              displayName: name,
+              source: ModelSource.api,
+            ),
           ),
         );
       }
@@ -459,7 +493,12 @@ class PromptAssistantConfigNotifier
       observed.encode(),
     );
     if (!identical(state, observed)) throw StateError('配置已变化，请重新导入。');
-    state = imported.copyWith(providerHasApiKey: keys);
+    state = imported.copyWith(
+      providerHasApiKey: keys,
+      models: [
+        for (final model in imported.models) _enrich(model, imported.providers),
+      ],
+    );
     await _save();
   }
 }

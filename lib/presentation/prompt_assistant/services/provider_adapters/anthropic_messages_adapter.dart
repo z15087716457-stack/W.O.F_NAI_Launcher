@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../models/prompt_assistant_models.dart';
 import 'prompt_assistant_adapter.dart';
+import 'model_request_options.dart';
 
 class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
   const AnthropicMessagesAdapter();
@@ -50,15 +51,22 @@ class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
       _resolveMessagesEndpoint(request.provider),
       data: {
         'model': request.model,
-        'max_tokens': request.modelConfig?.maxOutputTokens ?? 2048,
+        'max_tokens':
+            request.modelConfig?.maxOutputTokens ??
+            (request.modelConfig?.reasoningFormat == 'anthropicBudget' &&
+                    request.modelConfig?.reasoningEffort != null
+                ? modelThinkingBudget(request.modelConfig!, anthropic: true) +
+                      2048
+                : 2048),
         'system': request.systemPrompt,
-        if (request.modelConfig?.temperature case final value?)
-          'temperature': value,
-        if (request.modelConfig?.temperature == null &&
+        if (allowsModelSampling(request.modelConfig) &&
+            request.modelConfig?.temperature != null)
+          'temperature': request.modelConfig!.temperature,
+        if (allowsModelSampling(request.modelConfig) &&
+            request.modelConfig?.temperature == null &&
             request.modelConfig?.topP != null)
           'top_p': request.modelConfig!.topP,
-        if (request.modelConfig?.reasoningEffort case final String effort)
-          'output_config': {'effort': effort},
+        ...anthropicReasoningOptions(request.modelConfig),
         'messages': [
           {'role': 'user', 'content': _contentParts(request.userParts)},
         ],

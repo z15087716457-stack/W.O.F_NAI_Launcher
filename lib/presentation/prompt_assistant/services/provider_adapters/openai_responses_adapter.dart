@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../models/prompt_assistant_models.dart';
 import 'openai_chat_completions_adapter.dart';
 import 'prompt_assistant_adapter.dart';
+import 'model_request_options.dart';
 
 class OpenAiResponsesAdapter extends PromptAssistantProviderAdapter {
   const OpenAiResponsesAdapter();
@@ -36,9 +37,12 @@ class OpenAiResponsesAdapter extends PromptAssistantProviderAdapter {
       'model': request.model,
       'stream': false,
       'instructions': request.systemPrompt,
-      if (request.modelConfig?.temperature case final value?)
-        'temperature': value,
-      if (request.modelConfig?.topP case final value?) 'top_p': value,
+      if (allowsModelSampling(request.modelConfig) &&
+          request.modelConfig?.temperature != null)
+        'temperature': request.modelConfig!.temperature,
+      if (allowsModelSampling(request.modelConfig) &&
+          request.modelConfig?.topP != null)
+        'top_p': request.modelConfig!.topP,
       'input': [
         {'role': 'user', 'content': _inputParts(request.userParts)},
       ],

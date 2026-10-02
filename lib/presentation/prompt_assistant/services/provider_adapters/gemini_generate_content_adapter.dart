@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../models/prompt_assistant_models.dart';
 import 'prompt_assistant_adapter.dart';
+import 'model_request_options.dart';
 
 class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
   const GeminiGenerateContentAdapter();
@@ -60,13 +61,16 @@ class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
             request.modelConfig?.temperature != null ||
             request.modelConfig?.topP != null)
           'generationConfig': {
-            if (request.modelConfig?.temperature case final value?)
-              'temperature': value,
-            if (request.modelConfig?.topP case final value?) 'topP': value,
+            if (allowsModelSampling(request.modelConfig) &&
+                request.modelConfig?.temperature != null)
+              'temperature': request.modelConfig!.temperature,
+            if (allowsModelSampling(request.modelConfig) &&
+                request.modelConfig?.topP != null)
+              'topP': request.modelConfig!.topP,
             if (request.modelConfig?.maxOutputTokens case final int limit)
               'maxOutputTokens': limit,
-            if (request.modelConfig?.reasoningEffort case final String effort)
-              'thinkingConfig': {'thinkingLevel': effort.toUpperCase()},
+            if (request.modelConfig?.reasoningEffort != null)
+              'thinkingConfig': geminiThinkingOptions(request.modelConfig!),
           },
       },
       options: Options(

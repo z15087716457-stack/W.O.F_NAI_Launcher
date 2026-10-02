@@ -131,7 +131,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                   const SizedBox(height: 16),
                   _modelsOverview(
                     context,
-                    (viewport.maxHeight - 205).clamp(360.0, 610.0),
+                    (viewport.maxHeight - 250).clamp(320.0, 460.0),
                   ),
                   const SizedBox(height: 24),
                   _usageOverview(context),
@@ -147,14 +147,6 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
   }
 
   bool get _canSaveOverview => !_busy && _headersLoaded && !_headersLoadFailed;
-
-  ButtonStyle _overviewButton(BuildContext context) => TextButton.styleFrom(
-    textStyle: Theme.of(context).textTheme.bodySmall,
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-    minimumSize: const Size(32, 32),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-    visualDensity: VisualDensity.compact,
-  );
 
   Widget _overviewSection(
     BuildContext context,
@@ -237,75 +229,81 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final address = value(
-                  '接口地址',
-                  _baseUrl.text.trim().isEmpty ? '尚未配置' : _baseUrl.text.trim(),
-                  selectable: true,
-                );
-                final key = value('API 密钥', keyStatus);
-                final protocol = value('接口协议', _protocol.label);
-                final edit = TextButton.icon(
-                  key: const Key('service-edit-connection'),
-                  onPressed: _busy
-                      ? null
-                      : () => _updateOverview(
-                          () => _editingConnection = !_editingConnection,
-                        ),
-                  icon: Icon(
-                    _editingConnection
-                        ? Icons.expand_less
-                        : Icons.edit_outlined,
-                    size: 15,
-                  ),
-                  label: Text(_editingConnection ? '收起' : '编辑'),
-                );
-                return constraints.maxWidth <
-                        640 * MediaQuery.textScalerOf(context).scale(1)
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          address,
-                          const SizedBox(height: 12),
-                          protocol,
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(child: key),
-                              edit,
-                            ],
+            if (!_editingConnection)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final address = value(
+                    '接口地址',
+                    _baseUrl.text.trim().isEmpty
+                        ? '尚未配置'
+                        : _baseUrl.text.trim(),
+                    selectable: true,
+                  );
+                  final key = value('API 密钥', keyStatus);
+                  final protocol = value('接口协议', _protocol.label);
+                  final edit = TextButton.icon(
+                    key: const Key('service-edit-connection'),
+                    onPressed: _busy
+                        ? null
+                        : () => _updateOverview(
+                            () => _editingConnection = !_editingConnection,
                           ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          Expanded(flex: 4, child: address),
-                          const SizedBox(width: 20),
-                          Expanded(flex: 3, child: protocol),
-                          const SizedBox(width: 20),
-                          SizedBox(width: 104, child: key),
-                          const SizedBox(width: 12),
-                          edit,
-                        ],
-                      );
-              },
-            ),
-            if (_editingConnection) ...[
-              const SizedBox(height: 18),
-              const Divider(height: 1),
-              const SizedBox(height: 18),
-              _connectionFields(),
-              const SizedBox(height: 14),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton(
-                  key: const Key('service-connection-save'),
-                  onPressed: _canSaveOverview ? _save : null,
-                  style: _overviewButton(context),
-                  child: const Text('保存'),
-                ),
+                    icon: Icon(
+                      _editingConnection
+                          ? Icons.expand_less
+                          : Icons.edit_outlined,
+                      size: 15,
+                    ),
+                    label: Text(_editingConnection ? '收起' : '编辑'),
+                  );
+                  return constraints.maxWidth <
+                          640 * MediaQuery.textScalerOf(context).scale(1)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            address,
+                            const SizedBox(height: 12),
+                            protocol,
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(child: key),
+                                edit,
+                              ],
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(flex: 4, child: address),
+                            const SizedBox(width: 20),
+                            Expanded(flex: 3, child: protocol),
+                            const SizedBox(width: 20),
+                            SizedBox(width: 104, child: key),
+                            const SizedBox(width: 12),
+                            edit,
+                          ],
+                        );
+                },
               ),
+            if (_editingConnection) ...[
+              Row(
+                children: [
+                  Text('连接设置', style: theme.textTheme.labelMedium),
+                  const Spacer(),
+                  TextButton.icon(
+                    key: const Key('service-edit-connection'),
+                    onPressed: _busy
+                        ? null
+                        : () =>
+                              _updateOverview(() => _editingConnection = false),
+                    icon: const Icon(Icons.expand_less, size: 15),
+                    label: const Text('收起'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              _connectionFields(),
             ],
           ],
         ),
@@ -332,92 +330,122 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(flex: 9, child: _availablePanel()),
+            Expanded(flex: 51, child: _availablePanel()),
             const SizedBox(width: 12),
-            Expanded(flex: 11, child: _selectedPanel()),
+            Expanded(flex: 49, child: _selectedPanel()),
           ],
         ),
       );
     },
   );
 
-  Widget _overviewModelRow(ModelConfig model, Widget parameters) {
-    final theme = Theme.of(context);
+  Widget _overviewModelRow(ModelConfig model, Widget parameters, int index) {
+    final theme = Theme.of(context), colors = theme.colorScheme;
     final expanded = _expandedModel == model.name;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 3),
       child: Material(
-        color: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(9),
-          side: BorderSide(
-            color: expanded
-                ? theme.colorScheme.primary.withValues(alpha: .3)
-                : theme.colorScheme.outlineVariant,
-          ),
-        ),
+        color: colors.onSurface.withValues(alpha: expanded ? .065 : .035),
+        borderRadius: BorderRadius.circular(5),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SelectableText(
-                          model.name,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
+                  Tooltip(
+                    message: '拖拽调整模型排序',
+                    child: ReorderableDragStartListener(
+                      key: ValueKey('model-drag-${model.name}'),
+                      index: index,
+                      enabled: !_busy,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.grab,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 3,
+                            vertical: 6,
+                          ),
+                          child: Icon(
+                            Icons.drag_indicator,
+                            size: 14,
+                            color: colors.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          model.displayName == model.name
-                              ? model.source == ModelSource.manual
-                                    ? '手动添加'
-                                    : '模型目录'
-                              : model.displayName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  TextButton.icon(
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Tooltip(
+                      message: model.displayName == model.name
+                          ? model.name
+                          : '${model.name} · ${model.displayName}',
+                      child: Text(
+                        model.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontFamily: StudioTypography.mono,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Tooltip(
+                    message: '用户配置：上下文 / 最大输出；默认值由服务决定',
+                    child: Text(
+                      '${modelTokenLabel(model.contextWindow)} · ${modelTokenLabel(model.maxOutputTokens)}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontSize: 10,
+                        color: colors.onSurfaceVariant.withValues(alpha: .7),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  TextButton(
                     key: ValueKey('service-model-parameters-${model.name}'),
                     onPressed: _busy
                         ? null
                         : () => _updateOverview(
                             () => _expandedModel = expanded ? null : model.name,
                           ),
-                    style: _overviewButton(context).copyWith(
-                      foregroundColor: WidgetStatePropertyAll(
-                        expanded
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant,
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.onSurfaceVariant,
+                      backgroundColor: colors.onSurface.withValues(alpha: .06),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
+                      minimumSize: const Size(0, 21),
+                      visualDensity: VisualDensity.compact,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      textStyle: theme.textTheme.labelSmall?.copyWith(
+                        fontSize: 10.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(9),
                       ),
                     ),
-                    icon: const Icon(Icons.tune, size: 14),
-                    label: const Text('参数'),
+                    child: const Text('高级'),
                   ),
-                  PopupMenuButton<String>(
-                    tooltip: '管理模型 ${model.name}',
-                    enabled: !_busy,
-                    padding: EdgeInsets.zero,
-                    iconSize: 16,
-                    constraints: const BoxConstraints(minWidth: 130),
-                    onSelected: (_) => _toggleModel(model.name, false),
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(value: 'remove', child: Text('移除模型')),
-                    ],
-                    icon: const Icon(Icons.more_horiz),
+                  IconButton(
+                    key: ValueKey('service-remove-model-${model.name}'),
+                    tooltip: '删除模型 ${model.name}',
+                    onPressed: _busy
+                        ? null
+                        : () => _toggleModel(model.name, false),
+                    icon: const Icon(Icons.close, size: 13),
+                    color: colors.onSurfaceVariant.withValues(alpha: .6),
+                    padding: const EdgeInsets.all(5),
+                    constraints: const BoxConstraints(
+                      minWidth: 25,
+                      minHeight: 25,
+                    ),
+                    visualDensity: VisualDensity.compact,
                   ),
                 ],
               ),
@@ -445,6 +473,15 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
+            SizedBox(
+              width: 24,
+              child: Icon(
+                interfaceIcon(task),
+                size: 17,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 9),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

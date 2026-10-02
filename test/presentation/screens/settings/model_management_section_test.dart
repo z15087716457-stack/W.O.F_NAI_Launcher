@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -186,6 +187,7 @@ Future<ProviderContainer> pumpManagement(
 
 void main() {
   setUpAll(() async {
+    await ModelCatalogRepository.load();
     if (Platform.environment['CAPTURE_MODEL_MANAGEMENT'] != '1') return;
     await loadStudioCaptureFonts();
     await (FontLoader(
@@ -279,13 +281,11 @@ void main() {
         find.byKey(const Key('service-model-parameters-deepseek-chat')),
       );
       await capture(tester, 'model-parameters');
-      await tapVisible(tester, find.byKey(const Key('model-advanced-toggle')));
-      await tester.ensureVisible(
-        find.byKey(const Key('parameter-temperature')),
-      );
+      expect(find.text('采样与能力'), findsNothing);
+      await tester.ensureVisible(find.byKey(const Key('parameter-max-tokens')));
       await tester.enterText(
-        find.byKey(const Key('parameter-temperature')),
-        '0.4',
+        find.byKey(const Key('parameter-max-tokens')),
+        '8000',
       );
       await tapVisible(tester, find.byKey(const Key('service-save')));
       expect(
@@ -293,8 +293,8 @@ void main() {
             .read(promptAssistantConfigProvider)
             .models
             .firstWhere((model) => model.name == 'deepseek-chat')
-            .temperature,
-        0.4,
+            .maxOutputTokens,
+        8000,
       );
       await tapVisible(
         tester,
@@ -321,10 +321,7 @@ void main() {
         container.read(promptAssistantConfigProvider).providers.first.name,
         'DeepSeek',
       );
-      await tapVisible(
-        tester,
-        find.byKey(const Key('service-connection-save')),
-      );
+      await tapVisible(tester, find.byKey(const Key('service-save')));
       expect(
         container.read(promptAssistantConfigProvider).providers.first.name,
         '我的服务',
@@ -341,8 +338,8 @@ void main() {
             .read(promptAssistantConfigProvider)
             .models
             .firstWhere((m) => m.name == 'deepseek-chat')
-            .temperature,
-        0.4,
+            .maxOutputTokens,
+        8000,
       );
       await tester.tap(find.text('预设与提示词').first);
       await tester.pumpAndSettle();
@@ -418,10 +415,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      await tapVisible(
-        tester,
-        find.byKey(const Key('service-connection-save')),
-      );
+      await tapVisible(tester, find.byKey(const Key('service-save')));
       expect(
         container.read(promptAssistantConfigProvider).providers.first.name,
         '未保存的名称',
@@ -451,7 +445,7 @@ void main() {
         .read(promptAssistantConfigProvider.notifier)
         .upsertProvider(sampleConfig.providers.first.copyWith(name: '新的已保存名称'));
     await tester.pumpAndSettle();
-    await tapVisible(tester, find.byKey(const Key('service-connection-save')));
+    await tapVisible(tester, find.byKey(const Key('service-save')));
     expect(
       container.read(promptAssistantConfigProvider).providers.first.name,
       '新的已保存名称',

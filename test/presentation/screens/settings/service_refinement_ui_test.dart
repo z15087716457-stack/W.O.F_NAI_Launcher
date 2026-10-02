@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,6 +43,7 @@ PromptAssistantConfigState get _config => harness.sampleConfig.copyWith(
 
 void main() {
   setUpAll(() async {
+    await ModelCatalogRepository.load();
     if (Platform.environment['CAPTURE_MODEL_MANAGEMENT'] != '1') return;
     await loadStudioCaptureFonts();
     await (FontLoader(
@@ -66,7 +68,7 @@ void main() {
       await harness.capture(tester, 'refinement-catalog');
       await tester.enterText(
         find.byKey(const Key('service-catalog-search')),
-        'DeepSeek Chat',
+        'deepseek-chat',
       );
       await tester.pumpAndSettle();
       expect(row, findsOneWidget);

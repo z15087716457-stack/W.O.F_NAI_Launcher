@@ -1117,9 +1117,11 @@ void main() {
       'relay-model-v5',
     );
     await tester.pump();
-    await tester.ensureVisible(find.byTooltip('添加自定义模型'));
+    await tester.ensureVisible(
+      find.byKey(const Key('service-add-custom-model')),
+    );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('添加自定义模型'));
+    await tester.tap(find.byKey(const Key('service-add-custom-model')));
     await tester.pump();
     await tester.ensureVisible(find.byKey(const Key('service-save')));
     await tester.pumpAndSettle();

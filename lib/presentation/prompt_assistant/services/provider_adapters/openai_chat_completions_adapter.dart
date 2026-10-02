@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../models/prompt_assistant_models.dart';
 import 'prompt_assistant_adapter.dart';
+import 'model_request_options.dart';
 
 class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
   const OpenAiChatCompletionsAdapter({this.ollamaTagsFallback = false});
@@ -69,9 +70,12 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
       'model': request.model,
       'stream': false,
       'messages': _buildMessages(request),
-      if (request.modelConfig?.temperature case final value?)
-        'temperature': value,
-      if (request.modelConfig?.topP case final value?) 'top_p': value,
+      if (allowsModelSampling(request.modelConfig) &&
+          request.modelConfig?.temperature != null)
+        'temperature': request.modelConfig!.temperature,
+      if (allowsModelSampling(request.modelConfig) &&
+          request.modelConfig?.topP != null)
+        'top_p': request.modelConfig!.topP,
     };
     final settings = request.modelConfig;
     if (settings?.maxOutputTokens case final int limit) {
@@ -80,9 +84,7 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
               : 'max_tokens'] =
           limit;
     }
-    if (settings?.reasoningEffort case final String effort) {
-      payload['reasoning_effort'] = effort;
-    }
+    payload.addAll(chatReasoningOptions(request.provider, settings));
 
     final response = await _postWithFallback(
       dio: dio,
