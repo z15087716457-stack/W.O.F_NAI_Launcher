@@ -5,13 +5,24 @@ import '../models/prompt_assistant_models.dart';
 
 /// Local catalog facts are never inferred from a user's capacity overrides.
 class ModelCatalogRepository {
-  ModelCatalogRepository._(this.entries, this.bindings, this.providers);
-  static final empty = ModelCatalogRepository._(const {}, const {}, const {});
+  ModelCatalogRepository._(
+    this.entries,
+    this.bindings,
+    this.providers,
+    this.providerEntries,
+  );
+  static final empty = ModelCatalogRepository._(
+    const {},
+    const {},
+    const {},
+    const {},
+  );
   static ModelCatalogRepository? cached;
   static Future<ModelCatalogRepository>? _loading;
   final Map<String, ModelCatalogEntry> entries;
   final Map<String, String> bindings;
   final Map<String, List<String>> providers;
+  final Map<String, ModelCatalogEntry> providerEntries;
 
   static Future<ModelCatalogRepository> load() {
     if (cached != null) return Future.value(cached);
@@ -42,6 +53,13 @@ class ModelCatalogRepository {
         for (final entry in (json['providers'] as Map).entries)
           entry.key as String: List<String>.unmodifiable(
             (entry.value as List).cast<String>(),
+          ),
+      },
+      {
+        for (final entry
+            in (json['providerModels'] as Map? ?? const {}).entries)
+          (entry.key as String).toLowerCase(): ModelCatalogEntry.fromJson(
+            (entry.value as Map).cast<String, dynamic>(),
           ),
       },
     );
@@ -76,6 +94,12 @@ class ModelCatalogRepository {
   ModelCatalogEntry? lookup(ProviderPreset? preset, String name) {
     final key = name.trim().toLowerCase().replaceFirst(RegExp(r'^models/'), '');
     final vendor = _vendor(preset);
+    if (vendor != null) {
+      final hosted =
+          providerEntries['$vendor/$key'] ?? providerEntries['$vendor-cn/$key'];
+      if (hosted != null) return hosted;
+    }
+    if (providerEntries[key] case final hosted?) return hosted;
     final binding = vendor == null
         ? null
         : bindings['$vendor/$key'] ?? bindings['$vendor-cn/$key'];

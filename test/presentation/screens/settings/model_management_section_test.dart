@@ -1,6 +1,7 @@
 import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_task_definitions.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
+import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/model_management_section.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
@@ -149,6 +151,7 @@ Future<ProviderContainer> pumpManagement(
   Size size = const Size(1200, 820),
   double scale = 1,
   MemorySecrets? secrets,
+  Dio? dio,
   PromptAssistantConfigState config = sampleConfig,
 }) async {
   tester.view.physicalSize = size;
@@ -161,6 +164,7 @@ Future<ProviderContainer> pumpManagement(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        if (dio != null) promptAssistantDioProvider.overrideWithValue(dio),
         localStorageServiceProvider.overrideWithValue(storage),
         secureStorageServiceProvider.overrideWithValue(
           secrets ?? MemorySecrets(),
@@ -251,29 +255,40 @@ void main() {
     },
   );
 
-  testWidgets('offline starter selections retain manual provenance', (
-    tester,
-  ) async {
-    final container = await pumpManagement(tester);
-    await tapVisible(
-      tester,
-      find.byKey(const Key('catalog-model-deepseek-flash')),
-    );
-    await tapVisible(tester, find.byKey(const Key('service-save')));
-    final selected = container
-        .read(promptAssistantConfigProvider)
-        .models
-        .firstWhere((m) => m.name == 'deepseek-flash');
-    expect(selected.source, ModelSource.manual);
-    expect(
-      container
+  testWidgets(
+    'offline additions retain manual provenance without filling the API list',
+    (tester) async {
+      final container = await pumpManagement(tester);
+      expect(find.byKey(const Key('service-catalog-list')), findsNothing);
+      await tester.ensureVisible(
+        find.byKey(const Key('ai-service-manual-model-id')),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('ai-service-manual-model-id')),
+        'deepseek-flash',
+      );
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-add-custom-model')),
+      );
+      expect(find.byKey(const Key('service-catalog-list')), findsNothing);
+      await tapVisible(tester, find.byKey(const Key('service-save')));
+      final selected = container
           .read(promptAssistantConfigProvider)
           .models
-          .any((m) => m.name == 'deepseek-chat'),
-      isTrue,
-    );
-    expect(tester.takeException(), isNull);
-  });
+          .firstWhere((m) => m.name == 'deepseek-flash');
+      expect(selected.source, ModelSource.manual);
+      expect(
+        container
+            .read(promptAssistantConfigProvider)
+            .models
+            .any((m) => m.name == 'deepseek-chat'),
+        isTrue,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets(
     'management pages are usable without model calls and preserve unsaved service edits',
     (tester) async {

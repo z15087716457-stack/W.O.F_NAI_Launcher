@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/model_catalog_entry.dart';
@@ -20,6 +21,103 @@ void main() {
     name: name,
     displayName: name,
     customFields: const {},
+  );
+  test(
+    'snapshot includes complete hosted facts and valid provider bindings',
+    () {
+      final snapshot =
+          jsonDecode(File('assets/data/model_catalog.json').readAsStringSync())
+              as Map;
+      expect(snapshot['schemaVersion'], 2);
+      expect(catalog.providers.length, greaterThanOrEqualTo(200));
+      expect(catalog.providerEntries.length, greaterThanOrEqualTo(8000));
+      for (final entry in catalog.providerEntries.entries) {
+        final facts = entry.value;
+        expect(entry.key, facts.id.toLowerCase());
+        expect(facts.outputModalities, contains('text'));
+        if (facts.contextLimit != null) {
+          expect(facts.contextLimit, greaterThan(0));
+        }
+        if (facts.outputLimit != null) {
+          expect(facts.outputLimit, greaterThan(0));
+        }
+        if (facts.defaultReasoningEffort != null) {
+          expect(
+            facts.reasoningEfforts,
+            contains(facts.defaultReasoningEffort),
+          );
+        }
+      }
+      for (final entry in catalog.bindings.entries) {
+        expect(catalog.entries, contains(entry.value.toLowerCase()));
+      }
+    },
+  );
+  test(
+    'same base model keeps each serving platform limits and reasoning controls',
+    () {
+      final groq = catalog.lookup(ProviderPreset.groq, 'openai/gpt-oss-120b')!;
+      final siliconflow = catalog.lookup(
+        ProviderPreset.siliconflow,
+        'openai/gpt-oss-120b',
+      )!;
+      expect(groq.outputLimit, 65536);
+      expect(groq.contextLimit, 131072);
+      expect(siliconflow.outputLimit, 8000);
+      expect(siliconflow.contextLimit, 131000);
+      expect(groq.reasoningOptions.single['values'], ['low', 'medium', 'high']);
+      expect(siliconflow.reasoningOptions.single['type'], 'budget_tokens');
+      expect(siliconflow.budgetMax, 32768);
+      expect(groq.supportsToolCalling, isTrue);
+      expect(groq.supportsStructuredOutput, isTrue);
+      expect(groq.cost['input'], .15);
+      expect(catalog.lookup(null, 'groq/openai/gpt-oss-120b'), same(groq));
+    },
+  );
+  test(
+    'standalone hosted IDs and modality facts survive without a lab binding',
+    () {
+      final standalone = catalog.lookup(
+        ProviderPreset.openrouter,
+        'aion-labs/aion-3.5',
+      )!;
+      expect(standalone.id, 'openrouter/aion-labs/aion-3.5');
+      expect(standalone.canonicalId, isNull);
+      expect(standalone.contextLimit, greaterThan(0));
+      final claude = catalog.lookup(
+        ProviderPreset.anthropic,
+        'claude-opus-5-5',
+      )!;
+      expect(claude.supportsPdf, isTrue);
+      expect(claude.supportsTemperature, isFalse);
+      expect(claude.supportsReasoning, isTrue);
+      expect(claude.releasedAt, isNotEmpty);
+    },
+  );
+  test(
+    'hosted enrichment preserves user overrides instead of copying another platform',
+    () {
+      final initial = catalog.enrich(
+        model('openai/gpt-oss-120b'),
+        ProviderPreset.groq,
+      );
+      expect(initial.maxOutputTokens, 65536);
+      final changed = initial.copyWith(
+        contextWindow: 312000,
+        maxOutputTokens: 16000,
+        clearReasoningEffort: true,
+        customFields: {'contextWindow', 'maxOutputTokens', 'reasoningEffort'},
+      );
+      final restored = catalog.enrich(
+        ModelConfig.fromJson(changed.toJson()),
+        ProviderPreset.groq,
+      );
+      expect(restored.contextWindow, 312000);
+      expect(restored.maxOutputTokens, 16000);
+      expect(restored.reasoningEffort, isNull);
+      expect(restored.catalogEntry!.outputLimit, 65536);
+      expect(restored.name, 'openai/gpt-oss-120b');
+    },
   );
   Future<Map<String, dynamic>> wire(
     PromptAssistantProviderAdapter adapter,

@@ -1,10 +1,11 @@
-"""Build a small offline snapshot from a pinned models.dev Git checkout.
+"""Build offline model facts from pinned models.dev Git objects.
 
 Reads Git objects, so provider IDs containing ':' also work on Windows.
 Usage: python tool/model_catalog/build_model_catalog.py PATH_TO_REPOSITORY
 No source code from that repository is executed.
 """
 import argparse
+import copy
 import datetime
 import json
 import posixpath
@@ -14,6 +15,8 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser()
 parser.add_argument('repository', type=Path)
+parser.add_argument('--ref', default='HEAD', help='Commit or fetched ref to read without checking out')
+parser.add_argument('--date', default=datetime.date.today().isoformat())
 args = parser.parse_args()
 repo = args.repository.resolve()
 root = Path(__file__).resolve().parents[2]
@@ -23,7 +26,8 @@ def git(*arguments):
     return subprocess.check_output(['git', '-C', str(repo), *arguments])
 
 
-tree = git('ls-tree', '-r', 'HEAD').decode('utf-8').splitlines()
+revision = git('rev-parse', args.ref).decode().strip()
+tree = git('ls-tree', '-r', revision).decode('utf-8').splitlines()
 files = [(line.split()[2], line.split('\t', 1)[1]) for line in tree
          if line.endswith('.toml') and line.split('\t', 1)[1].startswith(('models/', 'providers/'))]
 raw = subprocess.run(['git', '-C', str(repo), 'cat-file', '--batch'],
@@ -59,32 +63,73 @@ for path in texts:
     document(path)
 
 canonical = {path.removeprefix('models/').removesuffix('.toml'): data
-             for path, data in documents.items() if path.startswith('models/') and data
-             and 'text' in data.get('modalities', {}).get('output', ['text'])
-             and data.get('limit', {}).get('output', 1) != 0}
+             for path, data in documents.items() if path.startswith('models/') and data}
+def merge(base, override):
+    result = copy.deepcopy(base)
+    for key, value in override.items():
+        result[key] = merge(result[key], value) if isinstance(result.get(key), dict) and isinstance(value, dict) else copy.deepcopy(value)
+    return result
+
+
+def apply_omit(target, paths):
+    for path in paths:
+        parts = path.split('.')
+        current = target
+        parents = []
+        for part in parts[:-1]:
+            if not isinstance(current.get(part), dict):
+                break
+            parents.append((current, part))
+            current = current[part]
+        else:
+            current.pop(parts[-1], None)
+            for parent, key in reversed(parents):
+                if parent[key]:
+                    break
+                del parent[key]
+
+
+def chat_model(data):
+    return 'text' in data.get('modalities', {}).get('output', ['text']) and data.get('limit', {}).get('output', 1) != 0 and not data.get('type')
+
+
 native = {}
 bindings = {}
 vendor_models = {}
+provider_facts = {}
 for path, data in documents.items():
     parts = path.split('/')
     if len(parts) < 4 or parts[0] != 'providers' or parts[2] != 'models':
         continue
     vendor = parts[1]
     name = '/'.join(parts[3:]).removesuffix('.toml')
-    base = data.get('base_model') or (f'{vendor}/{name}' if f'{vendor}/{name}' in canonical else None)
-    if base not in canonical:
+    if not data:
         continue
-    bindings[f'{vendor}/{name}'.lower()] = base
+    base = data.get('base_model')
+    if base is not None and base not in canonical:
+        # Missing or specialized base metadata is not an invented chat model.
+        omitted.add(path)
+        continue
+    inherited = {key: value for key, value in canonical.get(base, {}).items()
+                 if key not in {'id', 'benchmarks', 'license', 'links', 'weights'}}
+    resolved = merge(inherited, {key: value for key, value in data.items()
+                               if key not in {'base_model', 'base_model_omit'}})
+    apply_omit(resolved, data.get('base_model_omit', []))
+    if not chat_model(resolved):
+        continue
+    provider_facts[f'{vendor}/{name}'] = (vendor, base, resolved)
+    if base is not None and chat_model(canonical[base]):
+        bindings[f'{vendor}/{name}'.lower()] = base
     vendor_models.setdefault(vendor, []).append(name)
-    if base.split('/')[0] == vendor:
-        previous = native.get(base, {})
+    native_id = base or f'{vendor}/{name}'
+    if native_id in canonical and native_id.split('/')[0] == vendor:
+        previous = native.get(native_id, {})
         if not previous or len(data.get('reasoning_options', [])) > len(previous.get('reasoning_options', [])):
-            native[base] = data
+            native[native_id] = resolved
 
-entries = []
-for model_id, data in sorted(canonical.items()):
-    vendor, short_id = model_id.split('/', 1)
-    serving = native.get(model_id, {})
+def project(model_id, vendor, data, serving=None, base=None):
+    short_id = (base or model_id).split('/', 1)[-1]
+    serving = serving or {}
     options = serving.get('reasoning_options', data.get('reasoning_options', []))
     types = {option.get('type') for option in options}
     efforts = next((option.get('values') for option in options if option.get('type') == 'effort'), None)
@@ -126,8 +171,11 @@ for model_id, data in sorted(canonical.items()):
         elif vendor in ['anthropic', 'deepseek']:
             default = 'medium' if short_id == 'claude-opus-5-5' else 'high' if 'high' in efforts else None
     limits = {**data.get('limit', {}), **serving.get('limit', {})}
+    # Some providers use zero as an unknown/not-applicable capacity. Never seed
+    # the editable request settings with an invalid zero-token limit.
     entry = {'id': model_id, 'vendor': vendor, 'name': data.get('name', short_id),
-             'context': limits.get('context'), 'output': limits.get('output'),
+             'context': limits.get('context') if limits.get('context', 0) > 0 else None,
+             'output': limits.get('output') if limits.get('output', 0) > 0 else None,
              'vision': 'image' in data.get('modalities', {}).get('input', ['text']),
              'temperature': data.get('temperature'), 'efforts': efforts,
              'defaultEffort': default, 'reasoningFormat': fmt,
@@ -150,17 +198,40 @@ for model_id, data in sorted(canonical.items()):
         entry['nativeSearch'] = True
     elif vendor == 'anthropic' and short_id == 'claude-opus-5-5':
         entry['nativeSearch'] = True
-    entries.append({key: value for key, value in entry.items() if value is not None})
+    facts = merge(data, serving)
+    entry.update({
+        'canonicalId': base,
+        'input': limits.get('input') if limits.get('input', 0) > 0 else None,
+        'inputModalities': facts.get('modalities', {}).get('input'),
+        'outputModalities': facts.get('modalities', {}).get('output'),
+        'reasoning': facts.get('reasoning'),
+        'reasoningOptions': options,
+        'toolCall': facts.get('tool_call'),
+        'structuredOutput': facts.get('structured_output'),
+        'family': facts.get('family'),
+        'knowledge': facts.get('knowledge'),
+        'released': facts.get('release_date'),
+        'status': facts.get('status'),
+        'cost': facts.get('cost'),
+    })
+    return {key: value for key, value in entry.items() if value is not None}
+
+
+entries = [project(model_id, model_id.split('/')[0], data, native.get(model_id))
+           for model_id, data in sorted(canonical.items()) if chat_model(data)]
+profiles = {model_id.lower(): project(model_id, vendor, data, base=base)
+            for model_id, (vendor, base, data) in sorted(provider_facts.items())}
+assert len(profiles) == len(provider_facts), 'Case-folded provider/model IDs must be unique'
 
 destination = root / 'assets/data/model_catalog.json'
-snapshot = {'schemaVersion': 1, 'date': datetime.date.today().isoformat(),
+snapshot = {'schemaVersion': 2, 'date': args.date,
             'source': 'https://github.com/anomalyco/models.dev',
-            'revision': git('rev-parse', 'HEAD').decode().strip(),
+            'revision': revision,
             'omittedFiles': sorted(omitted),
-            'models': entries, 'bindings': dict(sorted(bindings.items())),
+            'models': entries, 'providerModels': profiles, 'bindings': dict(sorted(bindings.items())),
             'providers': {key: sorted(set(value)) for key, value in sorted(vendor_models.items())}}
 destination.write_text(json.dumps(snapshot, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
-(root / 'assets/data/model_catalog.LICENSE').write_bytes(git('show', 'HEAD:LICENSE'))
+(root / 'assets/data/model_catalog.LICENSE').write_bytes(git('show', f'{revision}:LICENSE'))
 print(json.dumps({'models': len(entries), 'bindings': len(bindings),
-                  'providers': len(vendor_models), 'bytes': destination.stat().st_size,
+                  'providers': len(vendor_models), 'providerModels': len(profiles), 'bytes': destination.stat().st_size,
                   'revision': snapshot['revision'], 'omitted': sorted(omitted)}, indent=2))

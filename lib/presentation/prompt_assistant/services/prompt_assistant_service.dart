@@ -380,7 +380,6 @@ icon characters or additional blocks. Never modify the other field.
     return _apiClient.fetchModels(
       provider: provider.copyWith(requestHeaders: headers),
       apiKey: apiKey,
-      usePresetFallback: false,
     );
   }
 
@@ -392,7 +391,6 @@ icon characters or additional blocks. Never modify the other field.
   ) async => _apiClient.fetchModels(
     provider: provider.copyWith(requestHeaders: headers),
     apiKey: apiKey,
-    usePresetFallback: false,
     trackConnectionHealth: await _matchesSavedConnection(
       provider,
       apiKey,
@@ -717,7 +715,7 @@ Prompt version: $tagTranslationPromptVersion
         : original;
   }
 
-  /// 词库翻译当前生效的路由标签，供设置页展示；无启用服务商时返回空串。
+  /// 词库翻译当前生效的路由标签；无启用服务商或未选模型时返回空串。
   String translateRouteLabel() {
     final config = _configuration;
     final route = _resolveInterfaceRoute(
@@ -729,7 +727,7 @@ Prompt version: $tagTranslationPromptVersion
   }
 
   /// 接口槽路由解析：槽位指向的启用服务商优先，否则回落到第一个启用服务商；
-  /// 没有任何启用服务商时返回 null。模型为空串表示“该服务商首个模型”。
+  /// 无启用服务商或未选真实模型时返回 null，不用预设 ID 代替用户选择。
   static ({ProviderConfig provider, String model})? _resolveInterfaceRoute(
     PromptAssistantConfigState config,
     LauncherInterface interface,
@@ -759,19 +757,10 @@ Prompt version: $tagTranslationPromptVersion
       model = routedModel;
     } else {
       final firstReal = models.where((m) => !m.isPlaceholder).firstOrNull;
-      model = firstReal?.name ?? _fallbackModelName(provider);
+      if (firstReal == null) return null;
+      model = firstReal.name;
     }
     return (provider: provider, model: model);
-  }
-
-  static String _fallbackModelName(ProviderConfig provider) {
-    final presetModels = provider.preset?.defaultModelNames ?? const [];
-    if (presetModels.isNotEmpty) {
-      return presetModels.first;
-    }
-    throw StateError(
-      'Provider ${provider.name} has no configured model. Pull the model list or add a model manually first.',
-    );
   }
 
   Future<
@@ -825,9 +814,7 @@ Prompt version: $tagTranslationPromptVersion
     }
     final route = _resolveInterfaceRoute(config, interface);
     if (route == null) {
-      throw StateError(
-        'No prompt assistant provider is available. Add and enable OpenAI, Anthropic, Gemini, DeepSeek, LM Studio, or another compatible provider in Settings first.',
-      );
+      throw StateError('请先在设置中启用服务，并获取或手动添加后选中一个模型。');
     }
     final apiKey = await _ref
         .read(promptAssistantConfigProvider.notifier)

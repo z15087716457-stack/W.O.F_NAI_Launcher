@@ -94,6 +94,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     ),
   );
   bool _catalogFromApi = false;
+  String? _fetchedConnection;
   String? _expandedModel;
   String? _error;
   String? _catalogMessage;
@@ -160,14 +161,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       if (provider != null)
         for (final model in saved.modelsForProvider(providerId: provider.id))
           if (!model.isPlaceholder) MapEntry(model.name, model),
-      if (provider == null && widget.initialPreset != null)
-        for (final name in _preset.defaultModelNames)
-          MapEntry(
-            name,
-            ModelConfig(providerId: 'draft', name: name, displayName: name),
-          ),
     ]);
-    _catalog = {..._preset.defaultModelNames, ..._selected.keys}.toList();
     for (final entry in _selected.entries.toList()) {
       _selected[entry.key] = _enrich(entry.value);
     }
@@ -189,9 +183,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       final wasClean = _fingerprint == _initialDraft;
       setState(() {
         _localCatalog = catalog;
-        if (!_catalogFromApi) {
-          _catalog = {..._preset.defaultModelNames, ..._selected.keys}.toList();
-        }
         for (final entry in _selected.entries.toList()) {
           _selected[entry.key] = _enrich(entry.value);
         }
@@ -259,7 +250,29 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   ]);
 
   void _refresh() {
-    if (mounted) setState(() {});
+    if (mounted) setState(_invalidateFetchedCatalog);
+  }
+
+  String get _catalogConnection => jsonEncode([
+    _preset.name,
+    _protocol.name,
+    _baseUrl.text.trim(),
+    _apiKey.text.trim(),
+    _clearKey,
+    _vendorChanged,
+    [
+      for (final name in _headers.keys.toList()..sort()) [name, _headers[name]],
+    ],
+  ]);
+
+  void _invalidateFetchedCatalog() {
+    if (_fetchedConnection != null &&
+        _fetchedConnection != _catalogConnection) {
+      _catalog = [];
+      _catalogFromApi = false;
+      _catalogMessage = null;
+      _fetchedConnection = null;
+    }
   }
 
   @override
@@ -359,6 +372,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
 
   Future<void> _fetchCatalog() async {
     if (!_validate()) return;
+    final connection = _catalogConnection;
     setState(() {
       _busy = true;
       _catalogMessage = '正在读取模型目录…';
@@ -367,14 +381,15 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       final names = await ref
           .read(promptAssistantServiceProvider)
           .fetchModelsForDraft(_draft(), await _effectiveKey(), _headers);
-      if (!mounted) return;
+      if (!mounted || connection != _catalogConnection) return;
       setState(() {
         _catalog = names;
         _catalogFromApi = true;
+        _fetchedConnection = connection;
         _catalogMessage = '目录返回 ${names.length} 个模型。勾选需要使用的模型。';
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || connection != _catalogConnection) return;
       setState(() => _catalogMessage = '目录不可用：$error。可以手动添加模型 ID。');
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -521,20 +536,17 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         _baseUrl.text = next.defaultBaseUrl;
       }
       _allowImageInput = next.defaultAllowImageInput;
-      _catalog = {...next.defaultModelNames}.toList();
+      _catalog = [];
       _catalogFromApi = false;
+      _fetchedConnection = null;
       _catalogMessage = null;
       _catalogSearch.clear();
-      if (_selected.isEmpty) {
-        for (final name in next.defaultModelNames) {
-          _selected[name] = _newModel(name, ModelSource.manual);
-        }
-      }
     });
   }
 
   void _setProtocol(ProviderProtocol protocol) {
     _protocol = protocol;
+    _invalidateFetchedCatalog();
     final allowed = reasoningChoices(protocol);
     for (final models in [_selected]) {
       for (final entry in models.entries.toList()) {
@@ -774,7 +786,10 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     );
   }
 
-  void _updateOverview(VoidCallback action) => setState(action);
+  void _updateOverview(VoidCallback action) => setState(() {
+    action();
+    _invalidateFetchedCatalog();
+  });
 
   Widget _buildEmbedded(BuildContext context) {
     final dirty =
@@ -810,7 +825,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         : _vendorChanged
         ? '输入此服务商的 Key'
         : '已保存；留空保持原值',
-    onClearKeyChanged: (value) => setState(() => _clearKey = value),
+    onClearKeyChanged: (value) => _updateOverview(() => _clearKey = value),
     onProtocolChanged: (value) => _updateOverview(() => _setProtocol(value)),
     onChooseProvider: () async {
       final next = await showProviderPicker(context, _preset);
@@ -947,7 +962,9 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
               child: filtered.isEmpty
                   ? Center(
                       child: Text(
-                        _catalog.isEmpty ? '获取模型列表，或在右侧手动添加模型 ID。' : '没有匹配的模型',
+                        _catalog.isEmpty
+                            ? '点击“获取列表”读取此服务的模型，\n或在右侧手动添加模型 ID。'
+                            : '没有匹配的模型',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,

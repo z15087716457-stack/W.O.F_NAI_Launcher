@@ -1,5 +1,6 @@
 import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,7 +55,29 @@ void main() {
   testWidgets(
     'dense model catalog has one header, aligned metadata, and filtered selection',
     (tester) async {
-      await harness.pumpManagement(tester, config: _config);
+      final dio = Dio()
+        ..interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options, handler) => handler.resolve(
+              Response(
+                requestOptions: options,
+                statusCode: 200,
+                data: {
+                  'data': [
+                    for (final model in _config.models) {'id': model.name},
+                  ],
+                },
+              ),
+            ),
+          ),
+        );
+      addTearDown(dio.close);
+      await harness.pumpManagement(tester, config: _config, dio: dio);
+      expect(find.byKey(const Key('service-catalog-list')), findsNothing);
+      await harness.tapVisible(
+        tester,
+        find.byKey(const Key('service-fetch-catalog')),
+      );
       expect(find.text('该服务的模型'), findsOneWidget);
       expect(find.text('获取列表'), findsOneWidget);
       expect(

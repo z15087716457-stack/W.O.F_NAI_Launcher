@@ -104,7 +104,7 @@ void main() {
             .first;
         final catalogPanel = find
             .ancestor(
-              of: find.byKey(const Key('service-catalog-list')),
+              of: find.byKey(const Key('service-catalog-search')),
               matching: find.byType(Material),
             )
             .first;
@@ -194,7 +194,7 @@ void main() {
           .first;
       final catalogPanel = find
           .ancestor(
-            of: find.byKey(const Key('service-catalog-list')),
+            of: find.byKey(const Key('service-catalog-search')),
             matching: find.byType(Material),
           )
           .first;

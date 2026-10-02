@@ -18,6 +18,19 @@ class ModelCatalogEntry {
     this.updatedAt,
     this.budgetMin,
     this.budgetMax,
+    this.canonicalId,
+    this.inputLimit,
+    this.inputModalities = const [],
+    this.outputModalities = const [],
+    this.reasoningOptions = const [],
+    this.supportsReasoning,
+    this.supportsToolCalling,
+    this.supportsStructuredOutput,
+    this.family,
+    this.knowledgeCutoff,
+    this.releasedAt,
+    this.status,
+    this.cost = const {},
   });
   final String id, vendor, name;
   final int? contextLimit, outputLimit;
@@ -26,6 +39,13 @@ class ModelCatalogEntry {
   final String? defaultReasoningEffort, reasoningFormat, updatedAt;
   final ModelReasoningProtocol reasoningProtocol;
   final bool? supportsVision, supportsNativeSearch, supportsTemperature;
+  final String? canonicalId, family, knowledgeCutoff, releasedAt, status;
+  final int? inputLimit;
+  final List<String> inputModalities, outputModalities;
+  final List<Map<String, dynamic>> reasoningOptions;
+  final bool? supportsReasoning, supportsToolCalling, supportsStructuredOutput;
+  final Map<String, dynamic> cost;
+  bool get supportsPdf => inputModalities.contains('pdf');
 
   factory ModelCatalogEntry.fromJson(Map<String, dynamic> json) =>
       ModelCatalogEntry(
@@ -50,6 +70,30 @@ class ModelCatalogEntry {
         updatedAt: json['updated'] as String?,
         budgetMin: (json['budgetMin'] as num?)?.toInt(),
         budgetMax: (json['budgetMax'] as num?)?.toInt(),
+        canonicalId: json['canonicalId'] as String?,
+        inputLimit: (json['input'] as num?)?.toInt(),
+        inputModalities: List<String>.unmodifiable(
+          (json['inputModalities'] as List? ?? const []).cast<String>(),
+        ),
+        outputModalities: List<String>.unmodifiable(
+          (json['outputModalities'] as List? ?? const []).cast<String>(),
+        ),
+        reasoningOptions: List<Map<String, dynamic>>.unmodifiable([
+          for (final option in json['reasoningOptions'] as List? ?? const [])
+            Map<String, dynamic>.unmodifiable(
+              (option as Map).cast<String, dynamic>(),
+            ),
+        ]),
+        supportsReasoning: json['reasoning'] as bool?,
+        supportsToolCalling: json['toolCall'] as bool?,
+        supportsStructuredOutput: json['structuredOutput'] as bool?,
+        family: json['family'] as String?,
+        knowledgeCutoff: json['knowledge'] as String?,
+        releasedAt: json['released'] as String?,
+        status: json['status'] as String?,
+        cost: Map<String, dynamic>.unmodifiable(
+          (json['cost'] as Map? ?? const {}).cast<String, dynamic>(),
+        ),
       );
 }
 

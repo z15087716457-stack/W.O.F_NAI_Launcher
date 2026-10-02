@@ -100,15 +100,9 @@ class PromptAssistantApiClient {
   Future<List<String>> fetchModels({
     required ProviderConfig provider,
     required String? apiKey,
-    bool usePresetFallback = true,
     bool trackConnectionHealth = true,
   }) async {
-    final defaults = provider.preset?.defaultModelNames ?? const [];
-    // Pollinations returns a local preset list without contacting the service.
-    final probe =
-        trackConnectionHealth &&
-            provider.preset != ProviderPreset.pollinations &&
-            provider.type != ProviderType.pollinations
+    final probe = trackConnectionHealth
         ? connectionHealth?.begin(provider)
         : null;
     try {
@@ -116,7 +110,7 @@ class PromptAssistantApiClient {
         provider,
       ).fetchModels(dio: _dio, provider: provider, apiKey: apiKey);
       connectionHealth?.succeeded(probe);
-      return models.isEmpty && usePresetFallback ? defaults : models;
+      return models;
     } catch (error) {
       connectionHealth?.failed(probe, error);
       rethrow;

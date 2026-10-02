@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,7 +78,33 @@ void main() {
   testWidgets(
     'compact panels separate official capacities from editable user values',
     (tester) async {
-      final container = await harness.pumpManagement(tester, config: _config);
+      final dio = Dio()
+        ..interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options, handler) => handler.resolve(
+              Response(
+                requestOptions: options,
+                statusCode: 200,
+                data: {
+                  'data': [
+                    for (final model in _config.models) {'id': model.name},
+                  ],
+                },
+              ),
+            ),
+          ),
+        );
+      addTearDown(dio.close);
+      final container = await harness.pumpManagement(
+        tester,
+        config: _config,
+        dio: dio,
+      );
+      expect(find.byKey(const Key('service-catalog-list')), findsNothing);
+      await harness.tapVisible(
+        tester,
+        find.byKey(const Key('service-fetch-catalog')),
+      );
       expect(find.text('312K · 128K'), findsOneWidget);
       expect(find.text('1M · 128K'), findsWidgets);
       expect(find.text('Claude Opus 5.5'), findsOneWidget);

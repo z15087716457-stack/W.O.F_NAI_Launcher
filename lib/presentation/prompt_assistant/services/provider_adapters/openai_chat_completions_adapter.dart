@@ -15,11 +15,6 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
     required ProviderConfig provider,
     required String? apiKey,
   }) async {
-    if (provider.preset == ProviderPreset.pollinations ||
-        provider.type == ProviderType.pollinations) {
-      return const ['openai-large'];
-    }
-
     final headers = <String, dynamic>{};
     if (apiKey != null && apiKey.trim().isNotEmpty) {
       headers['Authorization'] = 'Bearer ${apiKey.trim()}';
@@ -217,6 +212,10 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
   }
 
   String _resolveModelsEndpoint(ProviderConfig provider) {
+    if (provider.preset == ProviderPreset.pollinations ||
+        provider.type == ProviderType.pollinations) {
+      return 'https://gen.pollinations.ai/v1/models';
+    }
     final base = normalizedBaseUrl(provider.baseUrl);
     if (base.endsWith('/models')) {
       return base;

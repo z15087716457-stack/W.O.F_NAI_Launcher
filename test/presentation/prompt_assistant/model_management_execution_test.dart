@@ -79,6 +79,57 @@ Response<dynamic> _response({String text = 'OK', int status = 200}) =>
     );
 
 void main() {
+  test('empty services cannot dispatch a hidden preset model', () async {
+    final api = _CaptureApi();
+    final container = ProviderContainer(
+      overrides: [
+        localStorageServiceProvider.overrideWithValue(_Local()),
+        secureStorageServiceProvider.overrideWithValue(_Secrets()),
+        promptAssistantServiceProvider.overrideWith(
+          (ref) => PromptAssistantService(ref: ref, apiClient: api),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(promptAssistantConfigProvider.notifier);
+    final provider = ProviderPreset.mistral.createConfig();
+    await notifier.upsertProvider(provider);
+    final service = container.read(promptAssistantServiceProvider);
+    for (final models in [
+      <ModelConfig>[],
+      [
+        ModelConfig(
+          providerId: provider.id,
+          name: 'default-model',
+          displayName: 'Placeholder',
+        ),
+      ],
+    ]) {
+      await notifier.replaceProviderModels(provider.id, models);
+      expect(service.translateRouteFingerprint(), isEmpty);
+      expect(service.translateRouteLabel(), isEmpty);
+      await expectLater(
+        service.translateTags(['blue_eyes'], sessionId: 'empty'),
+        throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'message',
+            contains('选中一个模型'),
+          ),
+        ),
+      );
+      expect(api.requests, isEmpty);
+    }
+    await notifier.replaceProviderModels(provider.id, [
+      ModelConfig(
+        providerId: provider.id,
+        name: 'private-manual-model',
+        displayName: 'Manual',
+      ),
+    ]);
+    expect(service.translateRouteLabel(), contains('private-manual-model'));
+    expect(api.requests, isEmpty);
+  });
   test(
     'built-in rules remain canonical after injected configuration and cannot be saved, removed or imported',
     () async {

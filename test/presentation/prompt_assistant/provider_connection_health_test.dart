@@ -526,7 +526,7 @@ void main() {
   );
 
   test(
-    'catalog requests report real success but local Pollinations presets stay unverified',
+    'catalog requests including Pollinations use real responses without preset fallback',
     () async {
       final health = _health(_Memory());
       final client = _client(
@@ -552,17 +552,40 @@ void main() {
       );
       final local = _health(_Memory(), pollinations);
       final adapter = _OfflineAdapter(
-        (_, _) => throw StateError('unexpected network call'),
+        (_, _) => ResponseBody.fromString(
+          '{"data":[{"id":"returned-model"}]}',
+          200,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+          },
+        ),
       );
-      await _client(
+      final names = await _client(
         adapter,
         local,
       ).fetchModels(provider: pollinations, apiKey: null);
       expect(
         local.resultFor(pollinations.id).status,
-        ProviderConnectionStatus.unverified,
+        ProviderConnectionStatus.healthy,
       );
-      expect(adapter.requests, isEmpty);
+      expect(names, ['returned-model']);
+      expect(
+        adapter.requests.single.uri.toString(),
+        'https://gen.pollinations.ai/v1/models',
+      );
+      final empty = await _client(
+        _OfflineAdapter(
+          (_, _) => ResponseBody.fromString(
+            '{"data":[]}',
+            200,
+            headers: {
+              Headers.contentTypeHeader: ['application/json'],
+            },
+          ),
+        ),
+        local,
+      ).fetchModels(provider: pollinations, apiKey: null);
+      expect(empty, isEmpty);
     },
   );
 
