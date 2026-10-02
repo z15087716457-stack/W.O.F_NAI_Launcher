@@ -9,6 +9,8 @@ import 'model_management_widgets.dart';
 import 'model_reasoning_button.dart';
 import 'model_draft_save_controller.dart';
 
+typedef _ModelRoute = ({ProviderConfig provider, ModelConfig model});
+
 class ModelTaskEditor extends ConsumerStatefulWidget {
   const ModelTaskEditor({
     super.key,
@@ -120,6 +122,323 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
     }
   }
 
+  Widget _property({
+    required String label,
+    required Widget control,
+    List<Widget> actions = const [],
+    String? help,
+  }) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: 24 * MediaQuery.textScalerOf(context).scale(1),
+          ),
+          child: Wrap(
+            spacing: 16,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              ...actions,
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+        control,
+        if (help != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            help,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _propertyRow({
+    required Key key,
+    required Widget first,
+    required Widget second,
+    int firstFlex = 1,
+  }) => LayoutBuilder(
+    key: key,
+    builder: (context, constraints) {
+      final scale = MediaQuery.textScalerOf(context).scale(1);
+      if (constraints.maxWidth < 620 * scale) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [first, const SizedBox(height: 22), second],
+        );
+      }
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: firstFlex, child: first),
+          const SizedBox(width: 28),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.only(left: 28),
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outlineVariant.withValues(alpha: .5),
+                  ),
+                ),
+              ),
+              child: second,
+            ),
+          ),
+        ],
+      );
+    },
+  );
+
+  Widget _properties({
+    required PromptAssistantConfigState config,
+    required List<_ModelRoute> choices,
+    required _ModelRoute? selected,
+    required List<TaskPresetConfig> presets,
+    required TaskPresetConfig preset,
+    required bool usesInterfaceReasoning,
+  }) {
+    final theme = Theme.of(context), colors = theme.colorScheme;
+    final border = UnderlineInputBorder(
+      borderSide: BorderSide(
+        color: colors.outlineVariant.withValues(alpha: .7),
+      ),
+    );
+    final decoration = InputDecoration(
+      isDense: true,
+      filled: false,
+      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+      constraints: const BoxConstraints(minHeight: 42),
+      border: border,
+      enabledBorder: border,
+      disabledBorder: border,
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: colors.primary),
+      ),
+      errorBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: colors.error),
+      ),
+      focusedErrorBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: colors.error),
+      ),
+    );
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+      color: colors.onSurface,
+    );
+    final presetActions = [
+      TextButton(
+        key: const Key('task-preset-details'),
+        onPressed: () => widget.onEditPreset(preset.id),
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          minimumSize: const Size(0, 24),
+        ),
+        child: Text(preset.id.startsWith('builtin:') ? '查看内置规则' : '查看与编辑预设'),
+      ),
+      if (!preset.id.startsWith('builtin:'))
+        TextButton(
+          onPressed: _busy
+              ? null
+              : () => _edit(_slot.copyWith(presetId: widget.task.builtinId)),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+            minimumSize: const Size(0, 24),
+          ),
+          child: const Text('恢复内置预设'),
+        ),
+    ];
+    const languages = {
+      'auto': '跟随界面语言',
+      'zh': '简体中文',
+      'en': 'English',
+      'ja': '日本語',
+      'ko': '한국어',
+    };
+    final effectiveModel = selected == null
+        ? null
+        : effectiveTaskModel(
+            config.copyWith(
+              interfaces: {...config.interfaces, widget.task: _slot},
+            ),
+            widget.task,
+            selected.model,
+          );
+    return Column(
+      key: const Key('task-properties'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _propertyRow(
+          key: const Key('task-model-properties'),
+          firstFlex: 2,
+          first: _property(
+            label: '服务商与模型',
+            help: '仅列出启用服务中的已选模型',
+            control: DropdownButtonFormField<String>(
+              key: ValueKey(
+                'task-route-${widget.task.name}-${selected?.model.name}',
+              ),
+              initialValue: selected == null
+                  ? null
+                  : jsonEncode([selected.provider.id, selected.model.name]),
+              isExpanded: true,
+              decoration: decoration,
+              style: valueStyle,
+              hint: const Text('选择服务商与模型'),
+              items: [
+                for (final item in choices)
+                  DropdownMenuItem(
+                    value: jsonEncode([item.provider.id, item.model.name]),
+                    child: Text(
+                      '${item.provider.name} · ${item.model.displayName}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: _busy
+                  ? null
+                  : (value) {
+                      final route = (jsonDecode(value!) as List).cast<String>();
+                      _edit(
+                        _slot.copyWith(
+                          providerId: route[0],
+                          model: route[1],
+                          clearReasoningEffort: true,
+                        ),
+                      );
+                    },
+            ),
+          ),
+          second: _property(
+            label: '思考',
+            control: ModelReasoningButton(
+              model: selected?.model,
+              value: _slot.reasoningEffort,
+              enabled: !_busy,
+              onChanged: (value) => _edit(
+                _slot.copyWith(
+                  reasoningEffort: value,
+                  clearReasoningEffort: value == null,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 26),
+        const Divider(),
+        const SizedBox(height: 24),
+        _propertyRow(
+          key: const Key('task-output-properties'),
+          first: _property(
+            label: '使用预设',
+            actions: presetActions,
+            control: DropdownButtonFormField<String>(
+              key: ValueKey('task-preset-${preset.id}'),
+              initialValue: preset.id,
+              isExpanded: true,
+              decoration: decoration,
+              style: valueStyle,
+              items: [
+                for (final item in presets)
+                  DropdownMenuItem(
+                    value: item.id,
+                    child: Text(item.name, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: _busy
+                  ? null
+                  : (value) => _edit(_slot.copyWith(presetId: value)),
+            ),
+          ),
+          second: widget.task == LauncherInterface.promptReverse
+              ? _property(
+                  label: '输出语言',
+                  control: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Text('英文生成提示词', style: valueStyle),
+                  ),
+                  help: '结合原文落实修改，输出英文生成提示词。',
+                )
+              : _property(
+                  label: '目标语言',
+                  control: DropdownButtonFormField<String>(
+                    key: const Key('task-language'),
+                    initialValue: _slot.targetLanguage,
+                    isExpanded: true,
+                    decoration: decoration,
+                    style: valueStyle,
+                    items: [
+                      for (final entry in languages.entries)
+                        DropdownMenuItem(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        ),
+                    ],
+                    onChanged: _busy
+                        ? null
+                        : (value) =>
+                              _edit(_slot.copyWith(targetLanguage: value)),
+                  ),
+                ),
+        ),
+        const SizedBox(height: 26),
+        const Divider(),
+        const SizedBox(height: 14),
+        DefaultTextStyle(
+          style: theme.textTheme.bodySmall!.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+          child: Wrap(
+            key: const Key('task-effective-summary'),
+            spacing: 16,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                '当前生效',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                selected == null
+                    ? '尚未选择可用模型'
+                    : '${selected.provider.name} · ${selected.model.name}',
+              ),
+              if (effectiveModel != null)
+                Text(
+                  '思考：${reasoningEffortLabel(effectiveModel.reasoningEffort)}${usesInterfaceReasoning ? '（本接口）' : '（跟随模型）'}',
+                ),
+              Text(preset.name),
+              Text(
+                widget.task == LauncherInterface.promptReverse
+                    ? '英文生成提示词'
+                    : languages[_slot.targetLanguage] ?? '跟随界面语言',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(promptAssistantConfigProvider);
@@ -198,184 +517,15 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                     ),
                     const SizedBox(height: 16),
                   ],
-                  if (_tab == 0) ...[
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final picker = DropdownButtonFormField<String>(
-                          key: ValueKey(
-                            'task-route-${widget.task.name}-${selected?.model.name}',
-                          ),
-                          initialValue: selected == null
-                              ? null
-                              : jsonEncode([
-                                  selected.provider.id,
-                                  selected.model.name,
-                                ]),
-                          isExpanded: true,
-                          decoration: const InputDecoration(
-                            labelText: '服务商与模型',
-                            helperText: '仅列出启用服务中的已选模型',
-                          ),
-                          items: [
-                            for (final item in choices)
-                              DropdownMenuItem(
-                                value: jsonEncode([
-                                  item.provider.id,
-                                  item.model.name,
-                                ]),
-                                child: Text(
-                                  '${item.provider.name} · ${item.model.displayName}',
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                          ],
-                          onChanged: _busy
-                              ? null
-                              : (value) {
-                                  final route = (jsonDecode(value!) as List)
-                                      .cast<String>();
-                                  _edit(
-                                    _slot.copyWith(
-                                      providerId: route[0],
-                                      model: route[1],
-                                      clearReasoningEffort: true,
-                                    ),
-                                  );
-                                },
-                        );
-                        final reasoning = ModelReasoningButton(
-                          model: selected?.model,
-                          value: _slot.reasoningEffort,
-                          enabled: !_busy,
-                          onChanged: (value) => _edit(
-                            _slot.copyWith(
-                              reasoningEffort: value,
-                              clearReasoningEffort: value == null,
-                            ),
-                          ),
-                        );
-                        return constraints.maxWidth <
-                                520 * MediaQuery.textScalerOf(context).scale(1)
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  picker,
-                                  const SizedBox(height: 10),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: reasoning,
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(child: picker),
-                                  const SizedBox(width: 10),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 2),
-                                    child: reasoning,
-                                  ),
-                                ],
-                              );
-                      },
+                  if (_tab == 0)
+                    _properties(
+                      config: config,
+                      choices: choices,
+                      selected: selected,
+                      presets: presets,
+                      preset: preset,
+                      usesInterfaceReasoning: usesInterfaceReasoning,
                     ),
-                    const SizedBox(height: 24),
-                    DropdownButtonFormField<String>(
-                      key: ValueKey('task-preset-${preset.id}'),
-                      initialValue: preset.id,
-                      isExpanded: true,
-                      decoration: const InputDecoration(labelText: '使用预设'),
-                      items: [
-                        for (final item in presets)
-                          DropdownMenuItem(
-                            value: item.id,
-                            child: Text(
-                              item.name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                      ],
-                      onChanged: _busy
-                          ? null
-                          : (value) => _edit(_slot.copyWith(presetId: value)),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        TextButton.icon(
-                          onPressed: () => widget.onEditPreset(preset.id),
-                          icon: Icon(
-                            preset.id.startsWith('builtin:')
-                                ? Icons.lock_outline
-                                : Icons.edit_outlined,
-                            size: 16,
-                          ),
-                          label: Text(
-                            preset.id.startsWith('builtin:')
-                                ? '查看内置规则'
-                                : '查看与编辑预设',
-                          ),
-                        ),
-                        if (!preset.id.startsWith('builtin:'))
-                          TextButton(
-                            onPressed: () => _edit(
-                              _slot.copyWith(presetId: widget.task.builtinId),
-                            ),
-                            child: const Text('恢复内置预设'),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    if (widget.task != LauncherInterface.promptReverse)
-                      DropdownButtonFormField<String>(
-                        key: const Key('task-language'),
-                        initialValue: _slot.targetLanguage,
-                        decoration: const InputDecoration(labelText: '目标语言'),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'auto',
-                            child: Text('跟随界面语言'),
-                          ),
-                          DropdownMenuItem(value: 'zh', child: Text('简体中文')),
-                          DropdownMenuItem(value: 'en', child: Text('English')),
-                          DropdownMenuItem(value: 'ja', child: Text('日本語')),
-                          DropdownMenuItem(value: 'ko', child: Text('한국어')),
-                        ],
-                        onChanged: _busy
-                            ? null
-                            : (value) =>
-                                  _edit(_slot.copyWith(targetLanguage: value)),
-                      ),
-                    if (widget.task == LauncherInterface.promptReverse)
-                      Text(
-                        '结合原文落实修改，输出英文生成提示词。',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    const SizedBox(height: 28),
-                    Text('当前生效', style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 8),
-                    Text(
-                      selected == null
-                          ? '尚未选择可用模型'
-                          : '${selected.provider.name} · ${selected.model.name}',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 6),
-                    if (selected != null)
-                      Text(
-                        '思考：${reasoningEffortLabel(effectiveTaskModel(config.copyWith(interfaces: {...config.interfaces, widget.task: _slot}), widget.task, selected.model).reasoningEffort)}${usesInterfaceReasoning ? '（本接口）' : '（跟随模型）'}',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    const SizedBox(height: 6),
-                    Text(
-                      preset.name,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
                   if (_tab == 1) ...[
                     Row(
                       children: [

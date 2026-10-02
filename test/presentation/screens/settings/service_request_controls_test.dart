@@ -32,6 +32,20 @@ Future<void> _open(WidgetTester tester) async {
   }
 }
 
+void _expectAlignedStepper(WidgetTester tester, String name) {
+  final editable = find.descendant(
+    of: _field(name),
+    matching: find.byType(EditableText),
+  );
+  final painted = InputDecorator.containerOf(tester.element(editable))!;
+  final input = painted.localToGlobal(Offset.zero) & painted.size;
+  for (final part in ['decrease', 'increase', 'unit']) {
+    final bounds = tester.getRect(_button(name, part));
+    expect(bounds.height, closeTo(input.height, .01));
+    expect(bounds.center.dy, closeTo(input.center.dy, .01));
+  }
+}
+
 class _PausedSecrets extends harness.MemorySecrets {
   Completer<void>? pause;
   @override
@@ -60,6 +74,8 @@ void main() {
     await harness.capture(tester, 'request-controls-wide-default');
     expect(_text(tester, 'request-timeout'), '120');
     expect(_text(tester, 'max-concurrency'), '5');
+    _expectAlignedStepper(tester, 'request-timeout');
+    _expectAlignedStepper(tester, 'max-concurrency');
     await harness.tapVisible(tester, _button('request-timeout', 'increase'));
     expect(_text(tester, 'request-timeout'), '130');
     await harness.tapVisible(tester, _button('request-timeout', 'decrease'));
@@ -67,6 +83,20 @@ void main() {
     await harness.tapVisible(tester, _button('max-concurrency', 'increase'));
     expect(_text(tester, 'max-concurrency'), '6');
     await _type(tester, 'request-timeout', '175');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(
+              of: _field('request-timeout'),
+              matching: find.byType(EditableText),
+            ),
+          )
+          .focusNode
+          .hasFocus,
+      isFalse,
+    );
     await _type(tester, 'max-concurrency', '8');
     await harness.tapVisible(tester, _retry('2 次'));
     expect(
@@ -235,6 +265,7 @@ void main() {
           final input = tester.getRect(_field(name));
           final minus = tester.getRect(_button(name, 'decrease'));
           final plus = tester.getRect(_button(name, 'increase'));
+          _expectAlignedStepper(tester, name);
           expect(minus.left, greaterThanOrEqualTo(0));
           expect(minus.right, lessThan(input.left));
           expect(plus.left, greaterThan(input.right));

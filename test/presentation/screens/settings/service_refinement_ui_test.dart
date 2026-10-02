@@ -114,7 +114,7 @@ void main() {
   );
 
   testWidgets(
-    'thinking pill only offers declared levels and persists an explicit off',
+    'thinking control only offers declared levels and persists an explicit off',
     (tester) async {
       final container = await harness.pumpManagement(tester, config: _config);
       await harness.tapVisible(tester, find.text('功能接口').first);
@@ -125,7 +125,10 @@ void main() {
       await harness.capture(tester, 'refinement-thinking-menu');
       await tester.tap(find.byKey(const Key('task-reasoning-none')));
       await tester.pumpAndSettle();
-      expect(find.text('思考 · 关闭'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('task-reasoning-value'))).data,
+        '关闭',
+      );
       await harness.tapVisible(tester, find.byKey(const Key('task-save')));
       expect(
         container

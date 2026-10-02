@@ -17,20 +17,23 @@ class ModelReasoningButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context), colors = theme.colorScheme;
     final choices = model?.availableReasoningEfforts ?? const <String>[];
     final unsupported = model?.reasoningEfforts?.isEmpty == true;
     final selected = choices.contains(value) ? value : null;
     final label = unsupported
         ? '不支持'
         : selected == null
-        ? '跟随模型'
+        ? model?.reasoningEffort == null
+              ? '跟随模型'
+              : '跟随模型（${reasoningEffortLabel(model!.reasoningEffort)}）'
         : reasoningEffortLabel(selected);
+    final canChoose = enabled && model != null && !unsupported;
     return PopupMenuButton<String>(
       key: const Key('task-reasoning'),
       tooltip: unsupported ? '此模型不支持思考调节' : '思考强度',
       shadowColor: colors.shadow.withValues(alpha: .14),
-      enabled: enabled && model != null && !unsupported,
+      enabled: canChoose,
       position: PopupMenuPosition.under,
       onSelected: (v) => onChanged(v == 'inherit' ? null : v),
       itemBuilder: (context) => [
@@ -62,40 +65,37 @@ class ModelReasoningButton extends StatelessWidget {
       ],
       child: Semantics(
         button: true,
-        enabled: enabled && model != null && !unsupported,
+        enabled: canChoose,
         label: '思考强度：$label',
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+          constraints: const BoxConstraints(minHeight: 42),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: unsupported
-                ? colors.surfaceContainerLow
-                : colors.primary.withValues(alpha: .07),
-            border: Border.all(
-              color: unsupported
-                  ? colors.outlineVariant
-                  : colors.primary.withValues(alpha: .23),
+            border: Border(
+              bottom: BorderSide(
+                color: colors.outlineVariant.withValues(alpha: .7),
+              ),
             ),
-            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.psychology_outlined,
-                size: 17,
-                color: unsupported ? colors.onSurfaceVariant : colors.primary,
-              ),
-              const SizedBox(width: 7),
-              Text(
-                '思考 · $label',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: unsupported ? colors.onSurfaceVariant : colors.primary,
+              Expanded(
+                child: Text(
+                  label,
+                  key: const Key('task-reasoning-value'),
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: canChoose
+                        ? colors.onSurface
+                        : colors.onSurfaceVariant,
+                  ),
                 ),
               ),
-              if (!unsupported) ...[
-                const SizedBox(width: 7),
-                Icon(Icons.expand_more, size: 15, color: colors.primary),
-              ],
+              const SizedBox(width: 12),
+              Icon(Icons.expand_more, size: 18, color: colors.onSurfaceVariant),
             ],
           ),
         ),

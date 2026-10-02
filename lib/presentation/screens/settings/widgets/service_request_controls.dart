@@ -69,7 +69,7 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context), colors = theme.colorScheme;
     final scale = MediaQuery.textScalerOf(context).scale(1);
-    final height = 34 + (scale - 1).clamp(0.0, 10.0) * 18;
+    final height = 36 + (scale - 1).clamp(0.0, 10.0) * 18;
     final invalid =
         widget.value < widget.minimum || widget.value > widget.maximum;
     final border = OutlineInputBorder(
@@ -128,7 +128,7 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
     return Align(
       alignment: Alignment.centerRight,
       child: SizedBox(
-        width: 190 * scale,
+        width: 204 * scale,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -143,7 +143,11 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
                       key: Key(widget.fieldKey),
                       controller: _controller,
                       enabled: widget.enabled,
+                      expands: true,
+                      minLines: null,
+                      maxLines: null,
                       keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.done,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       textAlign: TextAlign.center,
                       textAlignVertical: TextAlignVertical.center,
@@ -151,12 +155,20 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
                         StudioTypography.data,
                       ),
                       decoration: InputDecoration(
+                        constraints: BoxConstraints.tightFor(height: height),
                         isDense: true,
+                        filled: true,
+                        fillColor: colors.onSurface.withValues(alpha: .025),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 4,
-                          vertical: 6,
+                          vertical: 0,
                         ),
                         border: border,
+                        disabledBorder: border.copyWith(
+                          borderSide: BorderSide(
+                            color: colors.outlineVariant.withValues(alpha: .5),
+                          ),
+                        ),
                         enabledBorder: invalid
                             ? border.copyWith(
                                 borderSide: BorderSide(color: colors.error),
@@ -176,7 +188,19 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
                 const SizedBox(width: 7),
                 button(1),
                 const SizedBox(width: 8),
-                Text(widget.unit, style: theme.textTheme.bodyMedium),
+                SizedBox(
+                  key: Key('${widget.fieldKey}-unit'),
+                  width: 20 * scale,
+                  height: height,
+                  child: Center(
+                    child: Text(
+                      widget.unit,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
             if (invalid)
