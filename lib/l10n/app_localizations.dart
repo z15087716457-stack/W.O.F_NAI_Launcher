@@ -9064,7 +9064,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_notificationSoundSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Play sound when generation completes'**
+  /// **'Play the completion sound only while the window is unfocused'**
   String get settings_notificationSoundSubtitle;
 
   /// No description provided for @settings_notificationCustomSound.

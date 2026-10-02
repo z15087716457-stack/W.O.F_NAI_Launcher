@@ -4862,7 +4862,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_notificationSound => '完成音效';
 
   @override
-  String get settings_notificationSoundSubtitle => '生成完成时播放提示音效';
+  String get settings_notificationSoundSubtitle => '仅在窗口失焦时播放生成完成音效';
 
   @override
   String get settings_notificationCustomSound => '自定义音效';

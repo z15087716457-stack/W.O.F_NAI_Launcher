@@ -12,12 +12,12 @@ class ModelPresetEditor extends ConsumerStatefulWidget {
     required this.preset,
     required this.onDirtyChanged,
     required this.onSaved,
-    required this.onClone,
+    required this.onCreate,
   });
   final TaskPresetConfig preset;
   final ValueChanged<bool> onDirtyChanged;
   final ValueChanged<String> onSaved;
-  final ValueChanged<TaskPresetConfig> onClone;
+  final ValueChanged<LauncherInterface> onCreate;
   @override
   ConsumerState<ModelPresetEditor> createState() => _ModelPresetEditorState();
 }
@@ -27,8 +27,10 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
   late final TextEditingController _name, _prompt;
   bool _busy = false;
   String? _message;
+  Offset? _creationPosition;
   late bool _newPreset;
   late String? _observedPreset;
+  late String? _observedInterfacePreset;
   int _tab = 0;
   bool get _builtin => widget.preset.id.startsWith('builtin:');
   @override
@@ -43,6 +45,10 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
             .presets
             .any((item) => item.id == widget.preset.id);
     _observedPreset = _newPreset ? null : widget.preset.toJson().toString();
+    _observedInterfacePreset = ref
+        .read(promptAssistantConfigProvider)
+        .interfaceFor(widget.preset.task)
+        .presetId;
   }
 
   @override
@@ -58,12 +64,16 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
     task: widget.preset.task,
     prompt: _prompt.text.trim(),
   );
-  void _changed(String _) => widget.onDirtyChanged(
-    !_builtin &&
-        (_newPreset ||
-            _name.text != widget.preset.name ||
-            _prompt.text != widget.preset.prompt),
-  );
+  void _changed(String _) {
+    setState(() {});
+    widget.onDirtyChanged(
+      !_builtin &&
+          (_newPreset ||
+              _name.text != widget.preset.name ||
+              _prompt.text != widget.preset.prompt),
+    );
+  }
+
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
     setState(() => _busy = true);
@@ -76,7 +86,17 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
       if (latest?.toJson().toString() != _observedPreset) {
         throw StateError('预设已在别处修改，请重新打开后编辑。');
       }
-      await ref.read(promptAssistantConfigProvider.notifier).savePreset(_draft);
+      if (_newPreset &&
+          ref
+                  .read(promptAssistantConfigProvider)
+                  .interfaceFor(widget.preset.task)
+                  .presetId !=
+              _observedInterfacePreset) {
+        throw StateError('接口使用的预设已在别处修改，请重新打开后新建。');
+      }
+      await ref
+          .read(promptAssistantConfigProvider.notifier)
+          .savePreset(_draft, applyToInterface: _newPreset);
       if (mounted) {
         widget.onDirtyChanged(false);
         widget.onSaved(widget.preset.id);
@@ -88,92 +108,6 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
     }
   }
 
-  Future<void> _compare() => showDialog<void>(
-    context: context,
-    builder: (context) => Dialog(
-      child: SizedBox(
-        width: 900,
-        height: MediaQuery.sizeOf(context).height * .75,
-        child: Column(
-          children: [
-            ManagementHeading(
-              '与内置方案对照',
-              actions: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  Widget text(String title, String body) =>
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            const SizedBox(height: 12),
-                            SelectableText(
-                              body,
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodySmall?.copyWith(height: 1.65),
-                            ),
-                          ],
-                        ),
-                      );
-                  return constraints.maxWidth > 600
-                      ? Row(
-                          children: [
-                            Expanded(
-                              child: text(
-                                'Studio 默认',
-                                widget.preset.task.builtinPrompt,
-                              ),
-                            ),
-                            const VerticalDivider(width: 1),
-                            Expanded(child: text('当前编辑', _prompt.text)),
-                          ],
-                        )
-                      : DefaultTabController(
-                          length: 2,
-                          child: Column(
-                            children: [
-                              const TabBar(
-                                tabs: [
-                                  Tab(text: 'Studio 默认'),
-                                  Tab(text: '当前编辑'),
-                                ],
-                              ),
-                              Expanded(
-                                child: TabBarView(
-                                  children: [
-                                    text(
-                                      'Studio 默认',
-                                      widget.preset.task.builtinPrompt,
-                                    ),
-                                    text('当前编辑', _prompt.text),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -183,37 +117,28 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ManagementHeading(
-            _builtin ? 'Studio 内置方案 · 只读' : '自定义预设',
-            description: widget.preset.task.title,
+            _builtin ? widget.preset.task.title : _name.text,
+            description: _builtin ? '内置 · 只读' : '用户',
             actions: [
-              TextButton.icon(
-                onPressed: _compare,
-                icon: Icon(
-                  _builtin ? Icons.lock_outline : Icons.compare_arrows,
-                  size: 16,
+              GestureDetector(
+                onTapDown: (details) =>
+                    _creationPosition = details.globalPosition,
+                child: FilledButton.icon(
+                  key: const Key('preset-create'),
+                  onPressed: _busy
+                      ? null
+                      : () async {
+                          final task = await showInterfacePresetMenu(
+                            context,
+                            globalPosition: _creationPosition,
+                          );
+                          _creationPosition = null;
+                          if (mounted && task != null) widget.onCreate(task);
+                        },
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('新建接口预设'),
                 ),
-                label: const Text('对照默认'),
               ),
-              if (_builtin)
-                FilledButton.icon(
-                  key: const Key('preset-clone'),
-                  onPressed: () => widget.onClone(
-                    TaskPresetConfig(
-                      id: 'preset-${DateTime.now().microsecondsSinceEpoch}',
-                      name: '${widget.preset.task.title} · 自定义',
-                      task: widget.preset.task,
-                      prompt: widget.preset.prompt,
-                    ),
-                  ),
-                  icon: const Icon(Icons.copy_outlined, size: 16),
-                  label: const Text('复制并编辑'),
-                )
-              else
-                FilledButton(
-                  key: const Key('preset-save'),
-                  onPressed: _busy ? null : _save,
-                  child: const Text('保存'),
-                ),
             ],
           ),
           ManagementTabs(
@@ -250,7 +175,7 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                     const SizedBox(height: 8),
                     Text(
                       _builtin
-                          ? '内置规则已锁定，始终保留默认内容。复制为自定义后可编辑。'
+                          ? '内置规则已锁定。新建接口预设后可编辑自己的翻译偏好。'
                           : '此处修改翻译偏好；返回格式由应用单独维护。',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -299,6 +224,17 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                         widget.preset.task,
                       ),
                       style: theme.textTheme.bodySmall?.copyWith(height: 1.65),
+                    ),
+                  ],
+                  if (!_builtin) ...[
+                    const SizedBox(height: 22),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton(
+                        key: const Key('preset-save'),
+                        onPressed: _busy ? null : _save,
+                        child: const Text('保存预设'),
+                      ),
                     ),
                   ],
                 ],

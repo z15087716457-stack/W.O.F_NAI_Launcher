@@ -314,7 +314,7 @@ extension ProviderPresetDefaults on ProviderPreset {
     ProviderPreset.moonshot => '默认国内平台；国际平台请使用对应区域的 Key 和接口地址。',
     ProviderPreset.zhipu => '默认按量接口；Coding Plan 请使用套餐专用地址。',
     ProviderPreset.doubao => '使用方舟 API Key；需先开通模型，也可添加推理接入点 ID。',
-    ProviderPreset.openaiCompatibleChat => '填写兼容服务的地址与 Key，接口协议可在高级设置中选择。',
+    ProviderPreset.openaiCompatibleChat => '填写兼容服务的地址与 Key，并在连接信息中选择接口协议。',
     ProviderPreset.lmStudioChat ||
     ProviderPreset.ollama => '先启动本地服务，再读取已加载的模型目录。',
     _ => '地址与协议已预填；保存 Key 后即可选择模型使用。',
@@ -547,6 +547,10 @@ class ModelConfig {
 
   /// Optional request control. Availability depends on the actual model.
   final String? reasoningEffort;
+
+  /// Provider-owned, user-confirmed reasoning capability. Null is unknown;
+  /// an empty list explicitly means this model has no adjustable reasoning.
+  final List<String>? reasoningEfforts;
   final double? temperature;
   final double? topP;
 
@@ -567,6 +571,7 @@ class ModelConfig {
     this.contextWindow,
     this.maxOutputTokens,
     this.reasoningEffort,
+    this.reasoningEfforts,
     this.temperature,
     this.topP,
     this.supportsVision,
@@ -576,6 +581,10 @@ class ModelConfig {
 
   bool get isPlaceholder =>
       name.trim().isEmpty || name.trim() == 'default-model';
+
+  List<String> get availableReasoningEfforts => List.unmodifiable(
+    reasoningEfforts ?? [if (reasoningEffort != null) reasoningEffort!],
+  );
 
   ModelConfig copyWith({
     String? providerId,
@@ -587,6 +596,8 @@ class ModelConfig {
     int? maxOutputTokens,
     String? reasoningEffort,
     bool clearReasoningEffort = false,
+    List<String>? reasoningEfforts,
+    bool clearReasoningEfforts = false,
     double? temperature,
     double? topP,
     bool clearTemperature = false,
@@ -615,6 +626,9 @@ class ModelConfig {
       reasoningEffort: clearReasoningEffort
           ? null
           : reasoningEffort ?? this.reasoningEffort,
+      reasoningEfforts: clearReasoningEfforts
+          ? null
+          : reasoningEfforts ?? this.reasoningEfforts,
       temperature: clearTemperature ? null : temperature ?? this.temperature,
       topP: clearTopP ? null : topP ?? this.topP,
       supportsVision: clearSupportsVision
@@ -638,6 +652,7 @@ class ModelConfig {
     if (contextWindow != null) 'contextWindow': contextWindow,
     if (maxOutputTokens != null) 'maxOutputTokens': maxOutputTokens,
     if (reasoningEffort != null) 'reasoningEffort': reasoningEffort,
+    if (reasoningEfforts != null) 'reasoningEfforts': reasoningEfforts,
     if (temperature != null) 'temperature': temperature,
     if (topP != null) 'topP': topP,
     if (supportsVision != null) 'supportsVision': supportsVision,
@@ -655,6 +670,11 @@ class ModelConfig {
       contextWindow: (json['contextWindow'] as num?)?.toInt(),
       maxOutputTokens: (json['maxOutputTokens'] as num?)?.toInt(),
       reasoningEffort: json['reasoningEffort'] as String?,
+      reasoningEfforts: json['reasoningEfforts'] is List
+          ? List<String>.unmodifiable(
+              (json['reasoningEfforts'] as List).whereType<String>().toSet(),
+            )
+          : null,
       temperature: (json['temperature'] as num?)?.toDouble(),
       topP: (json['topP'] as num?)?.toDouble(),
       supportsVision: json['supportsVision'] as bool?,
@@ -700,11 +720,15 @@ class InterfaceSlotConfig {
   final String? presetId;
   final String targetLanguage;
 
+  /// Null follows the model's default; this is the sole task-level parameter.
+  final String? reasoningEffort;
+
   const InterfaceSlotConfig({
     this.providerId = '',
     this.model = '',
     this.presetId,
     this.targetLanguage = 'auto',
+    this.reasoningEffort,
   });
 
   bool get isConfigured => providerId.trim().isNotEmpty;
@@ -714,12 +738,17 @@ class InterfaceSlotConfig {
     String? model,
     String? presetId,
     String? targetLanguage,
+    String? reasoningEffort,
+    bool clearReasoningEffort = false,
   }) {
     return InterfaceSlotConfig(
       providerId: providerId ?? this.providerId,
       model: model ?? this.model,
       presetId: presetId ?? this.presetId,
       targetLanguage: targetLanguage ?? this.targetLanguage,
+      reasoningEffort: clearReasoningEffort
+          ? null
+          : reasoningEffort ?? this.reasoningEffort,
     );
   }
 
@@ -728,6 +757,7 @@ class InterfaceSlotConfig {
     'model': model,
     if (presetId != null) 'presetId': presetId,
     'targetLanguage': targetLanguage,
+    if (reasoningEffort != null) 'reasoningEffort': reasoningEffort,
   };
 
   factory InterfaceSlotConfig.fromJson(Map<String, dynamic> json) {
@@ -735,6 +765,7 @@ class InterfaceSlotConfig {
       providerId: (json['providerId'] as String? ?? '').trim(),
       model: (json['model'] as String? ?? '').trim(),
       presetId: json['presetId'] as String?,
+      reasoningEffort: json['reasoningEffort'] as String?,
       targetLanguage:
           const [
             'auto',
@@ -918,7 +949,7 @@ class PromptAssistantConfigState {
   }
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': 4,
+    'schemaVersion': 5,
     'presets': presets.map((e) => e.toJson()).toList(),
     'providers': providers.map((e) => e.toJson()).toList(),
     'models': models.map((e) => e.toJson()).toList(),

@@ -345,6 +345,10 @@ class PromptAssistantConfigNotifier
       final model = state.models.firstWhere(
         (item) => item.providerId == provider.id && item.name == slot.model,
       );
+      if (slot.reasoningEffort != null &&
+          !model.availableReasoningEfforts.contains(slot.reasoningEffort)) {
+        throw StateError('模型支持的思考档位已变化，请重新选择或跟随模型。');
+      }
       final error = RequestParameters.fromModel(
         model,
       ).validateFor(provider.protocol);
@@ -354,13 +358,24 @@ class PromptAssistantConfigNotifier
     await _save();
   }
 
-  Future<void> savePreset(TaskPresetConfig preset) async {
+  Future<void> savePreset(
+    TaskPresetConfig preset, {
+    bool applyToInterface = false,
+  }) async {
     if (preset.id.trim().isEmpty) throw const FormatException('预设 ID 不能为空。');
     if (preset.id.startsWith('builtin:')) throw StateError('请将内置方案另存为自定义预设。');
     if (preset.name.trim().isEmpty || preset.prompt.trim().isEmpty) {
       throw const FormatException('名称和提示词不能为空。');
     }
     state = state.copyWith(
+      interfaces: applyToInterface
+          ? {
+              ...state.interfaces,
+              preset.task: state
+                  .interfaceFor(preset.task)
+                  .copyWith(presetId: preset.id),
+            }
+          : state.interfaces,
       presets: [
         for (final item in state.presets)
           if (item.id != preset.id) item,

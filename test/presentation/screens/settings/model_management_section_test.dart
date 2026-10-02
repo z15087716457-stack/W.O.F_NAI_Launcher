@@ -142,13 +142,14 @@ Future<ProviderContainer> pumpManagement(
   Size size = const Size(1200, 820),
   double scale = 1,
   MemorySecrets? secrets,
+  PromptAssistantConfigState config = sampleConfig,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   final storage = MemorySettings()
-    ..values[StorageKeys.promptAssistantConfigJson] = sampleConfig.encode()
+    ..values[StorageKeys.promptAssistantConfigJson] = config.encode()
     ..values[StorageKeys.settingsFontScale] = scale;
   await tester.pumpWidget(
     ProviderScope(
@@ -248,7 +249,7 @@ void main() {
     final container = await pumpManagement(tester);
     await tapVisible(
       tester,
-      find.widgetWithText(CheckboxListTile, 'deepseek-flash'),
+      find.byKey(const Key('catalog-model-deepseek-flash')),
     );
     await tapVisible(tester, find.byKey(const Key('service-save')));
     final selected = container
@@ -346,7 +347,14 @@ void main() {
       await tester.tap(find.text('预设与提示词').first);
       await tester.pumpAndSettle();
       await capture(tester, 'preset');
-      await tester.tap(find.byKey(const Key('preset-clone')));
+      await tester.tap(find.byKey(const Key('preset-create')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.widgetWithText(
+          PopupMenuItem<LauncherInterface>,
+          LauncherInterface.translate.title,
+        ),
+      );
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(const Key('preset-name')), '我的翻译规则');
       await tester.tap(find.byKey(const Key('preset-save')));

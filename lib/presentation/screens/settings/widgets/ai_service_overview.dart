@@ -245,6 +245,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                   selectable: true,
                 );
                 final key = value('API 密钥', keyStatus);
+                final protocol = value('接口协议', _protocol.label);
                 final edit = TextButton.icon(
                   key: const Key('service-edit-connection'),
                   onPressed: _busy
@@ -260,11 +261,14 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                   ),
                   label: Text(_editingConnection ? '收起' : '编辑'),
                 );
-                return constraints.maxWidth < 480
+                return constraints.maxWidth <
+                        640 * MediaQuery.textScalerOf(context).scale(1)
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           address,
+                          const SizedBox(height: 12),
+                          protocol,
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -276,7 +280,9 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                       )
                     : Row(
                         children: [
-                          Expanded(child: address),
+                          Expanded(flex: 4, child: address),
+                          const SizedBox(width: 20),
+                          Expanded(flex: 3, child: protocol),
                           const SizedBox(width: 20),
                           SizedBox(width: 104, child: key),
                           const SizedBox(width: 12),
@@ -494,6 +500,54 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
     );
   }
 
+  Widget _requestControlRow(
+    BuildContext context,
+    String title,
+    String description,
+    Widget control,
+  ) {
+    final theme = Theme.of(context);
+    final label = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: theme.textTheme.bodyMedium),
+        const SizedBox(height: 3),
+        Text(
+          description,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 13),
+      child: LayoutBuilder(
+        builder: (context, constraints) =>
+            constraints.maxWidth <
+                340 * MediaQuery.textScalerOf(context).scale(1)
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  label,
+                  const SizedBox(height: 9),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: SizedBox(width: 145, child: control),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(child: label),
+                  const SizedBox(width: 20),
+                  SizedBox(width: 145, child: control),
+                ],
+              ),
+      ),
+    );
+  }
+
   Widget _advancedOverview(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
@@ -523,88 +577,66 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
         ),
       ),
       if (_advancedExpanded) ...[
-        const SizedBox(height: 8),
-        DropdownButtonFormField<ProviderProtocol>(
-          key: ValueKey('service-protocol-${_protocol.name}'),
-          initialValue: _protocol,
-          isExpanded: true,
-          decoration: const InputDecoration(labelText: '接口协议'),
-          items: [
-            for (final item in ProviderProtocol.values)
-              DropdownMenuItem(value: item, child: Text(item.label)),
-          ],
-          onChanged: _busy
-              ? null
-              : (value) {
-                  if (value != null) _updateOverview(() => _setProtocol(value));
-                },
-        ),
-        const SizedBox(height: 16),
-
-        const SizedBox(height: 8),
-        TextFormField(
-          key: const Key('service-request-timeout'),
-          initialValue: '$_timeoutSeconds',
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: '请求超时（秒）',
-            helperText: '10–600 秒',
-            isDense: true,
-          ),
-          onChanged: (value) => _updateOverview(
-            () => _timeoutSeconds = int.tryParse(value) ?? -1,
+        _requestControlRow(
+          context,
+          '请求超时',
+          '单次请求最长等待时间',
+          TextFormField(
+            key: const Key('service-request-timeout'),
+            initialValue: '$_timeoutSeconds',
+            enabled: !_busy,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              isDense: true,
+              suffixText: '秒',
+              errorText: _timeoutSeconds < 10 || _timeoutSeconds > 600
+                  ? '10–600 秒'
+                  : null,
+            ),
+            onChanged: (value) => _updateOverview(
+              () => _timeoutSeconds = int.tryParse(value) ?? -1,
+            ),
           ),
         ),
-        const SizedBox(height: 18),
-        DropdownButtonFormField<int>(
-          initialValue: _maxConcurrentRequests,
-          decoration: const InputDecoration(
-            labelText: '此服务最大并发请求',
-            isDense: true,
+        const Divider(height: 1),
+        _requestControlRow(
+          context,
+          '最大并发数量',
+          '此服务同时处理的请求数',
+          DropdownButtonFormField<int>(
+            key: const Key('service-max-concurrency'),
+            initialValue: _maxConcurrentRequests,
+            isExpanded: true,
+            decoration: const InputDecoration(isDense: true),
+            items: [
+              for (var i = 1; i <= 20; i++)
+                DropdownMenuItem(value: i, child: Text('$i 个')),
+            ],
+            onChanged: _busy
+                ? null
+                : (value) =>
+                      _updateOverview(() => _maxConcurrentRequests = value!),
           ),
-          items: [
-            for (var i = 1; i <= 20; i++)
-              DropdownMenuItem(value: i, child: Text('$i 个')),
-          ],
-          onChanged: (value) =>
-              _updateOverview(() => _maxConcurrentRequests = value!),
         ),
-        const SizedBox(height: 18),
-        DropdownButtonFormField<int>(
-          initialValue: _retryAttempts,
-          decoration: const InputDecoration(
-            labelText: '失败重试',
-            helperText: '连接失败或服务繁忙时重试；默认关闭。',
-            isDense: true,
+        const Divider(height: 1),
+        _requestControlRow(
+          context,
+          '失败重试',
+          '连接失败或服务繁忙时重试',
+          DropdownButtonFormField<int>(
+            key: const Key('service-retry-attempts'),
+            initialValue: _retryAttempts,
+            isExpanded: true,
+            decoration: const InputDecoration(isDense: true),
+            items: [
+              for (var i = 0; i <= 3; i++)
+                DropdownMenuItem(value: i, child: Text(i == 0 ? '关闭' : '$i 次')),
+            ],
+            onChanged: _busy
+                ? null
+                : (value) => _updateOverview(() => _retryAttempts = value!),
           ),
-          items: [
-            for (var i = 0; i <= 3; i++)
-              DropdownMenuItem(
-                value: i,
-                child: Text(i == 0 ? '不自动重试' : '$i 次'),
-              ),
-          ],
-          onChanged: (value) => _updateOverview(() => _retryAttempts = value!),
         ),
-        const SizedBox(height: 16),
-        SettingsSwitchTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('允许图片输入'),
-          value: _allowImageInput,
-          onChanged: _protocol.supportsImagePayload && !_busy
-              ? (value) => _updateOverview(() => _allowImageInput = value)
-              : null,
-        ),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('自定义请求头'),
-          subtitle: Text('已设置 ${_headers.length} 项 · 安全存储'),
-          trailing: const Icon(Icons.chevron_right, size: 18),
-          onTap: _busy || !_headersLoaded || _headersLoadFailed
-              ? null
-              : _showAdvanced,
-        ),
-        const SizedBox(height: 16),
       ],
       const Divider(height: 1),
     ],

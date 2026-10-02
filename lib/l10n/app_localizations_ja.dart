@@ -4925,7 +4925,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_notificationSound => '完了音';
 
   @override
-  String get settings_notificationSoundSubtitle => '生成完了時にサウンドを再生する';
+  String get settings_notificationSoundSubtitle =>
+      'ウィンドウが非アクティブのときだけ生成完了音を再生する';
 
   @override
   String get settings_notificationCustomSound => 'カスタムサウンド';

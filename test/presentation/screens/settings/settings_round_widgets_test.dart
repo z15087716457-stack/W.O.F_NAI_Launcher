@@ -161,7 +161,10 @@ void main() {
     await snap(tester, 'providers');
     await tester.enterText(find.byKey(const Key('provider-search')), 'OpenAI');
     await tester.pumpAndSettle();
-    expect(find.byType(ListTile), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('choose-provider-openaiResponses')),
+      findsOneWidget,
+    );
     expect(find.text('OpenAI Responses'), findsNothing);
     await tester.tap(
       find.byKey(const ValueKey('choose-provider-openaiResponses')),

@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:window_manager/window_manager.dart';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/constants/storage_keys.dart';
@@ -15,6 +19,25 @@ final notificationSoundPreviewProvider =
           (path) =>
               NotificationService.instance.playSound(customSoundPath: path),
     );
+
+final completionWindowIsFocusedProvider = Provider<Future<bool> Function()>(
+  (ref) => () async {
+    if (!kIsWeb &&
+        const [
+          TargetPlatform.windows,
+          TargetPlatform.linux,
+          TargetPlatform.macOS,
+        ].contains(defaultTargetPlatform)) {
+      try {
+        return await windowManager.isFocused();
+      } catch (_) {
+        // An unavailable focus query must not create an unexpected sound.
+        return true;
+      }
+    }
+    return WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+  },
+);
 
 /// 音效设置状态
 class NotificationSettings {
@@ -82,8 +105,11 @@ class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
 /// （原由 QueueExecutionNotifier 托管，队列功能移除后独立常驻）
 @Riverpod(keepAlive: true)
 class GenerationCompletionWatcher extends _$GenerationCompletionWatcher {
+  bool _disposed = false;
   @override
   void build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     ref.listen<ImageGenerationState>(imageGenerationNotifierProvider, (
       previous,
       next,
@@ -95,15 +121,15 @@ class GenerationCompletionWatcher extends _$GenerationCompletionWatcher {
     });
   }
 
-  void _notifyGenerationComplete() {
+  Future<void> _notifyGenerationComplete() async {
     final settings = ref.read(notificationSettingsNotifierProvider);
     if (!settings.soundEnabled) return;
 
-    Future.microtask(() async {
-      await NotificationService.instance.notifyGenerationComplete(
-        playSound: settings.soundEnabled,
-        customSoundPath: settings.customSoundPath,
-      );
-    });
+    if (await ref.read(completionWindowIsFocusedProvider)() || _disposed) {
+      return;
+    }
+    final latest = ref.read(notificationSettingsNotifierProvider);
+    if (!latest.soundEnabled) return;
+    await ref.read(notificationSoundPreviewProvider)(latest.customSoundPath);
   }
 }

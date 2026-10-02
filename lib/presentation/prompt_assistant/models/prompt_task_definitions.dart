@@ -26,7 +26,7 @@ extension PromptTaskDefinition on LauncherInterface {
   };
   TaskPresetConfig get builtinPreset => TaskPresetConfig(
     id: builtinId,
-    name: 'Studio 默认 · $title',
+    name: title,
     task: this,
     prompt: builtinPrompt,
   );
@@ -48,4 +48,22 @@ ModelConfig effectiveTaskModel(
   PromptAssistantConfigState config,
   LauncherInterface task,
   ModelConfig model,
-) => model;
+) {
+  final effort = config.interfaceFor(task).reasoningEffort;
+  return effort != null && model.availableReasoningEfforts.contains(effort)
+      ? model.copyWith(reasoningEffort: effort)
+      : model;
+}
+
+String reasoningEffortLabel(String? value) => switch (value) {
+  null => '服务默认',
+  'none' || 'off' => '关闭',
+  'on' => '开启',
+  'minimal' => '极低',
+  'low' => '低',
+  'medium' => '中',
+  'high' => '高',
+  'xhigh' => '极高',
+  'max' => '最高',
+  _ => value,
+};

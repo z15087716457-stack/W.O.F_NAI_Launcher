@@ -1,10 +1,10 @@
 import 'settings_tile.dart';
 import 'dart:collection';
+import '../../../themes/studio_typography.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'provider_logo.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
@@ -61,6 +61,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   late final LinkedHashMap<String, ModelConfig> _selected;
   Map<String, String> _headers = {};
   List<String> _catalog = [];
+  final _catalogDetails = <String, ModelConfig>{};
   bool _catalogFromApi = false;
   String? _expandedModel;
   String? _error;
@@ -135,7 +136,8 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
             ModelConfig(providerId: 'draft', name: name, displayName: name),
           ),
     ]);
-    _catalog = List.of(_preset.defaultModelNames);
+    _catalogDetails.addAll(_selected);
+    _catalog = {..._preset.defaultModelNames, ..._selected.keys}.toList();
     _initialDraft = _fingerprint;
     _observedService = _serviceSnapshot();
     for (final controller in [_name, _baseUrl, _apiKey]) {
@@ -391,6 +393,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         _clearKey = false;
         _headers = {};
         _selected.clear();
+        _catalogDetails.clear();
         _modelInputErrors.clear();
         _expandedModel = null;
       }
@@ -422,10 +425,17 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
 
   void _setProtocol(ProviderProtocol protocol) {
     _protocol = protocol;
-    for (final entry in _selected.entries.toList()) {
-      final effort = entry.value.reasoningEffort;
-      if (effort != null && !reasoningChoices(protocol).contains(effort)) {
-        _selected[entry.key] = entry.value.copyWith(clearReasoningEffort: true);
+    final allowed = reasoningChoices(protocol);
+    for (final models in [_selected, _catalogDetails]) {
+      for (final entry in models.entries.toList()) {
+        models[entry.key] = entry.value.copyWith(
+          reasoningEfforts: entry.value.reasoningEfforts
+              ?.where(allowed.contains)
+              .toList(),
+          clearReasoningEffort:
+              entry.value.reasoningEffort != null &&
+              !allowed.contains(entry.value.reasoningEffort),
+        );
       }
     }
   }
@@ -435,12 +445,14 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       if (selected) {
         _selected.putIfAbsent(
           name,
-          () => ModelConfig(
-            providerId: widget.provider?.id ?? 'draft',
-            name: name,
-            displayName: name,
-            source: _catalogFromApi ? ModelSource.api : ModelSource.manual,
-          ),
+          () =>
+              _catalogDetails[name] ??
+              ModelConfig(
+                providerId: widget.provider?.id ?? 'draft',
+                name: name,
+                displayName: name,
+                source: _catalogFromApi ? ModelSource.api : ModelSource.manual,
+              ),
         );
       } else {
         _selected.remove(name);
@@ -469,25 +481,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     });
   }
 
-  Future<void> _showAdvanced() async {
-    final result = await showDialog<_AdvancedResult>(
-      context: context,
-      builder: (_) => _AdvancedSettingsDialog(
-        headers: _headers,
-        timeoutSeconds: _timeoutSeconds,
-        allowImageInput: _allowImageInput,
-        imageSupported: _protocol.supportsImagePayload,
-      ),
-    );
-    if (result != null) {
-      setState(() {
-        _headers = result.headers;
-        _timeoutSeconds = result.timeoutSeconds;
-        _allowImageInput = result.allowImageInput;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.embedded) return _buildEmbedded(context);
@@ -513,7 +506,11 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
                     ),
                   ),
                   TextButton(
-                    onPressed: _busy ? null : _showAdvanced,
+                    onPressed: _busy
+                        ? null
+                        : () => _updateOverview(
+                            () => _advancedExpanded = !_advancedExpanded,
+                          ),
                     child: const Text('高级设置'),
                   ),
                   if (width > 950) ...[
@@ -567,6 +564,8 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _connectionFields(),
+                    const SizedBox(height: 18),
+                    _advancedOverview(context),
                     if (_error != null) ...[
                       const SizedBox(height: 8),
                       Text(
@@ -717,6 +716,22 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
             return key;
           },
         ),
+        const SizedBox(height: 10),
+        DropdownButtonFormField<ProviderProtocol>(
+          key: ValueKey('service-protocol-${_protocol.name}'),
+          initialValue: _protocol,
+          isExpanded: true,
+          decoration: const InputDecoration(labelText: '接口协议', isDense: true),
+          items: [
+            for (final protocol in ProviderProtocol.values)
+              DropdownMenuItem(value: protocol, child: Text(protocol.label)),
+          ],
+          onChanged: _busy
+              ? null
+              : (value) {
+                  if (value != null) _updateOverview(() => _setProtocol(value));
+                },
+        ),
         if (widget.provider != null)
           CheckboxListTile(
             dense: true,
@@ -730,11 +745,84 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   }
 
   Widget _availablePanel() {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context), colors = theme.colorScheme;
     final query = _catalogSearch.text.trim().toLowerCase();
-    final filtered = query.isEmpty
-        ? _catalog
-        : _catalog.where((id) => id.toLowerCase().contains(query)).toList();
+    final filtered = _catalog
+        .where(
+          (id) => '$id ${_catalogDetails[id]?.displayName ?? ''}'
+              .toLowerCase()
+              .contains(query),
+        )
+        .toList();
+    final selectedCount = filtered.where(_selected.containsKey).length;
+    final bool? allSelected = selectedCount == 0
+        ? false
+        : selectedCount == filtered.length
+        ? true
+        : null;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final search = TextField(
+      key: const Key('service-catalog-search'),
+      controller: _catalogSearch,
+      style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+      decoration: const InputDecoration(
+        prefixIcon: Icon(Icons.search, size: 14),
+        hintText: '搜索模型 ID…',
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        prefixIconConstraints: BoxConstraints(minWidth: 28, minHeight: 28),
+      ),
+    );
+    final controls = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 20,
+          height: 28 * scale,
+          child: Checkbox(
+            key: const Key('service-catalog-select-all'),
+            value: allSelected,
+            tristate: true,
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onChanged: _busy || filtered.isEmpty
+                ? null
+                : (_) {
+                    final select = allSelected != true;
+                    for (final id in filtered) {
+                      _toggleModel(id, select);
+                    }
+                  },
+          ),
+        ),
+        const SizedBox(width: 7),
+        Text(
+          '该服务的模型',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: colors.onSurface,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(width: 7),
+        TextButton.icon(
+          key: const Key('service-fetch-catalog'),
+          onPressed: _busy ? null : _fetchCatalog,
+          style: TextButton.styleFrom(
+            foregroundColor: colors.onSurfaceVariant,
+            backgroundColor: colors.surfaceContainerHighest.withValues(
+              alpha: .45,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+            minimumSize: const Size(0, 28),
+            visualDensity: VisualDensity.compact,
+            textStyle: theme.textTheme.labelSmall,
+          ),
+          icon: const Icon(Icons.refresh, size: 13),
+          label: const Text('获取列表'),
+        ),
+      ],
+    );
     return Material(
       color: colors.surfaceContainerLow,
       borderRadius: BorderRadius.circular(10),
@@ -743,60 +831,158 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Text(
-                  _catalogFromApi ? '服务模型目录' : '预置模型',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const Spacer(),
-                Text(
-                  '${_catalog.length}',
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-                IconButton(
-                  tooltip: '刷新目录',
-                  onPressed: _busy ? null : _fetchCatalog,
-                  icon: const Icon(Icons.refresh, size: 18),
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) =>
+                  constraints.maxWidth < 350 * scale
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [controls, const SizedBox(height: 7), search],
+                    )
+                  : Row(
+                      children: [
+                        controls,
+                        const SizedBox(width: 12),
+                        Expanded(child: search),
+                      ],
+                    ),
             ),
-            TextField(
-              controller: _catalogSearch,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search, size: 18),
-                hintText: '搜索模型 ID',
-                isDense: true,
-              ),
-            ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 7),
             Expanded(
               child: filtered.isEmpty
                   ? Center(
                       child: Text(
-                        _catalog.isEmpty ? '点击刷新获取目录，也可手动添加模型 ID。' : '没有匹配的模型',
+                        _catalog.isEmpty ? '获取模型列表，或在右侧手动添加模型 ID。' : '没有匹配的模型',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: colors.onSurfaceVariant),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
                       ),
                     )
                   : ListView.builder(
+                      key: const Key('service-catalog-list'),
                       itemCount: filtered.length,
-                      itemExtent: 42,
+                      itemExtent: 30 * scale,
                       itemBuilder: (context, index) {
-                        final id = filtered[index];
-                        return CheckboxListTile(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          controlAffinity: ListTileControlAffinity.leading,
-                          title: Text(
-                            id,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        final id = filtered[index],
+                            selected = _selected.containsKey(id),
+                            metadata = _catalogDetails[id];
+                        final alias = metadata?.displayName ?? id;
+                        final capacity =
+                            metadata?.contextWindow != null ||
+                            metadata?.maxOutputTokens != null;
+                        String tokens(int? n) => n == null
+                            ? '—'
+                            : n >= 1000000
+                            ? '${(n / 1000000).toStringAsFixed(n % 1000000 == 0 ? 0 : 1)}M'
+                            : n >= 1000
+                            ? '${(n / 1000).toStringAsFixed(n % 1000 == 0 ? 0 : 1)}K'
+                            : '$n';
+                        return Semantics(
+                          selected: selected,
+                          child: Material(
+                            color: selected
+                                ? colors.primary.withValues(alpha: .065)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(5),
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              key: ValueKey('catalog-model-$id'),
+                              onTap: _busy
+                                  ? null
+                                  : () => _toggleModel(id, !selected),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                ),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 20,
+                                      child: Checkbox(
+                                        value: selected,
+                                        onChanged: _busy
+                                            ? null
+                                            : (value) => _toggleModel(
+                                                id,
+                                                value ?? false,
+                                              ),
+                                        visualDensity: VisualDensity.compact,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 9),
+                                    Expanded(
+                                      child: Tooltip(
+                                        message: alias == id
+                                            ? id
+                                            : '$id · $alias',
+                                        child: Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                id,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: theme.textTheme.bodySmall
+                                                    ?.copyWith(
+                                                      fontFamily:
+                                                          StudioTypography.mono,
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                              ),
+                                            ),
+                                            if (alias != id &&
+                                                alias.isNotEmpty) ...[
+                                              const SizedBox(width: 8),
+                                              Flexible(
+                                                child: Text(
+                                                  alias,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: theme
+                                                      .textTheme
+                                                      .labelSmall
+                                                      ?.copyWith(
+                                                        color: colors
+                                                            .onSurfaceVariant,
+                                                        fontSize: 11,
+                                                      ),
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    if (capacity) ...[
+                                      const SizedBox(width: 8),
+                                      SizedBox(
+                                        width: 84 * scale,
+                                        child: Tooltip(
+                                          message: '上下文 / 最大输出',
+                                          child: Text(
+                                            '${tokens(metadata!.contextWindow)} · ${tokens(metadata.maxOutputTokens)}',
+                                            textAlign: TextAlign.right,
+                                            maxLines: 1,
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                  color: colors.onSurfaceVariant
+                                                      .withValues(alpha: .8),
+                                                  fontSize: 11,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                          value: _selected.containsKey(id),
-                          onChanged: _busy
-                              ? null
-                              : (value) => _toggleModel(id, value ?? false),
                         );
                       },
                     ),
@@ -840,6 +1026,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
                 TextButton(
                   onPressed: () => setState(() {
                     _selected.clear();
+                    _catalogDetails.clear();
                     _expandedModel = null;
                     _modelInputErrors.clear();
                   }),
@@ -952,266 +1139,9 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     protocol: _protocol,
     enabled: !_busy,
     onValidationChanged: (error) => _modelInputErrors[model.name] = error,
-    onChanged: (value) => setState(() => _selected[model.name] = value),
+    onChanged: (value) => setState(() {
+      _selected[model.name] = value;
+      _catalogDetails[model.name] = value;
+    }),
   );
-}
-
-typedef _AdvancedResult = ({
-  Map<String, String> headers,
-  int timeoutSeconds,
-  bool allowImageInput,
-});
-
-class _AdvancedSettingsDialog extends StatefulWidget {
-  const _AdvancedSettingsDialog({
-    required this.headers,
-    required this.timeoutSeconds,
-    required this.allowImageInput,
-    required this.imageSupported,
-  });
-  final Map<String, String> headers;
-  final int timeoutSeconds;
-  final bool allowImageInput;
-  final bool imageSupported;
-
-  @override
-  State<_AdvancedSettingsDialog> createState() =>
-      _AdvancedSettingsDialogState();
-}
-
-class _AdvancedSettingsDialogState extends State<_AdvancedSettingsDialog> {
-  late final List<_HeaderDraft> _headers;
-  final List<_HeaderDraft> _ownedHeaders = [];
-  late final TextEditingController _timeout;
-  late bool _allowImageInput;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _headers = [
-      for (final entry in widget.headers.entries)
-        _HeaderDraft(entry.key, entry.value),
-    ];
-    _ownedHeaders.addAll(_headers);
-    _timeout = TextEditingController(text: '${widget.timeoutSeconds}');
-    _allowImageInput = widget.allowImageInput;
-  }
-
-  @override
-  void dispose() {
-    for (final row in _ownedHeaders) {
-      row.name.dispose();
-      row.value.dispose();
-    }
-    _timeout.dispose();
-    super.dispose();
-  }
-
-  Future<void> _importJson() async {
-    var input = '';
-    final raw = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('导入请求头 JSON'),
-        content: SizedBox(
-          width: 500,
-          child: TextField(
-            onChanged: (value) => input = value,
-            maxLines: 8,
-            decoration: const InputDecoration(
-              hintText: '{"X-Project": "example"}',
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, input),
-            child: const Text('导入'),
-          ),
-        ],
-      ),
-    );
-    if (raw == null) return;
-    try {
-      final parsed = jsonDecode(raw);
-      if (parsed is! Map ||
-          parsed.entries.any(
-            (entry) => entry.key is! String || entry.value is! String,
-          )) {
-        throw const FormatException('请求头 JSON 必须是字符串键值对象。');
-      }
-      setState(() {
-        _headers.clear();
-        for (final entry in parsed.entries) {
-          final row = _HeaderDraft(entry.key, entry.value);
-          _headers.add(row);
-          _ownedHeaders.add(row);
-        }
-        _error = null;
-      });
-    } catch (error) {
-      setState(() => _error = '导入失败：$error');
-    }
-  }
-
-  void _save() {
-    final timeout = int.tryParse(_timeout.text.trim());
-    if (timeout == null || timeout < 10 || timeout > 600) {
-      setState(() => _error = '请求超时须为 10～600 秒。');
-      return;
-    }
-    final headers = <String, String>{};
-    final names = <String>{};
-    final validName = RegExp(r'^[!#\$%&\x27*+.^_`|~0-9A-Za-z-]+$');
-    for (final row in _headers) {
-      final name = row.name.text.trim();
-      final value = row.value.text.trim();
-      if (name.isEmpty && value.isEmpty) continue;
-      if (!validName.hasMatch(name) ||
-          !names.add(name.toLowerCase()) ||
-          value.contains(RegExp(r'[\r\n]'))) {
-        setState(() => _error = '请求头名称无效或重复；值不能换行。');
-        return;
-      }
-      headers[name] = value;
-    }
-    Navigator.pop(context, (
-      headers: headers,
-      timeoutSeconds: timeout,
-      allowImageInput: _allowImageInput,
-    ));
-  }
-
-  @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: const Text('高级设置'),
-    content: SizedBox(
-      width: 580,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _timeout,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: '请求超时（秒）',
-                helperText: '10～600；用于模型目录与翻译请求',
-              ),
-            ),
-            SettingsSwitchTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('服务支持图像输入'),
-              subtitle: Text(
-                widget.imageSupported ? '记录服务能力；当前提示词翻译只发送文本' : '当前接口格式不支持图像载荷',
-              ),
-              value: _allowImageInput,
-              onChanged: widget.imageSupported
-                  ? (value) => setState(() => _allowImageInput = value)
-                  : null,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text('自定义请求头', style: Theme.of(context).textTheme.titleSmall),
-                const Spacer(),
-                TextButton(
-                  onPressed: _importJson,
-                  child: const Text('导入 JSON'),
-                ),
-                TextButton(
-                  onPressed: () => Clipboard.setData(
-                    ClipboardData(
-                      text: jsonEncode({
-                        for (final row in _headers)
-                          if (row.name.text.trim().isNotEmpty)
-                            row.name.text.trim(): row.value.text,
-                      }),
-                    ),
-                  ),
-                  child: const Text('复制 JSON'),
-                ),
-              ],
-            ),
-            Text(
-              '请求头可覆盖默认认证字段，并保存在系统安全存储中。',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 6),
-            for (var index = 0; index < _headers.length; index++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        key: ValueKey('ai-header-name-$index'),
-                        controller: _headers[index].name,
-                        decoration: const InputDecoration(
-                          hintText: 'Header 名称',
-                          isDense: true,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: TextField(
-                        key: ValueKey('ai-header-value-$index'),
-                        controller: _headers[index].value,
-                        decoration: const InputDecoration(
-                          hintText: '值',
-                          isDense: true,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: '删除请求头',
-                      icon: const Icon(Icons.close, size: 18),
-                      onPressed: () => setState(() {
-                        _headers.removeAt(index);
-                      }),
-                    ),
-                  ],
-                ),
-              ),
-            TextButton.icon(
-              onPressed: () => setState(() {
-                final row = _HeaderDraft('', '');
-                _headers.add(row);
-                _ownedHeaders.add(row);
-              }),
-              icon: const Icon(Icons.add, size: 17),
-              label: const Text('添加请求头'),
-            ),
-            if (_error != null)
-              Text(
-                _error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-          ],
-        ),
-      ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text('取消'),
-      ),
-      FilledButton(onPressed: _save, child: const Text('应用')),
-    ],
-  );
-}
-
-class _HeaderDraft {
-  _HeaderDraft(String name, String value)
-    : name = TextEditingController(text: name),
-      value = TextEditingController(text: value);
-  final TextEditingController name;
-  final TextEditingController value;
 }

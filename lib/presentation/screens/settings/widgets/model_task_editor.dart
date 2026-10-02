@@ -6,6 +6,7 @@ import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import 'model_management_widgets.dart';
+import 'model_reasoning_button.dart';
 
 class ModelTaskEditor extends ConsumerStatefulWidget {
   const ModelTaskEditor({
@@ -136,6 +137,12 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
         presets.where((item) => item.id == _slot.presetId).firstOrNull ??
         widget.task.builtinPreset;
     final changed = jsonEncode(_slot.toJson()) != _initial;
+    final usesInterfaceReasoning =
+        selected != null &&
+        _slot.reasoningEffort != null &&
+        selected.model.availableReasoningEfforts.contains(
+          _slot.reasoningEffort,
+        );
     return Form(
       key: _form,
       child: Column(
@@ -185,46 +192,86 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                     const SizedBox(height: 16),
                   ],
                   if (_tab == 0) ...[
-                    DropdownButtonFormField<String>(
-                      key: ValueKey(
-                        'task-route-${widget.task.name}-${selected?.model.name}',
-                      ),
-                      initialValue: selected == null
-                          ? null
-                          : jsonEncode([
-                              selected.provider.id,
-                              selected.model.name,
-                            ]),
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: '服务商与模型',
-                        helperText: '仅列出启用服务中的已选模型',
-                      ),
-                      items: [
-                        for (final item in choices)
-                          DropdownMenuItem(
-                            value: jsonEncode([
-                              item.provider.id,
-                              item.model.name,
-                            ]),
-                            child: Text(
-                              '${item.provider.name} · ${item.model.displayName}',
-                              overflow: TextOverflow.ellipsis,
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final picker = DropdownButtonFormField<String>(
+                          key: ValueKey(
+                            'task-route-${widget.task.name}-${selected?.model.name}',
+                          ),
+                          initialValue: selected == null
+                              ? null
+                              : jsonEncode([
+                                  selected.provider.id,
+                                  selected.model.name,
+                                ]),
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: '服务商与模型',
+                            helperText: '仅列出启用服务中的已选模型',
+                          ),
+                          items: [
+                            for (final item in choices)
+                              DropdownMenuItem(
+                                value: jsonEncode([
+                                  item.provider.id,
+                                  item.model.name,
+                                ]),
+                                child: Text(
+                                  '${item.provider.name} · ${item.model.displayName}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                          onChanged: _busy
+                              ? null
+                              : (value) {
+                                  final route = (jsonDecode(value!) as List)
+                                      .cast<String>();
+                                  _edit(
+                                    _slot.copyWith(
+                                      providerId: route[0],
+                                      model: route[1],
+                                      clearReasoningEffort: true,
+                                    ),
+                                  );
+                                },
+                        );
+                        final reasoning = ModelReasoningButton(
+                          model: selected?.model,
+                          value: _slot.reasoningEffort,
+                          enabled: !_busy,
+                          onChanged: (value) => _edit(
+                            _slot.copyWith(
+                              reasoningEffort: value,
+                              clearReasoningEffort: value == null,
                             ),
                           ),
-                      ],
-                      onChanged: _busy
-                          ? null
-                          : (value) {
-                              final route = (jsonDecode(value!) as List)
-                                  .cast<String>();
-                              _edit(
-                                _slot.copyWith(
-                                  providerId: route[0],
-                                  model: route[1],
-                                ),
+                        );
+                        return constraints.maxWidth <
+                                520 * MediaQuery.textScalerOf(context).scale(1)
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  picker,
+                                  const SizedBox(height: 10),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: reasoning,
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(child: picker),
+                                  const SizedBox(width: 10),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: reasoning,
+                                  ),
+                                ],
                               );
-                            },
+                      },
                     ),
                     const SizedBox(height: 24),
                     DropdownButtonFormField<String>(
@@ -308,6 +355,12 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                           : '${selected.provider.name} · ${selected.model.name}',
                       style: theme.textTheme.bodySmall,
                     ),
+                    const SizedBox(height: 6),
+                    if (selected != null)
+                      Text(
+                        '思考：${reasoningEffortLabel(effectiveTaskModel(config.copyWith(interfaces: {...config.interfaces, widget.task: _slot}), widget.task, selected.model).reasoningEffort)}${usesInterfaceReasoning ? '（本接口）' : '（跟随模型）'}',
+                        style: theme.textTheme.bodySmall,
+                      ),
                     const SizedBox(height: 6),
                     Text(
                       preset.name,

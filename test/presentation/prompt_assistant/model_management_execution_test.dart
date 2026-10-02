@@ -14,7 +14,10 @@ import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assis
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/provider_adapters/prompt_assistant_adapter.dart';
 
-class _Dio extends Mock implements Dio {}
+class _Dio extends Mock implements Dio {
+  @override
+  final Interceptors interceptors = Interceptors();
+}
 
 class _Local extends LocalStorageService {
   @override

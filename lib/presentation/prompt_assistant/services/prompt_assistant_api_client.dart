@@ -17,13 +17,69 @@ class PromptAssistantApiClient {
     required Dio dio,
     this.imageUploadMaxBytes = promptAssistantImageUploadMaxBytes,
     this.history,
-  }) : _dio = dio;
+  }) : _dio = dio {
+    if (history != null) {
+      _dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            final capture = _diagnostics[options.cancelToken];
+            if (capture != null) {
+              options.extra[_exchangeKey] = history!.sent(
+                capture.id,
+                ModelRequestExchange(
+                  time: DateTime.now(),
+                  method: options.method,
+                  url: capture.redactor.url(options.uri),
+                  requestHeaders: capture.redactor.headers(options.headers),
+                  requestBody: capture.redactor.value(options.data),
+                ),
+              );
+            }
+            handler.next(options);
+          },
+          onResponse: (response, handler) {
+            _captureResponse(response.requestOptions, response);
+            handler.next(response);
+          },
+          onError: (error, handler) {
+            _captureResponse(
+              error.requestOptions,
+              error.response,
+              error: error.message ?? error.type.name,
+            );
+            handler.next(error);
+          },
+        ),
+      );
+    }
+  }
 
   final Dio _dio;
   final ModelRequestHistory? history;
   final _gates = <String, _RequestGate>{};
   final int imageUploadMaxBytes;
   final Map<String, CancelToken> _cancelTokens = {};
+  static const _exchangeKey = 'studio.modelRequestExchange';
+  final _diagnostics =
+      <CancelToken, ({String id, ModelDiagnosticRedactor redactor})>{};
+
+  void _captureResponse(
+    RequestOptions options,
+    Response<dynamic>? response, {
+    String? error,
+  }) {
+    final capture = _diagnostics[options.cancelToken];
+    final index = options.extra[_exchangeKey];
+    if (capture == null || index is! int) return;
+    history?.received(
+      capture.id,
+      index,
+      headers: capture.redactor.headers(response?.headers.map ?? {}),
+      body: capture.redactor.value(response?.data),
+      statusCode: response?.statusCode,
+      error: error == null ? null : capture.redactor.text(error),
+    );
+  }
 
   void cancelCurrentRequest({String? sessionId}) {
     if (sessionId == null || sessionId.isEmpty) {
@@ -58,6 +114,13 @@ class PromptAssistantApiClient {
     final cancelToken = CancelToken();
     _cancelTokens[request.sessionId] = cancelToken;
     final record = history?.begin(request);
+    final redactor = ModelDiagnosticRedactor([
+      if (request.apiKey != null) request.apiKey!,
+      ...request.provider.requestHeaders.values,
+    ]);
+    if (record != null) {
+      _diagnostics[cancelToken] = (id: record, redactor: redactor);
+    }
     final watch = Stopwatch()..start();
     final gate = _gates.putIfAbsent(request.provider.id, _RequestGate.new);
     var acquired = false;
@@ -117,6 +180,7 @@ class PromptAssistantApiClient {
           '成功',
           elapsedMs: watch.elapsedMilliseconds,
           attempts: attempts,
+          output: redactor.text(trimmed),
         );
       }
       yield StreamingChunk(delta: trimmed);
@@ -141,11 +205,12 @@ class PromptAssistantApiClient {
           '失败',
           elapsedMs: watch.elapsedMilliseconds,
           attempts: attempts,
-          error: error.runtimeType.toString(),
+          error: redactor.text(error.toString()),
         );
       }
       rethrow;
     } finally {
+      _diagnostics.remove(cancelToken);
       if (acquired) gate.release();
       if (identical(_cancelTokens[request.sessionId], cancelToken)) {
         _cancelTokens.remove(request.sessionId);

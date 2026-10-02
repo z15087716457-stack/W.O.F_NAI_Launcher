@@ -11,6 +11,7 @@ import '../widgets/ai_service_editor_dialog.dart';
 import '../widgets/model_management_widgets.dart';
 import '../widgets/model_task_editor.dart';
 import '../widgets/model_preset_editor.dart';
+import '../widgets/model_request_details_dialog.dart';
 import '../widgets/provider_logo.dart';
 
 class _ProviderMonogram extends StatelessWidget {
@@ -95,6 +96,27 @@ class ModelManagementSectionState
     _presetId = id;
     _newPreset = null;
   });
+  Future<void> _createPreset(LauncherInterface task) async {
+    if (!await _leave() || !mounted) return;
+    final count = ref
+        .read(promptAssistantConfigProvider)
+        .presets
+        .where((p) => p.task == task)
+        .length;
+    final preset = TaskPresetConfig(
+      id: 'preset-${DateTime.now().microsecondsSinceEpoch}',
+      name: count == 0 ? task.title : '${task.title}（${count + 1}）',
+      task: task,
+      prompt: task.builtinPrompt,
+    );
+    setState(() {
+      _newPreset = preset;
+      _presetId = preset.id;
+      _dirty = true;
+      _editorRevision++;
+    });
+  }
+
   Future<void> _deleteProvider(ProviderConfig provider) async {
     if (!await _leave() || !mounted) return;
     final used = LauncherInterface.values
@@ -344,9 +366,11 @@ class ModelManagementSectionState
                   .firstOrNull ??
               config.providers.firstOrNull;
     final presets = [
-      for (final task in LauncherInterface.values) task.builtinPreset,
-      ...config.presets,
-      if (_newPreset != null) _newPreset!,
+      for (final task in LauncherInterface.values) ...[
+        task.builtinPreset,
+        ...config.presets.where((p) => p.task == task),
+        if (_newPreset?.task == task) _newPreset!,
+      ],
     ];
     final preset =
         presets.where((item) => item.id == _presetId).firstOrNull ??
@@ -617,15 +641,7 @@ class ModelManagementSectionState
                                       ? '待配置'
                                       : config.interfaceFor(task).model,
                                   selected: task == _task,
-                                  icon: Icon(switch (task) {
-                                    LauncherInterface.translate => Icons.south,
-                                    LauncherInterface.promptReverse =>
-                                      Icons.north,
-                                    LauncherInterface.tagTranslate =>
-                                      Icons.label_outline,
-                                    LauncherInterface.wikiTranslate =>
-                                      Icons.menu_book_outlined,
-                                  }),
+                                  icon: Icon(interfaceIcon(task)),
                                   onTap: () => _openTask(task),
                                 ),
                             ],
@@ -668,14 +684,10 @@ class ModelManagementSectionState
                                 ManagementListItem(
                                   title: item.name,
                                   subtitle: item.id.startsWith('builtin:')
-                                      ? '内置 · ${item.task.title}'
-                                      : '自定义 · ${item.task.title}',
+                                      ? '内置'
+                                      : '用户',
                                   selected: item.id == preset.id,
-                                  icon: Icon(
-                                    item.id.startsWith('builtin:')
-                                        ? Icons.description_outlined
-                                        : Icons.edit_note,
-                                  ),
+                                  icon: Icon(interfaceIcon(item.task)),
                                   onTap: () => _openPreset(item.id),
                                   trailing:
                                       item.id.startsWith('builtin:') ||
@@ -704,12 +716,7 @@ class ModelManagementSectionState
                               _dirty = false;
                               _editorRevision++;
                             }),
-                            onClone: (copy) => setState(() {
-                              _newPreset = copy;
-                              _presetId = copy.id;
-                              _dirty = true;
-                              _editorRevision++;
-                            }),
+                            onCreate: _createPreset,
                           ),
                         )
                       : _requestRecords(history),
@@ -732,7 +739,7 @@ class ModelManagementSectionState
       children: [
         ManagementHeading(
           '最近请求',
-          description: '本次会话最近 100 条 · 不记录密钥、请求头或正文',
+          description: '本次会话最近 100 条 · 完整请求与响应，认证信息已脱敏',
           actions: [
             TextButton.icon(
               onPressed: history.records.isEmpty ? null : history.clear,
@@ -800,33 +807,8 @@ class ModelManagementSectionState
                       ),
                       onTap: () => showDialog<void>(
                         context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(record.task),
-                          content: SizedBox(
-                            width: 560,
-                            child: SingleChildScrollView(
-                              child: SelectableText(
-                                const JsonEncoder.withIndent('  ').convert({
-                                  '服务商': record.provider,
-                                  '模型': record.model,
-                                  '协议': record.protocol,
-                                  '状态': record.status,
-                                  '耗时（毫秒）': record.elapsedMs,
-                                  '请求次数': record.attempts,
-                                  if (record.error != null) '错误': record.error,
-                                  '生效参数': record.parameters,
-                                }),
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('关闭'),
-                            ),
-                          ],
-                        ),
+                        builder: (_) =>
+                            ModelRequestDetailsDialog(recordId: record.id),
                       ),
                     );
                   },

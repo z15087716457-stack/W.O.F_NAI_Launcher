@@ -2500,7 +2500,7 @@
   "tagLibrary_contentPreview": "コンテンツのプレビュー",
   "unit_seconds": "秒",
   "settings_notificationSound": "完了音",
-  "settings_notificationSoundSubtitle": "生成完了時にサウンドを再生する",
+  "settings_notificationSoundSubtitle": "ウィンドウが非アクティブのときだけ生成完了音を再生する",
   "settings_notificationCustomSound": "カスタムサウンド",
   "settings_notificationSelectSound": "サウンドの選択",
   "settings_notificationResetSound": "デフォルトにリセット",

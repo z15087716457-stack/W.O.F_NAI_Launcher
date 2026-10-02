@@ -2506,7 +2506,7 @@
   "settings_weightScrollModifierNone": "None (legacy)",
   "unit_seconds": "seconds",
   "settings_notificationSound": "Completion Sound",
-  "settings_notificationSoundSubtitle": "Play sound when generation completes",
+  "settings_notificationSoundSubtitle": "Play the completion sound only while the window is unfocused",
   "settings_notificationCustomSound": "Custom Sound",
   "settings_notificationSelectSound": "Select Sound",
   "settings_notificationResetSound": "Reset to Default",

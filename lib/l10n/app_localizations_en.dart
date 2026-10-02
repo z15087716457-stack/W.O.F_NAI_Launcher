@@ -5032,7 +5032,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_notificationSoundSubtitle =>
-      'Play sound when generation completes';
+      'Play the completion sound only while the window is unfocused';
 
   @override
   String get settings_notificationCustomSound => 'Custom Sound';

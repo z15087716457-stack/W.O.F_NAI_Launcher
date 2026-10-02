@@ -23,17 +23,20 @@ class _ProviderPickerState extends State<_ProviderPicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final choices = ProviderPresetDefaults.selectable
-        .where(
-          (p) =>
-              '${p.label} ${p.group} ${Uri.tryParse(p.defaultBaseUrl)?.host ?? ''}'
+    final choices =
+        ProviderPresetDefaults.selectable
+            .where(
+              (p) => '${p.label} ${Uri.tryParse(p.defaultBaseUrl)?.host ?? ''}'
                   .toLowerCase()
                   .contains(_query.toLowerCase()),
-        )
-        .toList();
+            )
+            .toList()
+          ..sort(
+            (a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()),
+          );
     return SettingsDialogFrame(
       title: '选择服务商',
-      width: 520,
+      width: 860,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -49,62 +52,113 @@ class _ProviderPickerState extends State<_ProviderPicker> {
           const SizedBox(height: 14),
           Flexible(
             child: SizedBox(
-              height: 420,
-              child: ListView(
-                children: [
-                  if (choices.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text('没有匹配的服务商'),
+              height: 480,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final scale = MediaQuery.textScalerOf(context).scale(1);
+                  final columns = constraints.maxWidth >= 700 * scale
+                      ? 3
+                      : constraints.maxWidth >= 450 * scale
+                      ? 2
+                      : 1;
+                  if (choices.isEmpty) {
+                    return const Center(child: Text('没有匹配的服务商'));
+                  }
+                  return GridView.builder(
+                    key: const Key('provider-card-grid'),
+                    padding: const EdgeInsets.only(bottom: 4),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columns,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      mainAxisExtent: 82 * scale,
                     ),
-                  for (final group in const ['国内厂商', '国际厂商', '聚合平台', '本地与自定义'])
-                    if (choices.any((p) => p.group == group)) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
-                        child: Text(
-                          group,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                      for (final preset in choices.where(
-                        (p) => p.group == group,
-                      ))
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Material(
-                            color: preset == widget.value.vendor
-                                ? theme.colorScheme.primary.withValues(
-                                    alpha: .07,
-                                  )
-                                : Colors.transparent,
+                    itemCount: choices.length,
+                    itemBuilder: (context, index) {
+                      final preset = choices[index],
+                          selected = preset == widget.value.vendor;
+                      return Semantics(
+                        selected: selected,
+                        button: true,
+                        child: Material(
+                          color: selected
+                              ? theme.colorScheme.primary.withValues(alpha: .07)
+                              : theme.colorScheme.surfaceContainerLowest,
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            clipBehavior: Clip.antiAlias,
-                            child: ListTile(
-                              key: ValueKey('choose-provider-${preset.name}'),
-                              leading: ProviderLogo(preset, size: 25),
-                              title: Text(preset.label),
-                              subtitle: Text(
-                                preset.defaultBaseUrl.isEmpty
-                                    ? '兼容接口 · 地址自行填写'
-                                    : Uri.parse(preset.defaultBaseUrl).host,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              trailing: preset == widget.value.vendor
-                                  ? Icon(
-                                      Icons.check_rounded,
-                                      size: 18,
-                                      color: theme.colorScheme.primary,
+                            side: BorderSide(
+                              color: selected
+                                  ? theme.colorScheme.primary.withValues(
+                                      alpha: .4,
                                     )
-                                  : null,
-                              onTap: () => Navigator.pop(context, preset),
+                                  : theme.colorScheme.outlineVariant,
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            key: ValueKey('choose-provider-${preset.name}'),
+                            onTap: () => Navigator.pop(context, preset),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              child: Row(
+                                children: [
+                                  ProviderLogo(preset, size: 25),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          preset.label,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          preset.defaultBaseUrl.isEmpty
+                                              ? '兼容接口 · 自行填写地址'
+                                              : Uri.parse(
+                                                  preset.defaultBaseUrl,
+                                                ).host,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (selected) ...[
+                                    const SizedBox(width: 7),
+                                    Icon(
+                                      Icons.check,
+                                      size: 17,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                    ],
-                ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),

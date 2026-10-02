@@ -2499,7 +2499,7 @@
   "settings_weightScrollModifierNone": "无（旧行为）",
   "unit_seconds": "秒",
   "settings_notificationSound": "完成音效",
-  "settings_notificationSoundSubtitle": "生成完成时播放提示音效",
+  "settings_notificationSoundSubtitle": "仅在窗口失焦时播放生成完成音效",
   "settings_notificationCustomSound": "自定义音效",
   "settings_notificationSelectSound": "选择音效",
   "settings_notificationResetSound": "恢复默认",

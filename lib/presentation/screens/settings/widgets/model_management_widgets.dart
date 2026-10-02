@@ -1,4 +1,45 @@
 import 'package:flutter/material.dart';
+import '../../../prompt_assistant/models/prompt_assistant_models.dart';
+import '../../../prompt_assistant/models/prompt_task_definitions.dart';
+
+IconData interfaceIcon(LauncherInterface task) => switch (task) {
+  LauncherInterface.translate => Icons.south,
+  LauncherInterface.promptReverse => Icons.north,
+  LauncherInterface.tagTranslate => Icons.label_outline,
+  LauncherInterface.wikiTranslate => Icons.menu_book_outlined,
+};
+
+Future<LauncherInterface?> showInterfacePresetMenu(
+  BuildContext context, {
+  Offset? globalPosition,
+}) {
+  final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
+  final anchor = context.findRenderObject()! as RenderBox;
+  final position = overlay.globalToLocal(
+    globalPosition ?? anchor.localToGlobal(Offset(anchor.size.width - 24, 64)),
+  );
+  return showMenu<LauncherInterface>(
+    context: context,
+    shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: .14),
+    position: RelativeRect.fromSize(
+      Rect.fromLTWH(position.dx, position.dy, 0, 0),
+      overlay.size,
+    ),
+    items: [
+      for (final task in LauncherInterface.values)
+        PopupMenuItem(
+          value: task,
+          child: Row(
+            children: [
+              Icon(interfaceIcon(task), size: 18),
+              const SizedBox(width: 12),
+              Text(task.title),
+            ],
+          ),
+        ),
+    ],
+  );
+}
 
 class ManagementTabs extends StatelessWidget {
   const ManagementTabs({

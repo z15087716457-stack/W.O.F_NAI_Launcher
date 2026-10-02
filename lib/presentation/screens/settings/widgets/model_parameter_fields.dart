@@ -3,7 +3,7 @@ import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 
 List<String> reasoningChoices(ProviderProtocol protocol) => switch (protocol) {
   ProviderProtocol.openaiChatCompletions || ProviderProtocol.openaiResponses =>
-    ['minimal', 'low', 'medium', 'high', 'xhigh'],
+    ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'],
   ProviderProtocol.anthropicMessages => ['low', 'medium', 'high', 'max'],
   ProviderProtocol.geminiGenerateContent => [
     'minimal',

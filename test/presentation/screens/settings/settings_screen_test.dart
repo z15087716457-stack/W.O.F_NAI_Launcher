@@ -1144,11 +1144,12 @@ void main() {
     );
   });
 
-  testWidgets('服务高级设置保存超时和安全请求头', (tester) async {
+  testWidgets('服务高级设置保存超时并保留既有安全请求头', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1280, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final storage = _MemorySettingsStorage();
-    final secrets = _MemoryAssistantSecrets();
+    final secrets = _MemoryAssistantSecrets()
+      ..headers['custom'] = '{"X-Project":"studio"}';
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -1183,23 +1184,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('高级设置'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextField, '请求超时（秒）'), '75');
-    await tester.ensureVisible(find.text('自定义请求头').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('自定义请求头').first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('添加请求头'));
-    await tester.pumpAndSettle();
     await tester.enterText(
-      find.byKey(const Key('ai-header-name-0')),
-      'X-Project',
+      find.byKey(const Key('service-request-timeout')),
+      '75',
     );
-    await tester.enterText(
-      find.byKey(const Key('ai-header-value-0')),
-      'studio',
-    );
-    await tester.tap(find.text('应用'));
-    await tester.pumpAndSettle();
+    expect(find.text('自定义请求头'), findsNothing);
+    expect(find.text('允许图片输入'), findsNothing);
     await tester.ensureVisible(find.byKey(const Key('service-save')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('service-save')));

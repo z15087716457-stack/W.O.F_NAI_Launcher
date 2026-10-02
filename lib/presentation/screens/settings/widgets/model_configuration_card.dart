@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
+import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import 'model_parameter_fields.dart';
 
 /// All request controls belong to this model. Empty values use server defaults.
@@ -25,6 +26,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
   late ModelConfig _model;
   late final TextEditingController _context, _output;
   bool _advanced = false;
+  bool _editingReasoning = false;
   String? _samplingError;
   @override
   void initState() {
@@ -137,7 +139,8 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final choices = reasoningChoices(widget.protocol);
+    final protocolChoices = reasoningChoices(widget.protocol);
+    final choices = _model.reasoningEfforts ?? protocolChoices;
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
       child: Column(
@@ -178,25 +181,36 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
             },
           ),
           const SizedBox(height: 14),
-          if (choices.isNotEmpty)
+          if (protocolChoices.isNotEmpty)
             DropdownButtonFormField<String>(
-              key: const Key('parameter-reasoning'),
+              key: ValueKey(
+                'parameter-reasoning-${_model.reasoningEffort}-${choices.join(',')}',
+              ),
               initialValue: _model.reasoningEffort ?? '',
               isExpanded: true,
-              decoration: const InputDecoration(labelText: '推理强度'),
+              decoration: const InputDecoration(labelText: '模型默认思考强度'),
               items: [
                 const DropdownMenuItem(value: '', child: Text('使用服务默认值')),
                 for (final value in {
                   ...choices,
                   if (_model.reasoningEffort != null) _model.reasoningEffort!,
                 })
-                  DropdownMenuItem(value: value, child: Text(value)),
+                  DropdownMenuItem(
+                    value: value,
+                    child: Text(reasoningEffortLabel(value)),
+                  ),
               ],
               onChanged: widget.enabled
                   ? (value) => _emit(
                       _model.copyWith(
                         reasoningEffort: value,
                         clearReasoningEffort: value == '',
+                        reasoningEfforts:
+                            value != null &&
+                                value.isNotEmpty &&
+                                _model.reasoningEfforts == null
+                            ? [value]
+                            : _model.reasoningEfforts,
                       ),
                     )
                   : null,
@@ -237,6 +251,87 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
               ),
             ),
             const SizedBox(height: 16),
+            if (protocolChoices.isNotEmpty) ...[
+              DropdownButtonFormField<int>(
+                key: ValueKey(
+                  'model-reasoning-capability-${_model.reasoningEfforts}-$_editingReasoning',
+                ),
+                initialValue: _editingReasoning
+                    ? 1
+                    : _model.reasoningEfforts == null
+                    ? 0
+                    : _model.reasoningEfforts!.isEmpty
+                    ? 2
+                    : 1,
+                decoration: const InputDecoration(labelText: '思考能力'),
+                items: const [
+                  DropdownMenuItem(value: 0, child: Text('未确认')),
+                  DropdownMenuItem(value: 1, child: Text('支持调节')),
+                  DropdownMenuItem(value: 2, child: Text('不支持')),
+                ],
+                onChanged: widget.enabled
+                    ? (value) {
+                        _editingReasoning = value == 1;
+                        _emit(
+                          _model.copyWith(
+                            reasoningEfforts: value == 1
+                                ? _model.availableReasoningEfforts
+                                : const [],
+                            clearReasoningEfforts: value == 0,
+                            clearReasoningEffort: value != 1,
+                          ),
+                        );
+                      }
+                    : null,
+              ),
+              if (_editingReasoning ||
+                  (_model.reasoningEfforts?.isNotEmpty ?? false)) ...[
+                const SizedBox(height: 10),
+                Text(
+                  '勾选模型实际支持的档位，功能接口只会显示这些选项。',
+                  style: theme.textTheme.bodySmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final value in protocolChoices)
+                      FilterChip(
+                        key: ValueKey('model-supports-reasoning-$value'),
+                        label: Text(reasoningEffortLabel(value)),
+                        selected: _model.availableReasoningEfforts.contains(
+                          value,
+                        ),
+                        onSelected: widget.enabled
+                            ? (selected) {
+                                final values = {
+                                  ..._model.availableReasoningEfforts,
+                                };
+                                if (selected) {
+                                  values.add(value);
+                                } else {
+                                  values.remove(value);
+                                }
+                                _emit(
+                                  _model.copyWith(
+                                    reasoningEfforts: [
+                                      for (final choice in protocolChoices)
+                                        if (values.contains(choice)) choice,
+                                    ],
+                                    clearReasoningEffort: !values.contains(
+                                      _model.reasoningEffort,
+                                    ),
+                                  ),
+                                );
+                              }
+                            : null,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+            ],
             Text('模型能力', style: theme.textTheme.labelMedium),
             const SizedBox(height: 5),
             Text('按实际模型手动标注，未标注不会视为已支持。', style: theme.textTheme.bodySmall),
