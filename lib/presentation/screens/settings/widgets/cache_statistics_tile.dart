@@ -145,6 +145,7 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsTile(
+          hoverFeedback: false,
           title: Text(
             text('缓存概览', 'Cache overview', 'キャッシュの概要'),
             style: theme.textTheme.labelMedium?.copyWith(
@@ -160,15 +161,10 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                key: const Key('settings-refresh-cache-statistics'),
-                icon: const Icon(Icons.refresh, size: 20),
-                tooltip: context.l10n.cacheStats_refreshNow,
-                onPressed: () {
-                  _refreshStats();
-                  AppToast.success(context, context.l10n.cacheStats_refreshed);
-                },
+              const _AutoRefreshIndicator(
+                key: Key('settings-auto-refresh-indicator'),
               ),
+              const SizedBox(width: 8),
               TextButton.icon(
                 key: const Key('settings-reset-cache-statistics'),
                 style: TextButton.styleFrom(
@@ -184,7 +180,6 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
               ),
             ],
           ),
-          onTap: _refreshStats,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 18),
@@ -234,6 +229,56 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
       ],
     );
   }
+}
+
+class _AutoRefreshIndicator extends StatefulWidget {
+  const _AutoRefreshIndicator({super.key});
+
+  @override
+  State<_AutoRefreshIndicator> createState() => _AutoRefreshIndicatorState();
+}
+
+class _AutoRefreshIndicatorState extends State<_AutoRefreshIndicator>
+    with SingleTickerProviderStateMixin {
+  late final _controller = AnimationController(
+    duration: const Duration(seconds: 3),
+    vsync: this,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context) ||
+        !TickerMode.valuesOf(context).enabled) {
+      _controller.stop();
+      _controller.value = .75;
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: settingsText(context, '自动刷新', 'Auto refresh', '自動更新'),
+    child: SizedBox(
+      width: 16,
+      height: 16,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) => CircularProgressIndicator(
+          value: _controller.value,
+          strokeWidth: 2,
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: .6),
+        ),
+      ),
+    ),
+  );
 }
 
 class _CacheMetric extends StatelessWidget {

@@ -236,7 +236,9 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return SettingsColumns(
+      equalHeights: true,
       left: SettingsTile(
+        key: const Key('settings-rescan-row'),
         controlWrapWidth: 300 * MediaQuery.textScalerOf(context).scale(1),
         hoverFeedback: !_isScanning,
         title: Text(context.l10n.galleryCache_rescan),
@@ -259,6 +261,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
           ],
         ),
         trailing: OutlinedButton.icon(
+          key: const Key('settings-rescan-action'),
           onPressed: _isScanning ? null : _rescanGallery,
           icon: const Icon(Icons.refresh),
           label: Text(
@@ -269,6 +272,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
         ),
       ),
       right: SettingsTile(
+        key: const Key('settings-thumbnails-row'),
         controlWrapWidth: 300 * MediaQuery.textScalerOf(context).scale(1),
         hoverFeedback: !_isEvictingThumbnails,
         title: Text(context.l10n.galleryCache_evictThumbnailsTitle),
@@ -278,6 +282,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
               : context.l10n.galleryCache_evictThumbnailsSubtitle,
         ),
         trailing: OutlinedButton.icon(
+          key: const Key('settings-thumbnails-action'),
           onPressed: _isEvictingThumbnails ? null : _evictThumbnailCache,
           icon: const Icon(Icons.cleaning_services_outlined),
           label: Text(context.l10n.galleryCache_evictThumbnailsStart),

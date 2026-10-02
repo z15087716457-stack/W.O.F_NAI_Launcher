@@ -18,6 +18,7 @@ import 'package:nai_launcher/core/database/database_providers.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/font_provider.dart';
+import 'package:nai_launcher/presentation/providers/canvas_settings_provider.dart';
 import 'package:nai_launcher/presentation/providers/share_image_settings_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/generation_preferences_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/storage_settings_section.dart';
@@ -69,6 +70,7 @@ void main() {
   final capturing = Platform.environment['CAPTURE_SETTINGS_CONTENT'] == '1';
   final appearance = Platform.environment['STUDIO_APPEARANCE'] ?? 'light';
   var modelOpens = 0;
+  var statisticsLoads = 0;
   setUpAll(() async {
     hiveDir = Directory.systemTemp.createTempSync('settings_content_test_');
     Hive.init(hiveDir.path);
@@ -82,6 +84,7 @@ void main() {
   });
   setUp(() {
     modelOpens = 0;
+    statisticsLoads = 0;
     SharedPreferences.setMockInitialValues({});
   });
   tearDownAll(() async {
@@ -89,11 +92,19 @@ void main() {
     await hiveDir.delete(recursive: true);
   });
 
+  Future<void> advance(WidgetTester tester) async {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pump();
+  }
+
   Future<_Caches> pump(
     WidgetTester tester, {
     required bool data,
     required Size size,
     double scale = 1,
+    bool systemReducedMotion = false,
+    bool tickerEnabled = true,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -113,8 +124,9 @@ void main() {
           databaseManagerProvider.overrideWith(
             (ref) async => throw StateError('offline test'),
           ),
-          cacheStatisticsProvider.overrideWith(
-            (ref) async => CacheStatistics(
+          cacheStatisticsProvider.overrideWith((ref) async {
+            statisticsLoads++;
+            return CacheStatistics(
               l1MemorySize: 0,
               l1HitRate: 0,
               l1MemoryBytes: 0,
@@ -125,8 +137,8 @@ void main() {
               l3DatabaseMetadataCount: 54474,
               totalHitRate: 0,
               lastUpdated: DateTime(2026),
-            ),
-          ),
+            );
+          }),
         ],
         child: MaterialApp(
           locale: const Locale('zh'),
@@ -139,8 +151,16 @@ void main() {
               fontConfig: FontConfig.defaultFont,
             ),
           ),
-          builder: (context, child) => SettingsTypographyScope(
-            child: RepaintBoundary(key: capture, child: child!),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(disableAnimations: systemReducedMotion),
+            child: SettingsTypographyScope(
+              child: TickerMode(
+                enabled: tickerEnabled,
+                child: RepaintBoundary(key: capture, child: child!),
+              ),
+            ),
           ),
           home: Scaffold(
             body: SingleChildScrollView(
@@ -179,7 +199,11 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    if (data) {
+      await advance(tester);
+    } else {
+      await tester.pumpAndSettle();
+    }
     return caches;
   }
 
@@ -192,7 +216,7 @@ void main() {
               .toImage(pixelRatio: 1.5);
       final bytes = await pixels.toByteData(format: ui.ImageByteFormat.png);
       final file = File(
-        '.dart_tool/settings-content-captures/$name-$appearance.png',
+        '.dart_tool/settings-cache-polish-captures/$name-$appearance.png',
       );
       await file.parent.create(recursive: true);
       await file.writeAsBytes(bytes!.buffer.asUint8List());
@@ -295,6 +319,35 @@ void main() {
       expect(find.text('48,813'), findsOneWidget);
       expect(find.text('元数据 54,474'), findsOneWidget);
       expect(find.text('重置统计'), findsOneWidget);
+      expect(
+        find.byKey(const Key('settings-refresh-cache-statistics')),
+        findsNothing,
+      );
+      final overview = find.widgetWithText(SettingsTile, '缓存概览');
+      expect(tester.widget<SettingsTile>(overview).onTap, isNull);
+      final leftRow = tester.getRect(
+        find.byKey(const Key('settings-rescan-row')),
+      );
+      final rightRow = tester.getRect(
+        find.byKey(const Key('settings-thumbnails-row')),
+      );
+      if (label == 'wide') {
+        expect(leftRow.top, closeTo(rightRow.top, .01));
+        expect(leftRow.bottom, closeTo(rightRow.bottom, .01));
+        final leftButton = tester.getRect(
+          find.byKey(const Key('settings-rescan-action')),
+        );
+        final rightButton = tester.getRect(
+          find.byKey(const Key('settings-thumbnails-action')),
+        );
+        expect(leftButton.center.dy, closeTo(rightButton.center.dy, .01));
+        expect(
+          tester.getRect(find.text('重新扫描')).top,
+          closeTo(tester.getRect(find.text('清理缩略图缓存')).top, .01),
+        );
+      } else {
+        expect(rightRow.top, greaterThan(leftRow.bottom));
+      }
       await screenshot(tester, 'dictionary-A-$label');
       for (final title in ['重新扫描', '清理缩略图缓存']) {
         final maintenance = find.widgetWithText(SettingsTile, title);
@@ -304,10 +357,10 @@ void main() {
         );
         await tester.ensureVisible(button);
         await tester.tap(button);
-        await tester.pumpAndSettle();
+        await advance(tester);
         expect(find.byType(AlertDialog), findsOneWidget);
         await tester.tap(find.widgetWithText(TextButton, '取消'));
-        await tester.pumpAndSettle();
+        await advance(tester);
       }
       for (final key in [
         'settings-clear-danbooru-cache',
@@ -316,7 +369,7 @@ void main() {
         final action = find.byKey(Key(key));
         await tester.ensureVisible(action);
         await tester.tap(action);
-        await tester.pumpAndSettle();
+        await advance(tester);
       }
       expect(caches.danbooruClears, 1);
       expect(caches.aiClears, 1);
@@ -328,4 +381,78 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+
+  testWidgets(
+    'auto-refresh ring animates, follows motion preference and keeps refreshing',
+    (tester) async {
+      await pump(tester, data: true, size: const Size(1280, 960));
+      final ring = find.byKey(const Key('settings-auto-refresh-indicator'));
+      final progress = find.descendant(
+        of: ring,
+        matching: find.byType(CircularProgressIndicator),
+      );
+      final container = ProviderScope.containerOf(tester.element(ring));
+      final before = tester.widget<CircularProgressIndicator>(progress).value!;
+      final primary = Theme.of(tester.element(ring)).colorScheme.primary;
+      expect(
+        tester.widget<CircularProgressIndicator>(progress).color,
+        primary.withValues(alpha: .6),
+      );
+      await screenshot(tester, 'ring-before');
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(
+        tester.widget<CircularProgressIndicator>(progress).value,
+        greaterThan(before),
+      );
+      await screenshot(tester, 'ring-after');
+      await container
+          .read(canvasReducedMotionNotifierProvider.notifier)
+          .setReduced(true);
+      await advance(tester);
+      final paused = tester.widget<CircularProgressIndicator>(progress).value;
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(tester.widget<CircularProgressIndicator>(progress).value, paused);
+      await screenshot(tester, 'ring-reduced');
+      await tester.pump(const Duration(seconds: 3));
+      await advance(tester);
+      expect(statisticsLoads, greaterThan(1));
+      await container
+          .read(canvasReducedMotionNotifierProvider.notifier)
+          .setReduced(false);
+      await advance(tester);
+      final resumed = tester.widget<CircularProgressIndicator>(progress).value!;
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(
+        tester.widget<CircularProgressIndicator>(progress).value,
+        greaterThan(resumed),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 4));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('system reduced motion and hidden page keep a static blue ring', (
+    tester,
+  ) async {
+    for (final systemReducedMotion in [true, false]) {
+      await pump(
+        tester,
+        data: true,
+        size: const Size(1280, 960),
+        systemReducedMotion: systemReducedMotion,
+        tickerEnabled: systemReducedMotion,
+      );
+      final progress = find.descendant(
+        of: find.byKey(const Key('settings-auto-refresh-indicator')),
+        matching: find.byType(CircularProgressIndicator),
+      );
+      final value = tester.widget<CircularProgressIndicator>(progress).value;
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(tester.widget<CircularProgressIndicator>(progress).value, value);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
+  });
 }

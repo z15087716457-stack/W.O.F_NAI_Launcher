@@ -7,10 +7,12 @@ class SettingsColumns extends StatelessWidget {
     required this.left,
     required this.right,
     this.leftFraction = .5,
+    this.equalHeights = false,
   });
 
   final Widget left, right;
   final double leftFraction;
+  final bool equalHeights;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -27,14 +29,28 @@ class SettingsColumns extends StatelessWidget {
       final rtl = Directionality.of(context) == TextDirection.rtl;
       return Stack(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(width: leftWidth, child: left),
-              const SizedBox(width: gap),
-              Expanded(child: right),
-            ],
-          ),
+          if (equalHeights)
+            Table(
+              columnWidths: {
+                0: FixedColumnWidth(leftWidth),
+                1: const FixedColumnWidth(gap),
+                2: const FlexColumnWidth(),
+              },
+              defaultVerticalAlignment:
+                  TableCellVerticalAlignment.intrinsicHeight,
+              children: [
+                TableRow(children: [left, const SizedBox.shrink(), right]),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(width: leftWidth, child: left),
+                const SizedBox(width: gap),
+                Expanded(child: right),
+              ],
+            ),
           Positioned(
             top: 0,
             bottom: 0,
