@@ -10,6 +10,7 @@ import '../models/prompt_assistant_models.dart';
 import '../models/model_request_overrides.dart';
 import '../models/prompt_task_definitions.dart';
 import '../services/model_catalog_repository.dart';
+import 'provider_connection_health_provider.dart';
 
 final promptAssistantConfigProvider =
     StateNotifierProvider<
@@ -22,6 +23,12 @@ class PromptAssistantConfigNotifier
   PromptAssistantConfigNotifier(this._ref)
     : super(PromptAssistantConfigState.defaults()) {
     _load();
+    // Health stays independent of config so credential writes can invalidate it.
+    addListener((config) {
+      _ref
+          .read(providerConnectionHealthProvider)
+          .updateProviders(config.providers);
+    });
   }
 
   final Ref _ref;
@@ -121,10 +128,14 @@ class PromptAssistantConfigNotifier
     String providerId,
     Map<String, String> headers,
   ) async {
+    final previous = await _secure.getPromptAssistantHeaders(providerId);
     if (headers.isEmpty) {
       await _secure.deletePromptAssistantHeaders(providerId);
     } else {
       await _secure.savePromptAssistantHeaders(providerId, jsonEncode(headers));
+    }
+    if (previous != (headers.isEmpty ? null : jsonEncode(headers))) {
+      _ref.read(providerConnectionHealthProvider).invalidate(providerId);
     }
   }
 
@@ -253,6 +264,11 @@ class PromptAssistantConfigNotifier
       }
       if (!mounted) return;
       state = next;
+      if (before[provider.id] !=
+              (headers.isEmpty ? null : jsonEncode(headers)) ||
+          (apiKey != null && apiKey.trim() != (oldKey?.trim() ?? ''))) {
+        _ref.read(providerConnectionHealthProvider).invalidate(provider.id);
+      }
     } catch (_) {
       for (final key in completed.reversed) {
         await _writeOptions(key, before[key]);
@@ -270,6 +286,7 @@ class PromptAssistantConfigNotifier
 
   Future<void> setProviderApiKey(String providerId, String apiKey) async {
     final trimmed = apiKey.trim();
+    final previous = await _secure.getPromptAssistantApiKey(providerId);
     if (trimmed.isEmpty) {
       await _secure.deletePromptAssistantApiKey(providerId);
     } else {
@@ -278,6 +295,9 @@ class PromptAssistantConfigNotifier
     final next = Map<String, bool>.from(state.providerHasApiKey)
       ..[providerId] = trimmed.isNotEmpty;
     state = state.copyWith(providerHasApiKey: next);
+    if (trimmed != (previous?.trim() ?? '')) {
+      _ref.read(providerConnectionHealthProvider).invalidate(providerId);
+    }
   }
 
   Future<void> upsertProvider(ProviderConfig provider) async {

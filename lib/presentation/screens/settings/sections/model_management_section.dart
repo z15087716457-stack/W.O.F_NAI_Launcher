@@ -7,6 +7,7 @@ import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/providers/model_request_history_provider.dart';
+import '../../../prompt_assistant/providers/provider_connection_health_provider.dart';
 import '../widgets/ai_service_editor_dialog.dart';
 import '../widgets/model_management_widgets.dart';
 import '../widgets/model_task_editor.dart';
@@ -14,6 +15,7 @@ import '../widgets/model_preset_editor.dart';
 import '../widgets/model_request_details_dialog.dart';
 import '../widgets/provider_logo.dart';
 import '../widgets/provider_picker.dart';
+import '../widgets/provider_connection_status_dot.dart';
 import '../widgets/model_draft_save_controller.dart';
 
 enum _LeaveAction { discard, save }
@@ -208,41 +210,6 @@ class ModelManagementSectionState
     }
   }
 
-  Future<void> _cloneProvider(ProviderConfig provider) async {
-    if (!await _leave() || !mounted) return;
-    final config = ref.read(promptAssistantConfigProvider);
-    final id = 'service-${DateTime.now().microsecondsSinceEpoch}';
-    final notifier = ref.read(promptAssistantConfigProvider.notifier);
-    try {
-      await notifier.upsertProvider(
-        provider.copyWith(
-          id: id,
-          name: '${provider.name} · 副本',
-          enabled: false,
-        ),
-      );
-      await notifier.replaceProviderModels(id, [
-        for (final model in config.modelsForProvider(providerId: provider.id))
-          model.copyWith(
-            providerId: id,
-            hasRequestOverrides: false,
-            clearRequestOverrides: true,
-          ),
-      ]);
-      if (mounted) {
-        setState(() {
-          _providerId = id;
-          _addingService = false;
-          _dirty = false;
-          _editorRevision++;
-        });
-      }
-      _message('已复制连接与模型配置，请为副本设置密钥。');
-    } catch (error) {
-      _message('$error');
-    }
-  }
-
   Future<void> _deletePreset(TaskPresetConfig preset) async {
     if (!await _leave() || !mounted) return;
     final confirmed = await showDialog<bool>(
@@ -404,6 +371,7 @@ class ModelManagementSectionState
   @override
   Widget build(BuildContext context) {
     final config = ref.watch(promptAssistantConfigProvider);
+    final connectionHealth = ref.watch(providerConnectionHealthProvider);
     final history = ref.watch(modelRequestHistoryProvider);
     final theme = Theme.of(context);
     final provider = _addingService
@@ -495,6 +463,15 @@ class ModelManagementSectionState
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
+                                            if (item.enabled)
+                                              ProviderConnectionStatusDot(
+                                                key: ValueKey(
+                                                  'provider-health-compact-${item.id}',
+                                                ),
+                                                providerName: item.name,
+                                                result: connectionHealth
+                                                    .resultFor(item.id),
+                                              ),
                                           ],
                                         ),
                                       ),
@@ -552,29 +529,16 @@ class ModelManagementSectionState
                                           _providerId = item.id;
                                           _addingService = false;
                                         }),
-                                        trailing: SizedBox(
-                                          width: 26,
-                                          height: 32,
-                                          child: PopupMenuButton<String>(
-                                            tooltip: '管理 ${item.name}',
-                                            padding: EdgeInsets.zero,
-                                            iconSize: 16,
-                                            onSelected: (value) =>
-                                                value == 'clone'
-                                                ? _cloneProvider(item)
-                                                : _deleteProvider(item),
-                                            itemBuilder: (_) => const [
-                                              PopupMenuItem(
-                                                value: 'clone',
-                                                child: Text('复制服务配置'),
-                                              ),
-                                              PopupMenuItem(
-                                                value: 'delete',
-                                                child: Text('删除服务'),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                        trailing: item.enabled
+                                            ? ProviderConnectionStatusDot(
+                                                key: ValueKey(
+                                                  'provider-health-${item.id}',
+                                                ),
+                                                providerName: item.name,
+                                                result: connectionHealth
+                                                    .resultFor(item.id),
+                                              )
+                                            : null,
                                       ),
                                   ],
                                 ),
@@ -588,6 +552,9 @@ class ModelManagementSectionState
                                   ),
                                   provider: provider,
                                   initialPreset: _serviceTemplate,
+                                  onDelete: provider == null
+                                      ? null
+                                      : () => _deleteProvider(provider),
                                   embedded: true,
                                   saveController: _draftSave,
                                   onDirtyChanged: _dirtyChanged,

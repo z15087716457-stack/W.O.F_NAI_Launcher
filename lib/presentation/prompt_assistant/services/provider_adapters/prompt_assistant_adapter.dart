@@ -21,6 +21,7 @@ class PromptAssistantRequest {
     required this.apiKey,
     this.modelConfig,
     this.taskName = '模型连接测试',
+    this.trackConnectionHealth = true,
   });
 
   final String sessionId;
@@ -31,6 +32,7 @@ class PromptAssistantRequest {
   final String? apiKey;
   final ModelConfig? modelConfig;
   final String taskName;
+  final bool trackConnectionHealth;
 }
 
 abstract class PromptAssistantContentPart {
@@ -126,6 +128,7 @@ Future<PromptAssistantRequest> optimizePromptAssistantRequestImagesForUpload(
     apiKey: request.apiKey,
     modelConfig: request.modelConfig,
     taskName: request.taskName,
+    trackConnectionHealth: request.trackConnectionHealth,
   );
 }
 

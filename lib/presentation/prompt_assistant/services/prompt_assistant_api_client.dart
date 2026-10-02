@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import '../../../core/utils/app_logger.dart';
 import '../models/prompt_assistant_models.dart';
 import '../providers/model_request_history_provider.dart';
+import '../providers/provider_connection_health_provider.dart';
 import 'provider_adapters/anthropic_messages_adapter.dart';
 import 'provider_adapters/gemini_generate_content_adapter.dart';
 import 'provider_adapters/openai_chat_completions_adapter.dart';
@@ -17,6 +18,7 @@ class PromptAssistantApiClient {
     required Dio dio,
     this.imageUploadMaxBytes = promptAssistantImageUploadMaxBytes,
     this.history,
+    this.connectionHealth,
   }) : _dio = dio {
     if (history != null) {
       _dio.interceptors.add(
@@ -56,6 +58,7 @@ class PromptAssistantApiClient {
 
   final Dio _dio;
   final ModelRequestHistory? history;
+  final ProviderConnectionHealth? connectionHealth;
   final _gates = <String, _RequestGate>{};
   final int imageUploadMaxBytes;
   final Map<String, CancelToken> _cancelTokens = {};
@@ -98,13 +101,26 @@ class PromptAssistantApiClient {
     required ProviderConfig provider,
     required String? apiKey,
     bool usePresetFallback = true,
-  }) {
+    bool trackConnectionHealth = true,
+  }) async {
     final defaults = provider.preset?.defaultModelNames ?? const [];
-    return _adapterFor(provider)
-        .fetchModels(dio: _dio, provider: provider, apiKey: apiKey)
-        .then(
-          (models) => models.isEmpty && usePresetFallback ? defaults : models,
-        );
+    // Pollinations returns a local preset list without contacting the service.
+    final probe =
+        trackConnectionHealth &&
+            provider.preset != ProviderPreset.pollinations &&
+            provider.type != ProviderType.pollinations
+        ? connectionHealth?.begin(provider)
+        : null;
+    try {
+      final models = await _adapterFor(
+        provider,
+      ).fetchModels(dio: _dio, provider: provider, apiKey: apiKey);
+      connectionHealth?.succeeded(probe);
+      return models.isEmpty && usePresetFallback ? defaults : models;
+    } catch (error) {
+      connectionHealth?.failed(probe, error);
+      rethrow;
+    }
   }
 
   Stream<StreamingChunk> complete({
@@ -126,9 +142,13 @@ class PromptAssistantApiClient {
       _diagnostics[cancelToken] = (id: record, redactor: redactor);
     }
     final watch = Stopwatch()..start();
+    final probe = request.trackConnectionHealth
+        ? connectionHealth?.begin(request.provider)
+        : null;
     final gate = _gates.putIfAbsent(request.provider.id, _RequestGate.new);
     var acquired = false;
     var attempts = 0;
+    var requested = false;
     try {
       final parameters = request.modelConfig;
       if (parameters != null) {
@@ -152,6 +172,7 @@ class PromptAssistantApiClient {
         if (cancelToken.isCancelled) throw cancelToken.cancelError!;
         attempts++;
         try {
+          requested = true;
           content = await _adapterFor(
             upload.provider,
           ).complete(dio: _dio, request: upload, cancelToken: cancelToken);
@@ -187,9 +208,13 @@ class PromptAssistantApiClient {
           output: redactor.text(trimmed),
         );
       }
+      if (!cancelToken.isCancelled) connectionHealth?.succeeded(probe);
       yield StreamingChunk(delta: trimmed);
       yield const StreamingChunk(delta: '', done: true);
     } on DioException catch (error) {
+      if (requested && !cancelToken.isCancelled) {
+        connectionHealth?.failed(probe, error);
+      }
       if (record != null) {
         history?.update(
           record,
@@ -203,6 +228,9 @@ class PromptAssistantApiClient {
       }
       throw StateError(_formatDioException(error, request));
     } catch (error) {
+      if (requested && !cancelToken.isCancelled) {
+        connectionHealth?.failed(probe, error);
+      }
       if (record != null) {
         history?.update(
           record,

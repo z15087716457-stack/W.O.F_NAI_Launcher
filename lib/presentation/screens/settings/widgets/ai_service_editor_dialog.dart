@@ -41,6 +41,7 @@ class AiServiceEditorDialog extends ConsumerStatefulWidget {
     this.initialPreset,
     this.embedded = false,
     this.onSaved,
+    this.onDelete,
     this.onDirtyChanged,
     this.onTaskSelected,
     this.saveController,
@@ -49,6 +50,7 @@ class AiServiceEditorDialog extends ConsumerStatefulWidget {
   final ProviderPreset? initialPreset;
   final bool embedded;
   final ValueChanged<String>? onSaved;
+  final VoidCallback? onDelete;
   final ValueChanged<bool>? onDirtyChanged;
   final ValueChanged<LauncherInterface>? onTaskSelected;
   final ModelDraftSaveController? saveController;

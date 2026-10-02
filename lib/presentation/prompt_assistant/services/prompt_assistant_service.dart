@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import '../models/prompt_assistant_models.dart';
 import '../models/prompt_task_definitions.dart';
 import '../providers/model_request_history_provider.dart';
+import '../providers/provider_connection_health_provider.dart';
 import '../../providers/locale_provider.dart';
 import '../providers/prompt_assistant_config_provider.dart';
 import 'provider_adapters/prompt_assistant_adapter.dart';
@@ -31,6 +32,7 @@ final promptAssistantServiceProvider = Provider<PromptAssistantService>((ref) {
     apiClient: PromptAssistantApiClient(
       dio: dio,
       history: ref.read(modelRequestHistoryProvider),
+      connectionHealth: ref.read(providerConnectionHealthProvider),
     ),
     readingLanguage: () => ref.read(localeNotifierProvider).languageCode,
   );
@@ -387,11 +389,36 @@ icon characters or additional blocks. Never modify the other field.
     ProviderConfig provider,
     String? apiKey,
     Map<String, String> headers,
-  ) => _apiClient.fetchModels(
+  ) async => _apiClient.fetchModels(
     provider: provider.copyWith(requestHeaders: headers),
     apiKey: apiKey,
     usePresetFallback: false,
+    trackConnectionHealth: await _matchesSavedConnection(
+      provider,
+      apiKey,
+      headers,
+    ),
   );
+
+  Future<bool> _matchesSavedConnection(
+    ProviderConfig provider,
+    String? apiKey,
+    Map<String, String> headers,
+  ) async {
+    final saved = _configuration.providers
+        .where((p) => p.id == provider.id)
+        .firstOrNull;
+    if (saved == null ||
+        ProviderConnectionHealth.connectionSignature(saved) !=
+            ProviderConnectionHealth.connectionSignature(provider)) {
+      return false;
+    }
+    final notifier = _ref.read(promptAssistantConfigProvider.notifier);
+    final savedKey = await notifier.getProviderApiKey(provider.id);
+    final savedHeaders = await notifier.getProviderHeaders(provider.id);
+    return (savedKey?.trim() ?? '') == (apiKey?.trim() ?? '') &&
+        const MapEquality<String, String>().equals(savedHeaders, headers);
+  }
 
   /// Explicit user action: send a tiny completion to verify the selected model.
   Future<String> testModelForDraft(
@@ -410,6 +437,11 @@ icon characters or additional blocks. Never modify the other field.
         systemPrompt: 'Reply with OK only.',
         userParts: [PromptAssistantContentPart.text('OK')],
         apiKey: apiKey,
+        trackConnectionHealth: await _matchesSavedConnection(
+          provider,
+          apiKey,
+          headers,
+        ),
       ),
     )) {
       output.write(chunk.delta);

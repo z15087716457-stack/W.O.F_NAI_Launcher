@@ -285,6 +285,8 @@ class StorageKeys {
   // Prompt Assistant
   static const String promptAssistantConfigJson =
       'prompt_assistant_config_json';
+  static const String providerConnectionHealthV1 =
+      'provider_connection_health_v1';
   static const String promptAssistantApiKeyPrefix = 'prompt_assistant_api_key_';
   static const String promptAssistantHeadersPrefix =
       'prompt_assistant_headers_v1_';

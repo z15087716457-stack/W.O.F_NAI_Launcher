@@ -74,6 +74,19 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                           onPressed: _canSaveOverview ? _save : null,
                           child: const Text('保存服务'),
                         ),
+                        if (widget.provider != null && widget.onDelete != null)
+                          IconButton(
+                            key: const Key('service-delete'),
+                            tooltip: '删除服务',
+                            onPressed: _busy ? null : widget.onDelete,
+                            style: IconButton.styleFrom(
+                              foregroundColor: colors.onSurfaceVariant,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                          ),
                       ],
                     );
                     return constraints.maxWidth <
