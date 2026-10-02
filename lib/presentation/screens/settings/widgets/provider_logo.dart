@@ -9,29 +9,7 @@ class ProviderLogo extends StatelessWidget {
   final ProviderPreset? preset;
   final double size;
 
-  static String? assetFor(ProviderPreset? preset) => switch (preset) {
-    ProviderPreset.openaiChat || ProviderPreset.openaiResponses => 'openai',
-    ProviderPreset.anthropic => 'anthropic',
-    ProviderPreset.gemini => 'gemini-color',
-    ProviderPreset.deepseek => 'deepseek-color',
-    ProviderPreset.lmStudioChat ||
-    ProviderPreset.lmStudioResponses => 'lmstudio',
-    ProviderPreset.ollama => 'ollama',
-    ProviderPreset.pollinations => 'pollinations',
-    ProviderPreset.qwen => 'qwen',
-    ProviderPreset.moonshot => 'kimi',
-    ProviderPreset.zhipu => 'zhipu',
-    ProviderPreset.minimax => 'minimax',
-    ProviderPreset.doubao => 'doubao',
-    ProviderPreset.hunyuan => 'hunyuan',
-    ProviderPreset.qianfan => 'wenxin',
-    ProviderPreset.xai => 'xai',
-    ProviderPreset.mistral => 'mistral',
-    ProviderPreset.groq => 'groq',
-    ProviderPreset.siliconflow => 'siliconcloud',
-    ProviderPreset.openrouter => 'openrouter',
-    _ => null,
-  };
+  static String? assetFor(ProviderPreset? preset) => preset?.logoAsset;
 
   @override
   Widget build(BuildContext context) {

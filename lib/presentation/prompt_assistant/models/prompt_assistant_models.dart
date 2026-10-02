@@ -98,9 +98,29 @@ enum ProviderPreset {
   groq,
   siliconflow,
   openrouter,
+  togetherAi,
+  fireworks,
+  cerebras,
+  baseten,
+  huggingFace,
+  nvidia,
+  vercel,
+  openCodeZen,
+  zai,
+  zaiCodingPlan,
+  zhipuCodingPlan,
+  kimiCoding,
+  moonshotInternational,
+  minimaxChinaChat,
+  minimaxChinaMessages,
+  minimaxInternationalMessages,
+  xiaomi,
+  antLing,
+  stepfunPlan,
+  qwenTokenPlanChina,
 }
 
-// Built-in vendor connections, checked against official docs on 2026-10-02.
+// Built-in connections; pinned references live in tool/branding/provider_catalog_sources.json.
 // These are starter IDs, never a claim about access or a model's capabilities.
 class _VendorDefaults {
   const _VendorDefaults(
@@ -108,9 +128,13 @@ class _VendorDefaults {
     this.url,
     this.protocol,
     this.models,
-    this.group,
-  );
+    this.group, {
+    this.catalogKey,
+    this.logoAsset,
+    this.hint,
+  });
   final String label, url, group;
+  final String? catalogKey, logoAsset, hint;
   final ProviderProtocol protocol;
   final List<String> models;
 }
@@ -122,6 +146,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['gpt-4.1-mini'],
     '国际厂商',
+    catalogKey: 'openai',
+    logoAsset: 'openai',
   ),
   ProviderPreset.openaiResponses: _VendorDefaults(
     'OpenAI',
@@ -129,6 +155,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiResponses,
     ['gpt-6-astra'],
     '国际厂商',
+    catalogKey: 'openai',
+    logoAsset: 'openai',
   ),
   ProviderPreset.openaiCompatibleChat: _VendorDefaults(
     '自定义服务',
@@ -150,6 +178,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.anthropicMessages,
     ['claude-sonnet-5-5'],
     '国际厂商',
+    catalogKey: 'anthropic',
+    logoAsset: 'anthropic',
   ),
   ProviderPreset.gemini: _VendorDefaults(
     'Google Gemini',
@@ -157,6 +187,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.geminiGenerateContent,
     ['gemini-3.8-flash'],
     '国际厂商',
+    catalogKey: 'google',
+    logoAsset: 'gemini-color',
   ),
   ProviderPreset.deepseek: _VendorDefaults(
     'DeepSeek',
@@ -164,6 +196,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['deepseek-flash', 'deepseek-v4-pro'],
     '国内厂商',
+    catalogKey: 'deepseek',
+    logoAsset: 'deepseek-color',
   ),
   ProviderPreset.lmStudioChat: _VendorDefaults(
     'LM Studio',
@@ -171,6 +205,7 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     [],
     '本地与自定义',
+    logoAsset: 'lmstudio',
   ),
   ProviderPreset.lmStudioResponses: _VendorDefaults(
     'LM Studio',
@@ -178,6 +213,7 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiResponses,
     [],
     '本地与自定义',
+    logoAsset: 'lmstudio',
   ),
   ProviderPreset.ollama: _VendorDefaults(
     'Ollama',
@@ -185,6 +221,7 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.ollamaChatCompletions,
     [],
     '本地与自定义',
+    logoAsset: 'ollama',
   ),
   ProviderPreset.pollinations: _VendorDefaults(
     'Pollinations',
@@ -192,6 +229,7 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['openai-large'],
     '聚合平台',
+    logoAsset: 'pollinations',
   ),
   ProviderPreset.qwen: _VendorDefaults(
     '通义千问 · 百炼',
@@ -199,6 +237,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['qwen-plus'],
     '国内厂商',
+    catalogKey: 'alibaba',
+    logoAsset: 'qwen',
   ),
   ProviderPreset.moonshot: _VendorDefaults(
     'Kimi · 月之暗面',
@@ -206,6 +246,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['kimi-k3'],
     '国内厂商',
+    catalogKey: 'moonshotai',
+    logoAsset: 'kimi',
   ),
   ProviderPreset.zhipu: _VendorDefaults(
     '智谱 GLM',
@@ -213,6 +255,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['glm-5.3'],
     '国内厂商',
+    catalogKey: 'zhipuai',
+    logoAsset: 'zhipu',
   ),
   ProviderPreset.minimax: _VendorDefaults(
     'MiniMax',
@@ -220,6 +264,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['MiniMax-M3'],
     '国内厂商',
+    catalogKey: 'minimax',
+    logoAsset: 'minimax',
   ),
   ProviderPreset.doubao: _VendorDefaults(
     '豆包 · 火山方舟',
@@ -227,6 +273,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['doubao-seed-2-1-pro-260628'],
     '国内厂商',
+    catalogKey: 'volcengine',
+    logoAsset: 'doubao',
   ),
   ProviderPreset.hunyuan: _VendorDefaults(
     '腾讯混元',
@@ -234,6 +282,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['hunyuan-turbos-latest'],
     '国内厂商',
+    catalogKey: 'tencent',
+    logoAsset: 'hunyuan',
   ),
   ProviderPreset.qianfan: _VendorDefaults(
     '百度千帆',
@@ -241,6 +291,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     [],
     '国内厂商',
+    catalogKey: 'baidu',
+    logoAsset: 'wenxin',
   ),
   ProviderPreset.xai: _VendorDefaults(
     'xAI · Grok',
@@ -248,6 +300,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiResponses,
     ['grok-4.7'],
     '国际厂商',
+    catalogKey: 'xai',
+    logoAsset: 'xai',
   ),
   ProviderPreset.mistral: _VendorDefaults(
     'Mistral AI',
@@ -255,6 +309,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['mistral-small-latest'],
     '国际厂商',
+    catalogKey: 'mistral',
+    logoAsset: 'mistral',
   ),
   ProviderPreset.groq: _VendorDefaults(
     'Groq',
@@ -262,6 +318,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     [],
     '聚合平台',
+    catalogKey: 'groq',
+    logoAsset: 'groq',
   ),
   ProviderPreset.siliconflow: _VendorDefaults(
     '硅基流动',
@@ -269,6 +327,8 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     ['deepseek-ai/DeepSeek-V4-Flash'],
     '聚合平台',
+    catalogKey: 'siliconflow',
+    logoAsset: 'siliconcloud',
   ),
   ProviderPreset.openrouter: _VendorDefaults(
     'OpenRouter',
@@ -276,6 +336,197 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     ProviderProtocol.openaiChatCompletions,
     [],
     '聚合平台',
+    catalogKey: 'openrouter',
+    logoAsset: 'openrouter',
+  ),
+  ProviderPreset.togetherAi: _VendorDefaults(
+    'Together AI',
+    'https://api.together.xyz/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'togetherai',
+    logoAsset: 'together',
+  ),
+  ProviderPreset.fireworks: _VendorDefaults(
+    'Fireworks',
+    'https://api.fireworks.ai/inference/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'fireworks-ai',
+    logoAsset: 'fireworks',
+  ),
+  ProviderPreset.cerebras: _VendorDefaults(
+    'Cerebras',
+    'https://api.cerebras.ai/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'cerebras',
+    logoAsset: 'cerebras',
+  ),
+  ProviderPreset.baseten: _VendorDefaults(
+    'Baseten',
+    'https://inference.baseten.co/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'baseten',
+    logoAsset: 'baseten',
+  ),
+  ProviderPreset.huggingFace: _VendorDefaults(
+    'Hugging Face',
+    'https://router.huggingface.co/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'huggingface',
+    logoAsset: 'huggingface',
+    hint: '使用具有推理权限的 Hugging Face Token；可手动填写路由模型 ID。',
+  ),
+  ProviderPreset.nvidia: _VendorDefaults(
+    'NVIDIA',
+    'https://integrate.api.nvidia.com/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'nvidia',
+    logoAsset: 'nvidia',
+  ),
+  ProviderPreset.vercel: _VendorDefaults(
+    'Vercel AI Gateway',
+    'https://ai-gateway.vercel.sh/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'vercel',
+    logoAsset: 'vercel',
+  ),
+  ProviderPreset.openCodeZen: _VendorDefaults(
+    'OpenCode Zen',
+    'https://opencode.ai/zen/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'opencode',
+    logoAsset: 'opencode',
+  ),
+  ProviderPreset.zai: _VendorDefaults(
+    'Z.AI · 国际',
+    'https://api.z.ai/api/paas/v4',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'zai',
+    logoAsset: 'zai',
+  ),
+  ProviderPreset.zaiCodingPlan: _VendorDefaults(
+    'Z.AI Coding Plan',
+    'https://api.z.ai/api/coding/paas/v4',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'zai-coding-plan',
+    logoAsset: 'zai',
+    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
+  ),
+  ProviderPreset.zhipuCodingPlan: _VendorDefaults(
+    '智谱 Coding Plan',
+    'https://open.bigmodel.cn/api/coding/paas/v4',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '国内厂商',
+    catalogKey: 'zhipuai-coding-plan',
+    logoAsset: 'zhipu',
+    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
+  ),
+  ProviderPreset.kimiCoding: _VendorDefaults(
+    'Kimi 编程',
+    'https://api.kimi.com/coding/v1',
+    ProviderProtocol.anthropicMessages,
+    [],
+    '国内厂商',
+    catalogKey: 'kimi-code-plan-cn',
+    logoAsset: 'kimi',
+    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
+  ),
+  ProviderPreset.moonshotInternational: _VendorDefaults(
+    'Moonshot AI · 国际',
+    'https://api.moonshot.ai/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+    catalogKey: 'moonshotai',
+    logoAsset: 'kimi',
+    hint: '国际平台端点；使用国际平台的 API Key。',
+  ),
+  ProviderPreset.minimaxChinaChat: _VendorDefaults(
+    'MiniMax · 国内 OpenAI',
+    'https://api.minimaxi.com/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '国内厂商',
+    catalogKey: 'minimax-cn',
+    logoAsset: 'minimax',
+    hint: '使用对应地区的 API Key；当前预填 OpenAI Chat Completions 兼容地址。',
+  ),
+  ProviderPreset.minimaxChinaMessages: _VendorDefaults(
+    'MiniMax · 国内 Anthropic',
+    'https://api.minimaxi.com/anthropic/v1',
+    ProviderProtocol.anthropicMessages,
+    [],
+    '国内厂商',
+    catalogKey: 'minimax-cn',
+    logoAsset: 'minimax',
+    hint: '使用对应地区的 API Key；当前预填 Anthropic Messages 兼容地址。',
+  ),
+  ProviderPreset.minimaxInternationalMessages: _VendorDefaults(
+    'MiniMax · 国际 Anthropic',
+    'https://api.minimax.io/anthropic/v1',
+    ProviderProtocol.anthropicMessages,
+    [],
+    '聚合平台',
+    catalogKey: 'minimax',
+    logoAsset: 'minimax',
+    hint: '使用对应地区的 API Key；当前预填 Anthropic Messages 兼容地址。',
+  ),
+  ProviderPreset.xiaomi: _VendorDefaults(
+    '小米 MiMo',
+    'https://api.xiaomimimo.com/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '国内厂商',
+    catalogKey: 'xiaomi',
+  ),
+  ProviderPreset.antLing: _VendorDefaults(
+    '蚂蚁 Ling',
+    'https://api.ant-ling.com/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '国内厂商',
+    catalogKey: 'ant-ling',
+    logoAsset: 'antgroup',
+  ),
+  ProviderPreset.stepfunPlan: _VendorDefaults(
+    '阶跃 Step Plan',
+    'https://api.stepfun.com/step_plan/v1',
+    ProviderProtocol.anthropicMessages,
+    [],
+    '国内厂商',
+    catalogKey: 'stepfun-step-plan',
+    logoAsset: 'stepfun',
+    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
+  ),
+  ProviderPreset.qwenTokenPlanChina: _VendorDefaults(
+    '通义 Token 套餐 · 国内',
+    'https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '国内厂商',
+    catalogKey: 'alibaba-token-plan-cn',
+    logoAsset: 'qwen',
+    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
   ),
 };
 
@@ -287,27 +538,48 @@ extension ProviderPresetDefaults on ProviderPreset {
     ProviderPreset.lmStudioResponses => ProviderPreset.lmStudioChat,
     _ => this,
   };
+  // Display order is shared by the picker and future service consumers.
   static const selectable = [
-    ProviderPreset.deepseek,
-    ProviderPreset.qwen,
-    ProviderPreset.moonshot,
-    ProviderPreset.zhipu,
-    ProviderPreset.minimax,
-    ProviderPreset.doubao,
-    ProviderPreset.hunyuan,
-    ProviderPreset.qianfan,
+    ProviderPreset.openaiCompatibleChat,
     ProviderPreset.openaiResponses,
     ProviderPreset.anthropic,
     ProviderPreset.gemini,
     ProviderPreset.xai,
     ProviderPreset.mistral,
+    ProviderPreset.deepseek,
+    ProviderPreset.qwen,
+    ProviderPreset.qwenTokenPlanChina,
+    ProviderPreset.moonshot,
+    ProviderPreset.moonshotInternational,
+    ProviderPreset.kimiCoding,
+    ProviderPreset.zhipu,
+    ProviderPreset.zhipuCodingPlan,
+    ProviderPreset.zai,
+    ProviderPreset.zaiCodingPlan,
+    ProviderPreset.minimax,
+    ProviderPreset.minimaxChinaChat,
+    ProviderPreset.minimaxChinaMessages,
+    ProviderPreset.minimaxInternationalMessages,
+    ProviderPreset.doubao,
+    ProviderPreset.hunyuan,
+    ProviderPreset.qianfan,
     ProviderPreset.siliconflow,
+    ProviderPreset.xiaomi,
+    ProviderPreset.antLing,
+    ProviderPreset.stepfunPlan,
     ProviderPreset.openrouter,
     ProviderPreset.groq,
+    ProviderPreset.togetherAi,
+    ProviderPreset.fireworks,
+    ProviderPreset.cerebras,
+    ProviderPreset.baseten,
+    ProviderPreset.huggingFace,
+    ProviderPreset.nvidia,
+    ProviderPreset.openCodeZen,
+    ProviderPreset.vercel,
     ProviderPreset.pollinations,
     ProviderPreset.lmStudioChat,
     ProviderPreset.ollama,
-    ProviderPreset.openaiCompatibleChat,
   ];
   String get label => _vendorDefaults[this]!.label;
   String get group => _vendorDefaults[this]!.group;
@@ -321,6 +593,11 @@ extension ProviderPresetDefaults on ProviderPreset {
     _ => name,
   };
   String get defaultName => label;
+  String? get catalogProviderKey => _vendorDefaults[vendor]!.catalogKey;
+  String? get logoAsset => _vendorDefaults[this]!.logoAsset;
+  bool get isLocal => !requiresApiKey;
+  String get searchText =>
+      '$label $name $defaultBaseUrl ${catalogProviderKey ?? ""}';
   String get defaultBaseUrl => _vendorDefaults[this]!.url;
   ProviderProtocol get defaultProtocol => _vendorDefaults[this]!.protocol;
   List<String> get defaultModelNames => _vendorDefaults[this]!.models;
@@ -339,17 +616,19 @@ extension ProviderPresetDefaults on ProviderPreset {
     ProviderPreset.lmStudioChat,
     ProviderPreset.lmStudioResponses,
   ].contains(this);
-  String get connectionHint => switch (vendor) {
-    ProviderPreset.qwen => '默认北京区域；其他区域请使用对应 Key 并修改接口地址。',
-    ProviderPreset.minimax => '默认国际按量接口；国内平台请使用对应区域的 Key 和接口地址。',
-    ProviderPreset.moonshot => '默认国内平台；国际平台请使用对应区域的 Key 和接口地址。',
-    ProviderPreset.zhipu => '默认按量接口；Coding Plan 请使用套餐专用地址。',
-    ProviderPreset.doubao => '使用方舟 API Key；需先开通模型，也可添加推理接入点 ID。',
-    ProviderPreset.openaiCompatibleChat => '填写兼容服务的地址与 Key，并在连接信息中选择接口协议。',
-    ProviderPreset.lmStudioChat ||
-    ProviderPreset.ollama => '先启动本地服务，再读取已加载的模型目录。',
-    _ => '地址与协议已预填；保存 Key 后即可选择模型使用。',
-  };
+  String get connectionHint =>
+      _vendorDefaults[vendor]!.hint ??
+      switch (vendor) {
+        ProviderPreset.qwen => '默认北京区域；其他区域请使用对应 Key 并修改接口地址。',
+        ProviderPreset.minimax => '默认国际按量接口；国内平台请使用对应区域的 Key 和接口地址。',
+        ProviderPreset.moonshot => '默认国内平台；国际平台请使用对应区域的 Key 和接口地址。',
+        ProviderPreset.zhipu => '默认按量接口；Coding Plan 请使用套餐专用地址。',
+        ProviderPreset.doubao => '使用方舟 API Key；需先开通模型，也可添加推理接入点 ID。',
+        ProviderPreset.openaiCompatibleChat => '填写兼容服务的地址与 Key，并在连接信息中选择接口协议。',
+        ProviderPreset.lmStudioChat ||
+        ProviderPreset.ollama => '先启动本地服务，再读取已加载的模型目录。',
+        _ => '地址与协议已预填；保存 Key 后即可选择模型使用。',
+      };
   ProviderConfig createConfig({String? id}) => ProviderConfig(
     id: id == null || id.trim().isEmpty ? defaultId : id.trim(),
     name: defaultName,

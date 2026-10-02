@@ -97,6 +97,61 @@
       "asset": "openrouter.svg",
       "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/openrouter.svg",
       "sha256": "ae671cc83de9bd45db97a47ed5e38a4e1bd9f93a12be495ba4b4f8b284026bca"
+    },
+    {
+      "asset": "together.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/together.svg",
+      "sha256": "b3ec218e7e0b0432a2ce07f5ec98a1dcd24f808c74d5fee624ab31e4947feef3"
+    },
+    {
+      "asset": "fireworks.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/fireworks.svg",
+      "sha256": "9991ab2a8331096d3f408e07a5f2e1cb54c369143dd9fc7a97f6458478b33fe3"
+    },
+    {
+      "asset": "cerebras.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/cerebras.svg",
+      "sha256": "05af9593eca3fefdb30c5ad042040f008beea2b27e0a6b7315c319492f7a44ff"
+    },
+    {
+      "asset": "baseten.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/baseten.svg",
+      "sha256": "d560883f6df500c1290b2fb2018836d853c72697c1fc252793538fabf53ff28d"
+    },
+    {
+      "asset": "huggingface.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/huggingface.svg",
+      "sha256": "de7f2c60f974b75b385116ef0dc6a9fa62f2fd7bf58156b5623301a5436b91c4"
+    },
+    {
+      "asset": "nvidia.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/nvidia.svg",
+      "sha256": "5a419b99e0ffdbfbe8caa7ec25581054eae03024da59cb860c54ea55ac8e7e73"
+    },
+    {
+      "asset": "vercel.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/vercel.svg",
+      "sha256": "4874d52d8b2ce7c309cbd10c424fee123b2c9483e76d76ad0dca41794483eb24"
+    },
+    {
+      "asset": "opencode.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/opencode.svg",
+      "sha256": "7cfa6e9d6726f7c9fa26c7d9aef0dfec52d20a137380454340f30f12ccbfd302"
+    },
+    {
+      "asset": "zai.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/zai.svg",
+      "sha256": "e748cb5108ce37b116d7a5ba97d37e0ae97eadf6849b0de11afb248e244a01e1"
+    },
+    {
+      "asset": "stepfun.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/stepfun.svg",
+      "sha256": "90138fab370e3c0ce3105d38a496d6796ce73d44f9829d8e1045013dc064bcd2"
+    },
+    {
+      "asset": "antgroup.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/antgroup.svg",
+      "sha256": "0da4c28aae987c169ccd73d572659e3eca89df8e64efd0c3bcdde73f6c79fab9"
     }
   ]
 }

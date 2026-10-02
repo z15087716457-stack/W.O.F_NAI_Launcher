@@ -421,7 +421,7 @@ void main() {
       await harness.pumpManagement(tester, size: const Size(1600, 1000));
       await _tap(tester, 'service-edit-connection');
       await _tap(tester, 'service-provider-picker');
-      final grid = tester.widget<GridView>(
+      final grid = tester.widget<SliverGrid>(
         find.byKey(const Key('provider-card-grid')),
       );
       expect(

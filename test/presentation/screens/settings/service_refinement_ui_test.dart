@@ -167,7 +167,7 @@ void main() {
       find.byKey(const Key('service-provider-picker')),
     );
     expect(tester.getSize(find.byType(Dialog)).width, greaterThan(800));
-    expect(find.byType(GridView), findsOneWidget);
+    expect(find.byKey(const Key('provider-card-grid')), findsOneWidget);
     expect(find.text('国内厂商'), findsNothing);
     expect(find.text('国际厂商'), findsNothing);
     expect(find.text('聚合平台'), findsNothing);

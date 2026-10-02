@@ -83,7 +83,7 @@ void main() {
         for (final label in ['服务商与模型', '思考', '使用预设', '目标语言']) {
           expect(
             tester.widget<Text>(find.text(label)).style!.fontWeight,
-            FontWeight.w600,
+            FontWeight.w400,
           );
         }
         expect(

@@ -65,25 +65,7 @@ class ModelCatalogRepository {
     );
   }
 
-  String? _vendor(ProviderPreset? preset) => switch (preset?.vendor) {
-    ProviderPreset.openaiResponses => 'openai',
-    ProviderPreset.anthropic => 'anthropic',
-    ProviderPreset.gemini => 'google',
-    ProviderPreset.deepseek => 'deepseek',
-    ProviderPreset.qwen => 'alibaba',
-    ProviderPreset.moonshot => 'moonshotai',
-    ProviderPreset.zhipu => 'zhipuai',
-    ProviderPreset.minimax => 'minimax',
-    ProviderPreset.doubao => 'volcengine',
-    ProviderPreset.hunyuan => 'tencent',
-    ProviderPreset.qianfan => 'baidu',
-    ProviderPreset.xai => 'xai',
-    ProviderPreset.mistral => 'mistral',
-    ProviderPreset.groq => 'groq',
-    ProviderPreset.siliconflow => 'siliconflow',
-    ProviderPreset.openrouter => 'openrouter',
-    _ => null,
-  };
+  String? _vendor(ProviderPreset? preset) => preset?.catalogProviderKey;
 
   List<String> namesFor(ProviderPreset preset) {
     final vendor = _vendor(preset);

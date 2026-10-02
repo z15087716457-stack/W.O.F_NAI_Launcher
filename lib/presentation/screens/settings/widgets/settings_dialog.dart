@@ -8,11 +8,13 @@ class SettingsDialogFrame extends StatelessWidget {
     required this.child,
     this.actions = const [],
     this.width = 440,
+    this.height,
   });
   final String title;
   final Widget child;
   final List<Widget> actions;
   final double width;
+  final double? height;
   @override
   Widget build(BuildContext context) => Theme(
     data: settingsUiTheme(Theme.of(context)),
@@ -23,41 +25,44 @@ class SettingsDialogFrame extends StatelessWidget {
             maxWidth: width,
             maxHeight: MediaQuery.sizeOf(context).height - 64,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleLarge,
+          child: SizedBox(
+            height: height,
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).closeButtonTooltip,
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
+                      IconButton(
+                        tooltip: MaterialLocalizations.of(
+                          context,
+                        ).closeButtonTooltip,
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Flexible(child: child),
+                  if (actions.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: actions,
                     ),
                   ],
-                ),
-                const SizedBox(height: 16),
-                Flexible(child: child),
-                if (actions.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  Wrap(
-                    alignment: WrapAlignment.end,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: actions,
-                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),

@@ -153,6 +153,7 @@ void main() {
       final advanced = find.byKey(const Key('service-advanced-toggle'));
       await tester.ensureVisible(advanced);
       await tester.pumpAndSettle();
+      expect(tester.getSize(advanced).height, greaterThanOrEqualTo(58));
       final mouse = await tester.createGesture(
         kind: ui.PointerDeviceKind.mouse,
       );
@@ -210,9 +211,12 @@ void main() {
         final bounds = tester.getRect(help);
         expect(bounds.left, greaterThan(heading.right));
         expect(bounds.center.dy, closeTo(heading.center.dy, .1));
+        final sample = Offset(bounds.left + 2, bounds.center.dy);
+        final background = await _pixel(tester, sample);
         await mouse.moveTo(bounds.center);
         await tester.pump(const Duration(milliseconds: 700));
         await tester.pumpAndSettle();
+        expect(await _pixel(tester, sample), background);
         expect(find.text(_reasoningAdvice), findsOneWidget);
         await harness.capture(tester, 'settings-feedback-${task.name}-advice');
         await mouse.moveTo(const Offset(1, 1));

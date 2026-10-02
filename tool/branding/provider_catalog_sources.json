@@ -25,6 +25,12 @@
     "Local and custom endpoints retain manual IDs and saved protocols. Region and subscription-specific keys may require their own endpoint.",
     "No live authenticated API request was made during verification.",
     "Per-model capability flags are user annotations; null means unknown. No Agent runtime is introduced.",
-    "Schema 4 reads legacy task/preset parameters but discards overrides; only model request parameters are applied."
-  ]
+    "Saved connection choices and model overrides remain authoritative. Adding a preset does not create or fetch models."
+  ],
+  "expandedReference": {
+    "repository": "https://github.com/vastsa/PI-Desktop",
+    "commit": "9c4093bd03ac774bc5e17b6813f3903dbd6a7d38",
+    "reference": "packages/shared/src/provider-presets.ts",
+    "policy": "Endpoint names, addresses and wire styles only; implemented in the existing Flutter registry. No upstream runtime or UI code copied. OAuth will be added with Pi runtime integration."
+  }
 }

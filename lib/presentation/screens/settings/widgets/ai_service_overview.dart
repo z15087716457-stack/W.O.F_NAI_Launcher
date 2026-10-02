@@ -688,7 +688,7 @@ extension _ServiceOverview on _AiServiceEditorState {
             TextButton.styleFrom(
               alignment: Alignment.centerLeft,
               foregroundColor: Theme.of(context).colorScheme.onSurface,
-              padding: const EdgeInsets.symmetric(vertical: 15),
+              padding: const EdgeInsets.symmetric(vertical: 20),
             ).copyWith(
               overlayColor: settingsFieldOverlay,
               iconColor: settingsFieldIconColor(Theme.of(context).colorScheme),

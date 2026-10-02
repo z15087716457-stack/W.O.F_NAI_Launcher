@@ -151,7 +151,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                     label,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                   if (labelHelp != null) ...[
@@ -348,6 +348,9 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                 style: IconButton.styleFrom(
                   minimumSize: const Size.square(24),
                   padding: const EdgeInsets.all(4),
+                  backgroundColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                 ),
                 icon: const Icon(
                   Icons.help_outline,
