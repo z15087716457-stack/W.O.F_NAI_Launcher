@@ -54,7 +54,7 @@ class ModelCatalogEntry {
 }
 
 String modelTokenLabel(int? value) {
-  if (value == null) return '默认';
+  if (value == null) return '—';
   if (value >= 1000000) {
     final label = (value / 1000000).toStringAsFixed(
       value % 1000000 == 0 ? 0 : 2,

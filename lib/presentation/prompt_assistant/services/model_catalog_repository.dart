@@ -118,6 +118,12 @@ class ModelCatalogRepository {
       displayName: preserved.contains('displayName')
           ? model.displayName
           : entry.name,
+      contextWindow: preserved.contains('contextWindow')
+          ? model.contextWindow
+          : entry.contextLimit,
+      maxOutputTokens: preserved.contains('maxOutputTokens')
+          ? model.maxOutputTokens
+          : entry.outputLimit,
       reasoningEfforts: efforts,
       reasoningEffort: defaultEffort,
       clearReasoningEffort: defaultEffort == null,

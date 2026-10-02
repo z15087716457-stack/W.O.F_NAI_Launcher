@@ -9474,7 +9474,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockPalette_emptyHint =>
-      'Drag blocks here to keep them handy; tap to insert at the caret, or drag into the prompt box';
+      'Keep prompt blocks or translation blocks here; click to insert at the caret, or drag them into the prompt box.';
 
   @override
   String get promptBlockPalette_remove => 'Remove from blocks';

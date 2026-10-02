@@ -5,6 +5,7 @@ import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import 'model_management_widgets.dart';
+import 'model_draft_save_controller.dart';
 
 class ModelPresetEditor extends ConsumerStatefulWidget {
   const ModelPresetEditor({
@@ -13,11 +14,13 @@ class ModelPresetEditor extends ConsumerStatefulWidget {
     required this.onDirtyChanged,
     required this.onSaved,
     required this.onCreate,
+    this.saveController,
   });
   final TaskPresetConfig preset;
   final ValueChanged<bool> onDirtyChanged;
   final ValueChanged<String> onSaved;
   final ValueChanged<LauncherInterface> onCreate;
+  final ModelDraftSaveController? saveController;
   @override
   ConsumerState<ModelPresetEditor> createState() => _ModelPresetEditorState();
 }
@@ -49,10 +52,12 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
         .read(promptAssistantConfigProvider)
         .interfaceFor(widget.preset.task)
         .presetId;
+    widget.saveController?.attach(this, _save);
   }
 
   @override
   void dispose() {
+    widget.saveController?.detach(this);
     _name.dispose();
     _prompt.dispose();
     super.dispose();
@@ -74,8 +79,8 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
     );
   }
 
-  Future<void> _save() async {
-    if (!_form.currentState!.validate()) return;
+  Future<bool> _save() async {
+    if (_busy || _builtin || !_form.currentState!.validate()) return false;
     setState(() => _busy = true);
     try {
       final latest = ref
@@ -101,8 +106,10 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
         widget.onDirtyChanged(false);
         widget.onSaved(widget.preset.id);
       }
+      return true;
     } catch (error) {
       if (mounted) setState(() => _message = '$error');
+      return false;
     } finally {
       if (mounted) setState(() => _busy = false);
     }

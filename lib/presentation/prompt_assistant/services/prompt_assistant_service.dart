@@ -782,7 +782,13 @@ Prompt version: $tagTranslationPromptVersion
         provider: selected.provider.copyWith(requestHeaders: headers),
         model: selected.model.name,
         apiKey: apiKey,
-        modelConfig: effectiveTaskModel(config, interface, selected.model),
+        modelConfig: effectiveTaskModel(
+          config,
+          interface,
+          await _ref
+              .read(promptAssistantConfigProvider.notifier)
+              .loadModelRequestOverrides(selected.model),
+        ),
       );
     }
     final route = _resolveInterfaceRoute(config, interface);
@@ -807,7 +813,13 @@ Prompt version: $tagTranslationPromptVersion
       apiKey: apiKey,
       modelConfig: modelConfig == null
           ? null
-          : effectiveTaskModel(config, interface, modelConfig),
+          : effectiveTaskModel(
+              config,
+              interface,
+              await _ref
+                  .read(promptAssistantConfigProvider.notifier)
+                  .loadModelRequestOverrides(modelConfig),
+            ),
     );
   }
 }

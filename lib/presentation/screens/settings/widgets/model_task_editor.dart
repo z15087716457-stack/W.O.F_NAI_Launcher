@@ -7,6 +7,7 @@ import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dar
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import 'model_management_widgets.dart';
 import 'model_reasoning_button.dart';
+import 'model_draft_save_controller.dart';
 
 class ModelTaskEditor extends ConsumerStatefulWidget {
   const ModelTaskEditor({
@@ -14,10 +15,12 @@ class ModelTaskEditor extends ConsumerStatefulWidget {
     required this.task,
     required this.onDirtyChanged,
     required this.onEditPreset,
+    this.saveController,
   });
   final LauncherInterface task;
   final ValueChanged<bool> onDirtyChanged;
   final ValueChanged<String> onEditPreset;
+  final ModelDraftSaveController? saveController;
   @override
   ConsumerState<ModelTaskEditor> createState() => _ModelTaskEditorState();
 }
@@ -42,10 +45,12 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
         .interfaceFor(widget.task)
         .copyWith(presetId: presetFor(config, widget.task).id);
     _initial = jsonEncode(_slot.toJson());
+    widget.saveController?.attach(this, _save);
   }
 
   @override
   void dispose() {
+    widget.saveController?.detach(this);
     final session = _testSession;
     if (session != null) _service.cancelCurrentTask(sessionId: session);
     super.dispose();
@@ -61,8 +66,8 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
     widget.onDirtyChanged(jsonEncode(_slot.toJson()) != _initial);
   }
 
-  Future<void> _save() async {
-    if (!_validate()) return;
+  Future<bool> _save() async {
+    if (_busy || !_validate()) return false;
     setState(() => _busy = true);
     try {
       if (jsonEncode(
@@ -77,13 +82,15 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
       await ref
           .read(promptAssistantConfigProvider.notifier)
           .saveInterface(widget.task, _slot);
-      if (!mounted) return;
+      if (!mounted) return false;
       _initial = jsonEncode(_slot.toJson());
       _observedSlot = _initial;
       widget.onDirtyChanged(false);
       setState(() => _message = '配置已保存');
+      return true;
     } catch (error) {
       if (mounted) setState(() => _message = '$error');
+      return false;
     } finally {
       if (mounted) setState(() => _busy = false);
     }

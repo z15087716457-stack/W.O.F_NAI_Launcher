@@ -5456,7 +5456,7 @@
   "promptBlockLibrary_gridView": "网格视图",
   "promptBlockLibrary_waterfallView": "瀑布流视图",
   "promptBlockPalette_tooltip": "积木",
-  "promptBlockPalette_emptyHint": "把常用的块拖进来收纳；用的时候点一下插到光标处，或直接拖进提示词框",
+  "promptBlockPalette_emptyHint": "把常用的提示词块或翻译块拖进来收纳；用时点一下插到光标处，或直接拖进提示词框。",
   "promptBlockPalette_remove": "从积木移除",
   "promptBlockPalette_clearAll": "清空积木",
   "promptBlockPalette_clearAllArmed": "再点一次确认清空",

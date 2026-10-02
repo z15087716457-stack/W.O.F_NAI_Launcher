@@ -131,16 +131,31 @@ Future<PromptAssistantRequest> optimizePromptAssistantRequestImagesForUpload(
 
 Map<String, dynamic> promptAssistantHeaders(
   ProviderConfig provider,
-  Map<String, dynamic> defaults,
-) {
+  Map<String, dynamic> defaults, {
+  ModelConfig? model,
+}) {
   final headers = Map<String, dynamic>.from(defaults);
-  for (final entry in provider.requestHeaders.entries) {
+  for (final entry in [
+    ...provider.requestHeaders.entries,
+    ...?model?.requestOverrides?.headers.entries,
+  ]) {
     headers.removeWhere(
       (name, _) => name.toLowerCase() == entry.key.toLowerCase(),
     );
     headers[entry.key] = entry.value;
   }
   return headers;
+}
+
+Map<String, dynamic> promptAssistantRequestBody(
+  PromptAssistantRequest request,
+  Map<String, dynamic> defaults,
+) {
+  final options = request.modelConfig?.requestOverrides;
+  if (options == null) return defaults;
+  final error = options.validate(request.model);
+  if (error != null) throw FormatException(error);
+  return options.applyBody(defaults);
 }
 
 Duration promptAssistantTimeout(ProviderConfig provider) =>

@@ -231,6 +231,26 @@ class ModelDiagnosticRedactor {
     : _secrets = secrets.where((s) => s.isNotEmpty).toSet().toList()
         ..sort((a, b) => b.length.compareTo(a.length));
   final List<String> _secrets;
+  static Iterable<String> sensitiveValues(
+    Object? value, [
+    bool inherited = false,
+  ]) sync* {
+    if (value is Map) {
+      for (final entry in value.entries) {
+        yield* sensitiveValues(
+          entry.value,
+          inherited || sensitive('${entry.key}'),
+        );
+      }
+    } else if (value is List) {
+      for (final item in value) {
+        yield* sensitiveValues(item, inherited);
+      }
+    } else if (inherited && value is String && value.isNotEmpty) {
+      yield value;
+    }
+  }
+
   static bool sensitive(String name) {
     final key = name.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), '');
     return const [

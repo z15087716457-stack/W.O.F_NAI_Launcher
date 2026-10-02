@@ -315,7 +315,7 @@ void main() {
       await tester.tap(find.text('功能接口').first);
       await tester.pumpAndSettle();
       expect(find.text('保留当前编辑？'), findsOneWidget);
-      await tester.tap(find.text('继续编辑'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(
         container.read(promptAssistantConfigProvider).providers.first.name,
@@ -402,7 +402,7 @@ void main() {
       );
       await tapVisible(tester, find.text(LauncherInterface.translate.title));
       expect(find.text('保留当前编辑？'), findsOneWidget);
-      await tester.tap(find.text('继续编辑'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       await tapVisible(
         tester,

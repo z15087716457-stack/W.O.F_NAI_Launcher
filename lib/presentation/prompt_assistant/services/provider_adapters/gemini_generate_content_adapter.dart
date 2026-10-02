@@ -47,7 +47,7 @@ class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
   }) async {
     final response = await dio.post<dynamic>(
       _resolveGenerateEndpoint(request.provider, request.model),
-      data: {
+      data: promptAssistantRequestBody(request, {
         'system_instruction': {
           'parts': [
             {'text': request.systemPrompt},
@@ -72,11 +72,12 @@ class GeminiGenerateContentAdapter extends PromptAssistantProviderAdapter {
             if (request.modelConfig?.reasoningEffort != null)
               'thinkingConfig': geminiThinkingOptions(request.modelConfig!),
           },
-      },
+      }),
       options: Options(
         headers: promptAssistantHeaders(
           request.provider,
           _headers(request.apiKey),
+          model: request.modelConfig,
         ),
         sendTimeout: const Duration(seconds: 30),
         receiveTimeout: promptAssistantTimeout(request.provider),

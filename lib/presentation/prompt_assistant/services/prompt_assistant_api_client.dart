@@ -117,6 +117,10 @@ class PromptAssistantApiClient {
     final redactor = ModelDiagnosticRedactor([
       if (request.apiKey != null) request.apiKey!,
       ...request.provider.requestHeaders.values,
+      ...?request.modelConfig?.requestOverrides?.headers.values,
+      ...ModelDiagnosticRedactor.sensitiveValues(
+        request.modelConfig?.requestOverrides?.body,
+      ),
     ]);
     if (record != null) {
       _diagnostics[cancelToken] = (id: record, redactor: redactor);

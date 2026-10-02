@@ -5456,7 +5456,7 @@
   "promptBlockLibrary_gridView": "グリッド表示",
   "promptBlockLibrary_waterfallView": "ウォーターフォール表示",
   "promptBlockPalette_tooltip": "ブロック",
-  "promptBlockPalette_emptyHint": "よく使うブロックをここにドラッグして収納。使う時はクリックでカーソル位置に挿入、またはプロンプトへドラッグ",
+  "promptBlockPalette_emptyHint": "よく使うプロンプトブロックや翻訳ブロックをここに収納。クリックでカーソル位置に挿入するか、プロンプト欄へドラッグできます。",
   "promptBlockPalette_remove": "ブロックから削除",
   "promptBlockPalette_clearAll": "ブロックをすべて削除",
   "promptBlockPalette_clearAllArmed": "もう一度押してすべて削除",

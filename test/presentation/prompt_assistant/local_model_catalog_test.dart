@@ -92,7 +92,7 @@ void main() {
       expect(chat['model'], 'deepseek-flash');
       expect(chat['thinking'], {'type': 'disabled'});
       expect(chat, isNot(contains('reasoning_effort')));
-      expect(chat, isNot(contains('max_tokens')));
+      expect(chat['max_tokens'], ds.catalogEntry!.outputLimit);
       final gemini = catalog
           .enrich(model('gemini-2.5-flash'), ProviderPreset.gemini)
           .copyWith(reasoningEffort: 'low');
@@ -150,8 +150,8 @@ void main() {
     expect(deepseek.reasoningEfforts, ['none', 'low', 'high', 'max']);
     expect(deepseek.reasoningEffort, 'high');
     expect(deepseek.catalogEntry!.contextLimit, greaterThanOrEqualTo(1000000));
-    expect(deepseek.contextWindow, isNull);
-    expect(deepseek.maxOutputTokens, isNull);
+    expect(deepseek.contextWindow, deepseek.catalogEntry!.contextLimit);
+    expect(deepseek.maxOutputTokens, deepseek.catalogEntry!.outputLimit);
     final gemini = catalog.enrich(
       model('models/gemini-3-flash-preview'),
       ProviderPreset.gemini,

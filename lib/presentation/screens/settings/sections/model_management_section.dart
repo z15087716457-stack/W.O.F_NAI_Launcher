@@ -13,6 +13,9 @@ import '../widgets/model_task_editor.dart';
 import '../widgets/model_preset_editor.dart';
 import '../widgets/model_request_details_dialog.dart';
 import '../widgets/provider_logo.dart';
+import '../widgets/model_draft_save_controller.dart';
+
+enum _LeaveAction { discard, save }
 
 class _ProviderMonogram extends StatelessWidget {
   const _ProviderMonogram(this.provider, {required this.selected});
@@ -45,26 +48,37 @@ class ModelManagementSectionState
   TaskPresetConfig? _newPreset;
   ProviderPreset? _serviceTemplate;
   bool _addingService = false, _dirty = false;
+  bool _leaving = false;
+  final _draftSave = ModelDraftSaveController();
   Future<bool> _leave() async {
     if (!_dirty) return true;
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('保留当前编辑？'),
-            content: const Text('当前修改尚未保存。可以继续编辑，或放弃修改后切换。'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('继续编辑'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('放弃并切换'),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+    if (_leaving) return false;
+    _leaving = true;
+    try {
+      final action = await showDialog<_LeaveAction>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('保留当前编辑？'),
+          content: const Text('当前修改尚未保存。是否保存后切换？'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, _LeaveAction.discard),
+              child: const Text('放弃'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, _LeaveAction.save),
+              child: const Text('保存并切换'),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return false;
+      if (action == _LeaveAction.discard) return true;
+      if (action == _LeaveAction.save) return await _draftSave.save();
+      return false;
+    } finally {
+      _leaving = false;
+    }
   }
 
   Future<void> _switch(VoidCallback action) async {
@@ -180,7 +194,11 @@ class ModelManagementSectionState
       );
       await notifier.replaceProviderModels(id, [
         for (final model in config.modelsForProvider(providerId: provider.id))
-          model.copyWith(providerId: id),
+          model.copyWith(
+            providerId: id,
+            hasRequestOverrides: false,
+            clearRequestOverrides: true,
+          ),
       ]);
       if (mounted) {
         setState(() {
@@ -247,7 +265,7 @@ class ModelManagementSectionState
         ).convert(ref.read(promptAssistantConfigProvider).toJson()),
       ),
     );
-    _message('配置已复制，不包含密钥或自定义请求头。');
+    _message('配置已复制，不包含密钥、自定义请求头或请求体。');
   }
 
   Future<void> _import() async {
@@ -551,6 +569,7 @@ class ModelManagementSectionState
                                   provider: provider,
                                   initialPreset: _serviceTemplate,
                                   embedded: true,
+                                  saveController: _draftSave,
                                   onDirtyChanged: _dirtyChanged,
                                   onTaskSelected: _openTask,
                                   onSaved: (id) => setState(() {
@@ -651,6 +670,7 @@ class ModelManagementSectionState
                               'task-editor-${_task.name}-$_editorRevision',
                             ),
                             task: _task,
+                            saveController: _draftSave,
                             onDirtyChanged: _dirtyChanged,
                             onEditPreset: _openPreset,
                           ),
@@ -709,6 +729,7 @@ class ModelManagementSectionState
                               'preset-editor-${preset.id}-$_editorRevision',
                             ),
                             preset: preset,
+                            saveController: _draftSave,
                             onDirtyChanged: _dirtyChanged,
                             onSaved: (id) => setState(() {
                               _presetId = id;

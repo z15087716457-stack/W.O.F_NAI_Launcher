@@ -49,7 +49,7 @@ class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
   }) async {
     final response = await dio.post<dynamic>(
       _resolveMessagesEndpoint(request.provider),
-      data: {
+      data: promptAssistantRequestBody(request, {
         'model': request.model,
         'max_tokens':
             request.modelConfig?.maxOutputTokens ??
@@ -70,11 +70,12 @@ class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
         'messages': [
           {'role': 'user', 'content': _contentParts(request.userParts)},
         ],
-      },
+      }),
       options: Options(
         headers: promptAssistantHeaders(
           request.provider,
           _headers(request.apiKey),
+          model: request.modelConfig,
         ),
         sendTimeout: const Duration(seconds: 30),
         receiveTimeout: promptAssistantTimeout(request.provider),

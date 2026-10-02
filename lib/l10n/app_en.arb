@@ -5456,7 +5456,7 @@
   "promptBlockLibrary_gridView": "Grid view",
   "promptBlockLibrary_waterfallView": "Waterfall view",
   "promptBlockPalette_tooltip": "Blocks",
-  "promptBlockPalette_emptyHint": "Drag blocks here to keep them handy; tap to insert at the caret, or drag into the prompt box",
+  "promptBlockPalette_emptyHint": "Keep prompt blocks or translation blocks here; click to insert at the caret, or drag them into the prompt box.",
   "promptBlockPalette_remove": "Remove from blocks",
   "promptBlockPalette_clearAll": "Clear blocks",
   "promptBlockPalette_clearAllArmed": "Tap again to clear all",

@@ -16614,7 +16614,7 @@ abstract class AppLocalizations {
   /// No description provided for @promptBlockPalette_emptyHint.
   ///
   /// In en, this message translates to:
-  /// **'Drag blocks here to keep them handy; tap to insert at the caret, or drag into the prompt box'**
+  /// **'Keep prompt blocks or translation blocks here; click to insert at the caret, or drag them into the prompt box.'**
   String get promptBlockPalette_emptyHint;
 
   /// No description provided for @promptBlockPalette_remove.

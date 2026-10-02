@@ -7,6 +7,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../models/prompt_assistant_models.dart';
+import '../models/model_request_overrides.dart';
 import '../models/prompt_task_definitions.dart';
 import '../services/model_catalog_repository.dart';
 
@@ -88,6 +89,22 @@ class PromptAssistantConfigNotifier
     );
   }
 
+  Future<void> _persistDraft(PromptAssistantConfigState next) async {
+    final observed = state;
+    await _local.setSetting(
+      StorageKeys.promptAssistantConfigJson,
+      next.encode(),
+    );
+    if (!identical(state, observed)) {
+      await _local.setSetting(
+        StorageKeys.promptAssistantConfigJson,
+        state.encode(),
+      );
+      throw StateError('配置已变化，请重新保存。');
+    }
+    if (mounted) state = next;
+  }
+
   Future<String?> getProviderApiKey(String providerId) async {
     return _secure.getPromptAssistantApiKey(providerId);
   }
@@ -108,6 +125,146 @@ class PromptAssistantConfigNotifier
       await _secure.deletePromptAssistantHeaders(providerId);
     } else {
       await _secure.savePromptAssistantHeaders(providerId, jsonEncode(headers));
+    }
+  }
+
+  String _modelOptionsKey(ModelConfig model) =>
+      'model/${Uri.encodeComponent(model.providerId)}/${Uri.encodeComponent(model.name)}';
+
+  Future<ModelConfig> loadModelRequestOverrides(ModelConfig model) async {
+    if (model.requestOverrides != null) return model;
+    final raw = model.hasRequestOverrides
+        ? await _secure.getPromptAssistantHeaders(_modelOptionsKey(model))
+        : null;
+    return model.copyWith(
+      requestOverrides: raw == null || raw.isEmpty
+          ? ModelRequestOverrides.empty
+          : ModelRequestOverrides.decode(raw),
+    );
+  }
+
+  Future<void> _writeOptions(String key, String? raw) => raw == null
+      ? _secure.deletePromptAssistantHeaders(key)
+      : _secure.savePromptAssistantHeaders(key, raw);
+
+  Future<void> _saveModelOptions(ModelConfig model) async {
+    final options = model.requestOverrides;
+    if (options == null) return;
+    final error = options.validate(model.name);
+    if (error != null) throw FormatException(error);
+    await _writeOptions(
+      _modelOptionsKey(model),
+      options.isEmpty ? null : options.encode(),
+    );
+  }
+
+  /// Publish the draft only after configuration and secure values are written.
+  /// A failed save keeps both the previous service and the editable draft.
+  Future<void> saveServiceDraft({
+    required ProviderConfig provider,
+    required List<ModelConfig> models,
+    required Map<String, String> headers,
+    String? apiKey,
+  }) async {
+    final observed = state;
+    final providers = [...observed.providers];
+    final index = providers.indexWhere((p) => p.id == provider.id);
+    if (index < 0) {
+      providers.add(provider.copyWith(requestHeaders: const {}));
+    } else {
+      providers[index] = provider.copyWith(requestHeaders: const {});
+    }
+    final selected = [for (final m in models) _enrich(m, providers)];
+    final names = selected.map((m) => m.name).toSet();
+    for (final m in selected) {
+      final error =
+          m.requestOverrides?.validate(m.name) ??
+          RequestParameters.fromModel(m).validateFor(provider.protocol);
+      if (error != null) throw FormatException(error);
+    }
+    final next = observed.copyWith(
+      providers: providers,
+      models: [
+        for (final m in observed.models)
+          if (m.providerId != provider.id) m,
+        ...selected,
+      ],
+      interfaces: {
+        for (final e in observed.interfaces.entries)
+          e.key:
+              e.value.providerId == provider.id &&
+                  e.value.model.isNotEmpty &&
+                  !names.contains(e.value.model)
+              ? e.value.copyWith(providerId: '', model: '')
+              : e.value,
+      },
+      providerHasApiKey: {
+        ...observed.providerHasApiKey,
+        if (apiKey != null) provider.id: apiKey.trim().isNotEmpty,
+      },
+    );
+    final writes = <String, String?>{
+      provider.id: headers.isEmpty ? null : jsonEncode(headers),
+      for (final m in selected)
+        if (m.requestOverrides != null)
+          _modelOptionsKey(m): m.requestOverrides!.isEmpty
+              ? null
+              : m.requestOverrides!.encode(),
+      for (final m in observed.models)
+        if (m.providerId == provider.id &&
+            m.hasRequestOverrides &&
+            !names.contains(m.name))
+          _modelOptionsKey(m): null,
+    };
+    final before = <String, String?>{};
+    for (final key in writes.keys) {
+      before[key] = await _secure.getPromptAssistantHeaders(key);
+    }
+    final oldKey = apiKey == null
+        ? null
+        : await _secure.getPromptAssistantApiKey(provider.id);
+    if (!identical(state, observed)) throw StateError('配置已变化，请重新保存。');
+    final completed = <String>[];
+    var keyWritten = false;
+    try {
+      for (final entry in writes.entries) {
+        await _writeOptions(entry.key, entry.value);
+        completed.add(entry.key);
+      }
+      if (apiKey != null) {
+        if (apiKey.trim().isEmpty) {
+          await _secure.deletePromptAssistantApiKey(provider.id);
+        } else {
+          await _secure.savePromptAssistantApiKey(provider.id, apiKey.trim());
+        }
+        keyWritten = true;
+      }
+      if (!identical(state, observed)) throw StateError('配置已变化，请重新保存。');
+      await _local.setSetting(
+        StorageKeys.promptAssistantConfigJson,
+        next.encode(),
+      );
+      if (!identical(state, observed)) {
+        await _local.setSetting(
+          StorageKeys.promptAssistantConfigJson,
+          state.encode(),
+        );
+        throw StateError('配置已变化，请重新保存。');
+      }
+      if (!mounted) return;
+      state = next;
+    } catch (_) {
+      for (final key in completed.reversed) {
+        await _writeOptions(key, before[key]);
+      }
+      if (keyWritten) {
+        if (oldKey == null || oldKey.isEmpty) {
+          await _secure.deletePromptAssistantApiKey(provider.id);
+        } else {
+          await _secure.savePromptAssistantApiKey(provider.id, oldKey);
+        }
+      }
+      rethrow;
     }
   }
 
@@ -136,6 +293,11 @@ class PromptAssistantConfigNotifier
   }
 
   Future<void> deleteProvider(String providerId) async {
+    for (final model in state.models.where((m) => m.providerId == providerId)) {
+      if (model.hasRequestOverrides) {
+        await _writeOptions(_modelOptionsKey(model), null);
+      }
+    }
     final providers = state.providers.where((p) => p.id != providerId).toList();
     final models = state.models
         .where((m) => m.providerId != providerId)
@@ -174,6 +336,16 @@ class PromptAssistantConfigNotifier
     String providerId,
     List<ModelConfig> selected,
   ) async {
+    for (final model in selected) {
+      await _saveModelOptions(model);
+    }
+    for (final old in state.models) {
+      if (old.providerId == providerId &&
+          old.hasRequestOverrides &&
+          !selected.any((m) => m.name == old.name)) {
+        await _writeOptions(_modelOptionsKey(old), null);
+      }
+    }
     final names = <String>{};
     final models = [
       for (final model in state.models)
@@ -201,6 +373,7 @@ class PromptAssistantConfigNotifier
 
   Future<void> upsertModel(ModelConfig model) async {
     model = _enrich(model);
+    await _saveModelOptions(model);
     final models = [...state.models];
     final idx = models.indexWhere(
       (m) => m.providerId == model.providerId && m.name == model.name,
@@ -282,12 +455,22 @@ class PromptAssistantConfigNotifier
       }
     }
 
+    for (final old in state.models) {
+      if (old.providerId == providerId &&
+          removed.contains(old.name) &&
+          old.hasRequestOverrides) {
+        await _writeOptions(_modelOptionsKey(old), null);
+      }
+    }
     state = state.copyWith(models: models, interfaces: interfaces);
     await _save();
     return removed.toList();
   }
 
   Future<void> deleteModel(ModelConfig model) async {
+    if (model.hasRequestOverrides) {
+      await _writeOptions(_modelOptionsKey(model), null);
+    }
     final models = [...state.models]
       ..removeWhere(
         (m) => m.providerId == model.providerId && m.name == model.name,
@@ -388,8 +571,9 @@ class PromptAssistantConfigNotifier
       ).validateFor(provider.protocol);
       if (error != null) throw FormatException(error);
     }
-    _setInterfaceSlot(task, slot);
-    await _save();
+    await _persistDraft(
+      state.copyWith(interfaces: {...state.interfaces, task: slot}),
+    );
   }
 
   Future<void> savePreset(
@@ -401,7 +585,7 @@ class PromptAssistantConfigNotifier
     if (preset.name.trim().isEmpty || preset.prompt.trim().isEmpty) {
       throw const FormatException('名称和提示词不能为空。');
     }
-    state = state.copyWith(
+    final next = state.copyWith(
       interfaces: applyToInterface
           ? {
               ...state.interfaces,
@@ -416,7 +600,7 @@ class PromptAssistantConfigNotifier
         preset,
       ],
     );
-    await _save();
+    await _persistDraft(next);
   }
 
   Future<void> deletePreset(String id) async {

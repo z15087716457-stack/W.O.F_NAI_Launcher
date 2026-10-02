@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'model_request_overrides.dart';
 import 'model_catalog_entry.dart';
 
 // Legacy storage/UI type. New code should prefer ProviderProtocol and
@@ -564,6 +565,12 @@ class ModelConfig {
   /// Loaded locally, never serialized as a mutable user setting.
   final ModelCatalogEntry? catalogEntry;
 
+  final bool _hasRequestOverrides;
+  final ModelRequestOverrides? requestOverrides;
+  bool get hasRequestOverrides => requestOverrides == null
+      ? _hasRequestOverrides
+      : !requestOverrides!.isEmpty;
+
   /// User-confirmed capabilities; null means unknown.
   final bool? supportsVision, supportsTools, supportsStructuredOutput;
 
@@ -589,10 +596,12 @@ class ModelConfig {
     this.supportsNativeSearch,
     this.customFields,
     this.catalogEntry,
+    bool hasRequestOverrides = false,
+    this.requestOverrides,
     this.supportsVision,
     this.supportsTools,
     this.supportsStructuredOutput,
-  });
+  }) : _hasRequestOverrides = hasRequestOverrides;
 
   bool get isPlaceholder =>
       name.trim().isEmpty || name.trim() == 'default-model';
@@ -651,6 +660,9 @@ class ModelConfig {
     bool clearSupportsNativeSearch = false,
     Set<String>? customFields,
     ModelCatalogEntry? catalogEntry,
+    bool? hasRequestOverrides,
+    ModelRequestOverrides? requestOverrides,
+    bool clearRequestOverrides = false,
   }) {
     return ModelConfig(
       providerId: providerId ?? this.providerId,
@@ -679,6 +691,10 @@ class ModelConfig {
           : supportsNativeSearch ?? this.supportsNativeSearch,
       customFields: customFields ?? this.customFields,
       catalogEntry: catalogEntry ?? this.catalogEntry,
+      hasRequestOverrides: hasRequestOverrides ?? this.hasRequestOverrides,
+      requestOverrides: clearRequestOverrides
+          ? null
+          : requestOverrides ?? this.requestOverrides,
       supportsVision: clearSupportsVision
           ? null
           : supportsVision ?? this.supportsVision,
@@ -697,6 +713,7 @@ class ModelConfig {
     'displayName': displayName,
     'isDefault': isDefault,
     'source': source.name,
+    if (hasRequestOverrides) 'hasRequestOverrides': true,
     if (contextWindow != null) 'contextWindow': contextWindow,
     if (maxOutputTokens != null) 'maxOutputTokens': maxOutputTokens,
     if (reasoningEffort != null) 'reasoningEffort': reasoningEffort,
@@ -720,6 +737,7 @@ class ModelConfig {
       name: json['name'] as String,
       displayName: json['displayName'] as String? ?? (json['name'] as String),
       isDefault: json['isDefault'] as bool? ?? false,
+      hasRequestOverrides: json['hasRequestOverrides'] == true,
       contextWindow: (json['contextWindow'] as num?)?.toInt(),
       maxOutputTokens: (json['maxOutputTokens'] as num?)?.toInt(),
       reasoningEffort: json['reasoningEffort'] as String?,
@@ -1012,7 +1030,7 @@ class PromptAssistantConfigState {
   }
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': 6,
+    'schemaVersion': 7,
     'presets': presets.map((e) => e.toJson()).toList(),
     'providers': providers.map((e) => e.toJson()).toList(),
     'models': models.map((e) => e.toJson()).toList(),

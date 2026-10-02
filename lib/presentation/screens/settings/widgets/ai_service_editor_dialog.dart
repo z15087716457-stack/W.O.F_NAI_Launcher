@@ -18,6 +18,8 @@ import 'compact_service_connection.dart';
 import 'model_management_widgets.dart' show interfaceIcon;
 import '../../../prompt_assistant/models/model_catalog_entry.dart';
 import '../../../prompt_assistant/services/model_catalog_repository.dart';
+import 'model_draft_save_controller.dart';
+import 'model_request_overrides_editor.dart';
 
 part 'ai_service_overview.dart';
 
@@ -40,6 +42,7 @@ class AiServiceEditorDialog extends ConsumerStatefulWidget {
     this.onSaved,
     this.onDirtyChanged,
     this.onTaskSelected,
+    this.saveController,
   });
   final ProviderConfig? provider;
   final ProviderPreset? initialPreset;
@@ -47,6 +50,7 @@ class AiServiceEditorDialog extends ConsumerStatefulWidget {
   final ValueChanged<String>? onSaved;
   final ValueChanged<bool>? onDirtyChanged;
   final ValueChanged<LauncherInterface>? onTaskSelected;
+  final ModelDraftSaveController? saveController;
 
   @override
   ConsumerState<AiServiceEditorDialog> createState() =>
@@ -65,6 +69,9 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   final _selectedScroll = ScrollController();
   late final LinkedHashMap<String, ModelConfig> _selected;
   Map<String, String> _headers = {};
+  final _initialModelOverrides = <String, String>{};
+  final _requestDrafts = <String, ModelRequestDraft>{};
+  final _requestInputErrors = <String, String?>{};
   List<String> _catalog = [];
   ModelCatalogRepository _localCatalog =
       ModelCatalogRepository.cached ?? ModelCatalogRepository.empty;
@@ -161,6 +168,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     }
     _initialDraft = _fingerprint;
     _observedService = _serviceSnapshot();
+    widget.saveController?.attach(this, _save);
     for (final controller in [_name, _baseUrl, _apiKey]) {
       controller.addListener(_refresh);
     }
@@ -191,18 +199,38 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   }
 
   Future<void> _loadHeaders() async {
+    final loaded = <String, ModelConfig>{};
     if (widget.provider != null) {
       try {
-        _headers = await ref
-            .read(promptAssistantConfigProvider.notifier)
-            .getProviderHeaders(widget.provider!.id);
+        final notifier = ref.read(promptAssistantConfigProvider.notifier);
+        _headers = await notifier.getProviderHeaders(widget.provider!.id);
+        if (!mounted) return;
         _initialHeaders = jsonEncode(_headers);
+        for (final model in _selected.values.toList()) {
+          final value = await notifier.loadModelRequestOverrides(model);
+          if (!mounted) return;
+          loaded[model.name] = value;
+          _initialModelOverrides[model.name] = value.requestOverrides!.encode();
+        }
       } catch (error) {
         _headersLoadFailed = true;
-        _error = '读取高级请求头失败：$error';
+        _error = '读取自定义请求设置失败：$error';
       }
     }
-    if (mounted) setState(() => _headersLoaded = true);
+    if (mounted) {
+      setState(() {
+        final clean = _fingerprint == _initialDraft;
+        for (final entry in loaded.entries) {
+          if (_selected[entry.key] case final current?) {
+            _selected[entry.key] = current.copyWith(
+              requestOverrides: entry.value.requestOverrides,
+            );
+          }
+        }
+        _headersLoaded = true;
+        if (clean) _initialDraft = _fingerprint;
+      });
+    }
   }
 
   String get _fingerprint => jsonEncode([
@@ -218,6 +246,11 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     _maxConcurrentRequests,
     _retryAttempts,
     _selected.values.map((m) => m.toJson()).toList(),
+    _selected.values.map((m) => m.requestOverrides?.toJson()).toList(),
+    {
+      for (final e in _requestDrafts.entries)
+        if (_selected.containsKey(e.key)) e.key: e.value.fingerprint,
+    },
   ]);
 
   void _refresh() {
@@ -226,6 +259,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
 
   @override
   void dispose() {
+    widget.saveController?.detach(this);
     _name.dispose();
     _baseUrl.dispose();
     _apiKey.dispose();
@@ -286,6 +320,8 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     });
     for (final model in _selected.values) {
       final validation =
+          _requestInputErrors[model.name] ??
+          model.requestOverrides?.validate(model.name) ??
           _modelInputErrors[model.name] ??
           _modelInputErrors['context:${model.name}'] ??
           RequestParameters.fromModel(model).validateFor(_protocol) ??
@@ -366,13 +402,15 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     }
   }
 
-  Future<void> _save() async {
-    if (!_headersLoaded || _headersLoadFailed || !_validate()) return;
+  Future<bool> _save() async {
+    if (_busy || !_headersLoaded || _headersLoadFailed || !_validate()) {
+      return false;
+    }
     for (final model in _selected.values) {
       if ((model.contextWindow != null && model.contextWindow! <= 0) ||
           (model.maxOutputTokens != null && model.maxOutputTokens! <= 0)) {
         setState(() => _error = '模型“${model.name}”的 token 数量必须大于 0。');
-        return;
+        return false;
       }
     }
     setState(() => _busy = true);
@@ -381,30 +419,44 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       final notifier = ref.read(promptAssistantConfigProvider.notifier);
       if (widget.provider != null) {
         final latestHeaders = await notifier.getProviderHeaders(id);
-        if (!mounted) return;
+        if (!mounted) return false;
         if (_serviceSnapshot() != _observedService ||
             jsonEncode(latestHeaders) != _initialHeaders) {
           throw StateError('服务配置已在别处修改，请重新打开后编辑。');
         }
+        for (final entry in _initialModelOverrides.entries) {
+          final current = await notifier.loadModelRequestOverrides(
+            ModelConfig(
+              providerId: id,
+              name: entry.key,
+              displayName: entry.key,
+              hasRequestOverrides: true,
+            ),
+          );
+          if (!mounted) return false;
+          if (current.requestOverrides!.encode() != entry.value) {
+            throw StateError('模型请求设置已在别处修改，请重新打开后编辑。');
+          }
+        }
       }
-      await notifier.upsertProvider(
-        _draft(id: id).copyWith(requestHeaders: const {}),
+      await notifier.saveServiceDraft(
+        provider: _draft(id: id),
+        headers: _headers,
+        apiKey: _clearKey || (_vendorChanged && _apiKey.text.trim().isEmpty)
+            ? ''
+            : _apiKey.text.trim().isNotEmpty
+            ? _apiKey.text
+            : null,
+        models: [
+          for (final model in _selected.values)
+            model.copyWith(
+              providerId: id,
+              displayName: model.displayName.trim().isEmpty
+                  ? model.name
+                  : model.displayName.trim(),
+            ),
+        ],
       );
-      if (_clearKey || (_vendorChanged && _apiKey.text.trim().isEmpty)) {
-        await notifier.setProviderApiKey(id, '');
-      } else if (_apiKey.text.trim().isNotEmpty) {
-        await notifier.setProviderApiKey(id, _apiKey.text);
-      }
-      await notifier.setProviderHeaders(id, _headers);
-      await notifier.replaceProviderModels(id, [
-        for (final model in _selected.values)
-          model.copyWith(
-            providerId: id,
-            displayName: model.displayName.trim().isEmpty
-                ? model.name
-                : model.displayName.trim(),
-          ),
-      ]);
       _vendorChanged = false;
       _clearKey = false;
       _apiKey.clear();
@@ -413,14 +465,23 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
           _initialDraft = _fingerprint;
           _observedService = _serviceSnapshot();
           _initialHeaders = jsonEncode(_headers);
+          _initialModelOverrides
+            ..clear()
+            ..addAll({
+              for (final model in _selected.values)
+                if (model.requestOverrides != null)
+                  model.name: model.requestOverrides!.encode(),
+            });
           widget.onDirtyChanged?.call(false);
           widget.onSaved?.call(id);
         } else {
           Navigator.pop(context);
         }
       }
+      return true;
     } catch (error) {
       if (mounted) setState(() => _error = '保存失败：$error');
+      return false;
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -439,6 +500,8 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         _headers = {};
         _selected.clear();
         _modelInputErrors.clear();
+        _requestDrafts.clear();
+        _requestInputErrors.clear();
         _expandedModel = null;
       }
       _setProtocol(next.defaultProtocol);
@@ -494,6 +557,8 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         _selected.remove(name);
         _modelInputErrors.remove(name);
         _modelInputErrors.remove('context:$name');
+        _requestInputErrors.remove(name);
+        _requestDrafts.remove(name);
         if (_expandedModel == name) _expandedModel = null;
       }
     });
@@ -1131,7 +1196,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
                   onSubmitted: (_) => _addManual(),
                   style: theme.textTheme.bodySmall,
                   decoration: InputDecoration(
-                    hintText: '输入模型 ID，如 my-model-v2',
+                    hintText: '填写需要添加的模型 ID',
                     isDense: true,
                     filled: true,
                     fillColor: colors.surfaceContainerHighest.withValues(
@@ -1200,7 +1265,12 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     key: ValueKey('model-parameters-${model.name}-${_protocol.name}'),
     value: model,
     protocol: _protocol,
-    enabled: !_busy,
+    enabled: !_busy && _headersLoaded && !_headersLoadFailed,
+    requestDraft: _requestDrafts[model.name],
+    onRequestDraftChanged: (draft) =>
+        setState(() => _requestDrafts[model.name] = draft),
+    onRequestValidationChanged: (error) =>
+        _requestInputErrors[model.name] = error,
     onValidationChanged: (error) => _modelInputErrors[model.name] = error,
     onChanged: (value) => setState(() {
       _selected[model.name] = value;

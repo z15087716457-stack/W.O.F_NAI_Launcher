@@ -9148,7 +9148,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockPalette_emptyHint =>
-      '把常用的块拖进来收纳；用的时候点一下插到光标处，或直接拖进提示词框';
+      '把常用的提示词块或翻译块拖进来收纳；用时点一下插到光标处，或直接拖进提示词框。';
 
   @override
   String get promptBlockPalette_remove => '从积木移除';

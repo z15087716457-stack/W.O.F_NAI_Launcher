@@ -90,7 +90,7 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
       dio: dio,
       request: request,
       endpoint: endpoint,
-      payload: payload,
+      payload: promptAssistantRequestBody(request, payload),
       cancelToken: cancelToken,
     );
     return _extractResponseContent(response.data);
@@ -107,7 +107,11 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
     if (request.apiKey != null && request.apiKey!.trim().isNotEmpty) {
       headers['Authorization'] = 'Bearer ${request.apiKey!.trim()}';
     }
-    final requestHeaders = promptAssistantHeaders(request.provider, headers);
+    final requestHeaders = promptAssistantHeaders(
+      request.provider,
+      headers,
+      model: request.modelConfig,
+    );
 
     try {
       return await dio.post<dynamic>(
@@ -139,6 +143,7 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
         );
       }
       if (status == 400 &&
+          request.modelConfig?.requestOverrides?.isEmpty != false &&
           request.modelConfig?.maxOutputTokens == null &&
           request.modelConfig?.reasoningEffort == null &&
           request.modelConfig?.temperature == null &&

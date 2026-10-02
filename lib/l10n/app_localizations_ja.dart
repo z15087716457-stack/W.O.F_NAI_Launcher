@@ -9274,7 +9274,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptBlockPalette_emptyHint =>
-      'よく使うブロックをここにドラッグして収納。使う時はクリックでカーソル位置に挿入、またはプロンプトへドラッグ';
+      'よく使うプロンプトブロックや翻訳ブロックをここに収納。クリックでカーソル位置に挿入するか、プロンプト欄へドラッグできます。';
 
   @override
   String get promptBlockPalette_remove => 'ブロックから削除';

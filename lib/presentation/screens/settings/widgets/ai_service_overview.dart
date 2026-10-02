@@ -16,6 +16,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                   builder: (context, constraints) {
                     final title = Row(
                       children: [
+                        const SizedBox(width: 16),
                         ProviderLogo(_preset, size: 28),
                         const SizedBox(width: 12),
                         Expanded(
@@ -346,13 +347,13 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
       padding: const EdgeInsets.only(bottom: 3),
       child: Material(
         color: colors.onSurface.withValues(alpha: expanded ? .065 : .035),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(8),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               child: Row(
                 children: [
                   Tooltip(
@@ -396,7 +397,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                   ),
                   const SizedBox(width: 5),
                   Tooltip(
-                    message: '用户配置：上下文 / 最大输出；默认值由服务决定',
+                    message: '上下文 / 最大输出；可在高级中调整',
                     child: Text(
                       '${modelTokenLabel(model.contextWindow)} · ${modelTokenLabel(model.maxOutputTokens)}',
                       style: theme.textTheme.labelSmall?.copyWith(
@@ -418,10 +419,10 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                       backgroundColor: colors.onSurface.withValues(alpha: .06),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 7,
-                        vertical: 3,
+                        vertical: 4,
                       ),
-                      minimumSize: const Size(0, 21),
-                      visualDensity: VisualDensity.compact,
+                      minimumSize: const Size(0, 23),
+                      visualDensity: VisualDensity.standard,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       textStyle: theme.textTheme.labelSmall?.copyWith(
                         fontSize: 10.5,

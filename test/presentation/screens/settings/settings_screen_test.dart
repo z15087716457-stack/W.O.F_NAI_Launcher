@@ -369,7 +369,7 @@ void main() {
       container.read(settingsAccountOpenRequestProvider.notifier).state++;
       await tester.pumpAndSettle();
       expect(find.text('保留当前编辑？'), findsOneWidget);
-      await tester.tap(find.text('继续编辑'));
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.text('未保存的服务'), findsNWidgets(2));
       expect(find.byType(AccountSettingsSection), findsNothing);
@@ -400,7 +400,7 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(find.text('保留当前编辑？'), findsOneWidget);
-    await tester.tap(find.text('继续编辑'));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.text('未保存的服务'), findsNWidgets(2));
     expect(find.byType(AccountSettingsSection), findsNothing);
