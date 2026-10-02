@@ -22,6 +22,7 @@ import 'provider_logo.dart';
 import 'provider_picker.dart';
 import 'service_request_controls.dart';
 import 'settings_tile.dart';
+import 'settings_ui_theme.dart';
 
 part 'ai_service_overview.dart';
 part 'ai_service_model_panels.dart';

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'settings_ui_theme.dart';
 
 const modelMenuRadius = BorderRadius.all(Radius.circular(12));
 const modelMenuShape = RoundedRectangleBorder(borderRadius: modelMenuRadius);
@@ -101,37 +102,41 @@ class ModelCompactDropdown<T> extends StatelessWidget {
       builder: (context) {
         final button = TextButton(
           onPressed: canChoose ? () => _open(context) : null,
-          style: TextButton.styleFrom(
-            alignment: Alignment.centerLeft,
-            foregroundColor: colors.onSurface,
-            backgroundColor: decoration != null
-                ? Colors.transparent
-                : colors.surfaceContainerHighest.withValues(alpha: .55),
-            padding: decoration != null
-                ? EdgeInsets.zero
-                : EdgeInsets.symmetric(
-                    horizontal: compact ? 7 : 10,
-                    vertical: compact ? 6 : 9,
-                  ),
-            minimumSize: Size(
-              0,
-              decoration != null
-                  ? 24
-                  : compact
-                  ? 28
-                  : 33,
-            ),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            visualDensity: VisualDensity.standard,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-            textStyle:
-                textStyle ??
-                (compact
-                    ? Theme.of(context).textTheme.labelSmall
-                    : Theme.of(context).textTheme.bodySmall),
-          ),
+          style:
+              TextButton.styleFrom(
+                alignment: Alignment.centerLeft,
+                foregroundColor: colors.onSurface,
+                backgroundColor: decoration != null
+                    ? Colors.transparent
+                    : colors.surfaceContainerHighest.withValues(alpha: .55),
+                padding: decoration != null
+                    ? EdgeInsets.zero
+                    : EdgeInsets.symmetric(
+                        horizontal: compact ? 7 : 10,
+                        vertical: compact ? 6 : 9,
+                      ),
+                minimumSize: Size(
+                  0,
+                  decoration != null
+                      ? 24
+                      : compact
+                      ? 28
+                      : 33,
+                ),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.standard,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                textStyle:
+                    textStyle ??
+                    (compact
+                        ? Theme.of(context).textTheme.labelSmall
+                        : Theme.of(context).textTheme.bodySmall),
+              ).copyWith(
+                overlayColor: decoration == null ? null : settingsFieldOverlay,
+                iconColor: settingsFieldIconColor(colors),
+              ),
           child: Row(
             children: [
               Expanded(

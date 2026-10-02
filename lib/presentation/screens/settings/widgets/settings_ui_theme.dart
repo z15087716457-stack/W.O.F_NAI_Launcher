@@ -30,6 +30,8 @@ ThemeData settingsUiTheme(ThemeData base) {
   );
   return base.copyWith(
     scaffoldBackgroundColor: colors.surface,
+    // Settings rows keep their existing surface; controls own hover feedback.
+    hoverColor: Colors.transparent,
     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     textTheme: base.textTheme.copyWith(
       bodyLarge: text(base.textTheme.bodyLarge, 13),
@@ -164,6 +166,7 @@ ThemeData settingsUiTheme(ThemeData base) {
       ),
     ),
     inputDecorationTheme: base.inputDecorationTheme.copyWith(
+      hoverColor: Colors.transparent,
       filled: false,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
@@ -202,6 +205,27 @@ ThemeData settingsUiTheme(ThemeData base) {
     ),
   );
 }
+
+/// Open property fields use their arrow instead of a full-width hover wash.
+/// Focus and press fall back to the button's normal state feedback.
+final settingsFieldOverlay = WidgetStateProperty.resolveWith<Color?>(
+  (states) =>
+      states.contains(WidgetState.hovered) &&
+          !states.contains(WidgetState.pressed)
+      ? Colors.transparent
+      : null,
+);
+
+WidgetStateProperty<Color?> settingsFieldIconColor(ColorScheme colors) =>
+    WidgetStateProperty.resolveWith(
+      (states) => states.contains(WidgetState.disabled)
+          ? colors.onSurfaceVariant.withValues(alpha: .4)
+          : states.contains(WidgetState.focused)
+          ? colors.primary
+          : states.contains(WidgetState.hovered)
+          ? colors.onSurface
+          : colors.onSurfaceVariant,
+    );
 
 String settingsText(BuildContext context, String zh, String en, String ja) =>
     switch (Localizations.localeOf(context).languageCode) {

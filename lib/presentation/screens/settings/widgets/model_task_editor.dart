@@ -29,6 +29,7 @@ class ModelTaskEditor extends ConsumerStatefulWidget {
 }
 
 class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
+  final _reasoningHelpKey = GlobalKey<TooltipState>();
   final _form = GlobalKey<FormState>();
   late InterfaceSlotConfig _slot;
   late String _initial;
@@ -128,6 +129,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
     required Widget control,
     List<Widget> actions = const [],
     String? help,
+    Widget? labelHelp,
   }) {
     final theme = Theme.of(context);
     return Column(
@@ -142,12 +144,21 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
             runSpacing: 4,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text(
-                label,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (labelHelp != null) ...[
+                    const SizedBox(width: 5),
+                    labelHelp,
+                  ],
+                ],
               ),
               ...actions,
             ],
@@ -326,6 +337,25 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
           ),
           second: _property(
             label: '思考',
+            labelHelp: Tooltip(
+              key: _reasoningHelpKey,
+              message: '纯翻译通常无需开启思考；为兼顾打标、语义分类等处理，建议开启该模型支持的最低思考档位。',
+              waitDuration: const Duration(milliseconds: 450),
+              child: IconButton(
+                key: const Key('task-reasoning-help'),
+                onPressed: () =>
+                    _reasoningHelpKey.currentState?.ensureTooltipVisible(),
+                style: IconButton.styleFrom(
+                  minimumSize: const Size.square(24),
+                  padding: const EdgeInsets.all(4),
+                ),
+                icon: const Icon(
+                  Icons.help_outline,
+                  size: 13,
+                  semanticLabel: '思考档位建议',
+                ),
+              ),
+            ),
             control: ModelReasoningButton(
               model: selected?.model,
               value: _slot.reasoningEffort,
@@ -432,12 +462,11 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
   }
 
   Widget _effectiveFooter(Widget summary) {
-    if (widget.task != LauncherInterface.tagTranslate &&
-        widget.task != LauncherInterface.wikiTranslate) {
-      return summary;
-    }
+    final promptTask =
+        widget.task == LauncherInterface.translate ||
+        widget.task == LauncherInterface.promptReverse;
     final hint = Text(
-      '无需翻译时，也可整理排版并为相关标签添加链接。',
+      promptTask ? '无需翻译时，也可将提示词拆分为模块，通过积木功能自由拼装。' : '无需翻译时，也可整理排版并为相关标签添加链接。',
       key: const Key('task-format-hint'),
       textAlign: TextAlign.right,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -457,9 +486,9 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(flex: 2, child: summary),
+            Expanded(flex: 3, child: summary),
             const SizedBox(width: 24),
-            Expanded(child: hint),
+            Expanded(flex: 2, child: hint),
           ],
         );
       },

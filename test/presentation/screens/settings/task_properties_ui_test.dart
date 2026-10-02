@@ -100,7 +100,11 @@ void main() {
               .fontWeight,
           FontWeight.w400,
         );
-        expect(find.byKey(const Key('task-format-hint')), findsNothing);
+        expect(find.byKey(const Key('task-format-hint')), findsOneWidget);
+        expect(
+          tester.widget<Text>(find.byKey(const Key('task-format-hint'))).data,
+          '无需翻译时，也可将提示词拆分为模块，通过积木功能自由拼装。',
+        );
         for (final task in [
           LauncherInterface.tagTranslate,
           LauncherInterface.wikiTranslate,
@@ -121,7 +125,11 @@ void main() {
           }
           final hint = find.byKey(const Key('task-format-hint'));
           if (task == LauncherInterface.promptReverse) {
-            expect(hint, findsNothing);
+            expect(hint, findsOneWidget);
+            expect(
+              tester.widget<Text>(hint).data,
+              '无需翻译时，也可将提示词拆分为模块，通过积木功能自由拼装。',
+            );
           } else {
             expect(hint, findsOneWidget);
             await tester.ensureVisible(hint);

@@ -680,28 +680,34 @@ extension _ServiceOverview on _AiServiceEditorState {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       const Divider(height: 1),
-      InkWell(
+      TextButton(
         key: const Key('service-advanced-toggle'),
-        onTap: () =>
+        onPressed: () =>
             _updateOverview(() => _advancedExpanded = !_advancedExpanded),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          child: Row(
-            children: [
-              Text(
-                '高级设置',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
+        style:
+            TextButton.styleFrom(
+              alignment: Alignment.centerLeft,
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+            ).copyWith(
+              overlayColor: settingsFieldOverlay,
+              iconColor: settingsFieldIconColor(Theme.of(context).colorScheme),
+            ),
+        child: Row(
+          children: [
+            Text(
+              '高级设置',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
-              const Spacer(),
-              Icon(
-                _advancedExpanded ? Icons.expand_less : Icons.expand_more,
-                size: 17,
-              ),
-            ],
-          ),
+            ),
+            const Spacer(),
+            Icon(
+              _advancedExpanded ? Icons.expand_less : Icons.expand_more,
+              size: 17,
+            ),
+          ],
         ),
       ),
       if (_advancedExpanded) ...[
