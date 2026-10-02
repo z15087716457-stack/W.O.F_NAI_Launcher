@@ -27,6 +27,15 @@ class _PausedSecrets extends harness.MemorySecrets {
   }
 }
 
+class _LoadingSecrets extends harness.MemorySecrets {
+  final loaded = Completer<void>();
+  @override
+  Future<String?> getPromptAssistantHeaders(String id) async {
+    await loaded.future;
+    return super.getPromptAssistantHeaders(id);
+  }
+}
+
 Future<void> _expectFilledEdges(WidgetTester tester) async {
   final button = find.byKey(const Key('service-save'));
   final bounds = tester.getRect(button);
@@ -60,6 +69,25 @@ void main() {
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+  });
+
+  testWidgets('requests wait until saved headers have finished loading', (
+    tester,
+  ) async {
+    final secrets = _LoadingSecrets();
+    await harness.pumpManagement(tester, secrets: secrets);
+    final fetch = find.byKey(const Key('service-fetch-catalog'));
+    final test = find.widgetWithText(OutlinedButton, '测试连接');
+    final save = find.byKey(const Key('service-save'));
+    expect(tester.widget<TextButton>(fetch).onPressed, isNull);
+    expect(tester.widget<OutlinedButton>(test).onPressed, isNull);
+    expect(tester.widget<FilledButton>(save).onPressed, isNull);
+    secrets.loaded.complete();
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextButton>(fetch).onPressed, isNotNull);
+    expect(tester.widget<OutlinedButton>(test).onPressed, isNotNull);
+    expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+    expect(tester.takeException(), isNull);
   });
 
   for (final fail in [false, true]) {

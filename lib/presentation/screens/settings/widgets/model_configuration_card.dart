@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/models/model_catalog_entry.dart';
-import 'model_parameter_fields.dart' show reasoningChoices;
 import 'model_compact_dropdown.dart';
 import 'model_square_checkbox.dart';
 import 'model_request_overrides_editor.dart';
@@ -363,7 +362,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
 
   @override
   Widget build(BuildContext context) {
-    final possible = reasoningChoices(widget.protocol);
+    final possible = widget.protocol.supportedReasoningEfforts;
     final choices = _model.reasoningEfforts ?? const <String>[];
     final colors = Theme.of(context).colorScheme;
     Widget capability(

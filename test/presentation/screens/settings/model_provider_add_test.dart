@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/ai_service_editor_dialog.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/ai_service_editor.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/compact_service_connection.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_dialog.dart';
 
@@ -78,7 +78,7 @@ void main() {
           scale: spec.$2,
         );
         final before = container.read(promptAssistantConfigProvider).encode();
-        final editor = tester.state(find.byType(AiServiceEditorDialog));
+        final editor = tester.state(find.byType(AiServiceEditor));
         await harness.capture(tester, 'provider-add-${spec.$3}-button');
         final add = tester.widget<IconButton>(
           find.byKey(const Key('service-add')),
@@ -88,7 +88,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('选择服务商'), findsOneWidget);
         expect(find.byType(Dialog), findsOneWidget);
-        expect(tester.state(find.byType(AiServiceEditorDialog)), same(editor));
+        expect(tester.state(find.byType(AiServiceEditor)), same(editor));
         expect(container.read(promptAssistantConfigProvider).encode(), before);
         expect(
           find.descendant(
@@ -100,7 +100,7 @@ void main() {
         await harness.capture(tester, 'provider-add-${spec.$3}-picker');
         await tester.sendKeyEvent(LogicalKeyboardKey.escape);
         await tester.pumpAndSettle();
-        expect(tester.state(find.byType(AiServiceEditorDialog)), same(editor));
+        expect(tester.state(find.byType(AiServiceEditor)), same(editor));
         expect(container.read(promptAssistantConfigProvider).encode(), before);
 
         await harness.tapVisible(tester, find.byKey(const Key('service-add')));
@@ -142,13 +142,13 @@ void main() {
       final container = await harness.pumpManagement(tester);
       final before = container.read(promptAssistantConfigProvider).encode();
       await _editName(tester);
-      final editor = tester.state(find.byType(AiServiceEditorDialog));
+      final editor = tester.state(find.byType(AiServiceEditor));
       await harness.tapVisible(tester, find.byKey(const Key('service-add')));
       expect(find.text('选择服务商'), findsOneWidget);
       expect(find.text('保留当前编辑？'), findsNothing);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
-      expect(tester.state(find.byType(AiServiceEditorDialog)), same(editor));
+      expect(tester.state(find.byType(AiServiceEditor)), same(editor));
       expect(_connection(tester).name.text, '修改中的服务');
       expect(container.read(promptAssistantConfigProvider).encode(), before);
 
@@ -156,7 +156,7 @@ void main() {
       expect(find.text('保留当前编辑？'), findsOneWidget);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
-      expect(tester.state(find.byType(AiServiceEditorDialog)), same(editor));
+      expect(tester.state(find.byType(AiServiceEditor)), same(editor));
       expect(_connection(tester).name.text, '修改中的服务');
       await _choose(tester, ProviderPreset.anthropic);
       await tester.tap(find.text('放弃'));
@@ -214,10 +214,10 @@ void main() {
         tester,
         config: harness.sampleConfig.copyWith(providers: [], models: []),
       );
-      expect(find.byType(AiServiceEditorDialog), findsNothing);
+      expect(find.byType(AiServiceEditor), findsNothing);
       await harness.tapVisible(tester, find.byKey(const Key('service-add')));
       expect(find.text('选择服务商'), findsOneWidget);
-      expect(find.byType(AiServiceEditorDialog), findsNothing);
+      expect(find.byType(AiServiceEditor), findsNothing);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.text('添加你的第一个模型服务'), findsOneWidget);

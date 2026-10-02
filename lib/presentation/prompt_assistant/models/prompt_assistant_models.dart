@@ -15,6 +15,35 @@ enum ProviderProtocol {
 }
 
 extension ProviderProtocolLabel on ProviderProtocol {
+  List<String> get supportedReasoningEfforts => switch (this) {
+    ProviderProtocol.openaiChatCompletions ||
+    ProviderProtocol.openaiResponses => const [
+      'none',
+      'minimal',
+      'low',
+      'medium',
+      'high',
+      'xhigh',
+      'max',
+    ],
+    ProviderProtocol.anthropicMessages => const [
+      'none',
+      'low',
+      'medium',
+      'high',
+      'xhigh',
+      'max',
+    ],
+    ProviderProtocol.geminiGenerateContent => const [
+      'none',
+      'minimal',
+      'low',
+      'medium',
+      'high',
+    ],
+    ProviderProtocol.ollamaChatCompletions => const [],
+  };
+
   String get label {
     switch (this) {
       case ProviderProtocol.openaiChatCompletions:
@@ -522,13 +551,13 @@ class ProviderConfig {
   }
 }
 
-/// 模型条目的来源，用于刷新模型列表时区分“可回收的 API 模型”与
-/// “用户/预设手动模型”，避免弃用模型残留，也避免误删手动模型。
+/// 保存模型的来源。接口目录只供主动选择，不会自动填入已保存配置。
+/// 来源仍保留用于旧配置兼容和显式同步。
 enum ModelSource {
-  /// 通过供应商 `/models` 接口拉取；刷新时若不在最新列表里可安全清理。
+  /// 来自供应商 `/models` 接口。
   api,
 
-  /// 用户手动添加，或添加供应商时自动创建的默认/占位模型；刷新时永不删除。
+  /// 用户手动添加；也兼容旧配置中的默认/占位模型。
   manual;
 
   static ModelSource fromName(String? value) => ModelSource.values.firstWhere(
@@ -574,9 +603,7 @@ class ModelConfig {
   /// User-confirmed capabilities; null means unknown.
   final bool? supportsVision, supportsTools, supportsStructuredOutput;
 
-  /// 该模型是自动拉取（[ModelSource.api]）还是手动/默认（[ModelSource.manual]）。
-  /// 默认 [ModelSource.manual]：只有明确从接口拉取的路径才标记为 api，
-  /// 因此手动、预设、占位、测试构造的模型天然免于被刷新清理。
+  /// 接口来源或手动来源；新模型必须经用户选择或手动添加后才能保存。
   final ModelSource source;
 
   const ModelConfig({
@@ -796,7 +823,7 @@ enum LauncherInterface {
 class InterfaceSlotConfig {
   final String providerId;
 
-  /// 选中的模型名；空串 = 使用该服务商的首个模型。
+  /// 选中的模型名。提示词转换要求明确选择；标签任务保留首个已保存模型回退。
   final String model;
   final String? presetId;
   final String targetLanguage;

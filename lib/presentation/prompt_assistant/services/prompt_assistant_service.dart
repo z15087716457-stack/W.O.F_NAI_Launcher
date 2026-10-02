@@ -680,7 +680,7 @@ Prompt version: $tagTranslationPromptVersion
     );
     if (route == null) return '';
     final original =
-        '${route.provider.id}/${route.model}/${route.provider.protocol.name}/${route.provider.baseUrl}';
+        '${route.provider.id}/${route.model.name}/${route.provider.protocol.name}/${route.provider.baseUrl}';
     final wikiRoute = _resolveInterfaceRoute(
       config,
       LauncherInterface.wikiTranslate,
@@ -706,7 +706,7 @@ Prompt version: $tagTranslationPromptVersion
               (slot.presetId != null && !slot.presetId!.startsWith('builtin:'));
         }) ||
         wikiRoute?.provider.id != route.provider.id ||
-        wikiRoute?.model != route.model ||
+        wikiRoute?.model.name != route.model.name ||
         config.models.any(
           (model) => RequestParameters.fromModel(model).toJson().isNotEmpty,
         );
@@ -723,44 +723,38 @@ Prompt version: $tagTranslationPromptVersion
       LauncherInterface.tagTranslate,
     );
     if (route == null) return '';
-    return '${route.provider.name} / ${route.model}';
+    return '${route.provider.name} / ${route.model.name}';
   }
 
-  /// 接口槽路由解析：槽位指向的启用服务商优先，否则回落到第一个启用服务商；
-  /// 无启用服务商或未选真实模型时返回 null，不用预设 ID 代替用户选择。
-  static ({ProviderConfig provider, String model})? _resolveInterfaceRoute(
+  /// Translation requires an explicit route. Tag tasks retain their existing
+  /// fallback to the first enabled provider with a real, saved model.
+  static ({ProviderConfig provider, ModelConfig model})? _resolveInterfaceRoute(
     PromptAssistantConfigState config,
-    LauncherInterface interface,
-  ) {
-    final enabledProviders = config.providers
-        .where((provider) => provider.enabled)
-        .toList();
-    if (enabledProviders.isEmpty) return null;
-
+    LauncherInterface interface, {
+    bool requireExplicit = false,
+  }) {
+    final enabled = config.providers.where((provider) => provider.enabled);
     final slot = config.interfaceFor(interface);
-    var provider = enabledProviders.first;
-    if (slot.isConfigured) {
-      final configured = enabledProviders
-          .where((candidate) => candidate.id == slot.providerId)
-          .firstOrNull;
-      if (configured != null) {
-        provider = configured;
-      }
+    var provider = enabled
+        .where((item) => item.id == slot.providerId)
+        .firstOrNull;
+    if (provider == null) {
+      if (requireExplicit) return null;
+      provider = enabled.firstOrNull;
     }
-
-    final models = config.modelsForProvider(providerId: provider.id);
-    final routedModel = slot.providerId == provider.id ? slot.model.trim() : '';
-    String model;
-    if (routedModel.isNotEmpty &&
-        routedModel != 'default-model' &&
-        models.any((m) => m.name == routedModel)) {
-      model = routedModel;
-    } else {
-      final firstReal = models.where((m) => !m.isPlaceholder).firstOrNull;
-      if (firstReal == null) return null;
-      model = firstReal.name;
+    if (provider == null) return null;
+    final models = config
+        .modelsForProvider(providerId: provider.id)
+        .where((model) => !model.isPlaceholder);
+    final routedName = slot.providerId == provider.id
+        ? (requireExplicit ? slot.model : slot.model.trim())
+        : '';
+    var model = models.where((item) => item.name == routedName).firstOrNull;
+    if (model == null) {
+      if (requireExplicit) return null;
+      model = models.firstOrNull;
     }
-    return (provider: provider, model: model);
+    return model == null ? null : (provider: provider, model: model);
   }
 
   Future<
@@ -768,77 +762,35 @@ Prompt version: $tagTranslationPromptVersion
       ProviderConfig provider,
       String model,
       String? apiKey,
-      ModelConfig? modelConfig,
+      ModelConfig modelConfig,
     })
   >
   _resolveInterfaceExecution(LauncherInterface interface) async {
     final config = _configuration;
-    if (interface == LauncherInterface.translate ||
-        interface == LauncherInterface.promptReverse) {
-      final slot = config.interfaceFor(interface);
-      final provider = config.providers
-          .where((item) => item.enabled && item.id == slot.providerId)
-          .firstOrNull;
-      final model = config.models
-          .where(
-            (item) =>
-                item.providerId == provider?.id &&
-                item.name == slot.model &&
-                !item.isPlaceholder,
-          )
-          .firstOrNull;
-      final selected = provider != null && model != null
-          ? (provider: provider, model: model)
-          : null;
-      if (selected == null) {
-        throw StateError('请先在「设置 → 模型与接口 → 功能接口」选择服务商和模型。');
-      }
-      final apiKey = await _ref
-          .read(promptAssistantConfigProvider.notifier)
-          .getProviderApiKey(selected.provider.id);
-      final headers = await _ref
-          .read(promptAssistantConfigProvider.notifier)
-          .getProviderHeaders(selected.provider.id);
-      return (
-        provider: selected.provider.copyWith(requestHeaders: headers),
-        model: selected.model.name,
-        apiKey: apiKey,
-        modelConfig: effectiveTaskModel(
-          config,
-          interface,
-          await _ref
-              .read(promptAssistantConfigProvider.notifier)
-              .loadModelRequestOverrides(selected.model),
-        ),
+    final strict =
+        interface == LauncherInterface.translate ||
+        interface == LauncherInterface.promptReverse;
+    final route = _resolveInterfaceRoute(
+      config,
+      interface,
+      requireExplicit: strict,
+    );
+    if (route == null) {
+      throw StateError(
+        strict
+            ? '请先在「设置 → 模型与接口 → 功能接口」选择服务商和模型。'
+            : '请先在设置中启用服务，并获取或手动添加后选中一个模型。',
       );
     }
-    final route = _resolveInterfaceRoute(config, interface);
-    if (route == null) {
-      throw StateError('请先在设置中启用服务，并获取或手动添加后选中一个模型。');
-    }
-    final apiKey = await _ref
-        .read(promptAssistantConfigProvider.notifier)
-        .getProviderApiKey(route.provider.id);
-    final headers = await _ref
-        .read(promptAssistantConfigProvider.notifier)
-        .getProviderHeaders(route.provider.id);
-    final modelConfig = config
-        .modelsForProvider(providerId: route.provider.id)
-        .where((item) => item.name == route.model)
-        .firstOrNull;
+    final notifier = _ref.read(promptAssistantConfigProvider.notifier);
+    final apiKey = await notifier.getProviderApiKey(route.provider.id);
+    final headers = await notifier.getProviderHeaders(route.provider.id);
+    final model = await notifier.loadModelRequestOverrides(route.model);
     return (
       provider: route.provider.copyWith(requestHeaders: headers),
-      model: route.model,
+      model: route.model.name,
       apiKey: apiKey,
-      modelConfig: modelConfig == null
-          ? null
-          : effectiveTaskModel(
-              config,
-              interface,
-              await _ref
-                  .read(promptAssistantConfigProvider.notifier)
-                  .loadModelRequestOverrides(modelConfig),
-            ),
+      modelConfig: effectiveTaskModel(config, interface, model),
     );
   }
 }

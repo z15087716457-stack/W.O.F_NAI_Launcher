@@ -8,7 +8,7 @@ import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/providers/model_request_history_provider.dart';
 import '../../../prompt_assistant/providers/provider_connection_health_provider.dart';
-import '../widgets/ai_service_editor_dialog.dart';
+import '../widgets/ai_service_editor.dart';
 import '../widgets/model_management_widgets.dart';
 import '../widgets/model_task_editor.dart';
 import '../widgets/model_preset_editor.dart';
@@ -546,7 +546,7 @@ class ModelManagementSectionState
                             ],
                           ),
                           detail: provider != null || _addingService
-                              ? AiServiceEditorDialog(
+                              ? AiServiceEditor(
                                   key: ValueKey(
                                     'service-editor-$_editorRevision',
                                   ),
@@ -555,7 +555,6 @@ class ModelManagementSectionState
                                   onDelete: provider == null
                                       ? null
                                       : () => _deleteProvider(provider),
-                                  embedded: true,
                                   saveController: _draftSave,
                                   onDirtyChanged: _dirtyChanged,
                                   onTaskSelected: _openTask,

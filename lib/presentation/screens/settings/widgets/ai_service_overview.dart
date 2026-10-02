@@ -1,6 +1,6 @@
-part of 'ai_service_editor_dialog.dart';
+part of 'ai_service_editor.dart';
 
-extension _ServiceOverview on _AiServiceEditorDialogState {
+extension _ServiceOverview on _AiServiceEditorState {
   Widget _buildServiceOverview(BuildContext context, bool dirty) {
     final theme = Theme.of(context), colors = theme.colorScheme;
     return LayoutBuilder(
@@ -65,7 +65,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                           ],
                         ),
                         OutlinedButton.icon(
-                          onPressed: _busy ? null : _testModel,
+                          onPressed: _canOperate ? _testModel : null,
                           icon: const Icon(Icons.power_outlined, size: 15),
                           label: const Text('测试连接'),
                         ),
@@ -158,13 +158,11 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
     );
   }
 
-  bool get _canSaveOverview => !_busy && _headersLoaded && !_headersLoadFailed;
-
   Widget _saveButton() {
     final colors = Theme.of(context).colorScheme;
     return FilledButton(
       key: const Key('service-save'),
-      onPressed: _canSaveOverview ? _save : null,
+      onPressed: _canOperate ? _save : null,
       clipBehavior: Clip.antiAlias,
       style: FilledButton.styleFrom(
         backgroundColor: colors.primary,

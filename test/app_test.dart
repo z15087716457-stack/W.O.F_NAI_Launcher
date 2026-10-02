@@ -19,6 +19,7 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/storage/secure_storage_service.dart';
 import 'package:nai_launcher/core/utils/file_explorer_utils.dart';
 import 'package:nai_launcher/core/utils/nai_resolution_adapter.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_statistics.dart';
@@ -50,6 +51,8 @@ import 'package:nai_launcher/presentation/widgets/shortcuts/shortcut_aware_widge
 class _MockDio extends Mock implements Dio {}
 
 class _MockLocalStorageService extends Mock implements LocalStorageService {}
+
+class _MockSecureStorageService extends Mock implements SecureStorageService {}
 
 /// 简单的 Widget 测试示例
 ///
@@ -917,7 +920,7 @@ void main() {
     test('pollinations is available as a normal provider preset', () {
       const preset = ProviderPreset.pollinations;
 
-      expect(preset.defaultName, 'pollinations.ai');
+      expect(preset.defaultName, 'Pollinations');
       expect(preset.defaultProtocol, ProviderProtocol.openaiChatCompletions);
       expect(preset.defaultBaseUrl, 'https://gen.pollinations.ai');
     });
@@ -1352,6 +1355,19 @@ void main() {
       'deleting a provider clears the interface slots bound to it',
       () async {
         final localStorage = _MockLocalStorageService();
+        final secureStorage = _MockSecureStorageService();
+        when(
+          () => secureStorage.getPromptAssistantApiKey(any()),
+        ).thenAnswer((_) async => null);
+        when(
+          () => secureStorage.getPromptAssistantHeaders(any()),
+        ).thenAnswer((_) async => null);
+        when(
+          () => secureStorage.deletePromptAssistantApiKey(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => secureStorage.deletePromptAssistantHeaders(any()),
+        ).thenAnswer((_) async {});
         when(
           () => localStorage.getSetting<String>(
             StorageKeys.promptAssistantConfigJson,
@@ -1367,6 +1383,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             localStorageServiceProvider.overrideWithValue(localStorage),
+            secureStorageServiceProvider.overrideWithValue(secureStorage),
           ],
         );
         addTearDown(container.dispose);

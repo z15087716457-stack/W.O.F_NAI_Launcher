@@ -33,6 +33,7 @@ class PromptAssistantConfigNotifier
 
   final Ref _ref;
   ModelCatalogRepository? _catalog;
+  Future<void> _pendingServiceChange = Future.value();
 
   LocalStorageService get _local => _ref.read(localStorageServiceProvider);
   SecureStorageService get _secure => _ref.read(secureStorageServiceProvider);
@@ -98,10 +99,21 @@ class PromptAssistantConfigNotifier
 
   Future<void> _persistDraft(PromptAssistantConfigState next) async {
     final observed = state;
-    await _local.setSetting(
-      StorageKeys.promptAssistantConfigJson,
-      next.encode(),
-    );
+    try {
+      await _local.setSetting(
+        StorageKeys.promptAssistantConfigJson,
+        next.encode(),
+      );
+    } catch (_) {
+      if (mounted) {
+        try {
+          await _save();
+        } catch (_) {
+          AppLogger.w('Configuration rollback failed.', 'PromptAssistant');
+        }
+      }
+      rethrow;
+    }
     if (!identical(state, observed)) {
       await _local.setSetting(
         StorageKeys.promptAssistantConfigJson,
@@ -227,71 +239,91 @@ class PromptAssistantConfigNotifier
             !names.contains(m.name))
           _modelOptionsKey(m): null,
     };
-    final before = <String, String?>{};
-    for (final key in writes.keys) {
-      before[key] = await _secure.getPromptAssistantHeaders(key);
-    }
-    final oldKey = apiKey == null
-        ? null
-        : await _secure.getPromptAssistantApiKey(provider.id);
-    if (!identical(state, observed)) throw StateError('配置已变化，请重新保存。');
-    final completed = <String>[];
-    var keyWritten = false;
-    try {
-      for (final entry in writes.entries) {
-        await _writeOptions(entry.key, entry.value);
-        completed.add(entry.key);
-      }
-      if (apiKey != null) {
-        if (apiKey.trim().isEmpty) {
-          await _secure.deletePromptAssistantApiKey(provider.id);
-        } else {
-          await _secure.savePromptAssistantApiKey(provider.id, apiKey.trim());
-        }
-        keyWritten = true;
-      }
-      if (!identical(state, observed)) throw StateError('配置已变化，请重新保存。');
-      await _local.setSetting(
-        StorageKeys.promptAssistantConfigJson,
-        next.encode(),
-      );
-      if (!identical(state, observed)) {
-        await _local.setSetting(
-          StorageKeys.promptAssistantConfigJson,
-          state.encode(),
-        );
-        throw StateError('配置已变化，请重新保存。');
-      }
-      if (!mounted) return;
-      state = next;
-      if (before[provider.id] !=
-              (headers.isEmpty ? null : jsonEncode(headers)) ||
-          (apiKey != null && apiKey.trim() != (oldKey?.trim() ?? ''))) {
-        _ref.read(providerConnectionHealthProvider).invalidate(provider.id);
-      }
-    } catch (_) {
-      for (final key in completed.reversed) {
-        await _writeOptions(key, before[key]);
-      }
-      if (keyWritten) {
-        if (oldKey == null || oldKey.isEmpty) {
-          await _secure.deletePromptAssistantApiKey(provider.id);
-        } else {
-          await _secure.savePromptAssistantApiKey(provider.id, oldKey);
-        }
-      }
-      rethrow;
-    }
+    await _commitServiceChange(
+      observed: observed,
+      next: next,
+      providerId: provider.id,
+      options: writes,
+      apiKey: apiKey,
+    );
   }
+
+  /// Serialize service writes so a stale save cannot roll back a newer save's
+  /// credentials. Publish only after both secure values and config succeed.
+  Future<void> _commitServiceChange({
+    required PromptAssistantConfigState observed,
+    required PromptAssistantConfigState next,
+    required String providerId,
+    required Map<String, String?> options,
+    String? apiKey,
+  }) {
+    final operation = _pendingServiceChange.then<void>((_) async {
+      void checkCurrent() {
+        if (!mounted || !identical(state, observed)) {
+          throw StateError('配置已变化，请重新保存。');
+        }
+      }
+
+      checkCurrent();
+      final before = <String, String?>{};
+      for (final key in options.keys) {
+        before[key] = await _secure.getPromptAssistantHeaders(key);
+      }
+      final oldKey = apiKey == null
+          ? null
+          : await _secure.getPromptAssistantApiKey(providerId);
+      checkCurrent();
+      final attempted = <String>[];
+      var keyAttempted = false;
+      try {
+        for (final entry in options.entries) {
+          attempted.add(entry.key);
+          await _writeOptions(entry.key, entry.value);
+        }
+        if (apiKey != null) {
+          keyAttempted = true;
+          await _writeApiKey(providerId, apiKey.trim());
+        }
+        checkCurrent();
+        await _persistDraft(next);
+        if (mounted &&
+            (before[providerId] != options[providerId] ||
+                (apiKey != null && apiKey.trim() != (oldKey?.trim() ?? '')))) {
+          _ref.read(providerConnectionHealthProvider).invalidate(providerId);
+        }
+      } catch (_) {
+        // A storage call may throw after writing. Restore every attempted key,
+        // and keep restoring the rest if one rollback call also fails.
+        for (final key in attempted.reversed) {
+          try {
+            await _writeOptions(key, before[key]);
+          } catch (_) {
+            AppLogger.w('Service options rollback failed.', 'PromptAssistant');
+          }
+        }
+        if (keyAttempted) {
+          try {
+            await _writeApiKey(providerId, oldKey);
+          } catch (_) {
+            AppLogger.w('Service key rollback failed.', 'PromptAssistant');
+          }
+        }
+        rethrow;
+      }
+    });
+    _pendingServiceChange = operation.catchError((Object _) {});
+    return operation;
+  }
+
+  Future<void> _writeApiKey(String providerId, String? value) =>
+      value == null || value.isEmpty
+      ? _secure.deletePromptAssistantApiKey(providerId)
+      : _secure.savePromptAssistantApiKey(providerId, value);
 
   Future<void> setProviderApiKey(String providerId, String apiKey) async {
     final trimmed = apiKey.trim();
     final previous = await _secure.getPromptAssistantApiKey(providerId);
-    if (trimmed.isEmpty) {
-      await _secure.deletePromptAssistantApiKey(providerId);
-    } else {
-      await _secure.savePromptAssistantApiKey(providerId, trimmed);
-    }
+    await _writeApiKey(providerId, trimmed);
     final next = Map<String, bool>.from(state.providerHasApiKey)
       ..[providerId] = trimmed.isNotEmpty;
     state = state.copyWith(providerHasApiKey: next);
@@ -313,41 +345,33 @@ class PromptAssistantConfigNotifier
   }
 
   Future<void> deleteProvider(String providerId) async {
-    for (final model in state.models.where((m) => m.providerId == providerId)) {
-      if (model.hasRequestOverrides) {
-        await _writeOptions(_modelOptionsKey(model), null);
-      }
-    }
-    final providers = state.providers.where((p) => p.id != providerId).toList();
-    final models = state.models
-        .where((m) => m.providerId != providerId)
-        .toList();
-    final interfaces = Map<LauncherInterface, InterfaceSlotConfig>.from(
-      state.interfaces,
-    );
-    for (final entry in interfaces.entries.toList()) {
-      if (entry.value.providerId == providerId) {
-        interfaces[entry.key] = entry.value.copyWith(providerId: '', model: '');
-      }
-    }
-    final keys = Map<String, bool>.from(state.providerHasApiKey)
+    final observed = state;
+    final keys = Map<String, bool>.from(observed.providerHasApiKey)
       ..remove(providerId);
-    state = state.copyWith(
-      providers: providers,
-      models: models,
-      interfaces: interfaces,
-      providerHasApiKey: keys,
+    await _commitServiceChange(
+      observed: observed,
+      providerId: providerId,
+      apiKey: '',
+      options: {
+        for (final model in observed.models)
+          if (model.providerId == providerId && model.hasRequestOverrides)
+            _modelOptionsKey(model): null,
+        providerId: null,
+      },
+      next: observed.copyWith(
+        providers: observed.providers.where((p) => p.id != providerId).toList(),
+        models: observed.models
+            .where((m) => m.providerId != providerId)
+            .toList(),
+        interfaces: {
+          for (final entry in observed.interfaces.entries)
+            entry.key: entry.value.providerId == providerId
+                ? entry.value.copyWith(providerId: '', model: '')
+                : entry.value,
+        },
+        providerHasApiKey: keys,
+      ),
     );
-    await _secure.deletePromptAssistantApiKey(providerId);
-    try {
-      await _secure.deletePromptAssistantHeaders(providerId);
-    } catch (error) {
-      AppLogger.w(
-        'Failed to delete prompt assistant headers: $error',
-        'PromptAssistant',
-      );
-    }
-    await _save();
   }
 
   /// Persist only models explicitly selected by the user. The remote catalog
@@ -631,11 +655,12 @@ class PromptAssistantConfigNotifier
             ? entry.value.copyWith(presetId: 'builtin:${entry.key.name}')
             : entry.value,
     };
-    state = state.copyWith(
-      presets: state.presets.where((item) => item.id != id).toList(),
-      interfaces: interfaces,
+    await _persistDraft(
+      state.copyWith(
+        presets: state.presets.where((item) => item.id != id).toList(),
+        interfaces: interfaces,
+      ),
     );
-    await _save();
   }
 
   Future<void> importConfiguration(String raw) async {
@@ -697,12 +722,14 @@ class PromptAssistantConfigNotifier
       observed.encode(),
     );
     if (!identical(state, observed)) throw StateError('配置已变化，请重新导入。');
-    state = imported.copyWith(
-      providerHasApiKey: keys,
-      models: [
-        for (final model in imported.models) _enrich(model, imported.providers),
-      ],
+    await _persistDraft(
+      imported.copyWith(
+        providerHasApiKey: keys,
+        models: [
+          for (final model in imported.models)
+            _enrich(model, imported.providers),
+        ],
+      ),
     );
-    await _save();
   }
 }
