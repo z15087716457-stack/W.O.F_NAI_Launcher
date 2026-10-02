@@ -135,12 +135,112 @@ void main() {
         expect(model.source, ModelSource.api);
         expect(model.contextWindow, facts.contextLimit);
         expect(model.maxOutputTokens, facts.outputLimit);
-        expect(_catalog, findsNothing);
+        expect(_row('mistral-small-latest'), findsOneWidget);
+        expect(_row('private-model'), findsOneWidget);
         expect(
           find.byKey(const ValueKey('selected-model-mistral-small-latest')),
           findsOneWidget,
         );
         expect(requests, hasLength(2));
+        await harness.tapVisible(tester, _row('private-model'));
+        await harness.tapVisible(tester, find.byKey(const Key('service-save')));
+        expect(
+          container.read(promptAssistantConfigProvider).providers.length,
+          after.providers.length,
+        );
+        expect(
+          container
+              .read(promptAssistantConfigProvider)
+              .modelsForProvider(providerId: model.providerId)
+              .map((item) => item.name),
+          containsAll(['mistral-small-latest', 'private-model']),
+        );
+        expect(_row('private-model'), findsOneWidget);
+        await _fetch(tester);
+        expect(requests, hasLength(3));
+        expect(requests.last.headers['Authorization'], 'Bearer offline-key');
+        await harness.capture(tester, 'catalog-save-${spec.$3}-new');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+  for (final replaceKey in [false, true]) {
+    testWidgets(
+      'saved provider retains discovery after save, key replacement=$replaceKey',
+      (tester) async {
+        var calls = 0;
+        final secrets = harness.MemorySecrets()
+          ..keys['deepseek'] = 'stored-key';
+        final dio = Dio()
+          ..interceptors.add(
+            InterceptorsWrapper(
+              onRequest: (options, handler) {
+                calls++;
+                expect(
+                  options.headers['Authorization'],
+                  replaceKey ? 'Bearer entered-key' : 'Bearer stored-key',
+                );
+                handler.resolve(
+                  Response(
+                    requestOptions: options,
+                    statusCode: 200,
+                    data: {
+                      'data': [
+                        {'id': 'remote-only'},
+                        {'id': 'unselected-model'},
+                      ],
+                    },
+                  ),
+                );
+              },
+            ),
+          );
+        addTearDown(dio.close);
+        final container = await harness.pumpManagement(
+          tester,
+          dio: dio,
+          secrets: secrets,
+        );
+        if (replaceKey) {
+          await harness.tapVisible(
+            tester,
+            find.byKey(const Key('service-edit-connection')),
+          );
+          await _type(tester, _connection(tester).apiKey, 'entered-key');
+        }
+        await _fetch(tester);
+        await harness.tapVisible(tester, _row('remote-only'));
+        await harness.tapVisible(tester, find.byKey(const Key('service-save')));
+        expect(_row('remote-only'), findsOneWidget);
+        expect(_row('unselected-model'), findsOneWidget);
+        expect(calls, 1);
+        await harness.tapVisible(tester, find.byKey(const Key('service-save')));
+        expect(_row('unselected-model'), findsOneWidget);
+        expect(calls, 1);
+        expect(
+          container
+              .read(promptAssistantConfigProvider)
+              .modelsForProvider(providerId: 'deepseek')
+              .map((m) => m.name),
+          contains('remote-only'),
+        );
+        expect(find.text('保留当前编辑？'), findsNothing);
+        await _fetch(tester);
+        expect(calls, 2);
+        await harness.tapVisible(
+          tester,
+          find.byKey(const Key('service-edit-connection')),
+        );
+        await _type(
+          tester,
+          _connection(tester).url,
+          'https://changed.example.test/v1',
+        );
+        expect(_catalog, findsNothing);
+        expect(
+          find.byKey(const ValueKey('selected-model-remote-only')),
+          findsOneWidget,
+        );
         expect(tester.takeException(), isNull);
       },
     );

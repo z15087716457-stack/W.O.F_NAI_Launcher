@@ -69,11 +69,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                           icon: const Icon(Icons.power_outlined, size: 15),
                           label: const Text('测试连接'),
                         ),
-                        FilledButton(
-                          key: const Key('service-save'),
-                          onPressed: _canSaveOverview ? _save : null,
-                          child: const Text('保存服务'),
-                        ),
+                        _saveButton(),
                         if (widget.provider != null && widget.onDelete != null)
                           IconButton(
                             key: const Key('service-delete'),
@@ -163,6 +159,44 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
   }
 
   bool get _canSaveOverview => !_busy && _headersLoaded && !_headersLoadFailed;
+
+  Widget _saveButton() {
+    final colors = Theme.of(context).colorScheme;
+    return FilledButton(
+      key: const Key('service-save'),
+      onPressed: _canSaveOverview ? _save : null,
+      clipBehavior: Clip.antiAlias,
+      style: FilledButton.styleFrom(
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
+        disabledBackgroundColor: _saving
+            ? colors.primary
+            : colors.onSurface.withValues(alpha: .12),
+        disabledForegroundColor: _saving
+            ? colors.onPrimary
+            : colors.onSurface.withValues(alpha: .38),
+        side: BorderSide.none,
+        overlayColor: colors.onPrimary.withValues(alpha: .08),
+        animationDuration: Duration.zero,
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Opacity(opacity: _saving ? 0 : 1, child: const Text('保存服务')),
+          if (_saving)
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: colors.onPrimary,
+                semanticsLabel: '正在保存服务',
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _overviewSection(
     BuildContext context,

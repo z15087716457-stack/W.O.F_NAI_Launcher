@@ -548,7 +548,7 @@ class ModelManagementSectionState
                           detail: provider != null || _addingService
                               ? AiServiceEditorDialog(
                                   key: ValueKey(
-                                    'service-editor-${provider?.id ?? _serviceTemplate?.name ?? 'new'}-$_editorRevision',
+                                    'service-editor-$_editorRevision',
                                   ),
                                   provider: provider,
                                   initialPreset: _serviceTemplate,
@@ -563,7 +563,6 @@ class ModelManagementSectionState
                                     _providerId = id;
                                     _addingService = false;
                                     _dirty = false;
-                                    _editorRevision++;
                                   }),
                                 )
                               : Center(

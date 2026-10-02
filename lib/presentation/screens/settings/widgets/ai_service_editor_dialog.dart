@@ -86,7 +86,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       _localCatalog.enrich(model, _preset, protocol: _protocol);
   ModelConfig _newModel(String name, ModelSource source) => _enrich(
     ModelConfig(
-      providerId: widget.provider?.id ?? 'draft',
+      providerId: _providerId ?? 'draft',
       name: name,
       displayName: name,
       source: source,
@@ -99,6 +99,9 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   String? _error;
   String? _catalogMessage;
   bool _busy = false;
+  bool _saving = false;
+  String? _savedProviderId;
+  String? get _providerId => _savedProviderId ?? widget.provider?.id;
   bool _headersLoaded = false;
   bool _headersLoadFailed = false;
   bool _vendorChanged = false;
@@ -116,7 +119,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
 
   String _serviceSnapshot() {
     final config = ref.read(promptAssistantConfigProvider);
-    final id = widget.provider?.id;
+    final id = _providerId;
     return jsonEncode({
       'provider': config.providers
           .where((item) => item.id == id)
@@ -286,7 +289,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   }
 
   String _uniqueId() {
-    if (widget.provider != null) return widget.provider!.id;
+    if (_providerId case final id?) return id;
     final normalized = _name.text
         .trim()
         .toLowerCase()
@@ -303,7 +306,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   }
 
   ProviderConfig _draft({String? id}) => ProviderConfig(
-    id: id ?? widget.provider?.id ?? 'draft',
+    id: id ?? _providerId ?? 'draft',
     name: _name.text.trim(),
     type: _preset.legacyType,
     protocol: _protocol,
@@ -360,10 +363,10 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     final entered = _apiKey.text.trim();
     if (entered.isNotEmpty) return entered;
     if (_vendorChanged) return null;
-    if (widget.provider == null) return null;
+    if (_providerId == null) return null;
     return ref
         .read(promptAssistantConfigProvider.notifier)
-        .getProviderApiKey(widget.provider!.id);
+        .getProviderApiKey(_providerId!);
   }
 
   Future<void> _fetchCatalog() async {
@@ -431,11 +434,14 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         return false;
       }
     }
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _saving = true;
+    });
     try {
       final id = _uniqueId();
       final notifier = ref.read(promptAssistantConfigProvider.notifier);
-      if (widget.provider != null) {
+      if (_providerId != null) {
         final latestHeaders = await notifier.getProviderHeaders(id);
         if (!mounted) return false;
         if (_serviceSnapshot() != _observedService ||
@@ -475,10 +481,22 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
             ),
         ],
       );
+      // Committing the entered key does not change the effective connection.
+      // Keep explicit discovery results when the same editor becomes saved.
+      final retainCatalog = _fetchedConnection == _catalogConnection;
+      _savedProviderId = id;
       _vendorChanged = false;
+      _apiKey.removeListener(_refresh);
       _apiKey.clear();
+      _apiKey.addListener(_refresh);
+      if (retainCatalog) _fetchedConnection = _catalogConnection;
+      for (final entry in _selected.entries.toList()) {
+        _selected[entry.key] = entry.value.copyWith(providerId: id);
+      }
       if (mounted) {
         if (widget.embedded) {
+          _editingConnection = false;
+          _advancedExpanded = false;
           _initialDraft = _fingerprint;
           _observedService = _serviceSnapshot();
           _initialHeaders = jsonEncode(_headers);
@@ -500,7 +518,12 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       if (mounted) setState(() => _error = '保存失败：$error');
       return false;
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _saving = false;
+        });
+      }
     }
   }
 
@@ -511,7 +534,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     setState(() {
       _preset = next;
       if (previous.vendor != next.vendor) {
-        _vendorChanged = widget.provider != null;
+        _vendorChanged = _providerId != null;
         _apiKey.clear();
         _headers = {};
         _selected.clear();
@@ -716,12 +739,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
                     onPressed: _busy ? null : () => Navigator.pop(context),
                     child: const Text('取消'),
                   ),
-                  FilledButton(
-                    onPressed: _busy || !_headersLoaded || _headersLoadFailed
-                        ? null
-                        : _save,
-                    child: const Text('保存服务'),
-                  ),
+                  _saveButton(),
                 ],
               ),
             ),
@@ -806,7 +824,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     url: _baseUrl,
     apiKey: _apiKey,
     enabled: !_busy && _headersLoaded,
-    keyHint: widget.provider == null
+    keyHint: _providerId == null
         ? '输入 Key；本地服务可留空'
         : _vendorChanged
         ? '输入此服务商的 Key'
