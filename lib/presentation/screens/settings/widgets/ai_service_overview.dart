@@ -45,46 +45,7 @@ extension _ServiceOverview on _AiServiceEditorState {
                         ),
                       ],
                     );
-                    final actions = Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('启用', style: theme.textTheme.bodySmall),
-                            const SizedBox(width: 7),
-                            SettingsToggle(
-                              value: _enabled,
-                              onChanged: _busy
-                                  ? null
-                                  : (value) =>
-                                        _updateOverview(() => _enabled = value),
-                            ),
-                          ],
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: _canOperate ? _testModel : null,
-                          icon: const Icon(Icons.power_outlined, size: 15),
-                          label: const Text('测试连接'),
-                        ),
-                        _saveButton(),
-                        if (widget.provider != null && widget.onDelete != null)
-                          IconButton(
-                            key: const Key('service-delete'),
-                            tooltip: '删除服务',
-                            onPressed: _busy ? null : widget.onDelete,
-                            style: IconButton.styleFrom(
-                              foregroundColor: colors.onSurfaceVariant,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            icon: const Icon(Icons.delete_outline, size: 18),
-                          ),
-                      ],
-                    );
+                    final actions = _serviceActions(constraints.maxWidth);
                     return constraints.maxWidth <
                             650 * MediaQuery.textScalerOf(context).scale(1)
                         ? Column(
@@ -158,6 +119,86 @@ extension _ServiceOverview on _AiServiceEditorState {
     );
   }
 
+  Widget _serviceActions(double availableWidth) {
+    final theme = Theme.of(context), colors = theme.colorScheme;
+    final compact =
+        availableWidth < 440 * MediaQuery.textScalerOf(context).scale(1);
+    Widget separator() => SizedBox(
+      height: 22,
+      child: VerticalDivider(width: 12, color: colors.outlineVariant),
+    );
+    return Material(
+      key: const Key('service-actions'),
+      color: colors.onSurface.withValues(alpha: .035),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('启用', style: theme.textTheme.bodySmall),
+                  const SizedBox(width: 7),
+                  SettingsToggle(
+                    key: const Key('service-enabled'),
+                    value: _enabled,
+                    onChanged: _busy
+                        ? null
+                        : (value) => _updateOverview(() => _enabled = value),
+                  ),
+                ],
+              ),
+            ),
+            if (!compact) separator(),
+            TextButton.icon(
+              key: const Key('service-test'),
+              onPressed: _canOperate ? _testModel : null,
+              style: TextButton.styleFrom(
+                foregroundColor: colors.onSurface,
+                minimumSize: const Size(0, 32),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
+                ),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: serviceControlRadius,
+                ),
+              ),
+              icon: const Icon(Icons.power_outlined, size: 15),
+              label: const Text('测试连接'),
+            ),
+            _saveButton(),
+            if (widget.provider != null && widget.onDelete != null) ...[
+              if (!compact) separator(),
+              IconButton(
+                key: const Key('service-delete'),
+                tooltip: '删除服务',
+                onPressed: _busy ? null : widget.onDelete,
+                style: IconButton.styleFrom(
+                  fixedSize: const Size.square(32),
+                  minimumSize: const Size.square(32),
+                  padding: EdgeInsets.zero,
+                  foregroundColor: colors.onSurfaceVariant,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: serviceControlRadius,
+                  ),
+                ),
+                icon: const Icon(Icons.delete_outline, size: 18),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _saveButton() {
     final colors = Theme.of(context).colorScheme;
     return FilledButton(
@@ -174,6 +215,9 @@ extension _ServiceOverview on _AiServiceEditorState {
             ? colors.onPrimary
             : colors.onSurface.withValues(alpha: .38),
         side: BorderSide.none,
+        minimumSize: const Size(0, 32),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        shape: const RoundedRectangleBorder(borderRadius: serviceControlRadius),
         overlayColor: colors.onPrimary.withValues(alpha: .08),
         animationDuration: Duration.zero,
       ),
@@ -435,7 +479,6 @@ extension _ServiceOverview on _AiServiceEditorState {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          fontFamily: StudioTypography.mono,
                           fontSize: 11,
                         ),
                       ),

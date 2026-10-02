@@ -153,15 +153,19 @@ Future<ProviderContainer> pumpManagement(
   double scale = 1,
   MemorySecrets? secrets,
   Dio? dio,
+  MemorySettings? settings,
   PromptAssistantConfigState config = sampleConfig,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
-  final storage = MemorySettings()
-    ..values[StorageKeys.promptAssistantConfigJson] = config.encode()
-    ..values[StorageKeys.settingsFontScale] = scale;
+  final storage = settings ?? MemorySettings();
+  storage.values.putIfAbsent(
+    StorageKeys.promptAssistantConfigJson,
+    config.encode,
+  );
+  storage.values[StorageKeys.settingsFontScale] = scale;
   await tester.pumpWidget(
     ProviderScope(
       overrides: [

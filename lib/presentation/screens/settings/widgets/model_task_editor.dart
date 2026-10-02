@@ -146,6 +146,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                 label,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               ...actions,
@@ -241,7 +242,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
     );
     final valueStyle = theme.textTheme.bodyMedium?.copyWith(
       fontSize: 15,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       color: colors.onSurface,
     );
     final presetActions = [
@@ -394,37 +395,74 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
           style: theme.textTheme.bodySmall!.copyWith(
             color: colors.onSurfaceVariant,
           ),
-          child: Wrap(
-            key: const Key('task-effective-summary'),
-            spacing: 16,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                '当前生效',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                selected == null
-                    ? '尚未选择可用模型'
-                    : '${selected.provider.name} · ${selected.model.name}',
-              ),
-              if (effectiveModel != null)
+          child: _effectiveFooter(
+            Wrap(
+              key: const Key('task-effective-summary'),
+              spacing: 16,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
                 Text(
-                  '思考：${reasoningEffortLabel(effectiveModel.reasoningEffort)}${usesInterfaceReasoning ? '（本接口）' : '（跟随模型）'}',
+                  '当前生效',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              Text(preset.name),
-              Text(
-                widget.task == LauncherInterface.promptReverse
-                    ? '英文生成提示词'
-                    : languages[_slot.targetLanguage] ?? '跟随界面语言',
-              ),
-            ],
+                Text(
+                  selected == null
+                      ? '尚未选择可用模型'
+                      : '${selected.provider.name} · ${selected.model.name}',
+                ),
+                if (effectiveModel != null)
+                  Text(
+                    '思考：${reasoningEffortLabel(effectiveModel.reasoningEffort)}${usesInterfaceReasoning ? '（本接口）' : '（跟随模型）'}',
+                  ),
+                Text(preset.name),
+                Text(
+                  widget.task == LauncherInterface.promptReverse
+                      ? '英文生成提示词'
+                      : languages[_slot.targetLanguage] ?? '跟随界面语言',
+                ),
+              ],
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _effectiveFooter(Widget summary) {
+    if (widget.task != LauncherInterface.tagTranslate &&
+        widget.task != LauncherInterface.wikiTranslate) {
+      return summary;
+    }
+    final hint = Text(
+      '无需翻译时，也可整理排版并为相关标签添加链接。',
+      key: const Key('task-format-hint'),
+      textAlign: TextAlign.right,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontWeight: FontWeight.w400,
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth <
+            760 * MediaQuery.textScalerOf(context).scale(1)) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [summary, const SizedBox(height: 12), hint],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(flex: 2, child: summary),
+            const SizedBox(width: 24),
+            Expanded(child: hint),
+          ],
+        );
+      },
     );
   }
 

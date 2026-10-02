@@ -66,6 +66,90 @@ void main() {
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
 
+  for (final spec in [
+    (const Size(1440, 820), 1.0, 'wide'),
+    (const Size(600, 760), 1.3, 'compact'),
+  ]) {
+    testWidgets(
+      'task typography and contextual footer remain clear: ${spec.$3}',
+      (tester) async {
+        await harness.pumpManagement(
+          tester,
+          config: _config,
+          size: spec.$1,
+          scale: spec.$2,
+        );
+        await _open(tester);
+        for (final label in ['服务商与模型', '思考', '使用预设', '目标语言']) {
+          expect(
+            tester.widget<Text>(find.text(label)).style!.fontWeight,
+            FontWeight.w600,
+          );
+        }
+        expect(
+          tester
+              .widget<ModelCompactDropdown<String>>(_route)
+              .textStyle!
+              .fontWeight,
+          FontWeight.w400,
+        );
+        expect(
+          tester
+              .widget<Text>(find.byKey(const Key('task-reasoning-value')))
+              .style!
+              .fontWeight,
+          FontWeight.w400,
+        );
+        expect(find.byKey(const Key('task-format-hint')), findsNothing);
+        for (final task in [
+          LauncherInterface.tagTranslate,
+          LauncherInterface.wikiTranslate,
+          LauncherInterface.promptReverse,
+        ]) {
+          if (spec.$3 == 'compact') {
+            await harness.tapVisible(
+              tester,
+              find.byType(DropdownButtonFormField<LauncherInterface>),
+            );
+            await tester.tap(find.text(task.title).last);
+            await tester.pumpAndSettle();
+          } else {
+            await harness.tapVisible(
+              tester,
+              find.widgetWithText(ManagementListItem, task.title),
+            );
+          }
+          final hint = find.byKey(const Key('task-format-hint'));
+          if (task == LauncherInterface.promptReverse) {
+            expect(hint, findsNothing);
+          } else {
+            expect(hint, findsOneWidget);
+            await tester.ensureVisible(hint);
+            await tester.pumpAndSettle();
+            expect(tester.widget<Text>(hint).data, '无需翻译时，也可整理排版并为相关标签添加链接。');
+            final bounds = tester.getRect(hint);
+            expect(bounds.right, lessThanOrEqualTo(spec.$1.width));
+            if (spec.$3 == 'compact') {
+              expect(
+                bounds.top,
+                greaterThan(
+                  tester
+                      .getRect(find.byKey(const Key('task-effective-summary')))
+                      .bottom,
+                ),
+              );
+            }
+            await harness.capture(
+              tester,
+              'service-finish-${task.name}-${spec.$3}',
+            );
+          }
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('C properties align without outlines and preserve draft save', (
     tester,
   ) async {

@@ -220,13 +220,14 @@ void main() {
         );
       }
     }
-    final retry = tester.widget<SegmentedButton<int>>(
-      find.descendant(
-        of: _field('retry-attempts'),
-        matching: find.byType(SegmentedButton<int>),
-      ),
+    final retries = find.descendant(
+      of: _field('retry-attempts'),
+      matching: find.byType(TextButton),
     );
-    expect(retry.onSelectionChanged, isNull);
+    expect(retries, findsNWidgets(4));
+    for (final button in tester.widgetList<TextButton>(retries)) {
+      expect(button.onPressed, isNull);
+    }
     secrets.pause!.complete();
     await tester.pumpAndSettle();
     expect(

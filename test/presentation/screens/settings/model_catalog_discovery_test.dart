@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
+import 'package:nai_launcher/presentation/prompt_assistant/services/provider_model_list_cache.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/model_management_widgets.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/compact_service_connection.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'model_management_section_test.dart' as harness;
@@ -40,6 +42,229 @@ void main() {
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
+  for (final newProvider in [false, true]) {
+    testWidgets(
+      'full fetched directory survives navigation and restart, new=$newProvider',
+      (tester) async {
+        final storage = harness.MemorySettings();
+        final secrets = harness.MemorySecrets()
+          ..keys['deepseek'] = 'stored-key';
+        var calls = 0;
+        var fail = false;
+        var ids = ['remote-only', 'unselected-model'];
+        final dio = Dio()
+          ..interceptors.add(
+            InterceptorsWrapper(
+              onRequest: (options, handler) {
+                calls++;
+                if (fail) {
+                  handler.reject(
+                    DioException(
+                      requestOptions: options,
+                      error: 'offline refresh failure',
+                    ),
+                  );
+                } else {
+                  handler.resolve(
+                    Response(
+                      requestOptions: options,
+                      statusCode: 200,
+                      data: {
+                        'data': [
+                          for (final id in ids) {'id': id},
+                        ],
+                      },
+                    ),
+                  );
+                }
+              },
+            ),
+          );
+        addTearDown(dio.close);
+        var container = await harness.pumpManagement(
+          tester,
+          settings: storage,
+          secrets: secrets,
+          dio: dio,
+        );
+        if (newProvider) {
+          await harness.tapVisible(
+            tester,
+            find.byKey(const Key('service-add')),
+          );
+          await harness.tapVisible(
+            tester,
+            find.byKey(const ValueKey('choose-provider-mistral')),
+          );
+          await _type(tester, _connection(tester).apiKey, 'draft-key');
+        }
+        expect(_catalog, findsNothing);
+        expect(calls, 0);
+        await _fetch(tester);
+        await harness.tapVisible(tester, _row('remote-only'));
+        await harness.tapVisible(tester, find.byKey(const Key('service-save')));
+        final config = container.read(promptAssistantConfigProvider);
+        final provider = newProvider
+            ? config.providers.last
+            : config.providers.first;
+        expect(
+          config.modelsForProvider(providerId: provider.id).map((m) => m.name),
+          isNot(contains('unselected-model')),
+        );
+        final fingerprint = ProviderModelListCache.fingerprint(
+          provider,
+          secrets.keys[provider.id],
+          {},
+        );
+        expect(
+          container
+              .read(providerModelListCacheProvider)
+              .modelsFor(provider.id, fingerprint),
+          ['remote-only', 'unselected-model'],
+        );
+        await harness.tapVisible(tester, find.text('功能接口').first);
+        await harness.tapVisible(tester, find.text('服务商').first);
+        expect(_row('unselected-model'), findsOneWidget);
+        expect(calls, 1);
+        for (final row in [
+          _row('remote-only'),
+          find.byKey(const ValueKey('selected-model-remote-only')),
+        ]) {
+          final text = find.descendant(
+            of: row,
+            matching: find.text('remote-only'),
+          );
+          final widget = tester.widget<Text>(text);
+          expect(
+            widget.style!.fontFamily,
+            Theme.of(tester.element(text)).textTheme.bodySmall!.fontFamily,
+          );
+        }
+        await tester.pumpWidget(const SizedBox());
+        container = await harness.pumpManagement(
+          tester,
+          settings: storage,
+          secrets: secrets,
+          dio: dio,
+        );
+        if (newProvider) {
+          await harness.tapVisible(
+            tester,
+            find.widgetWithText(ManagementListItem, provider.name),
+          );
+        }
+        expect(_row('unselected-model'), findsOneWidget);
+        expect(calls, 1);
+        await harness.capture(
+          tester,
+          'service-finish-cached-${newProvider ? 'new' : 'existing'}',
+        );
+        ids = ['replacement-model'];
+        await _fetch(tester);
+        expect(_row('unselected-model'), findsNothing);
+        expect(_row('replacement-model'), findsOneWidget);
+        fail = true;
+        await _fetch(tester);
+        expect(_row('replacement-model'), findsOneWidget);
+        expect(
+          container
+              .read(providerModelListCacheProvider)
+              .modelsFor(provider.id, fingerprint),
+          ['replacement-model'],
+        );
+        await tester.pumpWidget(const SizedBox());
+        await harness.pumpManagement(
+          tester,
+          settings: storage,
+          secrets: secrets,
+          dio: dio,
+        );
+        if (newProvider) {
+          await harness.tapVisible(
+            tester,
+            find.widgetWithText(ManagementListItem, provider.name),
+          );
+        }
+        expect(_row('replacement-model'), findsOneWidget);
+        expect(calls, 3);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets(
+    'unsaved connection discovery cannot replace the saved directory',
+    (tester) async {
+      final storage = harness.MemorySettings();
+      final secrets = harness.MemorySecrets()..keys['deepseek'] = 'stored-key';
+      var calls = 0;
+      final dio = Dio()
+        ..interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options, handler) {
+              calls++;
+              handler.resolve(
+                Response(
+                  requestOptions: options,
+                  statusCode: 200,
+                  data: {
+                    'data': [
+                      {
+                        'id': calls == 1
+                            ? 'original-model'
+                            : 'draft-only-model',
+                      },
+                    ],
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      addTearDown(dio.close);
+      final container = await harness.pumpManagement(
+        tester,
+        settings: storage,
+        secrets: secrets,
+        dio: dio,
+      );
+      final provider = container
+          .read(promptAssistantConfigProvider)
+          .providers
+          .first;
+      final fingerprint = ProviderModelListCache.fingerprint(
+        provider,
+        'stored-key',
+        {},
+      );
+      await _fetch(tester);
+      await harness.tapVisible(
+        tester,
+        find.byKey(const Key('service-edit-connection')),
+      );
+      await _type(
+        tester,
+        _connection(tester).url,
+        'https://draft.offline.test/v1',
+      );
+      expect(_catalog, findsNothing);
+      await _fetch(tester);
+      expect(_row('draft-only-model'), findsOneWidget);
+      expect(
+        container
+            .read(providerModelListCacheProvider)
+            .modelsFor(provider.id, fingerprint),
+        ['original-model'],
+      );
+      await harness.tapVisible(tester, find.text('功能接口').first);
+      await harness.tapVisible(tester, find.text('放弃'));
+      await harness.tapVisible(tester, find.text('服务商').first);
+      expect(_row('original-model'), findsOneWidget);
+      expect(_row('draft-only-model'), findsNothing);
+      expect(calls, 2);
+      expect(tester.takeException(), isNull);
+    },
+  );
   for (final spec in [
     (const Size(1200, 820), 1.0, 'wide'),
     (const Size(600, 760), 1.3, 'compact'),

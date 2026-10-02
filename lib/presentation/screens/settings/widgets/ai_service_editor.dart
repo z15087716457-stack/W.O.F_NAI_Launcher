@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/app_logger.dart';
 import '../../../prompt_assistant/models/model_catalog_entry.dart';
 import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/services/model_catalog_repository.dart';
+import '../../../prompt_assistant/services/provider_model_list_cache.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
-import '../../../themes/studio_typography.dart';
 import 'compact_service_connection.dart';
 import 'model_configuration_card.dart';
 import 'model_draft_save_controller.dart';
@@ -84,6 +85,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
   );
   bool _catalogFromApi = false;
   String? _fetchedConnection;
+  String? _catalogFingerprint;
   String? _expandedModel;
   String? _error;
   String? _catalogMessage;
@@ -219,6 +221,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
         _headersLoaded = true;
         if (clean) _initialDraft = _fingerprint;
       });
+      await _restoreCatalog();
     }
   }
 
@@ -263,6 +266,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
       _catalogFromApi = false;
       _catalogMessage = null;
       _fetchedConnection = null;
+      _catalogFingerprint = null;
     }
   }
 
@@ -368,22 +372,112 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
       _catalogMessage = '正在读取模型目录…';
     });
     try {
+      final provider = _draft();
+      final headers = Map<String, String>.from(_headers);
+      final key = await _effectiveKey();
+      if (!mounted || connection != _catalogConnection) return;
       final names = await ref
           .read(promptAssistantServiceProvider)
-          .fetchModelsForDraft(_draft(), await _effectiveKey(), _headers);
+          .fetchModelsForDraft(provider, key, headers);
       if (!mounted || connection != _catalogConnection) return;
       setState(() {
         _catalog = names;
         _catalogFromApi = true;
         _fetchedConnection = connection;
+        _catalogFingerprint = ProviderModelListCache.fingerprint(
+          provider,
+          key,
+          headers,
+        );
         _catalogMessage = '目录返回 ${names.length} 个模型。勾选需要使用的模型。';
       });
+      await _persistCatalog();
     } catch (error) {
       if (!mounted || connection != _catalogConnection) return;
       setState(() => _catalogMessage = '目录不可用：$error。可以手动添加模型 ID。');
     } finally {
       if (mounted) setState(() => _operation = null);
     }
+  }
+
+  Future<void> _restoreCatalog() async {
+    try {
+      final id = _providerId;
+      if (id == null ||
+          !_headersLoaded ||
+          _headersLoadFailed ||
+          _catalogFromApi) {
+        return;
+      }
+      final connection = _catalogConnection;
+      final key = await _effectiveKey();
+      if (!mounted || connection != _catalogConnection || _catalogFromApi) {
+        return;
+      }
+      final fingerprint = ProviderModelListCache.fingerprint(
+        _draft(),
+        key,
+        _headers,
+      );
+      final names = ref
+          .read(providerModelListCacheProvider)
+          .modelsFor(id, fingerprint);
+      if (names == null) return;
+      setState(() {
+        _catalog = names;
+        _catalogFromApi = true;
+        _fetchedConnection = connection;
+        _catalogFingerprint = fingerprint;
+        _catalogMessage = '已载入上次获取的 ${names.length} 个模型。点击“获取列表”可刷新。';
+      });
+    } catch (_) {
+      AppLogger.w('Model list cache read failed.', 'PromptAssistant');
+    }
+  }
+
+  Future<void> _persistCatalog() async {
+    try {
+      final id = _providerId;
+      final fingerprint = _catalogFingerprint;
+      if (id == null || fingerprint == null || !_catalogFromApi) return;
+      final names = List<String>.from(_catalog);
+      final provider = ref
+          .read(promptAssistantConfigProvider)
+          .providers
+          .where((item) => item.id == id)
+          .firstOrNull;
+      if (provider == null) return;
+      final cache = ref.read(providerModelListCacheProvider);
+      final notifier = ref.read(promptAssistantConfigProvider.notifier);
+      final key = await notifier.getProviderApiKey(id);
+      final headers = await notifier.getProviderHeaders(id);
+      if (!mounted) return;
+      final latestProvider = ref
+          .read(promptAssistantConfigProvider)
+          .providers
+          .where((item) => item.id == id)
+          .firstOrNull;
+      if (latestProvider == null ||
+          _fetchedConnection != _catalogConnection ||
+          fingerprint != _catalogFingerprint ||
+          fingerprint !=
+              ProviderModelListCache.fingerprint(
+                latestProvider,
+                key,
+                headers,
+              )) {
+        return;
+      }
+      final saved = await cache.save(id, fingerprint, names);
+      if (!saved) _cacheSaveFailed();
+    } catch (_) {
+      AppLogger.w('Model list cache save failed.', 'PromptAssistant');
+      _cacheSaveFailed();
+    }
+  }
+
+  void _cacheSaveFailed() {
+    if (mounted) setState(() => _catalogMessage = '模型列表已获取，但本地缓存保存失败，下次需重新获取。');
   }
 
   Future<void> _testModel() async {
@@ -495,6 +589,8 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
               model.name: model.requestOverrides!.encode(),
         });
       widget.onDirtyChanged?.call(false);
+      await _persistCatalog();
+      if (!mounted) return true;
       widget.onSaved(id);
       return true;
     } catch (error) {
@@ -536,6 +632,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
       _catalog = [];
       _catalogFromApi = false;
       _fetchedConnection = null;
+      _catalogFingerprint = null;
       _catalogMessage = null;
       _catalogSearch.clear();
     });

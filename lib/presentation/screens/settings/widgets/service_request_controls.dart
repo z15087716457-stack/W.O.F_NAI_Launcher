@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../../../themes/studio_typography.dart';
 
+const serviceControlRadius = BorderRadius.all(Radius.circular(6));
+
 class ServiceRequestStepper extends StatefulWidget {
   const ServiceRequestStepper({
     super.key,
@@ -73,7 +75,7 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
     final invalid =
         widget.value < widget.minimum || widget.value > widget.maximum;
     final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: serviceControlRadius,
       borderSide: BorderSide(color: colors.outlineVariant),
     );
     Widget button(int direction) {
@@ -85,7 +87,7 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
                   : widget.value < widget.maximum));
       return DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: serviceControlRadius,
           boxShadow: enabled
               ? [
                   BoxShadow(
@@ -114,7 +116,7 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             visualDensity: VisualDensity.standard,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: serviceControlRadius,
               side: BorderSide(
                 color: colors.outlineVariant.withValues(alpha: .6),
               ),
@@ -235,39 +237,48 @@ class ServiceRetrySegments extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context), colors = theme.colorScheme;
-    return SegmentedButton<int>(
-      showSelectedIcon: false,
-      expandedInsets: EdgeInsets.zero,
-      segments: [
-        for (var i = 0; i <= 3; i++)
-          ButtonSegment(value: i, label: Text(i == 0 ? '关闭' : '$i 次')),
-      ],
-      selected: {value},
-      onSelectionChanged: enabled ? (values) => onChanged(values.single) : null,
-      style: ButtonStyle(
-        minimumSize: const WidgetStatePropertyAll(Size(0, 34)),
-        padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        ),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.standard,
-        textStyle: WidgetStatePropertyAll(theme.textTheme.bodyMedium),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        ),
-        side: WidgetStatePropertyAll(
-          BorderSide(color: colors.outlineVariant.withValues(alpha: .65)),
-        ),
-        backgroundColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? colors.onSurface.withValues(alpha: enabled ? 1 : .4)
-              : colors.onSurface.withValues(alpha: .045),
-        ),
-        foregroundColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? colors.surface
-              : colors.onSurfaceVariant.withValues(alpha: enabled ? 1 : .4),
-        ),
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: colors.onSurface.withValues(alpha: .045),
+        borderRadius: serviceControlRadius,
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i <= 3; i++)
+            Expanded(
+              child: Semantics(
+                selected: value == i,
+                child: TextButton(
+                  key: ValueKey('service-retry-$i'),
+                  onPressed: enabled ? () => onChanged(i) : null,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, 28),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    foregroundColor: value == i
+                        ? colors.surface
+                        : colors.onSurfaceVariant,
+                    backgroundColor: value == i
+                        ? colors.onSurface
+                        : Colors.transparent,
+                    disabledBackgroundColor: value == i
+                        ? colors.onSurface.withValues(alpha: .12)
+                        : Colors.transparent,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: serviceControlRadius,
+                    ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.standard,
+                    textStyle: theme.textTheme.bodyMedium,
+                  ),
+                  child: Text(i == 0 ? '关闭' : '$i 次'),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

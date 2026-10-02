@@ -10,6 +10,7 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assista
 import 'package:nai_launcher/presentation/prompt_assistant/models/model_request_overrides.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalog_repository.dart';
+import 'package:nai_launcher/presentation/prompt_assistant/services/provider_model_list_cache.dart';
 
 import '../screens/settings/model_management_section_test.dart' as harness;
 
@@ -97,6 +98,64 @@ Future<ProviderContainer> _container(_Settings local, _Secrets secrets) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(ModelCatalogRepository.load);
+
+  for (final change in [
+    'none',
+    'endpoint',
+    'protocol',
+    'key',
+    'headers',
+    'delete',
+    'failed',
+  ]) {
+    test('saved connection cache invalidation: $change', () async {
+      final local = _Settings();
+      final secrets = _Secrets();
+      final container = await _container(local, secrets);
+      final notifier = container.read(promptAssistantConfigProvider.notifier);
+      final provider = container
+          .read(promptAssistantConfigProvider)
+          .providers
+          .first;
+      final cache = container.read(providerModelListCacheProvider);
+      final fingerprint = ProviderModelListCache.fingerprint(
+        provider,
+        'previous-key',
+        {'X-Client': 'previous-client'},
+      );
+      await cache.save(provider.id, fingerprint, ['selected', 'unselected']);
+      if (change == 'delete') {
+        await notifier.deleteProvider(provider.id);
+      } else {
+        if (change == 'failed') local.failAfterWrite = true;
+        final saving = notifier.saveServiceDraft(
+          provider: change == 'endpoint' || change == 'failed'
+              ? provider.copyWith(baseUrl: 'https://other.offline.test/v1')
+              : change == 'protocol'
+              ? provider.copyWith(protocol: ProviderProtocol.openaiResponses)
+              : provider.copyWith(name: '名称更改仍保留目录'),
+          models: [_model],
+          headers: {
+            'X-Client': change == 'headers'
+                ? 'different-client'
+                : 'previous-client',
+          },
+          apiKey: change == 'key' ? 'different-key' : null,
+        );
+        if (change == 'failed') {
+          await expectLater(saving, throwsStateError);
+        } else {
+          await saving;
+        }
+      }
+      expect(
+        cache.modelsFor(provider.id, fingerprint),
+        change == 'none' || change == 'failed'
+            ? ['selected', 'unselected']
+            : isNull,
+      );
+    });
+  }
 
   for (final stage in ['options', 'key', 'config']) {
     for (final afterWrite in [false, true]) {

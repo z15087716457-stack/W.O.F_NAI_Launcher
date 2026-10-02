@@ -205,8 +205,6 @@ extension _ServiceModelPanels on _AiServiceEditorState {
                                                 overflow: TextOverflow.ellipsis,
                                                 style: theme.textTheme.bodySmall
                                                     ?.copyWith(
-                                                      fontFamily:
-                                                          StudioTypography.mono,
                                                       fontSize: 11,
                                                       fontWeight:
                                                           FontWeight.w400,

@@ -94,7 +94,7 @@ class ModelReasoningButton extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontSize: 15,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                     color: canChoose
                         ? colors.onSurface
                         : colors.onSurfaceVariant,

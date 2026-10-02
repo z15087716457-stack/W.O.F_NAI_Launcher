@@ -77,15 +77,15 @@ void main() {
     final secrets = _LoadingSecrets();
     await harness.pumpManagement(tester, secrets: secrets);
     final fetch = find.byKey(const Key('service-fetch-catalog'));
-    final test = find.widgetWithText(OutlinedButton, '测试连接');
+    final test = find.byKey(const Key('service-test'));
     final save = find.byKey(const Key('service-save'));
     expect(tester.widget<TextButton>(fetch).onPressed, isNull);
-    expect(tester.widget<OutlinedButton>(test).onPressed, isNull);
+    expect(tester.widget<TextButton>(test).onPressed, isNull);
     expect(tester.widget<FilledButton>(save).onPressed, isNull);
     secrets.loaded.complete();
     await tester.pumpAndSettle();
     expect(tester.widget<TextButton>(fetch).onPressed, isNotNull);
-    expect(tester.widget<OutlinedButton>(test).onPressed, isNotNull);
+    expect(tester.widget<TextButton>(test).onPressed, isNotNull);
     expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
     expect(tester.takeException(), isNull);
   });

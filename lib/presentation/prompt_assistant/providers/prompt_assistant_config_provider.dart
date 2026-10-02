@@ -10,6 +10,7 @@ import '../models/prompt_assistant_models.dart';
 import '../models/model_request_overrides.dart';
 import '../models/prompt_task_definitions.dart';
 import '../services/model_catalog_repository.dart';
+import '../services/provider_model_list_cache.dart';
 import 'provider_connection_health_provider.dart';
 
 final promptAssistantConfigProvider =
@@ -147,7 +148,7 @@ class PromptAssistantConfigNotifier
       await _secure.savePromptAssistantHeaders(providerId, jsonEncode(headers));
     }
     if (previous != (headers.isEmpty ? null : jsonEncode(headers))) {
-      _ref.read(providerConnectionHealthProvider).invalidate(providerId);
+      await _invalidateConnection(providerId);
     }
   }
 
@@ -288,8 +289,10 @@ class PromptAssistantConfigNotifier
         await _persistDraft(next);
         if (mounted &&
             (before[providerId] != options[providerId] ||
-                (apiKey != null && apiKey.trim() != (oldKey?.trim() ?? '')))) {
-          _ref.read(providerConnectionHealthProvider).invalidate(providerId);
+                (apiKey != null && apiKey.trim() != (oldKey?.trim() ?? '')) ||
+                _connectionRoute(observed.providers, providerId) !=
+                    _connectionRoute(next.providers, providerId))) {
+          await _invalidateConnection(providerId);
         }
       } catch (_) {
         // A storage call may throw after writing. Restore every attempted key,
@@ -320,6 +323,25 @@ class PromptAssistantConfigNotifier
       ? _secure.deletePromptAssistantApiKey(providerId)
       : _secure.savePromptAssistantApiKey(providerId, value);
 
+  String _connectionRoute(List<ProviderConfig> providers, String id) {
+    final provider = providers.where((item) => item.id == id).firstOrNull;
+    return jsonEncode(
+      provider == null
+          ? null
+          : [
+              (provider.preset ?? ProviderPreset.openaiCompatibleChat).name,
+              provider.protocol.name,
+              provider.baseUrl.trim(),
+            ],
+    );
+  }
+
+  Future<void> _invalidateConnection(String providerId) async {
+    if (!mounted) return;
+    _ref.read(providerConnectionHealthProvider).invalidate(providerId);
+    await _ref.read(providerModelListCacheProvider).remove(providerId);
+  }
+
   Future<void> setProviderApiKey(String providerId, String apiKey) async {
     final trimmed = apiKey.trim();
     final previous = await _secure.getPromptAssistantApiKey(providerId);
@@ -328,11 +350,12 @@ class PromptAssistantConfigNotifier
       ..[providerId] = trimmed.isNotEmpty;
     state = state.copyWith(providerHasApiKey: next);
     if (trimmed != (previous?.trim() ?? '')) {
-      _ref.read(providerConnectionHealthProvider).invalidate(providerId);
+      await _invalidateConnection(providerId);
     }
   }
 
   Future<void> upsertProvider(ProviderConfig provider) async {
+    final previousRoute = _connectionRoute(state.providers, provider.id);
     final providers = [...state.providers];
     final idx = providers.indexWhere((p) => p.id == provider.id);
     if (idx >= 0) {
@@ -342,6 +365,9 @@ class PromptAssistantConfigNotifier
     }
     state = state.copyWith(providers: providers);
     await _save();
+    if (previousRoute != _connectionRoute(state.providers, provider.id)) {
+      await _invalidateConnection(provider.id);
+    }
   }
 
   Future<void> deleteProvider(String providerId) async {
@@ -375,7 +401,7 @@ class PromptAssistantConfigNotifier
   }
 
   /// Persist only models explicitly selected by the user. The remote catalog
-  /// is ephemeral and must never silently populate local configuration.
+  /// cache must never silently populate selected-model configuration.
   Future<void> replaceProviderModels(
     String providerId,
     List<ModelConfig> selected,
