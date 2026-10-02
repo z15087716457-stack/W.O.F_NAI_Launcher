@@ -4,6 +4,7 @@ import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/presentation/providers/font_provider.dart';
 import 'package:nai_launcher/presentation/providers/settings_font_scale_provider.dart';
 import 'package:nai_launcher/presentation/widgets/settings/account_credentials_dialog.dart';
+import 'package:nai_launcher/presentation/widgets/settings/account_subscription_summary.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_toggle.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -342,7 +343,8 @@ void main() {
       expect(find.text('风格'), findsOneWidget);
       container.read(settingsAccountOpenRequestProvider.notifier).state++;
       await tester.pumpAndSettle();
-      expect(find.text('当前账号'), findsOneWidget);
+      expect(find.byType(AccountSubscriptionSummary), findsOneWidget);
+      expect(find.byKey(const Key('settings-account-pd')), findsOneWidget);
       expect(find.text('风格'), findsNothing);
       expect(tester.takeException(), isNull);
     },
@@ -885,7 +887,13 @@ void main() {
         await tester.pumpAndSettle();
         await navigate(SettingsDestination.account, 'NovelAI 账号');
         expect(find.text('账号资料'), findsNothing);
-        await tester.tap(find.text('PD').first);
+        expect(find.byType(AccountSubscriptionSummary), findsOneWidget);
+        expect(find.text('当前账号'), findsNothing);
+        final menu = find.byKey(const Key('settings-account-menu-pd'));
+        await tester.ensureVisible(menu);
+        await tester.tap(menu);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('编辑资料'));
         await tester.pumpAndSettle();
         expect(find.text('账号详情'), findsOneWidget);
         expect(find.text('token_fixture'), findsNothing);
@@ -895,6 +903,7 @@ void main() {
         );
         await tester.tap(find.byTooltip('关闭').last);
         await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('更新凭据'));
         await tester.tap(find.text('更新凭据'));
         await tester.pumpAndSettle();
         expect(find.byType(AccountCredentialsDialog), findsOneWidget);

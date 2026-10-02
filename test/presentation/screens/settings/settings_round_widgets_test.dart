@@ -175,7 +175,7 @@ void main() {
   });
 
   testWidgets(
-    'keyboard panel keeps rounded clipping and working search and preferences',
+    'keyboard C panel aligns options and keeps search and preferences',
     (tester) async {
       await pump(
         tester,
@@ -200,7 +200,7 @@ void main() {
           .read(shortcutConfigNotifierProvider)
           .requireValue
           .showInMenus;
-      await tester.tap(find.byType(FilterChip).last);
+      await tester.tap(find.byKey(const ValueKey('shortcut-display-menus')));
       await tester.pumpAndSettle();
       expect(
         container.read(shortcutConfigNotifierProvider).requireValue.showInMenus,
@@ -208,10 +208,13 @@ void main() {
       );
       await tester.enterText(find.byType(TextField), '生成页面');
       await tester.pumpAndSettle();
-      expect(find.byType(ListTile), findsWidgets);
+      expect(
+        find.byKey(const ValueKey('shortcut-binding-navigate_to_generation')),
+        findsOneWidget,
+      );
       await tester.enterText(find.byType(TextField), '无法匹配的快捷键');
       await tester.pumpAndSettle();
-      expect(find.byType(ListTile), findsNothing);
+      expect(find.text('未找到匹配的快捷键'), findsOneWidget);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pumpAndSettle();
       expect(find.byType(ShortcutSettingsPanel), findsNothing);

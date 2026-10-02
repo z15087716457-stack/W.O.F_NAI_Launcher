@@ -26,6 +26,7 @@ class AccountAvatar extends StatelessWidget {
     this.onTap,
     this.showEditBadge = true,
     this.muted = false,
+    this.neutral = false,
   });
 
   final SavedAccount account;
@@ -33,6 +34,9 @@ class AccountAvatar extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showEditBadge;
   final bool muted;
+
+  /// Settings can use a neutral fallback while preserving custom avatars.
+  final bool neutral;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +107,9 @@ class AccountAvatar extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: muted
+        color: neutral
+            ? theme.colorScheme.onSurface.withValues(alpha: .07)
+            : muted
             ? theme.colorScheme.primary.withValues(alpha: .12)
             : kAvatarBackground,
         borderRadius: avatarBorderRadius(size),
@@ -114,7 +120,11 @@ class AccountAvatar extends StatelessWidget {
           style: TextStyle(
             fontSize: size * 0.4,
             fontWeight: FontWeight.bold,
-            color: muted ? theme.colorScheme.primary : kAvatarForeground,
+            color: neutral
+                ? theme.colorScheme.onSurfaceVariant
+                : muted
+                ? theme.colorScheme.primary
+                : kAvatarForeground,
           ),
         ),
       ),

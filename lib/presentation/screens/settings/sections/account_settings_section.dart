@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/account_manager_provider.dart';
-import '../../../providers/subscription_provider.dart';
 import '../../../widgets/auth/add_account_dialog.dart';
-import '../../../widgets/auth/subscription_expiry_text.dart';
 import '../../../widgets/common/app_toast.dart';
-import '../../../widgets/settings/account_detail_tile.dart';
-import '../../../widgets/settings/account_credentials_dialog.dart';
-import '../../../widgets/settings/account_profile_sheet.dart';
 import '../../../widgets/settings/saved_accounts_section.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_tile.dart';
@@ -31,83 +27,18 @@ class AccountSettingsSection extends ConsumerWidget {
         settingsText(context, zh, en, ja);
     final auth = ref.watch(authNotifierProvider);
     final accounts = ref.watch(accountManagerNotifierProvider).accounts;
-    final account = accounts.where((a) => a.id == auth.accountId).firstOrNull;
     final manager = ref.read(accountManagerNotifierProvider.notifier);
-    final loggedIn = auth.isAuthenticated && account != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SettingsCard(
-          title: text('当前账号', 'Current account', '現在のアカウント'),
-          child: AccountDetailTile(
-            showExpiry: false,
-            onEdit: () => AccountProfileBottomSheet.show(
-              context: context,
-              account: account!,
-            ),
-            onLogin: () => AddAccountDialog.show(context, ref),
-          ),
-        ),
-        if (loggedIn)
+        if (!auth.isAuthenticated)
           SettingsCard(
-            child: Column(
-              children: [
-                ref
-                    .watch(subscriptionNotifierProvider)
-                    .maybeWhen(
-                      loaded: (subscription) =>
-                          subscription.tier > 0 &&
-                              subscription.expiresAt != null
-                          ? SettingsTile(
-                              hoverFeedback: false,
-                              title: Text(
-                                text(
-                                  '订阅有效期',
-                                  'Subscription expiry',
-                                  'サブスクリプション有効期限',
-                                ),
-                              ),
-                              subtitle: Text(
-                                text(
-                                  '账号到期后仍保留本地数据。',
-                                  'Local data stays available after expiry.',
-                                  '有効期限後もローカルデータは保持されます。',
-                                ),
-                              ),
-                              trailing: SubscriptionExpiryText(
-                                expiresAt: subscription.expiresAt!,
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                      orElse: () => const SizedBox.shrink(),
-                    ),
-                SettingsTile(
-                  title: Text(text('登录凭据', 'Sign-in credentials', 'ログイン認証')),
-                  subtitle: Text(
-                    text(
-                      '验证并更新此账号的登录令牌。',
-                      'Validate and update this account’s sign-in token.',
-                      'ログイントークンを確認して更新します。',
-                    ),
-                  ),
-                  trailing: OutlinedButton(
-                    onPressed: () async {
-                      final changed = await showDialog<bool>(
-                        context: context,
-                        builder: (_) =>
-                            AccountCredentialsDialog(account: account),
-                      );
-                      if (changed == true && context.mounted) {
-                        AppToast.success(
-                          context,
-                          text('登录凭据已更新', 'Credentials updated', '認証情報を更新しました'),
-                        );
-                      }
-                    },
-                    child: Text(text('更新凭据', 'Update', '更新')),
-                  ),
-                ),
-              ],
+            child: SettingsTile(
+              title: Text(text('尚未登录', 'Not signed in', '未ログイン')),
+              trailing: OutlinedButton(
+                onPressed: () => AddAccountDialog.show(context, ref),
+                child: Text(context.l10n.settings_goToLogin),
+              ),
             ),
           ),
         const SavedAccountsSection(showAddButton: false),
@@ -131,6 +62,17 @@ class AccountSettingsSection extends ConsumerWidget {
                     key: ValueKey(manager.defaultAccount?.id),
                     initialValue: manager.defaultAccount?.id,
                     isExpanded: true,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                    ),
                     itemHeight: 48,
                     hint: Text(text('暂无账号', 'No accounts', 'アカウントなし')),
                     items: accounts
@@ -158,6 +100,7 @@ class AccountSettingsSection extends ConsumerWidget {
                   .watch(accountAutoLoginProvider)
                   .when(
                     data: (value) => SettingsSwitchTile(
+                      key: const Key('settings-account-auto-login'),
                       title: Text(
                         text('启动时自动登录', 'Sign in automatically', '起動時に自動ログイン'),
                       ),

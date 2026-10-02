@@ -4,6 +4,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/auth/saved_account.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../screens/settings/widgets/settings_card.dart';
 import '../../screens/settings/widgets/settings_ui_theme.dart';
 import '../auth/account_avatar.dart';
@@ -11,6 +12,9 @@ import '../auth/account_switch_helper.dart';
 import '../auth/add_account_dialog.dart';
 import '../auth/subscription_expiry_text.dart';
 import 'account_profile_sheet.dart';
+import 'account_credentials_dialog.dart';
+import 'account_subscription_summary.dart';
+import '../common/app_toast.dart';
 
 class SavedAccountsSection extends ConsumerWidget {
   const SavedAccountsSection({super.key, this.showAddButton = true});
@@ -18,7 +22,8 @@ class SavedAccountsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(accountManagerNotifierProvider);
-    final current = ref.watch(authNotifierProvider).accountId;
+    final auth = ref.watch(authNotifierProvider);
+    final current = auth.isAuthenticated ? auth.accountId : null;
     final manager = ref.read(accountManagerNotifierProvider.notifier);
     final sorted = manager.sortedAccounts;
     final ordered = [
@@ -75,6 +80,13 @@ class _SavedAccountTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context), colors = theme.colorScheme;
+    final subscription = isCurrent
+        ? ref.watch(subscriptionNotifierProvider)
+        : null;
+    final loadedSubscription = subscription?.subscription;
+    final buttonStyle = OutlinedButton.styleFrom(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+    );
     Widget badge(String label, {bool active = false}) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
       decoration: BoxDecoration(
@@ -95,8 +107,9 @@ class _SavedAccountTile extends ConsumerWidget {
       children: [
         AccountAvatar(
           account: account,
-          size: 30,
+          size: isCurrent ? 42 : 32,
           muted: true,
+          neutral: true,
           showEditBadge: false,
         ),
         const SizedBox(width: 12),
@@ -115,6 +128,12 @@ class _SavedAccountTile extends ConsumerWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                  if (loadedSubscription != null)
+                    badge(
+                      loadedSubscription.hasActiveSubscription
+                          ? loadedSubscription.tierName
+                          : context.l10n.subscriptionTierNone,
+                    ),
                   if (isCurrent)
                     badge(
                       settingsText(context, '当前', 'Current', '現在'),
@@ -140,7 +159,26 @@ class _SavedAccountTile extends ConsumerWidget {
     final actions = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (account.subscriptionExpiresAt != null)
+        if (isCurrent) ...[
+          Icon(
+            Icons.circle,
+            size: 7,
+            color: theme.brightness == Brightness.dark
+                ? Colors.green.shade400
+                : Colors.green.shade700,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            settingsText(context, '已登录', 'Signed in', 'ログイン済み'),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.brightness == Brightness.dark
+                  ? Colors.green.shade400
+                  : Colors.green.shade700,
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
+        if (!isCurrent && account.subscriptionExpiresAt != null)
           Flexible(
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -151,6 +189,8 @@ class _SavedAccountTile extends ConsumerWidget {
           ),
         if (!isCurrent)
           OutlinedButton(
+            key: ValueKey('settings-account-switch-${account.id}'),
+            style: buttonStyle,
             onPressed: () =>
                 AccountSwitchHelper.switchToAccount(context, ref, account),
             child: Text(settingsText(context, '切换', 'Switch', '切替')),
@@ -206,32 +246,74 @@ class _SavedAccountTile extends ConsumerWidget {
         ),
       ],
     );
+    final header = LayoutBuilder(
+      builder: (context, constraints) =>
+          constraints.maxWidth < 500 * MediaQuery.textScalerOf(context).scale(1)
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                identity,
+                const SizedBox(height: 8),
+                Align(alignment: Alignment.centerRight, child: actions),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: identity),
+                const SizedBox(width: 20),
+                actions,
+              ],
+            ),
+    );
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      key: ValueKey('settings-account-${account.id}'),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: colors.outlineVariant.withValues(alpha: .5),
-          ),
-        ),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: .7)),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) => constraints.maxWidth < 520
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  identity,
-                  const SizedBox(height: 8),
-                  Align(alignment: Alignment.centerRight, child: actions),
-                ],
-              )
-            : Row(
-                children: [
-                  Expanded(child: identity),
-                  const SizedBox(width: 20),
-                  actions,
-                ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          if (subscription != null) ...[
+            const SizedBox(height: 14),
+            const Divider(),
+            AccountSubscriptionSummary(
+              state: subscription,
+              credentialAction: OutlinedButton(
+                key: const Key('settings-account-update-credentials'),
+                style: buttonStyle,
+                onPressed: () async {
+                  final changed = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AccountCredentialsDialog(account: account),
+                  );
+                  if (changed == true && context.mounted) {
+                    AppToast.success(
+                      context,
+                      settingsText(
+                        context,
+                        '登录凭据已更新',
+                        'Credentials updated',
+                        '認証情報を更新しました',
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  settingsText(
+                    context,
+                    '更新凭据',
+                    'Update credentials',
+                    '認証情報を更新',
+                  ),
+                ),
               ),
+            ),
+          ],
+        ],
       ),
     );
   }

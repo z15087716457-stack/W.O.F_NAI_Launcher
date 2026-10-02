@@ -37,6 +37,7 @@ class ShortcutBindingEditor extends ConsumerStatefulWidget {
 
 class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
   late TextEditingController _controller;
+  final _recordingFocus = FocusNode();
   bool _isRecording = false;
   String? _conflictId;
   Set<LogicalKeyboardKey> _pressedKeys = {};
@@ -50,6 +51,7 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
   @override
   void dispose() {
     _controller.dispose();
+    _recordingFocus.dispose();
     super.dispose();
   }
 
@@ -149,6 +151,7 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
     final l10n = context.l10n;
 
     return Focus(
+      focusNode: _recordingFocus,
       autofocus: true,
       onKeyEvent: _isRecording ? _handleKeyEvent : null,
       child: Column(
@@ -310,6 +313,7 @@ class _ShortcutBindingEditorState extends ConsumerState<ShortcutBindingEditor> {
       _isRecording = true;
       _pressedKeys = {};
     });
+    if (!widget.inline) _recordingFocus.requestFocus();
   }
 
   void _stopRecording() {

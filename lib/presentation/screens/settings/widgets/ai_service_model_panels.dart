@@ -1,6 +1,14 @@
 part of 'ai_service_editor.dart';
 
 extension _ServiceModelPanels on _AiServiceEditorState {
+  // Testing disables interaction, but must not recolor the saved selection.
+  WidgetStateProperty<Color> _catalogCheckboxFill(ColorScheme colors) =>
+      WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? colors.onSurface
+            : Colors.transparent,
+      );
+
   Widget _availablePanel() {
     final theme = Theme.of(context), colors = theme.colorScheme;
     final query = _catalogSearch.text.trim().toLowerCase();
@@ -53,6 +61,7 @@ extension _ServiceModelPanels on _AiServiceEditorState {
             key: const Key('service-catalog-select-all'),
             value: allSelected,
             activeColor: colors.onSurface,
+            fillColor: _catalogCheckboxFill(colors),
             checkColor: colors.surface,
             tristate: true,
             visualDensity: VisualDensity.compact,
@@ -177,6 +186,7 @@ extension _ServiceModelPanels on _AiServiceEditorState {
                                       child: Checkbox(
                                         value: selected,
                                         activeColor: colors.onSurface,
+                                        fillColor: _catalogCheckboxFill(colors),
                                         checkColor: colors.surface,
                                         onChanged: _busy
                                             ? null
