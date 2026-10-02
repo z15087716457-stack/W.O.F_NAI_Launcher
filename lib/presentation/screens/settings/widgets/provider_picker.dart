@@ -4,16 +4,16 @@ import 'provider_logo.dart';
 import 'settings_dialog.dart';
 
 Future<ProviderPreset?> showProviderPicker(
-  BuildContext context,
-  ProviderPreset value,
-) => showDialog<ProviderPreset>(
+  BuildContext context, [
+  ProviderPreset? value,
+]) => showDialog<ProviderPreset>(
   context: context,
   builder: (_) => _ProviderPicker(value: value),
 );
 
 class _ProviderPicker extends StatefulWidget {
   const _ProviderPicker({required this.value});
-  final ProviderPreset value;
+  final ProviderPreset? value;
   @override
   State<_ProviderPicker> createState() => _ProviderPickerState();
 }
@@ -102,7 +102,7 @@ class _ProviderPickerState extends State<_ProviderPicker> {
                           itemCount: choices.length,
                           itemBuilder: (context, index) {
                             final preset = choices[index],
-                                selected = preset == widget.value.vendor;
+                                selected = preset == widget.value?.vendor;
                             return Semantics(
                               selected: selected,
                               button: true,

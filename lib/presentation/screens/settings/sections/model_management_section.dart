@@ -13,6 +13,7 @@ import '../widgets/model_task_editor.dart';
 import '../widgets/model_preset_editor.dart';
 import '../widgets/model_request_details_dialog.dart';
 import '../widgets/provider_logo.dart';
+import '../widgets/provider_picker.dart';
 import '../widgets/model_draft_save_controller.dart';
 
 enum _LeaveAction { discard, save }
@@ -48,7 +49,7 @@ class ModelManagementSectionState
   TaskPresetConfig? _newPreset;
   ProviderPreset? _serviceTemplate;
   bool _addingService = false, _dirty = false;
-  bool _leaving = false;
+  bool _leaving = false, _choosingProvider = false;
   final _draftSave = ModelDraftSaveController();
   Future<bool> _leave() async {
     if (!_dirty) return true;
@@ -91,12 +92,40 @@ class ModelManagementSectionState
     });
   }
 
-  Future<void> _add([ProviderPreset? template]) => _switch(() {
-    _tab = 0;
-    _addingService = true;
-    _providerId = null;
-    _serviceTemplate = template;
-  });
+  Future<void> _add([ProviderPreset? template]) async {
+    if (_choosingProvider) return;
+    _choosingProvider = true;
+    try {
+      final selected = template ?? await showProviderPicker(context);
+      if (!mounted || selected == null) return;
+      await _switch(() {
+        _tab = 0;
+        _addingService = true;
+        _providerId = null;
+        _serviceTemplate = selected;
+      });
+    } finally {
+      _choosingProvider = false;
+    }
+  }
+
+  Widget _addServiceButton() {
+    final colors = Theme.of(context).colorScheme;
+    return IconButton(
+      key: const Key('service-add'),
+      tooltip: '添加服务商',
+      onPressed: _add,
+      style: IconButton.styleFrom(
+        foregroundColor: colors.onSurface,
+        backgroundColor: colors.onSurface.withValues(alpha: .075),
+        minimumSize: const Size(32, 32),
+        padding: const EdgeInsets.all(6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+      icon: const Icon(Icons.add, size: 18),
+    );
+  }
+
   void _dirtyChanged(bool value) {
     if (mounted && _dirty != value) setState(() => _dirty = value);
   }
@@ -476,11 +505,7 @@ class ModelManagementSectionState
                                   }),
                                 ),
                               ),
-                              IconButton(
-                                tooltip: '添加服务商',
-                                onPressed: _add,
-                                icon: const Icon(Icons.add),
-                              ),
+                              _addServiceButton(),
                             ],
                           ),
                           list: Column(
@@ -506,12 +531,7 @@ class ModelManagementSectionState
                                             ),
                                       ),
                                     ),
-                                    IconButton(
-                                      key: const Key('service-add'),
-                                      tooltip: '添加服务商',
-                                      onPressed: _add,
-                                      icon: const Icon(Icons.add, size: 18),
-                                    ),
+                                    _addServiceButton(),
                                   ],
                                 ),
                               ),
@@ -620,7 +640,10 @@ class ModelManagementSectionState
                                               child: const Text('OpenAI'),
                                             ),
                                             FilledButton(
-                                              onPressed: _add,
+                                              onPressed: () => _add(
+                                                ProviderPreset
+                                                    .openaiCompatibleChat,
+                                              ),
                                               child: const Text('自定义服务'),
                                             ),
                                           ],
