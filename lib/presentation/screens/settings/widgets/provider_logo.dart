@@ -18,20 +18,17 @@ class ProviderLogo extends StatelessWidget {
       return Icon(
         StudioIcons.settingsModels,
         size: size,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        color: Theme.of(context).colorScheme.onSurface,
       );
     }
-    final colored = asset.endsWith('-color');
     return SvgPicture.asset(
       'assets/icons/providers/$asset.svg',
       width: size,
       height: size,
-      colorFilter: colored
-          ? null
-          : ColorFilter.mode(
-              Theme.of(context).colorScheme.onSurface,
-              BlendMode.srcIn,
-            ),
+      colorFilter: ColorFilter.mode(
+        Theme.of(context).colorScheme.onSurface,
+        BlendMode.srcIn,
+      ),
     );
   }
 }

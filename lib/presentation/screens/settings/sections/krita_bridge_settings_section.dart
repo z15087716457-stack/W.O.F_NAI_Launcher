@@ -34,6 +34,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
           if (state.enabled) ...[
             const Divider(height: 1),
             SettingsTile(
+              hoverFeedback: state.status != KritaBridgeStatus.starting,
               leading: Icon(
                 Icons.circle,
                 size: 12,

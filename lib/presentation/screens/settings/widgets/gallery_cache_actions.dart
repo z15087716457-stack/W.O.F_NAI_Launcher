@@ -237,6 +237,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
     return Column(
       children: [
         SettingsTile(
+          hoverFeedback: !_isScanning,
           title: Text(context.l10n.galleryCache_rescan),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,6 +268,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
           ),
         ),
         SettingsTile(
+          hoverFeedback: !_isEvictingThumbnails,
           title: Text(context.l10n.galleryCache_evictThumbnailsTitle),
           subtitle: Text(
             _isEvictingThumbnails

@@ -163,6 +163,7 @@ class NetworkSettingsSectionState
 
             // 测试连接按钮
             SettingsTile(
+              hoverFeedback: !_isTesting,
               leading: const Icon(Icons.network_check),
               title: Text(l10n.settings_testConnection),
               subtitle: Text(_testResult ?? l10n.settings_testConnectionHint),

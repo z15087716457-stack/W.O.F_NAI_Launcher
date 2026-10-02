@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'settings_toggle.dart';
+import 'settings_hover_line.dart';
 export 'settings_toggle.dart';
 
 /// A setting row: readable labels on the left, its value or action on the right.
@@ -17,6 +18,7 @@ class SettingsTile extends StatelessWidget {
     this.contentPadding,
     this.isThreeLine = false,
     this.controlWrapWidth = 520,
+    this.hoverFeedback,
   });
   final Widget title;
   final Widget? subtitle, leading, trailing;
@@ -24,6 +26,9 @@ class SettingsTile extends StatelessWidget {
   final bool enabled, selected, dense, isThreeLine;
   final EdgeInsetsGeometry? contentPadding;
   final double controlWrapWidth;
+
+  /// Informational or temporarily unavailable controls can suppress feedback.
+  final bool? hoverFeedback;
 
   @override
   Widget build(BuildContext context) {
@@ -65,41 +70,50 @@ class SettingsTile extends StatelessWidget {
                 size: 17,
                 color: scheme.onSurfaceVariant,
               ));
-    return Material(
-      color: selected
-          ? scheme.primary.withValues(alpha: .06)
-          : Colors.transparent,
-      child: InkWell(
-        onTap: enabled ? onTap : null,
-        child: Container(
-          padding:
-              contentPadding ?? EdgeInsets.symmetric(vertical: dense ? 10 : 14),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: scheme.outlineVariant.withValues(alpha: .5),
+    return SettingsHoverLine(
+      enabled:
+          enabled && (hoverFeedback ?? (onTap != null || trailing != null)),
+      child: Material(
+        color: selected
+            ? scheme.primary.withValues(alpha: .06)
+            : Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          child: Container(
+            padding:
+                contentPadding ??
+                EdgeInsets.symmetric(vertical: dense ? 10 : 14),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: scheme.outlineVariant.withValues(alpha: .5),
+                ),
               ),
             ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth < controlWrapWidth && control != null) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth < controlWrapWidth &&
+                    control != null) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      labels,
+                      const SizedBox(height: 10),
+                      Align(alignment: Alignment.centerRight, child: control),
+                    ],
+                  );
+                }
+                return Row(
                   children: [
-                    labels,
-                    const SizedBox(height: 10),
-                    Align(alignment: Alignment.centerRight, child: control),
+                    Expanded(child: labels),
+                    if (control != null) ...[
+                      const SizedBox(width: 24),
+                      control,
+                    ],
                   ],
                 );
-              }
-              return Row(
-                children: [
-                  Expanded(child: labels),
-                  if (control != null) ...[const SizedBox(width: 24), control],
-                ],
-              );
-            },
+              },
+            ),
           ),
         ),
       ),

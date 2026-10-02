@@ -48,6 +48,7 @@ class _GalleryThumbnailQualitySettingsTileState
     );
 
     return SettingsTile(
+      hoverFeedback: !_isLoading,
       leading: const Icon(Icons.image_outlined),
       title: Text(context.l10n.settings_galleryThumbnailQuality),
       subtitle: Text(context.l10n.settings_galleryThumbnailQualitySubtitle),

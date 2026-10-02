@@ -245,6 +245,7 @@ class _SettingsPreferencesPanelState
     child: Column(
       children: [
         SettingsTile(
+          hoverFeedback: !busy,
           title: Text(
             text('偏好备份与恢复', 'Preference backup & restore', '設定のバックアップと復元'),
           ),

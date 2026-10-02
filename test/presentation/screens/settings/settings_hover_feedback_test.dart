@@ -165,9 +165,12 @@ void main() {
         final rect = tester.getRect(field);
         final point = Offset(rect.right - 36, rect.center.dy);
         final before = await _pixel(tester, point);
+        final linePoint = Offset(rect.left + 8, rect.bottom - 1);
+        final lineBefore = await _pixel(tester, linePoint);
         await mouse.moveTo(rect.center);
         await tester.pumpAndSettle();
         expect(await _pixel(tester, point), before);
+        expect(await _pixel(tester, linePoint), isNot(lineBefore));
         await harness.capture(tester, captureName);
         await mouse.moveTo(const Offset(1, 1));
         await tester.pumpAndSettle();

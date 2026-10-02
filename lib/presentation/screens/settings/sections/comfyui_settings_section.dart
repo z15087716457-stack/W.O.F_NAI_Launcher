@@ -271,6 +271,7 @@ class _ComfyUISettingsSectionState
     final description = template.localizedDescription(context);
 
     return SettingsTile(
+      hoverFeedback: !template.isBuiltin,
       leading: Icon(
         template.isBuiltin ? Icons.inventory_2 : Icons.account_tree,
         color: template.isBuiltin

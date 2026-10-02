@@ -210,6 +210,7 @@ class _GenerationSettingsSectionState
               onTap: () => _selectCustomSound(notificationNotifier),
             ),
             SettingsTile(
+              hoverFeedback: !_previewing,
               title: Text(
                 settingsText(context, '音效预览', 'Sound preview', '音声プレビュー'),
               ),

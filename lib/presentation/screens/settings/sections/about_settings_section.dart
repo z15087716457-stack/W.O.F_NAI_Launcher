@@ -78,6 +78,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
             builder: (context, snapshot) {
               final lastCheckTime = snapshot.data;
               return SettingsTile(
+                hoverFeedback: !updateState.isChecking && updateService != null,
                 leading: Badge(
                   isLabelVisible: updateState.hasNewVersion,
                   smallSize: 7,

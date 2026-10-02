@@ -59,6 +59,7 @@ class AccountSettingsSection extends ConsumerWidget {
                           subscription.tier > 0 &&
                               subscription.expiresAt != null
                           ? SettingsTile(
+                              hoverFeedback: false,
                               title: Text(
                                 text(
                                   '订阅有效期',

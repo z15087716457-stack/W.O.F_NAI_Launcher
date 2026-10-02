@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'settings_ui_theme.dart';
+import 'settings_hover_line.dart';
 
 const modelMenuRadius = BorderRadius.all(Radius.circular(12));
 const modelMenuShape = RoundedRectangleBorder(borderRadius: modelMenuRadius);
@@ -150,13 +151,15 @@ class ModelCompactDropdown<T> extends StatelessWidget {
             ],
           ),
         );
-        return decoration == null
-            ? button
-            : InputDecorator(
-                decoration: decoration!.copyWith(enabled: canChoose),
-                isEmpty: value == null,
-                child: button,
-              );
+        if (decoration == null) return button;
+        final field = InputDecorator(
+          decoration: decoration!.copyWith(enabled: canChoose),
+          isEmpty: value == null,
+          child: button,
+        );
+        return decoration!.border is UnderlineInputBorder
+            ? SettingsHoverLine(enabled: canChoose, child: field)
+            : field;
       },
     );
   }

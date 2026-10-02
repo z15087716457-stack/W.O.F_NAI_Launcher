@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import 'model_compact_dropdown.dart';
+import 'settings_hover_line.dart';
 
 class ModelReasoningButton extends StatelessWidget {
   const ModelReasoningButton({
@@ -30,80 +31,87 @@ class ModelReasoningButton extends StatelessWidget {
               : '跟随模型（${reasoningEffortLabel(model!.reasoningEffort)}）'
         : reasoningEffortLabel(selected);
     final canChoose = enabled && model != null && !unsupported;
-    return PopupMenuButton<String>(
-      key: const Key('task-reasoning'),
-      tooltip: unsupported ? '此模型不支持思考调节' : '思考强度',
-      shadowColor: colors.shadow.withValues(alpha: .14),
-      elevation: 3,
-      shape: modelMenuShape,
-      color: colors.surfaceContainerLow,
-      surfaceTintColor: Colors.transparent,
-      clipBehavior: Clip.antiAlias,
-      menuPadding: const EdgeInsets.symmetric(vertical: 6),
+    return SettingsHoverLine(
       enabled: canChoose,
-      position: PopupMenuPosition.under,
-      onSelected: (v) => onChanged(v == 'inherit' ? null : v),
-      itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          enabled: false,
-          height: 30,
-          child: Text('思考强度', style: Theme.of(context).textTheme.labelSmall),
-        ),
-        _item(
-          context,
-          'inherit',
-          '跟随模型',
-          selected == null,
-          subtitle: '模型默认：${reasoningEffortLabel(model?.reasoningEffort)}',
-        ),
-        if (choices.isNotEmpty) const PopupMenuDivider(),
-        for (final choice in choices)
+      child: PopupMenuButton<String>(
+        key: const Key('task-reasoning'),
+        tooltip: unsupported ? '此模型不支持思考调节' : '思考强度',
+        shadowColor: colors.shadow.withValues(alpha: .14),
+        elevation: 3,
+        shape: modelMenuShape,
+        color: colors.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        menuPadding: const EdgeInsets.symmetric(vertical: 6),
+        enabled: canChoose,
+        position: PopupMenuPosition.under,
+        onSelected: (v) => onChanged(v == 'inherit' ? null : v),
+        itemBuilder: (context) => [
+          PopupMenuItem<String>(
+            enabled: false,
+            height: 30,
+            child: Text('思考强度', style: Theme.of(context).textTheme.labelSmall),
+          ),
           _item(
             context,
-            choice,
-            reasoningEffortLabel(choice),
-            selected == choice,
+            'inherit',
+            '跟随模型',
+            selected == null,
+            subtitle: '模型默认：${reasoningEffortLabel(model?.reasoningEffort)}',
           ),
-        if (choices.isEmpty)
-          const PopupMenuItem<String>(
-            enabled: false,
-            child: Text('可调档位尚未确认\n可在服务商的模型配置中设置'),
-          ),
-      ],
-      child: Semantics(
-        button: true,
-        enabled: canChoose,
-        label: '思考强度：$label',
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 42),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: colors.outlineVariant.withValues(alpha: .7),
-              ),
+          if (choices.isNotEmpty) const PopupMenuDivider(),
+          for (final choice in choices)
+            _item(
+              context,
+              choice,
+              reasoningEffortLabel(choice),
+              selected == choice,
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  key: const Key('task-reasoning-value'),
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                    color: canChoose
-                        ? colors.onSurface
-                        : colors.onSurfaceVariant,
-                  ),
+          if (choices.isEmpty)
+            const PopupMenuItem<String>(
+              enabled: false,
+              child: Text('可调档位尚未确认\n可在服务商的模型配置中设置'),
+            ),
+        ],
+        child: Semantics(
+          button: true,
+          enabled: canChoose,
+          label: '思考强度：$label',
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 42),
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: colors.outlineVariant.withValues(alpha: .7),
                 ),
               ),
-              const SizedBox(width: 12),
-              Icon(Icons.expand_more, size: 18, color: colors.onSurfaceVariant),
-            ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    key: const Key('task-reasoning-value'),
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      color: canChoose
+                          ? colors.onSurface
+                          : colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Icon(
+                  Icons.expand_more,
+                  size: 18,
+                  color: colors.onSurfaceVariant,
+                ),
+              ],
+            ),
           ),
         ),
       ),

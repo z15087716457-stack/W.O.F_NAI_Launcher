@@ -648,30 +648,33 @@ extension _ServiceOverview on _AiServiceEditorState {
         ),
       ],
     );
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 13),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final scale = MediaQuery.textScalerOf(context).scale(1);
-          final controlWidth = (244 * scale).clamp(0.0, constraints.maxWidth);
-          final trailing = SizedBox(width: controlWidth, child: control);
-          return constraints.maxWidth < 444 * scale
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    label,
-                    const SizedBox(height: 9),
-                    Align(alignment: Alignment.centerRight, child: trailing),
-                  ],
-                )
-              : Row(
-                  children: [
-                    Expanded(child: label),
-                    const SizedBox(width: 20),
-                    trailing,
-                  ],
-                );
-        },
+    return SettingsHoverLine(
+      enabled: !_busy,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 13),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final scale = MediaQuery.textScalerOf(context).scale(1);
+            final controlWidth = (244 * scale).clamp(0.0, constraints.maxWidth);
+            final trailing = SizedBox(width: controlWidth, child: control);
+            return constraints.maxWidth < 444 * scale
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      label,
+                      const SizedBox(height: 9),
+                      Align(alignment: Alignment.centerRight, child: trailing),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(child: label),
+                      const SizedBox(width: 20),
+                      trailing,
+                    ],
+                  );
+          },
+        ),
       ),
     );
   }
@@ -680,34 +683,38 @@ extension _ServiceOverview on _AiServiceEditorState {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       const Divider(height: 1),
-      TextButton(
-        key: const Key('service-advanced-toggle'),
-        onPressed: () =>
-            _updateOverview(() => _advancedExpanded = !_advancedExpanded),
-        style:
-            TextButton.styleFrom(
-              alignment: Alignment.centerLeft,
-              foregroundColor: Theme.of(context).colorScheme.onSurface,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-            ).copyWith(
-              overlayColor: settingsFieldOverlay,
-              iconColor: settingsFieldIconColor(Theme.of(context).colorScheme),
-            ),
-        child: Row(
-          children: [
-            Text(
-              '高级设置',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
+      SettingsHoverLine(
+        child: TextButton(
+          key: const Key('service-advanced-toggle'),
+          onPressed: () =>
+              _updateOverview(() => _advancedExpanded = !_advancedExpanded),
+          style:
+              TextButton.styleFrom(
+                alignment: Alignment.centerLeft,
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+              ).copyWith(
+                overlayColor: settingsFieldOverlay,
+                iconColor: settingsFieldIconColor(
+                  Theme.of(context).colorScheme,
+                ),
               ),
-            ),
-            const Spacer(),
-            Icon(
-              _advancedExpanded ? Icons.expand_less : Icons.expand_more,
-              size: 17,
-            ),
-          ],
+          child: Row(
+            children: [
+              Text(
+                '高级设置',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Spacer(),
+              Icon(
+                _advancedExpanded ? Icons.expand_less : Icons.expand_more,
+                size: 17,
+              ),
+            ],
+          ),
         ),
       ),
       if (_advancedExpanded) ...[
