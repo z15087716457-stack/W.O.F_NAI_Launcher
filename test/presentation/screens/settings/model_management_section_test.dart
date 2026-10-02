@@ -17,6 +17,7 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_task_de
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/model_management_section.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/compact_service_connection.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
@@ -204,6 +205,69 @@ void main() {
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
+  for (final spec in [
+    (const Size(1200, 820), 1.0, 'wide'),
+    (const Size(360, 920), 1.3, 'compact'),
+  ]) {
+    testWidgets(
+      '${spec.$3} blank key preserves the saved key and typed key replaces it on save',
+      (tester) async {
+        final secrets = MemorySecrets()..keys['deepseek'] = 'old-test-key';
+        await pumpManagement(
+          tester,
+          secrets: secrets,
+          size: spec.$1,
+          scale: spec.$2,
+        );
+        await tapVisible(
+          tester,
+          find.byKey(const Key('service-edit-connection')),
+        );
+        final connection = tester.widget<CompactServiceConnection>(
+          find.byType(CompactServiceConnection),
+        );
+        final keyField = find.byWidgetPredicate(
+          (w) => w is TextField && identical(w.controller, connection.apiKey),
+        );
+        expect(connection.apiKey.text, isEmpty);
+        expect(tester.widget<TextField>(keyField).enabled, isTrue);
+        expect(find.text('清除密钥'), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(CompactServiceConnection),
+            matching: find.byType(Checkbox),
+          ),
+          findsNothing,
+        );
+        await Scrollable.ensureVisible(
+          tester.element(find.text(connection.preset.connectionHint)),
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        );
+        await tester.pumpAndSettle();
+        await capture(tester, 'key-cleanup-${spec.$3}');
+        expect(tester.takeException(), isNull);
+        await tapVisible(tester, find.byKey(const Key('service-save')));
+        expect(secrets.keys['deepseek'], 'old-test-key');
+        await tapVisible(
+          tester,
+          find.byKey(const Key('service-edit-connection')),
+        );
+        final updated = tester.widget<CompactServiceConnection>(
+          find.byType(CompactServiceConnection),
+        );
+        final replacement = find.byWidgetPredicate(
+          (w) => w is TextField && identical(w.controller, updated.apiKey),
+        );
+        await tester.ensureVisible(replacement);
+        await tester.pumpAndSettle();
+        await tester.enterText(replacement, 'new-test-key');
+        expect(secrets.keys['deepseek'], 'old-test-key');
+        await tapVisible(tester, find.byKey(const Key('service-save')));
+        expect(secrets.keys['deepseek'], 'new-test-key');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
   testWidgets(
     'changing vendors preserves stored credentials until save and requires the new key',
     (tester) async {

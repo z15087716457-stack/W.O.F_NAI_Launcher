@@ -12,9 +12,6 @@ class CompactServiceConnection extends StatelessWidget {
     required this.apiKey,
     required this.onChooseProvider,
     required this.onProtocolChanged,
-    required this.clearKey,
-    required this.onClearKeyChanged,
-    required this.hasSavedKey,
     required this.keyHint,
     this.enabled = true,
   });
@@ -23,8 +20,7 @@ class CompactServiceConnection extends StatelessWidget {
   final TextEditingController name, url, apiKey;
   final VoidCallback onChooseProvider;
   final ValueChanged<ProviderProtocol> onProtocolChanged;
-  final ValueChanged<bool> onClearKeyChanged;
-  final bool clearKey, hasSavedKey, enabled;
+  final bool enabled;
   final String keyHint;
 
   @override
@@ -119,7 +115,7 @@ class CompactServiceConnection extends StatelessWidget {
       TextField(
         controller: apiKey,
         obscureText: true,
-        enabled: enabled && !clearKey,
+        enabled: enabled,
         style: theme.textTheme.bodySmall,
         decoration: decoration(keyHint),
       ),
@@ -175,41 +171,11 @@ class CompactServiceConnection extends StatelessWidget {
             ] else
               pair(address, secret, leftFlex: 6, rightFlex: 4),
             const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    preset.connectionHint,
-                    style: labelStyle?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                if (hasSavedKey) ...[
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: enabled ? () => onClearKeyChanged(!clearKey) : null,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: Checkbox(
-                            value: clearKey,
-                            visualDensity: VisualDensity.compact,
-                            onChanged: enabled
-                                ? (value) => onClearKeyChanged(value ?? false)
-                                : null,
-                          ),
-                        ),
-                        Text('清除密钥', style: labelStyle),
-                      ],
-                    ),
-                  ),
-                ],
-              ],
+            Text(
+              preset.connectionHint,
+              style: labelStyle?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         );

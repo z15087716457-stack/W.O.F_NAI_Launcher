@@ -210,9 +210,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
             .watch(promptAssistantConfigProvider)
             .providerHasApiKey[widget.provider?.id] ??
         false;
-    final keyStatus = _clearKey
-        ? '保存后清除'
-        : _apiKey.text.trim().isNotEmpty
+    final keyStatus = _apiKey.text.trim().isNotEmpty
         ? '待保存'
         : hasKey
         ? '已保存'

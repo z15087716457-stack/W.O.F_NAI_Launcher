@@ -101,7 +101,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   bool _busy = false;
   bool _headersLoaded = false;
   bool _headersLoadFailed = false;
-  bool _clearKey = false;
   bool _vendorChanged = false;
   bool _allowImageInput = false;
   int _timeoutSeconds = 120;
@@ -236,7 +235,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     _preset.name,
     _protocol.name,
     _enabled,
-    _clearKey,
     _allowImageInput,
     _timeoutSeconds,
     _maxConcurrentRequests,
@@ -258,7 +256,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     _protocol.name,
     _baseUrl.text.trim(),
     _apiKey.text.trim(),
-    _clearKey,
     _vendorChanged,
     [
       for (final name in _headers.keys.toList()..sort()) [name, _headers[name]],
@@ -360,7 +357,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   }
 
   Future<String?> _effectiveKey() async {
-    if (_clearKey) return null;
     final entered = _apiKey.text.trim();
     if (entered.isNotEmpty) return entered;
     if (_vendorChanged) return null;
@@ -464,7 +460,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       await notifier.saveServiceDraft(
         provider: _draft(id: id),
         headers: _headers,
-        apiKey: _clearKey || (_vendorChanged && _apiKey.text.trim().isEmpty)
+        apiKey: _vendorChanged && _apiKey.text.trim().isEmpty
             ? ''
             : _apiKey.text.trim().isNotEmpty
             ? _apiKey.text
@@ -480,7 +476,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         ],
       );
       _vendorChanged = false;
-      _clearKey = false;
       _apiKey.clear();
       if (mounted) {
         if (widget.embedded) {
@@ -518,7 +513,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       if (previous.vendor != next.vendor) {
         _vendorChanged = widget.provider != null;
         _apiKey.clear();
-        _clearKey = false;
         _headers = {};
         _selected.clear();
         _modelInputErrors.clear();
@@ -812,20 +806,11 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     url: _baseUrl,
     apiKey: _apiKey,
     enabled: !_busy && _headersLoaded,
-    clearKey: _clearKey,
-    hasSavedKey:
-        widget.provider != null &&
-        !_vendorChanged &&
-        (ref
-                .watch(promptAssistantConfigProvider)
-                .providerHasApiKey[widget.provider!.id] ??
-            false),
     keyHint: widget.provider == null
         ? '输入 Key；本地服务可留空'
         : _vendorChanged
         ? '输入此服务商的 Key'
         : '已保存；留空保持原值',
-    onClearKeyChanged: (value) => _updateOverview(() => _clearKey = value),
     onProtocolChanged: (value) => _updateOverview(() => _setProtocol(value)),
     onChooseProvider: () async {
       final next = await showProviderPicker(context, _preset);
