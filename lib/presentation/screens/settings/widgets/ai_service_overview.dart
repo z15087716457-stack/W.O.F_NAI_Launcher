@@ -578,27 +578,27 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 13),
       child: LayoutBuilder(
-        builder: (context, constraints) =>
-            constraints.maxWidth <
-                340 * MediaQuery.textScalerOf(context).scale(1)
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  label,
-                  const SizedBox(height: 9),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: SizedBox(width: 145, child: control),
-                  ),
-                ],
-              )
-            : Row(
-                children: [
-                  Expanded(child: label),
-                  const SizedBox(width: 20),
-                  SizedBox(width: 145, child: control),
-                ],
-              ),
+        builder: (context, constraints) {
+          final scale = MediaQuery.textScalerOf(context).scale(1);
+          final controlWidth = (244 * scale).clamp(0.0, constraints.maxWidth);
+          final trailing = SizedBox(width: controlWidth, child: control);
+          return constraints.maxWidth < 444 * scale
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    label,
+                    const SizedBox(height: 9),
+                    Align(alignment: Alignment.centerRight, child: trailing),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(child: label),
+                    const SizedBox(width: 20),
+                    trailing,
+                  ],
+                );
+        },
       ),
     );
   }
@@ -636,21 +636,17 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
           context,
           '请求超时',
           '单次请求最长等待时间',
-          TextFormField(
-            key: const Key('service-request-timeout'),
-            initialValue: '$_timeoutSeconds',
+          ServiceRequestStepper(
+            fieldKey: 'service-request-timeout',
+            label: '请求超时',
+            unit: '秒',
+            value: _timeoutSeconds,
+            minimum: 10,
+            maximum: 600,
+            step: 10,
             enabled: !_busy,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              isDense: true,
-              suffixText: '秒',
-              errorText: _timeoutSeconds < 10 || _timeoutSeconds > 600
-                  ? '10–600 秒'
-                  : null,
-            ),
-            onChanged: (value) => _updateOverview(
-              () => _timeoutSeconds = int.tryParse(value) ?? -1,
-            ),
+            onChanged: (value) =>
+                _updateOverview(() => _timeoutSeconds = value),
           ),
         ),
         const Divider(height: 1),
@@ -658,19 +654,16 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
           context,
           '最大并发数量',
           '此服务同时处理的请求数',
-          DropdownButtonFormField<int>(
-            key: const Key('service-max-concurrency'),
-            initialValue: _maxConcurrentRequests,
-            isExpanded: true,
-            decoration: const InputDecoration(isDense: true),
-            items: [
-              for (var i = 1; i <= 20; i++)
-                DropdownMenuItem(value: i, child: Text('$i 个')),
-            ],
-            onChanged: _busy
-                ? null
-                : (value) =>
-                      _updateOverview(() => _maxConcurrentRequests = value!),
+          ServiceRequestStepper(
+            fieldKey: 'service-max-concurrency',
+            label: '最大并发数量',
+            unit: '个',
+            value: _maxConcurrentRequests,
+            minimum: 1,
+            maximum: 20,
+            enabled: !_busy,
+            onChanged: (value) =>
+                _updateOverview(() => _maxConcurrentRequests = value),
           ),
         ),
         const Divider(height: 1),
@@ -678,18 +671,11 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
           context,
           '失败重试',
           '连接失败或服务繁忙时重试',
-          DropdownButtonFormField<int>(
+          ServiceRetrySegments(
             key: const Key('service-retry-attempts'),
-            initialValue: _retryAttempts,
-            isExpanded: true,
-            decoration: const InputDecoration(isDense: true),
-            items: [
-              for (var i = 0; i <= 3; i++)
-                DropdownMenuItem(value: i, child: Text(i == 0 ? '关闭' : '$i 次')),
-            ],
-            onChanged: _busy
-                ? null
-                : (value) => _updateOverview(() => _retryAttempts = value!),
+            value: _retryAttempts,
+            enabled: !_busy,
+            onChanged: (value) => _updateOverview(() => _retryAttempts = value),
           ),
         ),
       ],

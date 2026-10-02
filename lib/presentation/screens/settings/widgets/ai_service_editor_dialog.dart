@@ -21,6 +21,7 @@ import '../../../prompt_assistant/models/model_catalog_entry.dart';
 import '../../../prompt_assistant/services/model_catalog_repository.dart';
 import 'model_draft_save_controller.dart';
 import 'model_request_overrides_editor.dart';
+import 'service_request_controls.dart';
 
 part 'ai_service_overview.dart';
 
@@ -314,6 +315,8 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
     setState(() {
       _error = _timeoutSeconds < 10 || _timeoutSeconds > 600
           ? '请求超时应在 10–600 秒之间。'
+          : _maxConcurrentRequests < 1 || _maxConcurrentRequests > 20
+          ? '最大并发数量应在 1–20 个之间。'
           : name.isEmpty
           ? '请输入服务名称。'
           : url == null ||
