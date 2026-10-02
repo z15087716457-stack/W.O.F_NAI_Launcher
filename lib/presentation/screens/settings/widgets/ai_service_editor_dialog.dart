@@ -1234,22 +1234,6 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
                     ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Text('自定义', style: theme.textTheme.labelSmall),
-                const SizedBox(width: 5),
-                Tooltip(
-                  message: '添加模型目录无法拉取到的模型',
-                  triggerMode: TooltipTriggerMode.tap,
-                  child: Icon(
-                    Icons.help_outline,
-                    size: 12,
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 5),
             LayoutBuilder(
               builder: (context, c) {
                 final input = TextField(
@@ -1259,7 +1243,20 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
                   onSubmitted: (_) => _addManual(),
                   style: theme.textTheme.bodySmall,
                   decoration: InputDecoration(
-                    hintText: '填写需要添加的模型 ID',
+                    hintText: '自定义模型 ID',
+                    prefixIcon: Tooltip(
+                      message: '添加模型目录无法拉取到的模型',
+                      triggerMode: TooltipTriggerMode.tap,
+                      child: Icon(
+                        Icons.help_outline,
+                        size: 12,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 30,
+                      minHeight: 28,
+                    ),
                     isDense: true,
                     filled: true,
                     fillColor: colors.surfaceContainerHighest.withValues(
