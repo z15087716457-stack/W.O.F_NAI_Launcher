@@ -92,6 +92,7 @@ class _IntegrationsSettingsSectionState
             onSelected: (index) => setState(() => _selectedIndex = index),
           ),
         ),
+        const SizedBox(height: 10),
         _builders[_selectedIndex](context),
       ],
     );

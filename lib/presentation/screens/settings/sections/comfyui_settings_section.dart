@@ -51,7 +51,6 @@ class _ComfyUISettingsSectionState
     return Column(
       children: [
         SettingsCard(
-          title: 'ComfyUI',
           icon: Icons.auto_fix_high,
           child: Column(
             children: [

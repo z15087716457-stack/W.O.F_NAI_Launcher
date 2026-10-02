@@ -112,6 +112,7 @@ final captureKey = GlobalKey();
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
 }
@@ -140,6 +141,7 @@ Future<ProviderContainer> pumpManagement(
   WidgetTester tester, {
   Size size = const Size(1200, 820),
   double scale = 1,
+  MemorySecrets? secrets,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -152,7 +154,9 @@ Future<ProviderContainer> pumpManagement(
     ProviderScope(
       overrides: [
         localStorageServiceProvider.overrideWithValue(storage),
-        secureStorageServiceProvider.overrideWithValue(MemorySecrets()),
+        secureStorageServiceProvider.overrideWithValue(
+          secrets ?? MemorySecrets(),
+        ),
       ],
       child: MaterialApp(
         locale: const Locale('zh'),
@@ -188,11 +192,85 @@ void main() {
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
   testWidgets(
+    'changing vendors preserves stored credentials until save and requires the new key',
+    (tester) async {
+      final secrets = MemorySecrets()
+        ..keys['deepseek'] = 'old-test-key'
+        ..headers['deepseek'] = '{"X-Project":"old"}';
+      final container = await pumpManagement(tester, secrets: secrets);
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-edit-connection')),
+      );
+      await tapVisible(
+        tester,
+        find.byKey(const Key('service-provider-picker')),
+      );
+      await tester.enterText(
+        find.byKey(const Key('provider-search')),
+        'OpenAI',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('choose-provider-openaiResponses')),
+      );
+      await tester.pumpAndSettle();
+      expect(secrets.keys['deepseek'], 'old-test-key');
+      expect(
+        container.read(promptAssistantConfigProvider).providers.first.preset,
+        ProviderPreset.deepseek,
+      );
+      final keyField = find.byWidgetPredicate(
+        (w) => w is TextField && w.obscureText,
+      );
+      await tester.ensureVisible(keyField);
+      await tester.pumpAndSettle();
+      await tester.enterText(keyField, 'new-test-key');
+      await tapVisible(tester, find.byKey(const Key('service-save')));
+      final saved = container
+          .read(promptAssistantConfigProvider)
+          .providers
+          .firstWhere((p) => p.id == 'deepseek');
+      expect(saved.protocol, ProviderProtocol.openaiResponses);
+      expect(saved.baseUrl, 'https://api.openai.com/v1');
+      expect(secrets.keys['deepseek'], 'new-test-key');
+      expect(
+        await secrets.getPromptAssistantHeaders('deepseek'),
+        anyOf(isNull, '{}'),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('offline starter selections retain manual provenance', (
+    tester,
+  ) async {
+    final container = await pumpManagement(tester);
+    await tapVisible(
+      tester,
+      find.widgetWithText(CheckboxListTile, 'deepseek-flash'),
+    );
+    await tapVisible(tester, find.byKey(const Key('service-save')));
+    final selected = container
+        .read(promptAssistantConfigProvider)
+        .models
+        .firstWhere((m) => m.name == 'deepseek-flash');
+    expect(selected.source, ModelSource.manual);
+    expect(
+      container
+          .read(promptAssistantConfigProvider)
+          .models
+          .any((m) => m.name == 'deepseek-chat'),
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets(
     'management pages are usable without model calls and preserve unsaved service edits',
     (tester) async {
       final container = await pumpManagement(tester);
       expect(find.text('DeepSeek'), findsWidgets);
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(TextField), findsNWidgets(3));
       await capture(tester, 'provider');
       await capture(tester, 'models');
       await tapVisible(
@@ -200,6 +278,7 @@ void main() {
         find.byKey(const Key('service-model-parameters-deepseek-chat')),
       );
       await capture(tester, 'model-parameters');
+      await tapVisible(tester, find.byKey(const Key('model-advanced-toggle')));
       await tester.ensureVisible(
         find.byKey(const Key('parameter-temperature')),
       );
@@ -252,31 +331,17 @@ void main() {
       await tester.tap(find.text('功能接口').first);
       await tester.pumpAndSettle();
       await capture(tester, 'task');
-      await tester.tap(find.text('参数').first);
-      await tester.pumpAndSettle();
-      await capture(tester, 'task-parameters');
-      await tester.enterText(
-        find.byKey(const Key('parameter-temperature')),
-        'invalid',
-      );
-      await tester.tap(find.text('模型与预设').first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('task-save')));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('无效数字'), findsOneWidget);
-      await tester.enterText(
-        find.byKey(const Key('parameter-temperature')),
-        '0.2',
-      );
+      expect(find.text('参数'), findsNothing);
+      expect(find.byKey(const Key('parameter-temperature')), findsNothing);
       await tester.tap(find.byKey(const Key('task-save')));
       await tester.pumpAndSettle();
       expect(
         container
             .read(promptAssistantConfigProvider)
-            .interfaceFor(LauncherInterface.translate)
-            .parameters
+            .models
+            .firstWhere((m) => m.name == 'deepseek-chat')
             .temperature,
-        0.2,
+        0.4,
       );
       await tester.tap(find.text('预设与提示词').first);
       await tester.pumpAndSettle();
@@ -325,7 +390,7 @@ void main() {
         tester,
         find.byKey(const Key('service-edit-connection')),
       );
-      expect(find.byType(TextField), findsNothing);
+      expect(find.byType(TextField), findsNWidgets(3));
       expect(
         container.read(promptAssistantConfigProvider).providers.first.name,
         'DeepSeek',
@@ -358,7 +423,6 @@ void main() {
   );
   testWidgets('short windows keep model editing scrollable', (tester) async {
     await pumpManagement(tester, size: const Size(1000, 500));
-    await tapVisible(tester, find.byKey(const Key('service-add-model')));
     await tester.ensureVisible(
       find.byKey(const Key('ai-service-manual-model-id')),
     );

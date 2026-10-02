@@ -4,7 +4,7 @@
 
 设置页按使用偏好、创作与资源、服务与连接分组，隐私与分享、关于与诊断位于导航底部。九个入口使用 `studio_icons/settings_*.svg` 自绘线性图标，追加至 StudioIcons 字体的 e90e–e916，已有码位保持稳定；字体和 `studio_icon_paths.dart` 由 `generate_studio_icons.py` 同步生成。
 
-服务商标识根据用户选择的 `ProviderPreset` 显示，兼容协议不推断厂商。OpenAI、Anthropic、Gemini、DeepSeek、LM Studio、Ollama、Pollinations 标识离线随包提供，来自 Lobe Icons 1.95.1 的 SVG 资源；固定来源与 SHA-256 见 `provider_logos.json`，MIT 许可见 `assets/licenses/LobeIcons-LICENSE.txt`，应用许可页同步登记。品牌标识仍归各厂商所有。单色标识随深浅主题调整，彩色标识保留原色；自定义兼容服务显示 Studio 自绘模型图标。
+服务商标识根据用户选择的 `ProviderPreset` 显示，兼容协议不推断厂商。OpenAI、Anthropic、Gemini、DeepSeek、通义千问、Kimi、智谱、MiniMax、豆包、混元、文心、xAI、Mistral、Groq、硅基流动、OpenRouter、LM Studio、Ollama、Pollinations 共 19 枚标识离线随包提供，来自 Lobe Icons 1.95.1 的 SVG 资源；固定来源与 SHA-256 见 `provider_logos.json`，MIT 许可见 `assets/licenses/LobeIcons-LICENSE.txt`，应用许可页同步登记。品牌标识仍归各厂商所有。单色标识随深浅主题调整，彩色标识保留原色；自定义兼容服务显示 Studio 自绘模型图标。
 
 `CAPTURE_SETTINGS_REDESIGN=1` 运行设置页测试可导出实际字体的九页、深浅色、1280 / 740 / 360px 宽度及窄窗口 130% 字号实绘；同变量运行 AppToast 测试导出通知卡片。测试只使用临时存储与模拟服务，不读取用户账号或调用模型。
 
@@ -105,3 +105,13 @@ NovelAI 账号页以当前账号、订阅与资料、已保存账号、登录偏
 顶部搜索支持 Ctrl/Cmd+F，定位分类、模型接口、预设及集成子页，并保留未保存编辑的离开保护。“关于与诊断”提供公开偏好的导入、导出、按范围恢复默认及上次恢复；仅允许白名单中的界面、输入与保护项，每次写入前生成回退副本，拒绝过时确认，失败时回滚已写项并保留后续修改。账号、密钥、模型配置、草稿、图片和本地路径不纳入偏好包。
 
 CAPTURE_SETTINGS_REDESIGN=1 SETTINGS_CAPTURE_DIR=.dart_tool/settings-polish-captures 运行 settings_screen_test.dart 可实绘九页、深浅色、1280/2400/740/360px 和窄窗 130% 字号，另有模型表单与账号菜单；所有数据为夹具，不读取用户账户、不调用在线接口。原生拖动手感仍由运行包验收。
+
+## 本轮设置与模型工作台
+
+常规与外观使用用户选定的第四款「明暗圆」：圆形细线轮廓与半圆实心，固定码位不变；已同步 SVG 母版、字体与动画路径。主界面字号维持原 100%，设置独立字号基线与 48px 导航栏、40px 账号头像沿用验收版本。
+
+模型页保留顶部导航与左侧服务列表，右侧使用可搜索的预置/服务模型目录和已选模型双栏；连接摘要、测试与保存固定在顶部，手动模型 ID 入口固定在已选列表底部。上下文、最大输出和推理强度为模型级设置，采样与能力标记折叠；功能接口与提示词预设不再覆盖参数。旧地址、协议、模型 ID 与提示词保留，旧覆盖参数解码时忽略，下一次保存移除。能力未知值不会自动变成支持。
+
+服务商菜单按国内、国际、聚合、本地与自定义分组，每个厂商只显示一次；协议位于服务高级设置。默认连接和预置模型的官方来源、核对日期与限制见 `provider_catalog_sources.json`。密钥和请求头继续使用安全存储，切换厂商只修改草稿，保存前不会替换已有凭据。
+
+设置弹窗统一裁切圆角，Anlas 阈值说明独立换行；快捷键分类使用圆角分区并支持本地化名称搜索。通知行、词库操作、图库源操作、集成标签内容与黑名单开关按同一控件体系排布。`settings_round_widgets_test.dart` 和 `model_catalog_migration_test.dart` 覆盖弹窗、搜索、参数迁移、未知能力与数值校验。全部测试使用夹具，不读取个人资料或调用付费接口。

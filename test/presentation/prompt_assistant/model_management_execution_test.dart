@@ -170,7 +170,7 @@ void main() {
     },
   );
   test(
-    'draft Wiki overrides language and parameters while retaining link contract and saved configuration',
+    'draft Wiki uses model parameters and preserves language, link contract and saved configuration',
     () async {
       final api = _CaptureApi();
       final container = ProviderContainer(
@@ -192,7 +192,6 @@ void main() {
         name: 'Wiki',
         task: LauncherInterface.wikiTranslate,
         prompt: 'Use short paragraphs.',
-        parameters: RequestParameters(temperature: 0.3, maxOutputTokens: 800),
       );
       final service = container.read(promptAssistantServiceProvider);
       await service.testTaskDraft(
@@ -201,14 +200,13 @@ void main() {
           providerId: 'service',
           model: 'model',
           targetLanguage: 'ja',
-          parameters: RequestParameters(maxOutputTokens: 1000),
         ),
         preset,
         sessionId: 'draft',
       );
       final request = api.requests.single;
-      expect(request.modelConfig!.temperature, 0.3);
-      expect(request.modelConfig!.maxOutputTokens, 1000);
+      expect(request.modelConfig!.temperature, 0.6);
+      expect(request.modelConfig!.maxOutputTokens, 500);
       expect(request.systemPrompt, contains('Use short paragraphs.'));
       expect(request.systemPrompt, contains('wof-tag:TAG'));
       expect(request.systemPrompt, contains('Return exactly one JSON object'));

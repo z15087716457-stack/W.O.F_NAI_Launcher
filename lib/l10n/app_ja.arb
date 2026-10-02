@@ -6013,5 +6013,7 @@
   "wiki_collectionNameHint": "コレクション名",
   "wiki_syncTags": "Danbooru タグを同期",
   "wiki_directorySource": "公式グループ一覧のスナップショット",
-  "wiki_openFull": "タグ百科で開く"
+  "wiki_openFull": "タグ百科で開く",
+  "shortcut_action_vibe_detail_prev_sub_vibe": "前のサブ Vibe",
+  "shortcut_action_vibe_detail_next_sub_vibe": "次のサブ Vibe"
 }

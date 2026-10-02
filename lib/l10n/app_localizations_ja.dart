@@ -10262,4 +10262,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wiki_openFull => 'タグ百科で開く';
+
+  @override
+  String get shortcut_action_vibe_detail_prev_sub_vibe => '前のサブ Vibe';
+
+  @override
+  String get shortcut_action_vibe_detail_next_sub_vibe => '次のサブ Vibe';
 }

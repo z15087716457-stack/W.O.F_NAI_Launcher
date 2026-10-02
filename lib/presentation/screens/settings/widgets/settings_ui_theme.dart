@@ -78,6 +78,7 @@ ThemeData settingsUiTheme(ThemeData base) {
       ),
     ),
     dialogTheme: base.dialogTheme.copyWith(
+      clipBehavior: Clip.antiAlias,
       backgroundColor: colors.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 12,
@@ -121,6 +122,11 @@ ThemeData settingsUiTheme(ThemeData base) {
     ),
     chipTheme: base.chipTheme.copyWith(
       labelStyle: text(base.textTheme.bodyMedium, 12),
+      color: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? colors.primary.withValues(alpha: .10)
+            : colors.surface,
+      ),
       selectedColor: colors.primary.withValues(alpha: .10),
       backgroundColor: colors.surface,
       checkmarkColor: colors.primary,

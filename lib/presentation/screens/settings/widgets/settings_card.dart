@@ -9,15 +9,17 @@ class SettingsCard extends StatelessWidget {
     this.trailing,
     required this.child,
     this.showDivider = true,
+    this.bottomSpacing = 26,
   });
   final String? title;
   final IconData? icon;
   final Widget? trailing;
   final Widget child;
   final bool showDivider;
+  final double bottomSpacing;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 26),
+    padding: EdgeInsets.only(bottom: bottomSpacing),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

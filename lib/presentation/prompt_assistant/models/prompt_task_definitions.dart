@@ -48,7 +48,4 @@ ModelConfig effectiveTaskModel(
   PromptAssistantConfigState config,
   LauncherInterface task,
   ModelConfig model,
-) => config
-    .interfaceFor(task)
-    .parameters
-    .applyTo(presetFor(config, task).parameters.applyTo(model));
+) => model;

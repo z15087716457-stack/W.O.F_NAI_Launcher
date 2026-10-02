@@ -5,6 +5,7 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/share_image_settings_provider.dart';
 import '../../../widgets/online_gallery/blacklist_settings_panel.dart';
 import '../widgets/settings_card.dart';
+import '../widgets/settings_number_dialog.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/settings_section_label.dart';
 
@@ -25,43 +26,16 @@ class _PrivacySettingsSectionState
     extends ConsumerState<PrivacySettingsSection> {
   Future<void> _editHighAnlasThreshold() async {
     final settings = ref.read(shareImageSettingsProvider);
-    final controller = TextEditingController(
-      text: settings.highAnlasCostThreshold.toString(),
-    );
     final result = await showDialog<int>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.settings_setHighAnlasCostThresholdTitle),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: context.l10n.settings_threshold,
-            suffixText: 'Anlas',
-            helperText: context.l10n.settings_highAnlasCostThresholdHelper,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(context.l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              final value = int.tryParse(controller.text.trim());
-              if (value != null && value > 0) {
-                Navigator.of(dialogContext).pop(value);
-              }
-            },
-            child: Text(context.l10n.common_save),
-          ),
-        ],
+      builder: (_) => SettingsNumberDialog(
+        title: context.l10n.settings_setHighAnlasCostThresholdTitle,
+        label: context.l10n.settings_threshold,
+        description: context.l10n.settings_highAnlasCostThresholdHelper,
+        value: settings.highAnlasCostThreshold,
+        suffix: 'Anlas',
       ),
     );
-
-    controller.dispose();
     if (result == null) {
       return;
     }

@@ -37,6 +37,66 @@
       "asset": "pollinations.svg",
       "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/pollinations.svg",
       "sha256": "f1a4a256ed110b13eb3cfb5dfda889ff1a91e5014fdff8e4862026f3950df53b"
+    },
+    {
+      "asset": "qwen.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/qwen.svg",
+      "sha256": "dcb3ba2f2b55ccbacbade0ca0bf98921fbaf8a07848972974b4a9bf8077376cf"
+    },
+    {
+      "asset": "kimi.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/kimi.svg",
+      "sha256": "ed08131b46acf70e6e2144eceb775e74098b58ea65fa21eaee04be7b05cfe63b"
+    },
+    {
+      "asset": "zhipu.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/zhipu.svg",
+      "sha256": "d4c3fe5ff92820b2ae5e3ddaaa30e6fc622cb746b75baad97f4bb2428fa25c5d"
+    },
+    {
+      "asset": "minimax.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/minimax.svg",
+      "sha256": "bb96e2005081494716de6af5fd030701ae551ee68393ad61b325c07325607848"
+    },
+    {
+      "asset": "doubao.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/doubao.svg",
+      "sha256": "cbda61929dbe7263a969d34ca8a022226d45d20fddfe333c1608abcb52de7b52"
+    },
+    {
+      "asset": "hunyuan.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/hunyuan.svg",
+      "sha256": "7306a65eb71c4de61e21a637e5c4fef94afde823678e225c46f891cc783f6531"
+    },
+    {
+      "asset": "wenxin.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/wenxin.svg",
+      "sha256": "3624b6084ce8ebefcbbb90ae6ab6485c4df9083187ae6e4012e1aba9a4bcea04"
+    },
+    {
+      "asset": "xai.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/xai.svg",
+      "sha256": "89eb7de9f0d02a41cfecd9109e253d7fd3529e27467dee4254faa67f3ac21451"
+    },
+    {
+      "asset": "mistral.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/mistral.svg",
+      "sha256": "a06cfa54e7deff7f7544175b006b7f8a03fbc5624c44f7d553a44d07ea96e629"
+    },
+    {
+      "asset": "groq.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/groq.svg",
+      "sha256": "078d5cf6e7a54905040c15ddacf5ea33c13042fe7739e820cedc2096e4406651"
+    },
+    {
+      "asset": "siliconcloud.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/siliconcloud.svg",
+      "sha256": "50025587d401e07f7d82a2977146176bd8c9d9f52c54c452f31bb49c16d0cf3c"
+    },
+    {
+      "asset": "openrouter.svg",
+      "url": "https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.1/icons/openrouter.svg",
+      "sha256": "ae671cc83de9bd45db97a47ed5e38a4e1bd9f93a12be495ba4b4f8b284026bca"
     }
   ]
 }

@@ -144,6 +144,15 @@ class _DesignCatalog extends TagCatalogRepository {
   Future<void> dispose() async {}
 }
 
+class _DesignDictionary extends ZhDictionaryService {
+  @override
+  ZhDictionaryState get state => const ZhDictionaryState(
+    isInstalled: true,
+    tagCount: 322933,
+    version: '4831090f',
+  );
+}
+
 class _DesignTagsCache extends DanbooruTagsCacheNotifier {
   @override
   Future<DanbooruTagsCacheState> build() async =>
@@ -362,7 +371,7 @@ void main() {
       expect(find.text('保留当前编辑？'), findsOneWidget);
       await tester.tap(find.text('继续编辑'));
       await tester.pumpAndSettle();
-      expect(find.text('未保存的服务'), findsOneWidget);
+      expect(find.text('未保存的服务'), findsNWidgets(2));
       expect(find.byType(AccountSettingsSection), findsNothing);
       expect(tester.takeException(), isNull);
     },
@@ -393,7 +402,7 @@ void main() {
     expect(find.text('保留当前编辑？'), findsOneWidget);
     await tester.tap(find.text('继续编辑'));
     await tester.pumpAndSettle();
-    expect(find.text('未保存的服务'), findsOneWidget);
+    expect(find.text('未保存的服务'), findsNWidgets(2));
     expect(find.byType(AccountSettingsSection), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -645,7 +654,7 @@ void main() {
                   _DesignCatalog(),
                 ),
                 zhDictionaryServiceProvider.overrideWith(
-                  (ref) => ZhDictionaryService(),
+                  (ref) => _DesignDictionary(),
                 ),
                 databaseManagerProvider.overrideWith(
                   (ref) async =>
@@ -743,6 +752,51 @@ void main() {
               reason:
                   '${destination.name}/${width.toInt()}/$scale/${brightness.name}',
             );
+            if (destination == SettingsDestination.data) {
+              final repair = find.text('修复');
+              await tester.ensureVisible(repair);
+              await tester.pump(const Duration(milliseconds: 250));
+              final actions = find
+                  .ancestor(of: repair, matching: find.byType(Wrap))
+                  .first;
+              final icons = find.descendant(
+                of: actions,
+                matching: find.byType(IconButton),
+              );
+              final button = find.descendant(
+                of: actions,
+                matching: find.byType(FilledButton),
+              );
+              if (width >= 740) {
+                for (final icon in icons.evaluate()) {
+                  expect(
+                    (tester.getCenter(find.byWidget(icon.widget)).dy -
+                            tester.getCenter(button).dy)
+                        .abs(),
+                    lessThan(1),
+                  );
+                }
+              }
+            }
+            if (destination == SettingsDestination.storage) {
+              final add = find.text('添加文件夹');
+              await tester.ensureVisible(add);
+              await tester.pump(const Duration(milliseconds: 250));
+              final import = find.text('导入标签索引...');
+              if (width >= 740 && import.evaluate().isNotEmpty) {
+                expect(
+                  (tester.getCenter(add).dy - tester.getCenter(import).dy)
+                      .abs(),
+                  lessThan(1),
+                );
+              }
+            }
+            if (destination == SettingsDestination.integrations) {
+              expect(find.text('ComfyUI'), findsOneWidget);
+              await tester.tap(find.text('Krita'));
+              await tester.pump(const Duration(milliseconds: 250));
+              expect(find.text('Krita Bridge'), findsNothing);
+            }
             if (shouldCapture) {
               await tester.runAsync(() async {
                 final image =
@@ -1054,8 +1108,9 @@ void main() {
         await file.writeAsBytes(bytes!.buffer.asUint8List());
       });
     }
-    await tester.ensureVisible(find.byKey(const Key('service-add-model')));
-    await tester.tap(find.byKey(const Key('service-add-model')));
+    await tester.ensureVisible(
+      find.byKey(const Key('ai-service-manual-model-id')),
+    );
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('ai-service-manual-model-id')),
@@ -1066,9 +1121,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('添加自定义模型'));
     await tester.pump();
-    await tester.ensureVisible(find.text('保存').first);
+    await tester.ensureVisible(find.byKey(const Key('service-save')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('保存').first);
+    await tester.tap(find.byKey(const Key('service-save')));
     await tester.pumpAndSettle();
     await tester.pump();
 
@@ -1124,6 +1179,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('中转服务').first);
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('高级设置'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('高级设置'));
     await tester.pumpAndSettle();
     await tester.enterText(find.widgetWithText(TextField, '请求超时（秒）'), '75');
@@ -1143,9 +1200,9 @@ void main() {
     );
     await tester.tap(find.text('应用'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('保存').first);
+    await tester.ensureVisible(find.byKey(const Key('service-save')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('保存').first);
+    await tester.tap(find.byKey(const Key('service-save')));
     await tester.pumpAndSettle();
     expect(
       container

@@ -55,227 +55,285 @@ enum ProviderPreset {
   lmStudioResponses,
   ollama,
   pollinations,
+  qwen,
+  moonshot,
+  zhipu,
+  minimax,
+  doubao,
+  hunyuan,
+  qianfan,
+  xai,
+  mistral,
+  groq,
+  siliconflow,
+  openrouter,
 }
 
+// Built-in vendor connections, checked against official docs on 2026-10-02.
+// These are starter IDs, never a claim about access or a model's capabilities.
+class _VendorDefaults {
+  const _VendorDefaults(
+    this.label,
+    this.url,
+    this.protocol,
+    this.models,
+    this.group,
+  );
+  final String label, url, group;
+  final ProviderProtocol protocol;
+  final List<String> models;
+}
+
+const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
+  ProviderPreset.openaiChat: _VendorDefaults(
+    'OpenAI',
+    'https://api.openai.com/v1',
+    ProviderProtocol.openaiChatCompletions,
+    ['gpt-4.1-mini'],
+    '国际厂商',
+  ),
+  ProviderPreset.openaiResponses: _VendorDefaults(
+    'OpenAI',
+    'https://api.openai.com/v1',
+    ProviderProtocol.openaiResponses,
+    ['gpt-6-astra'],
+    '国际厂商',
+  ),
+  ProviderPreset.openaiCompatibleChat: _VendorDefaults(
+    '自定义服务',
+    '',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '本地与自定义',
+  ),
+  ProviderPreset.openaiCompatibleResponses: _VendorDefaults(
+    '自定义服务',
+    '',
+    ProviderProtocol.openaiResponses,
+    [],
+    '本地与自定义',
+  ),
+  ProviderPreset.anthropic: _VendorDefaults(
+    'Anthropic',
+    'https://api.anthropic.com',
+    ProviderProtocol.anthropicMessages,
+    ['claude-sonnet-5-5'],
+    '国际厂商',
+  ),
+  ProviderPreset.gemini: _VendorDefaults(
+    'Google Gemini',
+    'https://generativelanguage.googleapis.com',
+    ProviderProtocol.geminiGenerateContent,
+    ['gemini-3.8-flash'],
+    '国际厂商',
+  ),
+  ProviderPreset.deepseek: _VendorDefaults(
+    'DeepSeek',
+    'https://api.deepseek.com',
+    ProviderProtocol.openaiChatCompletions,
+    ['deepseek-flash', 'deepseek-v4-pro'],
+    '国内厂商',
+  ),
+  ProviderPreset.lmStudioChat: _VendorDefaults(
+    'LM Studio',
+    'http://localhost:1234/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '本地与自定义',
+  ),
+  ProviderPreset.lmStudioResponses: _VendorDefaults(
+    'LM Studio',
+    'http://localhost:1234/v1',
+    ProviderProtocol.openaiResponses,
+    [],
+    '本地与自定义',
+  ),
+  ProviderPreset.ollama: _VendorDefaults(
+    'Ollama',
+    'http://127.0.0.1:11434/v1',
+    ProviderProtocol.ollamaChatCompletions,
+    [],
+    '本地与自定义',
+  ),
+  ProviderPreset.pollinations: _VendorDefaults(
+    'Pollinations',
+    'https://gen.pollinations.ai',
+    ProviderProtocol.openaiChatCompletions,
+    ['openai-large'],
+    '聚合平台',
+  ),
+  ProviderPreset.qwen: _VendorDefaults(
+    '通义千问 · 百炼',
+    'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    ProviderProtocol.openaiChatCompletions,
+    ['qwen-plus'],
+    '国内厂商',
+  ),
+  ProviderPreset.moonshot: _VendorDefaults(
+    'Kimi · 月之暗面',
+    'https://api.moonshot.cn/v1',
+    ProviderProtocol.openaiChatCompletions,
+    ['kimi-k3'],
+    '国内厂商',
+  ),
+  ProviderPreset.zhipu: _VendorDefaults(
+    '智谱 GLM',
+    'https://open.bigmodel.cn/api/paas/v4',
+    ProviderProtocol.openaiChatCompletions,
+    ['glm-5.3'],
+    '国内厂商',
+  ),
+  ProviderPreset.minimax: _VendorDefaults(
+    'MiniMax',
+    'https://api.minimax.io/v1',
+    ProviderProtocol.openaiChatCompletions,
+    ['MiniMax-M3'],
+    '国内厂商',
+  ),
+  ProviderPreset.doubao: _VendorDefaults(
+    '豆包 · 火山方舟',
+    'https://ark.cn-beijing.volces.com/api/v3',
+    ProviderProtocol.openaiChatCompletions,
+    ['doubao-seed-2-1-pro-260628'],
+    '国内厂商',
+  ),
+  ProviderPreset.hunyuan: _VendorDefaults(
+    '腾讯混元',
+    'https://api.hunyuan.cloud.tencent.com/v1',
+    ProviderProtocol.openaiChatCompletions,
+    ['hunyuan-turbos-latest'],
+    '国内厂商',
+  ),
+  ProviderPreset.qianfan: _VendorDefaults(
+    '百度千帆',
+    'https://qianfan.baidubce.com/v2',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '国内厂商',
+  ),
+  ProviderPreset.xai: _VendorDefaults(
+    'xAI · Grok',
+    'https://api.x.ai/v1',
+    ProviderProtocol.openaiResponses,
+    ['grok-4.7'],
+    '国际厂商',
+  ),
+  ProviderPreset.mistral: _VendorDefaults(
+    'Mistral AI',
+    'https://api.mistral.ai/v1',
+    ProviderProtocol.openaiChatCompletions,
+    ['mistral-small-latest'],
+    '国际厂商',
+  ),
+  ProviderPreset.groq: _VendorDefaults(
+    'Groq',
+    'https://api.groq.com/openai/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+  ),
+  ProviderPreset.siliconflow: _VendorDefaults(
+    '硅基流动',
+    'https://api.siliconflow.cn/v1',
+    ProviderProtocol.openaiChatCompletions,
+    ['deepseek-ai/DeepSeek-V4-Flash'],
+    '聚合平台',
+  ),
+  ProviderPreset.openrouter: _VendorDefaults(
+    'OpenRouter',
+    'https://openrouter.ai/api/v1',
+    ProviderProtocol.openaiChatCompletions,
+    [],
+    '聚合平台',
+  ),
+};
+
 extension ProviderPresetDefaults on ProviderPreset {
-  String get label {
-    switch (this) {
-      case ProviderPreset.openaiChat:
-        return 'OpenAI Chat Completions';
-      case ProviderPreset.openaiResponses:
-        return 'OpenAI Responses';
-      case ProviderPreset.openaiCompatibleChat:
-        return 'OpenAI-compatible Chat';
-      case ProviderPreset.openaiCompatibleResponses:
-        return 'OpenAI-compatible Responses';
-      case ProviderPreset.anthropic:
-        return 'Anthropic';
-      case ProviderPreset.gemini:
-        return 'Gemini';
-      case ProviderPreset.deepseek:
-        return 'DeepSeek';
-      case ProviderPreset.lmStudioChat:
-        return 'LM Studio Chat';
-      case ProviderPreset.lmStudioResponses:
-        return 'LM Studio Responses';
-      case ProviderPreset.ollama:
-        return 'Ollama';
-      case ProviderPreset.pollinations:
-        return 'Pollinations';
-    }
-  }
-
-  String get defaultId {
-    switch (this) {
-      case ProviderPreset.openaiChat:
-        return 'openai_chat';
-      case ProviderPreset.openaiResponses:
-        return 'openai_responses';
-      case ProviderPreset.openaiCompatibleChat:
-        return 'openai_compatible_chat';
-      case ProviderPreset.openaiCompatibleResponses:
-        return 'openai_compatible_responses';
-      case ProviderPreset.anthropic:
-        return 'anthropic';
-      case ProviderPreset.gemini:
-        return 'gemini';
-      case ProviderPreset.deepseek:
-        return 'deepseek';
-      case ProviderPreset.lmStudioChat:
-        return 'lmstudio_chat';
-      case ProviderPreset.lmStudioResponses:
-        return 'lmstudio_responses';
-      case ProviderPreset.ollama:
-        return 'ollama';
-      case ProviderPreset.pollinations:
-        return 'pollinations';
-    }
-  }
-
-  String get defaultName {
-    switch (this) {
-      case ProviderPreset.openaiChat:
-        return 'OpenAI Chat';
-      case ProviderPreset.openaiResponses:
-        return 'OpenAI Responses';
-      case ProviderPreset.openaiCompatibleChat:
-        return 'OpenAI Compatible Chat';
-      case ProviderPreset.openaiCompatibleResponses:
-        return 'OpenAI Compatible Responses';
-      case ProviderPreset.anthropic:
-        return 'Anthropic';
-      case ProviderPreset.gemini:
-        return 'Gemini';
-      case ProviderPreset.deepseek:
-        return 'DeepSeek';
-      case ProviderPreset.lmStudioChat:
-        return 'LM Studio Chat';
-      case ProviderPreset.lmStudioResponses:
-        return 'LM Studio Responses';
-      case ProviderPreset.ollama:
-        return 'Ollama';
-      case ProviderPreset.pollinations:
-        return 'pollinations.ai';
-    }
-  }
-
-  String get defaultBaseUrl {
-    switch (this) {
-      case ProviderPreset.openaiChat:
-      case ProviderPreset.openaiResponses:
-        return 'https://api.openai.com/v1';
-      case ProviderPreset.openaiCompatibleChat:
-      case ProviderPreset.openaiCompatibleResponses:
-        return '';
-      case ProviderPreset.anthropic:
-        return 'https://api.anthropic.com';
-      case ProviderPreset.gemini:
-        return 'https://generativelanguage.googleapis.com';
-      case ProviderPreset.deepseek:
-        return 'https://api.deepseek.com';
-      case ProviderPreset.lmStudioChat:
-      case ProviderPreset.lmStudioResponses:
-        return 'http://localhost:1234/v1';
-      case ProviderPreset.ollama:
-        return 'http://127.0.0.1:11434/v1';
-      case ProviderPreset.pollinations:
-        return 'https://gen.pollinations.ai';
-    }
-  }
-
-  ProviderProtocol get defaultProtocol {
-    switch (this) {
-      case ProviderPreset.openaiChat:
-      case ProviderPreset.openaiCompatibleChat:
-      case ProviderPreset.deepseek:
-      case ProviderPreset.lmStudioChat:
-      case ProviderPreset.pollinations:
-        return ProviderProtocol.openaiChatCompletions;
-      case ProviderPreset.openaiResponses:
-      case ProviderPreset.openaiCompatibleResponses:
-      case ProviderPreset.lmStudioResponses:
-        return ProviderProtocol.openaiResponses;
-      case ProviderPreset.anthropic:
-        return ProviderProtocol.anthropicMessages;
-      case ProviderPreset.gemini:
-        return ProviderProtocol.geminiGenerateContent;
-      case ProviderPreset.ollama:
-        return ProviderProtocol.ollamaChatCompletions;
-    }
-  }
-
-  List<String> get defaultModelNames {
-    switch (this) {
-      case ProviderPreset.openaiChat:
-      case ProviderPreset.openaiResponses:
-        return const ['gpt-4.1-mini'];
-      case ProviderPreset.anthropic:
-        return const ['claude-sonnet-4-20250514'];
-      case ProviderPreset.gemini:
-        return const ['gemini-2.5-flash'];
-      case ProviderPreset.deepseek:
-        return const ['deepseek-v4-flash', 'deepseek-v4-pro'];
-      case ProviderPreset.pollinations:
-        return const ['openai-large'];
-      case ProviderPreset.openaiCompatibleChat:
-      case ProviderPreset.openaiCompatibleResponses:
-      case ProviderPreset.lmStudioChat:
-      case ProviderPreset.lmStudioResponses:
-      case ProviderPreset.ollama:
-        return const [];
-    }
-  }
-
-  bool get requiresApiKey {
-    switch (this) {
-      case ProviderPreset.lmStudioChat:
-      case ProviderPreset.lmStudioResponses:
-      case ProviderPreset.ollama:
-      case ProviderPreset.pollinations:
-        return false;
-      case ProviderPreset.openaiChat:
-      case ProviderPreset.openaiResponses:
-      case ProviderPreset.openaiCompatibleChat:
-      case ProviderPreset.openaiCompatibleResponses:
-      case ProviderPreset.anthropic:
-      case ProviderPreset.gemini:
-      case ProviderPreset.deepseek:
-        return true;
-    }
-  }
-
-  bool get defaultAllowImageInput {
-    switch (this) {
-      case ProviderPreset.openaiChat:
-      case ProviderPreset.openaiResponses:
-      case ProviderPreset.openaiCompatibleChat:
-      case ProviderPreset.openaiCompatibleResponses:
-      case ProviderPreset.anthropic:
-      case ProviderPreset.gemini:
-      case ProviderPreset.lmStudioChat:
-      case ProviderPreset.lmStudioResponses:
-        return true;
-      case ProviderPreset.deepseek:
-      case ProviderPreset.ollama:
-      case ProviderPreset.pollinations:
-        return false;
-    }
-  }
-
-  ProviderConfig createConfig({String? id}) {
-    final resolvedId = (id == null || id.trim().isEmpty)
-        ? defaultId
-        : id.trim();
-    return ProviderConfig(
-      id: resolvedId,
-      name: defaultName,
-      type: legacyType,
-      protocol: defaultProtocol,
-      preset: this,
-      baseUrl: defaultBaseUrl,
-      allowImageInput: defaultAllowImageInput,
-      enabled: true,
-    );
-  }
-
-  ProviderType get legacyType {
-    switch (this) {
-      case ProviderPreset.pollinations:
-        return ProviderType.pollinations;
-      case ProviderPreset.ollama:
-        return ProviderType.ollama;
-      case ProviderPreset.openaiChat:
-      case ProviderPreset.openaiResponses:
-      case ProviderPreset.openaiCompatibleChat:
-      case ProviderPreset.openaiCompatibleResponses:
-      case ProviderPreset.anthropic:
-      case ProviderPreset.gemini:
-      case ProviderPreset.deepseek:
-      case ProviderPreset.lmStudioChat:
-      case ProviderPreset.lmStudioResponses:
-        return ProviderType.openaiCompatible;
-    }
-  }
+  ProviderPreset get vendor => switch (this) {
+    ProviderPreset.openaiChat => ProviderPreset.openaiResponses,
+    ProviderPreset.openaiCompatibleResponses =>
+      ProviderPreset.openaiCompatibleChat,
+    ProviderPreset.lmStudioResponses => ProviderPreset.lmStudioChat,
+    _ => this,
+  };
+  static const selectable = [
+    ProviderPreset.deepseek,
+    ProviderPreset.qwen,
+    ProviderPreset.moonshot,
+    ProviderPreset.zhipu,
+    ProviderPreset.minimax,
+    ProviderPreset.doubao,
+    ProviderPreset.hunyuan,
+    ProviderPreset.qianfan,
+    ProviderPreset.openaiResponses,
+    ProviderPreset.anthropic,
+    ProviderPreset.gemini,
+    ProviderPreset.xai,
+    ProviderPreset.mistral,
+    ProviderPreset.siliconflow,
+    ProviderPreset.openrouter,
+    ProviderPreset.groq,
+    ProviderPreset.pollinations,
+    ProviderPreset.lmStudioChat,
+    ProviderPreset.ollama,
+    ProviderPreset.openaiCompatibleChat,
+  ];
+  String get label => _vendorDefaults[this]!.label;
+  String get group => _vendorDefaults[this]!.group;
+  String get defaultId => switch (this) {
+    ProviderPreset.openaiChat => 'openai_chat',
+    ProviderPreset.openaiResponses => 'openai_responses',
+    ProviderPreset.openaiCompatibleChat => 'openai_compatible_chat',
+    ProviderPreset.openaiCompatibleResponses => 'openai_compatible_responses',
+    ProviderPreset.lmStudioChat => 'lmstudio_chat',
+    ProviderPreset.lmStudioResponses => 'lmstudio_responses',
+    _ => name,
+  };
+  String get defaultName => label;
+  String get defaultBaseUrl => _vendorDefaults[this]!.url;
+  ProviderProtocol get defaultProtocol => _vendorDefaults[this]!.protocol;
+  List<String> get defaultModelNames => _vendorDefaults[this]!.models;
+  bool get requiresApiKey => ![
+    ProviderPreset.lmStudioChat,
+    ProviderPreset.lmStudioResponses,
+    ProviderPreset.ollama,
+  ].contains(this);
+  bool get defaultAllowImageInput => [
+    ProviderPreset.openaiChat,
+    ProviderPreset.openaiResponses,
+    ProviderPreset.anthropic,
+    ProviderPreset.gemini,
+    ProviderPreset.openaiCompatibleChat,
+    ProviderPreset.openaiCompatibleResponses,
+    ProviderPreset.lmStudioChat,
+    ProviderPreset.lmStudioResponses,
+  ].contains(this);
+  String get connectionHint => switch (vendor) {
+    ProviderPreset.qwen => '默认北京区域；其他区域请使用对应 Key 并修改接口地址。',
+    ProviderPreset.minimax => '默认国际按量接口；国内平台请使用对应区域的 Key 和接口地址。',
+    ProviderPreset.moonshot => '默认国内平台；国际平台请使用对应区域的 Key 和接口地址。',
+    ProviderPreset.zhipu => '默认按量接口；Coding Plan 请使用套餐专用地址。',
+    ProviderPreset.doubao => '使用方舟 API Key；需先开通模型，也可添加推理接入点 ID。',
+    ProviderPreset.openaiCompatibleChat => '填写兼容服务的地址与 Key，接口协议可在高级设置中选择。',
+    ProviderPreset.lmStudioChat ||
+    ProviderPreset.ollama => '先启动本地服务，再读取已加载的模型目录。',
+    _ => '地址与协议已预填；保存 Key 后即可选择模型使用。',
+  };
+  ProviderConfig createConfig({String? id}) => ProviderConfig(
+    id: id == null || id.trim().isEmpty ? defaultId : id.trim(),
+    name: defaultName,
+    type: legacyType,
+    protocol: defaultProtocol,
+    preset: this,
+    baseUrl: defaultBaseUrl,
+    allowImageInput: defaultAllowImageInput,
+    enabled: true,
+  );
+  ProviderType get legacyType => switch (this) {
+    ProviderPreset.pollinations => ProviderType.pollinations,
+    ProviderPreset.ollama => ProviderType.ollama,
+    _ => ProviderType.openaiCompatible,
+  };
 }
 
 class ProviderConfig {
@@ -492,6 +550,9 @@ class ModelConfig {
   final double? temperature;
   final double? topP;
 
+  /// User-confirmed capabilities; null means unknown.
+  final bool? supportsVision, supportsTools, supportsStructuredOutput;
+
   /// 该模型是自动拉取（[ModelSource.api]）还是手动/默认（[ModelSource.manual]）。
   /// 默认 [ModelSource.manual]：只有明确从接口拉取的路径才标记为 api，
   /// 因此手动、预设、占位、测试构造的模型天然免于被刷新清理。
@@ -508,6 +569,9 @@ class ModelConfig {
     this.reasoningEffort,
     this.temperature,
     this.topP,
+    this.supportsVision,
+    this.supportsTools,
+    this.supportsStructuredOutput,
   });
 
   bool get isPlaceholder =>
@@ -529,6 +593,12 @@ class ModelConfig {
     bool clearTopP = false,
     bool clearMaxOutputTokens = false,
     bool clearContextWindow = false,
+    bool? supportsVision,
+    bool? supportsTools,
+    bool? supportsStructuredOutput,
+    bool clearSupportsVision = false,
+    bool clearSupportsTools = false,
+    bool clearSupportsStructuredOutput = false,
   }) {
     return ModelConfig(
       providerId: providerId ?? this.providerId,
@@ -547,6 +617,15 @@ class ModelConfig {
           : reasoningEffort ?? this.reasoningEffort,
       temperature: clearTemperature ? null : temperature ?? this.temperature,
       topP: clearTopP ? null : topP ?? this.topP,
+      supportsVision: clearSupportsVision
+          ? null
+          : supportsVision ?? this.supportsVision,
+      supportsTools: clearSupportsTools
+          ? null
+          : supportsTools ?? this.supportsTools,
+      supportsStructuredOutput: clearSupportsStructuredOutput
+          ? null
+          : supportsStructuredOutput ?? this.supportsStructuredOutput,
     );
   }
 
@@ -561,6 +640,10 @@ class ModelConfig {
     if (reasoningEffort != null) 'reasoningEffort': reasoningEffort,
     if (temperature != null) 'temperature': temperature,
     if (topP != null) 'topP': topP,
+    if (supportsVision != null) 'supportsVision': supportsVision,
+    if (supportsTools != null) 'supportsTools': supportsTools,
+    if (supportsStructuredOutput != null)
+      'supportsStructuredOutput': supportsStructuredOutput,
   };
 
   factory ModelConfig.fromJson(Map<String, dynamic> json) {
@@ -574,6 +657,9 @@ class ModelConfig {
       reasoningEffort: json['reasoningEffort'] as String?,
       temperature: (json['temperature'] as num?)?.toDouble(),
       topP: (json['topP'] as num?)?.toDouble(),
+      supportsVision: json['supportsVision'] as bool?,
+      supportsTools: json['supportsTools'] as bool?,
+      supportsStructuredOutput: json['supportsStructuredOutput'] as bool?,
       // 来源迁移（关键决策点）：
       // - 新数据带有 'source' 键 → 直接采用。
       // - 旧数据（升级前保存，无该键）→ 按 isDefault 推断：默认/占位模型
@@ -613,14 +699,12 @@ class InterfaceSlotConfig {
   final String model;
   final String? presetId;
   final String targetLanguage;
-  final RequestParameters parameters;
 
   const InterfaceSlotConfig({
     this.providerId = '',
     this.model = '',
     this.presetId,
     this.targetLanguage = 'auto',
-    this.parameters = const RequestParameters(),
   });
 
   bool get isConfigured => providerId.trim().isNotEmpty;
@@ -630,14 +714,12 @@ class InterfaceSlotConfig {
     String? model,
     String? presetId,
     String? targetLanguage,
-    RequestParameters? parameters,
   }) {
     return InterfaceSlotConfig(
       providerId: providerId ?? this.providerId,
       model: model ?? this.model,
       presetId: presetId ?? this.presetId,
       targetLanguage: targetLanguage ?? this.targetLanguage,
-      parameters: parameters ?? this.parameters,
     );
   }
 
@@ -646,7 +728,6 @@ class InterfaceSlotConfig {
     'model': model,
     if (presetId != null) 'presetId': presetId,
     'targetLanguage': targetLanguage,
-    'parameters': parameters.toJson(),
   };
 
   factory InterfaceSlotConfig.fromJson(Map<String, dynamic> json) {
@@ -664,7 +745,6 @@ class InterfaceSlotConfig {
           ].contains(json['targetLanguage'])
           ? json['targetLanguage'] as String
           : 'auto',
-      parameters: RequestParameters.fromJson(json['parameters']),
     );
   }
 }
@@ -723,7 +803,7 @@ class RequestParameters {
         return 'Anthropic 的 Temperature 应在 0–1 之间。';
       }
       if (temperature != null && topP != null) {
-        return 'Anthropic 的 Temperature 与 Top P 请选择一项；请检查模型、预设和功能参数。';
+        return 'Anthropic 的 Temperature 与 Top P 请选择一项；请检查模型参数。';
       }
     }
     return null;
@@ -743,17 +823,14 @@ class TaskPresetConfig {
     required this.name,
     required this.task,
     required this.prompt,
-    this.parameters = const RequestParameters(),
   });
   final String id, name, prompt;
   final LauncherInterface task;
-  final RequestParameters parameters;
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
     'task': task.name,
     'prompt': prompt,
-    'parameters': parameters.toJson(),
   };
   factory TaskPresetConfig.fromJson(Map<String, dynamic> json) =>
       TaskPresetConfig(
@@ -761,7 +838,6 @@ class TaskPresetConfig {
         name: json['name'] as String,
         task: LauncherInterface.fromName(json['task'] as String?),
         prompt: json['prompt'] as String? ?? '',
-        parameters: RequestParameters.fromJson(json['parameters']),
       );
 }
 
@@ -842,7 +918,7 @@ class PromptAssistantConfigState {
   }
 
   Map<String, dynamic> toJson() => {
-    'schemaVersion': 3,
+    'schemaVersion': 4,
     'presets': presets.map((e) => e.toJson()).toList(),
     'providers': providers.map((e) => e.toJson()).toList(),
     'models': models.map((e) => e.toJson()).toList(),
@@ -971,9 +1047,7 @@ class PromptAssistantConfigState {
       if (entry.value.isConfigured &&
           !providerIds.contains(entry.value.providerId)) {
         final slot = entry.value;
-        if (slot.presetId == null &&
-            slot.targetLanguage == 'auto' &&
-            slot.parameters.toJson().isEmpty) {
+        if (slot.presetId == null && slot.targetLanguage == 'auto') {
           interfaces.remove(entry.key);
         } else {
           interfaces[entry.key] = slot.copyWith(providerId: '', model: '');

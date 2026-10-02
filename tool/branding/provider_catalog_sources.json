@@ -1,0 +1,30 @@
+{
+  "checked": "2026-10-02",
+  "implementation": "lib/presentation/prompt_assistant/models/prompt_assistant_models.dart",
+  "sources": {
+    "openai": "https://developers.openai.com/api/docs/quickstart?site_locale=en",
+    "anthropic": "https://platform.claude.com/docs/en/api/messages/create",
+    "gemini": "https://ai.google.dev/api/generate-content",
+    "deepseek": "https://api-docs.deepseek.com/",
+    "qwen": "https://help.aliyun.com/zh/model-studio/model-calling-in-sub-workspace",
+    "moonshot": "https://platform.kimi.com/docs/get-api-key",
+    "zhipu": "https://docs.bigmodel.cn/cn/guide/develop/openai/introduction",
+    "minimax": "https://platform.minimax.io/docs/api-reference/text-openai-api",
+    "doubao": "https://docs.volcengine.com/docs/ark/streaming-output?lang=zh",
+    "hunyuan": "https://cloud.tencent.com/document/product/1729/111007",
+    "qianfan": "https://cloud.baidu.com/doc/qianfan-docs/s/Fm9l6ocai",
+    "xai": "https://docs.x.ai/overview",
+    "mistral": "https://docs.mistral.ai/api/endpoint/chat",
+    "groq": "https://console.groq.com/docs/openai",
+    "siliconflow": "https://docs.siliconflow.cn/docs/api/chat-completions-post",
+    "openrouter": "https://openrouter.ai/docs/quickstart",
+    "pollinations": "https://gen.pollinations.ai/docs"
+  },
+  "notes": [
+    "Starter IDs are editable offline defaults, not an account access guarantee or live model listing.",
+    "Local and custom endpoints retain manual IDs and saved protocols. Region and subscription-specific keys may require their own endpoint.",
+    "No live authenticated API request was made during verification.",
+    "Per-model capability flags are user annotations; null means unknown. No Agent runtime is introduced.",
+    "Schema 4 reads legacy task/preset parameters but discards overrides; only model request parameters are applied."
+  ]
+}

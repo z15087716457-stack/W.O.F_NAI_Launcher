@@ -2,143 +2,144 @@ part of 'ai_service_editor_dialog.dart';
 
 extension _ServiceOverview on _AiServiceEditorDialogState {
   Widget _buildServiceOverview(BuildContext context, bool dirty) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    return SingleChildScrollView(
-      key: const Key('service-overview-scroll'),
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
-      child: Column(
+    final theme = Theme.of(context), colors = theme.colorScheme;
+    return LayoutBuilder(
+      builder: (context, viewport) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final title = Row(
-                children: [
-                  ProviderLogo(_preset, size: 28),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final title = Row(
                       children: [
-                        Text(
-                          widget.provider?.name ?? '添加服务商',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 19,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          _protocol.label,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.onSurfaceVariant,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-              final enabled = Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Checkbox(
-                    value: _enabled,
-                    visualDensity: VisualDensity.compact,
-                    onChanged: _busy
-                        ? null
-                        : (value) =>
-                              _updateOverview(() => _enabled = value ?? false),
-                  ),
-                  Text(
-                    '启用',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              );
-              return constraints.maxWidth < 330
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [title, const SizedBox(height: 8), enabled],
-                    )
-                  : Row(
-                      children: [
-                        Expanded(child: title),
+                        ProviderLogo(_preset, size: 28),
                         const SizedBox(width: 12),
-                        enabled,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _name.text.trim().isEmpty
+                                    ? '添加服务商'
+                                    : _name.text.trim(),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                '${_selected.length} 个启用模型 · ${dirty ? '待保存' : '已保存'}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     );
-            },
+                    final actions = Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('启用', style: theme.textTheme.bodySmall),
+                            const SizedBox(width: 7),
+                            SettingsToggle(
+                              value: _enabled,
+                              onChanged: _busy
+                                  ? null
+                                  : (value) =>
+                                        _updateOverview(() => _enabled = value),
+                            ),
+                          ],
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _busy ? null : _testModel,
+                          icon: const Icon(Icons.power_outlined, size: 15),
+                          label: const Text('测试连接'),
+                        ),
+                        FilledButton(
+                          key: const Key('service-save'),
+                          onPressed: _canSaveOverview ? _save : null,
+                          child: const Text('保存服务'),
+                        ),
+                      ],
+                    );
+                    return constraints.maxWidth <
+                            650 * MediaQuery.textScalerOf(context).scale(1)
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              title,
+                              const SizedBox(height: 12),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: actions,
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Expanded(child: title),
+                              const SizedBox(width: 16),
+                              actions,
+                            ],
+                          );
+                  },
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
-          if (_busy)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 14),
-              child: LinearProgressIndicator(minHeight: 2),
-            ),
-          if (_error != null || _catalogMessage != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Semantics(
-                liveRegion: true,
-                child: Text(
-                  _error ?? _catalogMessage!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: _error == null
-                        ? colors.onSurfaceVariant
-                        : colors.error,
-                  ),
-                ),
-              ),
-            ),
-          _connectionOverview(context),
-          const SizedBox(height: 26),
-          _modelsOverview(context),
-          const SizedBox(height: 26),
-          _usageOverview(context),
-          const SizedBox(height: 20),
-          _advancedOverview(context),
-          const SizedBox(height: 18),
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 14,
-            runSpacing: 10,
-            children: [
-              Text(
-                dirty
-                    ? '有未保存的修改'
-                    : widget.provider == null
-                    ? '配置服务后保存'
-                    : '连接信息已保存',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: dirty ? colors.primary : colors.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-              ),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+          Expanded(
+            child: SingleChildScrollView(
+              key: const Key('service-overview-scroll'),
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  OutlinedButton.icon(
-                    onPressed: _busy ? null : _testModel,
-                    icon: const Icon(Icons.power_outlined, size: 15),
-                    label: const Text('测试连接'),
-                    style: _overviewButton(context),
-                  ),
-                  if (dirty || widget.provider == null)
-                    FilledButton(
-                      key: const Key('service-save'),
-                      onPressed: _canSaveOverview ? _save : null,
-                      style: _overviewButton(context),
-                      child: const Text('保存'),
+                  if (_busy)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: LinearProgressIndicator(minHeight: 2),
                     ),
+                  if (_error != null || _catalogMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          _error ?? _catalogMessage!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: _error == null
+                                ? colors.onSurfaceVariant
+                                : colors.error,
+                          ),
+                        ),
+                      ),
+                    ),
+                  _connectionOverview(context),
+                  const SizedBox(height: 16),
+                  _modelsOverview(
+                    context,
+                    (viewport.maxHeight - 205).clamp(360.0, 610.0),
+                  ),
+                  const SizedBox(height: 24),
+                  _usageOverview(context),
+                  const SizedBox(height: 18),
+                  _advancedOverview(context),
                 ],
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -236,28 +237,21 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Text(
-                  '连接信息',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                TextButton.icon(
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final address = value(
+                  '接口地址',
+                  _baseUrl.text.trim().isEmpty ? '尚未配置' : _baseUrl.text.trim(),
+                  selectable: true,
+                );
+                final key = value('API 密钥', keyStatus);
+                final edit = TextButton.icon(
                   key: const Key('service-edit-connection'),
                   onPressed: _busy
                       ? null
                       : () => _updateOverview(
                           () => _editingConnection = !_editingConnection,
                         ),
-                  style: _overviewButton(context).copyWith(
-                    foregroundColor: WidgetStatePropertyAll(
-                      colors.onSurfaceVariant,
-                    ),
-                  ),
                   icon: Icon(
                     _editingConnection
                         ? Icons.expand_less
@@ -265,31 +259,28 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                     size: 15,
                   ),
                   label: Text(_editingConnection ? '收起' : '编辑'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 13),
-            value(
-              '接口地址',
-              _baseUrl.text.trim().isEmpty ? '尚未配置' : _baseUrl.text.trim(),
-              selectable: true,
-            ),
-            const SizedBox(height: 16),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final protocol = value('接口格式', _protocol.label);
-                final key = value('API 密钥', keyStatus);
-                return constraints.maxWidth < 360
+                );
+                return constraints.maxWidth < 480
                     ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [protocol, const SizedBox(height: 14), key],
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          address,
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(child: key),
+                              edit,
+                            ],
+                          ),
+                        ],
                       )
                     : Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(child: protocol),
-                          const SizedBox(width: 18),
-                          Expanded(child: key),
+                          Expanded(child: address),
+                          const SizedBox(width: 20),
+                          SizedBox(width: 104, child: key),
+                          const SizedBox(width: 12),
+                          edit,
                         ],
                       );
               },
@@ -316,183 +307,119 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
     );
   }
 
-  Widget _modelsOverview(BuildContext context) {
-    final theme = Theme.of(context);
-    final query = _selectedSearch.text.trim().toLowerCase();
-    final models = _selected.values.where(
-      (model) =>
-          query.isEmpty ||
-          model.name.toLowerCase().contains(query) ||
-          model.displayName.toLowerCase().contains(query),
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _overviewSection(
-          context,
-          '模型',
-          count: '${_selected.length}',
-          actions: [
-            IconButton(
-              key: const Key('service-catalog-toggle'),
-              tooltip: _catalogVisible ? '收起模型目录' : '读取模型目录',
-              visualDensity: VisualDensity.compact,
-              onPressed: _busy
-                  ? null
-                  : () {
-                      _updateOverview(() => _catalogVisible = !_catalogVisible);
-                      if (_catalogVisible && _catalog.isEmpty) _fetchCatalog();
-                    },
-              icon: Icon(
-                _catalogVisible ? Icons.expand_less : Icons.refresh,
-                size: 17,
-              ),
-            ),
-            TextButton.icon(
-              key: const Key('service-add-model'),
-              onPressed: _busy
-                  ? null
-                  : () =>
-                        _updateOverview(() => _manualVisible = !_manualVisible),
-              style: _overviewButton(context).copyWith(
-                foregroundColor: WidgetStatePropertyAll(
-                  theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('添加'),
-            ),
+  Widget _modelsOverview(BuildContext context, double height) => LayoutBuilder(
+    builder: (context, constraints) {
+      final stacked =
+          constraints.maxWidth <
+          680 * MediaQuery.textScalerOf(context).scale(1);
+      if (stacked) {
+        return Column(
+          children: [
+            SizedBox(height: 300, child: _availablePanel()),
+            const SizedBox(height: 12),
+            SizedBox(height: height, child: _selectedPanel()),
+          ],
+        );
+      }
+      return SizedBox(
+        height: height,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(flex: 9, child: _availablePanel()),
+            const SizedBox(width: 12),
+            Expanded(flex: 11, child: _selectedPanel()),
           ],
         ),
-        if (_catalogVisible)
-          Padding(
-            padding: const EdgeInsets.only(top: 14, bottom: 8),
-            child: SizedBox(height: 300, child: _availablePanel()),
-          ),
-        if (_manualVisible)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    key: const Key('ai-service-manual-model-id'),
-                    controller: _manualId,
-                    onSubmitted: (_) => _addManual(),
-                    decoration: const InputDecoration(
-                      labelText: '模型 ID',
-                      hintText: '输入完整的模型 ID',
-                      isDense: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  tooltip: '添加自定义模型',
-                  onPressed: _busy ? null : _addManual,
-                  icon: const Icon(Icons.add, size: 18),
-                ),
-              ],
-            ),
-          ),
-        if (_selected.length > 6)
-          Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: TextField(
-              controller: _selectedSearch,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search, size: 17),
-                hintText: '搜索已选模型',
-                isDense: true,
-              ),
-            ),
-          ),
-        if (models.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 22),
-            child: Text(
-              _selected.isEmpty ? '读取模型目录，或手动添加模型。' : '没有匹配的模型',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        for (final model in models) _selectedTile(model),
-      ],
-    );
-  }
+      );
+    },
+  );
 
   Widget _overviewModelRow(ModelConfig model, Widget parameters) {
     final theme = Theme.of(context);
     final expanded = _expandedModel == model.name;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SelectableText(
-                      model.name,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      model.displayName == model.name
-                          ? model.source == ModelSource.manual
-                                ? '手动添加'
-                                : '模型目录'
-                          : model.displayName,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              TextButton.icon(
-                key: ValueKey('service-model-parameters-${model.name}'),
-                onPressed: _busy
-                    ? null
-                    : () => _updateOverview(
-                        () => _expandedModel = expanded ? null : model.name,
-                      ),
-                style: _overviewButton(context).copyWith(
-                  foregroundColor: WidgetStatePropertyAll(
-                    expanded
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                icon: const Icon(Icons.tune, size: 14),
-                label: const Text('参数'),
-              ),
-              PopupMenuButton<String>(
-                tooltip: '管理模型 ${model.name}',
-                enabled: !_busy,
-                padding: EdgeInsets.zero,
-                iconSize: 16,
-                constraints: const BoxConstraints(minWidth: 130),
-                onSelected: (_) => _toggleModel(model.name, false),
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'remove', child: Text('移除模型')),
-                ],
-                icon: const Icon(Icons.more_horiz),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Material(
+        color: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9),
+          side: BorderSide(
+            color: expanded
+                ? theme.colorScheme.primary.withValues(alpha: .3)
+                : theme.colorScheme.outlineVariant,
           ),
         ),
-        if (expanded) parameters,
-        const Divider(height: 1),
-      ],
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SelectableText(
+                          model.name,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          model.displayName == model.name
+                              ? model.source == ModelSource.manual
+                                    ? '手动添加'
+                                    : '模型目录'
+                              : model.displayName,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    key: ValueKey('service-model-parameters-${model.name}'),
+                    onPressed: _busy
+                        ? null
+                        : () => _updateOverview(
+                            () => _expandedModel = expanded ? null : model.name,
+                          ),
+                    style: _overviewButton(context).copyWith(
+                      foregroundColor: WidgetStatePropertyAll(
+                        expanded
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    icon: const Icon(Icons.tune, size: 14),
+                    label: const Text('参数'),
+                  ),
+                  PopupMenuButton<String>(
+                    tooltip: '管理模型 ${model.name}',
+                    enabled: !_busy,
+                    padding: EdgeInsets.zero,
+                    iconSize: 16,
+                    constraints: const BoxConstraints(minWidth: 130),
+                    onSelected: (_) => _toggleModel(model.name, false),
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(value: 'remove', child: Text('移除模型')),
+                    ],
+                    icon: const Icon(Icons.more_horiz),
+                  ),
+                ],
+              ),
+            ),
+            if (expanded) parameters,
+          ],
+        ),
+      ),
     );
   }
 
@@ -596,6 +523,24 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
         ),
       ),
       if (_advancedExpanded) ...[
+        const SizedBox(height: 8),
+        DropdownButtonFormField<ProviderProtocol>(
+          key: ValueKey('service-protocol-${_protocol.name}'),
+          initialValue: _protocol,
+          isExpanded: true,
+          decoration: const InputDecoration(labelText: '接口协议'),
+          items: [
+            for (final item in ProviderProtocol.values)
+              DropdownMenuItem(value: item, child: Text(item.label)),
+          ],
+          onChanged: _busy
+              ? null
+              : (value) {
+                  if (value != null) _updateOverview(() => _setProtocol(value));
+                },
+        ),
+        const SizedBox(height: 16),
+
         const SizedBox(height: 8),
         TextFormField(
           key: const Key('service-request-timeout'),

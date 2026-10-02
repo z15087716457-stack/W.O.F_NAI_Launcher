@@ -10529,4 +10529,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wiki_openFull => 'Open in Tag Wiki';
+
+  @override
+  String get shortcut_action_vibe_detail_prev_sub_vibe => 'Previous sub-Vibe';
+
+  @override
+  String get shortcut_action_vibe_detail_next_sub_vibe => 'Next sub-Vibe';
 }

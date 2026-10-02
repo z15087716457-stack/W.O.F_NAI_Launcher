@@ -5,7 +5,6 @@ import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import 'model_management_widgets.dart';
-import 'model_parameter_fields.dart';
 
 class ModelPresetEditor extends ConsumerStatefulWidget {
   const ModelPresetEditor({
@@ -26,10 +25,8 @@ class ModelPresetEditor extends ConsumerStatefulWidget {
 class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
   final _form = GlobalKey<FormState>();
   late final TextEditingController _name, _prompt;
-  late RequestParameters _parameters;
   bool _busy = false;
   String? _message;
-  String? _parameterError;
   late bool _newPreset;
   late String? _observedPreset;
   int _tab = 0;
@@ -39,7 +36,6 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
     super.initState();
     _name = TextEditingController(text: widget.preset.name);
     _prompt = TextEditingController(text: widget.preset.prompt);
-    _parameters = widget.preset.parameters;
     _newPreset =
         !_builtin &&
         !ref
@@ -61,25 +57,14 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
     name: _name.text.trim(),
     task: widget.preset.task,
     prompt: _prompt.text.trim(),
-    parameters: _parameters,
   );
   void _changed(String _) => widget.onDirtyChanged(
     !_builtin &&
         (_newPreset ||
-            _parameterError != null ||
             _name.text != widget.preset.name ||
-            _prompt.text != widget.preset.prompt ||
-            _parameters.toJson().toString() !=
-                widget.preset.parameters.toJson().toString()),
+            _prompt.text != widget.preset.prompt),
   );
   Future<void> _save() async {
-    if (_parameterError != null) {
-      setState(() {
-        _message = _parameterError;
-        _tab = 1;
-      });
-      return;
-    }
     if (!_form.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
@@ -218,7 +203,6 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                       name: '${widget.preset.task.title} · 自定义',
                       task: widget.preset.task,
                       prompt: widget.preset.prompt,
-                      parameters: widget.preset.parameters,
                     ),
                   ),
                   icon: const Icon(Icons.copy_outlined, size: 16),
@@ -233,7 +217,7 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
             ],
           ),
           ManagementTabs(
-            labels: const ['提示词', '参数', '输出约定'],
+            labels: const ['提示词', '输出约定'],
             selected: _tab,
             onSelected: (value) => setState(() => _tab = value),
           ),
@@ -301,26 +285,6 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                       ),
                   ],
                   if (_tab == 1) ...[
-                    Text('预设参数', style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 6),
-                    Text(
-                      '留空继承模型默认值；功能接口可以进一步覆盖。',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    ModelParameterFields(
-                      value: _parameters,
-                      onValidationChanged: (error) => _parameterError = error,
-                      readOnly: _builtin,
-                      onChanged: (value) {
-                        _parameters = value;
-                        _changed('');
-                      },
-                    ),
-                  ],
-                  if (_tab == 2) ...[
                     Text('应用输出约定', style: theme.textTheme.titleSmall),
                     const SizedBox(height: 8),
                     Text(

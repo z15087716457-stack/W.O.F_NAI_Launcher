@@ -10128,4 +10128,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wiki_openFull => '在标签百科中打开';
+
+  @override
+  String get shortcut_action_vibe_detail_prev_sub_vibe => '上一个子 Vibe';
+
+  @override
+  String get shortcut_action_vibe_detail_next_sub_vibe => '下一个子 Vibe';
 }

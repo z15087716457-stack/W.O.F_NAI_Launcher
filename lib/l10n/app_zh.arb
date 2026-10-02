@@ -6013,5 +6013,7 @@
   "wiki_collectionNameHint": "书签集名称",
   "wiki_syncTags": "同步 Danbooru 标签",
   "wiki_directorySource": "官方分组目录快照",
-  "wiki_openFull": "在标签百科中打开"
+  "wiki_openFull": "在标签百科中打开",
+  "shortcut_action_vibe_detail_prev_sub_vibe": "上一个子 Vibe",
+  "shortcut_action_vibe_detail_next_sub_vibe": "下一个子 Vibe"
 }

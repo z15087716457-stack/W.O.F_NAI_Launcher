@@ -6013,5 +6013,7 @@
   "wiki_collectionNameHint": "Collection name",
   "wiki_syncTags": "Sync Danbooru tags",
   "wiki_directorySource": "Official group directory snapshot",
-  "wiki_openFull": "Open in Tag Wiki"
+  "wiki_openFull": "Open in Tag Wiki",
+  "shortcut_action_vibe_detail_prev_sub_vibe": "Previous sub-Vibe",
+  "shortcut_action_vibe_detail_next_sub_vibe": "Next sub-Vibe"
 }

@@ -202,28 +202,7 @@ class AccountDetailTile extends ConsumerWidget {
                 ),
               )
         : const SizedBox.shrink();
-    final balanceControls = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        balance,
-        const SizedBox(width: 8),
-        IconButton(
-          key: const Key('settings-refresh-account'),
-          tooltip: settingsText(
-            context,
-            '刷新余额与订阅',
-            'Refresh balance and subscription',
-            '残高と契約を更新',
-          ),
-          onPressed: () async {
-            final notifier = ref.read(subscriptionNotifierProvider.notifier);
-            notifier.resetLoadState();
-            await notifier.fetchSubscription();
-          },
-          icon: const Icon(Icons.refresh, size: 16),
-        ),
-      ],
-    );
+    final balanceControls = balance;
     return Material(
       color: colors.surface,
       shape: RoundedRectangleBorder(

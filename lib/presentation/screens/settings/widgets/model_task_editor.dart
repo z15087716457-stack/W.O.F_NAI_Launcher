@@ -6,7 +6,6 @@ import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import 'model_management_widgets.dart';
-import 'model_parameter_fields.dart';
 
 class ModelTaskEditor extends ConsumerStatefulWidget {
   const ModelTaskEditor({
@@ -30,7 +29,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
   int _tab = 0;
   bool _busy = false;
   String? _message, _testResult;
-  String? _parameterError, _testSession;
+  String? _testSession;
   late final PromptAssistantService _service;
   @override
   void initState() {
@@ -51,25 +50,14 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
     super.dispose();
   }
 
-  bool _validate() {
-    if (_parameterError != null) {
-      setState(() {
-        _message = _parameterError;
-        _tab = 1;
-      });
-      return false;
-    }
-    return _form.currentState!.validate();
-  }
+  bool _validate() => _form.currentState!.validate();
 
   void _edit(InterfaceSlotConfig value) {
     setState(() {
       _slot = value;
       _message = null;
     });
-    widget.onDirtyChanged(
-      _parameterError != null || jsonEncode(_slot.toJson()) != _initial,
-    );
+    widget.onDirtyChanged(jsonEncode(_slot.toJson()) != _initial);
   }
 
   Future<void> _save() async {
@@ -147,11 +135,6 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
     final preset =
         presets.where((item) => item.id == _slot.presetId).firstOrNull ??
         widget.task.builtinPreset;
-    final protocol =
-        selected?.provider.protocol ?? ProviderProtocol.openaiChatCompletions;
-    final effective = selected == null
-        ? null
-        : _slot.parameters.applyTo(preset.parameters.applyTo(selected.model));
     final changed = jsonEncode(_slot.toJson()) != _initial;
     return Form(
       key: _form,
@@ -178,7 +161,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
             ],
           ),
           ManagementTabs(
-            labels: const ['模型与预设', '参数', '提示词与输出'],
+            labels: const ['模型与预设', '提示词与输出'],
             selected: _tab,
             onSelected: (value) => setState(() => _tab = value),
           ),
@@ -334,39 +317,6 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                     ),
                   ],
                   if (_tab == 1) ...[
-                    Text('本功能参数', style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 6),
-                    Text(
-                      '留空继承预设与模型默认值。只发送明确设置的参数。',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    ModelParameterFields(
-                      key: ValueKey(
-                        'task-parameters-${widget.task.name}-${protocol.name}',
-                      ),
-                      value: _slot.parameters,
-                      protocol: protocol,
-                      onValidationChanged: (error) => _parameterError = error,
-                      onChanged: (value) =>
-                          _edit(_slot.copyWith(parameters: value)),
-                    ),
-                    const SizedBox(height: 28),
-                    Text('生效参数', style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 10),
-                    SelectableText(
-                      const JsonEncoder.withIndent('  ').convert({
-                        'Temperature': effective?.temperature ?? '服务默认',
-                        'Top P': effective?.topP ?? '服务默认',
-                        '最大输出 token': effective?.maxOutputTokens ?? '服务默认',
-                        '推理强度': effective?.reasoningEffort ?? '服务默认',
-                      }),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                  if (_tab == 2) ...[
                     Row(
                       children: [
                         Expanded(

@@ -699,19 +699,24 @@ final studioIconPaths = <int, List<StudioIconPart>>{
     StudioIconPart(
       'outline',
       Path()
-        ..moveTo(4.0, 16.5)
-        ..cubicTo(4.0, 9.6, 8.5, 4.0, 15.0, 4.0)
-        ..lineTo(20.0, 4.0)
-        ..lineTo(20.0, 9.0)
-        ..cubicTo(20.0, 15.5, 14.4, 20.0, 7.5, 20.0)
-        ..lineTo(4.0, 20.0)
-        ..lineTo(4.0, 16.5)
-        ..close()
-        ..moveTo(4.0, 20.0)
-        ..lineTo(13.0, 11.0)
-        ..moveTo(11.0, 9.0)
-        ..lineTo(15.0, 13.0),
+        ..moveTo(21.0, 12.0)
+        ..cubicTo(21.0, 16.97056, 16.97056, 21.0, 12.0, 21.0)
+        ..cubicTo(7.02944, 21.0, 3.0, 16.97056, 3.0, 12.0)
+        ..cubicTo(3.0, 7.02944, 7.02944, 3.0, 12.0, 3.0)
+        ..cubicTo(16.97056, 3.0, 21.0, 7.02944, 21.0, 12.0)
+        ..close(),
       1.6,
+    ),
+    StudioIconPart(
+      'half',
+      Path()
+        ..moveTo(12.0, 3.0)
+        ..cubicTo(16.97056, 3.0, 21.0, 7.02944, 21.0, 12.0)
+        ..cubicTo(21.0, 16.97056, 16.97056, 21.0, 12.0, 21.0)
+        ..lineTo(12.0, 3.0)
+        ..close(),
+      1.6,
+      filled: true,
     ),
   ],
   0xe90f: [

@@ -18440,6 +18440,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open in Tag Wiki'**
   String get wiki_openFull;
+
+  /// No description provided for @shortcut_action_vibe_detail_prev_sub_vibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous sub-Vibe'**
+  String get shortcut_action_vibe_detail_prev_sub_vibe;
+
+  /// No description provided for @shortcut_action_vibe_detail_next_sub_vibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Next sub-Vibe'**
+  String get shortcut_action_vibe_detail_next_sub_vibe;
 }
 
 class _AppLocalizationsDelegate

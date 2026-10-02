@@ -7,6 +7,7 @@ import '../../providers/online_gallery_blacklist_provider.dart';
 import '../tag_expansion/tag_expansion_wrapper.dart';
 import '../danbooru_login_dialog.dart';
 import '../../screens/settings/widgets/settings_card.dart';
+import '../../screens/settings/widgets/settings_tile.dart';
 
 class OnlineGalleryBlacklistSettingsPanel extends ConsumerStatefulWidget {
   final bool compact;
@@ -69,7 +70,7 @@ class _OnlineGalleryBlacklistSettingsPanelState
                   ),
                 ),
               ),
-              FilledButton.tonalIcon(
+              OutlinedButton.icon(
                 onPressed: state.isSyncing ? null : () => notifier.syncNow(),
                 icon: state.isSyncing
                     ? const SizedBox(
@@ -79,9 +80,6 @@ class _OnlineGalleryBlacklistSettingsPanelState
                       )
                     : const Icon(Icons.sync, size: 16),
                 label: Text(context.l10n.dataSource_syncNow),
-                style: FilledButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                ),
               ),
             ],
           ),
@@ -108,7 +106,6 @@ class _OnlineGalleryBlacklistSettingsPanelState
                     focusNode: _tagFocusNode,
                     decoration: InputDecoration(
                       isDense: true,
-                      border: const OutlineInputBorder(),
                       hintText: context.l10n.onlineGallery_addBlacklistTagHint,
                     ),
                     onSubmitted: (_) => _addTag(),
@@ -151,7 +148,7 @@ class _OnlineGalleryBlacklistSettingsPanelState
                   .toList(),
             ),
           const SizedBox(height: 8),
-          SwitchListTile.adaptive(
+          SettingsSwitchTile(
             contentPadding: EdgeInsets.zero,
             dense: true,
             title: Text(context.l10n.onlineGallery_autoSyncOnStartup),

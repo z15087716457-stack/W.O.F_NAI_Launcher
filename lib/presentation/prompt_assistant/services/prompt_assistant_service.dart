@@ -673,7 +673,6 @@ Prompt version: $tagTranslationPromptVersion
         ) {
           final slot = config.interfaceFor(task);
           return targetLanguageFor(task) != 'zh' ||
-              slot.parameters.toJson().isNotEmpty ||
               (slot.presetId != null && !slot.presetId!.startsWith('builtin:'));
         }) ||
         wikiRoute?.provider.id != route.provider.id ||

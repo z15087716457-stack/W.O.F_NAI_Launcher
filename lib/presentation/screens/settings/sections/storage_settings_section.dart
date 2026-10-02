@@ -335,28 +335,30 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
               ),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 12),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
-                onPressed: _addExtraRoot,
-                icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-                label: Text(context.l10n.settings_extraRootsAdd),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 4, 0, 12),
+            padding: const EdgeInsets.symmetric(vertical: 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: OutlinedButton.icon(
-                    onPressed: importState.isImporting ? null : _importTagIndex,
-                    icon: const Icon(Icons.upload_file_outlined, size: 18),
-                    label: Text(context.l10n.settings_importTagIndex),
-                  ),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _addExtraRoot,
+                      icon: const Icon(
+                        Icons.create_new_folder_outlined,
+                        size: 17,
+                      ),
+                      label: Text(context.l10n.settings_extraRootsAdd),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: importState.isImporting
+                          ? null
+                          : _importTagIndex,
+                      icon: const Icon(Icons.upload_file_outlined, size: 17),
+                      label: Text(context.l10n.settings_importTagIndex),
+                    ),
+                  ],
                 ),
                 if (importState.isImporting) ...[
                   const SizedBox(height: 10),

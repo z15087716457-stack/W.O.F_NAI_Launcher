@@ -137,6 +137,7 @@ class _GenerationSettingsSectionState
     );
 
     return SettingsCard(
+      bottomSpacing: widget.feedbackOnly ? 0 : 26,
       child: Column(
         children: [
           if (!widget.feedbackOnly) ...[

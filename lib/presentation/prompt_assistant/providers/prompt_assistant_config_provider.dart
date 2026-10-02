@@ -319,9 +319,6 @@ class PromptAssistantConfigNotifier
     LauncherInterface task,
     InterfaceSlotConfig slot,
   ) async {
-    if (slot.parameters.validationError case final error?) {
-      throw FormatException(error);
-    }
     final preset = presetFor(
       state.copyWith(interfaces: {...state.interfaces, task: slot}),
       task,
@@ -349,7 +346,7 @@ class PromptAssistantConfigNotifier
         (item) => item.providerId == provider.id && item.name == slot.model,
       );
       final error = RequestParameters.fromModel(
-        slot.parameters.applyTo(preset.parameters.applyTo(model)),
+        model,
       ).validateFor(provider.protocol);
       if (error != null) throw FormatException(error);
     }
@@ -362,9 +359,6 @@ class PromptAssistantConfigNotifier
     if (preset.id.startsWith('builtin:')) throw StateError('请将内置方案另存为自定义预设。');
     if (preset.name.trim().isEmpty || preset.prompt.trim().isEmpty) {
       throw const FormatException('名称和提示词不能为空。');
-    }
-    if (preset.parameters.validationError case final error?) {
-      throw FormatException(error);
     }
     state = state.copyWith(
       presets: [
@@ -429,11 +423,6 @@ class PromptAssistantConfigNotifier
         throw FormatException(error);
       }
     }
-    for (final slot in imported.interfaces.values) {
-      if (slot.parameters.validationError case final error?) {
-        throw FormatException(error);
-      }
-    }
     final presetIds = <String>{};
     for (final preset in imported.presets) {
       if (preset.id.trim().isEmpty ||
@@ -442,9 +431,6 @@ class PromptAssistantConfigNotifier
           preset.name.trim().isEmpty ||
           preset.prompt.trim().isEmpty) {
         throw const FormatException('自定义预设的 ID、名称或提示词无效。');
-      }
-      if (preset.parameters.validationError case final error?) {
-        throw FormatException(error);
       }
     }
     final keys = <String, bool>{};

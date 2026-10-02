@@ -183,6 +183,7 @@ class _ZhDictionaryStatus extends ConsumerWidget {
       ),
       trailing: Wrap(
         spacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           if (state.isBusy)
             IconButton(

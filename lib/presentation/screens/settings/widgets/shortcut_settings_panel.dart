@@ -22,6 +22,7 @@ class ShortcutSettingsPanel extends ConsumerStatefulWidget {
       builder: (dialogContext) => Theme(
         data: settingsUiTheme(Theme.of(context)),
         child: Dialog(
+          clipBehavior: Clip.antiAlias,
           child: SizedBox(
             width: 760,
             height: (MediaQuery.sizeOf(context).height - 96).clamp(200, 720),
@@ -40,7 +41,7 @@ class ShortcutSettingsPanel extends ConsumerStatefulWidget {
 class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  ShortcutContext? _expandedContext;
+  ShortcutContext? _expandedContext = ShortcutContext.global;
   String? _editingId;
 
   @override
@@ -75,7 +76,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
       children: [
         // 标题栏
         Container(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.fromLTRB(22, 18, 22, 16),
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             border: Border(
@@ -88,7 +89,19 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.keyboard, color: theme.colorScheme.primary),
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: .07),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(
+                      Icons.keyboard_outlined,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -111,34 +124,29 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
               ),
               const SizedBox(height: 12),
               // 搜索框和全局设置
-              Row(
-                children: [
-                  // 搜索框
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: context.l10n.shortcut_settings_search,
-                        prefixIcon: const Icon(Icons.search, size: 20),
-                        isDense: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final search = TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: context.l10n.shortcut_settings_search,
+                      prefixIcon: const Icon(Icons.search, size: 20),
+                      isDense: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value.toLowerCase();
-                        });
-                      },
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // 全局开关
-                  Row(
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.toLowerCase();
+                      });
+                    },
+                  );
+                  final toggle = Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
@@ -155,8 +163,28 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
                         },
                       ),
                     ],
-                  ),
-                ],
+                  );
+                  return constraints.maxWidth <
+                          480 * MediaQuery.textScalerOf(context).scale(1)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            search,
+                            const SizedBox(height: 10),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: toggle,
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(child: search),
+                            const SizedBox(width: 16),
+                            toggle,
+                          ],
+                        );
+                },
               ),
               const SizedBox(height: 8),
               // 其他设置
@@ -179,7 +207,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
                           }
                         : null,
                   ),
-                  const SizedBox(width: 8),
                   // 显示徽章
                   FilterChip(
                     label: Text(context.l10n.shortcut_settings_show_badges),
@@ -192,7 +219,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
                           }
                         : null,
                   ),
-                  const SizedBox(width: 8),
                   // 在菜单中显示
                   FilterChip(
                     label: Text(context.l10n.shortcut_settings_show_in_menus),
@@ -232,7 +258,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
     Map<ShortcutContext, List<ShortcutBinding>> bindingsByContext,
   ) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
       itemCount: ShortcutContext.values.length,
       itemBuilder: (context, index) {
         final shortcutContext = ShortcutContext.values[index];
@@ -253,45 +279,54 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
     final theme = Theme.of(context);
     final isExpanded = _expandedContext == shortcutContext;
 
-    return Column(
-      children: [
-        // 上下文标题
-        ListTile(
-          dense: true,
-          leading: Icon(
-            isExpanded ? Icons.expand_less : Icons.expand_more,
-            color: isExpanded
-                ? theme.colorScheme.primary
-                : theme.colorScheme.onSurfaceVariant,
-          ),
-          title: Text(
-            _getContextDisplayName(shortcutContext),
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: isExpanded
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface,
-            ),
-          ),
-          trailing: Text(
-            '${bindings.length}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
-          ),
-          onTap: () {
-            setState(() {
-              _expandedContext = isExpanded ? null : shortcutContext;
-            });
-          },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: theme.colorScheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            // 上下文标题
+            ListTile(
+              dense: true,
+              leading: Icon(
+                isExpanded ? Icons.expand_less : Icons.expand_more,
+                color: isExpanded
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+              title: Text(
+                _getContextDisplayName(shortcutContext),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: isExpanded
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
+                ),
+              ),
+              trailing: Text(
+                '${bindings.length}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+              onTap: () {
+                setState(() {
+                  _expandedContext = isExpanded ? null : shortcutContext;
+                });
+              },
+            ),
 
-        // 快捷键列表
-        if (isExpanded)
-          ...bindings.map((binding) => _buildShortcutTile(config, binding)),
-
-        const Divider(height: 1),
-      ],
+            // 快捷键列表
+            if (isExpanded)
+              ...bindings.map((binding) => _buildShortcutTile(config, binding)),
+          ],
+        ),
+      ),
     );
   }
 
@@ -326,7 +361,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
 
     return ListTile(
       dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       title: Text(
         _getActionDisplayName(binding),
         style: theme.textTheme.bodyMedium,
@@ -402,7 +437,14 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
   }
 
   Widget _buildSearchResults(ShortcutConfig config) {
-    final searchResults = ref.watch(searchShortcutsProvider(_searchQuery));
+    final searchResults = config.bindings.values
+        .where(
+          (binding) =>
+              '${_getActionDisplayName(binding)} ${binding.id} ${binding.effectiveShortcut ?? ''}'
+                  .toLowerCase()
+                  .contains(_searchQuery),
+        )
+        .toList();
 
     if (searchResults.isEmpty) {
       return Center(
@@ -479,6 +521,25 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_action_navigate_to_statistics;
       case 'shortcut_action_navigate_to_settings':
         return l10n.shortcut_action_navigate_to_settings;
+      case 'shortcut_action_navigate_to_vibe_library':
+        return l10n.vibeLibrary_title;
+      case 'shortcut_action_vibe_import':
+        return l10n.common_import;
+      case 'shortcut_action_vibe_export':
+      case 'shortcut_action_vibe_detail_export':
+        return l10n.common_export;
+      case 'shortcut_action_vibe_detail_rename':
+        return l10n.shortcut_action_vibe_detail_rename;
+      case 'shortcut_action_vibe_detail_delete':
+        return l10n.common_delete;
+      case 'shortcut_action_vibe_detail_toggle_favorite':
+        return l10n.shortcut_action_toggle_favorite;
+      case 'shortcut_action_vibe_detail_send_to_generation':
+        return l10n.vibeLibrary_sendToGeneration;
+      case 'shortcut_action_vibe_detail_prev_sub_vibe':
+        return l10n.shortcut_action_vibe_detail_prev_sub_vibe;
+      case 'shortcut_action_vibe_detail_next_sub_vibe':
+        return l10n.shortcut_action_vibe_detail_next_sub_vibe;
       case 'shortcut_action_generate_image':
         return l10n.shortcut_action_generate_image;
       case 'shortcut_action_generation_prev_image':

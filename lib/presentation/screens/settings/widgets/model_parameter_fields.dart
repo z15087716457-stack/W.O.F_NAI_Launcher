@@ -22,11 +22,13 @@ class ModelParameterFields extends StatefulWidget {
     this.protocol = ProviderProtocol.openaiChatCompletions,
     this.readOnly = false,
     this.onValidationChanged,
+    this.samplingOnly = false,
   });
   final RequestParameters value;
   final ValueChanged<RequestParameters> onChanged;
   final ProviderProtocol protocol;
   final bool readOnly;
+  final bool samplingOnly;
   final ValueChanged<String?>? onValidationChanged;
   @override
   State<ModelParameterFields> createState() => _ModelParameterFieldsState();
@@ -146,26 +148,27 @@ class _ModelParameterFieldsState extends State<ModelParameterFields> {
               },
             ),
           ),
-          SizedBox(
-            width: width,
-            child: TextFormField(
-              key: const Key('parameter-max-tokens'),
-              controller: _tokens,
-              readOnly: widget.readOnly,
-              decoration: const InputDecoration(
-                labelText: '最大输出 token',
-                helperText: '留空继承模型默认',
+          if (!widget.samplingOnly)
+            SizedBox(
+              width: width,
+              child: TextFormField(
+                key: const Key('parameter-max-tokens'),
+                controller: _tokens,
+                readOnly: widget.readOnly,
+                decoration: const InputDecoration(
+                  labelText: '最大输出 token',
+                  helperText: '留空继承模型默认',
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: _changed,
+                validator: (value) =>
+                    value?.trim().isEmpty != false ||
+                        ((int.tryParse(value!) ?? 0) > 0)
+                    ? null
+                    : '请输入大于 0 的整数',
               ),
-              keyboardType: TextInputType.number,
-              onChanged: _changed,
-              validator: (value) =>
-                  value?.trim().isEmpty != false ||
-                      ((int.tryParse(value!) ?? 0) > 0)
-                  ? null
-                  : '请输入大于 0 的整数',
             ),
-          ),
-          if (choices.isNotEmpty)
+          if (!widget.samplingOnly && choices.isNotEmpty)
             SizedBox(
               width: width,
               child: DropdownButtonFormField<String>(

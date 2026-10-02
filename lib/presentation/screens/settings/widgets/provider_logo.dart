@@ -18,6 +18,18 @@ class ProviderLogo extends StatelessWidget {
     ProviderPreset.lmStudioResponses => 'lmstudio',
     ProviderPreset.ollama => 'ollama',
     ProviderPreset.pollinations => 'pollinations',
+    ProviderPreset.qwen => 'qwen',
+    ProviderPreset.moonshot => 'kimi',
+    ProviderPreset.zhipu => 'zhipu',
+    ProviderPreset.minimax => 'minimax',
+    ProviderPreset.doubao => 'doubao',
+    ProviderPreset.hunyuan => 'hunyuan',
+    ProviderPreset.qianfan => 'wenxin',
+    ProviderPreset.xai => 'xai',
+    ProviderPreset.mistral => 'mistral',
+    ProviderPreset.groq => 'groq',
+    ProviderPreset.siliconflow => 'siliconcloud',
+    ProviderPreset.openrouter => 'openrouter',
     _ => null,
   };
 
