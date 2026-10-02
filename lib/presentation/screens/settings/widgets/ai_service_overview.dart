@@ -102,43 +102,47 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              key: const Key('service-overview-scroll'),
-              padding: const EdgeInsets.fromLTRB(24, 4, 24, 22),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (_busy)
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 12),
-                      child: LinearProgressIndicator(minHeight: 2),
-                    ),
-                  if (_error != null || _catalogMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          _error ?? _catalogMessage!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: _error == null
-                                ? colors.onSurfaceVariant
-                                : colors.error,
+            child: LayoutBuilder(
+              builder: (context, bodyViewport) => SingleChildScrollView(
+                key: const Key('service-overview-scroll'),
+                padding: const EdgeInsets.fromLTRB(24, 4, 24, 22),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_busy)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: LinearProgressIndicator(minHeight: 2),
+                      ),
+                    if (_error != null || _catalogMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            _error ?? _catalogMessage!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: _error == null
+                                  ? colors.onSurfaceVariant
+                                  : colors.error,
+                            ),
                           ),
                         ),
                       ),
+                    _connectionOverview(context),
+                    const SizedBox(height: 16),
+                    _modelsOverview(
+                      context,
+                      _expandedModel == null
+                          ? (viewport.maxHeight - 250).clamp(320.0, 460.0)
+                          : (bodyViewport.maxHeight - 8).clamp(360.0, 680.0),
                     ),
-                  _connectionOverview(context),
-                  const SizedBox(height: 16),
-                  _modelsOverview(
-                    context,
-                    (viewport.maxHeight - 250).clamp(320.0, 460.0),
-                  ),
-                  const SizedBox(height: 24),
-                  _usageOverview(context),
-                  const SizedBox(height: 18),
-                  _advancedOverview(context),
-                ],
+                    const SizedBox(height: 24),
+                    _usageOverview(context),
+                    const SizedBox(height: 18),
+                    _advancedOverview(context),
+                  ],
+                ),
               ),
             ),
           ),
@@ -344,6 +348,7 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
     final theme = Theme.of(context), colors = theme.colorScheme;
     final expanded = _expandedModel == model.name;
     return Padding(
+      key: _selectedRowKeys.putIfAbsent(model.name, GlobalKey.new),
       padding: const EdgeInsets.only(bottom: 3),
       child: Material(
         color: colors.onSurface.withValues(alpha: expanded ? .065 : .035),
@@ -409,26 +414,23 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                   const SizedBox(width: 5),
                   TextButton(
                     key: ValueKey('service-model-parameters-${model.name}'),
-                    onPressed: _busy
-                        ? null
-                        : () => _updateOverview(
-                            () => _expandedModel = expanded ? null : model.name,
-                          ),
+                    onPressed: _busy ? null : () => _toggleAdvanced(model.name),
                     style: TextButton.styleFrom(
-                      foregroundColor: colors.onSurfaceVariant,
+                      foregroundColor: colors.onSurface,
                       backgroundColor: colors.onSurface.withValues(alpha: .06),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 7,
                         vertical: 4,
                       ),
-                      minimumSize: const Size(0, 23),
+                      minimumSize: const Size(0, 27),
                       visualDensity: VisualDensity.standard,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       textStyle: theme.textTheme.labelSmall?.copyWith(
                         fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(9),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                     ),
                     child: const Text('高级'),

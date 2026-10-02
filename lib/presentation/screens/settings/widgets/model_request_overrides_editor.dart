@@ -145,6 +145,10 @@ class _ModelRequestOverridesEditorState
 
   Widget _button(bool body) {
     final active = _openBody == body;
+    final configured = (body ? _body : _headers).any(
+      (row) =>
+          row.key.text.trim().isNotEmpty || row.value.text.trim().isNotEmpty,
+    );
     final colors = Theme.of(context).colorScheme;
     return TextButton(
       key: Key(body ? 'model-custom-body' : 'model-custom-headers'),
@@ -152,18 +156,21 @@ class _ModelRequestOverridesEditorState
           ? () => setState(() => _openBody = active ? null : body)
           : null,
       style: TextButton.styleFrom(
-        foregroundColor: colors.onSurfaceVariant,
-        backgroundColor: colors.onSurface.withValues(alpha: active ? .1 : .045),
+        foregroundColor: configured ? colors.surface : colors.onSurfaceVariant,
+        backgroundColor: configured
+            ? colors.onSurface
+            : colors.onSurface.withValues(alpha: active ? .1 : .045),
         minimumSize: const Size(0, 29),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.standard,
         textStyle: Theme.of(context).textTheme.labelSmall,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(body ? '自定义请求体' : '自定义请求头'),
+          Text(body ? '自定义 Body' : '自定义 Headers'),
           const SizedBox(width: 3),
           Icon(active ? Icons.expand_less : Icons.expand_more, size: 13),
         ],

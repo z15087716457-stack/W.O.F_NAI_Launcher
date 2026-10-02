@@ -67,6 +67,8 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
   late final TextEditingController _selectedSearch;
   late final TextEditingController _manualId;
   final _selectedScroll = ScrollController();
+  final _selectedPanelKey = GlobalKey();
+  final _selectedRowKeys = <String, GlobalKey>{};
   late final LinkedHashMap<String, ModelConfig> _selected;
   Map<String, String> _headers = {};
   final _initialModelOverrides = <String, String>{};
@@ -560,6 +562,27 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
         _requestInputErrors.remove(name);
         _requestDrafts.remove(name);
         if (_expandedModel == name) _expandedModel = null;
+      }
+    });
+  }
+
+  void _toggleAdvanced(String name) {
+    final opening = _expandedModel != name;
+    _updateOverview(() => _expandedModel = opening ? name : null);
+    if (!opening) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _expandedModel != name) return;
+      final panel = _selectedPanelKey.currentContext;
+      final panelBox = panel?.findRenderObject();
+      if (panel != null && panelBox != null) {
+        Scrollable.maybeOf(
+          panel,
+        )?.position.ensureVisible(panelBox, alignment: 0);
+      }
+      final row = _selectedRowKeys[name]?.currentContext;
+      final rowBox = row?.findRenderObject();
+      if (row != null && rowBox != null) {
+        Scrollable.maybeOf(row)?.position.ensureVisible(rowBox, alignment: 0);
       }
     });
   }
@@ -1107,6 +1130,7 @@ class _AiServiceEditorDialogState extends ConsumerState<AiServiceEditorDialog> {
       ],
     );
     return Material(
+      key: _selectedPanelKey,
       color: colors.surfaceContainerLow,
       borderRadius: BorderRadius.circular(10),
       child: Padding(

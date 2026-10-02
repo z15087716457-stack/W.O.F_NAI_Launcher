@@ -3,6 +3,7 @@ import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/models/model_catalog_entry.dart';
 import 'model_parameter_fields.dart' show reasoningChoices;
 import 'model_compact_dropdown.dart';
+import 'model_square_checkbox.dart';
 import 'model_request_overrides_editor.dart';
 import '../../../prompt_assistant/models/model_request_overrides.dart';
 
@@ -128,7 +129,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
     ).colorScheme.surfaceContainerHighest.withValues(alpha: .55),
     hintText: hint,
     errorText: error,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(9),
       borderSide: BorderSide.none,
@@ -142,14 +143,14 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
     final colors = Theme.of(context).colorScheme;
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.all(2),
+        padding: const EdgeInsets.symmetric(horizontal: 1),
         child: TextButton(
           onPressed: widget.enabled ? action : null,
           style: TextButton.styleFrom(
-            minimumSize: const Size(0, 27),
+            minimumSize: const Size(0, 28),
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            visualDensity: VisualDensity.compact,
+            visualDensity: VisualDensity.standard,
             foregroundColor: selected
                 ? colors.surface
                 : colors.onSurfaceVariant,
@@ -161,12 +162,32 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
               context,
             ).textTheme.labelSmall?.copyWith(fontSize: 10.5),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(6),
             ),
           ),
           child: Text(label, maxLines: 1),
         ),
       ),
+    );
+  }
+
+  Widget _segmentGroup(List<Widget> options, {required Key key}) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      key: key,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: colors.onSurface.withValues(alpha: .055),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: colors.onSurface.withValues(alpha: .035),
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(children: options),
     );
   }
 
@@ -215,22 +236,20 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
               ),
           onChanged: (_) => update(),
         ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            for (final n in presets)
-              _segment(
-                modelTokenLabel(n),
-                controller.text == '$n',
-                limit != null && n > limit
-                    ? null
-                    : () {
-                        controller.text = '$n';
-                        update();
-                      },
-              ),
-          ],
-        ),
+        const SizedBox(height: 3),
+        _segmentGroup([
+          for (final n in presets)
+            _segment(
+              modelTokenLabel(n),
+              controller.text == '$n',
+              limit != null && n > limit
+                  ? null
+                  : () {
+                      controller.text = '$n';
+                      update();
+                    },
+            ),
+        ], key: ValueKey(contextWindow ? 'context-presets' : 'output-presets')),
       ],
     );
   }
@@ -238,83 +257,107 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
   Widget _thinkingHeader(List<String> choices) {
     final current = _model.reasoningEffort;
     final defaults = {if (current != null) current, ...choices}.toList();
-    final protocol = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _label('思考协议'),
-        const SizedBox(height: 4),
-        ModelCompactDropdown<ModelReasoningProtocol>(
-          key: ValueKey('reasoning-protocol-${_model.name}'),
-          value: _model.reasoningProtocol,
-          choices: [
-            const ModelDropdownChoice(ModelReasoningProtocol.standard, '标准'),
-            ModelDropdownChoice(
-              ModelReasoningProtocol.adaptive,
-              '自适应',
-              enabled: widget.protocol == ProviderProtocol.anthropicMessages,
-            ),
-          ],
-          onChanged: widget.enabled
-              ? (value) => _emit(
-                  _model.copyWith(reasoningProtocol: value),
-                  'reasoningProtocol',
-                )
-              : null,
+    final protocol = ModelCompactDropdown<ModelReasoningProtocol>(
+      key: ValueKey('reasoning-protocol-${_model.name}'),
+      compact: true,
+      value: _model.reasoningProtocol,
+      choices: [
+        const ModelDropdownChoice(ModelReasoningProtocol.standard, '标准'),
+        ModelDropdownChoice(
+          ModelReasoningProtocol.adaptive,
+          '自适应',
+          enabled: widget.protocol == ProviderProtocol.anthropicMessages,
         ),
       ],
+      onChanged: widget.enabled
+          ? (value) => _emit(
+              _model.copyWith(reasoningProtocol: value),
+              'reasoningProtocol',
+            )
+          : null,
     );
-    final effort = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _label('默认思考等级'),
-        const SizedBox(height: 4),
-        ModelCompactDropdown<String>(
-          key: ValueKey('default-effort-${_model.name}-${choices.join('-')}'),
-          value: current ?? '',
-          choices: [
-            const ModelDropdownChoice('', '默认'),
-            for (final value in defaults)
-              ModelDropdownChoice(value, value == 'none' ? 'off' : value),
-          ],
-          onChanged: widget.enabled
-              ? (value) => _emit(
-                  _model.copyWith(
-                    reasoningEffort: value,
-                    clearReasoningEffort: value == '',
-                  ),
-                  'reasoningEffort',
-                )
-              : null,
-        ),
+    final effort = ModelCompactDropdown<String>(
+      key: ValueKey('default-effort-${_model.name}-${choices.join('-')}'),
+      compact: true,
+      value: current ?? '',
+      choices: [
+        const ModelDropdownChoice('', '默认'),
+        for (final value in defaults)
+          ModelDropdownChoice(value, value == 'none' ? 'off' : value),
       ],
+      onChanged: widget.enabled
+          ? (value) => _emit(
+              _model.copyWith(
+                reasoningEffort: value,
+                clearReasoningEffort: value == '',
+              ),
+              'reasoningEffort',
+            )
+          : null,
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Divider(height: 18),
-        _label(
-          '思考设置',
-          _model.catalogEntry?.reasoningEfforts == null
-              ? '目录未标注，可手动开启'
-              : '已按本地目录勾选支持的等级；可按实际接口调整。',
-        ),
-        const SizedBox(height: 7),
-        LayoutBuilder(
-          builder: (context, bounds) =>
-              bounds.maxWidth < 300 * MediaQuery.textScalerOf(context).scale(1)
-              ? Column(children: [protocol, const SizedBox(height: 8), effort])
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(child: protocol),
-                    const SizedBox(width: 8),
-                    Expanded(child: effort),
-                  ],
+    final title = _label(
+      '思考等级',
+      _model.catalogEntry?.reasoningEfforts == null
+          ? '目录未标注，可手动开启'
+          : '已按本地目录勾选支持的等级；可按实际接口调整。',
+    );
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final groups = [
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _label('思考协议'),
+          const SizedBox(width: 4),
+          SizedBox(width: 67 * scale, child: protocol),
+        ],
+      ),
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _label('默认思考等级'),
+          const SizedBox(width: 4),
+          SizedBox(width: 76 * scale, child: effort),
+        ],
+      ),
+    ];
+    double labelWidth(String text) => (TextPainter(
+      text: TextSpan(text: text, style: Theme.of(context).textTheme.labelSmall),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: Directionality.of(context),
+      maxLines: 1,
+    )..layout()).width;
+    final inlineWidth =
+        labelWidth('思考等级') +
+        labelWidth('思考协议') +
+        labelWidth('默认思考等级') +
+        143 * scale +
+        38;
+    return LayoutBuilder(
+      builder: (context, bounds) => bounds.maxWidth >= inlineWidth
+          ? Row(
+              key: const Key('model-thinking-controls'),
+              children: [
+                title,
+                const Spacer(),
+                groups[0],
+                const SizedBox(width: 8),
+                groups[1],
+              ],
+            )
+          : Column(
+              key: const Key('model-thinking-controls'),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                title,
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  alignment: WrapAlignment.end,
+                  children: groups,
                 ),
-        ),
-        const SizedBox(height: 8),
-        _label('支持的等级'),
-      ],
+              ],
+            ),
     );
   }
 
@@ -331,24 +374,17 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
     ]) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: 18,
-          height: 24,
-          child: Checkbox(
-            value: value == true,
-            onChanged: widget.enabled ? (v) => change(v!) : null,
-            activeColor: colors.onSurface,
-            checkColor: colors.surface,
-            visualDensity: VisualDensity.compact,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
+        ModelSquareCheckbox(
+          value: value == true,
+          semanticLabel: label,
+          onChanged: widget.enabled ? change : null,
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 2),
         _label(label, help),
       ],
     );
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 5, 10, 10),
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -367,7 +403,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
               'displayName',
             ),
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 6),
           LayoutBuilder(
             builder: (context, constraints) =>
                 constraints.maxWidth <
@@ -388,51 +424,42 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
                     ],
                   ),
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 8),
           _thinkingHeader(choices),
           const SizedBox(height: 5),
-          Container(
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerHighest.withValues(alpha: .35),
-              borderRadius: BorderRadius.circular(9),
-            ),
-            child: Row(
-              children: [
-                for (final effort in [
-                  'none',
-                  'minimal',
-                  'low',
-                  'medium',
-                  'high',
-                  'xhigh',
-                  'max',
-                ])
-                  _segment(
-                    effort == 'none' ? 'off' : effort,
-                    choices.contains(effort),
-                    possible.contains(effort)
-                        ? () {
-                            final next = [...choices];
-                            choices.contains(effort)
-                                ? next.remove(effort)
-                                : next.add(effort);
-                            _emit(
-                              _model.copyWith(
-                                reasoningEfforts: next,
-                                clearReasoningEffort:
-                                    _model.reasoningEffort != null &&
-                                    !next.contains(_model.reasoningEffort),
-                              ),
-                              'reasoningEfforts',
-                            );
-                          }
-                        : null,
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 9),
-          const Divider(height: 12),
+          _segmentGroup([
+            for (final effort in [
+              'none',
+              'minimal',
+              'low',
+              'medium',
+              'high',
+              'xhigh',
+              'max',
+            ])
+              _segment(
+                effort == 'none' ? 'off' : effort,
+                choices.contains(effort),
+                possible.contains(effort)
+                    ? () {
+                        final next = [...choices];
+                        choices.contains(effort)
+                            ? next.remove(effort)
+                            : next.add(effort);
+                        _emit(
+                          _model.copyWith(
+                            reasoningEfforts: next,
+                            clearReasoningEffort:
+                                _model.reasoningEffort != null &&
+                                !next.contains(_model.reasoningEffort),
+                          ),
+                          'reasoningEfforts',
+                        );
+                      }
+                    : null,
+              ),
+          ], key: const Key('reasoning-presets')),
+          const SizedBox(height: 8),
           ModelRequestOverridesEditor(
             modelId: _model.name,
             value: _model.requestOverrides ?? ModelRequestOverrides.empty,
@@ -447,10 +474,22 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
                 widget.onRequestValidationChanged ?? widget.onValidationChanged,
             capabilities: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 12,
+              spacing: 8,
               runSpacing: 5,
               children: [
-                _label('能力'),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _label('能力'),
+                    const SizedBox(width: 7),
+                    Container(
+                      key: const Key('model-capability-divider'),
+                      width: 1,
+                      height: 12,
+                      color: colors.onSurfaceVariant.withValues(alpha: .25),
+                    ),
+                  ],
+                ),
                 capability(
                   '图片',
                   _model.supportsVision,

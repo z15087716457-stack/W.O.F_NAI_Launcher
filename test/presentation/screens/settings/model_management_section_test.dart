@@ -121,6 +121,12 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 Future<void> capture(WidgetTester tester, String name) async {
   if (Platform.environment['CAPTURE_MODEL_MANAGEMENT'] != '1') return;
   debugDisableShadows = false;
+  void repaint(RenderObject render) {
+    render.markNeedsPaint();
+    render.visitChildren(repaint);
+  }
+
+  repaint(captureKey.currentContext!.findRenderObject()!);
   await tester.pump();
   await tester.runAsync(() async {
     final image =

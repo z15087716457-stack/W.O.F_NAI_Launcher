@@ -16,10 +16,12 @@ class ModelCompactDropdown<T> extends StatelessWidget {
     required this.value,
     required this.choices,
     required this.onChanged,
+    this.compact = false,
   });
   final T value;
   final List<ModelDropdownChoice<T>> choices;
   final ValueChanged<T>? onChanged;
+  final bool compact;
 
   Future<void> _open(BuildContext context) async {
     final box = context.findRenderObject()! as RenderBox;
@@ -92,12 +94,17 @@ class ModelCompactDropdown<T> extends StatelessWidget {
           backgroundColor: colors.surfaceContainerHighest.withValues(
             alpha: .55,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-          minimumSize: const Size(0, 33),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 7 : 10,
+            vertical: compact ? 6 : 9,
+          ),
+          minimumSize: Size(0, compact ? 28 : 33),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           visualDensity: VisualDensity.standard,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          textStyle: Theme.of(context).textTheme.bodySmall,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          textStyle: compact
+              ? Theme.of(context).textTheme.labelSmall
+              : Theme.of(context).textTheme.bodySmall,
         ),
         child: Row(
           children: [
