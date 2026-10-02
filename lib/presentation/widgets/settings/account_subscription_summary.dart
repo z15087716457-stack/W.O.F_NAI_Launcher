@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/subscription_expiry_utils.dart';
 import '../../../data/models/user/user_subscription.dart';
 import '../../screens/settings/widgets/settings_ui_theme.dart';
 import '../auth/subscription_expiry_text.dart';
@@ -45,13 +46,19 @@ class AccountSubscriptionSummary extends StatelessWidget {
         ? context.l10n.subscriptionExpired
         : context.l10n.subscriptionTierNone;
     final statusColor = subscription?.isGracePeriod == true
-        ? Colors.orange
+        ? SubscriptionExpiryText.statusColor(
+            context,
+            SubscriptionExpiryStatus.expiringSoon,
+            subdued: true,
+          )
         : subscription?.hasActiveSubscription == true
-        ? theme.brightness == Brightness.dark
-              ? Colors.green.shade400
-              : Colors.green.shade700
+        ? colors.onSurfaceVariant
         : subscription != null && subscription.tier > 0
-        ? colors.error
+        ? SubscriptionExpiryText.statusColor(
+            context,
+            SubscriptionExpiryStatus.expired,
+            subdued: true,
+          )
         : colors.onSurfaceVariant;
     final balance = subscription == null
         ? const SizedBox.shrink()
@@ -88,6 +95,7 @@ class AccountSubscriptionSummary extends StatelessWidget {
                 ? SubscriptionExpiryText(
                     expiresAt: subscription.expiresAt!,
                     fontSize: 13,
+                    subdued: true,
                   )
                 : Text(
                     status!,

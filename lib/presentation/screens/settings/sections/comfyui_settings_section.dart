@@ -10,6 +10,7 @@ import '../../../providers/comfyui/comfyui_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_input.dart';
 import '../widgets/settings_card.dart';
+import '../widgets/settings_hover_line.dart';
 import '../widgets/workflow_import_wizard.dart';
 
 /// ComfyUI 设置板块
@@ -49,13 +50,13 @@ class _ComfyUISettingsSectionState
     final builtinWorkflows = workflows.where((t) => t.isBuiltin).toList();
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsCard(
-          icon: Icons.auto_fix_high,
+          bottomSpacing: 22,
           child: Column(
             children: [
               SettingsSwitchTile(
-                secondary: const Icon(Icons.power),
                 title: Text(context.l10n.settings_comfyUiEnable),
                 subtitle: Text(
                   settings.enabled
@@ -72,31 +73,29 @@ class _ComfyUISettingsSectionState
               ),
               if (settings.enabled) ...[
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ThemedInput(
-                          controller: _urlController,
-                          decoration: InputDecoration(
-                            labelText: context.l10n.settings_comfyUiServerUrl,
-                            hintText: 'http://127.0.0.1:8188',
-                            border: const OutlineInputBorder(),
-                            isDense: true,
-                            prefixIcon: const Icon(Icons.dns_outlined),
-                          ),
-                          onChanged: (value) {
-                            ref
-                                .read(comfyUISettingsProvider.notifier)
-                                .setServerUrl(value);
-                          },
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final input = ThemedInput(
+                        key: const Key('settings-comfyui-address'),
+                        controller: _urlController,
+                        decoration: InputDecoration(
+                          hintText: 'http://127.0.0.1:8188',
+                          labelText:
+                              constraints.maxWidth <
+                                  540 *
+                                      MediaQuery.textScalerOf(context).scale(1)
+                              ? context.l10n.settings_comfyUiServerUrl
+                              : null,
+                          border: const OutlineInputBorder(),
+                          isDense: true,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      FilledButton.tonal(
+                        onChanged: (value) => ref
+                            .read(comfyUISettingsProvider.notifier)
+                            .setServerUrl(value),
+                      );
+                      final test = OutlinedButton(
+                        key: const Key('settings-comfyui-test'),
                         onPressed: _isTesting ? null : _testConnection,
                         child: _isTesting
                             ? const SizedBox(
@@ -107,38 +106,66 @@ class _ComfyUISettingsSectionState
                                 ),
                               )
                             : Text(context.l10n.settings_testConnection),
-                      ),
-                    ],
+                      );
+                      if (constraints.maxWidth <
+                          540 * MediaQuery.textScalerOf(context).scale(1)) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            input,
+                            const SizedBox(height: 10),
+                            Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: test,
+                            ),
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Text(
+                            context.l10n.settings_comfyUiServerUrl,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(child: input),
+                          const SizedBox(width: 12),
+                          test,
+                        ],
+                      );
+                    },
                   ),
                 ),
                 if (_testResult != null)
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(
                           _testResult == 'ok'
-                              ? Icons.check_circle
+                              ? Icons.check_circle_outline
                               : Icons.error_outline,
                           size: 16,
                           color: _testResult == 'ok'
-                              ? Colors.green
+                              ? theme.colorScheme.onSurfaceVariant
                               : theme.colorScheme.error,
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          _testResult == 'ok'
-                              ? context.l10n.settings_comfyUiConnectionSuccess
-                              : context.l10n.settings_comfyUiConnectionFailed(
-                                  _testResult!,
-                                ),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: _testResult == 'ok'
-                                ? Colors.green
-                                : theme.colorScheme.error,
+                        Expanded(
+                          child: Text(
+                            _testResult == 'ok'
+                                ? context.l10n.settings_comfyUiConnectionSuccess
+                                : context.l10n.settings_comfyUiConnectionFailed(
+                                    _testResult!,
+                                  ),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: _testResult == 'ok'
+                                  ? theme.colorScheme.onSurfaceVariant
+                                  : theme.colorScheme.error,
+                            ),
                           ),
                         ),
                       ],
@@ -146,95 +173,52 @@ class _ComfyUISettingsSectionState
                   ),
                 if (connStatus == ComfyUIConnectionStatus.connected)
                   SettingsTile(
-                    leading: const Icon(
-                      Icons.circle,
-                      color: Colors.green,
-                      size: 12,
-                    ),
                     title: Text(context.l10n.settings_comfyUiConnected),
                     subtitle: Text(settings.serverUrl),
                     trailing: TextButton(
-                      onPressed: () {
-                        ref
-                            .read(comfyUIConnectionProvider.notifier)
-                            .disconnect();
-                      },
+                      onPressed: () => ref
+                          .read(comfyUIConnectionProvider.notifier)
+                          .disconnect(),
                       child: Text(context.l10n.settings_comfyUiDisconnect),
                     ),
                   ),
-                const SizedBox(height: 8),
               ],
             ],
           ),
         ),
-
-        // 工作流管理
-        if (settings.enabled) ...[
-          const SizedBox(height: 16),
+        if (settings.enabled)
           SettingsCard(
             title: context.l10n.settings_comfyUiWorkflowManagement,
-            icon: Icons.account_tree,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 内置工作流列表
                 if (builtinWorkflows.isNotEmpty) ...[
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.inventory_2,
-                          size: 16,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.5,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          context.l10n.settings_comfyUiBuiltinWorkflows,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                        ),
-                      ],
+                    padding: const EdgeInsets.only(top: 6, bottom: 8),
+                    child: Text(
+                      context.l10n.settings_comfyUiBuiltinWorkflows,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   ...builtinWorkflows.map((t) => _buildWorkflowTile(theme, t)),
                 ],
-
-                // 用户自定义工作流
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.only(top: 14, bottom: 8),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.person,
-                        size: 16,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        context.l10n.settings_comfyUiCustomWorkflows,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.5,
+                      Expanded(
+                        child: Text(
+                          context.l10n.settings_comfyUiCustomWorkflows,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                      const Spacer(),
                       TextButton.icon(
                         onPressed: () => WorkflowImportWizard.show(context),
-                        icon: const Icon(Icons.add, size: 18),
+                        icon: const Icon(Icons.add, size: 16),
                         label: Text(context.l10n.common_import),
                       ),
                     ],
@@ -242,65 +226,116 @@ class _ComfyUISettingsSectionState
                 ),
                 if (customWorkflows.isEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     child: Text(
                       context.l10n.settings_comfyUiNoCustomWorkflows,
+                      textAlign: TextAlign.center,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.4,
-                        ),
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   )
                 else
                   ...customWorkflows.map((t) => _buildWorkflowTile(theme, t)),
-                const SizedBox(height: 8),
               ],
             ),
           ),
-        ],
       ],
     );
   }
 
   Widget _buildWorkflowTile(ThemeData theme, WorkflowTemplate template) {
-    final categoryLabel = template.category.localizedLabel(context);
     final description = template.localizedDescription(context);
-
-    return SettingsTile(
-      hoverFeedback: !template.isBuiltin,
-      leading: Icon(
-        template.isBuiltin ? Icons.inventory_2 : Icons.account_tree,
-        color: template.isBuiltin
-            ? theme.colorScheme.primary
-            : theme.colorScheme.tertiary,
-      ),
-      title: Text(template.localizedName(context)),
-      subtitle: Text(
-        '$categoryLabel · '
-        '${context.l10n.settings_comfyUiSlotCount(template.slots.length)}'
-        '${description.isNotEmpty ? " · $description" : ""}',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: template.isBuiltin
-          ? Chip(
-              label: Text(context.l10n.settings_comfyUiBuiltin),
-              labelStyle: theme.textTheme.bodySmall,
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact,
-            )
-          : IconButton(
-              icon: Icon(
-                Icons.delete_outline,
-                color: theme.colorScheme.error,
-                size: 20,
-              ),
-              onPressed: () => _confirmDeleteWorkflow(template),
+    final count = context.l10n.settings_comfyUiSlotCount(template.slots.length);
+    final action = template.isBuiltin
+        ? Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onSurface.withValues(alpha: .06),
+              borderRadius: BorderRadius.circular(4),
             ),
+            child: Text(
+              context.l10n.settings_comfyUiBuiltin,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          )
+        : IconButton(
+            tooltip: context.l10n.common_delete,
+            icon: Icon(
+              Icons.delete_outline,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 18,
+            ),
+            onPressed: () => _confirmDeleteWorkflow(template),
+          );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth <
+            680 * MediaQuery.textScalerOf(context).scale(1)) {
+          return SettingsTile(
+            key: ValueKey('settings-workflow-${template.id}'),
+            dense: true,
+            controlWrapWidth: 0,
+            hoverFeedback: !template.isBuiltin,
+            title: Text(template.localizedName(context)),
+            subtitle: Text(
+              '$count${description.isEmpty ? "" : " · $description"}',
+            ),
+            trailing: action,
+          );
+        }
+        return SettingsHoverLine(
+          enabled: !template.isBuiltin,
+          child: Container(
+            key: ValueKey('settings-workflow-${template.id}'),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: .5),
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    template.localizedName(context),
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+                  ),
+                ),
+                const SizedBox(width: 18),
+                SizedBox(
+                  width: 86 * MediaQuery.textScalerOf(context).scale(1),
+                  child: Text(
+                    count,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 18),
+                Expanded(
+                  flex: 4,
+                  child: Text(
+                    description,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                action,
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

@@ -113,21 +113,57 @@ class _OnlineGalleryBlacklistSettingsPanelState
                 ),
               ),
               const SizedBox(width: 8),
-              IconButton(
-                tooltip: context.l10n.common_add,
-                onPressed: _addTag,
-                icon: const Icon(Icons.add),
-              ),
+              if (widget.flat)
+                FilledButton.icon(
+                  onPressed: _addTag,
+                  icon: const Icon(Icons.add, size: 16),
+                  label: Text(context.l10n.common_add),
+                )
+              else
+                IconButton(
+                  tooltip: context.l10n.common_add,
+                  onPressed: _addTag,
+                  icon: const Icon(Icons.add),
+                ),
             ],
           ),
           const SizedBox(height: 10),
           if (localTags.isEmpty)
-            Text(
-              context.l10n.onlineGallery_noLocalBlacklistTags,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            )
+            widget.flat
+                ? Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 22),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: .5,
+                        ),
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.sell_outlined,
+                          size: 20,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.l10n.onlineGallery_noLocalBlacklistTags,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Text(
+                    context.l10n.onlineGallery_noLocalBlacklistTags,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  )
           else
             Wrap(
               spacing: 6,
@@ -183,6 +219,29 @@ class _OnlineGalleryBlacklistSettingsPanelState
 
   Widget _buildSyncStatus(ThemeData theme, OnlineGalleryBlacklistState state) {
     if (state.lastSyncError != null && state.lastSyncError!.isNotEmpty) {
+      if (widget.flat) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 16,
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xffd6b082)
+                  : const Color(0xff936b39),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                context.l10n.onlineGallery_lastSyncFailed(state.lastSyncError!),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        );
+      }
       return Text(
         context.l10n.onlineGallery_lastSyncFailed(state.lastSyncError!),
         style: theme.textTheme.bodySmall?.copyWith(

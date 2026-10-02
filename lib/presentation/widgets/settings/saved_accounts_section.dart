@@ -160,20 +160,12 @@ class _SavedAccountTile extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (isCurrent) ...[
-          Icon(
-            Icons.circle,
-            size: 7,
-            color: theme.brightness == Brightness.dark
-                ? Colors.green.shade400
-                : Colors.green.shade700,
-          ),
+          Icon(Icons.circle, size: 7, color: colors.onSurfaceVariant),
           const SizedBox(width: 6),
           Text(
             settingsText(context, '已登录', 'Signed in', 'ログイン済み'),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.brightness == Brightness.dark
-                  ? Colors.green.shade400
-                  : Colors.green.shade700,
+              color: colors.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: 12),
@@ -184,6 +176,7 @@ class _SavedAccountTile extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 12),
               child: SubscriptionExpiryText(
                 expiresAt: account.subscriptionExpiresAt!,
+                subdued: true,
               ),
             ),
           ),

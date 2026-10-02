@@ -86,10 +86,7 @@ class NetworkSettingsSectionState
           // 代理模式选择（仅在启用时显示）
           if (proxySettings.enabled) ...[
             SettingsTile(
-              leading: const Icon(Icons.security_outlined),
-              title: Text(l10n.settings_proxyTrafficDisclosure),
-            ),
-            SettingsTile(
+              dense: true,
               leading: const Icon(Icons.settings_ethernet),
               title: Text(l10n.settings_proxyMode),
               subtitle: Text(
@@ -163,20 +160,46 @@ class NetworkSettingsSectionState
 
             // 测试连接按钮
             SettingsTile(
+              dense: true,
               hoverFeedback: !_isTesting,
               leading: const Icon(Icons.network_check),
               title: Text(l10n.settings_testConnection),
               subtitle: Text(_testResult ?? l10n.settings_testConnectionHint),
-              trailing: _isTesting
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.play_arrow),
-                      onPressed: _testProxyConnection,
+              trailing: OutlinedButton.icon(
+                key: const Key('settings-proxy-test'),
+                onPressed: _isTesting ? null : _testProxyConnection,
+                icon: _isTesting
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.play_arrow, size: 16),
+                label: Text(l10n.settings_testConnection),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.settings_proxyTrafficDisclosure,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.5,
+                      ),
                     ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],

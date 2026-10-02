@@ -19,19 +19,34 @@ class SubscriptionExpiryText extends StatelessWidget {
   /// 是否显示「到期 yyyy-MM-dd」日期（详情行等已有独立标签的场景可关闭）
   final bool includeDate;
 
+  /// Quieter warning colors for the monochrome settings account list.
+  final bool subdued;
+
   const SubscriptionExpiryText({
     super.key,
     required this.expiresAt,
     this.fontSize = 11,
     this.includeDate = true,
+    this.subdued = false,
   });
 
   /// 状态对应颜色（供行值等着色场景复用）
   static Color statusColor(
     BuildContext context,
-    SubscriptionExpiryStatus status,
-  ) {
+    SubscriptionExpiryStatus status, {
+    bool subdued = false,
+  }) {
     final theme = Theme.of(context);
+    if (subdued) {
+      final dark = theme.brightness == Brightness.dark;
+      return switch (status) {
+        SubscriptionExpiryStatus.expired =>
+          dark ? const Color(0xffdf9797) : const Color(0xffad5757),
+        SubscriptionExpiryStatus.expiringSoon =>
+          dark ? const Color(0xffd6b082) : const Color(0xff936b39),
+        SubscriptionExpiryStatus.normal => theme.colorScheme.onSurfaceVariant,
+      };
+    }
     return switch (status) {
       SubscriptionExpiryStatus.expired => theme.colorScheme.error,
       SubscriptionExpiryStatus.expiringSoon => Colors.orange,
@@ -76,7 +91,7 @@ class SubscriptionExpiryText extends StatelessWidget {
     return Text(
       displayText,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: statusColor(context, info.status),
+        color: statusColor(context, info.status, subdued: subdued),
         fontSize: fontSize,
       ),
     );

@@ -11,6 +11,7 @@ import 'package:nai_launcher/core/services/danbooru_tags_lazy_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/privacy_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_card.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_protection_tile.dart';
 import 'package:nai_launcher/presentation/widgets/online_gallery/blacklist_settings_panel.dart';
 
 void main() {
@@ -47,7 +48,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          locale: Locale('zh'),
+          locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
@@ -76,10 +77,10 @@ void main() {
   testWidgets('子开关直接可用，附属参数跟随自己的开关', (tester) async {
     await pumpSection(tester);
 
-    final stripTile = tester.widget<SettingsSwitchTile>(
+    final stripTile = tester.widget<SettingsProtectionTile>(
       find.ancestor(
         of: find.text('复制/拖拽时移除全部元数据'),
-        matching: find.byType(SettingsSwitchTile),
+        matching: find.byType(SettingsProtectionTile),
       ),
     );
     expect(stripTile.onChanged, isNotNull);
@@ -110,10 +111,10 @@ void main() {
   testWidgets('复制/拖拽移除元数据默认关闭（空存储走默认值）', (tester) async {
     await pumpSection(tester);
 
-    final stripTile = tester.widget<SettingsSwitchTile>(
+    final stripTile = tester.widget<SettingsProtectionTile>(
       find.ancestor(
         of: find.text('复制/拖拽时移除全部元数据'),
-        matching: find.byType(SettingsSwitchTile),
+        matching: find.byType(SettingsProtectionTile),
       ),
     );
     expect(stripTile.value, isFalse);

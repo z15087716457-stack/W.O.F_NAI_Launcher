@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/utils/subscription_expiry_utils.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/auth/saved_account.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
@@ -223,14 +224,37 @@ void main() {
                   as RenderRepaintBoundary)
               .toImage(pixelRatio: 1.5);
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      final folder = Directory('.dart_tool/settings-layout-captures')
-        ..createSync(recursive: true);
+      final folder = Directory(
+        '.dart_tool/settings-privacy-connections-account-captures',
+      )..createSync(recursive: true);
       File(
         '${folder.path}/$name-${dark ? 'dark' : 'light'}.png',
       ).writeAsBytesSync(bytes!.buffer.asUint8List());
       image.dispose();
     });
   }
+
+  testWidgets(
+    'account palette keeps current blue and routine statuses neutral',
+    (tester) async {
+      await pump(tester);
+      final current = find.byKey(const ValueKey('settings-account-current'));
+      final colors = Theme.of(tester.element(current)).colorScheme;
+      for (final label in ['已登录', '订阅有效']) {
+        expect(
+          tester.widget<Text>(find.text(label)).style?.color,
+          colors.onSurfaceVariant,
+        );
+      }
+      expect(tester.widget<Text>(find.text('当前')).style?.color, colors.primary);
+      for (final expiry in tester.widgetList<SubscriptionExpiryText>(
+        find.byType(SubscriptionExpiryText),
+      )) {
+        expect(expiry.subdued, isTrue);
+      }
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   for (final spec in [
     (const Size(1040, 820), 1.0, 'wide'),
@@ -497,9 +521,13 @@ void main() {
         expect(status, findsOneWidget);
         expect(
           tester.widget<Text>(status).style?.color,
-          grace
-              ? Colors.orange
-              : Theme.of(tester.element(current)).colorScheme.error,
+          SubscriptionExpiryText.statusColor(
+            tester.element(current),
+            grace
+                ? SubscriptionExpiryStatus.expiringSoon
+                : SubscriptionExpiryStatus.expired,
+            subdued: true,
+          ),
         );
         expect(tester.takeException(), isNull);
       },

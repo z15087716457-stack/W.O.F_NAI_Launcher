@@ -34,6 +34,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
           if (state.enabled) ...[
             const Divider(height: 1),
             SettingsTile(
+              dense: true,
               hoverFeedback: state.status != KritaBridgeStatus.starting,
               leading: Icon(
                 Icons.circle,
@@ -41,8 +42,9 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
                 color: _statusColor(theme, state.status),
               ),
               title: Text(_statusLabel(context, state.status)),
-              subtitle: Text(_connectionDetails(context, state)),
-              trailing: TextButton.icon(
+              subtitle: SelectableText(_connectionDetails(context, state)),
+              trailing: OutlinedButton.icon(
+                key: const Key('settings-krita-regenerate'),
                 onPressed: state.status == KritaBridgeStatus.starting
                     ? null
                     : () async {
@@ -54,6 +56,8 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
             ),
             if (state.discoveryFilePath != null)
               SettingsTile(
+                dense: true,
+                hoverFeedback: false,
                 leading: const Icon(Icons.description_outlined),
                 title: Text(l10n.settings_kritaBridgeDiscoveryFile),
                 subtitle: SelectableText(state.discoveryFilePath!),
@@ -132,8 +136,8 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
 
   Color _statusColor(ThemeData theme, KritaBridgeStatus status) {
     return switch (status) {
-      KritaBridgeStatus.connected => Colors.green,
-      KritaBridgeStatus.listening => Colors.amber,
+      KritaBridgeStatus.connected => theme.colorScheme.onSurfaceVariant,
+      KritaBridgeStatus.listening => theme.colorScheme.onSurfaceVariant,
       KritaBridgeStatus.starting => theme.colorScheme.primary,
       KritaBridgeStatus.error => theme.colorScheme.error,
       KritaBridgeStatus.disabled => theme.colorScheme.outline,

@@ -9,6 +9,7 @@ import '../widgets/settings_ui_theme.dart';
 import '../widgets/settings_number_dialog.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/settings_section_label.dart';
+import '../widgets/settings_protection_tile.dart';
 
 /// 安全与分享设置板块
 ///
@@ -91,6 +92,107 @@ class _PrivacySettingsSectionState
   Widget build(BuildContext context) {
     final shareSettings = ref.watch(shareImageSettingsProvider);
 
+    if (!widget.generationOnly) {
+      final controls = [
+        SettingsProtectionTile(
+          key: const Key('privacy-strip-metadata'),
+          icon: Icons.description_outlined,
+          title: context.l10n.settings_stripMetadataTitle,
+          subtitle: context.l10n.settings_stripMetadataSubtitle,
+          value: shareSettings.stripMetadataForCopyAndDrag,
+          onChanged: (value) => ref
+              .read(shareImageSettingsProvider.notifier)
+              .setStripMetadataForCopyAndDrag(value),
+        ),
+        SettingsProtectionTile(
+          key: const Key('privacy-external-send'),
+          icon: Icons.send_outlined,
+          title: context.l10n.settings_warnExternalImageSendTitle,
+          subtitle: context.l10n.settings_warnExternalImageSendSubtitle,
+          value: shareSettings.warnExternalImageSend,
+          onChanged: (value) => ref
+              .read(shareImageSettingsProvider.notifier)
+              .setWarnExternalImageSend(value),
+        ),
+        SettingsProtectionTile(
+          key: const Key('privacy-dangerous-actions'),
+          icon: Icons.warning_amber_rounded,
+          title: context.l10n.settings_confirmDangerousActionsTitle,
+          subtitle: context.l10n.settings_confirmDangerousActionsSubtitle,
+          value: shareSettings.confirmDangerousActions,
+          onChanged: (value) => ref
+              .read(shareImageSettingsProvider.notifier)
+              .setConfirmDangerousActions(value),
+        ),
+        SettingsProtectionTile(
+          key: const Key('privacy-prevent-overwrite'),
+          icon: Icons.save_alt_outlined,
+          title: context.l10n.settings_preventOverwriteTitle,
+          subtitle: context.l10n.settings_preventOverwriteSubtitle,
+          value: shareSettings.preventOverwrite,
+          onChanged: (value) => ref
+              .read(shareImageSettingsProvider.notifier)
+              .setPreventOverwrite(value),
+        ),
+      ];
+      final line = Theme.of(
+        context,
+      ).colorScheme.outlineVariant.withValues(alpha: .5);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SettingsCard(
+            title: context.l10n.settings_protectionFeatures,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth <
+                    740 * MediaQuery.textScalerOf(context).scale(1)) {
+                  return Column(
+                    children: [
+                      for (final control in controls)
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(color: line)),
+                          ),
+                          child: control,
+                        ),
+                    ],
+                  );
+                }
+                return Table(
+                  defaultVerticalAlignment:
+                      TableCellVerticalAlignment.intrinsicHeight,
+                  border: TableBorder(
+                    horizontalInside: BorderSide(color: line),
+                    verticalInside: BorderSide(color: line),
+                    bottom: BorderSide(color: line),
+                  ),
+                  children: [
+                    for (var index = 0; index < controls.length; index += 2)
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 24),
+                            child: controls[index],
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(
+                              start: 24,
+                            ),
+                            child: controls[index + 1],
+                          ),
+                        ],
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+          const OnlineGalleryBlacklistSettingsPanel(flat: true),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -100,61 +202,6 @@ class _PrivacySettingsSectionState
               : null,
           child: Column(
             children: [
-              if (!widget.generationOnly) ...[
-                SettingsSectionLabel(context.l10n.settings_protectionFeatures),
-                SettingsSwitchTile(
-                  secondary: const Icon(Icons.cleaning_services_outlined),
-                  title: Text(context.l10n.settings_stripMetadataTitle),
-                  subtitle: Text(context.l10n.settings_stripMetadataSubtitle),
-                  value: shareSettings.stripMetadataForCopyAndDrag,
-                  onChanged: (value) async {
-                    await ref
-                        .read(shareImageSettingsProvider.notifier)
-                        .setStripMetadataForCopyAndDrag(value);
-                  },
-                ),
-                SettingsSwitchTile(
-                  secondary: const Icon(Icons.warning_amber_rounded),
-                  title: Text(
-                    context.l10n.settings_confirmDangerousActionsTitle,
-                  ),
-                  subtitle: Text(
-                    context.l10n.settings_confirmDangerousActionsSubtitle,
-                  ),
-                  value: shareSettings.confirmDangerousActions,
-                  onChanged: (value) async {
-                    await ref
-                        .read(shareImageSettingsProvider.notifier)
-                        .setConfirmDangerousActions(value);
-                  },
-                ),
-                SettingsSwitchTile(
-                  secondary: const Icon(Icons.cloud_upload_outlined),
-                  title: Text(context.l10n.settings_warnExternalImageSendTitle),
-                  subtitle: Text(
-                    context.l10n.settings_warnExternalImageSendSubtitle,
-                  ),
-                  value: shareSettings.warnExternalImageSend,
-                  onChanged: (value) async {
-                    await ref
-                        .read(shareImageSettingsProvider.notifier)
-                        .setWarnExternalImageSend(value);
-                  },
-                ),
-                SettingsSwitchTile(
-                  secondary: const Icon(Icons.file_copy_outlined),
-                  title: Text(context.l10n.settings_preventOverwriteTitle),
-                  subtitle: Text(
-                    context.l10n.settings_preventOverwriteSubtitle,
-                  ),
-                  value: shareSettings.preventOverwrite,
-                  onChanged: (value) async {
-                    await ref
-                        .read(shareImageSettingsProvider.notifier)
-                        .setPreventOverwrite(value);
-                  },
-                ),
-              ],
               if (widget.generationOnly) ...[
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.toll_outlined),
@@ -240,8 +287,6 @@ class _PrivacySettingsSectionState
             ],
           ),
         ),
-        if (!widget.generationOnly)
-          const OnlineGalleryBlacklistSettingsPanel(flat: true),
       ],
     );
   }
