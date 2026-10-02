@@ -414,7 +414,11 @@ extension _ServiceOverview on _AiServiceEditorDialogState {
                     key: ValueKey('service-model-parameters-${model.name}'),
                     onPressed: _busy ? null : () => _toggleAdvanced(model.name),
                     style: TextButton.styleFrom(
-                      foregroundColor: colors.onSurface,
+                      foregroundColor: Color.lerp(
+                        colors.onSurface,
+                        colors.onSurfaceVariant,
+                        .35,
+                      ),
                       backgroundColor: colors.onSurface.withValues(alpha: .06),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 7,

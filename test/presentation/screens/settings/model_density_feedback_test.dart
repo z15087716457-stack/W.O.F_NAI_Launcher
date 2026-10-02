@@ -138,7 +138,22 @@ void main() {
         final colors = Theme.of(
           tester.element(find.byType(ModelConfigurationCard)),
         ).colorScheme;
-        expect(advanced.style!.foregroundColor!.resolve({}), colors.onSurface);
+        final advancedInk = advanced.style!.foregroundColor!.resolve({})!;
+        final luminance = advancedInk.computeLuminance();
+        final mainLuminance = colors.onSurface.computeLuminance();
+        final mutedLuminance = colors.onSurfaceVariant.computeLuminance();
+        expect(
+          luminance,
+          greaterThan(
+            mainLuminance < mutedLuminance ? mainLuminance : mutedLuminance,
+          ),
+        );
+        expect(
+          luminance,
+          lessThan(
+            mainLuminance > mutedLuminance ? mainLuminance : mutedLuminance,
+          ),
+        );
         expect(container.read(promptAssistantConfigProvider).encode(), before);
         await harness.capture(tester, 'fixed-height-${entry.$3}-advanced');
         if (entry.$3 == 'regular') {
