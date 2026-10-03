@@ -86,11 +86,19 @@ class WindowHeader extends StatelessWidget {
     required this.child,
     this.enabled = true,
     this.minimumInlineWidth = 620,
+    this.inlineDragWidth = WindowChromeScope.dragWidth,
+    this.showCaptionDivider = false,
+    this.outsideRightWidth = 0,
     this.decoration,
   });
   final Widget child;
   final bool enabled;
   final double minimumInlineWidth;
+  final double inlineDragWidth;
+  final bool showCaptionDivider;
+
+  /// Width of an adjacent pane already underneath the window controls.
+  final double outsideRightWidth;
   final Decoration? decoration;
 
   @override
@@ -102,7 +110,9 @@ class WindowHeader extends StatelessWidget {
     }
     return LayoutBuilder(
       builder: (context, constraints) {
-        final reserved = WindowChromeScope.reservedWidthOf(context);
+        final reserved =
+            (WindowChromeScope.reservedWidthOf(context) - outsideRightWidth)
+                .clamp(0.0, double.infinity);
         final narrow =
             constraints.maxWidth <
             minimumInlineWidth + reserved - WindowChromeScope.controlsWidth;
@@ -115,18 +125,36 @@ class WindowHeader extends StatelessWidget {
               Padding(
                 padding: narrow
                     ? EdgeInsets.only(top: WindowChromeScope.heightOf(context))
-                    : EdgeInsets.only(
-                        right: reserved + WindowChromeScope.dragWidth,
-                      ),
+                    : EdgeInsets.only(right: reserved + inlineDragWidth),
                 child: child,
               ),
               Positioned(
                 top: 0,
                 left: narrow ? 0 : null,
                 right: reserved,
-                width: narrow ? null : WindowChromeScope.dragWidth,
+                width: narrow ? null : inlineDragWidth,
                 height: WindowChromeScope.heightOf(context),
-                child: const WindowDragArea(),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    const WindowDragArea(),
+                    if (showCaptionDivider)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IgnorePointer(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Container(
+                              key: const Key('window-header-caption-divider'),
+                              width: 1,
+                              height: 18,
+                              color: Theme.of(context).dividerColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -143,14 +171,23 @@ class LibraryWindowHeader extends StatelessWidget {
     required this.child,
     this.enabled = true,
     this.minimumInlineWidth = 620,
+    this.inlineDragWidth = WindowChromeScope.dragWidth,
+    this.showCaptionDivider = false,
+    this.outsideRightWidth = 0,
   });
   final Widget child;
   final bool enabled;
   final double minimumInlineWidth;
+  final double inlineDragWidth;
+  final bool showCaptionDivider;
+  final double outsideRightWidth;
   @override
   Widget build(BuildContext context) => WindowHeader(
     enabled: enabled,
     minimumInlineWidth: minimumInlineWidth,
+    inlineDragWidth: inlineDragWidth,
+    showCaptionDivider: showCaptionDivider,
+    outsideRightWidth: outsideRightWidth,
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
       border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),

@@ -238,7 +238,16 @@ class _PromptBlockLibraryScreenState
                       children: [
                         LibraryWindowHeader(
                           enabled: !showDetailPanel || !_detailPanelExpanded,
-                          child: _buildToolbar(context, library),
+                          inlineDragWidth: 17,
+                          showCaptionDivider: true,
+                          outsideRightWidth: showDetailPanel ? 40 : 0,
+                          child: _buildToolbar(
+                            context,
+                            library,
+                            besideCaptions:
+                                WindowChromeScope.activeOf(context) &&
+                                (!showDetailPanel || !_detailPanelExpanded),
+                          ),
                         ),
                         if (!showSidebar && library.valueOrNull != null)
                           _buildCompactFolderSelector(library.requireValue),
@@ -523,19 +532,23 @@ class _PromptBlockLibraryScreenState
 
   Widget _buildToolbar(
     BuildContext context,
-    AsyncValue<PromptBlockLibraryState> library,
-  ) {
+    AsyncValue<PromptBlockLibraryState> library, {
+    required bool besideCaptions,
+  }) {
     final theme = Theme.of(context);
     return LayoutBuilder(
       builder: (context, toolbarConstraints) {
-        final compact = toolbarConstraints.maxWidth < 792;
+        final compact =
+            toolbarConstraints.maxWidth < (besideCaptions ? 776 : 792);
         return Container(
           key: const Key('prompt-block-toolbar'),
           height: compact ? null : promptBlockLibraryWideHeaderHeight,
           constraints: compact ? const BoxConstraints(minHeight: 62) : null,
-          padding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: compact ? 12 : 8,
+          padding: EdgeInsets.fromLTRB(
+            16,
+            compact ? 12 : 8,
+            besideCaptions && !compact ? 0 : 16,
+            compact ? 12 : 8,
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -543,6 +556,7 @@ class _PromptBlockLibraryScreenState
               final actions = _multiSelectMode
                   ? _buildMultiSelectActions(context, library)
                   : Row(
+                      key: const Key('prompt-block-toolbar-actions'),
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         PopupMenuButton<String>(
@@ -651,6 +665,7 @@ class _PromptBlockLibraryScreenState
                           icon: const Icon(Icons.refresh),
                         ),
                         FilledButton.icon(
+                          key: const Key('prompt-block-new-folder'),
                           onPressed: () => _showFolderNameDialog(context),
                           icon: const Icon(
                             Icons.create_new_folder_outlined,
@@ -662,6 +677,7 @@ class _PromptBlockLibraryScreenState
                         ),
                         const SizedBox(width: 8),
                         FilledButton.icon(
+                          key: const Key('prompt-block-new-block'),
                           onPressed: () => _showCreateBlock(context),
                           icon: const Icon(Icons.add, size: 18),
                           label: Text(context.l10n.promptBlockLibrary_newBlock),
@@ -1022,46 +1038,42 @@ class _PromptBlockLibraryScreenState
         _searchController.text = tag;
         setState(() {});
       },
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 320),
-        child: SizedBox(
-          height: 36,
-          child: TextField(
-            key: const Key('prompt-block-library-search'),
-            controller: _searchController,
-            focusNode: _searchFocusNode,
-            style: theme.textTheme.bodyMedium,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: context.l10n.promptBlockLibrary_searchHint,
-              hintStyle: TextStyle(
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.5,
-                ),
-                fontSize: 13,
-              ),
-              prefixIcon: const Icon(Icons.search, size: 18),
-              suffixIcon: _searchController.text.isEmpty
-                  ? null
-                  : IconButton(
-                      tooltip: context.l10n.common_clear,
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {});
-                      },
-                      icon: const Icon(Icons.close, size: 16),
-                    ),
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.4,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
-              isDense: true,
+      child: SizedBox(
+        width: double.infinity,
+        height: 36,
+        child: TextField(
+          key: const Key('prompt-block-library-search'),
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          style: theme.textTheme.bodyMedium,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            hintText: context.l10n.promptBlockLibrary_searchHint,
+            hintStyle: TextStyle(
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              fontSize: 13,
             ),
+            prefixIcon: const Icon(Icons.search, size: 18),
+            suffixIcon: _searchController.text.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: context.l10n.common_clear,
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {});
+                    },
+                    icon: const Icon(Icons.close, size: 16),
+                  ),
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+            isDense: true,
           ),
         ),
       ),
