@@ -647,7 +647,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   Widget _toolbar() {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final auto = ref.read(autoTagTranslationProvider);
     final title = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -673,25 +672,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             ),
           ),
         ],
-        IconButton(
-          key: const ValueKey('wiki-auto-translate'),
-          tooltip: auto.activeRequests > 0
-              ? wikiTranslatingLabel(context)
-              : auto.lastError ??
-                    (Localizations.localeOf(context).languageCode == 'zh'
-                        ? '自动翻译可见标签与打开的百科'
-                        : 'Auto-translate visible tags and open articles'),
-          onPressed: () => unawaited(auto.setEnabled(!auto.enabled)),
-          icon: TranslationIcon(
-            busy: auto.activeRequests > 0,
-            size: 18,
-            color: auto.lastError != null
-                ? scheme.error
-                : auto.enabled
-                ? scheme.primary
-                : null,
-          ),
-        ),
         if (!_showRail)
           IconButton(
             key: const ValueKey('wiki-reading-button'),
@@ -1081,63 +1061,56 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     final tag = _selected!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final title = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Tooltip(
-          message: TagNormalizer.toDisplay(tag),
-          child: Text(
-            TagNormalizer.toDisplay(tag),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 23,
-              height: 1.25,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+    final title = Tooltip(
+      message: TagNormalizer.toDisplay(tag),
+      child: Text(
+        TagNormalizer.toDisplay(tag),
+        key: const ValueKey('wiki-article-title'),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontSize: 23,
+          height: 1.25,
+          fontWeight: FontWeight.w700,
         ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 10,
-          runSpacing: 5,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            if (candidate != null) ...[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.label_outline,
-                    size: 14,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _categoryName(candidate.category),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+      ),
+    );
+    final metadata = Wrap(
+      key: const ValueKey('wiki-article-metadata'),
+      spacing: 10,
+      runSpacing: 5,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        if (candidate != null) ...[
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.label_outline,
+                size: 14,
+                color: scheme.onSurfaceVariant,
               ),
+              const SizedBox(width: 4),
               Text(
-                _postCount(candidate.postCount),
+                _categoryName(candidate.category),
                 style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
               ),
             ],
-            FutureBuilder<String?>(
-              future: _translation,
-              builder: (context, snapshot) => Text(
-                snapshot.data ??
-                    ref.read(autoTagTranslationProvider).nameFor(tag) ??
-                    candidate?.translation ??
-                    '',
-                style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
-              ),
-            ),
-          ],
+          ),
+          Text(
+            _postCount(candidate.postCount),
+            style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+          ),
+        ],
+        FutureBuilder<String?>(
+          future: _translation,
+          builder: (context, snapshot) => Text(
+            snapshot.data ??
+                ref.read(autoTagTranslationProvider).nameFor(tag) ??
+                candidate?.translation ??
+                '',
+            style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+          ),
         ),
       ],
     );
@@ -1189,44 +1162,56 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             tooltip: _history.isNotEmpty
                 ? wikiBackLabel(context)
                 : context.l10n.wiki_allTags,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+            visualDensity: VisualDensity.standard,
+            style: IconButton.styleFrom(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
             onPressed: _history.isNotEmpty
                 ? _goBack
                 : () => setState(() => _showCompactArticle = false),
-            icon: const Icon(Icons.arrow_back, size: 19),
+            icon: const Icon(
+              Icons.arrow_back,
+              key: ValueKey('wiki-back-glyph'),
+              size: 19,
+            ),
           )
         : null;
     return Container(
       key: const ValueKey('wiki-article-header'),
-      padding: const EdgeInsets.fromLTRB(24, 20, 22, 18),
+      // Compensate for the arrow's 4.5px optical inset inside its 28px target.
+      padding: EdgeInsets.fromLTRB(back == null ? 24 : 19.5, 20, 24, 18),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
-          if (constraints.maxWidth < 650 * scale) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (back != null) back,
-                    Expanded(child: title),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                actions,
-              ],
-            );
-          }
-          return Row(
+          final compact = constraints.maxWidth < 650 * scale;
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (back != null) back,
-              Expanded(child: title),
-              const SizedBox(width: 18),
-              actions,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (back != null) ...[back, const SizedBox(width: 8)],
+                  Expanded(child: title),
+                  if (!compact) ...[const SizedBox(width: 18), actions],
+                ],
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: EdgeInsets.only(left: back == null ? 0 : 36),
+                child: metadata,
+              ),
+              if (compact) ...[
+                const SizedBox(height: 14),
+                Padding(
+                  padding: EdgeInsets.only(left: back == null ? 0 : 4.5),
+                  child: actions,
+                ),
+              ],
             ],
           );
         },
@@ -1441,10 +1426,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
               key: _articleViewport,
               controller: _articleScroll,
               child: Align(
-                alignment: Alignment.topLeft,
+                alignment: Alignment.topCenter,
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: _wideArticle ? 1040 : 760,
+                  key: const ValueKey('wiki-reading-column'),
+                  constraints: BoxConstraints.tightFor(
+                    width: _wideArticle ? 1040 : 760,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 25, 24, 35),
@@ -1557,12 +1543,139 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     );
   }
 
+  ButtonStyle _readingSegmentStyle() {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final dark = theme.brightness == Brightness.dark;
+    final track = Color.alphaBlend(
+      scheme.onSurface.withValues(alpha: .065),
+      scheme.surface,
+    );
+    final selected = dark
+        ? Color.alphaBlend(
+            scheme.onSurface.withValues(alpha: .16),
+            scheme.surface,
+          )
+        : scheme.surface;
+    return ButtonStyle(
+      backgroundColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected) ? selected : track,
+      ),
+      foregroundColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? scheme.onSurface
+            : scheme.onSurfaceVariant,
+      ),
+      textStyle: WidgetStateProperty.resolveWith(
+        (states) => theme.textTheme.labelMedium?.copyWith(
+          fontSize: 12,
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w600
+              : FontWeight.w400,
+        ),
+      ),
+      shape: WidgetStatePropertyAll(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      ),
+      side: WidgetStatePropertyAll(BorderSide(color: theme.dividerColor)),
+      padding: const WidgetStatePropertyAll(
+        EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      ),
+      minimumSize: const WidgetStatePropertyAll(Size(0, 32)),
+      visualDensity: VisualDensity.compact,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+  }
+
+  Widget _readingLabel(String text) =>
+      Text(text, maxLines: 1, overflow: TextOverflow.ellipsis);
+
+  Widget _textSizeChoice({
+    VoidCallback? refreshDialog,
+  }) => SegmentedButton<double>(
+    key: const ValueKey('wiki-text-size'),
+    style: _readingSegmentStyle(),
+    showSelectedIcon: false,
+    segments: [
+      ButtonSegment(value: 12, label: _readingLabel(context.l10n.wiki_small)),
+      ButtonSegment(
+        value: 14,
+        label: _readingLabel(context.l10n.wiki_standard),
+      ),
+      ButtonSegment(value: 17, label: _readingLabel(context.l10n.wiki_large)),
+    ],
+    selected: {_fontSize},
+    onSelectionChanged: (values) {
+      setState(() => _fontSize = values.first);
+      refreshDialog?.call();
+      _saveReadingSettings();
+    },
+  );
+
+  Widget _widthChoice({VoidCallback? refreshDialog}) => SegmentedButton<bool>(
+    key: const ValueKey('wiki-reading-width'),
+    style: _readingSegmentStyle(),
+    showSelectedIcon: false,
+    segments: [
+      ButtonSegment(
+        value: false,
+        label: _readingLabel(context.l10n.wiki_standard),
+      ),
+      ButtonSegment(value: true, label: _readingLabel(context.l10n.wiki_wide)),
+    ],
+    selected: {_wideArticle},
+    onSelectionChanged: (values) {
+      setState(() => _wideArticle = values.first);
+      refreshDialog?.call();
+      _saveReadingSettings();
+    },
+  );
+
+  Widget _autoTranslateButton() => Consumer(
+    builder: (context, ref, _) {
+      final auto = ref.watch(autoTagTranslationProvider);
+      final scheme = Theme.of(context).colorScheme;
+      final label = switch (Localizations.localeOf(context).languageCode) {
+        'zh' => '自动翻译标签与百科',
+        'ja' => 'タグと百科を自動翻訳',
+        'ko' => '태그 및 백과 자동 번역',
+        _ => 'Auto-translate tags and articles',
+      };
+      final status = auto.activeRequests > 0
+          ? wikiTranslatingLabel(context)
+          : auto.lastError;
+      return Semantics(
+        toggled: auto.enabled,
+        child: IconButton(
+          key: const ValueKey('wiki-auto-translate'),
+          constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.standard,
+          style: IconButton.styleFrom(
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          tooltip: status == null ? label : '$label\n$status',
+          onPressed: () => unawaited(auto.setEnabled(!auto.enabled)),
+          icon: TranslationIcon(
+            busy: auto.activeRequests > 0,
+            size: 18,
+            color: auto.lastError != null
+                ? scheme.error
+                : auto.enabled
+                ? scheme.primary
+                : scheme.onSurfaceVariant,
+          ),
+        ),
+      );
+    },
+  );
+
   Widget _readingRail() {
     final theme = Theme.of(context);
     return Container(
       key: const ValueKey('wiki-reading-rail'),
       width:
-          186 * (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1, 1.3),
+          216 * (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1, 1.3),
       padding: const EdgeInsets.fromLTRB(15, 19, 14, 15),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -1593,43 +1706,14 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
               style: theme.textTheme.labelMedium,
             ),
             const SizedBox(height: 9),
-            SegmentedButton<double>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(value: 12, label: Text(context.l10n.wiki_small)),
-                ButtonSegment(
-                  value: 14,
-                  label: Text(context.l10n.wiki_standard),
-                ),
-                ButtonSegment(value: 17, label: Text(context.l10n.wiki_large)),
-              ],
-              selected: {_fontSize},
-              onSelectionChanged: (values) {
-                setState(() => _fontSize = values.first);
-                _saveReadingSettings();
-              },
-            ),
+            _textSizeChoice(),
             const SizedBox(height: 22),
             Text(
               context.l10n.wiki_readingWidth,
               style: theme.textTheme.labelMedium,
             ),
             const SizedBox(height: 8),
-            SegmentedButton<bool>(
-              showSelectedIcon: false,
-              segments: [
-                ButtonSegment(
-                  value: false,
-                  label: Text(context.l10n.wiki_standard),
-                ),
-                ButtonSegment(value: true, label: Text(context.l10n.wiki_wide)),
-              ],
-              selected: {_wideArticle},
-              onSelectionChanged: (values) {
-                setState(() => _wideArticle = values.first);
-                _saveReadingSettings();
-              },
-            ),
+            _widthChoice(),
             const SizedBox(height: 22),
             _readingLanguage(),
             _articleOutline(),
@@ -1650,25 +1734,35 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         _ => 'Content',
       }, style: Theme.of(context).textTheme.labelMedium),
       const SizedBox(height: 8),
-      SegmentedButton<bool>(
-        key: const Key('wiki-reading-language'),
-        showSelectedIcon: false,
-        segments: [
-          ButtonSegment(
-            value: false,
-            label: Text(wikiReadingStateLabel(context, false)),
+      Row(
+        key: const ValueKey('wiki-reading-content-controls'),
+        children: [
+          Expanded(
+            child: SegmentedButton<bool>(
+              key: const Key('wiki-reading-language'),
+              style: _readingSegmentStyle(),
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(
+                  value: false,
+                  label: _readingLabel(wikiReadingStateLabel(context, false)),
+                ),
+                ButtonSegment(
+                  value: true,
+                  label: _readingLabel(wikiReadingStateLabel(context, true)),
+                ),
+              ],
+              selected: {_showTranslation},
+              onSelectionChanged: (values) {
+                setState(() => _showTranslation = values.first);
+                refreshDialog?.call();
+                _saveReadingSettings();
+              },
+            ),
           ),
-          ButtonSegment(
-            value: true,
-            label: Text(wikiReadingStateLabel(context, true)),
-          ),
+          const SizedBox(width: 8),
+          _autoTranslateButton(),
         ],
-        selected: {_showTranslation},
-        onSelectionChanged: (values) {
-          setState(() => _showTranslation = values.first);
-          refreshDialog?.call();
-          _saveReadingSettings();
-        },
       ),
     ],
   );
@@ -1677,56 +1771,26 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: Text(context.l10n.wiki_readingSettings),
-        content: StatefulBuilder(
-          builder: (context, update) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(context.l10n.wiki_textSize),
-              const SizedBox(height: 8),
-              SegmentedButton<double>(
-                showSelectedIcon: false,
-                segments: [
-                  ButtonSegment(
-                    value: 12,
-                    label: Text(context.l10n.wiki_small),
-                  ),
-                  ButtonSegment(
-                    value: 14,
-                    label: Text(context.l10n.wiki_standard),
-                  ),
-                  ButtonSegment(
-                    value: 17,
-                    label: Text(context.l10n.wiki_large),
-                  ),
-                ],
-                selected: {_fontSize},
-                onSelectionChanged: (values) {
-                  update(() => _fontSize = values.first);
-                  setState(() {});
-                  _saveReadingSettings();
-                },
-              ),
-              const SizedBox(height: 18),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(context.l10n.wiki_readingWidth),
-                subtitle: Text(
-                  _wideArticle
-                      ? context.l10n.wiki_wide
-                      : context.l10n.wiki_standard,
-                ),
-                value: _wideArticle,
-                onChanged: (value) {
-                  update(() => _wideArticle = value);
-                  setState(() {});
-                  _saveReadingSettings();
-                },
-              ),
-              const SizedBox(height: 18),
-              _readingLanguage(refreshDialog: () => update(() {})),
-            ],
+        content: SizedBox(
+          width: 300,
+          child: StatefulBuilder(
+            builder: (context, update) => Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.l10n.wiki_textSize),
+                const SizedBox(height: 8),
+                _textSizeChoice(refreshDialog: () => update(() {})),
+                const SizedBox(height: 18),
+                Text(context.l10n.wiki_readingWidth),
+                const SizedBox(height: 8),
+                _widthChoice(refreshDialog: () => update(() {})),
+                const SizedBox(height: 18),
+                _readingLanguage(refreshDialog: () => update(() {})),
+              ],
+            ),
           ),
         ),
         actions: [

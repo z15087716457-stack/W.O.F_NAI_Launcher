@@ -51,14 +51,14 @@ class _OfflineAdapter implements HttpClientAdapter {
 }
 
 class _CaptureApi extends PromptAssistantApiClient {
-  _CaptureApi() : super(dio: Dio());
+  _CaptureApi({this.output = '{"tag":"blue_eyes","name_zh":"蓝眼睛"}'})
+    : super(dio: Dio());
+  final String output;
   final requests = <PromptAssistantRequest>[];
   @override
   Stream<StreamingChunk> complete({required PromptAssistantRequest request}) {
     requests.add(request);
-    return Stream.value(
-      const StreamingChunk(delta: '{"tag":"blue_eyes","name_zh":"蓝眼睛"}'),
-    );
+    return Stream.value(StreamingChunk(delta: output));
   }
 }
 
@@ -132,6 +132,72 @@ ResponseBody _reply({int status = 200, bool responses = false}) =>
     );
 
 void main() {
+  for (final custom in [false, true]) {
+    test(
+      'Wiki requests preserve free semantic headings for ${custom ? 'custom' : 'built-in'} preset',
+      () async {
+        const preset = TaskPresetConfig(
+          id: 'user:wiki-test',
+          name: '离线测试',
+          task: LauncherInterface.wikiTranslate,
+          prompt: 'Translate faithfully.',
+        );
+        final config = custom
+            ? _config(
+                slot: _slot.copyWith(presetId: preset.id),
+              ).copyWith(presets: [preset])
+            : _config();
+        final storage = _Memory()
+          ..values[StorageKeys.promptAssistantConfigJson] = config.encode();
+        const translated =
+            '## 适用范围\n\n蓝眼睛。\n\n### 示例\n\n- [blue eyes](wof-tag:blue_eyes)';
+        const original =
+            '## Scope\n\nBlue eyes.\n\n### Examples\n\n- [blue eyes](wof-tag:blue_eyes)';
+        final api = _CaptureApi(
+          output: jsonEncode({
+            'tag': 'blue_eyes',
+            'name_zh': '蓝眼睛',
+            'wiki_zh': translated,
+            'wiki_original': original,
+          }),
+        );
+        final container = ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(storage),
+            secureStorageServiceProvider.overrideWithValue(_Secrets()),
+            promptAssistantServiceProvider.overrideWith(
+              (ref) => PromptAssistantService(ref: ref, apiClient: api),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        final result = await container
+            .read(promptAssistantServiceProvider)
+            .translateVisibleTag(
+              tag: 'blue_eyes',
+              wikiBody: 'Blue eyes. Examples: blue_eyes.',
+              includeWikiTranslation: true,
+              sessionId: 'wiki-structure-offline',
+            );
+        final sent = api.requests.single.systemPrompt;
+        expect(
+          sent,
+          contains(PromptAssistantService.wikiArticleStructureRules),
+        );
+        expect(sent, contains('short articles may remain unsectioned'));
+        expect(
+          sent,
+          contains(
+            'Keep all source facts, examples, canonical tags and external links complete',
+          ),
+        );
+        expect(sent, isNot(contains('do not add headings')));
+        if (custom) expect(sent, contains(preset.prompt));
+        expect(result.wikiZh, translated);
+        expect(result.wikiOriginal, original);
+      },
+    );
+  }
   test('task reasoning alone overrides model defaults for every interface', () {
     for (final task in LauncherInterface.values) {
       final configured = _config(slot: _slot.copyWith(reasoningEffort: 'none'));

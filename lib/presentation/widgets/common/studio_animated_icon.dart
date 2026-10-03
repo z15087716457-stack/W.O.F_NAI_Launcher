@@ -16,6 +16,7 @@ class StudioAnimatedIcon extends StatefulWidget {
     this.size,
     this.color,
     this.semanticLabel,
+    this.reducedMotion = false,
   });
 
   final IconData icon;
@@ -23,6 +24,7 @@ class StudioAnimatedIcon extends StatefulWidget {
   final double? size;
   final Color? color;
   final String? semanticLabel;
+  final bool reducedMotion;
 
   @override
   State<StudioAnimatedIcon> createState() => _StudioAnimatedIconState();
@@ -49,6 +51,7 @@ class _StudioAnimatedIconState extends State<StudioAnimatedIcon>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _motionAllowed =
+        !widget.reducedMotion &&
         !MediaQuery.disableAnimationsOf(context) &&
         TickerMode.valuesOf(context).enabled;
     if (!_motionAllowed) _stop();
@@ -62,6 +65,13 @@ class _StudioAnimatedIconState extends State<StudioAnimatedIcon>
   @override
   void didUpdateWidget(StudioAnimatedIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.reducedMotion != widget.reducedMotion) {
+      _motionAllowed =
+          !widget.reducedMotion &&
+          !MediaQuery.disableAnimationsOf(context) &&
+          TickerMode.valuesOf(context).enabled;
+      if (!_motionAllowed) _stop();
+    }
     if (oldWidget.icon != widget.icon) _stop();
     if (oldWidget.trigger != widget.trigger &&
         _motionAllowed &&
@@ -75,6 +85,7 @@ class _StudioAnimatedIconState extends State<StudioAnimatedIcon>
           0xe90b => 560, // Source pulse, orbit, result.
           0xe90c => 580, // Carry the style into the target.
           0xe90d => 520, // Focus corners settle around the features.
+          0xe918 => 620, // Fold lifts, index tabs follow, then settle.
           _ => 500,
         },
       );
@@ -396,6 +407,15 @@ class StudioIconPainter extends CustomPainter {
               sx: scale,
               sy: scale,
             );
+          }
+        case 0xe918:
+          if (part.name == 'fold') {
+            final lift = _pulse(t, .02, .6);
+            _around(canvas, 15.5, 7.5, sx: 1 - .22 * lift, angle: -.22 * lift);
+          } else if (part.name == 'topIndex' || part.name == 'bottomIndex') {
+            final first = part.name == 'topIndex';
+            final lift = _pulse(t, first ? .15 : .3, first ? .7 : .88);
+            canvas.translate(.65 * lift, -.2 * lift);
           }
       }
       _draw(canvas, part, opacity: opacity, trim: trim);

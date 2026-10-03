@@ -23,6 +23,7 @@ const _icons = <String, IconData>{
   '图生图': StudioIcons.imageToImage,
   '风格迁移': StudioIcons.styleTransfer,
   '参考聚焦': StudioIcons.referenceFocus,
+  '标签百科': StudioIcons.tagWiki,
 };
 
 Finder get _painting => find.byWidgetPredicate(
@@ -34,6 +35,7 @@ Widget _host(
   int trigger, {
   bool reduce = false,
   bool ticking = true,
+  bool preferenceReduced = false,
 }) {
   return MaterialApp(
     home: MediaQuery(
@@ -41,7 +43,11 @@ Widget _host(
       child: TickerMode(
         enabled: ticking,
         child: Center(
-          child: StudioAnimatedIcon(icon: icon, trigger: trigger),
+          child: StudioAnimatedIcon(
+            icon: icon,
+            trigger: trigger,
+            reducedMotion: preferenceReduced,
+          ),
         ),
       ),
     ),
@@ -49,6 +55,27 @@ Widget _host(
 }
 
 void main() {
+  testWidgets('Wiki reduced-motion preference cancels without replay', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_host(StudioIcons.tagWiki, 0));
+    await tester.pumpWidget(_host(StudioIcons.tagWiki, 1));
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(_painting, findsOneWidget);
+    await tester.pumpWidget(
+      _host(StudioIcons.tagWiki, 1, preferenceReduced: true),
+    );
+    expect(_painting, findsNothing);
+    await tester.pumpWidget(
+      _host(StudioIcons.tagWiki, 2, preferenceReduced: true),
+    );
+    await tester.pumpWidget(_host(StudioIcons.tagWiki, 2));
+    expect(_painting, findsNothing);
+    await tester.pumpWidget(_host(StudioIcons.tagWiki, 3));
+    expect(_painting, findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(tester.binding.transientCallbackCount, 0);
+  });
   for (final entry in _icons.entries) {
     testWidgets(
       '${entry.key}: idle has no ticker, activation plays once and settles',
@@ -274,7 +301,7 @@ void main() {
                   .toImage(pixelRatio: 1.5);
           final data = await image.toByteData(format: ui.ImageByteFormat.png);
           File(
-            '.dart_tool/studio-motion-${dark ? 'dark' : 'light'}.png',
+            '.dart_tool/${Platform.environment['CAPTURE_WIKI_POLISH'] == '1' ? 'wiki-polish-captures/' : ''}studio-motion-${dark ? 'dark' : 'light'}.png',
           ).writeAsBytesSync(data!.buffer.asUint8List());
           image.dispose();
         });

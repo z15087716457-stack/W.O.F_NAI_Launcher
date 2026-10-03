@@ -26,6 +26,8 @@ import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_tag_row.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
 import 'package:nai_launcher/presentation/widgets/autocomplete/tag_candidate_title.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -155,17 +157,25 @@ class _Auto extends ChangeNotifier implements AutoTagTranslationController {
   @override
   void clearSurface(String surface) => visible.remove(surface);
   int busy = 0;
+  bool autoEnabled = true;
+  String? error;
   bool cachedBodies = true;
   String? bodyOverride;
   String? originalOverride;
   @override
   String? wikiOriginalFor(String tag) => cachedBodies ? originalOverride : null;
   @override
-  bool get enabled => true;
+  bool get enabled => autoEnabled;
+  @override
+  Future<void> setEnabled(bool value) async {
+    autoEnabled = value;
+    notifyListeners();
+  }
+
   @override
   int get activeRequests => busy;
   @override
-  String? get lastError => null;
+  String? get lastError => error;
   @override
   String? wikiFor(String tag) => !cachedBodies
       ? null
@@ -212,10 +222,13 @@ Future<void> capture(WidgetTester tester, String name) async {
     final render =
         boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final redesign = Platform.environment['CAPTURE_WIKI_REDESIGN'] == '1';
-    final image = await render.toImage(pixelRatio: redesign ? 1 : 2);
+    final polish = Platform.environment['CAPTURE_WIKI_POLISH'] == '1';
+    final image = await render.toImage(pixelRatio: redesign || polish ? 1 : 2);
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final folder = Directory(
-      redesign
+      polish
+          ? '.dart_tool/wiki-polish-captures'
+          : redesign
           ? '.dart_tool/wiki-redesign-captures'
           : '.dart_tool/tag-wiki-captures',
     )..createSync(recursive: true);
@@ -358,6 +371,244 @@ void main() {
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
+
+  testWidgets(
+    'reading column remains centered, wider mode persists, and history actions align',
+    (tester) async {
+      tester.view.physicalSize = const Size(2560, 1440);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+        _Auto()..bodyOverride = '$_uiBody\n\n[solo](wof-tag:solo)',
+        catalog: _Tags(entries: _uiTags()),
+        chrome: true,
+      );
+      final column = find.byKey(const ValueKey('wiki-reading-column'));
+      final header = find.byKey(const ValueKey('wiki-article-header'));
+      expect(
+        tester.getRect(column).center.dx,
+        closeTo(tester.getRect(header).center.dx, .01),
+      );
+      expect(tester.getSize(column).width, 760);
+      final width = tester.widget<SegmentedButton<bool>>(
+        find.byKey(const ValueKey('wiki-reading-width')),
+      );
+      width.onSelectionChanged!({true});
+      await tester.pumpAndSettle();
+      expect(tester.getSize(column).width, 1040);
+      expect(
+        (await SharedPreferences.getInstance()).getBool('wiki_wide_article'),
+        isTrue,
+      );
+      expect(
+        tester.getRect(column).center.dx,
+        closeTo(tester.getRect(header).center.dx, .01),
+      );
+      await capture(tester, 'centered-wide-2k');
+      width.onSelectionChanged!({false});
+      await tester.pumpAndSettle();
+      final body = find.byKey(const ValueKey('wiki-body-1girl'));
+      await tester.tap(
+        find
+            .descendant(
+              of: body,
+              matching: find.text('solo', findRichText: true),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+      final title = tester.getRect(
+        find.byKey(const ValueKey('wiki-article-title')),
+      );
+      final back = tester.getRect(
+        find.byKey(const ValueKey('wiki-article-back')),
+      );
+      final copy = tester.getRect(find.byKey(const ValueKey('wiki-copy-tag')));
+      expect(title.center.dy, closeTo(back.center.dy, .01));
+      expect(title.center.dy, closeTo(copy.center.dy, .01));
+      final glyph = tester.getRect(
+        find.byKey(const ValueKey('wiki-back-glyph')),
+      );
+      final bounds = tester.getRect(header);
+      expect(glyph.left - bounds.left, closeTo(bounds.right - copy.right, .01));
+      expect(
+        tester.getRect(find.byKey(const ValueKey('wiki-article-metadata'))).top,
+        greaterThan(title.bottom),
+      );
+      await capture(tester, 'history-header-2k');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'reading selections are lighter and translation toggles in content row',
+    (tester) async {
+      tester.view.physicalSize = const Size(1720, 940);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auto = _Auto()..bodyOverride = _uiBody;
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+        auto,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      for (final key in [
+        'wiki-text-size',
+        'wiki-reading-width',
+        'wiki-reading-language',
+      ]) {
+        final dynamic segment = tester.widget(find.byKey(ValueKey(key)));
+        final ButtonStyle style = segment.style;
+        final selected = style.backgroundColor!.resolve({
+          WidgetState.selected,
+        })!;
+        final unselected = style.backgroundColor!.resolve({})!;
+        expect(
+          selected.computeLuminance(),
+          greaterThan(unselected.computeLuminance()),
+        );
+      }
+      final button = find.byKey(const ValueKey('wiki-auto-translate'));
+      expect(
+        find.ancestor(
+          of: button,
+          matching: find.byKey(const ValueKey('wiki-reading-content-controls')),
+        ),
+        findsOneWidget,
+      );
+      final language = find.byKey(const ValueKey('wiki-reading-language'));
+      expect(
+        tester.getRect(button).left,
+        greaterThan(tester.getRect(language).right),
+      );
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(auto.enabled, isFalse);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(auto.enabled, isTrue);
+      auto.busy = 1;
+      auto.notifyListeners();
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(tester.widget<IconButton>(button).tooltip, contains('正在翻译'));
+      auto.busy = 0;
+      auto.error = '离线测试错误';
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      expect(tester.widget<IconButton>(button).tooltip, contains('离线测试错误'));
+      auto.error = null;
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      await capture(tester, 'reading-controls');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'narrow reading dialog retains all choices and translation switch',
+    (tester) async {
+      tester.view.physicalSize = const Size(560, 760);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auto = _Auto()..bodyOverride = _uiBody;
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+        auto,
+        scale: 1.3,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('wiki-reading-language')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const ValueKey('wiki-auto-translate')));
+      await tester.pumpAndSettle();
+      expect(auto.enabled, isFalse);
+      tester
+          .widget<SegmentedButton<bool>>(
+            find.byKey(const ValueKey('wiki-reading-width')),
+          )
+          .onSelectionChanged!({true});
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<SegmentedButton<bool>>(
+              find.byKey(const ValueKey('wiki-reading-width')),
+            )
+            .selected,
+        {true},
+      );
+      await capture(tester, 'narrow-reading-dialog');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'directory has only top separators and original Wiki mark animates once',
+    (tester) async {
+      tester.view.physicalSize = const Size(1720, 940);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+        _Auto()..bodyOverride = _uiBody,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      final mark = find.byKey(const ValueKey('wiki-brand-mark'));
+      expect(
+        find.descendant(of: mark, matching: find.byIcon(StudioIcons.tagWiki)),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(ExpansionTile).first,
+          matching: find.byIcon(Icons.expand_more),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Composition'), findsOneWidget);
+      for (final tile in tester.widgetList<ExpansionTile>(
+        find.byType(ExpansionTile),
+      )) {
+        expect(tile.shape, const Border());
+        expect(tile.collapsedShape, const Border());
+      }
+      final mouse = await tester.createGesture(
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      await mouse.addPointer(location: Offset.zero);
+      await mouse.moveTo(tester.getCenter(mark));
+      await tester.pump(const Duration(milliseconds: 160));
+      expect(
+        find.descendant(
+          of: mark,
+          matching: find.byWidgetPredicate(
+            (w) => w is CustomPaint && w.painter is StudioIconPainter,
+          ),
+        ),
+        findsOneWidget,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: mark, matching: find.byIcon(StudioIcons.tagWiki)),
+        findsOneWidget,
+      );
+      await mouse.removePointer();
+      await capture(tester, 'directory-icon');
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   for (final scenario in const [
     ('2k', Size(2560, 1440), 1.0, 'zh'),

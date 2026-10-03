@@ -21,7 +21,7 @@ NAMES = ['style_explore', 'inherit', 'online_gallery', 'prompt_blocks',
          'precise_reference', 'vibe_library', 'generation', 'local_gallery',
          'statistics', 'settings', 'prompt_block_palette',
          'image_to_image', 'style_transfer', 'reference_focus',
-         'settings_appearance', 'settings_controls', 'settings_generation', 'settings_storage', 'settings_account', 'settings_models', 'settings_integrations', 'settings_privacy', 'settings_about', 'settings_data']
+         'settings_appearance', 'settings_controls', 'settings_generation', 'settings_storage', 'settings_account', 'settings_models', 'settings_integrations', 'settings_privacy', 'settings_about', 'settings_data', 'tag_wiki']
 
 
 class DartPathPen(BasePen):

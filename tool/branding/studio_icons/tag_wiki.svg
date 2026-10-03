@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <path id="spine" stroke="none" fill="currentColor" d="M6 3H4.1Q2.5 3 2.5 4.6V19.4Q2.5 21 4.1 21H6Z"/>
+  <path id="page" d="M8.8 3H15.5L20 7.5V19.4Q20 21 18.4 21H8.8"/>
+  <path id="fold" stroke="none" fill="currentColor" d="M15.5 3V6.2Q15.5 7.5 16.8 7.5H20Z"/>
+  <path id="topIndex" stroke="none" fill="currentColor" d="M20 10H21.1Q22 10 22 10.9V11.2Q22 12.1 21.1 12.1H20Z"/>
+  <path id="bottomIndex" stroke="none" fill="currentColor" d="M20 14.1H21.1Q22 14.1 22 15V15.3Q22 16.2 21.1 16.2H20Z"/>
+  <path id="text" d="M10.8 11.5H16.1M10.8 15H16.1"/>
+</svg>

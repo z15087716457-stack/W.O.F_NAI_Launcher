@@ -12,6 +12,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/settings_navigation_provider.dart';
 import '../../providers/update_provider.dart';
+import '../../providers/canvas_settings_provider.dart';
 import '../../router/app_branch.dart';
 import '../auth/account_avatar.dart';
 import '../auth/account_switch_helper.dart';
@@ -141,7 +142,10 @@ class MainNavRail extends ConsumerWidget {
                     ),
 
                     _NavIcon(
-                      icon: Icons.menu_book_outlined,
+                      icon: StudioIcons.tagWiki,
+                      reducedMotion: ref.watch(
+                        canvasReducedMotionNotifierProvider,
+                      ),
                       label: context.l10n.nav_tagWiki,
                       isSelected: currentIndex == AppBranch.tagWiki.index,
                       onTap: () =>
@@ -296,6 +300,7 @@ class _NavIcon extends StatefulWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final bool showBadge;
+  final bool reducedMotion;
 
   const _NavIcon({
     this.icon,
@@ -304,6 +309,7 @@ class _NavIcon extends StatefulWidget {
     required this.isSelected,
     required this.onTap,
     this.showBadge = false,
+    this.reducedMotion = false,
   }) : assert(
          icon != null || customIcon != null,
          '_NavIcon requires either icon or customIcon',
@@ -400,6 +406,7 @@ class _NavIconState extends State<_NavIcon> {
                                           trigger: _motionTrigger,
                                           color: color,
                                           size: 20,
+                                          reducedMotion: widget.reducedMotion,
                                         ),
                                 ),
                               ),

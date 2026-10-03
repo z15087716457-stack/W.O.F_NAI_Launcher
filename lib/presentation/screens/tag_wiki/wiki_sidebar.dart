@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/wiki/wiki_bookmark_store.dart';
@@ -6,6 +7,9 @@ import '../../../core/wiki/wiki_directory.dart';
 import '../../../core/wiki/wiki_directory_labels.dart';
 import '../../widgets/common/themed_input_dialog.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
+import '../../widgets/common/studio_animated_icon.dart';
+import '../../widgets/common/studio_icons.dart';
+import '../../providers/canvas_settings_provider.dart';
 
 enum WikiScopeKind { all, bookmarks, collection, directory }
 
@@ -167,8 +171,10 @@ class WikiSidebar extends StatelessWidget {
         ),
       );
     }
-    return ExpansionTile(
+    final tile = ExpansionTile(
       key: PageStorageKey('wiki-directory-$id'),
+      shape: const Border(),
+      collapsedShape: const Border(),
       dense: true,
       tilePadding: EdgeInsets.only(left: 12 + depth * 12, right: 4),
       childrenPadding: EdgeInsets.zero,
@@ -193,6 +199,17 @@ class WikiSidebar extends StatelessWidget {
       children: [
         for (var index = 0; index < children.length; index++)
           _directoryNode(context, children[index], '$id/$index', depth + 1),
+      ],
+    );
+    if (depth != 0) return tile;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(8, 0, 8, 4),
+          child: Divider(height: 1),
+        ),
+        tile,
       ],
     );
   }
@@ -279,19 +296,7 @@ class WikiSidebar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Icon(
-                        Icons.menu_book_outlined,
-                        size: 19,
-                        color: theme.colorScheme.onPrimary,
-                      ),
-                    ),
+                    const _WikiTitleMark(),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -348,7 +353,7 @@ class WikiSidebar extends StatelessWidget {
                   for (final item in bookmarks.childrenOf(null))
                     _collection(context, item, 1),
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 9),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 9),
                     child: Divider(height: 1),
                   ),
                   Padding(
@@ -376,4 +381,28 @@ class WikiSidebar extends StatelessWidget {
       ),
     );
   }
+}
+
+class _WikiTitleMark extends ConsumerStatefulWidget {
+  const _WikiTitleMark();
+
+  @override
+  ConsumerState<_WikiTitleMark> createState() => _WikiTitleMarkState();
+}
+
+class _WikiTitleMarkState extends ConsumerState<_WikiTitleMark> {
+  int _trigger = 0;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    key: const ValueKey('wiki-brand-mark'),
+    onEnter: (_) => setState(() => _trigger++),
+    child: StudioAnimatedIcon(
+      icon: StudioIcons.tagWiki,
+      trigger: _trigger,
+      size: 28,
+      color: Theme.of(context).colorScheme.primary,
+      reducedMotion: ref.watch(canvasReducedMotionNotifierProvider),
+    ),
+  );
 }

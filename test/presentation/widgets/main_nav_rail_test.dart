@@ -183,7 +183,7 @@ void main() {
       (find.byIcon(StudioIcons.promptBlocks), AppBranch.promptBlockLibrary),
       (find.byIcon(StudioIcons.vibeLibrary), AppBranch.vibeLibrary),
       (find.byIcon(StudioIcons.preciseReference), AppBranch.preciseRefLibrary),
-      (find.byIcon(Icons.menu_book_outlined), AppBranch.tagWiki),
+      (find.byIcon(StudioIcons.tagWiki), AppBranch.tagWiki),
       (find.byIcon(StudioIcons.statistics), AppBranch.statistics),
     ];
     for (var i = 1; i < destinations.length; i++) {
@@ -270,7 +270,7 @@ void main() {
           (widget) =>
               widget is CustomPaint && widget.painter is StudioIconPainter,
         ),
-        branch == AppBranch.tagWiki ? findsNothing : findsOneWidget,
+        findsOneWidget,
       );
       await tester.pumpAndSettle();
     }

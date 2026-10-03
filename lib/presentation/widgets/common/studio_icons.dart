@@ -33,9 +33,10 @@ abstract final class StudioIcons {
   static const settingsPrivacy = IconData(0xe915, fontFamily: _family);
   static const settingsAbout = IconData(0xe916, fontFamily: _family);
   static const settingsData = IconData(0xe917, fontFamily: _family);
+  static const tagWiki = IconData(0xe918, fontFamily: _family);
 
   static bool supportsMotion(IconData icon) =>
       icon.fontFamily == _family &&
       icon.codePoint >= 0xe900 &&
-      icon.codePoint <= 0xe90d;
+      (icon.codePoint <= 0xe90d || icon == tagWiki);
 }

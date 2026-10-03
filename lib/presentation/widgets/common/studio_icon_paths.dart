@@ -950,4 +950,80 @@ final studioIconPaths = <int, List<StudioIconPart>>{
       1.6,
     ),
   ],
+  0xe918: [
+    StudioIconPart(
+      'spine',
+      Path()
+        ..moveTo(6.0, 3.0)
+        ..lineTo(4.1, 3.0)
+        ..quadraticBezierTo(2.5, 3.0, 2.5, 4.6)
+        ..lineTo(2.5, 19.4)
+        ..quadraticBezierTo(2.5, 21.0, 4.1, 21.0)
+        ..lineTo(6.0, 21.0)
+        ..lineTo(6.0, 3.0)
+        ..close(),
+      1.8,
+      filled: true,
+    ),
+    StudioIconPart(
+      'page',
+      Path()
+        ..moveTo(8.8, 3.0)
+        ..lineTo(15.5, 3.0)
+        ..lineTo(20.0, 7.5)
+        ..lineTo(20.0, 19.4)
+        ..quadraticBezierTo(20.0, 21.0, 18.4, 21.0)
+        ..lineTo(8.8, 21.0),
+      1.8,
+    ),
+    StudioIconPart(
+      'fold',
+      Path()
+        ..moveTo(15.5, 3.0)
+        ..lineTo(15.5, 6.2)
+        ..quadraticBezierTo(15.5, 7.5, 16.8, 7.5)
+        ..lineTo(20.0, 7.5)
+        ..lineTo(15.5, 3.0)
+        ..close(),
+      1.8,
+      filled: true,
+    ),
+    StudioIconPart(
+      'topIndex',
+      Path()
+        ..moveTo(20.0, 10.0)
+        ..lineTo(21.1, 10.0)
+        ..quadraticBezierTo(22.0, 10.0, 22.0, 10.9)
+        ..lineTo(22.0, 11.2)
+        ..quadraticBezierTo(22.0, 12.1, 21.1, 12.1)
+        ..lineTo(20.0, 12.1)
+        ..lineTo(20.0, 10.0)
+        ..close(),
+      1.8,
+      filled: true,
+    ),
+    StudioIconPart(
+      'bottomIndex',
+      Path()
+        ..moveTo(20.0, 14.1)
+        ..lineTo(21.1, 14.1)
+        ..quadraticBezierTo(22.0, 14.1, 22.0, 15.0)
+        ..lineTo(22.0, 15.3)
+        ..quadraticBezierTo(22.0, 16.2, 21.1, 16.2)
+        ..lineTo(20.0, 16.2)
+        ..lineTo(20.0, 14.1)
+        ..close(),
+      1.8,
+      filled: true,
+    ),
+    StudioIconPart(
+      'text',
+      Path()
+        ..moveTo(10.8, 11.5)
+        ..lineTo(16.1, 11.5)
+        ..moveTo(10.8, 15.0)
+        ..lineTo(16.1, 15.0),
+      1.8,
+    ),
+  ],
 };
