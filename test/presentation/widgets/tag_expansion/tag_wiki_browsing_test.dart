@@ -22,6 +22,8 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
+import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_tag_row.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
 import 'package:nai_launcher/presentation/widgets/autocomplete/tag_candidate_title.dart';
@@ -56,13 +58,21 @@ final tags = [
 ];
 
 class _Tags extends UnifiedTagRepository {
-  _Tags()
+  _Tags({this.entries})
     : super(
         catalog: TagCatalogRepository(),
         runtime: () async => throw StateError('unused'),
       );
+  final List<CompletionCandidate>? entries;
+  TagCategory? lastCategory;
+  bool? lastCoverage;
+  List<CompletionCandidate> get values => entries ?? tags;
   @override
-  Future<List<CompletionCandidate>> search(CompletionQuery query) async => tags;
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
+      values;
+  @override
+  Future<List<CompletionCandidate>> byNames(Iterable<String> names) async =>
+      values.where((item) => names.contains(item.canonicalTag)).toList();
   @override
   Future<List<CompletionCandidate>> searchContains(
     String input, {
@@ -75,10 +85,22 @@ class _Tags extends UnifiedTagRepository {
     bool alphabetical = false,
     int offset = 0,
     int limit = 80,
-  }) async => tags.skip(offset).take(limit).toList();
+  }) async {
+    lastCategory = category;
+    lastCoverage = hasWiki;
+    return values
+        .where((item) => category == null || category == item.category)
+        .where((item) => hasWiki != false)
+        .skip(offset)
+        .take(limit)
+        .toList();
+  }
+
   @override
-  Future<int> count({TagCategory? category, bool? hasWiki}) async =>
-      tags.length;
+  Future<int> count({TagCategory? category, bool? hasWiki}) async => values
+      .where((item) => category == null || category == item.category)
+      .where((item) => hasWiki != false)
+      .length;
 }
 
 class _Wiki implements TagWikiRepository {
@@ -113,6 +135,25 @@ class _Source implements CompletionSource {
 }
 
 class _Auto extends ChangeNotifier implements AutoTagTranslationController {
+  final visible = <String, Set<String>>{};
+  @override
+  void observe({
+    required String surface,
+    required String tag,
+    required bool visible,
+    String? existingNameZh,
+    AutoTagTranslationContext? tagContext,
+  }) {
+    final tags = this.visible.putIfAbsent(surface, () => {});
+    if (visible) {
+      tags.add(tag);
+    } else {
+      tags.remove(tag);
+    }
+  }
+
+  @override
+  void clearSurface(String surface) => visible.remove(surface);
   int busy = 0;
   bool cachedBodies = true;
   String? bodyOverride;
@@ -142,9 +183,12 @@ class _Auto extends ChangeNotifier implements AutoTagTranslationController {
 }
 
 class _Blocks extends PromptBlockLibraryNotifier {
+  static int reads = 0;
   @override
-  Future<PromptBlockLibraryState> build() async =>
-      PromptBlockLibraryState(blocks: <PromptBlock>[], folders: []);
+  Future<PromptBlockLibraryState> build() async {
+    reads++;
+    return PromptBlockLibraryState(blocks: <PromptBlock>[], folders: []);
+  }
 }
 
 final boundary = GlobalKey();
@@ -167,10 +211,14 @@ Future<void> capture(WidgetTester tester, String name) async {
   await tester.runAsync(() async {
     final render =
         boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-    final image = await render.toImage(pixelRatio: 2);
+    final redesign = Platform.environment['CAPTURE_WIKI_REDESIGN'] == '1';
+    final image = await render.toImage(pixelRatio: redesign ? 1 : 2);
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    final folder = Directory('.dart_tool/tag-wiki-captures')
-      ..createSync(recursive: true);
+    final folder = Directory(
+      redesign
+          ? '.dart_tool/wiki-redesign-captures'
+          : '.dart_tool/tag-wiki-captures',
+    )..createSync(recursive: true);
     File(
       '${folder.path}/$name-${Platform.environment['STUDIO_APPEARANCE'] ?? 'light'}.png',
     ).writeAsBytesSync(bytes!.buffer.asUint8List());
@@ -185,15 +233,29 @@ Future<void> _pump(
   _Auto auto, {
   double scale = 1,
   TagWikiRepository? wiki,
+  _Tags? catalog,
+  Locale locale = const Locale('zh'),
+  bool chrome = false,
 }) async {
   final names = _Names();
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         autoTagTranslationProvider.overrideWith((_) => auto),
-        wikiTagLinksProvider.overrideWithValue(links),
+        wikiTagLinksProvider.overrideWithValue(
+          catalog == null
+              ? links
+              : WikiTagLinks(
+                  exactLookup: (names) async => {
+                    for (final item in catalog.values)
+                      if (names.contains(item.canonicalTag))
+                        item.canonicalTag: item,
+                  },
+                  chineseLookup: (_) async => [],
+                ),
+        ),
         tagWikiRepositoryProvider.overrideWithValue(wiki ?? _Wiki()),
-        unifiedTagRepositoryProvider.overrideWith((_) => _Tags()),
+        unifiedTagRepositoryProvider.overrideWith((_) => catalog ?? _Tags()),
         tagTranslationLookupProvider.overrideWithValue(names),
         promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
         localTagExpansionServiceProvider.overrideWithValue(
@@ -208,7 +270,7 @@ Future<void> _pump(
         ),
       ],
       child: MaterialApp(
-        locale: const Locale('zh'),
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         theme: AppTheme.getTheme(
@@ -223,12 +285,69 @@ Future<void> _pump(
           ).copyWith(textScaler: TextScaler.linear(scale)),
           child: RepaintBoundary(key: boundary, child: child!),
         ),
-        home: Scaffold(body: child),
+        home: WindowChromeScope(
+          enabled: chrome,
+          child: Scaffold(body: child),
+        ),
       ),
     ),
   );
   await tester.pumpAndSettle();
 }
+
+List<CompletionCandidate> _uiTags() => [
+  for (final row in const [
+    ('1girl', '1个女孩', 6000000),
+    ('highres', '高分辨率', 5300000),
+    ('solo', '单人', 5000000),
+    ('long_hair', '长发', 4400000),
+    ('looking_at_viewer', '注视观众', 3100000),
+    ('blush', '脸红', 2900000),
+    ('smile', '微笑', 2900000),
+    ('open_mouth', '张嘴', 2400000),
+    ('blue_eyes', '蓝眼睛', 1800000),
+    ('touhou', '东方Project', 900600),
+    ('1boy', '1个男孩', 1400000),
+    ('1other', '其他角色', 100000),
+    ('2girls', '2个女孩', 1300000),
+    ('multiple_girls', '多个女孩', 1500000),
+  ])
+    CompletionCandidate(
+      canonicalTag: row.$1,
+      translation: row.$2,
+      postCount: row.$3,
+      category: row.$1 == 'touhou'
+          ? TagCategory.copyright
+          : TagCategory.general,
+      matchKind: CompletionMatchKind.englishExact,
+      sources: const {CompletionSourceKind.base},
+    ),
+];
+
+const _uiBody =
+    '一张包含一名女性角色的图片。只有可见地出现在画面中的活体角色才计入此标签。\n\n'
+    '对于仅包含单个角色的图片，请参见 [solo](wof-tag:solo)。\n\n## 示例\n\n'
+    '- [1girl](wof-tag:1girl) [solo](wof-tag:solo)\n'
+    '- [1girl](wof-tag:1girl) 与 [1boy](wof-tag:1boy)\n\n'
+    '## 另见\n\n- [1boy](wof-tag:1boy)\n- [1other](wof-tag:1other)\n'
+    '- [2girls](wof-tag:2girls)\n- [multiple girls](wof-tag:multiple_girls)';
+const _uiDirectory = WikiDirectory(
+  roots: [
+    WikiDirectoryNode(
+      label: 'Visual characteristics',
+      group: 'visual',
+      children: [
+        WikiDirectoryNode(
+          label: 'Composition',
+          group: 'composition',
+          children: [],
+        ),
+        WikiDirectoryNode(label: 'Body', group: 'body', children: []),
+      ],
+    ),
+  ],
+  groups: {},
+);
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
@@ -239,6 +358,261 @@ void main() {
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
+
+  for (final scenario in const [
+    ('2k', Size(2560, 1440), 1.0, 'zh'),
+    ('wide', Size(1720, 940), 1.0, 'zh'),
+    ('large', Size(1720, 940), 1.5, 'zh'),
+    ('middle', Size(1100, 740), 1.0, 'zh'),
+    ('compact', Size(820, 650), 1.5, 'zh'),
+    ('narrow', Size(560, 760), 1.3, 'zh'),
+    ('short', Size(1720, 420), 1.0, 'zh'),
+    ('en', Size(1720, 940), 1.0, 'en'),
+    ('ja', Size(1100, 740), 1.3, 'ja'),
+  ]) {
+    testWidgets(
+      'Wiki E/I real layout ${scenario.$1} fits text and caption footprint',
+      (tester) async {
+        tester.view.physicalSize = scenario.$2;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        await _pump(
+          tester,
+          const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+          _Auto()..bodyOverride = _uiBody,
+          catalog: _Tags(entries: _uiTags()),
+          scale: scenario.$3,
+          locale: Locale(scenario.$4),
+          chrome: true,
+        );
+        expect(tester.takeException(), isNull);
+        final copy = find.byKey(const ValueKey('wiki-copy-tag'));
+        expect(copy, findsOneWidget);
+        final rect = tester.getRect(copy);
+        expect(rect.left, greaterThanOrEqualTo(0));
+        expect(rect.right, lessThanOrEqualTo(scenario.$2.width));
+        if (scenario.$1 == '2k' || scenario.$1 == 'wide') {
+          expect(
+            find.byKey(const ValueKey('wiki-reading-rail')),
+            findsOneWidget,
+          );
+          expect(find.byKey(const ValueKey('wiki-outline-0')), findsOneWidget);
+          final row = find.byKey(const ValueKey('wiki-row-1girl'));
+          expect(tester.getSize(row).height, greaterThanOrEqualTo(60));
+          expect(
+            find.byKey(const ValueKey('wiki-row-bookmark-long_hair')),
+            findsNothing,
+          );
+        }
+        await capture(tester, 'redesign-${scenario.$1}');
+      },
+    );
+  }
+
+  testWidgets('filters reset null selections and reading rail can reopen', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1720, 940);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final catalog = _Tags();
+    await _pump(
+      tester,
+      const TagWikiScreen(directory: _uiDirectory),
+      _Auto(),
+      catalog: catalog,
+    );
+    await tester.tap(find.byKey(const ValueKey('wiki-type-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('作品').last);
+    await tester.pumpAndSettle();
+    expect(catalog.lastCategory, TagCategory.copyright);
+    await tester.tap(find.byKey(const ValueKey('wiki-type-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('全部类型').last);
+    await tester.pumpAndSettle();
+    expect(catalog.lastCategory, isNull);
+    await tester.tap(find.byKey(const ValueKey('wiki-coverage-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('暂无释义').last);
+    await tester.pumpAndSettle();
+    expect(catalog.lastCoverage, isFalse);
+    await tester.tap(find.byKey(const ValueKey('wiki-coverage-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('全部释义').last);
+    await tester.pumpAndSettle();
+    expect(catalog.lastCoverage, isNull);
+    await tester.tap(find.byTooltip('隐藏'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wiki-reading-rail')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wiki-reading-rail')), findsOneWidget);
+    expect(
+      tester.getRect(find.byKey(const ValueKey('wiki-reading-rail'))).top,
+      tester.getRect(find.byKey(const ValueKey('wiki-results-pane'))).top,
+    );
+    expect(
+      tester
+          .getRect(find.byKey(const ValueKey('wiki-directory-header')))
+          .bottom,
+      tester.getRect(find.byKey(const ValueKey('wiki-results-pane'))).top - 1,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'article outline jumps to real headings and preserves linked heading navigation',
+    (tester) async {
+      tester.view.physicalSize = const Size(1720, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final body =
+          '${List.filled(45, '正文段落。').join('\n\n')}\n\n'
+          '## 示例\n\n示例正文\n\n## [blue eyes](wof-tag:blue_eyes)\n\n相关正文。';
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+        _Auto()..bodyOverride = body,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      await tester.tap(find.byKey(const ValueKey('wiki-outline-0')));
+      await tester.pumpAndSettle();
+      final bodyFinder = find.byKey(const ValueKey('wiki-body-1girl'));
+      final scroll = tester.widget<SingleChildScrollView>(
+        find
+            .ancestor(
+              of: bodyFinder,
+              matching: find.byType(SingleChildScrollView),
+            )
+            .first,
+      );
+      expect(scroll.controller!.offset, greaterThan(500));
+      await tester.tap(find.byKey(const ValueKey('wiki-outline-1')));
+      await tester.pumpAndSettle();
+      final heading = find.descendant(
+        of: bodyFinder,
+        matching: find.text('blue eyes', findRichText: true),
+      );
+      await tester.tap(heading);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('wiki-body-blue_eyes')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'scaled viewport observations follow row extent and hidden compact list clears',
+    (tester) async {
+      tester.view.physicalSize = const Size(1720, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auto = _Auto();
+      final entries = [
+        for (var i = 0; i < 50; i++)
+          CompletionCandidate(
+            canonicalTag: 'visible_$i',
+            category: TagCategory.general,
+            postCount: 100 - i,
+            matchKind: CompletionMatchKind.englishExact,
+            sources: const {CompletionSourceKind.base},
+          ),
+      ];
+      await _pump(
+        tester,
+        const TagWikiScreen(directory: _uiDirectory),
+        auto,
+        catalog: _Tags(entries: entries),
+        scale: 1.5,
+      );
+      final list = tester.widget<ListView>(
+        find.byKey(const ValueKey('wiki-results-list')),
+      );
+      list.controller!.jumpTo(list.itemExtent! * 12);
+      await tester.pumpAndSettle();
+      final visible = auto.visible.entries
+          .singleWhere((entry) => entry.key.startsWith('tag-wiki-list-'))
+          .value;
+      expect(visible.contains('visible_12'), isTrue);
+      expect(visible.contains('visible_11'), isTrue);
+      expect(visible.contains('visible_0'), isFalse);
+      expect(visible.length, lessThan(14));
+      tester.view.physicalSize = const Size(560, 760);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('wiki-results-list')), findsNothing);
+      expect(
+        auto.visible.keys.any((key) => key.startsWith('tag-wiki-list-')),
+        isFalse,
+      );
+      await tester.tap(find.byKey(const ValueKey('wiki-article-back')));
+      await tester.pumpAndSettle();
+      final row = find.byType(WikiTagRow).first;
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('wiki-results-list')), findsNothing);
+      expect(
+        auto.visible.keys.any((key) => key.startsWith('tag-wiki-list-')),
+        isFalse,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'wiki footer copies the selected tag and remains usable after a clipboard failure',
+    (tester) async {
+      tester.view.physicalSize = const Size(1400, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final copied = <String>[];
+      var reject = false;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          if (reject) throw PlatformException(code: 'clipboard-unavailable');
+          copied.add((call.arguments as Map)['text'] as String);
+        }
+        return null;
+      });
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+      _Blocks.reads = 0;
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          initialTag: 'blue_eyes',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        _Auto(),
+      );
+      expect(find.text('存为单原子块'), findsNothing);
+      final copy = find.byKey(const ValueKey('wiki-copy-tag'));
+      await tester.ensureVisible(copy);
+      await tester.tap(copy);
+      await tester.pumpAndSettle();
+      expect(copied, ['blue eyes']);
+      expect(find.text('已复制'), findsOneWidget);
+      await capture(tester, 'copy-footer');
+      reject = true;
+      await tester.tap(copy);
+      await tester.pumpAndSettle();
+      expect(copied, ['blue eyes']);
+      expect(tester.widget<OutlinedButton>(copy).onPressed, isNotNull);
+      reject = false;
+      await tester.tap(copy);
+      await tester.pumpAndSettle();
+      expect(copied, ['blue eyes', 'blue eyes']);
+      expect(_Blocks.reads, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'formatted original keeps current-article links, list layout and a compact centered preview header',
@@ -327,7 +701,7 @@ void main() {
             'Examples\n\n- [Fate Testarossa](wof-tag:fate_testarossa)\n- [Blue eyes](wof-tag:blue_eyes)';
       await _pump(
         tester,
-        TagWikiScreen(
+        const TagWikiScreen(
           initialTag: 'fate_testarossa',
           directory: WikiDirectory(roots: [], groups: {}),
         ),

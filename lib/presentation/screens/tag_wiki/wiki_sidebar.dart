@@ -27,12 +27,14 @@ class WikiSidebar extends StatelessWidget {
     required this.bookmarks,
     required this.selection,
     required this.onSelect,
+    this.width = 216,
   });
 
   final WikiDirectory directory;
   final WikiBookmarkStore bookmarks;
   final WikiScope selection;
   final ValueChanged<WikiScope> onSelect;
+  final double width;
 
   Future<void> _create(BuildContext context, {String? parentId}) async {
     final name = await ThemedInputDialog.show(
@@ -209,11 +211,11 @@ class WikiSidebar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
       child: Material(
         color: selected
-            ? scheme.primaryContainer.withValues(alpha: .55)
+            ? scheme.onSurface.withValues(alpha: .065)
             : Colors.transparent,
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(4),
         child: InkWell(
-          borderRadius: BorderRadius.circular(7),
+          borderRadius: BorderRadius.circular(4),
           onTap: onTap,
           child: SizedBox(
             height: 36,
@@ -261,101 +263,116 @@ class WikiSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      width: 242,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(right: BorderSide(color: theme.dividerColor)),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 56,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
+    return Material(
+      color: theme.colorScheme.surface,
+      child: Container(
+        width: width,
+        decoration: BoxDecoration(
+          border: Border(right: BorderSide(color: theme.dividerColor)),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              key: const ValueKey('wiki-directory-header'),
+              height: 62,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Icon(
+                        Icons.menu_book_outlined,
+                        size: 19,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        context.l10n.wiki_title,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: context.l10n.wiki_newCollection,
+                      icon: const Icon(
+                        Icons.create_new_folder_outlined,
+                        size: 19,
+                      ),
+                      onPressed: () => _create(context),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView(
                 children: [
-                  const Icon(Icons.menu_book_outlined, size: 19),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      context.l10n.wiki_title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                  const SizedBox(height: 9),
+                  _row(
+                    context,
+                    icon: Icons.library_books_outlined,
+                    label: context.l10n.wiki_allTags,
+                    selected: selection.kind == WikiScopeKind.all,
+                    onTap: () => onSelect(
+                      WikiScope(
+                        WikiScopeKind.all,
+                        null,
+                        context.l10n.wiki_allTags,
                       ),
                     ),
                   ),
-                  IconButton(
-                    tooltip: context.l10n.wiki_newCollection,
-                    icon: const Icon(
-                      Icons.create_new_folder_outlined,
-                      size: 19,
+                  _row(
+                    context,
+                    icon: Icons.bookmark_outline,
+                    label: context.l10n.wiki_bookmarks,
+                    count: bookmarks.bookmarkCount,
+                    selected: selection.kind == WikiScopeKind.bookmarks,
+                    onTap: () => onSelect(
+                      WikiScope(
+                        WikiScopeKind.bookmarks,
+                        null,
+                        context.l10n.wiki_bookmarks,
+                      ),
                     ),
-                    onPressed: () => _create(context),
                   ),
+                  for (final item in bookmarks.childrenOf(null))
+                    _collection(context, item, 1),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 9),
+                    child: Divider(height: 1),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(17, 0, 8, 7),
+                    child: Text(
+                      context.l10n.wiki_officialDirectory,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  for (var index = 0; index < directory.roots.length; index++)
+                    _directoryNode(
+                      context,
+                      directory.roots[index],
+                      'root-$index',
+                      0,
+                    ),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: ListView(
-              children: [
-                const SizedBox(height: 9),
-                _row(
-                  context,
-                  icon: Icons.library_books_outlined,
-                  label: context.l10n.wiki_allTags,
-                  selected: selection.kind == WikiScopeKind.all,
-                  onTap: () => onSelect(
-                    WikiScope(
-                      WikiScopeKind.all,
-                      null,
-                      context.l10n.wiki_allTags,
-                    ),
-                  ),
-                ),
-                _row(
-                  context,
-                  icon: Icons.bookmark_outline,
-                  label: context.l10n.wiki_bookmarks,
-                  count: bookmarks.bookmarkCount,
-                  selected: selection.kind == WikiScopeKind.bookmarks,
-                  onTap: () => onSelect(
-                    WikiScope(
-                      WikiScopeKind.bookmarks,
-                      null,
-                      context.l10n.wiki_bookmarks,
-                    ),
-                  ),
-                ),
-                for (final item in bookmarks.childrenOf(null))
-                  _collection(context, item, 1),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 9),
-                  child: Divider(height: 1),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(17, 0, 8, 7),
-                  child: Text(
-                    context.l10n.wiki_officialDirectory,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                for (var index = 0; index < directory.roots.length; index++)
-                  _directoryNode(
-                    context,
-                    directory.roots[index],
-                    'root-$index',
-                    0,
-                  ),
-                const SizedBox(height: 12),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
