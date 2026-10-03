@@ -32,6 +32,7 @@ class WikiSidebar extends StatelessWidget {
     required this.selection,
     required this.onSelect,
     this.width = 216,
+    this.headerHeight = 62,
   });
 
   final WikiDirectory directory;
@@ -39,6 +40,7 @@ class WikiSidebar extends StatelessWidget {
   final WikiScope selection;
   final ValueChanged<WikiScope> onSelect;
   final double width;
+  final double headerHeight;
 
   Future<void> _create(BuildContext context, {String? parentId}) async {
     final name = await ThemedInputDialog.show(
@@ -280,30 +282,35 @@ class WikiSidebar extends StatelessWidget {
           children: [
             SizedBox(
               key: const ValueKey('wiki-directory-header'),
-              height: 62,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    const _WikiTitleMark(),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        context.l10n.wiki_title,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+              height: headerHeight,
+              child: OverflowBox(
+                alignment: Alignment.topCenter,
+                minHeight: 62,
+                maxHeight: 62,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      const _WikiTitleMark(),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          context.l10n.wiki_title,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: context.l10n.wiki_newCollection,
-                      icon: const Icon(
-                        Icons.create_new_folder_outlined,
-                        size: 19,
+                      IconButton(
+                        tooltip: context.l10n.wiki_newCollection,
+                        icon: const Icon(
+                          Icons.create_new_folder_outlined,
+                          size: 19,
+                        ),
+                        onPressed: () => _create(context),
                       ),
-                      onPressed: () => _create(context),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

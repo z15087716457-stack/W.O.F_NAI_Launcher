@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +18,7 @@ import '../../../core/wiki/wiki_bookmark_store.dart';
 import '../../../core/wiki/wiki_directory.dart';
 import '../../providers/data_source_cache_provider.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
+import '../../widgets/autocomplete/tag_category_visuals.dart';
 import 'wiki_sidebar.dart';
 import 'wiki_tag_row.dart';
 import 'wiki_article_outline.dart';
@@ -110,6 +112,9 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   List<WikiArticleHeading> _headings = [];
   final _articleStart = GlobalKey();
   final _articleViewport = GlobalKey();
+  final _toolbarKey = GlobalKey();
+  double _toolbarHeight = 63;
+  bool _headerScheduled = false;
   GlobalKey? _activeOutline;
   bool _outlineScheduled = false;
   bool _wideArticle = false;
@@ -562,6 +567,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   Widget build(BuildContext context) {
     ref.watch(autoTagTranslationProvider);
     _scheduleVisibleUpdate();
+    _scheduleHeaderUpdate();
     final directory = _directory;
     if (directory == null || _scope == null) {
       return Center(
@@ -584,6 +590,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           children: [
             if (!_compactNavigation)
               WikiSidebar(
+                headerHeight: _toolbarHeight - 1,
                 width: 216.0 * scale.clamp(1, 1.12),
                 directory: directory,
                 bookmarks: bookmarks,
@@ -713,6 +720,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       onChanged: (_) => _queueSearch(),
     );
     return WindowHeader(
+      key: _toolbarKey,
       decoration: BoxDecoration(
         color: scheme.surface,
         border: Border(bottom: BorderSide(color: theme.dividerColor)),
@@ -763,17 +771,17 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                   ),
                 ),
               ),
+              if (_search.text.isNotEmpty && _scope?.kind != WikiScopeKind.all)
+                _toolbarChoice(
+                  value: _searchAll,
+                  label: _searchAll
+                      ? context.l10n.wiki_scopeAll
+                      : context.l10n.wiki_scopeCurrent,
+                  onTap: () => _changeFilter(() => _searchAll = !_searchAll),
+                ),
               _dataMenu(),
             ],
           ),
-          if (_search.text.isNotEmpty && _scope?.kind != WikiScopeKind.all)
-            _toolbarChoice(
-              value: _searchAll,
-              label: _searchAll
-                  ? context.l10n.wiki_scopeAll
-                  : context.l10n.wiki_scopeCurrent,
-              onTap: () => _changeFilter(() => _searchAll = !_searchAll),
-            ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -875,6 +883,13 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     required String label,
     required VoidCallback onTap,
   }) => TextButton.icon(
+    key: const ValueKey('wiki-search-scope'),
+    style: TextButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      minimumSize: const Size(0, 28),
+      visualDensity: VisualDensity.standard,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    ),
     onPressed: onTap,
     icon: Icon(value ? Icons.public : Icons.folder_outlined, size: 15),
     label: Text(label, style: const TextStyle(fontSize: 11.5)),
@@ -1086,14 +1101,19 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.label_outline,
+                TagCategoryVisuals.icon(candidate.category),
+                key: const ValueKey('wiki-article-category-icon'),
                 size: 14,
-                color: scheme.onSurfaceVariant,
+                color: TagCategoryVisuals.color(context, candidate.category),
               ),
               const SizedBox(width: 4),
               Text(
                 _categoryName(candidate.category),
-                style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+                key: const ValueKey('wiki-article-category-label'),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: TagCategoryVisuals.color(context, candidate.category),
+                ),
               ),
             ],
           ),
@@ -1272,6 +1292,39 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     return _headings;
   }
 
+  void _scheduleHeaderUpdate() {
+    if (_headerScheduled) return;
+    _headerScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _headerScheduled = false;
+      if (!mounted || _compactNavigation) return;
+      final render = _toolbarKey.currentContext?.findRenderObject();
+      if (render is RenderBox &&
+          render.hasSize &&
+          (render.size.height - _toolbarHeight).abs() > .1) {
+        setState(() => _toolbarHeight = render.size.height);
+      }
+    });
+  }
+
+  void _jumpToOutline(GlobalKey anchor) {
+    if (!_articleScroll.hasClients) return;
+    if (anchor == _articleStart) {
+      _articleScroll.jumpTo(0);
+      return;
+    }
+    final target = anchor.currentContext?.findRenderObject();
+    if (target == null || !target.attached) return;
+    final viewport = RenderAbstractViewport.of(target);
+    // Use the heading itself and a fixed inset, independent of window height.
+    // The scroll tracker uses 28px, so a clicked heading is always included.
+    final offset = viewport.getOffsetToReveal(target, 0).offset - 8;
+    _articleScroll.jumpTo(
+      offset.clamp(0, _articleScroll.position.maxScrollExtent),
+    );
+    _scheduleOutlineUpdate();
+  }
+
   void _scheduleOutlineUpdate() {
     if (_outlineScheduled) return;
     _outlineScheduled = true;
@@ -1384,10 +1437,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         minimumSize: const Size(0, 32),
         visualDensity: VisualDensity.compact,
       ),
-      onPressed: () {
-        final target = anchor.currentContext;
-        if (target != null) Scrollable.ensureVisible(target, alignment: .03);
-      },
+      onPressed: () => _jumpToOutline(anchor),
       child: Row(
         children: [
           Container(
@@ -1490,22 +1540,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                 ),
                               ),
                             ),
-                            if (translated != null)
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: WikiArticleActions(
-                                  tag: tag,
-                                  surface: _articleSurface,
-                                  showTranslation: _showTranslation,
-                                  onToggle: () {
-                                    setState(
-                                      () =>
-                                          _showTranslation = !_showTranslation,
-                                    );
-                                    _saveReadingSettings();
-                                  },
-                                ),
-                              ),
                             if (_showTranslation &&
                                 translated == null &&
                                 article?.body.trim().isNotEmpty == true)
@@ -1521,13 +1555,63 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                 ),
                               ),
                             const SizedBox(height: 26),
-                            if (article != null && article.sourceUrl.isNotEmpty)
-                              TextButton.icon(
-                                icon: const Icon(Icons.open_in_new, size: 15),
-                                label: Text(context.l10n.wiki_source),
-                                onPressed: () =>
-                                    launchUrl(Uri.parse(article.sourceUrl)),
+                            SizedBox(
+                              width: double.infinity,
+                              child: Wrap(
+                                key: const ValueKey('wiki-article-footer'),
+                                alignment: article?.sourceUrl.isNotEmpty == true
+                                    ? WrapAlignment.spaceBetween
+                                    : WrapAlignment.end,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 12,
+                                runSpacing: 8,
+                                children: [
+                                  if (article != null &&
+                                      article.sourceUrl.isNotEmpty)
+                                    TextButton.icon(
+                                      key: const ValueKey(
+                                        'wiki-article-source',
+                                      ),
+                                      icon: const Icon(
+                                        Icons.open_in_new,
+                                        size: 17,
+                                      ),
+                                      label: Text(context.l10n.wiki_source),
+                                      style: TextButton.styleFrom(
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium
+                                            ?.copyWith(fontSize: 14),
+                                        minimumSize: const Size(0, 32),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 6,
+                                        ),
+                                        visualDensity: VisualDensity.standard,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      onPressed: () => launchUrl(
+                                        Uri.parse(article.sourceUrl),
+                                      ),
+                                    ),
+                                  if (translated != null)
+                                    WikiArticleActions(
+                                      compact: false,
+                                      tag: tag,
+                                      surface: _articleSurface,
+                                      showTranslation: _showTranslation,
+                                      onToggle: () {
+                                        setState(
+                                          () => _showTranslation =
+                                              !_showTranslation,
+                                        );
+                                        _saveReadingSettings();
+                                      },
+                                    ),
+                                ],
                               ),
+                            ),
                             const SizedBox(height: 10),
                           ],
                         );

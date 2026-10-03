@@ -37,11 +37,13 @@ class WikiArticleActions extends StatelessWidget {
     required this.surface,
     required this.showTranslation,
     required this.onToggle,
+    this.compact = true,
   });
 
   final String tag, surface;
   final bool showTranslation;
   final VoidCallback onToggle;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) => Wrap(
@@ -59,35 +61,40 @@ class WikiArticleActions extends StatelessWidget {
         child: TextButton.icon(
           key: ValueKey('wiki-reading-toggle-$tag'),
           onPressed: onToggle,
-          style: _wikiActionStyle(context),
+          style: _wikiActionStyle(context, compact: compact),
           icon: showTranslation
-              ? const TranslationIcon(size: 14)
-              : const Icon(Icons.subject, size: 14),
+              ? Icon(Icons.translate, size: compact ? 14 : 17)
+              : Icon(Icons.subject, size: compact ? 14 : 17),
           label: Text(wikiReadingStateLabel(context, showTranslation)),
         ),
       ),
-      WikiRetranslateButton(tag: tag, surface: surface),
+      WikiRetranslateButton(tag: tag, surface: surface, compact: compact),
     ],
   );
 }
 
-ButtonStyle _wikiActionStyle(BuildContext context) => TextButton.styleFrom(
-  foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
-  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-  minimumSize: const Size(0, 28),
-  visualDensity: VisualDensity.compact,
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  textStyle: Theme.of(context).textTheme.labelSmall,
-);
+ButtonStyle _wikiActionStyle(BuildContext context, {bool compact = true}) =>
+    TextButton.styleFrom(
+      foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: compact ? 4 : 6),
+      minimumSize: Size(0, compact ? 28 : 32),
+      visualDensity: compact ? VisualDensity.compact : VisualDensity.standard,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      textStyle: compact
+          ? Theme.of(context).textTheme.labelSmall
+          : Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 14),
+    );
 
 class WikiRetranslateButton extends ConsumerWidget {
   const WikiRetranslateButton({
     super.key,
     required this.tag,
     required this.surface,
+    this.compact = true,
   });
   final String tag;
   final String surface;
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -108,10 +115,10 @@ class WikiRetranslateButton extends ConsumerWidget {
         onPressed: busy
             ? null
             : () => translation.retranslateWiki(surface: surface, tag: tag),
-        style: _wikiActionStyle(context),
+        style: _wikiActionStyle(context, compact: compact),
         icon: busy
-            ? const TranslationIcon(size: 14, busy: true)
-            : const Icon(Icons.refresh, size: 14),
+            ? TranslationIcon(size: compact ? 14 : 17, busy: true)
+            : Icon(Icons.refresh, size: compact ? 14 : 17),
         label: Text(label),
       ),
     );

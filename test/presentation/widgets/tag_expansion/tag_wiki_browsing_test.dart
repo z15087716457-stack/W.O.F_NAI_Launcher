@@ -30,6 +30,7 @@ import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
 import 'package:nai_launcher/presentation/widgets/autocomplete/tag_candidate_title.dart';
+import 'package:nai_launcher/presentation/widgets/autocomplete/tag_category_visuals.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -225,12 +226,15 @@ Future<void> capture(WidgetTester tester, String name) async {
     final redesign = Platform.environment['CAPTURE_WIKI_REDESIGN'] == '1';
     final polish = Platform.environment['CAPTURE_WIKI_POLISH'] == '1';
     final separators = Platform.environment['CAPTURE_WIKI_SEPARATORS'] == '1';
+    final feedback = Platform.environment['CAPTURE_WIKI_FEEDBACK'] == '1';
     final image = await render.toImage(
-      pixelRatio: redesign || polish || separators ? 1 : 2,
+      pixelRatio: redesign || polish || separators || feedback ? 1 : 2,
     );
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final folder = Directory(
-      separators
+      feedback
+          ? '.dart_tool/wiki-feedback-captures'
+          : separators
           ? '.dart_tool/wiki-separators-captures'
           : polish
           ? '.dart_tool/wiki-polish-captures'
@@ -762,15 +766,186 @@ void main() {
   });
 
   testWidgets(
+    'Wiki feedback toolbar, category and footer align without hover',
+    (tester) async {
+      tester.view.physicalSize = const Size(1720, 940);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final wiki = _Wiki()
+        ..pending['touhou'] = Future.value(
+          const TagWikiEntry(
+            tag: 'touhou',
+            body: _uiBody,
+            sourceUrl: 'https://danbooru.donmai.us/wiki_pages/touhou',
+          ),
+        );
+      await _pump(
+        tester,
+        TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(
+            roots: _uiDirectory.roots,
+            groups: const {
+              'visual': WikiDirectoryGroup(
+                title: 'Visual characteristics',
+                members: ['touhou', '1girl'],
+                children: [],
+                sourceUrl: '',
+              ),
+            },
+          ),
+        ),
+        _Auto()..bodyOverride = _uiBody,
+        catalog: _Tags(entries: _uiTags()),
+        wiki: wiki,
+        chrome: true,
+      );
+      await tester.tap(find.text('视觉特征').first);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('wiki-search')),
+        'touhou',
+      );
+      await tester.pumpAndSettle();
+      final scope = find.byKey(const ValueKey('wiki-search-scope'));
+      final pane = find.byKey(const ValueKey('wiki-results-pane'));
+      final label = find.descendant(of: pane, matching: find.text('视觉特征'));
+      expect(
+        tester.getCenter(scope).dy,
+        closeTo(tester.getCenter(label).dy, .1),
+      );
+      final scopeRect = tester.getRect(scope);
+      final mouse = await tester.createGesture(
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      await mouse.addPointer(location: Offset.zero);
+      await mouse.moveTo(tester.getCenter(scope));
+      await tester.pumpAndSettle();
+      expect(tester.getRect(scope), scopeRect);
+      await capture(tester, 'scope-hover');
+      await mouse.removePointer();
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is WikiTagRow && widget.candidate.canonicalTag == 'touhou',
+        ),
+      );
+      await tester.pumpAndSettle();
+      final icon = tester.widget<Icon>(
+        find.byKey(const ValueKey('wiki-article-category-icon')),
+      );
+      final category = find.byKey(
+        const ValueKey('wiki-article-category-label'),
+      );
+      final expectedColor = TagCategoryVisuals.color(
+        tester.element(category),
+        TagCategory.copyright,
+      );
+      expect(icon.icon, Icons.copyright_rounded);
+      expect(icon.color, expectedColor);
+      expect(tester.widget<Text>(category).style!.color, expectedColor);
+      final source = find.byKey(const ValueKey('wiki-article-source'));
+      final toggle = find.byKey(const ValueKey('wiki-reading-toggle-touhou'));
+      final retry = find.byKey(const ValueKey('wiki-retranslate-touhou'));
+      expect(
+        tester.getCenter(source).dy,
+        closeTo(tester.getCenter(toggle).dy, .1),
+      );
+      expect(
+        tester.getCenter(source).dy,
+        closeTo(tester.getCenter(retry).dy, .1),
+      );
+      expect(tester.getSize(toggle).height, greaterThanOrEqualTo(32));
+      expect(
+        find.descendant(of: toggle, matching: find.byIcon(Icons.translate)),
+        findsOneWidget,
+      );
+      expect(
+        tester
+                .getRect(find.byKey(const ValueKey('wiki-directory-header')))
+                .bottom +
+            1,
+        closeTo(tester.getRect(find.byType(WindowHeader)).bottom, .1),
+      );
+      // The accepted mark stays at its original center; only the row ends move.
+      expect(
+        tester.getCenter(find.byKey(const ValueKey('wiki-brand-mark'))).dy,
+        31,
+      );
+      await capture(tester, 'category-footer-header');
+      await tester.tap(scope);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: scope, matching: find.byIcon(Icons.public)),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'first completed Wiki translation immediately binds new outline anchors',
+    (tester) async {
+      tester.view.physicalSize = const Size(2560, 1440);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final body =
+          '简介。\n\n## 示例\n\n'
+          '${List.filled(45, '译文示例。').join('\n\n')}\n\n'
+          '## 音乐\n\n${List.filled(45, '音乐资料。').join('\n\n')}';
+      final auto = _Auto()
+        ..cachedBodies = false
+        ..bodyOverride = body;
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+        auto,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      expect(find.byKey(const ValueKey('wiki-outline-1')), findsNothing);
+      auto.cachedBodies = true;
+      await auto.setEnabled(true);
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('wiki-outline-1')));
+      await tester.pumpAndSettle();
+      final outline = find.byKey(const ValueKey('wiki-outline-1'));
+      expect(
+        tester.widget<TextButton>(outline).style!.foregroundColor!.resolve({}),
+        Theme.of(tester.element(outline)).colorScheme.primary,
+      );
+      final linked = tester.widget<WikiLinkedBody>(
+        find.byKey(const ValueKey('wiki-body-1girl')),
+      );
+      final viewport = find
+          .ancestor(
+            of: find.byKey(const ValueKey('wiki-body-1girl')),
+            matching: find.byType(SingleChildScrollView),
+          )
+          .first;
+      expect(
+        tester.getRect(find.byKey(linked.headingAnchors![1])).top,
+        closeTo(tester.getRect(viewport).top + 8, .5),
+      );
+      await capture(tester, 'translation-first-outline');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'article outline jumps to real headings and preserves linked heading navigation',
     (tester) async {
-      tester.view.physicalSize = const Size(1720, 800);
+      tester.view.physicalSize = const Size(2560, 1440);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       final body =
           '${List.filled(45, '正文段落。').join('\n\n')}\n\n'
-          '## 示例\n\n示例正文\n\n## [blue eyes](wof-tag:blue_eyes)\n\n相关正文。';
+          '## 示例\n\n${List.filled(20, '示例正文。').join('\n\n')}\n\n'
+          '## [blue eyes](wof-tag:blue_eyes)\n\n'
+          '${List.filled(35, '相关正文。').join('\n\n')}';
       await _pump(
         tester,
         const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
@@ -779,6 +954,15 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('wiki-outline-0')));
       await tester.pumpAndSettle();
+      final firstOutline = find.byKey(const ValueKey('wiki-outline-0'));
+      expect(
+        tester
+            .widget<TextButton>(firstOutline)
+            .style!
+            .foregroundColor!
+            .resolve({}),
+        Theme.of(tester.element(firstOutline)).colorScheme.primary,
+      );
       final bodyFinder = find.byKey(const ValueKey('wiki-body-1girl'));
       final scroll = tester.widget<SingleChildScrollView>(
         find
@@ -789,7 +973,36 @@ void main() {
             .first,
       );
       expect(scroll.controller!.offset, greaterThan(500));
+      final firstOffset = scroll.controller!.offset;
+      // Resizing and reading settings reparse Markdown without changing the tag.
+      tester.view.physicalSize = const Size(1780, 840);
+      await tester.pumpAndSettle();
+      final sizeChoice = tester.widget<SegmentedButton<double>>(
+        find.byKey(const ValueKey('wiki-text-size')),
+      );
+      sizeChoice.onSelectionChanged!({17});
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('wiki-outline-1')));
+      await tester.pumpAndSettle();
+      expect(scroll.controller!.offset, greaterThan(firstOffset + 400));
+      final secondOutline = find.byKey(const ValueKey('wiki-outline-1'));
+      expect(
+        tester
+            .widget<TextButton>(secondOutline)
+            .style!
+            .foregroundColor!
+            .resolve({}),
+        Theme.of(tester.element(secondOutline)).colorScheme.primary,
+      );
+      await capture(tester, 'outline-click-2k');
+      scroll.controller!.jumpTo(0);
+      await tester.pumpAndSettle();
+      final intro = find.byKey(const ValueKey('wiki-outline-intro'));
+      expect(
+        tester.widget<TextButton>(intro).style!.foregroundColor!.resolve({}),
+        Theme.of(tester.element(intro)).colorScheme.primary,
+      );
+      await tester.tap(secondOutline);
       await tester.pumpAndSettle();
       final heading = find.descendant(
         of: bodyFinder,

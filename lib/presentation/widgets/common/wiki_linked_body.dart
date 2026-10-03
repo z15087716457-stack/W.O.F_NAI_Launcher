@@ -61,6 +61,9 @@ class WikiLinkedBody extends ConsumerWidget {
             ? null
             : _WikiHeadingBuilder(headingAnchors!, sheet, onTapLink);
         return MarkdownBody(
+          key: headingAnchors?.isNotEmpty == true
+              ? ObjectKey(headingAnchors!.first)
+              : null,
           data: document?.markdown ?? WikiTagLinks.withoutLocalLinks(body),
           selectable: true,
           fitContent: false,
@@ -91,12 +94,15 @@ class _WikiHeadingBuilder extends MarkdownElementBuilder {
     TextStyle? preferredStyle,
     TextStyle? parentStyle,
   ) {
-    if (index >= anchors.length) return null;
+    if (anchors.isEmpty) return null;
+    // Markdown may reparse with the same builder after dependencies change.
+    // Each complete traversal starts a new sequence of the same headings.
+    if (index == anchors.length) index = 0;
     final anchor = anchors[index++];
     return Padding(
-      key: anchor,
       padding: const EdgeInsets.only(top: 12, bottom: 2),
       child: MarkdownBody(
+        key: anchor,
         data:
             '${'#' * int.parse(element.tag.substring(1))} ${_inlineMarkdown(element.children ?? [])}',
         selectable: true,
