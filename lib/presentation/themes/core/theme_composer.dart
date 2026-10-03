@@ -24,6 +24,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/themes/core/divider_module.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_modules.dart';
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:nai_launcher/presentation/themes/theme_extension.dart';
 
 /// Composes multiple theme modules into a complete [ThemeData].
@@ -107,7 +108,7 @@ class ThemeComposer {
       colorScheme: colorScheme,
       textTheme: textTheme,
       fontFamily: typography.bodyFontFamily,
-      fontFamilyFallback: const ['HarmonyOS Sans SC'],
+      fontFamilyFallback: StudioTypography.fallback,
 
       // Icon theme - ensures icons have good visibility by default
       // Uses onSurface for proper contrast on surface backgrounds

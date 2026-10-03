@@ -10,7 +10,8 @@ abstract final class StudioTypography {
   static const pixelSquare = 'Geist Pixel Square';
   static const pixelCircle = 'Geist Pixel Circle';
   static const cjk = 'HarmonyOS Sans SC';
-  static const fallback = [cjk];
+  static const korean = 'Pretendard';
+  static const fallback = [cjk, korean];
 
   static const body = TextStyle(fontFamily: sans, fontFamilyFallback: fallback);
 

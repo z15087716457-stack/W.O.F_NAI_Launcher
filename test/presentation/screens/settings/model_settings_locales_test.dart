@@ -33,7 +33,7 @@ void main() {
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
 
-  for (final code in ['en', 'ja', 'zh_TW']) {
+  for (final code in ['en', 'ja', 'zh_TW', 'ko']) {
     for (final layout in [
       (const Size(1200, 820), 1.1, 'regular'),
       (const Size(960, 820), 1.3, 'compact'),
@@ -62,7 +62,7 @@ void main() {
           for (final (index, tab) in tabs.indexed) {
             await harness.tapVisible(tester, find.text(tab).first);
             expect(tester.takeException(), isNull, reason: tab);
-            if (code == 'en') {
+            if (code == 'en' || code == 'ko') {
               expect(_visibleHanText(tester), isEmpty, reason: tab);
             }
             if (code == 'zh_TW') {
@@ -84,7 +84,9 @@ void main() {
           );
           expect(find.text(l10n.modelProvider_pickerTitle), findsOneWidget);
           expect(tester.takeException(), isNull);
-          if (code == 'en') expect(_visibleHanText(tester), isEmpty);
+          if (code == 'en' || code == 'ko') {
+            expect(_visibleHanText(tester), isEmpty);
+          }
           if (code == 'zh_TW') {
             expect(simplifiedOnlyTexts(_visibleHanText(tester)), isEmpty);
           }

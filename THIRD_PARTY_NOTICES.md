@@ -48,6 +48,15 @@ only at development time to generate the Traditional Chinese (Taiwan) interface
 text and are not packaged with the application. OpenCC is licensed under the
 Apache License 2.0; the full license text is in `tool/l10n/opencc/LICENSE`.
 
+## Pretendard
+
+`assets/fonts/Pretendard-*.otf` are the unmodified Regular, Medium, SemiBold
+and Bold static fonts from [Pretendard](https://github.com/orioncactus/pretendard)
+1.3.9, bundled as the Korean fallback after HarmonyOS Sans SC. Pretendard is
+Copyright (c) 2021 Kil Hyung-jin, with Reserved Font Name Pretendard, and is
+licensed under the SIL Open Font License 1.1; the full text is in
+`assets/licenses/Pretendard-OFL.txt` and on the app's license page.
+
 ## Pica
 
 This project contains a pure Dart port of the Lanczos3 resize pipeline from

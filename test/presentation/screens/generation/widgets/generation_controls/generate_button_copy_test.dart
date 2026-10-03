@@ -4,16 +4,8 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/generation_
 void main() {
   group('GenerateButtonCopy.pick', () {
     test('同一种子结果稳定，彩蛋种子与普通种子文案不同', () {
-      final a = GenerateButtonCopy.pick(
-        seed: 10,
-        count: 2,
-        languageCode: 'zh',
-      );
-      final b = GenerateButtonCopy.pick(
-        seed: 10,
-        count: 2,
-        languageCode: 'zh',
-      );
+      final a = GenerateButtonCopy.pick(seed: 10, count: 2, languageCode: 'zh');
+      final b = GenerateButtonCopy.pick(seed: 10, count: 2, languageCode: 'zh');
       final normal = GenerateButtonCopy.pick(
         seed: 3,
         count: 2,
@@ -27,42 +19,30 @@ void main() {
     test('多数种子回退官方式默认文案', () {
       for (final seed in [1, 2, 3, 4, 6, 7, 8, 9]) {
         expect(
-          GenerateButtonCopy.pick(
-            seed: seed,
-            count: 2,
-            languageCode: 'zh',
-          ),
+          GenerateButtonCopy.pick(seed: seed, count: 2, languageCode: 'zh'),
           '生成 2 张图片',
         );
       }
       expect(
-        GenerateButtonCopy.pick(
-          seed: 3,
-          count: 1,
-          languageCode: 'en',
-        ),
+        GenerateButtonCopy.pick(seed: 3, count: 1, languageCode: 'en'),
         'Generate 1 Image',
       );
       expect(
-        GenerateButtonCopy.pick(
-          seed: 3,
-          count: 5,
-          languageCode: 'en',
-        ),
+        GenerateButtonCopy.pick(seed: 3, count: 5, languageCode: 'en'),
         'Generate 5 Images',
       );
       expect(
-        GenerateButtonCopy.pick(
-          seed: 3,
-          count: 2,
-          languageCode: 'ja',
-        ),
+        GenerateButtonCopy.pick(seed: 3, count: 2, languageCode: 'ja'),
         '2 枚生成',
+      );
+      expect(
+        GenerateButtonCopy.pick(seed: 3, count: 2, languageCode: 'ko'),
+        '이미지 2장 생성',
       );
     });
 
     test('每个数量档与语言都能产出非空文案且包含正确的数字（如适用）', () {
-      for (final lang in ['zh', 'en', 'ja', 'fr']) {
+      for (final lang in ['zh', 'en', 'ja', 'ko', 'fr']) {
         for (var count = 1; count <= 120; count++) {
           for (var seed = 1; seed <= 12; seed++) {
             final text = GenerateButtonCopy.pick(
@@ -109,10 +89,7 @@ void main() {
     });
 
     test('count 为 1 的文案池与 count 为 5 的不同', () {
-      final one = GenerateButtonCopy.debugPoolFor(
-        languageCode: 'en',
-        count: 1,
-      );
+      final one = GenerateButtonCopy.debugPoolFor(languageCode: 'en', count: 1);
       final five = GenerateButtonCopy.debugPoolFor(
         languageCode: 'en',
         count: 5,

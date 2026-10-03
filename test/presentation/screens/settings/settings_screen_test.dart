@@ -602,6 +602,7 @@ void main() {
             Locale('en'),
             Locale('ja'),
             Locale('zh', 'TW'),
+            Locale('ko'),
           ]) ...[(1280.0, 1.0, locale), (360.0, 1.3, locale)],
         ]) {
           final width = layout.$1, scale = layout.$2, locale = layout.$3;
@@ -772,11 +773,12 @@ void main() {
               reason:
                   '${destination.name}/${width.toInt()}/$scale/${brightness.name}$suffix',
             );
-            if (locale.languageCode == 'en') {
+            if (const {'en', 'ko'}.contains(locale.languageCode)) {
               expect(
                 _visibleHanText(tester),
                 isEmpty,
-                reason: 'English ${destination.name}/${width.toInt()}',
+                reason:
+                    '${locale.languageCode} ${destination.name}/${width.toInt()}',
               );
             }
             if (traditional) {

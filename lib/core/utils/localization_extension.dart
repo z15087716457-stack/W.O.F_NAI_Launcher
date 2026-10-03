@@ -25,6 +25,7 @@ extension LocalizationExtension on BuildContext {
     AppLanguage.simplifiedChinese => 'zh',
     AppLanguage.traditionalChinese => 'zh_TW',
     AppLanguage.japanese => 'ja',
+    AppLanguage.korean => 'ko',
     AppLanguage.english => 'en',
   };
 

@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.text('语言'));
     await tester.pumpAndSettle();
     final dialog = find.byType(Dialog);
-    for (final name in ['简体中文', '繁體中文', 'English', '日本語']) {
+    for (final name in ['简体中文', '繁體中文', 'English', '日本語', '한국어']) {
       expect(
         find.descendant(of: dialog, matching: find.text(name)),
         findsOneWidget,
@@ -137,8 +137,9 @@ void main() {
     Locale('zh', 'TW'),
     Locale('ja'),
     Locale('en'),
+    Locale('ko'),
   ]) {
-    testWidgets('字体大小预览在 $locale 界面同时显示中日英三语', (tester) async {
+    testWidgets('字体大小预览在 $locale 界面显示多语言示例', (tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -172,7 +173,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text(locale.countryCode == 'TW' ? '光影落在畫布上。' : '光影落在画布上。'),
+        find.text(switch (locale) {
+          Locale(countryCode: 'TW') => '光影落在畫布上。',
+          Locale(languageCode: 'ko') => '빛과 그림자가 캔버스에 내려앉는다.',
+          _ => '光影落在画布上。',
+        }),
         findsOneWidget,
       );
       expect(find.text('色から物語が生まれる。'), findsOneWidget);

@@ -163,7 +163,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
               SettingsTile(
                 title: Text(context.l10n.settings_visualAssets),
                 subtitle: const Text(
-                  'Geist Sans / Mono / Pixel Line · HarmonyOS Sans SC',
+                  'Geist Sans / Mono / Pixel Line · HarmonyOS Sans SC · Pretendard',
                 ),
                 trailing: OutlinedButton(
                   key: const Key('about-view-licenses'),

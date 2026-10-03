@@ -18,7 +18,7 @@ void main() {
       english = _readArb('lib/l10n/app_en.arb');
     });
 
-    for (final locale in const ['en', 'ja', 'zh', 'zh_TW']) {
+    for (final locale in const ['en', 'ja', 'zh', 'zh_TW', 'ko']) {
       test('$locale does not contain duplicate top-level keys', () {
         final keys = _topLevelKeys('lib/l10n/app_$locale.arb');
         final counts = <String, int>{};
@@ -34,7 +34,7 @@ void main() {
       });
     }
 
-    for (final locale in const ['ja', 'zh', 'zh_TW']) {
+    for (final locale in const ['ja', 'zh', 'zh_TW', 'ko']) {
       test('$locale matches the template keys and metadata', () {
         final localized = _readArb('lib/l10n/app_$locale.arb');
 
@@ -50,6 +50,20 @@ void main() {
         }
       });
     }
+
+    test('Korean messages contain no Chinese characters or kana', () {
+      // The font-size sample deliberately shows several scripts.
+      const multilingualSamples = {'settings_fontScale_previewMedium'};
+      final korean = _readArb('lib/l10n/app_ko.arb');
+      final hanOrKana = RegExp(r'[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]');
+      final offenders = [
+        for (final key in _messageKeys(korean))
+          if (!multilingualSamples.contains(key) &&
+              hanOrKana.hasMatch(korean[key] as String))
+            key,
+      ];
+      expect(offenders, isEmpty);
+    });
 
     test('template does not contain unreferenced message keys', () {
       final references = _productionLocalizationReferences();

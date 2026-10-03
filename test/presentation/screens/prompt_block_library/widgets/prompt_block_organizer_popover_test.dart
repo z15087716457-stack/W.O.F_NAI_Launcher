@@ -211,7 +211,7 @@ void main() {
     expect(notifier.folderOrder, isNull);
   });
 
-  for (final code in ['en', 'ja', 'zh_TW']) {
+  for (final code in ['en', 'ja', 'zh_TW', 'ko']) {
     testWidgets('organizer pages follow the $code interface', (tester) async {
       // Declared last: real fonts stay loaded for the rest of the file.
       await tester.runAsync(loadStudioCaptureFonts);

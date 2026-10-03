@@ -524,6 +524,7 @@ Future<void> _bootstrapApplication() async {
   timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
   timeago.setLocaleMessages('zh_TW', timeago.ZhMessages());
   timeago.setLocaleMessages('ja', timeago.JaMessages());
+  timeago.setLocaleMessages('ko', timeago.KoMessages());
 
   // 清理过期临时文件（不阻塞启动）
   Future.microtask(() async {

@@ -18,6 +18,8 @@ void main() {
     expect(AppLanguage.fromStorage('zh-CN'), AppLanguage.simplifiedChinese);
     expect(AppLanguage.fromStorage('en'), AppLanguage.english);
     expect(AppLanguage.fromStorage('ja'), AppLanguage.japanese);
+    expect(AppLanguage.fromStorage('ko'), AppLanguage.korean);
+    expect(AppLanguage.fromStorage('ko-KR'), AppLanguage.korean);
     expect(AppLanguage.fromStorage('xx'), AppLanguage.english);
   });
 
@@ -44,6 +46,7 @@ void main() {
     expect(AppLanguage.isStorageCode('zh-Hant'), isFalse);
     expect(AppLanguage.traditionalChinese.locale.toString(), 'zh_TW');
     expect(AppLanguage.traditionalChinese.nativeName, '繁體中文');
+    expect(AppLanguage.korean.nativeName, '한국어');
   });
 
   test('curated labels use the generated Traditional table', () {
@@ -54,6 +57,7 @@ void main() {
       AppLanguage.simplifiedChinese,
       AppLanguage.english,
       AppLanguage.japanese,
+      AppLanguage.korean,
     ]) {
       expect(language.chineseLabel('发型'), '发型');
     }
@@ -81,6 +85,10 @@ void main() {
     );
     expect(
       PromptTranslationLanguage.forLocale(const Locale('ko')),
+      PromptTranslationLanguage.korean,
+    );
+    expect(
+      PromptTranslationLanguage.forInterface(AppLanguage.korean),
       PromptTranslationLanguage.korean,
     );
     expect(PromptTranslationLanguage.isCode('zh-TW'), isTrue);

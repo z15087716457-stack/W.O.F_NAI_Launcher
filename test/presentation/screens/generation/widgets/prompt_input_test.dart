@@ -368,7 +368,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final code in ['en', 'ja', 'zh_TW']) {
+  for (final code in ['en', 'ja', 'zh_TW', 'ko']) {
     testWidgets('translation menu and guide follow the $code interface', (
       tester,
     ) async {

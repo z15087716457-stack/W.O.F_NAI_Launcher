@@ -756,7 +756,12 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
-  for (final locale in const [Locale('en'), Locale('ja'), Locale('zh', 'TW')]) {
+  for (final locale in const [
+    Locale('en'),
+    Locale('ja'),
+    Locale('zh', 'TW'),
+    Locale('ko'),
+  ]) {
     for (final page in [3, 9]) {
       testWidgets(
         '${page == 3 ? 'gallery' : 'about'} wraps ${locale.toLanguageTag()} at compact enlarged size',

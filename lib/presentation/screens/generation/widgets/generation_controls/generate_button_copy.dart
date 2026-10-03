@@ -1,6 +1,6 @@
 import '../../../../../core/utils/app_language.dart';
 
-/// 生成按钮文案池（三语，全球通用梗路线；繁体沿用中文池的生成对照）
+/// 生成按钮文案池（中英日韩，全球通用梗路线；繁体沿用中文池的生成对照）
 ///
 /// 文案由 [pick] 用确定性种子选取：数量变化或一次生成结束时
 /// 外层推进种子，按钮即换上新文案；同一种子在 build 间结果稳定。
@@ -47,13 +47,15 @@ class GenerateButtonCopy {
   }
 
   /// 官方式默认文案（约 80% 显示）：英文随数量切换单复数，
-  /// 中/日无复数变化。
+  /// 中/日/韩无复数变化。
   static String normal({required int count, required String languageCode}) {
     switch (_normalize(languageCode)) {
       case 'zh':
         return _format(_zhNormal, count, _isTraditional(languageCode));
       case 'ja':
         return '$count 枚生成';
+      case 'ko':
+        return '이미지 $count장 생성';
       default:
         return count == 1 ? 'Generate 1 Image' : 'Generate $count Images';
     }
@@ -63,6 +65,7 @@ class GenerateButtonCopy {
     final code = languageCode.toLowerCase();
     if (code.startsWith('zh')) return 'zh';
     if (code.startsWith('ja')) return 'ja';
+    if (code.startsWith('ko')) return 'ko';
     return 'en';
   }
 
@@ -432,27 +435,90 @@ class GenerateButtonCopy {
     '今日の運勢：大吉',
   ];
 
+  // ------------------------------------------------------------------
+  // 한국어 풀
+  // ------------------------------------------------------------------
+
+  static const Map<int, List<String>> _koSmall = {
+    1: [
+      '딱 한 장만',
+      '단챠 한 번, 가 보자',
+      '일단 한 장',
+      '한 장으로 승부',
+      '소박하게 한 장',
+      '한 장 부탁해요',
+      '맛보기 한 장',
+      '오늘 밤은 이 한 장',
+      '혼신의 한 장',
+      '한 장만, 진짜로',
+    ],
+    2: ['두 장 중에 골라 보기', '둘 중 나은 걸로', '더블로 부탁해요', '두 장 동시 소환', '비교는 두 장부터'],
+    3: ['3연차', '세 장 세트', '세 장 한꺼번에', '트리플로 가자', '삼세판'],
+    4: ['네 장 한 번에', '4인 파티 집결', '네 장으로 화면 채우기', '4연속 생성'],
+    5: ['5연속으로 가자', '다섯 장 패키지', '한 손 가득 다섯 장', '다섯 장 주세요'],
+    6: ['여섯 장 한꺼번에', '갤러리 +6', '반 다스', '6연속'],
+    7: ['럭키 세븐', '일주일 치 배경화면', '일곱 장 풀콤보', '7연속 생성'],
+    8: ['여덟 장, 한계 돌파', '용량 주의: +8', '8연발', '문어발 여덟 장'],
+    9: ['3×3 그리드 완성', '한 장만 더 있으면 10', '아홉 장 한꺼번에', '9연속, 거의 꽉 참'],
+  };
+
+  static const List<List<String>> _koBig = [
+    [
+      '{count}장, 본격 모드',
+      'GPU가 땀을 흘린다',
+      '{count}장 연속 생성',
+      '두 자릿수 돌입',
+      '양산 준비 완료',
+    ],
+    ['양산 공장 풀가동', 'Anlas 소비 주의보', '{count}장, 공장 모드', '배치 처리 시작'],
+    ['{count}장, 도매가로', '산업 혁명 수준', '이건 더 이상 취미가 아니다', '{count}장, 봐주지 않음'],
+    [
+      '{count}장?! 화집이라도 내나요?',
+      '저장 공간 씨 안녕하세요',
+      '{count}장, 도감 완성',
+      '정말 {count}장?',
+    ],
+  ];
+
+  static const Map<int, List<String>> _koSpecial = {
+    42: ['{count}: 모든 것의 답'],
+    69: ['{count}장, 좋은 숫자'],
+    99: ['{count}장, 한 장만 더면 세 자릿수'],
+    100: ['딱 {count}장, 깔끔하게'],
+  };
+
+  static const List<String> _koRare = [
+    'SSR 확정 연출',
+    'AI 컨디션 최고래요',
+    '가챠의 신이여 굽어살피소서',
+    '오늘의 운세: 대길',
+  ];
+
   static const Map<String, Map<int, List<String>>> _smallPools = {
     'zh': _zhSmall,
     'en': _enSmall,
     'ja': _jaSmall,
+    'ko': _koSmall,
   };
 
   static const Map<String, List<List<String>>> _bigPools = {
     'zh': _zhBig,
     'en': _enBig,
     'ja': _jaBig,
+    'ko': _koBig,
   };
 
   static const Map<String, Map<int, List<String>>> _specialPool = {
     'zh': _zhSpecial,
     'en': _enSpecial,
     'ja': _jaSpecial,
+    'ko': _koSpecial,
   };
 
   static const Map<String, List<String>> _rarePool = {
     'zh': _zhRare,
     'en': _enRare,
     'ja': _jaRare,
+    'ko': _koRare,
   };
 }

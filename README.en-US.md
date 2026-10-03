@@ -231,7 +231,7 @@ nai_launcher/
 ├── lib/
 │   ├── core/               # Core features: networking, database, caching, encryption, file I/O, shortcuts, etc.
 │   ├── data/               # API clients, models, repositories, and business data services
-│   ├── l10n/               # Simplified/Traditional Chinese, English, and Japanese UI strings and generated files
+│   ├── l10n/               # Simplified/Traditional Chinese, English, Japanese, and Korean UI strings and generated files
 │   └── presentation/       # Pages, components, state management, themes, and routing
 ├── scripts/                # Build, packaging, signing, hot reload, and validation scripts
 ├── test/                   # Unit tests and widget tests
@@ -276,4 +276,4 @@ Contributions via Issues and Pull Requests are welcome. Before submitting a PR, 
 
 This project is open-source under the MIT License. See [LICENSE](LICENSE) for details. Original copyright belongs to the upstream NAI Launcher Contributors; new work in this fork is copyrighted by W.O.F (z15087716457-stack).
 
-The interface bundles Geist Sans / Mono / Pixel Line and HarmonyOS Sans SC fonts, alongside the original interface icons. Fonts retain their own licenses; see the [asset guide](tool/branding/README.md) and [license files](assets/licenses/), also available from the app’s About page.
+The interface bundles Geist Sans / Mono / Pixel Line, HarmonyOS Sans SC, and Pretendard (Korean) fonts, alongside the original interface icons. Fonts retain their own licenses; see the [asset guide](tool/branding/README.md) and [license files](assets/licenses/), also available from the app’s About page.

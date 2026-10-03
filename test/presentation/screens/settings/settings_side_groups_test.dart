@@ -487,7 +487,12 @@ void main() {
     },
   );
 
-  for (final locale in const [Locale('en'), Locale('ja'), Locale('zh', 'TW')]) {
+  for (final locale in const [
+    Locale('en'),
+    Locale('ja'),
+    Locale('zh', 'TW'),
+    Locale('ko'),
+  ]) {
     testWidgets('both grouped pages fit narrow $locale', (tester) async {
       for (final page in ['appearance', 'controls']) {
         await pump(

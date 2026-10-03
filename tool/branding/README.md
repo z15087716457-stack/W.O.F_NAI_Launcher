@@ -12,10 +12,10 @@
 
 | 用途 | 字体 |
 |---|---|
-| 正文与控件 | Geist Sans + HarmonyOS Sans SC fallback，400 / 500 / 600 / 700 |
-| 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC fallback，400 / 500 |
+| 正文与控件 | Geist Sans + HarmonyOS Sans SC + Pretendard fallback，400 / 500 / 600 / 700 |
+| 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC + Pretendard fallback，400 / 500 |
 
-`StudioTypography` 负责正文、控件与等宽数据字体，应用统一使用 Geist 深浅两套主题，共用离线 Geist / HarmonyOS 字体。显式系统 / Google 字体选择仍有效，旧默认键 `system`、空键使用应用默认组合。独立标题栏已移除，品牌展示位于登录 / 载入页和生图空画布。字体许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
+`StudioTypography` 负责正文、控件与等宽数据字体，应用统一使用 Geist 深浅两套主题，共用离线 Geist / HarmonyOS 字体；HarmonyOS Sans SC 不含韩文字母，韩文由随包的 Pretendard 1.3.9（OFL-1.1，未修改的静态 OTF 四档字重）回退显示。显式系统 / Google 字体选择仍有效，旧默认键 `system`、空键使用应用默认组合。独立标题栏已移除，品牌展示位于登录 / 载入页和生图空画布。字体许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
 
 功能图标统一使用 `lib/presentation/widgets/common/studio_icons.dart` 的 `StudioIcons`：画风探索为遗传分支，块内遗传动作为双螺旋，在线画廊为图片＋地球，提示词块为模块网格，积木悬浮窗为双凸点轻量砖块，精准参考为人物叠卡，Vibe 为方形叠卡与弯箭头；生图为画布与画笔，本地画廊为图片文件夹，统计为三级圆角柱，设置为六齿圆角齿轮。侧栏、标题、块默认图标和菜单复用对应造型；参考卡片使用下述独立功能图标。网格布局、通用文件夹、保存动作与用户自选块图标保持各自语义。
 

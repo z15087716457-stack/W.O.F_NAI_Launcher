@@ -7,6 +7,7 @@ void registerStudioAssetLicenses() {
     for (final entry in const {
       'Geist / Geist Mono / Geist Pixel': 'Geist-OFL.txt',
       'HarmonyOS Sans SC': 'HarmonyOS-Sans-LICENSE.txt',
+      'Pretendard': 'Pretendard-OFL.txt',
       'Lobe Icons (provider brand assets)': 'LobeIcons-LICENSE.txt',
     }.entries) {
       yield LicenseEntryWithLineBreaks([

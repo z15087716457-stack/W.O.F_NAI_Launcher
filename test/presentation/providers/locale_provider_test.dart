@@ -54,6 +54,6 @@ void main() {
       visited.add(storage.getLocaleCode());
     }
 
-    expect(visited, ['zh_TW', 'en', 'ja', 'zh']);
+    expect(visited, ['zh_TW', 'en', 'ja', 'ko', 'zh']);
   });
 }

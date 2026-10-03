@@ -121,7 +121,7 @@ class _SettingsFontDialogState extends ConsumerState<SettingsFontDialog> {
                       fontFamily: selected.source == FontSource.google
                           ? null
                           : selected.fontFamily,
-                      fontFamilyFallback: const [StudioTypography.cjk],
+                      fontFamilyFallback: StudioTypography.fallback,
                       height: 1.65,
                     ),
                   ),

@@ -20,6 +20,12 @@ Future<void> loadStudioCaptureFonts() async {
       'HarmonyOS_Sans_SC_Medium.ttf',
       'HarmonyOS_Sans_SC_Bold.ttf',
     ],
+    'Pretendard': [
+      'Pretendard-Regular.otf',
+      'Pretendard-Medium.otf',
+      'Pretendard-SemiBold.otf',
+      'Pretendard-Bold.otf',
+    ],
   }.entries) {
     final loader = FontLoader(entry.key);
     for (final file in entry.value) {

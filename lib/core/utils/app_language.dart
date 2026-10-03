@@ -9,7 +9,8 @@ enum AppLanguage {
   simplifiedChinese('zh', Locale('zh'), '简体中文'),
   traditionalChinese('zh_TW', Locale('zh', 'TW'), '繁體中文'),
   english('en', Locale('en'), 'English'),
-  japanese('ja', Locale('ja'), '日本語');
+  japanese('ja', Locale('ja'), '日本語'),
+  korean('ko', Locale('ko'), '한국어');
 
   const AppLanguage(this.storageCode, this.locale, this.nativeName);
 
@@ -69,6 +70,8 @@ enum AppLanguage {
         return traditional ? traditionalChinese : simplifiedChinese;
       case 'ja':
         return japanese;
+      case 'ko':
+        return korean;
       default:
         return english;
     }

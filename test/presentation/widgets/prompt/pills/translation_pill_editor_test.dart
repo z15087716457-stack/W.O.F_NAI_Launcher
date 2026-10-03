@@ -324,6 +324,7 @@ void main() {
     ('en', 'Chinese', 'en', 'English', 'blue eyes, smile'),
     ('ja', '中国語', 'ja', '日本語', '青い目、笑顔'),
     ('zh_TW', '中文', 'zh-TW', '繁體中文', '藍眼睛，微笑'),
+    ('ko', '중국어', 'ko', '한국어', '파란 눈, 미소'),
   ]) {
     testWidgets(
       '$locale locale preserves old Chinese until confirmed conversion',

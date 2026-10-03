@@ -467,7 +467,12 @@ void main() {
     },
   );
 
-  for (final locale in const [Locale('en'), Locale('ja'), Locale('zh', 'TW')]) {
+  for (final locale in const [
+    Locale('en'),
+    Locale('ja'),
+    Locale('zh', 'TW'),
+    Locale('ko'),
+  ]) {
     testWidgets(
       'privacy and connections retain narrow ${locale.toLanguageTag()} controls',
       (tester) async {

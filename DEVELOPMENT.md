@@ -34,7 +34,7 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 
 ## 资源、生成文件与发布注意事项
 
-界面文案以 `lib/l10n/app_en.arb` 为模板，修改后运行 `flutter gen-l10n`。繁体中文（台湾）的 `lib/l10n/app_zh_TW.arb` 与固定中文名单对照 `lib/l10n/zh_tw_labels.dart` 由 `tool/l10n` 用 OpenCC 1.4.2 `s2twp` 加产品术语生成，不手改：修改 `app_zh.arb`、Wiki 目录中文名、标签分组或子分类中文名、生成按钮中文文案后，运行 `UPDATE_ZH_TW=1 flutter test test/l10n/zh_tw_resources_test.dart`，再运行 `flutter gen-l10n`。通用用语修正写入 `tool/l10n/zh_tw_terms.dart`，单条消息的整句修正写入 `tool/l10n/zh_tw_overrides.json`（按 ARB 键）。
+界面文案以 `lib/l10n/app_en.arb` 为模板，中、日、韩 ARB 手工维护，修改后运行 `flutter gen-l10n`。繁体中文（台湾）的 `lib/l10n/app_zh_TW.arb` 与固定中文名单对照 `lib/l10n/zh_tw_labels.dart` 由 `tool/l10n` 用 OpenCC 1.4.2 `s2twp` 加产品术语生成，不手改：修改 `app_zh.arb`、Wiki 目录中文名、标签分组或子分类中文名、生成按钮中文文案后，运行 `UPDATE_ZH_TW=1 flutter test test/l10n/zh_tw_resources_test.dart`，再运行 `flutter gen-l10n`。通用用语修正写入 `tool/l10n/zh_tw_terms.dart`，单条消息的整句修正写入 `tool/l10n/zh_tw_overrides.json`（按 ARB 键）。
 
 `assets/databases/*.db` 通过 Git LFS 管理，发布前应确认本地文件是真实 SQLite 数据库而不是 LFS pointer。`assets/data/` 和 `assets/images/` 会随 Flutter assets 打包，移动或重命名后需要同步检查 `pubspec.yaml`。`assets/translations/github_chening233.csv` 只是 `tool/database/build_tag_wiki.py` 生成 `tag_wiki.db` 的源数据，不打包；`cooccurrence.db` 由 `tool/database/build_cooccurrence_only.dart` 按 `cooccurrence_source_lock.json` 锁定的下载文件生成。发布前确认 `CHANGELOG.md`、`dist/release_notes_<tag>.md`、`pubspec.yaml` 版本号和 Windows release build。
 
@@ -52,7 +52,7 @@ Windows `Runner.rc` 的 `CompanyName=com.example`、`ProductName=nai_launcher` �
 
 ### Studio 字体与界面图标
 
-显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC，字体角色、品牌入口、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。界面图标已恢复原有 `Icon` 和专用符号，只保留 `StudioTypography` 字体角色。应用统一使用 Geist 深色 / 浅色两套主题，`themeNotifierProvider` 持久化明暗选择，载入、登录、工作区与弹窗继承同一根主题。背景和面板使用黑白灰，蓝色仅用于操作强调；标题栏、图标与字体角色保持原有约定。字体、Logo、许可或原生显示名变更后需交付包含新资源的完整运行包。
+显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line、HarmonyOS Sans SC 与韩文回退 Pretendard，字体角色、品牌入口、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。界面图标已恢复原有 `Icon` 和专用符号，只保留 `StudioTypography` 字体角色。应用统一使用 Geist 深色 / 浅色两套主题，`themeNotifierProvider` 持久化明暗选择，载入、登录、工作区与弹窗继承同一根主题。背景和面板使用黑白灰，蓝色仅用于操作强调；标题栏、图标与字体角色保持原有约定。字体、Logo、许可或原生显示名变更后需交付包含新资源的完整运行包。
 
 ## Changelog 与 Release Notes 规范
 

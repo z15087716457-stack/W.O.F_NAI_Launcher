@@ -231,7 +231,7 @@ nai_launcher/
 ├── lib/
 │   ├── core/               # 网络、数据库、缓存、加密、文件、快捷键等基础能力
 │   ├── data/               # API、模型、仓库和业务数据服务
-│   ├── l10n/               # 简中/繁中/英/日界面文案与生成文件
+│   ├── l10n/               # 简中/繁中/英/日/韩界面文案与生成文件
 │   └── presentation/       # 页面、组件、状态管理、主题和路由
 ├── scripts/                # 构建、打包、签名、热重载与校验脚本
 ├── test/                   # 单元测试和组件测试
@@ -276,4 +276,4 @@ type(scope): 中文描述
 
 本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。原版权归属上游 NAI Launcher Contributors，本分支新增部分的版权归 W.O.F (z15087716457-stack)。
 
-界面使用随包提供的 Geist Sans / Mono / Pixel Line 与 HarmonyOS Sans SC 字体，界面图标沿用原有图标。字体遵循各自许可，见 [素材说明](tool/branding/README.md) 与 [许可文件](assets/licenses/)；应用「关于」页亦可查看。
+界面使用随包提供的 Geist Sans / Mono / Pixel Line、HarmonyOS Sans SC 与韩文 Pretendard 字体，界面图标沿用原有图标。字体遵循各自许可，见 [素材说明](tool/branding/README.md) 与 [许可文件](assets/licenses/)；应用「关于」页亦可查看。

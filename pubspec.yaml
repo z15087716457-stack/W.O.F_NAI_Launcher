@@ -186,3 +186,13 @@ flutter:
           weight: 500
         - asset: assets/fonts/HarmonyOS_Sans_SC_Bold.ttf
           weight: 700
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.otf
+          weight: 400
+        - asset: assets/fonts/Pretendard-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Pretendard-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Pretendard-Bold.otf
+          weight: 700
