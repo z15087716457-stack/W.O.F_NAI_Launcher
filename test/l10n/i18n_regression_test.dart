@@ -4,13 +4,11 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/comfyui/comfyui.dart';
-import 'package:nai_launcher/data/services/vibe_bulk_operation_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/bulk_operation_provider.dart';
 import 'package:nai_launcher/presentation/providers/category_operation_error.dart';
 import 'package:nai_launcher/presentation/providers/comfyui/comfyui_provider.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
-import 'package:nai_launcher/presentation/utils/vibe_bulk_operation_l10n.dart';
 
 void main() {
   group('ARB parity', () {
@@ -169,27 +167,6 @@ void main() {
       expect(error.localized(localizations['zh']!), '不能将分类移动到它的子孙分类下');
       expect(error.localized(localizations['zh_TW']!), '不能將分類移動到它的子孫分類下');
     });
-
-    test('Vibe bulk errors are localized before display', () {
-      const error = VibeBulkOperationError(
-        VibeBulkOperationErrorCode.importFailed,
-        itemName: 'sample.naiv4vibe',
-        details: 'invalid payload',
-      );
-
-      expect(
-        error.localized(localizations['en']!),
-        'Failed to import Vibe from sample.naiv4vibe: invalid payload',
-      );
-      expect(
-        error.localized(localizations['ja']!),
-        'sample.naiv4vibe からの Vibe インポートに失敗しました: invalid payload',
-      );
-      expect(
-        error.localized(localizations['zh']!),
-        '从 sample.naiv4vibe 导入 Vibe 失败：invalid payload',
-      );
-    });
   });
 
   test('Placeholder messages are generated for every locale', () {
@@ -207,14 +184,10 @@ void main() {
     expect(chinese.networkError_insufficientAnlas, 'Anlas 不足');
   });
 
-  test('Vibe bulk and detail surfaces use generated translations', () {
+  test('Vibe detail surfaces use generated translations', () {
     final english = lookupAppLocalizations(const Locale('en'));
     final japanese = lookupAppLocalizations(const Locale('ja'));
-    final chinese = lookupAppLocalizations(const Locale('zh'));
 
-    expect(english.vibeBulkTag_selectedCount(3), '3 Vibes selected');
-    expect(japanese.vibeBulkCategory_moveCount(2), '2 件の Vibe の移動先:');
-    expect(chinese.vibeBulk_processingProgress(1, 4), '正在处理：1 / 4');
     expect(english.vibeDetail_timesUsed(5), '5 times');
     expect(japanese.vibeDetail_saveParameters, 'パラメーターを保存');
   });

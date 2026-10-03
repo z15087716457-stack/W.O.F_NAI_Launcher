@@ -6,7 +6,6 @@ import 'package:nai_launcher/presentation/screens/precise_ref_library/precise_re
 import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
 import 'package:nai_launcher/data/services/danbooru_auth_service.dart';
 import 'package:nai_launcher/data/services/gelbooru_auth_service.dart';
-import 'package:nai_launcher/presentation/providers/danbooru_suggestion_provider.dart';
 import 'package:nai_launcher/presentation/providers/precise_ref_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
 import 'package:nai_launcher/presentation/widgets/bulk_action_bar.dart';
@@ -155,11 +154,6 @@ class _Gelbooru extends GelbooruAuth {
       const GelbooruAuthState(status: GelbooruAuthStatus.unconfigured);
 }
 
-class _Suggestions extends DanbooruSuggestionNotifier {
-  @override
-  TagSuggestionState build() => const TagSuggestionState();
-}
-
 class _Precise extends PreciseRefLibraryNotifier {
   @override
   PreciseRefLibraryState build() => const PreciseRefLibraryState();
@@ -246,7 +240,6 @@ void main() {
               ),
               danbooruAuthProvider.overrideWith(_Danbooru.new),
               gelbooruAuthProvider.overrideWith(_Gelbooru.new),
-              danbooruSuggestionNotifierProvider.overrideWith(_Suggestions.new),
               preciseRefLibraryNotifierProvider.overrideWith(_Precise.new),
               vibeLibraryNotifierProvider.overrideWith(_Vibes.new),
               vibeLibraryCategoryNotifierProvider.overrideWith(
@@ -375,13 +368,6 @@ void main() {
           expectNoUnreadableLightText(tester, panelName: name);
         }
         if (Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
-          await tester.runAsync(() async {
-            await precacheImage(
-              const AssetImage('assets/images/wof_logo_block.png'),
-              tester.element(find.byWidget(screen)),
-            );
-          });
-          await tester.pumpAndSettle();
           await tester.runAsync(() async {
             final image =
                 await (boundary.currentContext!.findRenderObject()!

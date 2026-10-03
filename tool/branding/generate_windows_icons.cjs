@@ -34,7 +34,7 @@ async function main() {
   }
   const brandDir = args.length ? path.resolve(args[1]) : null;
   const logo = await fs.readFile(source);
-  const squareW = await fs.readFile(path.join(root, 'assets/icons/wof_icon.svg'));
+  const squareW = await fs.readFile(path.join(__dirname, 'wof_icon.svg'));
   const windowImages = new Map();
   const images = new Map();
   for (const size of exportSizes) {
@@ -46,9 +46,7 @@ async function main() {
     windowImages.set(size, await sharp(oversampled).resize(size, size, { kernel: 'lanczos3' }).png().toBuffer());
   }
   const ico = makeIco(iconSizes.map(size => ({ size, png: images.get(size) })));
-  for (const target of ['assets/icons/app_icon.ico', 'windows/runner/resources/app_icon.ico']) {
-    await fs.writeFile(path.join(root, target), ico);
-  }
+  await fs.writeFile(path.join(root, 'windows/runner/resources/app_icon.ico'), ico);
   const windowIco = makeIco(iconSizes.map(size => ({ size, png: windowImages.get(size) })));
   for (const target of ['assets/icons/window_icon.ico', 'windows/runner/resources/window_icon.ico']) {
     await fs.writeFile(path.join(root, target), windowIco);

@@ -13,7 +13,6 @@ import 'package:nai_launcher/data/models/online_gallery/gelbooru_credentials.dar
 import 'package:nai_launcher/data/services/danbooru_auth_service.dart';
 import 'package:nai_launcher/data/services/gelbooru_auth_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/providers/danbooru_suggestion_provider.dart';
 import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
 import 'package:nai_launcher/presentation/screens/online_gallery/online_gallery_screen.dart';
 import 'package:nai_launcher/presentation/widgets/danbooru_post_card.dart';
@@ -32,9 +31,6 @@ void main() {
           ),
           danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
           gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
           localTagExpansionServiceProvider.overrideWithValue(
             LocalTagExpansionService(
               catalog: const _BlueHairSource(),
@@ -103,9 +99,6 @@ void main() {
           ),
           danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
           gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
           localTagExpansionServiceProvider.overrideWithValue(
             LocalTagExpansionService(
               catalog: const _BlueHairSource(),
@@ -162,9 +155,6 @@ void main() {
             ),
             danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
             gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-            danbooruSuggestionNotifierProvider.overrideWith(
-              _EmptyDanbooruSuggestionNotifier.new,
-            ),
           ],
           child: const _TestApp(),
         ),
@@ -187,9 +177,6 @@ void main() {
           ),
           danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
           gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
         ],
         child: const _TestApp(),
       ),
@@ -214,9 +201,6 @@ void main() {
             onlineGalleryNotifierProvider.overrideWith(entry.value),
             danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
             gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-            danbooruSuggestionNotifierProvider.overrideWith(
-              _EmptyDanbooruSuggestionNotifier.new,
-            ),
           ],
           child: const _TestApp(),
         ),
@@ -240,9 +224,6 @@ void main() {
             ),
             danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
             gelbooruAuthProvider.overrideWith(_AuthenticatedGelbooruAuth.new),
-            danbooruSuggestionNotifierProvider.overrideWith(
-              _EmptyDanbooruSuggestionNotifier.new,
-            ),
           ],
           child: const _TestApp(),
         ),
@@ -269,9 +250,6 @@ void main() {
               ),
               danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
               gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-              danbooruSuggestionNotifierProvider.overrideWith(
-                _EmptyDanbooruSuggestionNotifier.new,
-              ),
             ],
             child: const _TestApp(),
           ),
@@ -310,9 +288,6 @@ void main() {
           ),
           danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
           gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
         ],
         child: const _TestApp(),
       ),
@@ -406,9 +381,6 @@ void main() {
           ),
           danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
           gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
         ],
         child: const _TestApp(),
       ),
@@ -487,9 +459,6 @@ void main() {
           ),
           danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
           gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
         ],
         child: const _TestApp(),
       ),
@@ -516,9 +485,6 @@ void main() {
           onlineGalleryNotifierProvider.overrideWith(_PagedGalleryNotifier.new),
           danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
           gelbooruAuthProvider.overrideWith(_UnconfiguredGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
         ],
         child: const _TestApp(),
       ),
@@ -562,9 +528,6 @@ void main() {
           ),
           danbooruAuthProvider.overrideWith(_LoggedOutDanbooruAuth.new),
           gelbooruAuthProvider.overrideWith(_AuthenticatedGelbooruAuth.new),
-          danbooruSuggestionNotifierProvider.overrideWith(
-            _EmptyDanbooruSuggestionNotifier.new,
-          ),
         ],
         child: const _TestApp(),
       ),
@@ -1020,9 +983,4 @@ class _AuthenticatedGelbooruAuth extends GelbooruAuth {
     credentials: GelbooruCredentials(userId: 99, apiKey: 'key'),
     status: GelbooruAuthStatus.authenticated,
   );
-}
-
-class _EmptyDanbooruSuggestionNotifier extends DanbooruSuggestionNotifier {
-  @override
-  TagSuggestionState build() => const TagSuggestionState();
 }

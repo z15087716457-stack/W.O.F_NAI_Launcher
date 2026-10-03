@@ -713,12 +713,6 @@ abstract class AppLocalizations {
   /// **'Show / hide'**
   String get auth_toggleVisibility;
 
-  /// No description provided for @auth_loggedIn.
-  ///
-  /// In en, this message translates to:
-  /// **'Logged in'**
-  String get auth_loggedIn;
-
   /// No description provided for @auth_emailRequired.
   ///
   /// In en, this message translates to:
@@ -839,29 +833,11 @@ abstract class AppLocalizations {
   /// **'Get Token from NovelAI settings'**
   String get auth_tokenGuide;
 
-  /// No description provided for @auth_savedAccounts.
-  ///
-  /// In en, this message translates to:
-  /// **'Saved Accounts'**
-  String get auth_savedAccounts;
-
   /// No description provided for @auth_addAccount.
   ///
   /// In en, this message translates to:
   /// **'Add Account'**
   String get auth_addAccount;
-
-  /// No description provided for @auth_manageAccounts.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage'**
-  String get auth_manageAccounts;
-
-  /// No description provided for @auth_moreAccounts.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} more accounts'**
-  String auth_moreAccounts(Object count);
 
   /// No description provided for @auth_tokenNotFound.
   ///
@@ -1468,35 +1444,11 @@ abstract class AppLocalizations {
   /// **'Default'**
   String get settings_defaultAccount;
 
-  /// No description provided for @settings_editNickname.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Nickname'**
-  String get settings_editNickname;
-
   /// No description provided for @settings_nickname.
   ///
   /// In en, this message translates to:
   /// **'Nickname'**
   String get settings_nickname;
-
-  /// No description provided for @settings_nicknameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter 2-32 characters'**
-  String get settings_nicknameHint;
-
-  /// No description provided for @settings_nicknameEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a nickname'**
-  String get settings_nicknameEmpty;
-
-  /// No description provided for @settings_nicknameTooLong.
-  ///
-  /// In en, this message translates to:
-  /// **'Nickname cannot exceed {maxLength} characters'**
-  String settings_nicknameTooLong(int maxLength);
 
   /// No description provided for @settings_nicknameUpdated.
   ///
@@ -2944,18 +2896,6 @@ abstract class AppLocalizations {
   /// **'Blur'**
   String get editor_toolBlur;
 
-  /// No description provided for @editor_shortcutUndo.
-  ///
-  /// In en, this message translates to:
-  /// **'Undo (Ctrl+Z)'**
-  String get editor_shortcutUndo;
-
-  /// No description provided for @editor_shortcutRedo.
-  ///
-  /// In en, this message translates to:
-  /// **'Redo (Ctrl+Y)'**
-  String get editor_shortcutRedo;
-
   /// No description provided for @editor_back.
   ///
   /// In en, this message translates to:
@@ -3009,12 +2949,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fit to Window'**
   String get editor_fitToWindow;
-
-  /// No description provided for @editor_tempColorPickerShortcut.
-  ///
-  /// In en, this message translates to:
-  /// **'Alt+Click: temporary color picker'**
-  String get editor_tempColorPickerShortcut;
 
   /// No description provided for @editor_shortcutHelpTitle.
   ///
@@ -4976,36 +4910,6 @@ abstract class AppLocalizations {
   /// **'Increase Weight [+5%]'**
   String get tooltip_increaseWeight;
 
-  /// No description provided for @tooltip_edit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit'**
-  String get tooltip_edit;
-
-  /// No description provided for @tooltip_copy.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy'**
-  String get tooltip_copy;
-
-  /// No description provided for @tooltip_delete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get tooltip_delete;
-
-  /// No description provided for @tooltip_enable.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable'**
-  String get tooltip_enable;
-
-  /// No description provided for @tooltip_disable.
-  ///
-  /// In en, this message translates to:
-  /// **'Disable'**
-  String get tooltip_disable;
-
   /// No description provided for @tooltip_resetWeight.
   ///
   /// In en, this message translates to:
@@ -5192,137 +5096,11 @@ abstract class AppLocalizations {
   /// **'Gelbooru verification failed. Try again later.'**
   String get gelbooru_unknownError;
 
-  /// No description provided for @weight_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Weight'**
-  String get weight_title;
-
-  /// No description provided for @weight_reset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get weight_reset;
-
-  /// No description provided for @weight_done.
-  ///
-  /// In en, this message translates to:
-  /// **'Done'**
-  String get weight_done;
-
-  /// No description provided for @weight_noBrackets.
-  ///
-  /// In en, this message translates to:
-  /// **'No brackets'**
-  String get weight_noBrackets;
-
-  /// No description provided for @weight_editTag.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Tag'**
-  String get weight_editTag;
-
-  /// No description provided for @weight_tagName.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag Name'**
-  String get weight_tagName;
-
-  /// No description provided for @weight_tagNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter tag name...'**
-  String get weight_tagNameHint;
-
-  /// No description provided for @tag_selected.
-  ///
-  /// In en, this message translates to:
-  /// **'Selected {count}'**
-  String tag_selected(Object count);
-
-  /// No description provided for @tag_enable.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable'**
-  String get tag_enable;
-
-  /// No description provided for @tag_disable.
-  ///
-  /// In en, this message translates to:
-  /// **'Disable'**
-  String get tag_disable;
-
-  /// No description provided for @tag_delete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get tag_delete;
-
   /// No description provided for @tag_addTag.
   ///
   /// In en, this message translates to:
   /// **'Add Tag'**
   String get tag_addTag;
-
-  /// No description provided for @tag_add.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get tag_add;
-
-  /// No description provided for @tag_inputHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter tag...'**
-  String get tag_inputHint;
-
-  /// No description provided for @tag_copiedToClipboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Copied to clipboard'**
-  String get tag_copiedToClipboard;
-
-  /// No description provided for @tag_emptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add tags to describe your desired image'**
-  String get tag_emptyHint;
-
-  /// No description provided for @tag_emptyHintSub.
-  ///
-  /// In en, this message translates to:
-  /// **'You can browse, search, or add tags manually'**
-  String get tag_emptyHintSub;
-
-  /// No description provided for @tagCategory_artist.
-  ///
-  /// In en, this message translates to:
-  /// **'Artist'**
-  String get tagCategory_artist;
-
-  /// No description provided for @tagCategory_copyright.
-  ///
-  /// In en, this message translates to:
-  /// **'Copyright'**
-  String get tagCategory_copyright;
-
-  /// No description provided for @tagCategory_character.
-  ///
-  /// In en, this message translates to:
-  /// **'Character'**
-  String get tagCategory_character;
-
-  /// No description provided for @tagCategory_meta.
-  ///
-  /// In en, this message translates to:
-  /// **'Meta'**
-  String get tagCategory_meta;
-
-  /// No description provided for @tagCategory_general.
-  ///
-  /// In en, this message translates to:
-  /// **'General'**
-  String get tagCategory_general;
 
   /// No description provided for @qualityTags_label.
   ///
@@ -6050,24 +5828,6 @@ abstract class AppLocalizations {
   /// **'Fullscreen Edit'**
   String get toolbar_fullscreenEdit;
 
-  /// No description provided for @toolbar_clear.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear'**
-  String get toolbar_clear;
-
-  /// No description provided for @toolbar_confirmClear.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Clear'**
-  String get toolbar_confirmClear;
-
-  /// No description provided for @toolbar_settings.
-  ///
-  /// In en, this message translates to:
-  /// **'Settings'**
-  String get toolbar_settings;
-
   /// No description provided for @characterTooltip_noCharacters.
   ///
   /// In en, this message translates to:
@@ -6176,18 +5936,6 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get nav_settings;
 
-  /// No description provided for @download_completed.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} download completed'**
-  String download_completed(Object name);
-
-  /// No description provided for @download_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} download failed'**
-  String download_failed(Object name);
-
   /// No description provided for @sync_preparing.
   ///
   /// In en, this message translates to:
@@ -6254,42 +6002,6 @@ abstract class AppLocalizations {
   /// **'Sync completed'**
   String get sync_done;
 
-  /// No description provided for @download_tags_data.
-  ///
-  /// In en, this message translates to:
-  /// **'Downloading tags data...'**
-  String get download_tags_data;
-
-  /// No description provided for @download_cooccurrence_data.
-  ///
-  /// In en, this message translates to:
-  /// **'Downloading cooccurrence data...'**
-  String get download_cooccurrence_data;
-
-  /// No description provided for @download_parsing_data.
-  ///
-  /// In en, this message translates to:
-  /// **'Parsing data...'**
-  String get download_parsing_data;
-
-  /// No description provided for @download_readingFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Reading file...'**
-  String get download_readingFile;
-
-  /// No description provided for @download_mergingData.
-  ///
-  /// In en, this message translates to:
-  /// **'Merging data...'**
-  String get download_mergingData;
-
-  /// No description provided for @download_loadComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading complete'**
-  String get download_loadComplete;
-
   /// No description provided for @time_just_now.
   ///
   /// In en, this message translates to:
@@ -6320,293 +6032,11 @@ abstract class AppLocalizations {
   /// **'Never synced'**
   String get time_never_synced;
 
-  /// No description provided for @category_selectEmoji.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Emoji'**
-  String get category_selectEmoji;
-
-  /// No description provided for @category_noRecentEmoji.
-  ///
-  /// In en, this message translates to:
-  /// **'No recent emojis'**
-  String get category_noRecentEmoji;
-
-  /// No description provided for @category_searchEmoji.
-  ///
-  /// In en, this message translates to:
-  /// **'Search emoji'**
-  String get category_searchEmoji;
-
-  /// No description provided for @vibeNoEncodingWarning.
-  ///
-  /// In en, this message translates to:
-  /// **'This image has no pre-encoded data'**
-  String get vibeNoEncodingWarning;
-
-  /// No description provided for @vibeWillCostAnlas.
-  ///
-  /// In en, this message translates to:
-  /// **'Encoding will cost {count} Anlas'**
-  String vibeWillCostAnlas(int count);
-
-  /// No description provided for @vibeEncodeConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue and consume Anlas?'**
-  String get vibeEncodeConfirm;
-
-  /// No description provided for @vibeCancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get vibeCancel;
-
-  /// No description provided for @vibeConfirmEncode.
-  ///
-  /// In en, this message translates to:
-  /// **'Encode'**
-  String get vibeConfirmEncode;
-
   /// No description provided for @vibeParseFailed.
   ///
   /// In en, this message translates to:
   /// **'Failed to parse Vibe file'**
   String get vibeParseFailed;
-
-  /// No description provided for @tagGroupBrowser_searchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search tags...'**
-  String get tagGroupBrowser_searchHint;
-
-  /// No description provided for @tagGroupBrowser_tagCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} tags'**
-  String tagGroupBrowser_tagCount(Object count);
-
-  /// No description provided for @tagGroupBrowser_filteredTagCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Showing {filtered} of {total} tags'**
-  String tagGroupBrowser_filteredTagCount(Object filtered, Object total);
-
-  /// No description provided for @tagGroupBrowser_noTags.
-  ///
-  /// In en, this message translates to:
-  /// **'No tags'**
-  String get tagGroupBrowser_noTags;
-
-  /// No description provided for @tagGroupBrowser_noLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag library not loaded'**
-  String get tagGroupBrowser_noLibrary;
-
-  /// No description provided for @tagGroupBrowser_importLibraryHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Please import a tag library first'**
-  String get tagGroupBrowser_importLibraryHint;
-
-  /// No description provided for @tagGroupBrowser_noCategories.
-  ///
-  /// In en, this message translates to:
-  /// **'No enabled tag categories'**
-  String get tagGroupBrowser_noCategories;
-
-  /// No description provided for @tagGroupBrowser_enableCategoriesHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enable tag categories in settings'**
-  String get tagGroupBrowser_enableCategoriesHint;
-
-  /// No description provided for @tagGroupBrowser_danbooruSuggestions.
-  ///
-  /// In en, this message translates to:
-  /// **'Danbooru Suggestions'**
-  String get tagGroupBrowser_danbooruSuggestions;
-
-  /// No description provided for @tag_favoritesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Favorite Tags'**
-  String get tag_favoritesTitle;
-
-  /// No description provided for @tag_favoritesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No favorite tags yet'**
-  String get tag_favoritesEmpty;
-
-  /// No description provided for @tag_favoritesEmptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Long-press on a tag to add it to favorites'**
-  String get tag_favoritesEmptyHint;
-
-  /// No description provided for @tag_alreadyAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag already added to current prompt'**
-  String get tag_alreadyAdded;
-
-  /// No description provided for @tag_removeFavoriteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove from Favorites'**
-  String get tag_removeFavoriteTitle;
-
-  /// No description provided for @tag_removeFavoriteMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove \"{tag}\" from favorites?'**
-  String tag_removeFavoriteMessage(Object tag);
-
-  /// No description provided for @tag_templatesTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag Templates'**
-  String get tag_templatesTitle;
-
-  /// No description provided for @tag_templatesEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No tag templates yet'**
-  String get tag_templatesEmpty;
-
-  /// No description provided for @tag_templatesEmptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Select tags and click the + button to create a template'**
-  String get tag_templatesEmptyHint;
-
-  /// No description provided for @tag_templateCreate.
-  ///
-  /// In en, this message translates to:
-  /// **'Create Template'**
-  String get tag_templateCreate;
-
-  /// No description provided for @tag_templateNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Template Name'**
-  String get tag_templateNameLabel;
-
-  /// No description provided for @tag_templateNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter template name'**
-  String get tag_templateNameHint;
-
-  /// No description provided for @tag_templateNameRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Please enter a template name'**
-  String get tag_templateNameRequired;
-
-  /// No description provided for @tag_templateDescLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Description (Optional)'**
-  String get tag_templateDescLabel;
-
-  /// No description provided for @tag_templateDescHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter template description'**
-  String get tag_templateDescHint;
-
-  /// No description provided for @tag_templatePreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag Preview'**
-  String get tag_templatePreview;
-
-  /// No description provided for @tag_templateTagCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} tags'**
-  String tag_templateTagCount(Object count);
-
-  /// No description provided for @tag_templateMoreTags.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} more tags...'**
-  String tag_templateMoreTags(Object count);
-
-  /// No description provided for @tag_templateInserted.
-  ///
-  /// In en, this message translates to:
-  /// **'Inserted template \"{name}\"'**
-  String tag_templateInserted(Object name);
-
-  /// No description provided for @tag_templateNoTags.
-  ///
-  /// In en, this message translates to:
-  /// **'No tags to save'**
-  String get tag_templateNoTags;
-
-  /// No description provided for @tag_templateSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Template saved'**
-  String get tag_templateSaved;
-
-  /// No description provided for @tag_templateNameExists.
-  ///
-  /// In en, this message translates to:
-  /// **'Template name already exists'**
-  String get tag_templateNameExists;
-
-  /// No description provided for @tag_templateDeleteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Template'**
-  String get tag_templateDeleteTitle;
-
-  /// No description provided for @tag_templateDeleteMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete template \"{name}\"?'**
-  String tag_templateDeleteMessage(Object name);
-
-  /// No description provided for @tag_categoryGeneral.
-  ///
-  /// In en, this message translates to:
-  /// **'General'**
-  String get tag_categoryGeneral;
-
-  /// No description provided for @tag_categoryArtist.
-  ///
-  /// In en, this message translates to:
-  /// **'Artist'**
-  String get tag_categoryArtist;
-
-  /// No description provided for @tag_categoryCopyright.
-  ///
-  /// In en, this message translates to:
-  /// **'Copyright'**
-  String get tag_categoryCopyright;
-
-  /// No description provided for @tag_categoryCharacter.
-  ///
-  /// In en, this message translates to:
-  /// **'Character'**
-  String get tag_categoryCharacter;
-
-  /// No description provided for @tag_categoryMeta.
-  ///
-  /// In en, this message translates to:
-  /// **'Meta'**
-  String get tag_categoryMeta;
-
-  /// No description provided for @tag_countBadgeBreakdown.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag Breakdown'**
-  String get tag_countBadgeBreakdown;
 
   /// No description provided for @localGallery_progressiveLoadError.
   ///
@@ -7370,84 +6800,6 @@ abstract class AppLocalizations {
   /// **'Move to Root'**
   String get localGallery_moveToRoot;
 
-  /// No description provided for @localGallery_folderName.
-  ///
-  /// In en, this message translates to:
-  /// **'Folder Name'**
-  String get localGallery_folderName;
-
-  /// No description provided for @localGallery_newFolderName.
-  ///
-  /// In en, this message translates to:
-  /// **'New Name'**
-  String get localGallery_newFolderName;
-
-  /// No description provided for @localGallery_folderNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter folder name'**
-  String get localGallery_folderNameHint;
-
-  /// No description provided for @localGallery_folderCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'Folder created'**
-  String get localGallery_folderCreated;
-
-  /// No description provided for @localGallery_folderCreateFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to create folder'**
-  String get localGallery_folderCreateFailed;
-
-  /// No description provided for @localGallery_renameFolderTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Rename Folder'**
-  String get localGallery_renameFolderTitle;
-
-  /// No description provided for @localGallery_renameSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Renamed'**
-  String get localGallery_renameSuccess;
-
-  /// No description provided for @localGallery_renameFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Rename failed'**
-  String get localGallery_renameFailed;
-
-  /// No description provided for @localGallery_deleteFolderTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Folder'**
-  String get localGallery_deleteFolderTitle;
-
-  /// No description provided for @localGallery_deleteFolderWithImagesContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Folder \"{name}\" contains {count} images. Delete it?\n\nNote: this will delete the folder and all images in it. This cannot be undone.'**
-  String localGallery_deleteFolderWithImagesContent(Object name, Object count);
-
-  /// No description provided for @localGallery_deleteEmptyFolderContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete empty folder \"{name}\"?'**
-  String localGallery_deleteEmptyFolderContent(Object name);
-
-  /// No description provided for @localGallery_folderDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Folder deleted'**
-  String get localGallery_folderDeleted;
-
-  /// No description provided for @localGallery_folderDeleteFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to delete folder'**
-  String get localGallery_folderDeleteFailed;
-
   /// No description provided for @localGallery_withMetadata.
   ///
   /// In en, this message translates to:
@@ -7459,120 +6811,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skipped'**
   String get localGallery_skipped;
-
-  /// No description provided for @localGallery_cacheMonitor.
-  ///
-  /// In en, this message translates to:
-  /// **'Cache Monitor'**
-  String get localGallery_cacheMonitor;
-
-  /// No description provided for @localGallery_threeLayerCacheStats.
-  ///
-  /// In en, this message translates to:
-  /// **'Three-layer Cache Stats'**
-  String get localGallery_threeLayerCacheStats;
-
-  /// No description provided for @localGallery_updatedAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Updated: {time}'**
-  String localGallery_updatedAt(Object time);
-
-  /// No description provided for @localGallery_memoryCache.
-  ///
-  /// In en, this message translates to:
-  /// **'Memory Cache'**
-  String get localGallery_memoryCache;
-
-  /// No description provided for @localGallery_hiveCache.
-  ///
-  /// In en, this message translates to:
-  /// **'Hive Cache'**
-  String get localGallery_hiveCache;
-
-  /// No description provided for @localGallery_sqliteDatabase.
-  ///
-  /// In en, this message translates to:
-  /// **'SQLite Database'**
-  String get localGallery_sqliteDatabase;
-
-  /// No description provided for @localGallery_imageUnit.
-  ///
-  /// In en, this message translates to:
-  /// **'images'**
-  String get localGallery_imageUnit;
-
-  /// No description provided for @localGallery_metadataUnit.
-  ///
-  /// In en, this message translates to:
-  /// **'metadata'**
-  String get localGallery_metadataUnit;
-
-  /// No description provided for @localGallery_entriesUnit.
-  ///
-  /// In en, this message translates to:
-  /// **'entries'**
-  String get localGallery_entriesUnit;
-
-  /// No description provided for @localGallery_hitRate.
-  ///
-  /// In en, this message translates to:
-  /// **'Hit Rate'**
-  String get localGallery_hitRate;
-
-  /// No description provided for @localGallery_performanceStats.
-  ///
-  /// In en, this message translates to:
-  /// **'Performance Stats'**
-  String get localGallery_performanceStats;
-
-  /// No description provided for @localGallery_cacheHit.
-  ///
-  /// In en, this message translates to:
-  /// **'Hit'**
-  String get localGallery_cacheHit;
-
-  /// No description provided for @localGallery_cacheMiss.
-  ///
-  /// In en, this message translates to:
-  /// **'Miss'**
-  String get localGallery_cacheMiss;
-
-  /// No description provided for @localGallery_clearL1.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear L1'**
-  String get localGallery_clearL1;
-
-  /// No description provided for @localGallery_clearL2.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear L2'**
-  String get localGallery_clearL2;
-
-  /// No description provided for @localGallery_clearAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear All'**
-  String get localGallery_clearAll;
-
-  /// No description provided for @localGallery_resetStats.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset Stats'**
-  String get localGallery_resetStats;
-
-  /// No description provided for @localGallery_confirmClearCache.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Clear'**
-  String get localGallery_confirmClearCache;
-
-  /// No description provided for @localGallery_confirmClearCacheContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear all caches? This will rescan all images.'**
-  String get localGallery_confirmClearCacheContent;
 
   /// No description provided for @localGallery_clearFilters.
   ///
@@ -7675,30 +6913,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No statistics available'**
   String get statistics_noData;
-
-  /// No description provided for @statistics_generatedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Generated'**
-  String get statistics_generatedCount;
-
-  /// No description provided for @statistics_favoriteCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Favorites'**
-  String get statistics_favoriteCount;
-
-  /// No description provided for @statistics_tooltipGenerated.
-  ///
-  /// In en, this message translates to:
-  /// **'Generated: {count}'**
-  String statistics_tooltipGenerated(Object count);
-
-  /// No description provided for @statistics_tooltipFavorite.
-  ///
-  /// In en, this message translates to:
-  /// **'Favorites: {count}'**
-  String statistics_tooltipFavorite(Object count);
 
   /// No description provided for @statistics_noTagData.
   ///
@@ -7975,36 +7189,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset Advanced Filters'**
   String get localGallery_resetAdvancedFilters;
-
-  /// No description provided for @localGallery_exportFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Export failed'**
-  String get localGallery_exportFailed;
-
-  /// No description provided for @bulkExport_format.
-  ///
-  /// In en, this message translates to:
-  /// **'Format'**
-  String get bulkExport_format;
-
-  /// No description provided for @bulkExport_jsonFormat.
-  ///
-  /// In en, this message translates to:
-  /// **'JSON'**
-  String get bulkExport_jsonFormat;
-
-  /// No description provided for @bulkExport_csvFormat.
-  ///
-  /// In en, this message translates to:
-  /// **'CSV'**
-  String get bulkExport_csvFormat;
-
-  /// No description provided for @bulkExport_includeMetadataHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Export generation parameters with images'**
-  String get bulkExport_includeMetadataHint;
 
   /// No description provided for @localGallery_group_today.
   ///
@@ -8612,30 +7796,6 @@ abstract class AppLocalizations {
   /// **'Undesired Content Fixed Tags'**
   String get fixedTags_negativeTitle;
 
-  /// No description provided for @autocomplete_resultsCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} results'**
-  String autocomplete_resultsCount(Object count);
-
-  /// No description provided for @autocomplete_actionSelect.
-  ///
-  /// In en, this message translates to:
-  /// **'Select'**
-  String get autocomplete_actionSelect;
-
-  /// No description provided for @autocomplete_actionConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm'**
-  String get autocomplete_actionConfirm;
-
-  /// No description provided for @autocomplete_actionClose.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get autocomplete_actionClose;
-
   /// No description provided for @autocomplete_categoryCharacter.
   ///
   /// In en, this message translates to:
@@ -8737,12 +7897,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rename'**
   String get common_rename;
-
-  /// No description provided for @common_create.
-  ///
-  /// In en, this message translates to:
-  /// **'Create'**
-  String get common_create;
 
   /// No description provided for @tagLibrary_newCategory.
   ///
@@ -10309,287 +9463,11 @@ abstract class AppLocalizations {
   /// **'Failed to reorder categories: {error}'**
   String categoryError_reorderFailed(String error);
 
-  /// No description provided for @vibeBulk_titleDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Vibes'**
-  String get vibeBulk_titleDelete;
-
-  /// No description provided for @vibeBulk_titleMove.
-  ///
-  /// In en, this message translates to:
-  /// **'Move Vibes'**
-  String get vibeBulk_titleMove;
-
-  /// No description provided for @vibeBulk_titleToggleFavorite.
-  ///
-  /// In en, this message translates to:
-  /// **'Update Favorites'**
-  String get vibeBulk_titleToggleFavorite;
-
-  /// No description provided for @vibeBulk_titleAddTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Tags'**
-  String get vibeBulk_titleAddTags;
-
-  /// No description provided for @vibeBulk_titleRemoveTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove Tags'**
-  String get vibeBulk_titleRemoveTags;
-
-  /// No description provided for @vibeBulk_titleExport.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Vibes'**
-  String get vibeBulk_titleExport;
-
-  /// No description provided for @vibeBulk_titleImport.
-  ///
-  /// In en, this message translates to:
-  /// **'Import Vibes'**
-  String get vibeBulk_titleImport;
-
-  /// No description provided for @vibeBulk_processingProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Processing: {current} / {total}'**
-  String vibeBulk_processingProgress(int current, int total);
-
-  /// No description provided for @vibeBulk_completed.
-  ///
-  /// In en, this message translates to:
-  /// **'Operation complete'**
-  String get vibeBulk_completed;
-
-  /// No description provided for @vibeBulk_completedWithFailures.
-  ///
-  /// In en, this message translates to:
-  /// **'Operation complete with some failures'**
-  String get vibeBulk_completedWithFailures;
-
-  /// No description provided for @vibeBulk_successful.
-  ///
-  /// In en, this message translates to:
-  /// **'Succeeded'**
-  String get vibeBulk_successful;
-
-  /// No description provided for @vibeBulk_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed'**
-  String get vibeBulk_failed;
-
-  /// No description provided for @vibeBulk_errorDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Error details:'**
-  String get vibeBulk_errorDetails;
-
-  /// No description provided for @vibeBulk_moreErrors.
-  ///
-  /// In en, this message translates to:
-  /// **'...and {count} more errors'**
-  String vibeBulk_moreErrors(int count);
-
-  /// No description provided for @vibeBulk_operationFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Operation failed'**
-  String get vibeBulk_operationFailed;
-
-  /// No description provided for @vibeBulk_operationFailedHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Check the operation settings and try again.'**
-  String get vibeBulk_operationFailedHint;
-
-  /// No description provided for @vibeBulk_errorEntryNotFoundOrDeleteFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'{item} was not found or could not be deleted'**
-  String vibeBulk_errorEntryNotFoundOrDeleteFailed(String item);
-
-  /// No description provided for @vibeBulk_errorDeleteFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to delete {item}: {error}'**
-  String vibeBulk_errorDeleteFailed(String item, String error);
-
-  /// No description provided for @vibeBulk_errorEntryNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'Entry not found: {item}'**
-  String vibeBulk_errorEntryNotFound(String item);
-
-  /// No description provided for @vibeBulk_errorMoveFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to move {item}: {error}'**
-  String vibeBulk_errorMoveFailed(String item, String error);
-
-  /// No description provided for @vibeBulk_errorFavoriteFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to update favorite status: {item}'**
-  String vibeBulk_errorFavoriteFailed(String item);
-
-  /// No description provided for @vibeBulk_errorFavoriteFailedWithDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to update favorite status for {item}: {error}'**
-  String vibeBulk_errorFavoriteFailedWithDetails(String item, String error);
-
-  /// No description provided for @vibeBulk_errorAddTagsFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to add tags: {item}'**
-  String vibeBulk_errorAddTagsFailed(String item);
-
-  /// No description provided for @vibeBulk_errorAddTagsFailedWithDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to add tags to {item}: {error}'**
-  String vibeBulk_errorAddTagsFailedWithDetails(String item, String error);
-
-  /// No description provided for @vibeBulk_errorRemoveTagsFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to remove tags: {item}'**
-  String vibeBulk_errorRemoveTagsFailed(String item);
-
-  /// No description provided for @vibeBulk_errorRemoveTagsFailedWithDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to remove tags from {item}: {error}'**
-  String vibeBulk_errorRemoveTagsFailedWithDetails(String item, String error);
-
-  /// No description provided for @vibeBulk_errorExportNoFile.
-  ///
-  /// In en, this message translates to:
-  /// **'Export failed because no file was created'**
-  String get vibeBulk_errorExportNoFile;
-
-  /// No description provided for @vibeBulk_errorExportFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Export failed: {error}'**
-  String vibeBulk_errorExportFailed(String error);
-
-  /// No description provided for @vibeBulk_errorFileNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'File not found: {item}'**
-  String vibeBulk_errorFileNotFound(String item);
-
-  /// No description provided for @vibeBulk_errorNoVibeData.
-  ///
-  /// In en, this message translates to:
-  /// **'No valid Vibe data was found in {item}'**
-  String vibeBulk_errorNoVibeData(String item);
-
-  /// No description provided for @vibeBulk_errorImportFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to import Vibe from {item}: {error}'**
-  String vibeBulk_errorImportFailed(String item, String error);
-
-  /// No description provided for @vibeBulk_errorProcessFileFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to process {item}: {error}'**
-  String vibeBulk_errorProcessFileFailed(String item, String error);
-
-  /// No description provided for @vibeBulkTag_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit Tags in Bulk'**
-  String get vibeBulkTag_title;
-
-  /// No description provided for @vibeBulkTag_selectedCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} Vibes selected'**
-  String vibeBulkTag_selectedCount(int count);
-
-  /// No description provided for @vibeBulkTag_inputHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a new tag...'**
-  String get vibeBulkTag_inputHint;
-
-  /// No description provided for @vibeBulkTag_noTags.
-  ///
-  /// In en, this message translates to:
-  /// **'No tags'**
-  String get vibeBulkTag_noTags;
-
-  /// No description provided for @vibeBulkTag_noTagsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add tags to make filtering and management easier'**
-  String get vibeBulkTag_noTagsHint;
-
-  /// No description provided for @vibeBulkTag_currentTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Current tags ({count})'**
-  String vibeBulkTag_currentTags(int count);
-
-  /// No description provided for @vibeBulkTag_pendingRemoval.
-  ///
-  /// In en, this message translates to:
-  /// **'Tags to remove ({count})'**
-  String vibeBulkTag_pendingRemoval(int count);
-
-  /// No description provided for @vibeBulkTag_removeTag.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove tag'**
-  String get vibeBulkTag_removeTag;
-
   /// No description provided for @vibeBulkTag_actionPreview.
   ///
   /// In en, this message translates to:
   /// **'Change preview'**
   String get vibeBulkTag_actionPreview;
-
-  /// No description provided for @vibeBulkTag_addTagsSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Add tags: {tags}'**
-  String vibeBulkTag_addTagsSummary(String tags);
-
-  /// No description provided for @vibeBulkTag_removeTagsSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove tags: {tags}'**
-  String vibeBulkTag_removeTagsSummary(String tags);
-
-  /// No description provided for @vibeBulkTag_noChanges.
-  ///
-  /// In en, this message translates to:
-  /// **'There are no changes to apply'**
-  String get vibeBulkTag_noChanges;
-
-  /// No description provided for @vibeBulkCategory_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Target Category'**
-  String get vibeBulkCategory_title;
-
-  /// No description provided for @vibeBulkCategory_moveCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Move {count} Vibes to:'**
-  String vibeBulkCategory_moveCount(int count);
-
-  /// No description provided for @vibeBulkCategory_cannotMoveToCurrent.
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot move to the current category'**
-  String get vibeBulkCategory_cannotMoveToCurrent;
 
   /// No description provided for @vibeDetail_strengthDescription.
   ///
@@ -11323,12 +10201,6 @@ abstract class AppLocalizations {
   /// **'Import failed'**
   String get vibe_import_importFailed;
 
-  /// No description provided for @vibe_import_failedWithError.
-  ///
-  /// In en, this message translates to:
-  /// **'Import failed: {error}'**
-  String vibe_import_failedWithError(String error);
-
   /// No description provided for @vibe_import_bundleTitle.
   ///
   /// In en, this message translates to:
@@ -11484,18 +10356,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maximum 16 vibes reached'**
   String get vibe_maxReached;
-
-  /// No description provided for @vibe_maxReachedRemoveSome.
-  ///
-  /// In en, this message translates to:
-  /// **'Maximum 16 vibes reached. Remove some vibes first.'**
-  String get vibe_maxReachedRemoveSome;
-
-  /// No description provided for @vibe_addedNamed.
-  ///
-  /// In en, this message translates to:
-  /// **'Added Vibe: {name}'**
-  String vibe_addedNamed(String name);
 
   /// No description provided for @vibe_addedCount.
   ///
@@ -14557,18 +13417,6 @@ abstract class AppLocalizations {
   /// **'(Empty)'**
   String get common_emptyValue;
 
-  /// No description provided for @common_previewLoadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load preview'**
-  String get common_previewLoadFailed;
-
-  /// No description provided for @common_clickToRefresh.
-  ///
-  /// In en, this message translates to:
-  /// **'Click to refresh'**
-  String get common_clickToRefresh;
-
   /// No description provided for @common_clickToRetry.
   ///
   /// In en, this message translates to:
@@ -14664,12 +13512,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to re-encode Vibe: {name}'**
   String vibe_import_reencodeFailed(String name);
-
-  /// No description provided for @localGallery_createFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Create Folder'**
-  String get localGallery_createFolder;
 
   /// No description provided for @galleryScan_failed.
   ///
@@ -14863,24 +13705,6 @@ abstract class AppLocalizations {
   /// **'Page not found: {error}'**
   String router_pageNotFound(String error);
 
-  /// No description provided for @autocomplete_translating.
-  ///
-  /// In en, this message translates to:
-  /// **'Translating…'**
-  String get autocomplete_translating;
-
-  /// No description provided for @autocomplete_missingTranslation.
-  ///
-  /// In en, this message translates to:
-  /// **'Not translated'**
-  String get autocomplete_missingTranslation;
-
-  /// No description provided for @autocomplete_aliasMatch.
-  ///
-  /// In en, this message translates to:
-  /// **'Alias: {alias}'**
-  String autocomplete_aliasMatch(String alias);
-
   /// No description provided for @autocomplete_resultLimit.
   ///
   /// In en, this message translates to:
@@ -14965,12 +13789,6 @@ abstract class AppLocalizations {
   /// **'No local article for this tag yet.'**
   String get tagExpansion_wikiUnavailable;
 
-  /// No description provided for @autocomplete_danbooruPrivacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Only the current English tag is sent; the full prompt is never uploaded'**
-  String get autocomplete_danbooruPrivacy;
-
   /// No description provided for @autocomplete_cooccurrence.
   ///
   /// In en, this message translates to:
@@ -15012,132 +13830,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} tags · data version {version}'**
   String autocomplete_catalogStatus(String count, String version);
-
-  /// No description provided for @autocomplete_sourceBase.
-  ///
-  /// In en, this message translates to:
-  /// **'Bundled base catalog'**
-  String get autocomplete_sourceBase;
-
-  /// No description provided for @autocomplete_sourceApi.
-  ///
-  /// In en, this message translates to:
-  /// **'Danbooru API'**
-  String get autocomplete_sourceApi;
-
-  /// No description provided for @autocomplete_sourceRelated.
-  ///
-  /// In en, this message translates to:
-  /// **'Offline related tags'**
-  String get autocomplete_sourceRelated;
-
-  /// No description provided for @autocomplete_sourceAi.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt Assistant translation'**
-  String get autocomplete_sourceAi;
-
-  /// No description provided for @autocomplete_headerTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Tag autocomplete'**
-  String get autocomplete_headerTitle;
-
-  /// No description provided for @autocomplete_relatedHeaderTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Related tags'**
-  String get autocomplete_relatedHeaderTitle;
-
-  /// No description provided for @autocomplete_relatedLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Querying offline co-occurrences and online related tags…'**
-  String get autocomplete_relatedLoading;
-
-  /// No description provided for @autocomplete_relatedEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No related tags are available'**
-  String get autocomplete_relatedEmpty;
-
-  /// No description provided for @autocomplete_relatedMetric.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} co-occurrences · Jaccard {score}'**
-  String autocomplete_relatedMetric(int count, String score);
-
-  /// No description provided for @autocomplete_relatedPin.
-  ///
-  /// In en, this message translates to:
-  /// **'Pin this tag to insert multiple related tags'**
-  String get autocomplete_relatedPin;
-
-  /// No description provided for @autocomplete_relatedUnpin.
-  ///
-  /// In en, this message translates to:
-  /// **'Unpin and resume chained recommendations'**
-  String get autocomplete_relatedUnpin;
-
-  /// No description provided for @autocomplete_statusBase.
-  ///
-  /// In en, this message translates to:
-  /// **'Local'**
-  String get autocomplete_statusBase;
-
-  /// No description provided for @autocomplete_statusRelated.
-  ///
-  /// In en, this message translates to:
-  /// **'Related'**
-  String get autocomplete_statusRelated;
-
-  /// No description provided for @autocomplete_statusOnline.
-  ///
-  /// In en, this message translates to:
-  /// **'Online'**
-  String get autocomplete_statusOnline;
-
-  /// No description provided for @autocomplete_statusAi.
-  ///
-  /// In en, this message translates to:
-  /// **'AI'**
-  String get autocomplete_statusAi;
-
-  /// No description provided for @autocomplete_statusReady.
-  ///
-  /// In en, this message translates to:
-  /// **'Ready'**
-  String get autocomplete_statusReady;
-
-  /// No description provided for @autocomplete_statusError.
-  ///
-  /// In en, this message translates to:
-  /// **'Error'**
-  String get autocomplete_statusError;
-
-  /// No description provided for @autocomplete_statusDisabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Off'**
-  String get autocomplete_statusDisabled;
-
-  /// No description provided for @autocomplete_statusSearching.
-  ///
-  /// In en, this message translates to:
-  /// **'Searching'**
-  String get autocomplete_statusSearching;
-
-  /// No description provided for @autocomplete_statusTranslating.
-  ///
-  /// In en, this message translates to:
-  /// **'Translating'**
-  String get autocomplete_statusTranslating;
-
-  /// No description provided for @autocomplete_openSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Open autocomplete and data source settings'**
-  String get autocomplete_openSettings;
 
   /// No description provided for @nav_promptBlockLibrary.
   ///
@@ -21782,12 +20474,6 @@ abstract class AppLocalizations {
   /// **'Drag to share'**
   String get drop_dragToShare;
 
-  /// No description provided for @progress_cancelled.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancelled'**
-  String get progress_cancelled;
-
   /// No description provided for @promptSyntax_weightTooLarge.
   ///
   /// In en, this message translates to:
@@ -22394,30 +21080,6 @@ abstract class AppLocalizations {
   /// **'The API address cannot contain query parameters, fragments or user info'**
   String get apiEndpoint_noExtras;
 
-  /// No description provided for @gallery_initFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Initialization failed: {error}'**
-  String gallery_initFailed(Object error);
-
-  /// No description provided for @gallery_loadFoldersFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load folders: {error}'**
-  String gallery_loadFoldersFailed(Object error);
-
-  /// No description provided for @gallery_refreshFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh failed: {error}'**
-  String gallery_refreshFailed(Object error);
-
-  /// No description provided for @gallery_clearCacheFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to clear the cache: {error}'**
-  String gallery_clearCacheFailed(Object error);
-
   /// No description provided for @gallery_folderInaccessible.
   ///
   /// In en, this message translates to:
@@ -22435,12 +21097,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gallery initialization failed: {error}'**
   String gallery_galleryInitFailed(Object error);
-
-  /// No description provided for @cache_clearInProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'A clear operation is already in progress'**
-  String get cache_clearInProgress;
 
   /// No description provided for @vibeImport_imageProgress.
   ///

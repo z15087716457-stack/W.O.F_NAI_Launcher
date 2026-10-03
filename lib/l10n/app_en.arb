@@ -130,7 +130,6 @@
   "auth_localOnlyNote": "Accounts and tokens stay on this device",
   "auth_back": "Back",
   "auth_toggleVisibility": "Show / hide",
-  "auth_loggedIn": "Logged in",
   "auth_emailRequired": "Please enter email",
   "auth_emailInvalid": "Please enter a valid email address",
   "auth_passwordRequired": "Please enter password",
@@ -151,15 +150,7 @@
   "auth_thirdPartyApiSiteRequired": "Enter third-party API site URL",
   "auth_validateAndLogin": "Validate & Login",
   "auth_tokenGuide": "Get Token from NovelAI settings",
-  "auth_savedAccounts": "Saved Accounts",
   "auth_addAccount": "Add Account",
-  "auth_manageAccounts": "Manage",
-  "auth_moreAccounts": "{count} more accounts",
-  "@auth_moreAccounts": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "auth_tokenNotFound": "Token not found for this account",
   "auth_switchAccount": "Switch Account",
   "auth_currentAccount": "Current Account",
@@ -320,18 +311,7 @@
   "settings_tokenAccount": "Token Account",
   "settings_setAsDefault": "Set as Default",
   "settings_defaultAccount": "Default",
-  "settings_editNickname": "Edit Nickname",
   "settings_nickname": "Nickname",
-  "settings_nicknameHint": "Enter 2-32 characters",
-  "settings_nicknameEmpty": "Please enter a nickname",
-  "settings_nicknameTooLong": "Nickname cannot exceed {maxLength} characters",
-  "@settings_nicknameTooLong": {
-    "placeholders": {
-      "maxLength": {
-        "type": "int"
-      }
-    }
-  },
   "settings_nicknameUpdated": "Nickname updated",
   "settings_avatarUpdated": "Avatar updated",
   "settings_avatarRemoved": "Avatar removed",
@@ -692,8 +672,6 @@
   "editor_toolColorPicker": "Color Picker",
   "editor_toolCloneStamp": "Clone Stamp",
   "editor_toolBlur": "Blur",
-  "editor_shortcutUndo": "Undo (Ctrl+Z)",
-  "editor_shortcutRedo": "Redo (Ctrl+Y)",
   "editor_back": "Back",
   "editor_layers": "Layers",
   "editor_loadMask": "Load Mask",
@@ -703,7 +681,6 @@
   "editor_zoomIn": "Zoom In",
   "editor_zoomOut": "Zoom Out",
   "editor_fitToWindow": "Fit to Window",
-  "editor_tempColorPickerShortcut": "Alt+Click: temporary color picker",
   "editor_shortcutHelpTitle": "Shortcut Help",
   "editor_shortcutPaintTools": "Paint Tools",
   "editor_shortcutSelectionTools": "Selection Tools",
@@ -1254,11 +1231,6 @@
   "tooltip_fullscreenEdit": "Fullscreen Edit",
   "tooltip_decreaseWeight": "Decrease Weight [-5%]",
   "tooltip_increaseWeight": "Increase Weight [+5%]",
-  "tooltip_edit": "Edit",
-  "tooltip_copy": "Copy",
-  "tooltip_delete": "Delete",
-  "tooltip_enable": "Enable",
-  "tooltip_disable": "Disable",
   "tooltip_resetWeight": "Click to reset to 100%",
   "upscale_scale": "Scale Factor",
   "danbooru_loginTitle": "Login Danbooru",
@@ -1290,33 +1262,7 @@
   "gelbooru_malformedResponse": "Gelbooru returned data that could not be parsed.",
   "gelbooru_storageError": "Gelbooru credentials could not be stored or read securely.",
   "gelbooru_unknownError": "Gelbooru verification failed. Try again later.",
-  "weight_title": "Weight",
-  "weight_reset": "Reset",
-  "weight_done": "Done",
-  "weight_noBrackets": "No brackets",
-  "weight_editTag": "Edit Tag",
-  "weight_tagName": "Tag Name",
-  "weight_tagNameHint": "Enter tag name...",
-  "tag_selected": "Selected {count}",
-  "@tag_selected": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tag_enable": "Enable",
-  "tag_disable": "Disable",
-  "tag_delete": "Delete",
   "tag_addTag": "Add Tag",
-  "tag_add": "Add",
-  "tag_inputHint": "Enter tag...",
-  "tag_copiedToClipboard": "Copied to clipboard",
-  "tag_emptyHint": "Add tags to describe your desired image",
-  "tag_emptyHintSub": "You can browse, search, or add tags manually",
-  "tagCategory_artist": "Artist",
-  "tagCategory_copyright": "Copyright",
-  "tagCategory_character": "Character",
-  "tagCategory_meta": "Meta",
-  "tagCategory_general": "General",
   "qualityTags_label": "Quality",
   "transparentBackground_tooltip": "Adds \"transparent background\" to the prompt and generates images with an alpha channel (V5 only)",
   "qualityTags_positive": "Quality (Prompt)",
@@ -1470,9 +1416,6 @@
   "characterEditor_moveUp": "Move Up",
   "characterEditor_moveDown": "Move Down",
   "toolbar_fullscreenEdit": "Fullscreen Edit",
-  "toolbar_clear": "Clear",
-  "toolbar_confirmClear": "Confirm Clear",
-  "toolbar_settings": "Settings",
   "characterTooltip_noCharacters": "No characters configured",
   "characterTooltip_clickToConfig": "Click to configure multi-character prompts",
   "characterTooltip_globalAiLabel": "Global AI Position:",
@@ -1507,18 +1450,6 @@
   "nav_generate": "Generate",
   "nav_gallery": "Gallery",
   "nav_settings": "Settings",
-  "download_completed": "{name} download completed",
-  "@download_completed": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "download_failed": "{name} download failed",
-  "@download_failed": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "sync_preparing": "Preparing to sync...",
   "sync_fetching": "Fetching {category}...",
   "@sync_fetching": {
@@ -1555,12 +1486,6 @@
   },
   "sync_filtering": "Filtering tags...",
   "sync_done": "Sync completed",
-  "download_tags_data": "Downloading tags data...",
-  "download_cooccurrence_data": "Downloading cooccurrence data...",
-  "download_parsing_data": "Parsing data...",
-  "download_readingFile": "Reading file...",
-  "download_mergingData": "Merging data...",
-  "download_loadComplete": "Loading complete",
   "time_just_now": "Just now",
   "time_minutes_ago": "{n} minutes ago",
   "@time_minutes_ago": {
@@ -1581,9 +1506,6 @@
     }
   },
   "time_never_synced": "Never synced",
-  "category_selectEmoji": "Select Emoji",
-  "category_noRecentEmoji": "No recent emojis",
-  "category_searchEmoji": "Search emoji",
   "@randomManager_deleteTagGroupConfirm": {
     "placeholders": {
       "name": {}
@@ -1679,94 +1601,7 @@
       "count": {}
     }
   },
-  "vibeNoEncodingWarning": "This image has no pre-encoded data",
-  "vibeWillCostAnlas": "Encoding will cost {count} Anlas",
-  "@vibeWillCostAnlas": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeEncodeConfirm": "Continue and consume Anlas?",
-  "vibeCancel": "Cancel",
-  "vibeConfirmEncode": "Encode",
   "vibeParseFailed": "Failed to parse Vibe file",
-  "tagGroupBrowser_searchHint": "Search tags...",
-  "tagGroupBrowser_tagCount": "{count} tags",
-  "@tagGroupBrowser_tagCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tagGroupBrowser_filteredTagCount": "Showing {filtered} of {total} tags",
-  "@tagGroupBrowser_filteredTagCount": {
-    "placeholders": {
-      "filtered": {},
-      "total": {}
-    }
-  },
-  "tagGroupBrowser_noTags": "No tags",
-  "tagGroupBrowser_noLibrary": "Tag library not loaded",
-  "tagGroupBrowser_importLibraryHint": "Please import a tag library first",
-  "tagGroupBrowser_noCategories": "No enabled tag categories",
-  "tagGroupBrowser_enableCategoriesHint": "Please enable tag categories in settings",
-  "tagGroupBrowser_danbooruSuggestions": "Danbooru Suggestions",
-  "tag_favoritesTitle": "Favorite Tags",
-  "tag_favoritesEmpty": "No favorite tags yet",
-  "tag_favoritesEmptyHint": "Long-press on a tag to add it to favorites",
-  "tag_alreadyAdded": "Tag already added to current prompt",
-  "tag_removeFavoriteTitle": "Remove from Favorites",
-  "tag_removeFavoriteMessage": "Remove \"{tag}\" from favorites?",
-  "@tag_removeFavoriteMessage": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
-  "tag_templatesTitle": "Tag Templates",
-  "tag_templatesEmpty": "No tag templates yet",
-  "tag_templatesEmptyHint": "Select tags and click the + button to create a template",
-  "tag_templateCreate": "Create Template",
-  "tag_templateNameLabel": "Template Name",
-  "tag_templateNameHint": "Enter template name",
-  "tag_templateNameRequired": "Please enter a template name",
-  "tag_templateDescLabel": "Description (Optional)",
-  "tag_templateDescHint": "Enter template description",
-  "tag_templatePreview": "Tag Preview",
-  "tag_templateTagCount": "{count} tags",
-  "@tag_templateTagCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tag_templateMoreTags": "{count} more tags...",
-  "@tag_templateMoreTags": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "tag_templateInserted": "Inserted template \"{name}\"",
-  "@tag_templateInserted": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "tag_templateNoTags": "No tags to save",
-  "tag_templateSaved": "Template saved",
-  "tag_templateNameExists": "Template name already exists",
-  "tag_templateDeleteTitle": "Delete Template",
-  "tag_templateDeleteMessage": "Delete template \"{name}\"?",
-  "@tag_templateDeleteMessage": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "tag_categoryGeneral": "General",
-  "tag_categoryArtist": "Artist",
-  "tag_categoryCopyright": "Copyright",
-  "tag_categoryCharacter": "Character",
-  "tag_categoryMeta": "Meta",
-  "tag_countBadgeBreakdown": "Tag Breakdown",
   "localGallery_progressiveLoadError": "Failed to load image",
   "localGallery_noImagesFound": "No images found",
   "localGallery_unknownError": "Unknown error",
@@ -2008,56 +1843,8 @@
     }
   },
   "localGallery_moveToRoot": "Move to Root",
-  "localGallery_folderName": "Folder Name",
-  "localGallery_newFolderName": "New Name",
-  "localGallery_folderNameHint": "Enter folder name",
-  "localGallery_folderCreated": "Folder created",
-  "localGallery_folderCreateFailed": "Failed to create folder",
-  "localGallery_renameFolderTitle": "Rename Folder",
-  "localGallery_renameSuccess": "Renamed",
-  "localGallery_renameFailed": "Rename failed",
-  "localGallery_deleteFolderTitle": "Delete Folder",
-  "localGallery_deleteFolderWithImagesContent": "Folder \"{name}\" contains {count} images. Delete it?\n\nNote: this will delete the folder and all images in it. This cannot be undone.",
-  "@localGallery_deleteFolderWithImagesContent": {
-    "placeholders": {
-      "name": {},
-      "count": {}
-    }
-  },
-  "localGallery_deleteEmptyFolderContent": "Delete empty folder \"{name}\"?",
-  "@localGallery_deleteEmptyFolderContent": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "localGallery_folderDeleted": "Folder deleted",
-  "localGallery_folderDeleteFailed": "Failed to delete folder",
   "localGallery_withMetadata": "With Metadata",
   "localGallery_skipped": "Skipped",
-  "localGallery_cacheMonitor": "Cache Monitor",
-  "localGallery_threeLayerCacheStats": "Three-layer Cache Stats",
-  "localGallery_updatedAt": "Updated: {time}",
-  "@localGallery_updatedAt": {
-    "placeholders": {
-      "time": {}
-    }
-  },
-  "localGallery_memoryCache": "Memory Cache",
-  "localGallery_hiveCache": "Hive Cache",
-  "localGallery_sqliteDatabase": "SQLite Database",
-  "localGallery_imageUnit": "images",
-  "localGallery_metadataUnit": "metadata",
-  "localGallery_entriesUnit": "entries",
-  "localGallery_hitRate": "Hit Rate",
-  "localGallery_performanceStats": "Performance Stats",
-  "localGallery_cacheHit": "Hit",
-  "localGallery_cacheMiss": "Miss",
-  "localGallery_clearL1": "Clear L1",
-  "localGallery_clearL2": "Clear L2",
-  "localGallery_clearAll": "Clear All",
-  "localGallery_resetStats": "Reset Stats",
-  "localGallery_confirmClearCache": "Confirm Clear",
-  "localGallery_confirmClearCacheContent": "Clear all caches? This will rescan all images.",
   "localGallery_clearFilters": "Clear filters",
   "slideshow_of": "of",
   "slideshow_play": "Play",
@@ -2075,20 +1862,6 @@
   "comparison_loadError": "Failed to load image",
   "statistics_title": "Statistics",
   "statistics_noData": "No statistics available",
-  "statistics_generatedCount": "Generated",
-  "statistics_favoriteCount": "Favorites",
-  "statistics_tooltipGenerated": "Generated: {count}",
-  "@statistics_tooltipGenerated": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_tooltipFavorite": "Favorites: {count}",
-  "@statistics_tooltipFavorite": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "statistics_noTagData": "No tag data",
   "statistics_generateFirst": "Generate some images first",
   "statistics_totalImages": "Total Images",
@@ -2150,11 +1923,6 @@
   "localGallery_activeFiltersSet": "Filters set",
   "localGallery_applyFilters": "Apply Filters",
   "localGallery_resetAdvancedFilters": "Reset Advanced Filters",
-  "localGallery_exportFailed": "Export failed",
-  "bulkExport_format": "Format",
-  "bulkExport_jsonFormat": "JSON",
-  "bulkExport_csvFormat": "CSV",
-  "bulkExport_includeMetadataHint": "Export generation parameters with images",
   "localGallery_group_today": "Today",
   "localGallery_group_yesterday": "Yesterday",
   "localGallery_group_thisWeek": "This Week",
@@ -2416,15 +2184,6 @@
   "statistics_friday": "Fri",
   "statistics_saturday": "Sat",
   "fixedTags_negativeTitle": "Undesired Content Fixed Tags",
-  "autocomplete_resultsCount": "{count} results",
-  "@autocomplete_resultsCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "autocomplete_actionSelect": "Select",
-  "autocomplete_actionConfirm": "Confirm",
-  "autocomplete_actionClose": "Close",
   "autocomplete_categoryCharacter": "Character",
   "autocomplete_categoryCopyright": "Copyright",
   "autocomplete_categoryArtist": "Artist",
@@ -2442,7 +2201,6 @@
   "promptToken_negativePreset": "Undesired Content Preset",
   "promptToken_characterNegative": "Character Undesired Content",
   "common_rename": "Rename",
-  "common_create": "Create",
   "tagLibrary_newCategory": "New Category",
   "tagLibrary_tags": "Tags",
   "settings_network": "Network",
@@ -2942,238 +2700,7 @@
       }
     }
   },
-  "vibeBulk_titleDelete": "Delete Vibes",
-  "vibeBulk_titleMove": "Move Vibes",
-  "vibeBulk_titleToggleFavorite": "Update Favorites",
-  "vibeBulk_titleAddTags": "Add Tags",
-  "vibeBulk_titleRemoveTags": "Remove Tags",
-  "vibeBulk_titleExport": "Export Vibes",
-  "vibeBulk_titleImport": "Import Vibes",
-  "vibeBulk_processingProgress": "Processing: {current} / {total}",
-  "@vibeBulk_processingProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeBulk_completed": "Operation complete",
-  "vibeBulk_completedWithFailures": "Operation complete with some failures",
-  "vibeBulk_successful": "Succeeded",
-  "vibeBulk_failed": "Failed",
-  "vibeBulk_errorDetails": "Error details:",
-  "vibeBulk_moreErrors": "...and {count} more errors",
-  "@vibeBulk_moreErrors": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeBulk_operationFailed": "Operation failed",
-  "vibeBulk_operationFailedHint": "Check the operation settings and try again.",
-  "vibeBulk_errorEntryNotFoundOrDeleteFailed": "{item} was not found or could not be deleted",
-  "@vibeBulk_errorEntryNotFoundOrDeleteFailed": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorDeleteFailed": "Failed to delete {item}: {error}",
-  "@vibeBulk_errorDeleteFailed": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      },
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorEntryNotFound": "Entry not found: {item}",
-  "@vibeBulk_errorEntryNotFound": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorMoveFailed": "Failed to move {item}: {error}",
-  "@vibeBulk_errorMoveFailed": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      },
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorFavoriteFailed": "Failed to update favorite status: {item}",
-  "@vibeBulk_errorFavoriteFailed": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorFavoriteFailedWithDetails": "Failed to update favorite status for {item}: {error}",
-  "@vibeBulk_errorFavoriteFailedWithDetails": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      },
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorAddTagsFailed": "Failed to add tags: {item}",
-  "@vibeBulk_errorAddTagsFailed": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorAddTagsFailedWithDetails": "Failed to add tags to {item}: {error}",
-  "@vibeBulk_errorAddTagsFailedWithDetails": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      },
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorRemoveTagsFailed": "Failed to remove tags: {item}",
-  "@vibeBulk_errorRemoveTagsFailed": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorRemoveTagsFailedWithDetails": "Failed to remove tags from {item}: {error}",
-  "@vibeBulk_errorRemoveTagsFailedWithDetails": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      },
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorExportNoFile": "Export failed because no file was created",
-  "vibeBulk_errorExportFailed": "Export failed: {error}",
-  "@vibeBulk_errorExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorFileNotFound": "File not found: {item}",
-  "@vibeBulk_errorFileNotFound": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorNoVibeData": "No valid Vibe data was found in {item}",
-  "@vibeBulk_errorNoVibeData": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorImportFailed": "Failed to import Vibe from {item}: {error}",
-  "@vibeBulk_errorImportFailed": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      },
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulk_errorProcessFileFailed": "Failed to process {item}: {error}",
-  "@vibeBulk_errorProcessFileFailed": {
-    "placeholders": {
-      "item": {
-        "type": "String"
-      },
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulkTag_title": "Edit Tags in Bulk",
-  "vibeBulkTag_selectedCount": "{count} Vibes selected",
-  "@vibeBulkTag_selectedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeBulkTag_inputHint": "Enter a new tag...",
-  "vibeBulkTag_noTags": "No tags",
-  "vibeBulkTag_noTagsHint": "Add tags to make filtering and management easier",
-  "vibeBulkTag_currentTags": "Current tags ({count})",
-  "@vibeBulkTag_currentTags": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeBulkTag_pendingRemoval": "Tags to remove ({count})",
-  "@vibeBulkTag_pendingRemoval": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeBulkTag_removeTag": "Remove tag",
   "vibeBulkTag_actionPreview": "Change preview",
-  "vibeBulkTag_addTagsSummary": "Add tags: {tags}",
-  "@vibeBulkTag_addTagsSummary": {
-    "placeholders": {
-      "tags": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulkTag_removeTagsSummary": "Remove tags: {tags}",
-  "@vibeBulkTag_removeTagsSummary": {
-    "placeholders": {
-      "tags": {
-        "type": "String"
-      }
-    }
-  },
-  "vibeBulkTag_noChanges": "There are no changes to apply",
-  "vibeBulkCategory_title": "Select Target Category",
-  "vibeBulkCategory_moveCount": "Move {count} Vibes to:",
-  "@vibeBulkCategory_moveCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeBulkCategory_cannotMoveToCurrent": "Cannot move to the current category",
   "vibeDetail_strengthDescription": "Controls how strongly this Vibe influences generated results",
   "vibeDetail_infoExtractedDescription": "Controls how much information is extracted from the source image (costs 2 Anlas)",
   "vibeDetail_statistics": "Statistics",
@@ -3487,14 +3014,6 @@
   "vibe_import_fileParseFailed": "Failed to parse file",
   "vibe_import_fileSelectionFailed": "File selection failed",
   "vibe_import_importFailed": "Import failed",
-  "vibe_import_failedWithError": "Import failed: {error}",
-  "@vibe_import_failedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "vibe_import_bundleTitle": "Import Vibe Bundle",
   "vibe_import_bundleChooseMethod": "Choose import method",
   "vibe_import_bundleAsWhole": "Import as whole",
@@ -3576,15 +3095,6 @@
   },
   "vibe_saveToLibrary_tagHint": "Enter a tag, then press Add",
   "vibe_maxReached": "Maximum 16 vibes reached",
-  "vibe_maxReachedRemoveSome": "Maximum 16 vibes reached. Remove some vibes first.",
-  "vibe_addedNamed": "Added Vibe: {name}",
-  "@vibe_addedNamed": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "vibe_addedCount": "Added {count} vibes",
   "@vibe_addedCount": {
     "placeholders": {
@@ -4732,8 +4242,6 @@
   },
   "common_optional": "Optional",
   "common_emptyValue": "(Empty)",
-  "common_previewLoadFailed": "Failed to load preview",
-  "common_clickToRefresh": "Click to refresh",
   "common_clickToRetry": "Click to retry",
   "common_opening": "Opening...",
   "common_swap": "Swap",
@@ -4771,7 +4279,6 @@
       }
     }
   },
-  "localGallery_createFolder": "Create Folder",
   "galleryScan_failed": "Failed {count}",
   "@galleryScan_failed": {
     "placeholders": {
@@ -4899,16 +4406,6 @@
       }
     }
   },
-  "autocomplete_translating": "Translating…",
-  "autocomplete_missingTranslation": "Not translated",
-  "autocomplete_aliasMatch": "Alias: {alias}",
-  "@autocomplete_aliasMatch": {
-    "placeholders": {
-      "alias": {
-        "type": "String"
-      }
-    }
-  },
   "autocomplete_resultLimit": "Result count",
   "autocomplete_relatedTagsTitle": "Tag Expansion",
   "autocomplete_relatedTagsSubtitle": "Ctrl+click to search local tags; Ctrl+drag to explore related tags",
@@ -4923,7 +4420,6 @@
   "tagExpansion_tabComplete": "Tab to complete:",
   "tagExpansion_wikiTitle": "Tag wiki",
   "tagExpansion_wikiUnavailable": "No local article for this tag yet.",
-  "autocomplete_danbooruPrivacy": "Only the current English tag is sent; the full prompt is never uploaded",
   "autocomplete_cooccurrence": "Offline related-tag database",
   "autocomplete_entryCount": "{count} entries",
   "@autocomplete_entryCount": {
@@ -4955,37 +4451,6 @@
       }
     }
   },
-  "autocomplete_sourceBase": "Bundled base catalog",
-  "autocomplete_sourceApi": "Danbooru API",
-  "autocomplete_sourceRelated": "Offline related tags",
-  "autocomplete_sourceAi": "Prompt Assistant translation",
-  "autocomplete_headerTitle": "Tag autocomplete",
-  "autocomplete_relatedHeaderTitle": "Related tags",
-  "autocomplete_relatedLoading": "Querying offline co-occurrences and online related tags…",
-  "autocomplete_relatedEmpty": "No related tags are available",
-  "autocomplete_relatedMetric": "{count} co-occurrences · Jaccard {score}",
-  "@autocomplete_relatedMetric": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "score": {
-        "type": "String"
-      }
-    }
-  },
-  "autocomplete_relatedPin": "Pin this tag to insert multiple related tags",
-  "autocomplete_relatedUnpin": "Unpin and resume chained recommendations",
-  "autocomplete_statusBase": "Local",
-  "autocomplete_statusRelated": "Related",
-  "autocomplete_statusOnline": "Online",
-  "autocomplete_statusAi": "AI",
-  "autocomplete_statusReady": "Ready",
-  "autocomplete_statusError": "Error",
-  "autocomplete_statusDisabled": "Off",
-  "autocomplete_statusSearching": "Searching",
-  "autocomplete_statusTranslating": "Translating",
-  "autocomplete_openSettings": "Open autocomplete and data source settings",
   "nav_promptBlockLibrary": "Prompt Blocks",
   "promptBlockLibrary_title": "Prompt Blocks",
   "promptBlockLibrary_folders": "Folders",
@@ -6731,7 +6196,6 @@
   "metadataImport_replaceCharacters": "Replace characters",
   "metadataImport_appendCharacters": "Append characters",
   "drop_dragToShare": "Drag to share",
-  "progress_cancelled": "Cancelled",
   "promptSyntax_weightTooLarge": "Numeric weight is too large: {value}::",
   "@promptSyntax_weightTooLarge": {
     "placeholders": {
@@ -6984,30 +6448,6 @@
   "apiEndpoint_invalid": "Invalid API address",
   "apiEndpoint_httpOnly": "Only http or https API addresses are supported",
   "apiEndpoint_noExtras": "The API address cannot contain query parameters, fragments or user info",
-  "gallery_initFailed": "Initialization failed: {error}",
-  "@gallery_initFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "gallery_loadFoldersFailed": "Failed to load folders: {error}",
-  "@gallery_loadFoldersFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "gallery_refreshFailed": "Refresh failed: {error}",
-  "@gallery_refreshFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "gallery_clearCacheFailed": "Failed to clear the cache: {error}",
-  "@gallery_clearCacheFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "gallery_folderInaccessible": "Cannot access the image folder: {error}",
   "@gallery_folderInaccessible": {
     "placeholders": {
@@ -7026,7 +6466,6 @@
       "error": {}
     }
   },
-  "cache_clearInProgress": "A clear operation is already in progress",
   "vibeImport_imageProgress": "Importing image ({current}/{total}): {source}",
   "@vibeImport_imageProgress": {
     "placeholders": {

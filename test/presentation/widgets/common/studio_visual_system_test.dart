@@ -108,7 +108,7 @@ void main() {
                       Row(
                         children: [
                           Image.asset(
-                            'assets/images/wof_logo_block.png',
+                            'assets/images/wof_logo_full.png',
                             width: 50,
                             height: 20,
                           ),

@@ -331,9 +331,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth_toggleVisibility => 'Show / hide';
 
   @override
-  String get auth_loggedIn => 'Logged in';
-
-  @override
   String get auth_emailRequired => 'Please enter email';
 
   @override
@@ -400,18 +397,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get auth_tokenGuide => 'Get Token from NovelAI settings';
 
   @override
-  String get auth_savedAccounts => 'Saved Accounts';
-
-  @override
   String get auth_addAccount => 'Add Account';
-
-  @override
-  String get auth_manageAccounts => 'Manage';
-
-  @override
-  String auth_moreAccounts(Object count) {
-    return '$count more accounts';
-  }
 
   @override
   String get auth_tokenNotFound => 'Token not found for this account';
@@ -759,21 +745,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_defaultAccount => 'Default';
 
   @override
-  String get settings_editNickname => 'Edit Nickname';
-
-  @override
   String get settings_nickname => 'Nickname';
-
-  @override
-  String get settings_nicknameHint => 'Enter 2-32 characters';
-
-  @override
-  String get settings_nicknameEmpty => 'Please enter a nickname';
-
-  @override
-  String settings_nicknameTooLong(int maxLength) {
-    return 'Nickname cannot exceed $maxLength characters';
-  }
 
   @override
   String get settings_nicknameUpdated => 'Nickname updated';
@@ -1578,12 +1550,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editor_toolBlur => 'Blur';
 
   @override
-  String get editor_shortcutUndo => 'Undo (Ctrl+Z)';
-
-  @override
-  String get editor_shortcutRedo => 'Redo (Ctrl+Y)';
-
-  @override
   String get editor_back => 'Back';
 
   @override
@@ -1609,10 +1575,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editor_fitToWindow => 'Fit to Window';
-
-  @override
-  String get editor_tempColorPickerShortcut =>
-      'Alt+Click: temporary color picker';
 
   @override
   String get editor_shortcutHelpTitle => 'Shortcut Help';
@@ -2735,21 +2697,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tooltip_increaseWeight => 'Increase Weight [+5%]';
 
   @override
-  String get tooltip_edit => 'Edit';
-
-  @override
-  String get tooltip_copy => 'Copy';
-
-  @override
-  String get tooltip_delete => 'Delete';
-
-  @override
-  String get tooltip_enable => 'Enable';
-
-  @override
-  String get tooltip_disable => 'Disable';
-
-  @override
   String get tooltip_resetWeight => 'Click to reset to 100%';
 
   @override
@@ -2852,72 +2799,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Gelbooru verification failed. Try again later.';
 
   @override
-  String get weight_title => 'Weight';
-
-  @override
-  String get weight_reset => 'Reset';
-
-  @override
-  String get weight_done => 'Done';
-
-  @override
-  String get weight_noBrackets => 'No brackets';
-
-  @override
-  String get weight_editTag => 'Edit Tag';
-
-  @override
-  String get weight_tagName => 'Tag Name';
-
-  @override
-  String get weight_tagNameHint => 'Enter tag name...';
-
-  @override
-  String tag_selected(Object count) {
-    return 'Selected $count';
-  }
-
-  @override
-  String get tag_enable => 'Enable';
-
-  @override
-  String get tag_disable => 'Disable';
-
-  @override
-  String get tag_delete => 'Delete';
-
-  @override
   String get tag_addTag => 'Add Tag';
-
-  @override
-  String get tag_add => 'Add';
-
-  @override
-  String get tag_inputHint => 'Enter tag...';
-
-  @override
-  String get tag_copiedToClipboard => 'Copied to clipboard';
-
-  @override
-  String get tag_emptyHint => 'Add tags to describe your desired image';
-
-  @override
-  String get tag_emptyHintSub => 'You can browse, search, or add tags manually';
-
-  @override
-  String get tagCategory_artist => 'Artist';
-
-  @override
-  String get tagCategory_copyright => 'Copyright';
-
-  @override
-  String get tagCategory_character => 'Character';
-
-  @override
-  String get tagCategory_meta => 'Meta';
-
-  @override
-  String get tagCategory_general => 'General';
 
   @override
   String get qualityTags_label => 'Quality';
@@ -3312,15 +3194,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolbar_fullscreenEdit => 'Fullscreen Edit';
 
   @override
-  String get toolbar_clear => 'Clear';
-
-  @override
-  String get toolbar_confirmClear => 'Confirm Clear';
-
-  @override
-  String get toolbar_settings => 'Settings';
-
-  @override
   String get characterTooltip_noCharacters => 'No characters configured';
 
   @override
@@ -3380,16 +3253,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_settings => 'Settings';
 
   @override
-  String download_completed(Object name) {
-    return '$name download completed';
-  }
-
-  @override
-  String download_failed(Object name) {
-    return '$name download failed';
-  }
-
-  @override
   String get sync_preparing => 'Preparing to sync...';
 
   @override
@@ -3433,24 +3296,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sync_done => 'Sync completed';
 
   @override
-  String get download_tags_data => 'Downloading tags data...';
-
-  @override
-  String get download_cooccurrence_data => 'Downloading cooccurrence data...';
-
-  @override
-  String get download_parsing_data => 'Parsing data...';
-
-  @override
-  String get download_readingFile => 'Reading file...';
-
-  @override
-  String get download_mergingData => 'Merging data...';
-
-  @override
-  String get download_loadComplete => 'Loading complete';
-
-  @override
   String get time_just_now => 'Just now';
 
   @override
@@ -3472,168 +3317,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get time_never_synced => 'Never synced';
 
   @override
-  String get category_selectEmoji => 'Select Emoji';
-
-  @override
-  String get category_noRecentEmoji => 'No recent emojis';
-
-  @override
-  String get category_searchEmoji => 'Search emoji';
-
-  @override
-  String get vibeNoEncodingWarning => 'This image has no pre-encoded data';
-
-  @override
-  String vibeWillCostAnlas(int count) {
-    return 'Encoding will cost $count Anlas';
-  }
-
-  @override
-  String get vibeEncodeConfirm => 'Continue and consume Anlas?';
-
-  @override
-  String get vibeCancel => 'Cancel';
-
-  @override
-  String get vibeConfirmEncode => 'Encode';
-
-  @override
   String get vibeParseFailed => 'Failed to parse Vibe file';
-
-  @override
-  String get tagGroupBrowser_searchHint => 'Search tags...';
-
-  @override
-  String tagGroupBrowser_tagCount(Object count) {
-    return '$count tags';
-  }
-
-  @override
-  String tagGroupBrowser_filteredTagCount(Object filtered, Object total) {
-    return 'Showing $filtered of $total tags';
-  }
-
-  @override
-  String get tagGroupBrowser_noTags => 'No tags';
-
-  @override
-  String get tagGroupBrowser_noLibrary => 'Tag library not loaded';
-
-  @override
-  String get tagGroupBrowser_importLibraryHint =>
-      'Please import a tag library first';
-
-  @override
-  String get tagGroupBrowser_noCategories => 'No enabled tag categories';
-
-  @override
-  String get tagGroupBrowser_enableCategoriesHint =>
-      'Please enable tag categories in settings';
-
-  @override
-  String get tagGroupBrowser_danbooruSuggestions => 'Danbooru Suggestions';
-
-  @override
-  String get tag_favoritesTitle => 'Favorite Tags';
-
-  @override
-  String get tag_favoritesEmpty => 'No favorite tags yet';
-
-  @override
-  String get tag_favoritesEmptyHint =>
-      'Long-press on a tag to add it to favorites';
-
-  @override
-  String get tag_alreadyAdded => 'Tag already added to current prompt';
-
-  @override
-  String get tag_removeFavoriteTitle => 'Remove from Favorites';
-
-  @override
-  String tag_removeFavoriteMessage(Object tag) {
-    return 'Remove \"$tag\" from favorites?';
-  }
-
-  @override
-  String get tag_templatesTitle => 'Tag Templates';
-
-  @override
-  String get tag_templatesEmpty => 'No tag templates yet';
-
-  @override
-  String get tag_templatesEmptyHint =>
-      'Select tags and click the + button to create a template';
-
-  @override
-  String get tag_templateCreate => 'Create Template';
-
-  @override
-  String get tag_templateNameLabel => 'Template Name';
-
-  @override
-  String get tag_templateNameHint => 'Enter template name';
-
-  @override
-  String get tag_templateNameRequired => 'Please enter a template name';
-
-  @override
-  String get tag_templateDescLabel => 'Description (Optional)';
-
-  @override
-  String get tag_templateDescHint => 'Enter template description';
-
-  @override
-  String get tag_templatePreview => 'Tag Preview';
-
-  @override
-  String tag_templateTagCount(Object count) {
-    return '$count tags';
-  }
-
-  @override
-  String tag_templateMoreTags(Object count) {
-    return '$count more tags...';
-  }
-
-  @override
-  String tag_templateInserted(Object name) {
-    return 'Inserted template \"$name\"';
-  }
-
-  @override
-  String get tag_templateNoTags => 'No tags to save';
-
-  @override
-  String get tag_templateSaved => 'Template saved';
-
-  @override
-  String get tag_templateNameExists => 'Template name already exists';
-
-  @override
-  String get tag_templateDeleteTitle => 'Delete Template';
-
-  @override
-  String tag_templateDeleteMessage(Object name) {
-    return 'Delete template \"$name\"?';
-  }
-
-  @override
-  String get tag_categoryGeneral => 'General';
-
-  @override
-  String get tag_categoryArtist => 'Artist';
-
-  @override
-  String get tag_categoryCopyright => 'Copyright';
-
-  @override
-  String get tag_categoryCharacter => 'Character';
-
-  @override
-  String get tag_categoryMeta => 'Meta';
-
-  @override
-  String get tag_countBadgeBreakdown => 'Tag Breakdown';
 
   @override
   String get localGallery_progressiveLoadError => 'Failed to load image';
@@ -4086,113 +3770,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_moveToRoot => 'Move to Root';
 
   @override
-  String get localGallery_folderName => 'Folder Name';
-
-  @override
-  String get localGallery_newFolderName => 'New Name';
-
-  @override
-  String get localGallery_folderNameHint => 'Enter folder name';
-
-  @override
-  String get localGallery_folderCreated => 'Folder created';
-
-  @override
-  String get localGallery_folderCreateFailed => 'Failed to create folder';
-
-  @override
-  String get localGallery_renameFolderTitle => 'Rename Folder';
-
-  @override
-  String get localGallery_renameSuccess => 'Renamed';
-
-  @override
-  String get localGallery_renameFailed => 'Rename failed';
-
-  @override
-  String get localGallery_deleteFolderTitle => 'Delete Folder';
-
-  @override
-  String localGallery_deleteFolderWithImagesContent(Object name, Object count) {
-    return 'Folder \"$name\" contains $count images. Delete it?\n\nNote: this will delete the folder and all images in it. This cannot be undone.';
-  }
-
-  @override
-  String localGallery_deleteEmptyFolderContent(Object name) {
-    return 'Delete empty folder \"$name\"?';
-  }
-
-  @override
-  String get localGallery_folderDeleted => 'Folder deleted';
-
-  @override
-  String get localGallery_folderDeleteFailed => 'Failed to delete folder';
-
-  @override
   String get localGallery_withMetadata => 'With Metadata';
 
   @override
   String get localGallery_skipped => 'Skipped';
-
-  @override
-  String get localGallery_cacheMonitor => 'Cache Monitor';
-
-  @override
-  String get localGallery_threeLayerCacheStats => 'Three-layer Cache Stats';
-
-  @override
-  String localGallery_updatedAt(Object time) {
-    return 'Updated: $time';
-  }
-
-  @override
-  String get localGallery_memoryCache => 'Memory Cache';
-
-  @override
-  String get localGallery_hiveCache => 'Hive Cache';
-
-  @override
-  String get localGallery_sqliteDatabase => 'SQLite Database';
-
-  @override
-  String get localGallery_imageUnit => 'images';
-
-  @override
-  String get localGallery_metadataUnit => 'metadata';
-
-  @override
-  String get localGallery_entriesUnit => 'entries';
-
-  @override
-  String get localGallery_hitRate => 'Hit Rate';
-
-  @override
-  String get localGallery_performanceStats => 'Performance Stats';
-
-  @override
-  String get localGallery_cacheHit => 'Hit';
-
-  @override
-  String get localGallery_cacheMiss => 'Miss';
-
-  @override
-  String get localGallery_clearL1 => 'Clear L1';
-
-  @override
-  String get localGallery_clearL2 => 'Clear L2';
-
-  @override
-  String get localGallery_clearAll => 'Clear All';
-
-  @override
-  String get localGallery_resetStats => 'Reset Stats';
-
-  @override
-  String get localGallery_confirmClearCache => 'Confirm Clear';
-
-  @override
-  String get localGallery_confirmClearCacheContent =>
-      'Clear all caches? This will rescan all images.';
 
   @override
   String get localGallery_clearFilters => 'Clear filters';
@@ -4245,22 +3826,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statistics_noData => 'No statistics available';
-
-  @override
-  String get statistics_generatedCount => 'Generated';
-
-  @override
-  String get statistics_favoriteCount => 'Favorites';
-
-  @override
-  String statistics_tooltipGenerated(Object count) {
-    return 'Generated: $count';
-  }
-
-  @override
-  String statistics_tooltipFavorite(Object count) {
-    return 'Favorites: $count';
-  }
 
   @override
   String get statistics_noTagData => 'No tag data';
@@ -4408,22 +3973,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_resetAdvancedFilters => 'Reset Advanced Filters';
-
-  @override
-  String get localGallery_exportFailed => 'Export failed';
-
-  @override
-  String get bulkExport_format => 'Format';
-
-  @override
-  String get bulkExport_jsonFormat => 'JSON';
-
-  @override
-  String get bulkExport_csvFormat => 'CSV';
-
-  @override
-  String get bulkExport_includeMetadataHint =>
-      'Export generation parameters with images';
 
   @override
   String get localGallery_group_today => 'Today';
@@ -4796,20 +4345,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fixedTags_negativeTitle => 'Undesired Content Fixed Tags';
 
   @override
-  String autocomplete_resultsCount(Object count) {
-    return '$count results';
-  }
-
-  @override
-  String get autocomplete_actionSelect => 'Select';
-
-  @override
-  String get autocomplete_actionConfirm => 'Confirm';
-
-  @override
-  String get autocomplete_actionClose => 'Close';
-
-  @override
   String get autocomplete_categoryCharacter => 'Character';
 
   @override
@@ -4859,9 +4394,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_rename => 'Rename';
-
-  @override
-  String get common_create => 'Create';
 
   @override
   String get tagLibrary_newCategory => 'New Category';
@@ -5749,196 +5281,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vibeBulk_titleDelete => 'Delete Vibes';
-
-  @override
-  String get vibeBulk_titleMove => 'Move Vibes';
-
-  @override
-  String get vibeBulk_titleToggleFavorite => 'Update Favorites';
-
-  @override
-  String get vibeBulk_titleAddTags => 'Add Tags';
-
-  @override
-  String get vibeBulk_titleRemoveTags => 'Remove Tags';
-
-  @override
-  String get vibeBulk_titleExport => 'Export Vibes';
-
-  @override
-  String get vibeBulk_titleImport => 'Import Vibes';
-
-  @override
-  String vibeBulk_processingProgress(int current, int total) {
-    return 'Processing: $current / $total';
-  }
-
-  @override
-  String get vibeBulk_completed => 'Operation complete';
-
-  @override
-  String get vibeBulk_completedWithFailures =>
-      'Operation complete with some failures';
-
-  @override
-  String get vibeBulk_successful => 'Succeeded';
-
-  @override
-  String get vibeBulk_failed => 'Failed';
-
-  @override
-  String get vibeBulk_errorDetails => 'Error details:';
-
-  @override
-  String vibeBulk_moreErrors(int count) {
-    return '...and $count more errors';
-  }
-
-  @override
-  String get vibeBulk_operationFailed => 'Operation failed';
-
-  @override
-  String get vibeBulk_operationFailedHint =>
-      'Check the operation settings and try again.';
-
-  @override
-  String vibeBulk_errorEntryNotFoundOrDeleteFailed(String item) {
-    return '$item was not found or could not be deleted';
-  }
-
-  @override
-  String vibeBulk_errorDeleteFailed(String item, String error) {
-    return 'Failed to delete $item: $error';
-  }
-
-  @override
-  String vibeBulk_errorEntryNotFound(String item) {
-    return 'Entry not found: $item';
-  }
-
-  @override
-  String vibeBulk_errorMoveFailed(String item, String error) {
-    return 'Failed to move $item: $error';
-  }
-
-  @override
-  String vibeBulk_errorFavoriteFailed(String item) {
-    return 'Failed to update favorite status: $item';
-  }
-
-  @override
-  String vibeBulk_errorFavoriteFailedWithDetails(String item, String error) {
-    return 'Failed to update favorite status for $item: $error';
-  }
-
-  @override
-  String vibeBulk_errorAddTagsFailed(String item) {
-    return 'Failed to add tags: $item';
-  }
-
-  @override
-  String vibeBulk_errorAddTagsFailedWithDetails(String item, String error) {
-    return 'Failed to add tags to $item: $error';
-  }
-
-  @override
-  String vibeBulk_errorRemoveTagsFailed(String item) {
-    return 'Failed to remove tags: $item';
-  }
-
-  @override
-  String vibeBulk_errorRemoveTagsFailedWithDetails(String item, String error) {
-    return 'Failed to remove tags from $item: $error';
-  }
-
-  @override
-  String get vibeBulk_errorExportNoFile =>
-      'Export failed because no file was created';
-
-  @override
-  String vibeBulk_errorExportFailed(String error) {
-    return 'Export failed: $error';
-  }
-
-  @override
-  String vibeBulk_errorFileNotFound(String item) {
-    return 'File not found: $item';
-  }
-
-  @override
-  String vibeBulk_errorNoVibeData(String item) {
-    return 'No valid Vibe data was found in $item';
-  }
-
-  @override
-  String vibeBulk_errorImportFailed(String item, String error) {
-    return 'Failed to import Vibe from $item: $error';
-  }
-
-  @override
-  String vibeBulk_errorProcessFileFailed(String item, String error) {
-    return 'Failed to process $item: $error';
-  }
-
-  @override
-  String get vibeBulkTag_title => 'Edit Tags in Bulk';
-
-  @override
-  String vibeBulkTag_selectedCount(int count) {
-    return '$count Vibes selected';
-  }
-
-  @override
-  String get vibeBulkTag_inputHint => 'Enter a new tag...';
-
-  @override
-  String get vibeBulkTag_noTags => 'No tags';
-
-  @override
-  String get vibeBulkTag_noTagsHint =>
-      'Add tags to make filtering and management easier';
-
-  @override
-  String vibeBulkTag_currentTags(int count) {
-    return 'Current tags ($count)';
-  }
-
-  @override
-  String vibeBulkTag_pendingRemoval(int count) {
-    return 'Tags to remove ($count)';
-  }
-
-  @override
-  String get vibeBulkTag_removeTag => 'Remove tag';
-
-  @override
   String get vibeBulkTag_actionPreview => 'Change preview';
-
-  @override
-  String vibeBulkTag_addTagsSummary(String tags) {
-    return 'Add tags: $tags';
-  }
-
-  @override
-  String vibeBulkTag_removeTagsSummary(String tags) {
-    return 'Remove tags: $tags';
-  }
-
-  @override
-  String get vibeBulkTag_noChanges => 'There are no changes to apply';
-
-  @override
-  String get vibeBulkCategory_title => 'Select Target Category';
-
-  @override
-  String vibeBulkCategory_moveCount(int count) {
-    return 'Move $count Vibes to:';
-  }
-
-  @override
-  String get vibeBulkCategory_cannotMoveToCurrent =>
-      'Cannot move to the current category';
 
   @override
   String get vibeDetail_strengthDescription =>
@@ -6386,11 +5729,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vibe_import_importFailed => 'Import failed';
 
   @override
-  String vibe_import_failedWithError(String error) {
-    return 'Import failed: $error';
-  }
-
-  @override
   String get vibe_import_bundleTitle => 'Import Vibe Bundle';
 
   @override
@@ -6486,15 +5824,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vibe_maxReached => 'Maximum 16 vibes reached';
-
-  @override
-  String get vibe_maxReachedRemoveSome =>
-      'Maximum 16 vibes reached. Remove some vibes first.';
-
-  @override
-  String vibe_addedNamed(String name) {
-    return 'Added Vibe: $name';
-  }
 
   @override
   String vibe_addedCount(int count) {
@@ -8299,12 +7628,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_emptyValue => '(Empty)';
 
   @override
-  String get common_previewLoadFailed => 'Failed to load preview';
-
-  @override
-  String get common_clickToRefresh => 'Click to refresh';
-
-  @override
   String get common_clickToRetry => 'Click to retry';
 
   @override
@@ -8361,9 +7684,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String vibe_import_reencodeFailed(String name) {
     return 'Failed to re-encode Vibe: $name';
   }
-
-  @override
-  String get localGallery_createFolder => 'Create Folder';
 
   @override
   String galleryScan_failed(int count) {
@@ -8486,17 +7806,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_translating => 'Translating…';
-
-  @override
-  String get autocomplete_missingTranslation => 'Not translated';
-
-  @override
-  String autocomplete_aliasMatch(String alias) {
-    return 'Alias: $alias';
-  }
-
-  @override
   String get autocomplete_resultLimit => 'Result count';
 
   @override
@@ -8541,10 +7850,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No local article for this tag yet.';
 
   @override
-  String get autocomplete_danbooruPrivacy =>
-      'Only the current English tag is sent; the full prompt is never uploaded';
-
-  @override
   String get autocomplete_cooccurrence => 'Offline related-tag database';
 
   @override
@@ -8570,75 +7875,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String autocomplete_catalogStatus(String count, String version) {
     return '$count tags · data version $version';
   }
-
-  @override
-  String get autocomplete_sourceBase => 'Bundled base catalog';
-
-  @override
-  String get autocomplete_sourceApi => 'Danbooru API';
-
-  @override
-  String get autocomplete_sourceRelated => 'Offline related tags';
-
-  @override
-  String get autocomplete_sourceAi => 'Prompt Assistant translation';
-
-  @override
-  String get autocomplete_headerTitle => 'Tag autocomplete';
-
-  @override
-  String get autocomplete_relatedHeaderTitle => 'Related tags';
-
-  @override
-  String get autocomplete_relatedLoading =>
-      'Querying offline co-occurrences and online related tags…';
-
-  @override
-  String get autocomplete_relatedEmpty => 'No related tags are available';
-
-  @override
-  String autocomplete_relatedMetric(int count, String score) {
-    return '$count co-occurrences · Jaccard $score';
-  }
-
-  @override
-  String get autocomplete_relatedPin =>
-      'Pin this tag to insert multiple related tags';
-
-  @override
-  String get autocomplete_relatedUnpin =>
-      'Unpin and resume chained recommendations';
-
-  @override
-  String get autocomplete_statusBase => 'Local';
-
-  @override
-  String get autocomplete_statusRelated => 'Related';
-
-  @override
-  String get autocomplete_statusOnline => 'Online';
-
-  @override
-  String get autocomplete_statusAi => 'AI';
-
-  @override
-  String get autocomplete_statusReady => 'Ready';
-
-  @override
-  String get autocomplete_statusError => 'Error';
-
-  @override
-  String get autocomplete_statusDisabled => 'Off';
-
-  @override
-  String get autocomplete_statusSearching => 'Searching';
-
-  @override
-  String get autocomplete_statusTranslating => 'Translating';
-
-  @override
-  String get autocomplete_openSettings =>
-      'Open autocomplete and data source settings';
 
   @override
   String get nav_promptBlockLibrary => 'Prompt Blocks';
@@ -12452,9 +11688,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drop_dragToShare => 'Drag to share';
 
   @override
-  String get progress_cancelled => 'Cancelled';
-
-  @override
   String promptSyntax_weightTooLarge(Object value) {
     return 'Numeric weight is too large: $value::';
   }
@@ -12850,26 +12083,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The API address cannot contain query parameters, fragments or user info';
 
   @override
-  String gallery_initFailed(Object error) {
-    return 'Initialization failed: $error';
-  }
-
-  @override
-  String gallery_loadFoldersFailed(Object error) {
-    return 'Failed to load folders: $error';
-  }
-
-  @override
-  String gallery_refreshFailed(Object error) {
-    return 'Refresh failed: $error';
-  }
-
-  @override
-  String gallery_clearCacheFailed(Object error) {
-    return 'Failed to clear the cache: $error';
-  }
-
-  @override
   String gallery_folderInaccessible(Object error) {
     return 'Cannot access the image folder: $error';
   }
@@ -12883,10 +12096,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String gallery_galleryInitFailed(Object error) {
     return 'Gallery initialization failed: $error';
   }
-
-  @override
-  String get cache_clearInProgress =>
-      'A clear operation is already in progress';
 
   @override
   String vibeImport_imageProgress(Object current, Object total, Object source) {

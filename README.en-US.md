@@ -233,7 +233,7 @@ nai_launcher/
 │   ├── data/               # API clients, models, repositories, and business data services
 │   ├── l10n/               # Simplified/Traditional Chinese, English, and Japanese UI strings and generated files
 │   └── presentation/       # Pages, components, state management, themes, and routing
-├── scripts/                # Build, signing, database, and testing helper scripts
+├── scripts/                # Build, packaging, signing, hot reload, and validation scripts
 ├── test/                   # Unit tests and widget tests
 ├── tool/                   # Dev tools, data processing, icon generation, and diagnostic scripts
 └── windows/                # Windows runner

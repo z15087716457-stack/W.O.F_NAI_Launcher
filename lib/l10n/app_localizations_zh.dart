@@ -325,9 +325,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auth_toggleVisibility => '显示 / 隐藏';
 
   @override
-  String get auth_loggedIn => '已登录';
-
-  @override
   String get auth_emailRequired => '请输入邮箱';
 
   @override
@@ -389,18 +386,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get auth_tokenGuide => '从 NovelAI 账户设置获取 Token';
 
   @override
-  String get auth_savedAccounts => '已保存的账号';
-
-  @override
   String get auth_addAccount => '添加账号';
-
-  @override
-  String get auth_manageAccounts => '管理';
-
-  @override
-  String auth_moreAccounts(Object count) {
-    return '还有 $count 个账号';
-  }
 
   @override
   String get auth_tokenNotFound => '未找到此账号的 Token';
@@ -729,21 +715,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_defaultAccount => '默认';
 
   @override
-  String get settings_editNickname => '编辑昵称';
-
-  @override
   String get settings_nickname => '昵称';
-
-  @override
-  String get settings_nicknameHint => '输入2-32个字符';
-
-  @override
-  String get settings_nicknameEmpty => '请输入昵称';
-
-  @override
-  String settings_nicknameTooLong(int maxLength) {
-    return '昵称不能超过$maxLength个字符';
-  }
 
   @override
   String get settings_nicknameUpdated => '昵称已更新';
@@ -1525,12 +1497,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get editor_toolBlur => '模糊';
 
   @override
-  String get editor_shortcutUndo => '撤销 (Ctrl+Z)';
-
-  @override
-  String get editor_shortcutRedo => '重做 (Ctrl+Y)';
-
-  @override
   String get editor_back => '返回';
 
   @override
@@ -1556,9 +1522,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_fitToWindow => '适应窗口';
-
-  @override
-  String get editor_tempColorPickerShortcut => 'Alt+点击: 临时取色';
 
   @override
   String get editor_shortcutHelpTitle => '快捷键帮助';
@@ -2636,21 +2599,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tooltip_increaseWeight => '增加权重 [+5%]';
 
   @override
-  String get tooltip_edit => '编辑';
-
-  @override
-  String get tooltip_copy => '复制';
-
-  @override
-  String get tooltip_delete => '删除';
-
-  @override
-  String get tooltip_enable => '启用';
-
-  @override
-  String get tooltip_disable => '禁用';
-
-  @override
   String get tooltip_resetWeight => '点击重置为100%';
 
   @override
@@ -2746,72 +2694,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gelbooru_unknownError => 'Gelbooru 验证失败，请稍后重试。';
 
   @override
-  String get weight_title => '权重';
-
-  @override
-  String get weight_reset => '重置';
-
-  @override
-  String get weight_done => '完成';
-
-  @override
-  String get weight_noBrackets => '无括号';
-
-  @override
-  String get weight_editTag => '编辑标签';
-
-  @override
-  String get weight_tagName => '标签名称';
-
-  @override
-  String get weight_tagNameHint => '输入标签名称...';
-
-  @override
-  String tag_selected(Object count) {
-    return '已选 $count';
-  }
-
-  @override
-  String get tag_enable => '启用';
-
-  @override
-  String get tag_disable => '禁用';
-
-  @override
-  String get tag_delete => '删除';
-
-  @override
   String get tag_addTag => '添加标签';
-
-  @override
-  String get tag_add => '添加';
-
-  @override
-  String get tag_inputHint => '输入标签...';
-
-  @override
-  String get tag_copiedToClipboard => '已复制到剪贴板';
-
-  @override
-  String get tag_emptyHint => '添加标签来描述你想要的画面';
-
-  @override
-  String get tag_emptyHintSub => '你可以浏览、搜索或手动添加标签';
-
-  @override
-  String get tagCategory_artist => '艺术家';
-
-  @override
-  String get tagCategory_copyright => '版权';
-
-  @override
-  String get tagCategory_character => '角色';
-
-  @override
-  String get tagCategory_meta => '元数据';
-
-  @override
-  String get tagCategory_general => '通用';
 
   @override
   String get qualityTags_label => '质量词';
@@ -3187,15 +3070,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toolbar_fullscreenEdit => '全屏编辑';
 
   @override
-  String get toolbar_clear => '清空';
-
-  @override
-  String get toolbar_confirmClear => '确认清空';
-
-  @override
-  String get toolbar_settings => '设置';
-
-  @override
   String get characterTooltip_noCharacters => '未配置角色';
 
   @override
@@ -3254,16 +3128,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_settings => '设置';
 
   @override
-  String download_completed(Object name) {
-    return '$name下载完成';
-  }
-
-  @override
-  String download_failed(Object name) {
-    return '$name下载失败';
-  }
-
-  @override
   String get sync_preparing => '准备同步...';
 
   @override
@@ -3307,24 +3171,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sync_done => '同步完成';
 
   @override
-  String get download_tags_data => '正在下载标签数据...';
-
-  @override
-  String get download_cooccurrence_data => '正在下载共现标签数据...';
-
-  @override
-  String get download_parsing_data => '正在解析数据...';
-
-  @override
-  String get download_readingFile => '正在读取文件...';
-
-  @override
-  String get download_mergingData => '正在合并数据...';
-
-  @override
-  String get download_loadComplete => '加载完成';
-
-  @override
   String get time_just_now => '刚刚';
 
   @override
@@ -3346,164 +3192,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get time_never_synced => '从未同步';
 
   @override
-  String get category_selectEmoji => '选择 Emoji';
-
-  @override
-  String get category_noRecentEmoji => '暂无最近使用的 Emoji';
-
-  @override
-  String get category_searchEmoji => '搜索 Emoji';
-
-  @override
-  String get vibeNoEncodingWarning => '此图片没有预编码数据';
-
-  @override
-  String vibeWillCostAnlas(int count) {
-    return '编码将消耗 $count Anlas';
-  }
-
-  @override
-  String get vibeEncodeConfirm => '是否继续添加并消耗点数？';
-
-  @override
-  String get vibeCancel => '取消';
-
-  @override
-  String get vibeConfirmEncode => '确认编码';
-
-  @override
   String get vibeParseFailed => '无法解析 Vibe 文件';
-
-  @override
-  String get tagGroupBrowser_searchHint => '搜索标签...';
-
-  @override
-  String tagGroupBrowser_tagCount(Object count) {
-    return '$count个标签';
-  }
-
-  @override
-  String tagGroupBrowser_filteredTagCount(Object filtered, Object total) {
-    return '显示 $filtered 个，共 $total 个标签';
-  }
-
-  @override
-  String get tagGroupBrowser_noTags => '暂无标签';
-
-  @override
-  String get tagGroupBrowser_noLibrary => '词库未加载';
-
-  @override
-  String get tagGroupBrowser_importLibraryHint => '请先导入标签词库';
-
-  @override
-  String get tagGroupBrowser_noCategories => '没有启用的标签分类';
-
-  @override
-  String get tagGroupBrowser_enableCategoriesHint => '请在设置中启用标签分类';
-
-  @override
-  String get tagGroupBrowser_danbooruSuggestions => 'Danbooru 建议';
-
-  @override
-  String get tag_favoritesTitle => '收藏标签';
-
-  @override
-  String get tag_favoritesEmpty => '暂无收藏标签';
-
-  @override
-  String get tag_favoritesEmptyHint => '长按标签即可添加到收藏';
-
-  @override
-  String get tag_alreadyAdded => '该标签已在当前提示词中';
-
-  @override
-  String get tag_removeFavoriteTitle => '移除收藏';
-
-  @override
-  String tag_removeFavoriteMessage(Object tag) {
-    return '确定要移除收藏的标签「$tag」吗？';
-  }
-
-  @override
-  String get tag_templatesTitle => '标签模板';
-
-  @override
-  String get tag_templatesEmpty => '暂无标签模板';
-
-  @override
-  String get tag_templatesEmptyHint => '选择标签后点击右上角的 + 按钮创建模板';
-
-  @override
-  String get tag_templateCreate => '创建模板';
-
-  @override
-  String get tag_templateNameLabel => '模板名称';
-
-  @override
-  String get tag_templateNameHint => '输入模板名称';
-
-  @override
-  String get tag_templateNameRequired => '请输入模板名称';
-
-  @override
-  String get tag_templateDescLabel => '模板描述（可选）';
-
-  @override
-  String get tag_templateDescHint => '输入模板描述';
-
-  @override
-  String get tag_templatePreview => '标签预览';
-
-  @override
-  String tag_templateTagCount(Object count) {
-    return '$count 个标签';
-  }
-
-  @override
-  String tag_templateMoreTags(Object count) {
-    return '还有 $count 个标签...';
-  }
-
-  @override
-  String tag_templateInserted(Object name) {
-    return '已插入模板「$name」';
-  }
-
-  @override
-  String get tag_templateNoTags => '没有可保存的标签';
-
-  @override
-  String get tag_templateSaved => '模板已保存';
-
-  @override
-  String get tag_templateNameExists => '模板名称已存在';
-
-  @override
-  String get tag_templateDeleteTitle => '删除模板';
-
-  @override
-  String tag_templateDeleteMessage(Object name) {
-    return '确定要删除模板「$name」吗？';
-  }
-
-  @override
-  String get tag_categoryGeneral => '通用';
-
-  @override
-  String get tag_categoryArtist => '画师';
-
-  @override
-  String get tag_categoryCopyright => '版权';
-
-  @override
-  String get tag_categoryCharacter => '角色';
-
-  @override
-  String get tag_categoryMeta => '元数据';
-
-  @override
-  String get tag_countBadgeBreakdown => '标签分类统计';
 
   @override
   String get localGallery_progressiveLoadError => '图片加载失败';
@@ -3935,112 +3624,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_moveToRoot => '移至根目录';
 
   @override
-  String get localGallery_folderName => '文件夹名称';
-
-  @override
-  String get localGallery_newFolderName => '新名称';
-
-  @override
-  String get localGallery_folderNameHint => '输入文件夹名称';
-
-  @override
-  String get localGallery_folderCreated => '文件夹创建成功';
-
-  @override
-  String get localGallery_folderCreateFailed => '文件夹创建失败';
-
-  @override
-  String get localGallery_renameFolderTitle => '重命名文件夹';
-
-  @override
-  String get localGallery_renameSuccess => '重命名成功';
-
-  @override
-  String get localGallery_renameFailed => '重命名失败';
-
-  @override
-  String get localGallery_deleteFolderTitle => '删除文件夹';
-
-  @override
-  String localGallery_deleteFolderWithImagesContent(Object name, Object count) {
-    return '文件夹「$name」包含 $count 张图片，确定要删除吗？\n\n注意：此操作会删除文件夹及其中的所有图片，无法恢复。';
-  }
-
-  @override
-  String localGallery_deleteEmptyFolderContent(Object name) {
-    return '确定要删除空文件夹「$name」吗？';
-  }
-
-  @override
-  String get localGallery_folderDeleted => '文件夹已删除';
-
-  @override
-  String get localGallery_folderDeleteFailed => '删除文件夹失败';
-
-  @override
   String get localGallery_withMetadata => '有元数据';
 
   @override
   String get localGallery_skipped => '跳过';
-
-  @override
-  String get localGallery_cacheMonitor => '缓存监控';
-
-  @override
-  String get localGallery_threeLayerCacheStats => '三层缓存统计';
-
-  @override
-  String localGallery_updatedAt(Object time) {
-    return '更新: $time';
-  }
-
-  @override
-  String get localGallery_memoryCache => '内存缓存';
-
-  @override
-  String get localGallery_hiveCache => 'Hive 缓存';
-
-  @override
-  String get localGallery_sqliteDatabase => 'SQLite 数据库';
-
-  @override
-  String get localGallery_imageUnit => '图片';
-
-  @override
-  String get localGallery_metadataUnit => '元数据';
-
-  @override
-  String get localGallery_entriesUnit => '条目';
-
-  @override
-  String get localGallery_hitRate => '命中率';
-
-  @override
-  String get localGallery_performanceStats => '性能监控统计';
-
-  @override
-  String get localGallery_cacheHit => '命中';
-
-  @override
-  String get localGallery_cacheMiss => '未命中';
-
-  @override
-  String get localGallery_clearL1 => '清除 L1';
-
-  @override
-  String get localGallery_clearL2 => '清除 L2';
-
-  @override
-  String get localGallery_clearAll => '清除全部';
-
-  @override
-  String get localGallery_resetStats => '重置统计';
-
-  @override
-  String get localGallery_confirmClearCache => '确认清除';
-
-  @override
-  String get localGallery_confirmClearCacheContent => '确定要清除所有缓存吗？这将重新扫描所有图片。';
 
   @override
   String get localGallery_clearFilters => '清除筛选';
@@ -4092,22 +3679,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get statistics_noData => '暂无统计数据';
-
-  @override
-  String get statistics_generatedCount => '生成数量';
-
-  @override
-  String get statistics_favoriteCount => '收藏数';
-
-  @override
-  String statistics_tooltipGenerated(Object count) {
-    return '生成数量: $count';
-  }
-
-  @override
-  String statistics_tooltipFavorite(Object count) {
-    return '收藏数: $count';
-  }
 
   @override
   String get statistics_noTagData => '暂无标签数据';
@@ -4252,21 +3823,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localGallery_resetAdvancedFilters => '重置高级筛选';
-
-  @override
-  String get localGallery_exportFailed => '导出失败';
-
-  @override
-  String get bulkExport_format => '导出格式';
-
-  @override
-  String get bulkExport_jsonFormat => 'JSON';
-
-  @override
-  String get bulkExport_csvFormat => 'CSV';
-
-  @override
-  String get bulkExport_includeMetadataHint => '导出生成参数等信息';
 
   @override
   String get localGallery_group_today => '今天';
@@ -4629,20 +4185,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fixedTags_negativeTitle => '负向固定词';
 
   @override
-  String autocomplete_resultsCount(Object count) {
-    return '$count 个结果';
-  }
-
-  @override
-  String get autocomplete_actionSelect => '选择';
-
-  @override
-  String get autocomplete_actionConfirm => '确认';
-
-  @override
-  String get autocomplete_actionClose => '关闭';
-
-  @override
   String get autocomplete_categoryCharacter => '角色';
 
   @override
@@ -4692,9 +4234,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_rename => '重命名';
-
-  @override
-  String get common_create => '创建';
 
   @override
   String get tagLibrary_newCategory => '新建分类';
@@ -5563,191 +5102,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get vibeBulk_titleDelete => '批量删除';
-
-  @override
-  String get vibeBulk_titleMove => '批量移动';
-
-  @override
-  String get vibeBulk_titleToggleFavorite => '批量更新收藏';
-
-  @override
-  String get vibeBulk_titleAddTags => '批量添加标签';
-
-  @override
-  String get vibeBulk_titleRemoveTags => '批量移除标签';
-
-  @override
-  String get vibeBulk_titleExport => '批量导出';
-
-  @override
-  String get vibeBulk_titleImport => '批量导入';
-
-  @override
-  String vibeBulk_processingProgress(int current, int total) {
-    return '正在处理：$current / $total';
-  }
-
-  @override
-  String get vibeBulk_completed => '操作完成';
-
-  @override
-  String get vibeBulk_completedWithFailures => '操作完成（部分失败）';
-
-  @override
-  String get vibeBulk_successful => '成功';
-
-  @override
-  String get vibeBulk_failed => '失败';
-
-  @override
-  String get vibeBulk_errorDetails => '错误详情：';
-
-  @override
-  String vibeBulk_moreErrors(int count) {
-    return '……另有 $count 个错误';
-  }
-
-  @override
-  String get vibeBulk_operationFailed => '操作失败';
-
-  @override
-  String get vibeBulk_operationFailedHint => '请检查操作设置后重试。';
-
-  @override
-  String vibeBulk_errorEntryNotFoundOrDeleteFailed(String item) {
-    return '未找到 $item 或删除失败';
-  }
-
-  @override
-  String vibeBulk_errorDeleteFailed(String item, String error) {
-    return '删除 $item 失败：$error';
-  }
-
-  @override
-  String vibeBulk_errorEntryNotFound(String item) {
-    return '未找到条目：$item';
-  }
-
-  @override
-  String vibeBulk_errorMoveFailed(String item, String error) {
-    return '移动 $item 失败：$error';
-  }
-
-  @override
-  String vibeBulk_errorFavoriteFailed(String item) {
-    return '更新收藏状态失败：$item';
-  }
-
-  @override
-  String vibeBulk_errorFavoriteFailedWithDetails(String item, String error) {
-    return '更新 $item 的收藏状态失败：$error';
-  }
-
-  @override
-  String vibeBulk_errorAddTagsFailed(String item) {
-    return '添加标签失败：$item';
-  }
-
-  @override
-  String vibeBulk_errorAddTagsFailedWithDetails(String item, String error) {
-    return '为 $item 添加标签失败：$error';
-  }
-
-  @override
-  String vibeBulk_errorRemoveTagsFailed(String item) {
-    return '移除标签失败：$item';
-  }
-
-  @override
-  String vibeBulk_errorRemoveTagsFailedWithDetails(String item, String error) {
-    return '从 $item 移除标签失败：$error';
-  }
-
-  @override
-  String get vibeBulk_errorExportNoFile => '导出失败：未创建文件';
-
-  @override
-  String vibeBulk_errorExportFailed(String error) {
-    return '导出失败：$error';
-  }
-
-  @override
-  String vibeBulk_errorFileNotFound(String item) {
-    return '未找到文件：$item';
-  }
-
-  @override
-  String vibeBulk_errorNoVibeData(String item) {
-    return '$item 中没有有效的 Vibe 数据';
-  }
-
-  @override
-  String vibeBulk_errorImportFailed(String item, String error) {
-    return '从 $item 导入 Vibe 失败：$error';
-  }
-
-  @override
-  String vibeBulk_errorProcessFileFailed(String item, String error) {
-    return '处理 $item 失败：$error';
-  }
-
-  @override
-  String get vibeBulkTag_title => '批量编辑标签';
-
-  @override
-  String vibeBulkTag_selectedCount(int count) {
-    return '已选中 $count 个 Vibe';
-  }
-
-  @override
-  String get vibeBulkTag_inputHint => '输入新标签……';
-
-  @override
-  String get vibeBulkTag_noTags => '暂无标签';
-
-  @override
-  String get vibeBulkTag_noTagsHint => '添加标签以方便筛选和管理';
-
-  @override
-  String vibeBulkTag_currentTags(int count) {
-    return '当前标签（$count）';
-  }
-
-  @override
-  String vibeBulkTag_pendingRemoval(int count) {
-    return '待移除标签（$count）';
-  }
-
-  @override
-  String get vibeBulkTag_removeTag => '移除标签';
-
-  @override
   String get vibeBulkTag_actionPreview => '操作预览';
-
-  @override
-  String vibeBulkTag_addTagsSummary(String tags) {
-    return '添加标签：$tags';
-  }
-
-  @override
-  String vibeBulkTag_removeTagsSummary(String tags) {
-    return '移除标签：$tags';
-  }
-
-  @override
-  String get vibeBulkTag_noChanges => '没有要应用的更改';
-
-  @override
-  String get vibeBulkCategory_title => '选择目标分类';
-
-  @override
-  String vibeBulkCategory_moveCount(int count) {
-    return '将 $count 个 Vibe 移动到：';
-  }
-
-  @override
-  String get vibeBulkCategory_cannotMoveToCurrent => '不能移动到当前所在分类';
 
   @override
   String get vibeDetail_strengthDescription => '控制 Vibe 对生成结果的影响强度';
@@ -6176,11 +5531,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vibe_import_importFailed => '导入失败';
 
   @override
-  String vibe_import_failedWithError(String error) {
-    return '导入失败: $error';
-  }
-
-  @override
   String get vibe_import_bundleTitle => '导入 Vibe Bundle';
 
   @override
@@ -6271,14 +5621,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vibe_maxReached => '已达到最大数量 (16张)';
-
-  @override
-  String get vibe_maxReachedRemoveSome => '已达到最大数量 (16张)，请先移除一些 Vibe';
-
-  @override
-  String vibe_addedNamed(String name) {
-    return '已添加 Vibe: $name';
-  }
 
   @override
   String vibe_addedCount(int count) {
@@ -8008,12 +7350,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_emptyValue => '（空）';
 
   @override
-  String get common_previewLoadFailed => '无法加载预览';
-
-  @override
-  String get common_clickToRefresh => '点击刷新';
-
-  @override
   String get common_clickToRetry => '点击重试';
 
   @override
@@ -8066,9 +7402,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String vibe_import_reencodeFailed(String name) {
     return 'Vibe 重新编码失败: $name';
   }
-
-  @override
-  String get localGallery_createFolder => '创建文件夹';
 
   @override
   String galleryScan_failed(int count) {
@@ -8187,17 +7520,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_translating => '翻译中…';
-
-  @override
-  String get autocomplete_missingTranslation => '未汉化';
-
-  @override
-  String autocomplete_aliasMatch(String alias) {
-    return '别名：$alias';
-  }
-
-  @override
   String get autocomplete_resultLimit => '结果数量';
 
   @override
@@ -8240,9 +7562,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagExpansion_wikiUnavailable => '本地暂未收录这个标签的释义。';
 
   @override
-  String get autocomplete_danbooruPrivacy => '仅发送当前英文标签，不会上传完整提示词';
-
-  @override
   String get autocomplete_cooccurrence => '离线相关标签库';
 
   @override
@@ -8268,71 +7587,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String autocomplete_catalogStatus(String count, String version) {
     return '$count 个标签 · 数据版本 $version';
   }
-
-  @override
-  String get autocomplete_sourceBase => '随应用提供的基础词库';
-
-  @override
-  String get autocomplete_sourceApi => 'Danbooru API';
-
-  @override
-  String get autocomplete_sourceRelated => '离线相关标签';
-
-  @override
-  String get autocomplete_sourceAi => 'Prompt Assistant 汉化';
-
-  @override
-  String get autocomplete_headerTitle => '标签补全';
-
-  @override
-  String get autocomplete_relatedHeaderTitle => '相关标签';
-
-  @override
-  String get autocomplete_relatedLoading => '正在查询本地共现库与在线相关标签…';
-
-  @override
-  String get autocomplete_relatedEmpty => '没有找到可用的相关标签';
-
-  @override
-  String autocomplete_relatedMetric(int count, String score) {
-    return '共现 $count 次 · Jaccard $score';
-  }
-
-  @override
-  String get autocomplete_relatedPin => '固定当前标签，可连续插入相关标签';
-
-  @override
-  String get autocomplete_relatedUnpin => '取消固定并继续链式推荐';
-
-  @override
-  String get autocomplete_statusBase => '本地';
-
-  @override
-  String get autocomplete_statusRelated => '共现';
-
-  @override
-  String get autocomplete_statusOnline => '在线';
-
-  @override
-  String get autocomplete_statusAi => 'AI';
-
-  @override
-  String get autocomplete_statusReady => '就绪';
-
-  @override
-  String get autocomplete_statusError => '异常';
-
-  @override
-  String get autocomplete_statusDisabled => '已关闭';
-
-  @override
-  String get autocomplete_statusSearching => '查询中';
-
-  @override
-  String get autocomplete_statusTranslating => '翻译中';
-
-  @override
-  String get autocomplete_openSettings => '打开补全与数据源设置';
 
   @override
   String get nav_promptBlockLibrary => '提示词块';
@@ -11889,9 +11143,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get drop_dragToShare => '拖拽以分享';
 
   @override
-  String get progress_cancelled => '已取消';
-
-  @override
   String promptSyntax_weightTooLarge(Object value) {
     return '数值权重绝对值过大：$value::';
   }
@@ -12257,26 +11508,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get apiEndpoint_noExtras => 'API 地址不能包含查询参数、片段或用户信息';
 
   @override
-  String gallery_initFailed(Object error) {
-    return '初始化失败: $error';
-  }
-
-  @override
-  String gallery_loadFoldersFailed(Object error) {
-    return '加载文件夹失败: $error';
-  }
-
-  @override
-  String gallery_refreshFailed(Object error) {
-    return '刷新失败: $error';
-  }
-
-  @override
-  String gallery_clearCacheFailed(Object error) {
-    return '清除缓存失败: $error';
-  }
-
-  @override
   String gallery_folderInaccessible(Object error) {
     return '无法访问图片文件夹: $error';
   }
@@ -12290,9 +11521,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String gallery_galleryInitFailed(Object error) {
     return '画廊初始化失败: $error';
   }
-
-  @override
-  String get cache_clearInProgress => '清除操作正在进行中';
 
   @override
   String vibeImport_imageProgress(Object current, Object total, Object source) {
@@ -12635,9 +11863,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get auth_toggleVisibility => '顯示 / 隱藏';
 
   @override
-  String get auth_loggedIn => '已登入';
-
-  @override
   String get auth_emailRequired => '請輸入電子郵件';
 
   @override
@@ -12699,18 +11924,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get auth_tokenGuide => '從 NovelAI 帳戶設定取得 Token';
 
   @override
-  String get auth_savedAccounts => '已儲存的帳號';
-
-  @override
   String get auth_addAccount => '新增帳號';
-
-  @override
-  String get auth_manageAccounts => '管理';
-
-  @override
-  String auth_moreAccounts(Object count) {
-    return '還有 $count 個帳號';
-  }
 
   @override
   String get auth_tokenNotFound => '未找到此帳號的 Token';
@@ -13039,21 +12253,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_defaultAccount => '預設';
 
   @override
-  String get settings_editNickname => '編輯暱稱';
-
-  @override
   String get settings_nickname => '暱稱';
-
-  @override
-  String get settings_nicknameHint => '輸入2-32個字元';
-
-  @override
-  String get settings_nicknameEmpty => '請輸入暱稱';
-
-  @override
-  String settings_nicknameTooLong(int maxLength) {
-    return '暱稱不能超過$maxLength個字元';
-  }
 
   @override
   String get settings_nicknameUpdated => '暱稱已更新';
@@ -13835,12 +13035,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get editor_toolBlur => '模糊';
 
   @override
-  String get editor_shortcutUndo => '復原 (Ctrl+Z)';
-
-  @override
-  String get editor_shortcutRedo => '重做 (Ctrl+Y)';
-
-  @override
   String get editor_back => '返回';
 
   @override
@@ -13866,9 +13060,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editor_fitToWindow => '適應視窗';
-
-  @override
-  String get editor_tempColorPickerShortcut => 'Alt+點選: 臨時取色';
 
   @override
   String get editor_shortcutHelpTitle => '快速鍵幫助';
@@ -14946,21 +14137,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get tooltip_increaseWeight => '增加權重 [+5%]';
 
   @override
-  String get tooltip_edit => '編輯';
-
-  @override
-  String get tooltip_copy => '複製';
-
-  @override
-  String get tooltip_delete => '刪除';
-
-  @override
-  String get tooltip_enable => '啟用';
-
-  @override
-  String get tooltip_disable => '停用';
-
-  @override
   String get tooltip_resetWeight => '點選重設為100%';
 
   @override
@@ -15056,72 +14232,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get gelbooru_unknownError => 'Gelbooru 驗證失敗，請稍後重試。';
 
   @override
-  String get weight_title => '權重';
-
-  @override
-  String get weight_reset => '重設';
-
-  @override
-  String get weight_done => '完成';
-
-  @override
-  String get weight_noBrackets => '無括號';
-
-  @override
-  String get weight_editTag => '編輯標籤';
-
-  @override
-  String get weight_tagName => '標籤名稱';
-
-  @override
-  String get weight_tagNameHint => '輸入標籤名稱...';
-
-  @override
-  String tag_selected(Object count) {
-    return '已選 $count';
-  }
-
-  @override
-  String get tag_enable => '啟用';
-
-  @override
-  String get tag_disable => '停用';
-
-  @override
-  String get tag_delete => '刪除';
-
-  @override
   String get tag_addTag => '新增標籤';
-
-  @override
-  String get tag_add => '新增';
-
-  @override
-  String get tag_inputHint => '輸入標籤...';
-
-  @override
-  String get tag_copiedToClipboard => '已複製到剪貼簿';
-
-  @override
-  String get tag_emptyHint => '新增標籤來描述你想要的畫面';
-
-  @override
-  String get tag_emptyHintSub => '你可以瀏覽、搜尋或手動新增標籤';
-
-  @override
-  String get tagCategory_artist => '藝術家';
-
-  @override
-  String get tagCategory_copyright => '版權';
-
-  @override
-  String get tagCategory_character => '角色';
-
-  @override
-  String get tagCategory_meta => '後設資料';
-
-  @override
-  String get tagCategory_general => '通用';
 
   @override
   String get qualityTags_label => '品質詞';
@@ -15497,15 +14608,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get toolbar_fullscreenEdit => '全屏編輯';
 
   @override
-  String get toolbar_clear => '清空';
-
-  @override
-  String get toolbar_confirmClear => '確認清空';
-
-  @override
-  String get toolbar_settings => '設定';
-
-  @override
   String get characterTooltip_noCharacters => '未配置角色';
 
   @override
@@ -15564,16 +14666,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get nav_settings => '設定';
 
   @override
-  String download_completed(Object name) {
-    return '$name下載完成';
-  }
-
-  @override
-  String download_failed(Object name) {
-    return '$name下載失敗';
-  }
-
-  @override
   String get sync_preparing => '準備同步...';
 
   @override
@@ -15617,24 +14709,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get sync_done => '同步完成';
 
   @override
-  String get download_tags_data => '正在下載標籤資料...';
-
-  @override
-  String get download_cooccurrence_data => '正在下載共現標籤資料...';
-
-  @override
-  String get download_parsing_data => '正在解析資料...';
-
-  @override
-  String get download_readingFile => '正在讀取檔案...';
-
-  @override
-  String get download_mergingData => '正在合併資料...';
-
-  @override
-  String get download_loadComplete => '載入完成';
-
-  @override
   String get time_just_now => '剛剛';
 
   @override
@@ -15656,164 +14730,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get time_never_synced => '從未同步';
 
   @override
-  String get category_selectEmoji => '選擇 Emoji';
-
-  @override
-  String get category_noRecentEmoji => '暫無最近使用的 Emoji';
-
-  @override
-  String get category_searchEmoji => '搜尋 Emoji';
-
-  @override
-  String get vibeNoEncodingWarning => '此圖片沒有預編碼資料';
-
-  @override
-  String vibeWillCostAnlas(int count) {
-    return '編碼將消耗 $count Anlas';
-  }
-
-  @override
-  String get vibeEncodeConfirm => '是否繼續新增並消耗點數？';
-
-  @override
-  String get vibeCancel => '取消';
-
-  @override
-  String get vibeConfirmEncode => '確認編碼';
-
-  @override
   String get vibeParseFailed => '無法解析 Vibe 檔案';
-
-  @override
-  String get tagGroupBrowser_searchHint => '搜尋標籤...';
-
-  @override
-  String tagGroupBrowser_tagCount(Object count) {
-    return '$count個標籤';
-  }
-
-  @override
-  String tagGroupBrowser_filteredTagCount(Object filtered, Object total) {
-    return '顯示 $filtered 個，共 $total 個標籤';
-  }
-
-  @override
-  String get tagGroupBrowser_noTags => '暫無標籤';
-
-  @override
-  String get tagGroupBrowser_noLibrary => '詞庫未載入';
-
-  @override
-  String get tagGroupBrowser_importLibraryHint => '請先匯入標籤詞庫';
-
-  @override
-  String get tagGroupBrowser_noCategories => '沒有啟用的標籤分類';
-
-  @override
-  String get tagGroupBrowser_enableCategoriesHint => '請在設定中啟用標籤分類';
-
-  @override
-  String get tagGroupBrowser_danbooruSuggestions => 'Danbooru 建議';
-
-  @override
-  String get tag_favoritesTitle => '收藏標籤';
-
-  @override
-  String get tag_favoritesEmpty => '暫無收藏標籤';
-
-  @override
-  String get tag_favoritesEmptyHint => '長按標籤即可新增到收藏';
-
-  @override
-  String get tag_alreadyAdded => '該標籤已在當前提示詞中';
-
-  @override
-  String get tag_removeFavoriteTitle => '移除收藏';
-
-  @override
-  String tag_removeFavoriteMessage(Object tag) {
-    return '確定要移除收藏的標籤「$tag」嗎？';
-  }
-
-  @override
-  String get tag_templatesTitle => '標籤範本';
-
-  @override
-  String get tag_templatesEmpty => '暫無標籤範本';
-
-  @override
-  String get tag_templatesEmptyHint => '選擇標籤後點擊右上角的 + 按鈕建立範本';
-
-  @override
-  String get tag_templateCreate => '建立範本';
-
-  @override
-  String get tag_templateNameLabel => '範本名稱';
-
-  @override
-  String get tag_templateNameHint => '輸入範本名稱';
-
-  @override
-  String get tag_templateNameRequired => '請輸入範本名稱';
-
-  @override
-  String get tag_templateDescLabel => '範本描述（可選）';
-
-  @override
-  String get tag_templateDescHint => '輸入範本描述';
-
-  @override
-  String get tag_templatePreview => '標籤預覽';
-
-  @override
-  String tag_templateTagCount(Object count) {
-    return '$count 個標籤';
-  }
-
-  @override
-  String tag_templateMoreTags(Object count) {
-    return '還有 $count 個標籤...';
-  }
-
-  @override
-  String tag_templateInserted(Object name) {
-    return '已插入範本「$name」';
-  }
-
-  @override
-  String get tag_templateNoTags => '沒有可儲存的標籤';
-
-  @override
-  String get tag_templateSaved => '範本已儲存';
-
-  @override
-  String get tag_templateNameExists => '範本名稱已存在';
-
-  @override
-  String get tag_templateDeleteTitle => '刪除範本';
-
-  @override
-  String tag_templateDeleteMessage(Object name) {
-    return '確定要刪除範本「$name」嗎？';
-  }
-
-  @override
-  String get tag_categoryGeneral => '通用';
-
-  @override
-  String get tag_categoryArtist => '畫師';
-
-  @override
-  String get tag_categoryCopyright => '版權';
-
-  @override
-  String get tag_categoryCharacter => '角色';
-
-  @override
-  String get tag_categoryMeta => '後設資料';
-
-  @override
-  String get tag_countBadgeBreakdown => '標籤分類統計';
 
   @override
   String get localGallery_progressiveLoadError => '圖片載入失敗';
@@ -16245,112 +15162,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_moveToRoot => '移至根目錄';
 
   @override
-  String get localGallery_folderName => '資料夾名稱';
-
-  @override
-  String get localGallery_newFolderName => '新名稱';
-
-  @override
-  String get localGallery_folderNameHint => '輸入資料夾名稱';
-
-  @override
-  String get localGallery_folderCreated => '資料夾建立成功';
-
-  @override
-  String get localGallery_folderCreateFailed => '資料夾建立失敗';
-
-  @override
-  String get localGallery_renameFolderTitle => '重新命名資料夾';
-
-  @override
-  String get localGallery_renameSuccess => '重新命名成功';
-
-  @override
-  String get localGallery_renameFailed => '重新命名失敗';
-
-  @override
-  String get localGallery_deleteFolderTitle => '刪除資料夾';
-
-  @override
-  String localGallery_deleteFolderWithImagesContent(Object name, Object count) {
-    return '資料夾「$name」包含 $count 張圖片，確定要刪除嗎？\n\n注意：此操作會刪除資料夾及其中的所有圖片，無法恢復。';
-  }
-
-  @override
-  String localGallery_deleteEmptyFolderContent(Object name) {
-    return '確定要刪除空資料夾「$name」嗎？';
-  }
-
-  @override
-  String get localGallery_folderDeleted => '資料夾已刪除';
-
-  @override
-  String get localGallery_folderDeleteFailed => '刪除資料夾失敗';
-
-  @override
   String get localGallery_withMetadata => '有後設資料';
 
   @override
   String get localGallery_skipped => '跳過';
-
-  @override
-  String get localGallery_cacheMonitor => '快取監控';
-
-  @override
-  String get localGallery_threeLayerCacheStats => '三層快取統計';
-
-  @override
-  String localGallery_updatedAt(Object time) {
-    return '更新: $time';
-  }
-
-  @override
-  String get localGallery_memoryCache => '記憶體快取';
-
-  @override
-  String get localGallery_hiveCache => 'Hive 快取';
-
-  @override
-  String get localGallery_sqliteDatabase => 'SQLite 資料庫';
-
-  @override
-  String get localGallery_imageUnit => '圖片';
-
-  @override
-  String get localGallery_metadataUnit => '後設資料';
-
-  @override
-  String get localGallery_entriesUnit => '條目';
-
-  @override
-  String get localGallery_hitRate => '命中率';
-
-  @override
-  String get localGallery_performanceStats => '效能監控統計';
-
-  @override
-  String get localGallery_cacheHit => '命中';
-
-  @override
-  String get localGallery_cacheMiss => '未命中';
-
-  @override
-  String get localGallery_clearL1 => '清除 L1';
-
-  @override
-  String get localGallery_clearL2 => '清除 L2';
-
-  @override
-  String get localGallery_clearAll => '清除全部';
-
-  @override
-  String get localGallery_resetStats => '重設統計';
-
-  @override
-  String get localGallery_confirmClearCache => '確認清除';
-
-  @override
-  String get localGallery_confirmClearCacheContent => '確定要清除所有快取嗎？這將重新掃描所有圖片。';
 
   @override
   String get localGallery_clearFilters => '清除篩選';
@@ -16402,22 +15217,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get statistics_noData => '暫無統計資料';
-
-  @override
-  String get statistics_generatedCount => '生成數量';
-
-  @override
-  String get statistics_favoriteCount => '收藏數';
-
-  @override
-  String statistics_tooltipGenerated(Object count) {
-    return '生成數量: $count';
-  }
-
-  @override
-  String statistics_tooltipFavorite(Object count) {
-    return '收藏數: $count';
-  }
 
   @override
   String get statistics_noTagData => '暫無標籤資料';
@@ -16562,21 +15361,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localGallery_resetAdvancedFilters => '重設進階篩選';
-
-  @override
-  String get localGallery_exportFailed => '匯出失敗';
-
-  @override
-  String get bulkExport_format => '匯出格式';
-
-  @override
-  String get bulkExport_jsonFormat => 'JSON';
-
-  @override
-  String get bulkExport_csvFormat => 'CSV';
-
-  @override
-  String get bulkExport_includeMetadataHint => '匯出生成參數等資訊';
 
   @override
   String get localGallery_group_today => '今天';
@@ -16939,20 +15723,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get fixedTags_negativeTitle => '負向固定詞';
 
   @override
-  String autocomplete_resultsCount(Object count) {
-    return '$count 個結果';
-  }
-
-  @override
-  String get autocomplete_actionSelect => '選擇';
-
-  @override
-  String get autocomplete_actionConfirm => '確認';
-
-  @override
-  String get autocomplete_actionClose => '關閉';
-
-  @override
   String get autocomplete_categoryCharacter => '角色';
 
   @override
@@ -17002,9 +15772,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get common_rename => '重新命名';
-
-  @override
-  String get common_create => '建立';
 
   @override
   String get tagLibrary_newCategory => '新增分類';
@@ -17873,191 +16640,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get vibeBulk_titleDelete => '批次刪除';
-
-  @override
-  String get vibeBulk_titleMove => '批次移動';
-
-  @override
-  String get vibeBulk_titleToggleFavorite => '批次更新收藏';
-
-  @override
-  String get vibeBulk_titleAddTags => '批次新增標籤';
-
-  @override
-  String get vibeBulk_titleRemoveTags => '批次移除標籤';
-
-  @override
-  String get vibeBulk_titleExport => '批次匯出';
-
-  @override
-  String get vibeBulk_titleImport => '批次匯入';
-
-  @override
-  String vibeBulk_processingProgress(int current, int total) {
-    return '正在處理：$current / $total';
-  }
-
-  @override
-  String get vibeBulk_completed => '操作完成';
-
-  @override
-  String get vibeBulk_completedWithFailures => '操作完成（部分失敗）';
-
-  @override
-  String get vibeBulk_successful => '成功';
-
-  @override
-  String get vibeBulk_failed => '失敗';
-
-  @override
-  String get vibeBulk_errorDetails => '錯誤詳情：';
-
-  @override
-  String vibeBulk_moreErrors(int count) {
-    return '……另有 $count 個錯誤';
-  }
-
-  @override
-  String get vibeBulk_operationFailed => '操作失敗';
-
-  @override
-  String get vibeBulk_operationFailedHint => '請檢查操作設定後重試。';
-
-  @override
-  String vibeBulk_errorEntryNotFoundOrDeleteFailed(String item) {
-    return '未找到 $item 或刪除失敗';
-  }
-
-  @override
-  String vibeBulk_errorDeleteFailed(String item, String error) {
-    return '刪除 $item 失敗：$error';
-  }
-
-  @override
-  String vibeBulk_errorEntryNotFound(String item) {
-    return '未找到條目：$item';
-  }
-
-  @override
-  String vibeBulk_errorMoveFailed(String item, String error) {
-    return '移動 $item 失敗：$error';
-  }
-
-  @override
-  String vibeBulk_errorFavoriteFailed(String item) {
-    return '更新收藏狀態失敗：$item';
-  }
-
-  @override
-  String vibeBulk_errorFavoriteFailedWithDetails(String item, String error) {
-    return '更新 $item 的收藏狀態失敗：$error';
-  }
-
-  @override
-  String vibeBulk_errorAddTagsFailed(String item) {
-    return '新增標籤失敗：$item';
-  }
-
-  @override
-  String vibeBulk_errorAddTagsFailedWithDetails(String item, String error) {
-    return '為 $item 新增標籤失敗：$error';
-  }
-
-  @override
-  String vibeBulk_errorRemoveTagsFailed(String item) {
-    return '移除標籤失敗：$item';
-  }
-
-  @override
-  String vibeBulk_errorRemoveTagsFailedWithDetails(String item, String error) {
-    return '從 $item 移除標籤失敗：$error';
-  }
-
-  @override
-  String get vibeBulk_errorExportNoFile => '匯出失敗：未建立檔案';
-
-  @override
-  String vibeBulk_errorExportFailed(String error) {
-    return '匯出失敗：$error';
-  }
-
-  @override
-  String vibeBulk_errorFileNotFound(String item) {
-    return '未找到檔案：$item';
-  }
-
-  @override
-  String vibeBulk_errorNoVibeData(String item) {
-    return '$item 中沒有有效的 Vibe 資料';
-  }
-
-  @override
-  String vibeBulk_errorImportFailed(String item, String error) {
-    return '從 $item 匯入 Vibe 失敗：$error';
-  }
-
-  @override
-  String vibeBulk_errorProcessFileFailed(String item, String error) {
-    return '處理 $item 失敗：$error';
-  }
-
-  @override
-  String get vibeBulkTag_title => '批次編輯標籤';
-
-  @override
-  String vibeBulkTag_selectedCount(int count) {
-    return '已選中 $count 個 Vibe';
-  }
-
-  @override
-  String get vibeBulkTag_inputHint => '輸入新標籤……';
-
-  @override
-  String get vibeBulkTag_noTags => '暫無標籤';
-
-  @override
-  String get vibeBulkTag_noTagsHint => '新增標籤以方便篩選和管理';
-
-  @override
-  String vibeBulkTag_currentTags(int count) {
-    return '當前標籤（$count）';
-  }
-
-  @override
-  String vibeBulkTag_pendingRemoval(int count) {
-    return '待移除標籤（$count）';
-  }
-
-  @override
-  String get vibeBulkTag_removeTag => '移除標籤';
-
-  @override
   String get vibeBulkTag_actionPreview => '操作預覽';
-
-  @override
-  String vibeBulkTag_addTagsSummary(String tags) {
-    return '新增標籤：$tags';
-  }
-
-  @override
-  String vibeBulkTag_removeTagsSummary(String tags) {
-    return '移除標籤：$tags';
-  }
-
-  @override
-  String get vibeBulkTag_noChanges => '沒有要應用的更改';
-
-  @override
-  String get vibeBulkCategory_title => '選擇目標分類';
-
-  @override
-  String vibeBulkCategory_moveCount(int count) {
-    return '將 $count 個 Vibe 移動到：';
-  }
-
-  @override
-  String get vibeBulkCategory_cannotMoveToCurrent => '不能移動到當前所在分類';
 
   @override
   String get vibeDetail_strengthDescription => '控制 Vibe 對生成結果的影響強度';
@@ -18486,11 +17069,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get vibe_import_importFailed => '匯入失敗';
 
   @override
-  String vibe_import_failedWithError(String error) {
-    return '匯入失敗: $error';
-  }
-
-  @override
   String get vibe_import_bundleTitle => '匯入 Vibe Bundle';
 
   @override
@@ -18581,14 +17159,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get vibe_maxReached => '已達到最大數量 (16張)';
-
-  @override
-  String get vibe_maxReachedRemoveSome => '已達到最大數量 (16張)，請先移除一些 Vibe';
-
-  @override
-  String vibe_addedNamed(String name) {
-    return '已新增 Vibe: $name';
-  }
 
   @override
   String vibe_addedCount(int count) {
@@ -20318,12 +18888,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get common_emptyValue => '（空）';
 
   @override
-  String get common_previewLoadFailed => '無法載入預覽';
-
-  @override
-  String get common_clickToRefresh => '點選重新整理';
-
-  @override
   String get common_clickToRetry => '點選重試';
 
   @override
@@ -20376,9 +18940,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String vibe_import_reencodeFailed(String name) {
     return 'Vibe 重新編碼失敗: $name';
   }
-
-  @override
-  String get localGallery_createFolder => '建立資料夾';
 
   @override
   String galleryScan_failed(int count) {
@@ -20497,17 +19058,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get autocomplete_translating => '翻譯中…';
-
-  @override
-  String get autocomplete_missingTranslation => '未漢化';
-
-  @override
-  String autocomplete_aliasMatch(String alias) {
-    return '別名：$alias';
-  }
-
-  @override
   String get autocomplete_resultLimit => '結果數量';
 
   @override
@@ -20550,9 +19100,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get tagExpansion_wikiUnavailable => '本地暫未收錄這個標籤的釋義。';
 
   @override
-  String get autocomplete_danbooruPrivacy => '僅傳送當前英文標籤，不會上傳完整提示詞';
-
-  @override
   String get autocomplete_cooccurrence => '離線相關標籤庫';
 
   @override
@@ -20578,71 +19125,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String autocomplete_catalogStatus(String count, String version) {
     return '$count 個標籤 · 資料版本 $version';
   }
-
-  @override
-  String get autocomplete_sourceBase => '隨應用提供的基礎詞庫';
-
-  @override
-  String get autocomplete_sourceApi => 'Danbooru API';
-
-  @override
-  String get autocomplete_sourceRelated => '離線相關標籤';
-
-  @override
-  String get autocomplete_sourceAi => 'Prompt Assistant 漢化';
-
-  @override
-  String get autocomplete_headerTitle => '標籤補全';
-
-  @override
-  String get autocomplete_relatedHeaderTitle => '相關標籤';
-
-  @override
-  String get autocomplete_relatedLoading => '正在查詢本地共現庫與線上相關標籤…';
-
-  @override
-  String get autocomplete_relatedEmpty => '沒有找到可用的相關標籤';
-
-  @override
-  String autocomplete_relatedMetric(int count, String score) {
-    return '共現 $count 次 · Jaccard $score';
-  }
-
-  @override
-  String get autocomplete_relatedPin => '固定當前標籤，可連續插入相關標籤';
-
-  @override
-  String get autocomplete_relatedUnpin => '取消固定並繼續鏈式推薦';
-
-  @override
-  String get autocomplete_statusBase => '本地';
-
-  @override
-  String get autocomplete_statusRelated => '共現';
-
-  @override
-  String get autocomplete_statusOnline => '線上';
-
-  @override
-  String get autocomplete_statusAi => 'AI';
-
-  @override
-  String get autocomplete_statusReady => '就緒';
-
-  @override
-  String get autocomplete_statusError => '異常';
-
-  @override
-  String get autocomplete_statusDisabled => '已關閉';
-
-  @override
-  String get autocomplete_statusSearching => '查詢中';
-
-  @override
-  String get autocomplete_statusTranslating => '翻譯中';
-
-  @override
-  String get autocomplete_openSettings => '開啟補全與資料來源設定';
 
   @override
   String get nav_promptBlockLibrary => '提示詞塊';
@@ -24199,9 +22681,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get drop_dragToShare => '拖曳以分享';
 
   @override
-  String get progress_cancelled => '已取消';
-
-  @override
   String promptSyntax_weightTooLarge(Object value) {
     return '數值權重絕對值過大：$value::';
   }
@@ -24567,26 +23046,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get apiEndpoint_noExtras => 'API 地址不能包含查詢參數、片段或使用者資訊';
 
   @override
-  String gallery_initFailed(Object error) {
-    return '初始化失敗: $error';
-  }
-
-  @override
-  String gallery_loadFoldersFailed(Object error) {
-    return '載入資料夾失敗: $error';
-  }
-
-  @override
-  String gallery_refreshFailed(Object error) {
-    return '重新整理失敗: $error';
-  }
-
-  @override
-  String gallery_clearCacheFailed(Object error) {
-    return '清除快取失敗: $error';
-  }
-
-  @override
   String gallery_folderInaccessible(Object error) {
     return '無法存取圖片資料夾: $error';
   }
@@ -24600,9 +23059,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String gallery_galleryInitFailed(Object error) {
     return '畫廊初始化失敗: $error';
   }
-
-  @override
-  String get cache_clearInProgress => '清除操作正在進行中';
 
   @override
   String vibeImport_imageProgress(Object current, Object total, Object source) {
