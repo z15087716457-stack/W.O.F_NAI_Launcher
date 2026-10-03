@@ -332,14 +332,28 @@ void main() {
   });
 
   group('PromptBlockPaletteButton overlay', () {
-    Widget buildApp(ProviderContainer container) {
+    Widget buildApp(ProviderContainer container, {bool reducedMotion = false}) {
       return UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(
-          locale: Locale('zh'),
+        child: MaterialApp(
+          locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(body: Center(child: PromptBlockPaletteButton())),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(disableAnimations: reducedMotion),
+            child: child!,
+          ),
+          home: const Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: PromptBlockPaletteButton(),
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -382,10 +396,11 @@ void main() {
         // 悬浮窗出现：空态提示 + X 常驻钮。
         expect(find.byKey(const Key('prompt-block-palette-close')), findsOne);
         expect(find.textContaining('拖进来收纳'), findsOne);
+        await tester.pumpAndSettle();
 
         // X 关闭。
         await tester.tap(find.byKey(const Key('prompt-block-palette-close')));
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(
           find.byKey(const Key('prompt-block-palette-close')),
           findsNothing,
@@ -396,13 +411,153 @@ void main() {
         await tester.pump();
         expect(find.byKey(const Key('prompt-block-palette-close')), findsOne);
         await tester.tapAt(const Offset(10, 10));
-        await tester.pump();
+        await tester.pumpAndSettle();
         expect(
           find.byKey(const Key('prompt-block-palette-close')),
           findsNothing,
         );
       },
     );
+
+    ProviderContainer emptyPalette() {
+      final container = ProviderContainer(
+        overrides: [
+          promptBlockPaletteNotifierProvider.overrideWith(
+            () => _FakePaletteNotifier(const []),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    double opacity(WidgetTester tester) => tester
+        .widget<FadeTransition>(
+          find.byKey(const Key('prompt-block-palette-fade')),
+        )
+        .opacity
+        .value;
+
+    final toggle = find.byKey(const Key('prompt-block-palette-toggle'));
+    final close = find.byKey(const Key('prompt-block-palette-close'));
+    final card = find.byKey(const Key('prompt-block-palette-card'));
+
+    for (final method in ['X', 'outside', 'toolbar']) {
+      testWidgets('closing via $method fades, shrinks and animates the icon', (
+        tester,
+      ) async {
+        await tester.pumpWidget(buildApp(emptyPalette()));
+        await tester.pump();
+        await tester.tap(toggle);
+        await tester.pumpAndSettle();
+        final icon = find.descendant(
+          of: toggle,
+          matching: find.byType(StudioAnimatedIcon),
+        );
+        final trigger = tester.widget<StudioAnimatedIcon>(icon).trigger;
+        final opened = tester.getRect(card);
+        expect(opacity(tester), 1);
+        switch (method) {
+          case 'X':
+            await tester.tap(close);
+          case 'outside':
+            await tester.tapAt(const Offset(10, 10));
+          case 'toolbar':
+            await tester.tap(toggle);
+        }
+        await tester.pump();
+        expect(card, findsOneWidget);
+        expect(tester.widget<StudioAnimatedIcon>(icon).trigger, trigger + 1);
+        await tester.pump(const Duration(milliseconds: 60));
+        expect(opacity(tester), inExclusiveRange(0, 1));
+        expect(tester.getRect(card).width, lessThan(opened.width));
+        expect(tester.getRect(card).topLeft, opened.topLeft);
+        expect(
+          find.descendant(
+            of: icon,
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is CustomPaint && widget.painter is StudioIconPainter,
+            ),
+          ),
+          findsOneWidget,
+        );
+        await tester.pumpAndSettle();
+        expect(card, findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets(
+      'reopening during close preserves one window and dragged position',
+      (tester) async {
+        await tester.pumpWidget(buildApp(emptyPalette()));
+        await tester.pump();
+        await tester.tap(toggle);
+        await tester.pumpAndSettle();
+        await tester.drag(find.text('积木').last, const Offset(-60, -30));
+        await tester.pumpAndSettle();
+        final opened = tester.getRect(card);
+        await tester.tap(close);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 60));
+        final closingOpacity = opacity(tester);
+        await tester.tap(toggle);
+        await tester.pump();
+        expect(opacity(tester), closeTo(closingOpacity, .001));
+        await tester.pumpAndSettle();
+        expect(card, findsOneWidget);
+        expect(opacity(tester), 1);
+        expect(tester.getRect(card), opened);
+        await tester.tap(close);
+        await tester.pumpAndSettle();
+        expect(card, findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'disposing the toolbar while closing leaves no overlay or ticker',
+      (tester) async {
+        await tester.pumpWidget(buildApp(emptyPalette()));
+        await tester.pump();
+        await tester.tap(toggle);
+        await tester.pumpAndSettle();
+        await tester.tap(close);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 60));
+        await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+        await tester.pumpAndSettle();
+        expect(card, findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    for (final duringClose in [false, true]) {
+      testWidgets(
+        'reduced motion removes immediately duringClose=$duringClose',
+        (tester) async {
+          final container = emptyPalette();
+          await tester.pumpWidget(
+            buildApp(container, reducedMotion: !duringClose),
+          );
+          await tester.pump();
+          await tester.tap(toggle);
+          await tester.pumpAndSettle();
+          expect(opacity(tester), 1);
+          await tester.tap(close);
+          await tester.pump();
+          if (duringClose) {
+            await tester.pump(const Duration(milliseconds: 60));
+            await tester.pumpWidget(buildApp(container, reducedMotion: true));
+            await tester.pump();
+          }
+          expect(card, findsNothing);
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
 
     testWidgets(
       'palette chips hide the empty hint and insert at caret on tap',
@@ -534,6 +689,7 @@ void main() {
       await tester.pump();
 
       // 两个窄芯片并排同一行（A 的右边挨着 B 的左边，顶部对齐）。
+      await tester.pumpAndSettle();
       final a = tester.getRect(find.text('A').first);
       final b = tester.getRect(find.text('B').first);
       final card = tester.getRect(

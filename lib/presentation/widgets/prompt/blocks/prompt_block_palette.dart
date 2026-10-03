@@ -32,41 +32,117 @@ class PromptBlockPaletteButton extends ConsumerStatefulWidget {
 }
 
 class _PromptBlockPaletteButtonState
-    extends ConsumerState<PromptBlockPaletteButton> {
+    extends ConsumerState<PromptBlockPaletteButton>
+    with SingleTickerProviderStateMixin {
   OverlayEntry? _overlayEntry;
+  late final AnimationController _animation;
+  late final CurvedAnimation _progress;
+  bool _closing = false;
   bool _dragHover = false;
   int _motionTrigger = 0;
 
-  bool get _isOpen => _overlayEntry != null;
+  bool get _isOpen => _overlayEntry != null && !_closing;
+  bool get _reducedMotion =>
+      MediaQuery.disableAnimationsOf(context) ||
+      !TickerMode.valuesOf(context).enabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _animation = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+      reverseDuration: const Duration(milliseconds: 160),
+    );
+    _progress = CurvedAnimation(
+      parent: _animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_overlayEntry != null && _reducedMotion) {
+      // 悬浮层与按钮位于不同构建分支，动画值更新要等当前帧结束。
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _overlayEntry == null || !_reducedMotion) return;
+        if (_closing) _removeOverlay();
+        _animation.value = 1;
+      });
+    }
+  }
 
   @override
   void dispose() {
     // dispose 期间 mounted 仍为 true，不能走 _close 的 setState。
-    _overlayEntry?.remove();
-    _overlayEntry = null;
+    _removeOverlay(notify: false);
+    _progress.dispose();
+    _animation.dispose();
     super.dispose();
   }
 
   void _toggle() {
-    _motionTrigger++;
-    _isOpen ? _close() : _open();
+    _isOpen ? unawaited(_close()) : _open();
   }
 
   void _open() {
-    if (_overlayEntry != null) return;
-    final anchor = context.findRenderObject() as RenderBox?;
-    _overlayEntry = OverlayEntry(
-      builder: (_) =>
-          _PromptBlockPaletteOverlay(anchor: anchor, onClose: _close),
-    );
-    Overlay.of(context).insert(_overlayEntry!);
-    setState(() {});
+    if (_isOpen) return;
+    final resuming = _overlayEntry != null;
+    _closing = false;
+    if (!resuming) {
+      final anchor = context.findRenderObject() as RenderBox?;
+      _overlayEntry = OverlayEntry(
+        builder: (_) => IgnorePointer(
+          // 已开始关闭便释放点击；快速再开可从当前进度恢复。
+          ignoring: _closing,
+          child: _PromptBlockPaletteOverlay(
+            anchor: anchor,
+            progress: _progress,
+            onClose: () => unawaited(_close()),
+          ),
+        ),
+      );
+      Overlay.of(context).insert(_overlayEntry!);
+    }
+    _overlayEntry!.markNeedsBuild();
+    setState(() => _motionTrigger++);
+    if (_reducedMotion) {
+      _animation.value = 1;
+    } else {
+      _animation.forward(from: resuming ? null : 0);
+    }
   }
 
-  void _close() {
-    _overlayEntry?.remove();
+  Future<void> _close() async {
+    final entry = _overlayEntry;
+    if (entry == null || _closing) return;
+    setState(() {
+      _closing = true;
+      _motionTrigger++;
+    });
+    entry.markNeedsBuild();
+    if (!_reducedMotion) {
+      try {
+        await _animation.reverse().orCancel;
+      } on TickerCanceled {
+        // 快速再开或宿主销毁时，旧关闭请求不能移除新窗口。
+        return;
+      }
+    }
+    if (mounted && _closing && identical(entry, _overlayEntry)) {
+      _removeOverlay();
+    }
+  }
+
+  void _removeOverlay({bool notify = true}) {
+    final entry = _overlayEntry;
     _overlayEntry = null;
-    if (mounted) setState(() {});
+    _closing = false;
+    entry?.remove();
+    entry?.dispose();
+    if (notify && mounted) setState(() {});
   }
 
   @override
@@ -115,10 +191,12 @@ class _PromptBlockPaletteButtonState
 class _PromptBlockPaletteOverlay extends StatefulWidget {
   const _PromptBlockPaletteOverlay({
     required this.anchor,
+    required this.progress,
     required this.onClose,
   });
 
   final RenderBox? anchor;
+  final Animation<double> progress;
   final VoidCallback onClose;
 
   @override
@@ -178,18 +256,27 @@ class _PromptBlockPaletteOverlayState
         Positioned(
           left: _offset!.dx,
           top: _offset!.dy,
-          child: GestureDetector(
-            // 卡片自身吃掉点击，避免触发屏障关闭
-            onTap: () {},
-            child: _PromptBlockPaletteCard(
-              width: _windowWidth,
-              minHeight: _windowMinHeight,
-              maxHeight: _windowMaxHeight,
-              onClose: widget.onClose,
-              onPanUpdate: (delta) => setState(() {
-                _offset = _clamp(_offset! + delta, screen);
-                _lastOffset = _offset;
-              }),
+          child: FadeTransition(
+            key: const Key('prompt-block-palette-fade'),
+            opacity: widget.progress,
+            child: ScaleTransition(
+              key: const Key('prompt-block-palette-scale'),
+              scale: Tween<double>(begin: .94, end: 1).animate(widget.progress),
+              alignment: Alignment.topLeft,
+              child: GestureDetector(
+                // 卡片自身吃掉点击，避免触发屏障关闭
+                onTap: () {},
+                child: _PromptBlockPaletteCard(
+                  width: _windowWidth,
+                  minHeight: _windowMinHeight,
+                  maxHeight: _windowMaxHeight,
+                  onClose: widget.onClose,
+                  onPanUpdate: (delta) => setState(() {
+                    _offset = _clamp(_offset! + delta, screen);
+                    _lastOffset = _offset;
+                  }),
+                ),
+              ),
             ),
           ),
         ),
