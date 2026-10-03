@@ -907,11 +907,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_stepsLabel => '步数';
 
   @override
-  String get generation_guidance => 'PG';
+  String get generation_guidance => '提示词引导';
 
   @override
   String generation_cfgScale(Object scale) {
-    return 'PG：$scale';
+    return '提示词引导：$scale';
   }
 
   @override
@@ -943,7 +943,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String generation_cfgRescale(Object value) {
-    return 'PGR：$value';
+    return '提示词引导重缩放：$value';
   }
 
   @override
@@ -2151,7 +2151,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gallery_metaSampler => '采样器';
 
   @override
-  String get gallery_metaCfgScale => 'PG';
+  String get gallery_metaCfgScale => '提示词引导';
 
   @override
   String get gallery_metaSeed => '种子';
@@ -3762,7 +3762,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_filterBySteps => '按步数筛选';
 
   @override
-  String get localGallery_filterByCfg => '按 PG 筛选';
+  String get localGallery_filterByCfg => '按 提示词引导 筛选';
 
   @override
   String get localGallery_filterByResolution => '按分辨率筛选';
@@ -4446,7 +4446,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get metadataImport_steps => '步数 (Steps)';
 
   @override
-  String get metadataImport_scale => 'PG';
+  String get metadataImport_scale => '提示词引导';
 
   @override
   String get metadataImport_size => '尺寸 (Size)';
@@ -4467,7 +4467,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get metadataImport_noiseSchedule => '噪声计划';
 
   @override
-  String get metadataImport_cfgRescale => 'PGR';
+  String get metadataImport_cfgRescale => '提示词引导重缩放';
 
   @override
   String get metadataImport_qualityToggle => '质量标签';
@@ -7858,7 +7858,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
-      '请检查设置：步数 1–50、PG 1–20、PGR 0–1，并确认参数受所选模型支持。';
+      '请检查设置：步数 1–50、提示词引导 1–20、提示词引导重缩放 0–1，并确认参数受所选模型支持。';
 
   @override
   String get promptBlockLibrary_applySettings => '导入设置';
@@ -13075,11 +13075,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get generation_stepsLabel => '步數';
 
   @override
-  String get generation_guidance => 'PG';
+  String get generation_guidance => '提示詞引導';
 
   @override
   String generation_cfgScale(Object scale) {
-    return 'PG：$scale';
+    return '提示詞引導：$scale';
   }
 
   @override
@@ -13111,7 +13111,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String generation_cfgRescale(Object value) {
-    return 'PGR：$value';
+    return '提示詞引導重縮放：$value';
   }
 
   @override
@@ -14319,7 +14319,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get gallery_metaSampler => '取樣器';
 
   @override
-  String get gallery_metaCfgScale => 'PG';
+  String get gallery_metaCfgScale => '提示詞引導';
 
   @override
   String get gallery_metaSeed => '種子';
@@ -15930,7 +15930,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_filterBySteps => '按步數篩選';
 
   @override
-  String get localGallery_filterByCfg => '按 PG 篩選';
+  String get localGallery_filterByCfg => '按 提示詞引導 篩選';
 
   @override
   String get localGallery_filterByResolution => '按解析度篩選';
@@ -16614,7 +16614,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get metadataImport_steps => '步數 (Steps)';
 
   @override
-  String get metadataImport_scale => 'PG';
+  String get metadataImport_scale => '提示詞引導';
 
   @override
   String get metadataImport_size => '尺寸 (Size)';
@@ -16635,7 +16635,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get metadataImport_noiseSchedule => '噪聲計劃';
 
   @override
-  String get metadataImport_cfgRescale => 'PGR';
+  String get metadataImport_cfgRescale => '提示詞引導重縮放';
 
   @override
   String get metadataImport_qualityToggle => '品質標籤';
@@ -20026,7 +20026,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
-      '請檢查設定：步數 1–50、PG 1–20、PGR 0–1，並確認參數受所選模型支援。';
+      '請檢查設定：步數 1–50、提示詞引導 1–20、提示詞引導重縮放 0–1，並確認參數受所選模型支援。';
 
   @override
   String get promptBlockLibrary_applySettings => '匯入設定';

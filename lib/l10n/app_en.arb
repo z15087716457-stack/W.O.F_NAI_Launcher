@@ -413,8 +413,8 @@
     }
   },
   "generation_stepsLabel": "Steps",
-  "generation_guidance": "PG",
-  "generation_cfgScale": "PG: {scale}",
+  "generation_guidance": "Prompt Guidance",
+  "generation_cfgScale": "Prompt Guidance: {scale}",
   "@generation_cfgScale": {
     "placeholders": {
       "scale": {}
@@ -429,7 +429,7 @@
   "generation_smeaSubtitle": "Improve generation quality for large images",
   "generation_smeaDyn": "SMEA DYN",
   "generation_smeaDescription": "High resolution samplers will automatically be used above a certain image size",
-  "generation_cfgRescale": "PGR: {value}",
+  "generation_cfgRescale": "Prompt Guidance Rescale: {value}",
   "@generation_cfgRescale": {
     "placeholders": {
       "value": {}
@@ -1019,7 +1019,7 @@
   "gallery_metaResolution": "Resolution",
   "gallery_metaSteps": "Steps",
   "gallery_metaSampler": "Sampler",
-  "gallery_metaCfgScale": "PG",
+  "gallery_metaCfgScale": "Prompt Guidance",
   "gallery_metaSeed": "Seed",
   "gallery_metaSmea": "SMEA",
   "gallery_promptCopied": "Prompt copied",
@@ -1902,7 +1902,7 @@
   "localGallery_filterByModel": "Filter by Model",
   "localGallery_filterBySampler": "Filter by Sampler",
   "localGallery_filterBySteps": "Filter by Steps",
-  "localGallery_filterByCfg": "Filter by PG",
+  "localGallery_filterByCfg": "Filter by Prompt Guidance",
   "localGallery_filterByResolution": "Filter by Resolution",
   "localGallery_filterSubtitle": "Precisely filter your image collection",
   "localGallery_filterOrientation": "Orientation",
@@ -2330,14 +2330,14 @@
   },
   "metadataImport_seed": "Seed",
   "metadataImport_steps": "Steps",
-  "metadataImport_scale": "PG",
+  "metadataImport_scale": "Prompt Guidance",
   "metadataImport_size": "Size",
   "metadataImport_sampler": "Sampler",
   "metadataImport_model": "Model",
   "metadataImport_smea": "SMEA",
   "metadataImport_smeaDyn": "SMEA Dyn",
   "metadataImport_noiseSchedule": "Noise Schedule",
-  "metadataImport_cfgRescale": "PGR",
+  "metadataImport_cfgRescale": "Prompt Guidance Rescale",
   "metadataImport_qualityToggle": "Quality Toggle",
   "metadataImport_ucPreset": "Undesired Content Preset",
   "metadataImport_noData": "(no data)",
@@ -4559,7 +4559,7 @@
   "promptBlockLibrary_notSpecified": "Not specified",
   "promptBlockLibrary_stepsLabel": "Steps",
   "promptBlockLibrary_noiseScheduleLabel": "Noise Schedule",
-  "promptBlockLibrary_invalidGenerationSettings": "Check settings: steps 1–50, PG 1–20, PGR 0–1, and model compatibility.",
+  "promptBlockLibrary_invalidGenerationSettings": "Check settings: steps 1–50, Prompt Guidance 1–20, Prompt Guidance Rescale 0–1, and model compatibility.",
   "promptBlockLibrary_applySettings": "Import settings",
   "promptBlockLibrary_settingsApplied": "Block settings imported to the current image",
   "promptBlockLibrary_settingsIncompatible": "Block settings are incompatible with the target model. No parameters were imported.",

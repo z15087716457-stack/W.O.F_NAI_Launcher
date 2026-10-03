@@ -922,11 +922,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_stepsLabel => 'ステップ';
 
   @override
-  String get generation_guidance => 'PG';
+  String get generation_guidance => 'プロンプトガイダンス';
 
   @override
   String generation_cfgScale(Object scale) {
-    return 'PG: $scale';
+    return 'プロンプトガイダンス: $scale';
   }
 
   @override
@@ -959,7 +959,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String generation_cfgRescale(Object value) {
-    return 'PGR: $value';
+    return 'プロンプトガイダンスリスケール: $value';
   }
 
   @override
@@ -2181,7 +2181,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gallery_metaSampler => 'サンプラー';
 
   @override
-  String get gallery_metaCfgScale => 'PG';
+  String get gallery_metaCfgScale => 'プロンプトガイダンス';
 
   @override
   String get gallery_metaSeed => 'シード';
@@ -3823,7 +3823,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_filterBySteps => 'ステップごとにフィルターする';
 
   @override
-  String get localGallery_filterByCfg => 'PG で絞り込む';
+  String get localGallery_filterByCfg => 'プロンプトガイダンス で絞り込む';
 
   @override
   String get localGallery_filterByResolution => '解像度によるフィルター';
@@ -4509,7 +4509,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get metadataImport_steps => 'ステップ数';
 
   @override
-  String get metadataImport_scale => 'PG';
+  String get metadataImport_scale => 'プロンプトガイダンス';
 
   @override
   String get metadataImport_size => 'サイズ';
@@ -4530,7 +4530,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get metadataImport_noiseSchedule => 'ノイズスケジュール';
 
   @override
-  String get metadataImport_cfgRescale => 'PGR';
+  String get metadataImport_cfgRescale => 'プロンプトガイダンスリスケール';
 
   @override
   String get metadataImport_qualityToggle => '品質切り替え';
@@ -7977,7 +7977,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
-      '設定を確認してください：ステップ数 1～50、PG 1～20、PGR 0～1、モデルとの互換性。';
+      '設定を確認してください：ステップ数 1～50、プロンプトガイダンス 1～20、プロンプトガイダンスリスケール 0～1、モデルとの互換性。';
 
   @override
   String get promptBlockLibrary_applySettings => '設定を読み込む';

@@ -908,7 +908,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                 Expanded(
                   child: CompactParameterNumberField(
                     key: const Key('block-setting-scale'),
-                    label: 'PG',
+                    label: l10n.metadataImport_scale,
                     controller: _scaleController,
                     fallback: 5,
                     min: 1,
@@ -922,7 +922,7 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                   Expanded(
                     child: CompactParameterNumberField(
                       key: const Key('block-setting-cfg-rescale'),
-                      label: 'PGR',
+                      label: l10n.metadataImport_cfgRescale,
                       controller: _cfgRescaleController,
                       fallback: 0,
                       min: 0,

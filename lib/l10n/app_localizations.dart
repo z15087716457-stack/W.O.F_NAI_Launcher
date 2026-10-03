@@ -1803,13 +1803,13 @@ abstract class AppLocalizations {
   /// No description provided for @generation_guidance.
   ///
   /// In en, this message translates to:
-  /// **'PG'**
+  /// **'Prompt Guidance'**
   String get generation_guidance;
 
   /// No description provided for @generation_cfgScale.
   ///
   /// In en, this message translates to:
-  /// **'PG: {scale}'**
+  /// **'Prompt Guidance: {scale}'**
   String generation_cfgScale(Object scale);
 
   /// No description provided for @generation_seed.
@@ -1869,7 +1869,7 @@ abstract class AppLocalizations {
   /// No description provided for @generation_cfgRescale.
   ///
   /// In en, this message translates to:
-  /// **'PGR: {value}'**
+  /// **'Prompt Guidance Rescale: {value}'**
   String generation_cfgRescale(Object value);
 
   /// No description provided for @generation_noiseSchedule.
@@ -4099,7 +4099,7 @@ abstract class AppLocalizations {
   /// No description provided for @gallery_metaCfgScale.
   ///
   /// In en, this message translates to:
-  /// **'PG'**
+  /// **'Prompt Guidance'**
   String get gallery_metaCfgScale;
 
   /// No description provided for @gallery_metaSeed.
@@ -7069,7 +7069,7 @@ abstract class AppLocalizations {
   /// No description provided for @localGallery_filterByCfg.
   ///
   /// In en, this message translates to:
-  /// **'Filter by PG'**
+  /// **'Filter by Prompt Guidance'**
   String get localGallery_filterByCfg;
 
   /// No description provided for @localGallery_filterByResolution.
@@ -8274,7 +8274,7 @@ abstract class AppLocalizations {
   /// No description provided for @metadataImport_scale.
   ///
   /// In en, this message translates to:
-  /// **'PG'**
+  /// **'Prompt Guidance'**
   String get metadataImport_scale;
 
   /// No description provided for @metadataImport_size.
@@ -8316,7 +8316,7 @@ abstract class AppLocalizations {
   /// No description provided for @metadataImport_cfgRescale.
   ///
   /// In en, this message translates to:
-  /// **'PGR'**
+  /// **'Prompt Guidance Rescale'**
   String get metadataImport_cfgRescale;
 
   /// No description provided for @metadataImport_qualityToggle.
@@ -14358,7 +14358,7 @@ abstract class AppLocalizations {
   /// No description provided for @promptBlockLibrary_invalidGenerationSettings.
   ///
   /// In en, this message translates to:
-  /// **'Check settings: steps 1–50, PG 1–20, PGR 0–1, and model compatibility.'**
+  /// **'Check settings: steps 1–50, Prompt Guidance 1–20, Prompt Guidance Rescale 0–1, and model compatibility.'**
   String get promptBlockLibrary_invalidGenerationSettings;
 
   /// No description provided for @promptBlockLibrary_applySettings.

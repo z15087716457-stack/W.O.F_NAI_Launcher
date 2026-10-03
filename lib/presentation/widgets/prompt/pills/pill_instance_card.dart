@@ -396,8 +396,10 @@ class _PillInstanceCardState extends ConsumerState<PillInstanceCard> {
         ),
       if (settings?.steps != null)
         (l10n.promptBlockLibrary_stepsLabel, '${settings!.steps}'),
-      if (settings?.scale != null) ('PG', '${settings!.scale}'),
-      if (settings?.cfgRescale != null) ('PGR', '${settings!.cfgRescale}'),
+      if (settings?.scale != null)
+        (l10n.metadataImport_scale, '${settings!.scale}'),
+      if (settings?.cfgRescale != null)
+        (l10n.metadataImport_cfgRescale, '${settings!.cfgRescale}'),
       if (settings?.sampler != null)
         (
           l10n.generation_sampler,
@@ -472,13 +474,17 @@ class _PillInstanceCardState extends ConsumerState<PillInstanceCard> {
                     width: 126,
                     child: Row(
                       children: [
-                        Text(
-                          '${row.$1}  ',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 10,
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            row.$1,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: 10,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             row.$2,

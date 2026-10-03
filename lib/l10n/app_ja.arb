@@ -412,8 +412,8 @@
     }
   },
   "generation_stepsLabel": "ステップ",
-  "generation_guidance": "PG",
-  "generation_cfgScale": "PG: {scale}",
+  "generation_guidance": "プロンプトガイダンス",
+  "generation_cfgScale": "プロンプトガイダンス: {scale}",
   "@generation_cfgScale": {
     "placeholders": {
       "scale": {}
@@ -428,7 +428,7 @@
   "generation_smeaSubtitle": "大きな画像の生成品質を向上させます",
   "generation_smeaDyn": "SMEA DYN",
   "generation_smeaDescription": "特定の画像サイズを超えると、高解像度サンプラーが自動的に使用されます。",
-  "generation_cfgRescale": "PGR: {value}",
+  "generation_cfgRescale": "プロンプトガイダンスリスケール: {value}",
   "@generation_cfgRescale": {
     "placeholders": {
       "value": {}
@@ -1018,7 +1018,7 @@
   "gallery_metaResolution": "解像度",
   "gallery_metaSteps": "ステップ",
   "gallery_metaSampler": "サンプラー",
-  "gallery_metaCfgScale": "PG",
+  "gallery_metaCfgScale": "プロンプトガイダンス",
   "gallery_metaSeed": "シード",
   "gallery_metaSmea": "SMEA",
   "gallery_promptCopied": "プロンプトがコピーされました",
@@ -1902,7 +1902,7 @@
   "localGallery_filterByModel": "モデルによるフィルター",
   "localGallery_filterBySampler": "サンプラーによるフィルター",
   "localGallery_filterBySteps": "ステップごとにフィルターする",
-  "localGallery_filterByCfg": "PG で絞り込む",
+  "localGallery_filterByCfg": "プロンプトガイダンス で絞り込む",
   "localGallery_filterByResolution": "解像度によるフィルター",
   "localGallery_filterSubtitle": "画像コレクションを正確にフィルタリングします",
   "localGallery_filterOrientation": "向き",
@@ -2324,14 +2324,14 @@
   },
   "metadataImport_seed": "シード",
   "metadataImport_steps": "ステップ数",
-  "metadataImport_scale": "PG",
+  "metadataImport_scale": "プロンプトガイダンス",
   "metadataImport_size": "サイズ",
   "metadataImport_sampler": "サンプラー",
   "metadataImport_model": "モデル",
   "metadataImport_smea": "SMEA",
   "metadataImport_smeaDyn": "SMEA Dyn",
   "metadataImport_noiseSchedule": "ノイズスケジュール",
-  "metadataImport_cfgRescale": "PGR",
+  "metadataImport_cfgRescale": "プロンプトガイダンスリスケール",
   "metadataImport_qualityToggle": "品質切り替え",
   "metadataImport_ucPreset": "除外したい要素プリセット",
   "metadataImport_noData": "(データなし)",
@@ -4559,7 +4559,7 @@
   "promptBlockLibrary_notSpecified": "指定しない",
   "promptBlockLibrary_stepsLabel": "ステップ数",
   "promptBlockLibrary_noiseScheduleLabel": "ノイズスケジュール",
-  "promptBlockLibrary_invalidGenerationSettings": "設定を確認してください：ステップ数 1～50、PG 1～20、PGR 0～1、モデルとの互換性。",
+  "promptBlockLibrary_invalidGenerationSettings": "設定を確認してください：ステップ数 1～50、プロンプトガイダンス 1～20、プロンプトガイダンスリスケール 0～1、モデルとの互換性。",
   "promptBlockLibrary_applySettings": "設定を読み込む",
   "promptBlockLibrary_settingsApplied": "ブロック設定を現在の画像に読み込みました",
   "promptBlockLibrary_settingsIncompatible": "ブロック設定は対象モデルに対応していません。パラメータは変更されませんでした。",

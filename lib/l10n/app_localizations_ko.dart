@@ -919,11 +919,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_stepsLabel => '스텝';
 
   @override
-  String get generation_guidance => 'PG';
+  String get generation_guidance => '프롬프트 가이던스';
 
   @override
   String generation_cfgScale(Object scale) {
-    return 'PG: $scale';
+    return '프롬프트 가이던스: $scale';
   }
 
   @override
@@ -956,7 +956,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String generation_cfgRescale(Object value) {
-    return 'PGR: $value';
+    return '프롬프트 가이던스 리스케일: $value';
   }
 
   @override
@@ -2179,7 +2179,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gallery_metaSampler => '샘플러';
 
   @override
-  String get gallery_metaCfgScale => 'PG';
+  String get gallery_metaCfgScale => '프롬프트 가이던스';
 
   @override
   String get gallery_metaSeed => '시드';
@@ -3821,7 +3821,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_filterBySteps => '스텝으로 필터';
 
   @override
-  String get localGallery_filterByCfg => 'PG로 필터';
+  String get localGallery_filterByCfg => '프롬프트 가이던스로 필터';
 
   @override
   String get localGallery_filterByResolution => '해상도로 필터';
@@ -4507,7 +4507,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get metadataImport_steps => '스텝';
 
   @override
-  String get metadataImport_scale => 'PG';
+  String get metadataImport_scale => '프롬프트 가이던스';
 
   @override
   String get metadataImport_size => '크기';
@@ -4528,7 +4528,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get metadataImport_noiseSchedule => '노이즈 스케줄';
 
   @override
-  String get metadataImport_cfgRescale => 'PGR';
+  String get metadataImport_cfgRescale => '프롬프트 가이던스 리스케일';
 
   @override
   String get metadataImport_qualityToggle => '품질 전환';
@@ -7969,7 +7969,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
-      '설정을 확인하세요: 스텝 1–50, PG 1–20, PGR 0–1, 모델 호환성.';
+      '설정을 확인하세요: 스텝 1–50, 프롬프트 가이던스 1–20, 프롬프트 가이던스 리스케일 0–1, 모델 호환성.';
 
   @override
   String get promptBlockLibrary_applySettings => '설정 가져오기';

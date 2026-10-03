@@ -938,11 +938,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_stepsLabel => 'Steps';
 
   @override
-  String get generation_guidance => 'PG';
+  String get generation_guidance => 'Prompt Guidance';
 
   @override
   String generation_cfgScale(Object scale) {
-    return 'PG: $scale';
+    return 'Prompt Guidance: $scale';
   }
 
   @override
@@ -976,7 +976,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String generation_cfgRescale(Object value) {
-    return 'PGR: $value';
+    return 'Prompt Guidance Rescale: $value';
   }
 
   @override
@@ -2225,7 +2225,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gallery_metaSampler => 'Sampler';
 
   @override
-  String get gallery_metaCfgScale => 'PG';
+  String get gallery_metaCfgScale => 'Prompt Guidance';
 
   @override
   String get gallery_metaSeed => 'Seed';
@@ -3909,7 +3909,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_filterBySteps => 'Filter by Steps';
 
   @override
-  String get localGallery_filterByCfg => 'Filter by PG';
+  String get localGallery_filterByCfg => 'Filter by Prompt Guidance';
 
   @override
   String get localGallery_filterByResolution => 'Filter by Resolution';
@@ -4609,7 +4609,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get metadataImport_steps => 'Steps';
 
   @override
-  String get metadataImport_scale => 'PG';
+  String get metadataImport_scale => 'Prompt Guidance';
 
   @override
   String get metadataImport_size => 'Size';
@@ -4630,7 +4630,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get metadataImport_noiseSchedule => 'Noise Schedule';
 
   @override
-  String get metadataImport_cfgRescale => 'PGR';
+  String get metadataImport_cfgRescale => 'Prompt Guidance Rescale';
 
   @override
   String get metadataImport_qualityToggle => 'Quality Toggle';
@@ -8150,7 +8150,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
-      'Check settings: steps 1–50, PG 1–20, PGR 0–1, and model compatibility.';
+      'Check settings: steps 1–50, Prompt Guidance 1–20, Prompt Guidance Rescale 0–1, and model compatibility.';
 
   @override
   String get promptBlockLibrary_applySettings => 'Import settings';

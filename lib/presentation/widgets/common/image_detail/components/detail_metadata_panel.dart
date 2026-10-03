@@ -526,7 +526,7 @@ class _MetadataContent extends StatelessWidget {
               _InfoRow(label: 'Noise', value: metadata.noiseSchedule!),
             if (metadata.cfgRescale != null && metadata.cfgRescale! > 0)
               _InfoRow(
-                label: 'PGR',
+                label: context.l10n.metadataImport_cfgRescale,
                 value: metadata.cfgRescale.toString(),
               ),
             if (metadata.qualityToggle == true)

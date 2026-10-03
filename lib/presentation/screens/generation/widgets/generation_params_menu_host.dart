@@ -269,9 +269,11 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
         child: Row(
           children: [
             column(l10n.generation_stepsLabel, Text(params.steps.toString())),
-            column(
-              l10n.generation_guidance,
-              Text(params.scale.toStringAsFixed(1)),
+            Flexible(
+              child: column(
+                l10n.generation_guidance,
+                Text(params.scale.toStringAsFixed(1)),
+              ),
             ),
             tappableColumn(
               l10n.generation_seed,

@@ -469,10 +469,12 @@ class CfgScaleSection extends ConsumerWidget {
       children: [
         Row(
           children: [
-            ParamSectionTitle(
-              context.l10n.generation_cfgScale(data.scale.toStringAsFixed(1)),
+            Expanded(
+              child: ParamSectionTitle(
+                context.l10n.generation_cfgScale(data.scale.toStringAsFixed(1)),
+              ),
             ),
-            const Spacer(),
+            const SizedBox(width: 8),
             // Decrisp (仅 V3 模型)
             if (data.isV3Model) ...[
               _ToggleButton(
