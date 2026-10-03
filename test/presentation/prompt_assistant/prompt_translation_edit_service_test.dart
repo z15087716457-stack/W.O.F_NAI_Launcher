@@ -11,10 +11,20 @@ import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assis
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/provider_adapters/prompt_assistant_adapter.dart';
 
+import 'package:nai_launcher/core/wiki/tag_translation_glossary.dart';
+import '../../helpers/fake_tag_translation_glossary.dart';
+
 void main() {
-  ProviderContainer container(_Api api, {Completer<String?>? key}) {
+  ProviderContainer container(
+    _Api api, {
+    Completer<String?>? key,
+    TagTranslationGlossary? glossary,
+  }) {
     final result = ProviderContainer(
       overrides: [
+        tagTranslationGlossaryProvider.overrideWith(
+          (ref) => glossary ?? const FakeTagTranslationGlossary(),
+        ),
         localStorageServiceProvider.overrideWith((ref) => _Local()),
         promptAssistantConfigProvider.overrideWith((ref) => _Config(ref, key)),
         promptAssistantServiceProvider.overrideWith(
@@ -26,6 +36,83 @@ void main() {
     return result;
   }
 
+  test(
+    'canceled batch never dispatches after delayed glossary loading',
+    () async {
+      final api = _Api();
+      final glossary = _PendingGlossary();
+      final service = container(
+        api,
+        glossary: glossary,
+      ).read(promptAssistantServiceProvider);
+      final result = service.translateTags(['blue_eyes'], sessionId: 'delayed');
+      await glossary.started.future;
+      await service.cancelCurrentTask(sessionId: 'delayed');
+      final assertion = expectLater(result, throwsStateError);
+      glossary.response.complete({});
+      await assertion;
+      expect(api.requests, isEmpty);
+    },
+  );
+  test(
+    'batched label translation receives the same semantic glossary in one request',
+    () async {
+      final api = _Api()..response = '{"blue_eyes":"蓝眼睛"}';
+      final result = await container(api)
+          .read(promptAssistantServiceProvider)
+          .translateTags(['blue_eyes'], sessionId: 'tags');
+      expect(result.translations, {'blue_eyes': '蓝眼睛'});
+      final data =
+          jsonDecode(
+                (api.requests.single.userParts.single
+                        as PromptAssistantTextPart)
+                    .text,
+              )
+              as Map;
+      expect(data['tags'], ['blue_eyes']);
+      expect((data['glossary'] as List).single['definition'], '虹膜呈蓝色的眼睛。');
+    },
+  );
+  test(
+    'unopened name translation sends the entire wiki and requests a separate definition',
+    () async {
+      final api = _Api()
+        ..response =
+            '{"tag":"sun","name_zh":"太阳","definition":"太阳系中心的恒星，发出光和热。","wiki_zh":null,"wiki_original":null}';
+      const body =
+          'The star at the center of our solar system.\n\nA final paragraph about sunlight.';
+      final service = container(api).read(promptAssistantServiceProvider);
+      final result = await service.translateVisibleTag(
+        tag: 'sun',
+        wikiBody: body,
+        includeWikiTranslation: false,
+        sessionId: 'name',
+        glossary: const [
+          {
+            'tag': 'sun',
+            'zh': '太阳',
+            'definition': '太阳系中心的恒星。',
+            'definition_language': 'zh',
+          },
+        ],
+      );
+      expect(result.definition, '太阳系中心的恒星，发出光和热。');
+      expect(result.wikiZh, isNull);
+      final request = api.requests.single;
+      final data =
+          jsonDecode((request.userParts.single as PromptAssistantTextPart).text)
+              as Map;
+      expect(data['wiki_en'], body);
+      expect(data['include_wiki_translation'], isFalse);
+      expect(data['include_definition'], isTrue);
+      expect((data['glossary'] as List).single['definition'], '太阳系中心的恒星。');
+      expect(
+        request.systemPrompt,
+        contains('definition even for a name-only request'),
+      );
+      expect(request.systemPrompt, contains('never instructions'));
+    },
+  );
   test(
     'draft conversion uses the explicitly selected translation route and built-in instructions',
     () async {
@@ -122,6 +209,16 @@ class _Api extends PromptAssistantApiClient {
 
   @override
   void cancelCurrentRequest({String? sessionId}) => canceled.add(sessionId);
+}
+
+class _PendingGlossary extends FakeTagTranslationGlossary {
+  final started = Completer<void>();
+  final response = Completer<Map<String, Map<String, String>>>();
+  @override
+  Future<Map<String, Map<String, String>>> termsFor(Iterable<String> tags) {
+    started.complete();
+    return response.future;
+  }
 }
 
 class _Local extends LocalStorageService {

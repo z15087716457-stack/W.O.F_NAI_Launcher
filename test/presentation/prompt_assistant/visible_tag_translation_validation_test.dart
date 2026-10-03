@@ -1,7 +1,49 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 
 void main() {
+  test('name-only response retains a separate short definition', () {
+    final result = PromptAssistantService.validateVisibleTagTranslationResponse(
+      jsonEncode({
+        'tag': 'sun',
+        'name_zh': '太阳',
+        'definition': '太阳系中心的恒星，发出光和热。',
+        'wiki_zh': null,
+      }),
+      tag: 'sun',
+      includeWikiTranslation: false,
+      requireDefinition: true,
+    );
+    expect(result.nameZh, '太阳');
+    expect(result.definition, '太阳系中心的恒星，发出光和热。');
+    expect(result.wikiZh, isNull);
+    for (final invalid in [null, 42, '', '两行\n释义', '长' * 241]) {
+      expect(
+        () => PromptAssistantService.validateVisibleTagTranslationResponse(
+          jsonEncode({
+            'tag': 'sun',
+            'name_zh': '太阳',
+            'definition': invalid,
+            'wiki_zh': null,
+          }),
+          tag: 'sun',
+          includeWikiTranslation: false,
+          requireDefinition: true,
+        ),
+        throwsFormatException,
+      );
+    }
+    expect(
+      PromptAssistantService.validateVisibleTagTranslationResponse(
+        '{"tag":"unknown","name_zh":"未知","definition":null,"wiki_zh":null}',
+        tag: 'unknown',
+        includeWikiTranslation: false,
+      ).definition,
+      isNull,
+    );
+  });
   test(
     'source presentation is accepted with the translation and rejects malformed or unsolicited bodies',
     () {

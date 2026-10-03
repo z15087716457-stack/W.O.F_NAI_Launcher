@@ -5,6 +5,7 @@ import '../../core/utils/prompt_translation_document.dart';
 import '../../core/utils/prompt_translation_edit.dart';
 import '../../core/utils/prompt_translation_language.dart';
 import '../../core/utils/tag_normalizer.dart';
+import '../../core/wiki/tag_translation_glossary.dart';
 import '../../core/utils/nai_prompt_syntax.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../prompt_assistant/services/prompt_assistant_service.dart';
@@ -132,13 +133,18 @@ class PromptTranslationCoordinator {
         final picked = await _ref
             .read(unifiedTagRepositoryProvider)
             .byNames(activeTerms.map((term) => term.tag).toList());
+        final definitions = await _ref
+            .read(tagTranslationGlossaryProvider)
+            .termsFor(picked.map((candidate) => candidate.canonicalTag));
         for (final candidate in picked) {
           final term = activeTerms.firstWhere(
             (term) => term.tag == candidate.canonicalTag,
           );
           byTag[candidate.canonicalTag] = {
+            ...?byTag[candidate.canonicalTag],
             'tag': candidate.canonicalTag,
             'title': TagNormalizer.toDisplay(candidate.canonicalTag),
+            ...?definitions[candidate.canonicalTag],
             if (reading.isChinese) 'zh': term.text,
             'matched_text': term.text,
             'icon_id': candidate.category.name,
@@ -457,10 +463,14 @@ class PromptTranslationCoordinator {
       final candidates = await _ref
           .read(unifiedTagRepositoryProvider)
           .byNames(batch.tagCandidates);
+      final terms = await _ref
+          .read(tagTranslationGlossaryProvider)
+          .termsFor(candidates.map((candidate) => candidate.canonicalTag));
       return [
         for (final candidate in candidates)
           {
             'tag': candidate.canonicalTag,
+            ...?terms[candidate.canonicalTag],
             'title': TagNormalizer.toDisplay(candidate.canonicalTag),
             'icon_id': candidate.category.name,
           },

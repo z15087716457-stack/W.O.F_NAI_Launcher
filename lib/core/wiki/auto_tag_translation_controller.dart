@@ -22,11 +22,15 @@ final autoTagTranslationProvider =
       final controller = AutoTagTranslationController(
         assistant: ref.read(promptAssistantServiceProvider),
         wiki: ref.read(tagWikiRepositoryProvider),
-        cache: VisibleTagTranslationCache(),
+        cache: ref.read(visibleTagTranslationCacheProvider),
+        closeCacheOnDispose: false,
         wikiLinks: ref.read(wikiTagLinksProvider),
         readingLanguage: () => ref
             .read(promptAssistantServiceProvider)
             .targetLanguageFor(LauncherInterface.tagTranslate),
+        wikiReadingLanguage: () => ref
+            .read(promptAssistantServiceProvider)
+            .targetLanguageFor(LauncherInterface.wikiTranslate),
       );
       ref.listen(promptAssistantConfigProvider, (_, __) {
         controller.routeChanged();
@@ -69,11 +73,15 @@ class AutoTagTranslationController extends ChangeNotifier {
     WikiTagLinks? wikiLinks,
     this.maxConcurrentRequests = 5,
     String Function()? readingLanguage,
+    String Function()? wikiReadingLanguage,
+    this.closeCacheOnDispose = true,
   }) : _assistant = assistant,
        _wiki = wiki,
        _cache = cache,
        _wikiLinks = wikiLinks,
-       _readingLanguage = readingLanguage ?? (() => 'zh');
+       _readingLanguage = readingLanguage ?? (() => 'zh'),
+       _wikiReadingLanguage =
+           wikiReadingLanguage ?? readingLanguage ?? (() => 'zh');
 
   static const _preferenceKey = 'auto_visible_tag_translation_enabled';
   final PromptAssistantService _assistant;
@@ -82,6 +90,8 @@ class AutoTagTranslationController extends ChangeNotifier {
   final WikiTagLinks? _wikiLinks;
   final int maxConcurrentRequests;
   final String Function() _readingLanguage;
+  final String Function() _wikiReadingLanguage;
+  final bool closeCacheOnDispose;
   PromptTranslationLanguage get _reading =>
       PromptTranslationLanguage.fromCode(_readingLanguage());
   final Map<String, Set<String>> _visibleBySurface = {};
@@ -91,6 +101,7 @@ class AutoTagTranslationController extends ChangeNotifier {
   final Set<String> _wikiInFlight = {};
   final Map<String, String> _sessions = {};
   final Map<String, String> _names = {};
+  final Map<String, String> _definitions = {};
   final Map<String, String> _wikiBodies = {};
   final Map<String, String> _wikiOriginals = {};
   final Map<String, AutoTagTranslationContext> _contexts = {};
@@ -107,6 +118,8 @@ class AutoTagTranslationController extends ChangeNotifier {
   bool get enabled => _enabled;
   int get activeRequests => _active;
   String? nameFor(String tag) => _names[TagNormalizer.normalize(tag)];
+  String? definitionFor(String tag) =>
+      _definitions[TagNormalizer.normalize(tag)];
   String? wikiFor(String tag) => _wikiBodies[TagNormalizer.normalize(tag)];
   String? wikiOriginalFor(String tag) =>
       _wikiOriginals[TagNormalizer.normalize(tag)];
@@ -143,6 +156,7 @@ class AutoTagTranslationController extends ChangeNotifier {
     _routeEpoch++;
     _route = null;
     _names.clear();
+    _definitions.clear();
     _wikiBodies.clear();
     _wikiOriginals.clear();
     _failed.clear();
@@ -314,6 +328,7 @@ class AutoTagTranslationController extends ChangeNotifier {
         // Names observed before the first task came from this same interface.
         if (_route != null) {
           _names.clear();
+          _definitions.clear();
           _wikiBodies.clear();
           _wikiOriginals.clear();
         }
@@ -341,6 +356,9 @@ class AutoTagTranslationController extends ChangeNotifier {
       }
       final name = cached?.nameZh ?? _names[task.tag];
       if (name != null) _names[task.tag] = name;
+      if (cached?.definition case final definition?) {
+        _definitions[task.tag] = definition;
+      }
       if (cached?.wikiZh case final wikiZh?) _wikiBodies[task.tag] = wikiZh;
       if (cached?.wikiOriginal case final source?) {
         _wikiOriginals[task.tag] = source;
@@ -355,6 +373,12 @@ class AutoTagTranslationController extends ChangeNotifier {
         return;
       }
       var translatedName = name;
+      var nameLanguage = name == null
+          ? null
+          : cached?.nameLanguage ?? _reading.code;
+      var definition = cached?.definition;
+      var definitionLanguage = cached?.definitionLanguage;
+      final articleLanguage = _wikiReadingLanguage();
       final translatedWiki = StringBuffer();
       final originalWiki = StringBuffer();
       var completeOriginal = true;
@@ -377,6 +401,9 @@ class AutoTagTranslationController extends ChangeNotifier {
         );
         _sessions.remove(task.tag);
         translatedName = nameResult.nameZh;
+        nameLanguage = _reading.code;
+        definition = nameResult.definition;
+        definitionLanguage = _reading.code;
       }
       for (var index = 0; index < chunks.length; index++) {
         if ((!_enabled && !task.force) ||
@@ -386,10 +413,13 @@ class AutoTagTranslationController extends ChangeNotifier {
           return;
         }
         final chunk = chunks[index];
-        final glossary = task.wiki
-            ? await _wikiLinks?.glossaryFor(chunk.text, currentTag: task.tag) ??
-                  const <Map<String, Object>>[]
-            : const <Map<String, Object>>[];
+        final glossary =
+            await _wikiLinks?.glossaryFor(
+              task.wiki ? chunk.text : TagNormalizer.toDisplay(task.tag),
+              currentTag: task.tag,
+              limit: task.wiki ? 64 : 1,
+            ) ??
+            const <Map<String, Object>>[];
         if (_disposed ||
             epoch != _routeEpoch ||
             (!_enabled && !task.force) ||
@@ -413,6 +443,11 @@ class AutoTagTranslationController extends ChangeNotifier {
         );
         _sessions.remove(task.tag);
         translatedName = result.nameZh;
+        nameLanguage ??= task.wiki ? articleLanguage : _reading.code;
+        if (definition == null && result.definition != null) {
+          definition = result.definition;
+          definitionLanguage = task.wiki ? articleLanguage : _reading.code;
+        }
         if (task.wiki) {
           translatedWiki.write(result.wikiZh);
           if (result.wikiOriginal case final source?) {
@@ -461,9 +496,13 @@ class AutoTagTranslationController extends ChangeNotifier {
         nameZh: translatedName!,
         wikiZh: wikiZh ?? cached?.wikiZh,
         wikiOriginal: task.wiki ? wikiOriginal : cached?.wikiOriginal,
+        definition: definition,
+        nameLanguage: nameLanguage!,
+        definitionLanguage: definitionLanguage ?? _reading.code,
       );
       if (_disposed || epoch != _routeEpoch) return;
       _names[task.tag] = translatedName;
+      if (definition != null) _definitions[task.tag] = definition;
       if (wikiZh != null) {
         _wikiBodies[task.tag] = wikiZh;
         if (wikiOriginal != null) {
@@ -523,7 +562,7 @@ class AutoTagTranslationController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    unawaited(_cache.close());
+    if (closeCacheOnDispose) unawaited(_cache.close());
     super.dispose();
   }
 }

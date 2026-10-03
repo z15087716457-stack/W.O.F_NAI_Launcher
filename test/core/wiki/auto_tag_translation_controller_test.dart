@@ -46,12 +46,19 @@ class _Cache extends VisibleTagTranslationCache {
     required String nameZh,
     String? wikiZh,
     String? wikiOriginal,
+    String? definition,
+    String nameLanguage = 'zh',
+    String definitionLanguage = 'zh',
   }) async {
     writes++;
     records[tag] = CachedVisibleTagTranslation(
       nameZh: nameZh,
       wikiZh: wikiZh,
       wikiOriginal: wikiOriginal,
+      definition: definition,
+      wikiHash: wikiHash,
+      nameLanguage: nameLanguage,
+      definitionLanguage: definitionLanguage,
     );
   }
 
@@ -70,6 +77,72 @@ Future<void> _until(bool Function() ready) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  test(
+    'unopened visible tag sends full wiki, caches its definition and restores it without a new request',
+    () async {
+      final assistant = _Assistant();
+      final cache = _Cache();
+      const body =
+          'A hair bunch falls from the bangs to between the eyes.\n\nFull remaining article with examples and related tags.';
+      when(() => assistant.translateRouteFingerprint()).thenReturn('route');
+      when(
+        () => assistant.translateVisibleTag(
+          tag: any(named: 'tag'),
+          wikiBody: any(named: 'wikiBody'),
+          includeWikiTranslation: any(named: 'includeWikiTranslation'),
+          existingNameZh: any(named: 'existingNameZh'),
+          category: any(named: 'category'),
+          aliases: any(named: 'aliases'),
+          postCount: any(named: 'postCount'),
+          relatedTo: any(named: 'relatedTo'),
+          glossary: any(named: 'glossary'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((call) async {
+        expect(call.namedArguments[#wikiBody], body);
+        expect(call.namedArguments[#includeWikiTranslation], isFalse);
+        return const VisibleTagTranslationResult(
+          nameZh: '眼间发',
+          definition: '从刘海中央垂下、长度达到双眼之间的一束头发。',
+        );
+      });
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki(body),
+        cache: cache,
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.observe(
+        surface: 'list',
+        tag: 'hair_between_eyes',
+        visible: true,
+      );
+      await _until(
+        () =>
+            controller.activeRequests == 0 &&
+            controller.nameFor('hair_between_eyes') != null,
+      );
+      expect(controller.wikiFor('hair_between_eyes'), isNull);
+      expect(
+        controller.definitionFor('hair_between_eyes'),
+        '从刘海中央垂下、长度达到双眼之间的一束头发。',
+      );
+      expect(
+        cache.records['hair_between_eyes']!.definition,
+        controller.definitionFor('hair_between_eyes'),
+      );
+      expect(cache.records['hair_between_eyes']!.definitionLanguage, 'zh');
+      final writes = cache.writes;
+      controller.routeChanged();
+      await _until(() => controller.activeRequests == 0);
+      expect(cache.writes, writes);
+      expect(
+        controller.definitionFor('hair_between_eyes'),
+        cache.records['hair_between_eyes']!.definition,
+      );
+    },
+  );
 
   test(
     'one Wiki request sends candidate context and caches only model-selected validated links',

@@ -15,6 +15,40 @@ CompletionCandidate tag(
 
 void main() {
   test(
+    'verified wiki glossary matches carry Chinese names and short meanings',
+    () async {
+      final links = WikiTagLinks(
+        exactLookup: (names) async => {
+          for (final name in names)
+            if (name == 'sun') name: tag(name),
+        },
+        terminologyLookup: (names) async {
+          expect(names, ['sun']);
+          return {
+            'sun': {
+              'zh': '太阳',
+              'definition': '太阳系中心的恒星。',
+              'definition_language': 'zh',
+            },
+          };
+        },
+      );
+      final glossary = await links.glossaryFor(
+        'The sun emits light.',
+        currentTag: 'sun',
+      );
+      expect(glossary.single['tag'], 'sun');
+      expect(glossary.single['zh'], '太阳');
+      expect(glossary.single['definition'], '太阳系中心的恒星。');
+      expect(glossary.single['category'], 'general');
+      final fallback = WikiTagLinks(
+        exactLookup: links.exactLookup,
+        terminologyLookup: (_) async => throw StateError('no terminology'),
+      );
+      expect((await fallback.glossaryFor('sun')).single['tag'], 'sun');
+    },
+  );
+  test(
     'the current article is a prioritized glossary candidate even when not named in the source',
     () async {
       final links = WikiTagLinks(

@@ -44,6 +44,8 @@ void main() {
       );
       expect(restored?.wikiZh, '现有译文');
       expect(restored?.wikiOriginal, isNull);
+      expect(restored?.definition, isNull);
+      expect(await cache.chineseTerms(['medium_hair']), isEmpty);
       await cache.put(
         tag: 'medium_hair',
         route: 'model',
@@ -52,6 +54,11 @@ void main() {
         nameZh: '中发',
         wikiZh: '示例\n- 中发',
         wikiOriginal: 'Examples\n- Medium hair',
+        definition: '长度介于短发和长发之间的头发。',
+      );
+      expect(
+        (await cache.chineseTerms(['medium_hair']))['medium_hair']?.definition,
+        '长度介于短发和长发之间的头发。',
       );
       expect(
         (await cache.get(
@@ -62,6 +69,21 @@ void main() {
         ))?.wikiOriginal,
         'Examples\n- Medium hair',
       );
+      await cache.close();
+      final previousReader = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(version: 2),
+      );
+      expect(
+        (await previousReader.query(
+          'tag_translations',
+          columns: ['name_zh'],
+          where: 'tag = ? AND prompt_version = ?',
+          whereArgs: ['medium_hair', 4],
+        )).single['name_zh'],
+        '中发',
+      );
+      await previousReader.close();
     },
   );
   test(
@@ -81,6 +103,7 @@ void main() {
         nameZh: '蓝眼',
         wikiZh: '蓝色眼睛。',
         wikiOriginal: 'Blue eyes.\n\n- [Blue eyes](wof-tag:blue_eyes)',
+        definition: '虹膜呈蓝色的眼睛。',
       );
       await writer.close();
 
@@ -103,6 +126,11 @@ void main() {
       expect(changedWiki?.nameZh, '蓝眼');
       expect(changedWiki?.wikiZh, isNull);
       expect(changedWiki?.wikiOriginal, isNull);
+      expect(changedWiki?.definition, isNull);
+      expect(
+        (await reader.chineseTerms(['blue_eyes']))['blue_eyes']?.definition,
+        '虹膜呈蓝色的眼睛。',
+      );
       expect(
         (await reader.get(
           tag: 'blue_eyes',
@@ -122,6 +150,44 @@ void main() {
         isNull,
       );
       await reader.close();
+    },
+  );
+  test(
+    'terminology lookup excludes non-Chinese names and keeps definition language separate',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'tag_terms_languages_',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final cache = VisibleTagTranslationCache(
+        databasePath: () async => p.join(directory.path, 'cache.db'),
+      );
+      addTearDown(cache.close);
+      await cache.put(
+        tag: 'sun',
+        route: 'ja',
+        promptVersion: 6,
+        wikiHash: 'same',
+        nameZh: '太陽',
+        definition: '恒星。',
+        nameLanguage: 'ja',
+        definitionLanguage: 'ja',
+      );
+      expect(await cache.chineseTerms(['sun']), isEmpty);
+      await cache.put(
+        tag: 'sun',
+        route: 'zh',
+        promptVersion: 6,
+        wikiHash: 'same',
+        nameZh: '太阳',
+        definition: '恒星。',
+        nameLanguage: 'zh',
+        definitionLanguage: 'ja',
+      );
+      final term = (await cache.chineseTerms(['sun']))['sun']!;
+      expect(term.nameZh, '太阳');
+      expect(term.wikiHash, 'same');
+      expect(term.definitionLanguage, 'ja');
     },
   );
   test(

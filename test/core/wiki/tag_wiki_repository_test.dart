@@ -27,6 +27,9 @@ void main() {
       expect(entry?.body, 'Blue hair description.');
       expect(entry?.sourceUrl, 'https://example.com');
       expect(await wiki.find('not_in_wiki'), isNull);
+      final batch = await wiki.findAll([' Blue Hair ', 'blue_hair', 'missing']);
+      expect(batch.keys, ['blue_hair']);
+      expect(batch['blue_hair']?.body, entry?.body);
     },
   );
 }

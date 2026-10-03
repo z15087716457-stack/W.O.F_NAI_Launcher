@@ -22,6 +22,19 @@ abstract class TagWikiRepository {
 }
 
 extension TagWikiAvailability on TagWikiRepository {
+  Future<Map<String, TagWikiEntry>> findAll(Iterable<String> tags) async {
+    if (this case final AssetTagWikiRepository asset) {
+      return asset.findAll(tags);
+    }
+    final found = <String, TagWikiEntry>{};
+    for (final tag in tags.map(TagNormalizer.normalize).toSet()) {
+      if (await find(tag) case final entry?) {
+        found[tag] = entry;
+      }
+    }
+    return found;
+  }
+
   Future<Set<String>> available(Iterable<String> tags) async {
     if (this case final AssetTagWikiRepository asset) {
       return asset.available(tags);
@@ -94,6 +107,40 @@ class AssetTagWikiRepository implements TagWikiRepository {
       return found;
     } finally {
       await database.close();
+    }
+  }
+
+  Future<Map<String, TagWikiEntry>> findAll(Iterable<String> tags) async {
+    final names = tags
+        .map(TagNormalizer.normalize)
+        .where((tag) => tag.isNotEmpty)
+        .toSet()
+        .toList();
+    if (names.isEmpty) return const {};
+    final db = await databaseFactoryFfi.openDatabase(
+      await _databasePath(),
+      options: OpenDatabaseOptions(readOnly: true, singleInstance: false),
+    );
+    try {
+      final found = <String, TagWikiEntry>{};
+      for (var start = 0; start < names.length; start += 400) {
+        final chunk = names.skip(start).take(400).toList();
+        final rows = await db.rawQuery(
+          'SELECT tag, body, source_url FROM wiki_pages WHERE tag IN (${List.filled(chunk.length, '?').join(',')})',
+          chunk,
+        );
+        for (final row in rows) {
+          final tag = row['tag'] as String;
+          found[tag] = TagWikiEntry(
+            tag: tag,
+            body: row['body'] as String,
+            sourceUrl: row['source_url'] as String,
+          );
+        }
+      }
+      return found;
+    } finally {
+      await db.close();
     }
   }
 }

@@ -21,6 +21,9 @@ import 'package:nai_launcher/presentation/providers/prompt_translation_provider.
 import 'package:nai_launcher/presentation/providers/locale_provider.dart';
 import 'package:nai_launcher/core/utils/prompt_translation_language.dart';
 
+import 'package:nai_launcher/core/wiki/tag_translation_glossary.dart';
+import '../../helpers/fake_tag_translation_glossary.dart';
+
 void main() {
   for (final (localeCode, language) in const [
     ('zh', 'zh'),
@@ -48,6 +51,9 @@ void main() {
         });
         final container = ProviderContainer(
           overrides: [
+            tagTranslationGlossaryProvider.overrideWith(
+              (ref) => const FakeTagTranslationGlossary(),
+            ),
             characterPromptNotifierProvider.overrideWith(_Characters.new),
             promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
             promptAssistantServiceProvider.overrideWith((ref) => service),
@@ -80,6 +86,11 @@ void main() {
             .retranslateSingle(PillScopes.main, marker);
         await dispatched.future;
         expect((jsonDecode(sent!) as Map)['target_language'], language);
+        final term =
+            ((jsonDecode(sent!) as Map)['glossary'] as List).single as Map;
+        expect(term['tag'], 'blue_eyes');
+        expect(term['zh'], '蓝眼睛');
+        expect(term['definition'], '虹膜呈蓝色的眼睛。');
         await container
             .read(localeNotifierProvider.notifier)
             .setLocale(language == 'en' ? 'ja' : 'en');
@@ -182,6 +193,9 @@ void main() {
       }
       final container = ProviderContainer(
         overrides: [
+          tagTranslationGlossaryProvider.overrideWith(
+            (ref) => const FakeTagTranslationGlossary(),
+          ),
           characterPromptNotifierProvider.overrideWith(_Characters.new),
           promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
           promptAssistantServiceProvider.overrideWith((ref) => service),
@@ -222,6 +236,10 @@ void main() {
           containsPair('tag', 'kagamine_rin'),
         );
         expect((json['glossary'] as List).first, containsPair('zh', '镜音铃'));
+        expect(
+          (json['glossary'] as List).first,
+          containsPair('definition', '名为镜音铃的虚拟歌手角色。'),
+        );
         expect(result.text, 'kagamine rin, green eyes');
         expect(
           container.read(pillWorkspaceProvider(PillScopes.main)).document,
@@ -338,6 +356,9 @@ void main() {
         ).thenAnswer((_) => response.future);
         final container = ProviderContainer(
           overrides: [
+            tagTranslationGlossaryProvider.overrideWith(
+              (ref) => const FakeTagTranslationGlossary(),
+            ),
             characterPromptNotifierProvider.overrideWith(_Characters.new),
             promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
             promptAssistantServiceProvider.overrideWith((ref) => service),
@@ -414,6 +435,9 @@ void main() {
     ).thenThrow(StateError('offline'));
     final container = ProviderContainer(
       overrides: [
+        tagTranslationGlossaryProvider.overrideWith(
+          (ref) => const FakeTagTranslationGlossary(),
+        ),
         characterPromptNotifierProvider.overrideWith(_Characters.new),
         promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
         promptAssistantServiceProvider.overrideWith((ref) => service),
@@ -481,6 +505,9 @@ void main() {
       );
       final container = ProviderContainer(
         overrides: [
+          tagTranslationGlossaryProvider.overrideWith(
+            (ref) => const FakeTagTranslationGlossary(),
+          ),
           characterPromptNotifierProvider.overrideWith(_Characters.new),
           promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
           promptAssistantServiceProvider.overrideWith((ref) => service),
@@ -538,6 +565,9 @@ void main() {
     () {
       final container = ProviderContainer(
         overrides: [
+          tagTranslationGlossaryProvider.overrideWith(
+            (ref) => const FakeTagTranslationGlossary(),
+          ),
           characterPromptNotifierProvider.overrideWith(_Characters.new),
           promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
         ],
@@ -762,6 +792,9 @@ void main() {
 ProviderContainer _testContainer() {
   final container = ProviderContainer(
     overrides: [
+      tagTranslationGlossaryProvider.overrideWith(
+        (ref) => const FakeTagTranslationGlossary(),
+      ),
       characterPromptNotifierProvider.overrideWith(_Characters.new),
       promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
     ],

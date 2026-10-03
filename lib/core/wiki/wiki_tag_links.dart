@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../autocomplete/completion_models.dart';
 import '../tag_expansion/tag_expansion_providers.dart';
 import '../utils/tag_normalizer.dart';
+import 'tag_translation_glossary.dart';
 
 class WikiTagLink {
   const WikiTagLink(this.start, this.end, this.candidate);
@@ -20,14 +21,19 @@ class WikiLinkDocument {
 
 final wikiTagLinksProvider = Provider<WikiTagLinks>((ref) {
   final catalog = ref.watch(unifiedTagRepositoryProvider);
-  return WikiTagLinks(exactLookup: catalog.resolveExact);
+  return WikiTagLinks(
+    exactLookup: catalog.resolveExact,
+    terminologyLookup: ref.read(tagTranslationGlossaryProvider).termsFor,
+  );
 });
 
 /// Matching supplies model context; rendering validates explicit links only.
 class WikiTagLinks {
-  WikiTagLinks({required this.exactLookup});
+  WikiTagLinks({required this.exactLookup, this.terminologyLookup});
   final Future<Map<String, CompletionCandidate>> Function(Iterable<String>)
   exactLookup;
+  final Future<Map<String, Map<String, String>>> Function(Iterable<String>)?
+  terminologyLookup;
   final _cache = <String, Future<WikiLinkDocument>>{};
 
   Future<WikiLinkDocument> resolve(String body) {
@@ -267,10 +273,17 @@ class WikiTagLinks {
     for (final span in spans) {
       add(span.name, body.substring(span.start, span.end));
     }
+    Map<String, Map<String, String>> definitions = const {};
+    try {
+      definitions = await terminologyLookup?.call(chosen.keys) ?? const {};
+    } catch (_) {
+      // Optional terminology must not discard verified link candidates.
+    }
     return [
       for (final item in chosen.values)
         {
           'tag': item.canonicalTag,
+          ...?definitions[item.canonicalTag],
           'title': TagNormalizer.toDisplay(item.canonicalTag),
           'category': item.category.name,
           if (item.canonicalTag == _normalize(currentTag ?? ''))
