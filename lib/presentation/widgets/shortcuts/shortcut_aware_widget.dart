@@ -118,7 +118,7 @@ class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
       if (keys.isEmpty) continue;
 
       // 创建唯一的 Intent
-      final intent = _ShortcutIntent(shortcutId);
+      final intent = _ShortcutIntent(shortcutId, entry.value);
       shortcutsMap[LogicalKeySet.fromSet(keys)] = intent;
     }
 
@@ -131,8 +131,9 @@ class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
     final actionsMap = <Type, Action<Intent>>{
       _ShortcutIntent: CallbackAction<_ShortcutIntent>(
         onInvoke: (intent) {
-          final callback = widget.shortcuts[intent.shortcutId];
-          callback?.call();
+          // Nested Actions share this intent type. Dispatch to the callback
+          // that created the binding, rather than swallowing ancestor actions.
+          intent.callback();
           return null;
         },
       ),
@@ -217,7 +218,7 @@ class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
       if (keys.isEmpty) continue;
 
       // 创建唯一的 Intent
-      final intent = _ShortcutIntent(shortcutId);
+      final intent = _ShortcutIntent(shortcutId, entry.value);
       shortcutsMap[LogicalKeySet.fromSet(keys)] = intent;
     }
 
@@ -230,8 +231,7 @@ class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
     final actionsMap = <Type, Action<Intent>>{
       _ShortcutIntent: CallbackAction<_ShortcutIntent>(
         onInvoke: (intent) {
-          final callback = widget.shortcuts[intent.shortcutId];
-          callback?.call();
+          intent.callback();
           return null;
         },
       ),
@@ -416,8 +416,9 @@ class _ShortcutAwareWidgetState extends ConsumerState<ShortcutAwareWidget> {
 /// 内部 Intent 类，用于标识快捷键动作
 class _ShortcutIntent extends Intent {
   final String shortcutId;
+  final VoidCallback callback;
 
-  const _ShortcutIntent(this.shortcutId);
+  const _ShortcutIntent(this.shortcutId, this.callback);
 
   @override
   bool operator ==(Object other) {

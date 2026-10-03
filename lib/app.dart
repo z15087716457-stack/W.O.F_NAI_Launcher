@@ -136,7 +136,8 @@ class NAILauncherApp extends ConsumerWidget {
 
       // 全局应用快捷键
       ShortcutIds.showShortcutHelp: () {
-        ShortcutHelpDialog.show(context);
+        final dialogContext = router.routerDelegate.navigatorKey.currentContext;
+        if (dialogContext != null) ShortcutHelpDialog.show(dialogContext);
       },
       ShortcutIds.minimizeToTray: () {
         windowManager.hide();

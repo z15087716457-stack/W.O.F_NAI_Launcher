@@ -1,0 +1,159 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
+import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/widgets/shortcuts/shortcut_aware_widget.dart';
+import 'package:nai_launcher/presentation/widgets/shortcuts/shortcut_help_dialog.dart';
+
+class _DefaultConfig extends ShortcutConfigNotifier {
+  @override
+  Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
+}
+
+class _LoadingConfig extends ShortcutConfigNotifier {
+  @override
+  Future<ShortcutConfig> build() => Completer<ShortcutConfig>().future;
+}
+
+class _ErrorConfig extends ShortcutConfigNotifier {
+  @override
+  Future<ShortcutConfig> build() async =>
+      throw StateError('test config failure');
+}
+
+class _DisabledConfig extends ShortcutConfigNotifier {
+  @override
+  Future<ShortcutConfig> build() async =>
+      ShortcutConfig.createDefault().copyWith(enableShortcuts: false);
+}
+
+void main() {
+  for (final nested in [false, true]) {
+    testWidgets('F1 opens real help with page shortcuts: $nested', (
+      tester,
+    ) async {
+      var helpCalls = 0;
+      var generationCalls = 0;
+      final navigator = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            shortcutConfigNotifierProvider.overrideWith(_DefaultConfig.new),
+          ],
+          child: GlobalShortcuts(
+            shortcuts: {
+              ShortcutIds.showShortcutHelp: () {
+                helpCalls++;
+                ShortcutHelpDialog.show(navigator.currentContext!);
+              },
+            },
+            child: MaterialApp(
+              navigatorKey: navigator,
+              locale: const Locale('zh'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: nested
+                    ? PageShortcuts(
+                        contextType: ShortcutContext.generation,
+                        shortcuts: {
+                          ShortcutIds.generateImage: () => generationCalls++,
+                        },
+                        child: const Material(
+                          child: TextField(autofocus: true),
+                        ),
+                      )
+                    : const Material(child: TextField(autofocus: true)),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(TextField));
+      await tester.sendKeyEvent(LogicalKeyboardKey.f1);
+      await tester.pumpAndSettle();
+      expect(helpCalls, 1);
+      expect(find.byType(ShortcutHelpDialog), findsOneWidget);
+      Navigator.of(tester.element(find.byType(ShortcutHelpDialog))).pop();
+      await tester.pumpAndSettle();
+      if (nested) {
+        await tester.tap(find.byType(TextField));
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await tester.pump();
+        expect(generationCalls, 1);
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+  for (final entry in <String, ShortcutConfigNotifier Function()>{
+    'loading': _LoadingConfig.new,
+    'error': _ErrorConfig.new,
+    'disabled': _DisabledConfig.new,
+  }.entries) {
+    testWidgets('nested dispatch when config is ${entry.key}', (tester) async {
+      var calls = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [shortcutConfigNotifierProvider.overrideWith(entry.value)],
+          child: MaterialApp(
+            home: GlobalShortcuts(
+              shortcuts: {ShortcutIds.showShortcutHelp: () => calls++},
+              child: PageShortcuts(
+                contextType: ShortcutContext.generation,
+                shortcuts: {ShortcutIds.generateImage: () {}},
+                child: const Material(child: TextField(autofocus: true)),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(TextField));
+      await tester.sendKeyEvent(LogicalKeyboardKey.f1);
+      await tester.pump();
+      expect(calls, entry.key == 'disabled' ? 0 : 1);
+      expect(tester.takeException(), isNull);
+    });
+  }
+  testWidgets(
+    'nearest registered global binding wins without duplicate calls',
+    (tester) async {
+      var rootCalls = 0;
+      var shellCalls = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            shortcutConfigNotifierProvider.overrideWith(_DefaultConfig.new),
+          ],
+          child: MaterialApp(
+            home: GlobalShortcuts(
+              shortcuts: {ShortcutIds.showShortcutHelp: () => rootCalls++},
+              child: GlobalShortcuts(
+                shortcuts: {ShortcutIds.showShortcutHelp: () => shellCalls++},
+                child: PageShortcuts(
+                  contextType: ShortcutContext.generation,
+                  shortcuts: {ShortcutIds.generateImage: () {}},
+                  child: const Material(child: TextField(autofocus: true)),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(TextField));
+      await tester.sendKeyEvent(LogicalKeyboardKey.f1);
+      await tester.pump();
+      expect(rootCalls, 0);
+      expect(shellCalls, 1);
+    },
+  );
+}

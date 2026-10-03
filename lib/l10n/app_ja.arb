@@ -7179,5 +7179,9 @@
     "placeholders": {
       "service": {}
     }
-  }
+  },
+  "imageUse_title": "画像を使用",
+  "imageUse_importContent": "取り込む内容",
+  "imageUse_characters": "キャラクター",
+  "imageUse_characterMode": "キャラクターの処理"
 }

@@ -14,6 +14,7 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import '../../../core/enums/precise_ref_type.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
+import '../../../data/models/metadata/metadata_import_options.dart';
 import '../../../data/services/image_metadata_service.dart';
 import '../../../core/utils/vibe_file_parser.dart';
 import '../../../data/models/vibe/vibe_library_entry.dart';
@@ -30,7 +31,6 @@ import '../../utils/internal_drag_protocol.dart' as internal_drag;
 import '../../utils/metadata_import_coordinator.dart';
 import '../../utils/precise_ref_library_import_helper.dart';
 import '../common/app_toast.dart';
-import '../metadata/metadata_import_dialog.dart';
 import 'image_destination_dialog.dart';
 import 'prompt_block_drop_handler.dart';
 
@@ -446,7 +446,6 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
       fileName,
       bytes,
     );
-    final showExtractMetadata = detectedMetadata != null;
 
     // 检测是否包含 Vibe 元数据（仅 PNG）
     final detectedVibe = await _detectVibeMetadata(fileName, bytes);
@@ -461,7 +460,7 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
       context,
       imageBytes: bytes,
       fileName: fileName,
-      showExtractMetadata: showExtractMetadata,
+      metadata: detectedMetadata,
       detectedVibe: detectedVibe,
       isBundle: detectedVibes.length > 1,
     );
@@ -471,7 +470,7 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
     final notifier = ref.read(generationParamsNotifierProvider.notifier);
 
     await _handleDestination(
-      destination,
+      destination.destination,
       fileName,
       bytes,
       detectedVibe,
@@ -479,6 +478,7 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
       detectedMetadata,
       notifier,
       l10n,
+      destination.selection,
     );
   }
 
@@ -536,6 +536,7 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
     NaiImageMetadata? detectedMetadata,
     GenerationParamsNotifier notifier,
     AppLocalizations l10n,
+    OfficialMetadataImportSelection? selection,
   ) async {
     switch (destination) {
       case ImageDestination.img2img:
@@ -573,7 +574,7 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
         break;
 
       case ImageDestination.extractMetadata:
-        await _handleExtractMetadata(detectedMetadata, bytes, l10n);
+        await _handleExtractMetadata(detectedMetadata, bytes, l10n, selection);
         break;
     }
   }
@@ -803,7 +804,9 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
     NaiImageMetadata? detectedMetadata,
     Uint8List bytes,
     AppLocalizations l10n,
+    OfficialMetadataImportSelection? selection,
   ) async {
+    if (selection == null) return;
     try {
       final metadata =
           detectedMetadata ??
@@ -817,11 +820,6 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
       }
 
       if (!mounted) return;
-      final selection = await MetadataImportDialog.showOfficial(
-        context,
-        metadata: metadata,
-      );
-      if (selection == null || !mounted) return;
 
       final appliedCount =
           await MetadataImportCoordinator.applyOfficialSelection(

@@ -190,7 +190,7 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
         enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,
         // 清空由 UnifiedPromptInput 内部处理并回调 onChanged('')，无需重复
         showClearButton: true,
-        clearNeedsConfirm: true,
+        clearNeedsConfirm: false,
       ),
       decoration: const InputDecoration(
         contentPadding: EdgeInsets.fromLTRB(0, 0, 22, 4),

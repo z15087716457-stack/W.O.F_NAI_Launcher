@@ -92,10 +92,10 @@ class _PromptBlockPaletteButtonState
           iconSize: 18,
           visualDensity: VisualDensity.compact,
           style: IconButton.styleFrom(
-            backgroundColor: _isOpen || _dragHover
+            backgroundColor: _dragHover
                 ? theme.colorScheme.primaryContainer
                 : Colors.transparent,
-            foregroundColor: _isOpen || _dragHover
+            foregroundColor: _dragHover
                 ? theme.colorScheme.onPrimaryContainer
                 : theme.colorScheme.onSurfaceVariant,
           ),

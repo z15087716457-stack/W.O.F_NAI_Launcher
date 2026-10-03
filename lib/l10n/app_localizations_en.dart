@@ -12754,4 +12754,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String dataRefresh_updatingService(Object service) {
     return 'Updating $service...';
   }
+
+  @override
+  String get imageUse_title => 'Use image';
+
+  @override
+  String get imageUse_importContent => 'Import content';
+
+  @override
+  String get imageUse_characters => 'Characters';
+
+  @override
+  String get imageUse_characterMode => 'Character handling';
 }

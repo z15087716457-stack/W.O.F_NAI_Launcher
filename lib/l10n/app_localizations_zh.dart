@@ -12158,6 +12158,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String dataRefresh_updatingService(Object service) {
     return '正在更新 $service...';
   }
+
+  @override
+  String get imageUse_title => '使用图片';
+
+  @override
+  String get imageUse_importContent => '导入内容';
+
+  @override
+  String get imageUse_characters => '多角色';
+
+  @override
+  String get imageUse_characterMode => '角色处理';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24314,4 +24326,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String dataRefresh_updatingService(Object service) {
     return '正在更新 $service...';
   }
+
+  @override
+  String get imageUse_title => '使用圖片';
+
+  @override
+  String get imageUse_importContent => '匯入內容';
+
+  @override
+  String get imageUse_characters => '多角色';
+
+  @override
+  String get imageUse_characterMode => '角色處理';
 }

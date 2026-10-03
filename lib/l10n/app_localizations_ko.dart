@@ -12392,4 +12392,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String dataRefresh_updatingService(Object service) {
     return '$service 업데이트 중...';
   }
+
+  @override
+  String get imageUse_title => '이미지 사용';
+
+  @override
+  String get imageUse_importContent => '가져올 항목';
+
+  @override
+  String get imageUse_characters => '캐릭터';
+
+  @override
+  String get imageUse_characterMode => '캐릭터 처리';
 }

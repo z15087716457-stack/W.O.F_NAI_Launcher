@@ -60,7 +60,7 @@ import '../../widgets/gallery/gallery_state_views.dart';
 import '../../widgets/gallery/local_image_context_menu.dart';
 import '../../widgets/gallery/local_gallery_toolbar.dart';
 import '../../widgets/gallery/date_range_picker_dialog.dart';
-import '../../widgets/metadata/metadata_import_dialog.dart';
+import '../../widgets/drop/image_destination_dialog.dart';
 import '../../widgets/gallery_filter_panel.dart';
 import '../../widgets/grouped_grid_view.dart' show GroupedGridViewState;
 import '../../widgets/shortcuts/shortcut_aware_widget.dart';
@@ -1550,18 +1550,43 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
 
   Future<void> _importImageMetadata(LocalImageRecord record) async {
     try {
-      final metadata = await resolveLocalGalleryMetadata(record);
-      if (!mounted) return;
-      if (metadata == null) {
-        AppToast.warning(context, context.l10n.metadataImport_noDataFound);
+      final file = File(record.path);
+      if (!await file.exists()) {
+        if (mounted) {
+          AppToast.info(context, context.l10n.localGallery_imageFileMissing);
+        }
         return;
       }
-
-      final selection = await MetadataImportDialog.showOfficial(
+      final imageBytes = await file.readAsBytes();
+      final metadata = await resolveLocalGalleryMetadata(record);
+      if (!mounted) return;
+      final result = await ImageDestinationDialog.show(
         context,
+        imageBytes: imageBytes,
+        fileName: path.basename(record.path),
         metadata: metadata,
       );
-      if (selection == null || !mounted) return;
+      if (result == null || !mounted) return;
+      switch (result.destination) {
+        case ImageDestination.img2img:
+          await _sendToImg2Img(record);
+          return;
+        case ImageDestination.vibeTransfer:
+        case ImageDestination.vibeTransferRaw:
+          await _sendToStyleTransfer(record);
+          return;
+        case ImageDestination.characterReference:
+          await _sendToPreciseReference(record);
+          return;
+        case ImageDestination.vibeTransferReuse:
+        case ImageDestination.saveToVibeLibrary:
+          // Encoded Vibe actions are offered by the dropped-file flow only.
+          return;
+        case ImageDestination.extractMetadata:
+          break;
+      }
+      final selection = result.selection;
+      if (selection == null || metadata == null) return;
 
       final appliedCount =
           await MetadataImportCoordinator.applyOfficialSelection(

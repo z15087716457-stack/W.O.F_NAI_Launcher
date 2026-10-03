@@ -7179,5 +7179,9 @@
     "placeholders": {
       "service": {}
     }
-  }
+  },
+  "imageUse_title": "Use image",
+  "imageUse_importContent": "Import content",
+  "imageUse_characters": "Characters",
+  "imageUse_characterMode": "Character handling"
 }

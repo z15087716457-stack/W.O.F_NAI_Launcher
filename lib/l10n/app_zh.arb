@@ -7179,5 +7179,9 @@
     "placeholders": {
       "service": {}
     }
-  }
+  },
+  "imageUse_title": "使用图片",
+  "imageUse_importContent": "导入内容",
+  "imageUse_characters": "多角色",
+  "imageUse_characterMode": "角色处理"
 }

@@ -7179,5 +7179,9 @@
     "placeholders": {
       "service": {}
     }
-  }
+  },
+  "imageUse_title": "이미지 사용",
+  "imageUse_importContent": "가져올 항목",
+  "imageUse_characters": "캐릭터",
+  "imageUse_characterMode": "캐릭터 처리"
 }

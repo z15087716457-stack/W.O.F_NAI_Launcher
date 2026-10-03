@@ -12375,4 +12375,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String dataRefresh_updatingService(Object service) {
     return '$service を更新中...';
   }
+
+  @override
+  String get imageUse_title => '画像を使用';
+
+  @override
+  String get imageUse_importContent => '取り込む内容';
+
+  @override
+  String get imageUse_characters => 'キャラクター';
+
+  @override
+  String get imageUse_characterMode => 'キャラクターの処理';
 }

@@ -8,7 +8,7 @@ import '../../providers/layout_state_provider.dart';
 
 /// 块库面板开关按钮（生成页提示词顶栏）。
 ///
-/// 切换页面级右侧块库 dock（[BlockLibraryPanelSlot]），选中态高亮。
+/// 切换页面级右侧块库 dock，打开状态由面板本身表示。
 class BlockLibraryPanelToggleButton extends ConsumerStatefulWidget {
   const BlockLibraryPanelToggleButton({super.key});
 
@@ -23,9 +23,6 @@ class _BlockLibraryPanelToggleButtonState
 
   @override
   Widget build(BuildContext context) {
-    final expanded = ref.watch(
-      layoutStateNotifierProvider.select((s) => s.blockLibraryPanelExpanded),
-    );
     final theme = Theme.of(context);
 
     return Tooltip(
@@ -36,12 +33,8 @@ class _BlockLibraryPanelToggleButtonState
         iconSize: 18,
         visualDensity: VisualDensity.compact,
         style: IconButton.styleFrom(
-          backgroundColor: expanded
-              ? theme.colorScheme.primaryContainer
-              : Colors.transparent,
-          foregroundColor: expanded
-              ? theme.colorScheme.onPrimaryContainer
-              : theme.colorScheme.onSurfaceVariant,
+          backgroundColor: Colors.transparent,
+          foregroundColor: theme.colorScheme.onSurfaceVariant,
         ),
         onPressed: () {
           setState(() => _motionTrigger++);

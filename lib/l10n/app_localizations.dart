@@ -22125,6 +22125,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Updating {service}...'**
   String dataRefresh_updatingService(Object service);
+
+  /// No description provided for @imageUse_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Use image'**
+  String get imageUse_title;
+
+  /// No description provided for @imageUse_importContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Import content'**
+  String get imageUse_importContent;
+
+  /// No description provided for @imageUse_characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters'**
+  String get imageUse_characters;
+
+  /// No description provided for @imageUse_characterMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Character handling'**
+  String get imageUse_characterMode;
 }
 
 class _AppLocalizationsDelegate
