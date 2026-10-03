@@ -171,7 +171,7 @@ class WikiSidebar extends StatelessWidget {
         ),
       );
     }
-    final tile = ExpansionTile(
+    return ExpansionTile(
       key: PageStorageKey('wiki-directory-$id'),
       shape: const Border(),
       collapsedShape: const Border(),
@@ -199,17 +199,6 @@ class WikiSidebar extends StatelessWidget {
       children: [
         for (var index = 0; index < children.length; index++)
           _directoryNode(context, children[index], '$id/$index', depth + 1),
-      ],
-    );
-    if (depth != 0) return tile;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(8, 0, 8, 4),
-          child: Divider(height: 1),
-        ),
-        tile,
       ],
     );
   }

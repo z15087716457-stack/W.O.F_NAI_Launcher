@@ -22,6 +22,7 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
+import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_sidebar.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_tag_row.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
@@ -223,10 +224,15 @@ Future<void> capture(WidgetTester tester, String name) async {
         boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final redesign = Platform.environment['CAPTURE_WIKI_REDESIGN'] == '1';
     final polish = Platform.environment['CAPTURE_WIKI_POLISH'] == '1';
-    final image = await render.toImage(pixelRatio: redesign || polish ? 1 : 2);
+    final separators = Platform.environment['CAPTURE_WIKI_SEPARATORS'] == '1';
+    final image = await render.toImage(
+      pixelRatio: redesign || polish || separators ? 1 : 2,
+    );
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final folder = Directory(
-      polish
+      separators
+          ? '.dart_tool/wiki-separators-captures'
+          : polish
           ? '.dart_tool/wiki-polish-captures'
           : redesign
           ? '.dart_tool/wiki-redesign-captures'
@@ -553,7 +559,7 @@ void main() {
   );
 
   testWidgets(
-    'directory has only top separators and original Wiki mark animates once',
+    'official directory groups have no separators and original Wiki mark animates once',
     (tester) async {
       tester.view.physicalSize = const Size(1720, 940);
       tester.view.devicePixelRatio = 1;
@@ -561,7 +567,37 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       await _pump(
         tester,
-        const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+        TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(
+            roots: [
+              ..._uiDirectory.roots,
+              const WikiDirectoryNode(
+                label: 'Copyrights, artists, projects and media',
+                group: 'works',
+                children: [
+                  WikiDirectoryNode(
+                    label: 'Artists',
+                    group: 'artists',
+                    children: [],
+                  ),
+                ],
+              ),
+              const WikiDirectoryNode(
+                label: 'Metatags',
+                group: 'meta',
+                children: [
+                  WikiDirectoryNode(
+                    label: 'Software',
+                    group: 'software',
+                    children: [],
+                  ),
+                ],
+              ),
+            ],
+            groups: {},
+          ),
+        ),
         _Auto()..bodyOverride = _uiBody,
         catalog: _Tags(entries: _uiTags()),
       );
@@ -578,6 +614,17 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Composition'), findsOneWidget);
+      final sectionBottom = tester.getRect(find.text('官方目录')).bottom;
+      final dividers = find.descendant(
+        of: find.byType(WikiSidebar),
+        matching: find.byType(Divider),
+      );
+      for (final divider in dividers.evaluate()) {
+        expect(
+          tester.getRect(find.byWidget(divider.widget)).top,
+          lessThan(sectionBottom),
+        );
+      }
       for (final tile in tester.widgetList<ExpansionTile>(
         find.byType(ExpansionTile),
       )) {
