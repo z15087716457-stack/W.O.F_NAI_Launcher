@@ -127,8 +127,6 @@ class StorageKeys {
       'autocomplete_danbooru_enabled';
   static const String autocompleteLlmTranslationEnabled =
       'autocomplete_llm_translation_enabled';
-  static const String autocompleteZhInstallPromptDismissed =
-      'autocomplete_zh_install_prompt_dismissed';
   static const String autocompleteMigrationVersion =
       'autocomplete_migration_version';
   static const String autoFormatPrompt = 'auto_format_prompt';

@@ -7,8 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/localization_extension.dart';
-import '../../../../../core/autocomplete/tag_translation_lookup.dart';
 import '../../../../widgets/common/app_toast.dart';
+import '../../../../widgets/common/visible_tag_readings.dart';
 
 import '../../../../../data/models/prompt/prompt_tag.dart';
 import '../../../../../data/models/prompt/tag_favorite.dart';
@@ -93,10 +93,9 @@ class TagChip extends ConsumerStatefulWidget {
 }
 
 class _TagChipState extends ConsumerState<TagChip>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, VisibleTagReadings<TagChip> {
   bool _isHovering = false;
   bool _showMenu = false;
-  String? _translation;
   Timer? _menuShowTimer;
   Timer? _menuHideTimer;
 
@@ -111,7 +110,6 @@ class _TagChipState extends ConsumerState<TagChip>
   @override
   void initState() {
     super.initState();
-    _fetchTranslation();
     _currentWeight = widget.tag.weight;
 
     // Always initialize animation controllers
@@ -143,18 +141,6 @@ class _TagChipState extends ConsumerState<TagChip>
   @override
   void didUpdateWidget(TagChip oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // 当标签文本或存储的翻译变化时，重新获取翻译
-    if (oldWidget.tag.text != widget.tag.text ||
-        oldWidget.tag.translation != widget.tag.translation) {
-      _translation = null; // 重置翻译，强制重新获取
-      _fetchTranslation();
-    }
-
-    // 如果是首次加载且没有翻译，也尝试获取
-    if (_translation == null && widget.tag.translation == null) {
-      _fetchTranslation();
-    }
 
     if (oldWidget.isDragging != widget.isDragging) {
       if (widget.isDragging) {
@@ -195,24 +181,6 @@ class _TagChipState extends ConsumerState<TagChip>
   /// 检查标签是否已收藏
   bool _isFavorite(List<TagFavorite> favorites) {
     return favorites.any((f) => f.tag.text == widget.tag.text);
-  }
-
-  Future<void> _fetchTranslation() async {
-    // 1. 如果 PromptTag 已有翻译，直接使用
-    if (widget.tag.translation != null && widget.tag.translation!.isNotEmpty) {
-      _translation = widget.tag.translation;
-      return;
-    }
-
-    // 2. 从翻译服务获取
-    final translationService = ref.read(tagTranslationLookupProvider);
-    final result = await translationService.translate(widget.tag.text);
-
-    if (mounted) {
-      setState(() {
-        _translation = result;
-      });
-    }
   }
 
   void _onMouseEnter() {
@@ -573,8 +541,20 @@ class _TagChipState extends ConsumerState<TagChip>
     );
   }
 
+  /// 已存的翻译优先；否则交给用户的标签翻译接口（共用自动翻译开关）
+  String? _reading() {
+    final stored = widget.tag.translation;
+    if (stored != null && stored.isNotEmpty) {
+      observeTagReadings(const []);
+      return stored;
+    }
+    observeTagReadings([widget.tag.text]);
+    return tagReading(widget.tag.text);
+  }
+
   Widget _buildNormalMode() {
     final theme = Theme.of(context);
+    final translation = _reading();
     final tagColor = PromptTagColors.getByCategory(widget.tag.category);
     final isEnabled = widget.tag.enabled;
     final isSelected = widget.tag.selected;
@@ -772,7 +752,7 @@ class _TagChipState extends ConsumerState<TagChip>
             Padding(
               padding: const EdgeInsets.only(top: 2, left: 2),
               child: Text(
-                _translation ?? ' ',
+                translation ?? ' ',
                 style: TextStyle(
                   fontSize: TagChipSizes.normalTranslationFontSize,
                   height: 1.2,

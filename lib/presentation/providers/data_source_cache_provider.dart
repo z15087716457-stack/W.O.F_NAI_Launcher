@@ -70,7 +70,6 @@ class DanbooruTagsCacheState {
   // 分类阈值配置（V2新增）
   final TagCategoryThresholds categoryThresholds;
   // 预构建数据库统计
-  final int translationCount; // 翻译数据数量
   final int cooccurrenceCount; // 共现数据数量
 
   const DanbooruTagsCacheState({
@@ -91,7 +90,6 @@ class DanbooruTagsCacheState {
     // 分类阈值默认配置
     this.categoryThresholds = const TagCategoryThresholds(),
     // 预构建数据库统计默认值
-    this.translationCount = 0,
     this.cooccurrenceCount = 0,
   });
 
@@ -125,7 +123,6 @@ class DanbooruTagsCacheState {
     int? artistsTotal,
     DateTime? artistsLastUpdate,
     TagCategoryThresholds? categoryThresholds,
-    int? translationCount,
     int? cooccurrenceCount,
   }) {
     return DanbooruTagsCacheState(
@@ -143,7 +140,6 @@ class DanbooruTagsCacheState {
       artistsTotal: artistsTotal ?? this.artistsTotal,
       artistsLastUpdate: artistsLastUpdate ?? this.artistsLastUpdate,
       categoryThresholds: categoryThresholds ?? this.categoryThresholds,
-      translationCount: translationCount ?? this.translationCount,
       cooccurrenceCount: cooccurrenceCount ?? this.cooccurrenceCount,
     );
   }
@@ -271,27 +267,21 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
       }
     }
 
-    // 获取翻译和共现数据数量（预构建数据库）
-    var translationCount = 0;
+    // 获取共现数据数量（预构建数据库）
     var cooccurrenceCount = 0;
     try {
-      final translationService = await ref.read(
-        translationServiceProvider.future,
-      );
-      translationCount = await translationService.getCount();
-
       final cooccurrenceService = await ref.read(
         cooccurrenceServiceProvider.future,
       );
       cooccurrenceCount = await cooccurrenceService.getCount();
 
       AppLogger.i(
-        '[ProviderLifecycle] Database stats - translations: $translationCount, cooccurrences: $cooccurrenceCount',
+        '[ProviderLifecycle] Database stats - cooccurrences: $cooccurrenceCount',
         'DanbooruTagsCacheNotifier',
       );
     } catch (e) {
       AppLogger.w(
-        '[ProviderLifecycle] Failed to load translation/cooccurrence stats: $e',
+        '[ProviderLifecycle] Failed to load cooccurrence stats: $e',
         'DanbooruTagsCacheNotifier',
       );
     }
@@ -311,7 +301,6 @@ class DanbooruTagsCacheNotifier extends _$DanbooruTagsCacheNotifier {
       refreshInterval: refreshInterval,
       categoryThresholds: categoryThresholds,
       syncArtists: true, // 画师同步现在是默认行为
-      translationCount: translationCount,
       cooccurrenceCount: cooccurrenceCount,
     );
   }

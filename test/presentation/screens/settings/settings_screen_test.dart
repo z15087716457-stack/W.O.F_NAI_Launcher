@@ -13,7 +13,6 @@ import 'package:nai_launcher/core/constants/app_version.dart';
 import 'package:nai_launcher/data/models/auth/saved_account.dart';
 import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/database/database_providers.dart';
 import 'package:nai_launcher/core/cache/gallery_cache_manager.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/cache_statistics_tile.dart';
@@ -48,6 +47,9 @@ import 'package:nai_launcher/presentation/screens/settings/settings_screen.dart'
 import 'package:nai_launcher/presentation/screens/settings/widgets/model_management_widgets.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
+import 'package:nai_launcher/core/utils/app_language.dart';
+
+import '../../../helpers/chinese_script_test_support.dart';
 
 class _DesignShortcuts extends ShortcutConfigNotifier {
   @override
@@ -144,15 +146,6 @@ class _DesignCatalog extends TagCatalogRepository {
   };
   @override
   Future<void> dispose() async {}
-}
-
-class _DesignDictionary extends ZhDictionaryService {
-  @override
-  ZhDictionaryState get state => const ZhDictionaryState(
-    isInstalled: true,
-    tagCount: 322933,
-    version: '4831090f',
-  );
 }
 
 class _DesignTagsCache extends DanbooruTagsCacheNotifier {
@@ -605,15 +598,19 @@ void main() {
           (2400.0, 1.0, const Locale('zh')),
           (740.0, 1.3, const Locale('zh')),
           (360.0, 1.3, const Locale('zh')),
-          for (final code in ['en', 'ja']) ...[
-            (1280.0, 1.0, Locale(code)),
-            (360.0, 1.3, Locale(code)),
-          ],
+          for (final locale in const [
+            Locale('en'),
+            Locale('ja'),
+            Locale('zh', 'TW'),
+          ]) ...[(1280.0, 1.0, locale), (360.0, 1.3, locale)],
         ]) {
           final width = layout.$1, scale = layout.$2, locale = layout.$3;
           final l10n = lookupAppLocalizations(locale);
-          final chinese = locale.languageCode == 'zh';
-          final suffix = chinese ? '' : '-${locale.languageCode}';
+          final chinese = locale == const Locale('zh');
+          final traditional = AppLanguage.fromLocale(
+            locale,
+          ).isTraditionalChinese;
+          final suffix = chinese ? '' : '-${locale.toLanguageTag()}';
           tester.view.physicalSize = Size(width, 900);
           tester.view.devicePixelRatio = 1;
           await tester.binding.setSurfaceSize(Size(width, 900));
@@ -672,9 +669,6 @@ void main() {
                 ),
                 tagCatalogRepositoryProvider.overrideWithValue(
                   _DesignCatalog(),
-                ),
-                zhDictionaryServiceProvider.overrideWith(
-                  (ref) => _DesignDictionary(),
                 ),
                 databaseManagerProvider.overrideWith(
                   (ref) async =>
@@ -785,31 +779,12 @@ void main() {
                 reason: 'English ${destination.name}/${width.toInt()}',
               );
             }
-            if (chinese && destination == SettingsDestination.data) {
-              final repair = find.text('修复');
-              await tester.ensureVisible(repair);
-              await tester.pump(const Duration(milliseconds: 250));
-              final actions = find
-                  .ancestor(of: repair, matching: find.byType(Wrap))
-                  .first;
-              final icons = find.descendant(
-                of: actions,
-                matching: find.byType(IconButton),
+            if (traditional) {
+              expect(
+                simplifiedOnlyTexts(_visibleHanText(tester)),
+                isEmpty,
+                reason: 'Traditional ${destination.name}/${width.toInt()}',
               );
-              final button = find.descendant(
-                of: actions,
-                matching: find.byType(FilledButton),
-              );
-              if (width >= 740) {
-                for (final icon in icons.evaluate()) {
-                  expect(
-                    (tester.getCenter(find.byWidget(icon.widget)).dy -
-                            tester.getCenter(button).dy)
-                        .abs(),
-                    lessThan(1),
-                  );
-                }
-              }
             }
             if (chinese && destination == SettingsDestination.storage) {
               final add = find.text('添加文件夹');

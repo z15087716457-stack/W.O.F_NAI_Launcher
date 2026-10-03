@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
-import '../../../../../core/autocomplete/tag_translation_lookup.dart';
 import '../../app_toast.dart';
+import '../../visible_tag_readings.dart';
 import 'selection_copy_shortcuts.dart';
 
 /// 提示词分组展示组件
@@ -292,35 +292,9 @@ class _TranslatedTagChip extends ConsumerStatefulWidget {
   ConsumerState<_TranslatedTagChip> createState() => _TranslatedTagChipState();
 }
 
-class _TranslatedTagChipState extends ConsumerState<_TranslatedTagChip> {
+class _TranslatedTagChipState extends ConsumerState<_TranslatedTagChip>
+    with VisibleTagReadings<_TranslatedTagChip> {
   bool _isHovered = false;
-  String? _translation;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTranslation();
-  }
-
-  @override
-  void didUpdateWidget(_TranslatedTagChip oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.tag != oldWidget.tag) {
-      _translation = null;
-      _loadTranslation();
-    }
-  }
-
-  Future<void> _loadTranslation() async {
-    if (!widget.showTranslation) return;
-    final service = ref.read(tagTranslationLookupProvider);
-    // 提取基础标签（去除权重语法）
-    final baseTag = _extractBaseTag(widget.tag);
-    final result = await service.translate(baseTag);
-    if (mounted && result != null) {
-      setState(() => _translation = result);
-    }
-  }
 
   /// 从带权重的标签中提取基础标签
   /// 例如: "1.10::jaggy_lines::" -> "jaggy_lines"
@@ -344,18 +318,22 @@ class _TranslatedTagChipState extends ConsumerState<_TranslatedTagChip> {
     return text;
   }
 
-  String get _displayText {
+  String _displayText(String? translation) {
     final displayTag = widget.tag.length > 40
         ? '${widget.tag.substring(0, 40)}...'
         : widget.tag;
-    if (_translation?.isNotEmpty == true) {
-      return '$displayTag ($_translation)';
+    if (translation?.isNotEmpty == true) {
+      return '$displayTag ($translation)';
     }
     return displayTag;
   }
 
   @override
   Widget build(BuildContext context) {
+    // 提取基础标签（去除权重语法），释义走用户的标签翻译接口
+    final baseTag = _extractBaseTag(widget.tag);
+    observeTagReadings(widget.showTranslation ? [baseTag] : const []);
+    final translation = widget.showTranslation ? tagReading(baseTag) : null;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final bgColor = _isHovered
@@ -380,7 +358,7 @@ class _TranslatedTagChipState extends ConsumerState<_TranslatedTagChip> {
             border: Border.all(color: borderColor),
           ),
           child: Text(
-            _displayText,
+            _displayText(translation),
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 11,
               color: widget.contentColor ?? colorScheme.onSurface,

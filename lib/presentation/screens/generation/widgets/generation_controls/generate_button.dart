@@ -60,7 +60,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
     return GenerateButtonCopy.pick(
       seed: copySeed,
       count: imageCount,
-      languageCode: Localizations.localeOf(context).languageCode,
+      languageCode: Localizations.localeOf(context).toLanguageTag(),
     );
   }
 

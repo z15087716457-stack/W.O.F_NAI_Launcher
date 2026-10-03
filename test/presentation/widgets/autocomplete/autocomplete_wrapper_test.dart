@@ -74,7 +74,6 @@ void main() {
             autocompleteServicesProvider.overrideWithValue(
               AutocompleteServices(
                 localSources: [source],
-                dictionaryTranslations: const _NoTranslations(),
                 llmTranslations: const _NoTranslations(),
                 danbooru: _NoDanbooru(),
               ),
@@ -92,10 +91,7 @@ void main() {
                   autoInsertComma: false,
                   treatSpacesAsSeparators: search,
                 ),
-                child: TextField(
-                  controller: controller,
-                  focusNode: focusNode,
-                ),
+                child: TextField(controller: controller, focusNode: focusNode),
               ),
             ),
           ),
@@ -145,7 +141,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [baseSource],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -197,7 +192,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [_BaseSource()],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -270,7 +264,6 @@ void main() {
             autocompleteServicesProvider.overrideWithValue(
               AutocompleteServices(
                 localSources: [source],
-                dictionaryTranslations: const _NoTranslations(),
                 llmTranslations: const _NoTranslations(),
                 danbooru: _NoDanbooru(),
               ),
@@ -328,7 +321,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [_TranslatedBaseSource()],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -383,7 +375,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [source],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -440,7 +431,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [source],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -500,7 +490,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [_ManyBaseSource()],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -551,7 +540,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [_BaseSource()],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -626,7 +614,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [_ManyBaseSource()],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -701,7 +688,6 @@ void main() {
             autocompleteServicesProvider.overrideWithValue(
               AutocompleteServices(
                 localSources: [_RelatedSource()],
-                dictionaryTranslations: const _NoTranslations(),
                 llmTranslations: const _NoTranslations(),
                 danbooru: _NoDanbooru(),
               ),
@@ -773,7 +759,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [baseSource],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
               libraryAliases: librarySource,
@@ -864,7 +849,6 @@ void main() {
           autocompleteServicesProvider.overrideWithValue(
             AutocompleteServices(
               localSources: [_BaseSource()],
-              dictionaryTranslations: const _NoTranslations(),
               llmTranslations: const _NoTranslations(),
               danbooru: _NoDanbooru(),
             ),
@@ -1049,7 +1033,6 @@ class _FixedAutocompleteSettingsNotifier extends AutocompleteSettingsNotifier {
       showTranslations: false,
       autoInsertComma: false,
       danbooruEnabled: false,
-      zhInstallPromptDismissed: true,
     );
   }
 }

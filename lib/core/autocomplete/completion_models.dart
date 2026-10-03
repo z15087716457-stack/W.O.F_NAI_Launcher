@@ -52,14 +52,7 @@ abstract final class CompletionResultLimits {
   static bool isAll(int value) => value >= _legacyAll;
 }
 
-enum CompletionSourceKind {
-  base,
-  zhDictionary,
-  danbooruApi,
-  cooccurrence,
-  ai,
-  library,
-}
+enum CompletionSourceKind { base, danbooruApi, cooccurrence, ai, library }
 
 enum CompletionQueryKind { tag, libraryAlias }
 

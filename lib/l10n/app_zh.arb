@@ -207,9 +207,6 @@
   "settings_style": "风格",
   "settings_font": "字体",
   "settings_language": "语言",
-  "settings_languageChinese": "中文",
-  "settings_languageEnglish": "English",
-  "settings_languageJapanese": "日本語",
   "settings_shortcuts": "快捷键",
   "settings_generationInputSection": "输入",
   "settings_generationFeedbackSection": "完成提醒",
@@ -4904,17 +4901,6 @@
   },
   "autocomplete_translating": "翻译中…",
   "autocomplete_missingTranslation": "未汉化",
-  "autocomplete_translationCoverage": "汉化覆盖：{translated}/{total}",
-  "@autocomplete_translationCoverage": {
-    "placeholders": {
-      "translated": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "autocomplete_aliasMatch": "别名：{alias}",
   "@autocomplete_aliasMatch": {
     "placeholders": {
@@ -4969,28 +4955,7 @@
       }
     }
   },
-  "autocomplete_zhDictionary": "ffdkj 简体中文汉化库",
-  "autocomplete_zhInstalled": "已安装 {count} 条 · 版本 {version}",
-  "@autocomplete_zhInstalled": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "version": {
-        "type": "String"
-      }
-    }
-  },
-  "autocomplete_zhNotInstalled": "未安装；英文补全仍可正常使用",
-  "autocomplete_zhInstallPrompt": "可安装 ffdkj 汉化库以显示中文并支持中文反查；词库将直接从上游下载。",
-  "autocomplete_checkUpdate": "检查更新",
-  "autocomplete_update": "更新",
-  "autocomplete_repair": "修复",
-  "autocomplete_install": "安装",
-  "autocomplete_remove": "移除",
-  "autocomplete_removeConfirm": "移除已安装的中文汉化词库？之后仍可重新安装。",
   "autocomplete_sourceBase": "随应用提供的基础词库",
-  "autocomplete_sourceZh": "ffdkj 中文汉化库",
   "autocomplete_sourceApi": "Danbooru API",
   "autocomplete_sourceRelated": "离线相关标签",
   "autocomplete_sourceAi": "Prompt Assistant 汉化",
@@ -5013,20 +4978,9 @@
   "autocomplete_relatedUnpin": "取消固定并继续链式推荐",
   "autocomplete_statusBase": "本地",
   "autocomplete_statusRelated": "共现",
-  "autocomplete_statusDictionary": "汉化",
   "autocomplete_statusOnline": "在线",
   "autocomplete_statusAi": "AI",
   "autocomplete_statusReady": "就绪",
-  "autocomplete_statusNotInstalled": "未安装",
-  "autocomplete_statusDownloading": "下载 {progress}%",
-  "@autocomplete_statusDownloading": {
-    "placeholders": {
-      "progress": {
-        "type": "int"
-      }
-    }
-  },
-  "autocomplete_statusUpdateAvailable": "可更新",
   "autocomplete_statusError": "异常",
   "autocomplete_statusDisabled": "已关闭",
   "autocomplete_statusSearching": "查询中",
@@ -6086,6 +6040,7 @@
   "translationLanguage_english": "英语",
   "translationLanguage_japanese": "日语",
   "translationLanguage_korean": "韩语",
+  "translationLanguage_traditionalChinese": "繁体中文",
   "promptBlockEditor_translationNeedsReview": "原文已修改，译文待更新",
   "promptBlockEditor_translationReviewHint": "修改原文后请同步校对这里的译文",
   "modelTask_translateTitle": "原文 → 阅读语言",

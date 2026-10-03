@@ -1,4 +1,6 @@
-/// 生成按钮文案池（三语，全球通用梗路线）
+import '../../../../../core/utils/app_language.dart';
+
+/// 生成按钮文案池（三语，全球通用梗路线；繁体沿用中文池的生成对照）
 ///
 /// 文案由 [pick] 用确定性种子选取：数量变化或一次生成结束时
 /// 外层推进种子，按钮即换上新文案；同一种子在 build 间结果稳定。
@@ -16,26 +18,32 @@ class GenerateButtonCopy {
   /// 按种子与总张数挑选一条文案。
   ///
   /// [count] 是最终生成总张数（请求次数 × 每次张数）。
-  /// [languageCode] 只取前两位语言码，未知语言回退英文。
+  /// [languageCode] 为语言标签（如 zh-TW）；按前两位选池，未知语言回退英文，
+  /// 繁体中文使用中文池的台湾正体对照。
   static String pick({
     required int seed,
     required int count,
     required String languageCode,
   }) {
     final lang = _normalize(languageCode);
+    final traditional = _isTraditional(languageCode);
     if (seed % _funnyModulo != 0) {
-      return normal(count: count, languageCode: lang);
+      return normal(count: count, languageCode: languageCode);
     }
     final rare = _rarePool[lang]!;
     if (seed % _rareModulo == 0) {
-      return _format(rare[(seed ~/ _rareModulo) % rare.length], count);
+      return _format(
+        rare[(seed ~/ _rareModulo) % rare.length],
+        count,
+        traditional,
+      );
     }
     final special = _specialPool[lang]![count];
     if (special != null) {
-      return _format(special[seed % special.length], count);
+      return _format(special[seed % special.length], count, traditional);
     }
     final pool = _bucketPool(lang, count);
-    return _format(pool[seed % pool.length], count);
+    return _format(pool[seed % pool.length], count, traditional);
   }
 
   /// 官方式默认文案（约 80% 显示）：英文随数量切换单复数，
@@ -43,7 +51,7 @@ class GenerateButtonCopy {
   static String normal({required int count, required String languageCode}) {
     switch (_normalize(languageCode)) {
       case 'zh':
-        return '生成 $count 张图片';
+        return _format(_zhNormal, count, _isTraditional(languageCode));
       case 'ja':
         return '$count 枚生成';
       default:
@@ -58,15 +66,48 @@ class GenerateButtonCopy {
     return 'en';
   }
 
-  static String _format(String template, int count) =>
-      template.replaceAll('{count}', '$count');
+  static bool _isTraditional(String languageCode) =>
+      AppLanguage.fromLanguageTag(languageCode).isTraditionalChinese;
+
+  static String _format(
+    String template,
+    int count, [
+    bool traditional = false,
+  ]) =>
+      (traditional
+              ? AppLanguage.traditionalChinese.chineseLabel(template)
+              : template)
+          .replaceAll('{count}', '$count');
+
+  static const _zhNormal = '生成 {count} 张图片';
+
+  /// Every Chinese template; the Traditional table is generated from these.
+  static Iterable<String> get chineseTemplates sync* {
+    yield _zhNormal;
+    for (final pool in _zhSmall.values) {
+      yield* pool;
+    }
+    for (final pool in _zhBig) {
+      yield* pool;
+    }
+    for (final pool in _zhSpecial.values) {
+      yield* pool;
+    }
+    yield* _zhRare;
+  }
 
   /// 常规分档：1–9 逐张一池，之后按区间分池
   static List<String> _bucketPool(String lang, int count) {
     if (count <= 9) {
       return _smallPools[lang]![count]!;
     }
-    final index = count < 20 ? 0 : count < 50 ? 1 : count < 100 ? 2 : 3;
+    final index = count < 20
+        ? 0
+        : count < 50
+        ? 1
+        : count < 100
+        ? 2
+        : 3;
     return _bigPools[lang]![index];
   }
 
@@ -143,56 +184,12 @@ class GenerateButtonCopy {
       '三份灵感已到',
       '抽三次过过瘾',
     ],
-    4: [
-      '四连出击',
-      '四人小队集结',
-      '四张，铺满屏幕',
-      '4 宫格预备',
-      '四张一起上',
-      '四倍快乐',
-      '连开四张',
-    ],
-    5: [
-      '五连发',
-      '五张，一手牌',
-      '半打套餐还差一',
-      '五张走起',
-      '五连，上菜',
-      '一只手刚好数完',
-      '五张，开始上头了',
-    ],
-    6: [
-      '六连击',
-      '六张，排面有了',
-      '六张一起梭哈',
-      '来六张稳一手',
-      '图库 +6',
-      '六张，起飞',
-    ],
-    7: [
-      '七张排排坐',
-      '一周壁纸不重样',
-      'Lucky Seven ×7',
-      '七张，有点贪了',
-      '七连击预备',
-      '七张连开',
-    ],
-    8: [
-      '章鱼模式八连拍',
-      '图库爆仓预警',
-      '八张，要溢出了',
-      '八连发突突突',
-      '八张排排站',
-      '凑八张看大场面',
-    ],
-    9: [
-      '九宫格一次集齐',
-      '九图朋友圈稳了',
-      '九张，就差一张整十',
-      '九连，完美收官',
-      '朋友圈素材×9',
-      '九张全都要',
-    ],
+    4: ['四连出击', '四人小队集结', '四张，铺满屏幕', '4 宫格预备', '四张一起上', '四倍快乐', '连开四张'],
+    5: ['五连发', '五张，一手牌', '半打套餐还差一', '五张走起', '五连，上菜', '一只手刚好数完', '五张，开始上头了'],
+    6: ['六连击', '六张，排面有了', '六张一起梭哈', '来六张稳一手', '图库 +6', '六张，起飞'],
+    7: ['七张排排坐', '一周壁纸不重样', 'Lucky Seven ×7', '七张，有点贪了', '七连击预备', '七张连开'],
+    8: ['章鱼模式八连拍', '图库爆仓预警', '八张，要溢出了', '八连发突突突', '八张排排站', '凑八张看大场面'],
+    9: ['九宫格一次集齐', '九图朋友圈稳了', '九张，就差一张整十', '九连，完美收官', '朋友圈素材×9', '九张全都要'],
   };
 
   /// 10+ 分档池：0=10-19 1=20-49 2=50-99 3=100+
@@ -413,7 +410,12 @@ class GenerateButtonCopy {
     ['{count} 枚、本気モード', 'GPU が汗をかく', '{count} 枚連続生成', '二桁突入', '量産準備 OK'],
     ['量産工場フル稼働', 'Anlas 消費注意報', '{count} 枚、工場モード', 'バッチ処理ゴー'],
     ['{count} 枚、卸売りです', '産業革命レベル', 'もはや遊びではない', '{count} 枚、容赦なし'],
-    ['{count} 枚?! 画廊でも開く？', 'ストレージさんこんにちは', '{count} 枚、図鑑になる', 'さすがに {count} 枚？'],
+    [
+      '{count} 枚?! 画廊でも開く？',
+      'ストレージさんこんにちは',
+      '{count} 枚、図鑑になる',
+      'さすがに {count} 枚？',
+    ],
   ];
 
   static const Map<int, List<String>> _jaSpecial = {

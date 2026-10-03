@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../constants/storage_keys.dart';
 import '../autocomplete/completion_models.dart';
 import '../storage/local_storage_service.dart';
+import '../utils/app_language.dart';
 
 enum PreferenceGroup { appearance, input, protection }
 
@@ -53,7 +54,7 @@ class SettingsPreferencesService {
     if (key == StorageKeys.studioThemeMode) {
       return ['dark', 'light'].contains(value);
     }
-    if (key == StorageKeys.locale) return ['zh', 'en', 'ja'].contains(value);
+    if (key == StorageKeys.locale) return AppLanguage.isStorageCode(value);
     if (key == StorageKeys.fontFamily) {
       return value is String && value.isNotEmpty && value.length <= 128;
     }

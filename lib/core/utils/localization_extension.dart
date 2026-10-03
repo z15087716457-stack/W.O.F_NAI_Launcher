@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 
+import 'app_language.dart';
+
 /// BuildContext 扩展，简化多语言调用
 ///
 /// 使用示例：
@@ -12,17 +14,19 @@ extension LocalizationExtension on BuildContext {
   /// 获取当前语言环境的 AppLocalizations 实例
   AppLocalizations get l10n => AppLocalizations.of(this) ?? currentL10n;
 
-  /// 获取 timeago 使用的本地化代码
-  String get timeagoLocaleCode {
-    switch (Localizations.localeOf(this).languageCode) {
-      case 'zh':
-        return 'zh';
-      case 'ja':
-        return 'ja';
-      default:
-        return 'en';
-    }
+  /// Interface language, telling Simplified and Traditional Chinese apart.
+  AppLanguage get appLanguage {
+    final locale = Localizations.maybeLocaleOf(this);
+    return locale == null ? currentAppLanguage : AppLanguage.fromLocale(locale);
   }
+
+  /// 获取 timeago 使用的本地化代码
+  String get timeagoLocaleCode => switch (appLanguage) {
+    AppLanguage.simplifiedChinese => 'zh',
+    AppLanguage.traditionalChinese => 'zh_TW',
+    AppLanguage.japanese => 'ja',
+    AppLanguage.english => 'en',
+  };
 
   /// 获取 Vibe 来源类型的本地化展示名称
   String vibeSourceTypeLabel(VibeSourceType sourceType) {
@@ -40,18 +44,18 @@ extension LocalizationExtension on BuildContext {
 }
 
 AppLocalizations? _currentL10n;
+AppLanguage _currentAppLanguage = AppLanguage.simplifiedChinese;
 
 /// Localizations for code that has no BuildContext, such as models, services
 /// and errors raised below the UI. It follows [setCurrentL10nLocale], which the
 /// locale provider calls; before that it uses the app's default language.
 AppLocalizations get currentL10n =>
-    _currentL10n ??= lookupAppLocalizations(const Locale('zh'));
+    _currentL10n ??= lookupAppLocalizations(_currentAppLanguage.locale);
+
+/// Interface language for code without a BuildContext; see [currentL10n].
+AppLanguage get currentAppLanguage => _currentAppLanguage;
 
 void setCurrentL10nLocale(Locale locale) {
-  final supported = AppLocalizations.supportedLocales.any(
-    (item) => item.languageCode == locale.languageCode,
-  );
-  _currentL10n = lookupAppLocalizations(
-    supported ? locale : const Locale('en'),
-  );
+  _currentAppLanguage = AppLanguage.fromLocale(locale);
+  _currentL10n = lookupAppLocalizations(_currentAppLanguage.locale);
 }

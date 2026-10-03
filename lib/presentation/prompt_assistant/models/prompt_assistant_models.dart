@@ -4,6 +4,7 @@ import '../../../l10n/app_localizations.dart';
 import 'model_request_overrides.dart';
 import 'model_catalog_entry.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/prompt_translation_language.dart';
 
 // Legacy storage/UI type. New code should prefer ProviderProtocol and
 // ProviderPreset, but this remains to decode existing saved configs.
@@ -1190,13 +1191,8 @@ class InterfaceSlotConfig {
       presetId: json['presetId'] as String?,
       reasoningEffort: json['reasoningEffort'] as String?,
       targetLanguage:
-          const [
-            'auto',
-            'zh',
-            'en',
-            'ja',
-            'ko',
-          ].contains(json['targetLanguage'])
+          json['targetLanguage'] == 'auto' ||
+              PromptTranslationLanguage.isCode(json['targetLanguage'])
           ? json['targetLanguage'] as String
           : 'auto',
     );

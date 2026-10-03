@@ -34,7 +34,7 @@ W.O.F NAI Studio is a third-party client for NovelAI built with Flutter. It inte
 | 🎨 Image Generation | Supports NovelAI Diffusion V1/V2/V3/V4/V4.5/V5 (Full / Curated), Furry series, common samplers, size presets, multi-character parameters, and Anlas estimation. |
 | 🖼️ Image-to-Image & Editing | Supports img2img, inpainting, Outpaint, virtual canvas expansion, hard-edge masks, and click-to-fill region selection. |
 | 🌈 Reference & Style | Supports Vibe Transfer, Precise Reference, multi-image references, Vibe pack import/export, and PNG metadata embedding/export. |
-| ✍️ Prompt Tools | Includes the complete offline merged Danbooru/e621 tag and alias catalog plus Danbooru co-occurrence recommendations. Press `Ctrl/⌘+Shift+Space` for tags related to the tag before the cursor, pin the source tag for continuous insertion, and optionally merge Danbooru online relations, Chinese translations, and AI translations for missing entries. Also includes NAI/SD weight syntax assistance, token counting, in-box prompt search, and pinned words — plus the app-wide pill prompt-block system described in the highlights below. |
+| ✍️ Prompt Tools | Includes the complete offline merged Danbooru/e621 tag and alias catalog plus Danbooru co-occurrence recommendations. Press `Ctrl/⌘+Shift+Space` for tags related to the tag before the cursor, pin the source tag for continuous insertion, and optionally merge Danbooru online relations and AI tag translations. Also includes NAI/SD weight syntax assistance, token counting, in-box prompt search, and pinned words — plus the app-wide pill prompt-block system described in the highlights below. |
 | 📚 Local Gallery | Supports multi-source recursive scanning, default masonry layout, SQLite full-text search, categories/collections/trash pool, model-version filters, metadata parsing, batch operations, and large image previews. |
 | 🌐 Online Gallery | Supports Danbooru / Safebooru / Gelbooru / AI TAG search, native rankings, multi-image details, metadata reuse, and batch downloads. |
 | 📦 Generation Queue | Supports task sorting, batch generation, pause/resume, failure handling strategies, progress statistics, and queue import/export. |
@@ -137,7 +137,7 @@ You can log in for the first time using your NovelAI account credentials or an A
 ### Autocomplete Data & Privacy
 
 - The base Danbooru tag and alias catalog ships with the app and is queried locally without a network connection.
-- The Simplified Chinese translation dictionary is optional. It is downloaded directly from the [ffdkj/ComfyUI_Danbooru_Tag_Assistant](https://github.com/ffdkj/ComfyUI_Danbooru_Tag_Assistant) upstream only after user confirmation; this project does not redistribute that database.
+- The app neither bundles nor downloads a Chinese tag dictionary. Tag readings come from the tag translation interface configured under Settings → Models & APIs: the wiki, tag expansion, prompt tag chips, online gallery, and image details share the Auto-translate switch found in the wiki and tag expansion, along with its translation cache, and show English tags only while it is off. Chinese input is not used for local tag search.
 - The Danbooru online supplement is enabled by default. It sends only the current English token under the cursor, never the complete prompt; it can be disabled and its cache cleared separately under Settings → Data Sources & Cache.
 - AI translation for missing entries is disabled by default. When enabled, it reuses the Prompt Assistant `Translate` route and sends at most 8 untranslated tags to the model service selected by the user, which may incur API charges. Its cache can be cleared separately.
 
@@ -231,7 +231,7 @@ nai_launcher/
 ├── lib/
 │   ├── core/               # Core features: networking, database, caching, encryption, file I/O, shortcuts, etc.
 │   ├── data/               # API clients, models, repositories, and business data services
-│   ├── l10n/               # Chinese, English, and Japanese UI strings and generated files
+│   ├── l10n/               # Simplified/Traditional Chinese, English, and Japanese UI strings and generated files
 │   └── presentation/       # Pages, components, state management, themes, and routing
 ├── scripts/                # Build, signing, database, and testing helper scripts
 ├── test/                   # Unit tests and widget tests

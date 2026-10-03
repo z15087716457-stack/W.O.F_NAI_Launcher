@@ -2,8 +2,8 @@
 ///
 /// 提供统一的数据库访问接口，包括：
 /// - 基础设施层：DatabaseManager, ConnectionPoolHolder 等
-/// - 数据源层：TranslationDataSource, CooccurrenceDataSource, DanbooruTagDataSource
-/// - 服务层：TranslationService, CooccurrenceService, CompletionService
+/// - 数据源层：CooccurrenceDataSource, DanbooruTagDataSource
+/// - 服务层：CooccurrenceService, CompletionService
 ///
 /// V2 架构关键改进：
 /// - ConnectionPool 不再是单例，支持重建

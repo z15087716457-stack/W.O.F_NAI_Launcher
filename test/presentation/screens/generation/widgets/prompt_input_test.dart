@@ -8,8 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
@@ -30,6 +28,7 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 
 import '../../../../helpers/studio_capture_fonts.dart';
+import 'package:nai_launcher/core/utils/app_language.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
@@ -53,9 +52,6 @@ void main() {
         overrides: [
           promptAssistantConfigProvider.overrideWith(
             _TestPromptAssistantConfigNotifier.new,
-          ),
-          zhDictionaryServiceProvider.overrideWith(
-            (ref) => ZhDictionaryService(),
           ),
           promptBlockLibraryNotifierProvider.overrideWith(
             _EmptyPromptBlockLibraryNotifier.new,
@@ -372,13 +368,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final code in ['en', 'ja']) {
+  for (final code in ['en', 'ja', 'zh_TW']) {
     testWidgets('translation menu and guide follow the $code interface', (
       tester,
     ) async {
       // Real fonts keep the translated menu measurements representative.
       await tester.runAsync(loadStudioCaptureFonts);
-      final locale = Locale(code);
+      final locale = AppLanguage.fromStorage(code).locale;
       final l10n = lookupAppLocalizations(locale);
       final captureBoundary = GlobalKey();
       await tester.pumpWidget(
@@ -386,9 +382,6 @@ void main() {
           overrides: [
             promptAssistantConfigProvider.overrideWith(
               _TestPromptAssistantConfigNotifier.new,
-            ),
-            zhDictionaryServiceProvider.overrideWith(
-              (ref) => ZhDictionaryService(),
             ),
             promptBlockLibraryNotifierProvider.overrideWith(
               _EmptyPromptBlockLibraryNotifier.new,

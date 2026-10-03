@@ -34,6 +34,8 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 
 ## 资源、生成文件与发布注意事项
 
+界面文案以 `lib/l10n/app_en.arb` 为模板，修改后运行 `flutter gen-l10n`。繁体中文（台湾）的 `lib/l10n/app_zh_TW.arb` 与固定中文名单对照 `lib/l10n/zh_tw_labels.dart` 由 `tool/l10n` 用 OpenCC 1.4.2 `s2twp` 加产品术语生成，不手改：修改 `app_zh.arb`、Wiki 目录中文名、标签分组或子分类中文名、生成按钮中文文案后，运行 `UPDATE_ZH_TW=1 flutter test test/l10n/zh_tw_resources_test.dart`，再运行 `flutter gen-l10n`。通用用语修正写入 `tool/l10n/zh_tw_terms.dart`，单条消息的整句修正写入 `tool/l10n/zh_tw_overrides.json`（按 ARB 键）。
+
 `assets/databases/*.db` 通过 Git LFS 管理，发布前应确认本地文件是真实 SQLite 数据库而不是 LFS pointer。`assets/translations/`、`assets/data/` 和 `assets/images/` 会随 Flutter assets 打包，移动或重命名后需要同步检查 `pubspec.yaml`。发布前确认 `CHANGELOG.md`、`dist/release_notes_<tag>.md`、`pubspec.yaml` 版本号和 Windows release build。
 
 ### Windows 品牌图标

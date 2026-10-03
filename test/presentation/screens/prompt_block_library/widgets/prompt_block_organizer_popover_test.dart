@@ -11,6 +11,7 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_organizer_popover.dart';
 
 import '../../../../helpers/studio_capture_fonts.dart';
+import 'package:nai_launcher/core/utils/app_language.dart';
 
 class _OrganizerNotifier extends PromptBlockLibraryNotifier {
   _OrganizerNotifier(this.initial);
@@ -210,11 +211,11 @@ void main() {
     expect(notifier.folderOrder, isNull);
   });
 
-  for (final code in ['en', 'ja']) {
+  for (final code in ['en', 'ja', 'zh_TW']) {
     testWidgets('organizer pages follow the $code interface', (tester) async {
       // Declared last: real fonts stay loaded for the rest of the file.
       await tester.runAsync(loadStudioCaptureFonts);
-      final locale = Locale(code);
+      final locale = AppLanguage.fromStorage(code).locale;
       final l10n = lookupAppLocalizations(locale);
       for (final (page, title) in [
         (BlockOrganizerPage.favorites, l10n.blockOrganizer_titleFavorites),

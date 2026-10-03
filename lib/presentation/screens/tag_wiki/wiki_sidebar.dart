@@ -156,10 +156,7 @@ class WikiSidebar extends StatelessWidget {
     int depth,
   ) {
     final id = node.group ?? path;
-    final label = WikiDirectoryLabels.display(
-      node.label,
-      Localizations.localeOf(context).languageCode,
-    );
+    final label = WikiDirectoryLabels.display(node.label, context.appLanguage);
     final selected =
         selection.kind == WikiScopeKind.directory && selection.id == id;
     final children = node.children;

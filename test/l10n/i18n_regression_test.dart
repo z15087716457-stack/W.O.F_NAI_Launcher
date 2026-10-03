@@ -20,7 +20,7 @@ void main() {
       english = _readArb('lib/l10n/app_en.arb');
     });
 
-    for (final locale in const ['en', 'ja', 'zh']) {
+    for (final locale in const ['en', 'ja', 'zh', 'zh_TW']) {
       test('$locale does not contain duplicate top-level keys', () {
         final keys = _topLevelKeys('lib/l10n/app_$locale.arb');
         final counts = <String, int>{};
@@ -36,7 +36,7 @@ void main() {
       });
     }
 
-    for (final locale in const ['ja', 'zh']) {
+    for (final locale in const ['ja', 'zh', 'zh_TW']) {
       test('$locale matches the template keys and metadata', () {
         final localized = _readArb('lib/l10n/app_$locale.arb');
 
@@ -69,7 +69,7 @@ void main() {
   group('localized provider errors', () {
     final localizations = <String, AppLocalizations>{
       for (final locale in AppLocalizations.supportedLocales)
-        locale.languageCode: lookupAppLocalizations(locale),
+        locale.toString(): lookupAppLocalizations(locale),
     };
 
     test('ComfyUI errors are localized at the UI boundary', () {
@@ -167,6 +167,7 @@ void main() {
       );
       expect(error.localized(localizations['ja']!), '子孫カテゴリの下には移動できません');
       expect(error.localized(localizations['zh']!), '不能将分类移动到它的子孙分类下');
+      expect(error.localized(localizations['zh_TW']!), '不能將分類移動到它的子孫分類下');
     });
 
     test('Vibe bulk errors are localized before display', () {

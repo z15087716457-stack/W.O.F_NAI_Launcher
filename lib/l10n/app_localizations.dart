@@ -98,6 +98,7 @@ abstract class AppLocalizations {
     Locale('en'),
     Locale('ja'),
     Locale('zh'),
+    Locale('zh', 'TW'),
   ];
 
   /// No description provided for @app_title.
@@ -1113,24 +1114,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get settings_language;
-
-  /// No description provided for @settings_languageChinese.
-  ///
-  /// In en, this message translates to:
-  /// **'中文'**
-  String get settings_languageChinese;
-
-  /// No description provided for @settings_languageEnglish.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get settings_languageEnglish;
-
-  /// No description provided for @settings_languageJapanese.
-  ///
-  /// In en, this message translates to:
-  /// **'日本語'**
-  String get settings_languageJapanese;
 
   /// No description provided for @settings_shortcuts.
   ///
@@ -14892,12 +14875,6 @@ abstract class AppLocalizations {
   /// **'Not translated'**
   String get autocomplete_missingTranslation;
 
-  /// No description provided for @autocomplete_translationCoverage.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation coverage: {translated}/{total}'**
-  String autocomplete_translationCoverage(int translated, int total);
-
   /// No description provided for @autocomplete_aliasMatch.
   ///
   /// In en, this message translates to:
@@ -15036,77 +15013,11 @@ abstract class AppLocalizations {
   /// **'{count} tags · data version {version}'**
   String autocomplete_catalogStatus(String count, String version);
 
-  /// No description provided for @autocomplete_zhDictionary.
-  ///
-  /// In en, this message translates to:
-  /// **'ffdkj Simplified Chinese dictionary'**
-  String get autocomplete_zhDictionary;
-
-  /// No description provided for @autocomplete_zhInstalled.
-  ///
-  /// In en, this message translates to:
-  /// **'Installed: {count} entries · version {version}'**
-  String autocomplete_zhInstalled(int count, String version);
-
-  /// No description provided for @autocomplete_zhNotInstalled.
-  ///
-  /// In en, this message translates to:
-  /// **'Not installed; English autocomplete remains available'**
-  String get autocomplete_zhNotInstalled;
-
-  /// No description provided for @autocomplete_zhInstallPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Install the ffdkj dictionary for Chinese labels and reverse lookup. It is downloaded directly from upstream.'**
-  String get autocomplete_zhInstallPrompt;
-
-  /// No description provided for @autocomplete_checkUpdate.
-  ///
-  /// In en, this message translates to:
-  /// **'Check for updates'**
-  String get autocomplete_checkUpdate;
-
-  /// No description provided for @autocomplete_update.
-  ///
-  /// In en, this message translates to:
-  /// **'Update'**
-  String get autocomplete_update;
-
-  /// No description provided for @autocomplete_repair.
-  ///
-  /// In en, this message translates to:
-  /// **'Repair'**
-  String get autocomplete_repair;
-
-  /// No description provided for @autocomplete_install.
-  ///
-  /// In en, this message translates to:
-  /// **'Install'**
-  String get autocomplete_install;
-
-  /// No description provided for @autocomplete_remove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove'**
-  String get autocomplete_remove;
-
-  /// No description provided for @autocomplete_removeConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove the installed Chinese translation dictionary? You can install it again later.'**
-  String get autocomplete_removeConfirm;
-
   /// No description provided for @autocomplete_sourceBase.
   ///
   /// In en, this message translates to:
   /// **'Bundled base catalog'**
   String get autocomplete_sourceBase;
-
-  /// No description provided for @autocomplete_sourceZh.
-  ///
-  /// In en, this message translates to:
-  /// **'ffdkj Chinese dictionary'**
-  String get autocomplete_sourceZh;
 
   /// No description provided for @autocomplete_sourceApi.
   ///
@@ -15180,12 +15091,6 @@ abstract class AppLocalizations {
   /// **'Related'**
   String get autocomplete_statusRelated;
 
-  /// No description provided for @autocomplete_statusDictionary.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation'**
-  String get autocomplete_statusDictionary;
-
   /// No description provided for @autocomplete_statusOnline.
   ///
   /// In en, this message translates to:
@@ -15203,24 +15108,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ready'**
   String get autocomplete_statusReady;
-
-  /// No description provided for @autocomplete_statusNotInstalled.
-  ///
-  /// In en, this message translates to:
-  /// **'Not installed'**
-  String get autocomplete_statusNotInstalled;
-
-  /// No description provided for @autocomplete_statusDownloading.
-  ///
-  /// In en, this message translates to:
-  /// **'Downloading {progress}%'**
-  String autocomplete_statusDownloading(int progress);
-
-  /// No description provided for @autocomplete_statusUpdateAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Update'**
-  String get autocomplete_statusUpdateAvailable;
 
   /// No description provided for @autocomplete_statusError.
   ///
@@ -19215,6 +19102,12 @@ abstract class AppLocalizations {
   /// **'Korean'**
   String get translationLanguage_korean;
 
+  /// No description provided for @translationLanguage_traditionalChinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Traditional Chinese'**
+  String get translationLanguage_traditionalChinese;
+
   /// No description provided for @promptBlockEditor_translationNeedsReview.
   ///
   /// In en, this message translates to:
@@ -22598,6 +22491,18 @@ class _AppLocalizationsDelegate
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+country codes are specified.
+  switch (locale.languageCode) {
+    case 'zh':
+      {
+        switch (locale.countryCode) {
+          case 'TW':
+            return AppLocalizationsZhTw();
+        }
+        break;
+      }
+  }
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'en':

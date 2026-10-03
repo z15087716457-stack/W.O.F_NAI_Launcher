@@ -114,8 +114,8 @@ class CacheClearService {
     final result = await notifier.clearCache(
       serviceClearCallback: () async {
         await serviceClearCallback?.call();
-        // The shipped catalog and user-installed ffdkj dictionary are data
-        // sources, not caches, so a global cache clear must not remove them.
+        // The shipped catalog is a data source, not a cache, so a global
+        // cache clear must not remove it.
         danbooruRemoved = await autocompleteCache.clearDanbooruCache();
         aiRemoved = await autocompleteCache.clearAiTranslationCache();
       },

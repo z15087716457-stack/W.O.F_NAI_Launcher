@@ -92,8 +92,6 @@ class CompletionRanker {
     final priority = _matchPriority(candidate.matchKind);
     final sourceBoost = candidate.sources.contains(CompletionSourceKind.base)
         ? 2000.0
-        : candidate.sources.contains(CompletionSourceKind.zhDictionary)
-        ? 1000.0
         : 0.0;
     final popularity = candidate.postCount <= 0
         ? 0.0

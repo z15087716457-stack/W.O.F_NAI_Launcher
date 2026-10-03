@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nai_launcher/core/autocomplete/chinese_term_matcher.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 
@@ -23,8 +22,6 @@ void main() {
           for (final name in names)
             if (name == 'medium_hair' || name == 'long_hair') name: tag(name),
         },
-        chineseLookup: (_) async => [],
-        readingsLookup: (_) async => {'medium_hair': '中发'},
       );
       final glossary = await links.glossaryFor(
         'Hair down to the shoulders. long hair.',
@@ -33,37 +30,29 @@ void main() {
       );
       expect(glossary.single['tag'], 'medium_hair');
       expect(glossary.single['current_article'], isTrue);
-      expect(glossary.single['zh'], '中发');
       expect(
         (await links.resolve('Hair down to the shoulders.')).links,
         isEmpty,
       );
     },
   );
-  WikiTagLinks matcher(
-    Map<String, CompletionCandidate> entries, {
-    List<ChineseTermHit> hits = const [],
-  }) => WikiTagLinks(
-    exactLookup: (names) async => {
-      for (final name in names)
-        if (entries[name] case final item?) name: item,
-    },
-    chineseLookup: (_) async => hits,
-  );
-  test(
-    'dictionary hits in prose never create links or load a dictionary',
-    () async {
-      final links = WikiTagLinks(
-        exactLookup: (_) async => throw StateError('must not query'),
-        chineseLookup: (_) async => throw StateError('must not scan'),
+  WikiTagLinks matcher(Map<String, CompletionCandidate> entries) =>
+      WikiTagLinks(
+        exactLookup: (names) async => {
+          for (final name in names)
+            if (entries[name] case final item?) name: item,
+        },
       );
-      const body = '帽子以及 visor。帽子是戴在头上的一种衣物。blue_eyes';
-      final result = await links.resolve(body);
-      expect(result.markdown, body);
-      expect(result.targets, isEmpty);
-      expect(result.links, isEmpty);
-    },
-  );
+  test('prose never creates links or queries the catalog', () async {
+    final links = WikiTagLinks(
+      exactLookup: (_) async => throw StateError('must not query'),
+    );
+    const body = '帽子以及 visor。帽子是戴在头上的一种衣物。blue_eyes';
+    final result = await links.resolve(body);
+    expect(result.markdown, body);
+    expect(result.targets, isEmpty);
+    expect(result.links, isEmpty);
+  });
   test(
     'model choices repeat in examples and lists without article-wide deduplication',
     () async {
@@ -141,7 +130,6 @@ void main() {
     () async {
       final result = await WikiTagLinks(
         exactLookup: (_) async => throw StateError('unavailable'),
-        chineseLookup: (_) async => [],
       ).resolve('[蓝眼](wof-tag:blue_eyes) [site](https://example.test)');
       expect(result.markdown, '蓝眼 [site](https://example.test)');
       expect(result.targets, isEmpty);
@@ -172,7 +160,6 @@ void main() {
         calls++;
         return {'blue_eyes': tag('blue_eyes')};
       },
-      chineseLookup: (_) async => [],
     );
     final first = links.resolve('[蓝眼](wof-tag:blue_eyes)');
     expect(identical(first, links.resolve('[蓝眼](wof-tag:blue_eyes)')), isTrue);
@@ -180,7 +167,7 @@ void main() {
     expect(calls, 1);
   });
   test(
-    'candidate material keeps complete names, categories, readings and matching fragments',
+    'candidate material keeps complete names, categories and matching fragments',
     () async {
       final entries = {
         'blue_eyes': tag('blue_eyes'),
@@ -196,15 +183,12 @@ void main() {
           for (final name in names)
             if (entries[name] case final item?) name: item,
         },
-        chineseLookup: (_) async => [],
-        readingsLookup: (_) async => {'blue_eyes': '蓝眼睛'},
       );
       final glossary = await links.glossaryFor(
         'Blue eyes, fate_testarossa_(blaze_form), giants. (giant)',
       );
       final byTag = {for (final item in glossary) item['tag']: item};
       expect(byTag.keys, containsAll(entries.keys));
-      expect(byTag['blue_eyes']!['zh'], '蓝眼睛');
       expect(byTag['blue_eyes']!['matched_texts'], ['Blue eyes']);
       expect(byTag['fate_testarossa_(blaze_form)']!['category'], 'character');
       expect(byTag['giant']!['matched_texts'], ['giant']);
@@ -212,47 +196,16 @@ void main() {
       expect((await links.resolve('Blue eyes')).links, isEmpty);
     },
   );
-  test(
-    'ambiguous Chinese definitions are reference options, not automatic links',
-    () async {
-      final entries = {
-        'blue_eyes': tag('blue_eyes'),
-        'solo': tag('solo'),
-        'single': tag('single'),
-      };
-      final links = matcher(
-        entries,
-        hits: [
-          ChineseTermHit(0, 2, tag('blue_eyes')),
-          ChineseTermHit(3, 5, tag('solo')),
-          ChineseTermHit(3, 5, tag('single')),
-          ChineseTermHit(6, 8, tag('missing')),
-        ],
-      );
-      final glossary = await links.glossaryFor('蓝眼 单人 未知');
-      expect(glossary.map((item) => item['tag']), [
-        'blue_eyes',
-        'solo',
-        'single',
-      ]);
-      expect((await links.resolve('蓝眼 单人 未知')).links, isEmpty);
-    },
-  );
-  test(
-    'glossary is bounded and optional dictionary errors do not block English candidates',
-    () async {
-      final entries = {for (var i = 0; i < 80; i++) 'tag_$i': tag('tag_$i')};
-      final links = WikiTagLinks(
-        exactLookup: (names) async => {
-          for (final name in names)
-            if (entries[name] case final item?) name: item,
-        },
-        chineseLookup: (_) async => throw StateError('missing'),
-        readingsLookup: (_) async => throw StateError('missing'),
-      );
-      final glossary = await links.glossaryFor(entries.keys.join(', '));
-      expect(glossary, hasLength(64));
-      expect(await links.glossaryFor('tag_1', limit: 0), isEmpty);
-    },
-  );
+  test('glossary is bounded', () async {
+    final entries = {for (var i = 0; i < 80; i++) 'tag_$i': tag('tag_$i')};
+    final links = WikiTagLinks(
+      exactLookup: (names) async => {
+        for (final name in names)
+          if (entries[name] case final item?) name: item,
+      },
+    );
+    final glossary = await links.glossaryFor(entries.keys.join(', '));
+    expect(glossary, hasLength(64));
+    expect(await links.glossaryFor('tag_1', limit: 0), isEmpty);
+  });
 }

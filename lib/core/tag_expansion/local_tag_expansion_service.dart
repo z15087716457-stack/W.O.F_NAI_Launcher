@@ -6,23 +6,20 @@ typedef SubstringTagSearch =
 typedef PopularTagSearch =
     Future<List<CompletionCandidate>> Function({int limit});
 
-/// The explicit tag picker only reads bundled or installed local databases.
+/// The explicit tag picker only reads the bundled English tag databases.
 /// It deliberately does not depend on the autocomplete orchestrator, whose
-/// optional Danbooru and AI branches can make network requests.
+/// optional Danbooru and AI branches can make network requests. Readings come
+/// from the visible-tag translation queue, not from this service.
 class LocalTagExpansionService {
   const LocalTagExpansionService({
     required this.catalog,
-    required this.chineseDictionary,
     required this.relatedTags,
-    required this.translations,
     required this.substringSearch,
     required this.popularSearch,
   });
 
   final CompletionSource catalog;
-  final CompletionSource chineseDictionary;
   final CompletionSource relatedTags;
-  final TranslationResolver translations;
   final SubstringTagSearch substringSearch;
   final PopularTagSearch popularSearch;
 
@@ -39,7 +36,6 @@ class LocalTagExpansionService {
           .where((candidate) => !existingTags.contains(candidate.canonicalTag))
           .take(limit)
           .toList(growable: false),
-      locale,
       existingTags,
     );
   }
@@ -58,19 +54,13 @@ class LocalTagExpansionService {
       existingTags: existingTags,
       limit: limit,
     );
-    final List<CompletionCandidate> candidates;
-    if (query.isChinese) {
-      candidates = await chineseDictionary.search(query);
-    } else {
-      final prefix = await catalog.search(
-        query.copyWith(limit: limit.clamp(1, 100)),
-      );
-      final contains = token.runes.length < 2
-          ? const <CompletionCandidate>[]
-          : await substringSearch(token, limit: limit);
-      candidates = _unique([...prefix, ...contains], limit);
-    }
-    return _decorate(candidates, locale, existingTags);
+    final prefix = await catalog.search(
+      query.copyWith(limit: limit.clamp(1, 100)),
+    );
+    final contains = token.runes.length < 2
+        ? const <CompletionCandidate>[]
+        : await substringSearch(token, limit: limit);
+    return _decorate(_unique([...prefix, ...contains], limit), existingTags);
   }
 
   Future<List<CompletionCandidate>> related(
@@ -88,35 +78,19 @@ class LocalTagExpansionService {
       limit: limit,
     ).copyWith(relatedTag: source);
     final candidates = await relatedTags.search(query);
-    return _decorate(candidates, locale, existingTags);
+    return _decorate(candidates, existingTags);
   }
 
-  Future<List<CompletionCandidate>> _decorate(
+  static List<CompletionCandidate> _decorate(
     List<CompletionCandidate> candidates,
-    String locale,
     Set<String> existingTags,
-  ) async {
-    if (candidates.isEmpty) return candidates;
-    Map<String, String> names = const {};
-    try {
-      names = await translations.resolve(
-        candidates.map((candidate) => candidate.canonicalTag).toList(),
-        locale: locale,
-      );
-    } catch (_) {
-      // An optional dictionary must not make English tag search fail.
-    }
-    return candidates
-        .map((candidate) {
-          final translation =
-              candidate.translation ?? names[candidate.canonicalTag];
-          return candidate.copyWith(
-            translation: translation,
-            isExisting: existingTags.contains(candidate.canonicalTag),
-          );
-        })
-        .toList(growable: false);
-  }
+  ) => candidates
+      .map(
+        (candidate) => candidate.copyWith(
+          isExisting: existingTags.contains(candidate.canonicalTag),
+        ),
+      )
+      .toList(growable: false);
 
   static List<CompletionCandidate> _unique(
     List<CompletionCandidate> candidates,

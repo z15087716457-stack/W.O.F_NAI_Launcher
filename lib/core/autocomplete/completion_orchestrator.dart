@@ -11,13 +11,11 @@ import 'danbooru_completion_source.dart';
 class CompletionOrchestrator extends ChangeNotifier {
   CompletionOrchestrator({
     required List<CompletionSource> localSources,
-    required TranslationResolver dictionaryTranslations,
     required TranslationResolver llmTranslations,
     required DanbooruCompletionSource danbooru,
     CompletionSource? libraryAliases,
     Duration llmDebounceDuration = const Duration(milliseconds: 400),
   }) : _localSources = localSources,
-       _dictionaryTranslations = dictionaryTranslations,
        _llmTranslations = llmTranslations is ScopedTranslationResolver
            ? llmTranslations.createScope()
            : llmTranslations,
@@ -26,7 +24,6 @@ class CompletionOrchestrator extends ChangeNotifier {
        _llmDebounceDuration = llmDebounceDuration;
 
   final List<CompletionSource> _localSources;
-  final TranslationResolver _dictionaryTranslations;
   final TranslationResolver _llmTranslations;
   final DanbooruCompletionSource _danbooru;
   final CompletionSource? _libraryAliases;
@@ -120,13 +117,6 @@ class CompletionOrchestrator extends ChangeNotifier {
           .where((candidate) => !candidate.isExisting)
           .toList(growable: false);
     }
-    candidates = await _applyDictionaryTranslations(
-      candidates,
-      query,
-      sequence,
-      settings,
-    );
-    if (!_isCurrent(sequence)) return;
     _emit(
       _state.copyWith(
         candidates: candidates,
@@ -145,46 +135,6 @@ class CompletionOrchestrator extends ChangeNotifier {
     _remoteDebounce = Timer(const Duration(milliseconds: 250), () {
       unawaited(_loadRemote(query, sequence, settings));
     });
-  }
-
-  Future<List<CompletionCandidate>> _applyDictionaryTranslations(
-    List<CompletionCandidate> candidates,
-    CompletionQuery query,
-    int sequence,
-    AutocompleteSettings settings,
-  ) async {
-    if (query.kind == CompletionQueryKind.libraryAlias ||
-        !settings.showTranslations ||
-        candidates.isEmpty) {
-      return candidates;
-    }
-    final missing = candidates
-        .where((candidate) => candidate.translation?.isNotEmpty != true)
-        .map((candidate) => candidate.canonicalTag)
-        .toList();
-    Map<String, String> translations;
-    try {
-      translations = await _dictionaryTranslations.resolve(
-        missing,
-        locale: query.locale,
-      );
-    } catch (_) {
-      return candidates;
-    }
-    if (!_isCurrent(sequence) || translations.isEmpty) return candidates;
-    return candidates
-        .map(
-          (candidate) => translations[candidate.canonicalTag] == null
-              ? candidate
-              : candidate.copyWith(
-                  translation: translations[candidate.canonicalTag],
-                  sources: {
-                    ...candidate.sources,
-                    CompletionSourceKind.zhDictionary,
-                  },
-                ),
-        )
-        .toList(growable: false);
   }
 
   Future<void> _loadRemote(
@@ -219,13 +169,6 @@ class CompletionOrchestrator extends ChangeNotifier {
           .where((candidate) => !candidate.isExisting)
           .toList(growable: false);
     }
-    merged = await _applyDictionaryTranslations(
-      merged,
-      query,
-      sequence,
-      settings,
-    );
-    if (!_isCurrent(sequence)) return;
     final remoteError = _danbooru.lastError;
     _emit(
       _state.copyWith(

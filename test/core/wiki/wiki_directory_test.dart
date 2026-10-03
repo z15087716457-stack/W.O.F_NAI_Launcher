@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/utils/app_language.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory_labels.dart';
 
@@ -30,10 +31,37 @@ void main() {
       labels.difference(WikiDirectoryLabels.chinese.keys.toSet()),
       isEmpty,
     );
-    expect(WikiDirectoryLabels.display('Visual characteristics', 'zh'), '视觉特征');
     expect(
-      WikiDirectoryLabels.display('Visual characteristics', 'en'),
+      WikiDirectoryLabels.display(
+        'Visual characteristics',
+        AppLanguage.simplifiedChinese,
+      ),
+      '视觉特征',
+    );
+    expect(
+      WikiDirectoryLabels.display(
+        'Visual characteristics',
+        AppLanguage.english,
+      ),
       'Visual characteristics',
     );
+  });
+
+  test('Traditional Chinese shows generated names without editing the map', () {
+    expect(
+      WikiDirectoryLabels.display(
+        'Visual characteristics',
+        AppLanguage.traditionalChinese,
+      ),
+      '視覺特徵',
+    );
+    expect(
+      WikiDirectoryLabels.display(
+        'Hair Styles',
+        AppLanguage.traditionalChinese,
+      ),
+      '髮型',
+    );
+    expect(WikiDirectoryLabels.chinese['Hair Styles'], '发型');
   });
 }

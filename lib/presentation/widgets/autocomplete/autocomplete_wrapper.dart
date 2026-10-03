@@ -10,7 +10,6 @@ import '../../../core/autocomplete/autocomplete_settings.dart';
 import '../../../core/autocomplete/completion_models.dart';
 import '../../../core/autocomplete/completion_orchestrator.dart';
 import '../../../core/autocomplete/prompt_token_parser.dart';
-import '../../../core/utils/localization_extension.dart';
 import '../../providers/generation/generation_settings_notifiers.dart'
     as generation_settings;
 import '../../router/app_router.dart';
@@ -240,7 +239,6 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
       _dismissOverlay();
       return;
     }
-    _maybePromptZhDictionary(settings);
     final config = widget.config;
     final selection = widget.controller.selection;
     final cursorPosition = selection.isValid
@@ -270,30 +268,6 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
       return;
     }
     _orchestrator?.query(query, settings);
-  }
-
-  void _maybePromptZhDictionary(AutocompleteSettings settings) {
-    if (!settings.showTranslations || settings.zhInstallPromptDismissed) return;
-    if (!Localizations.localeOf(
-      context,
-    ).languageCode.toLowerCase().startsWith('zh')) {
-      return;
-    }
-    final dictionary = ref.read(zhDictionaryServiceProvider);
-    if (dictionary.state.isInstalled || dictionary.state.isBusy) return;
-    ref.read(autocompleteSettingsProvider.notifier).dismissZhInstallPrompt();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.autocomplete_zhInstallPrompt),
-          action: SnackBarAction(
-            label: context.l10n.autocomplete_install,
-            onPressed: () => dictionary.installOrUpdate(),
-          ),
-        ),
-      );
-    });
   }
 
   void _onCompletionStateChanged() {
@@ -388,7 +362,6 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
     final maxLeft = screen.width - viewportInset - width;
     final left = (caretLeft - leadingContext).clamp(viewportInset, maxLeft);
     final settings = ref.read(autocompleteSettingsProvider);
-    final dictionaryState = ref.read(zhDictionaryServiceProvider).state;
 
     return Positioned(
       left: left,
@@ -402,7 +375,6 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
           maxHeight: maxHeight,
           scrollController: _scrollController,
           settings: settings,
-          dictionaryState: dictionaryState,
           showAliases:
               settings.showAliases && (widget.config?.showTranslation ?? true),
           showTranslations:
@@ -615,9 +587,6 @@ class _AutocompleteWrapperState extends ConsumerState<AutocompleteWrapper> {
           relatedTagOverride: _pinnedRelatedTag,
         );
       }
-    });
-    ref.listen(zhDictionaryServiceProvider, (_, __) {
-      _overlayEntry?.markNeedsBuild();
     });
     ref.listen<bool>(generation_settings.autocompleteSettingsProvider, (
       _,

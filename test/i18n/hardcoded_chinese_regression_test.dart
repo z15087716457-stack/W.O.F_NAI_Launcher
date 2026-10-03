@@ -10,8 +10,20 @@ void main() {
 
     final l10n = lookupAppLocalizations(const Locale('ja'));
     expect(l10n.settings_language, '言語');
-    expect(l10n.settings_languageJapanese, '日本語');
     expect(l10n.common_cancel, isNot('Cancel'));
+  });
+
+  test('Traditional Chinese (Taiwan) is generated separately from zh', () {
+    expect(
+      AppLocalizations.supportedLocales,
+      contains(const Locale('zh', 'TW')),
+    );
+
+    final traditional = lookupAppLocalizations(const Locale('zh', 'TW'));
+    final simplified = lookupAppLocalizations(const Locale('zh'));
+    expect(traditional.localeName, 'zh_TW');
+    expect(traditional.settings_language, '語言');
+    expect(simplified.settings_language, '语言');
   });
 
   test('selected visible surfaces do not hardcode Chinese strings', () {

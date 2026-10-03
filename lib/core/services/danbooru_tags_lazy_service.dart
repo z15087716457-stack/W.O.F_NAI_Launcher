@@ -12,7 +12,6 @@ import '../../data/models/cache/data_source_cache_meta.dart';
 import '../../data/models/tag/local_tag.dart';
 import '../constants/storage_keys.dart';
 import '../database/datasources/danbooru_tag_data_source.dart';
-import '../database/datasources/translation_data_source.dart';
 import '../database/services/service_providers.dart';
 import '../utils/app_logger.dart';
 import '../utils/debouncer.dart';
@@ -44,7 +43,6 @@ class DanbooruTagsLazyService implements LazyDataSourceService<LocalTag> {
   static final RegExp _chineseCharacterPattern = RegExp(r'[\u4e00-\u9fa5]');
 
   final DanbooruTagDataSource _tagDataSource;
-  final TranslationDataSource? _translationDataSource;
   final Dio _dio;
 
   final Map<String, LocalTag> _hotDataCache = {};
@@ -87,13 +85,10 @@ class DanbooruTagsLazyService implements LazyDataSourceService<LocalTag> {
   /// 主构造函数 - 同步初始化
   ///
   /// [dataSource] 必须已初始化完成
-  /// [translationDataSource] 可选，用于获取标签翻译
   DanbooruTagsLazyService({
     required DanbooruTagDataSource dataSource,
     required Dio dio,
-    TranslationDataSource? translationDataSource,
   }) : _tagDataSource = dataSource,
-       _translationDataSource = translationDataSource,
        _dio = dio;
 
   @override
@@ -250,21 +245,11 @@ class DanbooruTagsLazyService implements LazyDataSourceService<LocalTag> {
       return;
     }
 
-    // 批量获取翻译
-    Map<String, String> translations = {};
-    if (_translationDataSource != null) {
-      final tagNames = records.map((r) => r.tag).toList();
-      translations = await _translationDataSource.queryBatch(tagNames);
-    }
-
-    // 构建带翻译的标签列表并加入缓存
     for (final record in records) {
-      final translation = translations[record.tag.toLowerCase().trim()];
       final tag = LocalTag(
         tag: record.tag,
         category: record.category,
         count: record.postCount,
-        translation: translation,
       );
       _hotDataCache[tag.tag] = tag;
     }
@@ -288,10 +273,6 @@ class DanbooruTagsLazyService implements LazyDataSourceService<LocalTag> {
     // 尝试精确匹配（热数据缓存直接返回，不防抖）
     if (_hotDataCache.containsKey(normalizedKey)) {
       final cached = _hotDataCache[normalizedKey];
-      AppLogger.d(
-        '[DanbooruTagsLazy] cache hit: translation="${cached?.translation}"',
-        'DanbooruTagsLazy',
-      );
       return cached;
     }
 
@@ -326,20 +307,10 @@ class DanbooruTagsLazyService implements LazyDataSourceService<LocalTag> {
 
         LocalTag? result;
         if (record != null) {
-          // 获取翻译（通过 TranslationDataSource）
-          String? translation;
-          if (_translationDataSource != null) {
-            translation = await _translationDataSource.query(k);
-          }
-          AppLogger.d(
-            '[DanbooruTagsLazy] DB translation: "$translation"',
-            'DanbooruTagsLazy',
-          );
           result = LocalTag(
             tag: record.tag,
             category: record.category,
             count: record.postCount,
-            translation: translation,
           );
         }
 
@@ -397,8 +368,9 @@ class DanbooruTagsLazyService implements LazyDataSourceService<LocalTag> {
         final cat = parts[1] == 'all' ? null : int.parse(parts[1]);
         final lim = int.parse(parts[2]);
 
+        // 标签库只有英文名；中文释义由用户的翻译接口提供，不参与检索
         final result = _containsChinese(q)
-            ? await _searchByChineseTranslation(q, category: cat, limit: lim)
+            ? const <LocalTag>[]
             : await _searchByTagName(q, category: cat, limit: lim);
 
         // 完成所有 pending 的 completers
@@ -439,73 +411,11 @@ class DanbooruTagsLazyService implements LazyDataSourceService<LocalTag> {
       return [];
     }
 
-    Map<String, String> translations = {};
-    if (_translationDataSource != null) {
-      final tagNames = records.map((r) => r.tag).toList();
-      translations = await _translationDataSource.queryBatch(tagNames);
-    }
-
-    return records.map((r) {
-      final translation = translations[r.tag.toLowerCase().trim()];
-      return LocalTag(
-        tag: r.tag,
-        category: r.category,
-        count: r.postCount,
-        translation: translation,
-      );
-    }).toList();
-  }
-
-  Future<List<LocalTag>> _searchByChineseTranslation(
-    String query, {
-    int? category,
-    required int limit,
-  }) async {
-    if (_translationDataSource == null) {
-      return [];
-    }
-
-    final matches = await _translationDataSource.search(
-      query,
-      limit: limit * 2,
-      matchTag: false,
-      matchTranslation: true,
-    );
-    final records = await _tagDataSource.getByNames(
-      matches.map((m) => m.tag).toList(),
-    );
-    final recordsByTag = {
-      for (final record in records) record.tag.toLowerCase().trim(): record,
-    };
-    final seenTags = <String>{};
-    final result = <LocalTag>[];
-
-    for (final match in matches) {
-      final normalizedTag = match.tag.toLowerCase().trim();
-      if (normalizedTag.isEmpty || !seenTags.add(normalizedTag)) {
-        continue;
-      }
-      final record = recordsByTag[normalizedTag];
-      final effectiveCategory = record?.category ?? match.category;
-      if (category != null && effectiveCategory != category) {
-        continue;
-      }
-
-      result.add(
-        LocalTag(
-          tag: record?.tag ?? normalizedTag,
-          category: effectiveCategory,
-          count: record?.postCount ?? match.count,
-          translation: match.translation,
-        ),
-      );
-
-      if (result.length >= limit) {
-        break;
-      }
-    }
-
-    return result;
+    return records
+        .map(
+          (r) => LocalTag(tag: r.tag, category: r.category, count: r.postCount),
+        )
+        .toList();
   }
 
   Future<List<LocalTag>> getHotTags({
@@ -522,25 +432,11 @@ class DanbooruTagsLazyService implements LazyDataSourceService<LocalTag> {
       return [];
     }
 
-    // 批量获取翻译
-    Map<String, String> translations = {};
-    if (_translationDataSource != null) {
-      final tagNames = records.map((r) => r.tag).toList();
-      translations = await _translationDataSource.queryBatch(tagNames);
-    }
-
-    // 构建带翻译的标签列表
-    final tags = records.map((r) {
-      final translation = translations[r.tag.toLowerCase().trim()];
-      return LocalTag(
-        tag: r.tag,
-        category: r.category,
-        count: r.postCount,
-        translation: translation,
-      );
-    }).toList();
-
-    return tags;
+    return records
+        .map(
+          (r) => LocalTag(tag: r.tag, category: r.category, count: r.postCount),
+        )
+        .toList();
   }
 
   @override
@@ -1781,21 +1677,8 @@ Future<DanbooruTagsLazyService> danbooruTagsLazyService(Ref ref) async {
   );
   final tagDataSource = await ref.read(danbooruTagDataSourceProvider.future);
 
-  // 等待翻译数据源初始化
-  AppLogger.i(
-    '[ProviderLifecycle] danbooruTagsLazyServiceProvider - waiting for translationDataSourceProvider',
-    'DanbooruTagsLazy',
-  );
-  final translationDataSource = await ref.read(
-    translationDataSourceProvider.future,
-  );
-
   // 创建并初始化服务（同步初始化，DataSource 必须已准备好）
-  final service = DanbooruTagsLazyService(
-    dataSource: tagDataSource,
-    dio: dio,
-    translationDataSource: translationDataSource,
-  );
+  final service = DanbooruTagsLazyService(dataSource: tagDataSource, dio: dio);
   AppLogger.i(
     '[ProviderLifecycle] danbooruTagsLazyServiceProvider - service instance created, hash=${service.hashCode}',
     'DanbooruTagsLazy',

@@ -40,13 +40,13 @@ pinned revision, source URL, SHA256, output hash, and record count are recorded
 in `tool/database/cooccurrence_source_lock.json`. The dataset's separate base
 tag CSV is not used by this application.
 
-## Optional ffdkj Chinese Dictionary
+## OpenCC Dictionaries
 
-The optional `tag.sqlite` Chinese dictionary is not bundled or redistributed.
-After explicit user confirmation, the application downloads it directly from
-[ffdkj/ComfyUI_Danbooru_Tag_Assistant](https://github.com/ffdkj/ComfyUI_Danbooru_Tag_Assistant).
-That upstream repository did not declare a license when this integration was
-implemented.
+`tool/l10n/opencc/` contains dictionaries exported from
+[OpenCC](https://github.com/BYVoid/OpenCC) 1.4.2 (`s2twp` chain). They are used
+only at development time to generate the Traditional Chinese (Taiwan) interface
+text and are not packaged with the application. OpenCC is licensed under the
+Apache License 2.0; the full license text is in `tool/l10n/opencc/LICENSE`.
 
 ## Pica
 

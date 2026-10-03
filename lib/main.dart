@@ -17,9 +17,8 @@ import 'core/constants/app_version.dart';
 import 'core/utils/studio_asset_licenses.dart';
 import 'core/constants/storage_keys.dart';
 import 'l10n/app_localizations.dart';
-import 'l10n/app_localizations_en.dart';
-import 'l10n/app_localizations_ja.dart';
-import 'l10n/app_localizations_zh.dart';
+import 'core/autocomplete/retired_dictionary_cleanup.dart';
+import 'core/utils/app_language.dart';
 import 'core/network/proxy_service.dart';
 import 'core/network/system_proxy_http_overrides.dart';
 import 'core/shortcuts/shortcut_storage.dart';
@@ -52,20 +51,14 @@ import 'data/services/thumbnail_service.dart';
 import 'presentation/providers/online_gallery_blacklist_provider.dart';
 import 'presentation/screens/splash/app_bootstrap.dart';
 
+AppLanguage _storedLanguage() => AppLanguage.fromStorage(
+  Hive.box(StorageKeys.settingsBox).get(StorageKeys.locale) as String?,
+);
+
 /// Get localized strings based on the stored locale setting
 /// Used in main() before the app is initialized
-AppLocalizations _getLocalizedStrings() {
-  final box = Hive.box(StorageKeys.settingsBox);
-  final localeCode = box.get(StorageKeys.locale, defaultValue: 'zh') as String;
-  switch (localeCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'ja':
-      return AppLocalizationsJa();
-    default:
-      return AppLocalizationsZh();
-  }
-}
+AppLocalizations _getLocalizedStrings() =>
+    lookupAppLocalizations(_storedLanguage().locale);
 
 Future<void> _openHiveBoxIfNeeded<E>(String name, {String? hivePath}) async {
   if (!Hive.isBoxOpen(name)) {
@@ -398,18 +391,14 @@ Future<void> _bootstrapApplication() async {
     final manager = await DatabaseManager.initialize();
     await manager.initialized;
 
-    // 检查核心资产库完整性。翻译和共现数据已迁移到独立资产数据库，
+    // 检查核心资产库完整性。共现数据已迁移到独立资产数据库，
     // 不应再从 danbooru.db 的运行时表统计里判断。
     final coreAssetStats = await manager.getCoreAssetStatistics();
-    final translationCount = coreAssetStats['translations'] ?? 0;
     final cooccurrenceCount = coreAssetStats['cooccurrences'] ?? 0;
 
-    AppLogger.i(
-      '核心资产数据库状态: translations=$translationCount, cooccurrences=$cooccurrenceCount',
-      'Main',
-    );
+    AppLogger.i('核心资产数据库状态: cooccurrences=$cooccurrenceCount', 'Main');
 
-    if (translationCount == 0 || cooccurrenceCount == 0) {
+    if (cooccurrenceCount == 0) {
       AppLogger.w('核心资产数据为空，请检查打包数据库', 'Main');
     }
 
@@ -533,6 +522,7 @@ Future<void> _bootstrapApplication() async {
   // Timeago 本地化配置
   timeago.setLocaleMessages('zh', timeago.ZhCnMessages());
   timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
+  timeago.setLocaleMessages('zh_TW', timeago.ZhMessages());
   timeago.setLocaleMessages('ja', timeago.JaMessages());
 
   // 清理过期临时文件（不阻塞启动）
@@ -725,6 +715,12 @@ Future<void> _bootstrapApplication() async {
     WidgetsBinding.instance.addObserver(WindowStateObserver());
     AppLogger.d('Window state observer registered', 'Main');
   }
+
+  _runDeferredStartupStep('Retired ffdkj dictionary cleanup', () async {
+    if (await removeRetiredZhDictionary()) {
+      AppLogger.i('Removed the retired ffdkj dictionary folder', 'Main');
+    }
+  });
 
   final searchIndexService = SearchIndexService();
   _runDeferredStartupStep('Search index service initialization', () async {

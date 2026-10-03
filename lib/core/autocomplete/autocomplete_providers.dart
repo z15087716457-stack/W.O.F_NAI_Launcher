@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/services/alias_resolver_service.dart';
 import '../../presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import '../database/services/service_providers.dart';
-import '../utils/app_logger.dart';
 import 'autocomplete_cache_database.dart';
 import 'autocomplete_settings.dart';
 import 'cooccurrence_completion_source.dart';
@@ -15,7 +14,6 @@ import 'danbooru_completion_source.dart';
 import 'llm_translation_resolver.dart';
 import 'tag_catalog_repository.dart';
 import 'prompt_block_completion_source.dart';
-import 'zh_dictionary_service.dart';
 
 final autocompleteCacheDatabaseProvider = Provider<AutocompleteCacheDatabase>((
   ref,
@@ -31,23 +29,6 @@ final tagCatalogRepositoryProvider = Provider<TagCatalogRepository>((ref) {
   ref.onDispose(() => unawaited(repository.dispose()));
   return repository;
 });
-
-final zhDictionaryServiceProvider = ChangeNotifierProvider<ZhDictionaryService>(
-  (ref) {
-    final service = ZhDictionaryService();
-    unawaited(
-      () async {
-        await service.initialize();
-        if (service.state.isInstalled) {
-          await service.checkForUpdate();
-        }
-      }().catchError((Object error, StackTrace stack) {
-        AppLogger.e('ffdkj dictionary initialization failed', error, stack);
-      }),
-    );
-    return service;
-  },
-);
 
 final danbooruCompletionSourceProvider = Provider<DanbooruCompletionSource>((
   ref,
@@ -69,21 +50,18 @@ final llmTranslationResolverProvider = Provider<LlmTranslationResolver>((ref) {
 class AutocompleteServices {
   const AutocompleteServices({
     required this.localSources,
-    required this.dictionaryTranslations,
     required this.llmTranslations,
     required this.danbooru,
     this.libraryAliases,
   });
 
   final List<CompletionSource> localSources;
-  final TranslationResolver dictionaryTranslations;
   final TranslationResolver llmTranslations;
   final DanbooruCompletionSource danbooru;
   final CompletionSource? libraryAliases;
 
   CompletionOrchestrator createOrchestrator() => CompletionOrchestrator(
     localSources: localSources,
-    dictionaryTranslations: dictionaryTranslations,
     llmTranslations: llmTranslations,
     danbooru: danbooru,
     libraryAliases: libraryAliases,
@@ -104,7 +82,6 @@ final autocompleteLocalSourcesProvider = Provider<List<CompletionSource>>((
 ) {
   return <CompletionSource>[
     ref.watch(tagCatalogRepositoryProvider),
-    ref.watch(zhDictionaryServiceProvider),
     ref.watch(cooccurrenceCompletionSourceProvider),
   ];
 });
@@ -127,10 +104,8 @@ final promptBlockCompletionSourceProvider =
     );
 
 final autocompleteServicesProvider = Provider<AutocompleteServices>((ref) {
-  final zhDictionary = ref.watch(zhDictionaryServiceProvider);
   return AutocompleteServices(
     localSources: ref.watch(autocompleteLocalSourcesProvider),
-    dictionaryTranslations: zhDictionary,
     llmTranslations: ref.watch(llmTranslationResolverProvider),
     danbooru: ref.watch(danbooruCompletionSourceProvider),
     libraryAliases: ref.watch(promptBlockCompletionSourceProvider),

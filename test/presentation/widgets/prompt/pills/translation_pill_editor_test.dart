@@ -21,6 +21,7 @@ import 'package:nai_launcher/presentation/widgets/prompt/pills/translation_pill_
 import 'package:nai_launcher/presentation/widgets/prompt/pills/translation_editing_controller.dart';
 
 import '../../../../helpers/studio_capture_fonts.dart';
+import 'package:nai_launcher/core/utils/app_language.dart';
 
 const sourceKey = Key('translation-pill-source-field');
 const zhKey = Key('translation-pill-zh-field');
@@ -319,27 +320,29 @@ void main() {
     },
   );
 
-  for (final locale in ['en', 'ja']) {
+  for (final (locale, before, target, after, converted) in const [
+    ('en', 'Chinese', 'en', 'English', 'blue eyes, smile'),
+    ('ja', '中国語', 'ja', '日本語', '青い目、笑顔'),
+    ('zh_TW', '中文', 'zh-TW', '繁體中文', '藍眼睛，微笑'),
+  ]) {
     testWidgets(
       '$locale locale preserves old Chinese until confirmed conversion',
       (tester) async {
         final requests = <PromptTranslationEditRequest>[];
         final handle = await openEditor(
           tester,
-          locale: Locale(locale),
+          locale: AppLanguage.fromStorage(locale).locale,
           converter: (request, _) async {
             requests.add(request);
-            return PromptTranslationEditResult(
-              locale == 'en' ? 'blue eyes, smile' : '青い目、笑顔',
-            );
+            return PromptTranslationEditResult(converted);
           },
         );
-        expect(find.text(locale == 'en' ? 'Chinese' : '中国語'), findsOneWidget);
+        expect(find.text(before), findsOneWidget);
         await tester.tap(find.byKey(downKey));
         await settleConversion(tester);
         expect(requests.single.languageCode, 'zh');
-        expect(requests.single.targetLanguageCode, locale);
-        expect(find.text(locale == 'en' ? 'English' : '日本語'), findsOneWidget);
+        expect(requests.single.targetLanguageCode, target);
+        expect(find.text(after), findsOneWidget);
         expect(find.byKey(badgeKey), findsNothing);
         expect(find.byKey(editedKey), findsNothing);
         await tester.enterText(find.byKey(zhKey), 'manual reading');
@@ -347,11 +350,11 @@ void main() {
         expect(find.byKey(editedKey), findsOneWidget);
         await tester.tap(find.byKey(upKey));
         await settleConversion(tester);
-        expect(requests.last.languageCode, locale);
+        expect(requests.last.languageCode, target);
         expect(find.byKey(editedKey), findsNothing);
         await tester.tap(find.byKey(saveKey));
         await tester.pump();
-        expect((await handle.result as TranslationPill).languageCode, locale);
+        expect((await handle.result as TranslationPill).languageCode, target);
         expect(tester.takeException(), isNull);
       },
     );
@@ -888,9 +891,7 @@ const _candidate = CompletionCandidate(
 );
 LocalTagExpansionService _tagService() => LocalTagExpansionService(
   catalog: _Source(),
-  chineseDictionary: _Source(),
   relatedTags: _Source(),
-  translations: _Readings(),
   substringSearch: (input, {limit = 20}) async => const [],
   popularSearch: ({limit = 12}) async => [_candidate],
 );
@@ -900,14 +901,6 @@ class _Source implements CompletionSource {
   Future<List<CompletionCandidate>> search(CompletionQuery query) async => [
     _candidate,
   ];
-}
-
-class _Readings implements TranslationResolver {
-  @override
-  Future<Map<String, String>> resolve(
-    List<String> tags, {
-    required String locale,
-  }) async => const {'green_eyes': '绿眼睛'};
 }
 
 class _Wiki implements TagWikiRepository {

@@ -756,10 +756,10 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
-  for (final locale in [const Locale('en'), const Locale('ja')]) {
+  for (final locale in const [Locale('en'), Locale('ja'), Locale('zh', 'TW')]) {
     for (final page in [3, 9]) {
       testWidgets(
-        '${page == 3 ? 'gallery' : 'about'} wraps ${locale.languageCode} at compact enlarged size',
+        '${page == 3 ? 'gallery' : 'about'} wraps ${locale.toLanguageTag()} at compact enlarged size',
         (tester) async {
           await pump(
             tester,
@@ -770,7 +770,7 @@ void main() {
           );
           await shot(
             tester,
-            '${page == 3 ? 'gallery' : 'about'}-${locale.languageCode}-narrow',
+            '${page == 3 ? 'gallery' : 'about'}-${locale.toLanguageTag()}-narrow',
           );
           await tester.drag(
             find.byType(SingleChildScrollView).first,
@@ -780,7 +780,7 @@ void main() {
           expect(tester.takeException(), isNull);
           await shot(
             tester,
-            '${page == 3 ? 'gallery' : 'about'}-${locale.languageCode}-narrow-bottom',
+            '${page == 3 ? 'gallery' : 'about'}-${locale.toLanguageTag()}-narrow-bottom',
           );
         },
       );

@@ -3,7 +3,6 @@ import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import '../../../core/autocomplete/autocomplete_settings.dart';
 import '../../../core/autocomplete/completion_models.dart';
-import '../../../core/autocomplete/zh_dictionary_service.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import 'tag_category_visuals.dart';
@@ -26,7 +25,6 @@ class CompletionOverlay extends StatelessWidget {
     required this.maxHeight,
     required this.scrollController,
     required this.settings,
-    required this.dictionaryState,
     required this.showAliases,
     required this.showTranslations,
     required this.showCategory,
@@ -43,7 +41,6 @@ class CompletionOverlay extends StatelessWidget {
   final double maxHeight;
   final ScrollController scrollController;
   final AutocompleteSettings settings;
-  final ZhDictionaryState dictionaryState;
   final bool showAliases;
   final bool showTranslations;
   final bool showCategory;
@@ -157,7 +154,6 @@ class CompletionOverlay extends StatelessWidget {
                 _CompletionFooter(
                   state: state,
                   settings: settings,
-                  dictionaryState: dictionaryState,
                   onOpenSettings: onOpenSettings,
                 ),
               ],
@@ -579,7 +575,6 @@ class _CompletionTile extends StatelessWidget {
     CompletionSourceKind source,
   ) => switch (source) {
     CompletionSourceKind.base => context.l10n.autocomplete_sourceBase,
-    CompletionSourceKind.zhDictionary => context.l10n.autocomplete_sourceZh,
     CompletionSourceKind.danbooruApi => context.l10n.autocomplete_sourceApi,
     CompletionSourceKind.cooccurrence =>
       context.l10n.autocomplete_sourceRelated,
@@ -741,7 +736,6 @@ class _SourceBadges extends StatelessWidget {
 
   static String _sourceLabel(CompletionSourceKind source) => switch (source) {
     CompletionSourceKind.base => 'BASE',
-    CompletionSourceKind.zhDictionary => 'ZH',
     CompletionSourceKind.danbooruApi => 'API',
     CompletionSourceKind.cooccurrence => 'REL',
     CompletionSourceKind.ai => 'AI',
@@ -752,8 +746,6 @@ class _SourceBadges extends StatelessWidget {
     final dark = theme.brightness == Brightness.dark;
     return switch (source) {
       CompletionSourceKind.base => theme.colorScheme.onSurfaceVariant,
-      CompletionSourceKind.zhDictionary =>
-        dark ? const Color(0xff72ca7b) : const Color(0xff2e7d32),
       CompletionSourceKind.danbooruApi =>
         dark ? const Color(0xff64b5f6) : const Color(0xff1565c0),
       CompletionSourceKind.cooccurrence =>
@@ -770,13 +762,11 @@ class _CompletionFooter extends StatelessWidget {
   const _CompletionFooter({
     required this.state,
     required this.settings,
-    required this.dictionaryState,
     required this.onOpenSettings,
   });
 
   final CompletionState state;
   final AutocompleteSettings settings;
-  final ZhDictionaryState dictionaryState;
   final VoidCallback onOpenSettings;
 
   @override
@@ -804,7 +794,6 @@ class _CompletionFooter extends StatelessWidget {
               _relatedStatus(context)
             else if (!veryCompact)
               _baseStatus(context),
-            _dictionaryStatus(context),
             _onlineStatus(context),
             if (!compact || settings.llmTranslationEnabled) _aiStatus(context),
           ];
@@ -897,68 +886,6 @@ class _CompletionFooter extends StatelessWidget {
       value: '$localCount',
       tone: _StatusTone.ready,
       tooltip: context.l10n.autocomplete_sourceRelated,
-    );
-  }
-
-  _StatusDescriptor _dictionaryStatus(BuildContext context) {
-    if (dictionaryState.isBusy) {
-      final progress = (dictionaryState.progress * 100).round().clamp(0, 100);
-      return _StatusDescriptor(
-        key: 'autocomplete-status-dictionary',
-        translationIcon: true,
-        label: context.l10n.autocomplete_statusDictionary,
-        value: context.l10n.autocomplete_statusDownloading(progress),
-        tone: _StatusTone.loading,
-        loading: true,
-      );
-    }
-    if (dictionaryState.error?.isNotEmpty == true) {
-      return _StatusDescriptor(
-        key: 'autocomplete-status-dictionary',
-        translationIcon: true,
-        label: context.l10n.autocomplete_statusDictionary,
-        value: context.l10n.autocomplete_statusError,
-        tone: _StatusTone.error,
-        tooltip: dictionaryState.error,
-      );
-    }
-    if (!dictionaryState.isInstalled) {
-      return _StatusDescriptor(
-        key: 'autocomplete-status-dictionary',
-        translationIcon: true,
-        label: context.l10n.autocomplete_statusDictionary,
-        value: context.l10n.autocomplete_statusNotInstalled,
-        tone: _StatusTone.warning,
-        tooltip: context.l10n.autocomplete_zhNotInstalled,
-      );
-    }
-    if (dictionaryState.updateAvailable) {
-      return _StatusDescriptor(
-        key: 'autocomplete-status-dictionary',
-        translationIcon: true,
-        label: context.l10n.autocomplete_statusDictionary,
-        value: context.l10n.autocomplete_statusUpdateAvailable,
-        tone: _StatusTone.warning,
-      );
-    }
-    final translatedCount = state.candidates
-        .where((candidate) => candidate.translation?.isNotEmpty == true)
-        .length;
-    final totalCount = state.candidates.length;
-    return _StatusDescriptor(
-      key: 'autocomplete-status-dictionary',
-      translationIcon: true,
-      label: context.l10n.autocomplete_statusDictionary,
-      value: totalCount == 0
-          ? context.l10n.autocomplete_statusReady
-          : '$translatedCount/$totalCount',
-      tone: _StatusTone.ready,
-      tooltip: totalCount == 0
-          ? context.l10n.autocomplete_entryCount(dictionaryState.tagCount)
-          : context.l10n.autocomplete_translationCoverage(
-              translatedCount,
-              totalCount,
-            ),
     );
   }
 

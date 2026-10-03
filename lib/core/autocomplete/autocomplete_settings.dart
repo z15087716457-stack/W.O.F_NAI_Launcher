@@ -14,7 +14,6 @@ class AutocompleteSettings {
     this.danbooruEnabled = true,
     this.relatedTagsEnabled = true,
     this.llmTranslationEnabled = false,
-    this.zhInstallPromptDismissed = false,
   });
 
   final bool enabled;
@@ -25,7 +24,6 @@ class AutocompleteSettings {
   final bool danbooruEnabled;
   final bool relatedTagsEnabled;
   final bool llmTranslationEnabled;
-  final bool zhInstallPromptDismissed;
 
   AutocompleteSettings copyWith({
     bool? enabled,
@@ -36,7 +34,6 @@ class AutocompleteSettings {
     bool? danbooruEnabled,
     bool? relatedTagsEnabled,
     bool? llmTranslationEnabled,
-    bool? zhInstallPromptDismissed,
   }) {
     return AutocompleteSettings(
       enabled: enabled ?? this.enabled,
@@ -48,8 +45,6 @@ class AutocompleteSettings {
       relatedTagsEnabled: relatedTagsEnabled ?? this.relatedTagsEnabled,
       llmTranslationEnabled:
           llmTranslationEnabled ?? this.llmTranslationEnabled,
-      zhInstallPromptDismissed:
-          zhInstallPromptDismissed ?? this.zhInstallPromptDismissed,
     );
   }
 }
@@ -120,12 +115,6 @@ class AutocompleteSettingsNotifier extends StateNotifier<AutocompleteSettings> {
               defaultValue: false,
             ) ??
             false,
-        zhInstallPromptDismissed:
-            storage.getSetting<bool>(
-              StorageKeys.autocompleteZhInstallPromptDismissed,
-              defaultValue: false,
-            ) ??
-            false,
       );
     } catch (_) {
       return const AutocompleteSettings();
@@ -186,12 +175,6 @@ class AutocompleteSettingsNotifier extends StateNotifier<AutocompleteSettings> {
     state.copyWith(llmTranslationEnabled: value),
     StorageKeys.autocompleteLlmTranslationEnabled,
     value,
-  );
-
-  Future<void> dismissZhInstallPrompt() => _set(
-    state.copyWith(zhInstallPromptDismissed: true),
-    StorageKeys.autocompleteZhInstallPromptDismissed,
-    true,
   );
 
   Future<void> _set<T>(AutocompleteSettings next, String key, T value) async {

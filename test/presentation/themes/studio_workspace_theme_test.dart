@@ -34,7 +34,6 @@ import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
 import 'package:nai_launcher/core/autocomplete/autocomplete_cache_database.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/autocomplete/danbooru_completion_source.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 
@@ -256,13 +255,9 @@ void main() {
               statisticsNotifierProvider.overrideWith(_Stats.new),
               localStorageServiceProvider.overrideWithValue(storage),
               shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
-              zhDictionaryServiceProvider.overrideWith(
-                (ref) => ZhDictionaryService(),
-              ),
               autocompleteServicesProvider.overrideWithValue(
                 AutocompleteServices(
                   localSources: [],
-                  dictionaryTranslations: const _NoTranslations(),
                   llmTranslations: const _NoTranslations(),
                   danbooru: _NoRemote(),
                 ),

@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nai_launcher/core/database/datasources/translation_data_source.dart';
 import 'package:nai_launcher/data/models/cache/data_source_cache_meta.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// DanbooruTagsLazyService shouldRefresh 逻辑单元测试
 ///
@@ -13,56 +11,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 ///
 /// 运行：flutter test test/core/services/danbooru_tags_lazy_service_test.dart
 void main() {
-  group('TranslationDataSource 中文标签反查', () {
-    late Database db;
-    late TranslationDataSource dataSource;
-
-    setUp(() async {
-      sqfliteFfiInit();
-      db = await databaseFactoryFfi.openDatabase(inMemoryDatabasePath);
-      await db.execute('''
-        CREATE TABLE tags (
-          name TEXT PRIMARY KEY,
-          category INTEGER NOT NULL,
-          cn_name TEXT,
-          post_count INTEGER NOT NULL
-        )
-      ''');
-      await db.insert('tags', {
-        'name': 'white_hair',
-        'category': 0,
-        'cn_name': '白发',
-        'post_count': 956400,
-      });
-      await db.insert('tags', {
-        'name': 'red_eyes',
-        'category': 0,
-        'cn_name': '白发红眼',
-        'post_count': 1047308,
-      });
-      dataSource = TranslationDataSource(database: db);
-    });
-
-    tearDown(() async {
-      await dataSource.dispose();
-    });
-
-    test('中文翻译搜索返回英文 tag 以及显示所需的分类和计数', () async {
-      final matches = await dataSource.search(
-        '白发',
-        matchTag: false,
-        matchTranslation: true,
-      );
-
-      expect(matches.map((m) => m.tag), contains('white_hair'));
-      final whiteHair = matches.firstWhere((m) => m.tag == 'white_hair');
-      expect(whiteHair.translation, equals('白发'));
-      expect(whiteHair.category, equals(0));
-      expect(whiteHair.count, equals(956400));
-      expect(matches.first.tag, equals('white_hair'));
-    });
-  });
-
   group('DanbooruTagsLazyService shouldRefresh 逻辑测试', () {
     group('AutoRefreshInterval.shouldRefresh 基础逻辑', () {
       test('从未更新时应该刷新 (lastUpdate = null)', () {

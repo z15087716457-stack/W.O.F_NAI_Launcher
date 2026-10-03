@@ -1,5 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../core/utils/app_language.dart';
+import '../../../core/utils/localization_extension.dart';
+
 /// Danbooru 官方标签类别
 ///
 /// 对应 Danbooru API 的 category 字段
@@ -227,34 +230,36 @@ class TagSubCategoryHelper {
     return TagSubCategory.other;
   }
 
-  /// 获取子分类的显示名称
+  /// 子分类简体中文名称；繁体界面使用生成的台湾正体对照
+  static const Map<TagSubCategory, String> chineseNames = {
+    TagSubCategory.hairColor: '发色',
+    TagSubCategory.eyeColor: '瞳色',
+    TagSubCategory.hairStyle: '发型',
+    TagSubCategory.clothing: '服装',
+    TagSubCategory.clothingFemale: '女性服装',
+    TagSubCategory.clothingMale: '男性服装',
+    TagSubCategory.clothingGeneral: '通用服装',
+    TagSubCategory.expression: '表情',
+    TagSubCategory.pose: '姿势',
+    TagSubCategory.background: '背景',
+    TagSubCategory.scene: '场景',
+    TagSubCategory.style: '风格',
+    TagSubCategory.bodyFeature: '身体特征',
+    TagSubCategory.bodyFeatureFemale: '女性体型',
+    TagSubCategory.bodyFeatureMale: '男性体型',
+    TagSubCategory.bodyFeatureGeneral: '通用体型',
+    TagSubCategory.accessory: '配饰',
+    TagSubCategory.characterCount: '人数',
+    TagSubCategory.other: '其他',
+  };
+
+  /// 获取子分类的显示名称；默认跟随当前界面语言
   static String getDisplayName(
     TagSubCategory category, {
-    String locale = 'zh',
+    AppLanguage? language,
   }) {
-    if (locale == 'zh') {
-      return switch (category) {
-        TagSubCategory.hairColor => '发色',
-        TagSubCategory.eyeColor => '瞳色',
-        TagSubCategory.hairStyle => '发型',
-        TagSubCategory.clothing => '服装',
-        TagSubCategory.clothingFemale => '女性服装',
-        TagSubCategory.clothingMale => '男性服装',
-        TagSubCategory.clothingGeneral => '通用服装',
-        TagSubCategory.expression => '表情',
-        TagSubCategory.pose => '姿势',
-        TagSubCategory.background => '背景',
-        TagSubCategory.scene => '场景',
-        TagSubCategory.style => '风格',
-        TagSubCategory.bodyFeature => '身体特征',
-        TagSubCategory.bodyFeatureFemale => '女性体型',
-        TagSubCategory.bodyFeatureMale => '男性体型',
-        TagSubCategory.bodyFeatureGeneral => '通用体型',
-        TagSubCategory.accessory => '配饰',
-        TagSubCategory.characterCount => '人数',
-        TagSubCategory.other => '其他',
-      };
-    }
+    final target = language ?? currentAppLanguage;
+    if (target.isChinese) return target.chineseLabel(chineseNames[category]!);
     return switch (category) {
       TagSubCategory.hairColor => 'Hair Color',
       TagSubCategory.eyeColor => 'Eye Color',

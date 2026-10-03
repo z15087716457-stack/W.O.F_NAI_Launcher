@@ -8,7 +8,7 @@ NovelAI Flutter 桌面客户端。业务按 `lib/core/`、`lib/data/`、`lib/pre
 - 开发运行、热重载、代码生成：查 [DEVELOPMENT.md](DEVELOPMENT.md)「构建、测试与开发命令」。
 - 准备发布、更新 README 或提交 PR：查 [DEVELOPMENT.md](DEVELOPMENT.md) 对应节。
 - 桥接/参数、模型/计费、登录、图库、画布或更新实现：定向查 [OPERATIONAL_NOTES.md](OPERATIONAL_NOTES.md) 对应章节；普通文案或格式修正不需要通读。
-- 依赖、资源和 lint 以 `pubspec.yaml`、`analysis_options.yaml` 为准；国际化源文件在 `lib/l10n/`。
+- 依赖、资源和 lint 以 `pubspec.yaml`、`analysis_options.yaml` 为准；国际化源文件在 `lib/l10n/`。`app_zh_TW.arb` 与 `zh_tw_labels.dart` 由 `tool/l10n` 生成，不手改，重新生成方法见 [DEVELOPMENT.md](DEVELOPMENT.md)「资源、生成文件与发布注意事项」。
 
 ## 修改与验证
 

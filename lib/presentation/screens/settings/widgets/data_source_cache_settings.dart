@@ -1,10 +1,8 @@
-import '../../../widgets/common/translation_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/autocomplete/autocomplete_providers.dart';
 import '../../../../core/autocomplete/autocomplete_settings.dart';
-import '../../../../core/autocomplete/zh_dictionary_service.dart';
 import '../../../../core/database/database_providers.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../widgets/common/app_toast.dart';
@@ -39,7 +37,6 @@ class DataSourceCacheSettings extends ConsumerWidget {
         child: relatedTags,
       );
     }
-    final zh = ref.watch(zhDictionaryServiceProvider).state;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -49,7 +46,6 @@ class DataSourceCacheSettings extends ConsumerWidget {
             children: [
               if (!cacheOnly) relatedTags,
               _CatalogStatus(ref: ref),
-              _ZhDictionaryStatus(state: zh),
               FutureBuilder<int>(
                 future: _loadCooccurrenceCount(ref),
                 builder: (context, snapshot) => SettingsTile(
@@ -139,124 +135,6 @@ class _CatalogStatus extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _ZhDictionaryStatus extends ConsumerWidget {
-  const _ZhDictionaryStatus({required this.state});
-
-  final ZhDictionaryState state;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final service = ref.read(zhDictionaryServiceProvider);
-    return SettingsTile(
-      leading: state.isBusy
-          ? SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                value: state.progress > 0 ? state.progress : null,
-              ),
-            )
-          : state.isInstalled
-          ? const TranslationIcon()
-          : const Icon(Icons.download_outlined),
-      title: Text(context.l10n.autocomplete_zhDictionary),
-      subtitle: Text(
-        state.error ??
-            (state.isInstalled
-                ? context.l10n.autocomplete_zhInstalled(
-                    state.tagCount,
-                    state.version?.substring(0, 8) ?? '-',
-                  )
-                : context.l10n.autocomplete_zhNotInstalled),
-      ),
-      trailing: Wrap(
-        spacing: 6,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          if (state.isBusy)
-            IconButton(
-              tooltip: context.l10n.common_cancel,
-              onPressed: service.cancelInstall,
-              icon: const Icon(Icons.close),
-            )
-          else ...[
-            if (state.isInstalled)
-              IconButton(
-                tooltip: context.l10n.autocomplete_checkUpdate,
-                onPressed: () => service.checkForUpdate(force: true),
-                icon: const Icon(Icons.refresh),
-              ),
-            FilledButton.tonal(
-              onPressed: () async {
-                if (!state.isInstalled) {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(context.l10n.autocomplete_zhDictionary),
-                      content: Text(context.l10n.autocomplete_zhInstallPrompt),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text(context.l10n.common_cancel),
-                        ),
-                        OutlinedButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: Text(context.l10n.autocomplete_install),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmed != true) return;
-                }
-                try {
-                  await service.installOrUpdate();
-                } catch (error) {
-                  if (context.mounted) {
-                    AppToast.error(context, error.toString());
-                  }
-                }
-              },
-              child: Text(
-                state.isInstalled
-                    ? state.updateAvailable
-                          ? context.l10n.autocomplete_update
-                          : context.l10n.autocomplete_repair
-                    : context.l10n.autocomplete_install,
-              ),
-            ),
-            if (state.isInstalled)
-              IconButton(
-                tooltip: context.l10n.autocomplete_remove,
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(context.l10n.autocomplete_remove),
-                      content: Text(context.l10n.autocomplete_removeConfirm),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text(context.l10n.common_cancel),
-                        ),
-                        OutlinedButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: Text(context.l10n.common_confirm),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmed == true) await service.remove();
-                },
-                icon: const Icon(Icons.delete_outline),
-              ),
-          ],
-        ],
-      ),
     );
   }
 }

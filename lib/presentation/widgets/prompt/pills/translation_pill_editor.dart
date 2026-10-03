@@ -424,10 +424,7 @@ class _TranslationPillEditPopoverState
       try {
         final results = await Future.wait([
           widget.annotations!(source, false),
-          widget.annotations!(
-            zh,
-            _language == PromptTranslationLanguage.chinese,
-          ),
+          widget.annotations!(zh, _language.isChinese),
         ]);
         if (!mounted ||
             version != _annotationVersion ||
@@ -459,9 +456,10 @@ class _TranslationPillEditPopoverState
     final caret = selected.isValid
         ? selected.extentOffset
         : controller.text.length;
-    final label = chinese && _language == PromptTranslationLanguage.chinese
-        ? (candidate.translation?.trim().isNotEmpty == true
-              ? candidate.translation!.trim()
+    final reading = candidate.translation?.trim() ?? '';
+    final label = chinese && _language.isChinese
+        ? (reading.isNotEmpty
+              ? reading
               : TagNormalizer.toDisplay(candidate.canonicalTag))
         : candidate.canonicalTag;
     final result = PromptTokenParser.insertAtCaret(

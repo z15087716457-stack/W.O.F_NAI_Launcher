@@ -7,6 +7,8 @@ import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalo
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'model_management_section_test.dart' as harness;
+import 'package:nai_launcher/core/utils/app_language.dart';
+import '../../../helpers/chinese_script_test_support.dart';
 
 /// Provider and model names in the sample configuration are user data.
 const _fixtureNames = {'本地模型'};
@@ -31,7 +33,7 @@ void main() {
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
 
-  for (final code in ['en', 'ja']) {
+  for (final code in ['en', 'ja', 'zh_TW']) {
     for (final layout in [
       (const Size(1200, 820), 1.1, 'regular'),
       (const Size(960, 820), 1.3, 'compact'),
@@ -40,7 +42,7 @@ void main() {
       testWidgets(
         'model settings stay localized and laid out in $code ${layout.$3}',
         (tester) async {
-          final locale = Locale(code);
+          final locale = AppLanguage.fromStorage(code).locale;
           final l10n = lookupAppLocalizations(locale);
           // The app keeps context-free text on the same locale.
           setCurrentL10nLocale(locale);
@@ -63,6 +65,13 @@ void main() {
             if (code == 'en') {
               expect(_visibleHanText(tester), isEmpty, reason: tab);
             }
+            if (code == 'zh_TW') {
+              expect(
+                simplifiedOnlyTexts(_visibleHanText(tester)),
+                isEmpty,
+                reason: tab,
+              );
+            }
             await harness.capture(tester, 'l10n-$code-${layout.$3}-tab$index');
           }
           await harness.tapVisible(
@@ -76,6 +85,9 @@ void main() {
           expect(find.text(l10n.modelProvider_pickerTitle), findsOneWidget);
           expect(tester.takeException(), isNull);
           if (code == 'en') expect(_visibleHanText(tester), isEmpty);
+          if (code == 'zh_TW') {
+            expect(simplifiedOnlyTexts(_visibleHanText(tester)), isEmpty);
+          }
           await harness.capture(tester, 'l10n-$code-${layout.$3}-picker');
         },
       );

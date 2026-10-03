@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../autocomplete/autocomplete_providers.dart';
 import '../autocomplete/tag_catalog_repository.dart';
-import '../autocomplete/zh_dictionary_service.dart';
 import '../constants/storage_keys.dart';
 import '../database/database.dart' hide Recommendation;
 import '../database/services/services.dart';
@@ -19,13 +18,11 @@ class RecommendedTag {
   final String tag;
   final double score;
   final int cooccurrence;
-  final String? translation;
 
   const RecommendedTag({
     required this.tag,
     required this.score,
     required this.cooccurrence,
-    this.translation,
   });
 
   /// 格式化显示的分数
@@ -37,16 +34,11 @@ class RecommendedTag {
 class SmartTagRecommendationService {
   final CooccurrenceService _cooccurrenceService;
   final TagCatalogRepository _catalog;
-  final ZhDictionaryService _dictionary;
 
   /// 是否启用智能推荐
   bool _isEnabled = true;
 
-  SmartTagRecommendationService(
-    this._cooccurrenceService,
-    this._catalog,
-    this._dictionary,
-  );
+  SmartTagRecommendationService(this._cooccurrenceService, this._catalog);
 
   /// 是否启用
   bool get isEnabled => _isEnabled;
@@ -162,11 +154,6 @@ class SmartTagRecommendationService {
 
     if (candidateScores.isEmpty) return [];
 
-    final translations = await _dictionary.resolve(
-      candidateScores.keys.toList(),
-      locale: 'zh-CN',
-    );
-
     // 计算最终分数：考虑匹配多个输入标签的加成
     final results = <RecommendedTag>[];
     for (final candidate in candidateScores.values) {
@@ -180,7 +167,6 @@ class SmartTagRecommendationService {
           tag: candidate.tag,
           score: min(finalScore, 1.0), // 限制最大分数为 1.0
           cooccurrence: candidate.totalCooccurrence,
-          translation: translations[candidate.tag],
         ),
       );
     }
@@ -252,6 +238,5 @@ Future<SmartTagRecommendationService> smartTagRecommendationService(
   return SmartTagRecommendationService(
     cooccurrenceService,
     ref.watch(tagCatalogRepositoryProvider),
-    ref.watch(zhDictionaryServiceProvider),
   );
 }

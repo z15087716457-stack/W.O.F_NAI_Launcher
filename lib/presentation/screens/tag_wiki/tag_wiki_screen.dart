@@ -8,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/autocomplete/completion_models.dart';
-import '../../../core/autocomplete/tag_translation_lookup.dart';
 import '../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
@@ -42,7 +41,6 @@ class _WikiVisit {
     required this.selected,
     required this.items,
     required this.article,
-    required this.translation,
     required this.total,
     required this.more,
     required this.loading,
@@ -61,7 +59,6 @@ class _WikiVisit {
   final String? loadError;
   final List<CompletionCandidate> items;
   final Future<TagWikiEntry?>? article;
-  final Future<String?>? translation;
   final int? total;
   final double listOffset, articleOffset;
   final CompletionCandidate? linkedCandidate;
@@ -130,7 +127,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   String? _loadError;
   List<CompletionCandidate> _items = const [];
   Future<TagWikiEntry?>? _article;
-  Future<String?>? _translation;
 
   @override
   void initState() {
@@ -200,7 +196,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _searchAll = false;
       _selected = null;
       _article = null;
-      _translation = null;
     });
     ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
     if (_listScroll.hasClients) _listScroll.jumpTo(0);
@@ -231,7 +226,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           selected: _selected!,
           items: _items,
           article: _article,
-          translation: _translation,
           total: _total,
           more: _more,
           loading: _loading,
@@ -252,7 +246,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _selected = tag;
       _showCompactArticle = reveal;
       _article = article;
-      _translation = ref.read(tagTranslationLookupProvider).translate(tag);
     });
     unawaited(
       article.then((entry) {
@@ -299,7 +292,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _selected = visit.selected;
       _items = visit.items;
       _article = visit.article;
-      _translation = visit.translation;
       _total = visit.total;
       _more = visit.more;
       _loading = false;
@@ -345,27 +337,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   Future<List<CompletionCandidate>> _searchCandidates(String text) async {
     final source = ref.read(unifiedTagRepositoryProvider);
     final normalized = TagNormalizer.normalize(text);
-    if (RegExp(r'[\u3400-\u9fff]').hasMatch(normalized)) {
-      final translated = await ref
-          .read(localTagExpansionServiceProvider)
-          .search(
-            text,
-            locale: Localizations.localeOf(context).toLanguageTag(),
-            limit: 300,
-          );
-      final canonical = await source.byNames(
-        translated.map((candidate) => candidate.canonicalTag),
-      );
-      final byName = {
-        for (final candidate in translated) candidate.canonicalTag: candidate,
-      };
-      return [
-        for (final candidate in canonical)
-          candidate.copyWith(
-            translation: byName[candidate.canonicalTag]?.translation,
-          ),
-      ];
-    }
     final query = CompletionQuery(
       fullText: text,
       cursorPosition: text.length,
@@ -487,7 +458,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       change();
       _selected = null;
       _article = null;
-      _translation = null;
     });
     if (_listScroll.hasClients) _listScroll.jumpTo(0);
     _load();
@@ -498,7 +468,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     setState(() {
       _selected = null;
       _article = null;
-      _translation = null;
     });
     _searchTimer?.cancel();
     if (immediate) {
@@ -1128,15 +1097,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
           ),
         ],
-        FutureBuilder<String?>(
-          future: _translation,
-          builder: (context, snapshot) => Text(
-            snapshot.data ??
-                ref.read(autoTagTranslationProvider).nameFor(tag) ??
-                candidate?.translation ??
-                '',
-            style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
-          ),
+        Text(
+          ref.read(autoTagTranslationProvider).nameFor(tag) ??
+              candidate?.translation ??
+              '',
+          style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
         ),
       ],
     );

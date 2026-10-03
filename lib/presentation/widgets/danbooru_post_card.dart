@@ -9,10 +9,10 @@ import '../../core/cache/danbooru_image_cache_manager.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/utils/file_picker_utils.dart';
 import '../../data/models/online_gallery/danbooru_post.dart';
-import '../../core/autocomplete/tag_translation_lookup.dart';
 import '../providers/character_prompt_provider.dart';
 import '../providers/pending_prompt_provider.dart';
 import 'common/card_action_buttons.dart';
+import 'common/visible_tag_readings.dart';
 
 import 'common/app_toast.dart';
 
@@ -792,7 +792,6 @@ class _HoverPreviewCardInner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final translationService = ref.watch(tagTranslationLookupProvider);
 
     const maxWidth = 320.0;
     const maxHeight = 360.0;
@@ -962,7 +961,6 @@ class _HoverPreviewCardInner extends ConsumerWidget {
                         icon: Icons.brush,
                         color: const Color(0xFFFF8A8A),
                         tags: post.artistTags.take(3).toList(),
-                        translationService: translationService,
                       ),
                       const SizedBox(height: 6),
                     ],
@@ -971,7 +969,6 @@ class _HoverPreviewCardInner extends ConsumerWidget {
                         icon: Icons.person,
                         color: const Color(0xFF8AFF8A),
                         tags: post.characterTags.take(4).toList(),
-                        translationService: translationService,
                         isCharacter: true,
                       ),
                       const SizedBox(height: 6),
@@ -981,7 +978,6 @@ class _HoverPreviewCardInner extends ConsumerWidget {
                         icon: Icons.movie,
                         color: const Color(0xFFCC8AFF),
                         tags: post.copyrightTags.take(2).toList(),
-                        translationService: translationService,
                       ),
                     ],
                   ],
@@ -1051,54 +1047,28 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-class _TagRow extends StatefulWidget {
+class _TagRow extends ConsumerStatefulWidget {
   final IconData icon;
   final Color color;
   final List<String> tags;
-  final TagTranslationLookup translationService;
   final bool isCharacter;
 
   const _TagRow({
     required this.icon,
     required this.color,
     required this.tags,
-    required this.translationService,
     this.isCharacter = false,
   });
 
   @override
-  State<_TagRow> createState() => _TagRowState();
+  ConsumerState<_TagRow> createState() => _TagRowState();
 }
 
-class _TagRowState extends State<_TagRow> {
-  Map<String, String>? _translations;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTranslations();
-  }
-
-  @override
-  void didUpdateWidget(_TagRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.tags != oldWidget.tags) {
-      _translations = null;
-      _loadTranslations();
-    }
-  }
-
-  Future<void> _loadTranslations() async {
-    final translations = await widget.translationService.translateBatch(
-      widget.tags,
-    );
-    if (mounted) {
-      setState(() => _translations = translations);
-    }
-  }
-
+class _TagRowState extends ConsumerState<_TagRow>
+    with VisibleTagReadings<_TagRow> {
   @override
   Widget build(BuildContext context) {
+    observeTagReadings(widget.tags);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1109,7 +1079,7 @@ class _TagRowState extends State<_TagRow> {
             spacing: 4,
             runSpacing: 2,
             children: widget.tags.map((tag) {
-              final translation = _translations?[tag];
+              final translation = tagReading(tag);
               final displayText = tag.replaceAll('_', ' ');
               return Text(
                 translation != null

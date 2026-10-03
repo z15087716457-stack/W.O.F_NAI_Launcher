@@ -11,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/autocomplete/autocomplete_cache_database.dart';
 import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/cache/gallery_cache_manager.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/database/database_providers.dart';
@@ -38,15 +37,6 @@ class _Catalog extends TagCatalogRepository {
     'tag_count': '221787',
     'data_version': '42f35be9d394',
   };
-}
-
-class _Dictionary extends ZhDictionaryService {
-  @override
-  ZhDictionaryState get state => const ZhDictionaryState(
-    isInstalled: true,
-    tagCount: 322933,
-    version: '4831090f',
-  );
 }
 
 class _Caches extends AutocompleteCacheDatabase {
@@ -119,7 +109,6 @@ void main() {
         overrides: [
           localStorageServiceProvider.overrideWithValue(storage),
           tagCatalogRepositoryProvider.overrideWithValue(_Catalog()),
-          zhDictionaryServiceProvider.overrideWith((ref) => _Dictionary()),
           autocompleteCacheDatabaseProvider.overrideWithValue(caches),
           databaseManagerProvider.overrideWith(
             (ref) async => throw StateError('offline test'),

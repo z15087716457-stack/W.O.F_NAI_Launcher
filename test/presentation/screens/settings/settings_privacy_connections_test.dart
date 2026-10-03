@@ -8,8 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/comfyui/builtin_workflows.dart';
 import 'package:nai_launcher/core/comfyui/comfyui_models.dart';
 import 'package:nai_launcher/core/comfyui/workflow_template.dart';
@@ -169,9 +167,6 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          zhDictionaryServiceProvider.overrideWith(
-            (ref) => ZhDictionaryService(),
-          ),
           localStorageServiceProvider.overrideWithValue(storage),
           comfyUISettingsProvider.overrideWith(_ComfySettings.new),
           comfyUIConnectionProvider.overrideWith(() => comfy),
@@ -472,9 +467,9 @@ void main() {
     },
   );
 
-  for (final locale in [const Locale('en'), const Locale('ja')]) {
+  for (final locale in const [Locale('en'), Locale('ja'), Locale('zh', 'TW')]) {
     testWidgets(
-      'privacy and connections retain narrow ${locale.languageCode} controls',
+      'privacy and connections retain narrow ${locale.toLanguageTag()} controls',
       (tester) async {
         await pump(
           tester,

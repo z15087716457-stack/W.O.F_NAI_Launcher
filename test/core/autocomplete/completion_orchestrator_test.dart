@@ -16,7 +16,6 @@ void main() {
         localSources: [
           _Source([_candidate('blue_eyes', CompletionSourceKind.base)]),
         ],
-        dictionaryTranslations: _Translations({'blue_eyes': '蓝眼睛'}),
         llmTranslations: _Translations(const {}),
         danbooru: remote,
       );
@@ -25,7 +24,6 @@ void main() {
       await orchestrator.query(_query('blue'), const AutocompleteSettings());
 
       expect(orchestrator.state.candidates.single.canonicalTag, 'blue_eyes');
-      expect(orchestrator.state.candidates.single.translation, '蓝眼睛');
       expect(remote.searchCount, 0);
 
       await Future<void>.delayed(const Duration(milliseconds: 270));
@@ -52,42 +50,6 @@ void main() {
     },
   );
 
-  test('keeps candidates that have no dictionary translation', () async {
-    final orchestrator = CompletionOrchestrator(
-      localSources: [
-        _Source([
-          _candidate('translated_tag', CompletionSourceKind.base),
-          _candidate('untranslated_tag', CompletionSourceKind.base),
-        ]),
-      ],
-      dictionaryTranslations: _Translations({'translated_tag': '已有汉化'}),
-      llmTranslations: _Translations(const {}),
-      danbooru: _FakeDanbooru(),
-    );
-    addTearDown(orchestrator.dispose);
-
-    await orchestrator.query(
-      _query('tag'),
-      const AutocompleteSettings(danbooruEnabled: false),
-    );
-
-    expect(orchestrator.state.candidates, hasLength(2));
-    expect(
-      orchestrator.state.candidates
-          .firstWhere((candidate) => candidate.canonicalTag == 'translated_tag')
-          .translation,
-      '已有汉化',
-    );
-    expect(
-      orchestrator.state.candidates
-          .firstWhere(
-            (candidate) => candidate.canonicalTag == 'untranslated_tag',
-          )
-          .translation,
-      isNull,
-    );
-  });
-
   test(
     'appends every online-only tag in exhaustive mode without moving local rows',
     () async {
@@ -100,7 +62,6 @@ void main() {
       ];
       final orchestrator = CompletionOrchestrator(
         localSources: [_Source(localTags)],
-        dictionaryTranslations: _Translations(const {}),
         llmTranslations: _Translations(const {}),
         danbooru: remote,
       );
@@ -166,7 +127,6 @@ void main() {
     final source = _QuerySource();
     final orchestrator = CompletionOrchestrator(
       localSources: [source],
-      dictionaryTranslations: _Translations(const {}),
       llmTranslations: _Translations(const {}),
       danbooru: remote,
     );
@@ -192,7 +152,6 @@ void main() {
     final source = _QuerySource();
     final orchestrator = CompletionOrchestrator(
       localSources: [source],
-      dictionaryTranslations: _Translations(const {}),
       llmTranslations: _Translations(const {}),
       danbooru: _FakeDanbooru(),
     );
@@ -218,7 +177,6 @@ void main() {
       localSources: [
         _Source([_candidate('smile', CompletionSourceKind.cooccurrence)]),
       ],
-      dictionaryTranslations: _Translations(const {}),
       llmTranslations: _Translations(const {}),
       danbooru: remote,
     );
@@ -248,7 +206,6 @@ void main() {
       final relatedSource = _RecordingRelatedSource();
       final orchestrator = CompletionOrchestrator(
         localSources: [relatedSource],
-        dictionaryTranslations: _Translations(const {}),
         llmTranslations: _Translations(const {}),
         danbooru: _FakeDanbooru(),
       );
@@ -271,7 +228,6 @@ void main() {
         _ThrowingSource(),
         _Source([_candidate('smile', CompletionSourceKind.cooccurrence)]),
       ],
-      dictionaryTranslations: _Translations(const {}),
       llmTranslations: _Translations(const {}),
       danbooru: _FakeDanbooru(),
     );
@@ -295,7 +251,6 @@ void main() {
       final translations = _CountingTranslations();
       final orchestrator = CompletionOrchestrator(
         localSources: [normalSource],
-        dictionaryTranslations: translations,
         llmTranslations: translations,
         danbooru: remote,
         libraryAliases: _Source([
@@ -344,7 +299,6 @@ void main() {
       );
       final orchestrator = CompletionOrchestrator(
         localSources: [_Source(tags)],
-        dictionaryTranslations: _Translations(const {}),
         llmTranslations: llm,
         danbooru: _FakeDanbooru(),
         llmDebounceDuration: Duration.zero,
@@ -386,7 +340,6 @@ void main() {
     final llm = _CancellableRecordingTranslations();
     final orchestrator = CompletionOrchestrator(
       localSources: [_TokenCandidateSource()],
-      dictionaryTranslations: _Translations(const {}),
       llmTranslations: llm,
       danbooru: _FakeDanbooru(),
       llmDebounceDuration: const Duration(milliseconds: 30),
@@ -420,14 +373,12 @@ void main() {
     final sharedLlm = _ScopedRecordingTranslations();
     final first = CompletionOrchestrator(
       localSources: [_TokenCandidateSource()],
-      dictionaryTranslations: _Translations(const {}),
       llmTranslations: sharedLlm,
       danbooru: _FakeDanbooru(),
       llmDebounceDuration: Duration.zero,
     );
     final second = CompletionOrchestrator(
       localSources: [_TokenCandidateSource()],
-      dictionaryTranslations: _Translations(const {}),
       llmTranslations: sharedLlm,
       danbooru: _FakeDanbooru(),
       llmDebounceDuration: Duration.zero,

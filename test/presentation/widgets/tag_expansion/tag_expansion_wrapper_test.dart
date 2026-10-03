@@ -109,7 +109,6 @@ void main() {
             for (final name in names)
               if (entries[name] case final item?) name: item,
           },
-          chineseLookup: (_) async => [],
         ),
         wiki: _Wiki({
           'first_tag': 'See second_tag.',
@@ -1178,11 +1177,7 @@ Future<void> _pumpEditor(
         localTagExpansionServiceProvider.overrideWithValue(service),
         tagWikiRepositoryProvider.overrideWithValue(wiki ?? _Wiki()),
         wikiTagLinksProvider.overrideWithValue(
-          links ??
-              WikiTagLinks(
-                exactLookup: (_) async => {},
-                chineseLookup: (_) async => [],
-              ),
+          links ?? WikiTagLinks(exactLookup: (_) async => {}),
         ),
       ],
       child: MaterialApp(
@@ -1202,9 +1197,7 @@ LocalTagExpansionService _service(
   CompletionSource? related,
 }) => LocalTagExpansionService(
   catalog: catalog,
-  chineseDictionary: _Source(const []),
   relatedTags: related ?? _Source(const []),
-  translations: const _Translations(),
   substringSearch: (input, {limit = 20}) async => const [],
   popularSearch: ({limit = 12}) async => [_tag('solo')],
 );
@@ -1232,16 +1225,6 @@ class _Source implements CompletionSource {
     queries.add(query);
     return results;
   }
-}
-
-class _Translations implements TranslationResolver {
-  const _Translations();
-
-  @override
-  Future<Map<String, String>> resolve(
-    List<String> canonicalTags, {
-    required String locale,
-  }) async => const {};
 }
 
 class _Wiki implements TagWikiRepository {

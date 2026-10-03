@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/autocomplete/tag_translation_lookup.dart';
+import 'common/visible_tag_readings.dart';
 
 /// 简单标签芯片组件
 ///
@@ -29,38 +29,14 @@ class SimpleTagChip extends ConsumerStatefulWidget {
   ConsumerState<SimpleTagChip> createState() => _SimpleTagChipState();
 }
 
-class _SimpleTagChipState extends ConsumerState<SimpleTagChip> {
+class _SimpleTagChipState extends ConsumerState<SimpleTagChip>
+    with VisibleTagReadings<SimpleTagChip> {
   bool _isHovering = false;
-  String? _autoTranslation;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.autoTranslate && widget.translation == null) {
-      _fetchTranslation();
-    }
-  }
-
-  @override
-  void didUpdateWidget(SimpleTagChip oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.tag != widget.tag &&
-        widget.autoTranslate &&
-        widget.translation == null) {
-      _fetchTranslation();
-    }
-  }
-
-  Future<void> _fetchTranslation() async {
-    final translationService = ref.read(tagTranslationLookupProvider);
-    _autoTranslation = await translationService.translate(widget.tag);
-    if (mounted) {
-      setState(() {});
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    final autoTranslate = widget.autoTranslate && widget.translation == null;
+    observeTagReadings(autoTranslate ? [widget.tag] : const []);
     final theme = Theme.of(context);
     final displayText = widget.tag.replaceAll('_', ' ');
     final chipColor =
@@ -68,7 +44,8 @@ class _SimpleTagChipState extends ConsumerState<SimpleTagChip> {
         (widget.category != null
             ? TagColors.fromCategory(widget.category!)
             : theme.colorScheme.primary);
-    final translationText = widget.translation ?? _autoTranslation;
+    final translationText =
+        widget.translation ?? (autoTranslate ? tagReading(widget.tag) : null);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),

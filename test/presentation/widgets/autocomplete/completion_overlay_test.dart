@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/autocomplete_settings.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/autocomplete/completion_overlay.dart';
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
@@ -46,7 +45,7 @@ void main() {
                         matchKind: CompletionMatchKind.englishPrefix,
                         sources: {
                           CompletionSourceKind.base,
-                          CompletionSourceKind.zhDictionary,
+                          CompletionSourceKind.ai,
                         },
                       ),
                       CompletionCandidate(
@@ -63,10 +62,6 @@ void main() {
                   maxHeight: 360,
                   scrollController: scrollController,
                   settings: const AutocompleteSettings(),
-                  dictionaryState: const ZhDictionaryState(
-                    isInstalled: true,
-                    tagCount: 200000,
-                  ),
                   showAliases: true,
                   showTranslations: true,
                   showCategory: true,
@@ -106,9 +101,8 @@ void main() {
         tester.getTopLeft(find.text('蓝色头发')).dx,
       );
       expect(find.text('BASE'), findsOne);
-      expect(find.text('ZH'), findsOne);
+      expect(find.text('ZH'), findsNothing);
       expect(find.text('API'), findsOne);
-      expect(find.textContaining('2/2', findRichText: true), findsOneWidget);
       expect(
         find.byKey(const ValueKey('autocomplete-category-general')),
         findsNothing,
@@ -129,7 +123,7 @@ void main() {
       expect(find.byKey(const ValueKey('autocomplete-status-base')), findsOne);
       expect(
         find.byKey(const ValueKey('autocomplete-status-dictionary')),
-        findsOne,
+        findsNothing,
       );
       expect(
         find.byKey(const ValueKey('autocomplete-status-online')),
@@ -196,7 +190,6 @@ void main() {
                 maxHeight: 360,
                 scrollController: scrollController,
                 settings: const AutocompleteSettings(),
-                dictionaryState: const ZhDictionaryState(),
                 showAliases: true,
                 showTranslations: true,
                 showCategory: true,
@@ -258,7 +251,6 @@ void main() {
               maxHeight: 360,
               scrollController: scrollController,
               settings: const AutocompleteSettings(),
-              dictionaryState: const ZhDictionaryState(),
               showAliases: true,
               showTranslations: true,
               showCategory: true,
@@ -379,10 +371,6 @@ void main() {
               maxHeight: 360,
               scrollController: scrollController,
               settings: const AutocompleteSettings(llmTranslationEnabled: true),
-              dictionaryState: const ZhDictionaryState(
-                isBusy: true,
-                progress: 0.42,
-              ),
               showAliases: true,
               showTranslations: true,
               showCategory: true,
@@ -396,10 +384,6 @@ void main() {
       ),
     );
 
-    expect(
-      find.textContaining('Downloading 42%', findRichText: true),
-      findsOne,
-    );
     expect(find.textContaining('Searching', findRichText: true), findsOne);
     expect(
       find.textContaining('Translating', findRichText: true),
@@ -412,6 +396,7 @@ void main() {
           .where((icon) => icon.busy),
       hasLength(2),
     );
-    expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
+    // Only the online search spins; there is no dictionary download.
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }

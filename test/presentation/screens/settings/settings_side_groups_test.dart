@@ -9,8 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/services/danbooru_tags_lazy_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
@@ -121,9 +119,6 @@ void main() {
         overrides: [
           localStorageServiceProvider.overrideWithValue(storage),
           shortcutStorageProvider.overrideWithValue(MemoryShortcuts()),
-          zhDictionaryServiceProvider.overrideWith(
-            (ref) => ZhDictionaryService(),
-          ),
           danbooruTagsLazyServiceProvider.overrideWith(
             (ref) => Completer<DanbooruTagsLazyService>().future,
           ),
@@ -492,7 +487,7 @@ void main() {
     },
   );
 
-  for (final locale in const [Locale('en'), Locale('ja')]) {
+  for (final locale in const [Locale('en'), Locale('ja'), Locale('zh', 'TW')]) {
     testWidgets('both grouped pages fit narrow $locale', (tester) async {
       for (final page in ['appearance', 'controls']) {
         await pump(
@@ -503,7 +498,7 @@ void main() {
           locale: locale,
         );
         expect(tester.takeException(), isNull);
-        await snap(tester, '$page-${locale.languageCode}-narrow');
+        await snap(tester, '$page-${locale.toLanguageTag()}-narrow');
       }
     });
   }

@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../autocomplete/autocomplete_providers.dart';
-import '../autocomplete/chinese_term_matcher.dart';
 import '../autocomplete/completion_models.dart';
 import '../tag_expansion/tag_expansion_providers.dart';
 import '../utils/tag_normalizer.dart';
@@ -22,25 +20,14 @@ class WikiLinkDocument {
 
 final wikiTagLinksProvider = Provider<WikiTagLinks>((ref) {
   final catalog = ref.watch(unifiedTagRepositoryProvider);
-  final dictionary = ref.watch(zhDictionaryServiceProvider);
-  return WikiTagLinks(
-    exactLookup: catalog.resolveExact,
-    chineseLookup: (text) => dictionary.matchInText(text, limit: 256),
-    readingsLookup: (tags) => dictionary.resolve(tags, locale: 'zh-CN'),
-  );
+  return WikiTagLinks(exactLookup: catalog.resolveExact);
 });
 
 /// Matching supplies model context; rendering validates explicit links only.
 class WikiTagLinks {
-  WikiTagLinks({
-    required this.exactLookup,
-    required this.chineseLookup,
-    this.readingsLookup,
-  });
+  WikiTagLinks({required this.exactLookup});
   final Future<Map<String, CompletionCandidate>> Function(Iterable<String>)
   exactLookup;
-  final Future<List<ChineseTermHit>> Function(String) chineseLookup;
-  final Future<Map<String, String>> Function(List<String>)? readingsLookup;
   final _cache = <String, Future<WikiLinkDocument>>{};
 
   Future<WikiLinkDocument> resolve(String body) {
@@ -244,16 +231,7 @@ class WikiTagLinks {
         }
       }
     }
-    List<ChineseTermHit> chinese = const [];
-    try {
-      chinese = await chineseLookup(body);
-    } catch (_) {
-      /* optional dictionary */
-    }
-    final terms = {
-      for (final span in spans) span.name,
-      for (final hit in chinese) hit.candidate.canonicalTag,
-    };
+    final terms = {for (final span in spans) span.name};
     final sourceLinks = {
       for (final link in _links(body))
         if (_target(link.url) case final tag?) link: tag,
@@ -268,8 +246,7 @@ class WikiTagLinks {
     }
     final chosen = <String, CompletionCandidate>{};
     final matches = <String, Set<String>>{};
-    final readings = <String, String>{};
-    void add(String name, String text, [String? reading]) {
+    void add(String name, String text) {
       final item = exact[name];
       if (item == null ||
           (!chosen.containsKey(item.canonicalTag) && chosen.length >= limit)) {
@@ -278,7 +255,6 @@ class WikiTagLinks {
       chosen[item.canonicalTag] = item;
       final fragments = matches.putIfAbsent(item.canonicalTag, () => {});
       if (fragments.length < 4) fragments.add(text);
-      if (reading != null) readings[item.canonicalTag] = reading;
     }
 
     if (currentTag != null) {
@@ -291,25 +267,6 @@ class WikiTagLinks {
     for (final span in spans) {
       add(span.name, body.substring(span.start, span.end));
     }
-    for (final hit in chinese) {
-      if (hit.start >= 0 &&
-          hit.end <= body.length &&
-          hit.end > hit.start &&
-          !overlaps(hit.start, hit.end)) {
-        add(
-          hit.candidate.canonicalTag,
-          body.substring(hit.start, hit.end),
-          hit.candidate.translation,
-        );
-      }
-    }
-    try {
-      readings.addAll(
-        await readingsLookup?.call(chosen.keys.toList()) ?? const {},
-      );
-    } catch (_) {
-      /* optional */
-    }
     return [
       for (final item in chosen.values)
         {
@@ -318,9 +275,6 @@ class WikiTagLinks {
           'category': item.category.name,
           if (item.canonicalTag == _normalize(currentTag ?? ''))
             'current_article': true,
-          if (readings[item.canonicalTag] ?? item.translation
-              case final reading?)
-            'zh': reading,
           if (item.aliases.isNotEmpty) 'aliases': item.aliases.take(6).toList(),
           'matched_texts': matches[item.canonicalTag]!.toList(),
         },

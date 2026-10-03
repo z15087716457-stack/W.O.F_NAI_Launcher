@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/tag_expansion/tag_expansion_providers.dart';
-import '../../core/autocomplete/tag_translation_lookup.dart';
-import '../../core/autocomplete/chinese_term_matcher.dart';
 import '../../core/utils/prompt_translation_document.dart';
 import '../../core/utils/prompt_translation_edit.dart';
 import '../../core/utils/prompt_translation_language.dart';
@@ -20,27 +18,10 @@ import '../../core/utils/localization_extension.dart';
 final promptTranslationAnnotationProvider =
     Provider<Future<List<TranslationTagMark>> Function(String, bool)>((ref) {
       final tags = ref.read(unifiedTagRepositoryProvider);
-      final chineseLookup = ref.read(chinesePromptTermLookupProvider);
       return (text, chinese) async {
-        if (chinese) {
-          final hits = await chineseLookup(text);
-          return [
-            for (final hit in hits)
-              if (hits
-                      .where(
-                        (other) =>
-                            other.start == hit.start && other.end == hit.end,
-                      )
-                      .length ==
-                  1)
-                TranslationTagMark(
-                  start: hit.start,
-                  end: hit.end,
-                  tag: hit.candidate.canonicalTag,
-                  iconId: hit.candidate.category.name,
-                ),
-          ];
-        }
+        // Reading text has no local term index; its marks come from the
+        // model and from terms the user picked.
+        if (chinese) return const [];
         final candidates = await tags.byNames(_editorTagCandidates(text));
         final marks = <TranslationTagMark>[];
         final boundary = RegExp(r'[a-zA-Z0-9_@]');
@@ -136,6 +117,7 @@ class PromptTranslationCoordinator {
       final batch = PromptTranslationBatch.prepare({
         'draft': PillDocument(text: request.source, instances: const {}),
       });
+      final reading = PromptTranslationLanguage.fromCode(request.languageCode);
       final glossary = await _glossaryFor(batch);
       final byTag = {for (final item in glossary) item['tag']!: item};
       final activeTerms = request.selectedTerms
@@ -157,29 +139,10 @@ class PromptTranslationCoordinator {
           byTag[candidate.canonicalTag] = {
             'tag': candidate.canonicalTag,
             'title': TagNormalizer.toDisplay(candidate.canonicalTag),
-            if (request.languageCode == 'zh') 'zh': term.text,
+            if (reading.isChinese) 'zh': term.text,
             'matched_text': term.text,
             'icon_id': candidate.category.name,
           };
-        }
-        final hits = request.languageCode == 'zh'
-            ? await _ref.read(chinesePromptTermLookupProvider)(request.zh)
-            : const <ChineseTermHit>[];
-        for (final hit in hits) {
-          final candidate = hit.candidate;
-          byTag.putIfAbsent(
-            candidate.canonicalTag,
-            () => {
-              'tag': candidate.canonicalTag,
-              'title': TagNormalizer.toDisplay(candidate.canonicalTag),
-              'zh':
-                  candidate.translation ??
-                  request.zh.substring(hit.start, hit.end),
-              'matched_text': request.zh.substring(hit.start, hit.end),
-              'icon_id': candidate.category.name,
-              'match': 'candidate',
-            },
-          );
         }
       } catch (_) {
         // Optional local terminology never blocks natural-language conversion.
@@ -349,11 +312,10 @@ class PromptTranslationCoordinator {
       }
       final batch = PromptTranslationBatch.prepare(snapshots);
       if (batch.isEmpty) return const PromptTranslationResult(0, 0);
-      final languageCode = PromptTranslationLanguage.fromCode(
-        _ref.read(localeNotifierProvider).languageCode,
-      ).code;
+      final language = _interfaceReadingLanguage();
 
       final groups = <String, List<PromptTranslationGroup>>{};
+      final languageCode = language.code;
       for (final part in batch.partitions()) {
         final glossary = await _glossaryFor(part);
         final raw = await _ref
@@ -413,9 +375,8 @@ class PromptTranslationCoordinator {
     if (initial == null) return false;
     _ref.read(promptTranslationBusyProvider.notifier).state = true;
     try {
-      final languageCode = PromptTranslationLanguage.fromCode(
-        _ref.read(localeNotifierProvider).languageCode,
-      ).code;
+      final language = _interfaceReadingLanguage();
+      final languageCode = language.code;
       final batch = PromptTranslationBatch.prepare({
         'single': PillDocument(text: initial.source, instances: const {}),
       });
@@ -483,6 +444,12 @@ class PromptTranslationCoordinator {
     }
   }
 
+  /// Prompt conversion reads in the interface language (block metadata keeps
+  /// it afterwards); Traditional Chinese has its own code.
+  PromptTranslationLanguage _interfaceReadingLanguage() =>
+      PromptTranslationLanguage.forLocale(_ref.read(localeNotifierProvider));
+
+  /// Verified local tags with their icons; the model writes the readings.
   Future<List<Map<String, String>>> _glossaryFor(
     PromptTranslationBatch batch,
   ) async {
@@ -490,26 +457,16 @@ class PromptTranslationCoordinator {
       final candidates = await _ref
           .read(unifiedTagRepositoryProvider)
           .byNames(batch.tagCandidates);
-      final names = candidates.map((item) => item.canonicalTag).toList();
-      Map<String, String> translations = const {};
-      try {
-        translations = await _ref
-            .read(tagTranslationLookupProvider)
-            .translateBatch(names);
-      } catch (_) {
-        // Missing optional Chinese readings must not hide verified tag icons.
-      }
       return [
         for (final candidate in candidates)
           {
             'tag': candidate.canonicalTag,
             'title': TagNormalizer.toDisplay(candidate.canonicalTag),
-            if (translations[candidate.canonicalTag] case final zh?) 'zh': zh,
             'icon_id': candidate.category.name,
           },
       ];
     } catch (_) {
-      // The optional dictionary must not prevent ordinary translation.
+      // The optional catalog lookup must not prevent ordinary translation.
       return const [];
     }
   }

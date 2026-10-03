@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
-import 'package:nai_launcher/core/autocomplete/tag_translation_lookup.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
@@ -69,13 +67,6 @@ class _Wiki implements TagWikiRepository {
   );
 }
 
-class _Translation extends TagTranslationLookup {
-  _Translation() : super(ZhDictionaryService());
-
-  @override
-  Future<String?> translate(String tag) async => '蓝眼睛';
-}
-
 class _Blocks extends PromptBlockLibraryNotifier {
   @override
   Future<PromptBlockLibraryState> build() async =>
@@ -122,11 +113,9 @@ void main() {
                     if (names.contains(item.canonicalTag))
                       item.canonicalTag: item,
                 },
-                chineseLookup: (_) async => [],
               ),
             ),
             tagWikiRepositoryProvider.overrideWith((ref) => _Wiki()),
-            tagTranslationLookupProvider.overrideWith((ref) => _Translation()),
             promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
           ],
           child: const MaterialApp(

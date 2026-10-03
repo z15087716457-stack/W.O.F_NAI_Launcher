@@ -6,8 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/history_click_behavior_provider.dart';
+import 'package:nai_launcher/presentation/providers/locale_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/appearance_settings_section.dart';
 
 void main() {
@@ -89,7 +91,53 @@ void main() {
     expect(storage.behavior, 'select_preview');
   });
 
-  for (final locale in const [Locale('zh'), Locale('ja'), Locale('en')]) {
+  testWidgets('语言选择列出简繁中文并切换到繁体', (tester) async {
+    addTearDown(() => setCurrentL10nLocale(const Locale('zh')));
+    await tester.binding.setSurfaceSize(const Size(1000, 1600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final storage = _FakeStorage();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+        child: Consumer(
+          builder: (context, ref, _) => MaterialApp(
+            locale: ref.watch(localeNotifierProvider),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(
+              body: SingleChildScrollView(child: AppearanceSettingsSection()),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('语言'));
+    await tester.pumpAndSettle();
+    final dialog = find.byType(Dialog);
+    for (final name in ['简体中文', '繁體中文', 'English', '日本語']) {
+      expect(
+        find.descendant(of: dialog, matching: find.text(name)),
+        findsOneWidget,
+      );
+    }
+    await tester.tap(find.descendant(of: dialog, matching: find.text('繁體中文')));
+    await tester.pumpAndSettle();
+
+    expect(storage.getLocaleCode(), 'zh_TW');
+    expect(find.text('語言'), findsOneWidget);
+    expect(find.text('繁體中文'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final locale in const [
+    Locale('zh'),
+    Locale('zh', 'TW'),
+    Locale('ja'),
+    Locale('en'),
+  ]) {
     testWidgets('字体大小预览在 $locale 界面同时显示中日英三语', (tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 1600));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -123,7 +171,10 @@ void main() {
       await tester.tap(find.text(l10n.settings_fontScale));
       await tester.pumpAndSettle();
 
-      expect(find.text('光影落在画布上。'), findsOneWidget);
+      expect(
+        find.text(locale.countryCode == 'TW' ? '光影落在畫布上。' : '光影落在画布上。'),
+        findsOneWidget,
+      );
       expect(find.text('色から物語が生まれる。'), findsOneWidget);
       expect(find.text('Let colors tell a story.'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -133,6 +184,14 @@ void main() {
 
 class _FakeStorage extends LocalStorageService {
   String behavior = 'open_detail';
+  String locale = 'zh';
+
+  // Real Hive writes would not finish inside the widget test's fake async.
+  @override
+  String getLocaleCode() => locale;
+
+  @override
+  Future<void> setLocaleCode(String code) async => locale = code;
 
   @override
   String getHistoryClickBehavior() => behavior;

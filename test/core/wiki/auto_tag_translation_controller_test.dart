@@ -5,7 +5,6 @@ import 'package:crypto/crypto.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:nai_launcher/core/autocomplete/tag_translation_lookup.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
 import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
@@ -15,8 +14,6 @@ import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assis
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _Assistant extends Mock implements PromptAssistantService {}
-
-class _Names extends Mock implements TagTranslationLookup {}
 
 class _Wiki implements TagWikiRepository {
   _Wiki(this.body);
@@ -78,7 +75,6 @@ void main() {
     'one Wiki request sends candidate context and caches only model-selected validated links',
     () async {
       final assistant = _Assistant();
-      final names = _Names();
       final cache = _Cache();
       final entries = {
         for (final name in ['hat', 'visor', 'blue_eyes', 'peaked_cap'])
@@ -97,11 +93,8 @@ void main() {
           for (final name in keys)
             if (entries[name] case final item?) name: item,
         },
-        chineseLookup: (_) async => [],
-        readingsLookup: (_) async => {'hat': '帽子', 'visor': '作品名'},
       );
       when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-      when(() => names.translate('visor_cap')).thenAnswer((_) async => '遮阳帽');
       var requests = 0;
       when(
         () => assistant.translateVisibleTag(
@@ -122,7 +115,6 @@ void main() {
             invocation.namedArguments[#glossary] as List<Map<String, Object>>;
         final visor = glossary.singleWhere((item) => item['tag'] == 'visor');
         expect(visor['category'], 'copyright');
-        expect(visor['zh'], '作品名');
         expect(visor['matched_texts'], ['visor']);
         return const VisibleTagTranslationResult(
           nameZh: '遮阳帽',
@@ -135,7 +127,6 @@ void main() {
       });
       final controller = AutoTagTranslationController(
         assistant: assistant,
-        localNames: names,
         wiki: _Wiki('A hat has a visor. Blue eyes.'),
         cache: cache,
         wikiLinks: links,
@@ -189,12 +180,9 @@ void main() {
         wikiZh: '帽子以及 visor。blue_eyes',
       );
       final assistant = _Assistant();
-      final names = _Names();
       when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-      when(() => names.translate('blue_eyes')).thenAnswer((_) async => '蓝眼');
       final controller = AutoTagTranslationController(
         assistant: assistant,
-        localNames: names,
         wiki: _Wiki(source),
         cache: cache,
       );
@@ -240,7 +228,6 @@ void main() {
     'closing while terminology loads prevents delayed model dispatch',
     () async {
       final assistant = _Assistant();
-      final names = _Names();
       final cache = _Cache();
       final pending = Completer<Map<String, CompletionCandidate>>();
       var started = false;
@@ -249,13 +236,10 @@ void main() {
           started = true;
           return pending.future;
         },
-        chineseLookup: (_) async => [],
       );
       when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-      when(() => names.translate('blue_eyes')).thenAnswer((_) async => '蓝眼');
       final controller = AutoTagTranslationController(
         assistant: assistant,
-        localNames: names,
         wiki: _Wiki('Blue eyes.'),
         cache: cache,
         wikiLinks: links,
@@ -302,7 +286,6 @@ void main() {
     'manual Wiki retry bypasses cache, deduplicates and retains old body on failure',
     () async {
       final assistant = _Assistant();
-      final names = _Names();
       final cache = _Cache();
       cache.records['blue_eyes'] = const CachedVisibleTagTranslation(
         nameZh: '蓝眼',
@@ -310,7 +293,6 @@ void main() {
         wikiOriginal: 'Old formatted original.',
       );
       when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-      when(() => names.translate(any())).thenAnswer((_) async => '蓝眼');
       var pending = Completer<VisibleTagTranslationResult>();
       var calls = 0;
       when(
@@ -332,7 +314,6 @@ void main() {
       });
       final controller = AutoTagTranslationController(
         assistant: assistant,
-        localNames: names,
         wiki: _Wiki('English wiki.'),
         cache: cache,
       );
@@ -380,10 +361,8 @@ void main() {
     'known Chinese names skip AI; wiki translates only when opened',
     () async {
       final assistant = _Assistant();
-      final names = _Names();
       final cache = _Cache();
       when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-      when(() => names.translate('blue_eyes')).thenAnswer((_) async => '蓝眼');
       when(
         () => assistant.translateVisibleTag(
           tag: 'blue_eyes',
@@ -403,7 +382,6 @@ void main() {
       );
       final controller = AutoTagTranslationController(
         assistant: assistant,
-        localNames: names,
         wiki: _Wiki('English wiki.'),
         cache: cache,
       );
@@ -457,10 +435,8 @@ void main() {
     'unknown tag sends wiki as context without translating it early',
     () async {
       final assistant = _Assistant();
-      final names = _Names();
       final requests = <bool>[];
       when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-      when(() => names.translate('artist_name')).thenAnswer((_) async => null);
       when(
         () => assistant.translateVisibleTag(
           tag: 'artist_name',
@@ -489,7 +465,6 @@ void main() {
       });
       final controller = AutoTagTranslationController(
         assistant: assistant,
-        localNames: names,
         wiki: _Wiki('English biography and tag context.'),
         cache: _Cache(),
       );
@@ -518,7 +493,6 @@ void main() {
 
   test('newly visible tags take priority after the active request', () async {
     final assistant = _Assistant();
-    final names = _Names();
     final cache = _Cache();
     final calls = <String>[];
     final completions = <String, Completer<VisibleTagTranslationResult>>{
@@ -526,7 +500,6 @@ void main() {
         tag: Completer<VisibleTagTranslationResult>(),
     };
     when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-    when(() => names.translate(any())).thenAnswer((_) async => null);
     when(
       () => assistant.translateVisibleTag(
         tag: any(named: 'tag'),
@@ -547,7 +520,6 @@ void main() {
     });
     final controller = AutoTagTranslationController(
       assistant: assistant,
-      localNames: names,
       wiki: _Wiki('Context'),
       cache: cache,
       maxConcurrentRequests: 1,
@@ -578,14 +550,12 @@ void main() {
 
   test('never has more than five model requests in flight', () async {
     final assistant = _Assistant();
-    final names = _Names();
     final calls = <String>[];
     final completions = <String, Completer<VisibleTagTranslationResult>>{
       for (var index = 0; index < 6; index++)
         'tag_$index': Completer<VisibleTagTranslationResult>(),
     };
     when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-    when(() => names.translate(any())).thenAnswer((_) async => null);
     when(
       () => assistant.translateVisibleTag(
         tag: any(named: 'tag'),
@@ -606,7 +576,6 @@ void main() {
     });
     final controller = AutoTagTranslationController(
       assistant: assistant,
-      localNames: names,
       wiki: _Wiki('Context'),
       cache: _Cache(),
     );
@@ -632,11 +601,9 @@ void main() {
 
   test('turning auto translation off cancels active model work', () async {
     final assistant = _Assistant();
-    final names = _Names();
     final completion = Completer<VisibleTagTranslationResult>();
     final started = Completer<String>();
     when(() => assistant.translateRouteFingerprint()).thenReturn('route');
-    when(() => names.translate('unfinished')).thenAnswer((_) async => null);
     when(
       () => assistant.translateVisibleTag(
         tag: 'unfinished',
@@ -659,7 +626,6 @@ void main() {
     ).thenAnswer((_) async {});
     final controller = AutoTagTranslationController(
       assistant: assistant,
-      localNames: names,
       wiki: _Wiki('English context'),
       cache: _Cache(),
     );

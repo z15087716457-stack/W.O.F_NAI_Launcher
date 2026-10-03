@@ -21,9 +21,7 @@ void main() {
           localTagExpansionServiceProvider.overrideWithValue(
             LocalTagExpansionService(
               catalog: const _BlueHairSource(),
-              chineseDictionary: const _EmptySource(),
               relatedTags: const _EmptySource(),
-              translations: const _NoTranslations(),
               substringSearch: (input, {limit = 20}) async => const [],
               popularSearch: ({limit = 12}) async => const [],
             ),
@@ -84,14 +82,4 @@ class _EmptySource implements CompletionSource {
   @override
   Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
       const [];
-}
-
-class _NoTranslations implements TranslationResolver {
-  const _NoTranslations();
-
-  @override
-  Future<Map<String, String>> resolve(
-    List<String> canonicalTags, {
-    required String locale,
-  }) async => const {};
 }

@@ -211,9 +211,6 @@
   "settings_style": "スタイル",
   "settings_font": "フォント",
   "settings_language": "言語",
-  "settings_languageChinese": "中文",
-  "settings_languageEnglish": "English",
-  "settings_languageJapanese": "日本語",
   "settings_shortcuts": "ショートカット",
   "settings_generationInputSection": "入力",
   "settings_generationFeedbackSection": "完了通知",
@@ -4904,17 +4901,6 @@
   },
   "autocomplete_translating": "翻訳中…",
   "autocomplete_missingTranslation": "未翻訳",
-  "autocomplete_translationCoverage": "翻訳カバー率：{translated}/{total}",
-  "@autocomplete_translationCoverage": {
-    "placeholders": {
-      "translated": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "autocomplete_aliasMatch": "別名：{alias}",
   "@autocomplete_aliasMatch": {
     "placeholders": {
@@ -4969,28 +4955,7 @@
       }
     }
   },
-  "autocomplete_zhDictionary": "ffdkj 簡体字中国語辞書",
-  "autocomplete_zhInstalled": "{count} 件インストール済み · バージョン {version}",
-  "@autocomplete_zhInstalled": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "version": {
-        "type": "String"
-      }
-    }
-  },
-  "autocomplete_zhNotInstalled": "未インストール（英語補完は利用できます）",
-  "autocomplete_zhInstallPrompt": "中国語表示と逆引き用の ffdkj 辞書を上流から直接インストールできます。",
-  "autocomplete_checkUpdate": "更新を確認",
-  "autocomplete_update": "更新",
-  "autocomplete_repair": "修復",
-  "autocomplete_install": "インストール",
-  "autocomplete_remove": "削除",
-  "autocomplete_removeConfirm": "インストール済みの中国語翻訳辞書を削除しますか？後で再インストールできます。",
   "autocomplete_sourceBase": "同梱の基本カタログ",
-  "autocomplete_sourceZh": "ffdkj 中国語辞書",
   "autocomplete_sourceApi": "Danbooru API",
   "autocomplete_sourceRelated": "オフライン関連タグ",
   "autocomplete_sourceAi": "Prompt Assistant 翻訳",
@@ -5013,20 +4978,9 @@
   "autocomplete_relatedUnpin": "固定を解除して連鎖候補に戻す",
   "autocomplete_statusBase": "ローカル",
   "autocomplete_statusRelated": "共起",
-  "autocomplete_statusDictionary": "翻訳",
   "autocomplete_statusOnline": "オンライン",
   "autocomplete_statusAi": "AI",
   "autocomplete_statusReady": "準備完了",
-  "autocomplete_statusNotInstalled": "未導入",
-  "autocomplete_statusDownloading": "DL {progress}%",
-  "@autocomplete_statusDownloading": {
-    "placeholders": {
-      "progress": {
-        "type": "int"
-      }
-    }
-  },
-  "autocomplete_statusUpdateAvailable": "更新あり",
   "autocomplete_statusError": "エラー",
   "autocomplete_statusDisabled": "オフ",
   "autocomplete_statusSearching": "検索中",
@@ -6086,6 +6040,7 @@
   "translationLanguage_english": "英語",
   "translationLanguage_japanese": "日本語",
   "translationLanguage_korean": "韓国語",
+  "translationLanguage_traditionalChinese": "繁体字中国語",
   "promptBlockEditor_translationNeedsReview": "原文が変更されました。訳文の更新が必要です",
   "promptBlockEditor_translationReviewHint": "原文を編集したら、この訳文も確認してください",
   "modelTask_translateTitle": "原文 → 表示言語",

@@ -545,15 +545,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_language => '言語';
 
   @override
-  String get settings_languageChinese => '中文';
-
-  @override
-  String get settings_languageEnglish => 'English';
-
-  @override
-  String get settings_languageJapanese => '日本語';
-
-  @override
   String get settings_shortcuts => 'ショートカット';
 
   @override
@@ -8320,11 +8311,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get autocomplete_missingTranslation => '未翻訳';
 
   @override
-  String autocomplete_translationCoverage(int translated, int total) {
-    return '翻訳カバー率：$translated/$total';
-  }
-
-  @override
   String autocomplete_aliasMatch(String alias) {
     return '別名：$alias';
   }
@@ -8403,44 +8389,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_zhDictionary => 'ffdkj 簡体字中国語辞書';
-
-  @override
-  String autocomplete_zhInstalled(int count, String version) {
-    return '$count 件インストール済み · バージョン $version';
-  }
-
-  @override
-  String get autocomplete_zhNotInstalled => '未インストール（英語補完は利用できます）';
-
-  @override
-  String get autocomplete_zhInstallPrompt =>
-      '中国語表示と逆引き用の ffdkj 辞書を上流から直接インストールできます。';
-
-  @override
-  String get autocomplete_checkUpdate => '更新を確認';
-
-  @override
-  String get autocomplete_update => '更新';
-
-  @override
-  String get autocomplete_repair => '修復';
-
-  @override
-  String get autocomplete_install => 'インストール';
-
-  @override
-  String get autocomplete_remove => '削除';
-
-  @override
-  String get autocomplete_removeConfirm =>
-      'インストール済みの中国語翻訳辞書を削除しますか？後で再インストールできます。';
-
-  @override
   String get autocomplete_sourceBase => '同梱の基本カタログ';
-
-  @override
-  String get autocomplete_sourceZh => 'ffdkj 中国語辞書';
 
   @override
   String get autocomplete_sourceApi => 'Danbooru API';
@@ -8481,9 +8430,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get autocomplete_statusRelated => '共起';
 
   @override
-  String get autocomplete_statusDictionary => '翻訳';
-
-  @override
   String get autocomplete_statusOnline => 'オンライン';
 
   @override
@@ -8491,17 +8437,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get autocomplete_statusReady => '準備完了';
-
-  @override
-  String get autocomplete_statusNotInstalled => '未導入';
-
-  @override
-  String autocomplete_statusDownloading(int progress) {
-    return 'DL $progress%';
-  }
-
-  @override
-  String get autocomplete_statusUpdateAvailable => '更新あり';
 
   @override
   String get autocomplete_statusError => 'エラー';
@@ -10641,6 +10576,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get translationLanguage_korean => '韓国語';
+
+  @override
+  String get translationLanguage_traditionalChinese => '繁体字中国語';
 
   @override
   String get promptBlockEditor_translationNeedsReview =>

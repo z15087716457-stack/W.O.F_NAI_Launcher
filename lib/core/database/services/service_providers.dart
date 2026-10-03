@@ -5,10 +5,8 @@ import '../../utils/app_logger.dart';
 import '../database_providers.dart';
 import '../datasources/cooccurrence_data_source.dart';
 import '../datasources/danbooru_tag_data_source.dart';
-import '../datasources/translation_data_source.dart';
 import 'cooccurrence_service.dart';
 import 'completion_service.dart';
-import 'translation_service.dart';
 
 part 'service_providers.g.dart';
 
@@ -28,27 +26,12 @@ Future<DanbooruTagDataSource> danbooruTagDataSource(Ref ref) async {
   return dataSource;
 }
 
-/// Translation DataSource Provider
-@Riverpod(keepAlive: true)
-Future<TranslationDataSource> translationDataSource(Ref ref) async {
-  // 等待数据库管理器就绪
-  final manager = await ref.watch(databaseManagerProvider.future);
-  return manager.translationDataSource;
-}
-
 /// Cooccurrence DataSource Provider
 @Riverpod(keepAlive: true)
 Future<CooccurrenceDataSource> cooccurrenceDataSource(Ref ref) async {
   // 等待数据库管理器就绪
   final manager = await ref.watch(databaseManagerProvider.future);
   return manager.cooccurrenceDataSource;
-}
-
-/// 翻译服务 Provider
-@Riverpod(keepAlive: true)
-Future<TranslationService> translationService(Ref ref) async {
-  final dataSource = await ref.watch(translationDataSourceProvider.future);
-  return TranslationService(dataSource);
 }
 
 /// 共现服务 Provider
@@ -62,8 +45,5 @@ Future<CooccurrenceService> cooccurrenceService(Ref ref) async {
 @Riverpod(keepAlive: true)
 Future<CompletionService> completionService(Ref ref) async {
   final tagDataSource = await ref.watch(danbooruTagDataSourceProvider.future);
-  final translationDataSource = await ref.watch(
-    translationDataSourceProvider.future,
-  );
-  return CompletionService(tagDataSource, translationDataSource);
+  return CompletionService(tagDataSource);
 }

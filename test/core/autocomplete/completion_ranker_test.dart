@@ -39,7 +39,7 @@ void main() {
           postCount: 1,
           translation: '蓝眼睛',
           matchKind: CompletionMatchKind.chineseExact,
-          sources: {CompletionSourceKind.zhDictionary},
+          sources: {CompletionSourceKind.ai},
         ),
       ], query: query);
 
@@ -53,7 +53,7 @@ void main() {
         containsAll([
           CompletionSourceKind.base,
           CompletionSourceKind.danbooruApi,
-          CompletionSourceKind.zhDictionary,
+          CompletionSourceKind.ai,
         ]),
       );
     },

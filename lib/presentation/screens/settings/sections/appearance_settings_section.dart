@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/utils/app_language.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/canvas_settings_provider.dart';
 import '../../../providers/font_provider.dart';
@@ -156,7 +157,7 @@ class _AppearanceSettingsSectionState
                 controlWrapWidth: wrapWidth,
                 title: Text(l10n.settings_language),
                 trailing: _valueControl(
-                  _languageLabel(context, locale.languageCode),
+                  AppLanguage.fromLocale(locale).nativeName,
                   () => _showLanguageDialog(context, locale),
                 ),
                 onTap: () => _showLanguageDialog(context, locale),
@@ -251,18 +252,19 @@ class _AppearanceSettingsSectionState
     BuildContext context,
     Locale currentLocale,
   ) async {
-    final language = await showSettingsChoice<String>(
+    final language = await showSettingsChoice<AppLanguage>(
       context: context,
       title: context.l10n.settings_selectLanguage,
-      value: currentLocale.languageCode,
-      choices: const [
-        SettingsChoice('zh', '中文', description: '简体中文'),
-        SettingsChoice('en', 'English', description: 'English'),
-        SettingsChoice('ja', '日本語', description: '日本語'),
+      value: AppLanguage.fromLocale(currentLocale),
+      choices: [
+        for (final language in AppLanguage.values)
+          SettingsChoice(language, language.nativeName),
       ],
     );
     if (language != null && mounted) {
-      ref.read(localeNotifierProvider.notifier).setLocale(language);
+      await ref
+          .read(localeNotifierProvider.notifier)
+          .setLocale(language.storageCode);
     }
   }
 
@@ -293,17 +295,6 @@ class _AppearanceSettingsSectionState
       await ref
           .read(historyClickBehaviorNotifierProvider.notifier)
           .setBehavior(value);
-    }
-  }
-
-  String _languageLabel(BuildContext context, String languageCode) {
-    switch (languageCode) {
-      case 'zh':
-        return context.l10n.settings_languageChinese;
-      case 'ja':
-        return context.l10n.settings_languageJapanese;
-      default:
-        return context.l10n.settings_languageEnglish;
     }
   }
 

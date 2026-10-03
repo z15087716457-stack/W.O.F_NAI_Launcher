@@ -38,9 +38,7 @@ void main() {
           localTagExpansionServiceProvider.overrideWithValue(
             LocalTagExpansionService(
               catalog: const _BlueHairSource(),
-              chineseDictionary: const _EmptyTagSource(),
               relatedTags: const _EmptyTagSource(),
-              translations: const _NoTagTranslations(),
               substringSearch: (input, {limit = 20}) async => const [],
               popularSearch: ({limit = 12}) async => const [],
             ),
@@ -111,9 +109,7 @@ void main() {
           localTagExpansionServiceProvider.overrideWithValue(
             LocalTagExpansionService(
               catalog: const _BlueHairSource(),
-              chineseDictionary: const _EmptyTagSource(),
               relatedTags: const _EmptyTagSource(),
-              translations: const _NoTagTranslations(),
               substringSearch: (input, {limit = 20}) async => const [],
               popularSearch: ({limit = 12}) async => const [],
             ),
@@ -759,16 +755,6 @@ class _EmptyTagSource implements CompletionSource {
   @override
   Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
       const [];
-}
-
-class _NoTagTranslations implements TranslationResolver {
-  const _NoTagTranslations();
-
-  @override
-  Future<Map<String, String>> resolve(
-    List<String> canonicalTags, {
-    required String locale,
-  }) async => const {};
 }
 
 class _SafebooruSearchGalleryNotifier extends OnlineGalleryNotifier {

@@ -10,13 +10,13 @@ import '../../../core/cache/danbooru_image_cache_manager.dart';
 import '../../router/app_router.dart';
 import '../../../data/models/online_gallery/danbooru_post.dart';
 import '../../../data/services/danbooru_auth_service.dart';
-import '../../../core/autocomplete/tag_translation_lookup.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/online_gallery_provider.dart';
 import '../../providers/pending_prompt_provider.dart';
 import '../tag_chip.dart';
 import '../../widgets/common/themed_divider.dart';
 import '../../widgets/common/app_toast.dart';
+import '../../widgets/common/visible_tag_readings.dart';
 import 'video_player_widget.dart';
 
 /// 在线画廊帖子详情弹窗
@@ -37,7 +37,7 @@ class PostDetailDialog extends ConsumerStatefulWidget {
 }
 
 class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, VisibleTagReadings<PostDetailDialog> {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -482,8 +482,14 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
 
   /// 标签区域
   Widget _buildTagsSection(ThemeData theme) {
-    final translationService = ref.watch(tagTranslationLookupProvider);
     final generalTags = _generalDisplayTags(widget.post);
+    observeTagReadings([
+      ...widget.post.artistTags,
+      ...widget.post.characterTags,
+      ...widget.post.copyrightTags,
+      ...generalTags,
+      ...widget.post.metaTags,
+    ]);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -503,7 +509,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               title: context.l10n.onlineGallery_artists,
               tags: widget.post.artistTags,
               color: TagColors.artist,
-              translationService: translationService,
+              reading: tagReading,
               onTagTap: _handleTagTap,
             ),
           // 角色标签
@@ -512,7 +518,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               title: context.l10n.onlineGallery_characters,
               tags: widget.post.characterTags,
               color: TagColors.character,
-              translationService: translationService,
+              reading: tagReading,
               onTagTap: _handleTagTap,
             ),
           // 版权标签
@@ -521,7 +527,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               title: context.l10n.onlineGallery_copyrights,
               tags: widget.post.copyrightTags,
               color: TagColors.copyright,
-              translationService: translationService,
+              reading: tagReading,
               onTagTap: _handleTagTap,
             ),
           // 通用标签
@@ -530,7 +536,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               title: context.l10n.onlineGallery_general,
               tags: generalTags,
               color: TagColors.general,
-              translationService: translationService,
+              reading: tagReading,
               onTagTap: _handleTagTap,
             ),
           // 元标签
@@ -539,7 +545,7 @@ class _PostDetailDialogState extends ConsumerState<PostDetailDialog>
               title: context.l10n.onlineGallery_metadata,
               tags: widget.post.metaTags,
               color: TagColors.meta,
-              translationService: translationService,
+              reading: tagReading,
               onTagTap: _handleTagTap,
             ),
         ],
@@ -723,14 +729,14 @@ class _TagSection extends StatelessWidget {
   final String title;
   final List<String> tags;
   final Color color;
-  final TagTranslationLookup translationService;
+  final String? Function(String tag) reading;
   final Function(String) onTagTap;
 
   const _TagSection({
     required this.title,
     required this.tags,
     required this.color,
-    required this.translationService,
+    required this.reading,
     required this.onTagTap,
   });
 
@@ -767,16 +773,11 @@ class _TagSection extends StatelessWidget {
             spacing: 4,
             runSpacing: 4,
             children: tags.map((tag) {
-              return FutureBuilder<String?>(
-                future: translationService.translate(tag),
-                builder: (context, snapshot) {
-                  return SimpleTagChip(
-                    tag: tag,
-                    color: color,
-                    translation: snapshot.data,
-                    onTap: () => onTagTap(tag),
-                  );
-                },
+              return SimpleTagChip(
+                tag: tag,
+                color: color,
+                translation: reading(tag),
+                onTap: () => onTagTap(tag),
               );
             }).toList(),
           ),

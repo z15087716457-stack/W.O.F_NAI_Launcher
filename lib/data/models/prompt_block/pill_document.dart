@@ -5,6 +5,8 @@
 /// 手写不可变类（不走 freezed/build_runner），原型期减少再生成链路。
 library;
 
+import '../../../core/utils/prompt_translation_language.dart';
+
 /// 实例随机模式（P2.5）：固定 = 投影恒为块内容；随机抽取 = 投影为物化的
 /// `currentRoll`（未锁定实例可在参数变更/手动骰子/生成入队后重抽）；
 /// 顺序 = 同样物化 `currentRoll`，但从池头起按池序逐批推进（游标见
@@ -490,8 +492,7 @@ class TranslationPill {
       marks: List.unmodifiable(marks),
       showOriginal: json['showOriginal'] as bool? ?? false,
       needsReview: json['needsReview'] as bool? ?? false,
-      languageCode:
-          const ['zh', 'en', 'ja', 'ko'].contains(json['languageCode'])
+      languageCode: PromptTranslationLanguage.isCode(json['languageCode'])
           ? json['languageCode'] as String
           : 'zh',
       translationEdited: json['translationEdited'] == true,

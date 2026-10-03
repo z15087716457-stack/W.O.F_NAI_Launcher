@@ -118,7 +118,7 @@ Future<void> main(List<String> arguments) async {
       postCount: 5000100,
       translation: '长发',
       matchKind: CompletionMatchKind.chineseExact,
-      sources: {CompletionSourceKind.zhDictionary},
+      sources: {CompletionSourceKind.ai},
     ),
     const CompletionCandidate(
       canonicalTag: 'long_skirt',

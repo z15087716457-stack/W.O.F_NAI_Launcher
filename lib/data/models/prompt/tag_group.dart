@@ -72,13 +72,13 @@ class TagGroup with _$TagGroup {
       name = name.substring('tag_group:'.length);
     }
 
-    // 检查是否有中文翻译（仅在中文语言环境下使用）
+    // 检查是否有中文翻译（仅在中文语言环境下使用，繁体用生成的对照）
     if (context != null) {
-      final locale = Localizations.localeOf(context);
-      if (locale.languageCode == 'zh') {
-        final chineseName = _tagGroupChineseNames[name];
+      final language = context.appLanguage;
+      if (language.isChinese) {
+        final chineseName = chineseNames[name];
         if (chineseName != null) {
-          return chineseName;
+          return language.chineseLabel(chineseName);
         }
       }
     }
@@ -96,7 +96,7 @@ class TagGroup with _$TagGroup {
 
   /// Tag Group 中文翻译映射表
   /// 这些翻译用于将 Danbooru 的 tag_group 标题显示为中文
-  static const Map<String, String> _tagGroupChineseNames = {
+  static const Map<String, String> chineseNames = {
     // 外貌特征
     'hair_color': '发色',
     'hair_styles': '发型',

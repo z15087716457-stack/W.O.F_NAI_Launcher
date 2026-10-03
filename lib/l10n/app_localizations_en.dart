@@ -554,15 +554,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_language => 'Language';
 
   @override
-  String get settings_languageChinese => '中文';
-
-  @override
-  String get settings_languageEnglish => 'English';
-
-  @override
-  String get settings_languageJapanese => '日本語';
-
-  @override
   String get settings_shortcuts => 'Shortcuts';
 
   @override
@@ -8501,11 +8492,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autocomplete_missingTranslation => 'Not translated';
 
   @override
-  String autocomplete_translationCoverage(int translated, int total) {
-    return 'Translation coverage: $translated/$total';
-  }
-
-  @override
   String autocomplete_aliasMatch(String alias) {
     return 'Alias: $alias';
   }
@@ -8586,45 +8572,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_zhDictionary => 'ffdkj Simplified Chinese dictionary';
-
-  @override
-  String autocomplete_zhInstalled(int count, String version) {
-    return 'Installed: $count entries · version $version';
-  }
-
-  @override
-  String get autocomplete_zhNotInstalled =>
-      'Not installed; English autocomplete remains available';
-
-  @override
-  String get autocomplete_zhInstallPrompt =>
-      'Install the ffdkj dictionary for Chinese labels and reverse lookup. It is downloaded directly from upstream.';
-
-  @override
-  String get autocomplete_checkUpdate => 'Check for updates';
-
-  @override
-  String get autocomplete_update => 'Update';
-
-  @override
-  String get autocomplete_repair => 'Repair';
-
-  @override
-  String get autocomplete_install => 'Install';
-
-  @override
-  String get autocomplete_remove => 'Remove';
-
-  @override
-  String get autocomplete_removeConfirm =>
-      'Remove the installed Chinese translation dictionary? You can install it again later.';
-
-  @override
   String get autocomplete_sourceBase => 'Bundled base catalog';
-
-  @override
-  String get autocomplete_sourceZh => 'ffdkj Chinese dictionary';
 
   @override
   String get autocomplete_sourceApi => 'Danbooru API';
@@ -8668,9 +8616,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autocomplete_statusRelated => 'Related';
 
   @override
-  String get autocomplete_statusDictionary => 'Translation';
-
-  @override
   String get autocomplete_statusOnline => 'Online';
 
   @override
@@ -8678,17 +8623,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autocomplete_statusReady => 'Ready';
-
-  @override
-  String get autocomplete_statusNotInstalled => 'Not installed';
-
-  @override
-  String autocomplete_statusDownloading(int progress) {
-    return 'Downloading $progress%';
-  }
-
-  @override
-  String get autocomplete_statusUpdateAvailable => 'Update';
 
   @override
   String get autocomplete_statusError => 'Error';
@@ -10939,6 +10873,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get translationLanguage_korean => 'Korean';
+
+  @override
+  String get translationLanguage_traditionalChinese => 'Traditional Chinese';
 
   @override
   String get promptBlockEditor_translationNeedsReview =>

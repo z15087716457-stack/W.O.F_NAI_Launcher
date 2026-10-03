@@ -286,6 +286,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
     final languages = {
       'auto': context.l10n.modelSettings_followUiLanguage,
       'zh': '简体中文',
+      'zh-TW': '繁體中文',
       'en': 'English',
       'ja': '日本語',
       'ko': '한국어',

@@ -10,7 +10,7 @@ import '../../presentation/prompt_assistant/services/prompt_assistant_service.da
 import '../../presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import '../../presentation/providers/locale_provider.dart';
-import '../autocomplete/tag_translation_lookup.dart';
+import '../utils/prompt_translation_language.dart';
 import '../utils/tag_normalizer.dart';
 import 'tag_wiki_repository.dart';
 import 'visible_tag_translation_cache.dart';
@@ -21,7 +21,6 @@ final autoTagTranslationProvider =
     ChangeNotifierProvider<AutoTagTranslationController>((ref) {
       final controller = AutoTagTranslationController(
         assistant: ref.read(promptAssistantServiceProvider),
-        localNames: ref.read(tagTranslationLookupProvider),
         wiki: ref.read(tagWikiRepositoryProvider),
         cache: VisibleTagTranslationCache(),
         wikiLinks: ref.read(wikiTagLinksProvider),
@@ -65,14 +64,12 @@ class AutoTagTranslationContext {
 class AutoTagTranslationController extends ChangeNotifier {
   AutoTagTranslationController({
     required PromptAssistantService assistant,
-    required TagTranslationLookup localNames,
     required TagWikiRepository wiki,
     required VisibleTagTranslationCache cache,
     WikiTagLinks? wikiLinks,
     this.maxConcurrentRequests = 5,
     String Function()? readingLanguage,
   }) : _assistant = assistant,
-       _localNames = localNames,
        _wiki = wiki,
        _cache = cache,
        _wikiLinks = wikiLinks,
@@ -80,12 +77,13 @@ class AutoTagTranslationController extends ChangeNotifier {
 
   static const _preferenceKey = 'auto_visible_tag_translation_enabled';
   final PromptAssistantService _assistant;
-  final TagTranslationLookup _localNames;
   final TagWikiRepository _wiki;
   final VisibleTagTranslationCache _cache;
   final WikiTagLinks? _wikiLinks;
   final int maxConcurrentRequests;
   final String Function() _readingLanguage;
+  PromptTranslationLanguage get _reading =>
+      PromptTranslationLanguage.fromCode(_readingLanguage());
   final Map<String, Set<String>> _visibleBySurface = {};
   final Map<String, String> _wikiBySurface = {};
   final Map<String, _VisibleTask> _pending = {};
@@ -189,8 +187,8 @@ class AutoTagTranslationController extends ChangeNotifier {
     if (canonical.isEmpty) return;
     final tags = _visibleBySurface.putIfAbsent(surface, () => <String>{});
     if (tagContext != null) _contexts[canonical] = tagContext;
-    if (_readingLanguage() == 'zh' &&
-        existingNameZh?.trim().isNotEmpty == true) {
+    // Existing names come from the same translation interface.
+    if (_reading.isChinese && existingNameZh?.trim().isNotEmpty == true) {
       _names[canonical] = existingNameZh!.trim();
     }
     if (visible) {
@@ -308,29 +306,18 @@ class AutoTagTranslationController extends ChangeNotifier {
   Future<void> _run(_VisibleTask task) async {
     final epoch = _routeEpoch;
     try {
-      String? localName;
-      try {
-        if (_readingLanguage() == 'zh') {
-          localName = await _localNames.translate(task.tag);
-        }
-      } catch (_) {
-        // The optional installed dictionary must not block model translation.
-      }
-      if (_disposed || epoch != _routeEpoch) return;
-      if (localName != null) {
-        _names[task.tag] = localName;
-        if (!_disposed) notifyListeners();
-        if (!task.wiki) return;
-      }
       final route = _assistant.translateRouteFingerprint();
       if (route.isEmpty) {
         throw StateError(currentL10n.wiki_configureTagModel);
       }
       if (_route != route) {
+        // Names observed before the first task came from this same interface.
+        if (_route != null) {
+          _names.clear();
+          _wikiBodies.clear();
+          _wikiOriginals.clear();
+        }
         _route = route;
-        _names.clear();
-        _wikiBodies.clear();
-        _wikiOriginals.clear();
       }
       final entry = await _wiki.find(task.tag);
       final body = entry?.body ?? '';
@@ -352,7 +339,7 @@ class AutoTagTranslationController extends ChangeNotifier {
           route != _assistant.translateRouteFingerprint()) {
         return;
       }
-      final name = localName ?? cached?.nameZh ?? _names[task.tag];
+      final name = cached?.nameZh ?? _names[task.tag];
       if (name != null) _names[task.tag] = name;
       if (cached?.wikiZh case final wikiZh?) _wikiBodies[task.tag] = wikiZh;
       if (cached?.wikiOriginal case final source?) {

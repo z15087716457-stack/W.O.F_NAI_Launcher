@@ -1,12 +1,16 @@
+import '../utils/app_language.dart';
+
 /// Chinese display names for the bundled official directory snapshot.
 ///
 /// The English labels and group IDs in wiki_directory.json remain the source
 /// of truth for navigation. Keep this map separate so refreshing the official
 /// snapshot cannot overwrite the translations.
 abstract final class WikiDirectoryLabels {
-  static String display(String label, String languageCode) {
-    if (languageCode != 'zh') return label;
-    return chinese[label] ?? label;
+  /// Traditional Chinese uses the generated Taiwan forms of these names.
+  static String display(String label, AppLanguage language) {
+    if (!language.isChinese) return label;
+    final name = chinese[label];
+    return name == null ? label : language.chineseLabel(name);
   }
 
   static const Map<String, String> chinese = {

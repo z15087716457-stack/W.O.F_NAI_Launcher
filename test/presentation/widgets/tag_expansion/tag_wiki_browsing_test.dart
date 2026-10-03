@@ -9,9 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
-import 'package:nai_launcher/core/autocomplete/tag_translation_lookup.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
-import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
@@ -122,17 +120,6 @@ class _Wiki implements TagWikiRepository {
       );
 }
 
-class _Names extends TagTranslationLookup implements TranslationResolver {
-  _Names() : super(ZhDictionaryService());
-  @override
-  Future<String?> translate(String tag) async => null;
-  @override
-  Future<Map<String, String>> resolve(
-    List<String> tags, {
-    required String locale,
-  }) async => {};
-}
-
 class _Source implements CompletionSource {
   @override
   Future<List<CompletionCandidate>> search(CompletionQuery query) async => [];
@@ -209,7 +196,6 @@ WikiTagLinks get links => WikiTagLinks(
     for (final tag in tags)
       if (names.contains(tag.canonicalTag)) tag.canonicalTag: tag,
   },
-  chineseLookup: (_) async => [],
 );
 
 Future<void> capture(WidgetTester tester, String name) async {
@@ -265,7 +251,6 @@ Future<void> _pump(
   Locale locale = const Locale('zh'),
   bool chrome = false,
 }) async {
-  final names = _Names();
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -279,19 +264,15 @@ Future<void> _pump(
                       if (names.contains(item.canonicalTag))
                         item.canonicalTag: item,
                   },
-                  chineseLookup: (_) async => [],
                 ),
         ),
         tagWikiRepositoryProvider.overrideWithValue(wiki ?? _Wiki()),
         unifiedTagRepositoryProvider.overrideWith((_) => catalog ?? _Tags()),
-        tagTranslationLookupProvider.overrideWithValue(names),
         promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
         localTagExpansionServiceProvider.overrideWithValue(
           LocalTagExpansionService(
             catalog: _Tags(),
-            chineseDictionary: _Source(),
             relatedTags: _Source(),
-            translations: names,
             substringSearch: (_, {limit = 20}) async => [],
             popularSearch: ({limit = 12}) async => tags,
           ),

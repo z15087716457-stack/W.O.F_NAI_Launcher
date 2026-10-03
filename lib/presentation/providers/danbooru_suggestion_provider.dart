@@ -8,6 +8,7 @@ import '../../core/autocomplete/autocomplete_settings.dart';
 import '../../core/autocomplete/completion_models.dart';
 import '../../core/autocomplete/completion_orchestrator.dart';
 import '../../core/autocomplete/prompt_token_parser.dart';
+import '../../core/utils/localization_extension.dart';
 import '../../data/models/tag/tag_suggestion.dart';
 
 part 'danbooru_suggestion_provider.g.dart';
@@ -76,7 +77,7 @@ class DanbooruSuggestionNotifier extends _$DanbooruSuggestionNotifier {
 
   Future<void> _run(String query) async {
     final locale = ref.read(autocompleteSettingsProvider).showTranslations
-        ? 'zh-CN'
+        ? currentAppLanguage.chineseReadingLocale
         : 'en';
     final completionQuery = PromptTokenParser.parse(
       text: query,

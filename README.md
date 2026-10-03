@@ -34,7 +34,7 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 | 🎨 图像生成 | 支持 NovelAI Diffusion V1/V2/V3/V4/V4.5/V5（Full / Curated）、Furry 系列、常用采样器、尺寸预设、多角色参数和 Anlas 估算。 |
 | 🖼️ 图生图与编辑 | 支持图生图、局部重绘、Outpaint、虚拟画布扩图、硬边蒙版和点击式区域填充。 |
 | 🌈 参考与风格 | 支持 Vibe Transfer、Precise Reference、多图参考、Vibe 整包导入导出、PNG 元数据嵌入导出。 |
-| ✍️ Prompt 工具 | 内置完整离线 Danbooru/e621 合并标签、别名及 Danbooru 共现关系补全，支持 `Ctrl/⌘+Shift+Space` 查询光标前标签的相关词、固定来源标签后连续选词、Danbooru 在线相关标签补充、可选中文词库与 AI 缺失汉化，以及 NAI/SD 权重语法辅助、Token 统计、提示词框内搜索和固定词；另有贯穿全器的 pill 提示词块系统，见下方特色介绍。 |
+| ✍️ Prompt 工具 | 内置完整离线 Danbooru/e621 合并标签、别名及 Danbooru 共现关系补全，支持 `Ctrl/⌘+Shift+Space` 查询光标前标签的相关词、固定来源标签后连续选词、Danbooru 在线相关标签补充与 AI 标签汉化，以及 NAI/SD 权重语法辅助、Token 统计、提示词框内搜索和固定词；另有贯穿全器的 pill 提示词块系统，见下方特色介绍。 |
 | 📚 本地图库 | 支持多图库源递归扫描、默认瀑布流、SQLite 全文搜索、分类/收藏集/删除池、模型版本过滤、元数据解析、批量操作和大图预览。 |
 | 🌐 在线图库 | 支持 Danbooru / Safebooru / Gelbooru / AI TAG 搜索、真实排行榜、多图详情、元数据复用和批量下载。 |
 | 📦 生成队列 | 支持任务排序、批量生成、暂停/继续、失败策略、进度统计和队列导入导出。 |
@@ -137,7 +137,7 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 ### 补全数据与隐私
 
 - 基础 Danbooru 标签与别名 catalog 随应用提供，只在本机查询，不需要联网。
-- 简体中文汉化词库为可选组件。应用仅在用户确认后从 [ffdkj/ComfyUI_Danbooru_Tag_Assistant](https://github.com/ffdkj/ComfyUI_Danbooru_Tag_Assistant) 上游直接下载，项目不再分发该数据库。
+- 应用不内置也不下载中文标签词库。标签释义统一由用户在“设置 → 模型与接口”配置的标签翻译接口生成：百科、标签扩展、提示词标签块、在线图库和图片详情共用百科与标签扩展中的“自动翻译”开关和翻译缓存，开关关闭时只显示英文标签；中文输入不参与本地标签检索。
 - Danbooru 在线补充默认开启，只发送光标所在的当前英文 token，不发送完整提示词；可在“设置 → 数据源与缓存”关闭并单独清除缓存。
 - AI 缺失汉化默认关闭。开启后会复用 Prompt Assistant 的 `Translate` 路由，向用户选择的模型服务发送最多 8 个待翻译标签，可能产生 API 费用；AI 翻译缓存可单独清除。
 
@@ -231,7 +231,7 @@ nai_launcher/
 ├── lib/
 │   ├── core/               # 网络、数据库、缓存、加密、文件、快捷键等基础能力
 │   ├── data/               # API、模型、仓库和业务数据服务
-│   ├── l10n/               # 中/英/日界面文案与生成文件
+│   ├── l10n/               # 简中/繁中/英/日界面文案与生成文件
 │   └── presentation/       # 页面、组件、状态管理、主题和路由
 ├── scripts/                # 构建、签名、数据库和测试辅助脚本
 ├── test/                   # 单元测试和组件测试

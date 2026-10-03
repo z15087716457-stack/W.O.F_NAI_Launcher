@@ -1,18 +1,15 @@
 import '../../utils/app_logger.dart';
 import '../datasources/danbooru_tag_data_source.dart';
-import '../datasources/translation_data_source.dart';
 
 /// 补全结果
 class CompletionResult {
   final String tag;
-  final String? translation;
   final int postCount;
   final int category;
   final double relevanceScore;
 
   const CompletionResult({
     required this.tag,
-    this.translation,
     required this.postCount,
     required this.category,
     this.relevanceScore = 0.0,
@@ -50,24 +47,21 @@ class CompletionResult {
 /// 补全服务
 ///
 /// 提供标签自动补全功能的高级服务层。
-/// 基于 DanbooruTagDataSource 进行前缀搜索，并结合 TranslationDataSource 提供翻译。
+/// 基于 DanbooruTagDataSource 进行前缀搜索；中文释义由翻译接口提供。
 class CompletionService {
   final DanbooruTagDataSource _tagDataSource;
-  final TranslationDataSource _translationDataSource;
 
-  CompletionService(this._tagDataSource, this._translationDataSource);
+  CompletionService(this._tagDataSource);
 
   /// 标签补全
   ///
-  /// 根据输入前缀返回匹配的标签列表，包含翻译信息。
+  /// 根据输入前缀返回匹配的标签列表。
   ///
   /// [prefix] 输入前缀
   /// [limit] 返回结果数量限制
-  /// [includeTranslation] 是否包含翻译
   Future<List<CompletionResult>> complete(
     String prefix, {
     int limit = 20,
-    bool includeTranslation = true,
   }) async {
     if (prefix.isEmpty) {
       return [];
@@ -84,14 +78,7 @@ class CompletionService {
         return [];
       }
 
-      // 2. 获取翻译（如果需要）
-      Map<String, String> translations = {};
-      if (includeTranslation) {
-        final tagNames = tagRecords.map((r) => r.tag).toList();
-        translations = await _translationDataSource.queryBatch(tagNames);
-      }
-
-      // 3. 构建补全结果
+      // 2. 构建补全结果
       final results = tagRecords.map((record) {
         final relevanceScore = _calculateRelevanceScore(
           record.tag,
@@ -101,14 +88,13 @@ class CompletionService {
 
         return CompletionResult(
           tag: record.tag,
-          translation: translations[record.tag.toLowerCase().trim()],
           postCount: record.postCount,
           category: record.category,
           relevanceScore: relevanceScore,
         );
       }).toList();
 
-      // 4. 按相关度排序
+      // 3. 按相关度排序
       results.sort((a, b) => b.relevanceScore.compareTo(a.relevanceScore));
 
       AppLogger.d(
@@ -180,11 +166,7 @@ class CompletionService {
         return [];
       }
 
-      // 2. 获取翻译
-      final tagNames = tagRecords.map((r) => r.tag).toList();
-      final translations = await _translationDataSource.queryBatch(tagNames);
-
-      // 3. 构建结果
+      // 2. 构建结果
       final results = tagRecords.map((record) {
         final relevanceScore = _calculateRelevanceScore(
           record.tag,
@@ -194,14 +176,13 @@ class CompletionService {
 
         return CompletionResult(
           tag: record.tag,
-          translation: translations[record.tag.toLowerCase().trim()],
           postCount: record.postCount,
           category: record.category,
           relevanceScore: relevanceScore,
         );
       }).toList();
 
-      // 4. 排序
+      // 3. 排序
       results.sort((a, b) => b.relevanceScore.compareTo(a.relevanceScore));
 
       return results;
@@ -238,11 +219,7 @@ class CompletionService {
         return [];
       }
 
-      // 2. 获取翻译
-      final tagNames = tagRecords.map((r) => r.tag).toList();
-      final translations = await _translationDataSource.queryBatch(tagNames);
-
-      // 3. 构建结果（模糊搜索的分数计算不同）
+      // 2. 构建结果（模糊搜索的分数计算不同）
       final results = tagRecords.map((record) {
         final relevanceScore = _calculateFuzzyRelevanceScore(
           record.tag,
@@ -252,14 +229,13 @@ class CompletionService {
 
         return CompletionResult(
           tag: record.tag,
-          translation: translations[record.tag.toLowerCase().trim()],
           postCount: record.postCount,
           category: record.category,
           relevanceScore: relevanceScore,
         );
       }).toList();
 
-      // 4. 排序
+      // 3. 排序
       results.sort((a, b) => b.relevanceScore.compareTo(a.relevanceScore));
 
       return results.take(limit).toList();
@@ -292,14 +268,9 @@ class CompletionService {
         return [];
       }
 
-      // 获取翻译
-      final tagNames = records.map((r) => r.tag).toList();
-      final translations = await _translationDataSource.queryBatch(tagNames);
-
       return records.map((record) {
         return CompletionResult(
           tag: record.tag,
-          translation: translations[record.tag.toLowerCase().trim()],
           postCount: record.postCount,
           category: record.category,
           relevanceScore: record.postCount.toDouble(),

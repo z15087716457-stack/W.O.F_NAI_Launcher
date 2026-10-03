@@ -137,16 +137,6 @@ class _EmptyBlockTagSource implements CompletionSource {
       const [];
 }
 
-class _NoBlockTagTranslations implements TranslationResolver {
-  const _NoBlockTagTranslations();
-
-  @override
-  Future<Map<String, String>> resolve(
-    List<String> canonicalTags, {
-    required String locale,
-  }) async => const {};
-}
-
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -318,9 +308,7 @@ void main() {
         ],
         tagService: LocalTagExpansionService(
           catalog: const _BlockTagSource(),
-          chineseDictionary: const _EmptyBlockTagSource(),
           relatedTags: const _EmptyBlockTagSource(),
-          translations: const _NoBlockTagTranslations(),
           substringSearch: (input, {limit = 20}) async => const [],
           popularSearch: ({limit = 12}) async => const [],
         ),

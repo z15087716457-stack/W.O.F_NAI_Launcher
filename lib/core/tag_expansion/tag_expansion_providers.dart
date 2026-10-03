@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../autocomplete/autocomplete_providers.dart';
-import '../autocomplete/chinese_term_matcher.dart';
 import '../autocomplete/unified_tag_repository.dart';
 import '../database/services/service_providers.dart';
 import 'local_tag_expansion_service.dart';
@@ -17,20 +16,10 @@ final localTagExpansionServiceProvider = Provider<LocalTagExpansionService>((
   ref,
 ) {
   final catalog = ref.watch(unifiedTagRepositoryProvider);
-  final dictionary = ref.watch(zhDictionaryServiceProvider);
   return LocalTagExpansionService(
     catalog: catalog,
-    chineseDictionary: dictionary,
     relatedTags: ref.watch(cooccurrenceCompletionSourceProvider),
-    translations: dictionary,
     substringSearch: catalog.searchContains,
     popularSearch: catalog.popular,
   );
 });
-
-/// Independently overridable for editor tests; always uses the local dictionary.
-final chinesePromptTermLookupProvider =
-    Provider<Future<List<ChineseTermHit>> Function(String)>((ref) {
-      final dictionary = ref.watch(zhDictionaryServiceProvider);
-      return (text) => dictionary.matchInText(text);
-    });

@@ -82,7 +82,6 @@ enum TagSearchMode {
 ///
 /// 管理 Danbooru 标签数据的查询和存储。
 /// 支持前缀搜索、分类过滤和热门标签查询。
-/// 依赖于 TranslationDataSource 进行标签翻译。
 ///
 /// 关键改进：
 /// 1. 不再直接持有数据库连接，每次操作从 ConnectionPoolHolder 获取
@@ -92,9 +91,6 @@ enum TagSearchMode {
 /// 新架构：使用 ConnectionLease 连接生命周期管理
 class DanbooruTagDataSource extends BaseDataSource {
   static const String _tableName = 'danbooru_tags';
-
-  // 可选的翻译数据源引用
-  dynamic _translationDataSource;
 
   // 热门标签缓存
   List<DanbooruTagRecord>? _hotTagsCache;
@@ -111,15 +107,7 @@ class DanbooruTagDataSource extends BaseDataSource {
   DataSourceType get type => DataSourceType.danbooruTag;
 
   @override
-  Set<String> get dependencies => {'translation'};
-
-  /// 设置翻译数据源
-  void setTranslationDataSource(dynamic dataSource) {
-    _translationDataSource = dataSource;
-  }
-
-  /// 获取翻译数据源
-  dynamic get translationDataSource => _translationDataSource;
+  Set<String> get dependencies => {};
 
   /// 根据标签名获取记录
   ///

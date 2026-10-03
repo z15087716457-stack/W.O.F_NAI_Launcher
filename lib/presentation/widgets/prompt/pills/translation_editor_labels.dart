@@ -8,8 +8,8 @@ import '../../../../l10n/app_localizations.dart';
 class TranslationEditorLabels {
   TranslationEditorLabels(BuildContext context)
     : _l10n = context.l10n,
-      language = PromptTranslationLanguage.fromCode(
-        Localizations.localeOf(context).languageCode,
+      language = PromptTranslationLanguage.forLocale(
+        Localizations.localeOf(context),
       );
 
   final AppLocalizations _l10n;
@@ -29,6 +29,8 @@ class TranslationEditorLabels {
   String get configure => _l10n.translationEditor_configure;
   String reading(PromptTranslationLanguage value) => switch (value) {
     PromptTranslationLanguage.chinese => _l10n.translationLanguage_chinese,
+    PromptTranslationLanguage.traditionalChinese =>
+      _l10n.translationLanguage_traditionalChinese,
     PromptTranslationLanguage.english => _l10n.translationLanguage_english,
     PromptTranslationLanguage.japanese => _l10n.translationLanguage_japanese,
     PromptTranslationLanguage.korean => _l10n.translationLanguage_korean,

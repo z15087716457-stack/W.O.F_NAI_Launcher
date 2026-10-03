@@ -328,7 +328,7 @@ class _AddToLibraryDialogState extends ConsumerState<AddToLibraryDialog> {
                           child: Text(
                             TagSubCategoryHelper.getDisplayName(
                               category,
-                              locale: l10n.localeName,
+                              language: context.appLanguage,
                             ),
                           ),
                         );
