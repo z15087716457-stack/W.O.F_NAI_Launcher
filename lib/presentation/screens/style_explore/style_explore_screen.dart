@@ -625,7 +625,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                           autoGrow: true,
                           showMaximizeButton: false,
                           allowEvolutionToggle: true,
-                          tipModule: TipModule.explore,
+                          tipSurface: TipSurface.explorePrompt,
                         ),
                         const SizedBox(height: GenSidebarStyle.sectionGap),
 

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -8,174 +6,231 @@ import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final localizations = <String, AppLocalizations>{
+  final localizations = {
     for (final locale in AppLocalizations.supportedLocales)
-      locale.languageCode: lookupAppLocalizations(locale),
+      locale.toLanguageTag(): lookupAppLocalizations(locale),
   };
+  final zh = localizations['zh']!;
+  final day = DateTime(2026, 5, 1, 14);
+  final night = DateTime(2026, 5, 1, 3);
 
-  group('pickTip', () {
-    test('returns a non-empty tip for every module in every locale', () {
+  group('catalog', () {
+    test('every surface has guides and copy in every locale', () {
+      for (final surface in TipSurface.values) {
+        final tips = tipsFor(surface);
+        expect(tips, isNotEmpty, reason: '$surface');
+        for (final l10n in localizations.values) {
+          for (final tip in tips) {
+            expect(tip.text(l10n).trim(), isNotEmpty);
+            expect(tip.label(l10n).trim(), isNotEmpty);
+          }
+        }
+        if (surface.leadsWithGuide) {
+          expect(tips.where((tip) => tip.kind == TipKind.guide), isNotEmpty);
+        }
+      }
+    });
+
+    test('tips never repeat their own speaker label', () {
       for (final l10n in localizations.values) {
-        for (final module in TipModule.values) {
-          for (var seed = 0; seed < 10; seed++) {
+        for (final surface in TipSurface.values) {
+          for (final tip in tipsFor(surface)) {
+            final label = tip.label(l10n);
             expect(
-              pickTip(l10n, module, random: Random(seed)),
-              isNotEmpty,
-              reason: '${l10n.localeName} / $module',
+              RegExp(
+                '^${RegExp.escape(label)}'
+                r'\s*[:：]',
+              ).hasMatch(tip.text(l10n)),
+              isFalse,
+              reason: tip.text(l10n),
             );
           }
         }
       }
     });
 
-    test('same epoch yields a stable pick', () {
-      final l10n = localizations['en']!;
-      final a = pickTip(l10n, TipModule.gen, epoch: 42);
-      final b = pickTip(l10n, TipModule.gen, epoch: 42);
-      expect(a, b);
+    test('hint keeps the kind label in front of the text', () {
+      final tip = tipsFor(TipSurface.prompt).first;
+      expect(tip.hint(zh), '${zh.tips_kind_guide}：${tip.text(zh)}');
+      final en = localizations['en']!;
+      expect(tip.hint(en), '${en.tips_kind_guide}: ${tip.text(en)}');
     });
 
-    test('different modules draw from their own pools', () {
-      final l10n = localizations['en']!;
-      final blocklibTips = {
-        for (final key in [
-          l10n.tips_blocklib_teach_1,
-          l10n.tips_blocklib_teach_2,
-          l10n.tips_blocklib_teach_3,
-          l10n.tips_blocklib_teach_4,
-          l10n.tips_blocklib_teach_5,
-          l10n.tips_blocklib_fun_1,
-          l10n.tips_blocklib_fun_2,
-          l10n.tips_blocklib_fun_3,
-          l10n.tips_blocklib_fun_4,
-          l10n.tips_blocklib_fun_5,
-        ])
-          key,
-      };
-      final genericTips = {
-        l10n.tips_gen_1,
-        l10n.tips_gen_2,
-        l10n.tips_gen_3,
-        l10n.tips_gen_4,
-        l10n.tips_gen_5,
-        l10n.tips_fun_1,
-        l10n.tips_fun_2,
-        l10n.tips_fun_3,
-        l10n.tips_fun_4,
-        l10n.tips_fun_5,
-      };
-      final foreignTips = {
-        l10n.tips_explore_fun_1,
-        l10n.tips_gallerySearch_fun_1,
-        l10n.tips_gen_fun_1,
-      };
-
-      var sawModuleSpecific = false;
-      for (var seed = 0; seed < 200; seed++) {
-        final tip = pickTip(l10n, TipModule.blockLibrary, random: Random(seed));
-        expect(foreignTips.contains(tip), isFalse);
-        expect(
-          blocklibTips.contains(tip) || genericTips.contains(tip),
-          isTrue,
-          reason: tip,
-        );
-        if (blocklibTips.contains(tip)) sawModuleSpecific = true;
+    test('the narrow prompt box has enough short tips of each kind', () {
+      final short = tipsFor(TipSurface.prompt).where((tip) => tip.short);
+      for (final kind in TipKind.values) {
+        expect(short.where((tip) => tip.kind == kind), isNotEmpty);
       }
-      expect(sawModuleSpecific, isTrue);
     });
 
-    test('gallerySearch start pool wins on mount epoch only', () {
-      final l10n = localizations['en']!;
-      final startTips = {
-        for (final getter in [
-          l10n.tips_gallerySearch_start_1,
-          l10n.tips_gallerySearch_start_2,
-          l10n.tips_gallerySearch_start_3,
-          l10n.tips_gallerySearch_start_4,
-          l10n.tips_gallerySearch_start_5,
-          l10n.tips_gallerySearch_start_6,
-          l10n.tips_gallerySearch_start_7,
-          l10n.tips_gallerySearch_start_8,
-          l10n.tips_gallerySearch_start_9,
-          l10n.tips_gallerySearch_start_10,
-        ])
-          getter,
-      };
-
-      // 挂载轮次内：必然来自启动池。
-      for (var seed = 0; seed < 50; seed++) {
-        expect(
-          startTips.contains(
-            pickTip(
-              l10n,
-              TipModule.gallerySearch,
-              epoch: 7,
-              firstEpoch: 7,
-              random: Random(seed),
-            ),
-          ),
-          isTrue,
-        );
-      }
-      // 进入下一轮：恢复常规配比，不再命中启动池文案。
-      var sawNonStart = false;
-      for (var seed = 0; seed < 400; seed++) {
-        final tip = pickTip(
-          l10n,
-          TipModule.gallerySearch,
-          epoch: 8,
-          firstEpoch: 7,
-          random: Random(seed),
-        );
-        expect(startTips.contains(tip), isFalse, reason: tip);
-        if (tip.isNotEmpty) sawNonStart = true;
-      }
-      expect(sawNonStart, isTrue);
-    });
-
-    test('explore module can draw generic pool (50% share)', () {
-      final l10n = localizations['en']!;
-      final genericTips = {
-        l10n.tips_gen_1,
-        l10n.tips_gen_2,
-        l10n.tips_gen_3,
-        l10n.tips_gen_4,
-        l10n.tips_gen_5,
-        l10n.tips_fun_1,
-        l10n.tips_fun_2,
-        l10n.tips_fun_3,
-        l10n.tips_fun_4,
-        l10n.tips_fun_5,
-      };
-      var sawGeneric = false;
-      var sawTeach = false;
-      for (var seed = 0; seed < 400; seed++) {
-        final tip = pickTip(l10n, TipModule.explore, random: Random(seed));
-        if (genericTips.contains(tip)) sawGeneric = true;
-        if (tip.startsWith('Heart + folder')) sawTeach = true;
-      }
-      expect(sawGeneric, isTrue);
-      expect(sawTeach, isTrue);
-    });
-  });
-
-  group('tipHint', () {
-    test('prefixes Tip:', () {
-      for (final l10n in localizations.values) {
-        expect(
-          tipHint(l10n, TipModule.gen, random: Random(1)),
-          startsWith('Tip: '),
-        );
+    test('single-line surfaces stay short in every locale', () {
+      // 搜索框与占位卡只有一行；超长会被省略号截断。
+      const limits = {'zh': 20, 'zh-TW': 20, 'ja': 27, 'ko': 29, 'en': 55};
+      for (final surface in [
+        TipSurface.gallerySearch,
+        TipSurface.onlineSearch,
+        TipSurface.blockSearch,
+        TipSurface.generating,
+      ]) {
+        for (final entry in localizations.entries) {
+          for (final tip in tipsFor(surface)) {
+            expect(
+              tip.text(entry.value).runes.length,
+              lessThanOrEqualTo(limits[entry.key]!),
+              reason: '${entry.key} $surface ${tip.text(entry.value)}',
+            );
+          }
+        }
       }
     });
   });
 
-  group('tipEpochProvider', () {
-    test('emits the current epoch on first listen', () async {
+  group('TipDeck', () {
+    test('walks a full shuffled cycle before repeating', () {
+      final deck = TipDeck(seed: 7);
+      for (final surface in TipSurface.values) {
+        final daytime = tipsFor(surface).where((tip) => !tip.night).toList();
+        final seen = [
+          for (var i = 0; i < daytime.length; i++)
+            deck.tipAt(surface, i, now: day),
+        ];
+        expect(seen.toSet(), daytime.toSet(), reason: '$surface');
+        expect(deck.tipAt(surface, daytime.length, now: day), seen.first);
+      }
+    });
+
+    test('night tips only appear at night', () {
+      final deck = TipDeck(seed: 3);
+      final tips = tipsFor(TipSurface.studio);
+      expect(tips.where((tip) => tip.night), isNotEmpty);
+      final dayTips = {
+        for (var i = 0; i < tips.length * 2; i++)
+          deck.tipAt(TipSurface.studio, i, now: day),
+      };
+      expect(dayTips.where((tip) => tip.night), isEmpty);
+      final nightTips = {
+        for (var i = 0; i < tips.length; i++)
+          deck.tipAt(TipSurface.studio, i, now: night),
+      };
+      expect(nightTips, tips.toSet());
+    });
+
+    test('shortOnly and kind filters', () {
+      final deck = TipDeck(seed: 1);
+      for (var i = 0; i < 30; i++) {
+        expect(
+          deck.tipAt(TipSurface.prompt, i, now: day, shortOnly: true).short,
+          isTrue,
+        );
+        expect(
+          deck
+              .tipAt(TipSurface.gallerySearch, i, now: day, kind: TipKind.guide)
+              .kind,
+          TipKind.guide,
+        );
+      }
+    });
+
+    test('the same seed gives the same order', () {
+      final a = TipDeck(seed: 42);
+      final b = TipDeck(seed: 42);
+      for (var i = 0; i < 20; i++) {
+        expect(
+          a.tipAt(TipSurface.prompt, i, now: day),
+          b.tipAt(TipSurface.prompt, i, now: day),
+        );
+      }
+    });
+
+    test('draw hands out the next tip on every visit', () {
+      final deck = TipDeck(seed: 5);
+      final count = tipsFor(TipSurface.lab).length;
+      final drawn = {
+        for (var i = 0; i < count; i++) deck.draw(TipSurface.lab, now: day),
+      };
+      expect(drawn.length, count);
+    });
+  });
+
+  group('rotatingTip', () {
+    test('stays put within an epoch and moves on the next', () {
+      final deck = TipDeck(seed: 9);
+      final a = rotatingTip(deck, TipSurface.prompt, epoch: 100, now: day);
+      expect(rotatingTip(deck, TipSurface.prompt, epoch: 100, now: day), a);
+      expect(
+        rotatingTip(deck, TipSurface.prompt, epoch: 101, now: day),
+        isNot(a),
+      );
+    });
+
+    test('slots keep side-by-side character boxes apart', () {
+      final deck = TipDeck(seed: 9);
+      expect(
+        rotatingTip(deck, TipSurface.character, epoch: 5, slot: 0, now: day),
+        isNot(
+          rotatingTip(deck, TipSurface.character, epoch: 5, slot: 1, now: day),
+        ),
+      );
+    });
+
+    test('search boxes open with a usage guide', () {
+      final deck = TipDeck(seed: 11);
+      for (final surface in [
+        TipSurface.gallerySearch,
+        TipSurface.onlineSearch,
+      ]) {
+        for (var epoch = 0; epoch < 30; epoch++) {
+          expect(
+            rotatingTip(
+              deck,
+              surface,
+              epoch: epoch,
+              firstEpoch: epoch,
+              now: day,
+            ).kind,
+            TipKind.guide,
+          );
+        }
+        final later = {
+          for (var epoch = 1; epoch < 60; epoch++)
+            rotatingTip(
+              deck,
+              surface,
+              epoch: epoch,
+              firstEpoch: 0,
+              now: day,
+            ).kind,
+        };
+        expect(later, containsAll([TipKind.trick, TipKind.wolf]));
+      }
+    });
+  });
+
+  test('deep night is 01:00–04:59 local time', () {
+    expect(isTipNight(DateTime(2026, 1, 1, 0, 59)), isFalse);
+    expect(isTipNight(DateTime(2026, 1, 1, 1)), isTrue);
+    expect(isTipNight(DateTime(2026, 1, 1, 4, 59)), isTrue);
+    expect(isTipNight(DateTime(2026, 1, 1, 5)), isFalse);
+  });
+
+  group('providers', () {
+    test('tipEpochProvider emits the current epoch on first listen', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       final epoch = await container.read(tipEpochProvider.future);
       expect(epoch, currentTipEpoch());
     });
+
+    test('the splash tip stays fixed for the session', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final first = container.read(splashTipProvider);
+      expect(container.read(splashTipProvider), same(first));
+      expect(tipsFor(TipSurface.splash), contains(first));
+    });
+  });
+
+  test('every locale resolves', () {
+    expect(localizations.keys, containsAll(['zh', 'zh-TW', 'en', 'ja', 'ko']));
   });
 }

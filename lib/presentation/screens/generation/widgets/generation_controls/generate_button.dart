@@ -58,9 +58,9 @@ class GenerateButtonWithCost extends ConsumerWidget {
     }
     if (labelOverride != null) return labelOverride!;
     return GenerateButtonCopy.pick(
+      l10n: context.l10n,
       seed: copySeed,
       count: imageCount,
-      languageCode: Localizations.localeOf(context).toLanguageTag(),
     );
   }
 

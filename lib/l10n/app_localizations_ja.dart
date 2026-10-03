@@ -3072,9 +3072,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get characterEditor_enabled => '有効';
 
   @override
-  String get characterEditor_promptHint => 'このキャラクターのプロンプトを入力してください...';
-
-  @override
   String get characterEditor_negativePromptHint =>
       'このキャラクターの除外したい要素を入力してください...';
 
@@ -7646,7 +7643,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'Ctrl+クリックでローカル検索、Ctrl+ドラッグで関連タグを表示';
 
   @override
-  String get tagExpansion_searchHint => 'タグ・別名・翻訳を検索';
+  String get tagExpansion_searchHint => 'タグや別名を検索';
 
   @override
   String get tagExpansion_relatedTitle => '関連タグ';
@@ -8337,9 +8334,6 @@ class AppLocalizationsJa extends AppLocalizations {
       '候補はまだありません。探索ランを作成または選択して一括生成を開始してください。';
 
   @override
-  String get styleExplore_labTip => '気に入った候補を選び、世代を重ねて画風を進化させましょう。';
-
-  @override
   String get styleExplore_runNameLabel => 'ラン名';
 
   @override
@@ -8777,185 +8771,849 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_modelsAndInterfaces => 'モデルとAPI';
 
   @override
-  String get tips_gen_teach_1 => 'プロンプト欄で < と入力するとブロックライブラリのブロックを挿入できます';
+  String get tips_kind_guide => 'ヒント';
 
   @override
-  String get tips_gen_teach_2 =>
-      'サマリーバーの Seed をクリックで固定/再抽選、Sampler をクリックで切り替えられます';
+  String get tips_kind_trick => '先輩';
 
   @override
-  String get tips_gen_teach_3 => '生成ボタン横の数字ボックスがバッチ枚数、右のダーク枠が Anlas 消費です';
+  String get tips_kind_wolf => 'オオカミ';
 
   @override
-  String get tips_gen_teach_4 => '右上の chunks メニューにブロック・プリセット・正規表現ルールがまとまっています';
+  String tips_hint(String label, String tip) {
+    return '$label：$tip';
+  }
 
   @override
-  String get tips_gen_teach_5 => '透明 BG はアルファチャンネル付きで出力。キャラ参照使用中は無効です';
+  String get tips_studio_guide_1 =>
+      'プロンプトを書いたら Ctrl+Enter で生成できます。結果はこのキャンバスにバッチごとに並びます。中ボタンか Shift+左ドラッグで移動、Ctrl+ホイールで拡大縮小、WASD でも移動できます。';
 
   @override
-  String get tips_gen_fun_1 => 'AI に電子おやつを給仕中…';
+  String get tips_studio_guide_2 =>
+      'よく使う絵師タグ、品質タグ、構図の指定は一度ブロックにしておけば、次からはブロックライブラリから呼び出すだけ。ブロックは単なるコピペではありません。固定・順番・ランダム抽出を選べるので、生成のたびに組み合わせが変わります。';
 
   @override
-  String get tips_gen_fun_2 => '生成 1 回は小さなガチャ——引いちゃいましょう';
+  String get tips_studio_guide_3 =>
+      'ランダムブロックで当たりを引いたら、ロックしてから他のブロックを再抽選しましょう。ロックした内容は変わらず、それ以外はランダムのまま。「このポーズのまま、服だけあと何パターンか」にぴったりです。';
 
   @override
-  String get tips_gen_fun_3 => 'Anlas 残高とモデル名は上に表示中——燃やす前に一瞥を';
+  String get tips_studio_guide_4 =>
+      '画像をウィンドウにドラッグすると、使い方を選べます。Image2Image、バイブストランスファー、精密参照、またはプロンプトとパラメーターの抽出だけ。NovelAI のメタデータが残っている画像なら、どう書かれていたかがすぐ分かります。';
 
   @override
-  String get tips_gen_fun_4 => 'プロンプト欄が背を伸ばしました。野望を広げて書けます';
+  String get tips_studio_guide_5 =>
+      'キャラクター枠の正体は「配置枠」です。人物だけでなく、猫やランプ、看板を入れてもかまいません。位置を「カスタム」に切り替えてプレビュー上のアンカーをドラッグすれば、どこに出すかをモデルに伝えられます。';
 
   @override
-  String get tips_gen_fun_5 => 'シード -1 は運任せ。運は丸い数字がお好き（らしい）';
+  String get tips_studio_guide_6 =>
+      'プロンプトの一部を選択し、Alt を押しながらホイールを回すと重みを調整できます。Alt なしなら普通にスクロールするだけなので、うっかり変わることはありません。修飾キーは設定で Ctrl に変更できます。';
 
   @override
-  String get tips_explore_teach_1 => 'ハート＋フォルダ仕分けが次世代への一票です';
+  String get tips_studio_guide_7 =>
+      'F1 でいつでもショートカット一覧を開けます。Ctrl+1・Ctrl+2・Ctrl+3 で生成、ギャラリー、オンライン ギャラリーを切り替え、Ctrl+, で設定を開けます。ショートカットはすべて設定で変更できます。';
 
   @override
-  String get tips_explore_teach_2 => 'A/B 対照は親の原画を見て判定——勝者を選んだら次へ';
+  String get tips_studio_guide_8 =>
+      'うっかり Anlas を大量に使うのが心配なら、設定で Anlas の高コスト警告をオンに。1 回の見積もりが設定値を超えると、生成前に確認が入ります。';
 
   @override
-  String get tips_explore_teach_3 => '「候補生成」横の数字ボックスがこのラウンドのバッチ数です';
+  String get tips_studio_trick_1 =>
+      'シードが「何を引くか」を決めます。パラメーターとシードが同じなら、出てくるのも同じ一枚。神絵を再現したいならシードも控えておくこと。運を変えたいなら、そのシードはもう見つめないこと。';
 
   @override
-  String get tips_explore_teach_4 => 'パイルのサムネイルにホバーで大きくプレビュー';
+  String get tips_studio_trick_2 =>
+      'エンコード済みの Vibe を使い回せば、2 Anlas のエンコード代がかかりません。2 Anlas なんて大したことない？ 1 日に何回 Vibe を使っているか、数えてみてください。';
 
   @override
-  String get tips_explore_teach_5 => '区切りバーをドラッグするとギャラリー欄を広げられます';
+  String get tips_studio_trick_3 =>
+      '除外したい要素は願いごとの泉ではありません。bad hands を百回書くより、プロンプト側で手の動きをはっきり書くほうが効きます。毎回のお決まりの言葉は除外したい要素プリセットに任せましょう。';
 
   @override
-  String get tips_explore_fun_1 => '適者生存、絵もまた然り';
+  String get tips_studio_trick_4 =>
+      '絵師タグは長ければいいわけではありません。10 人を超えたあたりで、モデルはたぶん誰のタッチが欲しいのか分からなくなっています。いくつかのブロックに分けて、ランダム抽出で順番に登場させましょう。';
 
   @override
-  String get tips_explore_fun_2 => '毎ラウンドはオーディション会場';
+  String get tips_studio_trick_5 =>
+      '1 回のクリックで何回リクエストするかと、1 回で何枚出すかは別の数字です。ボタンに出ているのは合計枚数で、Anlas も合計で計算されます。押す前に確認を。なぜ知っているかは聞かないで。';
 
   @override
-  String get tips_explore_fun_3 => '良い遺伝子は良い親から';
+  String get tips_studio_trick_6 =>
+      '翻訳ブロックを中クリックすると、原文と訳文を切り替えられます。AI の翻訳がどれだけ優秀でも、たまには原文をのぞいて cat ears が変なものになっていないか確かめましょう。';
 
   @override
-  String get tips_explore_fun_4 => '突然変異を侮るなかれ';
+  String get tips_studio_trick_7 =>
+      '設定の「画像生成の頻度を制限」を使うと、生成と生成のあいだに強制クールダウンを入れられます。少しランダムな揺らぎも足せば、リズムが機械っぽくなりません。のんびり回す夜にも、手が止まらない自分にも。';
 
   @override
-  String get tips_explore_fun_5 => '自然選択、早回し版';
+  String get tips_studio_wolf_1 =>
+      'ここはオオカミの巣。君が生成した画像は、ぼくがくわえて持ち帰って、ギャラリーにきちんと並べておく。正直、絵を描くより片付けのほうがずっと得意なんだ。';
 
   @override
-  String get tips_gallerySearch_teach_1 => 'カンマ区切り＝AND 検索';
+  String get tips_studio_wolf_2 =>
+      'オオカミは夜目がきく。だから君が午前 3 時にまだここにいても、ぼくは何も言わない。黙ってもう一枚付き合うだけさ。';
 
   @override
-  String get tips_gallerySearch_teach_2 => 'テキスト検索はネガティブプロンプトを除外済み——結果がクリーン';
+  String get tips_studio_wolf_3 =>
+      'AI 絵師の通過儀礼は、片手の指を落ち着いて数えきることらしい。ぼくには指がないから、ずっと落ち着いている。';
 
   @override
-  String get tips_gallerySearch_teach_3 => '検索はモデル・サンプラー・ソース・バージョンにもヒットします';
+  String get tips_studio_wolf_4 =>
+      '群れのおきて。いいシードは分け合う。いいプロンプトはブロックにする。いい絵は眺める前に保存する。最後のが一番大事。理由は聞かないで。';
 
   @override
-  String get tips_gallerySearch_teach_4 => 'ボタンが収まらない時は横スクロールできます';
+  String get tips_studio_wolf_5 =>
+      'ぼくは絵を描けないけど、待つのは得意。プレビューが少しずつはっきりしていく数秒間が、一日でいちばん静かな時間なんだ。';
 
   @override
-  String get tips_gallerySearch_teach_5 => '1 ページ最大 500 枚——一気に眺めたい人向け';
+  String get tips_studio_wolf_6 =>
+      'W.O.F は WolF の意味。間の点は何かって？ 雪の上を走ったぼくの足あとだよ。';
 
   @override
-  String get tips_gallerySearch_fun_1 => '下にいい物がたくさんありそう~~~何を探しましょうか？';
+  String get tips_studio_wolf_7 =>
+      'キャンバスが空っぽのあいだは、ここで丸くなって昼寝してる。生成を押せば、すぐ起きるよ。';
 
   @override
-  String get tips_gallerySearch_fun_2 => 'コレクションは増える、フォルダは追いつくフリ';
+  String get tips_studio_night_1 =>
+      'いまは真夜中。念のため言っておくと、この時間帯の審美眼はこっそり 3 割増しになっている。朝起きたらもう一度見直してね。';
 
   @override
-  String get tips_gallerySearch_fun_3 => 'プロのコツ：自分のプロンプトが一番の検索キーワード';
+  String get tips_studio_night_2 =>
+      '夜もふけて、遠くのサーバールームの GPU もあくびをした。このバッチが終わったら寝よう。ギャラリーはぼくが見張っておく。';
 
   @override
-  String get tips_gallerySearch_fun_4 => 'スクロールは立派な運動';
+  String get tips_lab_guide_1 =>
+      'スタイル探索はオーディションです。まず探索ランを作ってプロンプトとパラメーターを固定し、候補をまとめて生成します。選んだ子世代が次の世代の親になり、画風は世代ごとに理想へ近づいていきます。';
 
   @override
-  String get tips_gallerySearch_fun_5 => 'この山のどこかに今夜の傑作が隠れています';
+  String get tips_lab_guide_2 =>
+      'ハートとフォルダーは自分用の整理で、遺伝には影響しません。次の世代を決めるのは「複数選択でブランチ」で選んだ候補です。';
 
   @override
-  String get tips_gallerySearch_start_1 => 'ファイル名やプロンプト本文で検索——Enter または候補をクリック';
+  String get tips_lab_guide_3 =>
+      '迷ったら「A/B比較」へ。親の画像が 2 枚並ぶので、どちらが理想の画風に近いかだけ答えれば OK。上位の親ほど、次のラウンドで子を持ちやすくなります。';
 
   @override
-  String get tips_gallerySearch_start_2 => '複数語はカンマ区切り＝すべてヒットしたものだけ';
+  String get tips_lab_guide_4 =>
+      '次のラウンドを生成するには、メインプロンプトに遺伝を有効化したランダムブロックが必要です。変わる遺伝子がなければ、変異エンジンも手が出せません。';
 
   @override
-  String get tips_gallerySearch_start_3 => '検索対象はポジティブプロンプトのみ。ネガティブは除外済み';
+  String get tips_lab_guide_5 =>
+      '候補の組み合わせが気に入ったら「ブロックに収録」でブロックライブラリに保存できます。生成ページでもそのまま使えます。複数選べば「まとめて収録」で一つのブロックにすることも。';
 
   @override
-  String get tips_gallerySearch_start_4 => 'モデル・サンプラー・ソース・バージョンもヒットします';
+  String get tips_lab_guide_6 =>
+      '探索ランを削除しても、消えるのはランフォルダー内の候補コピーだけ。ギャラリーの元画像は残ります。安心して片付けて。実験場は少し散らかっているくらいでいい。';
 
   @override
-  String get tips_gallerySearch_start_5 => 'タグ（例：masterpiece）やファイル名の一部を入力';
+  String get tips_lab_trick_1 =>
+      '親には必ず 1 枚以上の枠が割り当てられるので、親が多いほど 1 ラウンドに必要な枚数も増えます。欲張ると、先に Anlas がストップをかけてくれます。';
 
   @override
-  String get tips_gallerySearch_start_6 => '見つけたらカードをクリックで詳細、右クリックで操作';
+  String get tips_lab_trick_2 =>
+      'ブランチを作れるのは最新世代の候補の山からだけ。振り返るのは自由でも、途中から枝分かれはできません。進化とはそういう非情なものです。';
 
   @override
-  String get tips_gallerySearch_start_7 => '右のバージョンチップと併用でさらに絞り込めます';
+  String get tips_lab_trick_3 =>
+      '変異エンジンが「十分に異なる子を作れない」と言うことがあります。サボっているのではなく、遺伝子プールが小さすぎるだけ。ランダムブロックに候補を少し足せば、すぐ仕事に戻ります。';
 
   @override
-  String get tips_gallerySearch_start_8 => '空欄なら全件表示。入力すれば即絞り込み';
+  String get tips_lab_trick_4 =>
+      '候補の山のサムネイルにカーソルを合わせれば大きく表示されます。一枚ずつ開かなくて大丈夫。審査員には審査員の効率がある。';
 
   @override
-  String get tips_gallerySearch_start_9 => '入力するたびに検索——送信不要';
+  String get tips_lab_trick_5 =>
+      '候補のパラメーター一式が気に入ったら「メタデータを導入」で、プロンプトとパラメーターをそのまま編集エリアに戻せます。そこから続きをどうぞ。';
 
   @override
-  String get tips_gallerySearch_start_10 => '再生成する前にまず検索——たぶんもうあります';
+  String get tips_lab_wolf_1 =>
+      '生まれたときから群れでいちばん強いオオカミなんていない。画風も同じで、第 1 世代が少しイマイチなのは普通。判断は第 3 世代まで待とう。';
 
   @override
-  String get tips_blocklib_teach_1 => 'ブロックはサムネイル付きにできます——編集ダイアログで設定';
+  String get tips_lab_wolf_2 =>
+      'ここの適者生存はやさしい版。選ばれなかった候補も消えない。今回は出番じゃなかった、それだけ。';
 
   @override
-  String get tips_blocklib_teach_2 => 'クリックで詳細、ホバーで大きめプレビュー';
+  String get tips_lab_wolf_3 =>
+      'ぼくの遺伝学の知識はこれだけ。見た目のいい親からは、たぶん見た目のいい子が生まれる。あとは変異と、ちょっとの運。';
 
   @override
-  String get tips_blocklib_teach_3 => '⭐ でコレクションに入れて、お気に入りは上段に集約';
+  String get tips_lab_wolf_4 =>
+      'LAB の明かりはたいてい遅くまでついている。ぼくは入口で当番をしながら、いま何世代目かを数えておくよ。';
 
   @override
-  String get tips_blocklib_teach_4 => 'ウォーターフォール表示だと画像ブロックが見やすい';
+  String get tips_lab_wolf_5 =>
+      '変異をなめちゃいけない。10 世代かけても見つからなかったものが、偶然ひょっこり出てくることがある。だから、ちょっと変な一枚もすぐには消さないで。';
 
   @override
-  String get tips_blocklib_teach_5 => '分割バーをドラッグしてブロック/フォルダの比率を調整';
+  String get tips_prompt_guide_1 => 'Ctrl+Enter で生成、生成中は Esc でキャンセル。';
 
   @override
-  String get tips_blocklib_fun_1 => 'すべてのブロックは指名される夢を見る';
+  String get tips_prompt_guide_2 =>
+      'テキストを選択して Alt を押しながらホイールを回すと重みを調整できます。Alt なしなら普通にスクロールします。';
 
   @override
-  String get tips_blocklib_fun_2 => 'フォルダの中にフォルダ——いつの間にか整理されてます';
+  String get tips_prompt_guide_3 =>
+      'タグを Ctrl+クリックするとローカルのタグで検索、Ctrl+ドラッグで選ぶと一緒によく使われるタグが見られます。';
 
   @override
-  String get tips_blocklib_fun_3 => '使用回数はブロックの履歴書';
+  String get tips_prompt_guide_4 =>
+      '文字を選択して右クリックすれば、そのままブロックライブラリに保存できます。次からはクリックかドラッグで呼び戻せます。';
 
   @override
-  String get tips_blocklib_fun_4 => 'ブロックは常連さん専用席';
+  String get tips_prompt_guide_5 =>
+      '枠の下にある品質タグのプリセットが、いつもの品質タグを代わりに足してくれます。除外したい要素に切り替えると、同じ場所がそのプリセットになります。';
 
   @override
-  String get tips_blocklib_fun_5 => '迷ったらブロック化';
+  String get tips_prompt_guide_6 => 'F1 でショートカット一覧を表示。';
 
   @override
-  String get tips_gen_1 => 'テキスト欄で Ctrl+Z が効きます——タイポは怖くない';
+  String get tips_prompt_guide_7 =>
+      'ComfyUI からコピーした複数キャラのプロンプトを貼り付けると自動で認識され、キャラクター枠として取り込むか確認されます。一つずつ入れ直す必要はありません。';
 
   @override
-  String get tips_gen_2 => '設定→プロンプトの chunks メニューには意外なスイッチが';
+  String get tips_prompt_guide_8 =>
+      '「SD 構文自動変換」をオンにすると、(tag:1.2) のような書き方がフォーカスを外したときや生成時に NovelAI の形式へ変換されます。';
 
   @override
-  String get tips_gen_3 => '細い区切りバーを見つけたらドラッグ——多くのパネルは伸縮します';
+  String get tips_prompt_guide_9 => '1.2::タグ:: で重みをぴったり指定。マイナスにすると逆向きに効きます。';
 
   @override
-  String get tips_gen_4 => '履歴欄から過去の画像と当時の設定を呼び戻せます';
+  String get tips_prompt_trick_1 =>
+      '波かっこを一重かけるごとに重みは 1.05 倍、角かっこは 1.05 で割ります。波かっこを五重にしている人は、たいていモデルと口論中です。';
 
   @override
-  String get tips_gen_5 => '右クリックでメニュー、ホバーでプレビュー';
+  String get tips_prompt_trick_2 =>
+      '自動フォーマットは意味のない 1 倍の重みを消します。嫌がらせではなく、トークンの節約です。';
 
   @override
-  String get tips_fun_1 => '本日分のオカルトを読み込み中…';
+  String get tips_prompt_trick_3 =>
+      '枠の下の細いバーはトークン使用量です。満タンになると、それ以降の内容はモデルにほとんど届きません。長編小説を書くなら別の場所でどうぞ。';
 
   @override
-  String get tips_fun_2 => 'シードはランダム、センスは非ランダム';
+  String get tips_prompt_trick_4 => '書けないときは、画面でいちばん大きいものから。';
 
   @override
-  String get tips_fun_3 => 'どこかの GPU が今か今かと唸っています';
+  String get tips_prompt_trick_5 =>
+      '品質タグは一度で十分。masterpiece を三回書いても、モデルは誠意を感じてくれません。';
 
   @override
-  String get tips_fun_4 => 'ここで一番高いボタンは生成——Anlas を食べます';
+  String get tips_prompt_trick_6 =>
+      '「出てほしいけど目立ちすぎないで」なら、消すより 0.8:: が効きます。消せばゼロ、下げれば控えめ。';
 
   @override
-  String get tips_fun_5 => 'この欄は何千もの傑作（と数枚の黒歴史）を見てきました';
+  String get tips_prompt_trick_7 => '同じ言葉を何度も差し替えているなら、ブロックにしてランダムに任せましょう。';
+
+  @override
+  String get tips_prompt_trick_8 =>
+      'プロンプトには「欲しいもの」、除外したい要素には「いらないもの」。プロンプトに no hat と書いても、モデルの耳には hat しか届きません。';
+
+  @override
+  String get tips_prompt_wolf_1 => 'この枠は何千枚もの神絵を見てきた。人には見せられない黒歴史も少々。';
+
+  @override
+  String get tips_prompt_wolf_2 =>
+      'まず一文で欲しい絵を言葉にして、それからタグに分ける。逆にすると、タグの山と意味不明な絵ができがちなんだ。';
+
+  @override
+  String get tips_prompt_wolf_3 => '打ってるところ、見てるよ。大丈夫、英語は読めないから。';
+
+  @override
+  String get tips_prompt_wolf_4 => 'どこか遠くの GPU が、君のプロンプトにため息をついた。';
+
+  @override
+  String get tips_prompt_wolf_5 => 'ガチャの果てはオカルト、オカルトの果てはシード固定。';
+
+  @override
+  String get tips_prompt_wolf_6 =>
+      '絵師タグが 12 人目になるころ、モデルはもう誰の絵を描いているのか分かっていない。君もね。';
+
+  @override
+  String get tips_explore_guide_1 =>
+      'ここに書くのは親のプロンプトです。一部を進化させたいなら、その部分をランダムブロックにして遺伝を有効化しましょう。';
+
+  @override
+  String get tips_explore_guide_2 =>
+      '遺伝は、ブロックインスタンスを有効にしてから使えます。グレーなら、まずブロックを有効に。';
+
+  @override
+  String get tips_explore_guide_3 => '「候補を生成」の横の数字で、このラウンドの枚数が決まります。';
+
+  @override
+  String get tips_explore_guide_4 =>
+      'ブロックインスタンスは「一幕戻る」「一幕進む」で、これまで引いた組み合わせを行き来できます。';
+
+  @override
+  String get tips_explore_guide_5 =>
+      '探索ランはプロンプトとパラメーターのスナップショットを固定します。あとからここを変えても、終わったラウンドには影響しません。';
+
+  @override
+  String get tips_explore_guide_6 =>
+      'ブロックの「ランダム設定」では抽出数、発動確率、ランダム重みを調整できます。遺伝子のバリエーションはここに詰まっています。';
+
+  @override
+  String get tips_explore_trick_1 =>
+      '遺伝子プールが大きいほど、変異の選択肢も増えます。ランダムブロックに 2 語しかなければ、10 世代進化しても 2 つの答えを行ったり来たりするだけ。';
+
+  @override
+  String get tips_explore_trick_2 =>
+      '確定している部分は固定し、迷っている部分をランダムブロックに。全部ランダムなら方向がなく、全部固定なら進化がありません。';
+
+  @override
+  String get tips_explore_trick_3 =>
+      'ロックしたブロックは再抽選されません。残したい特徴はまずロックして、ほかのブロックに暴れてもらいましょう。';
+
+  @override
+  String get tips_explore_trick_4 =>
+      '発動確率を 30% にすると、そのブロックはだいたい 3 割の組み合わせにだけ現れます。「たまに出るくらいがちょうどいい」要素に。';
+
+  @override
+  String get tips_explore_trick_5 => '第 1 世代で完璧を期待するのは、探索じゃなくてお願いごとです。';
+
+  @override
+  String get tips_explore_wolf_1 => '群れの血筋は、一世代ずつ選ばれてきた。君の画風もね。';
+
+  @override
+  String get tips_explore_wolf_2 => '毎ラウンドがオーディションで、審査員は君ひとり。ぼくは拍手係。';
+
+  @override
+  String get tips_explore_wolf_3 => 'いい遺伝子はいい親から。いい親は、手がすべらなかったあの一回のクリックから。';
+
+  @override
+  String get tips_explore_wolf_4 =>
+      '遺伝学はよく知らないけど、これだけは分かる。うるさい審査員ほど、きれいな子オオカミを育てる。';
+
+  @override
+  String get tips_character_guide_1 =>
+      'キャラクター枠の正体は配置枠。猫でもランプでも看板でも、人である必要はありません。';
+
+  @override
+  String get tips_character_guide_2 =>
+      '上の「位置」を「カスタム」にして、プレビュー上のアンカーをドラッグ。離せば反映されます。';
+
+  @override
+  String get tips_character_guide_3 =>
+      '「AIにおまかせ」なら配置はモデル任せ。「カスタム」に戻せば、前に決めた位置はそのまま残っています。';
+
+  @override
+  String get tips_character_guide_4 => 'キャラクター枠ごとに除外したい要素があり、その枠のキャラにだけ効きます。';
+
+  @override
+  String get tips_character_guide_5 => '右上のチェックで一時的に無効化できます。消して書き直す必要はありません。';
+
+  @override
+  String get tips_character_guide_6 => 'タイトルをクリックすれば名前を変えられます。番号より見分けやすいですよ。';
+
+  @override
+  String get tips_character_guide_7 =>
+      '右上の ⋯ から、このキャラクターをブロックライブラリに追加できます。あとでこの描写を使い回せます。';
+
+  @override
+  String get tips_character_trick_1 =>
+      '場面と画風はメインへ、この枠にはこのキャラだけ。両方に同じ服を書くと、よほど好きなんだと思われます。';
+
+  @override
+  String get tips_character_trick_2 =>
+      '二人が近すぎるとくっつきがち。separate を十回書くより、アンカーを少し離すほうが効きます。';
+
+  @override
+  String get tips_character_trick_3 =>
+      '左に木を立てたい？ キャラクター枠をあげて左へドラッグ。木は自分がキャラじゃないなんて文句を言いません。';
+
+  @override
+  String get tips_character_trick_4 =>
+      'キャラクター枠でもブロックと重みの構文が使えます。メインプロンプトと同じです。';
+
+  @override
+  String get tips_character_trick_5 =>
+      'キャラが多すぎたら数人を無効に。窮屈だとモデルが勝手に人を選び、たいてい残したかった子が外れます。';
+
+  @override
+  String get tips_character_wolf_1 => 'ぼくもキャラクター枠がほしいけど、画面の外から見ているほうが性に合ってる。';
+
+  @override
+  String get tips_character_wolf_2 => '一つの枠に、一つの場所、一つの役目。いい人生哲学だと思う。';
+
+  @override
+  String get tips_character_wolf_3 => '立ち位置を決めるのは君、ぼくは横で「もうちょい左」って言う係。';
+
+  @override
+  String get tips_character_wolf_4 =>
+      'オオカミの群れだって隊形を組んで歩く。キャラが多いときは、まず誰を真ん中にするか決めよう。';
+
+  @override
+  String get tips_gallery_guide_1 => 'ファイル名やプロンプト本文で検索';
+
+  @override
+  String get tips_gallery_guide_2 => 'カンマ区切りは全部一致';
+
+  @override
+  String get tips_gallery_guide_3 => 'モデルやサンプラーでも検索';
+
+  @override
+  String get tips_gallery_guide_4 => 'Ctrl+F でいつでもここへ';
+
+  @override
+  String get tips_gallery_guide_5 => 'キャラプロンプトも対象';
+
+  @override
+  String get tips_gallery_guide_6 => '画像を右クリックでメニュー';
+
+  @override
+  String get tips_gallery_guide_7 => 'F5 でギャラリーを更新';
+
+  @override
+  String get tips_gallery_trick_1 => '除外要素は検索されない';
+
+  @override
+  String get tips_gallery_trick_2 => '描き直す前に検索';
+
+  @override
+  String get tips_gallery_trick_3 => '自分のプロンプトが最強の検索語';
+
+  @override
+  String get tips_gallery_trick_4 => 'ゴミ箱は次の起動で空に';
+
+  @override
+  String get tips_gallery_trick_5 => 'masterpiece はほぼ全件';
+
+  @override
+  String get tips_gallery_wolf_1 => '今夜の獲物は 3 ページ目';
+
+  @override
+  String get tips_gallery_wolf_2 => 'におうぞ、神絵はこの中';
+
+  @override
+  String get tips_gallery_wolf_3 => 'スクロールも運動だよ';
+
+  @override
+  String get tips_gallery_wolf_4 => '巣は広い。ゆっくり探して';
+
+  @override
+  String get tips_online_guide_1 => 'スペース区切りで Enter';
+
+  @override
+  String get tips_online_guide_2 => 'ファジーマッチで *tag* も';
+
+  @override
+  String get tips_online_guide_3 => 'ブラックリストのタグは非表示';
+
+  @override
+  String get tips_online_guide_4 => 'ログインでお気に入りが使えます';
+
+  @override
+  String get tips_online_trick_1 => '複数語は下線で：blue_eyes';
+
+  @override
+  String get tips_online_trick_2 => 'いい絵のタグは参考に';
+
+  @override
+  String get tips_online_trick_3 => 'タグが多いほど結果は減る';
+
+  @override
+  String get tips_online_wolf_1 => '外の世界は広い。偵察してくる';
+
+  @override
+  String get tips_online_wolf_2 => 'よその縄張り、見るだけね';
+
+  @override
+  String get tips_online_wolf_3 => '今日はどの森で狩りをする？';
+
+  @override
+  String get tips_blocks_guide_1 => 'タイトルやタグで検索';
+
+  @override
+  String get tips_blocks_guide_2 => 'ブロックは枠へドラッグ';
+
+  @override
+  String get tips_blocks_guide_3 => '★ でお気に入りにまとめる';
+
+  @override
+  String get tips_blocks_guide_4 => 'サムネイルで選びやすく';
+
+  @override
+  String get tips_blocks_guide_5 => '選択して右クリックで保存';
+
+  @override
+  String get tips_blocks_trick_1 => '三回書いたらブロックに';
+
+  @override
+  String get tips_blocks_trick_2 => '迷ったら保存。消すのは一瞬';
+
+  @override
+  String get tips_blocks_trick_3 => '名前は丁寧に。未来の自分のため';
+
+  @override
+  String get tips_blocks_trick_4 => '候補が多いほど驚きも増える';
+
+  @override
+  String get tips_blocks_wolf_1 => 'どのブロックも出番待ち';
+
+  @override
+  String get tips_blocks_wolf_2 => 'ブロックは君の群れだよ';
+
+  @override
+  String get tips_blocks_wolf_3 => '知ってるのはブロック肉だけ';
+
+  @override
+  String get tips_blocks_wolf_4 => 'フォルダーの中にフォルダー';
+
+  @override
+  String get tips_generating_wolf_1 => '乱数と値段交渉中…';
+
+  @override
+  String get tips_generating_wolf_2 => '6 本目の指を説得中…';
+
+  @override
+  String get tips_generating_wolf_3 => 'ピクセルを整列させています…';
+
+  @override
+  String get tips_generating_wolf_4 => 'ノイズを一粒ずつ拭き取り中…';
+
+  @override
+  String get tips_generating_wolf_5 => 'オオカミが遠くで応援の遠吠え中…';
+
+  @override
+  String get tips_generating_wolf_6 => 'GPU に君の好みを説明中…';
+
+  @override
+  String get tips_generating_wolf_7 => 'プロンプトを夢に翻訳中…';
+
+  @override
+  String get tips_generating_wolf_8 => '目の数を確認中…';
+
+  @override
+  String get tips_generating_wolf_9 => '光と影のいい角度を探しています…';
+
+  @override
+  String get tips_generating_wolf_10 => '背景に目立ちすぎないよう説得中…';
+
+  @override
+  String get tips_generating_wolf_11 => 'ノイズの海から絵をすくい上げ中…';
+
+  @override
+  String get tips_generating_wolf_12 => '指を数えています。いち、に、さん…';
+
+  @override
+  String get tips_generating_wolf_13 => '絵の具が乾くのを待っています…';
+
+  @override
+  String get tips_generating_wolf_14 => '今日の運を召喚中…';
+
+  @override
+  String get tips_generating_trick_1 => '待てない？ Esc でキャンセル';
+
+  @override
+  String get tips_generating_trick_2 => 'プレビューは少しずつ鮮明に';
+
+  @override
+  String get tips_generating_trick_3 => '完成した画像は標準でギャラリーに保存';
+
+  @override
+  String get tips_generating_trick_4 => 'サンプリングの一歩ごとにノイズが減る';
+
+  @override
+  String get tips_splash_guide_1 => 'F1 でいつでもショートカット一覧を表示できます。';
+
+  @override
+  String get tips_splash_guide_2 => 'Ctrl+Enter で生成。ショートカットはすべて設定で変更できます。';
+
+  @override
+  String get tips_splash_guide_3 => '画像をウィンドウにドロップすると、プロンプトとパラメーターを読み取れます。';
+
+  @override
+  String get tips_splash_guide_4 => 'よく使うプロンプトはブロックにすれば、次はワンクリックで再利用できます。';
+
+  @override
+  String get tips_splash_trick_1 => '上の STEP /28 は、標準の 28 ステップへのオマージュです。';
+
+  @override
+  String get tips_splash_trick_2 => 'エンコード済みの Vibe は無料で再利用でき、2 Anlas の節約に。';
+
+  @override
+  String get tips_splash_trick_3 => '初回のギャラリー索引づくりは少し時間がかかりますが、その間も普通に使えます。';
+
+  @override
+  String get tips_splash_wolf_1 => 'あと五分だけ……わかった、起きるよ。';
+
+  @override
+  String get tips_splash_wolf_2 => '巣をちょっと片付けてる。すぐ終わるよ。';
+
+  @override
+  String get tips_splash_wolf_3 => 'GPU よし、月よし。あとは君だけ。';
+
+  @override
+  String get tips_splash_wolf_4 => 'におわない？ 新しいプロンプトのにおいがする。';
+
+  @override
+  String get tips_splash_wolf_5 => '今日もいいガチャを。';
+
+  @override
+  String genButton_normal(int count) {
+    return '$count 枚生成';
+  }
+
+  @override
+  String get genButton_one_1 => 'この一枚で決める';
+
+  @override
+  String get genButton_one_2 => 'いい一枚をください';
+
+  @override
+  String get genButton_one_3 => '単発、信じて飛べ';
+
+  @override
+  String get genButton_one_4 => 'まずは一枚お試し';
+
+  @override
+  String get genButton_one_5 => '一枚で勝負';
+
+  @override
+  String get genButton_one_6 => 'これは神絵の予感';
+
+  @override
+  String get genButton_one_7 => '一枚だけ、ほんとに';
+
+  @override
+  String get genButton_one_8 => '新アイコンはこれで';
+
+  @override
+  String get genButton_one_9 => '一発入魂';
+
+  @override
+  String get genButton_one_10 => '壁紙にできるやつを';
+
+  @override
+  String get genButton_one_11 => 'そっと一枚';
+
+  @override
+  String get genButton_one_12 => '一枚くわえてくる';
+
+  @override
+  String genButton_few_1(int count) {
+    return '$count 枚から一番を';
+  }
+
+  @override
+  String genButton_few_2(int count) {
+    return '$count 枚で見比べ';
+  }
+
+  @override
+  String genButton_few_3(int count) {
+    return '$count 連ガチャ';
+  }
+
+  @override
+  String genButton_few_4(int count) {
+    return '$count 枚、どれか当たる';
+  }
+
+  @override
+  String genButton_few_5(int count) {
+    return '$count 択、審査開始';
+  }
+
+  @override
+  String genButton_few_6(int count) {
+    return 'まず $count 枚で準備運動';
+  }
+
+  @override
+  String genButton_few_7(int count) {
+    return '$count 枚から選抜';
+  }
+
+  @override
+  String genButton_few_8(int count) {
+    return '$count 枚の小さな幸せ';
+  }
+
+  @override
+  String genButton_batch_1(int count) {
+    return '$count 連発';
+  }
+
+  @override
+  String genButton_batch_2(int count) {
+    return '$count 枚まとめて';
+  }
+
+  @override
+  String genButton_batch_3(int count) {
+    return '$count 枚、ハマってきた';
+  }
+
+  @override
+  String genButton_batch_4(int count) {
+    return '一度に $count 枚、たっぷり';
+  }
+
+  @override
+  String genButton_batch_5(int count) {
+    return '$count 枚で画面を埋める';
+  }
+
+  @override
+  String genButton_batch_6(int count) {
+    return '$count 連、手堅く';
+  }
+
+  @override
+  String genButton_batch_7(int count) {
+    return '$count 枚、群れで出撃';
+  }
+
+  @override
+  String genButton_batch_8(int count) {
+    return '$count 枚、宴の始まり';
+  }
+
+  @override
+  String genButton_many_1(int count) {
+    return '$count 枚、本気モード';
+  }
+
+  @override
+  String genButton_many_2(int count) {
+    return '$count 枚、GPU が汗だく';
+  }
+
+  @override
+  String genButton_many_3(int count) {
+    return '$count 枚、買いだめモード';
+  }
+
+  @override
+  String genButton_many_4(int count) {
+    return '$count 枚、ライン稼働';
+  }
+
+  @override
+  String genButton_many_5(int count) {
+    return '$count 枚、Anlas が燃える';
+  }
+
+  @override
+  String genButton_many_6(int count) {
+    return '$count 枚、毎日更新する気？';
+  }
+
+  @override
+  String genButton_many_7(int count) {
+    return '$count 枚まとめて出撃';
+  }
+
+  @override
+  String genButton_many_8(int count) {
+    return '$count 枚、オオカミもあ然';
+  }
+
+  @override
+  String genButton_huge_1(int count) {
+    return '$count 枚？！個展でも開く？';
+  }
+
+  @override
+  String genButton_huge_2(int count) {
+    return '$count 枚、ディスクが震える';
+  }
+
+  @override
+  String genButton_huge_3(int count) {
+    return '$count 枚、産業革命';
+  }
+
+  @override
+  String genButton_huge_4(int count) {
+    return '$count 枚、まず深呼吸';
+  }
+
+  @override
+  String genButton_huge_5(int count) {
+    return '$count 枚、容量足りる？';
+  }
+
+  @override
+  String genButton_huge_6(int count) {
+    return '$count 枚、印刷所開店';
+  }
+
+  @override
+  String genButton_huge_7(int count) {
+    return '$count 枚、卸売りで';
+  }
+
+  @override
+  String genButton_huge_8(int count) {
+    return '$count 枚、オオカミが応援を呼びに';
+  }
+
+  @override
+  String get genButton_rare_1 => 'SSR 確定演出';
+
+  @override
+  String get genButton_rare_2 => 'AI の調子が良いらしい';
+
+  @override
+  String get genButton_rare_3 => '今日の運勢：大吉';
+
+  @override
+  String get genButton_rare_4 => 'このボタン、君と相性がいい';
+
+  @override
+  String get genButton_rare_5 => 'オオカミが月に吠えた';
+
+  @override
+  String get genButton_rare_6 => '運気上昇中';
+
+  @override
+  String get genButton_rare_7 => '運気チャージ完了';
+
+  @override
+  String get genButton_rare_8 => 'このガチャはオオカミの提供です';
+
+  @override
+  String get genButton_rare_9 => '来い、神引き！';
+
+  @override
+  String get genButton_rare_10 => '押す者は救われる';
+
+  @override
+  String get genButton_night_1 => '夜も更けた、ラスト一回';
+
+  @override
+  String get genButton_night_2 => 'これ引いたら寝る';
+
+  @override
+  String get genButton_night_3 => '深夜の美意識は大胆';
+
+  @override
+  String get genButton_night_4 => 'オオカミも夜ふかし中';
+
+  @override
+  String genButton_special_7(int count) {
+    return 'ラッキー $count';
+  }
+
+  @override
+  String genButton_special_9(int count) {
+    return '$count 枚で 3×3 完成';
+  }
+
+  @override
+  String genButton_special_42(int count) {
+    return '$count：すべての答え';
+  }
+
+  @override
+  String genButton_special_99(int count) {
+    return '$count 枚、あと 1 枚で 100';
+  }
+
+  @override
+  String genButton_special_100(int count) {
+    return 'ぴったり $count 枚、気持ちいい';
+  }
 
   @override
   String get titleBar_minimize => '最小化';
@@ -9092,15 +9750,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_geistDescription => 'スタジオ全体で共通の外観。白黒の背景にブルーのアクセント。';
 
   @override
-  String get generation_tipReuseBlocks => 'よく使うプロンプトをブロックに保存して、次回も再利用。';
-
-  @override
-  String get generation_tipBlockModes => '順番・ランダムモードで、ブロックの組み合わせを変えられます。';
-
-  @override
-  String get generation_tipLockBlocks => '残したいブロックをロックして、ほかの部分をランダムに。';
-
-  @override
   String get styleExplore_collapseGallery => '候補ギャラリーを折りたたむ';
 
   @override
@@ -9140,7 +9789,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wiki_officialDirectory => '公式ディレクトリ';
 
   @override
-  String get wiki_searchHint => 'タグ、別名、中国語訳を検索';
+  String get wiki_searchHint => 'タグや別名を検索';
 
   @override
   String get wiki_typeAll => 'すべての種類';

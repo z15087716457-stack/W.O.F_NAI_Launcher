@@ -135,6 +135,7 @@ void main() {
             promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
             subscriptionNotifierProvider.overrideWith(_Subscription.new),
             tipEpochProvider.overrideWith((ref) => Stream.value(0)),
+            tipDeckProvider.overrideWithValue(TipDeck(seed: 1)),
             for (final target in PromptTokenCountTarget.values)
               promptTokenUsageProvider(target).overrideWith(
                 (ref) async =>
@@ -203,7 +204,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.getTopLeft(find.byType(WebLeftPanel)).dy, 0);
-        expect(find.text('TIP'), findsOneWidget);
+        expect(find.byKey(const Key('tip-welcome-label')), findsOneWidget);
         final welcome = find.byType(GenerationWelcome);
         expect(tester.getTopLeft(welcome).dy, 0);
         final tipBefore = tester
@@ -270,6 +271,7 @@ void main() {
               promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
               subscriptionNotifierProvider.overrideWith(_Subscription.new),
               tipEpochProvider.overrideWith((ref) => Stream.value(0)),
+              tipDeckProvider.overrideWithValue(TipDeck(seed: 1)),
               for (final target in PromptTokenCountTarget.values)
                 promptTokenUsageProvider(target).overrideWith(
                   (ref) async =>
@@ -340,7 +342,9 @@ void main() {
             ),
             findsNothing,
           );
-          expect(tester.getSize(promptCard).height, lessThan(230));
+          // 一体式提示词卡最低高度随宽度走，接近方框
+          final cardSize = tester.getSize(promptCard);
+          expect(cardSize.height / cardSize.width, inInclusiveRange(.6, 1.1));
           expect(find.text('12 / 512'), findsNothing);
           expect(find.byType(LinearProgressIndicator), findsNWidgets(2));
           // 额度胶囊：与 Model / Mode 选择框同款的灰底描边壳

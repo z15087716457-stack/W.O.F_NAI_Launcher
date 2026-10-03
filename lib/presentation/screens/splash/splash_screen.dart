@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/tips_provider.dart';
 import '../../providers/warmup_provider.dart';
 import '../../themes/studio_typography.dart';
 import '../../utils/warmup_message_localizer.dart';
@@ -35,6 +36,7 @@ class SplashScreen extends ConsumerWidget {
         error == null && state.subTaskMessage != null && !state.isComplete
         ? WarmupMessageLocalizer.localizeSubTask(l10n, state.subTaskMessage!)
         : null;
+    final tip = ref.watch(splashTipProvider).hint(l10n);
     return BrandEntryScene(
       loading: true,
       progress: progress,
@@ -44,6 +46,7 @@ class SplashScreen extends ConsumerWidget {
         detail: error != null
             ? WarmupMessageLocalizer.localizeSubTask(l10n, error)
             : subTask,
+        tip: tip,
         isError: error != null,
       ),
     );
@@ -55,12 +58,16 @@ class _BootPanel extends StatelessWidget {
     required this.progress,
     required this.task,
     required this.detail,
+    required this.tip,
     required this.isError,
   });
 
   final double progress;
   final String task;
   final String? detail;
+
+  /// 没有子任务或错误时，这一行显示一条小贴士。
+  final String tip;
   final bool isError;
 
   @override
@@ -139,18 +146,19 @@ class _BootPanel extends StatelessWidget {
             const SizedBox(height: 10),
             SizedBox(
               height: 34,
-              child: detail == null
-                  ? null
-                  : Text(
-                      detail!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        height: 1.45,
-                        color: isError ? palette.error : palette.faint,
-                      ),
-                    ),
+              child: Text(
+                detail ?? tip,
+                key: Key(
+                  detail == null ? 'brand_warmup_tip' : 'brand_warmup_detail',
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.45,
+                  color: isError ? palette.error : palette.faint,
+                ),
+              ),
             ),
           ],
         ),

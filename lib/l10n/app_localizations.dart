@@ -5728,12 +5728,6 @@ abstract class AppLocalizations {
   /// **'Enabled'**
   String get characterEditor_enabled;
 
-  /// No description provided for @characterEditor_promptHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter prompt for this character...'**
-  String get characterEditor_promptHint;
-
   /// No description provided for @characterEditor_negativePromptHint.
   ///
   /// In en, this message translates to:
@@ -13728,7 +13722,7 @@ abstract class AppLocalizations {
   /// No description provided for @tagExpansion_searchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search tags, aliases, or translations'**
+  /// **'Search tags or aliases'**
   String get tagExpansion_searchHint;
 
   /// No description provided for @tagExpansion_relatedTitle.
@@ -14988,12 +14982,6 @@ abstract class AppLocalizations {
   /// **'No candidates yet. Create or select an explore run to start batch generation.'**
   String get styleExplore_galleryEmptyHint;
 
-  /// No description provided for @styleExplore_labTip.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your favorite candidates and evolve your style, generation by generation.'**
-  String get styleExplore_labTip;
-
   /// No description provided for @styleExplore_runNameLabel.
   ///
   /// In en, this message translates to:
@@ -15738,365 +15726,1391 @@ abstract class AppLocalizations {
   /// **'Models & APIs'**
   String get settings_modelsAndInterfaces;
 
-  /// No description provided for @tips_gen_teach_1.
+  /// No description provided for @tips_kind_guide.
   ///
   /// In en, this message translates to:
-  /// **'Type < in the prompt box to pull in block-library blocks'**
-  String get tips_gen_teach_1;
+  /// **'Tip'**
+  String get tips_kind_guide;
 
-  /// No description provided for @tips_gen_teach_2.
+  /// No description provided for @tips_kind_trick.
   ///
   /// In en, this message translates to:
-  /// **'Click Seed on the summary bar to pin or re-randomize; the sampler has a menu too'**
-  String get tips_gen_teach_2;
+  /// **'Pro tip'**
+  String get tips_kind_trick;
 
-  /// No description provided for @tips_gen_teach_3.
+  /// No description provided for @tips_kind_wolf.
   ///
   /// In en, this message translates to:
-  /// **'The number box beside Generate sets batch count; the right chip shows Anlas cost'**
-  String get tips_gen_teach_3;
+  /// **'Wolf'**
+  String get tips_kind_wolf;
 
-  /// No description provided for @tips_gen_teach_4.
+  /// No description provided for @tips_hint.
   ///
   /// In en, this message translates to:
-  /// **'The chunks menu at top-right tucks away blocks, presets, and regex rules'**
-  String get tips_gen_teach_4;
+  /// **'{label}: {tip}'**
+  String tips_hint(String label, String tip);
 
-  /// No description provided for @tips_gen_teach_5.
+  /// Shortcut generateImage (ctrl+enter); canvas controls from settings_outputViewer_canvasDescription.
   ///
   /// In en, this message translates to:
-  /// **'Transparent BG exports the alpha channel — with character references enabled, it disables'**
-  String get tips_gen_teach_5;
+  /// **'Press Ctrl+Enter to generate once your prompt is ready. Results spread across this canvas batch by batch: middle-drag or Shift+left-drag to pan, Ctrl+scroll to zoom, and WASD to move around.'**
+  String get tips_studio_guide_1;
 
-  /// No description provided for @tips_gen_fun_1.
+  /// Pill instance modes (pillSettingsModeFixed / Sequential / Random).
   ///
   /// In en, this message translates to:
-  /// **'Feeding the AI digital treats…'**
-  String get tips_gen_fun_1;
+  /// **'Write your go-to artist strings, quality tags and composition notes once, save them as blocks, and pull them from the block library next time. Blocks are more than copy-paste: set them to Fixed, Sequential or Random draw and every generation gets a new combination.'**
+  String get tips_studio_guide_2;
 
-  /// No description provided for @tips_gen_fun_2.
+  /// pillCardLock / pillCardReroll.
   ///
   /// In en, this message translates to:
-  /// **'Every generation is a tiny gacha pull — go on'**
-  String get tips_gen_fun_2;
+  /// **'Got a random roll you love? Lock it, then re-roll the other blocks. Locked blocks stay put while the rest keeps shuffling — perfect for \"keep this pose, try a few more outfits.\"'**
+  String get tips_studio_guide_3;
 
-  /// No description provided for @tips_gen_fun_3.
+  /// Image drop dialog (drop_dialogTitle).
   ///
   /// In en, this message translates to:
-  /// **'Anlas balance and model name live up top — worth a glance before you burn'**
-  String get tips_gen_fun_3;
+  /// **'Drag an image into the window and you\'ll be asked how to use it: Image2Image, Vibe Transfer, Precise Reference, or just extracting its prompt and settings. If it carries NovelAI metadata, one drag shows exactly how it was made.'**
+  String get tips_studio_guide_4;
 
-  /// No description provided for @tips_gen_fun_4.
+  /// Character position canvas (characterCanvas_custom, characterCanvas_dragHint).
   ///
   /// In en, this message translates to:
-  /// **'The prompt box grew taller so your ambitions can sprawl'**
-  String get tips_gen_fun_4;
+  /// **'A character box is really a placement box. Besides people, you can put a cat, a lamp or a shop sign in one. Switch Position to Custom and drag its anchor on the preview to tell the model where it belongs.'**
+  String get tips_studio_guide_5;
 
-  /// No description provided for @tips_gen_fun_5.
+  /// Weight scroll modifier (settings_enablePromptWeightScrollSubtitle).
   ///
   /// In en, this message translates to:
-  /// **'Seed -1 means fate decides; fate likes round numbers (allegedly)'**
-  String get tips_gen_fun_5;
+  /// **'Select part of a prompt and hold Alt while scrolling to adjust its weight. Without Alt the wheel just scrolls, so weights never change by accident. You can switch the modifier to Ctrl in Settings.'**
+  String get tips_studio_guide_6;
 
-  /// No description provided for @tips_explore_teach_1.
+  /// Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma.
   ///
   /// In en, this message translates to:
-  /// **'Heart + folder triage feeds the next generation'**
-  String get tips_explore_teach_1;
+  /// **'Press F1 any time for the shortcut list. Ctrl+1, Ctrl+2 and Ctrl+3 jump between Generate, Gallery and Online Gallery, and Ctrl+, opens Settings. Every shortcut can be remapped in Settings.'**
+  String get tips_studio_guide_7;
 
-  /// No description provided for @tips_explore_teach_2.
+  /// settings_warnHighAnlasCostTitle.
   ///
   /// In en, this message translates to:
-  /// **'The A/B compare view judges parent images — pick a winner and move on'**
-  String get tips_explore_teach_2;
+  /// **'Worried about burning a pile of Anlas by accident? Turn on the High Anlas cost warning in Settings, and any generation estimated above your threshold will ask before it runs.'**
+  String get tips_studio_guide_8;
 
-  /// No description provided for @tips_explore_teach_3.
+  /// NovelAI output is deterministic for identical parameters and seed.
   ///
   /// In en, this message translates to:
-  /// **'The number box next to Generate sets the batch size for this round'**
-  String get tips_explore_teach_3;
+  /// **'The seed decides which image you pull. Same settings plus the same seed means the same picture. Want to recreate a masterpiece? Keep the seed. Want new luck? Stop staring at that seed.'**
+  String get tips_studio_trick_1;
 
-  /// No description provided for @tips_explore_teach_4.
+  /// drop_reuseVibeSubtitle / drop_useAsRawImageSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Hover a pile thumbnail to preview it big'**
-  String get tips_explore_teach_4;
+  /// **'Reusing a pre-encoded Vibe skips the 2 Anlas encoding fee. Two Anlas doesn\'t sound like much — until you count how many Vibes you use in a day.'**
+  String get tips_studio_trick_2;
 
-  /// No description provided for @tips_explore_teach_5.
+  /// UC preset selector on the negative tab (ucPreset_label).
   ///
   /// In en, this message translates to:
-  /// **'Drag the divider to widen the gallery column'**
-  String get tips_explore_teach_5;
+  /// **'Undesired Content isn\'t a wishing well. Writing \"bad hands\" a hundred times does less than describing the hands clearly in the prompt. Leave the usual boilerplate to the Undesired Content preset.'**
+  String get tips_studio_trick_3;
 
-  /// No description provided for @tips_explore_fun_1.
+  /// Random draw block mode.
   ///
   /// In en, this message translates to:
-  /// **'Survival of the fittest, but for paintings'**
-  String get tips_explore_fun_1;
+  /// **'Longer artist strings aren\'t always better. Past ten names, the model probably can\'t tell whose brushwork you actually want. Split them into a few blocks and let random draws rotate them in.'**
+  String get tips_studio_trick_4;
 
-  /// No description provided for @tips_explore_fun_2.
+  /// Button count = nSamples x imagesPerRequest; estimatedCost uses both.
   ///
   /// In en, this message translates to:
-  /// **'Every generation is an audition'**
-  String get tips_explore_fun_2;
+  /// **'Requests per click and images per request are two different numbers. The button shows the total, and Anlas is charged on the total too. Check before you click. Don\'t ask how I know.'**
+  String get tips_studio_trick_5;
 
-  /// No description provided for @tips_explore_fun_3.
+  /// promptTranslation_guideMiddleText.
   ///
   /// In en, this message translates to:
-  /// **'Good genes come from good parents'**
-  String get tips_explore_fun_3;
+  /// **'Middle-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.'**
+  String get tips_studio_trick_6;
 
-  /// No description provided for @tips_explore_fun_4.
+  /// settings_limitGenerationIntervalTitle / settings_setGenerationIntervalJitterTitle.
   ///
   /// In en, this message translates to:
-  /// **'Never underestimate mutation'**
-  String get tips_explore_fun_4;
+  /// **'Limit generation frequency in Settings forces a cooldown between runs, and a little random jitter keeps the rhythm from feeling mechanical. Good for slow late-night sessions — and for anyone whose finger won\'t leave the button.'**
+  String get tips_studio_trick_7;
 
-  /// No description provided for @tips_explore_fun_5.
+  /// No description provided for @tips_studio_wolf_1.
   ///
   /// In en, this message translates to:
-  /// **'Natural selection, fast-forwarded'**
-  String get tips_explore_fun_5;
+  /// **'Welcome to the den. I carry the images you make back here and stack them neatly in the gallery. Honestly, I\'m far better at tidying than at drawing.'**
+  String get tips_studio_wolf_1;
 
-  /// No description provided for @tips_gallerySearch_teach_1.
+  /// No description provided for @tips_studio_wolf_2.
   ///
   /// In en, this message translates to:
-  /// **'Comma-separated terms = intersection search'**
-  String get tips_gallerySearch_teach_1;
+  /// **'Wolves see best at night. So if you\'re still here at 3 a.m., I won\'t say a word. I\'ll just keep you company for one more pull.'**
+  String get tips_studio_wolf_2;
 
-  /// No description provided for @tips_gallerySearch_teach_2.
+  /// No description provided for @tips_studio_wolf_3.
   ///
   /// In en, this message translates to:
-  /// **'Text search excludes negative prompts — hits stay clean'**
-  String get tips_gallerySearch_teach_2;
+  /// **'They say an AI artist comes of age the first time they count the fingers on one hand without panicking. I don\'t have fingers, so I\'ve always been calm.'**
+  String get tips_studio_wolf_3;
 
-  /// No description provided for @tips_gallerySearch_teach_3.
+  /// No description provided for @tips_studio_wolf_4.
   ///
   /// In en, this message translates to:
-  /// **'Search matches model, sampler, source, and version fields'**
-  String get tips_gallerySearch_teach_3;
+  /// **'Pack rules: share good seeds, save good prompts as blocks, and save good images before you admire them. The last one matters most. Don\'t ask why.'**
+  String get tips_studio_wolf_4;
 
-  /// No description provided for @tips_gallerySearch_teach_4.
+  /// No description provided for @tips_studio_wolf_5.
   ///
   /// In en, this message translates to:
-  /// **'Out of room for buttons? They scroll horizontally'**
-  String get tips_gallerySearch_teach_4;
+  /// **'I can\'t draw, but I\'m very good at waiting. Those few seconds when the live preview slowly sharpens are the quietest part of my day.'**
+  String get tips_studio_wolf_5;
 
-  /// No description provided for @tips_gallerySearch_teach_5.
+  /// No description provided for @tips_studio_wolf_6.
   ///
   /// In en, this message translates to:
-  /// **'Page size goes up to 500 — for the browse-everything type'**
-  String get tips_gallerySearch_teach_5;
+  /// **'W.O.F stands for WolF. As for the dots in between? Those are my paw prints in the snow.'**
+  String get tips_studio_wolf_6;
 
-  /// No description provided for @tips_gallerySearch_fun_1.
+  /// No description provided for @tips_studio_wolf_7.
   ///
   /// In en, this message translates to:
-  /// **'Looks like there\'s good stuff down there~~~ what are we hunting?'**
-  String get tips_gallerySearch_fun_1;
+  /// **'When the canvas is empty, I curl up here for a nap. Hit Generate and I\'m awake.'**
+  String get tips_studio_wolf_7;
 
-  /// No description provided for @tips_gallerySearch_fun_2.
+  /// No description provided for @tips_studio_night_1.
   ///
   /// In en, this message translates to:
-  /// **'The collection grows; the folders pretend to keep up'**
-  String get tips_gallerySearch_fun_2;
+  /// **'It\'s the middle of the night. Friendly reminder: your taste runs about 30% bolder at this hour. Take another look in the morning.'**
+  String get tips_studio_night_1;
 
-  /// No description provided for @tips_gallerySearch_fun_3.
+  /// No description provided for @tips_studio_night_2.
   ///
   /// In en, this message translates to:
-  /// **'Pro tip: your own prompts are the best search keywords'**
-  String get tips_gallerySearch_fun_3;
+  /// **'It\'s late, and somewhere in a server room a GPU just yawned. Finish this batch and get some sleep. I\'ll guard the gallery.'**
+  String get tips_studio_night_2;
 
-  /// No description provided for @tips_gallerySearch_fun_4.
+  /// Explore runs snapshot prompt and parameters; branches turn picked children into parents.
   ///
   /// In en, this message translates to:
-  /// **'Scrolling is cardio'**
-  String get tips_gallerySearch_fun_4;
+  /// **'Style Explore is an audition. Start an explore run to lock in the prompt and settings, then generate a batch of candidates. The children you pick become the next generation\'s parents, and the style moves toward what you want one generation at a time.'**
+  String get tips_lab_guide_1;
 
-  /// No description provided for @tips_gallerySearch_fun_5.
+  /// Heart/folder are annotations only (explore_candidate_gallery); styleExplore_branchSelect.
   ///
   /// In en, this message translates to:
-  /// **'Somewhere in this pile hides tonight\'s masterpiece'**
-  String get tips_gallerySearch_fun_5;
+  /// **'Hearts and folders are for your own organizing; they don\'t affect inheritance. What decides the next generation is the set you pick with \"Select for branch.\"'**
+  String get tips_lab_guide_2;
 
-  /// No description provided for @tips_gallerySearch_start_1.
+  /// Preference values weight parent selection in ExploreMutationEngine.
   ///
   /// In en, this message translates to:
-  /// **'Search filename or prompt text — press Enter or pick a suggestion'**
-  String get tips_gallerySearch_start_1;
+  /// **'Cannot decide? Use the A/B comparison: two parent images appear side by side and you only answer which is closer to the style you want. Parents ranked higher are more likely to get children next round.'**
+  String get tips_lab_guide_3;
 
-  /// No description provided for @tips_gallerySearch_start_2.
+  /// styleExplore_deepRoundNoInstance.
   ///
   /// In en, this message translates to:
-  /// **'Separate terms with commas to require all of them'**
-  String get tips_gallerySearch_start_2;
+  /// **'To generate the next round, the main prompt needs at least one random block with evolution enabled. No variable genes, nothing for the mutation engine to work with.'**
+  String get tips_lab_guide_4;
 
-  /// No description provided for @tips_gallerySearch_start_3.
+  /// styleExplore_adoptAsBlock / styleExplore_mergeAdopt.
   ///
   /// In en, this message translates to:
-  /// **'Positive prompts only — negative prompts are already excluded from hits'**
-  String get tips_gallerySearch_start_3;
+  /// **'Found a candidate with a great combination? Adopt as block saves it to the block library so you can use it on the Generate page too. Select several and Merge & adopt combines them into one block.'**
+  String get tips_lab_guide_5;
 
-  /// No description provided for @tips_gallerySearch_start_4.
+  /// styleExplore_deleteRunMessage.
   ///
   /// In en, this message translates to:
-  /// **'It also matches model, sampler, source, and version metadata'**
-  String get tips_gallerySearch_start_4;
+  /// **'Deleting an explore run only removes the candidate copies in its run folder; originals in the gallery stay untouched. Clean up freely — a lab is supposed to be a bit messy.'**
+  String get tips_lab_guide_6;
 
-  /// No description provided for @tips_gallerySearch_start_5.
+  /// styleExplore_deepRoundCountHint.
   ///
   /// In en, this message translates to:
-  /// **'Type a tag like masterpiece, or a filename fragment'**
-  String get tips_gallerySearch_start_5;
+  /// **'Every parent is guaranteed at least one child per round, so more parents means more images per round. Get greedy and your Anlas will call time for you.'**
+  String get tips_lab_trick_1;
 
-  /// No description provided for @tips_gallerySearch_start_6.
+  /// styleExplore_branchNeedLatest.
   ///
   /// In en, this message translates to:
-  /// **'Found the one? Click the card for details, right-click for actions'**
-  String get tips_gallerySearch_start_6;
+  /// **'You can only branch from the latest generation\'s pile. You can look back, but you can\'t fork from halfway. Evolution is ruthless like that.'**
+  String get tips_lab_trick_2;
 
-  /// No description provided for @tips_gallerySearch_start_7.
+  /// styleExplore_deepRoundEmpty; injection draws new atoms from the block pool.
   ///
   /// In en, this message translates to:
-  /// **'Combine text with the version chip on the right to narrow down'**
-  String get tips_gallerySearch_start_7;
+  /// **'Sometimes the mutation engine says it can\'t produce enough distinct children. It isn\'t slacking — the gene pool is just too small. Add a few more options to the random block and it gets right back to work.'**
+  String get tips_lab_trick_3;
 
-  /// No description provided for @tips_gallerySearch_start_8.
+  /// Pile thumbnail hover preview (ExploreCandidateHoverSession).
   ///
   /// In en, this message translates to:
-  /// **'Empty query = browse all; type anything to filter instantly'**
-  String get tips_gallerySearch_start_8;
+  /// **'Hover a thumbnail in the candidate pile to see it large. No need to open them one by one; a judge has to be efficient.'**
+  String get tips_lab_trick_4;
 
-  /// No description provided for @tips_gallerySearch_start_9.
+  /// styleExplore_fixateAsTemplate.
   ///
   /// In en, this message translates to:
-  /// **'Search updates as you type — no submit needed'**
-  String get tips_gallerySearch_start_9;
+  /// **'Like a candidate\'s whole setup? Import metadata moves its prompt and settings straight back into the editor so you can keep tweaking from there.'**
+  String get tips_lab_trick_5;
 
-  /// No description provided for @tips_gallerySearch_start_10.
+  /// No description provided for @tips_lab_wolf_1.
   ///
   /// In en, this message translates to:
-  /// **'Resist the urge to re-generate it — search first, it\'s probably here'**
-  String get tips_gallerySearch_start_10;
+  /// **'No wolf is born the strongest in the pack. Styles are the same: a rough first generation is normal. Judge it at the third.'**
+  String get tips_lab_wolf_1;
 
-  /// No description provided for @tips_blocklib_teach_1.
+  /// No description provided for @tips_lab_wolf_2.
   ///
   /// In en, this message translates to:
-  /// **'Blocks take thumbnails — set one in the edit dialog'**
-  String get tips_blocklib_teach_1;
+  /// **'Survival of the fittest has a gentle version here: candidates you don\'t pick don\'t disappear. It just wasn\'t their turn this round.'**
+  String get tips_lab_wolf_2;
 
-  /// No description provided for @tips_blocklib_teach_2.
+  /// No description provided for @tips_lab_wolf_3.
   ///
   /// In en, this message translates to:
-  /// **'Click a block to open details; hover it for a quick preview'**
-  String get tips_blocklib_teach_2;
+  /// **'My entire understanding of genetics: good-looking parents usually have good-looking pups. The rest is mutation and a little luck.'**
+  String get tips_lab_wolf_3;
 
-  /// No description provided for @tips_blocklib_teach_3.
+  /// No description provided for @tips_lab_wolf_4.
   ///
   /// In en, this message translates to:
-  /// **'Star a block into a collection; the favorites lane sits up top'**
-  String get tips_blocklib_teach_3;
+  /// **'The lights in the LAB usually stay on late. I\'m on duty at the door, keeping count of which generation we\'re on.'**
+  String get tips_lab_wolf_4;
 
-  /// No description provided for @tips_blocklib_teach_4.
+  /// No description provided for @tips_lab_wolf_5.
   ///
   /// In en, this message translates to:
-  /// **'Waterfall view shows the image blocks properly'**
-  String get tips_blocklib_teach_4;
+  /// **'Never underestimate mutation. Sometimes the thing you couldn\'t find in ten generations shows up by accident. So don\'t rush to delete the one that looks off.'**
+  String get tips_lab_wolf_5;
 
-  /// No description provided for @tips_blocklib_teach_5.
+  /// Shortcuts generateImage ctrl+enter / cancelGeneration escape (web_style_layout).
   ///
   /// In en, this message translates to:
-  /// **'Drag the divider to resize blocks vs folders'**
-  String get tips_blocklib_teach_5;
+  /// **'Ctrl+Enter generates; Esc cancels a run in progress.'**
+  String get tips_prompt_guide_1;
 
-  /// No description provided for @tips_blocklib_fun_1.
+  /// Weight scroll modifier (default Alt).
   ///
   /// In en, this message translates to:
-  /// **'Every block dreams of being summoned'**
-  String get tips_blocklib_fun_1;
+  /// **'Select some text and hold Alt while scrolling to change its weight. Without Alt, the wheel just scrolls.'**
+  String get tips_prompt_guide_2;
 
-  /// No description provided for @tips_blocklib_fun_2.
+  /// prompt_cooccurrenceRecommendationSubtitle (default on).
   ///
   /// In en, this message translates to:
-  /// **'Folders within folders — we\'re organized now'**
-  String get tips_blocklib_fun_2;
+  /// **'Ctrl+click a tag to look it up in the local tag library; Ctrl+drag across a phrase to see tags that often appear with it.'**
+  String get tips_prompt_guide_3;
 
-  /// No description provided for @tips_blocklib_fun_3.
+  /// Selection context menu promptBlockLibrary_saveToLibrary.
   ///
   /// In en, this message translates to:
-  /// **'A use count is a block\'s CV'**
-  String get tips_blocklib_fun_3;
+  /// **'Right-click selected text to save it straight to the block library. Next time, one click or drag brings it back.'**
+  String get tips_prompt_guide_4;
 
-  /// No description provided for @tips_blocklib_fun_4.
+  /// QualityTagsSelector / UcPresetSelector in the prompt card footer.
   ///
   /// In en, this message translates to:
-  /// **'The blocks tray is for the greatest hits'**
-  String get tips_blocklib_fun_4;
+  /// **'The quality tag preset at the bottom of this box adds the usual quality tags for you; switch to Undesired Content and the same spot holds its preset.'**
+  String get tips_prompt_guide_5;
 
-  /// No description provided for @tips_blocklib_fun_5.
+  /// showShortcutHelp f1.
   ///
   /// In en, this message translates to:
-  /// **'If in doubt, make it a block'**
-  String get tips_blocklib_fun_5;
+  /// **'Press F1 to see every shortcut.'**
+  String get tips_prompt_guide_6;
 
-  /// No description provided for @tips_gen_1.
+  /// ComfyuiImportWrapper detects ComfyUI multi-character syntax.
   ///
   /// In en, this message translates to:
-  /// **'Ctrl+Z works in the text fields — fear not the typo'**
-  String get tips_gen_1;
+  /// **'Paste a multi-character prompt copied from ComfyUI and it\'s recognized, with an offer to import it as character boxes — no retyping one by one.'**
+  String get tips_prompt_guide_7;
 
-  /// No description provided for @tips_gen_2.
+  /// prompt_sdSyntaxAutoConvertSubtitle (default off).
   ///
   /// In en, this message translates to:
-  /// **'The Settings → Prompt chunk menu hides more toggles than you\'d guess'**
-  String get tips_gen_2;
+  /// **'With SD Syntax Auto Convert on, weights like (tag:1.2) are converted to the NovelAI format when you leave the box or generate.'**
+  String get tips_prompt_guide_8;
 
-  /// No description provided for @tips_gen_3.
+  /// NovelAI V4+ numeric emphasis syntax.
   ///
   /// In en, this message translates to:
-  /// **'Drag any thin divider — most panes resize'**
-  String get tips_gen_3;
+  /// **'1.2::tag:: sets an exact weight; a negative number pushes the other way.'**
+  String get tips_prompt_guide_9;
 
-  /// No description provided for @tips_gen_4.
+  /// NovelAI bracket emphasis.
   ///
   /// In en, this message translates to:
-  /// **'The history lane recalls past generations with their settings'**
-  String get tips_gen_4;
+  /// **'Each layer of curly braces multiplies the weight by 1.05; each layer of square brackets divides it by 1.05. Anyone wrapping five layers of braces is usually arguing with the model.'**
+  String get tips_prompt_trick_1;
 
-  /// No description provided for @tips_gen_5.
+  /// prompt_autoFormatSubtitle (default on).
   ///
   /// In en, this message translates to:
-  /// **'Right-click is a menu; hover is a preview'**
-  String get tips_gen_5;
+  /// **'Auto Format strips useless 1.0 weights. It isn\'t judging you; it\'s saving tokens.'**
+  String get tips_prompt_trick_2;
 
-  /// No description provided for @tips_fun_1.
+  /// PromptTokenCountFooter.
   ///
   /// In en, this message translates to:
-  /// **'Loading today\'s dose of mysticism…'**
-  String get tips_fun_1;
+  /// **'The thin bar at the bottom shows token usage. Once it\'s full, the model barely sees anything past it. If you\'re writing a novel, this isn\'t the place.'**
+  String get tips_prompt_trick_3;
 
-  /// No description provided for @tips_fun_2.
+  /// No description provided for @tips_prompt_trick_4.
   ///
   /// In en, this message translates to:
-  /// **'The seed was random; the taste wasn\'t'**
-  String get tips_fun_2;
+  /// **'Stuck? Start with the biggest thing in the picture.'**
+  String get tips_prompt_trick_4;
 
-  /// No description provided for @tips_fun_3.
+  /// No description provided for @tips_prompt_trick_5.
   ///
   /// In en, this message translates to:
-  /// **'Somewhere, a GPU hums in anticipation'**
-  String get tips_fun_3;
+  /// **'One set of quality tags is enough. Typing masterpiece three times doesn\'t make you look more sincere to the model.'**
+  String get tips_prompt_trick_5;
 
-  /// No description provided for @tips_fun_4.
+  /// NovelAI numeric emphasis.
   ///
   /// In en, this message translates to:
-  /// **'The most expensive button here is Generate — it eats Anlas'**
-  String get tips_fun_4;
+  /// **'Want something present but not stealing the show? 0.8:: works better than deleting it. Deleting means gone; lowering the weight means low-key.'**
+  String get tips_prompt_trick_6;
 
-  /// No description provided for @tips_fun_5.
+  /// Random draw block mode.
   ///
   /// In en, this message translates to:
-  /// **'This box has seen thousands of masterpieces (and a few regrets)'**
-  String get tips_fun_5;
+  /// **'Swapping the same few words over and over? Make a block and let random draws do it.'**
+  String get tips_prompt_trick_7;
+
+  /// No description provided for @tips_prompt_trick_8.
+  ///
+  /// In en, this message translates to:
+  /// **'Put what you want in the prompt and what you don\'t want in Undesired Content. Write \"no hat\" in the prompt and the model mostly just hears \"hat.\"'**
+  String get tips_prompt_trick_8;
+
+  /// No description provided for @tips_prompt_wolf_1.
+  ///
+  /// In en, this message translates to:
+  /// **'This box has seen thousands of masterpieces, and a few things best left unshared.'**
+  String get tips_prompt_wolf_1;
+
+  /// No description provided for @tips_prompt_wolf_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the picture in one plain sentence first, then break it into tags. Do it the other way around and you often get a pile of tags and a picture nobody understands.'**
+  String get tips_prompt_wolf_2;
+
+  /// No description provided for @tips_prompt_wolf_3.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m watching you type. Relax, I can\'t read.'**
+  String get tips_prompt_wolf_3;
+
+  /// No description provided for @tips_prompt_wolf_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Somewhere far away, a GPU just sighed at your prompt.'**
+  String get tips_prompt_wolf_4;
+
+  /// No description provided for @tips_prompt_wolf_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Gacha ends in superstition. Superstition ends in a fixed seed.'**
+  String get tips_prompt_wolf_5;
+
+  /// No description provided for @tips_prompt_wolf_6.
+  ///
+  /// In en, this message translates to:
+  /// **'By the twelfth artist tag, the model no longer knows whose style it\'s drawing. Neither do you.'**
+  String get tips_prompt_wolf_6;
+
+  /// pillCardEvolutionEnable (explore only).
+  ///
+  /// In en, this message translates to:
+  /// **'This is the parent prompt. To let part of it evolve, turn that part into a random block and enable evolution on the block.'**
+  String get tips_explore_guide_1;
+
+  /// pillCardEvolutionRequiresEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution can only be enabled once the block instance is enabled. If it\'s greyed out, enable the block first.'**
+  String get tips_explore_guide_2;
+
+  /// styleExplore_createDeepRound count box.
+  ///
+  /// In en, this message translates to:
+  /// **'The number next to Generate candidates sets how many images this round makes.'**
+  String get tips_explore_guide_3;
+
+  /// pillCardStepBack / pillCardStepForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Block instances can step back and forward one scene at a time through the combinations they have already rolled.'**
+  String get tips_explore_guide_4;
+
+  /// styleExplore_runEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An explore run keeps a snapshot of the prompt and settings. Editing here afterwards won\'t change rounds that already finished.'**
+  String get tips_explore_guide_5;
+
+  /// pillCardSettings / pillSettingsCount / TriggerProbability / Weight.
+  ///
+  /// In en, this message translates to:
+  /// **'A block\'s random settings control draw count, trigger chance and random weight — that\'s where all the genetic variety lives.'**
+  String get tips_explore_guide_6;
+
+  /// No description provided for @tips_explore_trick_1.
+  ///
+  /// In en, this message translates to:
+  /// **'The bigger the gene pool, the more mutation has to work with. Put only two words in a random block and ten generations will just bounce between two answers.'**
+  String get tips_explore_trick_1;
+
+  /// No description provided for @tips_explore_trick_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard-code what you\'re sure about and make the uncertain parts random. All random means no direction; all fixed means no evolution.'**
+  String get tips_explore_trick_2;
+
+  /// pillCardRerollLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked blocks don\'t get re-rolled. To keep a trait, lock it first and let the other blocks do the experimenting.'**
+  String get tips_explore_trick_3;
+
+  /// pillSettingsTriggerProbability.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a trigger chance of 30% and the block shows up in roughly three out of ten combinations — great for touches that only look good once in a while.'**
+  String get tips_explore_trick_4;
+
+  /// No description provided for @tips_explore_trick_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Expecting perfection in the first generation? That\'s called wishing, not exploring.'**
+  String get tips_explore_trick_5;
+
+  /// No description provided for @tips_explore_wolf_1.
+  ///
+  /// In en, this message translates to:
+  /// **'A pack\'s bloodline is chosen one generation at a time. So is your style.'**
+  String get tips_explore_wolf_1;
+
+  /// No description provided for @tips_explore_wolf_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Every round is an open audition with exactly one judge: you. I\'m in charge of applause.'**
+  String get tips_explore_wolf_2;
+
+  /// No description provided for @tips_explore_wolf_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Good genes come from good parents. Good parents come from that one click where your hand didn\'t slip.'**
+  String get tips_explore_wolf_3;
+
+  /// No description provided for @tips_explore_wolf_4.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t know much genetics, but I know this: picky judges raise the best-looking pups.'**
+  String get tips_explore_wolf_4;
+
+  /// Character prompts carry a position; content is free-form.
+  ///
+  /// In en, this message translates to:
+  /// **'A character box is really a placement box: cats, lamps, signs — it doesn\'t have to be a person.'**
+  String get tips_character_guide_1;
+
+  /// CharacterPositionModeSegments / characterCanvas_dragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Position above to Custom, then drag the anchor on the preview. It applies when you let go.'**
+  String get tips_character_guide_2;
+
+  /// AI choice hides anchors but keeps position data (character_position_canvas).
+  ///
+  /// In en, this message translates to:
+  /// **'AI\'s Choice lets the model handle placement. Switch back to Custom and your earlier positions are still there.'**
+  String get tips_character_guide_3;
+
+  /// CharacterPromptEditor negative tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Every character box has its own Undesired Content tab that only applies to that character.'**
+  String get tips_character_guide_4;
+
+  /// toggleCharacterEnabled header button.
+  ///
+  /// In en, this message translates to:
+  /// **'The check mark at the top right disables this character for now — no need to delete and retype.'**
+  String get tips_character_guide_5;
+
+  /// CharacterNameField.
+  ///
+  /// In en, this message translates to:
+  /// **'Click the title to rename this character. Much easier to tell apart than numbers.'**
+  String get tips_character_guide_6;
+
+  /// Character header menu addToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the ⋯ menu at the top right to add this character to the block library and reuse its description later.'**
+  String get tips_character_guide_7;
+
+  /// No description provided for @tips_character_trick_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep scene and style in the main prompt and only this character here. Write an outfit twice and the model assumes you love it.'**
+  String get tips_character_trick_1;
+
+  /// No description provided for @tips_character_trick_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Two people placed too close tend to merge. Pulling their anchors apart works better than writing \"separate\" ten times.'**
+  String get tips_character_trick_2;
+
+  /// No description provided for @tips_character_trick_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Want a tree on the left? Give it a character box and drag it there. The tree won\'t complain about not being a character.'**
+  String get tips_character_trick_3;
+
+  /// Character boxes use PromptPillEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocks and weight syntax work in character boxes too, just like the main prompt.'**
+  String get tips_character_trick_4;
+
+  /// No description provided for @tips_character_trick_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many characters? Disable a few. In a crowded frame the model picks who stays — usually not the one you wanted.'**
+  String get tips_character_trick_5;
+
+  /// No description provided for @tips_character_wolf_1.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'d like a character box too, but I think I\'m better off watching from outside the frame.'**
+  String get tips_character_wolf_1;
+
+  /// No description provided for @tips_character_wolf_2.
+  ///
+  /// In en, this message translates to:
+  /// **'One box, one place, one job. Sounds like a good philosophy for life.'**
+  String get tips_character_wolf_2;
+
+  /// No description provided for @tips_character_wolf_3.
+  ///
+  /// In en, this message translates to:
+  /// **'You handle the blocking; I\'ll stand on the side yelling \"a little more to the left.\"'**
+  String get tips_character_wolf_3;
+
+  /// No description provided for @tips_character_wolf_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Even a wolf pack moves in formation. With lots of characters, decide who stands in the middle first.'**
+  String get tips_character_wolf_4;
+
+  /// Local gallery searchable text (gallery_data_source _buildSearchablePromptText).
+  ///
+  /// In en, this message translates to:
+  /// **'Search filenames or prompt text'**
+  String get tips_gallery_guide_1;
+
+  /// gallery_filter_service comma-delimited required tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Commas mean all terms must match'**
+  String get tips_gallery_guide_2;
+
+  /// Searchable metadata fields.
+  ///
+  /// In en, this message translates to:
+  /// **'Model, sampler and source match too'**
+  String get tips_gallery_guide_3;
+
+  /// focusSearch ctrl+f.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+F jumps here any time'**
+  String get tips_gallery_guide_4;
+
+  /// Character prompts are part of searchable text.
+  ///
+  /// In en, this message translates to:
+  /// **'Character prompts count too'**
+  String get tips_gallery_guide_5;
+
+  /// Local image context menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click an image for more'**
+  String get tips_gallery_guide_6;
+
+  /// refreshGallery f5.
+  ///
+  /// In en, this message translates to:
+  /// **'F5 refreshes the gallery'**
+  String get tips_gallery_guide_7;
+
+  /// Negative prompt excluded from searchable text.
+  ///
+  /// In en, this message translates to:
+  /// **'Negatives never match'**
+  String get tips_gallery_trick_1;
+
+  /// No description provided for @tips_gallery_trick_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Search first. It\'s probably here'**
+  String get tips_gallery_trick_2;
+
+  /// No description provided for @tips_gallery_trick_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Your prompts are the best keywords'**
+  String get tips_gallery_trick_3;
+
+  /// localGallery_trashHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash empties at next launch'**
+  String get tips_gallery_trick_4;
+
+  /// No description provided for @tips_gallery_trick_5.
+  ///
+  /// In en, this message translates to:
+  /// **'masterpiece matches everything'**
+  String get tips_gallery_trick_5;
+
+  /// No description provided for @tips_gallery_wolf_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Tonight\'s prey is on page three'**
+  String get tips_gallery_wolf_1;
+
+  /// No description provided for @tips_gallery_wolf_2.
+  ///
+  /// In en, this message translates to:
+  /// **'I smell a masterpiece in here'**
+  String get tips_gallery_wolf_2;
+
+  /// No description provided for @tips_gallery_wolf_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Scrolling is cardio. I\'ll run too'**
+  String get tips_gallery_wolf_3;
+
+  /// No description provided for @tips_gallery_wolf_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Big den. Take your time'**
+  String get tips_gallery_wolf_4;
+
+  /// Online search splitOnSpaces, onSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Space between tags, then Enter'**
+  String get tips_online_guide_1;
+
+  /// onlineGallery_fuzzySearchTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuzzy Match: *tag* finds similar tags'**
+  String get tips_online_guide_2;
+
+  /// onlineGallery_blacklistSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Blacklisted tags stay hidden'**
+  String get tips_online_guide_3;
+
+  /// danbooru_loginHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Danbooru for favorites'**
+  String get tips_online_guide_4;
+
+  /// Danbooru tag syntax.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-word tags: blue_eyes'**
+  String get tips_online_trick_1;
+
+  /// No description provided for @tips_online_trick_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Great post? Borrow its tags'**
+  String get tips_online_trick_2;
+
+  /// No description provided for @tips_online_trick_3.
+  ///
+  /// In en, this message translates to:
+  /// **'More tags, fewer results'**
+  String get tips_online_trick_3;
+
+  /// No description provided for @tips_online_wolf_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Big world out there. I\'ll scout'**
+  String get tips_online_wolf_1;
+
+  /// No description provided for @tips_online_wolf_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Other packs\' turf. Just looking'**
+  String get tips_online_wolf_2;
+
+  /// No description provided for @tips_online_wolf_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Which forest are we hunting in?'**
+  String get tips_online_wolf_3;
+
+  /// promptBlockLibrary_searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search titles, prompts or tags'**
+  String get tips_blocks_guide_1;
+
+  /// PromptPillEditor DragTarget<PromptBlockDragData>.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag a block into the prompt'**
+  String get tips_blocks_guide_2;
+
+  /// promptBlockLibrary_emptyFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Star the ones you use most'**
+  String get tips_blocks_guide_3;
+
+  /// Block thumbnails.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnails make picking faster'**
+  String get tips_blocks_guide_4;
+
+  /// promptBlockLibrary_saveToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click text to save a block'**
+  String get tips_blocks_guide_5;
+
+  /// No description provided for @tips_blocks_trick_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Typed it thrice? Make it a block'**
+  String get tips_blocks_trick_1;
+
+  /// No description provided for @tips_blocks_trick_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsure? Save it. Deleting is fast'**
+  String get tips_blocks_trick_2;
+
+  /// No description provided for @tips_blocks_trick_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Future you loves clear names'**
+  String get tips_blocks_trick_3;
+
+  /// No description provided for @tips_blocks_trick_4.
+  ///
+  /// In en, this message translates to:
+  /// **'More options, more surprises'**
+  String get tips_blocks_trick_4;
+
+  /// No description provided for @tips_blocks_wolf_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Every block wants to be picked'**
+  String get tips_blocks_wolf_1;
+
+  /// No description provided for @tips_blocks_wolf_2.
+  ///
+  /// In en, this message translates to:
+  /// **'These blocks are your pack'**
+  String get tips_blocks_wolf_2;
+
+  /// No description provided for @tips_blocks_wolf_3.
+  ///
+  /// In en, this message translates to:
+  /// **'The only block I know is meat'**
+  String get tips_blocks_wolf_3;
+
+  /// No description provided for @tips_blocks_wolf_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders in folders. So organized'**
+  String get tips_blocks_wolf_4;
+
+  /// No description provided for @tips_generating_wolf_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Haggling with the random numbers…'**
+  String get tips_generating_wolf_1;
+
+  /// No description provided for @tips_generating_wolf_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Having a word with the sixth finger…'**
+  String get tips_generating_wolf_2;
+
+  /// No description provided for @tips_generating_wolf_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Asking the pixels to line up…'**
+  String get tips_generating_wolf_3;
+
+  /// No description provided for @tips_generating_wolf_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Wiping away the noise, grain by grain…'**
+  String get tips_generating_wolf_4;
+
+  /// No description provided for @tips_generating_wolf_5.
+  ///
+  /// In en, this message translates to:
+  /// **'A wolf is howling encouragement…'**
+  String get tips_generating_wolf_5;
+
+  /// No description provided for @tips_generating_wolf_6.
+  ///
+  /// In en, this message translates to:
+  /// **'Explaining your taste to the GPU…'**
+  String get tips_generating_wolf_6;
+
+  /// No description provided for @tips_generating_wolf_7.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating your prompt into a dream…'**
+  String get tips_generating_wolf_7;
+
+  /// No description provided for @tips_generating_wolf_8.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-checking the eye count…'**
+  String get tips_generating_wolf_8;
+
+  /// No description provided for @tips_generating_wolf_9.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding a flattering light…'**
+  String get tips_generating_wolf_9;
+
+  /// No description provided for @tips_generating_wolf_10.
+  ///
+  /// In en, this message translates to:
+  /// **'Convincing the background not to steal the show…'**
+  String get tips_generating_wolf_10;
+
+  /// No description provided for @tips_generating_wolf_11.
+  ///
+  /// In en, this message translates to:
+  /// **'Fishing your image out of the noise…'**
+  String get tips_generating_wolf_11;
+
+  /// No description provided for @tips_generating_wolf_12.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting fingers: one, two, three…'**
+  String get tips_generating_wolf_12;
+
+  /// No description provided for @tips_generating_wolf_13.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the paint to dry…'**
+  String get tips_generating_wolf_13;
+
+  /// No description provided for @tips_generating_wolf_14.
+  ///
+  /// In en, this message translates to:
+  /// **'Summoning today\'s luck…'**
+  String get tips_generating_wolf_14;
+
+  /// cancelGeneration escape.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed your mind? Esc cancels'**
+  String get tips_generating_trick_1;
+
+  /// Streaming preview frames.
+  ///
+  /// In en, this message translates to:
+  /// **'The preview sharpens frame by frame'**
+  String get tips_generating_trick_2;
+
+  /// autoSaveImages default true.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished images save to the gallery by default'**
+  String get tips_generating_trick_3;
+
+  /// No description provided for @tips_generating_trick_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Each sampling step removes a little more noise'**
+  String get tips_generating_trick_4;
+
+  /// showShortcutHelp f1.
+  ///
+  /// In en, this message translates to:
+  /// **'Press F1 any time to see every shortcut.'**
+  String get tips_splash_guide_1;
+
+  /// generateImage ctrl+enter; shortcut settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+Enter generates, and every shortcut can be remapped in Settings.'**
+  String get tips_splash_guide_2;
+
+  /// drop_extractMetadataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop an image into the window to read its prompt and settings.'**
+  String get tips_splash_guide_3;
+
+  /// Prompt blocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Save prompts you use often as blocks and reuse them in one click.'**
+  String get tips_splash_guide_4;
+
+  /// Splash STEP xx/28 counter.
+  ///
+  /// In en, this message translates to:
+  /// **'That STEP /28 up there is a nod to the default 28 sampling steps.'**
+  String get tips_splash_trick_1;
+
+  /// drop_reuseVibeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-encoded Vibes can be reused for free — that\'s 2 Anlas saved.'**
+  String get tips_splash_trick_2;
+
+  /// localGallery_firstIndexHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Building the gallery index takes a while the first time; keep working meanwhile.'**
+  String get tips_splash_trick_3;
+
+  /// No description provided for @tips_splash_wolf_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Five more minutes… fine, I\'m up.'**
+  String get tips_splash_wolf_1;
+
+  /// No description provided for @tips_splash_wolf_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tidying up the den. Almost ready.'**
+  String get tips_splash_wolf_2;
+
+  /// No description provided for @tips_splash_wolf_3.
+  ///
+  /// In en, this message translates to:
+  /// **'GPU ready. Moon ready. Just waiting on you.'**
+  String get tips_splash_wolf_3;
+
+  /// No description provided for @tips_splash_wolf_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Smell that? Fresh prompts.'**
+  String get tips_splash_wolf_4;
+
+  /// No description provided for @tips_splash_wolf_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s have some good pulls today.'**
+  String get tips_splash_wolf_5;
+
+  /// No description provided for @genButton_normal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Generate 1 Image} other{Generate {count} Images}}'**
+  String genButton_normal(int count);
+
+  /// No description provided for @genButton_one_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Just this one'**
+  String get genButton_one_1;
+
+  /// No description provided for @genButton_one_2.
+  ///
+  /// In en, this message translates to:
+  /// **'One good one, please'**
+  String get genButton_one_2;
+
+  /// No description provided for @genButton_one_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Single pull, leap of faith'**
+  String get genButton_one_3;
+
+  /// No description provided for @genButton_one_4.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing the waters'**
+  String get genButton_one_4;
+
+  /// No description provided for @genButton_one_5.
+  ///
+  /// In en, this message translates to:
+  /// **'One shot, one verdict'**
+  String get genButton_one_5;
+
+  /// No description provided for @genButton_one_6.
+  ///
+  /// In en, this message translates to:
+  /// **'This one is a masterpiece'**
+  String get genButton_one_6;
+
+  /// No description provided for @genButton_one_7.
+  ///
+  /// In en, this message translates to:
+  /// **'Just one, I swear'**
+  String get genButton_one_7;
+
+  /// No description provided for @genButton_one_8.
+  ///
+  /// In en, this message translates to:
+  /// **'New avatar incoming'**
+  String get genButton_one_8;
+
+  /// No description provided for @genButton_one_9.
+  ///
+  /// In en, this message translates to:
+  /// **'One and done'**
+  String get genButton_one_9;
+
+  /// No description provided for @genButton_one_10.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallpaper material, please'**
+  String get genButton_one_10;
+
+  /// No description provided for @genButton_one_11.
+  ///
+  /// In en, this message translates to:
+  /// **'A gentle single pull'**
+  String get genButton_one_11;
+
+  /// No description provided for @genButton_one_12.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch me one'**
+  String get genButton_one_12;
+
+  /// No description provided for @genButton_few_1.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, pick the best'**
+  String genButton_few_1(int count);
+
+  /// No description provided for @genButton_few_2.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to compare'**
+  String genButton_few_2(int count);
+
+  /// No description provided for @genButton_few_3.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}-pull'**
+  String genButton_few_3(int count);
+
+  /// No description provided for @genButton_few_4.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tries, one will land'**
+  String genButton_few_4(int count);
+
+  /// No description provided for @genButton_few_5.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick 1 of {count}'**
+  String genButton_few_5(int count);
+
+  /// No description provided for @genButton_few_6.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to warm up'**
+  String genButton_few_6(int count);
+
+  /// No description provided for @genButton_few_7.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} auditions'**
+  String genButton_few_7(int count);
+
+  /// No description provided for @genButton_few_8.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} little wins'**
+  String genButton_few_8(int count);
+
+  /// No description provided for @genButton_batch_1.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}-shot burst'**
+  String genButton_batch_1(int count);
+
+  /// No description provided for @genButton_batch_2.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} at once'**
+  String genButton_batch_2(int count);
+
+  /// No description provided for @genButton_batch_3.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, getting hooked'**
+  String genButton_batch_3(int count);
+
+  /// No description provided for @genButton_batch_4.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in one go'**
+  String genButton_batch_4(int count);
+
+  /// No description provided for @genButton_batch_5.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to fill the screen'**
+  String genButton_batch_5(int count);
+
+  /// No description provided for @genButton_batch_6.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}-pull, playing it safe'**
+  String genButton_batch_6(int count);
+
+  /// No description provided for @genButton_batch_7.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, the pack is out'**
+  String genButton_batch_7(int count);
+
+  /// No description provided for @genButton_batch_8.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} servings coming up'**
+  String genButton_batch_8(int count);
+
+  /// No description provided for @genButton_many_1.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, turning it up'**
+  String genButton_many_1(int count);
+
+  /// No description provided for @genButton_many_2.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, GPU sweating'**
+  String genButton_many_2(int count);
+
+  /// No description provided for @genButton_many_3.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, stockpiling'**
+  String genButton_many_3(int count);
+
+  /// No description provided for @genButton_many_4.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, assembly line on'**
+  String genButton_many_4(int count);
+
+  /// No description provided for @genButton_many_5.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, Anlas burning'**
+  String genButton_many_5(int count);
+
+  /// No description provided for @genButton_many_6.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, daily upload mode'**
+  String genButton_many_6(int count);
+
+  /// No description provided for @genButton_many_7.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}-image batch run'**
+  String genButton_many_7(int count);
+
+  /// No description provided for @genButton_many_8.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, the wolf is stunned'**
+  String genButton_many_8(int count);
+
+  /// No description provided for @genButton_huge_1.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}?! Opening a gallery?'**
+  String genButton_huge_1(int count);
+
+  /// No description provided for @genButton_huge_2.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, the drive is shaking'**
+  String genButton_huge_2(int count);
+
+  /// No description provided for @genButton_huge_3.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, industrial revolution'**
+  String genButton_huge_3(int count);
+
+  /// No description provided for @genButton_huge_4.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, deep breath first'**
+  String genButton_huge_4(int count);
+
+  /// No description provided for @genButton_huge_5.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, got the space?'**
+  String genButton_huge_5(int count);
+
+  /// No description provided for @genButton_huge_6.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, print shop open'**
+  String genButton_huge_6(int count);
+
+  /// No description provided for @genButton_huge_7.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, wholesale'**
+  String genButton_huge_7(int count);
+
+  /// No description provided for @genButton_huge_8.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images, the wolf went for backup'**
+  String genButton_huge_8(int count);
+
+  /// No description provided for @genButton_rare_1.
+  ///
+  /// In en, this message translates to:
+  /// **'SSR guaranteed'**
+  String get genButton_rare_1;
+
+  /// No description provided for @genButton_rare_2.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI feels lucky today'**
+  String get genButton_rare_2;
+
+  /// No description provided for @genButton_rare_3.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s fortune: excellent'**
+  String get genButton_rare_3;
+
+  /// No description provided for @genButton_rare_4.
+  ///
+  /// In en, this message translates to:
+  /// **'They say this button likes you'**
+  String get genButton_rare_4;
+
+  /// No description provided for @genButton_rare_5.
+  ///
+  /// In en, this message translates to:
+  /// **'The wolf howled at the moon'**
+  String get genButton_rare_5;
+
+  /// No description provided for @genButton_rare_6.
+  ///
+  /// In en, this message translates to:
+  /// **'Luck buff active'**
+  String get genButton_rare_6;
+
+  /// No description provided for @genButton_rare_7.
+  ///
+  /// In en, this message translates to:
+  /// **'Luck recharged'**
+  String get genButton_rare_7;
+
+  /// No description provided for @genButton_rare_8.
+  ///
+  /// In en, this message translates to:
+  /// **'This pull is sponsored by the wolf'**
+  String get genButton_rare_8;
+
+  /// No description provided for @genButton_rare_9.
+  ///
+  /// In en, this message translates to:
+  /// **'Come on, luck!'**
+  String get genButton_rare_9;
+
+  /// No description provided for @genButton_rare_10.
+  ///
+  /// In en, this message translates to:
+  /// **'Press to believe'**
+  String get genButton_rare_10;
+
+  /// No description provided for @genButton_night_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Late night, last pull'**
+  String get genButton_night_1;
+
+  /// No description provided for @genButton_night_2.
+  ///
+  /// In en, this message translates to:
+  /// **'One more batch, then bed'**
+  String get genButton_night_2;
+
+  /// No description provided for @genButton_night_3.
+  ///
+  /// In en, this message translates to:
+  /// **'3 a.m. taste is wild'**
+  String get genButton_night_3;
+
+  /// No description provided for @genButton_night_4.
+  ///
+  /// In en, this message translates to:
+  /// **'The wolf is up with you'**
+  String get genButton_night_4;
+
+  /// No description provided for @genButton_special_7.
+  ///
+  /// In en, this message translates to:
+  /// **'Lucky {count}'**
+  String genButton_special_7(int count);
+
+  /// No description provided for @genButton_special_9.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} for a full 3×3 grid'**
+  String genButton_special_9(int count);
+
+  /// No description provided for @genButton_special_42.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}: the answer to everything'**
+  String genButton_special_42(int count);
+
+  /// No description provided for @genButton_special_99.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}, one short of a hundred'**
+  String genButton_special_99(int count);
+
+  /// No description provided for @genButton_special_100.
+  ///
+  /// In en, this message translates to:
+  /// **'A clean {count}. Satisfying'**
+  String genButton_special_100(int count);
 
   /// No description provided for @titleBar_minimize.
   ///
@@ -16356,24 +17370,6 @@ abstract class AppLocalizations {
   /// **'One appearance across your studio. Black or white surfaces, with blue accents.'**
   String get settings_geistDescription;
 
-  /// No description provided for @generation_tipReuseBlocks.
-  ///
-  /// In en, this message translates to:
-  /// **'Save frequently used prompts as blocks to reuse them later.'**
-  String get generation_tipReuseBlocks;
-
-  /// No description provided for @generation_tipBlockModes.
-  ///
-  /// In en, this message translates to:
-  /// **'Combine blocks in sequence or random mode for new variations.'**
-  String get generation_tipBlockModes;
-
-  /// No description provided for @generation_tipLockBlocks.
-  ///
-  /// In en, this message translates to:
-  /// **'Lock the blocks you want to keep, then randomize the rest.'**
-  String get generation_tipLockBlocks;
-
   /// No description provided for @styleExplore_collapseGallery.
   ///
   /// In en, this message translates to:
@@ -16455,7 +17451,7 @@ abstract class AppLocalizations {
   /// No description provided for @wiki_searchHint.
   ///
   /// In en, this message translates to:
-  /// **'Search tags, aliases, or Chinese names'**
+  /// **'Search tags or aliases'**
   String get wiki_searchHint;
 
   /// No description provided for @wiki_typeAll.

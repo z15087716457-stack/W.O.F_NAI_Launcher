@@ -141,11 +141,7 @@ class _PromptBlockPickerDialogState
           flex: 2,
           child: TextField(
             decoration: InputDecoration(
-              hintText: tipHint(
-                context.l10n,
-                TipModule.blockLibrary,
-                epoch: watchTipEpoch(ref),
-              ),
+              hintText: watchTipHint(ref, context.l10n, TipSurface.blockSearch),
               prefixIcon: const Icon(Icons.search, size: 20),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),

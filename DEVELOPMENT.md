@@ -34,9 +34,19 @@ Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会
 
 ## 资源、生成文件与发布注意事项
 
-界面文案以 `lib/l10n/app_en.arb` 为模板，中、日、韩 ARB 手工维护，修改后运行 `flutter gen-l10n`。繁体中文（台湾）的 `lib/l10n/app_zh_TW.arb` 与固定中文名单对照 `lib/l10n/zh_tw_labels.dart` 由 `tool/l10n` 用 OpenCC 1.4.2 `s2twp` 加产品术语生成，不手改：修改 `app_zh.arb`、Wiki 目录中文名、标签分组或子分类中文名、生成按钮中文文案后，运行 `UPDATE_ZH_TW=1 flutter test test/l10n/zh_tw_resources_test.dart`，再运行 `flutter gen-l10n`。通用用语修正写入 `tool/l10n/zh_tw_terms.dart`，单条消息的整句修正写入 `tool/l10n/zh_tw_overrides.json`（按 ARB 键）。
+界面文案以 `lib/l10n/app_en.arb` 为模板，中、日、韩 ARB 手工维护，修改后运行 `flutter gen-l10n`。繁体中文（台湾）的 `lib/l10n/app_zh_TW.arb` 与固定中文名单对照 `lib/l10n/zh_tw_labels.dart` 由 `tool/l10n` 用 OpenCC 1.4.2 `s2twp` 加产品术语生成，不手改：修改 `app_zh.arb`、Wiki 目录中文名、标签分组或子分类中文名后，运行 `UPDATE_ZH_TW=1 flutter test test/l10n/zh_tw_resources_test.dart`，再运行 `flutter gen-l10n`。通用用语修正写入 `tool/l10n/zh_tw_terms.dart`，单条消息的整句修正写入 `tool/l10n/zh_tw_overrides.json`（按 ARB 键）。
 
 `assets/databases/*.db` 通过 Git LFS 管理，发布前应确认本地文件是真实 SQLite 数据库而不是 LFS pointer。`assets/data/` 和 `assets/images/` 会随 Flutter assets 打包，移动或重命名后需要同步检查 `pubspec.yaml`。`assets/translations/github_chening233.csv` 只是 `tool/database/build_tag_wiki.py` 生成 `tag_wiki.db` 的源数据，不打包；`cooccurrence.db` 由 `tool/database/build_cooccurrence_only.dart` 按 `cooccurrence_source_lock.json` 锁定的下载文件生成。发布前确认 `CHANGELOG.md`、`dist/release_notes_<tag>.md`、`pubspec.yaml` 版本号和 Windows release build。
+
+### 小贴士与彩蛋文案
+
+小贴士和生成按钮彩蛋的正文都在 ARB：`tips_<位置>_<类型>_<序号>` 与 `genButton_<分档>_<序号>`。`lib/presentation/providers/tip_catalog.dart` 只登记每条出现的位置、类型（`guide` 正经教程 / `trick` 幽默教学 / `wolf` 品牌角色「狼」的闲聊）以及 `short`（窄屏紧凑提示词框可用）、`night`（只在本地 01:00–04:59 出现）；生成按钮的分档与概率写在 `generate_button_copy.dart`。新增一条要同时改四份手写 ARB、登记目录并重新生成繁体。
+
+- **说真话**：教程与幽默教学只写当前真实存在的功能，ARB `@description` 记下它依赖的功能或设置键；功能改名或删除时搜这些说明一起改。玩笑要一眼看得出是玩笑。
+- **不碰**：NSFW、真实画师、嘲讽用户作品、催促消费；报错、删除确认、扣费确认、设置说明不加梗。
+- **狼的口吻**：第一人称、温和、偶尔吐槽；类型标签已经写了「狼」，正文不要再以「狼说」开头。
+- **长度**：欢迎页可写成段落；提示词框不超过最低高度，角色框不超过 3 行；搜索框和生成中占位卡只有一行。`test/presentation/tips/tip_layout_test.dart` 用真实字体逐条核对，`CAPTURE_TIPS=1` 时把截图写到 `.dart_tool/tips-captures/`。
+- **多语言**：英日韩按各自语言的梗重写，不逐字直译；同一编号讲同一个功能。ICU 下花括号是占位符，正文写「花括号」而不是 `{}`。
 
 ### Windows 品牌图标
 

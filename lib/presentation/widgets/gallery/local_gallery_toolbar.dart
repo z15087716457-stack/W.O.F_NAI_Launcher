@@ -717,10 +717,10 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
         decoration: InputDecoration(
           hintText: scopeLabel != null
               ? context.l10n.localGallery_searchInScope(scopeLabel)
-              : tipHint(
+              : watchTipHint(
+                  ref,
                   context.l10n,
-                  TipModule.gallerySearch,
-                  epoch: watchTipEpoch(ref),
+                  TipSurface.gallerySearch,
                   firstEpoch: _tipMountEpoch ??= currentTipEpoch(),
                 ),
           hintStyle: TextStyle(

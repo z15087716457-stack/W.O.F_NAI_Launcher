@@ -6,7 +6,6 @@ import 'package:nai_launcher/core/wiki/wiki_directory_labels.dart';
 import 'package:nai_launcher/data/models/prompt/tag_category.dart';
 import 'package:nai_launcher/data/models/prompt/tag_group.dart';
 import 'package:nai_launcher/l10n/zh_tw_labels.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generate_button_copy.dart';
 
 import '../../tool/l10n/opencc_engine.dart';
 import '../../tool/l10n/zh_tw_resources.dart';
@@ -17,7 +16,6 @@ Iterable<String> _curatedLabels() => [
   ...WikiDirectoryLabels.chinese.values,
   ...TagGroup.chineseNames.values,
   ...TagSubCategoryHelper.chineseNames.values,
-  ...GenerateButtonCopy.chineseTemplates,
 ];
 
 void main() {

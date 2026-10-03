@@ -13,6 +13,7 @@ import '../../../../providers/canvas_settings_provider.dart';
 import '../../../../providers/generation/generation_models.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
+import '../../../../providers/tips_provider.dart';
 import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import '../../services/generation_save_service.dart';
 import 'canvas_feed_layout.dart';
@@ -1178,22 +1179,25 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
 }
 
 /// 生成中占位 tile（官网 `image-grid-generating`）：批参数尺寸的卡面 +
-/// 三点弹跳加载动画；有流式预览帧时盖一层进度图。
-class _InflightSlotTile extends StatefulWidget {
+/// 三点弹跳加载动画 + 一句等待小贴士；有流式预览帧时盖一层进度图。
+class _InflightSlotTile extends ConsumerStatefulWidget {
   const _InflightSlotTile({required this.slot});
 
   final StreamPreviewSlot slot;
 
   @override
-  State<_InflightSlotTile> createState() => _InflightSlotTileState();
+  ConsumerState<_InflightSlotTile> createState() => _InflightSlotTileState();
 }
 
-class _InflightSlotTileState extends State<_InflightSlotTile>
+class _InflightSlotTileState extends ConsumerState<_InflightSlotTile>
     with SingleTickerProviderStateMixin {
   late final AnimationController _dots = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1200),
   )..repeat();
+
+  /// 每张占位卡一句，生成期间不换。
+  late final Tip _tip = ref.read(tipDeckProvider).draw(TipSurface.generating);
 
   @override
   void dispose() {
@@ -1262,11 +1266,16 @@ class _InflightSlotTileState extends State<_InflightSlotTile>
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          preview?.isNotEmpty == true
-                              ? context.l10n.generation_generating
-                              : context.l10n.common_loading,
-                          style: theme.textTheme.bodyMedium,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            _tip.text(context.l10n),
+                            key: const Key('canvas-inflight-tip'),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium,
+                          ),
                         ),
                       ],
                     );

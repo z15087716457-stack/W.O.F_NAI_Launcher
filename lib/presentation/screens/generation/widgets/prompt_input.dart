@@ -64,8 +64,8 @@ class PromptInputWidget extends ConsumerStatefulWidget {
   /// 关闭时编辑器填充父级给定的高度并内部滚动。
   final bool autoGrow;
 
-  /// 空态 hint 使用的 tip 模块池（FEAT-60）。
-  final TipModule tipModule;
+  /// 空态占位轮播的小贴士位置。
+  final TipSurface tipSurface;
 
   const PromptInputWidget({
     super.key,
@@ -76,7 +76,7 @@ class PromptInputWidget extends ConsumerStatefulWidget {
     this.negativeModeNotifier,
     this.allowEvolutionToggle = false,
     this.autoGrow = false,
-    this.tipModule = TipModule.gen,
+    this.tipSurface = TipSurface.prompt,
   });
 
   @override
@@ -425,9 +425,20 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final model = ref.watch(
       generationParamsNotifierProvider.select((params) => params.model),
     );
-    final editor = _isNegativeMode
-        ? _buildTextNegativeInput(theme, numericEmphasisEnabled)
-        : _buildTextPromptInput(theme, numericEmphasisEnabled);
+    Widget buildEditor(int? minLines) => _isNegativeMode
+        ? _buildTextNegativeInput(theme, numericEmphasisEnabled, minLines)
+        : _buildTextPromptInput(theme, numericEmphasisEnabled, minLines);
+    // 一体式布局：最低高度随面板宽度走，整张卡接近方框，长贴士也放得下
+    final editor = widget.autoGrow
+        ? LayoutBuilder(
+            builder: (context, constraints) => buildEditor(
+              _squareMinLines(
+                constraints.maxWidth,
+                MediaQuery.textScalerOf(context).scale(14) * 1.55,
+              ),
+            ),
+          )
+        : buildEditor(null);
 
     // 官网式单卡：页签+配件在框内头部，预设片在框内底行，
     // token 用量长条压在最底边。
@@ -944,7 +955,16 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     );
   }
 
-  Widget _buildTextPromptInput(ThemeData theme, bool numericEmphasisEnabled) {
+  /// 卡片高 ≈ 0.72 × 宽时编辑区的行数（[lineHeight] 为编辑器实际行高，
+  /// 扣除头部、预设行与 token 条约 92px），窄面板至少 4 行。
+  static int _squareMinLines(double width, double lineHeight) =>
+      ((width * 0.72 - 92) / lineHeight).round().clamp(4, 16);
+
+  Widget _buildTextPromptInput(
+    ThemeData theme,
+    bool numericEmphasisEnabled,
+    int? minLines,
+  ) {
     final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
     final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
     final enableSdSyntaxAutoConvert = ref.watch(
@@ -954,7 +974,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       key: const ValueKey('generation_prompt_positive_input'),
       compact: false,
       autoGrow: widget.autoGrow,
-      minLines: widget.autoGrow ? 4 : null,
+      minLines: minLines,
       allowEvolutionToggle: widget.allowEvolutionToggle,
       config: UnifiedPromptConfig(
         embedded: true,
@@ -963,11 +983,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         enableAutoFormat: enableAutoFormat,
         enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,
         enableComfyuiImport: true,
-        hintText: tipHint(
-          context.l10n,
-          widget.tipModule,
-          epoch: watchTipEpoch(ref),
-        ),
+        hintText: watchTipHint(ref, context.l10n, widget.tipSurface),
         // 官网式：框内右上小 ✕ 清空本文本（不再连带清角色卡）
         showClearButton: true,
       ),
@@ -997,7 +1013,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     );
   }
 
-  Widget _buildTextNegativeInput(ThemeData theme, bool numericEmphasisEnabled) {
+  Widget _buildTextNegativeInput(
+    ThemeData theme,
+    bool numericEmphasisEnabled,
+    int? minLines,
+  ) {
     final enableAutoFormat = ref.watch(autoFormatPromptSettingsProvider);
     final enableHighlight = ref.watch(highlightEmphasisSettingsProvider);
     final enableSdSyntaxAutoConvert = ref.watch(
@@ -1010,7 +1030,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       initialPlainText: _negativeController.text,
       compact: false,
       autoGrow: widget.autoGrow,
-      minLines: widget.autoGrow ? 4 : null,
+      minLines: minLines,
       allowEvolutionToggle: false,
       config: UnifiedPromptConfig(
         embedded: true,
@@ -1052,10 +1072,11 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               enableSyntaxHighlight: enableHighlight,
               numericEmphasisEnabled: numericEmphasisEnabled,
               enableComfyuiImport: true,
-              hintText: tipHint(
+              hintText: watchTipHint(
+                ref,
                 context.l10n,
-                widget.tipModule,
-                epoch: watchTipEpoch(ref),
+                widget.tipSurface,
+                shortOnly: true,
               ),
             ),
             decoration: InputDecoration(

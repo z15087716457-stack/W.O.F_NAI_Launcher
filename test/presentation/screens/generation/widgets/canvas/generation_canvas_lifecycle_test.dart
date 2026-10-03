@@ -250,10 +250,10 @@ void main() {
       final newCenter = position.screenToWorld(viewportCenter);
       expect(newCenter.dy, lessThan(oldCenter.dy));
       expect((newCenter - _rect(container, 2).center).distance, lessThan(0.01));
-      final l10n = AppLocalizations.of(
-        tester.element(find.byType(GenerationCanvasView)),
-      )!;
-      expect(find.text(l10n.common_loading), findsOneWidget);
+      // 占位卡显示一句等待小贴士，流式帧到来后保持同一句
+      final waitTip = find.byKey(const Key('canvas-inflight-tip'));
+      expect(waitTip, findsOneWidget);
+      final waitText = tester.widget<Text>(waitTip).data;
       final tile = find.byKey(const ValueKey('canvas-tile:run:2:0'));
       final screenRect = tester.getRect(tile);
 
@@ -271,7 +271,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text(l10n.generation_generating), findsOneWidget);
+      expect(tester.widget<Text>(waitTip).data, waitText);
       final preview = tester.widget<Image>(
         find.descendant(of: tile, matching: find.byType(Image)).first,
       );

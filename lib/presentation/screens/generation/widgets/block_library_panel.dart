@@ -317,11 +317,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
         controller: _searchController,
         style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
-          hintText: tipHint(
-            context.l10n,
-            TipModule.blockLibrary,
-            epoch: watchTipEpoch(ref),
-          ),
+          hintText: watchTipHint(ref, context.l10n, TipSurface.blockSearch),
           hintStyle: TextStyle(
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontSize: 13,

@@ -7,6 +7,7 @@ import '../../providers/character_prompt_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/pill_workspace_provider.dart';
 import '../../providers/prompt_token_counter_provider.dart';
+import '../../providers/tips_provider.dart';
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import '../prompt/prompt_token_count_bar.dart';
 import '../prompt/pills/prompt_pill_editor.dart';
@@ -118,7 +119,12 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
           _buildPillLaneEditor(
             scope: _posScope,
             initialText: widget.character.prompt,
-            hintText: l10n.characterEditor_promptHint,
+            hintText: watchTipHint(
+              ref,
+              l10n,
+              TipSurface.character,
+              slot: characterTipSlot(widget.character.id),
+            ),
             onChanged: (value) =>
                 _updateCharacter(widget.character.copyWith(prompt: value)),
           )
@@ -193,6 +199,9 @@ class _CharacterPromptEditorState extends ConsumerState<CharacterPromptEditor> {
     );
   }
 }
+
+/// 同屏多个角色框错开小贴士：编辑器与收起预览用同一个槽位。
+int characterTipSlot(String characterId) => characterId.hashCode & 0x7fff;
 
 /// 编辑态正/负切换小标签（与主提示词卡页签同款中性高亮，不用主题色填充）
 class _EditorTab extends StatelessWidget {

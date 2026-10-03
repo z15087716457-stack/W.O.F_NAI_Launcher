@@ -3019,9 +3019,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get characterEditor_enabled => '启用';
 
   @override
-  String get characterEditor_promptHint => '输入角色的正向提示词...';
-
-  @override
   String get characterEditor_negativePromptHint => '输入角色的负面提示词...';
 
   @override
@@ -7529,7 +7526,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autocomplete_relatedTagsSubtitle => 'Ctrl+单击搜索本地标签；Ctrl+拖选查看关联标签';
 
   @override
-  String get tagExpansion_searchHint => '搜索标签、别名或汉化名';
+  String get tagExpansion_searchHint => '搜索标签或别名';
 
   @override
   String get tagExpansion_relatedTitle => '关联标签';
@@ -8212,9 +8209,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_galleryEmptyHint => '暂无候选。新建或选择一个探索任务，开始批量生成。';
 
   @override
-  String get styleExplore_labTip => '选择喜欢的候选，让画风逐代进化。';
-
-  @override
   String get styleExplore_runNameLabel => '任务名称';
 
   @override
@@ -8648,184 +8642,817 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_modelsAndInterfaces => '模型与接口';
 
   @override
-  String get tips_gen_teach_1 => '在提示词框输入 < 可以拉进块库里的块';
+  String get tips_kind_guide => '提示';
 
   @override
-  String get tips_gen_teach_2 => '摘要条点 Seed 可锁定/重抽，点 Sampler 可直接换采样器';
+  String get tips_kind_trick => '过来人';
 
   @override
-  String get tips_gen_teach_3 => '生成键旁边的数字小框定本批张数，右端深色框是 Anlas 消耗';
+  String get tips_kind_wolf => '狼';
 
   @override
-  String get tips_gen_teach_4 => '右上角 chunks 菜单里收纳了块库、预设和正则规则';
+  String tips_hint(String label, String tip) {
+    return '$label：$tip';
+  }
 
   @override
-  String get tips_gen_teach_5 => '透明通道导出 Alpha 通道；启用角色参考时不可用';
+  String get tips_studio_guide_1 =>
+      '写好提示词，按 Ctrl+Enter 就能生成。生成的图会在这块画布上一批批铺开：中键或 Shift+左键拖动平移，Ctrl+滚轮缩放，WASD 也能用来导航。';
 
   @override
-  String get tips_gen_fun_1 => '正在给 AI 喂电子小鱼干…';
+  String get tips_studio_guide_2 =>
+      '常用的画师串、质量词和构图描述，写一次存成块，下次从块库直接拉进来。块不只是复制粘贴：它可以设成固定、顺序或随机抽取，每次生成换一种组合。';
 
   @override
-  String get tips_gen_fun_2 => '每张图都是一次小型抽卡——抽吧';
+  String get tips_studio_guide_3 =>
+      '随机块抽到一组特别满意的结果？锁定它，再去重抽别的块。锁住的内容不会变，没锁的照常随机——适合「这个姿势留着，衣服再换几套」。';
 
   @override
-  String get tips_gen_fun_3 => 'Anlas 余额和模型名都在头顶上——烧钱前瞄一眼';
+  String get tips_studio_guide_4 =>
+      '把一张图拖进窗口，会问你想怎么用：图生图、风格迁移、精准参考，或者只提取它的提示词和参数。带着 NovelAI 元数据的图，一拖就能看到当时是怎么写的。';
 
   @override
-  String get tips_gen_fun_4 => '提示词框长高了，方便野心摊开写';
+  String get tips_studio_guide_5 =>
+      '角色框本质上是定位框。除了人物，你也可以放一只猫、一盏灯、一块招牌；把定位切到「自定义」，在预览图上拖动锚点，告诉模型它该出现在哪里。';
 
   @override
-  String get tips_gen_fun_5 => '种子 -1 交给命运；据说命运喜欢整数';
+  String get tips_studio_guide_6 =>
+      '选中一段提示词，按住 Alt 滚动滚轮就能调权重。不按 Alt 时滚轮只是正常翻页，不会误改权重。修饰键可以在设置里换成 Ctrl。';
 
   @override
-  String get tips_explore_teach_1 => '点红心+归文件夹，就是给下一代投票';
+  String get tips_studio_guide_7 =>
+      '按 F1 随时打开快捷键帮助。Ctrl+1、Ctrl+2、Ctrl+3 在生成页、本地画廊和在线画廊之间切换，Ctrl+, 打开设置。所有快捷键都能在设置里改成你顺手的组合。';
 
   @override
-  String get tips_explore_teach_2 => 'A/B 对照组看的是父本原图——选出胜者就翻篇';
+  String get tips_studio_guide_8 =>
+      '担心一不小心花掉一大笔 Anlas？在设置里打开「Anlas 高消耗警告」，单次预计消耗超过你设定的数值时，生成前会先问你一句。';
 
   @override
-  String get tips_explore_teach_3 => '「生成候选图」旁边的数字框定本轮批量';
+  String get tips_studio_trick_1 =>
+      '种子决定了这张图「抽」到什么。参数和种子都不变，出来的就是同一张。所以想复现神图，记得把种子一起留下；想换运气，就别再盯着那个种子了。';
 
   @override
-  String get tips_explore_teach_4 => '悬停候选堆缩略图能看大图';
+  String get tips_studio_trick_2 =>
+      '复用预编码过的 Vibe 不用再花 2 Anlas。2 Anlas 听起来不多，但你一天会用几次 Vibe，自己心里有数。';
 
   @override
-  String get tips_explore_teach_5 => '拖分隔条可以拉宽画廊栏';
+  String get tips_studio_trick_3 =>
+      '负面提示词不是许愿池。写一百遍 bad hands，不如把正面里的手部动作写清楚。那排每次都要写的负面词，交给负面预设去管就好。';
 
   @override
-  String get tips_explore_fun_1 => '适者生存，画也一样';
+  String get tips_studio_trick_4 =>
+      '画师串不是越长越好。加到第十个以后，模型多半已经分不清你到底想要谁的笔触了。不如把它们拆成几个块，用随机抽取轮流上场。';
 
   @override
-  String get tips_explore_fun_2 => '每一轮生图都是海选现场';
+  String get tips_studio_trick_5 =>
+      '一次点击发几次请求、每次出几张，是两个不同的数。按钮上显示的是总张数，Anlas 也按总张数算——看清楚再按，别问我是怎么知道的。';
 
   @override
-  String get tips_explore_fun_3 => '好基因来自好父本';
+  String get tips_studio_trick_6 =>
+      '在翻译块上按一下鼠标中键，原文和译文来回切换。AI 翻得再好，偶尔也值得偷看一眼原文，确认它没把 cat ears 翻成什么奇怪的东西。';
 
   @override
-  String get tips_explore_fun_4 => '永远不要小看变异';
+  String get tips_studio_trick_7 =>
+      '设置里的「限制生图频率」可以让两次生图之间强制冷却，再加一点随机抖动，节奏就没那么机械。适合挂着慢慢抽的夜晚，也适合管不住手的自己。';
 
   @override
-  String get tips_explore_fun_5 => '自然选择，加速版';
+  String get tips_studio_wolf_1 =>
+      '这里是狼窝。你生成的图会被我叼回来，整整齐齐摆在本地画廊里——说真的，我的收纳能力比画技可靠得多。';
 
   @override
-  String get tips_gallerySearch_teach_1 => '逗号分隔 = 交集搜索';
+  String get tips_studio_wolf_2 =>
+      '我们狼在夜里视力最好。所以如果你凌晨三点还在这里，我什么都不会说，只会默默陪你再抽一张。';
 
   @override
-  String get tips_gallerySearch_teach_2 => '文字搜索已排除负面提示词——结果更干净';
+  String get tips_studio_wolf_3 =>
+      '据说 AI 画手的成年礼，是第一次心平气和地数完一只手上的手指。我没有手指，所以我一直很平静。';
 
   @override
-  String get tips_gallerySearch_teach_3 => '搜索会命中模型、采样器、来源、版本字段';
+  String get tips_studio_wolf_4 =>
+      '狼群的规矩：好种子要分享，好提示词要存成块，好图要先保存再欣赏。最后一条最重要，别问为什么。';
 
   @override
-  String get tips_gallerySearch_teach_4 => '按钮放不下时会横向滚动';
+  String get tips_studio_wolf_5 => '我不会画画，但我很会等。看着流式预览一点点变清晰的那几秒，是我一天里最安静的时候。';
 
   @override
-  String get tips_gallerySearch_teach_5 => '每页最多 500 张——给一口气翻到底的人';
+  String get tips_studio_wolf_6 => 'W.O.F 的意思是 WolF。至于中间为什么有点，那是我跑过雪地留下的脚印。';
 
   @override
-  String get tips_gallerySearch_fun_1 => '下面看上去有不少好东西呢~~~打算找点什么吗？';
+  String get tips_studio_wolf_7 => '画布空着的时候，我就趴在这里打个盹。按下生成，我就醒了。';
 
   @override
-  String get tips_gallerySearch_fun_2 => '收藏在长，文件夹在假装跟得上';
+  String get tips_studio_night_1 => '现在是深夜。友情提醒：这个时间段你的审美会悄悄上调 30%，明早起来记得再看一遍。';
 
   @override
-  String get tips_gallerySearch_fun_3 => '专业建议：自己的提示词就是最好的搜索词';
+  String get tips_studio_night_2 => '夜深了，远方机房里的显卡也打了个哈欠。抽完这一批就去睡吧，画廊我替你守着。';
 
   @override
-  String get tips_gallerySearch_fun_4 => '滚动也算运动';
+  String get tips_lab_guide_1 =>
+      '画风探索是一场选秀：先建一个探索任务，把提示词和参数固定下来，再批量生成候选图。你挑中的子代会成为下一代的父本，画风就这样一代代朝你想要的方向靠近。';
 
   @override
-  String get tips_gallerySearch_fun_5 => '这堆里某个角落藏着今晚的神作';
+  String get tips_lab_guide_2 =>
+      '红心和文件夹是给你自己整理用的，不会影响遗传。真正决定下一代的，是你用「多选建分支」挑进去的那几张。';
 
   @override
-  String get tips_gallerySearch_start_1 => '搜文件名或提示词正文——回车或点补全项都行';
+  String get tips_lab_guide_3 =>
+      '拿不定主意时，用「A/B 组对照」：两张父本的图并排出现，你只需要回答哪张更接近想要的画风。排在前面的父本，下一轮更容易分到子代。';
 
   @override
-  String get tips_gallerySearch_start_2 => '多个词用逗号分隔 = 全部命中才算数';
+  String get tips_lab_guide_4 =>
+      '想生成下一轮候选，主提示词里得有一个启用了遗传的随机块。没有可变的基因，变异引擎也无从下手。';
 
   @override
-  String get tips_gallerySearch_start_3 => '搜索只看正向提示词，负面词不会误中';
+  String get tips_lab_guide_5 =>
+      '某张候选的提示词组合特别好？「收编为块」能把它存进块库，以后在生成页也能直接用；多选几张，还能合并收编成一个块。';
 
   @override
-  String get tips_gallerySearch_start_4 => '模型、采样器、来源、版本字段也能被搜到';
+  String get tips_lab_guide_6 =>
+      '删除探索任务只会删掉任务目录里的候选副本，本地画廊里的原图不受影响。放心清理，试验场本来就该乱一点。';
 
   @override
-  String get tips_gallerySearch_start_5 => '输入标签（比如 masterpiece）或文件名片段即可';
+  String get tips_lab_trick_1 =>
+      '每个父本至少会分到一张出图名额，所以父本越多，一轮需要的张数也越多。贪心的话，Anlas 会先替你喊停。';
 
   @override
-  String get tips_gallerySearch_start_6 => '找到了点卡片看详情，右键有更多操作';
+  String get tips_lab_trick_2 => '只能从最新一代的候选堆建分支。回头路可以看，但不能从半路岔出去——进化论就是这么无情。';
 
   @override
-  String get tips_gallerySearch_start_7 => '配合右侧版本 chip 可以进一步收窄范围';
+  String get tips_lab_trick_3 =>
+      '变异引擎偶尔会说「产不出足够不同的子代」。这不是它偷懒，是基因池太小了：给随机块多塞几个候选词，它马上就有活干。';
 
   @override
-  String get tips_gallerySearch_start_8 => '空着就是浏览全部；输入即筛不用等';
+  String get tips_lab_trick_4 => '悬停候选堆里的缩略图就能看大图。别一张张点开，评委要有评委的效率。';
 
   @override
-  String get tips_gallerySearch_start_9 => '边输边搜，不用按回车';
+  String get tips_lab_trick_5 =>
+      '看中了某张候选的整套参数？「导入元数据」会把它的提示词和参数原样搬回编辑区，你可以从这里接着改。';
 
   @override
-  String get tips_gallerySearch_start_10 => '先搜一搜再考虑重新生成——多半已经有了';
+  String get tips_lab_wolf_1 => '狼群里没有哪只狼一出生就是最强的。画风也一样，第一代丑一点很正常，到第三代再下结论。';
 
   @override
-  String get tips_blocklib_teach_1 => '块可以带缩略图——编辑弹窗里设置';
+  String get tips_lab_wolf_2 => '这里的适者生存有个温柔的版本：没被选中的候选不会消失，只是这一轮没轮到它而已。';
 
   @override
-  String get tips_blocklib_teach_2 => '点击块开详情，悬停先看大图';
+  String get tips_lab_wolf_3 => '我对遗传学的全部理解是：好看的爸妈，大概率生出好看的崽。剩下的交给变异，和一点点运气。';
 
   @override
-  String get tips_blocklib_teach_3 => '⭐ 收进收藏集，常用块置顶集中';
+  String get tips_lab_wolf_4 => 'LAB 的灯通常亮到很晚。我在门口值班，顺便帮你记着这是第几代了。';
 
   @override
-  String get tips_blocklib_teach_4 => '瀑布流视图能看清图块';
+  String get tips_lab_wolf_5 =>
+      '永远不要小看变异。有时候你挑了十代都没找到的东西，会在一次意外里冒出来。所以，看着不对劲的那张也别急着删。';
 
   @override
-  String get tips_blocklib_teach_5 => '拖分割条可以调整块区/文件夹区比例';
+  String get tips_prompt_guide_1 => '写完按 Ctrl+Enter 就能生成，生成途中按 Esc 取消。';
 
   @override
-  String get tips_blocklib_fun_1 => '每个块都梦想着被点名';
+  String get tips_prompt_guide_2 => '选中一段提示词，按住 Alt 滚动滚轮调权重；不按 Alt，滚轮只是翻页。';
 
   @override
-  String get tips_blocklib_fun_2 => '文件夹里套文件夹——现在算是有条理了';
+  String get tips_prompt_guide_3 =>
+      'Ctrl+单击提示词里的标签，直接在本地标签库里搜它；Ctrl+拖选一段，看看哪些标签常和它一起出现。';
 
   @override
-  String get tips_blocklib_fun_3 => '使用次数就是块的履历表';
+  String get tips_prompt_guide_4 => '选中一段文字点右键，可以直接保存到块库。以后点一下或拖一下，它就回来了。';
 
   @override
-  String get tips_blocklib_fun_4 => '积木留给钉子户';
+  String get tips_prompt_guide_5 => '框底部的质量词预设会替你补上那排常用质量词；切到负面，同一个位置就是负面预设。';
 
   @override
-  String get tips_blocklib_fun_5 => '犹豫就做成块';
+  String get tips_prompt_guide_6 => '按 F1 查看全部快捷键。';
 
   @override
-  String get tips_gen_1 => '文本框里 Ctrl+Z 管用——错别字不可怕';
+  String get tips_prompt_guide_7 =>
+      '从 ComfyUI 复制来的多角色提示词，粘贴进来会被识别，并询问是否导入成角色框，不用一个个重填。';
 
   @override
-  String get tips_gen_2 => '设置→提示词的 chunks 菜单里藏着不少开关';
+  String get tips_prompt_guide_8 =>
+      '打开「SD 语法自动转换」后，(tag:1.2) 这种写法会在失焦或生成时自动换成 NovelAI 的权重格式。';
 
   @override
-  String get tips_gen_3 => '看见细分隔条就拖拖看——多数面板能调宽';
+  String get tips_prompt_guide_9 => '写 1.2::词:: 能精确调权重，写负数就反着来。';
 
   @override
-  String get tips_gen_4 => '历史栏可以调回旧图和当时的参数';
+  String get tips_prompt_trick_1 =>
+      '花括号每套一层，权重乘 1.05；方括号每套一层，除以 1.05。套五层花括号的人，通常是在和模型吵架。';
 
   @override
-  String get tips_gen_5 => '右键出菜单，悬停出预览';
+  String get tips_prompt_trick_2 => '自动格式化会删掉没用的 1 倍权重。它不是嫌弃你，是在帮你省 token。';
 
   @override
-  String get tips_fun_1 => '正在加载今日份的玄学…';
+  String get tips_prompt_trick_3 =>
+      '框底下那条细线是 token 用量。写满之后，后面的内容模型基本就看不见了——想写长篇小说，请换个地方。';
 
   @override
-  String get tips_fun_2 => '种子是随机的，品味不是';
+  String get tips_prompt_trick_4 => '写不出来的时候，先写画面里最大的那个东西。';
 
   @override
-  String get tips_fun_3 => '某处有一块显卡正在摩拳擦掌';
+  String get tips_prompt_trick_5 => '质量词写一次就够了。masterpiece 写三遍，模型也不会觉得你更真诚。';
 
   @override
-  String get tips_fun_4 => '这里最贵的按钮是生成——它吃 Anlas';
+  String get tips_prompt_trick_6 =>
+      '想让一个元素「出现但别太抢戏」，写 0.8:: 比删掉它好使。删掉是没有，降权是低调。';
 
   @override
-  String get tips_fun_5 => '这个框见证过上千张神作（和几张黑历史）';
+  String get tips_prompt_trick_7 => '同一套词改来改去？先存成块，再交给随机抽取。';
+
+  @override
+  String get tips_prompt_trick_8 =>
+      '正面写「要什么」，负面写「不要什么」。在正面写 no hat，模型多半只听见了 hat。';
+
+  @override
+  String get tips_prompt_wolf_1 => '这个框见过上千张神图，和几张不太方便公开的黑历史。';
+
+  @override
+  String get tips_prompt_wolf_2 =>
+      '先用一句人话描述你想要的画面，再把它拆成标签。顺序反过来的话，常常会得到一堆标签和一张不知所云的图。';
+
+  @override
+  String get tips_prompt_wolf_3 => '我在看你打字。别紧张，我看不懂英文。';
+
+  @override
+  String get tips_prompt_wolf_4 => '远方某张显卡，刚刚因为你的提示词叹了口气。';
+
+  @override
+  String get tips_prompt_wolf_5 => '抽卡的尽头是玄学，玄学的尽头是锁种子。';
+
+  @override
+  String get tips_prompt_wolf_6 => '画师串加到第十二个的时候，模型已经不知道自己在画谁了。你也是。';
+
+  @override
+  String get tips_explore_guide_1 => '这里写的是父本的提示词。想让某部分参与进化，就把它做成随机块，再在块上开启遗传。';
+
+  @override
+  String get tips_explore_guide_2 => '遗传开关要等块实例启用后才能打开。灰着的话，先把块启用。';
+
+  @override
+  String get tips_explore_guide_3 => '「生成候选图」旁边的数字，决定这一轮出几张。';
+
+  @override
+  String get tips_explore_guide_4 => '块实例可以「退回一幕」「前进一幕」，在抽过的组合之间来回翻。';
+
+  @override
+  String get tips_explore_guide_5 => '探索任务会固化提示词和参数快照。之后再改这里，不会影响已经跑完的那几轮。';
+
+  @override
+  String get tips_explore_guide_6 => '块的「随机设置」里能调抽取数量、触发概率和随机权重——基因的花样都藏在这里。';
+
+  @override
+  String get tips_explore_trick_1 =>
+      '基因池越大，变异越有得挑。一个随机块里只放两个词，进化十代也只是在两个答案之间来回横跳。';
+
+  @override
+  String get tips_explore_trick_2 =>
+      '确定要的部分写死，拿不准的做成随机块。全都随机等于没有方向，全都写死等于没有进化。';
+
+  @override
+  String get tips_explore_trick_3 => '锁住的块不会被重抽。想保住某个特征，就先锁上它，再让别的块去折腾。';
+
+  @override
+  String get tips_explore_trick_4 =>
+      '触发概率设成 30%，这个块大约只在三成的组合里出现。适合那些「偶尔来一下才好看」的元素。';
+
+  @override
+  String get tips_explore_trick_5 => '第一代就想看到完美答案？那叫许愿，不叫探索。';
+
+  @override
+  String get tips_explore_wolf_1 => '狼群的血统是一代代挑出来的。你的画风也是。';
+
+  @override
+  String get tips_explore_wolf_2 => '每一轮生成都是一场海选，评委只有你一个。我负责鼓掌。';
+
+  @override
+  String get tips_explore_wolf_3 => '好基因来自好父本，好父本来自你那一下没手滑的点击。';
+
+  @override
+  String get tips_explore_wolf_4 => '我不太懂遗传学，但我知道：挑剔的评委，才养得出好看的狼崽。';
+
+  @override
+  String get tips_character_guide_1 => '角色框本质是定位框：猫、灯、招牌都能放，不一定是人。';
+
+  @override
+  String get tips_character_guide_2 => '上方「定位」切到「自定义」，在预览图上拖动锚点，松开就生效。';
+
+  @override
+  String get tips_character_guide_3 => '「AI 选择」把位置交给模型安排；切回「自定义」，之前拖好的位置还在。';
+
+  @override
+  String get tips_character_guide_4 => '每个角色框都有自己的负面，只管这一个角色。';
+
+  @override
+  String get tips_character_guide_5 => '右上角的勾可以临时停用这个角色，不用删掉重写。';
+
+  @override
+  String get tips_character_guide_6 => '点一下标题就能给角色改名，比编号好认多了。';
+
+  @override
+  String get tips_character_guide_7 => '右上角的 ⋯ 里可以把这个角色收藏到块库，以后接着复用这段描述。';
+
+  @override
+  String get tips_character_trick_1 =>
+      '场景和画风写主提示词，这里只写这个角色。两边写同一件衣服，模型会以为你超爱它。';
+
+  @override
+  String get tips_character_trick_2 =>
+      '两人挨太近容易「粘」在一起。把锚点拉开一点，比写十遍 separate 管用。';
+
+  @override
+  String get tips_character_trick_3 => '想让一棵树站在画面左边？给它一个角色框，拖到左边。树不会抱怨自己不是角色。';
+
+  @override
+  String get tips_character_trick_4 => '角色框里也能用块和权重语法，和主提示词一样。';
+
+  @override
+  String get tips_character_trick_5 => '角色太多就先停用几个。画面挤不下时，模型会自己挑人——通常不是你想留的那个。';
+
+  @override
+  String get tips_character_wolf_1 => '我也想要一个角色框，但我觉得自己更适合站在画面外面看着。';
+
+  @override
+  String get tips_character_wolf_2 => '一个框，一个位置，一件事。我觉得这是很好的人生哲学。';
+
+  @override
+  String get tips_character_wolf_3 => '你负责安排站位，我负责在旁边喊「再往左一点」。';
+
+  @override
+  String get tips_character_wolf_4 => '狼群出门也要排队形。角色多的时候，先想好谁站中间。';
+
+  @override
+  String get tips_gallery_guide_1 => '搜文件名或提示词正文';
+
+  @override
+  String get tips_gallery_guide_2 => '逗号分隔多个词，要全部命中才算';
+
+  @override
+  String get tips_gallery_guide_3 => '模型、采样器、来源也能搜到';
+
+  @override
+  String get tips_gallery_guide_4 => 'Ctrl+F 随时跳到搜索框';
+
+  @override
+  String get tips_gallery_guide_5 => '角色提示词里的内容也搜得到';
+
+  @override
+  String get tips_gallery_guide_6 => '右键图片，还有更多操作';
+
+  @override
+  String get tips_gallery_guide_7 => 'F5 刷新画廊';
+
+  @override
+  String get tips_gallery_trick_1 => '只搜正面，负面里的搜不到';
+
+  @override
+  String get tips_gallery_trick_2 => '重抽之前先搜，多半已经有了';
+
+  @override
+  String get tips_gallery_trick_3 => '你写过的提示词就是最好的搜索词';
+
+  @override
+  String get tips_gallery_trick_4 => '删除池的图，下次启动才真删';
+
+  @override
+  String get tips_gallery_trick_5 => '搜 masterpiece 约等于搜全部';
+
+  @override
+  String get tips_gallery_wolf_1 => '今晚的猎物大概在第三页';
+
+  @override
+  String get tips_gallery_wolf_2 => '我闻到了，神作就在这堆里';
+
+  @override
+  String get tips_gallery_wolf_3 => '滚动也算运动，我陪你跑';
+
+  @override
+  String get tips_gallery_wolf_4 => '窝很大，慢慢翻';
+
+  @override
+  String get tips_online_guide_1 => '空格分隔多个标签，回车搜索';
+
+  @override
+  String get tips_online_guide_2 => '开模糊匹配，*tag* 找相近标签';
+
+  @override
+  String get tips_online_guide_3 => '黑名单标签的图会直接隐藏';
+
+  @override
+  String get tips_online_guide_4 => '登录 Danbooru 后可以用收藏夹';
+
+  @override
+  String get tips_online_trick_1 => '多词标签用下划线：blue_eyes';
+
+  @override
+  String get tips_online_trick_2 => '看到好图，记下它的标签思路';
+
+  @override
+  String get tips_online_trick_3 => '标签越多结果越少，先少写几个';
+
+  @override
+  String get tips_online_wolf_1 => '外面的世界很大，我先去探路';
+
+  @override
+  String get tips_online_wolf_2 => '别人家的猎场，逛逛就好';
+
+  @override
+  String get tips_online_wolf_3 => '今天想去哪片林子打猎？';
+
+  @override
+  String get tips_blocks_guide_1 => '标题、提示词、标签都能搜';
+
+  @override
+  String get tips_blocks_guide_2 => '把块直接拖进提示词框';
+
+  @override
+  String get tips_blocks_guide_3 => '点 ★ 收藏，常用块集中放';
+
+  @override
+  String get tips_blocks_guide_4 => '块可以带缩略图，挑起来更快';
+
+  @override
+  String get tips_blocks_guide_5 => '选中文字右键，就能存成块';
+
+  @override
+  String get tips_blocks_trick_1 => '同一段写过三次，就该存成块了';
+
+  @override
+  String get tips_blocks_trick_2 => '犹豫要不要存？存。删比写快';
+
+  @override
+  String get tips_blocks_trick_3 => '名字起清楚，半年后会感谢自己';
+
+  @override
+  String get tips_blocks_trick_4 => '随机块候选越多，惊喜越多';
+
+  @override
+  String get tips_blocks_wolf_1 => '每个块都在等你点名';
+
+  @override
+  String get tips_blocks_wolf_2 => '这些块是你的狼群，常带出去溜';
+
+  @override
+  String get tips_blocks_wolf_3 => '我只认得一种块：肉块';
+
+  @override
+  String get tips_blocks_wolf_4 => '文件夹套文件夹，算是有条理了';
+
+  @override
+  String get tips_generating_wolf_1 => '正在和随机数讨价还价…';
+
+  @override
+  String get tips_generating_wolf_2 => '正在跟第六根手指好好谈谈…';
+
+  @override
+  String get tips_generating_wolf_3 => '正在劝像素们排好队…';
+
+  @override
+  String get tips_generating_wolf_4 => '正在把噪点一粒粒擦掉…';
+
+  @override
+  String get tips_generating_wolf_5 => '狼正在远处嚎叫助威…';
+
+  @override
+  String get tips_generating_wolf_6 => '正在向显卡解释你的审美…';
+
+  @override
+  String get tips_generating_wolf_7 => '正在把提示词翻译成梦…';
+
+  @override
+  String get tips_generating_wolf_8 => '正在确认眼睛的数量…';
+
+  @override
+  String get tips_generating_wolf_9 => '正在给光影找个好角度…';
+
+  @override
+  String get tips_generating_wolf_10 => '正在说服背景别抢戏…';
+
+  @override
+  String get tips_generating_wolf_11 => '正在从噪声里捞出你的图…';
+
+  @override
+  String get tips_generating_wolf_12 => '正在数手指：一、二、三…';
+
+  @override
+  String get tips_generating_wolf_13 => '正在等颜料晾干…';
+
+  @override
+  String get tips_generating_wolf_14 => '正在召唤今天的好运气…';
+
+  @override
+  String get tips_generating_trick_1 => '等不及了？按 Esc 可以取消';
+
+  @override
+  String get tips_generating_trick_2 => '预览会一帧帧变清晰';
+
+  @override
+  String get tips_generating_trick_3 => '生成好的图默认存进本地画廊';
+
+  @override
+  String get tips_generating_trick_4 => '每一步采样都在去掉一层噪点';
+
+  @override
+  String get tips_splash_guide_1 => '按 F1 可以随时查看全部快捷键。';
+
+  @override
+  String get tips_splash_guide_2 => 'Ctrl+Enter 生成，所有快捷键都能在设置里改。';
+
+  @override
+  String get tips_splash_guide_3 => '把图拖进窗口，可以读出它的提示词和参数。';
+
+  @override
+  String get tips_splash_guide_4 => '常用的提示词存成块，下次一键复用。';
+
+  @override
+  String get tips_splash_trick_1 => '上面那个 STEP /28，致敬的是默认的 28 步采样。';
+
+  @override
+  String get tips_splash_trick_2 => '预编码的 Vibe 可以免费复用，省下 2 Anlas。';
+
+  @override
+  String get tips_splash_trick_3 => '第一次建立图库索引会慢一点，期间照常使用就好。';
+
+  @override
+  String get tips_splash_wolf_1 => '再让我睡五分钟……好吧，起来了。';
+
+  @override
+  String get tips_splash_wolf_2 => '我先把窝收拾一下，马上就好。';
+
+  @override
+  String get tips_splash_wolf_3 => '显卡就位，月亮就位，就差你了。';
+
+  @override
+  String get tips_splash_wolf_4 => '闻到了吗？是新提示词的味道。';
+
+  @override
+  String get tips_splash_wolf_5 => '今天也要好好抽卡。';
+
+  @override
+  String genButton_normal(int count) {
+    return '生成 $count 张图片';
+  }
+
+  @override
+  String get genButton_one_1 => '就这一张，不改了';
+
+  @override
+  String get genButton_one_2 => '来张好的';
+
+  @override
+  String get genButton_one_3 => '单抽，信仰之跃';
+
+  @override
+  String get genButton_one_4 => '先来一张试试水';
+
+  @override
+  String get genButton_one_5 => '一张定胜负';
+
+  @override
+  String get genButton_one_6 => '这张必是神图';
+
+  @override
+  String get genButton_one_7 => '就一张，我发誓';
+
+  @override
+  String get genButton_one_8 => '新头像就靠它了';
+
+  @override
+  String get genButton_one_9 => '一发入魂';
+
+  @override
+  String get genButton_one_10 => '来张能当壁纸的';
+
+  @override
+  String get genButton_one_11 => '轻轻抽一张';
+
+  @override
+  String get genButton_one_12 => '叼一张回来';
+
+  @override
+  String genButton_few_1(int count) {
+    return '$count 张，挑个最好的';
+  }
+
+  @override
+  String genButton_few_2(int count) {
+    return '来 $count 张比一比';
+  }
+
+  @override
+  String genButton_few_3(int count) {
+    return '$count 连抽';
+  }
+
+  @override
+  String genButton_few_4(int count) {
+    return '$count 张，总有一张行';
+  }
+
+  @override
+  String genButton_few_5(int count) {
+    return '$count 选一，评委就位';
+  }
+
+  @override
+  String genButton_few_6(int count) {
+    return '先来 $count 张热热身';
+  }
+
+  @override
+  String genButton_few_7(int count) {
+    return '$count 张，择优录取';
+  }
+
+  @override
+  String genButton_few_8(int count) {
+    return '$count 张小确幸';
+  }
+
+  @override
+  String genButton_batch_1(int count) {
+    return '$count 连发';
+  }
+
+  @override
+  String genButton_batch_2(int count) {
+    return '$count 张一起上';
+  }
+
+  @override
+  String genButton_batch_3(int count) {
+    return '$count 张，开始停不下来';
+  }
+
+  @override
+  String genButton_batch_4(int count) {
+    return '一次 $count 张，吃到饱';
+  }
+
+  @override
+  String genButton_batch_5(int count) {
+    return '$count 张，铺满屏幕';
+  }
+
+  @override
+  String genButton_batch_6(int count) {
+    return '$count 连，稳一手';
+  }
+
+  @override
+  String genButton_batch_7(int count) {
+    return '$count 张，狼群出动';
+  }
+
+  @override
+  String genButton_batch_8(int count) {
+    return '$count 张，开席';
+  }
+
+  @override
+  String genButton_many_1(int count) {
+    return '$count 张，上强度了';
+  }
+
+  @override
+  String genButton_many_2(int count) {
+    return '$count 张，显卡开始冒汗';
+  }
+
+  @override
+  String genButton_many_3(int count) {
+    return '$count 张，囤货模式';
+  }
+
+  @override
+  String genButton_many_4(int count) {
+    return '$count 张，流水线启动';
+  }
+
+  @override
+  String genButton_many_5(int count) {
+    return '$count 张，Anlas 在燃烧';
+  }
+
+  @override
+  String genButton_many_6(int count) {
+    return '$count 张，这是要日更';
+  }
+
+  @override
+  String genButton_many_7(int count) {
+    return '$count 张批量出击';
+  }
+
+  @override
+  String genButton_many_8(int count) {
+    return '$count 张，狼都看呆了';
+  }
+
+  @override
+  String genButton_huge_1(int count) {
+    return '$count 张？！开画展吗';
+  }
+
+  @override
+  String genButton_huge_2(int count) {
+    return '$count 张，硬盘瑟瑟发抖';
+  }
+
+  @override
+  String genButton_huge_3(int count) {
+    return '$count 张，工业革命了';
+  }
+
+  @override
+  String genButton_huge_4(int count) {
+    return '$count 张，先冷静一下';
+  }
+
+  @override
+  String genButton_huge_5(int count) {
+    return '$count 张，存得下吗';
+  }
+
+  @override
+  String genButton_huge_6(int count) {
+    return '$count 张，打印店开张';
+  }
+
+  @override
+  String genButton_huge_7(int count) {
+    return '批发 $count 张';
+  }
+
+  @override
+  String genButton_huge_8(int count) {
+    return '$count 张，狼去搬救兵了';
+  }
+
+  @override
+  String get genButton_rare_1 => '这发必出 SSR';
+
+  @override
+  String get genButton_rare_2 => 'AI 说它今天手感不错';
+
+  @override
+  String get genButton_rare_3 => '今日运势：大吉';
+
+  @override
+  String get genButton_rare_4 => '据说这个按钮旺你';
+
+  @override
+  String get genButton_rare_5 => '狼对着月亮嚎了一声';
+
+  @override
+  String get genButton_rare_6 => '玄学加持中';
+
+  @override
+  String get genButton_rare_7 => '欧气已充值';
+
+  @override
+  String get genButton_rare_8 => '本次抽卡由狼赞助';
+
+  @override
+  String get genButton_rare_9 => '手气，来！';
+
+  @override
+  String get genButton_rare_10 => '按下即是信仰';
+
+  @override
+  String get genButton_night_1 => '夜深了，最后一抽';
+
+  @override
+  String get genButton_night_2 => '抽完这批就睡';
+
+  @override
+  String get genButton_night_3 => '凌晨的审美最野';
+
+  @override
+  String get genButton_night_4 => '狼陪你熬夜';
+
+  @override
+  String genButton_special_7(int count) {
+    return '$count 张，幸运七';
+  }
+
+  @override
+  String genButton_special_9(int count) {
+    return '$count 张，九宫格集齐';
+  }
+
+  @override
+  String genButton_special_42(int count) {
+    return '$count，万物的答案';
+  }
+
+  @override
+  String genButton_special_99(int count) {
+    return '$count 张，差一张破百';
+  }
+
+  @override
+  String genButton_special_100(int count) {
+    return '整整 $count 张，强迫症舒服了';
+  }
 
   @override
   String get titleBar_minimize => '最小化';
@@ -8961,15 +9588,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_geistDescription => '全工作室统一外观：黑白灰底色，蓝色作为操作强调。';
 
   @override
-  String get generation_tipReuseBlocks => '把常用提示词保存为块，下一次直接复用。';
-
-  @override
-  String get generation_tipBlockModes => '顺序与随机模式，可以让提示词块产生不同组合。';
-
-  @override
-  String get generation_tipLockBlocks => '锁定想保留的块，再随机调整其他部分。';
-
-  @override
   String get styleExplore_collapseGallery => '收起候选画廊';
 
   @override
@@ -9009,7 +9627,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_officialDirectory => '官方目录';
 
   @override
-  String get wiki_searchHint => '搜索标签、别名或中文译名';
+  String get wiki_searchHint => '搜索标签或别名';
 
   @override
   String get wiki_typeAll => '全部类型';
@@ -14557,9 +15175,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get characterEditor_enabled => '啟用';
 
   @override
-  String get characterEditor_promptHint => '輸入角色的正向提示詞...';
-
-  @override
   String get characterEditor_negativePromptHint => '輸入角色的負面提示詞...';
 
   @override
@@ -19067,7 +19682,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get autocomplete_relatedTagsSubtitle => 'Ctrl+單擊搜尋本地標籤；Ctrl+拖選檢視關聯標籤';
 
   @override
-  String get tagExpansion_searchHint => '搜尋標籤、別名或漢化名';
+  String get tagExpansion_searchHint => '搜尋標籤或別名';
 
   @override
   String get tagExpansion_relatedTitle => '關聯標籤';
@@ -19750,9 +20365,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_galleryEmptyHint => '暫無候選。新增或選擇一個探索任務，開始批次生成。';
 
   @override
-  String get styleExplore_labTip => '選擇喜歡的候選，讓畫風逐代進化。';
-
-  @override
   String get styleExplore_runNameLabel => '任務名稱';
 
   @override
@@ -20186,184 +20798,817 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_modelsAndInterfaces => '模型與介面';
 
   @override
-  String get tips_gen_teach_1 => '在提示詞框輸入 < 可以拉進塊庫裡的塊';
+  String get tips_kind_guide => '提示';
 
   @override
-  String get tips_gen_teach_2 => '摘要條點 Seed 可鎖定/重抽，點 Sampler 可直接換取樣器';
+  String get tips_kind_trick => '過來人';
 
   @override
-  String get tips_gen_teach_3 => '生成鍵旁邊的數字小框定本批張數，右端深色框是 Anlas 消耗';
+  String get tips_kind_wolf => '狼';
 
   @override
-  String get tips_gen_teach_4 => '右上角 chunks 選單裡收納了塊庫、預設和正則規則';
+  String tips_hint(String label, String tip) {
+    return '$label：$tip';
+  }
 
   @override
-  String get tips_gen_teach_5 => '透明通道匯出 Alpha 通道；啟用角色參考時不可用';
+  String get tips_studio_guide_1 =>
+      '寫好提示詞，按 Ctrl+Enter 就能生成。生成的圖會在這塊畫布上一批批鋪開：中鍵或 Shift+左鍵拖動平移，Ctrl+滾輪縮放，WASD 也能用來導航。';
 
   @override
-  String get tips_gen_fun_1 => '正在給 AI 喂電子小魚乾…';
+  String get tips_studio_guide_2 =>
+      '常用的畫師串、品質詞和構圖描述，寫一次存成塊，下次從塊庫直接拉進來。塊不只是複製貼上：它可以設成固定、順序或隨機抽取，每次生成換一種組合。';
 
   @override
-  String get tips_gen_fun_2 => '每張圖都是一次小型抽卡——抽吧';
+  String get tips_studio_guide_3 =>
+      '隨機塊抽到一組特別滿意的結果？鎖定它，再去重抽別的塊。鎖住的內容不會變，沒鎖的照常隨機——適合「這個姿勢留著，衣服再換幾套」。';
 
   @override
-  String get tips_gen_fun_3 => 'Anlas 餘額和模型名都在頭頂上——燒錢前瞄一眼';
+  String get tips_studio_guide_4 =>
+      '把一張圖拖進視窗，會問你想怎麼用：圖生圖、風格遷移、精準參考，或者只提取它的提示詞和參數。帶著 NovelAI 後設資料的圖，一拖就能看到當時是怎麼寫的。';
 
   @override
-  String get tips_gen_fun_4 => '提示詞框長高了，方便野心攤開寫';
+  String get tips_studio_guide_5 =>
+      '角色框本質上是定位框。除了人物，你也可以放一隻貓、一盞燈、一塊招牌；把定位切到「自訂」，在預覽圖上拖動錨點，告訴模型它該出現在哪裡。';
 
   @override
-  String get tips_gen_fun_5 => '種子 -1 交給命運；據說命運喜歡整數';
+  String get tips_studio_guide_6 =>
+      '選中一段提示詞，按住 Alt 滾動滾輪就能調權重。不按 Alt 時滾輪只是正常翻頁，不會誤改權重。修飾鍵可以在設定裡換成 Ctrl。';
 
   @override
-  String get tips_explore_teach_1 => '點紅心+歸資料夾，就是給下一代投票';
+  String get tips_studio_guide_7 =>
+      '按 F1 隨時開啟快速鍵幫助。Ctrl+1、Ctrl+2、Ctrl+3 在生成頁、本地畫廊和線上畫廊之間切換，Ctrl+, 開啟設定。所有快速鍵都能在設定裡改成你順手的組合。';
 
   @override
-  String get tips_explore_teach_2 => 'A/B 對照組看的是父本原圖——選出勝者就翻篇';
+  String get tips_studio_guide_8 =>
+      '擔心一不小心花掉一大筆 Anlas？在設定裡開啟「Anlas 高消耗警告」，單次預計消耗超過你設定的數值時，生成前會先問你一句。';
 
   @override
-  String get tips_explore_teach_3 => '「生成候選圖」旁邊的數字框定本輪批次';
+  String get tips_studio_trick_1 =>
+      '種子決定了這張圖「抽」到什麼。參數和種子都不變，出來的就是同一張。所以想復現神圖，記得把種子一起留下；想換運氣，就別再盯著那個種子了。';
 
   @override
-  String get tips_explore_teach_4 => '懸停候選堆縮圖能看大圖';
+  String get tips_studio_trick_2 =>
+      '複用預編碼過的 Vibe 不用再花 2 Anlas。2 Anlas 聽起來不多，但你一天會用幾次 Vibe，自己心裡有數。';
 
   @override
-  String get tips_explore_teach_5 => '拖分隔條可以拉寬畫廊欄';
+  String get tips_studio_trick_3 =>
+      '負面提示詞不是許願池。寫一百遍 bad hands，不如把正面裡的手部動作寫清楚。那排每次都要寫的負面詞，交給負面預設去管就好。';
 
   @override
-  String get tips_explore_fun_1 => '適者生存，畫也一樣';
+  String get tips_studio_trick_4 =>
+      '畫師串不是越長越好。加到第十個以後，模型多半已經分不清你到底想要誰的筆觸了。不如把它們拆成幾個塊，用隨機抽取輪流上場。';
 
   @override
-  String get tips_explore_fun_2 => '每一輪生圖都是海選現場';
+  String get tips_studio_trick_5 =>
+      '一次點擊發幾次請求、每次出幾張，是兩個不同的數。按鈕上顯示的是總張數，Anlas 也按總張數算——看清楚再按，別問我是怎麼知道的。';
 
   @override
-  String get tips_explore_fun_3 => '好基因來自好父本';
+  String get tips_studio_trick_6 =>
+      '在翻譯塊上按一下滑鼠中鍵，原文和譯文來回切換。AI 翻得再好，偶爾也值得偷看一眼原文，確認它沒把 cat ears 翻成什麼奇怪的東西。';
 
   @override
-  String get tips_explore_fun_4 => '永遠不要小看變異';
+  String get tips_studio_trick_7 =>
+      '設定裡的「限制生圖頻率」可以讓兩次生圖之間強制冷卻，再加一點隨機抖動，節奏就沒那麼機械。適合掛著慢慢抽的夜晚，也適合管不住手的自己。';
 
   @override
-  String get tips_explore_fun_5 => '自然選擇，加速版';
+  String get tips_studio_wolf_1 =>
+      '這裡是狼窩。你生成的圖會被我叼回來，整整齊齊擺在本地畫廊裡——說真的，我的收納能力比畫技可靠得多。';
 
   @override
-  String get tips_gallerySearch_teach_1 => '逗號分隔 = 交集搜尋';
+  String get tips_studio_wolf_2 =>
+      '我們狼在夜裡視力最好。所以如果你凌晨三點還在這裡，我什麼都不會說，只會默默陪你再抽一張。';
 
   @override
-  String get tips_gallerySearch_teach_2 => '文字搜尋已排除負面提示詞——結果更乾淨';
+  String get tips_studio_wolf_3 =>
+      '據說 AI 畫手的成年禮，是第一次心平氣和地數完一隻手上的手指。我沒有手指，所以我一直很平靜。';
 
   @override
-  String get tips_gallerySearch_teach_3 => '搜尋會命中模型、取樣器、來源、版本欄位';
+  String get tips_studio_wolf_4 =>
+      '狼群的規矩：好種子要分享，好提示詞要存成塊，好圖要先儲存再欣賞。最後一條最重要，別問為什麼。';
 
   @override
-  String get tips_gallerySearch_teach_4 => '按鈕放不下時會橫向滾動';
+  String get tips_studio_wolf_5 => '我不會畫畫，但我很會等。看著流式預覽一點點變清晰的那幾秒，是我一天裡最安靜的時候。';
 
   @override
-  String get tips_gallerySearch_teach_5 => '每頁最多 500 張——給一口氣翻到底的人';
+  String get tips_studio_wolf_6 => 'W.O.F 的意思是 WolF。至於中間為什麼有點，那是我跑過雪地留下的腳印。';
 
   @override
-  String get tips_gallerySearch_fun_1 => '下面看上去有不少好東西呢~~~打算找點什麼嗎？';
+  String get tips_studio_wolf_7 => '畫布空著的時候，我就趴在這裡打個盹。按下生成，我就醒了。';
 
   @override
-  String get tips_gallerySearch_fun_2 => '收藏在長，資料夾在假裝跟得上';
+  String get tips_studio_night_1 => '現在是深夜。友情提醒：這個時間段你的審美會悄悄上調 30%，明早起來記得再看一遍。';
 
   @override
-  String get tips_gallerySearch_fun_3 => '專業建議：自己的提示詞就是最好的搜尋詞';
+  String get tips_studio_night_2 => '夜深了，遠方機房裡的顯示卡也打了個哈欠。抽完這一批就去睡吧，畫廊我替你守著。';
 
   @override
-  String get tips_gallerySearch_fun_4 => '滾動也算運動';
+  String get tips_lab_guide_1 =>
+      '畫風探索是一場選秀：先建一個探索任務，把提示詞和參數固定下來，再批次生成候選圖。你挑中的子代會成為下一代的父本，畫風就這樣一代代朝你想要的方向靠近。';
 
   @override
-  String get tips_gallerySearch_fun_5 => '這堆裡某個角落藏著今晚的神作';
+  String get tips_lab_guide_2 =>
+      '紅心和資料夾是給你自己整理用的，不會影響遺傳。真正決定下一代的，是你用「多選建分支」挑進去的那幾張。';
 
   @override
-  String get tips_gallerySearch_start_1 => '搜檔名或提示詞正文——回車或點補全項都行';
+  String get tips_lab_guide_3 =>
+      '拿不定主意時，用「A/B 組對照」：兩張父本的圖並排出現，你只需要回答哪張更接近想要的畫風。排在前面的父本，下一輪更容易分到子代。';
 
   @override
-  String get tips_gallerySearch_start_2 => '多個詞用逗號分隔 = 全部命中才算數';
+  String get tips_lab_guide_4 =>
+      '想生成下一輪候選，主提示詞裡得有一個啟用了遺傳的隨機塊。沒有可變的基因，變異引擎也無從下手。';
 
   @override
-  String get tips_gallerySearch_start_3 => '搜尋只看正向提示詞，負面詞不會誤中';
+  String get tips_lab_guide_5 =>
+      '某張候選的提示詞組合特別好？「收編為塊」能把它存進塊庫，以後在生成頁也能直接用；多選幾張，還能合併收編成一個塊。';
 
   @override
-  String get tips_gallerySearch_start_4 => '模型、取樣器、來源、版本欄位也能被搜到';
+  String get tips_lab_guide_6 =>
+      '刪除探索任務只會刪掉任務目錄裡的候選副本，本地畫廊裡的原圖不受影響。放心清理，試驗場本來就該亂一點。';
 
   @override
-  String get tips_gallerySearch_start_5 => '輸入標籤（比如 masterpiece）或檔名片段即可';
+  String get tips_lab_trick_1 =>
+      '每個父本至少會分到一張出圖名額，所以父本越多，一輪需要的張數也越多。貪心的話，Anlas 會先替你喊停。';
 
   @override
-  String get tips_gallerySearch_start_6 => '找到了點卡片看詳情，右鍵有更多操作';
+  String get tips_lab_trick_2 => '只能從最新一代的候選堆建分支。回頭路可以看，但不能從半路岔出去——進化論就是這麼無情。';
 
   @override
-  String get tips_gallerySearch_start_7 => '配合右側版本 chip 可以進一步收窄範圍';
+  String get tips_lab_trick_3 =>
+      '變異引擎偶爾會說「產不出足夠不同的子代」。這不是它偷懶，是基因池太小了：給隨機塊多塞幾個候選詞，它馬上就有活幹。';
 
   @override
-  String get tips_gallerySearch_start_8 => '空著就是瀏覽全部；輸入即篩不用等';
+  String get tips_lab_trick_4 => '懸停候選堆裡的縮圖就能看大圖。別一張張點開，評委要有評委的效率。';
 
   @override
-  String get tips_gallerySearch_start_9 => '邊輸邊搜，不用按回車';
+  String get tips_lab_trick_5 =>
+      '看中了某張候選的整套參數？「匯入後設資料」會把它的提示詞和參數原樣搬回編輯區，你可以從這裡接著改。';
 
   @override
-  String get tips_gallerySearch_start_10 => '先搜一搜再考慮重新生成——多半已經有了';
+  String get tips_lab_wolf_1 => '狼群裡沒有哪隻狼一出生就是最強的。畫風也一樣，第一代醜一點很正常，到第三代再下結論。';
 
   @override
-  String get tips_blocklib_teach_1 => '塊可以帶縮圖——編輯彈窗裡設定';
+  String get tips_lab_wolf_2 => '這裡的適者生存有個溫柔的版本：沒被選中的候選不會消失，只是這一輪沒輪到它而已。';
 
   @override
-  String get tips_blocklib_teach_2 => '點選塊開詳情，懸停先看大圖';
+  String get tips_lab_wolf_3 => '我對遺傳學的全部理解是：好看的爸媽，大機率生出好看的崽。剩下的交給變異，和一點點運氣。';
 
   @override
-  String get tips_blocklib_teach_3 => '⭐ 收進收藏集，常用塊置頂集中';
+  String get tips_lab_wolf_4 => 'LAB 的燈通常亮到很晚。我在門口值班，順便幫你記著這是第幾代了。';
 
   @override
-  String get tips_blocklib_teach_4 => '瀑布流檢視能看清圖塊';
+  String get tips_lab_wolf_5 =>
+      '永遠不要小看變異。有時候你挑了十代都沒找到的東西，會在一次意外裡冒出來。所以，看著不對勁的那張也別急著刪。';
 
   @override
-  String get tips_blocklib_teach_5 => '拖分割條可以調整塊區/資料夾區比例';
+  String get tips_prompt_guide_1 => '寫完按 Ctrl+Enter 就能生成，生成途中按 Esc 取消。';
 
   @override
-  String get tips_blocklib_fun_1 => '每個塊都夢想著被點名';
+  String get tips_prompt_guide_2 => '選中一段提示詞，按住 Alt 滾動滾輪調權重；不按 Alt，滾輪只是翻頁。';
 
   @override
-  String get tips_blocklib_fun_2 => '資料夾裡套資料夾——現在算是有條理了';
+  String get tips_prompt_guide_3 =>
+      'Ctrl+單擊提示詞裡的標籤，直接在本地標籤庫裡搜它；Ctrl+拖選一段，看看哪些標籤常和它一起出現。';
 
   @override
-  String get tips_blocklib_fun_3 => '使用次數就是塊的履歷表';
+  String get tips_prompt_guide_4 => '選中一段文字點右鍵，可以直接儲存到塊庫。以後點一下或拖一下，它就回來了。';
 
   @override
-  String get tips_blocklib_fun_4 => '積木留給釘子戶';
+  String get tips_prompt_guide_5 => '框底部的品質詞預設會替你補上那排常用品質詞；切到負面，同一個位置就是負面預設。';
 
   @override
-  String get tips_blocklib_fun_5 => '猶豫就做成塊';
+  String get tips_prompt_guide_6 => '按 F1 檢視全部快速鍵。';
 
   @override
-  String get tips_gen_1 => '文本框裡 Ctrl+Z 管用——錯別字不可怕';
+  String get tips_prompt_guide_7 =>
+      '從 ComfyUI 複製來的多角色提示詞，貼上進來會被識別，並詢問是否匯入成角色框，不用一個個重填。';
 
   @override
-  String get tips_gen_2 => '設定→提示詞的 chunks 選單裡藏著不少開關';
+  String get tips_prompt_guide_8 =>
+      '開啟「SD 語法自動轉換」後，(tag:1.2) 這種寫法會在失焦或生成時自動換成 NovelAI 的權重格式。';
 
   @override
-  String get tips_gen_3 => '看見細分隔條就拖拖看——多數面板能調寬';
+  String get tips_prompt_guide_9 => '寫 1.2::詞:: 能精確調權重，寫負數就反著來。';
 
   @override
-  String get tips_gen_4 => '歷史欄可以調回舊圖和當時的參數';
+  String get tips_prompt_trick_1 =>
+      '花括號每套一層，權重乘 1.05；方括號每套一層，除以 1.05。套五層花括號的人，通常是在和模型吵架。';
 
   @override
-  String get tips_gen_5 => '右鍵出選單，懸停出預覽';
+  String get tips_prompt_trick_2 => '自動格式化會刪掉沒用的 1 倍權重。它不是嫌棄你，是在幫你省 token。';
 
   @override
-  String get tips_fun_1 => '正在載入今日份的玄學…';
+  String get tips_prompt_trick_3 =>
+      '框底下那條細線是 token 用量。寫滿之後，後面的內容模型基本就看不見了——想寫長篇小說，請換個地方。';
 
   @override
-  String get tips_fun_2 => '種子是隨機的，品味不是';
+  String get tips_prompt_trick_4 => '寫不出來的時候，先寫畫面裡最大的那個東西。';
 
   @override
-  String get tips_fun_3 => '某處有一塊顯示卡正在摩拳擦掌';
+  String get tips_prompt_trick_5 => '品質詞寫一次就夠了。masterpiece 寫三遍，模型也不會覺得你更真誠。';
 
   @override
-  String get tips_fun_4 => '這裡最貴的按鈕是生成——它吃 Anlas';
+  String get tips_prompt_trick_6 =>
+      '想讓一個元素「出現但別太搶戲」，寫 0.8:: 比刪掉它好使。刪掉是沒有，降權是低調。';
 
   @override
-  String get tips_fun_5 => '這個框見證過上千張神作（和幾張黑歷史）';
+  String get tips_prompt_trick_7 => '同一套詞改來改去？先存成塊，再交給隨機抽取。';
+
+  @override
+  String get tips_prompt_trick_8 =>
+      '正面寫「要什麼」，負面寫「不要什麼」。在正面寫 no hat，模型多半隻聽見了 hat。';
+
+  @override
+  String get tips_prompt_wolf_1 => '這個框見過上千張神圖，和幾張不太方便公開的黑歷史。';
+
+  @override
+  String get tips_prompt_wolf_2 =>
+      '先用一句人話描述你想要的畫面，再把它拆成標籤。順序反過來的話，常常會得到一堆標籤和一張不知所云的圖。';
+
+  @override
+  String get tips_prompt_wolf_3 => '我在看你打字。別緊張，我看不懂英文。';
+
+  @override
+  String get tips_prompt_wolf_4 => '遠方某張顯示卡，剛剛因為你的提示詞嘆了口氣。';
+
+  @override
+  String get tips_prompt_wolf_5 => '抽卡的盡頭是玄學，玄學的盡頭是鎖種子。';
+
+  @override
+  String get tips_prompt_wolf_6 => '畫師串加到第十二個的時候，模型已經不知道自己在畫誰了。你也是。';
+
+  @override
+  String get tips_explore_guide_1 => '這裡寫的是父本的提示詞。想讓某部分參與進化，就把它做成隨機塊，再在塊上開啟遺傳。';
+
+  @override
+  String get tips_explore_guide_2 => '遺傳開關要等塊實例啟用後才能開啟。灰著的話，先把塊啟用。';
+
+  @override
+  String get tips_explore_guide_3 => '「生成候選圖」旁邊的數字，決定這一輪出幾張。';
+
+  @override
+  String get tips_explore_guide_4 => '塊實例可以「退回一幕」「前進一幕」，在抽過的組合之間來回翻。';
+
+  @override
+  String get tips_explore_guide_5 => '探索任務會固化提示詞和參數快照。之後再改這裡，不會影響已經跑完的那幾輪。';
+
+  @override
+  String get tips_explore_guide_6 => '塊的「隨機設定」裡能調抽取數量、觸發機率和隨機權重——基因的花樣都藏在這裡。';
+
+  @override
+  String get tips_explore_trick_1 =>
+      '基因池越大，變異越有得挑。一個隨機塊裡只放兩個詞，進化十代也只是在兩個答案之間來回橫跳。';
+
+  @override
+  String get tips_explore_trick_2 =>
+      '確定要的部分寫死，拿不準的做成隨機塊。全都隨機等於沒有方向，全都寫死等於沒有進化。';
+
+  @override
+  String get tips_explore_trick_3 => '鎖住的塊不會被重抽。想保住某個特徵，就先鎖上它，再讓別的塊去折騰。';
+
+  @override
+  String get tips_explore_trick_4 =>
+      '觸發機率設成 30%，這個塊大約只在三成的組合裡出現。適合那些「偶爾來一下才好看」的元素。';
+
+  @override
+  String get tips_explore_trick_5 => '第一代就想看到完美答案？那叫許願，不叫探索。';
+
+  @override
+  String get tips_explore_wolf_1 => '狼群的血統是一代代挑出來的。你的畫風也是。';
+
+  @override
+  String get tips_explore_wolf_2 => '每一輪生成都是一場海選，評委只有你一個。我負責鼓掌。';
+
+  @override
+  String get tips_explore_wolf_3 => '好基因來自好父本，好父本來自你那一下沒手滑的點選。';
+
+  @override
+  String get tips_explore_wolf_4 => '我不太懂遺傳學，但我知道：挑剔的評委，才養得出好看的狼崽。';
+
+  @override
+  String get tips_character_guide_1 => '角色框本質是定位框：貓、燈、招牌都能放，不一定是人。';
+
+  @override
+  String get tips_character_guide_2 => '上方「定位」切到「自訂」，在預覽圖上拖動錨點，鬆開就生效。';
+
+  @override
+  String get tips_character_guide_3 => '「AI 選擇」把位置交給模型安排；切回「自訂」，之前拖好的位置還在。';
+
+  @override
+  String get tips_character_guide_4 => '每個角色框都有自己的負面，只管這一個角色。';
+
+  @override
+  String get tips_character_guide_5 => '右上角的勾可以臨時停用這個角色，不用刪掉重寫。';
+
+  @override
+  String get tips_character_guide_6 => '點一下標題就能給角色改名，比編號好認多了。';
+
+  @override
+  String get tips_character_guide_7 => '右上角的 ⋯ 裡可以把這個角色收藏到塊庫，以後接著複用這段描述。';
+
+  @override
+  String get tips_character_trick_1 =>
+      '場景和畫風寫主提示詞，這裡只寫這個角色。兩邊寫同一件衣服，模型會以為你超愛它。';
+
+  @override
+  String get tips_character_trick_2 =>
+      '兩人挨太近容易「粘」在一起。把錨點拉開一點，比寫十遍 separate 管用。';
+
+  @override
+  String get tips_character_trick_3 => '想讓一棵樹站在畫面左邊？給它一個角色框，拖到左邊。樹不會抱怨自己不是角色。';
+
+  @override
+  String get tips_character_trick_4 => '角色框裡也能用塊和權重語法，和主提示詞一樣。';
+
+  @override
+  String get tips_character_trick_5 => '角色太多就先停用幾個。畫面擠不下時，模型會自己挑人——通常不是你想留的那個。';
+
+  @override
+  String get tips_character_wolf_1 => '我也想要一個角色框，但我覺得自己更適合站在畫面外面看著。';
+
+  @override
+  String get tips_character_wolf_2 => '一個框，一個位置，一件事。我覺得這是很好的人生哲學。';
+
+  @override
+  String get tips_character_wolf_3 => '你負責安排站位，我負責在旁邊喊「再往左一點」。';
+
+  @override
+  String get tips_character_wolf_4 => '狼群出門也要排隊形。角色多的時候，先想好誰站中間。';
+
+  @override
+  String get tips_gallery_guide_1 => '搜檔名或提示詞正文';
+
+  @override
+  String get tips_gallery_guide_2 => '逗號分隔多個詞，要全部命中才算';
+
+  @override
+  String get tips_gallery_guide_3 => '模型、取樣器、來源也能搜到';
+
+  @override
+  String get tips_gallery_guide_4 => 'Ctrl+F 隨時跳到搜尋框';
+
+  @override
+  String get tips_gallery_guide_5 => '角色提示詞裡的內容也搜得到';
+
+  @override
+  String get tips_gallery_guide_6 => '右鍵圖片，還有更多操作';
+
+  @override
+  String get tips_gallery_guide_7 => 'F5 重新整理畫廊';
+
+  @override
+  String get tips_gallery_trick_1 => '只搜正面，負面裡的搜不到';
+
+  @override
+  String get tips_gallery_trick_2 => '重抽之前先搜，多半已經有了';
+
+  @override
+  String get tips_gallery_trick_3 => '你寫過的提示詞就是最好的搜尋詞';
+
+  @override
+  String get tips_gallery_trick_4 => '刪除池的圖，下次啟動才真刪';
+
+  @override
+  String get tips_gallery_trick_5 => '搜 masterpiece 約等於搜全部';
+
+  @override
+  String get tips_gallery_wolf_1 => '今晚的獵物大概在第三頁';
+
+  @override
+  String get tips_gallery_wolf_2 => '我聞到了，神作就在這堆裡';
+
+  @override
+  String get tips_gallery_wolf_3 => '滾動也算運動，我陪你跑';
+
+  @override
+  String get tips_gallery_wolf_4 => '窩很大，慢慢翻';
+
+  @override
+  String get tips_online_guide_1 => '空格分隔多個標籤，回車搜尋';
+
+  @override
+  String get tips_online_guide_2 => '開模糊匹配，*tag* 找相近標籤';
+
+  @override
+  String get tips_online_guide_3 => '黑名單標籤的圖會直接隱藏';
+
+  @override
+  String get tips_online_guide_4 => '登入 Danbooru 後可以用收藏夾';
+
+  @override
+  String get tips_online_trick_1 => '多詞標籤用下劃線：blue_eyes';
+
+  @override
+  String get tips_online_trick_2 => '看到好圖，記下它的標籤思路';
+
+  @override
+  String get tips_online_trick_3 => '標籤越多結果越少，先少寫幾個';
+
+  @override
+  String get tips_online_wolf_1 => '外面的世界很大，我先去探路';
+
+  @override
+  String get tips_online_wolf_2 => '別人家的獵場，逛逛就好';
+
+  @override
+  String get tips_online_wolf_3 => '今天想去哪片林子打獵？';
+
+  @override
+  String get tips_blocks_guide_1 => '標題、提示詞、標籤都能搜';
+
+  @override
+  String get tips_blocks_guide_2 => '把塊直接拖進提示詞框';
+
+  @override
+  String get tips_blocks_guide_3 => '點 ★ 收藏，常用塊集中放';
+
+  @override
+  String get tips_blocks_guide_4 => '塊可以帶縮圖，挑起來更快';
+
+  @override
+  String get tips_blocks_guide_5 => '選中文字右鍵，就能存成塊';
+
+  @override
+  String get tips_blocks_trick_1 => '同一段寫過三次，就該存成塊了';
+
+  @override
+  String get tips_blocks_trick_2 => '猶豫要不要存？存。刪比寫快';
+
+  @override
+  String get tips_blocks_trick_3 => '名字起清楚，半年後會感謝自己';
+
+  @override
+  String get tips_blocks_trick_4 => '隨機塊候選越多，驚喜越多';
+
+  @override
+  String get tips_blocks_wolf_1 => '每個塊都在等你點名';
+
+  @override
+  String get tips_blocks_wolf_2 => '這些塊是你的狼群，常帶出去溜';
+
+  @override
+  String get tips_blocks_wolf_3 => '我只認得一種塊：肉塊';
+
+  @override
+  String get tips_blocks_wolf_4 => '資料夾套資料夾，算是有條理了';
+
+  @override
+  String get tips_generating_wolf_1 => '正在和隨機數討價還價…';
+
+  @override
+  String get tips_generating_wolf_2 => '正在跟第六根手指好好談談…';
+
+  @override
+  String get tips_generating_wolf_3 => '正在勸像素們排好隊…';
+
+  @override
+  String get tips_generating_wolf_4 => '正在把噪點一粒粒擦掉…';
+
+  @override
+  String get tips_generating_wolf_5 => '狼正在遠處嚎叫助威…';
+
+  @override
+  String get tips_generating_wolf_6 => '正在向顯示卡解釋你的審美…';
+
+  @override
+  String get tips_generating_wolf_7 => '正在把提示詞翻譯成夢…';
+
+  @override
+  String get tips_generating_wolf_8 => '正在確認眼睛的數量…';
+
+  @override
+  String get tips_generating_wolf_9 => '正在給光影找個好角度…';
+
+  @override
+  String get tips_generating_wolf_10 => '正在說服背景別搶戲…';
+
+  @override
+  String get tips_generating_wolf_11 => '正在從噪聲裡撈出你的圖…';
+
+  @override
+  String get tips_generating_wolf_12 => '正在數手指：一、二、三…';
+
+  @override
+  String get tips_generating_wolf_13 => '正在等顏料晾乾…';
+
+  @override
+  String get tips_generating_wolf_14 => '正在召喚今天的好運氣…';
+
+  @override
+  String get tips_generating_trick_1 => '等不及了？按 Esc 可以取消';
+
+  @override
+  String get tips_generating_trick_2 => '預覽會一幀幀變清晰';
+
+  @override
+  String get tips_generating_trick_3 => '生成好的圖預設存進本地畫廊';
+
+  @override
+  String get tips_generating_trick_4 => '每一步取樣都在去掉一層噪點';
+
+  @override
+  String get tips_splash_guide_1 => '按 F1 可以隨時檢視全部快速鍵。';
+
+  @override
+  String get tips_splash_guide_2 => 'Ctrl+Enter 生成，所有快速鍵都能在設定裡改。';
+
+  @override
+  String get tips_splash_guide_3 => '把圖拖進視窗，可以讀出它的提示詞和參數。';
+
+  @override
+  String get tips_splash_guide_4 => '常用的提示詞存成塊，下次一鍵複用。';
+
+  @override
+  String get tips_splash_trick_1 => '上面那個 STEP /28，致敬的是預設的 28 步取樣。';
+
+  @override
+  String get tips_splash_trick_2 => '預編碼的 Vibe 可以免費複用，省下 2 Anlas。';
+
+  @override
+  String get tips_splash_trick_3 => '第一次建立圖庫索引會慢一點，期間照常使用就好。';
+
+  @override
+  String get tips_splash_wolf_1 => '再讓我睡五分鐘……好吧，起來了。';
+
+  @override
+  String get tips_splash_wolf_2 => '我先把窩收拾一下，馬上就好。';
+
+  @override
+  String get tips_splash_wolf_3 => '顯示卡就位，月亮就位，就差你了。';
+
+  @override
+  String get tips_splash_wolf_4 => '聞到了嗎？是新提示詞的味道。';
+
+  @override
+  String get tips_splash_wolf_5 => '今天也要好好抽卡。';
+
+  @override
+  String genButton_normal(int count) {
+    return '生成 $count 張圖片';
+  }
+
+  @override
+  String get genButton_one_1 => '就這一張，不改了';
+
+  @override
+  String get genButton_one_2 => '來張好的';
+
+  @override
+  String get genButton_one_3 => '單抽，信仰之躍';
+
+  @override
+  String get genButton_one_4 => '先來一張試試水';
+
+  @override
+  String get genButton_one_5 => '一張定勝負';
+
+  @override
+  String get genButton_one_6 => '這張必是神圖';
+
+  @override
+  String get genButton_one_7 => '就一張，我發誓';
+
+  @override
+  String get genButton_one_8 => '新頭像就靠它了';
+
+  @override
+  String get genButton_one_9 => '一發入魂';
+
+  @override
+  String get genButton_one_10 => '來張能當桌布的';
+
+  @override
+  String get genButton_one_11 => '輕輕抽一張';
+
+  @override
+  String get genButton_one_12 => '叼一張回來';
+
+  @override
+  String genButton_few_1(int count) {
+    return '$count 張，挑個最好的';
+  }
+
+  @override
+  String genButton_few_2(int count) {
+    return '來 $count 張比一比';
+  }
+
+  @override
+  String genButton_few_3(int count) {
+    return '$count 連抽';
+  }
+
+  @override
+  String genButton_few_4(int count) {
+    return '$count 張，總有一張行';
+  }
+
+  @override
+  String genButton_few_5(int count) {
+    return '$count 選一，評委就位';
+  }
+
+  @override
+  String genButton_few_6(int count) {
+    return '先來 $count 張熱熱身';
+  }
+
+  @override
+  String genButton_few_7(int count) {
+    return '$count 張，擇優錄取';
+  }
+
+  @override
+  String genButton_few_8(int count) {
+    return '$count 張小確幸';
+  }
+
+  @override
+  String genButton_batch_1(int count) {
+    return '$count 連發';
+  }
+
+  @override
+  String genButton_batch_2(int count) {
+    return '$count 張一起上';
+  }
+
+  @override
+  String genButton_batch_3(int count) {
+    return '$count 張，開始停不下來';
+  }
+
+  @override
+  String genButton_batch_4(int count) {
+    return '一次 $count 張，吃到飽';
+  }
+
+  @override
+  String genButton_batch_5(int count) {
+    return '$count 張，鋪滿螢幕';
+  }
+
+  @override
+  String genButton_batch_6(int count) {
+    return '$count 連，穩一手';
+  }
+
+  @override
+  String genButton_batch_7(int count) {
+    return '$count 張，狼群出動';
+  }
+
+  @override
+  String genButton_batch_8(int count) {
+    return '$count 張，開席';
+  }
+
+  @override
+  String genButton_many_1(int count) {
+    return '$count 張，上強度了';
+  }
+
+  @override
+  String genButton_many_2(int count) {
+    return '$count 張，顯示卡開始冒汗';
+  }
+
+  @override
+  String genButton_many_3(int count) {
+    return '$count 張，囤貨模式';
+  }
+
+  @override
+  String genButton_many_4(int count) {
+    return '$count 張，流水線啟動';
+  }
+
+  @override
+  String genButton_many_5(int count) {
+    return '$count 張，Anlas 在燃燒';
+  }
+
+  @override
+  String genButton_many_6(int count) {
+    return '$count 張，這是要日更';
+  }
+
+  @override
+  String genButton_many_7(int count) {
+    return '$count 張批量出擊';
+  }
+
+  @override
+  String genButton_many_8(int count) {
+    return '$count 張，狼都看呆了';
+  }
+
+  @override
+  String genButton_huge_1(int count) {
+    return '$count 張？！開畫展嗎';
+  }
+
+  @override
+  String genButton_huge_2(int count) {
+    return '$count 張，硬碟瑟瑟發抖';
+  }
+
+  @override
+  String genButton_huge_3(int count) {
+    return '$count 張，工業革命了';
+  }
+
+  @override
+  String genButton_huge_4(int count) {
+    return '$count 張，先冷靜一下';
+  }
+
+  @override
+  String genButton_huge_5(int count) {
+    return '$count 張，存得下嗎';
+  }
+
+  @override
+  String genButton_huge_6(int count) {
+    return '$count 張，列印店開張';
+  }
+
+  @override
+  String genButton_huge_7(int count) {
+    return '批發 $count 張';
+  }
+
+  @override
+  String genButton_huge_8(int count) {
+    return '$count 張，狼去搬救兵了';
+  }
+
+  @override
+  String get genButton_rare_1 => '這發必出 SSR';
+
+  @override
+  String get genButton_rare_2 => 'AI 說它今天手感不錯';
+
+  @override
+  String get genButton_rare_3 => '今日運勢：大吉';
+
+  @override
+  String get genButton_rare_4 => '據說這個按鈕旺你';
+
+  @override
+  String get genButton_rare_5 => '狼對著月亮嚎了一聲';
+
+  @override
+  String get genButton_rare_6 => '玄學加持中';
+
+  @override
+  String get genButton_rare_7 => '歐氣已充值';
+
+  @override
+  String get genButton_rare_8 => '本次抽卡由狼贊助';
+
+  @override
+  String get genButton_rare_9 => '手氣，來！';
+
+  @override
+  String get genButton_rare_10 => '按下即是信仰';
+
+  @override
+  String get genButton_night_1 => '夜深了，最後一抽';
+
+  @override
+  String get genButton_night_2 => '抽完這批就睡';
+
+  @override
+  String get genButton_night_3 => '凌晨的審美最野';
+
+  @override
+  String get genButton_night_4 => '狼陪你熬夜';
+
+  @override
+  String genButton_special_7(int count) {
+    return '$count 張，幸運七';
+  }
+
+  @override
+  String genButton_special_9(int count) {
+    return '$count 張，九宮格集齊';
+  }
+
+  @override
+  String genButton_special_42(int count) {
+    return '$count，萬物的答案';
+  }
+
+  @override
+  String genButton_special_99(int count) {
+    return '$count 張，差一張破百';
+  }
+
+  @override
+  String genButton_special_100(int count) {
+    return '整整 $count 張，強迫症舒服了';
+  }
 
   @override
   String get titleBar_minimize => '最小化';
@@ -20499,15 +21744,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_geistDescription => '全工作室統一外觀：黑白灰底色，藍色作為操作強調。';
 
   @override
-  String get generation_tipReuseBlocks => '把常用提示詞儲存為塊，下一次直接複用。';
-
-  @override
-  String get generation_tipBlockModes => '順序與隨機模式，可以讓提示詞塊產生不同組合。';
-
-  @override
-  String get generation_tipLockBlocks => '鎖定想保留的塊，再隨機調整其他部分。';
-
-  @override
   String get styleExplore_collapseGallery => '收起候選畫廊';
 
   @override
@@ -20547,7 +21783,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get wiki_officialDirectory => '官方目錄';
 
   @override
-  String get wiki_searchHint => '搜尋標籤、別名或中文譯名';
+  String get wiki_searchHint => '搜尋標籤或別名';
 
   @override
   String get wiki_typeAll => '全部類型';

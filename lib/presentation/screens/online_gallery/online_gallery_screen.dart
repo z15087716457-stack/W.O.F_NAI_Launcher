@@ -779,10 +779,10 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
           focusNode: _searchFocusNode,
           style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
-            hintText: tipHint(
+            hintText: watchTipHint(
+              ref,
               context.l10n,
-              TipModule.gallerySearch,
-              epoch: watchTipEpoch(ref),
+              TipSurface.onlineSearch,
               firstEpoch: _tipMountEpoch ??= currentTipEpoch(),
             ),
             hintStyle: TextStyle(

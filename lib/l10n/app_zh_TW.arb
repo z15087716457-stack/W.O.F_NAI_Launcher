@@ -1391,7 +1391,6 @@
   "characterEditor_clearAllConfirm": "確定要刪除所有角色嗎？此操作無法復原。",
   "characterEditor_nameHint": "輸入角色名稱",
   "characterEditor_enabled": "啟用",
-  "characterEditor_promptHint": "輸入角色的正向提示詞...",
   "characterEditor_negativePromptHint": "輸入角色的負面提示詞...",
   "characterCanvas_title": "角色位置",
   "characterCanvas_finishEditing": "完成位置編輯",
@@ -4409,7 +4408,7 @@
   "autocomplete_resultLimit": "結果數量",
   "autocomplete_relatedTagsTitle": "標籤擴展",
   "autocomplete_relatedTagsSubtitle": "Ctrl+單擊搜尋本地標籤；Ctrl+拖選檢視關聯標籤",
-  "tagExpansion_searchHint": "搜尋標籤、別名或漢化名",
+  "tagExpansion_searchHint": "搜尋標籤或別名",
   "tagExpansion_relatedTitle": "關聯標籤",
   "tagExpansion_empty": "輸入詞語搜尋本地標籤",
   "tagExpansion_noResults": "沒有找到本地標籤",
@@ -4776,7 +4775,6 @@
   "styleExplore_newRun": "新增任務",
   "styleExplore_galleryTitle": "候選畫廊",
   "styleExplore_galleryEmptyHint": "暫無候選。新增或選擇一個探索任務，開始批次生成。",
-  "styleExplore_labTip": "選擇喜歡的候選，讓畫風逐代進化。",
   "styleExplore_runNameLabel": "任務名稱",
   "styleExplore_runNameHint": "例如：柔光畫風 ×30",
   "styleExplore_runCreated": "已建立任務「{name}」",
@@ -5124,66 +5122,768 @@
   "subscriptionGracePeriod": "寬限期",
   "subscriptionTierNone": "無訂閱",
   "settings_modelsAndInterfaces": "模型與介面",
-  "tips_gen_teach_1": "在提示詞框輸入 < 可以拉進塊庫裡的塊",
-  "tips_gen_teach_2": "摘要條點 Seed 可鎖定/重抽，點 Sampler 可直接換取樣器",
-  "tips_gen_teach_3": "生成鍵旁邊的數字小框定本批張數，右端深色框是 Anlas 消耗",
-  "tips_gen_teach_4": "右上角 chunks 選單裡收納了塊庫、預設和正則規則",
-  "tips_gen_teach_5": "透明通道匯出 Alpha 通道；啟用角色參考時不可用",
-  "tips_gen_fun_1": "正在給 AI 喂電子小魚乾…",
-  "tips_gen_fun_2": "每張圖都是一次小型抽卡——抽吧",
-  "tips_gen_fun_3": "Anlas 餘額和模型名都在頭頂上——燒錢前瞄一眼",
-  "tips_gen_fun_4": "提示詞框長高了，方便野心攤開寫",
-  "tips_gen_fun_5": "種子 -1 交給命運；據說命運喜歡整數",
-  "tips_explore_teach_1": "點紅心+歸資料夾，就是給下一代投票",
-  "tips_explore_teach_2": "A/B 對照組看的是父本原圖——選出勝者就翻篇",
-  "tips_explore_teach_3": "「生成候選圖」旁邊的數字框定本輪批次",
-  "tips_explore_teach_4": "懸停候選堆縮圖能看大圖",
-  "tips_explore_teach_5": "拖分隔條可以拉寬畫廊欄",
-  "tips_explore_fun_1": "適者生存，畫也一樣",
-  "tips_explore_fun_2": "每一輪生圖都是海選現場",
-  "tips_explore_fun_3": "好基因來自好父本",
-  "tips_explore_fun_4": "永遠不要小看變異",
-  "tips_explore_fun_5": "自然選擇，加速版",
-  "tips_gallerySearch_teach_1": "逗號分隔 = 交集搜尋",
-  "tips_gallerySearch_teach_2": "文字搜尋已排除負面提示詞——結果更乾淨",
-  "tips_gallerySearch_teach_3": "搜尋會命中模型、取樣器、來源、版本欄位",
-  "tips_gallerySearch_teach_4": "按鈕放不下時會橫向滾動",
-  "tips_gallerySearch_teach_5": "每頁最多 500 張——給一口氣翻到底的人",
-  "tips_gallerySearch_fun_1": "下面看上去有不少好東西呢~~~打算找點什麼嗎？",
-  "tips_gallerySearch_fun_2": "收藏在長，資料夾在假裝跟得上",
-  "tips_gallerySearch_fun_3": "專業建議：自己的提示詞就是最好的搜尋詞",
-  "tips_gallerySearch_fun_4": "滾動也算運動",
-  "tips_gallerySearch_fun_5": "這堆裡某個角落藏著今晚的神作",
-  "tips_gallerySearch_start_1": "搜檔名或提示詞正文——回車或點補全項都行",
-  "tips_gallerySearch_start_2": "多個詞用逗號分隔 = 全部命中才算數",
-  "tips_gallerySearch_start_3": "搜尋只看正向提示詞，負面詞不會誤中",
-  "tips_gallerySearch_start_4": "模型、取樣器、來源、版本欄位也能被搜到",
-  "tips_gallerySearch_start_5": "輸入標籤（比如 masterpiece）或檔名片段即可",
-  "tips_gallerySearch_start_6": "找到了點卡片看詳情，右鍵有更多操作",
-  "tips_gallerySearch_start_7": "配合右側版本 chip 可以進一步收窄範圍",
-  "tips_gallerySearch_start_8": "空著就是瀏覽全部；輸入即篩不用等",
-  "tips_gallerySearch_start_9": "邊輸邊搜，不用按回車",
-  "tips_gallerySearch_start_10": "先搜一搜再考慮重新生成——多半已經有了",
-  "tips_blocklib_teach_1": "塊可以帶縮圖——編輯彈窗裡設定",
-  "tips_blocklib_teach_2": "點選塊開詳情，懸停先看大圖",
-  "tips_blocklib_teach_3": "⭐ 收進收藏集，常用塊置頂集中",
-  "tips_blocklib_teach_4": "瀑布流檢視能看清圖塊",
-  "tips_blocklib_teach_5": "拖分割條可以調整塊區/資料夾區比例",
-  "tips_blocklib_fun_1": "每個塊都夢想著被點名",
-  "tips_blocklib_fun_2": "資料夾裡套資料夾——現在算是有條理了",
-  "tips_blocklib_fun_3": "使用次數就是塊的履歷表",
-  "tips_blocklib_fun_4": "積木留給釘子戶",
-  "tips_blocklib_fun_5": "猶豫就做成塊",
-  "tips_gen_1": "文本框裡 Ctrl+Z 管用——錯別字不可怕",
-  "tips_gen_2": "設定→提示詞的 chunks 選單裡藏著不少開關",
-  "tips_gen_3": "看見細分隔條就拖拖看——多數面板能調寬",
-  "tips_gen_4": "歷史欄可以調回舊圖和當時的參數",
-  "tips_gen_5": "右鍵出選單，懸停出預覽",
-  "tips_fun_1": "正在載入今日份的玄學…",
-  "tips_fun_2": "種子是隨機的，品味不是",
-  "tips_fun_3": "某處有一塊顯示卡正在摩拳擦掌",
-  "tips_fun_4": "這裡最貴的按鈕是生成——它吃 Anlas",
-  "tips_fun_5": "這個框見證過上千張神作（和幾張黑歷史）",
+  "tips_kind_guide": "提示",
+  "tips_kind_trick": "過來人",
+  "tips_kind_wolf": "狼",
+  "tips_hint": "{label}：{tip}",
+  "@tips_hint": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "tip": {
+        "type": "String"
+      }
+    }
+  },
+  "tips_studio_guide_1": "寫好提示詞，按 Ctrl+Enter 就能生成。生成的圖會在這塊畫布上一批批鋪開：中鍵或 Shift+左鍵拖動平移，Ctrl+滾輪縮放，WASD 也能用來導航。",
+  "@tips_studio_guide_1": {
+    "description": "Shortcut generateImage (ctrl+enter); canvas controls from settings_outputViewer_canvasDescription."
+  },
+  "tips_studio_guide_2": "常用的畫師串、品質詞和構圖描述，寫一次存成塊，下次從塊庫直接拉進來。塊不只是複製貼上：它可以設成固定、順序或隨機抽取，每次生成換一種組合。",
+  "@tips_studio_guide_2": {
+    "description": "Pill instance modes (pillSettingsModeFixed / Sequential / Random)."
+  },
+  "tips_studio_guide_3": "隨機塊抽到一組特別滿意的結果？鎖定它，再去重抽別的塊。鎖住的內容不會變，沒鎖的照常隨機——適合「這個姿勢留著，衣服再換幾套」。",
+  "@tips_studio_guide_3": {
+    "description": "pillCardLock / pillCardReroll."
+  },
+  "tips_studio_guide_4": "把一張圖拖進視窗，會問你想怎麼用：圖生圖、風格遷移、精準參考，或者只提取它的提示詞和參數。帶著 NovelAI 後設資料的圖，一拖就能看到當時是怎麼寫的。",
+  "@tips_studio_guide_4": {
+    "description": "Image drop dialog (drop_dialogTitle)."
+  },
+  "tips_studio_guide_5": "角色框本質上是定位框。除了人物，你也可以放一隻貓、一盞燈、一塊招牌；把定位切到「自訂」，在預覽圖上拖動錨點，告訴模型它該出現在哪裡。",
+  "@tips_studio_guide_5": {
+    "description": "Character position canvas (characterCanvas_custom, characterCanvas_dragHint)."
+  },
+  "tips_studio_guide_6": "選中一段提示詞，按住 Alt 滾動滾輪就能調權重。不按 Alt 時滾輪只是正常翻頁，不會誤改權重。修飾鍵可以在設定裡換成 Ctrl。",
+  "@tips_studio_guide_6": {
+    "description": "Weight scroll modifier (settings_enablePromptWeightScrollSubtitle)."
+  },
+  "tips_studio_guide_7": "按 F1 隨時開啟快速鍵幫助。Ctrl+1、Ctrl+2、Ctrl+3 在生成頁、本地畫廊和線上畫廊之間切換，Ctrl+, 開啟設定。所有快速鍵都能在設定裡改成你順手的組合。",
+  "@tips_studio_guide_7": {
+    "description": "Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma."
+  },
+  "tips_studio_guide_8": "擔心一不小心花掉一大筆 Anlas？在設定裡開啟「Anlas 高消耗警告」，單次預計消耗超過你設定的數值時，生成前會先問你一句。",
+  "@tips_studio_guide_8": {
+    "description": "settings_warnHighAnlasCostTitle."
+  },
+  "tips_studio_trick_1": "種子決定了這張圖「抽」到什麼。參數和種子都不變，出來的就是同一張。所以想復現神圖，記得把種子一起留下；想換運氣，就別再盯著那個種子了。",
+  "@tips_studio_trick_1": {
+    "description": "NovelAI output is deterministic for identical parameters and seed."
+  },
+  "tips_studio_trick_2": "複用預編碼過的 Vibe 不用再花 2 Anlas。2 Anlas 聽起來不多，但你一天會用幾次 Vibe，自己心裡有數。",
+  "@tips_studio_trick_2": {
+    "description": "drop_reuseVibeSubtitle / drop_useAsRawImageSubtitle."
+  },
+  "tips_studio_trick_3": "負面提示詞不是許願池。寫一百遍 bad hands，不如把正面裡的手部動作寫清楚。那排每次都要寫的負面詞，交給負面預設去管就好。",
+  "@tips_studio_trick_3": {
+    "description": "UC preset selector on the negative tab (ucPreset_label)."
+  },
+  "tips_studio_trick_4": "畫師串不是越長越好。加到第十個以後，模型多半已經分不清你到底想要誰的筆觸了。不如把它們拆成幾個塊，用隨機抽取輪流上場。",
+  "@tips_studio_trick_4": {
+    "description": "Random draw block mode."
+  },
+  "tips_studio_trick_5": "一次點擊發幾次請求、每次出幾張，是兩個不同的數。按鈕上顯示的是總張數，Anlas 也按總張數算——看清楚再按，別問我是怎麼知道的。",
+  "@tips_studio_trick_5": {
+    "description": "Button count = nSamples x imagesPerRequest; estimatedCost uses both."
+  },
+  "tips_studio_trick_6": "在翻譯塊上按一下滑鼠中鍵，原文和譯文來回切換。AI 翻得再好，偶爾也值得偷看一眼原文，確認它沒把 cat ears 翻成什麼奇怪的東西。",
+  "@tips_studio_trick_6": {
+    "description": "promptTranslation_guideMiddleText."
+  },
+  "tips_studio_trick_7": "設定裡的「限制生圖頻率」可以讓兩次生圖之間強制冷卻，再加一點隨機抖動，節奏就沒那麼機械。適合掛著慢慢抽的夜晚，也適合管不住手的自己。",
+  "@tips_studio_trick_7": {
+    "description": "settings_limitGenerationIntervalTitle / settings_setGenerationIntervalJitterTitle."
+  },
+  "tips_studio_wolf_1": "這裡是狼窩。你生成的圖會被我叼回來，整整齊齊擺在本地畫廊裡——說真的，我的收納能力比畫技可靠得多。",
+  "tips_studio_wolf_2": "我們狼在夜裡視力最好。所以如果你凌晨三點還在這裡，我什麼都不會說，只會默默陪你再抽一張。",
+  "tips_studio_wolf_3": "據說 AI 畫手的成年禮，是第一次心平氣和地數完一隻手上的手指。我沒有手指，所以我一直很平靜。",
+  "tips_studio_wolf_4": "狼群的規矩：好種子要分享，好提示詞要存成塊，好圖要先儲存再欣賞。最後一條最重要，別問為什麼。",
+  "tips_studio_wolf_5": "我不會畫畫，但我很會等。看著流式預覽一點點變清晰的那幾秒，是我一天裡最安靜的時候。",
+  "tips_studio_wolf_6": "W.O.F 的意思是 WolF。至於中間為什麼有點，那是我跑過雪地留下的腳印。",
+  "tips_studio_wolf_7": "畫布空著的時候，我就趴在這裡打個盹。按下生成，我就醒了。",
+  "tips_studio_night_1": "現在是深夜。友情提醒：這個時間段你的審美會悄悄上調 30%，明早起來記得再看一遍。",
+  "tips_studio_night_2": "夜深了，遠方機房裡的顯示卡也打了個哈欠。抽完這一批就去睡吧，畫廊我替你守著。",
+  "tips_lab_guide_1": "畫風探索是一場選秀：先建一個探索任務，把提示詞和參數固定下來，再批次生成候選圖。你挑中的子代會成為下一代的父本，畫風就這樣一代代朝你想要的方向靠近。",
+  "@tips_lab_guide_1": {
+    "description": "Explore runs snapshot prompt and parameters; branches turn picked children into parents."
+  },
+  "tips_lab_guide_2": "紅心和資料夾是給你自己整理用的，不會影響遺傳。真正決定下一代的，是你用「多選建分支」挑進去的那幾張。",
+  "@tips_lab_guide_2": {
+    "description": "Heart/folder are annotations only (explore_candidate_gallery); styleExplore_branchSelect."
+  },
+  "tips_lab_guide_3": "拿不定主意時，用「A/B 組對照」：兩張父本的圖並排出現，你只需要回答哪張更接近想要的畫風。排在前面的父本，下一輪更容易分到子代。",
+  "@tips_lab_guide_3": {
+    "description": "Preference values weight parent selection in ExploreMutationEngine."
+  },
+  "tips_lab_guide_4": "想生成下一輪候選，主提示詞裡得有一個啟用了遺傳的隨機塊。沒有可變的基因，變異引擎也無從下手。",
+  "@tips_lab_guide_4": {
+    "description": "styleExplore_deepRoundNoInstance."
+  },
+  "tips_lab_guide_5": "某張候選的提示詞組合特別好？「收編為塊」能把它存進塊庫，以後在生成頁也能直接用；多選幾張，還能合併收編成一個塊。",
+  "@tips_lab_guide_5": {
+    "description": "styleExplore_adoptAsBlock / styleExplore_mergeAdopt."
+  },
+  "tips_lab_guide_6": "刪除探索任務只會刪掉任務目錄裡的候選副本，本地畫廊裡的原圖不受影響。放心清理，試驗場本來就該亂一點。",
+  "@tips_lab_guide_6": {
+    "description": "styleExplore_deleteRunMessage."
+  },
+  "tips_lab_trick_1": "每個父本至少會分到一張出圖名額，所以父本越多，一輪需要的張數也越多。貪心的話，Anlas 會先替你喊停。",
+  "@tips_lab_trick_1": {
+    "description": "styleExplore_deepRoundCountHint."
+  },
+  "tips_lab_trick_2": "只能從最新一代的候選堆建分支。回頭路可以看，但不能從半路岔出去——進化論就是這麼無情。",
+  "@tips_lab_trick_2": {
+    "description": "styleExplore_branchNeedLatest."
+  },
+  "tips_lab_trick_3": "變異引擎偶爾會說「產不出足夠不同的子代」。這不是它偷懶，是基因池太小了：給隨機塊多塞幾個候選詞，它馬上就有活幹。",
+  "@tips_lab_trick_3": {
+    "description": "styleExplore_deepRoundEmpty; injection draws new atoms from the block pool."
+  },
+  "tips_lab_trick_4": "懸停候選堆裡的縮圖就能看大圖。別一張張點開，評委要有評委的效率。",
+  "@tips_lab_trick_4": {
+    "description": "Pile thumbnail hover preview (ExploreCandidateHoverSession)."
+  },
+  "tips_lab_trick_5": "看中了某張候選的整套參數？「匯入後設資料」會把它的提示詞和參數原樣搬回編輯區，你可以從這裡接著改。",
+  "@tips_lab_trick_5": {
+    "description": "styleExplore_fixateAsTemplate."
+  },
+  "tips_lab_wolf_1": "狼群裡沒有哪隻狼一出生就是最強的。畫風也一樣，第一代醜一點很正常，到第三代再下結論。",
+  "tips_lab_wolf_2": "這裡的適者生存有個溫柔的版本：沒被選中的候選不會消失，只是這一輪沒輪到它而已。",
+  "tips_lab_wolf_3": "我對遺傳學的全部理解是：好看的爸媽，大機率生出好看的崽。剩下的交給變異，和一點點運氣。",
+  "tips_lab_wolf_4": "LAB 的燈通常亮到很晚。我在門口值班，順便幫你記著這是第幾代了。",
+  "tips_lab_wolf_5": "永遠不要小看變異。有時候你挑了十代都沒找到的東西，會在一次意外裡冒出來。所以，看著不對勁的那張也別急著刪。",
+  "tips_prompt_guide_1": "寫完按 Ctrl+Enter 就能生成，生成途中按 Esc 取消。",
+  "@tips_prompt_guide_1": {
+    "description": "Shortcuts generateImage ctrl+enter / cancelGeneration escape (web_style_layout)."
+  },
+  "tips_prompt_guide_2": "選中一段提示詞，按住 Alt 滾動滾輪調權重；不按 Alt，滾輪只是翻頁。",
+  "@tips_prompt_guide_2": {
+    "description": "Weight scroll modifier (default Alt)."
+  },
+  "tips_prompt_guide_3": "Ctrl+單擊提示詞裡的標籤，直接在本地標籤庫裡搜它；Ctrl+拖選一段，看看哪些標籤常和它一起出現。",
+  "@tips_prompt_guide_3": {
+    "description": "prompt_cooccurrenceRecommendationSubtitle (default on)."
+  },
+  "tips_prompt_guide_4": "選中一段文字點右鍵，可以直接儲存到塊庫。以後點一下或拖一下，它就回來了。",
+  "@tips_prompt_guide_4": {
+    "description": "Selection context menu promptBlockLibrary_saveToLibrary."
+  },
+  "tips_prompt_guide_5": "框底部的品質詞預設會替你補上那排常用品質詞；切到負面，同一個位置就是負面預設。",
+  "@tips_prompt_guide_5": {
+    "description": "QualityTagsSelector / UcPresetSelector in the prompt card footer."
+  },
+  "tips_prompt_guide_6": "按 F1 檢視全部快速鍵。",
+  "@tips_prompt_guide_6": {
+    "description": "showShortcutHelp f1."
+  },
+  "tips_prompt_guide_7": "從 ComfyUI 複製來的多角色提示詞，貼上進來會被識別，並詢問是否匯入成角色框，不用一個個重填。",
+  "@tips_prompt_guide_7": {
+    "description": "ComfyuiImportWrapper detects ComfyUI multi-character syntax."
+  },
+  "tips_prompt_guide_8": "開啟「SD 語法自動轉換」後，(tag:1.2) 這種寫法會在失焦或生成時自動換成 NovelAI 的權重格式。",
+  "@tips_prompt_guide_8": {
+    "description": "prompt_sdSyntaxAutoConvertSubtitle (default off)."
+  },
+  "tips_prompt_guide_9": "寫 1.2::詞:: 能精確調權重，寫負數就反著來。",
+  "@tips_prompt_guide_9": {
+    "description": "NovelAI V4+ numeric emphasis syntax."
+  },
+  "tips_prompt_trick_1": "花括號每套一層，權重乘 1.05；方括號每套一層，除以 1.05。套五層花括號的人，通常是在和模型吵架。",
+  "@tips_prompt_trick_1": {
+    "description": "NovelAI bracket emphasis."
+  },
+  "tips_prompt_trick_2": "自動格式化會刪掉沒用的 1 倍權重。它不是嫌棄你，是在幫你省 token。",
+  "@tips_prompt_trick_2": {
+    "description": "prompt_autoFormatSubtitle (default on)."
+  },
+  "tips_prompt_trick_3": "框底下那條細線是 token 用量。寫滿之後，後面的內容模型基本就看不見了——想寫長篇小說，請換個地方。",
+  "@tips_prompt_trick_3": {
+    "description": "PromptTokenCountFooter."
+  },
+  "tips_prompt_trick_4": "寫不出來的時候，先寫畫面裡最大的那個東西。",
+  "tips_prompt_trick_5": "品質詞寫一次就夠了。masterpiece 寫三遍，模型也不會覺得你更真誠。",
+  "tips_prompt_trick_6": "想讓一個元素「出現但別太搶戲」，寫 0.8:: 比刪掉它好使。刪掉是沒有，降權是低調。",
+  "@tips_prompt_trick_6": {
+    "description": "NovelAI numeric emphasis."
+  },
+  "tips_prompt_trick_7": "同一套詞改來改去？先存成塊，再交給隨機抽取。",
+  "@tips_prompt_trick_7": {
+    "description": "Random draw block mode."
+  },
+  "tips_prompt_trick_8": "正面寫「要什麼」，負面寫「不要什麼」。在正面寫 no hat，模型多半隻聽見了 hat。",
+  "tips_prompt_wolf_1": "這個框見過上千張神圖，和幾張不太方便公開的黑歷史。",
+  "tips_prompt_wolf_2": "先用一句人話描述你想要的畫面，再把它拆成標籤。順序反過來的話，常常會得到一堆標籤和一張不知所云的圖。",
+  "tips_prompt_wolf_3": "我在看你打字。別緊張，我看不懂英文。",
+  "tips_prompt_wolf_4": "遠方某張顯示卡，剛剛因為你的提示詞嘆了口氣。",
+  "tips_prompt_wolf_5": "抽卡的盡頭是玄學，玄學的盡頭是鎖種子。",
+  "tips_prompt_wolf_6": "畫師串加到第十二個的時候，模型已經不知道自己在畫誰了。你也是。",
+  "tips_explore_guide_1": "這裡寫的是父本的提示詞。想讓某部分參與進化，就把它做成隨機塊，再在塊上開啟遺傳。",
+  "@tips_explore_guide_1": {
+    "description": "pillCardEvolutionEnable (explore only)."
+  },
+  "tips_explore_guide_2": "遺傳開關要等塊實例啟用後才能開啟。灰著的話，先把塊啟用。",
+  "@tips_explore_guide_2": {
+    "description": "pillCardEvolutionRequiresEnabled."
+  },
+  "tips_explore_guide_3": "「生成候選圖」旁邊的數字，決定這一輪出幾張。",
+  "@tips_explore_guide_3": {
+    "description": "styleExplore_createDeepRound count box."
+  },
+  "tips_explore_guide_4": "塊實例可以「退回一幕」「前進一幕」，在抽過的組合之間來回翻。",
+  "@tips_explore_guide_4": {
+    "description": "pillCardStepBack / pillCardStepForward."
+  },
+  "tips_explore_guide_5": "探索任務會固化提示詞和參數快照。之後再改這裡，不會影響已經跑完的那幾輪。",
+  "@tips_explore_guide_5": {
+    "description": "styleExplore_runEmptyHint."
+  },
+  "tips_explore_guide_6": "塊的「隨機設定」裡能調抽取數量、觸發機率和隨機權重——基因的花樣都藏在這裡。",
+  "@tips_explore_guide_6": {
+    "description": "pillCardSettings / pillSettingsCount / TriggerProbability / Weight."
+  },
+  "tips_explore_trick_1": "基因池越大，變異越有得挑。一個隨機塊裡只放兩個詞，進化十代也只是在兩個答案之間來回橫跳。",
+  "tips_explore_trick_2": "確定要的部分寫死，拿不準的做成隨機塊。全都隨機等於沒有方向，全都寫死等於沒有進化。",
+  "tips_explore_trick_3": "鎖住的塊不會被重抽。想保住某個特徵，就先鎖上它，再讓別的塊去折騰。",
+  "@tips_explore_trick_3": {
+    "description": "pillCardRerollLocked."
+  },
+  "tips_explore_trick_4": "觸發機率設成 30%，這個塊大約只在三成的組合裡出現。適合那些「偶爾來一下才好看」的元素。",
+  "@tips_explore_trick_4": {
+    "description": "pillSettingsTriggerProbability."
+  },
+  "tips_explore_trick_5": "第一代就想看到完美答案？那叫許願，不叫探索。",
+  "tips_explore_wolf_1": "狼群的血統是一代代挑出來的。你的畫風也是。",
+  "tips_explore_wolf_2": "每一輪生成都是一場海選，評委只有你一個。我負責鼓掌。",
+  "tips_explore_wolf_3": "好基因來自好父本，好父本來自你那一下沒手滑的點選。",
+  "tips_explore_wolf_4": "我不太懂遺傳學，但我知道：挑剔的評委，才養得出好看的狼崽。",
+  "tips_character_guide_1": "角色框本質是定位框：貓、燈、招牌都能放，不一定是人。",
+  "@tips_character_guide_1": {
+    "description": "Character prompts carry a position; content is free-form."
+  },
+  "tips_character_guide_2": "上方「定位」切到「自訂」，在預覽圖上拖動錨點，鬆開就生效。",
+  "@tips_character_guide_2": {
+    "description": "CharacterPositionModeSegments / characterCanvas_dragHint."
+  },
+  "tips_character_guide_3": "「AI 選擇」把位置交給模型安排；切回「自訂」，之前拖好的位置還在。",
+  "@tips_character_guide_3": {
+    "description": "AI choice hides anchors but keeps position data (character_position_canvas)."
+  },
+  "tips_character_guide_4": "每個角色框都有自己的負面，只管這一個角色。",
+  "@tips_character_guide_4": {
+    "description": "CharacterPromptEditor negative tab."
+  },
+  "tips_character_guide_5": "右上角的勾可以臨時停用這個角色，不用刪掉重寫。",
+  "@tips_character_guide_5": {
+    "description": "toggleCharacterEnabled header button."
+  },
+  "tips_character_guide_6": "點一下標題就能給角色改名，比編號好認多了。",
+  "@tips_character_guide_6": {
+    "description": "CharacterNameField."
+  },
+  "tips_character_guide_7": "右上角的 ⋯ 裡可以把這個角色收藏到塊庫，以後接著複用這段描述。",
+  "@tips_character_guide_7": {
+    "description": "Character header menu addToLibrary."
+  },
+  "tips_character_trick_1": "場景和畫風寫主提示詞，這裡只寫這個角色。兩邊寫同一件衣服，模型會以為你超愛它。",
+  "tips_character_trick_2": "兩人挨太近容易「粘」在一起。把錨點拉開一點，比寫十遍 separate 管用。",
+  "tips_character_trick_3": "想讓一棵樹站在畫面左邊？給它一個角色框，拖到左邊。樹不會抱怨自己不是角色。",
+  "tips_character_trick_4": "角色框裡也能用塊和權重語法，和主提示詞一樣。",
+  "@tips_character_trick_4": {
+    "description": "Character boxes use PromptPillEditor."
+  },
+  "tips_character_trick_5": "角色太多就先停用幾個。畫面擠不下時，模型會自己挑人——通常不是你想留的那個。",
+  "tips_character_wolf_1": "我也想要一個角色框，但我覺得自己更適合站在畫面外面看著。",
+  "tips_character_wolf_2": "一個框，一個位置，一件事。我覺得這是很好的人生哲學。",
+  "tips_character_wolf_3": "你負責安排站位，我負責在旁邊喊「再往左一點」。",
+  "tips_character_wolf_4": "狼群出門也要排隊形。角色多的時候，先想好誰站中間。",
+  "tips_gallery_guide_1": "搜檔名或提示詞正文",
+  "@tips_gallery_guide_1": {
+    "description": "Local gallery searchable text (gallery_data_source _buildSearchablePromptText)."
+  },
+  "tips_gallery_guide_2": "逗號分隔多個詞，要全部命中才算",
+  "@tips_gallery_guide_2": {
+    "description": "gallery_filter_service comma-delimited required tags."
+  },
+  "tips_gallery_guide_3": "模型、取樣器、來源也能搜到",
+  "@tips_gallery_guide_3": {
+    "description": "Searchable metadata fields."
+  },
+  "tips_gallery_guide_4": "Ctrl+F 隨時跳到搜尋框",
+  "@tips_gallery_guide_4": {
+    "description": "focusSearch ctrl+f."
+  },
+  "tips_gallery_guide_5": "角色提示詞裡的內容也搜得到",
+  "@tips_gallery_guide_5": {
+    "description": "Character prompts are part of searchable text."
+  },
+  "tips_gallery_guide_6": "右鍵圖片，還有更多操作",
+  "@tips_gallery_guide_6": {
+    "description": "Local image context menu."
+  },
+  "tips_gallery_guide_7": "F5 重新整理畫廊",
+  "@tips_gallery_guide_7": {
+    "description": "refreshGallery f5."
+  },
+  "tips_gallery_trick_1": "只搜正面，負面裡的搜不到",
+  "@tips_gallery_trick_1": {
+    "description": "Negative prompt excluded from searchable text."
+  },
+  "tips_gallery_trick_2": "重抽之前先搜，多半已經有了",
+  "tips_gallery_trick_3": "你寫過的提示詞就是最好的搜尋詞",
+  "tips_gallery_trick_4": "刪除池的圖，下次啟動才真刪",
+  "@tips_gallery_trick_4": {
+    "description": "localGallery_trashHint."
+  },
+  "tips_gallery_trick_5": "搜 masterpiece 約等於搜全部",
+  "tips_gallery_wolf_1": "今晚的獵物大概在第三頁",
+  "tips_gallery_wolf_2": "我聞到了，神作就在這堆裡",
+  "tips_gallery_wolf_3": "滾動也算運動，我陪你跑",
+  "tips_gallery_wolf_4": "窩很大，慢慢翻",
+  "tips_online_guide_1": "空格分隔多個標籤，回車搜尋",
+  "@tips_online_guide_1": {
+    "description": "Online search splitOnSpaces, onSubmitted."
+  },
+  "tips_online_guide_2": "開模糊匹配，*tag* 找相近標籤",
+  "@tips_online_guide_2": {
+    "description": "onlineGallery_fuzzySearchTooltip."
+  },
+  "tips_online_guide_3": "黑名單標籤的圖會直接隱藏",
+  "@tips_online_guide_3": {
+    "description": "onlineGallery_blacklistSubtitle."
+  },
+  "tips_online_guide_4": "登入 Danbooru 後可以用收藏夾",
+  "@tips_online_guide_4": {
+    "description": "danbooru_loginHint."
+  },
+  "tips_online_trick_1": "多詞標籤用下劃線：blue_eyes",
+  "@tips_online_trick_1": {
+    "description": "Danbooru tag syntax."
+  },
+  "tips_online_trick_2": "看到好圖，記下它的標籤思路",
+  "tips_online_trick_3": "標籤越多結果越少，先少寫幾個",
+  "tips_online_wolf_1": "外面的世界很大，我先去探路",
+  "tips_online_wolf_2": "別人家的獵場，逛逛就好",
+  "tips_online_wolf_3": "今天想去哪片林子打獵？",
+  "tips_blocks_guide_1": "標題、提示詞、標籤都能搜",
+  "@tips_blocks_guide_1": {
+    "description": "promptBlockLibrary_searchHint."
+  },
+  "tips_blocks_guide_2": "把塊直接拖進提示詞框",
+  "@tips_blocks_guide_2": {
+    "description": "PromptPillEditor DragTarget<PromptBlockDragData>."
+  },
+  "tips_blocks_guide_3": "點 ★ 收藏，常用塊集中放",
+  "@tips_blocks_guide_3": {
+    "description": "promptBlockLibrary_emptyFavorites."
+  },
+  "tips_blocks_guide_4": "塊可以帶縮圖，挑起來更快",
+  "@tips_blocks_guide_4": {
+    "description": "Block thumbnails."
+  },
+  "tips_blocks_guide_5": "選中文字右鍵，就能存成塊",
+  "@tips_blocks_guide_5": {
+    "description": "promptBlockLibrary_saveToLibrary."
+  },
+  "tips_blocks_trick_1": "同一段寫過三次，就該存成塊了",
+  "tips_blocks_trick_2": "猶豫要不要存？存。刪比寫快",
+  "tips_blocks_trick_3": "名字起清楚，半年後會感謝自己",
+  "tips_blocks_trick_4": "隨機塊候選越多，驚喜越多",
+  "tips_blocks_wolf_1": "每個塊都在等你點名",
+  "tips_blocks_wolf_2": "這些塊是你的狼群，常帶出去溜",
+  "tips_blocks_wolf_3": "我只認得一種塊：肉塊",
+  "tips_blocks_wolf_4": "資料夾套資料夾，算是有條理了",
+  "tips_generating_wolf_1": "正在和隨機數討價還價…",
+  "tips_generating_wolf_2": "正在跟第六根手指好好談談…",
+  "tips_generating_wolf_3": "正在勸像素們排好隊…",
+  "tips_generating_wolf_4": "正在把噪點一粒粒擦掉…",
+  "tips_generating_wolf_5": "狼正在遠處嚎叫助威…",
+  "tips_generating_wolf_6": "正在向顯示卡解釋你的審美…",
+  "tips_generating_wolf_7": "正在把提示詞翻譯成夢…",
+  "tips_generating_wolf_8": "正在確認眼睛的數量…",
+  "tips_generating_wolf_9": "正在給光影找個好角度…",
+  "tips_generating_wolf_10": "正在說服背景別搶戲…",
+  "tips_generating_wolf_11": "正在從噪聲裡撈出你的圖…",
+  "tips_generating_wolf_12": "正在數手指：一、二、三…",
+  "tips_generating_wolf_13": "正在等顏料晾乾…",
+  "tips_generating_wolf_14": "正在召喚今天的好運氣…",
+  "tips_generating_trick_1": "等不及了？按 Esc 可以取消",
+  "@tips_generating_trick_1": {
+    "description": "cancelGeneration escape."
+  },
+  "tips_generating_trick_2": "預覽會一幀幀變清晰",
+  "@tips_generating_trick_2": {
+    "description": "Streaming preview frames."
+  },
+  "tips_generating_trick_3": "生成好的圖預設存進本地畫廊",
+  "@tips_generating_trick_3": {
+    "description": "autoSaveImages default true."
+  },
+  "tips_generating_trick_4": "每一步取樣都在去掉一層噪點",
+  "tips_splash_guide_1": "按 F1 可以隨時檢視全部快速鍵。",
+  "@tips_splash_guide_1": {
+    "description": "showShortcutHelp f1."
+  },
+  "tips_splash_guide_2": "Ctrl+Enter 生成，所有快速鍵都能在設定裡改。",
+  "@tips_splash_guide_2": {
+    "description": "generateImage ctrl+enter; shortcut settings."
+  },
+  "tips_splash_guide_3": "把圖拖進視窗，可以讀出它的提示詞和參數。",
+  "@tips_splash_guide_3": {
+    "description": "drop_extractMetadataSubtitle."
+  },
+  "tips_splash_guide_4": "常用的提示詞存成塊，下次一鍵複用。",
+  "@tips_splash_guide_4": {
+    "description": "Prompt blocks."
+  },
+  "tips_splash_trick_1": "上面那個 STEP /28，致敬的是預設的 28 步取樣。",
+  "@tips_splash_trick_1": {
+    "description": "Splash STEP xx/28 counter."
+  },
+  "tips_splash_trick_2": "預編碼的 Vibe 可以免費複用，省下 2 Anlas。",
+  "@tips_splash_trick_2": {
+    "description": "drop_reuseVibeSubtitle."
+  },
+  "tips_splash_trick_3": "第一次建立圖庫索引會慢一點，期間照常使用就好。",
+  "@tips_splash_trick_3": {
+    "description": "localGallery_firstIndexHint."
+  },
+  "tips_splash_wolf_1": "再讓我睡五分鐘……好吧，起來了。",
+  "tips_splash_wolf_2": "我先把窩收拾一下，馬上就好。",
+  "tips_splash_wolf_3": "顯示卡就位，月亮就位，就差你了。",
+  "tips_splash_wolf_4": "聞到了嗎？是新提示詞的味道。",
+  "tips_splash_wolf_5": "今天也要好好抽卡。",
+  "genButton_normal": "生成 {count} 張圖片",
+  "@genButton_normal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_one_1": "就這一張，不改了",
+  "genButton_one_2": "來張好的",
+  "genButton_one_3": "單抽，信仰之躍",
+  "genButton_one_4": "先來一張試試水",
+  "genButton_one_5": "一張定勝負",
+  "genButton_one_6": "這張必是神圖",
+  "genButton_one_7": "就一張，我發誓",
+  "genButton_one_8": "新頭像就靠它了",
+  "genButton_one_9": "一發入魂",
+  "genButton_one_10": "來張能當桌布的",
+  "genButton_one_11": "輕輕抽一張",
+  "genButton_one_12": "叼一張回來",
+  "genButton_few_1": "{count} 張，挑個最好的",
+  "@genButton_few_1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_2": "來 {count} 張比一比",
+  "@genButton_few_2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_3": "{count} 連抽",
+  "@genButton_few_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_4": "{count} 張，總有一張行",
+  "@genButton_few_4": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_5": "{count} 選一，評委就位",
+  "@genButton_few_5": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_6": "先來 {count} 張熱熱身",
+  "@genButton_few_6": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_7": "{count} 張，擇優錄取",
+  "@genButton_few_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_8": "{count} 張小確幸",
+  "@genButton_few_8": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_1": "{count} 連發",
+  "@genButton_batch_1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_2": "{count} 張一起上",
+  "@genButton_batch_2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_3": "{count} 張，開始停不下來",
+  "@genButton_batch_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_4": "一次 {count} 張，吃到飽",
+  "@genButton_batch_4": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_5": "{count} 張，鋪滿螢幕",
+  "@genButton_batch_5": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_6": "{count} 連，穩一手",
+  "@genButton_batch_6": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_7": "{count} 張，狼群出動",
+  "@genButton_batch_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_8": "{count} 張，開席",
+  "@genButton_batch_8": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_1": "{count} 張，上強度了",
+  "@genButton_many_1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_2": "{count} 張，顯示卡開始冒汗",
+  "@genButton_many_2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_3": "{count} 張，囤貨模式",
+  "@genButton_many_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_4": "{count} 張，流水線啟動",
+  "@genButton_many_4": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_5": "{count} 張，Anlas 在燃燒",
+  "@genButton_many_5": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_6": "{count} 張，這是要日更",
+  "@genButton_many_6": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_7": "{count} 張批量出擊",
+  "@genButton_many_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_8": "{count} 張，狼都看呆了",
+  "@genButton_many_8": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_1": "{count} 張？！開畫展嗎",
+  "@genButton_huge_1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_2": "{count} 張，硬碟瑟瑟發抖",
+  "@genButton_huge_2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_3": "{count} 張，工業革命了",
+  "@genButton_huge_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_4": "{count} 張，先冷靜一下",
+  "@genButton_huge_4": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_5": "{count} 張，存得下嗎",
+  "@genButton_huge_5": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_6": "{count} 張，列印店開張",
+  "@genButton_huge_6": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_7": "批發 {count} 張",
+  "@genButton_huge_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_8": "{count} 張，狼去搬救兵了",
+  "@genButton_huge_8": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_rare_1": "這發必出 SSR",
+  "genButton_rare_2": "AI 說它今天手感不錯",
+  "genButton_rare_3": "今日運勢：大吉",
+  "genButton_rare_4": "據說這個按鈕旺你",
+  "genButton_rare_5": "狼對著月亮嚎了一聲",
+  "genButton_rare_6": "玄學加持中",
+  "genButton_rare_7": "歐氣已充值",
+  "genButton_rare_8": "本次抽卡由狼贊助",
+  "genButton_rare_9": "手氣，來！",
+  "genButton_rare_10": "按下即是信仰",
+  "genButton_night_1": "夜深了，最後一抽",
+  "genButton_night_2": "抽完這批就睡",
+  "genButton_night_3": "凌晨的審美最野",
+  "genButton_night_4": "狼陪你熬夜",
+  "genButton_special_7": "{count} 張，幸運七",
+  "@genButton_special_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_special_9": "{count} 張，九宮格集齊",
+  "@genButton_special_9": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_special_42": "{count}，萬物的答案",
+  "@genButton_special_42": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_special_99": "{count} 張，差一張破百",
+  "@genButton_special_99": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_special_100": "整整 {count} 張，強迫症舒服了",
+  "@genButton_special_100": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "titleBar_minimize": "最小化",
   "titleBar_maximize": "最大化",
   "titleBar_restore": "還原",
@@ -5250,9 +5950,6 @@
   "settings_geistDark": "Geist 深色",
   "settings_geistLight": "Geist 淺色",
   "settings_geistDescription": "全工作室統一外觀：黑白灰底色，藍色作為操作強調。",
-  "generation_tipReuseBlocks": "把常用提示詞儲存為塊，下一次直接複用。",
-  "generation_tipBlockModes": "順序與隨機模式，可以讓提示詞塊產生不同組合。",
-  "generation_tipLockBlocks": "鎖定想保留的塊，再隨機調整其他部分。",
   "styleExplore_collapseGallery": "收起候選畫廊",
   "updateCapsuleLabel": "更新",
   "updateWaitForTask": "任務進行中，結束後即可重啟更新",
@@ -5266,7 +5963,7 @@
   "wiki_renameCollection": "重新命名",
   "wiki_deleteCollection": "刪除書籤集",
   "wiki_officialDirectory": "官方目錄",
-  "wiki_searchHint": "搜尋標籤、別名或中文譯名",
+  "wiki_searchHint": "搜尋標籤或別名",
   "wiki_typeAll": "全部類型",
   "wiki_coverageAll": "全部釋義",
   "wiki_withArticle": "有釋義",

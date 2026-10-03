@@ -1396,7 +1396,6 @@
   "characterEditor_clearAllConfirm": "모든 캐릭터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
   "characterEditor_nameHint": "캐릭터 이름 입력",
   "characterEditor_enabled": "사용",
-  "characterEditor_promptHint": "이 캐릭터의 프롬프트 입력...",
   "characterEditor_negativePromptHint": "이 캐릭터의 네거티브 입력...",
   "characterCanvas_title": "캐릭터 위치",
   "characterCanvas_finishEditing": "위치 편집 완료",
@@ -4409,7 +4408,7 @@
   "autocomplete_resultLimit": "결과 수",
   "autocomplete_relatedTagsTitle": "태그 확장",
   "autocomplete_relatedTagsSubtitle": "Ctrl+클릭으로 로컬 태그 검색, Ctrl+드래그로 관련 태그 탐색",
-  "tagExpansion_searchHint": "태그, 별칭, 번역 검색",
+  "tagExpansion_searchHint": "태그나 별칭 검색",
   "tagExpansion_relatedTitle": "관련 태그",
   "tagExpansion_empty": "입력하여 로컬 태그 검색",
   "tagExpansion_noResults": "로컬 태그를 찾을 수 없습니다",
@@ -4776,7 +4775,6 @@
   "styleExplore_newRun": "새 작업",
   "styleExplore_galleryTitle": "후보 갤러리",
   "styleExplore_galleryEmptyHint": "아직 후보가 없습니다. 탐색 작업을 만들거나 선택해 일괄 생성을 시작하세요.",
-  "styleExplore_labTip": "마음에 드는 후보를 골라 세대를 거듭하며 스타일을 진화시키세요.",
   "styleExplore_runNameLabel": "작업 이름",
   "styleExplore_runNameHint": "예: 부드러운 빛 ×30",
   "styleExplore_runCreated": "\"{name}\"을(를) 만들었습니다",
@@ -5124,66 +5122,768 @@
   "subscriptionGracePeriod": "유예 기간",
   "subscriptionTierNone": "구독 없음",
   "settings_modelsAndInterfaces": "모델 및 API",
-  "tips_gen_teach_1": "프롬프트 입력란에 <를 입력하면 블록 라이브러리의 블록을 불러올 수 있습니다",
-  "tips_gen_teach_2": "요약 바의 시드를 클릭해 고정하거나 다시 무작위로 정하세요. 샘플러에도 메뉴가 있습니다",
-  "tips_gen_teach_3": "생성 버튼 옆 숫자 상자로 배치 개수를 정하고, 오른쪽 칩에서 Anlas 비용을 확인하세요",
-  "tips_gen_teach_4": "오른쪽 위 chunks 메뉴에 블록, 프리셋, 정규식 규칙이 모여 있습니다",
-  "tips_gen_teach_5": "투명 배경은 알파 채널을 내보냅니다 — 캐릭터 참조를 켜면 사용할 수 없습니다",
-  "tips_gen_fun_1": "AI에게 디지털 간식을 주는 중…",
-  "tips_gen_fun_2": "생성 한 번 한 번이 작은 가챠입니다 — 뽑아 보세요",
-  "tips_gen_fun_3": "Anlas 잔액과 모델 이름은 위쪽에 있습니다 — 쓰기 전에 한번 확인하세요",
-  "tips_gen_fun_4": "야망을 마음껏 펼치도록 프롬프트 입력란이 커졌습니다",
-  "tips_gen_fun_5": "시드 -1은 운명에 맡긴다는 뜻입니다. 운명은 딱 떨어지는 숫자를 좋아한다나요",
-  "tips_explore_teach_1": "하트와 폴더 분류가 다음 세대를 결정합니다",
-  "tips_explore_teach_2": "A/B 비교 보기는 부모 이미지를 평가합니다 — 승자를 고르고 넘어가세요",
-  "tips_explore_teach_3": "생성 옆 숫자 상자로 이번 라운드의 배치 크기를 정합니다",
-  "tips_explore_teach_4": "더미 썸네일에 마우스를 올리면 크게 볼 수 있습니다",
-  "tips_explore_teach_5": "구분선을 끌어 갤러리 열을 넓히세요",
-  "tips_explore_fun_1": "적자생존, 그림도 마찬가지",
-  "tips_explore_fun_2": "생성 한 번 한 번이 오디션입니다",
-  "tips_explore_fun_3": "좋은 유전자는 좋은 부모에게서",
-  "tips_explore_fun_4": "변이를 절대 얕보지 마세요",
-  "tips_explore_fun_5": "빨리 감기한 자연 선택",
-  "tips_gallerySearch_teach_1": "쉼표로 구분한 검색어 = 교집합 검색",
-  "tips_gallerySearch_teach_2": "텍스트 검색은 네거티브 프롬프트를 제외해 결과가 깔끔합니다",
-  "tips_gallerySearch_teach_3": "검색은 모델, 샘플러, 소스, 버전 필드도 찾습니다",
-  "tips_gallerySearch_teach_4": "버튼이 넘치면 가로로 스크롤됩니다",
-  "tips_gallerySearch_teach_5": "페이지당 최대 500장 — 한 번에 다 보고 싶은 분을 위해",
-  "tips_gallerySearch_fun_1": "아래에 좋은 게 많아 보이네요~~~ 뭘 찾아볼까요?",
-  "tips_gallerySearch_fun_2": "컬렉션은 늘어나고, 폴더는 따라가는 척합니다",
-  "tips_gallerySearch_fun_3": "꿀팁: 내가 쓴 프롬프트가 최고의 검색어입니다",
-  "tips_gallerySearch_fun_4": "스크롤도 운동입니다",
-  "tips_gallerySearch_fun_5": "이 더미 어딘가에 오늘 밤의 걸작이 숨어 있습니다",
-  "tips_gallerySearch_start_1": "파일 이름이나 프롬프트 텍스트로 검색하세요 — Enter를 누르거나 제안을 고르면 됩니다",
-  "tips_gallerySearch_start_2": "모두 포함하려면 검색어를 쉼표로 구분하세요",
-  "tips_gallerySearch_start_3": "프롬프트만 검색합니다 — 네거티브 프롬프트는 결과에서 이미 제외됩니다",
-  "tips_gallerySearch_start_4": "모델, 샘플러, 소스, 버전 메타데이터도 검색됩니다",
-  "tips_gallerySearch_start_5": "masterpiece 같은 태그나 파일 이름 일부를 입력하세요",
-  "tips_gallerySearch_start_6": "찾으셨나요? 카드를 클릭하면 상세 정보, 마우스 오른쪽 버튼을 누르면 작업 메뉴가 열립니다",
-  "tips_gallerySearch_start_7": "텍스트와 오른쪽 버전 칩을 함께 써서 범위를 좁히세요",
-  "tips_gallerySearch_start_8": "검색어가 비어 있으면 전체 보기, 입력하면 바로 필터링됩니다",
-  "tips_gallerySearch_start_9": "입력하는 대로 검색됩니다 — 제출할 필요 없음",
-  "tips_gallerySearch_start_10": "다시 생성하고 싶어도 참으세요 — 먼저 검색하면 아마 여기 있을 겁니다",
-  "tips_blocklib_teach_1": "블록에 썸네일을 넣을 수 있습니다 — 편집 대화 상자에서 설정하세요",
-  "tips_blocklib_teach_2": "블록을 클릭하면 상세 정보가 열리고, 마우스를 올리면 빠르게 미리 볼 수 있습니다",
-  "tips_blocklib_teach_3": "별표로 블록을 컬렉션에 넣으세요. 즐겨찾기 영역은 맨 위에 있습니다",
-  "tips_blocklib_teach_4": "폭포형 보기에서는 이미지 블록이 제대로 보입니다",
-  "tips_blocklib_teach_5": "구분선을 끌어 블록 영역과 폴더 영역의 크기를 조정하세요",
-  "tips_blocklib_fun_1": "모든 블록은 불려 나가기를 꿈꿉니다",
-  "tips_blocklib_fun_2": "폴더 안의 폴더 — 이제 좀 정리된 느낌",
-  "tips_blocklib_fun_3": "사용 횟수는 블록의 이력서입니다",
-  "tips_blocklib_fun_4": "블록 보관함은 최고 인기곡 전용",
-  "tips_blocklib_fun_5": "망설여지면 블록으로 만드세요",
-  "tips_gen_1": "텍스트 입력란에서 Ctrl+Z가 작동합니다 — 오타를 두려워하지 마세요",
-  "tips_gen_2": "설정 → 프롬프트 chunks 메뉴에는 생각보다 많은 전환 옵션이 숨어 있습니다",
-  "tips_gen_3": "얇은 구분선이 보이면 끌어 보세요 — 대부분의 패널 크기를 바꿀 수 있습니다",
-  "tips_gen_4": "기록 영역에서 지난 생성 결과와 그때의 설정을 불러올 수 있습니다",
-  "tips_gen_5": "마우스 오른쪽 버튼은 메뉴, 마우스 올리기는 미리 보기",
-  "tips_fun_1": "오늘의 운빨 불러오는 중…",
-  "tips_fun_2": "시드는 무작위여도 안목은 아닙니다",
-  "tips_fun_3": "어딘가에서 GPU가 기대에 부풀어 윙윙거립니다",
-  "tips_fun_4": "여기서 가장 비싼 버튼은 생성입니다 — Anlas를 먹거든요",
-  "tips_fun_5": "이 상자는 수천 장의 걸작(과 몇 장의 흑역사)을 봐 왔습니다",
+  "tips_kind_guide": "팁",
+  "tips_kind_trick": "고수",
+  "tips_kind_wolf": "늑대",
+  "tips_hint": "{label}: {tip}",
+  "@tips_hint": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "tip": {
+        "type": "String"
+      }
+    }
+  },
+  "tips_studio_guide_1": "프롬프트를 다 썼다면 Ctrl+Enter로 바로 생성할 수 있습니다. 결과는 이 캔버스에 묶음별로 펼쳐집니다. 가운데 버튼이나 Shift+왼쪽 드래그로 이동하고, Ctrl+휠로 확대·축소하며, WASD로도 둘러볼 수 있습니다.",
+  "@tips_studio_guide_1": {
+    "description": "Shortcut generateImage (ctrl+enter); canvas controls from settings_outputViewer_canvasDescription."
+  },
+  "tips_studio_guide_2": "자주 쓰는 작가 태그, 품질 태그, 구도 설명은 한 번 블록으로 저장해 두고 다음부터 블록 라이브러리에서 불러오면 됩니다. 블록은 단순한 복사·붙여넣기가 아닙니다. 고정, 순차, 무작위 뽑기 중에서 고를 수 있어 생성할 때마다 조합이 바뀝니다.",
+  "@tips_studio_guide_2": {
+    "description": "Pill instance modes (pillSettingsModeFixed / Sequential / Random)."
+  },
+  "tips_studio_guide_3": "무작위 블록에서 마음에 드는 결과가 나왔다면 잠근 다음 나머지만 다시 뽑아 보세요. 잠근 내용은 그대로 두고 나머지만 계속 무작위로 바뀝니다. \"이 포즈는 그대로, 옷만 몇 벌 더\"에 딱 맞습니다.",
+  "@tips_studio_guide_3": {
+    "description": "pillCardLock / pillCardReroll."
+  },
+  "tips_studio_guide_4": "이미지를 창으로 끌어다 놓으면 어떻게 쓸지 묻습니다. Image2Image, Vibe 트랜스퍼, 정밀 참조, 또는 프롬프트와 파라미터만 추출하기 중에서 고르면 됩니다. NovelAI 메타데이터가 남아 있는 이미지라면 어떻게 만들었는지 한 번에 확인할 수 있습니다.",
+  "@tips_studio_guide_4": {
+    "description": "Image drop dialog (drop_dialogTitle)."
+  },
+  "tips_studio_guide_5": "캐릭터 칸의 정체는 사실 위치를 정하는 칸입니다. 사람뿐 아니라 고양이, 램프, 간판도 넣을 수 있습니다. 위치를 사용자 지정으로 바꾸고 미리보기에서 앵커를 끌어 어디에 둘지 모델에게 알려 주세요.",
+  "@tips_studio_guide_5": {
+    "description": "Character position canvas (characterCanvas_custom, characterCanvas_dragHint)."
+  },
+  "tips_studio_guide_6": "프롬프트 일부를 선택하고 Alt를 누른 채 휠을 굴리면 가중치를 조절할 수 있습니다. Alt 없이 굴리면 그냥 스크롤만 되니 실수로 바뀔 일이 없습니다. 보조 키는 설정에서 Ctrl로 바꿀 수 있습니다.",
+  "@tips_studio_guide_6": {
+    "description": "Weight scroll modifier (settings_enablePromptWeightScrollSubtitle)."
+  },
+  "tips_studio_guide_7": "F1을 누르면 언제든 단축키 도움말이 열립니다. Ctrl+1, Ctrl+2, Ctrl+3으로 생성, 갤러리, 온라인 갤러리를 오가고, Ctrl+,로 설정을 엽니다. 모든 단축키는 설정에서 원하는 조합으로 바꿀 수 있습니다.",
+  "@tips_studio_guide_7": {
+    "description": "Default shortcuts: showShortcutHelp f1, navigateTo* ctrl+1/2/3, settings ctrl+comma."
+  },
+  "tips_studio_guide_8": "Anlas를 실수로 왕창 쓸까 걱정된다면 설정에서 높은 Anlas 비용 경고를 켜 두세요. 한 번에 드는 예상 비용이 정한 값을 넘으면 생성 전에 한 번 더 묻습니다.",
+  "@tips_studio_guide_8": {
+    "description": "settings_warnHighAnlasCostTitle."
+  },
+  "tips_studio_trick_1": "시드가 이번에 무엇을 뽑을지 정해요. 파라미터와 시드가 같으면 같은 그림이 나와요. 명작을 다시 뽑고 싶다면 시드도 같이 챙기고, 운을 바꾸고 싶다면 그 시드는 그만 쳐다보세요.",
+  "@tips_studio_trick_1": {
+    "description": "NovelAI output is deterministic for identical parameters and seed."
+  },
+  "tips_studio_trick_2": "미리 인코딩된 Vibe를 다시 쓰면 2 Anlas가 들지 않아요. 2 Anlas쯤이야 싶겠지만, 하루에 Vibe를 몇 번 쓰는지 세어 보면 생각이 달라질걸요.",
+  "@tips_studio_trick_2": {
+    "description": "drop_reuseVibeSubtitle / drop_useAsRawImageSubtitle."
+  },
+  "tips_studio_trick_3": "네거티브 프롬프트는 소원 비는 우물이 아니에요. bad hands를 백 번 쓰는 것보다 프롬프트 쪽에 손동작을 분명하게 쓰는 편이 나아요. 매번 쓰는 네거티브 문구는 네거티브 프리셋에 맡기세요.",
+  "@tips_studio_trick_3": {
+    "description": "UC preset selector on the negative tab (ucPreset_label)."
+  },
+  "tips_studio_trick_4": "작가 태그는 길수록 좋은 게 아니에요. 열 명을 넘기면 모델은 아마 누구 화풍을 원하는지 헷갈리기 시작할 거예요. 몇 개의 블록으로 나눠서 무작위 뽑기로 돌아가며 나오게 해 보세요.",
+  "@tips_studio_trick_4": {
+    "description": "Random draw block mode."
+  },
+  "tips_studio_trick_5": "한 번 클릭할 때 보내는 요청 수와 요청마다 나오는 장수는 서로 다른 숫자예요. 버튼에 보이는 건 총 장수이고 Anlas도 총 장수로 계산돼요. 누르기 전에 꼭 확인하세요. 제가 어떻게 아는지는 묻지 마시고요.",
+  "@tips_studio_trick_5": {
+    "description": "Button count = nSamples x imagesPerRequest; estimatedCost uses both."
+  },
+  "tips_studio_trick_6": "번역 블록을 가운데 버튼으로 누르면 원문과 번역문이 번갈아 바뀌어요. AI 번역이 아무리 좋아도 가끔은 원문을 슬쩍 보고 cat ears가 이상한 말로 바뀌지 않았는지 확인해 보세요.",
+  "@tips_studio_trick_6": {
+    "description": "promptTranslation_guideMiddleText."
+  },
+  "tips_studio_trick_7": "설정의 생성 빈도 제한을 켜면 생성 사이에 강제로 쉬는 시간을 둘 수 있어요. 간격 무작위 변동까지 더하면 리듬이 덜 기계적이에요. 느긋하게 돌리는 밤에도, 손이 멈추지 않는 나에게도 좋아요.",
+  "@tips_studio_trick_7": {
+    "description": "settings_limitGenerationIntervalTitle / settings_setGenerationIntervalJitterTitle."
+  },
+  "tips_studio_wolf_1": "여기는 늑대 굴이야. 네가 만든 그림은 내가 물어 와서 갤러리에 가지런히 쌓아 둬. 솔직히 그림 실력보다 정리 실력이 훨씬 믿을 만하지.",
+  "tips_studio_wolf_2": "늑대는 밤눈이 제일 밝아. 그러니까 네가 새벽 세 시에 아직 여기 있어도 아무 말 안 할게. 그냥 한 장 더 같이 뽑아 줄 뿐이야.",
+  "tips_studio_wolf_3": "AI 그림쟁이의 성인식은 한 손의 손가락을 침착하게 끝까지 세는 거래. 나는 손가락이 없어서 늘 침착해.",
+  "tips_studio_wolf_4": "늑대 무리의 규칙: 좋은 시드는 나누고, 좋은 프롬프트는 블록으로 저장하고, 좋은 그림은 감상하기 전에 먼저 저장할 것. 마지막이 제일 중요해. 이유는 묻지 마.",
+  "tips_studio_wolf_5": "나는 그림은 못 그려도 기다리는 건 잘해. 미리보기가 조금씩 선명해지는 그 몇 초가 하루 중 제일 조용한 시간이야.",
+  "tips_studio_wolf_6": "W.O.F는 WolF라는 뜻이야. 가운데 점이 뭐냐고? 내가 눈밭을 달리다 남긴 발자국이지.",
+  "tips_studio_wolf_7": "캔버스가 비어 있을 땐 여기서 웅크리고 낮잠을 자. 생성을 누르면 바로 일어날게.",
+  "tips_studio_night_1": "지금은 한밤중이야. 미리 말해 두는데, 이 시간대엔 네 안목이 몰래 30% 정도 과감해져. 아침에 일어나서 한 번 더 봐.",
+  "tips_studio_night_2": "밤이 깊었어. 저 멀리 서버실의 GPU도 하품을 했어. 이번 묶음만 끝내고 자러 가. 갤러리는 내가 지킬게.",
+  "tips_lab_guide_1": "스타일 탐색은 일종의 오디션입니다. 먼저 탐색 작업을 만들어 프롬프트와 파라미터를 고정하고, 후보를 한꺼번에 생성합니다. 고른 자손이 다음 세대의 부모가 되면서 화풍이 세대마다 원하는 방향으로 다가갑니다.",
+  "@tips_lab_guide_1": {
+    "description": "Explore runs snapshot prompt and parameters; branches turn picked children into parents."
+  },
+  "tips_lab_guide_2": "하트와 폴더는 정리용일 뿐 유전에는 영향을 주지 않습니다. 다음 세대를 정하는 건 '분기용으로 선택'으로 고른 후보들입니다.",
+  "@tips_lab_guide_2": {
+    "description": "Heart/folder are annotations only (explore_candidate_gallery); styleExplore_branchSelect."
+  },
+  "tips_lab_guide_3": "고민될 땐 A/B 비교를 써 보세요. 부모 이미지 두 장이 나란히 나오면 어느 쪽이 원하는 화풍에 더 가까운지만 고르면 됩니다. 순위가 높은 부모일수록 다음 라운드에서 자손을 얻기 쉽습니다.",
+  "@tips_lab_guide_3": {
+    "description": "Preference values weight parent selection in ExploreMutationEngine."
+  },
+  "tips_lab_guide_4": "다음 라운드를 생성하려면 메인 프롬프트에 유전을 켠 무작위 블록이 하나는 있어야 합니다. 바뀔 유전자가 없으면 변이 엔진도 손쓸 방법이 없습니다.",
+  "@tips_lab_guide_4": {
+    "description": "styleExplore_deepRoundNoInstance."
+  },
+  "tips_lab_guide_5": "마음에 드는 조합의 후보가 있다면 '블록으로 저장'으로 블록 라이브러리에 넣어 두세요. 생성 화면에서도 바로 쓸 수 있습니다. 여러 장을 고르면 '병합해 저장'으로 하나의 블록으로 합칠 수도 있습니다.",
+  "@tips_lab_guide_5": {
+    "description": "styleExplore_adoptAsBlock / styleExplore_mergeAdopt."
+  },
+  "tips_lab_guide_6": "탐색 작업을 삭제해도 작업 폴더의 후보 사본만 지워지고, 갤러리의 원본은 그대로입니다. 마음 놓고 정리하세요. 실험실은 원래 좀 어수선해야 합니다.",
+  "@tips_lab_guide_6": {
+    "description": "styleExplore_deleteRunMessage."
+  },
+  "tips_lab_trick_1": "부모마다 최소 한 장은 배정되니까 부모가 많을수록 한 라운드에 필요한 장수도 늘어요. 욕심부리면 Anlas가 먼저 그만하라고 할 거예요.",
+  "@tips_lab_trick_1": {
+    "description": "styleExplore_deepRoundCountHint."
+  },
+  "tips_lab_trick_2": "분기는 최신 세대 후보 더미에서만 만들 수 있어요. 지난 세대를 돌아볼 순 있어도 중간에서 갈라질 순 없어요. 진화란 원래 그렇게 냉정하죠.",
+  "@tips_lab_trick_2": {
+    "description": "styleExplore_branchNeedLatest."
+  },
+  "tips_lab_trick_3": "변이 엔진이 가끔 충분히 다른 자손을 만들 수 없다고 할 때가 있어요. 게으른 게 아니라 유전자 풀이 너무 작은 거예요. 무작위 블록에 후보를 몇 개 더 넣어 주면 바로 다시 일해요.",
+  "@tips_lab_trick_3": {
+    "description": "styleExplore_deepRoundEmpty; injection draws new atoms from the block pool."
+  },
+  "tips_lab_trick_4": "후보 더미의 썸네일에 마우스를 올리면 크게 볼 수 있어요. 하나씩 열 필요 없어요. 심사위원에겐 심사위원다운 효율이 필요하니까요.",
+  "@tips_lab_trick_4": {
+    "description": "Pile thumbnail hover preview (ExploreCandidateHoverSession)."
+  },
+  "tips_lab_trick_5": "어떤 후보의 설정 전체가 마음에 든다면 '메타데이터 가져오기'로 프롬프트와 파라미터를 그대로 편집 영역에 가져올 수 있어요. 거기서 이어서 다듬으면 돼요.",
+  "@tips_lab_trick_5": {
+    "description": "styleExplore_fixateAsTemplate."
+  },
+  "tips_lab_wolf_1": "태어날 때부터 무리에서 제일 센 늑대는 없어. 화풍도 마찬가지야. 첫 세대가 좀 별로인 건 당연해. 판단은 3세대쯤에 하자.",
+  "tips_lab_wolf_2": "여기 적자생존은 다정한 버전이야. 뽑히지 않은 후보도 사라지지 않아. 이번엔 차례가 아니었을 뿐이야.",
+  "tips_lab_wolf_3": "내가 아는 유전학은 이게 전부야. 잘생긴 부모한테선 아마 잘생긴 새끼가 나온다. 나머지는 변이랑 약간의 운이지.",
+  "tips_lab_wolf_4": "LAB 불은 보통 늦게까지 켜져 있어. 나는 입구에서 당번을 서면서 지금 몇 세대째인지 세어 둘게.",
+  "tips_lab_wolf_5": "변이를 얕보면 안 돼. 열 세대를 골라도 못 찾던 게 우연히 툭 튀어나올 때가 있거든. 그러니까 좀 이상해 보이는 한 장도 서둘러 지우지 마.",
+  "tips_prompt_guide_1": "Ctrl+Enter로 생성하고, 생성 중에는 Esc로 취소합니다.",
+  "@tips_prompt_guide_1": {
+    "description": "Shortcuts generateImage ctrl+enter / cancelGeneration escape (web_style_layout)."
+  },
+  "tips_prompt_guide_2": "텍스트를 선택하고 Alt를 누른 채 휠을 굴리면 가중치가 바뀝니다. Alt 없이 굴리면 그냥 스크롤됩니다.",
+  "@tips_prompt_guide_2": {
+    "description": "Weight scroll modifier (default Alt)."
+  },
+  "tips_prompt_guide_3": "태그를 Ctrl+클릭하면 로컬 태그에서 찾고, Ctrl+드래그로 고르면 함께 자주 쓰이는 태그를 볼 수 있습니다.",
+  "@tips_prompt_guide_3": {
+    "description": "prompt_cooccurrenceRecommendationSubtitle (default on)."
+  },
+  "tips_prompt_guide_4": "텍스트를 선택하고 오른쪽 클릭하면 바로 블록 라이브러리에 저장할 수 있습니다. 다음부터는 클릭이나 드래그 한 번이면 다시 넣을 수 있습니다.",
+  "@tips_prompt_guide_4": {
+    "description": "Selection context menu promptBlockLibrary_saveToLibrary."
+  },
+  "tips_prompt_guide_5": "칸 아래쪽의 품질 태그 프리셋이 자주 쓰는 품질 태그를 대신 붙여 줍니다. 네거티브로 바꾸면 같은 자리에 네거티브 프리셋이 있습니다.",
+  "@tips_prompt_guide_5": {
+    "description": "QualityTagsSelector / UcPresetSelector in the prompt card footer."
+  },
+  "tips_prompt_guide_6": "F1을 누르면 모든 단축키를 볼 수 있습니다.",
+  "@tips_prompt_guide_6": {
+    "description": "showShortcutHelp f1."
+  },
+  "tips_prompt_guide_7": "ComfyUI에서 복사한 다중 캐릭터 프롬프트를 붙여 넣으면 자동으로 인식해 캐릭터 칸으로 가져올지 묻습니다. 하나씩 다시 입력할 필요가 없습니다.",
+  "@tips_prompt_guide_7": {
+    "description": "ComfyuiImportWrapper detects ComfyUI multi-character syntax."
+  },
+  "tips_prompt_guide_8": "SD 구문 자동 변환을 켜면 (tag:1.2) 같은 표기가 입력란을 벗어나거나 생성할 때 NovelAI 가중치 형식으로 바뀝니다.",
+  "@tips_prompt_guide_8": {
+    "description": "prompt_sdSyntaxAutoConvertSubtitle (default off)."
+  },
+  "tips_prompt_guide_9": "1.2::태그::로 가중치를 정확히 지정합니다. 음수를 쓰면 반대로 작용합니다.",
+  "@tips_prompt_guide_9": {
+    "description": "NovelAI V4+ numeric emphasis syntax."
+  },
+  "tips_prompt_trick_1": "중괄호를 한 겹 씌울 때마다 가중치는 1.05배, 대괄호는 1.05로 나눠요. 중괄호를 다섯 겹씩 씌우는 사람은 대개 모델이랑 말다툼 중이에요.",
+  "@tips_prompt_trick_1": {
+    "description": "NovelAI bracket emphasis."
+  },
+  "tips_prompt_trick_2": "자동 서식은 쓸모없는 1배 가중치를 지워요. 미워서가 아니라 토큰을 아껴 주는 거예요.",
+  "@tips_prompt_trick_2": {
+    "description": "prompt_autoFormatSubtitle (default on)."
+  },
+  "tips_prompt_trick_3": "칸 아래의 가는 막대는 토큰 사용량이에요. 꽉 차면 그 뒤 내용은 모델이 거의 못 봐요. 장편 소설을 쓰려면 다른 곳을 찾아 주세요.",
+  "@tips_prompt_trick_3": {
+    "description": "PromptTokenCountFooter."
+  },
+  "tips_prompt_trick_4": "막힐 땐 화면에서 제일 큰 것부터 써 보세요.",
+  "tips_prompt_trick_5": "품질 태그는 한 번이면 충분해요. masterpiece를 세 번 써도 모델은 진심을 더 느끼지 않아요.",
+  "tips_prompt_trick_6": "나오긴 하되 너무 튀지 않게 하고 싶다면 지우는 것보다 0.8::이 나아요. 지우면 없는 거고, 낮추면 은은한 거예요.",
+  "@tips_prompt_trick_6": {
+    "description": "NovelAI numeric emphasis."
+  },
+  "tips_prompt_trick_7": "같은 단어만 계속 바꾸고 있다면 블록으로 만들어 무작위에 맡겨 보세요.",
+  "@tips_prompt_trick_7": {
+    "description": "Random draw block mode."
+  },
+  "tips_prompt_trick_8": "프롬프트에는 원하는 것, 네거티브에는 원하지 않는 것. 프롬프트에 no hat이라고 써도 모델 귀에는 hat만 들려요.",
+  "tips_prompt_wolf_1": "이 칸은 수천 장의 명작을 봤어. 남한테 보여 주기 곤란한 흑역사도 몇 장.",
+  "tips_prompt_wolf_2": "먼저 원하는 그림을 한 문장으로 말해 보고, 그다음에 태그로 쪼개. 순서를 거꾸로 하면 태그 더미랑 뭔지 모를 그림만 남기 쉬워.",
+  "tips_prompt_wolf_3": "너 타자 치는 거 보고 있어. 걱정 마, 나 영어 못 읽어.",
+  "tips_prompt_wolf_4": "저 멀리 어떤 GPU가 방금 네 프롬프트를 보고 한숨을 쉬었어.",
+  "tips_prompt_wolf_5": "가챠의 끝은 미신, 미신의 끝은 시드 고정.",
+  "tips_prompt_wolf_6": "작가 태그가 열두 번째쯤 되면 모델은 누구 그림을 그리는지 모르게 돼. 너도 그렇고.",
+  "tips_explore_guide_1": "여기에는 부모 프롬프트를 씁니다. 일부를 진화시키고 싶다면 그 부분을 무작위 블록으로 만들고 블록에서 유전을 켜세요.",
+  "@tips_explore_guide_1": {
+    "description": "pillCardEvolutionEnable (explore only)."
+  },
+  "tips_explore_guide_2": "유전은 블록 인스턴스를 켠 뒤에야 켤 수 있습니다. 회색이라면 블록부터 켜세요.",
+  "@tips_explore_guide_2": {
+    "description": "pillCardEvolutionRequiresEnabled."
+  },
+  "tips_explore_guide_3": "'후보 생성' 옆의 숫자가 이번 라운드에 몇 장을 만들지 정합니다.",
+  "@tips_explore_guide_3": {
+    "description": "styleExplore_createDeepRound count box."
+  },
+  "tips_explore_guide_4": "블록 인스턴스는 '한 장면 뒤로', '한 장면 앞으로'로 이미 뽑았던 조합 사이를 오갈 수 있습니다.",
+  "@tips_explore_guide_4": {
+    "description": "pillCardStepBack / pillCardStepForward."
+  },
+  "tips_explore_guide_5": "탐색 작업은 프롬프트와 파라미터의 스냅숏을 고정합니다. 나중에 여기를 고쳐도 이미 끝난 라운드에는 영향이 없습니다.",
+  "@tips_explore_guide_5": {
+    "description": "styleExplore_runEmptyHint."
+  },
+  "tips_explore_guide_6": "블록의 무작위 설정에서 뽑을 개수, 발동 확률, 무작위 가중치를 조절할 수 있습니다. 유전자의 다양성은 전부 여기에 있습니다.",
+  "@tips_explore_guide_6": {
+    "description": "pillCardSettings / pillSettingsCount / TriggerProbability / Weight."
+  },
+  "tips_explore_trick_1": "유전자 풀이 클수록 변이가 고를 게 많아져요. 무작위 블록에 단어가 두 개뿐이면 열 세대를 진화해도 두 답 사이를 오갈 뿐이에요.",
+  "tips_explore_trick_2": "확실한 부분은 고정하고, 애매한 부분만 무작위 블록으로 만드세요. 전부 무작위면 방향이 없고, 전부 고정이면 진화가 없어요.",
+  "tips_explore_trick_3": "잠근 블록은 다시 뽑히지 않아요. 지키고 싶은 특징은 먼저 잠그고 나머지 블록이 마음껏 바뀌게 두세요.",
+  "@tips_explore_trick_3": {
+    "description": "pillCardRerollLocked."
+  },
+  "tips_explore_trick_4": "발동 확률을 30%로 두면 그 블록은 대략 열에 셋 정도의 조합에만 나와요. 가끔 나와야 예쁜 요소에 딱이에요.",
+  "@tips_explore_trick_4": {
+    "description": "pillSettingsTriggerProbability."
+  },
+  "tips_explore_trick_5": "첫 세대에서 완벽한 답을 바란다면, 그건 탐색이 아니라 소원이에요.",
+  "tips_explore_wolf_1": "늑대 무리의 혈통은 한 세대씩 골라 온 거야. 네 화풍도 그래.",
+  "tips_explore_wolf_2": "매 라운드가 오디션이고 심사위원은 너 하나야. 나는 박수 담당.",
+  "tips_explore_wolf_3": "좋은 유전자는 좋은 부모한테서, 좋은 부모는 손이 미끄러지지 않은 그 한 번의 클릭에서 나와.",
+  "tips_explore_wolf_4": "유전학은 잘 몰라도 이건 알아. 깐깐한 심사위원이 제일 멋진 새끼 늑대를 키워.",
+  "tips_character_guide_1": "캐릭터 칸의 정체는 위치를 정하는 칸입니다. 고양이, 램프, 간판 무엇이든 넣을 수 있습니다.",
+  "@tips_character_guide_1": {
+    "description": "Character prompts carry a position; content is free-form."
+  },
+  "tips_character_guide_2": "위쪽 위치를 사용자 지정으로 바꾸고 미리보기에서 앵커를 끄세요. 놓는 순간 적용됩니다.",
+  "@tips_character_guide_2": {
+    "description": "CharacterPositionModeSegments / characterCanvas_dragHint."
+  },
+  "tips_character_guide_3": "AI 선택은 위치를 모델에게 맡깁니다. 사용자 지정으로 돌아가면 전에 정한 위치가 그대로 있습니다.",
+  "@tips_character_guide_3": {
+    "description": "AI choice hides anchors but keeps position data (character_position_canvas)."
+  },
+  "tips_character_guide_4": "캐릭터 칸마다 자기 네거티브가 있고, 그 캐릭터에만 적용됩니다.",
+  "@tips_character_guide_4": {
+    "description": "CharacterPromptEditor negative tab."
+  },
+  "tips_character_guide_5": "오른쪽 위 체크 표시로 이 캐릭터를 잠시 끌 수 있습니다. 지우고 다시 쓸 필요가 없습니다.",
+  "@tips_character_guide_5": {
+    "description": "toggleCharacterEnabled header button."
+  },
+  "tips_character_guide_6": "제목을 누르면 이름을 바꿀 수 있습니다. 번호보다 훨씬 알아보기 쉽습니다.",
+  "@tips_character_guide_6": {
+    "description": "CharacterNameField."
+  },
+  "tips_character_guide_7": "오른쪽 위 ⋯ 메뉴에서 이 캐릭터를 블록 라이브러리에 추가해 두면 나중에 이 묘사를 다시 쓸 수 있습니다.",
+  "@tips_character_guide_7": {
+    "description": "Character header menu addToLibrary."
+  },
+  "tips_character_trick_1": "장면과 화풍은 메인 프롬프트에, 여기엔 이 캐릭터만 쓰세요. 같은 옷을 두 번 쓰면 모델은 엄청 좋아하는 줄 알아요.",
+  "tips_character_trick_2": "두 사람이 너무 가까우면 붙어 버리기 쉬워요. separate를 열 번 쓰기보다 앵커를 조금 떨어뜨리세요.",
+  "tips_character_trick_3": "왼쪽에 나무를 세우고 싶다면 캐릭터 칸을 주고 왼쪽으로 끌어 두세요. 나무는 캐릭터가 아니라고 불평 안 해요.",
+  "tips_character_trick_4": "캐릭터 칸에서도 블록과 가중치 문법을 쓸 수 있어요. 메인 프롬프트와 똑같아요.",
+  "@tips_character_trick_4": {
+    "description": "Character boxes use PromptPillEditor."
+  },
+  "tips_character_trick_5": "캐릭터가 너무 많다면 몇 명을 꺼 보세요. 비좁으면 모델이 알아서 고르는데, 대개 남기고 싶던 사람이 빠져요.",
+  "tips_character_wolf_1": "나도 캐릭터 칸 하나 갖고 싶지만, 화면 밖에서 지켜보는 게 더 어울리는 것 같아.",
+  "tips_character_wolf_2": "칸 하나, 자리 하나, 할 일 하나. 꽤 괜찮은 인생 철학 같아.",
+  "tips_character_wolf_3": "자리 배치는 네가 하고, 나는 옆에서 \"조금만 더 왼쪽\" 하고 외칠게.",
+  "tips_character_wolf_4": "늑대 무리도 대형을 짜서 다녀. 캐릭터가 많을 땐 누가 가운데 설지부터 정하자.",
+  "tips_gallery_guide_1": "파일 이름이나 프롬프트 본문으로 검색",
+  "@tips_gallery_guide_1": {
+    "description": "Local gallery searchable text (gallery_data_source _buildSearchablePromptText)."
+  },
+  "tips_gallery_guide_2": "쉼표로 나누면 모두 일치",
+  "@tips_gallery_guide_2": {
+    "description": "gallery_filter_service comma-delimited required tags."
+  },
+  "tips_gallery_guide_3": "모델, 샘플러, 출처도 검색",
+  "@tips_gallery_guide_3": {
+    "description": "Searchable metadata fields."
+  },
+  "tips_gallery_guide_4": "Ctrl+F로 언제든 여기로 이동",
+  "@tips_gallery_guide_4": {
+    "description": "focusSearch ctrl+f."
+  },
+  "tips_gallery_guide_5": "캐릭터 프롬프트도 검색",
+  "@tips_gallery_guide_5": {
+    "description": "Character prompts are part of searchable text."
+  },
+  "tips_gallery_guide_6": "이미지 오른쪽 클릭으로 더 보기",
+  "@tips_gallery_guide_6": {
+    "description": "Local image context menu."
+  },
+  "tips_gallery_guide_7": "F5로 갤러리 새로고침",
+  "@tips_gallery_guide_7": {
+    "description": "refreshGallery f5."
+  },
+  "tips_gallery_trick_1": "네거티브는 검색 안 돼요",
+  "@tips_gallery_trick_1": {
+    "description": "Negative prompt excluded from searchable text."
+  },
+  "tips_gallery_trick_2": "다시 뽑기 전에 검색부터",
+  "tips_gallery_trick_3": "내 프롬프트가 최고의 검색어",
+  "tips_gallery_trick_4": "휴지통은 다음 실행 때 비워져요",
+  "@tips_gallery_trick_4": {
+    "description": "localGallery_trashHint."
+  },
+  "tips_gallery_trick_5": "masterpiece는 거의 전부 나와요",
+  "tips_gallery_wolf_1": "오늘 밤 사냥감은 세 번째 페이지",
+  "tips_gallery_wolf_2": "냄새가 나, 명작이 여기 있어",
+  "tips_gallery_wolf_3": "스크롤도 운동이야",
+  "tips_gallery_wolf_4": "굴은 넓어, 천천히 찾아봐",
+  "tips_online_guide_1": "공백으로 나누고 Enter",
+  "@tips_online_guide_1": {
+    "description": "Online search splitOnSpaces, onSubmitted."
+  },
+  "tips_online_guide_2": "유사 일치: *tag*로 비슷한 태그",
+  "@tips_online_guide_2": {
+    "description": "onlineGallery_fuzzySearchTooltip."
+  },
+  "tips_online_guide_3": "차단 목록 태그는 숨겨져요",
+  "@tips_online_guide_3": {
+    "description": "onlineGallery_blacklistSubtitle."
+  },
+  "tips_online_guide_4": "Danbooru 로그인 후 즐겨찾기",
+  "@tips_online_guide_4": {
+    "description": "danbooru_loginHint."
+  },
+  "tips_online_trick_1": "여러 단어는 밑줄로: blue_eyes",
+  "@tips_online_trick_1": {
+    "description": "Danbooru tag syntax."
+  },
+  "tips_online_trick_2": "좋은 그림의 태그는 참고하세요",
+  "tips_online_trick_3": "태그가 많을수록 결과는 줄어요",
+  "tips_online_wolf_1": "바깥세상은 넓어, 정찰하고 올게",
+  "tips_online_wolf_2": "남의 영역이야, 구경만 하자",
+  "tips_online_wolf_3": "오늘은 어느 숲에서 사냥할까?",
+  "tips_blocks_guide_1": "제목, 프롬프트, 태그로 검색",
+  "@tips_blocks_guide_1": {
+    "description": "promptBlockLibrary_searchHint."
+  },
+  "tips_blocks_guide_2": "블록을 프롬프트로 끌어오기",
+  "@tips_blocks_guide_2": {
+    "description": "PromptPillEditor DragTarget<PromptBlockDragData>."
+  },
+  "tips_blocks_guide_3": "★로 즐겨찾기에 모으기",
+  "@tips_blocks_guide_3": {
+    "description": "promptBlockLibrary_emptyFavorites."
+  },
+  "tips_blocks_guide_4": "썸네일이 있으면 고르기 쉬워요",
+  "@tips_blocks_guide_4": {
+    "description": "Block thumbnails."
+  },
+  "tips_blocks_guide_5": "선택 후 오른쪽 클릭으로 저장",
+  "@tips_blocks_guide_5": {
+    "description": "promptBlockLibrary_saveToLibrary."
+  },
+  "tips_blocks_trick_1": "세 번 썼다면 블록으로",
+  "tips_blocks_trick_2": "고민되면 저장. 지우긴 쉬워요",
+  "tips_blocks_trick_3": "이름은 분명하게, 미래의 나를 위해",
+  "tips_blocks_trick_4": "후보가 많을수록 놀라움도 커요",
+  "tips_blocks_wolf_1": "블록들이 다 출전을 기다려",
+  "tips_blocks_wolf_2": "이 블록들이 네 무리야",
+  "tips_blocks_wolf_3": "내가 아는 블록은 고기뿐",
+  "tips_blocks_wolf_4": "폴더 안에 폴더, 정리 끝",
+  "tips_generating_wolf_1": "난수와 흥정하는 중…",
+  "tips_generating_wolf_2": "여섯 번째 손가락을 설득하는 중…",
+  "tips_generating_wolf_3": "픽셀들을 줄 세우는 중…",
+  "tips_generating_wolf_4": "노이즈를 한 알씩 닦아 내는 중…",
+  "tips_generating_wolf_5": "늑대가 멀리서 응원하며 우는 중…",
+  "tips_generating_wolf_6": "GPU에게 네 취향을 설명하는 중…",
+  "tips_generating_wolf_7": "프롬프트를 꿈으로 번역하는 중…",
+  "tips_generating_wolf_8": "눈 개수를 확인하는 중…",
+  "tips_generating_wolf_9": "빛과 그림자의 좋은 각도를 찾는 중…",
+  "tips_generating_wolf_10": "배경이 튀지 않게 설득하는 중…",
+  "tips_generating_wolf_11": "노이즈 속에서 그림을 건져 내는 중…",
+  "tips_generating_wolf_12": "손가락 세는 중: 하나, 둘, 셋…",
+  "tips_generating_wolf_13": "물감이 마르길 기다리는 중…",
+  "tips_generating_wolf_14": "오늘의 운을 소환하는 중…",
+  "tips_generating_trick_1": "못 기다리겠다면 Esc로 취소",
+  "@tips_generating_trick_1": {
+    "description": "cancelGeneration escape."
+  },
+  "tips_generating_trick_2": "미리보기는 조금씩 선명해져요",
+  "@tips_generating_trick_2": {
+    "description": "Streaming preview frames."
+  },
+  "tips_generating_trick_3": "완성된 그림은 기본으로 갤러리에 저장돼요",
+  "@tips_generating_trick_3": {
+    "description": "autoSaveImages default true."
+  },
+  "tips_generating_trick_4": "샘플링 한 단계마다 노이즈가 걷혀요",
+  "tips_splash_guide_1": "F1을 누르면 언제든 모든 단축키를 볼 수 있습니다.",
+  "@tips_splash_guide_1": {
+    "description": "showShortcutHelp f1."
+  },
+  "tips_splash_guide_2": "Ctrl+Enter로 생성합니다. 모든 단축키는 설정에서 바꿀 수 있습니다.",
+  "@tips_splash_guide_2": {
+    "description": "generateImage ctrl+enter; shortcut settings."
+  },
+  "tips_splash_guide_3": "이미지를 창에 끌어다 놓으면 프롬프트와 파라미터를 읽을 수 있습니다.",
+  "@tips_splash_guide_3": {
+    "description": "drop_extractMetadataSubtitle."
+  },
+  "tips_splash_guide_4": "자주 쓰는 프롬프트는 블록으로 저장해 두면 다음엔 한 번에 다시 쓸 수 있습니다.",
+  "@tips_splash_guide_4": {
+    "description": "Prompt blocks."
+  },
+  "tips_splash_trick_1": "위의 STEP /28은 기본 28스텝 샘플링에 바치는 오마주예요.",
+  "@tips_splash_trick_1": {
+    "description": "Splash STEP xx/28 counter."
+  },
+  "tips_splash_trick_2": "미리 인코딩된 Vibe는 무료로 다시 쓸 수 있어서 2 Anlas가 절약돼요.",
+  "@tips_splash_trick_2": {
+    "description": "drop_reuseVibeSubtitle."
+  },
+  "tips_splash_trick_3": "처음 갤러리 색인을 만들 땐 조금 걸리지만 그동안에도 평소처럼 쓸 수 있어요.",
+  "@tips_splash_trick_3": {
+    "description": "localGallery_firstIndexHint."
+  },
+  "tips_splash_wolf_1": "오 분만 더… 알았어, 일어날게.",
+  "tips_splash_wolf_2": "굴 좀 치우는 중이야. 금방 끝나.",
+  "tips_splash_wolf_3": "GPU 준비 완료, 달 준비 완료. 이제 너만 오면 돼.",
+  "tips_splash_wolf_4": "냄새 나지? 새 프롬프트 냄새야.",
+  "tips_splash_wolf_5": "오늘도 좋은 뽑기 하자.",
+  "genButton_normal": "이미지 {count}장 생성",
+  "@genButton_normal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_one_1": "이 한 장으로 끝",
+  "genButton_one_2": "좋은 걸로 한 장",
+  "genButton_one_3": "단챠, 믿음의 도약",
+  "genButton_one_4": "일단 한 장 맛보기",
+  "genButton_one_5": "한 장으로 승부",
+  "genButton_one_6": "이건 명작 각",
+  "genButton_one_7": "딱 한 장만, 진짜로",
+  "genButton_one_8": "새 프사는 이걸로",
+  "genButton_one_9": "한 방에 끝내기",
+  "genButton_one_10": "배경화면감으로 한 장",
+  "genButton_one_11": "살포시 한 장",
+  "genButton_one_12": "한 장 물어 올게",
+  "genButton_few_1": "{count}장 중 최고를",
+  "@genButton_few_1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_2": "{count}장 비교하기",
+  "@genButton_few_2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_3": "{count}연차",
+  "@genButton_few_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_4": "{count}장, 하나는 걸린다",
+  "@genButton_few_4": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_5": "{count}개 중 하나, 심사 시작",
+  "@genButton_few_5": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_6": "{count}장으로 몸풀기",
+  "@genButton_few_6": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_7": "{count}장 중 선발",
+  "@genButton_few_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_few_8": "{count}장의 소확행",
+  "@genButton_few_8": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_1": "{count}연발",
+  "@genButton_batch_1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_2": "{count}장 한꺼번에",
+  "@genButton_batch_2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_3": "{count}장, 빠져들기 시작",
+  "@genButton_batch_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_4": "한 번에 {count}장, 넉넉하게",
+  "@genButton_batch_4": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_5": "{count}장으로 화면 채우기",
+  "@genButton_batch_5": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_6": "{count}연차, 안전하게",
+  "@genButton_batch_6": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_7": "{count}장, 늑대 무리 출동",
+  "@genButton_batch_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_batch_8": "{count}장, 잔치 시작",
+  "@genButton_batch_8": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_1": "{count}장, 강도 올린다",
+  "@genButton_many_1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_2": "{count}장, GPU가 땀 흘린다",
+  "@genButton_many_2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_3": "{count}장, 사재기 모드",
+  "@genButton_many_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_4": "{count}장, 생산 라인 가동",
+  "@genButton_many_4": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_5": "{count}장, Anlas가 탄다",
+  "@genButton_many_5": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_6": "{count}장, 매일 연재각",
+  "@genButton_many_6": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_7": "{count}장 일괄 출격",
+  "@genButton_many_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_many_8": "{count}장, 늑대도 멍해짐",
+  "@genButton_many_8": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_1": "{count}장?! 전시회라도 여나요",
+  "@genButton_huge_1": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_2": "{count}장, 하드가 떤다",
+  "@genButton_huge_2": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_3": "{count}장, 산업 혁명",
+  "@genButton_huge_3": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_4": "{count}장, 일단 심호흡",
+  "@genButton_huge_4": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_5": "{count}장, 용량은 괜찮나요",
+  "@genButton_huge_5": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_6": "{count}장, 인쇄소 개업",
+  "@genButton_huge_6": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_7": "{count}장, 도매로",
+  "@genButton_huge_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_huge_8": "{count}장, 늑대가 지원군 부르러 감",
+  "@genButton_huge_8": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_rare_1": "SSR 확정 연출",
+  "genButton_rare_2": "AI가 오늘 컨디션 최고래요",
+  "genButton_rare_3": "오늘의 운세: 대길",
+  "genButton_rare_4": "이 버튼이 당신과 궁합이 좋대요",
+  "genButton_rare_5": "늑대가 달을 보고 울었다",
+  "genButton_rare_6": "행운 버프 적용 중",
+  "genButton_rare_7": "운 충전 완료",
+  "genButton_rare_8": "이번 뽑기는 늑대가 후원합니다",
+  "genButton_rare_9": "와라, 신의 한 수!",
+  "genButton_rare_10": "누르면 믿음이 된다",
+  "genButton_night_1": "밤이 깊었다, 마지막 한 번",
+  "genButton_night_2": "이번만 뽑고 잘게",
+  "genButton_night_3": "새벽 감성은 과감하다",
+  "genButton_night_4": "늑대도 같이 밤샘 중",
+  "genButton_special_7": "럭키 {count}",
+  "@genButton_special_7": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_special_9": "{count}장, 3×3 그리드 완성",
+  "@genButton_special_9": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_special_42": "{count}: 모든 것의 답",
+  "@genButton_special_42": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_special_99": "{count}장, 100까지 한 장",
+  "@genButton_special_99": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "genButton_special_100": "딱 {count}장, 속이 시원",
+  "@genButton_special_100": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "titleBar_minimize": "최소화",
   "titleBar_maximize": "최대화",
   "titleBar_restore": "이전 크기로",
@@ -5250,9 +5950,6 @@
   "settings_geistDark": "Geist 다크",
   "settings_geistLight": "Geist 라이트",
   "settings_geistDescription": "스튜디오 전체에 하나의 외관. 검정 또는 흰색 바탕에 파란색 강조.",
-  "generation_tipReuseBlocks": "자주 쓰는 프롬프트를 블록으로 저장해 나중에 다시 사용하세요.",
-  "generation_tipBlockModes": "블록을 순차 또는 무작위 모드로 조합해 새로운 베리에이션을 만들어 보세요.",
-  "generation_tipLockBlocks": "유지할 블록은 잠그고 나머지를 무작위로 바꿔 보세요.",
   "styleExplore_collapseGallery": "후보 갤러리 접기",
   "updateCapsuleLabel": "업데이트",
   "updateWaitForTask": "현재 작업이 끝난 뒤 다시 시작하세요",
@@ -5266,7 +5963,7 @@
   "wiki_renameCollection": "이름 변경",
   "wiki_deleteCollection": "컬렉션 삭제",
   "wiki_officialDirectory": "공식 목차",
-  "wiki_searchHint": "태그, 별칭, 중국어 이름 검색",
+  "wiki_searchHint": "태그나 별칭 검색",
   "wiki_typeAll": "모든 유형",
   "wiki_coverageAll": "모든 설명",
   "wiki_withArticle": "설명 있음",

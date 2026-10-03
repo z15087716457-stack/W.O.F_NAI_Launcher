@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/character/character_prompt.dart';
 import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/character_prompt_provider.dart';
+import '../../providers/tips_provider.dart';
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import '../common/decoded_memory_image.dart';
 import 'add_to_library_dialog.dart';
@@ -417,7 +418,14 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Text(
-            isEmpty ? l10n.characterEditor_promptHint : prompt,
+            isEmpty
+                ? watchTipHint(
+                    ref,
+                    l10n,
+                    TipSurface.character,
+                    slot: characterTipSlot(widget.character.id),
+                  )
+                : prompt,
             maxLines: widget.compact ? 2 : 3,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(

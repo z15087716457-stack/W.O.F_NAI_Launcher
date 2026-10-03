@@ -3140,9 +3140,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get characterEditor_enabled => 'Enabled';
 
   @override
-  String get characterEditor_promptHint => 'Enter prompt for this character...';
-
-  @override
   String get characterEditor_negativePromptHint =>
       'Enter Undesired Content for this character...';
 
@@ -7816,7 +7813,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Ctrl+click to search local tags; Ctrl+drag to explore related tags';
 
   @override
-  String get tagExpansion_searchHint => 'Search tags, aliases, or translations';
+  String get tagExpansion_searchHint => 'Search tags or aliases';
 
   @override
   String get tagExpansion_relatedTitle => 'Related tags';
@@ -8519,10 +8516,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No candidates yet. Create or select an explore run to start batch generation.';
 
   @override
-  String get styleExplore_labTip =>
-      'Choose your favorite candidates and evolve your style, generation by generation.';
-
-  @override
   String get styleExplore_runNameLabel => 'Run name';
 
   @override
@@ -8975,226 +8968,884 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_modelsAndInterfaces => 'Models & APIs';
 
   @override
-  String get tips_gen_teach_1 =>
-      'Type < in the prompt box to pull in block-library blocks';
+  String get tips_kind_guide => 'Tip';
 
   @override
-  String get tips_gen_teach_2 =>
-      'Click Seed on the summary bar to pin or re-randomize; the sampler has a menu too';
+  String get tips_kind_trick => 'Pro tip';
 
   @override
-  String get tips_gen_teach_3 =>
-      'The number box beside Generate sets batch count; the right chip shows Anlas cost';
+  String get tips_kind_wolf => 'Wolf';
 
   @override
-  String get tips_gen_teach_4 =>
-      'The chunks menu at top-right tucks away blocks, presets, and regex rules';
+  String tips_hint(String label, String tip) {
+    return '$label: $tip';
+  }
 
   @override
-  String get tips_gen_teach_5 =>
-      'Transparent BG exports the alpha channel — with character references enabled, it disables';
+  String get tips_studio_guide_1 =>
+      'Press Ctrl+Enter to generate once your prompt is ready. Results spread across this canvas batch by batch: middle-drag or Shift+left-drag to pan, Ctrl+scroll to zoom, and WASD to move around.';
 
   @override
-  String get tips_gen_fun_1 => 'Feeding the AI digital treats…';
+  String get tips_studio_guide_2 =>
+      'Write your go-to artist strings, quality tags and composition notes once, save them as blocks, and pull them from the block library next time. Blocks are more than copy-paste: set them to Fixed, Sequential or Random draw and every generation gets a new combination.';
 
   @override
-  String get tips_gen_fun_2 => 'Every generation is a tiny gacha pull — go on';
+  String get tips_studio_guide_3 =>
+      'Got a random roll you love? Lock it, then re-roll the other blocks. Locked blocks stay put while the rest keeps shuffling — perfect for \"keep this pose, try a few more outfits.\"';
 
   @override
-  String get tips_gen_fun_3 =>
-      'Anlas balance and model name live up top — worth a glance before you burn';
+  String get tips_studio_guide_4 =>
+      'Drag an image into the window and you\'ll be asked how to use it: Image2Image, Vibe Transfer, Precise Reference, or just extracting its prompt and settings. If it carries NovelAI metadata, one drag shows exactly how it was made.';
 
   @override
-  String get tips_gen_fun_4 =>
-      'The prompt box grew taller so your ambitions can sprawl';
+  String get tips_studio_guide_5 =>
+      'A character box is really a placement box. Besides people, you can put a cat, a lamp or a shop sign in one. Switch Position to Custom and drag its anchor on the preview to tell the model where it belongs.';
 
   @override
-  String get tips_gen_fun_5 =>
-      'Seed -1 means fate decides; fate likes round numbers (allegedly)';
+  String get tips_studio_guide_6 =>
+      'Select part of a prompt and hold Alt while scrolling to adjust its weight. Without Alt the wheel just scrolls, so weights never change by accident. You can switch the modifier to Ctrl in Settings.';
 
   @override
-  String get tips_explore_teach_1 =>
-      'Heart + folder triage feeds the next generation';
+  String get tips_studio_guide_7 =>
+      'Press F1 any time for the shortcut list. Ctrl+1, Ctrl+2 and Ctrl+3 jump between Generate, Gallery and Online Gallery, and Ctrl+, opens Settings. Every shortcut can be remapped in Settings.';
 
   @override
-  String get tips_explore_teach_2 =>
-      'The A/B compare view judges parent images — pick a winner and move on';
+  String get tips_studio_guide_8 =>
+      'Worried about burning a pile of Anlas by accident? Turn on the High Anlas cost warning in Settings, and any generation estimated above your threshold will ask before it runs.';
 
   @override
-  String get tips_explore_teach_3 =>
-      'The number box next to Generate sets the batch size for this round';
+  String get tips_studio_trick_1 =>
+      'The seed decides which image you pull. Same settings plus the same seed means the same picture. Want to recreate a masterpiece? Keep the seed. Want new luck? Stop staring at that seed.';
 
   @override
-  String get tips_explore_teach_4 => 'Hover a pile thumbnail to preview it big';
+  String get tips_studio_trick_2 =>
+      'Reusing a pre-encoded Vibe skips the 2 Anlas encoding fee. Two Anlas doesn\'t sound like much — until you count how many Vibes you use in a day.';
 
   @override
-  String get tips_explore_teach_5 =>
-      'Drag the divider to widen the gallery column';
+  String get tips_studio_trick_3 =>
+      'Undesired Content isn\'t a wishing well. Writing \"bad hands\" a hundred times does less than describing the hands clearly in the prompt. Leave the usual boilerplate to the Undesired Content preset.';
 
   @override
-  String get tips_explore_fun_1 => 'Survival of the fittest, but for paintings';
+  String get tips_studio_trick_4 =>
+      'Longer artist strings aren\'t always better. Past ten names, the model probably can\'t tell whose brushwork you actually want. Split them into a few blocks and let random draws rotate them in.';
 
   @override
-  String get tips_explore_fun_2 => 'Every generation is an audition';
+  String get tips_studio_trick_5 =>
+      'Requests per click and images per request are two different numbers. The button shows the total, and Anlas is charged on the total too. Check before you click. Don\'t ask how I know.';
 
   @override
-  String get tips_explore_fun_3 => 'Good genes come from good parents';
+  String get tips_studio_trick_6 =>
+      'Middle-click a translation block to flip between the original and the translation. However good the AI is, peek at the original now and then to make sure \"cat ears\" didn\'t become something strange.';
 
   @override
-  String get tips_explore_fun_4 => 'Never underestimate mutation';
+  String get tips_studio_trick_7 =>
+      'Limit generation frequency in Settings forces a cooldown between runs, and a little random jitter keeps the rhythm from feeling mechanical. Good for slow late-night sessions — and for anyone whose finger won\'t leave the button.';
 
   @override
-  String get tips_explore_fun_5 => 'Natural selection, fast-forwarded';
+  String get tips_studio_wolf_1 =>
+      'Welcome to the den. I carry the images you make back here and stack them neatly in the gallery. Honestly, I\'m far better at tidying than at drawing.';
 
   @override
-  String get tips_gallerySearch_teach_1 =>
-      'Comma-separated terms = intersection search';
+  String get tips_studio_wolf_2 =>
+      'Wolves see best at night. So if you\'re still here at 3 a.m., I won\'t say a word. I\'ll just keep you company for one more pull.';
 
   @override
-  String get tips_gallerySearch_teach_2 =>
-      'Text search excludes negative prompts — hits stay clean';
+  String get tips_studio_wolf_3 =>
+      'They say an AI artist comes of age the first time they count the fingers on one hand without panicking. I don\'t have fingers, so I\'ve always been calm.';
 
   @override
-  String get tips_gallerySearch_teach_3 =>
-      'Search matches model, sampler, source, and version fields';
+  String get tips_studio_wolf_4 =>
+      'Pack rules: share good seeds, save good prompts as blocks, and save good images before you admire them. The last one matters most. Don\'t ask why.';
 
   @override
-  String get tips_gallerySearch_teach_4 =>
-      'Out of room for buttons? They scroll horizontally';
+  String get tips_studio_wolf_5 =>
+      'I can\'t draw, but I\'m very good at waiting. Those few seconds when the live preview slowly sharpens are the quietest part of my day.';
 
   @override
-  String get tips_gallerySearch_teach_5 =>
-      'Page size goes up to 500 — for the browse-everything type';
+  String get tips_studio_wolf_6 =>
+      'W.O.F stands for WolF. As for the dots in between? Those are my paw prints in the snow.';
 
   @override
-  String get tips_gallerySearch_fun_1 =>
-      'Looks like there\'s good stuff down there~~~ what are we hunting?';
+  String get tips_studio_wolf_7 =>
+      'When the canvas is empty, I curl up here for a nap. Hit Generate and I\'m awake.';
 
   @override
-  String get tips_gallerySearch_fun_2 =>
-      'The collection grows; the folders pretend to keep up';
+  String get tips_studio_night_1 =>
+      'It\'s the middle of the night. Friendly reminder: your taste runs about 30% bolder at this hour. Take another look in the morning.';
 
   @override
-  String get tips_gallerySearch_fun_3 =>
-      'Pro tip: your own prompts are the best search keywords';
+  String get tips_studio_night_2 =>
+      'It\'s late, and somewhere in a server room a GPU just yawned. Finish this batch and get some sleep. I\'ll guard the gallery.';
 
   @override
-  String get tips_gallerySearch_fun_4 => 'Scrolling is cardio';
+  String get tips_lab_guide_1 =>
+      'Style Explore is an audition. Start an explore run to lock in the prompt and settings, then generate a batch of candidates. The children you pick become the next generation\'s parents, and the style moves toward what you want one generation at a time.';
 
   @override
-  String get tips_gallerySearch_fun_5 =>
-      'Somewhere in this pile hides tonight\'s masterpiece';
+  String get tips_lab_guide_2 =>
+      'Hearts and folders are for your own organizing; they don\'t affect inheritance. What decides the next generation is the set you pick with \"Select for branch.\"';
 
   @override
-  String get tips_gallerySearch_start_1 =>
-      'Search filename or prompt text — press Enter or pick a suggestion';
+  String get tips_lab_guide_3 =>
+      'Cannot decide? Use the A/B comparison: two parent images appear side by side and you only answer which is closer to the style you want. Parents ranked higher are more likely to get children next round.';
 
   @override
-  String get tips_gallerySearch_start_2 =>
-      'Separate terms with commas to require all of them';
+  String get tips_lab_guide_4 =>
+      'To generate the next round, the main prompt needs at least one random block with evolution enabled. No variable genes, nothing for the mutation engine to work with.';
 
   @override
-  String get tips_gallerySearch_start_3 =>
-      'Positive prompts only — negative prompts are already excluded from hits';
+  String get tips_lab_guide_5 =>
+      'Found a candidate with a great combination? Adopt as block saves it to the block library so you can use it on the Generate page too. Select several and Merge & adopt combines them into one block.';
 
   @override
-  String get tips_gallerySearch_start_4 =>
-      'It also matches model, sampler, source, and version metadata';
+  String get tips_lab_guide_6 =>
+      'Deleting an explore run only removes the candidate copies in its run folder; originals in the gallery stay untouched. Clean up freely — a lab is supposed to be a bit messy.';
 
   @override
-  String get tips_gallerySearch_start_5 =>
-      'Type a tag like masterpiece, or a filename fragment';
+  String get tips_lab_trick_1 =>
+      'Every parent is guaranteed at least one child per round, so more parents means more images per round. Get greedy and your Anlas will call time for you.';
 
   @override
-  String get tips_gallerySearch_start_6 =>
-      'Found the one? Click the card for details, right-click for actions';
+  String get tips_lab_trick_2 =>
+      'You can only branch from the latest generation\'s pile. You can look back, but you can\'t fork from halfway. Evolution is ruthless like that.';
 
   @override
-  String get tips_gallerySearch_start_7 =>
-      'Combine text with the version chip on the right to narrow down';
+  String get tips_lab_trick_3 =>
+      'Sometimes the mutation engine says it can\'t produce enough distinct children. It isn\'t slacking — the gene pool is just too small. Add a few more options to the random block and it gets right back to work.';
 
   @override
-  String get tips_gallerySearch_start_8 =>
-      'Empty query = browse all; type anything to filter instantly';
+  String get tips_lab_trick_4 =>
+      'Hover a thumbnail in the candidate pile to see it large. No need to open them one by one; a judge has to be efficient.';
 
   @override
-  String get tips_gallerySearch_start_9 =>
-      'Search updates as you type — no submit needed';
+  String get tips_lab_trick_5 =>
+      'Like a candidate\'s whole setup? Import metadata moves its prompt and settings straight back into the editor so you can keep tweaking from there.';
 
   @override
-  String get tips_gallerySearch_start_10 =>
-      'Resist the urge to re-generate it — search first, it\'s probably here';
+  String get tips_lab_wolf_1 =>
+      'No wolf is born the strongest in the pack. Styles are the same: a rough first generation is normal. Judge it at the third.';
 
   @override
-  String get tips_blocklib_teach_1 =>
-      'Blocks take thumbnails — set one in the edit dialog';
+  String get tips_lab_wolf_2 =>
+      'Survival of the fittest has a gentle version here: candidates you don\'t pick don\'t disappear. It just wasn\'t their turn this round.';
 
   @override
-  String get tips_blocklib_teach_2 =>
-      'Click a block to open details; hover it for a quick preview';
+  String get tips_lab_wolf_3 =>
+      'My entire understanding of genetics: good-looking parents usually have good-looking pups. The rest is mutation and a little luck.';
 
   @override
-  String get tips_blocklib_teach_3 =>
-      'Star a block into a collection; the favorites lane sits up top';
+  String get tips_lab_wolf_4 =>
+      'The lights in the LAB usually stay on late. I\'m on duty at the door, keeping count of which generation we\'re on.';
 
   @override
-  String get tips_blocklib_teach_4 =>
-      'Waterfall view shows the image blocks properly';
+  String get tips_lab_wolf_5 =>
+      'Never underestimate mutation. Sometimes the thing you couldn\'t find in ten generations shows up by accident. So don\'t rush to delete the one that looks off.';
 
   @override
-  String get tips_blocklib_teach_5 =>
-      'Drag the divider to resize blocks vs folders';
+  String get tips_prompt_guide_1 =>
+      'Ctrl+Enter generates; Esc cancels a run in progress.';
 
   @override
-  String get tips_blocklib_fun_1 => 'Every block dreams of being summoned';
+  String get tips_prompt_guide_2 =>
+      'Select some text and hold Alt while scrolling to change its weight. Without Alt, the wheel just scrolls.';
 
   @override
-  String get tips_blocklib_fun_2 =>
-      'Folders within folders — we\'re organized now';
+  String get tips_prompt_guide_3 =>
+      'Ctrl+click a tag to look it up in the local tag library; Ctrl+drag across a phrase to see tags that often appear with it.';
 
   @override
-  String get tips_blocklib_fun_3 => 'A use count is a block\'s CV';
+  String get tips_prompt_guide_4 =>
+      'Right-click selected text to save it straight to the block library. Next time, one click or drag brings it back.';
 
   @override
-  String get tips_blocklib_fun_4 => 'The blocks tray is for the greatest hits';
+  String get tips_prompt_guide_5 =>
+      'The quality tag preset at the bottom of this box adds the usual quality tags for you; switch to Undesired Content and the same spot holds its preset.';
 
   @override
-  String get tips_blocklib_fun_5 => 'If in doubt, make it a block';
+  String get tips_prompt_guide_6 => 'Press F1 to see every shortcut.';
 
   @override
-  String get tips_gen_1 =>
-      'Ctrl+Z works in the text fields — fear not the typo';
+  String get tips_prompt_guide_7 =>
+      'Paste a multi-character prompt copied from ComfyUI and it\'s recognized, with an offer to import it as character boxes — no retyping one by one.';
 
   @override
-  String get tips_gen_2 =>
-      'The Settings → Prompt chunk menu hides more toggles than you\'d guess';
+  String get tips_prompt_guide_8 =>
+      'With SD Syntax Auto Convert on, weights like (tag:1.2) are converted to the NovelAI format when you leave the box or generate.';
 
   @override
-  String get tips_gen_3 => 'Drag any thin divider — most panes resize';
+  String get tips_prompt_guide_9 =>
+      '1.2::tag:: sets an exact weight; a negative number pushes the other way.';
 
   @override
-  String get tips_gen_4 =>
-      'The history lane recalls past generations with their settings';
+  String get tips_prompt_trick_1 =>
+      'Each layer of curly braces multiplies the weight by 1.05; each layer of square brackets divides it by 1.05. Anyone wrapping five layers of braces is usually arguing with the model.';
 
   @override
-  String get tips_gen_5 => 'Right-click is a menu; hover is a preview';
+  String get tips_prompt_trick_2 =>
+      'Auto Format strips useless 1.0 weights. It isn\'t judging you; it\'s saving tokens.';
 
   @override
-  String get tips_fun_1 => 'Loading today\'s dose of mysticism…';
+  String get tips_prompt_trick_3 =>
+      'The thin bar at the bottom shows token usage. Once it\'s full, the model barely sees anything past it. If you\'re writing a novel, this isn\'t the place.';
 
   @override
-  String get tips_fun_2 => 'The seed was random; the taste wasn\'t';
+  String get tips_prompt_trick_4 =>
+      'Stuck? Start with the biggest thing in the picture.';
 
   @override
-  String get tips_fun_3 => 'Somewhere, a GPU hums in anticipation';
+  String get tips_prompt_trick_5 =>
+      'One set of quality tags is enough. Typing masterpiece three times doesn\'t make you look more sincere to the model.';
 
   @override
-  String get tips_fun_4 =>
-      'The most expensive button here is Generate — it eats Anlas';
+  String get tips_prompt_trick_6 =>
+      'Want something present but not stealing the show? 0.8:: works better than deleting it. Deleting means gone; lowering the weight means low-key.';
 
   @override
-  String get tips_fun_5 =>
-      'This box has seen thousands of masterpieces (and a few regrets)';
+  String get tips_prompt_trick_7 =>
+      'Swapping the same few words over and over? Make a block and let random draws do it.';
+
+  @override
+  String get tips_prompt_trick_8 =>
+      'Put what you want in the prompt and what you don\'t want in Undesired Content. Write \"no hat\" in the prompt and the model mostly just hears \"hat.\"';
+
+  @override
+  String get tips_prompt_wolf_1 =>
+      'This box has seen thousands of masterpieces, and a few things best left unshared.';
+
+  @override
+  String get tips_prompt_wolf_2 =>
+      'Describe the picture in one plain sentence first, then break it into tags. Do it the other way around and you often get a pile of tags and a picture nobody understands.';
+
+  @override
+  String get tips_prompt_wolf_3 =>
+      'I\'m watching you type. Relax, I can\'t read.';
+
+  @override
+  String get tips_prompt_wolf_4 =>
+      'Somewhere far away, a GPU just sighed at your prompt.';
+
+  @override
+  String get tips_prompt_wolf_5 =>
+      'Gacha ends in superstition. Superstition ends in a fixed seed.';
+
+  @override
+  String get tips_prompt_wolf_6 =>
+      'By the twelfth artist tag, the model no longer knows whose style it\'s drawing. Neither do you.';
+
+  @override
+  String get tips_explore_guide_1 =>
+      'This is the parent prompt. To let part of it evolve, turn that part into a random block and enable evolution on the block.';
+
+  @override
+  String get tips_explore_guide_2 =>
+      'Evolution can only be enabled once the block instance is enabled. If it\'s greyed out, enable the block first.';
+
+  @override
+  String get tips_explore_guide_3 =>
+      'The number next to Generate candidates sets how many images this round makes.';
+
+  @override
+  String get tips_explore_guide_4 =>
+      'Block instances can step back and forward one scene at a time through the combinations they have already rolled.';
+
+  @override
+  String get tips_explore_guide_5 =>
+      'An explore run keeps a snapshot of the prompt and settings. Editing here afterwards won\'t change rounds that already finished.';
+
+  @override
+  String get tips_explore_guide_6 =>
+      'A block\'s random settings control draw count, trigger chance and random weight — that\'s where all the genetic variety lives.';
+
+  @override
+  String get tips_explore_trick_1 =>
+      'The bigger the gene pool, the more mutation has to work with. Put only two words in a random block and ten generations will just bounce between two answers.';
+
+  @override
+  String get tips_explore_trick_2 =>
+      'Hard-code what you\'re sure about and make the uncertain parts random. All random means no direction; all fixed means no evolution.';
+
+  @override
+  String get tips_explore_trick_3 =>
+      'Locked blocks don\'t get re-rolled. To keep a trait, lock it first and let the other blocks do the experimenting.';
+
+  @override
+  String get tips_explore_trick_4 =>
+      'Set a trigger chance of 30% and the block shows up in roughly three out of ten combinations — great for touches that only look good once in a while.';
+
+  @override
+  String get tips_explore_trick_5 =>
+      'Expecting perfection in the first generation? That\'s called wishing, not exploring.';
+
+  @override
+  String get tips_explore_wolf_1 =>
+      'A pack\'s bloodline is chosen one generation at a time. So is your style.';
+
+  @override
+  String get tips_explore_wolf_2 =>
+      'Every round is an open audition with exactly one judge: you. I\'m in charge of applause.';
+
+  @override
+  String get tips_explore_wolf_3 =>
+      'Good genes come from good parents. Good parents come from that one click where your hand didn\'t slip.';
+
+  @override
+  String get tips_explore_wolf_4 =>
+      'I don\'t know much genetics, but I know this: picky judges raise the best-looking pups.';
+
+  @override
+  String get tips_character_guide_1 =>
+      'A character box is really a placement box: cats, lamps, signs — it doesn\'t have to be a person.';
+
+  @override
+  String get tips_character_guide_2 =>
+      'Switch Position above to Custom, then drag the anchor on the preview. It applies when you let go.';
+
+  @override
+  String get tips_character_guide_3 =>
+      'AI\'s Choice lets the model handle placement. Switch back to Custom and your earlier positions are still there.';
+
+  @override
+  String get tips_character_guide_4 =>
+      'Every character box has its own Undesired Content tab that only applies to that character.';
+
+  @override
+  String get tips_character_guide_5 =>
+      'The check mark at the top right disables this character for now — no need to delete and retype.';
+
+  @override
+  String get tips_character_guide_6 =>
+      'Click the title to rename this character. Much easier to tell apart than numbers.';
+
+  @override
+  String get tips_character_guide_7 =>
+      'Use the ⋯ menu at the top right to add this character to the block library and reuse its description later.';
+
+  @override
+  String get tips_character_trick_1 =>
+      'Keep scene and style in the main prompt and only this character here. Write an outfit twice and the model assumes you love it.';
+
+  @override
+  String get tips_character_trick_2 =>
+      'Two people placed too close tend to merge. Pulling their anchors apart works better than writing \"separate\" ten times.';
+
+  @override
+  String get tips_character_trick_3 =>
+      'Want a tree on the left? Give it a character box and drag it there. The tree won\'t complain about not being a character.';
+
+  @override
+  String get tips_character_trick_4 =>
+      'Blocks and weight syntax work in character boxes too, just like the main prompt.';
+
+  @override
+  String get tips_character_trick_5 =>
+      'Too many characters? Disable a few. In a crowded frame the model picks who stays — usually not the one you wanted.';
+
+  @override
+  String get tips_character_wolf_1 =>
+      'I\'d like a character box too, but I think I\'m better off watching from outside the frame.';
+
+  @override
+  String get tips_character_wolf_2 =>
+      'One box, one place, one job. Sounds like a good philosophy for life.';
+
+  @override
+  String get tips_character_wolf_3 =>
+      'You handle the blocking; I\'ll stand on the side yelling \"a little more to the left.\"';
+
+  @override
+  String get tips_character_wolf_4 =>
+      'Even a wolf pack moves in formation. With lots of characters, decide who stands in the middle first.';
+
+  @override
+  String get tips_gallery_guide_1 => 'Search filenames or prompt text';
+
+  @override
+  String get tips_gallery_guide_2 => 'Commas mean all terms must match';
+
+  @override
+  String get tips_gallery_guide_3 => 'Model, sampler and source match too';
+
+  @override
+  String get tips_gallery_guide_4 => 'Ctrl+F jumps here any time';
+
+  @override
+  String get tips_gallery_guide_5 => 'Character prompts count too';
+
+  @override
+  String get tips_gallery_guide_6 => 'Right-click an image for more';
+
+  @override
+  String get tips_gallery_guide_7 => 'F5 refreshes the gallery';
+
+  @override
+  String get tips_gallery_trick_1 => 'Negatives never match';
+
+  @override
+  String get tips_gallery_trick_2 => 'Search first. It\'s probably here';
+
+  @override
+  String get tips_gallery_trick_3 => 'Your prompts are the best keywords';
+
+  @override
+  String get tips_gallery_trick_4 => 'Trash empties at next launch';
+
+  @override
+  String get tips_gallery_trick_5 => 'masterpiece matches everything';
+
+  @override
+  String get tips_gallery_wolf_1 => 'Tonight\'s prey is on page three';
+
+  @override
+  String get tips_gallery_wolf_2 => 'I smell a masterpiece in here';
+
+  @override
+  String get tips_gallery_wolf_3 => 'Scrolling is cardio. I\'ll run too';
+
+  @override
+  String get tips_gallery_wolf_4 => 'Big den. Take your time';
+
+  @override
+  String get tips_online_guide_1 => 'Space between tags, then Enter';
+
+  @override
+  String get tips_online_guide_2 => 'Fuzzy Match: *tag* finds similar tags';
+
+  @override
+  String get tips_online_guide_3 => 'Blacklisted tags stay hidden';
+
+  @override
+  String get tips_online_guide_4 => 'Sign in to Danbooru for favorites';
+
+  @override
+  String get tips_online_trick_1 => 'Multi-word tags: blue_eyes';
+
+  @override
+  String get tips_online_trick_2 => 'Great post? Borrow its tags';
+
+  @override
+  String get tips_online_trick_3 => 'More tags, fewer results';
+
+  @override
+  String get tips_online_wolf_1 => 'Big world out there. I\'ll scout';
+
+  @override
+  String get tips_online_wolf_2 => 'Other packs\' turf. Just looking';
+
+  @override
+  String get tips_online_wolf_3 => 'Which forest are we hunting in?';
+
+  @override
+  String get tips_blocks_guide_1 => 'Search titles, prompts or tags';
+
+  @override
+  String get tips_blocks_guide_2 => 'Drag a block into the prompt';
+
+  @override
+  String get tips_blocks_guide_3 => 'Star the ones you use most';
+
+  @override
+  String get tips_blocks_guide_4 => 'Thumbnails make picking faster';
+
+  @override
+  String get tips_blocks_guide_5 => 'Right-click text to save a block';
+
+  @override
+  String get tips_blocks_trick_1 => 'Typed it thrice? Make it a block';
+
+  @override
+  String get tips_blocks_trick_2 => 'Unsure? Save it. Deleting is fast';
+
+  @override
+  String get tips_blocks_trick_3 => 'Future you loves clear names';
+
+  @override
+  String get tips_blocks_trick_4 => 'More options, more surprises';
+
+  @override
+  String get tips_blocks_wolf_1 => 'Every block wants to be picked';
+
+  @override
+  String get tips_blocks_wolf_2 => 'These blocks are your pack';
+
+  @override
+  String get tips_blocks_wolf_3 => 'The only block I know is meat';
+
+  @override
+  String get tips_blocks_wolf_4 => 'Folders in folders. So organized';
+
+  @override
+  String get tips_generating_wolf_1 => 'Haggling with the random numbers…';
+
+  @override
+  String get tips_generating_wolf_2 => 'Having a word with the sixth finger…';
+
+  @override
+  String get tips_generating_wolf_3 => 'Asking the pixels to line up…';
+
+  @override
+  String get tips_generating_wolf_4 => 'Wiping away the noise, grain by grain…';
+
+  @override
+  String get tips_generating_wolf_5 => 'A wolf is howling encouragement…';
+
+  @override
+  String get tips_generating_wolf_6 => 'Explaining your taste to the GPU…';
+
+  @override
+  String get tips_generating_wolf_7 => 'Translating your prompt into a dream…';
+
+  @override
+  String get tips_generating_wolf_8 => 'Double-checking the eye count…';
+
+  @override
+  String get tips_generating_wolf_9 => 'Finding a flattering light…';
+
+  @override
+  String get tips_generating_wolf_10 =>
+      'Convincing the background not to steal the show…';
+
+  @override
+  String get tips_generating_wolf_11 => 'Fishing your image out of the noise…';
+
+  @override
+  String get tips_generating_wolf_12 => 'Counting fingers: one, two, three…';
+
+  @override
+  String get tips_generating_wolf_13 => 'Waiting for the paint to dry…';
+
+  @override
+  String get tips_generating_wolf_14 => 'Summoning today\'s luck…';
+
+  @override
+  String get tips_generating_trick_1 => 'Changed your mind? Esc cancels';
+
+  @override
+  String get tips_generating_trick_2 => 'The preview sharpens frame by frame';
+
+  @override
+  String get tips_generating_trick_3 =>
+      'Finished images save to the gallery by default';
+
+  @override
+  String get tips_generating_trick_4 =>
+      'Each sampling step removes a little more noise';
+
+  @override
+  String get tips_splash_guide_1 => 'Press F1 any time to see every shortcut.';
+
+  @override
+  String get tips_splash_guide_2 =>
+      'Ctrl+Enter generates, and every shortcut can be remapped in Settings.';
+
+  @override
+  String get tips_splash_guide_3 =>
+      'Drop an image into the window to read its prompt and settings.';
+
+  @override
+  String get tips_splash_guide_4 =>
+      'Save prompts you use often as blocks and reuse them in one click.';
+
+  @override
+  String get tips_splash_trick_1 =>
+      'That STEP /28 up there is a nod to the default 28 sampling steps.';
+
+  @override
+  String get tips_splash_trick_2 =>
+      'Pre-encoded Vibes can be reused for free — that\'s 2 Anlas saved.';
+
+  @override
+  String get tips_splash_trick_3 =>
+      'Building the gallery index takes a while the first time; keep working meanwhile.';
+
+  @override
+  String get tips_splash_wolf_1 => 'Five more minutes… fine, I\'m up.';
+
+  @override
+  String get tips_splash_wolf_2 => 'Tidying up the den. Almost ready.';
+
+  @override
+  String get tips_splash_wolf_3 =>
+      'GPU ready. Moon ready. Just waiting on you.';
+
+  @override
+  String get tips_splash_wolf_4 => 'Smell that? Fresh prompts.';
+
+  @override
+  String get tips_splash_wolf_5 => 'Let\'s have some good pulls today.';
+
+  @override
+  String genButton_normal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Generate $count Images',
+      one: 'Generate 1 Image',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get genButton_one_1 => 'Just this one';
+
+  @override
+  String get genButton_one_2 => 'One good one, please';
+
+  @override
+  String get genButton_one_3 => 'Single pull, leap of faith';
+
+  @override
+  String get genButton_one_4 => 'Testing the waters';
+
+  @override
+  String get genButton_one_5 => 'One shot, one verdict';
+
+  @override
+  String get genButton_one_6 => 'This one is a masterpiece';
+
+  @override
+  String get genButton_one_7 => 'Just one, I swear';
+
+  @override
+  String get genButton_one_8 => 'New avatar incoming';
+
+  @override
+  String get genButton_one_9 => 'One and done';
+
+  @override
+  String get genButton_one_10 => 'Wallpaper material, please';
+
+  @override
+  String get genButton_one_11 => 'A gentle single pull';
+
+  @override
+  String get genButton_one_12 => 'Fetch me one';
+
+  @override
+  String genButton_few_1(int count) {
+    return '$count images, pick the best';
+  }
+
+  @override
+  String genButton_few_2(int count) {
+    return '$count to compare';
+  }
+
+  @override
+  String genButton_few_3(int count) {
+    return '$count-pull';
+  }
+
+  @override
+  String genButton_few_4(int count) {
+    return '$count tries, one will land';
+  }
+
+  @override
+  String genButton_few_5(int count) {
+    return 'Pick 1 of $count';
+  }
+
+  @override
+  String genButton_few_6(int count) {
+    return '$count to warm up';
+  }
+
+  @override
+  String genButton_few_7(int count) {
+    return '$count auditions';
+  }
+
+  @override
+  String genButton_few_8(int count) {
+    return '$count little wins';
+  }
+
+  @override
+  String genButton_batch_1(int count) {
+    return '$count-shot burst';
+  }
+
+  @override
+  String genButton_batch_2(int count) {
+    return '$count at once';
+  }
+
+  @override
+  String genButton_batch_3(int count) {
+    return '$count images, getting hooked';
+  }
+
+  @override
+  String genButton_batch_4(int count) {
+    return '$count in one go';
+  }
+
+  @override
+  String genButton_batch_5(int count) {
+    return '$count to fill the screen';
+  }
+
+  @override
+  String genButton_batch_6(int count) {
+    return '$count-pull, playing it safe';
+  }
+
+  @override
+  String genButton_batch_7(int count) {
+    return '$count images, the pack is out';
+  }
+
+  @override
+  String genButton_batch_8(int count) {
+    return '$count servings coming up';
+  }
+
+  @override
+  String genButton_many_1(int count) {
+    return '$count images, turning it up';
+  }
+
+  @override
+  String genButton_many_2(int count) {
+    return '$count images, GPU sweating';
+  }
+
+  @override
+  String genButton_many_3(int count) {
+    return '$count images, stockpiling';
+  }
+
+  @override
+  String genButton_many_4(int count) {
+    return '$count images, assembly line on';
+  }
+
+  @override
+  String genButton_many_5(int count) {
+    return '$count images, Anlas burning';
+  }
+
+  @override
+  String genButton_many_6(int count) {
+    return '$count images, daily upload mode';
+  }
+
+  @override
+  String genButton_many_7(int count) {
+    return '$count-image batch run';
+  }
+
+  @override
+  String genButton_many_8(int count) {
+    return '$count images, the wolf is stunned';
+  }
+
+  @override
+  String genButton_huge_1(int count) {
+    return '$count?! Opening a gallery?';
+  }
+
+  @override
+  String genButton_huge_2(int count) {
+    return '$count images, the drive is shaking';
+  }
+
+  @override
+  String genButton_huge_3(int count) {
+    return '$count images, industrial revolution';
+  }
+
+  @override
+  String genButton_huge_4(int count) {
+    return '$count images, deep breath first';
+  }
+
+  @override
+  String genButton_huge_5(int count) {
+    return '$count images, got the space?';
+  }
+
+  @override
+  String genButton_huge_6(int count) {
+    return '$count images, print shop open';
+  }
+
+  @override
+  String genButton_huge_7(int count) {
+    return '$count images, wholesale';
+  }
+
+  @override
+  String genButton_huge_8(int count) {
+    return '$count images, the wolf went for backup';
+  }
+
+  @override
+  String get genButton_rare_1 => 'SSR guaranteed';
+
+  @override
+  String get genButton_rare_2 => 'The AI feels lucky today';
+
+  @override
+  String get genButton_rare_3 => 'Today\'s fortune: excellent';
+
+  @override
+  String get genButton_rare_4 => 'They say this button likes you';
+
+  @override
+  String get genButton_rare_5 => 'The wolf howled at the moon';
+
+  @override
+  String get genButton_rare_6 => 'Luck buff active';
+
+  @override
+  String get genButton_rare_7 => 'Luck recharged';
+
+  @override
+  String get genButton_rare_8 => 'This pull is sponsored by the wolf';
+
+  @override
+  String get genButton_rare_9 => 'Come on, luck!';
+
+  @override
+  String get genButton_rare_10 => 'Press to believe';
+
+  @override
+  String get genButton_night_1 => 'Late night, last pull';
+
+  @override
+  String get genButton_night_2 => 'One more batch, then bed';
+
+  @override
+  String get genButton_night_3 => '3 a.m. taste is wild';
+
+  @override
+  String get genButton_night_4 => 'The wolf is up with you';
+
+  @override
+  String genButton_special_7(int count) {
+    return 'Lucky $count';
+  }
+
+  @override
+  String genButton_special_9(int count) {
+    return '$count for a full 3×3 grid';
+  }
+
+  @override
+  String genButton_special_42(int count) {
+    return '$count: the answer to everything';
+  }
+
+  @override
+  String genButton_special_99(int count) {
+    return '$count, one short of a hundred';
+  }
+
+  @override
+  String genButton_special_100(int count) {
+    return 'A clean $count. Satisfying';
+  }
 
   @override
   String get titleBar_minimize => 'Minimize';
@@ -9335,18 +9986,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'One appearance across your studio. Black or white surfaces, with blue accents.';
 
   @override
-  String get generation_tipReuseBlocks =>
-      'Save frequently used prompts as blocks to reuse them later.';
-
-  @override
-  String get generation_tipBlockModes =>
-      'Combine blocks in sequence or random mode for new variations.';
-
-  @override
-  String get generation_tipLockBlocks =>
-      'Lock the blocks you want to keep, then randomize the rest.';
-
-  @override
   String get styleExplore_collapseGallery => 'Collapse candidate gallery';
 
   @override
@@ -9387,7 +10026,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wiki_officialDirectory => 'Official directory';
 
   @override
-  String get wiki_searchHint => 'Search tags, aliases, or Chinese names';
+  String get wiki_searchHint => 'Search tags or aliases';
 
   @override
   String get wiki_typeAll => 'All types';

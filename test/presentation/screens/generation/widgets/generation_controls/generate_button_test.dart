@@ -63,11 +63,11 @@ void main() {
       onCancel: () => cancelCalled = true,
     );
 
-    // 待机文案来自三语文案池（种子决定句型），左侧不再带图标
+    // 待机文案来自 ARB 文案池（种子决定句型），左侧不再带图标
     final expectedLabel = GenerateButtonCopy.pick(
+      l10n: l10n,
       seed: 0,
       count: 1,
-      languageCode: 'zh',
     );
     expect(find.text(expectedLabel), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome), findsNothing);
