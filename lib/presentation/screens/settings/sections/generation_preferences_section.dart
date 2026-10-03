@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/utils/localization_extension.dart';
 import '../../../widgets/common/studio_icons.dart';
 import '../widgets/data_source_cache_settings.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_columns.dart';
-import '../widgets/settings_ui_theme.dart';
 import 'generation_settings_section.dart';
 import 'privacy_settings_section.dart';
 
@@ -20,7 +20,7 @@ class GenerationPreferencesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsCard(
-          title: settingsText(context, '提示词输入', 'Prompt input', 'プロンプト入力'),
+          title: context.l10n.settings_promptInput,
           child: const Column(
             children: [
               GenerationSettingsSection(showHeading: false),
@@ -34,14 +34,7 @@ class GenerationPreferencesSection extends StatelessWidget {
             key: const Key('settings-manage-translation-models'),
             onPressed: onManageModels,
             icon: const Icon(StudioIcons.settingsModels, size: 17),
-            label: Text(
-              settingsText(
-                context,
-                '管理翻译模型与规则',
-                'Manage translation models & rules',
-                '翻訳モデルとルールを管理',
-              ),
-            ),
+            label: Text(context.l10n.settings_manageTranslationModelsRules),
           ),
         ),
       ],

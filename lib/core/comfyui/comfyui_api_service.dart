@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import '../utils/app_logger.dart';
 import 'comfyui_models.dart';
 import 'comfyui_url_utils.dart';
+import '../utils/localization_extension.dart';
 
 /// ComfyUI HTTP API 服务
 ///
@@ -86,7 +87,7 @@ class ComfyUIApiService {
     } on DioException catch (e) {
       final detail = _extractErrorDetail(e);
       AppLogger.e('Queue prompt failed: $detail', _tag);
-      throw ComfyUIApiException('提交工作流失败: $detail');
+      throw ComfyUIApiException(currentL10n.comfyui_submitFailed(detail));
     }
   }
 
@@ -112,7 +113,9 @@ class ComfyUIApiService {
       return data['name'] as String;
     } on DioException catch (e) {
       AppLogger.e('Upload image failed: ${e.message}', _tag);
-      throw ComfyUIApiException('上传图像失败: ${_extractErrorDetail(e)}');
+      throw ComfyUIApiException(
+        currentL10n.comfyui_uploadFailed(_extractErrorDetail(e)),
+      );
     }
   }
 
@@ -147,7 +150,9 @@ class ComfyUIApiService {
       return Uint8List.fromList(response.data as List<int>);
     } on DioException catch (e) {
       AppLogger.e('View image failed: ${e.message}', _tag);
-      throw ComfyUIApiException('获取图像失败: ${_extractErrorDetail(e)}');
+      throw ComfyUIApiException(
+        currentL10n.comfyui_fetchImageFailed(_extractErrorDetail(e)),
+      );
     }
   }
 
@@ -160,7 +165,7 @@ class ComfyUIApiService {
   }) async {
     final history = await getHistory(promptId);
     if (history == null) {
-      throw ComfyUIApiException('未找到任务历史: $promptId');
+      throw ComfyUIApiException(currentL10n.comfyui_historyMissing(promptId));
     }
 
     final refs = extractHistoryImageRefs(
@@ -217,7 +222,7 @@ class ComfyUIApiService {
           return data['error']?.toString() ??
               data['node_errors']?.toString() ??
               e.message ??
-              '未知错误';
+              currentL10n.comfyui_unknownError;
         }
         if (e.response!.data is String) {
           return e.response!.data as String;
@@ -228,9 +233,9 @@ class ComfyUIApiService {
     }
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.connectionError) {
-      return '无法连接到 ComfyUI 服务器 ($baseUrl)';
+      return currentL10n.comfyui_cannotConnect(baseUrl);
     }
-    return e.message ?? '未知错误';
+    return e.message ?? currentL10n.comfyui_unknownError;
   }
 }
 
@@ -254,7 +259,7 @@ List<ComfyUIHistoryImageRef> extractHistoryImageRefs(
 }) {
   final outputs = history['outputs'] as Map<String, dynamic>?;
   if (outputs == null || outputs.isEmpty) {
-    throw const ComfyUIApiException('任务无输出');
+    throw ComfyUIApiException(currentL10n.comfyui_noOutput);
   }
 
   final refs = <ComfyUIHistoryImageRef>[];
@@ -283,10 +288,12 @@ List<ComfyUIHistoryImageRef> extractHistoryImageRefs(
 
   if (refs.isEmpty && allowedNodeIds != null && allowedNodeIds.isNotEmpty) {
     final joined = allowedNodeIds.toList()..sort();
-    throw ComfyUIApiException('指定输出节点无图像输出: ${joined.join(", ")}');
+    throw ComfyUIApiException(
+      currentL10n.comfyui_nodesNoImage(joined.join(', ')),
+    );
   }
   if (refs.isEmpty) {
-    throw const ComfyUIApiException('任务无图像输出');
+    throw ComfyUIApiException(currentL10n.comfyui_noImageOutput);
   }
   return refs;
 }

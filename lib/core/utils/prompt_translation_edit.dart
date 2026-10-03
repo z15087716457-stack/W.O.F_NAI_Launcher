@@ -5,6 +5,7 @@ import 'nai_prompt_syntax.dart';
 import 'tag_normalizer.dart';
 import 'prompt_translation_document.dart';
 import 'prompt_translation_language.dart';
+import 'localization_extension.dart';
 
 enum PromptTranslationDirection { toChinese, toSource }
 
@@ -126,20 +127,20 @@ class PromptTranslationEditResult {
     try {
       decoded = jsonDecode(raw);
     } catch (_) {
-      throw const FormatException('转换结果格式不正确，草稿已保留');
+      throw FormatException(currentL10n.promptTranslation_invalidResultFormat);
     }
     if (decoded is! Map ||
         decoded['text'] is! String ||
         (decoded['text'] as String).trim().isEmpty) {
-      throw const FormatException('模型没有返回有效文字，草稿已保留');
+      throw FormatException(currentL10n.promptTranslation_noValidText);
     }
     final text = (decoded['text'] as String).trim();
     if (text.contains('```') || RegExp(r'[\uE000-\uF8FF]').hasMatch(text)) {
-      throw const FormatException('转换结果包含无效格式，草稿已保留');
+      throw FormatException(currentL10n.promptTranslation_invalidResultContent);
     }
     if (request.direction == PromptTranslationDirection.toSource &&
         _structureErrors(text) > _structureErrors(request.source)) {
-      throw const FormatException('转换结果的权重或分组不完整，草稿已保留');
+      throw FormatException(currentL10n.promptTranslation_incompleteStructure);
     }
     final marks = <TranslationTagMark>[];
     if (request.direction == PromptTranslationDirection.toChinese &&

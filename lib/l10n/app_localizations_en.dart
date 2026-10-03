@@ -545,9 +545,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_savedAccounts => 'Saved Accounts';
 
   @override
-  String get settings_appearance => 'Appearance';
-
-  @override
   String get settings_style => 'Style';
 
   @override
@@ -569,25 +566,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_shortcuts => 'Shortcuts';
 
   @override
-  String get settings_generation => 'Generation';
-
-  @override
-  String get settings_dataStorage => 'Data & Storage';
-
-  @override
-  String get settings_privacySharing => 'Privacy & Sharing';
-
-  @override
-  String get settings_integrations => 'Integrations';
-
-  @override
   String get settings_generationInputSection => 'Input';
 
   @override
   String get settings_generationFeedbackSection => 'Completion Alert';
-
-  @override
-  String get settings_selectStyle => 'Select Style';
 
   @override
   String get settings_selectFont => 'Select Font';
@@ -709,9 +691,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_extraRootsIndexImportConfirm => 'Import Now';
 
   @override
-  String get settings_about => 'About';
-
-  @override
   String settings_version(Object version) {
     return 'Version $version';
   }
@@ -765,16 +744,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_thirdPartyApiAccount => 'Third-party Site API';
 
   @override
-  String get settings_apiSite => 'API Site';
-
-  @override
-  String get settings_notLoggedIn => 'Log in to set avatar and nickname';
-
-  @override
   String get settings_goToLogin => 'Go to Login';
-
-  @override
-  String get settings_tapToChangeAvatar => 'Tap to change avatar';
 
   @override
   String get settings_changeAvatar => 'Change Avatar';
@@ -848,12 +818,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generation_pleaseInputPrompt => 'Please enter prompt';
-
-  @override
-  String get generation_emptyPromptHint => 'Enter prompt and click generate';
-
-  @override
-  String get generation_imageWillShowHere => 'Image will be displayed here';
 
   @override
   String get generation_generationFailed => 'Generation failed';
@@ -3287,9 +3251,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drop_processing => 'Processing image...';
 
   @override
-  String get characterEditor_close => 'Close';
-
-  @override
   String get characterEditor_clearAll => 'Clear All';
 
   @override
@@ -4177,22 +4138,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_folderDeleteFailed => 'Failed to delete folder';
 
   @override
-  String get localGallery_cachingMetadata => 'Caching metadata...';
-
-  @override
-  String get localGallery_metadataCacheStats => 'Metadata Cache Stats';
-
-  @override
-  String get localGallery_totalImages => 'Total Images';
-
-  @override
   String get localGallery_withMetadata => 'With Metadata';
 
   @override
   String get localGallery_skipped => 'Skipped';
-
-  @override
-  String get localGallery_remaining => 'Remaining';
 
   @override
   String get localGallery_cacheMonitor => 'Cache Monitor';
@@ -4861,9 +4810,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_keyNavigate => '↑↓/Scroll';
-
-  @override
   String get autocomplete_actionSelect => 'Select';
 
   @override
@@ -4871,9 +4817,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get autocomplete_actionClose => 'Close';
-
-  @override
-  String get autocomplete_categoryRecommended => 'Recommended';
 
   @override
   String get autocomplete_categoryCharacter => 'Character';
@@ -6680,15 +6623,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_openFolderFailed => 'Failed to open folder';
 
   @override
-  String get settings_pleaseLoginFirst => 'Please login first';
-
-  @override
-  String get settings_accountNotFound => 'Account information not found';
-
-  @override
-  String get settings_goToLoginPage => 'Go to login page';
-
-  @override
   String get settings_vibePathSaved => 'Vibe library path saved';
 
   @override
@@ -6708,9 +6642,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_resetPathConfirm =>
       'After resetting the data storage path, the app needs to restart to take effect.\\n\\nThe default path will take effect on the next startup. Continue?';
-
-  @override
-  String get settings_kritaBridgeTitle => 'Krita Bridge';
 
   @override
   String get settings_kritaBridgeEnable => 'Enable Krita local bridge';
@@ -6768,9 +6699,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_fontScale => 'Font Size';
 
   @override
-  String get settings_fontScale_description => 'Adjust global font scale';
-
-  @override
   String get settings_fontScale_previewSmall => '光影落在画布上。';
 
   @override
@@ -6778,9 +6706,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_fontScale_previewLarge => 'Let colors tell a story.';
-
-  @override
-  String get settings_fontScale_reset => 'Reset';
 
   @override
   String get settings_fontScale_done => 'Done';
@@ -6841,20 +6766,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Default (Documents/NAI_Launcher/images/)';
 
   @override
-  String settings_defaultVibePath(Object path) {
-    return '$path (Default)';
-  }
-
-  @override
   String get settings_defaultHivePath =>
       'Default (%APPDATA%/NAI_Launcher/hive/)';
-
-  @override
-  String get settings_protectionMode => 'Protection Mode';
-
-  @override
-  String get settings_protectionModeSubtitle =>
-      'Protect local assets, shared copies, and high-cost or high-frequency generation operations through the options below. Turning this off keeps the option values but disables them.';
 
   @override
   String get settings_protectionFeatures => 'Protection Features';
@@ -7187,12 +7100,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get cacheStats_refreshNow => 'Refresh now';
-
-  @override
-  String get cacheStats_refreshed => 'Refreshed';
-
-  @override
   String get cacheStats_resetStats => 'Reset statistics';
 
   @override
@@ -7206,16 +7113,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cacheStats_l3Sqlite => 'L3 SQLite Database';
-
-  @override
-  String cacheStats_recordCount(Object count) {
-    return '$count records';
-  }
-
-  @override
-  String cacheStats_databaseValue(Object imageCount, Object metadataCount) {
-    return '$imageCount images · $metadataCount metadata rows';
-  }
 
   @override
   String get galleryCache_rescanTitle => 'Rescan Gallery';
@@ -7999,10 +7896,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get releaseNotes => 'Release Notes';
 
   @override
-  String get updatePortableManualHint =>
-      'This build cannot update in-app. Please download the new version from the Release page.';
-
-  @override
   String updateDownloadingProgress(Object percent) {
     return 'Downloading update package: $percent%';
   }
@@ -8047,17 +7940,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'The installer has started. The app will close and finish updating automatically.';
 
   @override
-  String get updateInstallConfirmationTitle => 'Install the update now?';
-
-  @override
-  String get updateInstallConfirmationBody =>
-      'The app will shut down safely, install the update, and restart automatically. Active generation and download tasks will stop, so save anything important first.';
-
-  @override
   String get remindMeLater => 'Remind Me in 4 Hours';
-
-  @override
-  String get skipThisVersion => 'Skip This Version';
 
   @override
   String updateNoticeAvailable(Object version) {
@@ -8099,9 +7982,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goToDownload => 'Go to Download';
-
-  @override
-  String get versionSkipped => 'Version skipped';
 
   @override
   String get cannotOpenUrl => 'Cannot open link';
@@ -8495,16 +8375,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_createFolder => 'Create Folder';
 
   @override
-  String galleryScan_skipped(int count) {
-    return 'Skipped $count';
-  }
-
-  @override
-  String galleryScan_withMetadata(int count) {
-    return 'With metadata $count';
-  }
-
-  @override
   String galleryScan_failed(int count) {
     return 'Failed $count';
   }
@@ -8514,9 +8384,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get galleryScan_processing => 'Processing';
-
-  @override
-  String get galleryScan_pending => 'Pending';
 
   @override
   String get vibeDetail_useAll => 'Use All';
@@ -8644,28 +8511,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_settingsTitle => 'Autocomplete';
-
-  @override
-  String get autocomplete_enable => 'Enable autocomplete';
-
-  @override
   String get autocomplete_resultLimit => 'Result count';
-
-  @override
-  String get autocomplete_allResults => 'All';
-
-  @override
-  String get autocomplete_showAliases => 'Show matched aliases';
-
-  @override
-  String get autocomplete_showTranslations => 'Show Chinese translations';
-
-  @override
-  String get autocomplete_autoComma => 'Add a comma after insertion';
-
-  @override
-  String get autocomplete_dataSourcesTitle => 'Data Sources & Cache';
 
   @override
   String get autocomplete_relatedTagsTitle => 'Tag Expansion';
@@ -8709,24 +8555,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'No local article for this tag yet.';
 
   @override
-  String get autocomplete_danbooruApi => 'Danbooru online supplement';
-
-  @override
   String get autocomplete_danbooruPrivacy =>
       'Only the current English tag is sent; the full prompt is never uploaded';
-
-  @override
-  String get autocomplete_llmTranslation =>
-      'Use Prompt Assistant for missing translations';
-
-  @override
-  String get autocomplete_llmRouteMissing =>
-      'Configure a Translate route in Prompt Assistant first';
-
-  @override
-  String autocomplete_llmRoute(String route) {
-    return 'Current route: $route. Model usage may incur fees.';
-  }
 
   @override
   String get autocomplete_cooccurrence => 'Offline related-tag database';
@@ -8735,9 +8565,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String autocomplete_entryCount(int count) {
     return '$count entries';
   }
-
-  @override
-  String get autocomplete_cacheTitle => 'Online & AI Cache';
 
   @override
   String get autocomplete_clearDanbooruCache => 'Clear Danbooru cache';
@@ -9101,10 +8928,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_noFolders => 'No folders yet';
 
   @override
-  String get promptBlockLibrary_favoriteMenuEmptyCollections =>
-      'No collections yet — create one next to Favorites in the sidebar';
-
-  @override
   String get promptBlockLibrary_emptyFavorites =>
       'No favorite blocks yet — tap the ★ on a block to favorite it';
 
@@ -9140,9 +8963,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_folderNameHint => 'Folder name';
 
   @override
-  String get promptBlockLibrary_blockContent => 'Content';
-
-  @override
   String get promptBlockLibrary_basicPrompt => 'Base Prompt';
 
   @override
@@ -9159,13 +8979,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_stepsLabel => 'Steps';
 
   @override
-  String get promptBlockLibrary_cfgLabel => 'PG';
-
-  @override
   String get promptBlockLibrary_noiseScheduleLabel => 'Noise Schedule';
-
-  @override
-  String get promptBlockLibrary_cfgRescaleLabel => 'PGR';
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
@@ -9276,28 +9090,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String promptBlockLibrary_favoriteSelected(int count) {
-    return 'Favorite $count selected blocks';
-  }
-
-  @override
-  String promptBlockLibrary_unfavoriteSelected(int count) {
-    return 'Unfavorite $count selected blocks';
-  }
-
-  @override
-  String promptBlockLibrary_moveToSelected(int count) {
-    return 'Move $count blocks to…';
-  }
-
-  @override
   String promptBlockLibrary_deleteSelected(int count) {
     return 'Delete $count selected blocks';
-  }
-
-  @override
-  String promptBlockLibrary_blocksMoved(int count) {
-    return 'Moved $count blocks';
   }
 
   @override
@@ -9361,17 +9155,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_importLibraryBackup => 'Import library backup…';
-
-  @override
-  String get promptBlockLibrary_exportBlockAsTxt => 'Export as TXT';
-
-  @override
-  String get promptBlockLibrary_exportTxtDone => 'TXT exported';
-
-  @override
-  String promptBlockLibrary_exportTxtFailed(String error) {
-    return 'Export failed: $error';
-  }
 
   @override
   String get promptBlockLibrary_importTxtTitle => 'Select TXT files';
@@ -10504,12 +10287,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wiki_addToCollection => 'Add to collection';
 
   @override
-  String get wiki_importBlock => 'Save as single-atom block';
-
-  @override
-  String get wiki_inBlockLibrary => 'In block library';
-
-  @override
   String get wiki_loadMore => 'Load more';
 
   @override
@@ -10535,4 +10312,2661 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcut_action_vibe_detail_next_sub_vibe => 'Next sub-Vibe';
+
+  @override
+  String get settings_addAccountsSwitchBetweenThem =>
+      'Add accounts to switch between them here.';
+
+  @override
+  String get settings_current => 'Current';
+
+  @override
+  String get settings_emailLogin => 'Email login';
+
+  @override
+  String get settings_signedIn => 'Signed in';
+
+  @override
+  String get settings_switch => 'Switch';
+
+  @override
+  String get settings_accountActions => 'Account actions';
+
+  @override
+  String get settings_editProfile => 'Edit profile';
+
+  @override
+  String get settings_setDefault => 'Set as default';
+
+  @override
+  String get settings_credentialsUpdated => 'Credentials updated';
+
+  @override
+  String get settings_updateCredentials => 'Update credentials';
+
+  @override
+  String get settings_accountDetails => 'Account details';
+
+  @override
+  String get settings_localAccountProfile => 'Local account profile';
+
+  @override
+  String get settings_setDefault2 => 'Set default';
+
+  @override
+  String get settings_credentialsWereNotUpdatedCheck =>
+      'Credentials were not updated. Check the token and connection.';
+
+  @override
+  String get settings_updateCredentials2 => 'Update credentials';
+
+  @override
+  String get settings_checking => 'Checking…';
+
+  @override
+  String get settings_enterNewSignInToken =>
+      'Enter a new sign-in token. This account updates after validation.';
+
+  @override
+  String get auth_signInAccounts => 'Sign-in & accounts';
+
+  @override
+  String get auth_notSignedIn => 'Not signed in';
+
+  @override
+  String get auth_chooseAccountContinue => 'Choose an account to continue';
+
+  @override
+  String get auth_manageAccounts2 => 'Manage accounts';
+
+  @override
+  String get auth_subscriptionExpired => 'Subscription expired';
+
+  @override
+  String get settings_tagExpansion => 'Tag expansion';
+
+  @override
+  String get settings_tagDictionaries => 'Tag dictionaries';
+
+  @override
+  String get settings_cacheMaintenance => 'Cache maintenance';
+
+  @override
+  String get settings_clear => 'Clear';
+
+  @override
+  String get settings_autoRefresh => 'Auto refresh';
+
+  @override
+  String get settings_searchFonts => 'Search fonts';
+
+  @override
+  String get settings_couldNotLoadFonts => 'Could not load fonts';
+
+  @override
+  String get settings_recommended => 'Recommended';
+
+  @override
+  String get settings_included => 'Included';
+
+  @override
+  String get settings_systemFonts => 'System fonts';
+
+  @override
+  String get settings_fontPreview => 'Font preview';
+
+  @override
+  String get settings_onlineFontsLoadAfterApplying =>
+      'Online fonts load after applying; preview uses the interface font.';
+
+  @override
+  String get settings_saving => 'Saving';
+
+  @override
+  String get settings_howGeneratedImagesSaved =>
+      'How generated images are saved';
+
+  @override
+  String get settings_assetsDisplay => 'Assets & display';
+
+  @override
+  String get settings_vibeLocationThumbnailQuality =>
+      'Vibe location and thumbnail quality';
+
+  @override
+  String get settings_applicationData => 'Application data';
+
+  @override
+  String get settings_gallerySources => 'Gallery sources';
+
+  @override
+  String get settings_manageAdditionalGalleryFolders =>
+      'Manage additional gallery folders';
+
+  @override
+  String get settings_default => 'Default';
+
+  @override
+  String get settings_keyboard => 'Keyboard';
+
+  @override
+  String get settings_customizeFrequentlyUsedActions =>
+      'Customize frequently used actions';
+
+  @override
+  String get settings_manageShortcuts => 'Manage shortcuts';
+
+  @override
+  String get settings_costReminders => 'Cost reminders';
+
+  @override
+  String get settings_requestPacing => 'Request pacing';
+
+  @override
+  String get settings_notificationsSound => 'Notifications & sound';
+
+  @override
+  String get settings_lockCanvasCamera => 'Lock canvas camera';
+
+  @override
+  String get settings_dictionariesCache => 'Dictionaries & cache';
+
+  @override
+  String get settings_defaultAccount2 => 'Default account';
+
+  @override
+  String get settings_signInAutomatically => 'Sign in automatically';
+
+  @override
+  String get settings_signInCredentials => 'Sign-in credentials';
+
+  @override
+  String get settings_translationInterfaces => 'Translation interfaces';
+
+  @override
+  String get settings_presetsBuiltInRules => 'Presets & built-in rules';
+
+  @override
+  String get settings_preferenceBackupRestore => 'Preference backup & restore';
+
+  @override
+  String get settings_searchSettingsFeatures => 'Search settings and features';
+
+  @override
+  String get settings_noMatchingSettings => 'No matching settings';
+
+  @override
+  String get settings_change => 'Change';
+
+  @override
+  String get settings_couldNotPlaySoundCheck =>
+      'Could not play the sound. Check the audio file.';
+
+  @override
+  String get settings_useDefaultCompletionSound =>
+      'Use the default completion sound';
+
+  @override
+  String get settings_soundPreview => 'Sound preview';
+
+  @override
+  String get settings_listenCurrentCompletionSound =>
+      'Listen to the current completion sound';
+
+  @override
+  String get settings_playSound => 'Play sound';
+
+  @override
+  String get settings_searchResults => 'Search results';
+
+  @override
+  String get settings_promptInput => 'Prompt input';
+
+  @override
+  String get settings_manageTranslationModelsRules =>
+      'Manage translation models & rules';
+
+  @override
+  String get settings_browsing => 'Browsing';
+
+  @override
+  String get settings_chooseHowViewImages => 'Choose how to view images';
+
+  @override
+  String get settings_canvasControls => 'Canvas controls';
+
+  @override
+  String get settings_keepViewSteady => 'Keep the view steady';
+
+  @override
+  String get settings_appearance2 => 'Appearance';
+
+  @override
+  String get settings_chooseLightDarkWorkspace =>
+      'Choose a light or dark workspace';
+
+  @override
+  String get settings_textLanguage => 'Text & language';
+
+  @override
+  String get settings_makeReadingComfortable => 'Make reading comfortable';
+
+  @override
+  String get settings_adjustSettingsPagesDialogsOnly =>
+      'Adjust settings pages and dialogs only';
+
+  @override
+  String get settings_motionNotifications => 'Motion & notifications';
+
+  @override
+  String get settings_reduceDistractionsKnowWorkFinishes =>
+      'Reduce distractions, know when work finishes';
+
+  @override
+  String get settings_notificationStyle => 'Notification style';
+
+  @override
+  String get settings_notificationsAppearUpperRightWrap =>
+      'Notifications appear at the upper right, wrap long messages, and close when progress tasks finish.';
+
+  @override
+  String get settings_preview => 'Preview';
+
+  @override
+  String get settings_versionUpdates => 'Version & updates';
+
+  @override
+  String get settings_currentVersionUpdateOptions =>
+      'Current version and update options';
+
+  @override
+  String get settings_diagnosticsResources => 'Diagnostics & resources';
+
+  @override
+  String get settings_logsFontsOpenSourceProject =>
+      'Logs, fonts and the open-source project';
+
+  @override
+  String get settings_viewLicenses => 'View licenses';
+
+  @override
+  String get settings_openProject => 'Open project';
+
+  @override
+  String get settings_actionIncomplete => 'Action incomplete';
+
+  @override
+  String get settings_exportPreferences => 'Export preferences';
+
+  @override
+  String get settings_preferencesExported => 'Preferences exported';
+
+  @override
+  String get settings_noAutomaticBackupYet => 'No automatic backup yet';
+
+  @override
+  String get settings_restorePreviousPreferences =>
+      'Restore previous preferences';
+
+  @override
+  String get settings_importPreferences => 'Import preferences';
+
+  @override
+  String get settings_apply => 'Apply';
+
+  @override
+  String get settings_preferencesAppliedPreviousSettingsBacked =>
+      'Preferences applied; previous settings backed up';
+
+  @override
+  String get settings_restoreDefaultPreferences =>
+      'Restore default preferences';
+
+  @override
+  String get settings_choosePreferencesResetCurrentSettings =>
+      'Choose the preferences to reset. Current settings will be backed up.';
+
+  @override
+  String get settings_appearanceSoundControls => 'Appearance, sound & controls';
+
+  @override
+  String get settings_inputAutocomplete => 'Input & autocomplete';
+
+  @override
+  String get settings_privacyGenerationProtection =>
+      'Privacy & generation protection';
+
+  @override
+  String get settings_moveAppearanceControlsInputProtection =>
+      'Move appearance, controls, input and protection preferences between devices.';
+
+  @override
+  String get settings_rollbackCopySavedBeforeImport =>
+      'A rollback copy is saved before an import or reset.';
+
+  @override
+  String get settings_resetSelectedScopeWhileKeeping =>
+      'Reset a selected scope while keeping accounts, models, libraries and creative work.';
+
+  @override
+  String get settings_chooseScope => 'Choose scope';
+
+  @override
+  String get settings_preferenceManagement => 'Preference management';
+
+  @override
+  String get settings_backupMigrationRecovery =>
+      'Backup, migration and recovery';
+
+  @override
+  String get settings_generalAppearance => 'General & appearance';
+
+  @override
+  String get settings_makeWorkspaceComfortableReadUse =>
+      'Make the workspace comfortable to read and use.';
+
+  @override
+  String get settings_controlsShortcuts => 'Controls & shortcuts';
+
+  @override
+  String get settings_chooseInteractionCanvasControlsKeyboard =>
+      'Choose interaction, canvas controls and keyboard shortcuts.';
+
+  @override
+  String get settings_generationPrompts => 'Generation & prompts';
+
+  @override
+  String get settings_managePromptInputGenerationReminders =>
+      'Manage prompt input, generation reminders and request pacing.';
+
+  @override
+  String get settings_galleryFiles => 'Gallery & files';
+
+  @override
+  String get settings_manageImageSavingGallerySources =>
+      'Manage image saving, gallery sources and display.';
+
+  @override
+  String get settings_manageTagDictionariesIndexesCache =>
+      'Manage tag dictionaries, indexes and cache maintenance.';
+
+  @override
+  String get settings_novelaiAccounts => 'NovelAI accounts';
+
+  @override
+  String get settings_viewAccountManageSignIn =>
+      'View your account and manage sign-in and the default account.';
+
+  @override
+  String get settings_connectionsIntegrations => 'Connections & integrations';
+
+  @override
+  String get settings_manageExternalToolsBridgesNetwork =>
+      'Manage external tools, bridges and network settings.';
+
+  @override
+  String get settings_privacySharing2 => 'Privacy & sharing';
+
+  @override
+  String get settings_controlSharedInformationConfirmationBefore =>
+      'Control shared information and confirmation before sensitive actions.';
+
+  @override
+  String get settings_aboutDiagnostics => 'About & diagnostics';
+
+  @override
+  String get settings_updatesLogsProjectInformation =>
+      'Updates, logs and project information.';
+
+  @override
+  String get settings_searchSettings => 'Search settings';
+
+  @override
+  String get settings_preferences => 'Preferences';
+
+  @override
+  String get settings_creationResources => 'Creation & resources';
+
+  @override
+  String get settings_servicesConnections => 'Services & connections';
+
+  @override
+  String get settings_safetyMaintenance => 'Safety & maintenance';
+
+  @override
+  String get settings_subscriptionActive => 'Subscription active';
+
+  @override
+  String get settings_availableBalance => 'Available balance';
+
+  @override
+  String get settings_subscriptionExpiry2 => 'Subscription expiry';
+
+  @override
+  String get settings_subscriptionDetailsUnavailable =>
+      'Subscription details are unavailable';
+
+  @override
+  String get settings_loadingSubscriptionDetails =>
+      'Loading subscription details…';
+
+  @override
+  String get settings_localDataStaysAvailableAfter =>
+      'Local data stays available after expiry.';
+
+  @override
+  String get settings_records => 'records';
+
+  @override
+  String get settings_hitRate => 'Hit rate';
+
+  @override
+  String get settings_images => 'images';
+
+  @override
+  String get settings_cacheOverview => 'Cache overview';
+
+  @override
+  String get settings_loginPreferences => 'Login preferences';
+
+  @override
+  String get settings_preselectedSignInPage =>
+      'Preselected on the sign-in page.';
+
+  @override
+  String get settings_noAccounts => 'No accounts';
+
+  @override
+  String get settings_useLastSessionOffNext =>
+      'Use the last session. When off, the next launch opens sign-in.';
+
+  @override
+  String get settings_couldNotSaveLoginPreference =>
+      'Could not save the login preference.';
+
+  @override
+  String get settings_loginPreferencesUnavailable =>
+      'Login preferences are unavailable.';
+
+  @override
+  String settings_applyPreferencesConfirm(Object count) {
+    return 'Apply $count preferences. Current preferences are backed up automatically and can be recovered from “Restore previous preferences”. Accounts, secrets, drafts, libraries and model configurations are kept separately.';
+  }
+
+  @override
+  String get settings_restore => 'Restore';
+
+  @override
+  String get wiki_translating => 'Translating';
+
+  @override
+  String get wiki_back => 'Back';
+
+  @override
+  String get wiki_readingTranslation => 'Translation';
+
+  @override
+  String get wiki_readingOriginal => 'Original';
+
+  @override
+  String get wiki_switchToOriginal => 'Show original';
+
+  @override
+  String get wiki_switchToTranslation => 'Show translation';
+
+  @override
+  String get wiki_retranslate => 'Retranslate';
+
+  @override
+  String get wiki_onThisPage => 'On this page';
+
+  @override
+  String get wiki_overview => 'Overview';
+
+  @override
+  String get wiki_untranslated => 'Not translated yet';
+
+  @override
+  String get wiki_autoTranslateTagsArticles =>
+      'Auto-translate tags and articles';
+
+  @override
+  String get wiki_readingContent => 'Content';
+
+  @override
+  String get wiki_categoryGeneral => 'General';
+
+  @override
+  String get wiki_categoryArtist => 'Artist';
+
+  @override
+  String get wiki_categoryCopyright => 'Copyright';
+
+  @override
+  String get wiki_categoryCharacter => 'Character';
+
+  @override
+  String get wiki_categoryMeta => 'Meta';
+
+  @override
+  String get wiki_categoryContributor => 'Contributor';
+
+  @override
+  String get wiki_categorySpecies => 'Species';
+
+  @override
+  String get wiki_categoryLore => 'Lore';
+
+  @override
+  String get wiki_categoryLibrary => 'Library';
+
+  @override
+  String get toast_titleSuccess => 'Completed';
+
+  @override
+  String get toast_titleError => 'Action failed';
+
+  @override
+  String get toast_titleWarning => 'Please note';
+
+  @override
+  String get toast_titleInfo => 'Notice';
+
+  @override
+  String get toast_titleProgress => 'In progress';
+
+  @override
+  String get tagExpansion_autoTranslateVisible => 'Auto-translate visible tags';
+
+  @override
+  String get translationEditor_title => 'Translation block';
+
+  @override
+  String get translationEditor_source => 'Original';
+
+  @override
+  String get translationEditor_sourcePrefix => 'Src';
+
+  @override
+  String get translationEditor_generation => 'Generation';
+
+  @override
+  String get translationEditor_editable => 'Editable';
+
+  @override
+  String get translationEditor_modified => 'Modified';
+
+  @override
+  String get translationEditor_edited => 'Edited';
+
+  @override
+  String get translationEditor_close => 'Close';
+
+  @override
+  String get translationEditor_save => 'Save';
+
+  @override
+  String get translationEditor_delete => 'Delete block';
+
+  @override
+  String get translationEditor_restore => 'Restore original text';
+
+  @override
+  String get translationEditor_configure => 'Configure translation model';
+
+  @override
+  String translationEditor_readingFieldTitle(Object language) {
+    return '$language reading text';
+  }
+
+  @override
+  String translationEditor_sourceWarning(Object language) {
+    return 'Original modified; $language needs syncing';
+  }
+
+  @override
+  String get translationEditor_editHint =>
+      'Translation edited manually; original review status is unchanged';
+
+  @override
+  String get translationLanguage_chinese => 'Chinese';
+
+  @override
+  String get translationLanguage_english => 'English';
+
+  @override
+  String get translationLanguage_japanese => 'Japanese';
+
+  @override
+  String get translationLanguage_korean => 'Korean';
+
+  @override
+  String get promptBlockEditor_translationNeedsReview =>
+      'Original changed; translation needs updating';
+
+  @override
+  String get promptBlockEditor_translationReviewHint =>
+      'After editing the original, review this translation as well';
+
+  @override
+  String get modelTask_translateTitle => 'Original → reading language';
+
+  @override
+  String get modelTask_promptReverseTitle => 'Reading language → original';
+
+  @override
+  String get modelTask_tagTranslateTitle => 'Tag name translation';
+
+  @override
+  String get modelTask_wikiTranslateTitle => 'Wiki article translation';
+
+  @override
+  String get modelTask_translateDescription =>
+      'Translate prompts and blocks while preserving weights, groups and tag meaning.';
+
+  @override
+  String get modelTask_promptReverseDescription =>
+      'Apply additions, deletions and edits from the translation to the original, then return it for review.';
+
+  @override
+  String get modelTask_tagTranslateDescription =>
+      'Give visible tags concise, accurate names.';
+
+  @override
+  String get modelTask_wikiTranslateDescription =>
+      'Translate wiki articles, tidy the layout and choose clickable tags from context.';
+
+  @override
+  String get modelTask_connectionTest => 'Model connection test';
+
+  @override
+  String get modelReasoning_serviceDefault => 'Service default';
+
+  @override
+  String get modelReasoning_off => 'Off';
+
+  @override
+  String get modelReasoning_on => 'On';
+
+  @override
+  String get modelReasoning_minimal => 'Minimal';
+
+  @override
+  String get modelReasoning_low => 'Low';
+
+  @override
+  String get modelReasoning_medium => 'Medium';
+
+  @override
+  String get modelReasoning_high => 'High';
+
+  @override
+  String get modelReasoning_xhigh => 'Extra high';
+
+  @override
+  String get modelReasoning_max => 'Max';
+
+  @override
+  String get modelProvider_custom => 'Custom service';
+
+  @override
+  String get modelProvider_qwen => 'Qwen · Alibaba Model Studio';
+
+  @override
+  String get modelProvider_moonshot => 'Kimi · Moonshot AI';
+
+  @override
+  String get modelProvider_zhipu => 'Zhipu GLM';
+
+  @override
+  String get modelProvider_doubao => 'Doubao · Volcano Ark';
+
+  @override
+  String get modelProvider_hunyuan => 'Tencent Hunyuan';
+
+  @override
+  String get modelProvider_qianfan => 'Baidu Qianfan';
+
+  @override
+  String get modelProvider_siliconflow => 'SiliconFlow';
+
+  @override
+  String get modelProvider_zai => 'Z.AI · International';
+
+  @override
+  String get modelProvider_zhipuCodingPlan => 'Zhipu Coding Plan';
+
+  @override
+  String get modelProvider_kimiCoding => 'Kimi Coding';
+
+  @override
+  String get modelProvider_moonshotInternational =>
+      'Moonshot AI · International';
+
+  @override
+  String get modelProvider_minimaxChinaChat => 'MiniMax · China OpenAI';
+
+  @override
+  String get modelProvider_minimaxChinaMessages => 'MiniMax · China Anthropic';
+
+  @override
+  String get modelProvider_minimaxInternationalMessages =>
+      'MiniMax · International Anthropic';
+
+  @override
+  String get modelProvider_xiaomi => 'Xiaomi MiMo';
+
+  @override
+  String get modelProvider_antLing => 'Ant Ling';
+
+  @override
+  String get modelProvider_stepfunPlan => 'StepFun Step Plan';
+
+  @override
+  String get modelProvider_qwenTokenPlanChina => 'Qwen Token Plan · China';
+
+  @override
+  String get modelProvider_hintHuggingFace =>
+      'Use a Hugging Face token with inference permission; router model IDs can be added manually.';
+
+  @override
+  String get modelProvider_hintPlanKey =>
+      'Use the API key for this plan; available models and scope follow what the plan returns.';
+
+  @override
+  String get modelProvider_hintInternationalEndpoint =>
+      'International endpoint; use an API key from the international platform.';
+
+  @override
+  String get modelProvider_hintRegionOpenAi =>
+      'Use the API key for the matching region; the OpenAI Chat Completions compatible address is prefilled.';
+
+  @override
+  String get modelProvider_hintRegionAnthropic =>
+      'Use the API key for the matching region; the Anthropic Messages compatible address is prefilled.';
+
+  @override
+  String get modelProvider_hintQwen =>
+      'Defaults to the Beijing region; for other regions use the matching key and change the endpoint.';
+
+  @override
+  String get modelProvider_hintMinimax =>
+      'Defaults to the international pay-as-you-go endpoint; for the China platform use its key and endpoint.';
+
+  @override
+  String get modelProvider_hintMoonshot =>
+      'Defaults to the China platform; for the international platform use its key and endpoint.';
+
+  @override
+  String get modelProvider_hintZhipu =>
+      'Defaults to the pay-as-you-go endpoint; Coding Plan uses its own address.';
+
+  @override
+  String get modelProvider_hintDoubao =>
+      'Use an Ark API key; enable the model first, or add an inference endpoint ID.';
+
+  @override
+  String get modelProvider_hintCustom =>
+      'Enter the compatible service address and key, then choose the protocol in the connection details.';
+
+  @override
+  String get modelProvider_hintLocal =>
+      'Start the local service first, then read the loaded model list.';
+
+  @override
+  String get modelProvider_hintDefault =>
+      'Address and protocol are prefilled; save a key to start choosing models.';
+
+  @override
+  String get modelParams_temperatureRange =>
+      'Temperature must be between 0 and 2.';
+
+  @override
+  String get modelParams_topPRange =>
+      'Top P must be greater than 0 and at most 1.';
+
+  @override
+  String get modelParams_maxOutputPositive =>
+      'Max output tokens must be greater than 0.';
+
+  @override
+  String get modelParams_anthropicTemperatureRange =>
+      'Anthropic temperature must be between 0 and 1.';
+
+  @override
+  String get modelParams_anthropicSamplingConflict =>
+      'Anthropic accepts either temperature or Top P; check the model parameters.';
+
+  @override
+  String modelParams_thinkingBudgetTooSmall(Object minimum) {
+    return 'Max output must be larger than the minimum thinking budget of $minimum.';
+  }
+
+  @override
+  String get modelOverrides_invalidHeaderName => 'Enter a valid header name';
+
+  @override
+  String get modelOverrides_invalidHeaderValue =>
+      'Header values cannot contain line breaks or control characters';
+
+  @override
+  String get modelOverrides_emptyBodyField =>
+      'Body field names cannot be empty';
+
+  @override
+  String get modelOverrides_modelFromList =>
+      'Set the model ID from the model list';
+
+  @override
+  String get modelOverrides_streamMustBeFalse =>
+      'This connection uses non-streaming requests; stream must be false';
+
+  @override
+  String get modelConfig_changedSaveAgain =>
+      'The configuration changed. Save again.';
+
+  @override
+  String get modelConfig_presetChanged =>
+      'The selected preset changed. Choose again.';
+
+  @override
+  String get modelConfig_serviceDisabled =>
+      'The selected service was disabled. Choose again.';
+
+  @override
+  String get modelConfig_modelChanged =>
+      'The selected model changed. Choose again.';
+
+  @override
+  String get modelConfig_reasoningChanged =>
+      'The model’s reasoning levels changed. Choose again or follow the model.';
+
+  @override
+  String get modelConfig_presetIdRequired => 'Preset ID cannot be empty.';
+
+  @override
+  String get modelConfig_saveBuiltinAsCustom =>
+      'Save the built-in preset as a custom preset.';
+
+  @override
+  String get modelConfig_namePromptRequired =>
+      'Name and prompt cannot be empty.';
+
+  @override
+  String get modelConfig_builtinNotDeletable =>
+      'Built-in rules cannot be deleted.';
+
+  @override
+  String get modelConfig_pasteFullJson =>
+      'Paste the complete model configuration JSON.';
+
+  @override
+  String get modelConfig_builtinNotOverwritable =>
+      'Built-in presets cannot be overwritten; copy them as custom presets.';
+
+  @override
+  String get modelConfig_invalidProvider =>
+      'Invalid service ID, name or address.';
+
+  @override
+  String get modelConfig_missingProvider =>
+      'The model’s service does not exist.';
+
+  @override
+  String get modelConfig_invalidCustomPreset =>
+      'Invalid custom preset ID, name or prompt.';
+
+  @override
+  String get modelConfig_changedImportAgain =>
+      'The configuration changed. Import again.';
+
+  @override
+  String get modelHealth_unverified =>
+      'Connection not verified yet; it updates after using a model or “Test connection”.';
+
+  @override
+  String get modelHealth_healthy => 'The last request succeeded';
+
+  @override
+  String get modelHealth_limited =>
+      'Reachable, but the last request was rate limited (HTTP 429); try later or check your quota';
+
+  @override
+  String get modelHealth_authentication =>
+      'Authentication failed; check the API key';
+
+  @override
+  String get modelHealth_permission =>
+      'Access denied; check the service permissions';
+
+  @override
+  String get modelHealth_timeout => 'The last request timed out';
+
+  @override
+  String get modelHealth_network =>
+      'The last request could not reach the service';
+
+  @override
+  String get modelHealth_invalidResponse =>
+      'The last response was invalid; see the request log for details';
+
+  @override
+  String get modelHealth_failed => 'The last request failed';
+
+  @override
+  String modelHealth_failedStatus(Object status) {
+    return 'The last request failed (HTTP $status)';
+  }
+
+  @override
+  String get modelRequest_statusPending => 'Waiting';
+
+  @override
+  String get modelRequest_statusRunning => 'Requesting';
+
+  @override
+  String get modelRequest_statusSuccess => 'Succeeded';
+
+  @override
+  String get modelRequest_statusFailed => 'Failed';
+
+  @override
+  String get modelRequest_statusCancelled => 'Cancelled';
+
+  @override
+  String get modelRequest_fieldTime => 'Time';
+
+  @override
+  String get modelRequest_fieldMethod => 'Method';
+
+  @override
+  String get modelRequest_fieldUrl => 'URL';
+
+  @override
+  String get modelRequest_fieldRequestHeaders => 'Request headers';
+
+  @override
+  String get modelRequest_fieldBody => 'Body';
+
+  @override
+  String get modelRequest_fieldStatusCode => 'Status code';
+
+  @override
+  String get modelRequest_fieldResponseHeaders => 'Response headers';
+
+  @override
+  String get modelRequest_fieldError => 'Error';
+
+  @override
+  String get modelRequest_fieldInterface => 'Interface';
+
+  @override
+  String get modelRequest_fieldProvider => 'Service';
+
+  @override
+  String get modelRequest_fieldModel => 'Model';
+
+  @override
+  String get modelRequest_fieldProtocol => 'Protocol';
+
+  @override
+  String get modelRequest_fieldStatus => 'Status';
+
+  @override
+  String get modelRequest_fieldElapsed => 'Elapsed (ms)';
+
+  @override
+  String get modelRequest_fieldAttempts => 'Attempts';
+
+  @override
+  String get modelRequest_fieldHttpRequests => 'HTTP requests';
+
+  @override
+  String get modelRequest_fieldParameters => 'Effective parameters';
+
+  @override
+  String get modelRequest_redacted => '[redacted]';
+
+  @override
+  String get modelRequest_emptyResponse => 'The model returned empty content.';
+
+  @override
+  String get modelService_testFieldsIncomplete =>
+      'The test response is missing fields.';
+
+  @override
+  String get modelService_testFieldsInvalid =>
+      'The test response has invalid fields.';
+
+  @override
+  String get modelService_testGroupsInvalid =>
+      'The test response has invalid groups.';
+
+  @override
+  String get modelService_testSourceEmpty =>
+      'The test response returned an empty original.';
+
+  @override
+  String get modelService_conversionCancelled => 'Conversion cancelled';
+
+  @override
+  String get modelService_chooseInterfaceModel =>
+      'Choose a service and model in Settings → Models & APIs → Interfaces first.';
+
+  @override
+  String get modelService_enableServiceModel =>
+      'Enable a service in Settings, then fetch or add a model and select it.';
+
+  @override
+  String get modelSettings_keepEditsTitle => 'Keep current edits?';
+
+  @override
+  String get modelSettings_keepEditsBody =>
+      'Your changes are not saved yet. Save before switching?';
+
+  @override
+  String get modelSettings_discard => 'Discard';
+
+  @override
+  String get modelSettings_saveAndSwitch => 'Save and switch';
+
+  @override
+  String get modelSettings_addProvider => 'Add service';
+
+  @override
+  String modelSettings_deleteProviderTitle(Object name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get modelSettings_deleteProviderBody =>
+      'This service’s connection, key and selected models will be deleted.';
+
+  @override
+  String modelSettings_deleteProviderBindings(Object count) {
+    return '$count interface model bindings will be cleared; presets are kept.';
+  }
+
+  @override
+  String modelSettings_deletePresetTitle(Object name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String get modelSettings_deletePresetBody =>
+      'Interfaces using this preset return to the built-in preset. Model bindings are kept.';
+
+  @override
+  String get modelSettings_configCopied =>
+      'Configuration copied, without keys, custom headers or bodies.';
+
+  @override
+  String get modelSettings_importConfig => 'Import configuration';
+
+  @override
+  String get modelSettings_importConfigHint =>
+      'Paste an exported configuration. The current configuration is backed up first; keys stay stored separately.';
+
+  @override
+  String get modelSettings_configJson => 'Configuration JSON';
+
+  @override
+  String modelSettings_importPreview(
+    Object providers,
+    Object models,
+    Object presets,
+  ) {
+    return 'Imports $providers services, $models models and $presets custom presets.';
+  }
+
+  @override
+  String get modelSettings_importMissingProviders =>
+      'Service or model configuration is missing.';
+
+  @override
+  String get modelSettings_checkConfig => 'Check configuration';
+
+  @override
+  String get modelSettings_importAndReplace => 'Import and replace';
+
+  @override
+  String get modelSettings_configImported => 'Configuration imported';
+
+  @override
+  String get modelSettings_description =>
+      'Manage service connections and translation preferences.';
+
+  @override
+  String get modelSettings_configMenu => 'Configuration';
+
+  @override
+  String get modelSettings_copyConfig => 'Copy configuration';
+
+  @override
+  String get modelSettings_tabProviders => 'Services';
+
+  @override
+  String get modelSettings_tabInterfaces => 'Interfaces';
+
+  @override
+  String get modelSettings_tabPresets => 'Presets & prompts';
+
+  @override
+  String get modelSettings_tabRequests => 'Request log';
+
+  @override
+  String modelSettings_providersCount(Object count) {
+    return 'Services · $count';
+  }
+
+  @override
+  String modelSettings_providerModelCount(Object count) {
+    return '$count models';
+  }
+
+  @override
+  String get modelSettings_providerDisabledSuffix => ' · Disabled';
+
+  @override
+  String get modelSettings_emptyTitle => 'Add your first model service';
+
+  @override
+  String get modelSettings_emptyBody =>
+      'Choose a common service or connect a custom endpoint.';
+
+  @override
+  String get modelSettings_customService => 'Custom service';
+
+  @override
+  String get modelSettings_notConfigured => 'Not configured';
+
+  @override
+  String get modelSettings_preset => 'Preset';
+
+  @override
+  String get modelSettings_presetBuiltin => 'Built-in';
+
+  @override
+  String get modelSettings_presetUser => 'User';
+
+  @override
+  String get modelSettings_deletePreset => 'Delete preset';
+
+  @override
+  String modelSettings_presetCopyName(Object title, Object number) {
+    return '$title ($number)';
+  }
+
+  @override
+  String get modelSettings_recentRequests => 'Recent requests';
+
+  @override
+  String get modelSettings_recentRequestsHint =>
+      'Last 100 in this session · full requests and responses, with authentication redacted';
+
+  @override
+  String get modelSettings_clearRequests => 'Clear';
+
+  @override
+  String get modelSettings_requestsEmpty =>
+      'Requests appear here after you translate or test a model.';
+
+  @override
+  String get modelSettings_interfaceChangedElsewhere =>
+      'The interface configuration changed elsewhere. Reopen it to edit.';
+
+  @override
+  String get modelSettings_configSaved => 'Configuration saved';
+
+  @override
+  String get modelSettings_viewBuiltinRules => 'View built-in rules';
+
+  @override
+  String get modelSettings_viewEditPreset => 'View and edit preset';
+
+  @override
+  String get modelSettings_restoreBuiltinPreset => 'Restore built-in preset';
+
+  @override
+  String get modelSettings_followUiLanguage => 'Follow interface language';
+
+  @override
+  String get modelSettings_providerAndModel => 'Service and model';
+
+  @override
+  String get modelSettings_providerAndModelHelp =>
+      'Only selected models from enabled services are listed';
+
+  @override
+  String get modelSettings_chooseProviderModel => 'Choose a service and model';
+
+  @override
+  String get modelSettings_reasoning => 'Thinking';
+
+  @override
+  String get modelSettings_reasoningHelp =>
+      'Plain translation usually needs no thinking. For tagging, semantic grouping and similar work, use the lowest thinking level the model supports.';
+
+  @override
+  String get modelSettings_reasoningHelpLabel => 'Thinking level advice';
+
+  @override
+  String get modelSettings_usePreset => 'Preset';
+
+  @override
+  String get modelSettings_outputLanguage => 'Output language';
+
+  @override
+  String get modelSettings_englishPrompt => 'English generation prompt';
+
+  @override
+  String get modelSettings_englishPromptHelp =>
+      'Applies the edits against the original and outputs an English generation prompt.';
+
+  @override
+  String get modelSettings_targetLanguage => 'Target language';
+
+  @override
+  String get modelSettings_effective => 'Effective';
+
+  @override
+  String get modelSettings_noModelSelected => 'No available model selected';
+
+  @override
+  String modelSettings_reasoningSummaryInterface(Object level) {
+    return 'Thinking: $level (this interface)';
+  }
+
+  @override
+  String modelSettings_reasoningSummaryModel(Object level) {
+    return 'Thinking: $level (follows model)';
+  }
+
+  @override
+  String get modelSettings_promptBlocksHint =>
+      'When translation isn’t needed, you can also split prompts into blocks and arrange them freely with the block feature.';
+
+  @override
+  String get modelSettings_wikiFormatHint =>
+      'When translation isn’t needed, it can still tidy the layout and link related tags.';
+
+  @override
+  String get modelSettings_unsavedChanges => 'Unsaved changes';
+
+  @override
+  String get modelSettings_testPreset => 'Test preset';
+
+  @override
+  String get modelSettings_tabModelPreset => 'Model & preset';
+
+  @override
+  String get modelSettings_tabPromptOutput => 'Prompt & output';
+
+  @override
+  String get modelSettings_translationStrategy => 'Translation strategy';
+
+  @override
+  String get modelSettings_editPreset => 'Edit preset';
+
+  @override
+  String get modelSettings_outputContract => 'App output contract';
+
+  @override
+  String get modelSettings_outputContractHint =>
+      'Returned fields and validation rules are maintained by the app';
+
+  @override
+  String get modelSettings_testResult => 'Test result';
+
+  @override
+  String get modelRequest_detailsRequests => 'Requests';
+
+  @override
+  String get modelRequest_detailsIndex => 'No.';
+
+  @override
+  String get modelRequest_detailsResponses => 'Responses';
+
+  @override
+  String get modelRequest_detailsOutput => 'Extracted result';
+
+  @override
+  String get modelRequest_detailsTitle => 'Request log';
+
+  @override
+  String get modelRequest_detailsCopied => 'Copied';
+
+  @override
+  String get modelRequest_detailsCopyPage => 'Copy this page';
+
+  @override
+  String get modelRequest_detailsOverview => 'Overview';
+
+  @override
+  String get modelRequest_detailsMissing =>
+      'This record was cleared or is older than the last 100.';
+
+  @override
+  String get modelPreset_changedElsewhere =>
+      'The preset changed elsewhere. Reopen it to edit.';
+
+  @override
+  String get modelPreset_interfacePresetChanged =>
+      'The interface’s preset changed elsewhere. Reopen it to create a new one.';
+
+  @override
+  String get modelPreset_builtinReadOnly => 'Built-in · Read only';
+
+  @override
+  String get modelPreset_newInterfacePreset => 'New interface preset';
+
+  @override
+  String get modelPreset_tabPrompt => 'Prompt';
+
+  @override
+  String get modelPreset_tabOutputContract => 'Output contract';
+
+  @override
+  String get modelPreset_name => 'Preset name';
+
+  @override
+  String get modelPreset_nameRequired => 'Enter a name';
+
+  @override
+  String get modelPreset_behavior => 'Behavior & translation strategy';
+
+  @override
+  String get modelPreset_builtinLocked =>
+      'Built-in rules are locked. Create an interface preset to edit your own translation preferences.';
+
+  @override
+  String get modelPreset_editHint =>
+      'Edit translation preferences here; the response format is maintained by the app.';
+
+  @override
+  String get modelPreset_strategyHint => 'Enter a translation strategy';
+
+  @override
+  String get modelPreset_promptRequired => 'Prompt cannot be empty';
+
+  @override
+  String get modelPreset_restoreStrategy => 'Restore built-in strategy';
+
+  @override
+  String get modelPreset_outputContractNote =>
+      'This section keeps translation results writable back and displayable; the app maintains it.';
+
+  @override
+  String get modelPreset_save => 'Save preset';
+
+  @override
+  String get modelReasoning_unsupported => 'Not supported';
+
+  @override
+  String get modelReasoning_followModel => 'Follow model';
+
+  @override
+  String modelReasoning_followModelLevel(Object level) {
+    return 'Follow model ($level)';
+  }
+
+  @override
+  String get modelReasoning_notAdjustable =>
+      'This model does not support thinking adjustment';
+
+  @override
+  String get modelReasoning_strength => 'Thinking strength';
+
+  @override
+  String modelReasoning_modelDefault(Object level) {
+    return 'Model default: $level';
+  }
+
+  @override
+  String get modelReasoning_levelsUnknown =>
+      'Available levels are not confirmed yet\nSet them in the service’s model settings';
+
+  @override
+  String modelReasoning_strengthValue(Object level) {
+    return 'Thinking strength: $level';
+  }
+
+  @override
+  String get modelProvider_customEndpoint => 'Custom endpoint';
+
+  @override
+  String get modelProvider_pickerTitle => 'Choose a service';
+
+  @override
+  String get modelProvider_pickerSearch =>
+      'Search vendors, platforms or local services';
+
+  @override
+  String get modelProvider_pickerEmpty => 'No matching services';
+
+  @override
+  String get modelProvider_groupApiKey => 'API key connections';
+
+  @override
+  String get modelProvider_groupLocal => 'Local services';
+
+  @override
+  String get modelProvider_enterCompatibleAddress =>
+      'Enter a compatible endpoint address';
+
+  @override
+  String get modelConnection_provider => 'Service';
+
+  @override
+  String get modelConnection_name => 'Name';
+
+  @override
+  String get modelConnection_nameExample => 'e.g. my relay';
+
+  @override
+  String get modelConnection_protocol => 'Protocol';
+
+  @override
+  String get modelConnection_address => 'Endpoint address';
+
+  @override
+  String get modelConnection_apiKey => 'API key';
+
+  @override
+  String modelControls_decrease(Object label, Object step, Object unit) {
+    return 'Decrease $label ($step $unit)';
+  }
+
+  @override
+  String modelControls_increase(Object label, Object step, Object unit) {
+    return 'Increase $label ($step $unit)';
+  }
+
+  @override
+  String get modelControls_retryOff => 'Off';
+
+  @override
+  String modelControls_retryTimes(Object count) {
+    return '$count×';
+  }
+
+  @override
+  String get settings_positiveIntegerRequired =>
+      'Enter an integer greater than 0';
+
+  @override
+  String get modelSettings_testingPreset => 'Testing preset';
+
+  @override
+  String modelHealth_lastUpdated(Object time) {
+    return 'Last updated: $time';
+  }
+
+  @override
+  String get modelSettings_backToEditing => 'Back to editing';
+
+  @override
+  String modelService_loadOverridesFailed(Object error) {
+    return 'Could not read custom request settings: $error';
+  }
+
+  @override
+  String get modelService_timeoutRange =>
+      'Request timeout must be between 10 and 600 seconds.';
+
+  @override
+  String get modelService_concurrencyRange =>
+      'Max concurrency must be between 1 and 20.';
+
+  @override
+  String get modelService_nameRequired => 'Enter a service name.';
+
+  @override
+  String get modelService_invalidUrl =>
+      'The endpoint must be a complete http:// or https:// URL.';
+
+  @override
+  String get modelService_contextPositive =>
+      'Context window must be greater than 0.';
+
+  @override
+  String get modelService_readingCatalog => 'Reading the model list…';
+
+  @override
+  String modelService_catalogReturned(Object count) {
+    return 'The service returned $count models. Check the ones you want to use.';
+  }
+
+  @override
+  String modelService_catalogUnavailable(Object error) {
+    return 'Model list unavailable: $error. You can add model IDs manually.';
+  }
+
+  @override
+  String modelService_catalogCached(Object count) {
+    return 'Loaded $count models fetched last time. Click “Fetch list” to refresh.';
+  }
+
+  @override
+  String get modelService_catalogCacheFailed =>
+      'Model list fetched, but saving the local cache failed; fetch again next time.';
+
+  @override
+  String get modelService_selectModelFirst => 'Select a model first.';
+
+  @override
+  String get modelService_testingModel => 'Testing a model request…';
+
+  @override
+  String modelService_testSucceeded(Object reply) {
+    return 'Model request succeeded: $reply';
+  }
+
+  @override
+  String modelService_testFailed(Object error) {
+    return 'Model request failed: $error';
+  }
+
+  @override
+  String modelService_tokensPositive(Object name) {
+    return 'Token counts for model “$name” must be greater than 0.';
+  }
+
+  @override
+  String get modelService_changedElsewhere =>
+      'The service configuration changed elsewhere. Reopen it to edit.';
+
+  @override
+  String get modelService_overridesChangedElsewhere =>
+      'Model request settings changed elsewhere. Reopen them to edit.';
+
+  @override
+  String modelService_saveFailed(Object error) {
+    return 'Save failed: $error';
+  }
+
+  @override
+  String get modelService_keyHintNew =>
+      'Enter a key; local services can leave it empty';
+
+  @override
+  String get modelService_keyHintVendor => 'Enter the key for this service';
+
+  @override
+  String get modelService_keyHintSaved => 'Saved; leave empty to keep it';
+
+  @override
+  String modelService_enabledModels(Object count) {
+    return '$count enabled models';
+  }
+
+  @override
+  String get modelService_pendingSave => 'Not saved';
+
+  @override
+  String get modelService_saved => 'Saved';
+
+  @override
+  String get modelService_enable => 'Enable';
+
+  @override
+  String get modelService_testConnection => 'Test connection';
+
+  @override
+  String get modelService_delete => 'Delete service';
+
+  @override
+  String get modelService_save => 'Save service';
+
+  @override
+  String get modelService_saving => 'Saving service';
+
+  @override
+  String get modelService_notConfigured => 'Not configured';
+
+  @override
+  String get modelService_optional => 'Optional';
+
+  @override
+  String get modelService_editConnection => 'Edit';
+
+  @override
+  String get modelService_collapse => 'Collapse';
+
+  @override
+  String get modelService_connectionSettings => 'Connection settings';
+
+  @override
+  String get modelService_dragToReorder => 'Drag to reorder models';
+
+  @override
+  String get modelService_capacityTooltip =>
+      'Context / max output; adjust in Advanced';
+
+  @override
+  String get modelService_advanced => 'Advanced';
+
+  @override
+  String modelService_removeModel(Object name) {
+    return 'Remove model $name';
+  }
+
+  @override
+  String get modelService_linkedInterfaces => 'Linked interfaces';
+
+  @override
+  String get modelService_noLinkedInterfaces => 'No linked interfaces yet';
+
+  @override
+  String get modelService_advancedSettings => 'Advanced settings';
+
+  @override
+  String get modelService_requestTimeout => 'Request timeout';
+
+  @override
+  String get modelService_requestTimeoutHelp =>
+      'Longest wait for a single request';
+
+  @override
+  String get modelService_seconds => 's';
+
+  @override
+  String get modelService_maxConcurrency => 'Max concurrency';
+
+  @override
+  String get modelService_maxConcurrencyHelp =>
+      'Requests this service handles at once';
+
+  @override
+  String get modelService_countUnit => '';
+
+  @override
+  String get modelService_retry => 'Retry on failure';
+
+  @override
+  String get modelService_retryHelp =>
+      'Retry when the connection fails or the service is busy';
+
+  @override
+  String get modelService_searchModelId => 'Search model IDs…';
+
+  @override
+  String get modelService_serviceModels => 'Available models';
+
+  @override
+  String get modelService_fetchList => 'Fetch list';
+
+  @override
+  String get modelService_catalogEmpty =>
+      'Click “Fetch list” to read this service’s models,\nor add model IDs on the right.';
+
+  @override
+  String get modelService_noMatchingModels => 'No matching models';
+
+  @override
+  String get modelService_catalogLimitTooltip =>
+      'Catalog limits: context / max output';
+
+  @override
+  String get modelService_searchAddedModels => 'Search added models…';
+
+  @override
+  String get modelService_modelSettings => 'Model settings';
+
+  @override
+  String get modelService_addedEmpty =>
+      'Check models on the left, or add one below';
+
+  @override
+  String get modelService_customModelId => 'Custom model ID';
+
+  @override
+  String get modelService_customModelHelp =>
+      'Add models the catalog cannot list';
+
+  @override
+  String get modelService_addCustomModel => 'Add custom model';
+
+  @override
+  String get modelCard_positiveInteger => 'Enter a positive integer';
+
+  @override
+  String modelCard_catalogLimit(Object limit) {
+    return 'Catalog limit $limit';
+  }
+
+  @override
+  String get modelCard_outputExceedsContext =>
+      'Output cannot exceed the context window';
+
+  @override
+  String get modelCard_contextWindow => 'Context window';
+
+  @override
+  String get modelCard_maxOutput => 'Max output';
+
+  @override
+  String get modelCard_unlabeled => 'Not listed';
+
+  @override
+  String get modelCard_protocolStandard => 'Standard';
+
+  @override
+  String get modelCard_protocolAdaptive => 'Adaptive';
+
+  @override
+  String get modelCard_default => 'Default';
+
+  @override
+  String get modelCard_thinkingLevels => 'Thinking levels';
+
+  @override
+  String get modelCard_thinkingLevelsUnlisted =>
+      'Not listed in the catalog; you can enable them manually';
+
+  @override
+  String get modelCard_thinkingLevelsFromCatalog =>
+      'Supported levels are checked from the local catalog; adjust them to match the actual API.';
+
+  @override
+  String get modelCard_thinkingProtocol => 'Thinking protocol';
+
+  @override
+  String get modelCard_defaultThinkingLevel => 'Default level';
+
+  @override
+  String get modelCard_alias => 'Alias';
+
+  @override
+  String get modelCard_aliasHelp =>
+      'Shown wherever the model name appears; requests still use the model ID.';
+
+  @override
+  String get modelCard_aliasExample => 'e.g. fast';
+
+  @override
+  String get modelCard_capabilities => 'Capabilities';
+
+  @override
+  String get modelCard_images => 'Images';
+
+  @override
+  String get modelCard_nativeSearch => 'Native web search';
+
+  @override
+  String get modelCard_nativeSearchHelp =>
+      'The app does not use native search on this connection yet; this does not mean the vendor or other APIs lack search.';
+
+  @override
+  String get modelOverrides_duplicateHeader => 'Duplicate header name';
+
+  @override
+  String get modelOverrides_fieldNameRequired => 'Enter a field name';
+
+  @override
+  String get modelOverrides_duplicateField => 'Duplicate field name';
+
+  @override
+  String get modelOverrides_invalidJson => 'Enter a valid JSON value';
+
+  @override
+  String get modelOverrides_customBody => 'Custom body';
+
+  @override
+  String get modelOverrides_customHeaders => 'Custom headers';
+
+  @override
+  String get modelOverrides_fieldName => 'Field name';
+
+  @override
+  String get modelOverrides_headerName => 'Header name';
+
+  @override
+  String get modelOverrides_valueJson => 'Value (JSON)';
+
+  @override
+  String get modelOverrides_value => 'Value';
+
+  @override
+  String get modelOverrides_removeItem => 'Remove item';
+
+  @override
+  String get modelOverrides_body => 'Request body';
+
+  @override
+  String get modelOverrides_headers => 'Request headers';
+
+  @override
+  String modelOverrides_itemCount(Object count) {
+    return '$count items';
+  }
+
+  @override
+  String get modelOverrides_valueTypes =>
+      'Supports strings, numbers, booleans, arrays and objects';
+
+  @override
+  String get modelOverrides_addBodyField => 'Add body field';
+
+  @override
+  String get modelOverrides_addHeader => 'Add header';
+
+  @override
+  String get promptTranslation_translating => 'Translating';
+
+  @override
+  String get promptTranslation_needsModel =>
+      'Translate · configure a model first';
+
+  @override
+  String promptTranslation_withRoute(Object provider, Object model) {
+    return 'Translate · $provider / $model';
+  }
+
+  @override
+  String get promptTranslation_actions => 'Translation actions';
+
+  @override
+  String get promptTranslation_promptChanged =>
+      'The prompt changed; new edits were not overwritten';
+
+  @override
+  String get promptTranslation_nothingToTranslate =>
+      'There is no plain text to translate';
+
+  @override
+  String promptTranslation_failed(Object error) {
+    return 'Translation failed: $error';
+  }
+
+  @override
+  String get promptTranslation_setupTitle =>
+      'Configure a translation model first';
+
+  @override
+  String get promptTranslation_setupBody =>
+      'Translation needs an explicitly selected service and model. Go to Settings → Integrations → Models & APIs, add a service and fetch its model list, then choose a model for prompt translation.';
+
+  @override
+  String get promptTranslation_later => 'Later';
+
+  @override
+  String get promptTranslation_openSettings => 'Open settings';
+
+  @override
+  String get promptTranslation_toolTitle => 'Translate';
+
+  @override
+  String get promptTranslation_noModel => 'No model configured';
+
+  @override
+  String get promptTranslation_configureModel => 'Configure translation model';
+
+  @override
+  String get promptTranslation_translateNew => 'Translate new content';
+
+  @override
+  String get promptTranslation_undoRestore =>
+      'Undo the restore and bring translation blocks back';
+
+  @override
+  String get promptTranslation_restoreAll =>
+      'Restore all translation blocks to original text';
+
+  @override
+  String get promptTranslation_tutorial => 'How it works';
+
+  @override
+  String get promptTranslation_guideBack => 'Back to actions';
+
+  @override
+  String get promptTranslation_guideMiddleTitle => 'Middle-click a block';
+
+  @override
+  String get promptTranslation_guideMiddleText =>
+      'Switch original and translation';
+
+  @override
+  String get promptTranslation_guideSourceTitle => 'Left-click the original';
+
+  @override
+  String get promptTranslation_guideSourceText =>
+      'Place the cursor and edit directly';
+
+  @override
+  String get promptTranslation_guideReadingTitle =>
+      'Left-click the translation';
+
+  @override
+  String get promptTranslation_guideReadingText => 'Open the block editor';
+
+  @override
+  String get promptTranslation_guideCtrlTitle => 'Ctrl + click / drag-select';
+
+  @override
+  String get promptTranslation_guideCtrlText =>
+      'Search tags / find related tags in the editor';
+
+  @override
+  String get promptTranslation_guideConvertTitle => '↑ Translation to original';
+
+  @override
+  String get promptTranslation_guideConvertText =>
+      '↓ Original to translation; review before saving';
+
+  @override
+  String get promptTranslation_guideRestoreTitle => 'A / Restore';
+
+  @override
+  String get promptTranslation_guideRestoreText =>
+      'Restore the whole group / bring blocks back';
+
+  @override
+  String get promptTranslation_middleButton => 'Middle mouse button';
+
+  @override
+  String get promptTranslation_leftButton => 'Left mouse button';
+
+  @override
+  String get promptTranslation_blockShowingOriginal =>
+      'Translation block, showing original';
+
+  @override
+  String get promptTranslation_blockShowingReading =>
+      'Translation block, showing translation';
+
+  @override
+  String get promptTranslation_blockNeedsReview =>
+      'Original changed · translation needs updating';
+
+  @override
+  String get promptTranslation_badgeTooltip =>
+      'Original changed; translation needs syncing';
+
+  @override
+  String get promptTranslation_sourceChanged =>
+      'The original changed; reopen the translation block';
+
+  @override
+  String promptTranslation_retranslateFailed(Object error) {
+    return 'Retranslation failed: $error';
+  }
+
+  @override
+  String get promptTranslation_draftChanged =>
+      'Content changed; convert again. The new draft is kept.';
+
+  @override
+  String promptTranslation_convertFailed(Object error) {
+    return 'Conversion failed; the draft is kept: $error';
+  }
+
+  @override
+  String get promptTranslation_invalidResultFormat =>
+      'The conversion result format is invalid; the draft is kept';
+
+  @override
+  String get promptTranslation_noValidText =>
+      'The model returned no valid text; the draft is kept';
+
+  @override
+  String get promptTranslation_invalidResultContent =>
+      'The conversion result contains invalid formatting; the draft is kept';
+
+  @override
+  String get promptTranslation_incompleteStructure =>
+      'The conversion result has incomplete weights or groups; the draft is kept';
+
+  @override
+  String get promptTranslation_inputRequired =>
+      'Enter the content to convert first';
+
+  @override
+  String get wiki_configureTagModel =>
+      'Configure an available tag translation model in Models & APIs first.';
+
+  @override
+  String get blockOrganizer_barrierLabel => 'Block organizer';
+
+  @override
+  String get blockOrganizer_replaceTitle =>
+      'Replace copies from the same source?';
+
+  @override
+  String blockOrganizer_replaceMoveBody(Object count) {
+    return 'The target already has $count copies from the same source. After replacing, the source is hidden from the library; instances already inserted in prompts can still reference the original block.';
+  }
+
+  @override
+  String blockOrganizer_replaceCopyBody(Object count) {
+    return 'The target already has $count copies from the same source. Replacing updates the target copies; the source is kept.';
+  }
+
+  @override
+  String get blockOrganizer_replace => 'Replace';
+
+  @override
+  String get blockOrganizer_customTagColor => 'Custom tag color';
+
+  @override
+  String get blockOrganizer_colorHint => '#RRGGBB or #AARRGGBB';
+
+  @override
+  String get blockOrganizer_invalidColor =>
+      'Enter a 6- or 8-digit hexadecimal color';
+
+  @override
+  String blockOrganizer_deleteFolderConfirm(Object name) {
+    return 'Delete “$name”? Its blocks will move to the root folder.';
+  }
+
+  @override
+  String blockOrganizer_deleteCollectionConfirm(Object name) {
+    return 'Delete “$name”? The blocks themselves are kept.';
+  }
+
+  @override
+  String get blockOrganizer_titleFavorites => 'Favorites & collections';
+
+  @override
+  String get blockOrganizer_titleFolders => 'Choose a folder';
+
+  @override
+  String blockOrganizer_itemCount(Object count) {
+    return '$count items';
+  }
+
+  @override
+  String get blockOrganizer_search => 'Search';
+
+  @override
+  String get blockOrganizer_name => 'Name';
+
+  @override
+  String get blockOrganizer_customColor => 'Custom color…';
+
+  @override
+  String get blockOrganizer_newCollection => 'New collection';
+
+  @override
+  String get blockOrganizer_newCollectionFolder => 'New collection folder';
+
+  @override
+  String get blockOrganizer_newTag => 'New tag';
+
+  @override
+  String get blockOrganizer_newFolder => 'New folder';
+
+  @override
+  String get blockOrganizer_rootUncategorized => 'Root / Uncategorized';
+
+  @override
+  String get blockOrganizer_manageDrag => 'Manage; drag to reorder';
+
+  @override
+  String get blockLibrary_dragSelectedHint =>
+      'Drag the selected blocks onto a favorite or folder on the left, then choose copy or move when you release.';
+
+  @override
+  String blockLibrary_blockCount(Object count) {
+    return '$count blocks';
+  }
+
+  @override
+  String get blockLibrary_changedSelectAgain =>
+      'The block library changed. Select again and retry.';
+
+  @override
+  String get blockLibrary_hiddenSource => 'Hidden blocks cannot be organized';
+
+  @override
+  String get blockLibrary_sameSourceSelected =>
+      'The selection contains copies from the same source; organize them separately';
+
+  @override
+  String get blockLibrary_sameSourceExists =>
+      'Copies from the same source already exist; confirm replacement';
+
+  @override
+  String get blockLibrary_collectionMissing => 'The collection does not exist';
+
+  @override
+  String get promptBlockEditor_appearance => 'Block appearance';
+
+  @override
+  String get promptBlockEditor_imageUnreadable =>
+      'Could not read the selected image';
+
+  @override
+  String get blockAppearance_classic => 'Classic';
+
+  @override
+  String get blockAppearance_stripes => 'Fine stripes';
+
+  @override
+  String get blockAppearance_dots => 'Dots';
+
+  @override
+  String get blockAppearance_solid => 'Solid';
+
+  @override
+  String get blockAppearance_gradient => 'Gradient';
+
+  @override
+  String get blockAppearance_translation => 'Translation';
+
+  @override
+  String get opusUsage_exhausted =>
+      'Free account quota used up; V5 generation is billed in Anlas';
+
+  @override
+  String opusUsage_remaining(Object percent) {
+    return 'Free account quota remaining: $percent%';
+  }
+
+  @override
+  String opusUsage_recharging(Object time) {
+    return 'Recharging: next +1% in $time';
+  }
+
+  @override
+  String get opusUsage_notRecharging =>
+      'Not recharging (the pool is above the threshold or used up)';
+
+  @override
+  String get opusUsage_clickToRefresh => 'Click to refresh';
+
+  @override
+  String opusUsage_hoursMinutes(Object hours, Object minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String opusUsage_hours(Object hours) {
+    return '$hours h';
+  }
+
+  @override
+  String opusUsage_minutesSeconds(Object minutes, Object seconds) {
+    return '$minutes min $seconds s';
+  }
+
+  @override
+  String opusUsage_minutes(Object minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String opusUsage_seconds(Object seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get metadataImport_noCharactersReplaceClears =>
+      'No character data; replace clears current characters';
+
+  @override
+  String get metadataImport_replaceCharacters => 'Replace characters';
+
+  @override
+  String get metadataImport_appendCharacters => 'Append characters';
+
+  @override
+  String get drop_dragToShare => 'Drag to share';
+
+  @override
+  String get progress_cancelled => 'Cancelled';
+
+  @override
+  String promptSyntax_weightTooLarge(Object value) {
+    return 'Numeric weight is too large: $value::';
+  }
+
+  @override
+  String promptSyntax_spaceBeforeColons(Object value) {
+    return 'No space allowed between the weight and :: : $value ::';
+  }
+
+  @override
+  String promptSyntax_weightAfterColons(Object value) {
+    return 'Numeric weights go before :: : ::$value';
+  }
+
+  @override
+  String get update_errorInAppUnsupported =>
+      'This version does not support automatic in-app updates';
+
+  @override
+  String get update_errorNoInstallablePackage =>
+      'No automatically installable update package was found';
+
+  @override
+  String get update_errorMissingSha256 =>
+      'The update package is missing its SHA256 checksum';
+
+  @override
+  String get update_errorDiskFull =>
+      'Not enough disk space to save the update package';
+
+  @override
+  String get update_errorWriteFailed => 'Failed to write the update package';
+
+  @override
+  String get update_errorDownloadFailed =>
+      'Failed to download the update package';
+
+  @override
+  String get update_errorSizeMismatch => 'The update package size check failed';
+
+  @override
+  String get update_errorChecksumMismatch =>
+      'The update package checksum failed';
+
+  @override
+  String get update_errorResumeRejected =>
+      'The server rejected resuming the update download';
+
+  @override
+  String get update_errorEmptyResponse =>
+      'The update server returned an empty response';
+
+  @override
+  String get update_errorPlatformUnsupported =>
+      'In-app updates are not supported on this platform';
+
+  @override
+  String get update_errorPackageRemoved =>
+      'The update package was cleaned up; download it again';
+
+  @override
+  String get update_errorPackageCorrupted =>
+      'The update package is corrupted; download it again';
+
+  @override
+  String get update_errorLaunchFailed => 'Failed to start the updater';
+
+  @override
+  String get update_errorCheckFailed => 'Failed to check for updates';
+
+  @override
+  String get update_errorCheckUnknown =>
+      'An unknown error occurred while checking for updates';
+
+  @override
+  String update_errorLogPath(Object path) {
+    return 'Log: $path';
+  }
+
+  @override
+  String get update_errorInstallFailed => 'Failed to install the update';
+
+  @override
+  String get update_errorInstallFailedSeeLog =>
+      'Failed to install the update; see the update log';
+
+  @override
+  String get auth_tokenEmpty => 'The token is empty and cannot be verified';
+
+  @override
+  String get auth_tokenFormatInvalid => 'Invalid token format';
+
+  @override
+  String get auth_tokenInvalidOrExpired =>
+      'The token is invalid or expired; check that it is correct. A persistent token starts with pst-.';
+
+  @override
+  String get auth_tokenMustStartPst =>
+      'Invalid token format; it should start with pst-';
+
+  @override
+  String get auth_tokenFormatDetail =>
+      'Invalid token format. A persistent token starts with pst- followed by at least 10 characters. Check the token you entered.';
+
+  @override
+  String get danbooru_credentialsExpired =>
+      'Credentials expired; sign in again';
+
+  @override
+  String get danbooru_networkRetryLater =>
+      'Network connection failed; it will retry when the network is back';
+
+  @override
+  String get danbooru_invalidCredentials =>
+      'Could not verify the credentials; check the username and API key';
+
+  @override
+  String danbooru_verifyFailed(Object error) {
+    return 'Verification failed: $error';
+  }
+
+  @override
+  String get danbooru_credentialsRequired =>
+      'Username and API key cannot be empty';
+
+  @override
+  String get danbooru_networkCheck =>
+      'Network connection failed; check your connection';
+
+  @override
+  String get danbooru_loginFailedNetwork =>
+      'Sign-in failed; check your network connection';
+
+  @override
+  String get danbooru_blacklistLoginRequired =>
+      'Sign in to a Danbooru account first';
+
+  @override
+  String get danbooru_blacklistPushFailed =>
+      'Failed to push the Danbooru blacklist';
+
+  @override
+  String danbooru_blacklistSyncFailed(Object error) {
+    return 'Sync failed: $error';
+  }
+
+  @override
+  String comfyui_submitFailed(Object detail) {
+    return 'Failed to submit the workflow: $detail';
+  }
+
+  @override
+  String comfyui_uploadFailed(Object detail) {
+    return 'Failed to upload the image: $detail';
+  }
+
+  @override
+  String comfyui_fetchImageFailed(Object detail) {
+    return 'Failed to fetch the image: $detail';
+  }
+
+  @override
+  String comfyui_historyMissing(Object id) {
+    return 'Task history not found: $id';
+  }
+
+  @override
+  String get comfyui_unknownError => 'Unknown error';
+
+  @override
+  String comfyui_cannotConnect(Object url) {
+    return 'Cannot connect to the ComfyUI server ($url)';
+  }
+
+  @override
+  String get comfyui_noOutput => 'The task produced no output';
+
+  @override
+  String comfyui_nodesNoImage(Object nodes) {
+    return 'The specified output nodes produced no image: $nodes';
+  }
+
+  @override
+  String get comfyui_noImageOutput => 'The task produced no image';
+
+  @override
+  String get comfyui_executionError => 'Execution error';
+
+  @override
+  String comfyui_missingNodes(Object nodes) {
+    return 'Missing ComfyUI nodes: $nodes. Install or enable the custom nodes in ComfyUI, then restart ComfyUI.';
+  }
+
+  @override
+  String get enhance_cannotReadSize => 'Could not read the image size';
+
+  @override
+  String enhance_upscaleFailed(Object error) {
+    return 'Upscale failed: $error';
+  }
+
+  @override
+  String enhance_vibeEncodeFailed(Object error) {
+    return 'Vibe encoding failed: $error';
+  }
+
+  @override
+  String enhance_enhanceFailed(Object error) {
+    return 'Image enhancement failed: $error';
+  }
+
+  @override
+  String enhance_annotateFailed(Object error) {
+    return 'Image annotation failed: $error';
+  }
+
+  @override
+  String get enhance_timeout => 'Request timed out';
+
+  @override
+  String get enhance_networkError => 'Network connection error';
+
+  @override
+  String enhance_serverError(Object status) {
+    return 'Server returned an error: $status';
+  }
+
+  @override
+  String enhance_serverErrorDetail(Object status, Object detail) {
+    return 'Server returned an error: $status ($detail)';
+  }
+
+  @override
+  String get proxy_connectTimeout => 'Connection timed out';
+
+  @override
+  String get proxy_cannotConnect => 'Cannot connect to the server';
+
+  @override
+  String get proxy_connectFailed => 'Connection failed';
+
+  @override
+  String get proxy_testServerUnreachable => 'Cannot connect to the test server';
+
+  @override
+  String proxy_testFailed(Object error) {
+    return 'Test failed: $error';
+  }
+
+  @override
+  String get avatar_noFilePath => 'Could not get the file path';
+
+  @override
+  String get avatar_sourceMissing =>
+      'The source file does not exist or was deleted';
+
+  @override
+  String avatar_copyFailed(Object error) {
+    return 'Could not copy the file: $error';
+  }
+
+  @override
+  String avatar_saveFailed(Object error) {
+    return 'Could not save the avatar: $error';
+  }
+
+  @override
+  String avatar_operationFailed(Object error) {
+    return 'Operation failed: $error';
+  }
+
+  @override
+  String get vibeExport_rawImage => 'Original image';
+
+  @override
+  String get vibeExport_vibePreview => 'Vibe preview';
+
+  @override
+  String get vibeExport_libraryThumbnail => 'Library thumbnail';
+
+  @override
+  String get vibeExport_pngTitle => 'Export PNG Vibe image';
+
+  @override
+  String get vibeExport_pngDirectoryTitle => 'Choose a PNG export folder';
+
+  @override
+  String get vibeExport_fileTitle => 'Export Vibe file';
+
+  @override
+  String get vibeExport_bundleTitle => 'Export Vibe bundle';
+
+  @override
+  String get vibeExport_zipTitle => 'Export Vibe ZIP';
+
+  @override
+  String get vibeExport_nothingToExport => 'No Vibe entries to export';
+
+  @override
+  String get vibeImport_fileParseFailed => 'Failed to parse the file';
+
+  @override
+  String get vibeImport_importFiles => 'Importing files';
+
+  @override
+  String get vibeImport_noVibeData => 'The image contains no valid Vibe data';
+
+  @override
+  String get vibeImport_importImages => 'Importing images';
+
+  @override
+  String get vibeImport_encodingParseFailed => 'Failed to parse the encoding';
+
+  @override
+  String get vibeImport_importEncodings => 'Importing encodings';
+
+  @override
+  String vibeImport_namingCancelled(Object name) {
+    return 'Naming cancelled; skipped: $name';
+  }
+
+  @override
+  String vibeImport_nameEmpty(Object name) {
+    return 'Name is empty; skipped: $name';
+  }
+
+  @override
+  String vibeImport_nameConflict(Object name) {
+    return 'Name conflict; skipped: $name';
+  }
+
+  @override
+  String get vibeImport_saveFailed => 'Save failed';
+
+  @override
+  String vibeFile_missingRawImage(Object file) {
+    return 'The file has no usable original image data: $file (type=image). It may be damaged or incomplete; delete it and save again.';
+  }
+
+  @override
+  String get generation_countMustBePositive =>
+      'Generation count must be greater than 0';
+
+  @override
+  String get generation_allTasksFailed => 'All generation tasks failed';
+
+  @override
+  String get generation_failedShort => 'Generation failed';
+
+  @override
+  String generation_tasksFailedAfterRetry(Object count) {
+    return '$count tasks still failed after retrying';
+  }
+
+  @override
+  String get generation_streamFallbackUnavailable =>
+      'Streaming generation is unsupported and cannot fall back automatically (parameters were lost)';
+
+  @override
+  String generation_streamFallbackFailed(Object error) {
+    return 'Falling back to non-streaming generation failed: $error';
+  }
+
+  @override
+  String get generation_batchSizeMustBePositive =>
+      'Batch count and batch size must be greater than 0';
+
+  @override
+  String get clipboard_unsupportedPlatform =>
+      'The system clipboard is not supported on this platform';
+
+  @override
+  String get clipboard_decodeFailed =>
+      'Could not decode the image to copy it to the clipboard';
+
+  @override
+  String drop_remoteImageTooLarge(Object size) {
+    return 'The remote image download exceeds $size MB';
+  }
+
+  @override
+  String get apiEndpoint_empty => 'API address cannot be empty';
+
+  @override
+  String get apiEndpoint_invalid => 'Invalid API address';
+
+  @override
+  String get apiEndpoint_httpOnly =>
+      'Only http or https API addresses are supported';
+
+  @override
+  String get apiEndpoint_noExtras =>
+      'The API address cannot contain query parameters, fragments or user info';
+
+  @override
+  String gallery_initFailed(Object error) {
+    return 'Initialization failed: $error';
+  }
+
+  @override
+  String gallery_loadFoldersFailed(Object error) {
+    return 'Failed to load folders: $error';
+  }
+
+  @override
+  String gallery_refreshFailed(Object error) {
+    return 'Refresh failed: $error';
+  }
+
+  @override
+  String gallery_clearCacheFailed(Object error) {
+    return 'Failed to clear the cache: $error';
+  }
+
+  @override
+  String gallery_folderInaccessible(Object error) {
+    return 'Cannot access the image folder: $error';
+  }
+
+  @override
+  String gallery_scanFailed(Object error) {
+    return 'Image scan failed: $error';
+  }
+
+  @override
+  String gallery_galleryInitFailed(Object error) {
+    return 'Gallery initialization failed: $error';
+  }
+
+  @override
+  String get cache_clearInProgress =>
+      'A clear operation is already in progress';
+
+  @override
+  String vibeImport_imageProgress(Object current, Object total, Object source) {
+    return 'Importing image ($current/$total): $source';
+  }
+
+  @override
+  String get vibeImport_clipboardSource => 'Clipboard';
+
+  @override
+  String get resolution_noAdjustment => 'No adjustment needed';
+
+  @override
+  String get dataRefresh_updating => 'Updating data...';
+
+  @override
+  String dataRefresh_updatingService(Object service) {
+    return 'Updating $service...';
+  }
 }

@@ -5,6 +5,7 @@ import 'package:dio/io.dart';
 
 import '../utils/app_logger.dart';
 import 'windows_proxy_helper.dart';
+import '../utils/localization_extension.dart';
 
 /// 代理测试结果
 class ProxyTestResult {
@@ -89,9 +90,9 @@ class ProxyService {
 
   static String _getErrorMessage(DioException e) {
     return switch (e.type) {
-      DioExceptionType.connectionTimeout => '连接超时',
-      DioExceptionType.connectionError => '无法连接到服务器',
-      _ => e.message ?? '连接失败',
+      DioExceptionType.connectionTimeout => currentL10n.proxy_connectTimeout,
+      DioExceptionType.connectionError => currentL10n.proxy_cannotConnect,
+      _ => e.message ?? currentL10n.proxy_connectFailed,
     };
   }
 
@@ -127,11 +128,11 @@ class ProxyService {
           AppLogger.d('Proxy test URL failed ($url): $e', 'ProxyService');
         }
       }
-      return ProxyTestResult.failure('无法连接到测试服务器');
+      return ProxyTestResult.failure(currentL10n.proxy_testServerUnreachable);
     } on DioException catch (e) {
       return ProxyTestResult.failure(_getErrorMessage(e));
     } catch (e) {
-      return ProxyTestResult.failure('测试失败: $e');
+      return ProxyTestResult.failure(currentL10n.proxy_testFailed('$e'));
     } finally {
       dio.close();
     }
@@ -159,7 +160,7 @@ class ProxyService {
     } on DioException catch (e) {
       return ProxyTestResult.failure(_getErrorMessage(e));
     } catch (e) {
-      return ProxyTestResult.failure('测试失败: $e');
+      return ProxyTestResult.failure(currentL10n.proxy_testFailed('$e'));
     } finally {
       dio.close();
     }

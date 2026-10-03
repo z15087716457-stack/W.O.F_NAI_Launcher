@@ -536,9 +536,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_savedAccounts => '保存済みアカウント';
 
   @override
-  String get settings_appearance => '外観';
-
-  @override
   String get settings_style => 'スタイル';
 
   @override
@@ -560,25 +557,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_shortcuts => 'ショートカット';
 
   @override
-  String get settings_generation => '生成';
-
-  @override
-  String get settings_dataStorage => 'データとストレージ';
-
-  @override
-  String get settings_privacySharing => '保護と共有';
-
-  @override
-  String get settings_integrations => '連携';
-
-  @override
   String get settings_generationInputSection => '入力';
 
   @override
   String get settings_generationFeedbackSection => '完了通知';
-
-  @override
-  String get settings_selectStyle => 'スタイルの選択';
 
   @override
   String get settings_selectFont => 'フォントの選択';
@@ -694,9 +676,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_extraRootsIndexImportConfirm => '今すぐインポート';
 
   @override
-  String get settings_about => '概要';
-
-  @override
   String settings_version(Object version) {
     return 'バージョン $version';
   }
@@ -749,16 +728,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_thirdPartyApiAccount => 'サードパーティのサイト API';
 
   @override
-  String get settings_apiSite => 'API サイト';
-
-  @override
-  String get settings_notLoggedIn => 'ログインしてアバターとニックネームを設定してください';
-
-  @override
   String get settings_goToLogin => 'ログインに移動';
-
-  @override
-  String get settings_tapToChangeAvatar => 'タップしてアバターを変更します';
 
   @override
   String get settings_changeAvatar => 'アバターの変更';
@@ -832,12 +802,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get generation_pleaseInputPrompt => 'プロンプトを入力してください';
-
-  @override
-  String get generation_emptyPromptHint => 'プロンプトを入力し、「生成」をクリックします';
-
-  @override
-  String get generation_imageWillShowHere => 'ここに画像が表示されます';
 
   @override
   String get generation_generationFailed => '生成に失敗しました';
@@ -3218,9 +3182,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get drop_processing => '画像を処理しています...';
 
   @override
-  String get characterEditor_close => '閉じる';
-
-  @override
   String get characterEditor_clearAll => 'すべてクリア';
 
   @override
@@ -4086,22 +4047,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_folderDeleteFailed => 'フォルダーの削除に失敗しました';
 
   @override
-  String get localGallery_cachingMetadata => 'メタデータをキャッシュしています...';
-
-  @override
-  String get localGallery_metadataCacheStats => 'メタデータ キャッシュ統計';
-
-  @override
-  String get localGallery_totalImages => '合計画像数';
-
-  @override
   String get localGallery_withMetadata => 'メタデータあり';
 
   @override
   String get localGallery_skipped => 'スキップされました';
-
-  @override
-  String get localGallery_remaining => '残り';
 
   @override
   String get localGallery_cacheMonitor => 'キャッシュ モニター';
@@ -4757,9 +4706,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_keyNavigate => '↑↓/スクロール';
-
-  @override
   String get autocomplete_actionSelect => '選択してください';
 
   @override
@@ -4767,9 +4713,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get autocomplete_actionClose => '閉じる';
-
-  @override
-  String get autocomplete_categoryRecommended => '推奨';
 
   @override
   String get autocomplete_categoryCharacter => 'キャラクター';
@@ -6550,15 +6493,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_openFolderFailed => 'フォルダーを開けませんでした';
 
   @override
-  String get settings_pleaseLoginFirst => 'まずログインしてください';
-
-  @override
-  String get settings_accountNotFound => 'アカウント情報が見つかりません';
-
-  @override
-  String get settings_goToLoginPage => 'ログインページに移動';
-
-  @override
   String get settings_vibePathSaved => 'バイブライブラリのパスを保存しました';
 
   @override
@@ -6577,9 +6511,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get settings_resetPathConfirm =>
       'データ ストレージ パスをリセットした後、反映するにはアプリの再起動が必要です。\\n\\nデフォルトのパスは次回起動時に有効になります。続行しますか？';
-
-  @override
-  String get settings_kritaBridgeTitle => 'Krita Bridge';
 
   @override
   String get settings_kritaBridgeEnable => 'Krita ローカル ブリッジを有効にする';
@@ -6634,9 +6565,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_fontScale => 'フォント サイズ';
 
   @override
-  String get settings_fontScale_description => 'グローバルフォントスケールを調整します';
-
-  @override
   String get settings_fontScale_previewSmall => '光影落在画布上。';
 
   @override
@@ -6644,9 +6572,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_fontScale_previewLarge => 'Let colors tell a story.';
-
-  @override
-  String get settings_fontScale_reset => 'リセット';
 
   @override
   String get settings_fontScale_done => '完了';
@@ -6707,19 +6632,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'デフォルト (Documents/NAI_Launcher/images/)';
 
   @override
-  String settings_defaultVibePath(Object path) {
-    return '$path (デフォルト)';
-  }
-
-  @override
   String get settings_defaultHivePath => 'デフォルト (%APPDATA%/NAI_Launcher/hive/)';
-
-  @override
-  String get settings_protectionMode => '保護モード';
-
-  @override
-  String get settings_protectionModeSubtitle =>
-      '以下のオプションを通じて、ローカル資産、共有コピー、高コストおよび高頻度の画像生成操作を保護します。オフにしても各設定値は保持されますが、機能は無効になります。';
 
   @override
   String get settings_protectionFeatures => '保護機能';
@@ -7043,12 +6956,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get cacheStats_refreshNow => '今すぐ更新';
-
-  @override
-  String get cacheStats_refreshed => '更新されました';
-
-  @override
   String get cacheStats_resetStats => '統計をリセット';
 
   @override
@@ -7062,16 +6969,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cacheStats_l3Sqlite => 'L3 SQLite データベース';
-
-  @override
-  String cacheStats_recordCount(Object count) {
-    return '$count レコード';
-  }
-
-  @override
-  String cacheStats_databaseValue(Object imageCount, Object metadataCount) {
-    return '$imageCount 画像 · $metadataCount メタデータ行';
-  }
 
   @override
   String get galleryCache_rescanTitle => 'ギャラリーを再スキャン';
@@ -7840,10 +7737,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get releaseNotes => 'リリースノート';
 
   @override
-  String get updatePortableManualHint =>
-      'このビルドはアプリ内更新に対応していません。Release ページから新しいバージョンを手動でダウンロードしてください。';
-
-  @override
   String updateDownloadingProgress(Object percent) {
     return '更新パッケージをダウンロードしています: $percent%';
   }
@@ -7886,17 +7779,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get updateInstallingHint => 'インストーラーが起動しました。アプリは終了し、自動的に更新が完了します。';
 
   @override
-  String get updateInstallConfirmationTitle => '今すぐ更新をインストールしますか？';
-
-  @override
-  String get updateInstallConfirmationBody =>
-      'アプリを安全に終了して更新をインストールし、自動的に再起動します。実行中の生成・ダウンロードタスクは停止するため、必要な内容を先に保存してください。';
-
-  @override
   String get remindMeLater => '4時間後に通知';
-
-  @override
-  String get skipThisVersion => 'このバージョンをスキップ';
 
   @override
   String updateNoticeAvailable(Object version) {
@@ -7936,9 +7819,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get goToDownload => 'ダウンロードに移動';
-
-  @override
-  String get versionSkipped => 'バージョンがスキップされました';
 
   @override
   String get cannotOpenUrl => 'リンクを開けません';
@@ -8317,16 +8197,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_createFolder => 'フォルダーを作成';
 
   @override
-  String galleryScan_skipped(int count) {
-    return 'スキップ $count';
-  }
-
-  @override
-  String galleryScan_withMetadata(int count) {
-    return 'メタデータあり $count';
-  }
-
-  @override
   String galleryScan_failed(int count) {
     return '失敗 $count';
   }
@@ -8336,9 +8206,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get galleryScan_processing => '処理中';
-
-  @override
-  String get galleryScan_pending => '処理待ち';
 
   @override
   String get vibeDetail_useAll => 'すべて使用';
@@ -8463,28 +8330,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_settingsTitle => 'オートコンプリート';
-
-  @override
-  String get autocomplete_enable => 'オートコンプリートを有効にする';
-
-  @override
   String get autocomplete_resultLimit => '結果数';
-
-  @override
-  String get autocomplete_allResults => 'すべて';
-
-  @override
-  String get autocomplete_showAliases => '一致した別名を表示';
-
-  @override
-  String get autocomplete_showTranslations => '中国語訳を表示';
-
-  @override
-  String get autocomplete_autoComma => '挿入後にカンマを追加';
-
-  @override
-  String get autocomplete_dataSourcesTitle => 'データソースとキャッシュ';
 
   @override
   String get autocomplete_relatedTagsTitle => 'タグ拡張';
@@ -8527,22 +8373,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tagExpansion_wikiUnavailable => 'このタグの説明はまだローカルにありません。';
 
   @override
-  String get autocomplete_danbooruApi => 'Danbooru オンライン補完';
-
-  @override
   String get autocomplete_danbooruPrivacy => '現在の英語タグのみ送信し、プロンプト全体は送信しません';
-
-  @override
-  String get autocomplete_llmTranslation => '不足する翻訳に Prompt Assistant を使用';
-
-  @override
-  String get autocomplete_llmRouteMissing =>
-      '先に Prompt Assistant で Translate ルートを設定してください';
-
-  @override
-  String autocomplete_llmRoute(String route) {
-    return '現在のルート：$route。モデル利用料が発生する場合があります。';
-  }
 
   @override
   String get autocomplete_cooccurrence => 'オフライン関連タグデータベース';
@@ -8551,9 +8382,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String autocomplete_entryCount(int count) {
     return '$count 件';
   }
-
-  @override
-  String get autocomplete_cacheTitle => 'オンライン・AI キャッシュ';
 
   @override
   String get autocomplete_clearDanbooruCache => 'Danbooru キャッシュを消去';
@@ -8910,10 +8738,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_noFolders => 'フォルダーはまだありません';
 
   @override
-  String get promptBlockLibrary_favoriteMenuEmptyCollections =>
-      'コレクションはまだありません。サイドバーの「お気に入り」から作成できます';
-
-  @override
   String get promptBlockLibrary_emptyFavorites =>
       'お気に入りのブロックはまだありません。ブロックの ★ で登録できます';
 
@@ -8949,9 +8773,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_folderNameHint => 'フォルダー名';
 
   @override
-  String get promptBlockLibrary_blockContent => '内容';
-
-  @override
   String get promptBlockLibrary_basicPrompt => '基本プロンプト';
 
   @override
@@ -8968,13 +8789,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptBlockLibrary_stepsLabel => 'ステップ数';
 
   @override
-  String get promptBlockLibrary_cfgLabel => 'PG';
-
-  @override
   String get promptBlockLibrary_noiseScheduleLabel => 'ノイズスケジュール';
-
-  @override
-  String get promptBlockLibrary_cfgRescaleLabel => 'PGR';
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
@@ -9080,28 +8895,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String promptBlockLibrary_favoriteSelected(int count) {
-    return '選択した $count 個のブロックをお気に入りに追加';
-  }
-
-  @override
-  String promptBlockLibrary_unfavoriteSelected(int count) {
-    return '選択した $count 個のブロックのお気に入りを解除';
-  }
-
-  @override
-  String promptBlockLibrary_moveToSelected(int count) {
-    return '$count 個のブロックを移動先…';
-  }
-
-  @override
   String promptBlockLibrary_deleteSelected(int count) {
     return '選択した $count 個のブロックを削除';
-  }
-
-  @override
-  String promptBlockLibrary_blocksMoved(int count) {
-    return '$count 個のブロックを移動しました';
   }
 
   @override
@@ -9163,17 +8958,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_importLibraryBackup => 'ライブラリバックアップをインポート…';
-
-  @override
-  String get promptBlockLibrary_exportBlockAsTxt => 'TXT としてエクスポート';
-
-  @override
-  String get promptBlockLibrary_exportTxtDone => 'TXT をエクスポートしました';
-
-  @override
-  String promptBlockLibrary_exportTxtFailed(String error) {
-    return 'エクスポートに失敗しました：$error';
-  }
 
   @override
   String get promptBlockLibrary_importTxtTitle => 'TXT ファイルを選択';
@@ -10238,12 +10022,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wiki_addToCollection => 'コレクションに追加';
 
   @override
-  String get wiki_importBlock => '単一アトムのブロックとして保存';
-
-  @override
-  String get wiki_inBlockLibrary => 'ブロックライブラリに登録済み';
-
-  @override
   String get wiki_loadMore => 'さらに読み込む';
 
   @override
@@ -10269,4 +10047,2519 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shortcut_action_vibe_detail_next_sub_vibe => '次のサブ Vibe';
+
+  @override
+  String get settings_addAccountsSwitchBetweenThem => '追加したアカウントをここで切り替えられます。';
+
+  @override
+  String get settings_current => '現在';
+
+  @override
+  String get settings_emailLogin => 'メールログイン';
+
+  @override
+  String get settings_signedIn => 'ログイン済み';
+
+  @override
+  String get settings_switch => '切替';
+
+  @override
+  String get settings_accountActions => 'アカウント操作';
+
+  @override
+  String get settings_editProfile => '情報を編集';
+
+  @override
+  String get settings_setDefault => '既定に設定';
+
+  @override
+  String get settings_credentialsUpdated => '認証情報を更新しました';
+
+  @override
+  String get settings_updateCredentials => '認証情報を更新';
+
+  @override
+  String get settings_accountDetails => 'アカウントの詳細';
+
+  @override
+  String get settings_localAccountProfile => 'ローカル情報';
+
+  @override
+  String get settings_setDefault2 => '既定にする';
+
+  @override
+  String get settings_credentialsWereNotUpdatedCheck =>
+      '認証情報を更新できませんでした。トークンと接続を確認してください。';
+
+  @override
+  String get settings_updateCredentials2 => '認証情報を更新';
+
+  @override
+  String get settings_checking => '確認中…';
+
+  @override
+  String get settings_enterNewSignInToken => '新しいログイントークンを入力してください。確認後に更新します。';
+
+  @override
+  String get auth_signInAccounts => 'ログインとアカウント';
+
+  @override
+  String get auth_notSignedIn => '未ログイン';
+
+  @override
+  String get auth_chooseAccountContinue => 'アカウントを選択して続ける';
+
+  @override
+  String get auth_manageAccounts2 => 'アカウント管理';
+
+  @override
+  String get auth_subscriptionExpired => 'サブスクリプションの期限切れ';
+
+  @override
+  String get settings_tagExpansion => 'タグ検索';
+
+  @override
+  String get settings_tagDictionaries => 'タグ辞書';
+
+  @override
+  String get settings_cacheMaintenance => 'キャッシュの管理';
+
+  @override
+  String get settings_clear => '消去';
+
+  @override
+  String get settings_autoRefresh => '自動更新';
+
+  @override
+  String get settings_searchFonts => 'フォントを検索';
+
+  @override
+  String get settings_couldNotLoadFonts => 'フォントを読み込めません';
+
+  @override
+  String get settings_recommended => 'おすすめ';
+
+  @override
+  String get settings_included => '内蔵';
+
+  @override
+  String get settings_systemFonts => 'システム';
+
+  @override
+  String get settings_fontPreview => 'プレビュー';
+
+  @override
+  String get settings_onlineFontsLoadAfterApplying => 'オンラインフォントは適用後に読み込まれます。';
+
+  @override
+  String get settings_saving => '保存設定';
+
+  @override
+  String get settings_howGeneratedImagesSaved => '生成画像の保存方法';
+
+  @override
+  String get settings_assetsDisplay => '素材と表示';
+
+  @override
+  String get settings_vibeLocationThumbnailQuality => 'Vibe の保存先とサムネイル品質';
+
+  @override
+  String get settings_applicationData => 'アプリデータ';
+
+  @override
+  String get settings_gallerySources => 'ギャラリーのソース';
+
+  @override
+  String get settings_manageAdditionalGalleryFolders => '追加のギャラリーフォルダーを管理';
+
+  @override
+  String get settings_default => '既定';
+
+  @override
+  String get settings_keyboard => 'キーボード操作';
+
+  @override
+  String get settings_customizeFrequentlyUsedActions => 'よく使う操作をカスタマイズ';
+
+  @override
+  String get settings_manageShortcuts => 'ショートカット管理';
+
+  @override
+  String get settings_costReminders => '消費の通知';
+
+  @override
+  String get settings_requestPacing => 'リクエスト間隔';
+
+  @override
+  String get settings_notificationsSound => '通知とサウンド';
+
+  @override
+  String get settings_lockCanvasCamera => 'キャンバスのカメラを固定';
+
+  @override
+  String get settings_dictionariesCache => '辞書とキャッシュ';
+
+  @override
+  String get settings_defaultAccount2 => '既定のアカウント';
+
+  @override
+  String get settings_signInAutomatically => '起動時に自動ログイン';
+
+  @override
+  String get settings_signInCredentials => 'ログイン認証';
+
+  @override
+  String get settings_translationInterfaces => '翻訳機能';
+
+  @override
+  String get settings_presetsBuiltInRules => 'プリセットと内蔵ルール';
+
+  @override
+  String get settings_preferenceBackupRestore => '設定のバックアップと復元';
+
+  @override
+  String get settings_searchSettingsFeatures => '設定や機能を検索';
+
+  @override
+  String get settings_noMatchingSettings => '該当する設定はありません';
+
+  @override
+  String get settings_change => '変更';
+
+  @override
+  String get settings_couldNotPlaySoundCheck => '音声ファイルを確認してください。';
+
+  @override
+  String get settings_useDefaultCompletionSound => '既定の完了音を使用';
+
+  @override
+  String get settings_soundPreview => '音声プレビュー';
+
+  @override
+  String get settings_listenCurrentCompletionSound => '現在の完了音を試聴';
+
+  @override
+  String get settings_playSound => '試聴';
+
+  @override
+  String get settings_searchResults => '検索結果';
+
+  @override
+  String get settings_promptInput => 'プロンプト入力';
+
+  @override
+  String get settings_manageTranslationModelsRules => '翻訳モデルとルールを管理';
+
+  @override
+  String get settings_browsing => '閲覧方法';
+
+  @override
+  String get settings_chooseHowViewImages => '画像の閲覧方法を選択';
+
+  @override
+  String get settings_canvasControls => 'キャンバス操作';
+
+  @override
+  String get settings_keepViewSteady => '視点を固定';
+
+  @override
+  String get settings_appearance2 => '外観スタイル';
+
+  @override
+  String get settings_chooseLightDarkWorkspace => '明るい・暗いスタイルを選択';
+
+  @override
+  String get settings_textLanguage => '文字と言語';
+
+  @override
+  String get settings_makeReadingComfortable => '読みやすさを統一';
+
+  @override
+  String get settings_adjustSettingsPagesDialogsOnly => '設定画面と設定ダイアログの文字サイズ';
+
+  @override
+  String get settings_motionNotifications => '動きと通知';
+
+  @override
+  String get settings_reduceDistractionsKnowWorkFinishes => '邪魔を減らし、完了をお知らせ';
+
+  @override
+  String get settings_notificationStyle => '通知スタイル';
+
+  @override
+  String get settings_notificationsAppearUpperRightWrap =>
+      '通知は右上に表示され、長い文章は折り返し、進行中のタスクは完了後に閉じます。';
+
+  @override
+  String get settings_preview => 'プレビュー';
+
+  @override
+  String get settings_versionUpdates => 'バージョンと更新';
+
+  @override
+  String get settings_currentVersionUpdateOptions => '現在のバージョンと更新設定';
+
+  @override
+  String get settings_diagnosticsResources => '診断と資料';
+
+  @override
+  String get settings_logsFontsOpenSourceProject => 'ログ・フォント・オープンソース';
+
+  @override
+  String get settings_viewLicenses => 'ライセンスを見る';
+
+  @override
+  String get settings_openProject => 'プロジェクトを開く';
+
+  @override
+  String get settings_actionIncomplete => '操作は完了しませんでした';
+
+  @override
+  String get settings_exportPreferences => '設定をエクスポート';
+
+  @override
+  String get settings_preferencesExported => '設定をエクスポートしました';
+
+  @override
+  String get settings_noAutomaticBackupYet => '自動バックアップはまだありません';
+
+  @override
+  String get settings_restorePreviousPreferences => '前の設定に復元';
+
+  @override
+  String get settings_importPreferences => '設定をインポート';
+
+  @override
+  String get settings_apply => '適用';
+
+  @override
+  String get settings_preferencesAppliedPreviousSettingsBacked =>
+      '設定を適用し、以前の設定を保存しました';
+
+  @override
+  String get settings_restoreDefaultPreferences => '既定の設定に戻す';
+
+  @override
+  String get settings_choosePreferencesResetCurrentSettings =>
+      'リセットする項目を選択します。現在の設定は保存されます。';
+
+  @override
+  String get settings_appearanceSoundControls => '外観・サウンド・操作';
+
+  @override
+  String get settings_inputAutocomplete => '入力と自動補完';
+
+  @override
+  String get settings_privacyGenerationProtection => 'プライバシーと生成の保護';
+
+  @override
+  String get settings_moveAppearanceControlsInputProtection =>
+      '外観・操作・入力・保護の設定を他の端末へ移行できます。';
+
+  @override
+  String get settings_rollbackCopySavedBeforeImport =>
+      'インポートやリセットの前に元の設定を自動保存します。';
+
+  @override
+  String get settings_resetSelectedScopeWhileKeeping =>
+      '範囲を選んでリセットし、アカウント・モデル・ライブラリ・創作内容を保持します。';
+
+  @override
+  String get settings_chooseScope => '範囲を選択';
+
+  @override
+  String get settings_preferenceManagement => '設定の管理';
+
+  @override
+  String get settings_backupMigrationRecovery => 'バックアップ・移行・復元';
+
+  @override
+  String get settings_generalAppearance => '一般と外観';
+
+  @override
+  String get settings_makeWorkspaceComfortableReadUse => '使いやすく読みやすいワークスペースに。';
+
+  @override
+  String get settings_controlsShortcuts => '操作とショートカット';
+
+  @override
+  String get settings_chooseInteractionCanvasControlsKeyboard =>
+      '操作方法とキーボードショートカットを設定。';
+
+  @override
+  String get settings_generationPrompts => '生成とプロンプト';
+
+  @override
+  String get settings_managePromptInputGenerationReminders =>
+      'プロンプト入力と生成の動作を管理。';
+
+  @override
+  String get settings_galleryFiles => 'ギャラリーとファイル';
+
+  @override
+  String get settings_manageImageSavingGallerySources =>
+      '画像の保存、ギャラリーのソースと表示を管理。';
+
+  @override
+  String get settings_manageTagDictionariesIndexesCache => 'タグ辞書、索引とキャッシュを管理。';
+
+  @override
+  String get settings_novelaiAccounts => 'NovelAI アカウント';
+
+  @override
+  String get settings_viewAccountManageSignIn => 'アカウントとログインを管理。';
+
+  @override
+  String get settings_connectionsIntegrations => '接続と連携';
+
+  @override
+  String get settings_manageExternalToolsBridgesNetwork => '外部ツール、ブリッジとネットワーク。';
+
+  @override
+  String get settings_privacySharing2 => 'プライバシーと共有';
+
+  @override
+  String get settings_controlSharedInformationConfirmationBefore =>
+      '共有する情報と確認が必要な操作。';
+
+  @override
+  String get settings_aboutDiagnostics => '情報と診断';
+
+  @override
+  String get settings_updatesLogsProjectInformation => '更新、ログとプロジェクト情報。';
+
+  @override
+  String get settings_searchSettings => '設定を検索';
+
+  @override
+  String get settings_preferences => '使い方';
+
+  @override
+  String get settings_creationResources => '制作とリソース';
+
+  @override
+  String get settings_servicesConnections => 'サービスと接続';
+
+  @override
+  String get settings_safetyMaintenance => '安全とメンテナンス';
+
+  @override
+  String get settings_subscriptionActive => 'サブスクリプション有効';
+
+  @override
+  String get settings_availableBalance => '利用可能な残高';
+
+  @override
+  String get settings_subscriptionExpiry2 => 'サブスクリプション有効期限';
+
+  @override
+  String get settings_subscriptionDetailsUnavailable => 'サブスクリプション情報を取得できません';
+
+  @override
+  String get settings_loadingSubscriptionDetails => 'サブスクリプション情報を読み込み中…';
+
+  @override
+  String get settings_localDataStaysAvailableAfter => '有効期限後もローカルデータは保持されます。';
+
+  @override
+  String get settings_records => '件';
+
+  @override
+  String get settings_hitRate => 'ヒット率';
+
+  @override
+  String get settings_images => '画像';
+
+  @override
+  String get settings_cacheOverview => 'キャッシュの概要';
+
+  @override
+  String get settings_loginPreferences => 'ログイン設定';
+
+  @override
+  String get settings_preselectedSignInPage => 'ログイン画面で優先的に選択します。';
+
+  @override
+  String get settings_noAccounts => 'アカウントなし';
+
+  @override
+  String get settings_useLastSessionOffNext =>
+      '前回の認証情報を使用します。オフにすると次回はログイン画面を開きます。';
+
+  @override
+  String get settings_couldNotSaveLoginPreference => 'ログイン設定を保存できませんでした。';
+
+  @override
+  String get settings_loginPreferencesUnavailable => 'ログイン設定を読み込めません。';
+
+  @override
+  String settings_applyPreferencesConfirm(Object count) {
+    return '$count 件の設定を適用します。現在の設定は自動保存され、「前の設定に復元」から戻せます。アカウント、認証情報、下書き、ライブラリ、モデル設定は個別に保持されます。';
+  }
+
+  @override
+  String get settings_restore => '復元';
+
+  @override
+  String get wiki_translating => '翻訳中';
+
+  @override
+  String get wiki_back => '前に戻る';
+
+  @override
+  String get wiki_readingTranslation => '訳文';
+
+  @override
+  String get wiki_readingOriginal => '原文';
+
+  @override
+  String get wiki_switchToOriginal => '原文に切り替え';
+
+  @override
+  String get wiki_switchToTranslation => '訳文に切り替え';
+
+  @override
+  String get wiki_retranslate => '再翻訳';
+
+  @override
+  String get wiki_onThisPage => '目次';
+
+  @override
+  String get wiki_overview => '概要';
+
+  @override
+  String get wiki_untranslated => 'まだ翻訳されていません';
+
+  @override
+  String get wiki_autoTranslateTagsArticles => 'タグと百科を自動翻訳';
+
+  @override
+  String get wiki_readingContent => '表示内容';
+
+  @override
+  String get wiki_categoryGeneral => '一般';
+
+  @override
+  String get wiki_categoryArtist => '絵師';
+
+  @override
+  String get wiki_categoryCopyright => '作品';
+
+  @override
+  String get wiki_categoryCharacter => 'キャラクター';
+
+  @override
+  String get wiki_categoryMeta => 'メタ';
+
+  @override
+  String get wiki_categoryContributor => '投稿者';
+
+  @override
+  String get wiki_categorySpecies => '種族';
+
+  @override
+  String get wiki_categoryLore => '設定';
+
+  @override
+  String get wiki_categoryLibrary => 'ローカル';
+
+  @override
+  String get toast_titleSuccess => '完了';
+
+  @override
+  String get toast_titleError => '操作失敗';
+
+  @override
+  String get toast_titleWarning => 'ご注意';
+
+  @override
+  String get toast_titleInfo => 'お知らせ';
+
+  @override
+  String get toast_titleProgress => '処理中';
+
+  @override
+  String get tagExpansion_autoTranslateVisible => '表示中のタグを自動翻訳';
+
+  @override
+  String get translationEditor_title => '翻訳ブロック';
+
+  @override
+  String get translationEditor_source => '原文';
+
+  @override
+  String get translationEditor_sourcePrefix => '原';
+
+  @override
+  String get translationEditor_generation => '画像生成用';
+
+  @override
+  String get translationEditor_editable => '編集可能';
+
+  @override
+  String get translationEditor_modified => '変更済み';
+
+  @override
+  String get translationEditor_edited => '編集済み';
+
+  @override
+  String get translationEditor_close => '閉じる';
+
+  @override
+  String get translationEditor_save => '保存';
+
+  @override
+  String get translationEditor_delete => 'ブロックを削除';
+
+  @override
+  String get translationEditor_restore => '原文テキストに戻す';
+
+  @override
+  String get translationEditor_configure => '翻訳モデルを設定';
+
+  @override
+  String translationEditor_readingFieldTitle(Object language) {
+    return '$languageの表示テキスト';
+  }
+
+  @override
+  String translationEditor_sourceWarning(Object language) {
+    return '原文が変更されました。$languageとの同期が必要です';
+  }
+
+  @override
+  String get translationEditor_editHint => '訳文の手動編集履歴です。原文の確認状態は変わりません';
+
+  @override
+  String get translationLanguage_chinese => '中国語';
+
+  @override
+  String get translationLanguage_english => '英語';
+
+  @override
+  String get translationLanguage_japanese => '日本語';
+
+  @override
+  String get translationLanguage_korean => '韓国語';
+
+  @override
+  String get promptBlockEditor_translationNeedsReview =>
+      '原文が変更されました。訳文の更新が必要です';
+
+  @override
+  String get promptBlockEditor_translationReviewHint =>
+      '原文を編集したら、この訳文も確認してください';
+
+  @override
+  String get modelTask_translateTitle => '原文 → 表示言語';
+
+  @override
+  String get modelTask_promptReverseTitle => '表示言語 → 原文';
+
+  @override
+  String get modelTask_tagTranslateTitle => 'タグ名の翻訳';
+
+  @override
+  String get modelTask_wikiTranslateTitle => '百科本文の翻訳';
+
+  @override
+  String get modelTask_translateDescription =>
+      'プロンプトとブロックを翻訳し、重み・グループ・タグの意味を保ちます。';
+
+  @override
+  String get modelTask_promptReverseDescription =>
+      '訳文での追加・削除・変更を原文に反映し、確認用に原文へ戻します。';
+
+  @override
+  String get modelTask_tagTranslateDescription => '表示中のタグに簡潔で正確な名前を付けます。';
+
+  @override
+  String get modelTask_wikiTranslateDescription =>
+      '百科本文を翻訳してレイアウトを整え、文脈に応じてクリックできるタグを選びます。';
+
+  @override
+  String get modelTask_connectionTest => 'モデル接続テスト';
+
+  @override
+  String get modelReasoning_serviceDefault => 'サービス既定';
+
+  @override
+  String get modelReasoning_off => 'オフ';
+
+  @override
+  String get modelReasoning_on => 'オン';
+
+  @override
+  String get modelReasoning_minimal => '最小';
+
+  @override
+  String get modelReasoning_low => '低';
+
+  @override
+  String get modelReasoning_medium => '中';
+
+  @override
+  String get modelReasoning_high => '高';
+
+  @override
+  String get modelReasoning_xhigh => '非常に高い';
+
+  @override
+  String get modelReasoning_max => '最大';
+
+  @override
+  String get modelProvider_custom => 'カスタムサービス';
+
+  @override
+  String get modelProvider_qwen => 'Qwen · Alibaba Model Studio';
+
+  @override
+  String get modelProvider_moonshot => 'Kimi · Moonshot AI';
+
+  @override
+  String get modelProvider_zhipu => 'Zhipu GLM';
+
+  @override
+  String get modelProvider_doubao => 'Doubao · Volcano Ark';
+
+  @override
+  String get modelProvider_hunyuan => 'Tencent Hunyuan';
+
+  @override
+  String get modelProvider_qianfan => 'Baidu Qianfan';
+
+  @override
+  String get modelProvider_siliconflow => 'SiliconFlow';
+
+  @override
+  String get modelProvider_zai => 'Z.AI · 国際';
+
+  @override
+  String get modelProvider_zhipuCodingPlan => 'Zhipu Coding Plan';
+
+  @override
+  String get modelProvider_kimiCoding => 'Kimi Coding';
+
+  @override
+  String get modelProvider_moonshotInternational => 'Moonshot AI · 国際';
+
+  @override
+  String get modelProvider_minimaxChinaChat => 'MiniMax · 中国 OpenAI';
+
+  @override
+  String get modelProvider_minimaxChinaMessages => 'MiniMax · 中国 Anthropic';
+
+  @override
+  String get modelProvider_minimaxInternationalMessages =>
+      'MiniMax · 国際 Anthropic';
+
+  @override
+  String get modelProvider_xiaomi => 'Xiaomi MiMo';
+
+  @override
+  String get modelProvider_antLing => 'Ant Ling';
+
+  @override
+  String get modelProvider_stepfunPlan => 'StepFun Step Plan';
+
+  @override
+  String get modelProvider_qwenTokenPlanChina => 'Qwen Token Plan · 中国';
+
+  @override
+  String get modelProvider_hintHuggingFace =>
+      '推論権限のある Hugging Face トークンを使用します。ルーターのモデル ID は手動で追加できます。';
+
+  @override
+  String get modelProvider_hintPlanKey =>
+      'プラン専用の API キーを使用します。利用できるモデルと範囲はプランの応答に従います。';
+
+  @override
+  String get modelProvider_hintInternationalEndpoint =>
+      '国際版のエンドポイントです。国際版プラットフォームの API キーを使用します。';
+
+  @override
+  String get modelProvider_hintRegionOpenAi =>
+      '対応する地域の API キーを使用します。OpenAI Chat Completions 互換のアドレスが入力済みです。';
+
+  @override
+  String get modelProvider_hintRegionAnthropic =>
+      '対応する地域の API キーを使用します。Anthropic Messages 互換のアドレスが入力済みです。';
+
+  @override
+  String get modelProvider_hintQwen =>
+      '既定は北京リージョンです。他のリージョンでは対応するキーを使い、エンドポイントを変更してください。';
+
+  @override
+  String get modelProvider_hintMinimax =>
+      '既定は国際版の従量課金エンドポイントです。中国版ではそのキーとエンドポイントを使用してください。';
+
+  @override
+  String get modelProvider_hintMoonshot =>
+      '既定は中国版です。国際版ではそのキーとエンドポイントを使用してください。';
+
+  @override
+  String get modelProvider_hintZhipu =>
+      '既定は従量課金のエンドポイントです。Coding Plan では専用アドレスを使用してください。';
+
+  @override
+  String get modelProvider_hintDoubao =>
+      'Ark の API キーを使用します。先にモデルを有効化するか、推論エンドポイント ID を追加してください。';
+
+  @override
+  String get modelProvider_hintCustom =>
+      '互換サービスのアドレスとキーを入力し、接続情報でプロトコルを選択してください。';
+
+  @override
+  String get modelProvider_hintLocal =>
+      '先にローカルサービスを起動してから、読み込まれたモデル一覧を取得してください。';
+
+  @override
+  String get modelProvider_hintDefault =>
+      'アドレスとプロトコルは入力済みです。キーを保存するとモデルを選択できます。';
+
+  @override
+  String get modelParams_temperatureRange => 'Temperature は 0〜2 の範囲で指定してください。';
+
+  @override
+  String get modelParams_topPRange => 'Top P は 0 より大きく 1 以下で指定してください。';
+
+  @override
+  String get modelParams_maxOutputPositive => '最大出力トークンは 0 より大きくしてください。';
+
+  @override
+  String get modelParams_anthropicTemperatureRange =>
+      'Anthropic の Temperature は 0〜1 の範囲で指定してください。';
+
+  @override
+  String get modelParams_anthropicSamplingConflict =>
+      'Anthropic では Temperature と Top P のどちらか一方を指定してください。モデルのパラメーターを確認してください。';
+
+  @override
+  String modelParams_thinkingBudgetTooSmall(Object minimum) {
+    return '最大出力は思考予算の下限 $minimum より大きくしてください。';
+  }
+
+  @override
+  String get modelOverrides_invalidHeaderName => '有効なヘッダー名を入力してください';
+
+  @override
+  String get modelOverrides_invalidHeaderValue => 'ヘッダーの値に改行や制御文字は使えません';
+
+  @override
+  String get modelOverrides_emptyBodyField => 'ボディのフィールド名は空にできません';
+
+  @override
+  String get modelOverrides_modelFromList => 'モデル ID はモデル一覧から設定してください';
+
+  @override
+  String get modelOverrides_streamMustBeFalse =>
+      'この接続は非ストリーミングのため、stream は false にしてください';
+
+  @override
+  String get modelConfig_changedSaveAgain => '設定が変更されました。もう一度保存してください。';
+
+  @override
+  String get modelConfig_presetChanged => '選択したプリセットが変更されました。選び直してください。';
+
+  @override
+  String get modelConfig_serviceDisabled => '選択したサービスが無効になりました。選び直してください。';
+
+  @override
+  String get modelConfig_modelChanged => '選択したモデルが変更されました。選び直してください。';
+
+  @override
+  String get modelConfig_reasoningChanged =>
+      'モデルの思考レベルが変更されました。選び直すか、モデルに従ってください。';
+
+  @override
+  String get modelConfig_presetIdRequired => 'プリセット ID は空にできません。';
+
+  @override
+  String get modelConfig_saveBuiltinAsCustom => '内蔵プリセットはカスタムプリセットとして保存してください。';
+
+  @override
+  String get modelConfig_namePromptRequired => '名前とプロンプトは空にできません。';
+
+  @override
+  String get modelConfig_builtinNotDeletable => '内蔵ルールは削除できません。';
+
+  @override
+  String get modelConfig_pasteFullJson => 'モデル設定の JSON を丸ごと貼り付けてください。';
+
+  @override
+  String get modelConfig_builtinNotOverwritable =>
+      '内蔵プリセットは上書きできません。カスタムプリセットとして複製してください。';
+
+  @override
+  String get modelConfig_invalidProvider => 'サービスの ID・名前・アドレスが無効です。';
+
+  @override
+  String get modelConfig_missingProvider => 'モデルに対応するサービスが存在しません。';
+
+  @override
+  String get modelConfig_invalidCustomPreset => 'カスタムプリセットの ID・名前・プロンプトが無効です。';
+
+  @override
+  String get modelConfig_changedImportAgain => '設定が変更されました。もう一度インポートしてください。';
+
+  @override
+  String get modelHealth_unverified =>
+      '接続はまだ確認されていません。モデルを使うか「接続をテスト」すると更新されます';
+
+  @override
+  String get modelHealth_healthy => '直近のリクエストは成功しました';
+
+  @override
+  String get modelHealth_limited =>
+      '接続できますが、直近のリクエストはレート制限されました（HTTP 429）。後で再試行するか、利用枠を確認してください';
+
+  @override
+  String get modelHealth_authentication => '認証に失敗しました。API キーを確認してください';
+
+  @override
+  String get modelHealth_permission => 'アクセスが拒否されました。サービスの権限を確認してください';
+
+  @override
+  String get modelHealth_timeout => '直近のリクエストはタイムアウトしました';
+
+  @override
+  String get modelHealth_network => '直近のリクエストはサービスに接続できませんでした';
+
+  @override
+  String get modelHealth_invalidResponse => '直近の応答が不正でした。詳細はリクエスト記録で確認できます';
+
+  @override
+  String get modelHealth_failed => '直近のリクエストは失敗しました';
+
+  @override
+  String modelHealth_failedStatus(Object status) {
+    return '直近のリクエストは失敗しました（HTTP $status）';
+  }
+
+  @override
+  String get modelRequest_statusPending => '待機中';
+
+  @override
+  String get modelRequest_statusRunning => 'リクエスト中';
+
+  @override
+  String get modelRequest_statusSuccess => '成功';
+
+  @override
+  String get modelRequest_statusFailed => '失敗';
+
+  @override
+  String get modelRequest_statusCancelled => 'キャンセル済み';
+
+  @override
+  String get modelRequest_fieldTime => '時刻';
+
+  @override
+  String get modelRequest_fieldMethod => 'メソッド';
+
+  @override
+  String get modelRequest_fieldUrl => 'URL';
+
+  @override
+  String get modelRequest_fieldRequestHeaders => 'リクエストヘッダー';
+
+  @override
+  String get modelRequest_fieldBody => '本文';
+
+  @override
+  String get modelRequest_fieldStatusCode => 'ステータスコード';
+
+  @override
+  String get modelRequest_fieldResponseHeaders => 'レスポンスヘッダー';
+
+  @override
+  String get modelRequest_fieldError => 'エラー';
+
+  @override
+  String get modelRequest_fieldInterface => 'インターフェース';
+
+  @override
+  String get modelRequest_fieldProvider => 'サービス';
+
+  @override
+  String get modelRequest_fieldModel => 'モデル';
+
+  @override
+  String get modelRequest_fieldProtocol => 'プロトコル';
+
+  @override
+  String get modelRequest_fieldStatus => '状態';
+
+  @override
+  String get modelRequest_fieldElapsed => '所要時間（ミリ秒）';
+
+  @override
+  String get modelRequest_fieldAttempts => '実行回数';
+
+  @override
+  String get modelRequest_fieldHttpRequests => 'HTTP リクエスト数';
+
+  @override
+  String get modelRequest_fieldParameters => '適用パラメーター';
+
+  @override
+  String get modelRequest_redacted => '[マスク済み]';
+
+  @override
+  String get modelRequest_emptyResponse => 'モデルが空の内容を返しました。';
+
+  @override
+  String get modelService_testFieldsIncomplete => 'テストの応答にフィールドが不足しています。';
+
+  @override
+  String get modelService_testFieldsInvalid => 'テストの応答のフィールドが正しくありません。';
+
+  @override
+  String get modelService_testGroupsInvalid => 'テストの応答のグループが正しくありません。';
+
+  @override
+  String get modelService_testSourceEmpty => 'テストの応答の原文が空です。';
+
+  @override
+  String get modelService_conversionCancelled => '変換をキャンセルしました';
+
+  @override
+  String get modelService_chooseInterfaceModel =>
+      '先に「設定 → モデルとAPI → 機能インターフェース」でサービスとモデルを選択してください。';
+
+  @override
+  String get modelService_enableServiceModel =>
+      '先に設定でサービスを有効にし、モデルを取得または手動で追加して選択してください。';
+
+  @override
+  String get modelSettings_keepEditsTitle => '現在の編集を保持しますか？';
+
+  @override
+  String get modelSettings_keepEditsBody => '変更はまだ保存されていません。保存してから切り替えますか？';
+
+  @override
+  String get modelSettings_discard => '破棄';
+
+  @override
+  String get modelSettings_saveAndSwitch => '保存して切り替え';
+
+  @override
+  String get modelSettings_addProvider => 'サービスを追加';
+
+  @override
+  String modelSettings_deleteProviderTitle(Object name) {
+    return '$name を削除しますか？';
+  }
+
+  @override
+  String get modelSettings_deleteProviderBody => 'このサービスの接続、キー、選択したモデルが削除されます。';
+
+  @override
+  String modelSettings_deleteProviderBindings(Object count) {
+    return '$count 件の機能のモデル割り当てが解除されます。プリセットは保持されます。';
+  }
+
+  @override
+  String modelSettings_deletePresetTitle(Object name) {
+    return '「$name」を削除しますか？';
+  }
+
+  @override
+  String get modelSettings_deletePresetBody =>
+      'このプリセットを使う機能は内蔵プリセットに戻ります。モデルの割り当ては保持されます。';
+
+  @override
+  String get modelSettings_configCopied => '設定をコピーしました。キー、カスタムヘッダー、ボディは含まれません。';
+
+  @override
+  String get modelSettings_importConfig => '設定をインポート';
+
+  @override
+  String get modelSettings_importConfigHint =>
+      'エクスポートした設定を貼り付けます。現在の設定は先にバックアップされ、キーは別に保存されたままです。';
+
+  @override
+  String get modelSettings_configJson => '設定 JSON';
+
+  @override
+  String modelSettings_importPreview(
+    Object providers,
+    Object models,
+    Object presets,
+  ) {
+    return '$providers 件のサービス、$models 件のモデル、$presets 件のカスタムプリセットをインポートします。';
+  }
+
+  @override
+  String get modelSettings_importMissingProviders => 'サービスまたはモデルの設定がありません。';
+
+  @override
+  String get modelSettings_checkConfig => '設定を確認';
+
+  @override
+  String get modelSettings_importAndReplace => 'インポートして置き換え';
+
+  @override
+  String get modelSettings_configImported => '設定をインポートしました';
+
+  @override
+  String get modelSettings_description => 'サービスの接続と翻訳設定を管理します。';
+
+  @override
+  String get modelSettings_configMenu => '設定の管理';
+
+  @override
+  String get modelSettings_copyConfig => '設定をコピー';
+
+  @override
+  String get modelSettings_tabProviders => 'サービス';
+
+  @override
+  String get modelSettings_tabInterfaces => '機能インターフェース';
+
+  @override
+  String get modelSettings_tabPresets => 'プリセットとプロンプト';
+
+  @override
+  String get modelSettings_tabRequests => 'リクエスト記録';
+
+  @override
+  String modelSettings_providersCount(Object count) {
+    return 'サービス · $count';
+  }
+
+  @override
+  String modelSettings_providerModelCount(Object count) {
+    return '$count 件のモデル';
+  }
+
+  @override
+  String get modelSettings_providerDisabledSuffix => ' · 無効';
+
+  @override
+  String get modelSettings_emptyTitle => '最初のモデルサービスを追加';
+
+  @override
+  String get modelSettings_emptyBody => 'よく使うサービスを選ぶか、カスタムエンドポイントに接続します。';
+
+  @override
+  String get modelSettings_customService => 'カスタムサービス';
+
+  @override
+  String get modelSettings_notConfigured => '未設定';
+
+  @override
+  String get modelSettings_preset => 'プリセット';
+
+  @override
+  String get modelSettings_presetBuiltin => '内蔵';
+
+  @override
+  String get modelSettings_presetUser => 'ユーザー';
+
+  @override
+  String get modelSettings_deletePreset => 'プリセットを削除';
+
+  @override
+  String modelSettings_presetCopyName(Object title, Object number) {
+    return '$title（$number）';
+  }
+
+  @override
+  String get modelSettings_recentRequests => '最近のリクエスト';
+
+  @override
+  String get modelSettings_recentRequestsHint =>
+      'このセッションの直近 100 件 · リクエストと応答の全文（認証情報はマスク済み）';
+
+  @override
+  String get modelSettings_clearRequests => 'クリア';
+
+  @override
+  String get modelSettings_requestsEmpty => '翻訳やモデルのテストを行うと、ここにリクエストが表示されます。';
+
+  @override
+  String get modelSettings_interfaceChangedElsewhere =>
+      '機能の設定が別の場所で変更されました。開き直してから編集してください。';
+
+  @override
+  String get modelSettings_configSaved => '設定を保存しました';
+
+  @override
+  String get modelSettings_viewBuiltinRules => '内蔵ルールを表示';
+
+  @override
+  String get modelSettings_viewEditPreset => 'プリセットを表示・編集';
+
+  @override
+  String get modelSettings_restoreBuiltinPreset => '内蔵プリセットに戻す';
+
+  @override
+  String get modelSettings_followUiLanguage => 'UI の言語に合わせる';
+
+  @override
+  String get modelSettings_providerAndModel => 'サービスとモデル';
+
+  @override
+  String get modelSettings_providerAndModelHelp => '有効なサービスで選択したモデルのみ表示されます';
+
+  @override
+  String get modelSettings_chooseProviderModel => 'サービスとモデルを選択';
+
+  @override
+  String get modelSettings_reasoning => '思考';
+
+  @override
+  String get modelSettings_reasoningHelp =>
+      '単純な翻訳では通常、思考は不要です。タグ付けや意味による分類なども行う場合は、モデルが対応する最も低い思考レベルをおすすめします。';
+
+  @override
+  String get modelSettings_reasoningHelpLabel => '思考レベルのヒント';
+
+  @override
+  String get modelSettings_usePreset => '使用するプリセット';
+
+  @override
+  String get modelSettings_outputLanguage => '出力言語';
+
+  @override
+  String get modelSettings_englishPrompt => '英語の生成プロンプト';
+
+  @override
+  String get modelSettings_englishPromptHelp => '原文に変更を反映し、英語の生成プロンプトを出力します。';
+
+  @override
+  String get modelSettings_targetLanguage => '翻訳先の言語';
+
+  @override
+  String get modelSettings_effective => '現在の設定';
+
+  @override
+  String get modelSettings_noModelSelected => '利用できるモデルが選択されていません';
+
+  @override
+  String modelSettings_reasoningSummaryInterface(Object level) {
+    return '思考：$level（この機能）';
+  }
+
+  @override
+  String modelSettings_reasoningSummaryModel(Object level) {
+    return '思考：$level（モデルに従う）';
+  }
+
+  @override
+  String get modelSettings_promptBlocksHint =>
+      '翻訳が不要なときは、プロンプトをモジュールに分け、ブロック機能で自由に組み立てることもできます。';
+
+  @override
+  String get modelSettings_wikiFormatHint =>
+      '翻訳が不要なときも、レイアウトを整えて関連タグにリンクを付けられます。';
+
+  @override
+  String get modelSettings_unsavedChanges => '未保存の変更があります';
+
+  @override
+  String get modelSettings_testPreset => 'プリセットをテスト';
+
+  @override
+  String get modelSettings_tabModelPreset => 'モデルとプリセット';
+
+  @override
+  String get modelSettings_tabPromptOutput => 'プロンプトと出力';
+
+  @override
+  String get modelSettings_translationStrategy => '翻訳方針';
+
+  @override
+  String get modelSettings_editPreset => 'プリセットを編集';
+
+  @override
+  String get modelSettings_outputContract => 'アプリの出力仕様';
+
+  @override
+  String get modelSettings_outputContractHint => '返却フィールドと検証ルールはアプリが管理します';
+
+  @override
+  String get modelSettings_testResult => 'テスト結果';
+
+  @override
+  String get modelRequest_detailsRequests => 'リクエスト';
+
+  @override
+  String get modelRequest_detailsIndex => '番号';
+
+  @override
+  String get modelRequest_detailsResponses => 'レスポンス';
+
+  @override
+  String get modelRequest_detailsOutput => '抽出結果';
+
+  @override
+  String get modelRequest_detailsTitle => 'リクエスト記録';
+
+  @override
+  String get modelRequest_detailsCopied => 'コピーしました';
+
+  @override
+  String get modelRequest_detailsCopyPage => 'このページをコピー';
+
+  @override
+  String get modelRequest_detailsOverview => '概要';
+
+  @override
+  String get modelRequest_detailsMissing => 'この記録はクリアされたか、直近 100 件を超えました。';
+
+  @override
+  String get modelPreset_changedElsewhere =>
+      'プリセットが別の場所で変更されました。開き直してから編集してください。';
+
+  @override
+  String get modelPreset_interfacePresetChanged =>
+      '機能で使うプリセットが別の場所で変更されました。開き直してから新規作成してください。';
+
+  @override
+  String get modelPreset_builtinReadOnly => '内蔵 · 読み取り専用';
+
+  @override
+  String get modelPreset_newInterfacePreset => '新しい機能プリセット';
+
+  @override
+  String get modelPreset_tabPrompt => 'プロンプト';
+
+  @override
+  String get modelPreset_tabOutputContract => '出力仕様';
+
+  @override
+  String get modelPreset_name => 'プリセット名';
+
+  @override
+  String get modelPreset_nameRequired => '名前を入力してください';
+
+  @override
+  String get modelPreset_behavior => '動作と翻訳方針';
+
+  @override
+  String get modelPreset_builtinLocked =>
+      '内蔵ルールはロックされています。機能プリセットを新規作成すると、独自の翻訳設定を編集できます。';
+
+  @override
+  String get modelPreset_editHint => 'ここで翻訳設定を編集します。返却形式はアプリが別に管理します。';
+
+  @override
+  String get modelPreset_strategyHint => '翻訳方針を入力';
+
+  @override
+  String get modelPreset_promptRequired => 'プロンプトは空にできません';
+
+  @override
+  String get modelPreset_restoreStrategy => '方針を内蔵の内容に戻す';
+
+  @override
+  String get modelPreset_outputContractNote =>
+      'この部分は翻訳結果を書き戻して表示できるようにするもので、アプリが管理します。';
+
+  @override
+  String get modelPreset_save => 'プリセットを保存';
+
+  @override
+  String get modelReasoning_unsupported => '非対応';
+
+  @override
+  String get modelReasoning_followModel => 'モデルに従う';
+
+  @override
+  String modelReasoning_followModelLevel(Object level) {
+    return 'モデルに従う（$level）';
+  }
+
+  @override
+  String get modelReasoning_notAdjustable => 'このモデルは思考の調整に対応していません';
+
+  @override
+  String get modelReasoning_strength => '思考の強さ';
+
+  @override
+  String modelReasoning_modelDefault(Object level) {
+    return 'モデル既定：$level';
+  }
+
+  @override
+  String get modelReasoning_levelsUnknown =>
+      '調整できるレベルはまだ確認されていません\nサービスのモデル設定で設定できます';
+
+  @override
+  String modelReasoning_strengthValue(Object level) {
+    return '思考の強さ：$level';
+  }
+
+  @override
+  String get modelProvider_customEndpoint => 'カスタムエンドポイント';
+
+  @override
+  String get modelProvider_pickerTitle => 'サービスを選択';
+
+  @override
+  String get modelProvider_pickerSearch => 'ベンダー、プラットフォーム、ローカルサービスを検索';
+
+  @override
+  String get modelProvider_pickerEmpty => '一致するサービスはありません';
+
+  @override
+  String get modelProvider_groupApiKey => 'API キー接続';
+
+  @override
+  String get modelProvider_groupLocal => 'ローカルサービス';
+
+  @override
+  String get modelProvider_enterCompatibleAddress => '互換エンドポイントのアドレスを入力';
+
+  @override
+  String get modelConnection_provider => 'サービス';
+
+  @override
+  String get modelConnection_name => '名前';
+
+  @override
+  String get modelConnection_nameExample => '例：自分用のリレー';
+
+  @override
+  String get modelConnection_protocol => 'プロトコル';
+
+  @override
+  String get modelConnection_address => 'エンドポイント';
+
+  @override
+  String get modelConnection_apiKey => 'API キー';
+
+  @override
+  String modelControls_decrease(Object label, Object step, Object unit) {
+    return '$labelを減らす（$step $unit）';
+  }
+
+  @override
+  String modelControls_increase(Object label, Object step, Object unit) {
+    return '$labelを増やす（$step $unit）';
+  }
+
+  @override
+  String get modelControls_retryOff => 'オフ';
+
+  @override
+  String modelControls_retryTimes(Object count) {
+    return '$count 回';
+  }
+
+  @override
+  String get settings_positiveIntegerRequired => '0 より大きい整数を入力してください';
+
+  @override
+  String get modelSettings_testingPreset => 'プリセットをテスト中';
+
+  @override
+  String modelHealth_lastUpdated(Object time) {
+    return '最終更新：$time';
+  }
+
+  @override
+  String get modelSettings_backToEditing => '編集に戻る';
+
+  @override
+  String modelService_loadOverridesFailed(Object error) {
+    return 'カスタムリクエスト設定を読み込めませんでした：$error';
+  }
+
+  @override
+  String get modelService_timeoutRange => 'リクエストのタイムアウトは 10〜600 秒にしてください。';
+
+  @override
+  String get modelService_concurrencyRange => '最大同時実行数は 1〜20 にしてください。';
+
+  @override
+  String get modelService_nameRequired => 'サービス名を入力してください。';
+
+  @override
+  String get modelService_invalidUrl =>
+      'エンドポイントは http:// または https:// から始まる完全な URL にしてください。';
+
+  @override
+  String get modelService_contextPositive => 'コンテキストウィンドウは 0 より大きくしてください。';
+
+  @override
+  String get modelService_readingCatalog => 'モデル一覧を読み込み中…';
+
+  @override
+  String modelService_catalogReturned(Object count) {
+    return '$count 件のモデルが返されました。使用するモデルにチェックを入れてください。';
+  }
+
+  @override
+  String modelService_catalogUnavailable(Object error) {
+    return 'モデル一覧を取得できません：$error。モデル ID は手動で追加できます。';
+  }
+
+  @override
+  String modelService_catalogCached(Object count) {
+    return '前回取得した $count 件のモデルを読み込みました。「一覧を取得」で更新できます。';
+  }
+
+  @override
+  String get modelService_catalogCacheFailed =>
+      'モデル一覧は取得しましたが、ローカルキャッシュを保存できませんでした。次回は再取得が必要です。';
+
+  @override
+  String get modelService_selectModelFirst => '先にモデルを選択してください。';
+
+  @override
+  String get modelService_testingModel => 'モデルへのリクエストをテスト中…';
+
+  @override
+  String modelService_testSucceeded(Object reply) {
+    return 'モデルへのリクエストに成功しました：$reply';
+  }
+
+  @override
+  String modelService_testFailed(Object error) {
+    return 'モデルへのリクエストに失敗しました：$error';
+  }
+
+  @override
+  String modelService_tokensPositive(Object name) {
+    return 'モデル「$name」のトークン数は 0 より大きくしてください。';
+  }
+
+  @override
+  String get modelService_changedElsewhere =>
+      'サービスの設定が別の場所で変更されました。開き直してから編集してください。';
+
+  @override
+  String get modelService_overridesChangedElsewhere =>
+      'モデルのリクエスト設定が別の場所で変更されました。開き直してから編集してください。';
+
+  @override
+  String modelService_saveFailed(Object error) {
+    return '保存に失敗しました：$error';
+  }
+
+  @override
+  String get modelService_keyHintNew => 'キーを入力（ローカルサービスは空欄可）';
+
+  @override
+  String get modelService_keyHintVendor => 'このサービスのキーを入力';
+
+  @override
+  String get modelService_keyHintSaved => '保存済み。空欄のままなら変更しません';
+
+  @override
+  String modelService_enabledModels(Object count) {
+    return '有効なモデル $count 件';
+  }
+
+  @override
+  String get modelService_pendingSave => '未保存';
+
+  @override
+  String get modelService_saved => '保存済み';
+
+  @override
+  String get modelService_enable => '有効';
+
+  @override
+  String get modelService_testConnection => '接続をテスト';
+
+  @override
+  String get modelService_delete => 'サービスを削除';
+
+  @override
+  String get modelService_save => 'サービスを保存';
+
+  @override
+  String get modelService_saving => 'サービスを保存中';
+
+  @override
+  String get modelService_notConfigured => '未設定';
+
+  @override
+  String get modelService_optional => '空欄可';
+
+  @override
+  String get modelService_editConnection => '編集';
+
+  @override
+  String get modelService_collapse => '閉じる';
+
+  @override
+  String get modelService_connectionSettings => '接続設定';
+
+  @override
+  String get modelService_dragToReorder => 'ドラッグしてモデルを並べ替え';
+
+  @override
+  String get modelService_capacityTooltip => 'コンテキスト / 最大出力（詳細で調整できます）';
+
+  @override
+  String get modelService_advanced => '詳細';
+
+  @override
+  String modelService_removeModel(Object name) {
+    return 'モデル $name を削除';
+  }
+
+  @override
+  String get modelService_linkedInterfaces => '関連する機能';
+
+  @override
+  String get modelService_noLinkedInterfaces => 'まだ機能に関連付けられていません';
+
+  @override
+  String get modelService_advancedSettings => '詳細設定';
+
+  @override
+  String get modelService_requestTimeout => 'リクエストのタイムアウト';
+
+  @override
+  String get modelService_requestTimeoutHelp => '1 回のリクエストの最大待ち時間';
+
+  @override
+  String get modelService_seconds => '秒';
+
+  @override
+  String get modelService_maxConcurrency => '最大同時実行数';
+
+  @override
+  String get modelService_maxConcurrencyHelp => 'このサービスで同時に処理するリクエスト数';
+
+  @override
+  String get modelService_countUnit => '';
+
+  @override
+  String get modelService_retry => '失敗時の再試行';
+
+  @override
+  String get modelService_retryHelp => '接続の失敗時やサービスの混雑時に再試行します';
+
+  @override
+  String get modelService_searchModelId => 'モデル ID を検索…';
+
+  @override
+  String get modelService_serviceModels => 'サービスのモデル';
+
+  @override
+  String get modelService_fetchList => '一覧を取得';
+
+  @override
+  String get modelService_catalogEmpty =>
+      '「一覧を取得」でこのサービスのモデルを読み込むか、\n右側でモデル ID を手動で追加します。';
+
+  @override
+  String get modelService_noMatchingModels => '一致するモデルはありません';
+
+  @override
+  String get modelService_catalogLimitTooltip => 'カタログ上限：コンテキスト / 最大出力';
+
+  @override
+  String get modelService_searchAddedModels => '追加したモデルを検索…';
+
+  @override
+  String get modelService_modelSettings => 'モデル設定';
+
+  @override
+  String get modelService_addedEmpty => '左側でチェックするか、下でモデルを追加してください';
+
+  @override
+  String get modelService_customModelId => 'カスタムモデル ID';
+
+  @override
+  String get modelService_customModelHelp => '一覧に出てこないモデルを追加します';
+
+  @override
+  String get modelService_addCustomModel => 'カスタムモデルを追加';
+
+  @override
+  String get modelCard_positiveInteger => '正の整数を入力してください';
+
+  @override
+  String modelCard_catalogLimit(Object limit) {
+    return 'カタログ上限 $limit';
+  }
+
+  @override
+  String get modelCard_outputExceedsContext => '出力はコンテキストウィンドウを超えられません';
+
+  @override
+  String get modelCard_contextWindow => 'コンテキストウィンドウ';
+
+  @override
+  String get modelCard_maxOutput => '最大出力';
+
+  @override
+  String get modelCard_unlabeled => '未記載';
+
+  @override
+  String get modelCard_protocolStandard => '標準';
+
+  @override
+  String get modelCard_protocolAdaptive => '自動調整';
+
+  @override
+  String get modelCard_default => '既定';
+
+  @override
+  String get modelCard_thinkingLevels => '思考レベル';
+
+  @override
+  String get modelCard_thinkingLevelsUnlisted => 'カタログに記載がありません。手動で有効にできます';
+
+  @override
+  String get modelCard_thinkingLevelsFromCatalog =>
+      'ローカルカタログに基づき対応レベルにチェックしています。実際の API に合わせて調整できます。';
+
+  @override
+  String get modelCard_thinkingProtocol => '思考プロトコル';
+
+  @override
+  String get modelCard_defaultThinkingLevel => '既定の思考レベル';
+
+  @override
+  String get modelCard_alias => '別名';
+
+  @override
+  String get modelCard_aliasHelp =>
+      'モデル名を表示する場所で使われます。リクエストには引き続きモデル ID を使います。';
+
+  @override
+  String get modelCard_aliasExample => '例：fast';
+
+  @override
+  String get modelCard_capabilities => '機能';
+
+  @override
+  String get modelCard_images => '画像';
+
+  @override
+  String get modelCard_nativeSearch => 'ネイティブ Web 検索';
+
+  @override
+  String get modelCard_nativeSearchHelp =>
+      'アプリはまだこの接続のネイティブ検索に対応していません。ベンダーや他の API が検索に非対応という意味ではありません。';
+
+  @override
+  String get modelOverrides_duplicateHeader => 'ヘッダー名が重複しています';
+
+  @override
+  String get modelOverrides_fieldNameRequired => 'フィールド名を入力してください';
+
+  @override
+  String get modelOverrides_duplicateField => 'フィールド名が重複しています';
+
+  @override
+  String get modelOverrides_invalidJson => '有効な JSON 値を入力してください';
+
+  @override
+  String get modelOverrides_customBody => 'カスタム Body';
+
+  @override
+  String get modelOverrides_customHeaders => 'カスタム Headers';
+
+  @override
+  String get modelOverrides_fieldName => 'フィールド名';
+
+  @override
+  String get modelOverrides_headerName => 'ヘッダー名';
+
+  @override
+  String get modelOverrides_valueJson => '値（JSON）';
+
+  @override
+  String get modelOverrides_value => '値';
+
+  @override
+  String get modelOverrides_removeItem => 'この項目を削除';
+
+  @override
+  String get modelOverrides_body => 'リクエストボディ';
+
+  @override
+  String get modelOverrides_headers => 'リクエストヘッダー';
+
+  @override
+  String modelOverrides_itemCount(Object count) {
+    return '$count 件';
+  }
+
+  @override
+  String get modelOverrides_valueTypes => '文字列・数値・真偽値・配列・オブジェクトに対応';
+
+  @override
+  String get modelOverrides_addBodyField => 'ボディのフィールドを追加';
+
+  @override
+  String get modelOverrides_addHeader => 'ヘッダーを追加';
+
+  @override
+  String get promptTranslation_translating => '翻訳中';
+
+  @override
+  String get promptTranslation_needsModel => '翻訳 · 先にモデルを設定';
+
+  @override
+  String promptTranslation_withRoute(Object provider, Object model) {
+    return '翻訳 · $provider / $model';
+  }
+
+  @override
+  String get promptTranslation_actions => '翻訳の操作';
+
+  @override
+  String get promptTranslation_promptChanged =>
+      'プロンプトが変更されたため、新しい編集は上書きしませんでした';
+
+  @override
+  String get promptTranslation_nothingToTranslate => '翻訳する通常のテキストはありません';
+
+  @override
+  String promptTranslation_failed(Object error) {
+    return '翻訳に失敗しました：$error';
+  }
+
+  @override
+  String get promptTranslation_setupTitle => '先に翻訳モデルを設定してください';
+
+  @override
+  String get promptTranslation_setupBody =>
+      '翻訳にはサービスとモデルを明示的に選ぶ必要があります。「設定 → 連携 → モデルとAPI」でサービスを追加してモデル一覧を取得し、プロンプト翻訳のモデルを選択してください。';
+
+  @override
+  String get promptTranslation_later => '後で';
+
+  @override
+  String get promptTranslation_openSettings => '設定を開く';
+
+  @override
+  String get promptTranslation_toolTitle => '翻訳';
+
+  @override
+  String get promptTranslation_noModel => 'モデル未設定';
+
+  @override
+  String get promptTranslation_configureModel => '翻訳モデルを設定';
+
+  @override
+  String get promptTranslation_translateNew => '追加した内容を翻訳';
+
+  @override
+  String get promptTranslation_undoRestore => '原文への復元を取り消し、翻訳ブロックに戻す';
+
+  @override
+  String get promptTranslation_restoreAll => 'すべての翻訳ブロックを原文テキストに戻す';
+
+  @override
+  String get promptTranslation_tutorial => '使い方';
+
+  @override
+  String get promptTranslation_guideBack => '操作に戻る';
+
+  @override
+  String get promptTranslation_guideMiddleTitle => 'ブロックを中クリック';
+
+  @override
+  String get promptTranslation_guideMiddleText => '原文と訳文を切り替え';
+
+  @override
+  String get promptTranslation_guideSourceTitle => '原文を左クリック';
+
+  @override
+  String get promptTranslation_guideSourceText => 'カーソルを置いて直接編集';
+
+  @override
+  String get promptTranslation_guideReadingTitle => '訳文を左クリック';
+
+  @override
+  String get promptTranslation_guideReadingText => 'ブロック編集を開く';
+
+  @override
+  String get promptTranslation_guideCtrlTitle => 'Ctrl + クリック / ドラッグ選択';
+
+  @override
+  String get promptTranslation_guideCtrlText => '編集画面でタグ検索 / 関連タグ';
+
+  @override
+  String get promptTranslation_guideConvertTitle => '↑ 訳文から原文へ';
+
+  @override
+  String get promptTranslation_guideConvertText => '↓ 原文から訳文へ。確認してから保存';
+
+  @override
+  String get promptTranslation_guideRestoreTitle => 'A / 復元';
+
+  @override
+  String get promptTranslation_guideRestoreText => 'グループ全体を原文に戻す / 翻訳ブロックに戻す';
+
+  @override
+  String get promptTranslation_middleButton => 'マウス中ボタン';
+
+  @override
+  String get promptTranslation_leftButton => 'マウス左ボタン';
+
+  @override
+  String get promptTranslation_blockShowingOriginal => '翻訳ブロック（原文を表示）';
+
+  @override
+  String get promptTranslation_blockShowingReading => '翻訳ブロック（訳文を表示）';
+
+  @override
+  String get promptTranslation_blockNeedsReview => '原文が変更されました · 訳文の更新が必要です';
+
+  @override
+  String get promptTranslation_badgeTooltip => '原文が変更されました。訳文の同期が必要です';
+
+  @override
+  String get promptTranslation_sourceChanged => '原文が変更されました。翻訳ブロックを開き直してください';
+
+  @override
+  String promptTranslation_retranslateFailed(Object error) {
+    return '再翻訳に失敗しました：$error';
+  }
+
+  @override
+  String get promptTranslation_draftChanged =>
+      '内容が変更されました。もう一度変換してください。新しい下書きは保持されています';
+
+  @override
+  String promptTranslation_convertFailed(Object error) {
+    return '変換に失敗しました。下書きは保持されています：$error';
+  }
+
+  @override
+  String get promptTranslation_invalidResultFormat =>
+      '変換結果の形式が正しくありません。下書きは保持されています';
+
+  @override
+  String get promptTranslation_noValidText =>
+      'モデルが有効なテキストを返しませんでした。下書きは保持されています';
+
+  @override
+  String get promptTranslation_invalidResultContent =>
+      '変換結果に無効な書式が含まれています。下書きは保持されています';
+
+  @override
+  String get promptTranslation_incompleteStructure =>
+      '変換結果の重みまたはグループが不完全です。下書きは保持されています';
+
+  @override
+  String get promptTranslation_inputRequired => '先に変換する内容を入力してください';
+
+  @override
+  String get wiki_configureTagModel => '先に「モデルとAPI」で利用できるタグ翻訳モデルを設定してください。';
+
+  @override
+  String get blockOrganizer_barrierLabel => 'ブロックの整理';
+
+  @override
+  String get blockOrganizer_replaceTitle => '同じ元のブロックを置き換えますか？';
+
+  @override
+  String blockOrganizer_replaceMoveBody(Object count) {
+    return '移動先に同じ元のコピーが $count 件あります。置き換えると元のブロックはライブラリで非表示になりますが、プロンプトに挿入済みのインスタンスは引き続き元のブロックを参照できます。';
+  }
+
+  @override
+  String blockOrganizer_replaceCopyBody(Object count) {
+    return '移動先に同じ元のコピーが $count 件あります。置き換えると移動先のコピーの内容が更新され、元のブロックは残ります。';
+  }
+
+  @override
+  String get blockOrganizer_replace => '置き換え';
+
+  @override
+  String get blockOrganizer_customTagColor => 'タグの色をカスタマイズ';
+
+  @override
+  String get blockOrganizer_colorHint => '#RRGGBB または #AARRGGBB';
+
+  @override
+  String get blockOrganizer_invalidColor => '6 桁または 8 桁の 16 進数カラーを入力してください';
+
+  @override
+  String blockOrganizer_deleteFolderConfirm(Object name) {
+    return '「$name」を削除しますか？中のブロックはルートに移動します。';
+  }
+
+  @override
+  String blockOrganizer_deleteCollectionConfirm(Object name) {
+    return '「$name」を削除しますか？ブロック自体は残ります。';
+  }
+
+  @override
+  String get blockOrganizer_titleFavorites => 'お気に入りとコレクション';
+
+  @override
+  String get blockOrganizer_titleFolders => 'フォルダーを選択';
+
+  @override
+  String blockOrganizer_itemCount(Object count) {
+    return '$count 件';
+  }
+
+  @override
+  String get blockOrganizer_search => '検索';
+
+  @override
+  String get blockOrganizer_name => '名前';
+
+  @override
+  String get blockOrganizer_customColor => 'カスタムカラー…';
+
+  @override
+  String get blockOrganizer_newCollection => '新しいコレクション';
+
+  @override
+  String get blockOrganizer_newCollectionFolder => '新しいコレクションフォルダー';
+
+  @override
+  String get blockOrganizer_newTag => '新しいタグ';
+
+  @override
+  String get blockOrganizer_newFolder => '新しいフォルダー';
+
+  @override
+  String get blockOrganizer_rootUncategorized => 'ルート / 未分類';
+
+  @override
+  String get blockOrganizer_manageDrag => '管理（ドラッグで並べ替え）';
+
+  @override
+  String get blockLibrary_dragSelectedHint =>
+      '選択したブロックを左側のお気に入りやフォルダーにドラッグし、離したらコピーか移動を選びます。';
+
+  @override
+  String blockLibrary_blockCount(Object count) {
+    return '$count 件のブロック';
+  }
+
+  @override
+  String get blockLibrary_changedSelectAgain =>
+      'ブロックライブラリが変更されました。選び直してから再試行してください';
+
+  @override
+  String get blockLibrary_hiddenSource => '非表示のブロックは整理の対象にできません';
+
+  @override
+  String get blockLibrary_sameSourceSelected =>
+      '選択に同じ元のコピーが含まれています。別々に整理してください';
+
+  @override
+  String get blockLibrary_sameSourceExists => '同じ元のブロックが既にあります。置き換えを確認してください';
+
+  @override
+  String get blockLibrary_collectionMissing => 'コレクションが存在しません';
+
+  @override
+  String get promptBlockEditor_appearance => 'ブロックの外観';
+
+  @override
+  String get promptBlockEditor_imageUnreadable => '選択した画像を読み込めません';
+
+  @override
+  String get blockAppearance_classic => 'クラシック';
+
+  @override
+  String get blockAppearance_stripes => '細いストライプ';
+
+  @override
+  String get blockAppearance_dots => 'ドット';
+
+  @override
+  String get blockAppearance_solid => 'ベタ塗り';
+
+  @override
+  String get blockAppearance_gradient => 'グラデーション';
+
+  @override
+  String get blockAppearance_translation => '翻訳';
+
+  @override
+  String get opusUsage_exhausted => 'アカウントの無料枠を使い切りました。V5 の生成は Anlas で課金されます';
+
+  @override
+  String opusUsage_remaining(Object percent) {
+    return 'アカウントの無料枠の残り $percent%';
+  }
+
+  @override
+  String opusUsage_recharging(Object time) {
+    return '回復中：次の +1% まで $time';
+  }
+
+  @override
+  String get opusUsage_notRecharging => '現在は回復しません（回復しきい値を超えているか、使い切っています）';
+
+  @override
+  String get opusUsage_clickToRefresh => 'クリックして更新';
+
+  @override
+  String opusUsage_hoursMinutes(Object hours, Object minutes) {
+    return '$hours 時間 $minutes 分';
+  }
+
+  @override
+  String opusUsage_hours(Object hours) {
+    return '$hours 時間';
+  }
+
+  @override
+  String opusUsage_minutesSeconds(Object minutes, Object seconds) {
+    return '$minutes 分 $seconds 秒';
+  }
+
+  @override
+  String opusUsage_minutes(Object minutes) {
+    return '$minutes 分';
+  }
+
+  @override
+  String opusUsage_seconds(Object seconds) {
+    return '$seconds 秒';
+  }
+
+  @override
+  String get metadataImport_noCharactersReplaceClears =>
+      'キャラクターデータがありません。置き換えモードでは現在のキャラクターが消去されます';
+
+  @override
+  String get metadataImport_replaceCharacters => 'キャラクターを置き換え';
+
+  @override
+  String get metadataImport_appendCharacters => 'キャラクターを追加';
+
+  @override
+  String get drop_dragToShare => 'ドラッグして共有';
+
+  @override
+  String get progress_cancelled => 'キャンセルしました';
+
+  @override
+  String promptSyntax_weightTooLarge(Object value) {
+    return '数値の重みが大きすぎます：$value::';
+  }
+
+  @override
+  String promptSyntax_spaceBeforeColons(Object value) {
+    return '重みの数値と :: の間に空白は入れられません：$value ::';
+  }
+
+  @override
+  String promptSyntax_weightAfterColons(Object value) {
+    return '数値の重みは :: の前に書いてください：::$value';
+  }
+
+  @override
+  String get update_errorInAppUnsupported => 'このバージョンはアプリ内の自動更新に対応していません';
+
+  @override
+  String get update_errorNoInstallablePackage => '自動インストールできる更新パッケージが見つかりません';
+
+  @override
+  String get update_errorMissingSha256 => '更新パッケージに SHA256 チェックサムがありません';
+
+  @override
+  String get update_errorDiskFull => 'ディスクの空き容量が不足しているため、更新パッケージを保存できません';
+
+  @override
+  String get update_errorWriteFailed => '更新パッケージの書き込みに失敗しました';
+
+  @override
+  String get update_errorDownloadFailed => '更新パッケージのダウンロードに失敗しました';
+
+  @override
+  String get update_errorSizeMismatch => '更新パッケージのサイズ確認に失敗しました';
+
+  @override
+  String get update_errorChecksumMismatch => '更新パッケージの検証に失敗しました';
+
+  @override
+  String get update_errorResumeRejected => 'サーバーが更新パッケージの再開要求を拒否しました';
+
+  @override
+  String get update_errorEmptyResponse => '更新サーバーが空の応答を返しました';
+
+  @override
+  String get update_errorPlatformUnsupported => 'このプラットフォームはアプリ内の自動更新に対応していません';
+
+  @override
+  String get update_errorPackageRemoved => '更新パッケージが削除されました。もう一度ダウンロードしてください';
+
+  @override
+  String get update_errorPackageCorrupted => '更新パッケージが破損しています。もう一度ダウンロードしてください';
+
+  @override
+  String get update_errorLaunchFailed => '更新プログラムの起動に失敗しました';
+
+  @override
+  String get update_errorCheckFailed => '更新の確認に失敗しました';
+
+  @override
+  String get update_errorCheckUnknown => '更新の確認中に不明なエラーが発生しました';
+
+  @override
+  String update_errorLogPath(Object path) {
+    return 'ログ：$path';
+  }
+
+  @override
+  String get update_errorInstallFailed => '更新のインストールに失敗しました';
+
+  @override
+  String get update_errorInstallFailedSeeLog =>
+      '更新のインストールに失敗しました。更新ログを確認してください';
+
+  @override
+  String get auth_tokenEmpty => 'トークンが空のため確認できません';
+
+  @override
+  String get auth_tokenFormatInvalid => 'トークンの形式が無効です';
+
+  @override
+  String get auth_tokenInvalidOrExpired =>
+      'トークンが無効か期限切れです。正しいか確認してください。Persistent Token は pst- で始まります。';
+
+  @override
+  String get auth_tokenMustStartPst => 'トークンの形式が無効です。pst- で始まる必要があります';
+
+  @override
+  String get auth_tokenFormatDetail =>
+      'トークンの形式が無効です。Persistent Token は pst- に続けて 10 文字以上が必要です。入力したトークンを確認してください。';
+
+  @override
+  String get danbooru_credentialsExpired => '認証情報が無効になりました。もう一度ログインしてください';
+
+  @override
+  String get danbooru_networkRetryLater => 'ネットワーク接続に失敗しました。回復後に再試行します';
+
+  @override
+  String get danbooru_invalidCredentials =>
+      '認証情報を確認できません。ユーザー名と API キーを確認してください';
+
+  @override
+  String danbooru_verifyFailed(Object error) {
+    return '確認に失敗しました：$error';
+  }
+
+  @override
+  String get danbooru_credentialsRequired => 'ユーザー名と API キーは空にできません';
+
+  @override
+  String get danbooru_networkCheck => 'ネットワーク接続に失敗しました。接続を確認してください';
+
+  @override
+  String get danbooru_loginFailedNetwork => 'ログインに失敗しました。ネットワーク接続を確認してください';
+
+  @override
+  String get danbooru_blacklistLoginRequired => '先に Danbooru アカウントにログインしてください';
+
+  @override
+  String get danbooru_blacklistPushFailed => 'Danbooru のブラックリストを送信できませんでした';
+
+  @override
+  String danbooru_blacklistSyncFailed(Object error) {
+    return '同期に失敗しました：$error';
+  }
+
+  @override
+  String comfyui_submitFailed(Object detail) {
+    return 'ワークフローの送信に失敗しました：$detail';
+  }
+
+  @override
+  String comfyui_uploadFailed(Object detail) {
+    return '画像のアップロードに失敗しました：$detail';
+  }
+
+  @override
+  String comfyui_fetchImageFailed(Object detail) {
+    return '画像の取得に失敗しました：$detail';
+  }
+
+  @override
+  String comfyui_historyMissing(Object id) {
+    return 'タスク履歴が見つかりません：$id';
+  }
+
+  @override
+  String get comfyui_unknownError => '不明なエラー';
+
+  @override
+  String comfyui_cannotConnect(Object url) {
+    return 'ComfyUI サーバー（$url）に接続できません';
+  }
+
+  @override
+  String get comfyui_noOutput => 'タスクの出力がありません';
+
+  @override
+  String comfyui_nodesNoImage(Object nodes) {
+    return '指定した出力ノードに画像がありません：$nodes';
+  }
+
+  @override
+  String get comfyui_noImageOutput => 'タスクの画像出力がありません';
+
+  @override
+  String get comfyui_executionError => '実行エラー';
+
+  @override
+  String comfyui_missingNodes(Object nodes) {
+    return 'ComfyUI のノードが不足しています：$nodes。ComfyUI で該当するカスタムノードをインストールまたは有効化し、ComfyUI を再起動してください。';
+  }
+
+  @override
+  String get enhance_cannotReadSize => '画像サイズを読み取れません';
+
+  @override
+  String enhance_upscaleFailed(Object error) {
+    return 'アップスケールに失敗しました：$error';
+  }
+
+  @override
+  String enhance_vibeEncodeFailed(Object error) {
+    return 'Vibe のエンコードに失敗しました：$error';
+  }
+
+  @override
+  String enhance_enhanceFailed(Object error) {
+    return '画像の補正に失敗しました：$error';
+  }
+
+  @override
+  String enhance_annotateFailed(Object error) {
+    return '画像の注釈付けに失敗しました：$error';
+  }
+
+  @override
+  String get enhance_timeout => 'リクエストがタイムアウトしました';
+
+  @override
+  String get enhance_networkError => 'ネットワーク接続エラー';
+
+  @override
+  String enhance_serverError(Object status) {
+    return 'サーバーがエラーを返しました：$status';
+  }
+
+  @override
+  String enhance_serverErrorDetail(Object status, Object detail) {
+    return 'サーバーがエラーを返しました：$status（$detail）';
+  }
+
+  @override
+  String get proxy_connectTimeout => '接続がタイムアウトしました';
+
+  @override
+  String get proxy_cannotConnect => 'サーバーに接続できません';
+
+  @override
+  String get proxy_connectFailed => '接続に失敗しました';
+
+  @override
+  String get proxy_testServerUnreachable => 'テストサーバーに接続できません';
+
+  @override
+  String proxy_testFailed(Object error) {
+    return 'テストに失敗しました：$error';
+  }
+
+  @override
+  String get avatar_noFilePath => 'ファイルパスを取得できません';
+
+  @override
+  String get avatar_sourceMissing => '元のファイルが存在しないか、削除されました';
+
+  @override
+  String avatar_copyFailed(Object error) {
+    return 'ファイルをコピーできません：$error';
+  }
+
+  @override
+  String avatar_saveFailed(Object error) {
+    return 'アバターを保存できません：$error';
+  }
+
+  @override
+  String avatar_operationFailed(Object error) {
+    return '操作に失敗しました：$error';
+  }
+
+  @override
+  String get vibeExport_rawImage => '元の画像';
+
+  @override
+  String get vibeExport_vibePreview => 'Vibe プレビュー';
+
+  @override
+  String get vibeExport_libraryThumbnail => 'ライブラリのサムネイル';
+
+  @override
+  String get vibeExport_pngTitle => 'PNG Vibe 画像をエクスポート';
+
+  @override
+  String get vibeExport_pngDirectoryTitle => 'PNG の書き出し先フォルダーを選択';
+
+  @override
+  String get vibeExport_fileTitle => 'Vibe ファイルをエクスポート';
+
+  @override
+  String get vibeExport_bundleTitle => 'Vibe バンドルをエクスポート';
+
+  @override
+  String get vibeExport_zipTitle => 'Vibe ZIP をエクスポート';
+
+  @override
+  String get vibeExport_nothingToExport => 'エクスポートできる Vibe 項目がありません';
+
+  @override
+  String get vibeImport_fileParseFailed => 'ファイルの解析に失敗しました';
+
+  @override
+  String get vibeImport_importFiles => 'ファイルをインポート';
+
+  @override
+  String get vibeImport_noVibeData => '画像に有効な Vibe データが含まれていません';
+
+  @override
+  String get vibeImport_importImages => '画像をインポート';
+
+  @override
+  String get vibeImport_encodingParseFailed => 'エンコードの解析に失敗しました';
+
+  @override
+  String get vibeImport_importEncodings => 'エンコードをインポート';
+
+  @override
+  String vibeImport_namingCancelled(Object name) {
+    return '名前の入力がキャンセルされたためスキップしました：$name';
+  }
+
+  @override
+  String vibeImport_nameEmpty(Object name) {
+    return '名前が空のためスキップしました：$name';
+  }
+
+  @override
+  String vibeImport_nameConflict(Object name) {
+    return '名前が重複しているためスキップしました：$name';
+  }
+
+  @override
+  String get vibeImport_saveFailed => '保存に失敗しました';
+
+  @override
+  String vibeFile_missingRawImage(Object file) {
+    return 'ファイルに使用できる元画像データがありません：$file（type=image）。破損または不完全な可能性があるため、削除して保存し直してください。';
+  }
+
+  @override
+  String get generation_countMustBePositive => '生成数は 0 より大きくしてください';
+
+  @override
+  String get generation_allTasksFailed => 'すべての生成タスクが失敗しました';
+
+  @override
+  String get generation_failedShort => '生成に失敗しました';
+
+  @override
+  String generation_tasksFailedAfterRetry(Object count) {
+    return '$count 件のタスクが再試行後も失敗しました';
+  }
+
+  @override
+  String get generation_streamFallbackUnavailable =>
+      'ストリーミング生成に対応しておらず、自動で切り替えられません（パラメーターが失われました）';
+
+  @override
+  String generation_streamFallbackFailed(Object error) {
+    return '非ストリーミング生成への切り替えに失敗しました：$error';
+  }
+
+  @override
+  String get generation_batchSizeMustBePositive => 'バッチ数とバッチサイズは 0 より大きくしてください';
+
+  @override
+  String get clipboard_unsupportedPlatform =>
+      'このプラットフォームはシステムのクリップボードに対応していません';
+
+  @override
+  String get clipboard_decodeFailed => 'クリップボードにコピーする画像をデコードできません';
+
+  @override
+  String drop_remoteImageTooLarge(Object size) {
+    return 'リモート画像のダウンロードが $size MB を超えています';
+  }
+
+  @override
+  String get apiEndpoint_empty => 'API アドレスは空にできません';
+
+  @override
+  String get apiEndpoint_invalid => 'API アドレスが無効です';
+
+  @override
+  String get apiEndpoint_httpOnly => 'http または https の API アドレスのみ対応しています';
+
+  @override
+  String get apiEndpoint_noExtras => 'API アドレスにクエリパラメーター・フラグメント・ユーザー情報は含められません';
+
+  @override
+  String gallery_initFailed(Object error) {
+    return '初期化に失敗しました：$error';
+  }
+
+  @override
+  String gallery_loadFoldersFailed(Object error) {
+    return 'フォルダーの読み込みに失敗しました：$error';
+  }
+
+  @override
+  String gallery_refreshFailed(Object error) {
+    return '更新に失敗しました：$error';
+  }
+
+  @override
+  String gallery_clearCacheFailed(Object error) {
+    return 'キャッシュの消去に失敗しました：$error';
+  }
+
+  @override
+  String gallery_folderInaccessible(Object error) {
+    return '画像フォルダーにアクセスできません：$error';
+  }
+
+  @override
+  String gallery_scanFailed(Object error) {
+    return '画像のスキャンに失敗しました：$error';
+  }
+
+  @override
+  String gallery_galleryInitFailed(Object error) {
+    return 'ギャラリーの初期化に失敗しました：$error';
+  }
+
+  @override
+  String get cache_clearInProgress => '消去処理を実行中です';
+
+  @override
+  String vibeImport_imageProgress(Object current, Object total, Object source) {
+    return '画像をインポート中（$current/$total）：$source';
+  }
+
+  @override
+  String get vibeImport_clipboardSource => 'クリップボード';
+
+  @override
+  String get resolution_noAdjustment => '調整不要';
+
+  @override
+  String get dataRefresh_updating => 'データを更新中...';
+
+  @override
+  String dataRefresh_updatingService(Object service) {
+    return '$service を更新中...';
+  }
 }

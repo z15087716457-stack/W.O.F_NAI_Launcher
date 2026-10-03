@@ -205,13 +205,11 @@ void main() {
   final settingsCaptureKey = GlobalKey();
 
   setUpAll(() async {
-    if (Platform.environment['CAPTURE_MODEL_MANAGEMENT'] == '1' ||
-        Platform.environment['CAPTURE_SETTINGS_REDESIGN'] == '1') {
-      await loadStudioCaptureFonts();
-      await (FontLoader(
-        'MaterialIcons',
-      )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
-    }
+    // Real fonts keep the English and Japanese layout checks representative.
+    await loadStudioCaptureFonts();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
     hiveDir = Directory.systemTemp.createTempSync('settings_screen_hive_');
     PathProviderPlatform.instance = _DesignPaths(hiveDir.path);
     Hive.init(hiveDir.path);
@@ -603,12 +601,19 @@ void main() {
       final styles = shouldCapture ? Brightness.values : [Brightness.light];
       for (final brightness in styles) {
         for (final layout in [
-          (1280.0, 1.0),
-          (2400.0, 1.0),
-          (740.0, 1.3),
-          (360.0, 1.3),
+          (1280.0, 1.0, const Locale('zh')),
+          (2400.0, 1.0, const Locale('zh')),
+          (740.0, 1.3, const Locale('zh')),
+          (360.0, 1.3, const Locale('zh')),
+          for (final code in ['en', 'ja']) ...[
+            (1280.0, 1.0, Locale(code)),
+            (360.0, 1.3, Locale(code)),
+          ],
         ]) {
-          final width = layout.$1, scale = layout.$2;
+          final width = layout.$1, scale = layout.$2, locale = layout.$3;
+          final l10n = lookupAppLocalizations(locale);
+          final chinese = locale.languageCode == 'zh';
+          final suffix = chinese ? '' : '-${locale.languageCode}';
           tester.view.physicalSize = Size(width, 900);
           tester.view.devicePixelRatio = 1;
           await tester.binding.setSurfaceSize(Size(width, 900));
@@ -695,7 +700,7 @@ void main() {
               ],
               child: MaterialApp(
                 theme: AppTheme.getTheme(AppStyle.geist, brightness),
-                locale: const Locale('zh'),
+                locale: locale,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 builder: (context, child) => RepaintBoundary(
@@ -738,16 +743,19 @@ void main() {
               await tester.pump(const Duration(milliseconds: 250));
               await tester.pump();
               final label = switch (destination) {
-                SettingsDestination.appearance => '常规与外观',
-                SettingsDestination.controls => '操作与快捷键',
-                SettingsDestination.generation => '生成与提示词',
-                SettingsDestination.storage => '图库与文件',
-                SettingsDestination.data => '词库与缓存',
-                SettingsDestination.account => 'NovelAI 账号',
-                SettingsDestination.models => '模型与接口',
-                SettingsDestination.integrations => '连接与集成',
-                SettingsDestination.privacy => '隐私与分享',
-                SettingsDestination.about => '关于与诊断',
+                SettingsDestination.appearance =>
+                  l10n.settings_generalAppearance,
+                SettingsDestination.controls => l10n.settings_controlsShortcuts,
+                SettingsDestination.generation =>
+                  l10n.settings_generationPrompts,
+                SettingsDestination.storage => l10n.settings_galleryFiles,
+                SettingsDestination.data => l10n.settings_dictionariesCache,
+                SettingsDestination.account => l10n.settings_novelaiAccounts,
+                SettingsDestination.models => l10n.settings_modelsAndInterfaces,
+                SettingsDestination.integrations =>
+                  l10n.settings_connectionsIntegrations,
+                SettingsDestination.privacy => l10n.settings_privacySharing2,
+                SettingsDestination.about => l10n.settings_aboutDiagnostics,
               };
               await tester.ensureVisible(find.text(label).last);
               await tester.tap(find.text(label).last);
@@ -768,9 +776,16 @@ void main() {
               tester.takeException(),
               isNull,
               reason:
-                  '${destination.name}/${width.toInt()}/$scale/${brightness.name}',
+                  '${destination.name}/${width.toInt()}/$scale/${brightness.name}$suffix',
             );
-            if (destination == SettingsDestination.data) {
+            if (locale.languageCode == 'en') {
+              expect(
+                _visibleHanText(tester),
+                isEmpty,
+                reason: 'English ${destination.name}/${width.toInt()}',
+              );
+            }
+            if (chinese && destination == SettingsDestination.data) {
               final repair = find.text('修复');
               await tester.ensureVisible(repair);
               await tester.pump(const Duration(milliseconds: 250));
@@ -796,7 +811,7 @@ void main() {
                 }
               }
             }
-            if (destination == SettingsDestination.storage) {
+            if (chinese && destination == SettingsDestination.storage) {
               final add = find.text('添加文件夹');
               await tester.ensureVisible(add);
               await tester.pump(const Duration(milliseconds: 250));
@@ -825,7 +840,7 @@ void main() {
                   format: ui.ImageByteFormat.png,
                 );
                 final file = File(
-                  '${Platform.environment['SETTINGS_CAPTURE_DIR'] ?? '.dart_tool/settings-redesign-captures'}/${destination.name}-${brightness.name}-${width.toInt()}.png',
+                  '${Platform.environment['SETTINGS_CAPTURE_DIR'] ?? '.dart_tool/settings-redesign-captures'}/${destination.name}-${brightness.name}-${width.toInt()}$suffix.png',
                 );
                 await file.parent.create(recursive: true);
                 await file.writeAsBytes(bytes!.buffer.asUint8List());
@@ -1235,4 +1250,19 @@ void main() {
     expect(jsonDecode(secrets.headers['custom']!), {'X-Project': 'studio'});
     expect(tester.takeException(), isNull);
   });
+}
+
+/// Language names stay in their own script and account nicknames are fixture
+/// data; everything else on English pages should be free of Han characters.
+const _allowedHanText = {'中文', '简体中文', '繁體中文', '日本語', '鲟', '鲟鱼'};
+
+/// Visible text that still contains Han characters.
+List<String> _visibleHanText(WidgetTester tester) {
+  final han = RegExp(r'[\u4e00-\u9fff]');
+  return [
+    for (final element in find.byType(RichText).evaluate())
+      if ((element.widget as RichText).text.toPlainText() case final text
+          when han.hasMatch(text) && !_allowedHanText.contains(text))
+        text,
+  ];
 }

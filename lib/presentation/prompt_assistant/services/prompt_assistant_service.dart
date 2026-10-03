@@ -13,6 +13,7 @@ import '../../providers/locale_provider.dart';
 import '../providers/prompt_assistant_config_provider.dart';
 import 'provider_adapters/prompt_assistant_adapter.dart';
 import 'prompt_assistant_api_client.dart';
+import '../../../core/utils/localization_extension.dart';
 
 final promptAssistantDioProvider = Provider<Dio>((ref) {
   // 使用独立 Dio，避免第三方服务的 401 触发全局登录态刷新/登出逻辑。
@@ -180,13 +181,13 @@ Reading language: $language. Legacy JSON field names such as zh, name_zh and wik
         if (decoded is! Map ||
             decoded['fields'] is! List ||
             (decoded['fields'] as List).length != 1) {
-          throw const FormatException('测试返回的字段不完整。');
+          throw FormatException(currentL10n.modelService_testFieldsIncomplete);
         }
         final field = (decoded['fields'] as List).single;
         if (field is! Map ||
             field['id'] != 'sample' ||
             field['groups'] is! List) {
-          throw const FormatException('测试返回的字段不正确。');
+          throw FormatException(currentL10n.modelService_testFieldsInvalid);
         }
         final groups = field['groups'] as List;
         if (groups.length != 1 ||
@@ -194,7 +195,7 @@ Reading language: $language. Legacy JSON field names such as zh, name_zh and wik
             jsonEncode(groups.single['ids']) != '["sample-1"]' ||
             groups.single['zh'] is! String ||
             (groups.single['zh'] as String).trim().isEmpty) {
-          throw const FormatException('测试返回的分组不正确。');
+          throw FormatException(currentL10n.modelService_testGroupsInvalid);
         }
         return groups.single['zh'] as String;
       }
@@ -215,7 +216,7 @@ Reading language: $language. Legacy JSON field names such as zh, name_zh and wik
         if (decoded is! Map ||
             decoded['text'] is! String ||
             (decoded['text'] as String).trim().isEmpty) {
-          throw const FormatException('测试返回的原文为空。');
+          throw FormatException(currentL10n.modelService_testSourceEmpty);
         }
         return decoded['text'] as String;
       }
@@ -273,7 +274,9 @@ return source text, Markdown, code fences or comments.
     final execution = await _resolveInterfaceExecution(
       LauncherInterface.translate,
     );
-    if (_draftRequests[sessionId] == true) throw StateError('转换已取消');
+    if (_draftRequests[sessionId] == true) {
+      throw StateError(currentL10n.modelService_conversionCancelled);
+    }
     final output = StringBuffer();
     await for (final chunk in _apiClient.complete(
       request: PromptAssistantRequest(
@@ -342,7 +345,9 @@ icon characters or additional blocks. Never modify the other field.
           ? LauncherInterface.promptReverse
           : LauncherInterface.translate;
       final execution = await _resolveInterfaceExecution(task);
-      if (_draftRequests[sessionId] == true) throw StateError('转换已取消');
+      if (_draftRequests[sessionId] == true) {
+        throw StateError(currentL10n.modelService_conversionCancelled);
+      }
       final output = StringBuffer();
       await for (final chunk in _apiClient.complete(
         request: PromptAssistantRequest(
@@ -360,7 +365,9 @@ icon characters or additional blocks. Never modify the other field.
       )) {
         output.write(chunk.delta);
       }
-      if (_draftRequests[sessionId] == true) throw StateError('转换已取消');
+      if (_draftRequests[sessionId] == true) {
+        throw StateError(currentL10n.modelService_conversionCancelled);
+      }
       return output.toString();
     } finally {
       _draftRequests.remove(sessionId);
@@ -533,7 +540,9 @@ Prompt version: $visibleTagTranslationPromptVersion
         ? LauncherInterface.wikiTranslate
         : LauncherInterface.tagTranslate;
     final execution = await _resolveInterfaceExecution(task);
-    if (_draftRequests[sessionId] == true) throw StateError('转换已取消');
+    if (_draftRequests[sessionId] == true) {
+      throw StateError(currentL10n.modelService_conversionCancelled);
+    }
     final output = StringBuffer();
     final request = jsonEncode({
       'tag': tag,
@@ -795,8 +804,8 @@ Prompt version: $tagTranslationPromptVersion
     if (route == null) {
       throw StateError(
         strict
-            ? '请先在「设置 → 模型与接口 → 功能接口」选择服务商和模型。'
-            : '请先在设置中启用服务，并获取或手动添加后选中一个模型。',
+            ? currentL10n.modelService_chooseInterfaceModel
+            : currentL10n.modelService_enableServiceModel,
       );
     }
     final notifier = _ref.read(promptAssistantConfigProvider.notifier);

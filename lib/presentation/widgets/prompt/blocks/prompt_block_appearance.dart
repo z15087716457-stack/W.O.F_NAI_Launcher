@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 /// Visual presets remain independent of block content and generation text.
 abstract final class PromptBlockAppearance {
   static const classic = 'classic';
@@ -20,13 +22,13 @@ abstract final class PromptBlockAppearance {
     translation,
   ];
 
-  static String label(String value) => switch (value) {
-    stripes => '细条纹',
-    dots => '圆点',
-    solid => '实心',
-    gradient => '渐变',
-    translation => '翻译',
-    _ => '经典',
+  static String label(String value, AppLocalizations l10n) => switch (value) {
+    stripes => l10n.blockAppearance_stripes,
+    dots => l10n.blockAppearance_dots,
+    solid => l10n.blockAppearance_solid,
+    gradient => l10n.blockAppearance_gradient,
+    translation => l10n.blockAppearance_translation,
+    _ => l10n.blockAppearance_classic,
   };
 
   static Color fill(String value, Color color, {required bool dark}) {

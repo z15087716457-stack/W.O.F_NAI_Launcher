@@ -1,17 +1,28 @@
+import '../../../core/utils/localization_extension.dart';
+import '../../../l10n/app_localizations.dart';
 import 'prompt_assistant_models.dart';
 
 extension PromptTaskDefinition on LauncherInterface {
-  String get title => switch (this) {
+  String get title => titleIn(currentL10n);
+  String titleIn(AppLocalizations l10n) => switch (this) {
+    LauncherInterface.translate => l10n.modelTask_translateTitle,
+    LauncherInterface.promptReverse => l10n.modelTask_promptReverseTitle,
+    LauncherInterface.tagTranslate => l10n.modelTask_tagTranslateTitle,
+    LauncherInterface.wikiTranslate => l10n.modelTask_wikiTranslateTitle,
+  };
+  String descriptionIn(AppLocalizations l10n) => switch (this) {
+    LauncherInterface.translate => l10n.modelTask_translateDescription,
+    LauncherInterface.promptReverse => l10n.modelTask_promptReverseDescription,
+    LauncherInterface.tagTranslate => l10n.modelTask_tagTranslateDescription,
+    LauncherInterface.wikiTranslate => l10n.modelTask_wikiTranslateDescription,
+  };
+
+  // Stable built-in names keep route fingerprints and caches language-neutral.
+  String get _builtinName => switch (this) {
     LauncherInterface.translate => '原文 → 阅读语言',
     LauncherInterface.promptReverse => '阅读语言 → 原文',
     LauncherInterface.tagTranslate => '标签名称翻译',
     LauncherInterface.wikiTranslate => '百科正文翻译',
-  };
-  String get description => switch (this) {
-    LauncherInterface.translate => '翻译提示词与积木，保留权重、分组和标签语义。',
-    LauncherInterface.promptReverse => '结合原文落实译文中的增删修改，结果填回原文供确认。',
-    LauncherInterface.tagTranslate => '为可见标签提供简洁、准确的名称释义。',
-    LauncherInterface.wikiTranslate => '翻译百科正文、整理排版，并按语境选择可点击标签。',
   };
   String get builtinId => 'builtin:$name';
   String get builtinPrompt => switch (this) {
@@ -26,10 +37,16 @@ extension PromptTaskDefinition on LauncherInterface {
   };
   TaskPresetConfig get builtinPreset => TaskPresetConfig(
     id: builtinId,
-    name: title,
+    name: _builtinName,
     task: this,
     prompt: builtinPrompt,
   );
+}
+
+extension TaskPresetDisplay on TaskPresetConfig {
+  bool get isBuiltin => id.startsWith('builtin:');
+  String displayNameIn(AppLocalizations l10n) =>
+      isBuiltin ? task.titleIn(l10n) : name;
 }
 
 TaskPresetConfig presetFor(
@@ -55,15 +72,16 @@ ModelConfig effectiveTaskModel(
       : model;
 }
 
-String reasoningEffortLabel(String? value) => switch (value) {
-  null => '服务默认',
-  'none' || 'off' => '关闭',
-  'on' => '开启',
-  'minimal' => '极低',
-  'low' => '低',
-  'medium' => '中',
-  'high' => '高',
-  'xhigh' => '极高',
-  'max' => '最高',
-  _ => value,
-};
+String reasoningEffortLabel(AppLocalizations l10n, String? value) =>
+    switch (value) {
+      null => l10n.modelReasoning_serviceDefault,
+      'none' || 'off' => l10n.modelReasoning_off,
+      'on' => l10n.modelReasoning_on,
+      'minimal' => l10n.modelReasoning_minimal,
+      'low' => l10n.modelReasoning_low,
+      'medium' => l10n.modelReasoning_medium,
+      'high' => l10n.modelReasoning_high,
+      'xhigh' => l10n.modelReasoning_xhigh,
+      'max' => l10n.modelReasoning_max,
+      _ => value,
+    };

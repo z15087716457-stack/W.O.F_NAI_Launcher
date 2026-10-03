@@ -211,7 +211,7 @@ class PromptBlockCard extends StatelessWidget {
         if (onAddTag != null)
           Builder(
             builder: (buttonContext) => IconButton(
-              tooltip: '添加标签',
+              tooltip: context.l10n.promptBlockLibrary_addTag,
               visualDensity: VisualDensity.compact,
               onPressed: () => onAddTag?.call(_anchorOf(buttonContext)),
               icon: const Icon(Icons.sell_outlined, size: 18),
@@ -293,9 +293,9 @@ class PromptBlockCard extends StatelessWidget {
             child: Text(context.l10n.common_copy),
           ),
           if (onAddTag != null)
-            const PopupMenuItem(
+            PopupMenuItem(
               value: _PromptBlockCardAction.addTag,
-              child: Text('添加标签'),
+              child: Text(context.l10n.promptBlockLibrary_addTag),
             ),
           PopupMenuItem(
             value: _PromptBlockCardAction.edit,

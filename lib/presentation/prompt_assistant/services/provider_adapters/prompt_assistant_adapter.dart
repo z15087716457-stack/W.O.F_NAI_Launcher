@@ -20,7 +20,7 @@ class PromptAssistantRequest {
     required this.userParts,
     required this.apiKey,
     this.modelConfig,
-    this.taskName = '模型连接测试',
+    this.taskName,
     this.trackConnectionHealth = true,
   });
 
@@ -31,7 +31,7 @@ class PromptAssistantRequest {
   final List<PromptAssistantContentPart> userParts;
   final String? apiKey;
   final ModelConfig? modelConfig;
-  final String taskName;
+  final String? taskName;
   final bool trackConnectionHealth;
 }
 

@@ -11,6 +11,7 @@ import '../../../core/network/dio_client.dart';
 import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/zip_utils.dart';
+import '../../../core/utils/localization_extension.dart';
 
 part 'nai_image_enhancement_api_service.g.dart';
 
@@ -49,7 +50,7 @@ class NAIImageEnhancementApiService {
     try {
       final decoded = img.decodeImage(image);
       if (decoded == null) {
-        throw Exception('无法解析图像尺寸');
+        throw Exception(currentL10n.enhance_cannotReadSize);
       }
 
       final response = await _dio.post(
@@ -73,7 +74,7 @@ class NAIImageEnhancementApiService {
       return raw;
     } on DioException catch (e) {
       AppLogger.w('Upscale image failed: ${e.message}', 'NAIEnhancement');
-      throw Exception('图像放大失败: ${_mapDioError(e)}');
+      throw Exception(currentL10n.enhance_upscaleFailed(_mapDioError(e)));
     }
   }
 
@@ -97,7 +98,7 @@ class NAIImageEnhancementApiService {
       return base64Encode(response.data as Uint8List);
     } on DioException catch (e) {
       AppLogger.w('Encode vibe failed: ${e.message}', 'NAIEnhancement');
-      throw Exception('Vibe编码失败: ${_mapDioError(e)}');
+      throw Exception(currentL10n.enhance_vibeEncodeFailed(_mapDioError(e)));
     }
   }
 
@@ -125,7 +126,7 @@ class NAIImageEnhancementApiService {
     try {
       final decoded = img.decodeImage(image);
       if (decoded == null) {
-        throw Exception('无法解析图像尺寸');
+        throw Exception(currentL10n.enhance_cannotReadSize);
       }
 
       final requestData = <String, dynamic>{
@@ -154,7 +155,7 @@ class NAIImageEnhancementApiService {
       return images;
     } on DioException catch (e) {
       AppLogger.w('Augment image failed: ${e.message}', 'NAIEnhancement');
-      throw Exception('图像增强失败: ${_mapDioError(e)}');
+      throw Exception(currentL10n.enhance_enhanceFailed(_mapDioError(e)));
     }
   }
 
@@ -213,7 +214,7 @@ class NAIImageEnhancementApiService {
           : response.data as Uint8List;
     } on DioException catch (e) {
       AppLogger.w('Annotate image failed: ${e.message}', 'NAIEnhancement');
-      throw Exception('图像标注失败: ${_mapDioError(e)}');
+      throw Exception(currentL10n.enhance_annotateFailed(_mapDioError(e)));
     }
   }
 
@@ -222,9 +223,9 @@ class NAIImageEnhancementApiService {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return '请求超时';
+        return currentL10n.enhance_timeout;
       case DioExceptionType.connectionError:
-        return '网络连接错误';
+        return currentL10n.enhance_networkError;
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
         final responseData = e.response?.data;
@@ -247,10 +248,10 @@ class NAIImageEnhancementApiService {
           detail = jsonEncode(responseData);
         }
         return detail == null || detail.isEmpty
-            ? '服务器返回错误: $statusCode'
-            : '服务器返回错误: $statusCode ($detail)';
+            ? currentL10n.enhance_serverError('$statusCode')
+            : currentL10n.enhance_serverErrorDetail('$statusCode', detail);
       default:
-        return e.message ?? '未知错误';
+        return e.message ?? currentL10n.comfyui_unknownError;
     }
   }
 

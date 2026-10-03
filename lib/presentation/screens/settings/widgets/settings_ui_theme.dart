@@ -226,10 +226,3 @@ WidgetStateProperty<Color?> settingsFieldIconColor(ColorScheme colors) =>
           ? colors.onSurface
           : colors.onSurfaceVariant,
     );
-
-String settingsText(BuildContext context, String zh, String en, String ja) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'zh' => zh,
-      'ja' => ja,
-      _ => en,
-    };

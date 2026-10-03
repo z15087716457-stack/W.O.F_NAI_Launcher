@@ -25,7 +25,7 @@ extension _ServiceOverview on _AiServiceEditorState {
                             children: [
                               Text(
                                 _name.text.trim().isEmpty
-                                    ? '添加服务商'
+                                    ? context.l10n.modelSettings_addProvider
                                     : _name.text.trim(),
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontSize: 19,
@@ -34,7 +34,7 @@ extension _ServiceOverview on _AiServiceEditorState {
                               ),
                               const SizedBox(height: 3),
                               Text(
-                                '${_selected.length} 个启用模型 · ${dirty ? '待保存' : '已保存'}',
+                                '${context.l10n.modelService_enabledModels(_selected.length)} · ${dirty ? context.l10n.modelService_pendingSave : context.l10n.modelService_saved}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: colors.onSurfaceVariant,
                                   fontSize: 12,
@@ -63,7 +63,14 @@ extension _ServiceOverview on _AiServiceEditorState {
                             children: [
                               Expanded(child: title),
                               const SizedBox(width: 16),
-                              actions,
+                              // Longer translations wrap the actions instead of
+                              // squeezing the service name.
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: constraints.maxWidth * .6,
+                                ),
+                                child: actions,
+                              ),
                             ],
                           );
                   },
@@ -135,6 +142,7 @@ extension _ServiceOverview on _AiServiceEditorState {
       child: Padding(
         padding: const EdgeInsets.all(6),
         child: Wrap(
+          alignment: WrapAlignment.end,
           spacing: 6,
           runSpacing: 6,
           crossAxisAlignment: WrapCrossAlignment.center,
@@ -144,7 +152,10 @@ extension _ServiceOverview on _AiServiceEditorState {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('启用', style: theme.textTheme.bodySmall),
+                  Text(
+                    context.l10n.modelService_enable,
+                    style: theme.textTheme.bodySmall,
+                  ),
                   const SizedBox(width: 7),
                   SettingsToggle(
                     key: const Key('service-enabled'),
@@ -172,14 +183,14 @@ extension _ServiceOverview on _AiServiceEditorState {
                 ),
               ),
               icon: const Icon(Icons.power_outlined, size: 15),
-              label: const Text('测试连接'),
+              label: Text(context.l10n.modelService_testConnection),
             ),
             _saveButton(),
             if (widget.provider != null && widget.onDelete != null) ...[
               if (!compact) separator(),
               IconButton(
                 key: const Key('service-delete'),
-                tooltip: '删除服务',
+                tooltip: context.l10n.modelService_delete,
                 onPressed: _busy ? null : widget.onDelete,
                 style: IconButton.styleFrom(
                   fixedSize: const Size.square(32),
@@ -224,7 +235,10 @@ extension _ServiceOverview on _AiServiceEditorState {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Opacity(opacity: _saving ? 0 : 1, child: const Text('保存服务')),
+          Opacity(
+            opacity: _saving ? 0 : 1,
+            child: Text(context.l10n.modelService_save),
+          ),
           if (_saving)
             SizedBox(
               width: 14,
@@ -232,7 +246,7 @@ extension _ServiceOverview on _AiServiceEditorState {
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 color: colors.onPrimary,
-                semanticsLabel: '正在保存服务',
+                semanticsLabel: context.l10n.modelService_saving,
               ),
             ),
         ],
@@ -287,12 +301,12 @@ extension _ServiceOverview on _AiServiceEditorState {
             .providerHasApiKey[widget.provider?.id] ??
         false;
     final keyStatus = _apiKey.text.trim().isNotEmpty
-        ? '待保存'
+        ? context.l10n.modelService_pendingSave
         : hasKey
-        ? '已保存'
+        ? context.l10n.modelService_saved
         : _preset.requiresApiKey
-        ? '尚未配置'
-        : '可留空';
+        ? context.l10n.modelService_notConfigured
+        : context.l10n.modelService_optional;
     Widget value(String label, String text, {bool selectable = false}) =>
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,14 +337,20 @@ extension _ServiceOverview on _AiServiceEditorState {
               LayoutBuilder(
                 builder: (context, constraints) {
                   final address = value(
-                    '接口地址',
+                    context.l10n.modelConnection_address,
                     _baseUrl.text.trim().isEmpty
-                        ? '尚未配置'
+                        ? context.l10n.modelService_notConfigured
                         : _baseUrl.text.trim(),
                     selectable: true,
                   );
-                  final key = value('API 密钥', keyStatus);
-                  final protocol = value('接口协议', _protocol.label);
+                  final key = value(
+                    context.l10n.modelConnection_apiKey,
+                    keyStatus,
+                  );
+                  final protocol = value(
+                    context.l10n.modelConnection_protocol,
+                    _protocol.label,
+                  );
                   final edit = TextButton.icon(
                     key: const Key('service-edit-connection'),
                     onPressed: _busy
@@ -344,7 +364,11 @@ extension _ServiceOverview on _AiServiceEditorState {
                           : Icons.edit_outlined,
                       size: 15,
                     ),
-                    label: Text(_editingConnection ? '收起' : '编辑'),
+                    label: Text(
+                      _editingConnection
+                          ? context.l10n.modelService_collapse
+                          : context.l10n.modelService_editConnection,
+                    ),
                   );
                   return constraints.maxWidth <
                           640 * MediaQuery.textScalerOf(context).scale(1)
@@ -379,7 +403,10 @@ extension _ServiceOverview on _AiServiceEditorState {
             if (_editingConnection) ...[
               Row(
                 children: [
-                  Text('连接设置', style: theme.textTheme.labelMedium),
+                  Text(
+                    context.l10n.modelService_connectionSettings,
+                    style: theme.textTheme.labelMedium,
+                  ),
                   const Spacer(),
                   TextButton.icon(
                     key: const Key('service-edit-connection'),
@@ -388,7 +415,7 @@ extension _ServiceOverview on _AiServiceEditorState {
                         : () =>
                               _updateOverview(() => _editingConnection = false),
                     icon: const Icon(Icons.expand_less, size: 15),
-                    label: const Text('收起'),
+                    label: Text(context.l10n.modelService_collapse),
                   ),
                 ],
               ),
@@ -447,7 +474,7 @@ extension _ServiceOverview on _AiServiceEditorState {
               child: Row(
                 children: [
                   Tooltip(
-                    message: '拖拽调整模型排序',
+                    message: context.l10n.modelService_dragToReorder,
                     child: ReorderableDragStartListener(
                       key: ValueKey('model-drag-${model.name}'),
                       index: index,
@@ -486,7 +513,7 @@ extension _ServiceOverview on _AiServiceEditorState {
                   ),
                   const SizedBox(width: 5),
                   Tooltip(
-                    message: '上下文 / 最大输出；可在高级中调整',
+                    message: context.l10n.modelService_capacityTooltip,
                     child: Text(
                       '${modelTokenLabel(model.contextWindow)} · ${modelTokenLabel(model.maxOutputTokens)}',
                       style: theme.textTheme.labelSmall?.copyWith(
@@ -521,11 +548,11 @@ extension _ServiceOverview on _AiServiceEditorState {
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
-                    child: const Text('高级'),
+                    child: Text(context.l10n.modelService_advanced),
                   ),
                   IconButton(
                     key: ValueKey('service-remove-model-${model.name}'),
-                    tooltip: '删除模型 ${model.name}',
+                    tooltip: context.l10n.modelService_removeModel(model.name),
                     onPressed: _busy
                         ? null
                         : () => _toggleModel(model.name, false),
@@ -577,7 +604,10 @@ extension _ServiceOverview on _AiServiceEditorState {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(task.title, style: theme.textTheme.bodySmall),
+                  Text(
+                    task.titleIn(context.l10n),
+                    style: theme.textTheme.bodySmall,
+                  ),
                   const SizedBox(height: 3),
                   Text(
                     config.interfaceFor(task).model,
@@ -597,12 +627,12 @@ extension _ServiceOverview on _AiServiceEditorState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _overviewSection(context, '关联功能'),
+        _overviewSection(context, context.l10n.modelService_linkedInterfaces),
         if (tasks.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 18),
             child: Text(
-              '尚未关联功能',
+              context.l10n.modelService_noLinkedInterfaces,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -702,7 +732,7 @@ extension _ServiceOverview on _AiServiceEditorState {
           child: Row(
             children: [
               Text(
-                '高级设置',
+                context.l10n.modelService_advancedSettings,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -720,12 +750,12 @@ extension _ServiceOverview on _AiServiceEditorState {
       if (_advancedExpanded) ...[
         _requestControlRow(
           context,
-          '请求超时',
-          '单次请求最长等待时间',
+          context.l10n.modelService_requestTimeout,
+          context.l10n.modelService_requestTimeoutHelp,
           ServiceRequestStepper(
             fieldKey: 'service-request-timeout',
-            label: '请求超时',
-            unit: '秒',
+            label: context.l10n.modelService_requestTimeout,
+            unit: context.l10n.modelService_seconds,
             value: _timeoutSeconds,
             minimum: 10,
             maximum: 600,
@@ -738,12 +768,12 @@ extension _ServiceOverview on _AiServiceEditorState {
         const Divider(height: 1),
         _requestControlRow(
           context,
-          '最大并发数量',
-          '此服务同时处理的请求数',
+          context.l10n.modelService_maxConcurrency,
+          context.l10n.modelService_maxConcurrencyHelp,
           ServiceRequestStepper(
             fieldKey: 'service-max-concurrency',
-            label: '最大并发数量',
-            unit: '个',
+            label: context.l10n.modelService_maxConcurrency,
+            unit: context.l10n.modelService_countUnit,
             value: _maxConcurrentRequests,
             minimum: 1,
             maximum: 20,
@@ -755,8 +785,8 @@ extension _ServiceOverview on _AiServiceEditorState {
         const Divider(height: 1),
         _requestControlRow(
           context,
-          '失败重试',
-          '连接失败或服务繁忙时重试',
+          context.l10n.modelService_retry,
+          context.l10n.modelService_retryHelp,
           ServiceRetrySegments(
             key: const Key('service-retry-attempts'),
             value: _retryAttempts,

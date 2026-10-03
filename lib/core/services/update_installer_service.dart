@@ -14,6 +14,7 @@ import '../utils/app_logger.dart';
 import 'app_installation_service.dart';
 import 'desktop_app_shutdown_service.dart';
 import 'windows_update_script.dart';
+import '../utils/localization_extension.dart';
 
 part 'update_installer_service.g.dart';
 
@@ -139,16 +140,18 @@ class UpdateInstallerService {
     CancelToken? cancelToken,
   }) async {
     if (!_installationService.supportsInAppInstall) {
-      throw const UpdateInstallException('当前版本不支持应用内自动安装更新');
+      throw UpdateInstallException(currentL10n.update_errorInAppUnsupported);
     }
 
     final asset = versionInfo.primaryAsset;
     if (asset == null || !asset.supportsInAppInstall) {
-      throw const UpdateInstallException('未找到可自动安装的更新包');
+      throw UpdateInstallException(
+        currentL10n.update_errorNoInstallablePackage,
+      );
     }
     final expectedSha256 = asset.sha256;
     if (expectedSha256 == null || expectedSha256.isEmpty) {
-      throw const UpdateInstallException('更新包缺少 SHA256 校验信息');
+      throw UpdateInstallException(currentL10n.update_errorMissingSha256);
     }
 
     final updateDir = await _ensureUpdateDir();
@@ -197,18 +200,30 @@ class UpdateInstallerService {
       rethrow;
     } on FileSystemException catch (error) {
       if (_isDiskFull(error)) {
-        throw UpdateInstallException('磁盘空间不足，无法保存更新包', originalError: error);
+        throw UpdateInstallException(
+          currentL10n.update_errorDiskFull,
+          originalError: error,
+        );
       }
-      throw UpdateInstallException('写入更新包失败', originalError: error);
+      throw UpdateInstallException(
+        currentL10n.update_errorWriteFailed,
+        originalError: error,
+      );
     } on DioException catch (error) {
       if (CancelToken.isCancel(error)) {
         throw const UpdateDownloadCancelledException();
       }
-      throw UpdateInstallException('下载更新包失败', originalError: error);
+      throw UpdateInstallException(
+        currentL10n.update_errorDownloadFailed,
+        originalError: error,
+      );
     } on UpdateInstallException {
       rethrow;
     } catch (error) {
-      throw UpdateInstallException('下载更新包失败', originalError: error);
+      throw UpdateInstallException(
+        currentL10n.update_errorDownloadFailed,
+        originalError: error,
+      );
     }
 
     _throwIfCancelled(cancelToken);
@@ -218,7 +233,7 @@ class UpdateInstallerService {
     if (asset.size != null && fileLength != asset.size) {
       await _deleteQuietly(partFile);
       throw UpdateInstallException(
-        '更新包大小校验失败',
+        currentL10n.update_errorSizeMismatch,
         originalError: 'expected=${asset.size} actual=$fileLength',
       );
     }
@@ -228,7 +243,7 @@ class UpdateInstallerService {
     if (!equalsSha256(actualSha256, expectedSha256)) {
       await _deleteQuietly(partFile);
       throw UpdateInstallException(
-        '更新包校验失败',
+        currentL10n.update_errorChecksumMismatch,
         originalError: 'expected=$expectedSha256 actual=$actualSha256',
       );
     }
@@ -290,7 +305,7 @@ class UpdateInstallerService {
           return;
         }
         if (retriedWithoutRange) {
-          throw const UpdateInstallException('服务器拒绝了更新包续传请求');
+          throw UpdateInstallException(currentL10n.update_errorResumeRejected);
         }
         await _deleteQuietly(partFile);
         existingBytes = 0;
@@ -307,7 +322,7 @@ class UpdateInstallerService {
 
       final responseBody = response.data;
       if (responseBody == null) {
-        throw const UpdateInstallException('更新服务器返回了空响应');
+        throw UpdateInstallException(currentL10n.update_errorEmptyResponse);
       }
 
       final contentLength = _parseHeaderInt(
@@ -463,13 +478,13 @@ class UpdateInstallerService {
   /// 启动独立更新脚本，并通过统一退出流程释放应用资源。
   Future<void> installAndRestart(DownloadedUpdate update) async {
     if (!Platform.isWindows) {
-      throw const UpdateInstallException('当前平台不支持应用内自动更新');
+      throw UpdateInstallException(currentL10n.update_errorPlatformUnsupported);
     }
     if (!await update.file.exists()) {
-      throw const UpdateInstallException('更新包已被清理，请重新下载');
+      throw UpdateInstallException(currentL10n.update_errorPackageRemoved);
     }
     if (!await _isPackageValid(update.file, update.asset)) {
-      throw const UpdateInstallException('更新包已损坏，请重新下载');
+      throw UpdateInstallException(currentL10n.update_errorPackageCorrupted);
     }
 
     final scriptFile = await _writeUpdateScript(update);
@@ -491,7 +506,10 @@ class UpdateInstallerService {
         scriptFile.path,
       ], mode: ProcessStartMode.detached);
     } catch (error) {
-      throw UpdateInstallException('启动更新程序失败', originalError: error);
+      throw UpdateInstallException(
+        currentL10n.update_errorLaunchFailed,
+        originalError: error,
+      );
     }
 
     await _shutdownHandler(0);

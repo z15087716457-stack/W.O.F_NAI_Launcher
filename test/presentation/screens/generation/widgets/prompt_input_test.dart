@@ -372,6 +372,88 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final code in ['en', 'ja']) {
+    testWidgets('translation menu and guide follow the $code interface', (
+      tester,
+    ) async {
+      // Real fonts keep the translated menu measurements representative.
+      await tester.runAsync(loadStudioCaptureFonts);
+      final locale = Locale(code);
+      final l10n = lookupAppLocalizations(locale);
+      final captureBoundary = GlobalKey();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            promptAssistantConfigProvider.overrideWith(
+              _TestPromptAssistantConfigNotifier.new,
+            ),
+            zhDictionaryServiceProvider.overrideWith(
+              (ref) => ZhDictionaryService(),
+            ),
+            promptBlockLibraryNotifierProvider.overrideWith(
+              _EmptyPromptBlockLibraryNotifier.new,
+            ),
+            localStorageServiceProvider.overrideWith(
+              (ref) => _TestLocalStorageService(),
+            ),
+            characterPromptNotifierProvider.overrideWith(
+              _TestCharacterPromptNotifier.new,
+            ),
+            promptTokenUsageProvider(
+              PromptTokenCountTarget.positive,
+            ).overrideWith(
+              (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+            ),
+            promptTokenUsageProvider(
+              PromptTokenCountTarget.negative,
+            ).overrideWith(
+              (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.getTheme(AppStyle.geist, Brightness.light),
+            builder: (_, child) =>
+                RepaintBoundary(key: captureBoundary, child: child!),
+            locale: locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: const Scaffold(
+              body: SizedBox(
+                width: 960,
+                height: 420,
+                child: PromptInputWidget(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('prompt-translation-toggle')));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.promptTranslation_setupTitle), findsOneWidget);
+      await tester.tap(find.text(l10n.promptTranslation_later));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('prompt-translation-actions')));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.promptTranslation_noModel), findsOneWidget);
+      expect(
+        find.byTooltip(l10n.promptTranslation_translateNew),
+        findsOneWidget,
+      );
+      expect(find.text(l10n.promptTranslation_tutorial), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await _captureTranslationMenu(tester, captureBoundary, '$code-menu');
+      await tester.tap(find.byKey(const Key('prompt-translation-tutorial')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(l10n.promptTranslation_guideMiddleTitle),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      await _captureTranslationMenu(tester, captureBoundary, '$code-guide');
+    });
+  }
+
   testWidgets('冷启动时切换到负面提示词不会抛出异常', (tester) async {
     await tester.pumpWidget(
       ProviderScope(

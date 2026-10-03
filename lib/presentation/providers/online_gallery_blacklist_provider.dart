@@ -7,6 +7,7 @@ import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/datasources/remote/danbooru_api_service.dart';
 import '../../data/services/danbooru_auth_service.dart';
+import '../../core/utils/localization_extension.dart';
 
 class OnlineGalleryBlacklistState {
   final Set<String> localTags;
@@ -175,8 +176,9 @@ class OnlineGalleryBlacklistNotifier
     final authState = _ref.read(danbooruAuthProvider);
     if (!authState.isLoggedIn) {
       if (!triggeredByStartup) {
-        state = state.copyWith(lastSyncError: '请先登录 Danbooru 账号');
-        await _saveLastSyncError('请先登录 Danbooru 账号');
+        final message = currentL10n.danbooru_blacklistLoginRequired;
+        state = state.copyWith(lastSyncError: message);
+        await _saveLastSyncError(message);
       }
       return;
     }
@@ -191,7 +193,7 @@ class OnlineGalleryBlacklistNotifier
 
       final pushOk = await api.updateBlacklistedTags(merged.toList()..sort());
       if (!pushOk) {
-        throw Exception('推送 Danbooru 黑名单失败');
+        throw Exception(currentL10n.danbooru_blacklistPushFailed);
       }
 
       final syncTime = DateTime.now();
@@ -208,7 +210,7 @@ class OnlineGalleryBlacklistNotifier
         clearLastSyncError: true,
       );
     } catch (e, stack) {
-      final message = '同步失败: $e';
+      final message = currentL10n.danbooru_blacklistSyncFailed('$e');
       AppLogger.w(message, 'OnlineGalleryBlacklist');
       AppLogger.d('$stack', 'OnlineGalleryBlacklist');
       await _saveLastSyncError(message);

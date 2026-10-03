@@ -1,6 +1,9 @@
 import 'dart:convert';
+
+import '../../../l10n/app_localizations.dart';
 import 'model_request_overrides.dart';
 import 'model_catalog_entry.dart';
+import '../../../core/utils/localization_extension.dart';
 
 // Legacy storage/UI type. New code should prefer ProviderProtocol and
 // ProviderPreset, but this remains to decode existing saved configs.
@@ -131,10 +134,9 @@ class _VendorDefaults {
     this.group, {
     this.catalogKey,
     this.logoAsset,
-    this.hint,
   });
   final String label, url, group;
-  final String? catalogKey, logoAsset, hint;
+  final String? catalogKey, logoAsset;
   final ProviderProtocol protocol;
   final List<String> models;
 }
@@ -383,7 +385,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '聚合平台',
     catalogKey: 'huggingface',
     logoAsset: 'huggingface',
-    hint: '使用具有推理权限的 Hugging Face Token；可手动填写路由模型 ID。',
   ),
   ProviderPreset.nvidia: _VendorDefaults(
     'NVIDIA',
@@ -429,7 +430,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '聚合平台',
     catalogKey: 'zai-coding-plan',
     logoAsset: 'zai',
-    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
   ),
   ProviderPreset.zhipuCodingPlan: _VendorDefaults(
     '智谱 Coding Plan',
@@ -439,7 +439,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '国内厂商',
     catalogKey: 'zhipuai-coding-plan',
     logoAsset: 'zhipu',
-    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
   ),
   ProviderPreset.kimiCoding: _VendorDefaults(
     'Kimi 编程',
@@ -449,7 +448,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '国内厂商',
     catalogKey: 'kimi-code-plan-cn',
     logoAsset: 'kimi',
-    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
   ),
   ProviderPreset.moonshotInternational: _VendorDefaults(
     'Moonshot AI · 国际',
@@ -459,7 +457,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '聚合平台',
     catalogKey: 'moonshotai',
     logoAsset: 'kimi',
-    hint: '国际平台端点；使用国际平台的 API Key。',
   ),
   ProviderPreset.minimaxChinaChat: _VendorDefaults(
     'MiniMax · 国内 OpenAI',
@@ -469,7 +466,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '国内厂商',
     catalogKey: 'minimax-cn',
     logoAsset: 'minimax',
-    hint: '使用对应地区的 API Key；当前预填 OpenAI Chat Completions 兼容地址。',
   ),
   ProviderPreset.minimaxChinaMessages: _VendorDefaults(
     'MiniMax · 国内 Anthropic',
@@ -479,7 +475,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '国内厂商',
     catalogKey: 'minimax-cn',
     logoAsset: 'minimax',
-    hint: '使用对应地区的 API Key；当前预填 Anthropic Messages 兼容地址。',
   ),
   ProviderPreset.minimaxInternationalMessages: _VendorDefaults(
     'MiniMax · 国际 Anthropic',
@@ -489,7 +484,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '聚合平台',
     catalogKey: 'minimax',
     logoAsset: 'minimax',
-    hint: '使用对应地区的 API Key；当前预填 Anthropic Messages 兼容地址。',
   ),
   ProviderPreset.xiaomi: _VendorDefaults(
     '小米 MiMo',
@@ -516,7 +510,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '国内厂商',
     catalogKey: 'stepfun-step-plan',
     logoAsset: 'stepfun',
-    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
   ),
   ProviderPreset.qwenTokenPlanChina: _VendorDefaults(
     '通义 Token 套餐 · 国内',
@@ -526,7 +519,6 @@ const _vendorDefaults = <ProviderPreset, _VendorDefaults>{
     '国内厂商',
     catalogKey: 'alibaba-token-plan-cn',
     logoAsset: 'qwen',
-    hint: '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。',
   ),
 };
 
@@ -581,7 +573,37 @@ extension ProviderPresetDefaults on ProviderPreset {
     ProviderPreset.lmStudioChat,
     ProviderPreset.ollama,
   ];
-  String get label => _vendorDefaults[this]!.label;
+  String get label => labelIn(currentL10n);
+  String labelIn(AppLocalizations l10n) {
+    return switch (this) {
+      ProviderPreset.openaiCompatibleChat ||
+      ProviderPreset.openaiCompatibleResponses => l10n.modelProvider_custom,
+      ProviderPreset.qwen => l10n.modelProvider_qwen,
+      ProviderPreset.moonshot => l10n.modelProvider_moonshot,
+      ProviderPreset.zhipu => l10n.modelProvider_zhipu,
+      ProviderPreset.doubao => l10n.modelProvider_doubao,
+      ProviderPreset.hunyuan => l10n.modelProvider_hunyuan,
+      ProviderPreset.qianfan => l10n.modelProvider_qianfan,
+      ProviderPreset.siliconflow => l10n.modelProvider_siliconflow,
+      ProviderPreset.zai => l10n.modelProvider_zai,
+      ProviderPreset.zhipuCodingPlan => l10n.modelProvider_zhipuCodingPlan,
+      ProviderPreset.kimiCoding => l10n.modelProvider_kimiCoding,
+      ProviderPreset.moonshotInternational =>
+        l10n.modelProvider_moonshotInternational,
+      ProviderPreset.minimaxChinaChat => l10n.modelProvider_minimaxChinaChat,
+      ProviderPreset.minimaxChinaMessages =>
+        l10n.modelProvider_minimaxChinaMessages,
+      ProviderPreset.minimaxInternationalMessages =>
+        l10n.modelProvider_minimaxInternationalMessages,
+      ProviderPreset.xiaomi => l10n.modelProvider_xiaomi,
+      ProviderPreset.antLing => l10n.modelProvider_antLing,
+      ProviderPreset.stepfunPlan => l10n.modelProvider_stepfunPlan,
+      ProviderPreset.qwenTokenPlanChina =>
+        l10n.modelProvider_qwenTokenPlanChina,
+      _ => _vendorDefaults[this]!.label,
+    };
+  }
+
   String get group => _vendorDefaults[this]!.group;
   String get defaultId => switch (this) {
     ProviderPreset.openaiChat => 'openai_chat',
@@ -597,7 +619,7 @@ extension ProviderPresetDefaults on ProviderPreset {
   String? get logoAsset => _vendorDefaults[this]!.logoAsset;
   bool get isLocal => !requiresApiKey;
   String get searchText =>
-      '$label $name $defaultBaseUrl ${catalogProviderKey ?? ""}';
+      '$label ${_vendorDefaults[this]!.label} $name $defaultBaseUrl ${catalogProviderKey ?? ""}';
   String get defaultBaseUrl => _vendorDefaults[this]!.url;
   ProviderProtocol get defaultProtocol => _vendorDefaults[this]!.protocol;
   List<String> get defaultModelNames => _vendorDefaults[this]!.models;
@@ -616,19 +638,33 @@ extension ProviderPresetDefaults on ProviderPreset {
     ProviderPreset.lmStudioChat,
     ProviderPreset.lmStudioResponses,
   ].contains(this);
-  String get connectionHint =>
-      _vendorDefaults[vendor]!.hint ??
-      switch (vendor) {
-        ProviderPreset.qwen => '默认北京区域；其他区域请使用对应 Key 并修改接口地址。',
-        ProviderPreset.minimax => '默认国际按量接口；国内平台请使用对应区域的 Key 和接口地址。',
-        ProviderPreset.moonshot => '默认国内平台；国际平台请使用对应区域的 Key 和接口地址。',
-        ProviderPreset.zhipu => '默认按量接口；Coding Plan 请使用套餐专用地址。',
-        ProviderPreset.doubao => '使用方舟 API Key；需先开通模型，也可添加推理接入点 ID。',
-        ProviderPreset.openaiCompatibleChat => '填写兼容服务的地址与 Key，并在连接信息中选择接口协议。',
-        ProviderPreset.lmStudioChat ||
-        ProviderPreset.ollama => '先启动本地服务，再读取已加载的模型目录。',
-        _ => '地址与协议已预填；保存 Key 后即可选择模型使用。',
-      };
+  String get connectionHint => connectionHintIn(currentL10n);
+  String connectionHintIn(AppLocalizations l10n) {
+    return switch (vendor) {
+      ProviderPreset.huggingFace => l10n.modelProvider_hintHuggingFace,
+      ProviderPreset.zaiCodingPlan ||
+      ProviderPreset.zhipuCodingPlan ||
+      ProviderPreset.kimiCoding ||
+      ProviderPreset.stepfunPlan ||
+      ProviderPreset.qwenTokenPlanChina => l10n.modelProvider_hintPlanKey,
+      ProviderPreset.moonshotInternational =>
+        l10n.modelProvider_hintInternationalEndpoint,
+      ProviderPreset.minimaxChinaChat => l10n.modelProvider_hintRegionOpenAi,
+      ProviderPreset.minimaxChinaMessages ||
+      ProviderPreset.minimaxInternationalMessages =>
+        l10n.modelProvider_hintRegionAnthropic,
+      ProviderPreset.qwen => l10n.modelProvider_hintQwen,
+      ProviderPreset.minimax => l10n.modelProvider_hintMinimax,
+      ProviderPreset.moonshot => l10n.modelProvider_hintMoonshot,
+      ProviderPreset.zhipu => l10n.modelProvider_hintZhipu,
+      ProviderPreset.doubao => l10n.modelProvider_hintDoubao,
+      ProviderPreset.openaiCompatibleChat => l10n.modelProvider_hintCustom,
+      ProviderPreset.lmStudioChat ||
+      ProviderPreset.ollama => l10n.modelProvider_hintLocal,
+      _ => l10n.modelProvider_hintDefault,
+    };
+  }
+
   ProviderConfig createConfig({String? id}) => ProviderConfig(
     id: id == null || id.trim().isEmpty ? defaultId : id.trim(),
     name: defaultName,
@@ -1195,13 +1231,13 @@ class RequestParameters {
   String? get validationError {
     if (temperature != null &&
         (!temperature!.isFinite || temperature! < 0 || temperature! > 2)) {
-      return 'Temperature 应在 0–2 之间。';
+      return currentL10n.modelParams_temperatureRange;
     }
     if (topP != null && (!topP!.isFinite || topP! <= 0 || topP! > 1)) {
-      return 'Top P 应大于 0 且不超过 1。';
+      return currentL10n.modelParams_topPRange;
     }
     if (maxOutputTokens != null && maxOutputTokens! <= 0) {
-      return '最大输出 token 必须大于 0。';
+      return currentL10n.modelParams_maxOutputPositive;
     }
     return null;
   }
@@ -1218,10 +1254,10 @@ class RequestParameters {
     if (general != null) return general;
     if (protocol == ProviderProtocol.anthropicMessages) {
       if (temperature != null && temperature! > 1) {
-        return 'Anthropic 的 Temperature 应在 0–1 之间。';
+        return currentL10n.modelParams_anthropicTemperatureRange;
       }
       if (temperature != null && topP != null) {
-        return 'Anthropic 的 Temperature 与 Top P 请选择一项；请检查模型参数。';
+        return currentL10n.modelParams_anthropicSamplingConflict;
       }
     }
     return null;

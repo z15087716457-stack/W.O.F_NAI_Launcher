@@ -9,6 +9,7 @@ import '../../core/services/update_check_service.dart';
 import '../../core/services/update_installer_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../data/models/version/version_info.dart';
+import '../../core/utils/localization_extension.dart';
 
 part 'update_provider.g.dart';
 
@@ -122,12 +123,13 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
       if (result != null && !result.success) {
         final logSuffix = result.logPath == null
             ? ''
-            : '\n日志：${result.logPath}';
+            : '\n${currentL10n.update_errorLogPath(result.logPath!)}';
         state = UpdateState(
           status: UpdateStatus.error,
           versionInfo: restored.versionInfo,
           downloadedUpdate: restored.update,
-          errorMessage: '${result.message ?? '安装更新失败'}$logSuffix',
+          errorMessage:
+              '${result.message ?? currentL10n.update_errorInstallFailed}$logSuffix',
           notificationVisible: true,
         );
       } else {
@@ -155,7 +157,8 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
     if (result != null && !result.success) {
       state = UpdateState(
         status: UpdateStatus.error,
-        errorMessage: result.message ?? '安装更新失败，请查看更新日志',
+        errorMessage:
+            result.message ?? currentL10n.update_errorInstallFailedSeeLog,
         notificationVisible: true,
       );
     }

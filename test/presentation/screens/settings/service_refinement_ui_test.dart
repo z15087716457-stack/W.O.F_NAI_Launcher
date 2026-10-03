@@ -277,7 +277,7 @@ void main() {
         },
       ),
     );
-    history.update(id, '成功', output: '完整响应');
+    history.update(id, ModelRequestStatus.success, output: '完整响应');
     await harness.tapVisible(tester, find.text('请求记录').first);
     await harness.tapVisible(tester, find.text('原文 → 阅读语言 · test-model'));
     expect(tester.getSize(find.byType(Dialog)).width, greaterThan(900));

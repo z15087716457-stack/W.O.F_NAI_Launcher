@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:image/image.dart' as img;
 import 'package:super_clipboard/super_clipboard.dart';
+import '../../core/utils/localization_extension.dart';
 
 /// 把图片字节写入系统剪贴板，统一规范化为 PNG。
 ///
@@ -17,7 +18,7 @@ import 'package:super_clipboard/super_clipboard.dart';
 Future<void> writeImageBytesToClipboardAsPng(Uint8List bytes) async {
   final clipboard = SystemClipboard.instance;
   if (clipboard == null) {
-    throw UnsupportedError('当前平台不支持系统剪贴板');
+    throw UnsupportedError(currentL10n.clipboard_unsupportedPlatform);
   }
   final png = await _ensurePngBytes(bytes);
   final item = DataWriterItem();
@@ -31,10 +32,11 @@ Future<Uint8List> _ensurePngBytes(Uint8List bytes) async {
   if (_looksLikePng(bytes)) {
     return bytes;
   }
+  final decodeFailed = currentL10n.clipboard_decodeFailed;
   return Isolate.run(() {
     final decoded = img.decodeImage(bytes);
     if (decoded == null) {
-      throw const FormatException('无法解码图片用于复制到剪贴板');
+      throw FormatException(decodeFailed);
     }
     return img.encodePng(decoded);
   });

@@ -24,6 +24,7 @@ import 'service_request_controls.dart';
 import 'settings_tile.dart';
 import 'settings_hover_line.dart';
 import 'settings_ui_theme.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 part 'ai_service_overview.dart';
 part 'ai_service_model_panels.dart';
@@ -207,7 +208,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
         }
       } catch (error) {
         _headersLoadFailed = true;
-        _error = '读取自定义请求设置失败：$error';
+        _error = context.l10n.modelService_loadOverridesFailed('$error');
       }
     }
     if (mounted) {
@@ -324,15 +325,15 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
     final name = _name.text.trim();
     setState(() {
       _error = _timeoutSeconds < 10 || _timeoutSeconds > 600
-          ? '请求超时应在 10–600 秒之间。'
+          ? context.l10n.modelService_timeoutRange
           : _maxConcurrentRequests < 1 || _maxConcurrentRequests > 20
-          ? '最大并发数量应在 1–20 个之间。'
+          ? context.l10n.modelService_concurrencyRange
           : name.isEmpty
-          ? '请输入服务名称。'
+          ? context.l10n.modelService_nameRequired
           : url == null ||
                 !url.hasAuthority ||
                 (url.scheme != 'http' && url.scheme != 'https')
-          ? '接口地址必须是完整的 http:// 或 https:// URL。'
+          ? context.l10n.modelService_invalidUrl
           : null;
     });
     for (final model in _selected.values) {
@@ -343,7 +344,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
           _modelInputErrors['context:${model.name}'] ??
           RequestParameters.fromModel(model).validateFor(_protocol) ??
           (model.contextWindow != null && model.contextWindow! <= 0
-              ? '上下文窗口必须大于 0。'
+              ? context.l10n.modelService_contextPositive
               : null);
       if (validation != null) {
         setState(() {
@@ -371,7 +372,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
     final connection = _catalogConnection;
     setState(() {
       _operation = _ServiceOperation.discover;
-      _catalogMessage = '正在读取模型目录…';
+      _catalogMessage = context.l10n.modelService_readingCatalog;
     });
     try {
       final provider = _draft();
@@ -391,12 +392,18 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
           key,
           headers,
         );
-        _catalogMessage = '目录返回 ${names.length} 个模型。勾选需要使用的模型。';
+        _catalogMessage = context.l10n.modelService_catalogReturned(
+          names.length,
+        );
       });
       await _persistCatalog();
     } catch (error) {
       if (!mounted || connection != _catalogConnection) return;
-      setState(() => _catalogMessage = '目录不可用：$error。可以手动添加模型 ID。');
+      setState(
+        () => _catalogMessage = context.l10n.modelService_catalogUnavailable(
+          '$error',
+        ),
+      );
     } finally {
       if (mounted) setState(() => _operation = null);
     }
@@ -430,7 +437,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
         _catalogFromApi = true;
         _fetchedConnection = connection;
         _catalogFingerprint = fingerprint;
-        _catalogMessage = '已载入上次获取的 ${names.length} 个模型。点击“获取列表”可刷新。';
+        _catalogMessage = context.l10n.modelService_catalogCached(names.length);
       });
     } catch (_) {
       AppLogger.w('Model list cache read failed.', 'PromptAssistant');
@@ -479,18 +486,22 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
   }
 
   void _cacheSaveFailed() {
-    if (mounted) setState(() => _catalogMessage = '模型列表已获取，但本地缓存保存失败，下次需重新获取。');
+    if (mounted) {
+      setState(
+        () => _catalogMessage = context.l10n.modelService_catalogCacheFailed,
+      );
+    }
   }
 
   Future<void> _testModel() async {
     if (!_canOperate || !_validate()) return;
     if (_selected.isEmpty) {
-      setState(() => _error = '请先选中一个模型。');
+      setState(() => _error = context.l10n.modelService_selectModelFirst);
       return;
     }
     setState(() {
       _operation = _ServiceOperation.test;
-      _catalogMessage = '正在测试模型请求…';
+      _catalogMessage = context.l10n.modelService_testingModel;
     });
     try {
       final model = _selected[_expandedModel] ?? _selected.values.first;
@@ -499,12 +510,18 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
           .testModelForDraft(_draft(), model, await _effectiveKey(), _headers);
       if (mounted) {
         setState(
-          () => _catalogMessage =
-              '模型请求成功：${reply.length > 90 ? '${reply.substring(0, 90)}…' : reply}',
+          () => _catalogMessage = context.l10n.modelService_testSucceeded(
+            reply.length > 90 ? '${reply.substring(0, 90)}…' : reply,
+          ),
         );
       }
     } catch (error) {
-      if (mounted) setState(() => _catalogMessage = '模型请求失败：$error');
+      if (mounted) {
+        setState(
+          () =>
+              _catalogMessage = context.l10n.modelService_testFailed('$error'),
+        );
+      }
     } finally {
       if (mounted) setState(() => _operation = null);
     }
@@ -517,7 +534,9 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
     for (final model in _selected.values) {
       if ((model.contextWindow != null && model.contextWindow! <= 0) ||
           (model.maxOutputTokens != null && model.maxOutputTokens! <= 0)) {
-        setState(() => _error = '模型“${model.name}”的 token 数量必须大于 0。');
+        setState(
+          () => _error = context.l10n.modelService_tokensPositive(model.name),
+        );
         return false;
       }
     }
@@ -530,7 +549,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
         if (!mounted) return false;
         if (_serviceSnapshot() != _observedService ||
             jsonEncode(latestHeaders) != _initialHeaders) {
-          throw StateError('服务配置已在别处修改，请重新打开后编辑。');
+          throw StateError(context.l10n.modelService_changedElsewhere);
         }
         for (final entry in _initialModelOverrides.entries) {
           final current = await notifier.loadModelRequestOverrides(
@@ -543,7 +562,9 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
           );
           if (!mounted) return false;
           if (current.requestOverrides!.encode() != entry.value) {
-            throw StateError('模型请求设置已在别处修改，请重新打开后编辑。');
+            throw StateError(
+              context.l10n.modelService_overridesChangedElsewhere,
+            );
           }
         }
       }
@@ -596,7 +617,9 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
       widget.onSaved(id);
       return true;
     } catch (error) {
-      if (mounted) setState(() => _error = '保存失败：$error');
+      if (mounted) {
+        setState(() => _error = context.l10n.modelService_saveFailed('$error'));
+      }
       return false;
     } finally {
       if (mounted) {
@@ -779,10 +802,10 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
     apiKey: _apiKey,
     enabled: !_busy && _headersLoaded,
     keyHint: _providerId == null
-        ? '输入 Key；本地服务可留空'
+        ? context.l10n.modelService_keyHintNew
         : _vendorChanged
-        ? '输入此服务商的 Key'
-        : '已保存；留空保持原值',
+        ? context.l10n.modelService_keyHintVendor
+        : context.l10n.modelService_keyHintSaved,
     onProtocolChanged: (value) => _updateOverview(() => _setProtocol(value)),
     onChooseProvider: () async {
       final next = await showProviderPicker(context, _preset);

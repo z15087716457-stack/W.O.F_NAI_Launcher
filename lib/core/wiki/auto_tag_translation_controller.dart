@@ -15,6 +15,7 @@ import '../utils/tag_normalizer.dart';
 import 'tag_wiki_repository.dart';
 import 'visible_tag_translation_cache.dart';
 import 'wiki_tag_links.dart';
+import '../utils/localization_extension.dart';
 
 final autoTagTranslationProvider =
     ChangeNotifierProvider<AutoTagTranslationController>((ref) {
@@ -323,7 +324,7 @@ class AutoTagTranslationController extends ChangeNotifier {
       }
       final route = _assistant.translateRouteFingerprint();
       if (route.isEmpty) {
-        throw StateError('请先在「模型与接口」配置可用的标签翻译模型。');
+        throw StateError(currentL10n.wiki_configureTagModel);
       }
       if (_route != route) {
         _route = route;

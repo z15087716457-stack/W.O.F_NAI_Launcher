@@ -6,6 +6,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/nai_api_endpoint.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/localization_extension.dart';
 
 part 'nai_auth_api_service.g.dart';
 
@@ -31,11 +32,11 @@ class NAIAuthApiService {
     final normalizedToken = _normalizeToken(token);
 
     if (normalizedToken.isEmpty) {
-      throw ArgumentError('Token 为空，无法验证');
+      throw ArgumentError(currentL10n.auth_tokenEmpty);
     }
 
     if (!allowAnyTokenFormat && !_isSupportedTokenFormat(normalizedToken)) {
-      throw ArgumentError('Token 格式无效');
+      throw ArgumentError(currentL10n.auth_tokenFormatInvalid);
     }
 
     // 所有 token 都使用 Bearer 前缀（与 NAI-Generator-Flutter 保持一致）
@@ -88,9 +89,7 @@ class NAIAuthApiService {
             requestOptions: e.requestOptions,
             response: e.response,
             type: e.type,
-            error:
-                'Token无效或已过期，请检查Token是否正确。'
-                '如果是Persistent Token，应以pst-开头。',
+            error: currentL10n.auth_tokenInvalidOrExpired,
           );
         }
       }

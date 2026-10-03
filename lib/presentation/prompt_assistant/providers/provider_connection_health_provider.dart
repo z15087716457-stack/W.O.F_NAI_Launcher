@@ -9,7 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../l10n/app_localizations.dart';
 import '../models/prompt_assistant_models.dart';
+import '../../../core/utils/localization_extension.dart';
 
 final providerConnectionHealthProvider =
     ChangeNotifierProvider<ProviderConnectionHealth>((ref) {
@@ -43,17 +45,22 @@ class ProviderConnectionResult {
   final int? statusCode;
   final ProviderConnectionIssue? issue;
 
-  String get description => switch (status) {
-    ProviderConnectionStatus.unverified => '尚未验证连接；使用模型或点击“测试连接”后更新',
-    ProviderConnectionStatus.healthy => '最近一次请求成功',
-    ProviderConnectionStatus.limited => '接口可达，但最近请求被限流（HTTP 429）；请稍后重试或检查额度',
+  String get description => descriptionIn(currentL10n);
+  String descriptionIn(AppLocalizations l10n) => switch (status) {
+    ProviderConnectionStatus.unverified => l10n.modelHealth_unverified,
+    ProviderConnectionStatus.healthy => l10n.modelHealth_healthy,
+    ProviderConnectionStatus.limited => l10n.modelHealth_limited,
     ProviderConnectionStatus.failed => switch (issue) {
-      ProviderConnectionIssue.authentication => '认证失败；请检查 API 密钥',
-      ProviderConnectionIssue.permission => '访问被拒绝；请检查服务权限',
-      ProviderConnectionIssue.timeout => '最近一次请求超时',
-      ProviderConnectionIssue.network => '最近一次请求无法连接服务',
-      ProviderConnectionIssue.invalidResponse => '最近一次响应异常；可在请求记录中查看详情',
-      _ => '最近一次请求失败${statusCode == null ? '' : '（HTTP $statusCode）'}',
+      ProviderConnectionIssue.authentication => l10n.modelHealth_authentication,
+      ProviderConnectionIssue.permission => l10n.modelHealth_permission,
+      ProviderConnectionIssue.timeout => l10n.modelHealth_timeout,
+      ProviderConnectionIssue.network => l10n.modelHealth_network,
+      ProviderConnectionIssue.invalidResponse =>
+        l10n.modelHealth_invalidResponse,
+      _ =>
+        statusCode == null
+            ? l10n.modelHealth_failed
+            : l10n.modelHealth_failedStatus(statusCode!),
     },
   };
 }

@@ -509,17 +509,17 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   }
 
   String _categoryName(TagCategory category) {
-    final chinese = Localizations.localeOf(context).languageCode == 'zh';
+    final l10n = context.l10n;
     return switch (category) {
-      TagCategory.general => chinese ? '一般' : 'General',
-      TagCategory.artist => chinese ? '画师' : 'Artist',
-      TagCategory.copyright => chinese ? '作品' : 'Copyright',
-      TagCategory.character => chinese ? '角色' : 'Character',
-      TagCategory.meta => chinese ? '元标签' : 'Meta',
-      TagCategory.contributor => chinese ? '贡献者' : 'Contributor',
-      TagCategory.species => chinese ? '物种' : 'Species',
-      TagCategory.lore => chinese ? '设定' : 'Lore',
-      TagCategory.library => chinese ? '本地' : 'Library',
+      TagCategory.general => l10n.wiki_categoryGeneral,
+      TagCategory.artist => l10n.wiki_categoryArtist,
+      TagCategory.copyright => l10n.wiki_categoryCopyright,
+      TagCategory.character => l10n.wiki_categoryCharacter,
+      TagCategory.meta => l10n.wiki_categoryMeta,
+      TagCategory.contributor => l10n.wiki_categoryContributor,
+      TagCategory.species => l10n.wiki_categorySpecies,
+      TagCategory.lore => l10n.wiki_categoryLore,
+      TagCategory.library => l10n.wiki_categoryLibrary,
     };
   }
 
@@ -1394,19 +1394,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       }
       final headings = _outlineFor(_visibleBody(snapshot.data));
       if (headings.isEmpty) return const SizedBox.shrink();
-      final lang = Localizations.localeOf(context).languageCode;
-      final label = switch (lang) {
-        'zh' => '本文目录',
-        'ja' => '目次',
-        'ko' => '목차',
-        _ => 'On this page',
-      };
-      final intro = switch (lang) {
-        'zh' => '简介',
-        'ja' => '概要',
-        'ko' => '개요',
-        _ => 'Overview',
-      };
+      final label = context.l10n.wiki_onThisPage;
+      final intro = context.l10n.wiki_overview;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1583,7 +1572,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(top: 10),
                                 child: Text(
-                                  '暂未翻译',
+                                  context.l10n.wiki_untranslated,
                                   key: const Key('wiki-untranslated'),
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
@@ -1756,12 +1745,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     builder: (context, ref, _) {
       final auto = ref.watch(autoTagTranslationProvider);
       final scheme = Theme.of(context).colorScheme;
-      final label = switch (Localizations.localeOf(context).languageCode) {
-        'zh' => '自动翻译标签与百科',
-        'ja' => 'タグと百科を自動翻訳',
-        'ko' => '태그 및 백과 자동 번역',
-        _ => 'Auto-translate tags and articles',
-      };
+      final label = context.l10n.wiki_autoTranslateTagsArticles;
       final status = auto.activeRequests > 0
           ? wikiTranslatingLabel(context)
           : auto.lastError;
@@ -1848,12 +1832,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
     children: [
-      Text(switch (Localizations.localeOf(context).languageCode) {
-        'zh' => '阅读内容',
-        'ja' => '表示内容',
-        'ko' => '읽기 내용',
-        _ => 'Content',
-      }, style: Theme.of(context).textTheme.labelMedium),
+      Text(
+        context.l10n.wiki_readingContent,
+        style: Theme.of(context).textTheme.labelMedium,
+      ),
       const SizedBox(height: 8),
       Row(
         key: const ValueKey('wiki-reading-content-controls'),

@@ -14,6 +14,7 @@ import 'character_prompt_provider.dart';
 import 'image_generation_provider.dart';
 import 'pill_workspace_provider.dart';
 import 'locale_provider.dart';
+import '../../core/utils/localization_extension.dart';
 
 /// Only verified, unambiguous category metadata becomes an editor decoration.
 final promptTranslationAnnotationProvider =
@@ -130,7 +131,7 @@ class PromptTranslationCoordinator {
     _draftRequests[sessionId] = false;
     try {
       if (request.input.trim().isEmpty) {
-        throw const FormatException('请先输入需要转换的内容');
+        throw FormatException(currentL10n.promptTranslation_inputRequired);
       }
       final batch = PromptTranslationBatch.prepare({
         'draft': PillDocument(text: request.source, instances: const {}),
@@ -183,7 +184,9 @@ class PromptTranslationCoordinator {
       } catch (_) {
         // Optional local terminology never blocks natural-language conversion.
       }
-      if (_draftRequests[sessionId] == true) throw StateError('转换已取消');
+      if (_draftRequests[sessionId] == true) {
+        throw StateError(currentL10n.modelService_conversionCancelled);
+      }
       final pickedTags = activeTerms.map((term) => term.tag).toSet();
       final terms = [
         for (final tag in pickedTags)
@@ -197,7 +200,9 @@ class PromptTranslationCoordinator {
             request.requestJson(terms),
             sessionId: sessionId,
           );
-      if (_draftRequests[sessionId] == true) throw StateError('转换已取消');
+      if (_draftRequests[sessionId] == true) {
+        throw StateError(currentL10n.modelService_conversionCancelled);
+      }
       return PromptTranslationEditResult.parse(raw, request, terms);
     } finally {
       _draftRequests.remove(sessionId);

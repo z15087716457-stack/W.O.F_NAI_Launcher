@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/storage_keys.dart';
 import '../../core/services/lazy_data_source_service.dart';
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/localization_extension.dart';
 
 part 'background_refresh_provider.g.dart';
 
@@ -137,7 +138,7 @@ class BackgroundRefreshNotifier extends _$BackgroundRefreshNotifier {
     // 显示轻量级进度提示
     state = state.copyWith(
       showProgressIndicator: true,
-      currentPhase: '正在更新数据...',
+      currentPhase: currentL10n.dataRefresh_updating,
     );
 
     // 并行执行所有刷新任务
@@ -175,7 +176,9 @@ class BackgroundRefreshNotifier extends _$BackgroundRefreshNotifier {
     // 添加到活跃刷新列表
     state = state.copyWith(
       activeRefreshes: [...state.activeRefreshes, service.serviceName],
-      currentPhase: '正在更新 ${service.serviceName}...',
+      currentPhase: currentL10n.dataRefresh_updatingService(
+        service.serviceName,
+      ),
     );
 
     try {
@@ -187,7 +190,9 @@ class BackgroundRefreshNotifier extends _$BackgroundRefreshNotifier {
       // 设置进度回调
       service.onProgress = (progress, message) {
         state = state.copyWith(
-          currentPhase: message ?? '正在更新 ${service.serviceName}...',
+          currentPhase:
+              message ??
+              currentL10n.dataRefresh_updatingService(service.serviceName),
         );
       };
 

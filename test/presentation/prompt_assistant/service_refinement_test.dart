@@ -357,7 +357,7 @@ void main() {
           'none',
         );
         final record = history.records.single;
-        expect(record.status, '成功');
+        expect(record.status, ModelRequestStatus.success);
         expect(record.parameters['reasoningEffort'], 'none');
         expect(record.parameters.containsKey('contextWindow'), isFalse);
         final exchange = record.exchanges.single;
@@ -408,7 +408,7 @@ void main() {
         isNot(contains('synthetic-key')),
       );
       expect(record.exchanges.first.error, isNotNull);
-      expect(record.status, '成功');
+      expect(record.status, ModelRequestStatus.success);
     },
   );
 
@@ -444,7 +444,7 @@ void main() {
       api.complete(request: _request()).toList(),
       throwsStateError,
     );
-    expect(history.records.single.status, '失败');
+    expect(history.records.single.status, ModelRequestStatus.failed);
     expect(history.records.single.exchanges.single.statusCode, 401);
     expect(
       jsonEncode(history.records.single.exchanges.single.response),
@@ -462,7 +462,7 @@ void main() {
     api.cancelCurrentRequest(sessionId: 'offline-session');
     await expectation;
     release.complete(_reply());
-    expect(history.records.first.status, '已取消');
+    expect(history.records.first.status, ModelRequestStatus.cancelled);
     expect(history.records.first.exchanges.single.error, isNotNull);
   });
 
@@ -478,7 +478,7 @@ void main() {
       expect(history.records.length, 100);
       expect(history.records.any((r) => r.id == id), isFalse);
       history.clear();
-      history.update(id, '成功');
+      history.update(id, ModelRequestStatus.success);
       expect(history.records, isEmpty);
       final redactor = ModelDiagnosticRedactor(['synthetic-key']);
       final value = redactor.value({

@@ -15,6 +15,7 @@ import '../../common/translation_modified_badge.dart';
 import 'translation_editing_controller.dart';
 import 'translation_editor_labels.dart';
 import '../../common/translation_icon.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 class TranslationPillEditHandle {
   const TranslationPillEditHandle({
@@ -239,8 +240,7 @@ class _TranslationPillEditPopoverState
       _synchronizedSource == null || _source.text != _synchronizedSource;
   bool get _translationEdited =>
       _synchronizedReading == null || _zh.text != _synchronizedReading;
-  TranslationEditorLabels get _labels =>
-      TranslationEditorLabels(Localizations.localeOf(context).languageCode);
+  TranslationEditorLabels get _labels => TranslationEditorLabels(context);
 
   @override
   void initState() {
@@ -343,7 +343,7 @@ class _TranslationPillEditPopoverState
       final result = await widget.converter!(request, _sessionId);
       if (!mounted) return;
       if (revision != _revision) {
-        setState(() => _message = '内容已修改，请重新转换；新草稿已保留');
+        setState(() => _message = context.l10n.promptTranslation_draftChanged);
         return;
       }
       (direction == PromptTranslationDirection.toChinese
@@ -387,7 +387,12 @@ class _TranslationPillEditPopoverState
       _scheduleAnnotations();
       setState(() {});
     } catch (error) {
-      if (mounted) setState(() => _message = '转换失败，草稿已保留：$error');
+      if (mounted) {
+        setState(
+          () =>
+              _message = context.l10n.promptTranslation_convertFailed('$error'),
+        );
+      }
     } finally {
       if (mounted) setState(() => _busy = null);
     }

@@ -9,7 +9,6 @@ import '../../../providers/notification_settings_provider.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/settings_section_label.dart';
-import '../widgets/settings_ui_theme.dart';
 import '../../../widgets/common/app_toast.dart';
 
 /// 生成设置板块
@@ -41,15 +40,7 @@ class _GenerationSettingsSectionState
         settings.customSoundPath,
       );
       if (!ok && mounted) {
-        AppToast.error(
-          context,
-          settingsText(
-            context,
-            '无法播放音效，请检查音频文件。',
-            'Could not play the sound. Check the audio file.',
-            '音声ファイルを確認してください。',
-          ),
-        );
+        AppToast.error(context, context.l10n.settings_couldNotPlaySoundCheck);
       }
     } finally {
       if (mounted) setState(() => _previewing = false);
@@ -199,12 +190,7 @@ class _GenerationSettingsSectionState
                         notificationSettings.customSoundPath!,
                       ).pathSegments.last
                     : widget.explicitSoundPicker
-                    ? settingsText(
-                        context,
-                        '使用默认完成音效',
-                        'Use the default completion sound',
-                        '既定の完了音を使用',
-                      )
+                    ? context.l10n.settings_useDefaultCompletionSound
                     : l10n.settings_notificationSelectSound,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -234,22 +220,15 @@ class _GenerationSettingsSectionState
             ),
             SettingsTile(
               hoverFeedback: !_previewing,
-              title: Text(
-                settingsText(context, '音效预览', 'Sound preview', '音声プレビュー'),
-              ),
+              title: Text(context.l10n.settings_soundPreview),
               subtitle: Text(
-                settingsText(
-                  context,
-                  '试听当前完成音效',
-                  'Listen to the current completion sound',
-                  '現在の完了音を試聴',
-                ),
+                context.l10n.settings_listenCurrentCompletionSound,
               ),
               trailing: OutlinedButton.icon(
                 key: const Key('settings-preview-sound'),
                 onPressed: _previewing ? null : _previewSound,
                 icon: const Icon(Icons.play_arrow_rounded),
-                label: Text(settingsText(context, '试听音效', 'Play sound', '試聴')),
+                label: Text(context.l10n.settings_playSound),
               ),
             ),
           ],

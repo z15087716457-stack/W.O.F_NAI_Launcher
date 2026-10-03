@@ -846,7 +846,11 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
       onProgress(
         i + 1,
         totalCount,
-        '导入图片(${i + 1}/${imageItems.length}): ${imageItem.source}',
+        currentL10n.vibeImport_imageProgress(
+          i + 1,
+          imageItems.length,
+          imageItem.source,
+        ),
       );
 
       // 检测是否经过编码流程
@@ -1925,7 +1929,12 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
     try {
       try {
         final result = await importService.importFromEncoding(
-          items: [VibeEncodingImportItem(source: '剪贴板', encoding: text)],
+          items: [
+            VibeEncodingImportItem(
+              source: context.l10n.vibeImport_clipboardSource,
+              encoding: text,
+            ),
+          ],
           categoryId: targetCategoryId,
           onProgress: (current, total, message) {
             AppLogger.d(message, 'VibeLibrary');

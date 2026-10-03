@@ -8,6 +8,7 @@ import '../../../data/datasources/remote/nai_image_generation_api_service.dart';
 import '../../../data/models/image/image_params.dart';
 import 'generation_models.dart';
 import 'image_generation_service.dart';
+import '../../../core/utils/localization_extension.dart';
 
 part 'batch_generation_notifier.g.dart';
 
@@ -217,7 +218,7 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
     if (count <= 0) {
       state = state.copyWith(
         status: BatchGenerationStatus.error,
-        errorMessage: '生成数量必须大于0',
+        errorMessage: currentL10n.generation_countMustBePositive,
       );
       return;
     }
@@ -279,7 +280,9 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
           completedCount: completed,
           failedCount: failed,
           clearStreamPreview: true,
-          errorMessage: failed == count ? '所有生成任务失败' : null,
+          errorMessage: failed == count
+              ? currentL10n.generation_allTasksFailed
+              : null,
         );
 
         AppLogger.d(
@@ -360,7 +363,7 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
       } else if (result.isCancelled) {
         AppLogger.d('Image $index generation cancelled', 'BatchGeneration');
       } else {
-        throw Exception(result.error ?? '生成失败');
+        throw Exception(result.error ?? currentL10n.generation_failedShort);
       }
     } catch (e) {
       if (_isCancelled) return;
@@ -482,7 +485,9 @@ class BatchGenerationNotifier extends _$BatchGenerationNotifier {
         overallProgress: 1.0,
         completedCount: completed,
         failedCount: failed,
-        errorMessage: failed > 0 ? '$failed 个任务重试后仍失败' : null,
+        errorMessage: failed > 0
+            ? currentL10n.generation_tasksFailedAfterRetry(failed)
+            : null,
       );
     }
   }

@@ -11,7 +11,6 @@ import '../../../widgets/common/app_toast.dart';
 import 'settings_card.dart';
 import 'settings_columns.dart';
 import 'settings_tile.dart';
-import 'settings_ui_theme.dart';
 
 class DataSourceCacheSettings extends ConsumerWidget {
   const DataSourceCacheSettings({
@@ -35,9 +34,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
     );
     if (controlsOnly) {
       return SettingsCard(
-        title: showHeading
-            ? settingsText(context, '标签扩展', 'Tag expansion', 'タグ検索')
-            : null,
+        title: showHeading ? context.l10n.settings_tagExpansion : null,
         bottomSpacing: showHeading ? 26 : 0,
         child: relatedTags,
       );
@@ -47,7 +44,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SettingsCard(
-          title: settingsText(context, '标签词库', 'Tag dictionaries', 'タグ辞書'),
+          title: context.l10n.settings_tagDictionaries,
           child: Column(
             children: [
               if (!cacheOnly) relatedTags,
@@ -67,7 +64,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
           ),
         ),
         SettingsCard(
-          title: settingsText(context, '缓存维护', 'Cache maintenance', 'キャッシュの管理'),
+          title: context.l10n.settings_cacheMaintenance,
           child: SettingsColumns(
             left: _clearCache(context, ref, ai: false),
             right: _clearCache(context, ref, ai: true),
@@ -102,7 +99,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
             }
           },
           icon: const Icon(Icons.delete_outline),
-          label: Text(settingsText(context, '清理', 'Clear', '消去')),
+          label: Text(context.l10n.settings_clear),
         ),
       );
 }

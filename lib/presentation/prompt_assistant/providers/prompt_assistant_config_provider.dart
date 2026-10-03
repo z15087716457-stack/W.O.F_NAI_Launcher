@@ -12,6 +12,7 @@ import '../models/prompt_task_definitions.dart';
 import '../services/model_catalog_repository.dart';
 import '../services/provider_model_list_cache.dart';
 import 'provider_connection_health_provider.dart';
+import '../../../core/utils/localization_extension.dart';
 
 final promptAssistantConfigProvider =
     StateNotifierProvider<
@@ -120,7 +121,7 @@ class PromptAssistantConfigNotifier
         StorageKeys.promptAssistantConfigJson,
         state.encode(),
       );
-      throw StateError('配置已变化，请重新保存。');
+      throw StateError(currentL10n.modelConfig_changedSaveAgain);
     }
     if (mounted) state = next;
   }
@@ -261,7 +262,7 @@ class PromptAssistantConfigNotifier
     final operation = _pendingServiceChange.then<void>((_) async {
       void checkCurrent() {
         if (!mounted || !identical(state, observed)) {
-          throw StateError('配置已变化，请重新保存。');
+          throw StateError(currentL10n.modelConfig_changedSaveAgain);
         }
       }
 
@@ -611,13 +612,13 @@ class PromptAssistantConfigNotifier
       task,
     );
     if (slot.presetId != null && preset.id != slot.presetId) {
-      throw StateError('所选预设已变化，请重新选择。');
+      throw StateError(currentL10n.modelConfig_presetChanged);
     }
     final provider = state.providers
         .where((item) => item.id == slot.providerId && item.enabled)
         .firstOrNull;
     if (slot.isConfigured && provider == null) {
-      throw StateError('所选服务已停用，请重新选择。');
+      throw StateError(currentL10n.modelConfig_serviceDisabled);
     }
     if (slot.isConfigured &&
         !state.models.any(
@@ -626,7 +627,7 @@ class PromptAssistantConfigNotifier
               model.name == slot.model &&
               !model.isPlaceholder,
         )) {
-      throw StateError('所选模型已变化，请重新选择。');
+      throw StateError(currentL10n.modelConfig_modelChanged);
     }
     if (provider != null) {
       final model = state.models.firstWhere(
@@ -634,7 +635,7 @@ class PromptAssistantConfigNotifier
       );
       if (slot.reasoningEffort != null &&
           !model.availableReasoningEfforts.contains(slot.reasoningEffort)) {
-        throw StateError('模型支持的思考档位已变化，请重新选择或跟随模型。');
+        throw StateError(currentL10n.modelConfig_reasoningChanged);
       }
       final error = RequestParameters.fromModel(
         model,
@@ -650,10 +651,14 @@ class PromptAssistantConfigNotifier
     TaskPresetConfig preset, {
     bool applyToInterface = false,
   }) async {
-    if (preset.id.trim().isEmpty) throw const FormatException('预设 ID 不能为空。');
-    if (preset.id.startsWith('builtin:')) throw StateError('请将内置方案另存为自定义预设。');
+    if (preset.id.trim().isEmpty) {
+      throw FormatException(currentL10n.modelConfig_presetIdRequired);
+    }
+    if (preset.id.startsWith('builtin:')) {
+      throw StateError(currentL10n.modelConfig_saveBuiltinAsCustom);
+    }
     if (preset.name.trim().isEmpty || preset.prompt.trim().isEmpty) {
-      throw const FormatException('名称和提示词不能为空。');
+      throw FormatException(currentL10n.modelConfig_namePromptRequired);
     }
     final next = state.copyWith(
       interfaces: applyToInterface
@@ -674,7 +679,9 @@ class PromptAssistantConfigNotifier
   }
 
   Future<void> deletePreset(String id) async {
-    if (id.startsWith('builtin:')) throw StateError('内置规则不可删除。');
+    if (id.startsWith('builtin:')) {
+      throw StateError(currentL10n.modelConfig_builtinNotDeletable);
+    }
     final interfaces = {
       for (final entry in state.interfaces.entries)
         entry.key: entry.value.presetId == id
@@ -693,13 +700,13 @@ class PromptAssistantConfigNotifier
     final observed = state;
     final data = jsonDecode(raw);
     if (data is! Map || data['providers'] is! List || data['models'] is! List) {
-      throw const FormatException('请粘贴完整的模型配置 JSON。');
+      throw FormatException(currentL10n.modelConfig_pasteFullJson);
     }
     if (data['presets'] case final List presets) {
       if (presets.any(
         (preset) => preset is Map && '${preset['id']}'.startsWith('builtin:'),
       )) {
-        throw const FormatException('内置方案不可覆盖，请复制为自定义预设。');
+        throw FormatException(currentL10n.modelConfig_builtinNotOverwritable);
       }
     }
     final imported = PromptAssistantConfigState.decode(raw);
@@ -712,12 +719,12 @@ class PromptAssistantConfigNotifier
           uri == null ||
           !uri.hasAuthority ||
           !['http', 'https'].contains(uri.scheme)) {
-        throw const FormatException('服务商 ID、名称或地址无效。');
+        throw FormatException(currentL10n.modelConfig_invalidProvider);
       }
     }
     for (final model in imported.models) {
       if (!ids.contains(model.providerId)) {
-        throw const FormatException('模型对应的服务商不存在。');
+        throw FormatException(currentL10n.modelConfig_missingProvider);
       }
       final provider = imported.providers.firstWhere(
         (item) => item.id == model.providerId,
@@ -734,7 +741,7 @@ class PromptAssistantConfigNotifier
           preset.id.startsWith('builtin:') ||
           preset.name.trim().isEmpty ||
           preset.prompt.trim().isEmpty) {
-        throw const FormatException('自定义预设的 ID、名称或提示词无效。');
+        throw FormatException(currentL10n.modelConfig_invalidCustomPreset);
       }
     }
     final keys = <String, bool>{};
@@ -742,12 +749,16 @@ class PromptAssistantConfigNotifier
       final key = await _secure.getPromptAssistantApiKey(provider.id);
       keys[provider.id] = key != null && key.isNotEmpty;
     }
-    if (!identical(state, observed)) throw StateError('配置已变化，请重新导入。');
+    if (!identical(state, observed)) {
+      throw StateError(currentL10n.modelConfig_changedImportAgain);
+    }
     await _local.setSetting(
       '${StorageKeys.promptAssistantConfigJson}_before_import',
       observed.encode(),
     );
-    if (!identical(state, observed)) throw StateError('配置已变化，请重新导入。');
+    if (!identical(state, observed)) {
+      throw StateError(currentL10n.modelConfig_changedImportAgain);
+    }
     await _persistDraft(
       imported.copyWith(
         providerHasApiKey: keys,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'settings_dialog.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 class SettingsNumberDialog extends StatefulWidget {
   const SettingsNumberDialog({
@@ -36,7 +37,11 @@ class _SettingsNumberDialogState extends State<SettingsNumberDialog> {
     if (number == null ||
         number < widget.minValue ||
         (widget.maxValue != null && number > widget.maxValue!)) {
-      setState(() => _error = widget.invalidValueText ?? '请输入大于 0 的整数');
+      setState(
+        () => _error =
+            widget.invalidValueText ??
+            context.l10n.settings_positiveIntegerRequired,
+      );
       return;
     }
     Navigator.pop(context, number);
@@ -49,12 +54,12 @@ class _SettingsNumberDialogState extends State<SettingsNumberDialog> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('取消'),
+        child: Text(context.l10n.common_cancel),
       ),
       FilledButton(
         key: const Key('settings-save-number'),
         onPressed: _save,
-        child: const Text('保存'),
+        child: Text(context.l10n.common_save),
       ),
     ],
     child: SingleChildScrollView(

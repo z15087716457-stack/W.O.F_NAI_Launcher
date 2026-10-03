@@ -181,33 +181,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final theme = Theme.of(context), scheme = theme.colorScheme;
     final captionHeight = WindowChromeScope.heightOf(context);
     final headerHeight = captionHeight > 44 ? captionHeight : 44.0;
-    final language = Localizations.localeOf(context).languageCode;
-    String text(String zh, String en, String ja) => language == 'zh'
-        ? zh
-        : language == 'ja'
-        ? ja
-        : en;
     final sections = [
       _SettingsSection(
         SettingsDestination.appearance,
         StudioIcons.settingsAppearance,
-        text('常规与外观', 'General & appearance', '一般と外観'),
-        text(
-          '让工作台符合你的阅读与使用习惯。',
-          'Make the workspace comfortable to read and use.',
-          '使いやすく読みやすいワークスペースに。',
-        ),
+        context.l10n.settings_generalAppearance,
+        context.l10n.settings_makeWorkspaceComfortableReadUse,
         const AppearanceSettingsSection(),
       ),
       _SettingsSection(
         SettingsDestination.controls,
         StudioIcons.settingsControls,
-        text('操作与快捷键', 'Controls & shortcuts', '操作とショートカット'),
-        text(
-          '设置交互方式、画布操作和键盘快捷键。',
-          'Choose interaction, canvas controls and keyboard shortcuts.',
-          '操作方法とキーボードショートカットを設定。',
-        ),
+        context.l10n.settings_controlsShortcuts,
+        context.l10n.settings_chooseInteractionCanvasControlsKeyboard,
         const Column(
           children: [
             AppearanceSettingsSection(controlsOnly: true),
@@ -218,12 +204,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _SettingsSection(
         SettingsDestination.generation,
         StudioIcons.settingsGeneration,
-        text('生成与提示词', 'Generation & prompts', '生成とプロンプト'),
-        text(
-          '管理提示词输入、生成提醒与请求节奏。',
-          'Manage prompt input, generation reminders and request pacing.',
-          'プロンプト入力と生成の動作を管理。',
-        ),
+        context.l10n.settings_generationPrompts,
+        context.l10n.settings_managePromptInputGenerationReminders,
         GenerationPreferencesSection(
           onManageModels: () => _select(SettingsDestination.models),
         ),
@@ -231,34 +213,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _SettingsSection(
         SettingsDestination.storage,
         StudioIcons.settingsStorage,
-        text('图库与文件', 'Gallery & files', 'ギャラリーとファイル'),
-        text(
-          '管理图片保存、图库来源与浏览显示。',
-          'Manage image saving, gallery sources and display.',
-          '画像の保存、ギャラリーのソースと表示を管理。',
-        ),
+        context.l10n.settings_galleryFiles,
+        context.l10n.settings_manageImageSavingGallerySources,
         const StorageSettingsSection(),
       ),
       _SettingsSection(
         SettingsDestination.data,
         StudioIcons.settingsData,
-        text('词库与缓存', 'Dictionaries & cache', '辞書とキャッシュ'),
-        text(
-          '管理标签词库、索引与缓存维护。',
-          'Manage tag dictionaries, indexes and cache maintenance.',
-          'タグ辞書、索引とキャッシュを管理。',
-        ),
+        context.l10n.settings_dictionariesCache,
+        context.l10n.settings_manageTagDictionariesIndexesCache,
         const StorageMaintenanceSection(),
       ),
       _SettingsSection(
         SettingsDestination.account,
         StudioIcons.settingsAccount,
-        text('NovelAI 账号', 'NovelAI accounts', 'NovelAI アカウント'),
-        text(
-          '查看当前账号，管理登录与默认账号。',
-          'View your account and manage sign-in and the default account.',
-          'アカウントとログインを管理。',
-        ),
+        context.l10n.settings_novelaiAccounts,
+        context.l10n.settings_viewAccountManageSignIn,
         const AccountSettingsSection(),
       ),
       _SettingsSection(
@@ -271,12 +241,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _SettingsSection(
         SettingsDestination.integrations,
         StudioIcons.settingsIntegrations,
-        text('连接与集成', 'Connections & integrations', '接続と連携'),
-        text(
-          '管理外部工具、桥接连接与网络设置。',
-          'Manage external tools, bridges and network settings.',
-          '外部ツール、ブリッジとネットワーク。',
-        ),
+        context.l10n.settings_connectionsIntegrations,
+        context.l10n.settings_manageExternalToolsBridgesNetwork,
         IntegrationsSettingsSection(
           initialNetwork: widget.initialSectionIndex == 5,
           initialTab: _integrationSearchTab,
@@ -285,23 +251,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _SettingsSection(
         SettingsDestination.privacy,
         StudioIcons.settingsPrivacy,
-        text('隐私与分享', 'Privacy & sharing', 'プライバシーと共有'),
-        text(
-          '控制分享信息与需要确认的操作。',
-          'Control shared information and confirmation before sensitive actions.',
-          '共有する情報と確認が必要な操作。',
-        ),
+        context.l10n.settings_privacySharing2,
+        context.l10n.settings_controlSharedInformationConfirmationBefore,
         const PrivacySettingsSection(),
       ),
       _SettingsSection(
         SettingsDestination.about,
         StudioIcons.settingsAbout,
-        text('关于与诊断', 'About & diagnostics', '情報と診断'),
-        text(
-          '版本更新、日志与项目资料。',
-          'Updates, logs and project information.',
-          '更新、ログとプロジェクト情報。',
-        ),
+        context.l10n.settings_aboutDiagnostics,
+        context.l10n.settings_updatesLogsProjectInformation,
         const AboutSettingsSection(),
       ),
     ];
@@ -314,7 +272,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       key: const Key('settings-open-search'),
       onPressed: () => _search(context, sections),
       icon: const Icon(Icons.search, size: 17),
-      label: Text(text('搜索设置', 'Search settings', '設定を検索')),
+      label: Text(context.l10n.settings_searchSettings),
       style: OutlinedButton.styleFrom(
         alignment: Alignment.centerLeft,
         minimumSize: const Size.fromHeight(38),
@@ -470,31 +428,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             padding: const EdgeInsets.only(bottom: 16),
                             children: [
                               group(
-                                text('使用偏好', 'Preferences', '使い方'),
+                                context.l10n.settings_preferences,
                                 sections.take(2),
                               ),
                               group(
-                                text(
-                                  '创作与资源',
-                                  'Creation & resources',
-                                  '制作とリソース',
-                                ),
+                                context.l10n.settings_creationResources,
                                 sections.skip(2).take(3),
                               ),
                               group(
-                                text(
-                                  '服务与连接',
-                                  'Services & connections',
-                                  'サービスと接続',
-                                ),
+                                context.l10n.settings_servicesConnections,
                                 sections.skip(5).take(3),
                               ),
                               group(
-                                text(
-                                  '安全与维护',
-                                  'Safety & maintenance',
-                                  '安全とメンテナンス',
-                                ),
+                                context.l10n.settings_safetyMaintenance,
                                 sections.skip(8),
                               ),
                             ],

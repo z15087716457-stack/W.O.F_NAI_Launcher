@@ -6,6 +6,7 @@ import '../../../data/datasources/remote/github_api_service.dart';
 import '../../../data/models/version/version_info.dart';
 import '../storage/local_storage_service.dart';
 import 'app_installation_service.dart';
+import '../utils/localization_extension.dart';
 
 part 'update_check_service.g.dart';
 
@@ -322,10 +323,16 @@ class UpdateCheckService {
       await _storage.setUpdateRemindAfter(null);
       return null;
     } on GitHubApiException catch (e) {
-      throw UpdateCheckException('检查更新失败', originalError: e);
+      throw UpdateCheckException(
+        currentL10n.update_errorCheckFailed,
+        originalError: e,
+      );
     } catch (e) {
       if (e is UpdateCheckException) rethrow;
-      throw UpdateCheckException('检查更新时发生未知错误', originalError: e);
+      throw UpdateCheckException(
+        currentL10n.update_errorCheckUnknown,
+        originalError: e,
+      );
     }
   }
 

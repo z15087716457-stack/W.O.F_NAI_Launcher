@@ -42,27 +42,19 @@ List<SettingsSearchEntry> settingsSearchEntries(
     item('appearance', l.settings_language, 'locale 语言'),
     item(
       'appearance',
-      settingsText(context, '完成提醒与声音', 'Notifications & sound', '通知とサウンド'),
+      context.l10n.settings_notificationsSound,
       'sound notification 音效 声音 自定义',
     ),
     item('controls', l.settings_historyClickBehavior, 'history 历史 点击'),
     item('controls', l.settings_outputViewer, 'canvas viewer 图片 查看器'),
-    item(
-      'controls',
-      settingsText(context, '锁定画布相机', 'Lock canvas camera', 'キャンバスのカメラを固定'),
-      'WASD 相机 缩放',
-    ),
+    item('controls', context.l10n.settings_lockCanvasCamera, 'WASD 相机 缩放'),
     item('controls', l.settings_shortcuts, 'shortcut 键盘 快捷键'),
     item(
       'generation',
       l.settings_enablePromptWeightScroll,
       'weight scroll 权重 滚轮',
     ),
-    item(
-      'generation',
-      settingsText(context, '标签扩展', 'Tag expansion', 'タグ検索'),
-      'tags 标签 扩展 Ctrl',
-    ),
+    item('generation', context.l10n.settings_tagExpansion, 'tags 标签 扩展 Ctrl'),
     item('generation', l.settings_warnHighAnlasCostTitle, 'Anlas cost 消耗 额度'),
     item('generation', l.settings_generationIntervalTitle, 'interval 间隔 节奏'),
     item('storage', l.settings_imageSavePath, 'path 保存 路径'),
@@ -76,38 +68,33 @@ List<SettingsSearchEntry> settingsSearchEntries(
     item('storage', l.settings_extraRootsTitle, 'gallery folder 图库来源 文件夹'),
     item(
       'data',
-      settingsText(context, '词库与缓存', 'Dictionaries & cache', '辞書とキャッシュ'),
+      context.l10n.settings_dictionariesCache,
       'dictionary tags cache 中文 汉化 词典 数据源',
     ),
     item(
       'account',
-      settingsText(context, '默认账号', 'Default account', '既定のアカウント'),
+      context.l10n.settings_defaultAccount2,
       'login default 默认 登录',
     ),
     item(
       'account',
-      settingsText(context, '启动时自动登录', 'Sign in automatically', '起動時に自動ログイン'),
+      context.l10n.settings_signInAutomatically,
       'auto login 启动 自动 登录',
     ),
     item(
       'account',
-      settingsText(context, '登录凭据', 'Sign-in credentials', 'ログイン認証'),
+      context.l10n.settings_signInCredentials,
       'token credentials 登录 凭据 账号 头像 昵称',
     ),
     item(
       'models',
-      settingsText(context, '翻译功能接口', 'Translation interfaces', '翻訳機能'),
+      context.l10n.settings_translationInterfaces,
       'model translation 接口 术词表 模型',
       'tasks',
     ),
     item(
       'models',
-      settingsText(
-        context,
-        '预设与内置规则',
-        'Presets & built-in rules',
-        'プリセットと内蔵ルール',
-      ),
+      context.l10n.settings_presetsBuiltInRules,
       'prompt preset 提示词 规则 默认',
       'presets',
     ),
@@ -122,12 +109,7 @@ List<SettingsSearchEntry> settingsSearchEntries(
     item('privacy', l.settings_stripMetadataTitle, 'metadata 脱敏 元数据 分享'),
     item(
       'about',
-      settingsText(
-        context,
-        '偏好备份与恢复',
-        'Preference backup & restore',
-        '設定のバックアップと復元',
-      ),
+      context.l10n.settings_preferenceBackupRestore,
       'backup import export reset 配置 偏好 导入 导出 恢复 默认',
     ),
   ];
@@ -183,12 +165,7 @@ class _SearchDialogState extends State<_SearchDialog> {
                 autofocus: true,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search, size: 18),
-                  hintText: settingsText(
-                    context,
-                    '搜索设置、功能或关键词',
-                    'Search settings and features',
-                    '設定や機能を検索',
-                  ),
+                  hintText: context.l10n.settings_searchSettingsFeatures,
                   suffixIcon: IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close, size: 17),
@@ -205,12 +182,7 @@ class _SearchDialogState extends State<_SearchDialog> {
               child: results.isEmpty
                   ? Center(
                       child: Text(
-                        settingsText(
-                          context,
-                          '没有找到匹配设置',
-                          'No matching settings',
-                          '該当する設定はありません',
-                        ),
+                        context.l10n.settings_noMatchingSettings,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     )

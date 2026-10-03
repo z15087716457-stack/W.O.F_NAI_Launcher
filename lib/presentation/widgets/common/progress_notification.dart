@@ -252,7 +252,7 @@ class _ProgressNotificationControllerImpl
     final notification = _manager._notifications[_id];
     if (notification != null && notification.onCancel != null) {
       notification.onCancel!();
-      fail(title: '已取消');
+      fail(title: currentL10n.progress_cancelled);
     }
   }
 }

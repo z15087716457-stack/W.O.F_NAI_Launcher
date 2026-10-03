@@ -7,6 +7,7 @@ import '../../../../core/utils/prompt_input_normalization.dart';
 import '../nai_syntax_controller.dart';
 import 'translation_tag_span.dart';
 import '../../common/translation_icon.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 export 'translation_pill_editor.dart';
 
@@ -175,7 +176,9 @@ class _TranslationPillViewState extends State<TranslationPillView> {
         TextStyle(color: scheme.onSurface, height: 1.25);
     return Semantics(
       button: !editableSource,
-      label: original ? '翻译块，显示原文' : '翻译块，显示译文',
+      label: original
+          ? context.l10n.promptTranslation_blockShowingOriginal
+          : context.l10n.promptTranslation_blockShowingReading,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth.isFinite
@@ -278,7 +281,7 @@ class _TranslationPillViewState extends State<TranslationPillView> {
                 if (pill.needsReview) ...[
                   const SizedBox(width: 5),
                   Tooltip(
-                    message: '原文已修改 · 译文待更新',
+                    message: context.l10n.promptTranslation_blockNeedsReview,
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTapUp: (details) =>

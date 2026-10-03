@@ -1237,12 +1237,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         Builder(
           builder: (context) {
             final translation = ref.read(autoTagTranslationProvider);
-            final language = Localizations.localeOf(context).languageCode;
-            final label = language == 'zh'
-                ? '自动翻译可见标签'
-                : language == 'ja'
-                ? '表示中のタグを自動翻訳'
-                : 'Auto-translate visible tags';
+            final label = context.l10n.tagExpansion_autoTranslateVisible;
             return IconButton(
               key: const ValueKey('tag-expansion-auto-translate'),
               tooltip: translation.activeRequests > 0

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/subscription_expiry_utils.dart';
 import '../../../data/models/user/user_subscription.dart';
-import '../../screens/settings/widgets/settings_ui_theme.dart';
 import '../auth/subscription_expiry_text.dart';
 
 /// Only the active account receives live subscription data and balance.
@@ -21,8 +20,6 @@ class AccountSubscriptionSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context), colors = theme.colorScheme;
     final subscription = state.subscription;
-    String text(String zh, String en, String ja) =>
-        settingsText(context, zh, en, ja);
     Widget metric(String label, Widget value) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,7 +38,7 @@ class AccountSubscriptionSummary extends StatelessWidget {
         : subscription.isGracePeriod
         ? context.l10n.subscriptionGracePeriod
         : subscription.hasActiveSubscription
-        ? text('订阅有效', 'Subscription active', 'サブスクリプション有効')
+        ? context.l10n.settings_subscriptionActive
         : subscription.tier > 0
         ? context.l10n.subscriptionExpired
         : context.l10n.subscriptionTierNone;
@@ -63,7 +60,7 @@ class AccountSubscriptionSummary extends StatelessWidget {
     final balance = subscription == null
         ? const SizedBox.shrink()
         : metric(
-            text('可用余额', 'Available balance', '利用可能な残高'),
+            context.l10n.settings_availableBalance,
             Text.rich(
               TextSpan(
                 children: [
@@ -90,7 +87,7 @@ class AccountSubscriptionSummary extends StatelessWidget {
     final expiry = subscription == null
         ? const SizedBox.shrink()
         : metric(
-            text('订阅有效期', 'Subscription expiry', 'サブスクリプション有効期限'),
+            context.l10n.settings_subscriptionExpiry2,
             subscription.tier > 0 && subscription.expiresAt != null
                 ? SubscriptionExpiryText(
                     expiresAt: subscription.expiresAt!,
@@ -112,16 +109,8 @@ class AccountSubscriptionSummary extends StatelessWidget {
           child: subscription == null
               ? Text(
                   state.isError
-                      ? text(
-                          '订阅信息暂不可用',
-                          'Subscription details are unavailable',
-                          'サブスクリプション情報を取得できません',
-                        )
-                      : text(
-                          '正在读取订阅信息…',
-                          'Loading subscription details…',
-                          'サブスクリプション情報を読み込み中…',
-                        ),
+                      ? context.l10n.settings_subscriptionDetailsUnavailable
+                      : context.l10n.settings_loadingSubscriptionDetails,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
@@ -169,11 +158,7 @@ class AccountSubscriptionSummary extends StatelessWidget {
                     ),
                   const SizedBox(height: 4),
                   Text(
-                    text(
-                      '账号到期后仍保留本地数据。',
-                      'Local data stays available after expiry.',
-                      '有効期限後もローカルデータは保持されます。',
-                    ),
+                    context.l10n.settings_localDataStaysAvailableAfter,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colors.onSurfaceVariant,
                     ),

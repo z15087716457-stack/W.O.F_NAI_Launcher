@@ -9,6 +9,7 @@ import '../../../../data/models/prompt_block/prompt_block_collection.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../../../data/repositories/prompt_block_repository.dart';
 import '../../../providers/prompt_block_library_provider.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 enum BlockOrganizerPage { favorites, folders, tags }
 
@@ -34,7 +35,7 @@ Future<void> showBlockOrganizerPopover(
 }) => showGeneralDialog<void>(
   context: context,
   barrierDismissible: true,
-  barrierLabel: '块分类',
+  barrierLabel: context.l10n.blockOrganizer_barrierLabel,
   barrierColor: Colors.transparent,
   transitionDuration: const Duration(milliseconds: 110),
   pageBuilder: (context, _, _) => _OrganizerPanel(
@@ -109,20 +110,20 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('替换同源块？'),
+          title: Text(context.l10n.blockOrganizer_replaceTitle),
           content: Text(
             mode == PromptBlockTransferMode.move
-                ? '目标中已有 $conflicts 个同源副本。替换后来源从块库隐藏；已插入提示词的实例仍可引用原块。'
-                : '目标中已有 $conflicts 个同源副本。替换会更新目标副本的内容，来源保留。',
+                ? context.l10n.blockOrganizer_replaceMoveBody(conflicts)
+                : context.l10n.blockOrganizer_replaceCopyBody(conflicts),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('取消'),
+              child: Text(context.l10n.common_cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('替换'),
+              child: Text(context.l10n.blockOrganizer_replace),
             ),
           ],
         ),
@@ -255,20 +256,22 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
     final value = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('自定义标签颜色'),
+        title: Text(context.l10n.blockOrganizer_customTagColor),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: '#RRGGBB 或 #AARRGGBB'),
+          decoration: InputDecoration(
+            hintText: context.l10n.blockOrganizer_colorHint,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(context.l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('确定'),
+            child: Text(context.l10n.common_confirm),
           ),
         ],
       ),
@@ -277,9 +280,9 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
     if (value == null || !mounted) return;
     final hex = value.replaceFirst('#', '');
     if (!RegExp(r'^(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$').hasMatch(hex)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请输入六位或八位十六进制颜色')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.blockOrganizer_invalidColor)),
+      );
       return;
     }
     setState(
@@ -296,7 +299,9 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
         await _notifier.updateFolder(folder.copyWith(name: name));
       }
     } else if (action == 'delete') {
-      if (await _confirmDelete('删除「${folder.name}」？其中的块会移至根目录。')) {
+      if (await _confirmDelete(
+        context.l10n.blockOrganizer_deleteFolderConfirm(folder.name),
+      )) {
         await _notifier.deleteFolder(
           folder.id,
           mode: PromptBlockFolderDeleteMode.moveContentsToRoot,
@@ -313,7 +318,9 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
       final name = await _askName(node.name);
       if (name != null) await _notifier.renameCollection(node.id, name);
     } else if (action == 'delete') {
-      if (await _confirmDelete('删除「${node.name}」？块本体会保留。')) {
+      if (await _confirmDelete(
+        context.l10n.blockOrganizer_deleteCollectionConfirm(node.name),
+      )) {
         await _notifier.deleteCollection(node.id);
       }
     }
@@ -410,7 +417,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
     final value = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('重命名'),
+        title: Text(context.l10n.common_rename),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -419,11 +426,11 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(context.l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('保存'),
+            child: Text(context.l10n.common_save),
           ),
         ],
       ),
@@ -436,16 +443,16 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
       await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('确认删除'),
+          title: Text(context.l10n.common_confirmDelete),
           content: Text(message),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('取消'),
+              child: Text(context.l10n.common_cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('删除'),
+              child: Text(context.l10n.common_delete),
             ),
           ],
         ),
@@ -473,9 +480,10 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
     );
     final state = ref.watch(promptBlockLibraryNotifierProvider).valueOrNull;
     final title = switch (widget.page) {
-      BlockOrganizerPage.favorites => '收藏与收藏集',
-      BlockOrganizerPage.folders => '选择文件夹',
-      BlockOrganizerPage.tags => '添加标签',
+      BlockOrganizerPage.favorites =>
+        context.l10n.blockOrganizer_titleFavorites,
+      BlockOrganizerPage.folders => context.l10n.blockOrganizer_titleFolders,
+      BlockOrganizerPage.tags => context.l10n.promptBlockLibrary_addTag,
     };
     return Stack(
       children: [
@@ -526,12 +534,14 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                           ),
                         ),
                         Text(
-                          '${widget.blockIds.length} 项',
+                          context.l10n.blockOrganizer_itemCount(
+                            widget.blockIds.length,
+                          ),
                           style: theme.textTheme.labelSmall,
                         ),
                         const SizedBox(width: 8),
                         IconButton(
-                          tooltip: '关闭',
+                          tooltip: context.l10n.common_close,
                           icon: const Icon(Icons.close, size: 16),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints.tightFor(
@@ -551,7 +561,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                         controller: _search,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.search, size: 18),
-                          hintText: '搜索',
+                          hintText: context.l10n.blockOrganizer_search,
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
                             vertical: 8,
@@ -596,7 +606,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                                 controller: _name,
                                 autofocus: true,
                                 decoration: InputDecoration(
-                                  hintText: '名称',
+                                  hintText: context.l10n.blockOrganizer_name,
                                   isDense: true,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
@@ -640,9 +650,11 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                                       size: 18,
                                     ),
                                   ),
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'custom',
-                                  child: Text('自定义颜色…'),
+                                  child: Text(
+                                    context.l10n.blockOrganizer_customColor,
+                                  ),
                                 ),
                               ],
                             ),
@@ -663,29 +675,38 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                       children: [
                         if (widget.page == BlockOrganizerPage.favorites)
                           PopupMenuButton<bool>(
-                            tooltip: '新建',
+                            tooltip: context.l10n.common_new,
                             onSelected: (isFolder) => setState(() {
                               _creating = true;
                               _creatingCollectionFolder = isFolder;
                             }),
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(value: false, child: Text('新建收藏集')),
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                value: false,
+                                child: Text(
+                                  context.l10n.blockOrganizer_newCollection,
+                                ),
+                              ),
                               PopupMenuItem(
                                 value: true,
-                                child: Text('新建收藏文件夹'),
+                                child: Text(
+                                  context
+                                      .l10n
+                                      .blockOrganizer_newCollectionFolder,
+                                ),
                               ),
                             ],
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 8,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.add, size: 17),
-                                  SizedBox(width: 5),
-                                  Text('新建'),
+                                  const Icon(Icons.add, size: 17),
+                                  const SizedBox(width: 5),
+                                  Text(context.l10n.common_new),
                                 ],
                               ),
                             ),
@@ -697,8 +718,8 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                             icon: const Icon(Icons.add, size: 17),
                             label: Text(
                               widget.page == BlockOrganizerPage.tags
-                                  ? '新标签'
-                                  : '新建文件夹',
+                                  ? context.l10n.blockOrganizer_newTag
+                                  : context.l10n.blockOrganizer_newFolder,
                             ),
                           ),
                         const Spacer(),
@@ -718,7 +739,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                                             true)
                                 ? null
                                 : () => _transfer(PromptBlockTransferMode.copy),
-                            child: const Text('复制'),
+                            child: Text(context.l10n.common_copy),
                           ),
                           FilledButton(
                             onPressed:
@@ -735,7 +756,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                                             true)
                                 ? null
                                 : () => _transfer(PromptBlockTransferMode.move),
-                            child: const Text('移动'),
+                            child: Text(context.l10n.common_move),
                           ),
                         ],
                       ],
@@ -760,7 +781,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
     final rows = <Widget>[
       _row(
         Icons.star_outline,
-        '收藏',
+        context.l10n.promptBlockLibrary_favorites,
         selected: allFavorite,
         onTap: () {
           setState(
@@ -828,7 +849,9 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                 children: [
                   if (node.isFolder)
                     IconButton(
-                      tooltip: _expanded.contains(node.id) ? '收起' : '展开',
+                      tooltip: _expanded.contains(node.id)
+                          ? context.l10n.common_collapse
+                          : context.l10n.common_expand,
                       icon: Icon(
                         _expanded.contains(node.id)
                             ? Icons.expand_less
@@ -871,7 +894,7 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
     final rows = <Widget>[
       _row(
         Icons.folder_open_outlined,
-        '根目录 / 未分类',
+        context.l10n.blockOrganizer_rootUncategorized,
         selected:
             _picked?.kind == PromptBlockTransferKind.folder &&
             _picked?.id == null,
@@ -912,7 +935,9 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
                   children: [
                     if (state.folders.childrenOf(folder.id).isNotEmpty)
                       IconButton(
-                        tooltip: _expanded.contains(folder.id) ? '收起' : '展开',
+                        tooltip: _expanded.contains(folder.id)
+                            ? context.l10n.common_collapse
+                            : context.l10n.common_expand,
                         icon: Icon(
                           _expanded.contains(folder.id)
                               ? Icons.expand_less
@@ -1027,12 +1052,12 @@ class _OrganizerPanelState extends ConsumerState<_OrganizerPanel> {
       child: Icon(Icons.more_horiz, size: 17),
     ),
     child: PopupMenuButton<String>(
-      tooltip: '管理；拖动排序',
+      tooltip: context.l10n.blockOrganizer_manageDrag,
       padding: EdgeInsets.zero,
       onSelected: (value) => value == 'rename' ? onRename() : onDelete(),
-      itemBuilder: (_) => const [
-        PopupMenuItem(value: 'rename', child: Text('重命名')),
-        PopupMenuItem(value: 'delete', child: Text('删除')),
+      itemBuilder: (_) => [
+        PopupMenuItem(value: 'rename', child: Text(context.l10n.common_rename)),
+        PopupMenuItem(value: 'delete', child: Text(context.l10n.common_delete)),
       ],
       child: const MouseRegion(
         cursor: SystemMouseCursors.grab,

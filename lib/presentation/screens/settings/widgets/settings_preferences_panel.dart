@@ -6,6 +6,7 @@ import '../../../../core/autocomplete/autocomplete_settings.dart'
     as autocomplete;
 import '../../../../core/settings/settings_preferences_service.dart';
 import '../../../../core/storage/local_storage_service.dart';
+import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/theme_provider.dart';
 import '../../../providers/font_provider.dart';
 import '../../../providers/font_scale_provider.dart';
@@ -22,7 +23,6 @@ import '../../../widgets/common/app_toast.dart';
 import 'settings_card.dart';
 import 'settings_labeled_group.dart';
 import 'settings_tile.dart';
-import 'settings_ui_theme.dart';
 
 class SettingsPreferencesPanel extends ConsumerStatefulWidget {
   const SettingsPreferencesPanel({super.key, this.labeled = false});
@@ -37,8 +37,6 @@ class _SettingsPreferencesPanelState
   bool busy = false;
   SettingsPreferencesService get service =>
       SettingsPreferencesService(ref.read(localStorageServiceProvider));
-  String text(String zh, String en, String ja) =>
-      settingsText(context, zh, en, ja);
   Future<void> run(Future<void> Function() action) async {
     if (busy) return;
     setState(() => busy = true);
@@ -48,7 +46,7 @@ class _SettingsPreferencesPanelState
       if (mounted) {
         AppToast.error(
           context,
-          '${text('操作未完成', 'Action incomplete', '操作は完了しませんでした')}: $error',
+          '${context.l10n.settings_actionIncomplete}: $error',
         );
       }
     } finally {
@@ -78,7 +76,7 @@ class _SettingsPreferencesPanelState
   Future<void> exportPreferences() => run(() async {
     final raw = service.encode(service.capture());
     final path = await FilePicker.platform.saveFile(
-      dialogTitle: text('导出偏好', 'Export preferences', '設定をエクスポート'),
+      dialogTitle: context.l10n.settings_exportPreferences,
       fileName: 'studio-preferences.json',
       type: FileType.custom,
       allowedExtensions: ['json'],
@@ -86,13 +84,11 @@ class _SettingsPreferencesPanelState
     if (path == null) return;
     await File(path).writeAsString(raw, flush: true);
     if (mounted) {
-      AppToast.success(
-        context,
-        text('偏好已导出', 'Preferences exported', '設定をエクスポートしました'),
-      );
+      AppToast.success(context, context.l10n.settings_preferencesExported);
     }
   });
   Future<void> importPreferences([bool latest = false]) => run(() async {
+    final l10n = context.l10n;
     File? file;
     if (latest) {
       file = await service.latestBackup();
@@ -107,10 +103,7 @@ class _SettingsPreferencesPanelState
     }
     if (file == null) {
       if (mounted) {
-        AppToast.info(
-          context,
-          text('尚无自动回退备份', 'No automatic backup yet', '自動バックアップはまだありません'),
-        );
+        AppToast.info(context, context.l10n.settings_noAutomaticBackupYet);
       }
       return;
     }
@@ -121,8 +114,8 @@ class _SettingsPreferencesPanelState
     await confirmApply(
       values,
       latest
-          ? text('恢复上次偏好', 'Restore previous preferences', '前の設定に復元')
-          : text('导入偏好', 'Import preferences', '設定をインポート'),
+          ? l10n.settings_restorePreviousPreferences
+          : l10n.settings_importPreferences,
     );
   });
   Future<void> confirmApply(Map<String, Object?> values, String title) async {
@@ -134,20 +127,16 @@ class _SettingsPreferencesPanelState
           builder: (ctx) => AlertDialog(
             title: Text(title),
             content: Text(
-              text(
-                '将应用 ${values.length} 项偏好。当前偏好会自动备份，可从“恢复上次偏好”找回。账号、密钥、草稿、图库和模型配置保持独立。',
-                'Apply ${values.length} preferences. Current preferences are backed up automatically. Accounts, secrets, drafts, libraries and model configurations are kept separately.',
-                '${values.length} 件の設定を適用します。現在の設定は自動保存されます。アカウント、認証情報、下書き、ライブラリ、モデル設定は個別に保持されます。',
-              ),
+              context.l10n.settings_applyPreferencesConfirm(values.length),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: Text(text('取消', 'Cancel', 'キャンセル')),
+                child: Text(context.l10n.common_cancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(ctx, true),
-                child: Text(text('确认应用', 'Apply', '適用')),
+                child: Text(context.l10n.settings_apply),
               ),
             ],
           ),
@@ -159,11 +148,7 @@ class _SettingsPreferencesPanelState
     if (mounted) {
       AppToast.success(
         context,
-        text(
-          '偏好已应用，旧设置已自动备份',
-          'Preferences applied; previous settings backed up',
-          '設定を適用し、以前の設定を保存しました',
-        ),
+        context.l10n.settings_preferencesAppliedPreviousSettingsBacked,
       );
     }
   }
@@ -174,19 +159,11 @@ class _SettingsPreferencesPanelState
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(
-            text('恢复默认偏好', 'Restore default preferences', '既定の設定に戻す'),
-          ),
+          title: Text(context.l10n.settings_restoreDefaultPreferences),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                text(
-                  '选择需要恢复的范围，当前偏好将自动备份。',
-                  'Choose the preferences to reset. Current settings will be backed up.',
-                  'リセットする項目を選択します。現在の設定は保存されます。',
-                ),
-              ),
+              Text(context.l10n.settings_choosePreferencesResetCurrentSettings),
               for (final group in PreferenceGroup.values)
                 CheckboxListTile(
                   dense: true,
@@ -200,21 +177,12 @@ class _SettingsPreferencesPanelState
                     }
                   }),
                   title: Text(switch (group) {
-                    PreferenceGroup.appearance => text(
-                      '外观、声音与操作',
-                      'Appearance, sound & controls',
-                      '外観・サウンド・操作',
-                    ),
-                    PreferenceGroup.input => text(
-                      '输入与自动补全',
-                      'Input & autocomplete',
-                      '入力と自動補完',
-                    ),
-                    PreferenceGroup.protection => text(
-                      '隐私与生成保护',
-                      'Privacy & generation protection',
-                      'プライバシーと生成の保護',
-                    ),
+                    PreferenceGroup.appearance =>
+                      context.l10n.settings_appearanceSoundControls,
+                    PreferenceGroup.input =>
+                      context.l10n.settings_inputAutocomplete,
+                    PreferenceGroup.protection =>
+                      context.l10n.settings_privacyGenerationProtection,
                   }),
                 ),
             ],
@@ -222,22 +190,22 @@ class _SettingsPreferencesPanelState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(text('取消', 'Cancel', 'キャンセル')),
+              child: Text(context.l10n.common_cancel),
             ),
             FilledButton(
               onPressed: selected.isEmpty
                   ? null
                   : () => Navigator.pop(ctx, Set<PreferenceGroup>.of(selected)),
-              child: Text(text('继续', 'Continue', '続行')),
+              child: Text(context.l10n.common_continue),
             ),
           ],
         ),
       ),
     );
-    if (groups != null) {
+    if (groups != null && mounted) {
       await confirmApply(
         service.defaults(groups),
-        text('恢复默认偏好', 'Restore default preferences', '既定の設定に戻す'),
+        context.l10n.settings_restoreDefaultPreferences,
       );
     }
   });
@@ -247,15 +215,9 @@ class _SettingsPreferencesPanelState
       children: [
         SettingsTile(
           hoverFeedback: !busy,
-          title: Text(
-            text('偏好备份与恢复', 'Preference backup & restore', '設定のバックアップと復元'),
-          ),
+          title: Text(context.l10n.settings_preferenceBackupRestore),
           subtitle: Text(
-            text(
-              '界面、操作、输入和保护偏好，可跨设备迁移。',
-              'Move appearance, controls, input and protection preferences between devices.',
-              '外観・操作・入力・保護の設定を他の端末へ移行できます。',
-            ),
+            context.l10n.settings_moveAppearanceControlsInputProtection,
           ),
           trailing: Wrap(
             spacing: 8,
@@ -265,52 +227,36 @@ class _SettingsPreferencesPanelState
                 key: const Key('preferences-export'),
                 onPressed: busy ? null : exportPreferences,
                 icon: const Icon(Icons.upload_outlined, size: 16),
-                label: Text(text('导出', 'Export', 'エクスポート')),
+                label: Text(context.l10n.common_export),
               ),
               OutlinedButton.icon(
                 key: const Key('preferences-import'),
                 onPressed: busy ? null : importPreferences,
                 icon: const Icon(Icons.download_outlined, size: 16),
-                label: Text(text('导入', 'Import', 'インポート')),
+                label: Text(context.l10n.common_import),
               ),
             ],
           ),
         ),
         SettingsTile(
           hoverFeedback: !busy,
-          title: Text(
-            text('恢复上次偏好', 'Restore previous preferences', '前の設定に復元'),
-          ),
-          subtitle: Text(
-            text(
-              '导入或恢复默认前会自动保存回退副本。',
-              'A rollback copy is saved before an import or reset.',
-              'インポートやリセットの前に元の設定を自動保存します。',
-            ),
-          ),
+          title: Text(context.l10n.settings_restorePreviousPreferences),
+          subtitle: Text(context.l10n.settings_rollbackCopySavedBeforeImport),
           trailing: OutlinedButton(
             key: const Key('preferences-restore-previous'),
             onPressed: busy ? null : () => importPreferences(true),
-            child: Text(text('恢复', 'Restore', '復元')),
+            child: Text(context.l10n.settings_restore),
           ),
           onTap: busy ? null : () => importPreferences(true),
         ),
         SettingsTile(
           hoverFeedback: !busy,
-          title: Text(
-            text('恢复默认偏好', 'Restore default preferences', '既定の設定に戻す'),
-          ),
-          subtitle: Text(
-            text(
-              '按范围恢复，保留账号、模型、图库和创作内容。',
-              'Reset a selected scope while keeping accounts, models, libraries and creative work.',
-              '範囲を選んでリセットし、アカウント・モデル・ライブラリ・創作内容を保持します。',
-            ),
-          ),
+          title: Text(context.l10n.settings_restoreDefaultPreferences),
+          subtitle: Text(context.l10n.settings_resetSelectedScopeWhileKeeping),
           trailing: OutlinedButton(
             key: const Key('preferences-restore-defaults'),
             onPressed: busy ? null : reset,
-            child: Text(text('选择范围', 'Choose scope', '範囲を選択')),
+            child: Text(context.l10n.settings_chooseScope),
           ),
           onTap: busy ? null : reset,
         ),
@@ -319,17 +265,13 @@ class _SettingsPreferencesPanelState
     if (widget.labeled) {
       return SettingsLabeledGroup(
         key: const Key('about-preferences-group'),
-        title: text('偏好管理', 'Preference management', '設定の管理'),
-        description: text(
-          '备份、迁移与恢复',
-          'Backup, migration and recovery',
-          'バックアップ・移行・復元',
-        ),
+        title: context.l10n.settings_preferenceManagement,
+        description: context.l10n.settings_backupMigrationRecovery,
         child: content,
       );
     }
     return SettingsCard(
-      title: text('偏好管理', 'Preference management', '設定の管理'),
+      title: context.l10n.settings_preferenceManagement,
       child: content,
     );
   }

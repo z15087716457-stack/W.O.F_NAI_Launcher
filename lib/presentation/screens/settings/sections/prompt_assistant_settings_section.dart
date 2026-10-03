@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'model_management_section.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 /// Compatibility entry for existing in-place configuration consumers.
 class PromptAssistantSettingsSection extends StatelessWidget {
@@ -24,7 +25,7 @@ Future<void> showModelManagementDialog(BuildContext context) {
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
-                tooltip: '返回编辑',
+                tooltip: context.l10n.modelSettings_backToEditing,
                 icon: const Icon(Icons.close),
                 onPressed: () async {
                   if (await (editor.currentState?.confirmLeave() ??

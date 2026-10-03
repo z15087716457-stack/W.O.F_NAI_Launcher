@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../themes/studio_typography.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 const serviceControlRadius = BorderRadius.all(Radius.circular(6));
 
@@ -102,8 +103,17 @@ class _ServiceRequestStepperState extends State<ServiceRequestStepper> {
           key: Key(
             '${widget.fieldKey}-${direction < 0 ? 'decrease' : 'increase'}',
           ),
-          tooltip:
-              '${direction < 0 ? '减少' : '增加'}${widget.label}（${widget.step} ${widget.unit}）',
+          tooltip: direction < 0
+              ? context.l10n.modelControls_decrease(
+                  widget.label,
+                  widget.step,
+                  widget.unit,
+                )
+              : context.l10n.modelControls_increase(
+                  widget.label,
+                  widget.step,
+                  widget.unit,
+                ),
           onPressed: enabled ? () => _adjust(direction) : null,
           style: IconButton.styleFrom(
             fixedSize: Size.square(height),
@@ -274,7 +284,11 @@ class ServiceRetrySegments extends StatelessWidget {
                     visualDensity: VisualDensity.standard,
                     textStyle: theme.textTheme.bodyMedium,
                   ),
-                  child: Text(i == 0 ? '关闭' : '$i 次'),
+                  child: Text(
+                    i == 0
+                        ? context.l10n.modelControls_retryOff
+                        : context.l10n.modelControls_retryTimes(i),
+                  ),
                 ),
               ),
             ),

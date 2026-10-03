@@ -426,17 +426,15 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                   minLines: 2,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    labelText:
-                        TranslationEditorLabels(
-                          Localizations.localeOf(context).languageCode,
-                        ).readingFieldTitle(
+                    labelText: TranslationEditorLabels(context)
+                        .readingFieldTitle(
                           PromptTranslationLanguage.fromCode(
                             widget.block!.readingTranslationLanguageCode,
                           ),
                         ),
                     helperText: widget.block!.readingTranslationNeedsReview
-                        ? '原文已修改，译文待更新'
-                        : '修改原文后请同步校对这里的译文',
+                        ? context.l10n.promptBlockEditor_translationNeedsReview
+                        : context.l10n.promptBlockEditor_translationReviewHint,
                   ),
                 ),
               ],
@@ -458,12 +456,16 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
                     )
                     ? _selectedAppearance
                     : PromptBlockAppearance.classic,
-                decoration: const InputDecoration(labelText: '块外观'),
+                decoration: InputDecoration(
+                  labelText: context.l10n.promptBlockEditor_appearance,
+                ),
                 items: [
                   for (final appearance in PromptBlockAppearance.selectable)
                     DropdownMenuItem(
                       value: appearance,
-                      child: Text(PromptBlockAppearance.label(appearance)),
+                      child: Text(
+                        PromptBlockAppearance.label(appearance, context.l10n),
+                      ),
                     ),
                 ],
                 onChanged: (value) {
@@ -1137,7 +1139,9 @@ class _PromptBlockEditDialogState extends State<PromptBlockEditDialog> {
               ? null
               : await File(selectedFile.path!).readAsBytes());
       if (bytes == null) {
-        throw const FileSystemException('无法读取所选图像');
+        throw FileSystemException(
+          currentL10n.promptBlockEditor_imageUnreadable,
+        );
       }
 
       // 归一化为 PNG 后直接落进块缩略图目录（与词库同策略）。

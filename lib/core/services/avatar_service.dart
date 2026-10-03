@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../data/models/auth/saved_account.dart';
 import '../utils/app_logger.dart';
+import '../utils/localization_extension.dart';
 
 /// 头像操作结果
 class AvatarResult {
@@ -77,7 +78,7 @@ class AvatarService {
 
       // 文件路径为空
       if (pickedFile.path == null) {
-        return const AvatarResult.failure('无法获取文件路径');
+        return AvatarResult.failure(currentL10n.avatar_noFilePath);
       }
 
       final sourcePath = pickedFile.path!;
@@ -87,7 +88,7 @@ class AvatarService {
       final sourceFile = File(sourcePath);
       if (!await sourceFile.exists()) {
         AppLogger.e('Source file not exists: $sourcePath', 'AvatarService');
-        return const AvatarResult.failure('源文件不存在或已被删除');
+        return AvatarResult.failure(currentL10n.avatar_sourceMissing);
       }
 
       final avatarsDir = await _getAvatarsDirectory();
@@ -109,7 +110,9 @@ class AvatarService {
         AppLogger.i('Copied to temp file: $tempPath', 'AvatarService');
       } catch (copyError) {
         AppLogger.e('Failed to copy to temp file: $copyError', 'AvatarService');
-        return AvatarResult.failure('无法复制文件：$copyError');
+        return AvatarResult.failure(
+          currentL10n.avatar_copyFailed('$copyError'),
+        );
       }
 
       // 如果旧头像存在，先保存旧路径
@@ -133,7 +136,9 @@ class AvatarService {
           'Failed to rename temp file: $renameError',
           'AvatarService',
         );
-        return AvatarResult.failure('无法保存头像：$renameError');
+        return AvatarResult.failure(
+          currentL10n.avatar_saveFailed('$renameError'),
+        );
       }
 
       // 只有在成功保存后才删除旧头像
@@ -157,7 +162,7 @@ class AvatarService {
       return AvatarResult.success(finalPath);
     } catch (e) {
       AppLogger.e('Failed to pick and save avatar: $e', 'AvatarService');
-      return AvatarResult.failure('操作失败：$e');
+      return AvatarResult.failure(currentL10n.avatar_operationFailed('$e'));
     }
   }
 

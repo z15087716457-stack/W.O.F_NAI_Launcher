@@ -155,6 +155,7 @@ Future<ProviderContainer> pumpManagement(
   Dio? dio,
   MemorySettings? settings,
   PromptAssistantConfigState config = sampleConfig,
+  Locale locale = const Locale('zh'),
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -176,7 +177,7 @@ Future<ProviderContainer> pumpManagement(
         ),
       ],
       child: MaterialApp(
-        locale: const Locale('zh'),
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         theme: settingsUiTheme(

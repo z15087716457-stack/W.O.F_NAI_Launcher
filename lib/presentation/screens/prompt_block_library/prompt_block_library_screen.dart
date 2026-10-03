@@ -305,7 +305,7 @@ class _PromptBlockLibraryScreenState
                   ? _buildEmptyDetailPanel(
                       icon: Icons.checklist,
                       message:
-                          '${context.l10n.promptBlockLibrary_selectedCount(_multiSelectedIds.length)}\n拖动已选块到左侧的收藏或文件夹，松开后选择复制或移动。',
+                          '${context.l10n.promptBlockLibrary_selectedCount(_multiSelectedIds.length)}\n${context.l10n.blockLibrary_dragSelectedHint}',
                     )
                   : block != null
                   ? PromptBlockDetailPanel(
@@ -805,7 +805,7 @@ class _PromptBlockLibraryScreenState
         ),
         Builder(
           builder: (buttonContext) => IconButton(
-            tooltip: '添加标签',
+            tooltip: context.l10n.promptBlockLibrary_addTag,
             onPressed: hasSelection
                 ? () => _showOrganizerAtButton(
                     BlockOrganizerPage.tags,
@@ -937,7 +937,11 @@ class _PromptBlockLibraryScreenState
                 color: theme.colorScheme.primary,
               ),
               const SizedBox(width: 7),
-              Text(ids.length == 1 ? block.displayTitle : '${ids.length} 个块'),
+              Text(
+                ids.length == 1
+                    ? block.displayTitle
+                    : context.l10n.blockLibrary_blockCount(ids.length),
+              ),
             ],
           ),
         ),
@@ -2106,9 +2110,9 @@ class _PromptBlockLibraryScreenState
                 value: _BlockContextAction.moveTo,
                 child: Text(l10n.promptBlockLibrary_moveTo),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: _BlockContextAction.addTag,
-                child: Text('添加标签'),
+                child: Text(context.l10n.promptBlockLibrary_addTag),
               ),
               const PopupMenuDivider(),
               PopupMenuItem(

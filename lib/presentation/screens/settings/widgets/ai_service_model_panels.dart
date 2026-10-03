@@ -32,7 +32,7 @@ extension _ServiceModelPanels on _AiServiceEditorState {
       style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.search, size: 14),
-        hintText: '搜索模型 ID…',
+        hintText: context.l10n.modelService_searchModelId,
         isDense: true,
         filled: true,
         fillColor: colors.surfaceContainerHighest.withValues(alpha: .45),
@@ -77,12 +77,16 @@ extension _ServiceModelPanels on _AiServiceEditorState {
           ),
         ),
         const SizedBox(width: 7),
-        Text(
-          '该服务的模型',
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: colors.onSurface,
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+        Flexible(
+          child: Text(
+            context.l10n.modelService_serviceModels,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: colors.onSurface,
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         const SizedBox(width: 7),
@@ -100,7 +104,7 @@ extension _ServiceModelPanels on _AiServiceEditorState {
             textStyle: theme.textTheme.labelSmall,
           ),
           icon: const Icon(Icons.refresh, size: 13),
-          label: const Text('获取列表'),
+          label: Text(context.l10n.modelService_fetchList),
         ),
       ],
     );
@@ -128,8 +132,12 @@ extension _ServiceModelPanels on _AiServiceEditorState {
                     )
                   : Row(
                       children: [
-                        controls,
-                        const Spacer(),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: controls,
+                          ),
+                        ),
                         SizedBox(width: 165 * scale, child: search),
                       ],
                     ),
@@ -140,8 +148,8 @@ extension _ServiceModelPanels on _AiServiceEditorState {
                   ? Center(
                       child: Text(
                         _catalog.isEmpty
-                            ? '点击“获取列表”读取此服务的模型，\n或在右侧手动添加模型 ID。'
-                            : '没有匹配的模型',
+                            ? context.l10n.modelService_catalogEmpty
+                            : context.l10n.modelService_noMatchingModels,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
@@ -250,7 +258,9 @@ extension _ServiceModelPanels on _AiServiceEditorState {
                                       SizedBox(
                                         width: 84 * scale,
                                         child: Tooltip(
-                                          message: '目录上限：上下文 / 最大输出',
+                                          message: context
+                                              .l10n
+                                              .modelService_catalogLimitTooltip,
                                           child: Text(
                                             '${tokens(metadata!.contextLimit)} · ${tokens(metadata.outputLimit)}',
                                             textAlign: TextAlign.right,
@@ -317,7 +327,7 @@ extension _ServiceModelPanels on _AiServiceEditorState {
       style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.search, size: 14),
-        hintText: '搜索已添加模型…',
+        hintText: context.l10n.modelService_searchAddedModels,
         isDense: true,
         filled: true,
         fillColor: colors.surfaceContainerHighest.withValues(alpha: .45),
@@ -340,7 +350,7 @@ extension _ServiceModelPanels on _AiServiceEditorState {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '模型设置',
+          context.l10n.modelService_modelSettings,
           style: theme.textTheme.labelSmall?.copyWith(
             fontSize: 11,
             fontWeight: FontWeight.w500,
@@ -394,7 +404,9 @@ extension _ServiceModelPanels on _AiServiceEditorState {
               child: models.isEmpty
                   ? Center(
                       child: Text(
-                        query.isEmpty ? '从左侧勾选，或在下方添加模型' : '没有匹配的模型',
+                        query.isEmpty
+                            ? context.l10n.modelService_addedEmpty
+                            : context.l10n.modelService_noMatchingModels,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
@@ -434,9 +446,9 @@ extension _ServiceModelPanels on _AiServiceEditorState {
                   onSubmitted: (_) => _addManual(),
                   style: theme.textTheme.bodySmall,
                   decoration: InputDecoration(
-                    hintText: '自定义模型 ID',
+                    hintText: context.l10n.modelService_customModelId,
                     prefixIcon: Tooltip(
-                      message: '添加模型目录无法拉取到的模型',
+                      message: context.l10n.modelService_customModelHelp,
                       triggerMode: TooltipTriggerMode.tap,
                       child: Icon(
                         Icons.help_outline,
@@ -486,7 +498,7 @@ extension _ServiceModelPanels on _AiServiceEditorState {
                     textStyle: theme.textTheme.bodySmall,
                   ),
                   icon: const Icon(Icons.add, size: 15),
-                  label: const Text('添加自定义模型'),
+                  label: Text(context.l10n.modelService_addCustomModel),
                 );
                 return c.maxWidth < 340 * scale
                     ? Column(

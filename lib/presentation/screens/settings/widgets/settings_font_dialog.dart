@@ -5,7 +5,6 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/font_provider.dart';
 import '../../../themes/studio_typography.dart';
 import 'settings_dialog.dart';
-import 'settings_ui_theme.dart';
 
 class SettingsFontDialog extends ConsumerStatefulWidget {
   const SettingsFontDialog({super.key, required this.current});
@@ -45,12 +44,7 @@ class _SettingsFontDialogState extends ConsumerState<SettingsFontDialog> {
                   setState(() => query = value.trim().toLowerCase()),
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search, size: 18),
-                hintText: settingsText(
-                  context,
-                  '搜索字体名称',
-                  'Search fonts',
-                  'フォントを検索',
-                ),
+                hintText: context.l10n.settings_searchFonts,
               ),
             ),
             const SizedBox(height: 12),
@@ -62,14 +56,7 @@ class _SettingsFontDialogState extends ConsumerState<SettingsFontDialog> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                     error: (_, _) => Center(
-                      child: Text(
-                        settingsText(
-                          context,
-                          '暂时无法读取字体',
-                          'Could not load fonts',
-                          'フォントを読み込めません',
-                        ),
-                      ),
+                      child: Text(context.l10n.settings_couldNotLoadFonts),
                     ),
                     data: (groups) => ListView(
                       children: [
@@ -83,24 +70,9 @@ class _SettingsFontDialogState extends ConsumerState<SettingsFontDialog> {
                               padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                               child: Text(
                                 switch (group.key) {
-                                  '应用默认' => settingsText(
-                                    context,
-                                    '推荐',
-                                    'Recommended',
-                                    'おすすめ',
-                                  ),
-                                  '内置字体' => settingsText(
-                                    context,
-                                    '随应用提供',
-                                    'Included',
-                                    '内蔵',
-                                  ),
-                                  '系统字体' => settingsText(
-                                    context,
-                                    '系统字体',
-                                    'System fonts',
-                                    'システム',
-                                  ),
+                                  '应用默认' => context.l10n.settings_recommended,
+                                  '内置字体' => context.l10n.settings_included,
+                                  '系统字体' => context.l10n.settings_systemFonts,
                                   _ => group.key,
                                 },
                                 style: theme.textTheme.bodySmall?.copyWith(
@@ -137,7 +109,7 @@ class _SettingsFontDialogState extends ConsumerState<SettingsFontDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    settingsText(context, '字体预览', 'Font preview', 'プレビュー'),
+                    context.l10n.settings_fontPreview,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colors.onSurfaceVariant,
                     ),
@@ -156,12 +128,7 @@ class _SettingsFontDialogState extends ConsumerState<SettingsFontDialog> {
                   if (selected.source == FontSource.google) ...[
                     const SizedBox(height: 6),
                     Text(
-                      settingsText(
-                        context,
-                        '在线字体将在应用后加载，当前显示界面字体。',
-                        'Online fonts load after applying; preview uses the interface font.',
-                        'オンラインフォントは適用後に読み込まれます。',
-                      ),
+                      context.l10n.settings_onlineFontsLoadAfterApplying,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),

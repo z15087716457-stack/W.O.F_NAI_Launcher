@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/model_request_overrides.dart';
 import '../../../themes/studio_typography.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 class ModelRequestDraft {
   const ModelRequestDraft(this.headers, this.body, {this.openBody});
@@ -95,7 +96,9 @@ class _ModelRequestOverridesEditorState
       final key = row.key.text.trim(), value = row.value.text;
       if (key.isEmpty && value.isEmpty) continue;
       row.error = ModelRequestOverrides.headerError(key, value);
-      if (!names.add(key.toLowerCase())) row.error = '请求头名称重复';
+      if (!names.add(key.toLowerCase())) {
+        row.error = currentL10n.modelOverrides_duplicateHeader;
+      }
       error ??= row.error;
       if (row.error == null) headers[key] = value;
     }
@@ -104,19 +107,19 @@ class _ModelRequestOverridesEditorState
       final key = row.key.text.trim(), value = row.value.text.trim();
       if (key.isEmpty && value.isEmpty) continue;
       if (key.isEmpty) {
-        row.error = '请输入字段名';
+        row.error = currentL10n.modelOverrides_fieldNameRequired;
       } else if (body.containsKey(key)) {
-        row.error = '字段名重复';
+        row.error = currentL10n.modelOverrides_duplicateField;
       } else {
         try {
           body[key] = jsonDecode(value);
           if (key == 'model' && body[key] != widget.modelId) {
-            row.error = '模型 ID 请通过模型列表设置';
+            row.error = currentL10n.modelOverrides_modelFromList;
           } else if (key == 'stream' && body[key] != false) {
-            row.error = '当前接口使用非流式请求，stream 应为 false';
+            row.error = currentL10n.modelOverrides_streamMustBeFalse;
           }
         } on FormatException {
-          row.error = '请输入有效的 JSON 值';
+          row.error = currentL10n.modelOverrides_invalidJson;
         }
       }
       error ??= row.error;
@@ -170,7 +173,11 @@ class _ModelRequestOverridesEditorState
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(body ? '自定义 Body' : '自定义 Headers'),
+          Text(
+            body
+                ? context.l10n.modelOverrides_customBody
+                : context.l10n.modelOverrides_customHeaders,
+          ),
           const SizedBox(width: 3),
           Icon(active ? Icons.expand_less : Icons.expand_more, size: 13),
         ],
@@ -200,7 +207,11 @@ class _ModelRequestOverridesEditorState
       controller: row.key,
       enabled: widget.enabled,
       style: style,
-      decoration: _decoration(body ? '字段名' : '请求头名称'),
+      decoration: _decoration(
+        body
+            ? context.l10n.modelOverrides_fieldName
+            : context.l10n.modelOverrides_headerName,
+      ),
       onChanged: (_) => _changed(),
     );
     final valueField = TextField(
@@ -210,7 +221,12 @@ class _ModelRequestOverridesEditorState
       style: body
           ? style?.copyWith(fontFamily: StudioTypography.mono, fontSize: 11)
           : style,
-      decoration: _decoration(body ? '值（JSON）' : '值', row.error),
+      decoration: _decoration(
+        body
+            ? context.l10n.modelOverrides_valueJson
+            : context.l10n.modelOverrides_value,
+        row.error,
+      ),
       minLines: body ? 2 : 1,
       maxLines: body ? 4 : 1,
       keyboardType: body ? TextInputType.multiline : TextInputType.text,
@@ -218,7 +234,7 @@ class _ModelRequestOverridesEditorState
     );
     final remove = IconButton(
       key: ValueKey('${body ? 'body' : 'header'}-remove-$index'),
-      tooltip: '删除此项',
+      tooltip: context.l10n.modelOverrides_removeItem,
       onPressed: widget.enabled
           ? () {
               (body ? _body : _headers).remove(row);
@@ -310,12 +326,16 @@ class _ModelRequestOverridesEditorState
                 Row(
                   children: [
                     Text(
-                      body ? '请求体' : '请求头',
+                      body
+                          ? context.l10n.modelOverrides_body
+                          : context.l10n.modelOverrides_headers,
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
                     const Spacer(),
                     Text(
-                      '${(body ? _body : _headers).length} 项',
+                      context.l10n.modelOverrides_itemCount(
+                        (body ? _body : _headers).length,
+                      ),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
@@ -327,7 +347,7 @@ class _ModelRequestOverridesEditorState
                 if (body) ...[
                   const SizedBox(height: 6),
                   Text(
-                    '支持字符串、数字、布尔值、数组和对象',
+                    context.l10n.modelOverrides_valueTypes,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: colors.onSurfaceVariant,
                     ),
@@ -362,7 +382,11 @@ class _ModelRequestOverridesEditorState
                       ),
                     ),
                     icon: const Icon(Icons.add, size: 15),
-                    label: Text(body ? '添加请求体字段' : '添加请求头'),
+                    label: Text(
+                      body
+                          ? context.l10n.modelOverrides_addBodyField
+                          : context.l10n.modelOverrides_addHeader,
+                    ),
                   ),
                 ),
               ],

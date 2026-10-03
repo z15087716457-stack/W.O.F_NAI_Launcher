@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../../core/utils/localization_extension.dart';
 
 enum ToastType { success, error, warning, info, progress }
 
@@ -334,18 +335,13 @@ class _ToastCardState extends State<_ToastCard>
         theme = Theme.of(context),
         scheme = theme.colorScheme;
     final (icon, color) = _style(scheme, record.type);
-    final language = Localizations.localeOf(context).languageCode;
-    String label(String zh, String en, String ja) => language == 'zh'
-        ? zh
-        : language == 'ja'
-        ? ja
-        : en;
+    final l10n = context.l10n;
     final title = switch (record.type) {
-      ToastType.success => label('已完成', 'Completed', '完了'),
-      ToastType.error => label('操作失败', 'Action failed', '操作失敗'),
-      ToastType.warning => label('请留意', 'Please note', 'ご注意'),
-      ToastType.info => label('提示', 'Notice', 'お知らせ'),
-      ToastType.progress => label('正在处理', 'In progress', '処理中'),
+      ToastType.success => l10n.toast_titleSuccess,
+      ToastType.error => l10n.toast_titleError,
+      ToastType.warning => l10n.toast_titleWarning,
+      ToastType.info => l10n.toast_titleInfo,
+      ToastType.progress => l10n.toast_titleProgress,
     };
     final card = MouseRegion(
       onEnter: (_) => record.pause(),

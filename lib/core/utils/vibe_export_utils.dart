@@ -14,6 +14,7 @@ import 'file_name_sanitizer.dart';
 import 'novelai_vibe_codec.dart';
 import 'vibe_file_parser.dart';
 import 'vibe_image_embedder.dart';
+import 'localization_extension.dart';
 
 class VibeEmbeddedPngExportPlan {
   const VibeEmbeddedPngExportPlan({
@@ -59,9 +60,21 @@ class VibeExportUtils {
       );
     }
 
-    addCandidate(_rawImageCandidateId, '原始图片', entry.rawImageData);
-    addCandidate(_vibeThumbnailCandidateId, 'Vibe 预览图', entry.vibeThumbnail);
-    addCandidate(_thumbnailCandidateId, '库缩略图', entry.thumbnail);
+    addCandidate(
+      _rawImageCandidateId,
+      currentL10n.vibeExport_rawImage,
+      entry.rawImageData,
+    );
+    addCandidate(
+      _vibeThumbnailCandidateId,
+      currentL10n.vibeExport_vibePreview,
+      entry.vibeThumbnail,
+    );
+    addCandidate(
+      _thumbnailCandidateId,
+      currentL10n.vibeExport_libraryThumbnail,
+      entry.thumbnail,
+    );
 
     return candidates;
   }
@@ -129,7 +142,7 @@ class VibeExportUtils {
       }
 
       final outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: '导出 PNG Vibe 图片',
+        dialogTitle: currentL10n.vibeExport_pngTitle,
         fileName: fileName,
         type: FileType.custom,
         allowedExtensions: ['png'],
@@ -167,7 +180,7 @@ class VibeExportUtils {
     }
 
     final outputDirectory = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: '选择 PNG 导出目录',
+      dialogTitle: currentL10n.vibeExport_pngDirectoryTitle,
     );
     if (outputDirectory == null || outputDirectory.isEmpty) {
       AppLogger.i('用户取消了 PNG 批量导出目录选择', 'VibeExport');
@@ -214,7 +227,7 @@ class VibeExportUtils {
       final outputFile = await _resolveOutputFilePath(
         outputDirectory: outputDirectory,
         fileName: fileName,
-        dialogTitle: '导出 Vibe 文件',
+        dialogTitle: currentL10n.vibeExport_fileTitle,
         allowedExtensions: const ['naiv4vibe'],
       );
 
@@ -264,7 +277,7 @@ class VibeExportUtils {
       final outputFile = await _resolveOutputFilePath(
         outputDirectory: outputDirectory,
         fileName: fileName,
-        dialogTitle: '导出 Vibe Bundle',
+        dialogTitle: currentL10n.vibeExport_bundleTitle,
         allowedExtensions: const ['naiv4vibebundle'],
       );
 
@@ -313,7 +326,7 @@ class VibeExportUtils {
       final outputFile = await _resolveOutputFilePath(
         outputDirectory: null,
         fileName: fileName,
-        dialogTitle: '导出 Vibe ZIP',
+        dialogTitle: currentL10n.vibeExport_zipTitle,
         allowedExtensions: const ['zip'],
       );
 
@@ -365,7 +378,7 @@ class VibeExportUtils {
     }
 
     if (archive.files.isEmpty) {
-      throw StateError('没有可导出的 Vibe 条目');
+      throw StateError(currentL10n.vibeExport_nothingToExport);
     }
 
     final zipBytes = ZipEncoder().encode(
@@ -548,7 +561,7 @@ class VibeExportUtils {
   }) async {
     final exportableVibes = vibes.where(_hasExportableData).toList();
     if (exportableVibes.isEmpty) {
-      throw StateError('没有可导出的 Vibe 条目');
+      throw StateError(currentL10n.vibeExport_nothingToExport);
     }
     return NovelAiVibeCodec.encodeJson(
       NovelAiVibeCodec.buildBundleMap(

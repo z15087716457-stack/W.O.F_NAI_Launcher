@@ -1,4 +1,5 @@
 import '../constants/api_constants.dart';
+import '../utils/localization_extension.dart';
 
 /// NAI-compatible API endpoint configuration.
 ///
@@ -76,21 +77,21 @@ class NaiApiEndpointConfig {
   static String _normalizeBaseUrl(String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) {
-      throw ArgumentError('API 地址不能为空');
+      throw ArgumentError(currentL10n.apiEndpoint_empty);
     }
 
     final withScheme = _withDefaultScheme(trimmed);
     final uri = Uri.tryParse(withScheme);
     if (uri == null || !uri.hasAuthority) {
-      throw ArgumentError('API 地址无效');
+      throw ArgumentError(currentL10n.apiEndpoint_invalid);
     }
 
     if (uri.scheme != 'http' && uri.scheme != 'https') {
-      throw ArgumentError('仅支持 http 或 https API 地址');
+      throw ArgumentError(currentL10n.apiEndpoint_httpOnly);
     }
 
     if (uri.hasQuery || uri.hasFragment || uri.userInfo.isNotEmpty) {
-      throw ArgumentError('API 地址不能包含查询参数、片段或用户信息');
+      throw ArgumentError(currentL10n.apiEndpoint_noExtras);
     }
 
     final path = uri.path.replaceAll(RegExp(r'/+$'), '');

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../../data/models/gallery/local_image_record.dart';
+import 'localization_extension.dart';
 
 const protectedDragFeedbackMarkerKey = ValueKey<String>(
   'protected-drag-feedback-marker',
@@ -221,7 +222,7 @@ Widget buildImageDragFeedback(
                       ),
                       const SizedBox(width: 3),
                       Text(
-                        hintText ?? '拖拽以分享',
+                        hintText ?? currentL10n.drop_dragToShare,
                         style: TextStyle(
                           fontSize: 8,
                           color: colorScheme.onSurfaceVariant,

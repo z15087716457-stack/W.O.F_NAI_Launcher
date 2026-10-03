@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import 'provider_logo.dart';
 import 'settings_dialog.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 Future<ProviderPreset?> showProviderPicker(
   BuildContext context, [
@@ -20,7 +21,9 @@ class _ProviderPicker extends StatefulWidget {
 
 class _ProviderPickerState extends State<_ProviderPicker> {
   String _label(ProviderPreset preset) =>
-      preset == ProviderPreset.openaiCompatibleChat ? '自定义端点' : preset.label;
+      preset == ProviderPreset.openaiCompatibleChat
+      ? context.l10n.modelProvider_customEndpoint
+      : preset.labelIn(context.l10n);
   String _query = '';
   @override
   Widget build(BuildContext context) {
@@ -32,7 +35,7 @@ class _ProviderPickerState extends State<_ProviderPicker> {
         )
         .toList();
     return SettingsDialogFrame(
-      title: '选择服务商',
+      title: context.l10n.modelProvider_pickerTitle,
       width: 1060,
       height: MediaQuery.sizeOf(context).height * .85,
       child: Column(
@@ -41,9 +44,9 @@ class _ProviderPickerState extends State<_ProviderPicker> {
           TextField(
             key: const Key('provider-search'),
             autofocus: true,
-            decoration: const InputDecoration(
-              prefixIcon: Icon(Icons.search, size: 18),
-              hintText: '搜索厂商、平台或本地服务',
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search, size: 18),
+              hintText: context.l10n.modelProvider_pickerSearch,
             ),
             onChanged: (value) => setState(() => _query = value.trim()),
           ),
@@ -62,13 +65,15 @@ class _ProviderPickerState extends State<_ProviderPicker> {
                 final api = choices.where((p) => !p.isLocal).toList();
                 final local = choices.where((p) => p.isLocal).toList();
                 return choices.isEmpty
-                    ? const Center(child: Text('没有匹配的服务商'))
+                    ? Center(
+                        child: Text(context.l10n.modelProvider_pickerEmpty),
+                      )
                     : CustomScrollView(
                         key: const Key('provider-catalog-scroll'),
                         slivers: [
                           ..._section(
                             context,
-                            'API Key 连接',
+                            context.l10n.modelProvider_groupApiKey,
                             api,
                             columns,
                             scale,
@@ -76,7 +81,7 @@ class _ProviderPickerState extends State<_ProviderPicker> {
                           ),
                           ..._section(
                             context,
-                            '本地服务',
+                            context.l10n.modelProvider_groupLocal,
                             local,
                             columns,
                             scale,
@@ -135,7 +140,7 @@ class _ProviderPickerState extends State<_ProviderPicker> {
     final theme = Theme.of(context);
     final selected = preset == widget.value?.vendor;
     final address = preset.defaultBaseUrl.isEmpty
-        ? '填写兼容接口地址'
+        ? context.l10n.modelProvider_enterCompatibleAddress
         : preset.defaultBaseUrl.replaceFirst(RegExp(r'^https?://'), '');
     return Semantics(
       selected: selected,

@@ -9,7 +9,6 @@ import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/settings/saved_accounts_section.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_tile.dart';
-import '../widgets/settings_ui_theme.dart';
 
 final accountAutoLoginProvider = FutureProvider<bool>(
   (ref) async =>
@@ -23,8 +22,6 @@ class AccountSettingsSection extends ConsumerWidget {
   const AccountSettingsSection({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    String text(String zh, String en, String ja) =>
-        settingsText(context, zh, en, ja);
     final auth = ref.watch(authNotifierProvider);
     final accounts = ref.watch(accountManagerNotifierProvider).accounts;
     final manager = ref.read(accountManagerNotifierProvider.notifier);
@@ -34,7 +31,7 @@ class AccountSettingsSection extends ConsumerWidget {
         if (!auth.isAuthenticated)
           SettingsCard(
             child: SettingsTile(
-              title: Text(text('尚未登录', 'Not signed in', '未ログイン')),
+              title: Text(context.l10n.auth_notSignedIn),
               trailing: OutlinedButton(
                 onPressed: () => AddAccountDialog.show(context, ref),
                 child: Text(context.l10n.settings_goToLogin),
@@ -43,18 +40,12 @@ class AccountSettingsSection extends ConsumerWidget {
           ),
         const SavedAccountsSection(showAddButton: false),
         SettingsCard(
-          title: text('登录偏好', 'Login preferences', 'ログイン設定'),
+          title: context.l10n.settings_loginPreferences,
           child: Column(
             children: [
               SettingsTile(
-                title: Text(text('默认账号', 'Default account', '既定のアカウント')),
-                subtitle: Text(
-                  text(
-                    '在登录页优先选中此账号。',
-                    'Preselected on the sign-in page.',
-                    'ログイン画面で優先的に選択します。',
-                  ),
-                ),
+                title: Text(context.l10n.settings_defaultAccount2),
+                subtitle: Text(context.l10n.settings_preselectedSignInPage),
                 trailing: SizedBox(
                   key: const ValueKey('settings-default-account'),
                   width: 160,
@@ -74,7 +65,7 @@ class AccountSettingsSection extends ConsumerWidget {
                       ),
                     ),
                     itemHeight: 48,
-                    hint: Text(text('暂无账号', 'No accounts', 'アカウントなし')),
+                    hint: Text(context.l10n.settings_noAccounts),
                     items: accounts
                         .map(
                           (a) => DropdownMenuItem(
@@ -101,15 +92,9 @@ class AccountSettingsSection extends ConsumerWidget {
                   .when(
                     data: (value) => SettingsSwitchTile(
                       key: const Key('settings-account-auto-login'),
-                      title: Text(
-                        text('启动时自动登录', 'Sign in automatically', '起動時に自動ログイン'),
-                      ),
+                      title: Text(context.l10n.settings_signInAutomatically),
                       subtitle: Text(
-                        text(
-                          '使用上次的登录凭据；关闭后，下次启动进入登录页。',
-                          'Use the last session. When off, the next launch opens sign-in.',
-                          '前回の認証情報を使用します。オフにすると次回はログイン画面を開きます。',
-                        ),
+                        context.l10n.settings_useLastSessionOffNext,
                       ),
                       value: value,
                       onChanged: (enabled) async {
@@ -123,24 +108,15 @@ class AccountSettingsSection extends ConsumerWidget {
                           if (context.mounted) {
                             AppToast.error(
                               context,
-                              text(
-                                '登录偏好未保存，请重试。',
-                                'Could not save the login preference.',
-                                'ログイン設定を保存できませんでした。',
-                              ),
+                              context.l10n.settings_couldNotSaveLoginPreference,
                             );
                           }
                         }
                       },
                     ),
                     loading: () => const SizedBox(height: 32),
-                    error: (_, _) => Text(
-                      text(
-                        '无法读取登录偏好。',
-                        'Login preferences are unavailable.',
-                        'ログイン設定を読み込めません。',
-                      ),
-                    ),
+                    error: (_, _) =>
+                        Text(context.l10n.settings_loginPreferencesUnavailable),
                   ),
             ],
           ),

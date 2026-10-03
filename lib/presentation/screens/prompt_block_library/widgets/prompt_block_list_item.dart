@@ -160,7 +160,7 @@ class PromptBlockListItem extends StatelessWidget {
               if (onAddTag != null)
                 Builder(
                   builder: (buttonContext) => IconButton(
-                    tooltip: '添加标签',
+                    tooltip: context.l10n.promptBlockLibrary_addTag,
                     onPressed: () {
                       final box = buttonContext.findRenderObject();
                       onAddTag?.call(

@@ -5,6 +5,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../data/datasources/remote/nai_image_generation_api_service.dart';
 import '../../../data/models/image/image_params.dart';
 import 'generation_models.dart';
+import '../../../core/utils/localization_extension.dart';
 
 /// 图像生成结果
 class ImageGenerationResult {
@@ -167,7 +168,9 @@ class ImageGenerationService {
 
     // 验证参数，防止除以零
     if (batchCount <= 0 || batchSize <= 0) {
-      return ImageGenerationResult.error('批次数量和批次大小必须大于0');
+      return ImageGenerationResult.error(
+        currentL10n.generation_batchSizeMustBePositive,
+      );
     }
 
     final totalImages = (batchCount * batchSize).toInt();

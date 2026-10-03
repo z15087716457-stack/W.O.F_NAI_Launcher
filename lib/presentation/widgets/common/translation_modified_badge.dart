@@ -1,23 +1,37 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/localization_extension.dart';
 
 /// A single flat caution label; only the right edge carries warning stripes.
 class TranslationModifiedBadge extends StatelessWidget {
   const TranslationModifiedBadge({
     super.key,
-    this.prefix = '原',
-    this.label = '被修改',
-    this.tooltip = '原文已修改，中文待同步',
+    this.prefix,
+    this.label,
+    this.tooltip,
   });
 
-  final String prefix;
-  final String label;
-  final String tooltip;
+  final String? prefix;
+  final String? label;
+  final String? tooltip;
 
   @override
-  Widget build(BuildContext context) => Tooltip(
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final prefix = this.prefix ?? l10n.translationEditor_sourcePrefix;
+    final label = this.label ?? l10n.translationEditor_modified;
+    final tooltip = this.tooltip ?? l10n.promptTranslation_badgeTooltip;
+    return _buildBadge(context, prefix, label, tooltip);
+  }
+
+  Widget _buildBadge(
+    BuildContext context,
+    String prefix,
+    String label,
+    String tooltip,
+  ) => Tooltip(
     message: tooltip,
     child: Semantics(
-      label: '$prefix，$label，$tooltip',
+      label: '$prefix, $label, $tooltip',
       child: ClipRRect(
         borderRadius: BorderRadius.circular(3),
         child: ColoredBox(

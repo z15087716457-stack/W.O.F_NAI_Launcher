@@ -1,5 +1,6 @@
 import '../../models/model_catalog_entry.dart';
 import '../../models/prompt_assistant_models.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 bool allowsModelSampling(ModelConfig? model) => model?.allowsSampling ?? true;
 
@@ -12,7 +13,9 @@ int modelThinkingBudget(ModelConfig model, {bool anthropic = false}) {
   final maximum = anthropic && model.maxOutputTokens != null
       ? (model.maxOutputTokens! - 1).clamp(0, catalogMaximum)
       : catalogMaximum;
-  if (maximum < minimum) throw StateError('最大输出必须大于思考预算下限 $minimum。');
+  if (maximum < minimum) {
+    throw StateError(currentL10n.modelParams_thinkingBudgetTooSmall(minimum));
+  }
   final proposed = switch (model.reasoningEffort) {
     'minimal' => minimum,
     'low' => 1024,

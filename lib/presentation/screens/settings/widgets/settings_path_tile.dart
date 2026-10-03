@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import 'settings_tile.dart';
-import 'settings_ui_theme.dart';
 
 /// A readable path with explicit actions; narrow settings put Change below it.
 class SettingsPathTile extends StatelessWidget {
@@ -72,7 +71,7 @@ class SettingsPathTile extends StatelessWidget {
     final change = OutlinedButton(
       key: const Key('settings-path-change'),
       onPressed: onChange,
-      child: Text(settingsText(context, '更改', 'Change', '変更')),
+      child: Text(context.l10n.settings_change),
     );
     return SettingsTile(
       title: Text(title),

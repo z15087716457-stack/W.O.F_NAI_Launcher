@@ -204,7 +204,6 @@
   "settings_title": "设置",
   "settings_account": "账户",
   "settings_savedAccounts": "已保存账号",
-  "settings_appearance": "外观",
   "settings_style": "风格",
   "settings_font": "字体",
   "settings_language": "语言",
@@ -212,13 +211,8 @@
   "settings_languageEnglish": "English",
   "settings_languageJapanese": "日本語",
   "settings_shortcuts": "快捷键",
-  "settings_generation": "生成",
-  "settings_dataStorage": "数据与存储",
-  "settings_privacySharing": "安全与分享",
-  "settings_integrations": "集成",
   "settings_generationInputSection": "输入",
   "settings_generationFeedbackSection": "完成提醒",
-  "settings_selectStyle": "选择风格",
   "settings_selectFont": "选择字体",
   "settings_selectLanguage": "选择语言",
   "settings_loadFailed": "加载失败: {error}",
@@ -290,7 +284,6 @@
     }
   },
   "settings_extraRootsIndexImportConfirm": "现在导入",
-  "settings_about": "关于",
   "settings_version": "版本 {version}",
   "settings_openSource": "开源项目",
   "settings_openSourceSubtitle": "查看源代码和文档",
@@ -307,10 +300,7 @@
   "settings_accountType": "账号类型",
   "settings_subscriptionExpiry": "订阅到期",
   "settings_thirdPartyApiAccount": "第三方站点 API",
-  "settings_apiSite": "API 站点",
-  "settings_notLoggedIn": "登录后可设置头像和昵称",
   "settings_goToLogin": "去登录",
-  "settings_tapToChangeAvatar": "点击更换头像",
   "settings_changeAvatar": "更换头像",
   "settings_removeAvatar": "移除头像",
   "settings_accountEmail": "账号邮箱",
@@ -346,8 +336,6 @@
   "generation_cancelGeneration": "取消生成",
   "generation_stopGeneration": "停止生成",
   "generation_pleaseInputPrompt": "请输入提示词",
-  "generation_emptyPromptHint": "输入提示词并点击生成",
-  "generation_imageWillShowHere": "图像将在这里显示",
   "generation_generationFailed": "生成失败",
   "generation_progress": "生成中... {progress}%",
   "generation_lockHistoryScroll": "锁定历史滚动",
@@ -1445,7 +1433,6 @@
       }
     }
   },
-  "characterEditor_close": "关闭",
   "characterEditor_clearAll": "清空所有",
   "characterEditor_clearAllTitle": "清空所有角色",
   "characterEditor_clearAllConfirm": "确定要删除所有角色吗？此操作无法撤销。",
@@ -1958,12 +1945,8 @@
   },
   "localGallery_folderDeleted": "文件夹已删除",
   "localGallery_folderDeleteFailed": "删除文件夹失败",
-  "localGallery_cachingMetadata": "正在缓存元数据...",
-  "localGallery_metadataCacheStats": "元数据缓存统计",
-  "localGallery_totalImages": "总图片",
   "localGallery_withMetadata": "有元数据",
   "localGallery_skipped": "跳过",
-  "localGallery_remaining": "剩余",
   "localGallery_cacheMonitor": "缓存监控",
   "localGallery_threeLayerCacheStats": "三层缓存统计",
   "localGallery_updatedAt": "更新: {time}",
@@ -2435,11 +2418,9 @@
       "count": {}
     }
   },
-  "autocomplete_keyNavigate": "↑↓/滚轮",
   "autocomplete_actionSelect": "选择",
   "autocomplete_actionConfirm": "确认",
   "autocomplete_actionClose": "关闭",
-  "autocomplete_categoryRecommended": "推荐",
   "autocomplete_categoryCharacter": "角色",
   "autocomplete_categoryCopyright": "版权",
   "autocomplete_categoryArtist": "艺术家",
@@ -3414,16 +3395,12 @@
   "settings_shortcutsSubtitle": "自定义键盘快捷键",
   "settings_openFolder": "打开文件夹",
   "settings_openFolderFailed": "打开文件夹失败",
-  "settings_pleaseLoginFirst": "请先登录",
-  "settings_accountNotFound": "未找到账号信息",
-  "settings_goToLoginPage": "请前往登录页面",
   "settings_vibePathSaved": "Vibe 库路径已保存",
   "settings_selectFolderFailed": "选择文件夹失败",
   "settings_hivePathSaved": "数据存储路径已保存，重启后生效",
   "settings_restartRequiredTitle": "需要重启应用",
   "settings_changePathConfirm": "更改数据存储路径后，需要重启应用才能生效。\\n\\n新路径将在下次启动时生效。是否继续？",
   "settings_resetPathConfirm": "重置数据存储路径后，需要重启应用才能生效。\\n\\n默认路径将在下次启动时生效。是否继续？",
-  "settings_kritaBridgeTitle": "Krita Bridge",
   "settings_kritaBridgeEnable": "启用 Krita 本地桥接",
   "settings_kritaBridgeDisabledText": "默认关闭；开启后只监听本机 127.0.0.1",
   "settings_kritaBridgeStartingText": "正在启动本地桥接服务...",
@@ -3445,11 +3422,9 @@
     }
   },
   "settings_fontScale": "字体大小",
-  "settings_fontScale_description": "调整应用全局字体缩放比例",
   "settings_fontScale_previewSmall": "光影落在画布上。",
   "settings_fontScale_previewMedium": "色から物語が生まれる。",
   "settings_fontScale_previewLarge": "Let colors tell a story.",
-  "settings_fontScale_reset": "重置",
   "settings_fontScale_done": "完成",
   "settings_historyClickBehavior": "历史记录点击行为",
   "settings_historyClickBehavior_classic": "经典",
@@ -3467,15 +3442,7 @@
   "settings_canvasReducedMotionDescription": "飞行、缩放与惯性改为瞬时切换，降低动画负担",
   "image_viewDetail": "查看详情",
   "settings_defaultImagesPath": "默认 (Documents/NAI_Launcher/images/)",
-  "settings_defaultVibePath": "{path} (默认)",
-  "@settings_defaultVibePath": {
-    "placeholders": {
-      "path": {}
-    }
-  },
   "settings_defaultHivePath": "默认 (%APPDATA%/NAI_Launcher/hive/)",
-  "settings_protectionMode": "保护模式",
-  "settings_protectionModeSubtitle": "开启后按下方子项保护本地资产、分享副本、高消耗和高频生图操作；关闭时保留子项配置但不生效。",
   "settings_protectionFeatures": "保护功能",
   "settings_stripMetadataTitle": "复制/拖拽时移除全部元数据",
   "settings_stripMetadataSubtitle": "生成净化副本，清除 PNG 文本块、EXIF 与 NAI 隐写水印，并避免拖拽暴露原始路径。",
@@ -3642,26 +3609,11 @@
       "seconds": {}
     }
   },
-  "cacheStats_refreshNow": "立即刷新",
-  "cacheStats_refreshed": "已刷新",
   "cacheStats_resetStats": "重置统计",
   "cacheStats_statsReset": "统计已重置",
   "cacheStats_l1Memory": "L1 内存缓存",
   "cacheStats_l2Hive": "L2 Hive 缓存",
   "cacheStats_l3Sqlite": "L3 SQLite 数据库",
-  "cacheStats_recordCount": "{count} 条记录",
-  "@cacheStats_recordCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "cacheStats_databaseValue": "{imageCount} 张图片 · {metadataCount} 条元数据",
-  "@cacheStats_databaseValue": {
-    "placeholders": {
-      "imageCount": {},
-      "metadataCount": {}
-    }
-  },
   "galleryCache_rescanTitle": "重新扫描画廊",
   "galleryCache_rescanContent": "这将执行以下操作：\n\n1. 检查数据一致性（标记不存在的文件）\n2. 扫描新文件和变更的文件\n3. 重新尝试历史上未提取成功的元数据（含失败记录）\n\n此操作不会清空已有数据，也不会删除图片文件。",
   "galleryCache_startScan": "开始扫描",
@@ -4093,7 +4045,6 @@
   "currentVersion": "当前版本",
   "latestVersion": "最新版本",
   "releaseNotes": "更新日志",
-  "updatePortableManualHint": "当前构建不支持应用内更新，请前往 Release 页面手动下载新版。",
   "updateDownloadingProgress": "正在下载更新包：{percent}%",
   "@updateDownloadingProgress": {
     "placeholders": {
@@ -4123,10 +4074,7 @@
   "updateDownloadFailed": "下载更新失败",
   "updateInstallFailed": "安装更新失败",
   "updateInstallingHint": "安装程序已启动，应用即将关闭并自动完成更新。",
-  "updateInstallConfirmationTitle": "现在安装更新？",
-  "updateInstallConfirmationBody": "应用将安全关闭并安装更新，完成后自动重新启动。进行中的生成和下载任务会停止，请先保存必要内容。",
   "remindMeLater": "4 小时后提醒",
-  "skipThisVersion": "忽略此版本",
   "updateNoticeAvailable": "新版本 v{version} 可用",
   "@updateNoticeAvailable": {
     "placeholders": {
@@ -4157,7 +4105,6 @@
     }
   },
   "goToDownload": "前往下载",
-  "versionSkipped": "已忽略此版本",
   "cannotOpenUrl": "无法打开链接",
   "model3d_editorTitle": "3D 模型图层",
   "model3d_addMannequin": "添加内置人偶",
@@ -4828,22 +4775,6 @@
     }
   },
   "localGallery_createFolder": "创建文件夹",
-  "galleryScan_skipped": "跳过 {count}",
-  "@galleryScan_skipped": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "galleryScan_withMetadata": "有元数据 {count}",
-  "@galleryScan_withMetadata": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "galleryScan_failed": "失败 {count}",
   "@galleryScan_failed": {
     "placeholders": {
@@ -4854,7 +4785,6 @@
   },
   "galleryScan_organizingGallery": "正在整理图库",
   "galleryScan_processing": "处理中",
-  "galleryScan_pending": "待处理",
   "vibeDetail_useAll": "使用全部",
   "vibeDetail_longPressSetCover": "长按设为封面",
   "vibeDetail_noPreviewImage": "无预览图像",
@@ -4993,14 +4923,7 @@
       }
     }
   },
-  "autocomplete_settingsTitle": "自动补全",
-  "autocomplete_enable": "启用自动补全",
   "autocomplete_resultLimit": "结果数量",
-  "autocomplete_allResults": "全部",
-  "autocomplete_showAliases": "显示命中的别名",
-  "autocomplete_showTranslations": "显示中文汉化",
-  "autocomplete_autoComma": "插入后自动添加逗号",
-  "autocomplete_dataSourcesTitle": "数据源与缓存",
   "autocomplete_relatedTagsTitle": "标签扩展",
   "autocomplete_relatedTagsSubtitle": "Ctrl+单击搜索本地标签；Ctrl+拖选查看关联标签",
   "tagExpansion_searchHint": "搜索标签、别名或汉化名",
@@ -5014,18 +4937,7 @@
   "tagExpansion_tabComplete": "Tab 补全：",
   "tagExpansion_wikiTitle": "标签小百科",
   "tagExpansion_wikiUnavailable": "本地暂未收录这个标签的释义。",
-  "autocomplete_danbooruApi": "Danbooru 在线补充",
   "autocomplete_danbooruPrivacy": "仅发送当前英文标签，不会上传完整提示词",
-  "autocomplete_llmTranslation": "使用 Prompt Assistant 补译缺失汉化",
-  "autocomplete_llmRouteMissing": "请先在 Prompt Assistant 中配置 Translate 路由",
-  "autocomplete_llmRoute": "当前路由：{route}。调用模型可能产生费用。",
-  "@autocomplete_llmRoute": {
-    "placeholders": {
-      "route": {
-        "type": "String"
-      }
-    }
-  },
   "autocomplete_cooccurrence": "离线相关标签库",
   "autocomplete_entryCount": "{count} 条记录",
   "@autocomplete_entryCount": {
@@ -5035,7 +4947,6 @@
       }
     }
   },
-  "autocomplete_cacheTitle": "在线与 AI 缓存",
   "autocomplete_clearDanbooruCache": "清除 Danbooru 缓存",
   "autocomplete_clearAiCache": "清除 AI 汉化缓存",
   "autocomplete_cacheCleared": "已清除 {count} 条缓存",
@@ -5200,7 +5111,6 @@
   "promptBlockLibrary_collectionNameHint": "收藏集名称",
   "promptBlockLibrary_noCollections": "还没有收藏集 —— 点「收藏」行旁的 + 新建，或把块拖到收藏集上",
   "promptBlockLibrary_noFolders": "还没有文件夹",
-  "promptBlockLibrary_favoriteMenuEmptyCollections": "还没有收藏集，可在侧栏「收藏」旁新建",
   "promptBlockLibrary_emptyFavorites": "还没有收藏的块，点块上的 ★ 即可收藏",
   "promptBlockLibrary_emptyCollection": "该收藏集为空",
   "promptBlockLibrary_deleteCollectionConfirm": "确定要删除收藏集「{name}」吗？其中的块不会被删除，只会移出该收藏集。",
@@ -5225,15 +5135,12 @@
   "promptBlockLibrary_folder": "文件夹",
   "promptBlockLibrary_folderName": "文件夹名称",
   "promptBlockLibrary_folderNameHint": "文件夹名称",
-  "promptBlockLibrary_blockContent": "正文",
   "promptBlockLibrary_basicPrompt": "基础提示词",
   "promptBlockLibrary_generationSettings": "设置",
   "promptBlockLibrary_settingsOptionalHint": "仅保存填写的参数；插入块后可手动应用设置。",
   "promptBlockLibrary_notSpecified": "不指定",
   "promptBlockLibrary_stepsLabel": "步数",
-  "promptBlockLibrary_cfgLabel": "PG",
   "promptBlockLibrary_noiseScheduleLabel": "噪声调度",
-  "promptBlockLibrary_cfgRescaleLabel": "PGR",
   "promptBlockLibrary_invalidGenerationSettings": "请检查设置：步数 1–50、PG 1–20、PGR 0–1，并确认参数受所选模型支持。",
   "promptBlockLibrary_applySettings": "导入设置",
   "promptBlockLibrary_settingsApplied": "块设置已导入当前画面",
@@ -5280,40 +5187,8 @@
       }
     }
   },
-  "promptBlockLibrary_favoriteSelected": "收藏选中的 {count} 个块",
-  "@promptBlockLibrary_favoriteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_unfavoriteSelected": "取消收藏选中的 {count} 个块",
-  "@promptBlockLibrary_unfavoriteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_moveToSelected": "移动 {count} 个块到…",
-  "@promptBlockLibrary_moveToSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_deleteSelected": "删除选中的 {count} 个块",
   "@promptBlockLibrary_deleteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_blocksMoved": "已移动 {count} 个块",
-  "@promptBlockLibrary_blocksMoved": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -5350,16 +5225,6 @@
   "promptBlockLibrary_importFromFolder": "从文件夹导入…",
   "promptBlockLibrary_exportLibraryBackup": "导出库备份…",
   "promptBlockLibrary_importLibraryBackup": "导入库备份…",
-  "promptBlockLibrary_exportBlockAsTxt": "导出为 TXT",
-  "promptBlockLibrary_exportTxtDone": "已导出 TXT",
-  "promptBlockLibrary_exportTxtFailed": "导出失败：{error}",
-  "@promptBlockLibrary_exportTxtFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "promptBlockLibrary_importTxtTitle": "选择 TXT 文件",
   "promptBlockLibrary_txtImportDone": "导入 {created} 个块，跳过 {skipped} 个已有来源",
   "@promptBlockLibrary_txtImportDone": {
@@ -6005,8 +5870,6 @@
   "wiki_addBookmark": "加入书签",
   "wiki_removeBookmark": "移出书签",
   "wiki_addToCollection": "加入书签集",
-  "wiki_importBlock": "存为单原子块",
-  "wiki_inBlockLibrary": "已在块库",
   "wiki_loadMore": "加载更多",
   "wiki_noResults": "没有匹配的词条",
   "wiki_noSelection": "选择一个词条查看释义",
@@ -6015,5 +5878,1215 @@
   "wiki_directorySource": "官方分组目录快照",
   "wiki_openFull": "在标签百科中打开",
   "shortcut_action_vibe_detail_prev_sub_vibe": "上一个子 Vibe",
-  "shortcut_action_vibe_detail_next_sub_vibe": "下一个子 Vibe"
+  "shortcut_action_vibe_detail_next_sub_vibe": "下一个子 Vibe",
+  "settings_addAccountsSwitchBetweenThem": "添加账号后，可以在这里快速切换。",
+  "settings_current": "当前",
+  "settings_emailLogin": "邮箱登录",
+  "settings_signedIn": "已登录",
+  "settings_switch": "切换",
+  "settings_accountActions": "账号操作",
+  "settings_editProfile": "编辑资料",
+  "settings_setDefault": "设为默认账号",
+  "settings_credentialsUpdated": "登录凭据已更新",
+  "settings_updateCredentials": "更新凭据",
+  "settings_accountDetails": "账号详情",
+  "settings_localAccountProfile": "本地账号资料",
+  "settings_setDefault2": "设为默认",
+  "settings_credentialsWereNotUpdatedCheck": "凭据未更新，请检查令牌与连接后重试。",
+  "settings_updateCredentials2": "更新登录凭据",
+  "settings_checking": "正在验证…",
+  "settings_enterNewSignInToken": "输入新的登录令牌，验证成功后更新此账号。",
+  "auth_signInAccounts": "登录与账号",
+  "auth_notSignedIn": "尚未登录",
+  "auth_chooseAccountContinue": "选择账号，继续创作",
+  "auth_manageAccounts2": "管理账号",
+  "auth_subscriptionExpired": "订阅已到期",
+  "settings_tagExpansion": "标签扩展",
+  "settings_tagDictionaries": "标签词库",
+  "settings_cacheMaintenance": "缓存维护",
+  "settings_clear": "清理",
+  "settings_autoRefresh": "自动刷新",
+  "settings_searchFonts": "搜索字体名称",
+  "settings_couldNotLoadFonts": "暂时无法读取字体",
+  "settings_recommended": "推荐",
+  "settings_included": "随应用提供",
+  "settings_systemFonts": "系统字体",
+  "settings_fontPreview": "字体预览",
+  "settings_onlineFontsLoadAfterApplying": "在线字体将在应用后加载，当前显示界面字体。",
+  "settings_saving": "保存设置",
+  "settings_howGeneratedImagesSaved": "生成图片的保存方式",
+  "settings_assetsDisplay": "素材与显示",
+  "settings_vibeLocationThumbnailQuality": "Vibe 位置与缩略图质量",
+  "settings_applicationData": "应用数据",
+  "settings_gallerySources": "图库来源",
+  "settings_manageAdditionalGalleryFolders": "管理额外图库文件夹",
+  "settings_default": "默认",
+  "settings_keyboard": "键盘操作",
+  "settings_customizeFrequentlyUsedActions": "按习惯配置常用操作",
+  "settings_manageShortcuts": "管理快捷键",
+  "settings_costReminders": "消耗提醒",
+  "settings_requestPacing": "请求节奏",
+  "settings_notificationsSound": "完成提醒与声音",
+  "settings_lockCanvasCamera": "锁定画布相机",
+  "settings_dictionariesCache": "词库与缓存",
+  "settings_defaultAccount2": "默认账号",
+  "settings_signInAutomatically": "启动时自动登录",
+  "settings_signInCredentials": "登录凭据",
+  "settings_translationInterfaces": "翻译功能接口",
+  "settings_presetsBuiltInRules": "预设与内置规则",
+  "settings_preferenceBackupRestore": "偏好备份与恢复",
+  "settings_searchSettingsFeatures": "搜索设置、功能或关键词",
+  "settings_noMatchingSettings": "没有找到匹配设置",
+  "settings_change": "更改",
+  "settings_couldNotPlaySoundCheck": "无法播放音效，请检查音频文件。",
+  "settings_useDefaultCompletionSound": "使用默认完成音效",
+  "settings_soundPreview": "音效预览",
+  "settings_listenCurrentCompletionSound": "试听当前完成音效",
+  "settings_playSound": "试听音效",
+  "settings_searchResults": "搜索结果",
+  "settings_promptInput": "提示词输入",
+  "settings_manageTranslationModelsRules": "管理翻译模型与规则",
+  "settings_browsing": "浏览方式",
+  "settings_chooseHowViewImages": "选择图片的查看习惯",
+  "settings_canvasControls": "画布操作",
+  "settings_keepViewSteady": "保持视角稳定",
+  "settings_appearance2": "外观样式",
+  "settings_chooseLightDarkWorkspace": "选择工作台的明暗风格",
+  "settings_textLanguage": "文字与语言",
+  "settings_makeReadingComfortable": "统一阅读体验",
+  "settings_adjustSettingsPagesDialogsOnly": "仅调整设置页面与设置弹窗的字号",
+  "settings_motionNotifications": "动效与提醒",
+  "settings_reduceDistractionsKnowWorkFinishes": "减少打扰，及时获知完成",
+  "settings_notificationStyle": "通知样式",
+  "settings_notificationsAppearUpperRightWrap": "通知会显示在右上角，长文本自动换行，进度任务完成后自动收起。",
+  "settings_preview": "预览",
+  "settings_versionUpdates": "版本与更新",
+  "settings_currentVersionUpdateOptions": "当前版本与更新选项",
+  "settings_diagnosticsResources": "诊断与资料",
+  "settings_logsFontsOpenSourceProject": "日志、字体与开源项目",
+  "settings_viewLicenses": "查看许可",
+  "settings_openProject": "打开项目",
+  "settings_actionIncomplete": "操作未完成",
+  "settings_exportPreferences": "导出偏好",
+  "settings_preferencesExported": "偏好已导出",
+  "settings_noAutomaticBackupYet": "尚无自动回退备份",
+  "settings_restorePreviousPreferences": "恢复上次偏好",
+  "settings_importPreferences": "导入偏好",
+  "settings_apply": "确认应用",
+  "settings_preferencesAppliedPreviousSettingsBacked": "偏好已应用，旧设置已自动备份",
+  "settings_restoreDefaultPreferences": "恢复默认偏好",
+  "settings_choosePreferencesResetCurrentSettings": "选择需要恢复的范围，当前偏好将自动备份。",
+  "settings_appearanceSoundControls": "外观、声音与操作",
+  "settings_inputAutocomplete": "输入与自动补全",
+  "settings_privacyGenerationProtection": "隐私与生成保护",
+  "settings_moveAppearanceControlsInputProtection": "界面、操作、输入和保护偏好，可跨设备迁移。",
+  "settings_rollbackCopySavedBeforeImport": "导入或恢复默认前会自动保存回退副本。",
+  "settings_resetSelectedScopeWhileKeeping": "按范围恢复，保留账号、模型、图库和创作内容。",
+  "settings_chooseScope": "选择范围",
+  "settings_preferenceManagement": "偏好管理",
+  "settings_backupMigrationRecovery": "备份、迁移与恢复",
+  "settings_generalAppearance": "常规与外观",
+  "settings_makeWorkspaceComfortableReadUse": "让工作台符合你的阅读与使用习惯。",
+  "settings_controlsShortcuts": "操作与快捷键",
+  "settings_chooseInteractionCanvasControlsKeyboard": "设置交互方式、画布操作和键盘快捷键。",
+  "settings_generationPrompts": "生成与提示词",
+  "settings_managePromptInputGenerationReminders": "管理提示词输入、生成提醒与请求节奏。",
+  "settings_galleryFiles": "图库与文件",
+  "settings_manageImageSavingGallerySources": "管理图片保存、图库来源与浏览显示。",
+  "settings_manageTagDictionariesIndexesCache": "管理标签词库、索引与缓存维护。",
+  "settings_novelaiAccounts": "NovelAI 账号",
+  "settings_viewAccountManageSignIn": "查看当前账号，管理登录与默认账号。",
+  "settings_connectionsIntegrations": "连接与集成",
+  "settings_manageExternalToolsBridgesNetwork": "管理外部工具、桥接连接与网络设置。",
+  "settings_privacySharing2": "隐私与分享",
+  "settings_controlSharedInformationConfirmationBefore": "控制分享信息与需要确认的操作。",
+  "settings_aboutDiagnostics": "关于与诊断",
+  "settings_updatesLogsProjectInformation": "版本更新、日志与项目资料。",
+  "settings_searchSettings": "搜索设置",
+  "settings_preferences": "使用偏好",
+  "settings_creationResources": "创作与资源",
+  "settings_servicesConnections": "服务与连接",
+  "settings_safetyMaintenance": "安全与维护",
+  "settings_subscriptionActive": "订阅有效",
+  "settings_availableBalance": "可用余额",
+  "settings_subscriptionExpiry2": "订阅有效期",
+  "settings_subscriptionDetailsUnavailable": "订阅信息暂不可用",
+  "settings_loadingSubscriptionDetails": "正在读取订阅信息…",
+  "settings_localDataStaysAvailableAfter": "账号到期后仍保留本地数据。",
+  "settings_records": "条记录",
+  "settings_hitRate": "命中率",
+  "settings_images": "张图片",
+  "settings_cacheOverview": "缓存概览",
+  "settings_loginPreferences": "登录偏好",
+  "settings_preselectedSignInPage": "在登录页优先选中此账号。",
+  "settings_noAccounts": "暂无账号",
+  "settings_useLastSessionOffNext": "使用上次的登录凭据；关闭后，下次启动进入登录页。",
+  "settings_couldNotSaveLoginPreference": "登录偏好未保存，请重试。",
+  "settings_loginPreferencesUnavailable": "无法读取登录偏好。",
+  "settings_applyPreferencesConfirm": "将应用 {count} 项偏好。当前偏好会自动备份，可从“恢复上次偏好”找回。账号、密钥、草稿、图库和模型配置保持独立。",
+  "@settings_applyPreferencesConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "settings_restore": "恢复",
+  "wiki_translating": "正在翻译中",
+  "wiki_back": "返回上一次",
+  "wiki_readingTranslation": "译文",
+  "wiki_readingOriginal": "原文",
+  "wiki_switchToOriginal": "切换到原文",
+  "wiki_switchToTranslation": "切换到译文",
+  "wiki_retranslate": "重新翻译",
+  "wiki_onThisPage": "本文目录",
+  "wiki_overview": "简介",
+  "wiki_untranslated": "暂未翻译",
+  "wiki_autoTranslateTagsArticles": "自动翻译标签与百科",
+  "wiki_readingContent": "阅读内容",
+  "wiki_categoryGeneral": "一般",
+  "wiki_categoryArtist": "画师",
+  "wiki_categoryCopyright": "作品",
+  "wiki_categoryCharacter": "角色",
+  "wiki_categoryMeta": "元标签",
+  "wiki_categoryContributor": "贡献者",
+  "wiki_categorySpecies": "物种",
+  "wiki_categoryLore": "设定",
+  "wiki_categoryLibrary": "本地",
+  "toast_titleSuccess": "已完成",
+  "toast_titleError": "操作失败",
+  "toast_titleWarning": "请留意",
+  "toast_titleInfo": "提示",
+  "toast_titleProgress": "正在处理",
+  "tagExpansion_autoTranslateVisible": "自动翻译可见标签",
+  "translationEditor_title": "翻译块",
+  "translationEditor_source": "原文",
+  "translationEditor_sourcePrefix": "原",
+  "translationEditor_generation": "生图使用",
+  "translationEditor_editable": "可改写",
+  "translationEditor_modified": "被修改",
+  "translationEditor_edited": "已编辑",
+  "translationEditor_close": "关闭",
+  "translationEditor_save": "保存",
+  "translationEditor_delete": "删除整块",
+  "translationEditor_restore": "还原为原文文本",
+  "translationEditor_configure": "配置翻译模型",
+  "translationEditor_readingFieldTitle": "{language}阅读文本",
+  "@translationEditor_readingFieldTitle": {
+    "placeholders": {
+      "language": {}
+    }
+  },
+  "translationEditor_sourceWarning": "原文已修改，{language}待同步",
+  "@translationEditor_sourceWarning": {
+    "placeholders": {
+      "language": {}
+    }
+  },
+  "translationEditor_editHint": "译文已手工编辑；这是编辑记录，不触发原文修改提醒",
+  "translationLanguage_chinese": "中文",
+  "translationLanguage_english": "英语",
+  "translationLanguage_japanese": "日语",
+  "translationLanguage_korean": "韩语",
+  "promptBlockEditor_translationNeedsReview": "原文已修改，译文待更新",
+  "promptBlockEditor_translationReviewHint": "修改原文后请同步校对这里的译文",
+  "modelTask_translateTitle": "原文 → 阅读语言",
+  "modelTask_promptReverseTitle": "阅读语言 → 原文",
+  "modelTask_tagTranslateTitle": "标签名称翻译",
+  "modelTask_wikiTranslateTitle": "百科正文翻译",
+  "modelTask_translateDescription": "翻译提示词与积木，保留权重、分组和标签语义。",
+  "modelTask_promptReverseDescription": "结合原文落实译文中的增删修改，结果填回原文供确认。",
+  "modelTask_tagTranslateDescription": "为可见标签提供简洁、准确的名称释义。",
+  "modelTask_wikiTranslateDescription": "翻译百科正文、整理排版，并按语境选择可点击标签。",
+  "modelTask_connectionTest": "模型连接测试",
+  "modelReasoning_serviceDefault": "服务默认",
+  "modelReasoning_off": "关闭",
+  "modelReasoning_on": "开启",
+  "modelReasoning_minimal": "极低",
+  "modelReasoning_low": "低",
+  "modelReasoning_medium": "中",
+  "modelReasoning_high": "高",
+  "modelReasoning_xhigh": "极高",
+  "modelReasoning_max": "最高",
+  "modelProvider_custom": "自定义服务",
+  "modelProvider_qwen": "通义千问 · 百炼",
+  "modelProvider_moonshot": "Kimi · 月之暗面",
+  "modelProvider_zhipu": "智谱 GLM",
+  "modelProvider_doubao": "豆包 · 火山方舟",
+  "modelProvider_hunyuan": "腾讯混元",
+  "modelProvider_qianfan": "百度千帆",
+  "modelProvider_siliconflow": "硅基流动",
+  "modelProvider_zai": "Z.AI · 国际",
+  "modelProvider_zhipuCodingPlan": "智谱 Coding Plan",
+  "modelProvider_kimiCoding": "Kimi 编程",
+  "modelProvider_moonshotInternational": "Moonshot AI · 国际",
+  "modelProvider_minimaxChinaChat": "MiniMax · 国内 OpenAI",
+  "modelProvider_minimaxChinaMessages": "MiniMax · 国内 Anthropic",
+  "modelProvider_minimaxInternationalMessages": "MiniMax · 国际 Anthropic",
+  "modelProvider_xiaomi": "小米 MiMo",
+  "modelProvider_antLing": "蚂蚁 Ling",
+  "modelProvider_stepfunPlan": "阶跃 Step Plan",
+  "modelProvider_qwenTokenPlanChina": "通义 Token 套餐 · 国内",
+  "modelProvider_hintHuggingFace": "使用具有推理权限的 Hugging Face Token；可手动填写路由模型 ID。",
+  "modelProvider_hintPlanKey": "使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。",
+  "modelProvider_hintInternationalEndpoint": "国际平台端点；使用国际平台的 API Key。",
+  "modelProvider_hintRegionOpenAi": "使用对应地区的 API Key；当前预填 OpenAI Chat Completions 兼容地址。",
+  "modelProvider_hintRegionAnthropic": "使用对应地区的 API Key；当前预填 Anthropic Messages 兼容地址。",
+  "modelProvider_hintQwen": "默认北京区域；其他区域请使用对应 Key 并修改接口地址。",
+  "modelProvider_hintMinimax": "默认国际按量接口；国内平台请使用对应区域的 Key 和接口地址。",
+  "modelProvider_hintMoonshot": "默认国内平台；国际平台请使用对应区域的 Key 和接口地址。",
+  "modelProvider_hintZhipu": "默认按量接口；Coding Plan 请使用套餐专用地址。",
+  "modelProvider_hintDoubao": "使用方舟 API Key；需先开通模型，也可添加推理接入点 ID。",
+  "modelProvider_hintCustom": "填写兼容服务的地址与 Key，并在连接信息中选择接口协议。",
+  "modelProvider_hintLocal": "先启动本地服务，再读取已加载的模型目录。",
+  "modelProvider_hintDefault": "地址与协议已预填；保存 Key 后即可选择模型使用。",
+  "modelParams_temperatureRange": "Temperature 应在 0–2 之间。",
+  "modelParams_topPRange": "Top P 应大于 0 且不超过 1。",
+  "modelParams_maxOutputPositive": "最大输出 token 必须大于 0。",
+  "modelParams_anthropicTemperatureRange": "Anthropic 的 Temperature 应在 0–1 之间。",
+  "modelParams_anthropicSamplingConflict": "Anthropic 的 Temperature 与 Top P 请选择一项；请检查模型参数。",
+  "modelParams_thinkingBudgetTooSmall": "最大输出必须大于思考预算下限 {minimum}。",
+  "@modelParams_thinkingBudgetTooSmall": {
+    "placeholders": {
+      "minimum": {}
+    }
+  },
+  "modelOverrides_invalidHeaderName": "请输入有效的请求头名称",
+  "modelOverrides_invalidHeaderValue": "请求头值不能包含换行或控制字符",
+  "modelOverrides_emptyBodyField": "请求体字段名不能为空",
+  "modelOverrides_modelFromList": "模型 ID 请通过模型列表设置",
+  "modelOverrides_streamMustBeFalse": "当前接口使用非流式请求，stream 应为 false",
+  "modelConfig_changedSaveAgain": "配置已变化，请重新保存。",
+  "modelConfig_presetChanged": "所选预设已变化，请重新选择。",
+  "modelConfig_serviceDisabled": "所选服务已停用，请重新选择。",
+  "modelConfig_modelChanged": "所选模型已变化，请重新选择。",
+  "modelConfig_reasoningChanged": "模型支持的思考档位已变化，请重新选择或跟随模型。",
+  "modelConfig_presetIdRequired": "预设 ID 不能为空。",
+  "modelConfig_saveBuiltinAsCustom": "请将内置方案另存为自定义预设。",
+  "modelConfig_namePromptRequired": "名称和提示词不能为空。",
+  "modelConfig_builtinNotDeletable": "内置规则不可删除。",
+  "modelConfig_pasteFullJson": "请粘贴完整的模型配置 JSON。",
+  "modelConfig_builtinNotOverwritable": "内置方案不可覆盖，请复制为自定义预设。",
+  "modelConfig_invalidProvider": "服务商 ID、名称或地址无效。",
+  "modelConfig_missingProvider": "模型对应的服务商不存在。",
+  "modelConfig_invalidCustomPreset": "自定义预设的 ID、名称或提示词无效。",
+  "modelConfig_changedImportAgain": "配置已变化，请重新导入。",
+  "modelHealth_unverified": "尚未验证连接；使用模型或点击“测试连接”后更新",
+  "modelHealth_healthy": "最近一次请求成功",
+  "modelHealth_limited": "接口可达，但最近请求被限流（HTTP 429）；请稍后重试或检查额度",
+  "modelHealth_authentication": "认证失败；请检查 API 密钥",
+  "modelHealth_permission": "访问被拒绝；请检查服务权限",
+  "modelHealth_timeout": "最近一次请求超时",
+  "modelHealth_network": "最近一次请求无法连接服务",
+  "modelHealth_invalidResponse": "最近一次响应异常；可在请求记录中查看详情",
+  "modelHealth_failed": "最近一次请求失败",
+  "modelHealth_failedStatus": "最近一次请求失败（HTTP {status}）",
+  "@modelHealth_failedStatus": {
+    "placeholders": {
+      "status": {}
+    }
+  },
+  "modelRequest_statusPending": "等待中",
+  "modelRequest_statusRunning": "请求中",
+  "modelRequest_statusSuccess": "成功",
+  "modelRequest_statusFailed": "失败",
+  "modelRequest_statusCancelled": "已取消",
+  "modelRequest_fieldTime": "时间",
+  "modelRequest_fieldMethod": "方法",
+  "modelRequest_fieldUrl": "地址",
+  "modelRequest_fieldRequestHeaders": "请求头",
+  "modelRequest_fieldBody": "正文",
+  "modelRequest_fieldStatusCode": "状态码",
+  "modelRequest_fieldResponseHeaders": "响应头",
+  "modelRequest_fieldError": "错误",
+  "modelRequest_fieldInterface": "接口",
+  "modelRequest_fieldProvider": "服务商",
+  "modelRequest_fieldModel": "模型",
+  "modelRequest_fieldProtocol": "协议",
+  "modelRequest_fieldStatus": "状态",
+  "modelRequest_fieldElapsed": "耗时（毫秒）",
+  "modelRequest_fieldAttempts": "执行次数",
+  "modelRequest_fieldHttpRequests": "HTTP 请求数",
+  "modelRequest_fieldParameters": "生效参数",
+  "modelRequest_redacted": "[已脱敏]",
+  "modelRequest_emptyResponse": "模型返回了空内容。",
+  "modelService_testFieldsIncomplete": "测试返回的字段不完整。",
+  "modelService_testFieldsInvalid": "测试返回的字段不正确。",
+  "modelService_testGroupsInvalid": "测试返回的分组不正确。",
+  "modelService_testSourceEmpty": "测试返回的原文为空。",
+  "modelService_conversionCancelled": "转换已取消",
+  "modelService_chooseInterfaceModel": "请先在「设置 → 模型与接口 → 功能接口」选择服务商和模型。",
+  "modelService_enableServiceModel": "请先在设置中启用服务，并获取或手动添加后选中一个模型。",
+  "modelSettings_keepEditsTitle": "保留当前编辑？",
+  "modelSettings_keepEditsBody": "当前修改尚未保存。是否保存后切换？",
+  "modelSettings_discard": "放弃",
+  "modelSettings_saveAndSwitch": "保存并切换",
+  "modelSettings_addProvider": "添加服务商",
+  "modelSettings_deleteProviderTitle": "删除 {name}？",
+  "@modelSettings_deleteProviderTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "modelSettings_deleteProviderBody": "此服务的连接、密钥和已选模型将被删除。",
+  "modelSettings_deleteProviderBindings": "{count} 个功能的模型绑定会被清除，预设保留。",
+  "@modelSettings_deleteProviderBindings": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelSettings_deletePresetTitle": "删除“{name}”？",
+  "@modelSettings_deletePresetTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "modelSettings_deletePresetBody": "使用此预设的功能将恢复内置方案。模型绑定保留。",
+  "modelSettings_configCopied": "配置已复制，不包含密钥、自定义请求头或请求体。",
+  "modelSettings_importConfig": "导入配置",
+  "modelSettings_importConfigHint": "粘贴导出的配置。导入前会备份当前配置；密钥继续独立保存。",
+  "modelSettings_configJson": "配置 JSON",
+  "modelSettings_importPreview": "将导入 {providers} 个服务商、{models} 个模型和 {presets} 个自定义预设。",
+  "@modelSettings_importPreview": {
+    "placeholders": {
+      "providers": {},
+      "models": {},
+      "presets": {}
+    }
+  },
+  "modelSettings_importMissingProviders": "缺少服务商或模型配置。",
+  "modelSettings_checkConfig": "检查配置",
+  "modelSettings_importAndReplace": "导入并替换",
+  "modelSettings_configImported": "配置已导入",
+  "modelSettings_description": "管理服务连接与翻译偏好。",
+  "modelSettings_configMenu": "配置管理",
+  "modelSettings_copyConfig": "复制配置",
+  "modelSettings_tabProviders": "服务商",
+  "modelSettings_tabInterfaces": "功能接口",
+  "modelSettings_tabPresets": "预设与提示词",
+  "modelSettings_tabRequests": "请求记录",
+  "modelSettings_providersCount": "服务商 · {count}",
+  "@modelSettings_providersCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelSettings_providerModelCount": "{count} 个模型",
+  "@modelSettings_providerModelCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelSettings_providerDisabledSuffix": " · 未启用",
+  "modelSettings_emptyTitle": "添加你的第一个模型服务",
+  "modelSettings_emptyBody": "选择常用服务，或连接自定义接口。",
+  "modelSettings_customService": "自定义服务",
+  "modelSettings_notConfigured": "待配置",
+  "modelSettings_preset": "预设",
+  "modelSettings_presetBuiltin": "内置",
+  "modelSettings_presetUser": "用户",
+  "modelSettings_deletePreset": "删除预设",
+  "modelSettings_presetCopyName": "{title}（{number}）",
+  "@modelSettings_presetCopyName": {
+    "placeholders": {
+      "title": {},
+      "number": {}
+    }
+  },
+  "modelSettings_recentRequests": "最近请求",
+  "modelSettings_recentRequestsHint": "本次会话最近 100 条 · 完整请求与响应，认证信息已脱敏",
+  "modelSettings_clearRequests": "清空",
+  "modelSettings_requestsEmpty": "翻译或测试模型后，请求记录会出现在这里。",
+  "modelSettings_interfaceChangedElsewhere": "功能配置已在别处修改，请重新打开后编辑。",
+  "modelSettings_configSaved": "配置已保存",
+  "modelSettings_viewBuiltinRules": "查看内置规则",
+  "modelSettings_viewEditPreset": "查看与编辑预设",
+  "modelSettings_restoreBuiltinPreset": "恢复内置预设",
+  "modelSettings_followUiLanguage": "跟随界面语言",
+  "modelSettings_providerAndModel": "服务商与模型",
+  "modelSettings_providerAndModelHelp": "仅列出启用服务中的已选模型",
+  "modelSettings_chooseProviderModel": "选择服务商与模型",
+  "modelSettings_reasoning": "思考",
+  "modelSettings_reasoningHelp": "纯翻译通常无需开启思考；为兼顾打标、语义分类等处理，建议开启该模型支持的最低思考档位。",
+  "modelSettings_reasoningHelpLabel": "思考档位建议",
+  "modelSettings_usePreset": "使用预设",
+  "modelSettings_outputLanguage": "输出语言",
+  "modelSettings_englishPrompt": "英文生成提示词",
+  "modelSettings_englishPromptHelp": "结合原文落实修改，输出英文生成提示词。",
+  "modelSettings_targetLanguage": "目标语言",
+  "modelSettings_effective": "当前生效",
+  "modelSettings_noModelSelected": "尚未选择可用模型",
+  "modelSettings_reasoningSummaryInterface": "思考：{level}（本接口）",
+  "@modelSettings_reasoningSummaryInterface": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelSettings_reasoningSummaryModel": "思考：{level}（跟随模型）",
+  "@modelSettings_reasoningSummaryModel": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelSettings_promptBlocksHint": "无需翻译时，也可将提示词拆分为模块，通过积木功能自由拼装。",
+  "modelSettings_wikiFormatHint": "无需翻译时，也可整理排版并为相关标签添加链接。",
+  "modelSettings_unsavedChanges": "有未保存的修改",
+  "modelSettings_testPreset": "测试预设",
+  "modelSettings_tabModelPreset": "模型与预设",
+  "modelSettings_tabPromptOutput": "提示词与输出",
+  "modelSettings_translationStrategy": "翻译策略",
+  "modelSettings_editPreset": "编辑预设",
+  "modelSettings_outputContract": "应用输出约定",
+  "modelSettings_outputContractHint": "返回字段与校验规则由应用维护",
+  "modelSettings_testResult": "测试结果",
+  "modelRequest_detailsRequests": "请求",
+  "modelRequest_detailsIndex": "序号",
+  "modelRequest_detailsResponses": "响应",
+  "modelRequest_detailsOutput": "提取结果",
+  "modelRequest_detailsTitle": "请求记录",
+  "modelRequest_detailsCopied": "已复制",
+  "modelRequest_detailsCopyPage": "复制当前页",
+  "modelRequest_detailsOverview": "概览",
+  "modelRequest_detailsMissing": "此记录已清空或已超出最近 100 条。",
+  "modelPreset_changedElsewhere": "预设已在别处修改，请重新打开后编辑。",
+  "modelPreset_interfacePresetChanged": "接口使用的预设已在别处修改，请重新打开后新建。",
+  "modelPreset_builtinReadOnly": "内置 · 只读",
+  "modelPreset_newInterfacePreset": "新建接口预设",
+  "modelPreset_tabPrompt": "提示词",
+  "modelPreset_tabOutputContract": "输出约定",
+  "modelPreset_name": "预设名称",
+  "modelPreset_nameRequired": "请输入名称",
+  "modelPreset_behavior": "行为与翻译策略",
+  "modelPreset_builtinLocked": "内置规则已锁定。新建接口预设后可编辑自己的翻译偏好。",
+  "modelPreset_editHint": "此处修改翻译偏好；返回格式由应用单独维护。",
+  "modelPreset_strategyHint": "输入翻译策略",
+  "modelPreset_promptRequired": "提示词不能为空",
+  "modelPreset_restoreStrategy": "将策略恢复为内置内容",
+  "modelPreset_outputContractNote": "此部分保证翻译结果可以回填和显示，由应用维护。",
+  "modelPreset_save": "保存预设",
+  "modelReasoning_unsupported": "不支持",
+  "modelReasoning_followModel": "跟随模型",
+  "modelReasoning_followModelLevel": "跟随模型（{level}）",
+  "@modelReasoning_followModelLevel": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelReasoning_notAdjustable": "此模型不支持思考调节",
+  "modelReasoning_strength": "思考强度",
+  "modelReasoning_modelDefault": "模型默认：{level}",
+  "@modelReasoning_modelDefault": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelReasoning_levelsUnknown": "可调档位尚未确认\n可在服务商的模型配置中设置",
+  "modelReasoning_strengthValue": "思考强度：{level}",
+  "@modelReasoning_strengthValue": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelProvider_customEndpoint": "自定义端点",
+  "modelProvider_pickerTitle": "选择服务商",
+  "modelProvider_pickerSearch": "搜索厂商、平台或本地服务",
+  "modelProvider_pickerEmpty": "没有匹配的服务商",
+  "modelProvider_groupApiKey": "API Key 连接",
+  "modelProvider_groupLocal": "本地服务",
+  "modelProvider_enterCompatibleAddress": "填写兼容接口地址",
+  "modelConnection_provider": "服务商",
+  "modelConnection_name": "名称",
+  "modelConnection_nameExample": "例如：自用中转",
+  "modelConnection_protocol": "接口协议",
+  "modelConnection_address": "接口地址",
+  "modelConnection_apiKey": "API 密钥",
+  "modelControls_decrease": "减少{label}（{step} {unit}）",
+  "@modelControls_decrease": {
+    "placeholders": {
+      "label": {},
+      "step": {},
+      "unit": {}
+    }
+  },
+  "modelControls_increase": "增加{label}（{step} {unit}）",
+  "@modelControls_increase": {
+    "placeholders": {
+      "label": {},
+      "step": {},
+      "unit": {}
+    }
+  },
+  "modelControls_retryOff": "关闭",
+  "modelControls_retryTimes": "{count} 次",
+  "@modelControls_retryTimes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "settings_positiveIntegerRequired": "请输入大于 0 的整数",
+  "modelSettings_testingPreset": "正在测试预设",
+  "modelHealth_lastUpdated": "最近更新：{time}",
+  "@modelHealth_lastUpdated": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "modelSettings_backToEditing": "返回编辑",
+  "modelService_loadOverridesFailed": "读取自定义请求设置失败：{error}",
+  "@modelService_loadOverridesFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "modelService_timeoutRange": "请求超时应在 10–600 秒之间。",
+  "modelService_concurrencyRange": "最大并发数量应在 1–20 个之间。",
+  "modelService_nameRequired": "请输入服务名称。",
+  "modelService_invalidUrl": "接口地址必须是完整的 http:// 或 https:// URL。",
+  "modelService_contextPositive": "上下文窗口必须大于 0。",
+  "modelService_readingCatalog": "正在读取模型目录…",
+  "modelService_catalogReturned": "目录返回 {count} 个模型。勾选需要使用的模型。",
+  "@modelService_catalogReturned": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelService_catalogUnavailable": "目录不可用：{error}。可以手动添加模型 ID。",
+  "@modelService_catalogUnavailable": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "modelService_catalogCached": "已载入上次获取的 {count} 个模型。点击“获取列表”可刷新。",
+  "@modelService_catalogCached": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelService_catalogCacheFailed": "模型列表已获取，但本地缓存保存失败，下次需重新获取。",
+  "modelService_selectModelFirst": "请先选中一个模型。",
+  "modelService_testingModel": "正在测试模型请求…",
+  "modelService_testSucceeded": "模型请求成功：{reply}",
+  "@modelService_testSucceeded": {
+    "placeholders": {
+      "reply": {}
+    }
+  },
+  "modelService_testFailed": "模型请求失败：{error}",
+  "@modelService_testFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "modelService_tokensPositive": "模型“{name}”的 token 数量必须大于 0。",
+  "@modelService_tokensPositive": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "modelService_changedElsewhere": "服务配置已在别处修改，请重新打开后编辑。",
+  "modelService_overridesChangedElsewhere": "模型请求设置已在别处修改，请重新打开后编辑。",
+  "modelService_saveFailed": "保存失败：{error}",
+  "@modelService_saveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "modelService_keyHintNew": "输入 Key；本地服务可留空",
+  "modelService_keyHintVendor": "输入此服务商的 Key",
+  "modelService_keyHintSaved": "已保存；留空保持原值",
+  "modelService_enabledModels": "{count} 个启用模型",
+  "@modelService_enabledModels": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelService_pendingSave": "待保存",
+  "modelService_saved": "已保存",
+  "modelService_enable": "启用",
+  "modelService_testConnection": "测试连接",
+  "modelService_delete": "删除服务",
+  "modelService_save": "保存服务",
+  "modelService_saving": "正在保存服务",
+  "modelService_notConfigured": "尚未配置",
+  "modelService_optional": "可留空",
+  "modelService_editConnection": "编辑",
+  "modelService_collapse": "收起",
+  "modelService_connectionSettings": "连接设置",
+  "modelService_dragToReorder": "拖拽调整模型排序",
+  "modelService_capacityTooltip": "上下文 / 最大输出；可在高级中调整",
+  "modelService_advanced": "高级",
+  "modelService_removeModel": "删除模型 {name}",
+  "@modelService_removeModel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "modelService_linkedInterfaces": "关联功能",
+  "modelService_noLinkedInterfaces": "尚未关联功能",
+  "modelService_advancedSettings": "高级设置",
+  "modelService_requestTimeout": "请求超时",
+  "modelService_requestTimeoutHelp": "单次请求最长等待时间",
+  "modelService_seconds": "秒",
+  "modelService_maxConcurrency": "最大并发数量",
+  "modelService_maxConcurrencyHelp": "此服务同时处理的请求数",
+  "modelService_countUnit": "个",
+  "modelService_retry": "失败重试",
+  "modelService_retryHelp": "连接失败或服务繁忙时重试",
+  "modelService_searchModelId": "搜索模型 ID…",
+  "modelService_serviceModels": "该服务的模型",
+  "modelService_fetchList": "获取列表",
+  "modelService_catalogEmpty": "点击“获取列表”读取此服务的模型，\n或在右侧手动添加模型 ID。",
+  "modelService_noMatchingModels": "没有匹配的模型",
+  "modelService_catalogLimitTooltip": "目录上限：上下文 / 最大输出",
+  "modelService_searchAddedModels": "搜索已添加模型…",
+  "modelService_modelSettings": "模型设置",
+  "modelService_addedEmpty": "从左侧勾选，或在下方添加模型",
+  "modelService_customModelId": "自定义模型 ID",
+  "modelService_customModelHelp": "添加模型目录无法拉取到的模型",
+  "modelService_addCustomModel": "添加自定义模型",
+  "modelCard_positiveInteger": "请输入正整数",
+  "modelCard_catalogLimit": "目录上限 {limit}",
+  "@modelCard_catalogLimit": {
+    "placeholders": {
+      "limit": {}
+    }
+  },
+  "modelCard_outputExceedsContext": "输出不能超过上下文窗口",
+  "modelCard_contextWindow": "上下文窗口",
+  "modelCard_maxOutput": "最大输出",
+  "modelCard_unlabeled": "未标注",
+  "modelCard_protocolStandard": "标准",
+  "modelCard_protocolAdaptive": "自适应",
+  "modelCard_default": "默认",
+  "modelCard_thinkingLevels": "思考等级",
+  "modelCard_thinkingLevelsUnlisted": "目录未标注，可手动开启",
+  "modelCard_thinkingLevelsFromCatalog": "已按本地目录勾选支持的等级；可按实际接口调整。",
+  "modelCard_thinkingProtocol": "思考协议",
+  "modelCard_defaultThinkingLevel": "默认思考等级",
+  "modelCard_alias": "别名",
+  "modelCard_aliasHelp": "在显示模型名称的地方生效；请求仍使用模型 ID。",
+  "modelCard_aliasExample": "例如 fast",
+  "modelCard_capabilities": "能力",
+  "modelCard_images": "图片",
+  "modelCard_nativeSearch": "原生网络搜索",
+  "modelCard_nativeSearchHelp": "应用尚未适配此连接的原生搜索；不代表厂商网站或其他 API 不支持搜索。",
+  "modelOverrides_duplicateHeader": "请求头名称重复",
+  "modelOverrides_fieldNameRequired": "请输入字段名",
+  "modelOverrides_duplicateField": "字段名重复",
+  "modelOverrides_invalidJson": "请输入有效的 JSON 值",
+  "modelOverrides_customBody": "自定义 Body",
+  "modelOverrides_customHeaders": "自定义 Headers",
+  "modelOverrides_fieldName": "字段名",
+  "modelOverrides_headerName": "请求头名称",
+  "modelOverrides_valueJson": "值（JSON）",
+  "modelOverrides_value": "值",
+  "modelOverrides_removeItem": "删除此项",
+  "modelOverrides_body": "请求体",
+  "modelOverrides_headers": "请求头",
+  "modelOverrides_itemCount": "{count} 项",
+  "@modelOverrides_itemCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelOverrides_valueTypes": "支持字符串、数字、布尔值、数组和对象",
+  "modelOverrides_addBodyField": "添加请求体字段",
+  "modelOverrides_addHeader": "添加请求头",
+  "promptTranslation_translating": "正在翻译",
+  "promptTranslation_needsModel": "翻译 · 先配置模型",
+  "promptTranslation_withRoute": "翻译 · {provider} / {model}",
+  "@promptTranslation_withRoute": {
+    "placeholders": {
+      "provider": {},
+      "model": {}
+    }
+  },
+  "promptTranslation_actions": "翻译操作",
+  "promptTranslation_promptChanged": "提示词已变化，未覆盖新编辑",
+  "promptTranslation_nothingToTranslate": "当前没有需要翻译的普通文字",
+  "promptTranslation_failed": "翻译失败：{error}",
+  "@promptTranslation_failed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "promptTranslation_setupTitle": "先配置翻译模型",
+  "promptTranslation_setupBody": "翻译需要明确选择服务商和模型。前往「设置 → 集成 → 模型与接口」，先添加服务商并取得模型列表，再在「提示词翻译」卡片中完成选择。",
+  "promptTranslation_later": "稍后",
+  "promptTranslation_openSettings": "前往设置",
+  "promptTranslation_toolTitle": "翻译",
+  "promptTranslation_noModel": "未配置模型",
+  "promptTranslation_configureModel": "配置翻译模型",
+  "promptTranslation_translateNew": "翻译新增内容",
+  "promptTranslation_undoRestore": "撤销原文还原，恢复翻译块",
+  "promptTranslation_restoreAll": "全部翻译块还原为原文文本",
+  "promptTranslation_tutorial": "操作教程",
+  "promptTranslation_guideBack": "返回操作",
+  "promptTranslation_guideMiddleTitle": "中键点块",
+  "promptTranslation_guideMiddleText": "切换原文与译文",
+  "promptTranslation_guideSourceTitle": "左键点原文",
+  "promptTranslation_guideSourceText": "定位光标，直接修改",
+  "promptTranslation_guideReadingTitle": "左键点译文",
+  "promptTranslation_guideReadingText": "打开块编辑窗",
+  "promptTranslation_guideCtrlTitle": "Ctrl + 点击 / 拖选",
+  "promptTranslation_guideCtrlText": "编辑窗内搜索标签 / 查关联",
+  "promptTranslation_guideConvertTitle": "↑ 中文转原文",
+  "promptTranslation_guideConvertText": "↓ 原文转中文，检查后保存",
+  "promptTranslation_guideRestoreTitle": "A / 恢复",
+  "promptTranslation_guideRestoreText": "整组还原原文 / 恢复翻译块",
+  "promptTranslation_middleButton": "鼠标中键",
+  "promptTranslation_leftButton": "鼠标左键",
+  "promptTranslation_blockShowingOriginal": "翻译块，显示原文",
+  "promptTranslation_blockShowingReading": "翻译块，显示译文",
+  "promptTranslation_blockNeedsReview": "原文已修改 · 译文待更新",
+  "promptTranslation_badgeTooltip": "原文已修改，中文待同步",
+  "promptTranslation_sourceChanged": "原文已变化，请重新打开翻译块",
+  "promptTranslation_retranslateFailed": "重新翻译失败：{error}",
+  "@promptTranslation_retranslateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "promptTranslation_draftChanged": "内容已修改，请重新转换；新草稿已保留",
+  "promptTranslation_convertFailed": "转换失败，草稿已保留：{error}",
+  "@promptTranslation_convertFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "promptTranslation_invalidResultFormat": "转换结果格式不正确，草稿已保留",
+  "promptTranslation_noValidText": "模型没有返回有效文字，草稿已保留",
+  "promptTranslation_invalidResultContent": "转换结果包含无效格式，草稿已保留",
+  "promptTranslation_incompleteStructure": "转换结果的权重或分组不完整，草稿已保留",
+  "promptTranslation_inputRequired": "请先输入需要转换的内容",
+  "wiki_configureTagModel": "请先在「模型与接口」配置可用的标签翻译模型。",
+  "blockOrganizer_barrierLabel": "块分类",
+  "blockOrganizer_replaceTitle": "替换同源块？",
+  "blockOrganizer_replaceMoveBody": "目标中已有 {count} 个同源副本。替换后来源从块库隐藏；已插入提示词的实例仍可引用原块。",
+  "@blockOrganizer_replaceMoveBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockOrganizer_replaceCopyBody": "目标中已有 {count} 个同源副本。替换会更新目标副本的内容，来源保留。",
+  "@blockOrganizer_replaceCopyBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockOrganizer_replace": "替换",
+  "blockOrganizer_customTagColor": "自定义标签颜色",
+  "blockOrganizer_colorHint": "#RRGGBB 或 #AARRGGBB",
+  "blockOrganizer_invalidColor": "请输入六位或八位十六进制颜色",
+  "blockOrganizer_deleteFolderConfirm": "删除「{name}」？其中的块会移至根目录。",
+  "@blockOrganizer_deleteFolderConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "blockOrganizer_deleteCollectionConfirm": "删除「{name}」？块本体会保留。",
+  "@blockOrganizer_deleteCollectionConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "blockOrganizer_titleFavorites": "收藏与收藏集",
+  "blockOrganizer_titleFolders": "选择文件夹",
+  "blockOrganizer_itemCount": "{count} 项",
+  "@blockOrganizer_itemCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockOrganizer_search": "搜索",
+  "blockOrganizer_name": "名称",
+  "blockOrganizer_customColor": "自定义颜色…",
+  "blockOrganizer_newCollection": "新建收藏集",
+  "blockOrganizer_newCollectionFolder": "新建收藏文件夹",
+  "blockOrganizer_newTag": "新标签",
+  "blockOrganizer_newFolder": "新建文件夹",
+  "blockOrganizer_rootUncategorized": "根目录 / 未分类",
+  "blockOrganizer_manageDrag": "管理；拖动排序",
+  "blockLibrary_dragSelectedHint": "拖动已选块到左侧的收藏或文件夹，松开后选择复制或移动。",
+  "blockLibrary_blockCount": "{count} 个块",
+  "@blockLibrary_blockCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockLibrary_changedSelectAgain": "块库已变化，请重新选择后再试",
+  "blockLibrary_hiddenSource": "隐藏的块不能作为整理来源",
+  "blockLibrary_sameSourceSelected": "所选块包含同源副本，请分开整理",
+  "blockLibrary_sameSourceExists": "同源块已存在，请确认替换",
+  "blockLibrary_collectionMissing": "收藏集不存在",
+  "promptBlockEditor_appearance": "块外观",
+  "promptBlockEditor_imageUnreadable": "无法读取所选图像",
+  "blockAppearance_classic": "经典",
+  "blockAppearance_stripes": "细条纹",
+  "blockAppearance_dots": "圆点",
+  "blockAppearance_solid": "实心",
+  "blockAppearance_gradient": "渐变",
+  "blockAppearance_translation": "翻译",
+  "opusUsage_exhausted": "账号免费额度已用尽，V5 生成按 Anlas 计费",
+  "opusUsage_remaining": "账号免费额度剩余 {percent}%",
+  "@opusUsage_remaining": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_recharging": "回充中：下一 +1% 还需 {time}",
+  "@opusUsage_recharging": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "opusUsage_notRecharging": "当前不回充（池子在回充阈值之上或已用尽）",
+  "opusUsage_clickToRefresh": "点击刷新",
+  "opusUsage_hoursMinutes": "{hours} 小时 {minutes} 分",
+  "@opusUsage_hoursMinutes": {
+    "placeholders": {
+      "hours": {},
+      "minutes": {}
+    }
+  },
+  "opusUsage_hours": "{hours} 小时",
+  "@opusUsage_hours": {
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "opusUsage_minutesSeconds": "{minutes} 分 {seconds} 秒",
+  "@opusUsage_minutesSeconds": {
+    "placeholders": {
+      "minutes": {},
+      "seconds": {}
+    }
+  },
+  "opusUsage_minutes": "{minutes} 分",
+  "@opusUsage_minutes": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "opusUsage_seconds": "{seconds} 秒",
+  "@opusUsage_seconds": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "metadataImport_noCharactersReplaceClears": "无角色数据；替换模式会清空当前角色",
+  "metadataImport_replaceCharacters": "替换角色",
+  "metadataImport_appendCharacters": "追加角色",
+  "drop_dragToShare": "拖拽以分享",
+  "progress_cancelled": "已取消",
+  "promptSyntax_weightTooLarge": "数值权重绝对值过大：{value}::",
+  "@promptSyntax_weightTooLarge": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "promptSyntax_spaceBeforeColons": "权重数字与 :: 之间不能有空格：{value} ::",
+  "@promptSyntax_spaceBeforeColons": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "promptSyntax_weightAfterColons": "数值权重应写在 :: 前：::{value}",
+  "@promptSyntax_weightAfterColons": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "update_errorInAppUnsupported": "当前版本不支持应用内自动安装更新",
+  "update_errorNoInstallablePackage": "未找到可自动安装的更新包",
+  "update_errorMissingSha256": "更新包缺少 SHA256 校验信息",
+  "update_errorDiskFull": "磁盘空间不足，无法保存更新包",
+  "update_errorWriteFailed": "写入更新包失败",
+  "update_errorDownloadFailed": "下载更新包失败",
+  "update_errorSizeMismatch": "更新包大小校验失败",
+  "update_errorChecksumMismatch": "更新包校验失败",
+  "update_errorResumeRejected": "服务器拒绝了更新包续传请求",
+  "update_errorEmptyResponse": "更新服务器返回了空响应",
+  "update_errorPlatformUnsupported": "当前平台不支持应用内自动更新",
+  "update_errorPackageRemoved": "更新包已被清理，请重新下载",
+  "update_errorPackageCorrupted": "更新包已损坏，请重新下载",
+  "update_errorLaunchFailed": "启动更新程序失败",
+  "update_errorCheckFailed": "检查更新失败",
+  "update_errorCheckUnknown": "检查更新时发生未知错误",
+  "update_errorLogPath": "日志：{path}",
+  "@update_errorLogPath": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "update_errorInstallFailed": "安装更新失败",
+  "update_errorInstallFailedSeeLog": "安装更新失败，请查看更新日志",
+  "auth_tokenEmpty": "Token 为空，无法验证",
+  "auth_tokenFormatInvalid": "Token 格式无效",
+  "auth_tokenInvalidOrExpired": "Token无效或已过期，请检查Token是否正确。如果是Persistent Token，应以pst-开头。",
+  "auth_tokenMustStartPst": "Token 格式无效，应以 pst- 开头",
+  "auth_tokenFormatDetail": "Token 格式无效。Persistent Token 应以 pst- 开头，后跟至少10位字符。请检查输入的 Token 是否正确。",
+  "danbooru_credentialsExpired": "凭据已失效，请重新登录",
+  "danbooru_networkRetryLater": "网络连接失败，将在网络恢复后重试",
+  "danbooru_invalidCredentials": "无法验证凭据，请检查用户名和 API Key 是否正确",
+  "danbooru_verifyFailed": "验证失败: {error}",
+  "@danbooru_verifyFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "danbooru_credentialsRequired": "用户名和 API Key 不能为空",
+  "danbooru_networkCheck": "网络连接失败，请检查网络连接",
+  "danbooru_loginFailedNetwork": "登录失败，请检查网络连接",
+  "danbooru_blacklistLoginRequired": "请先登录 Danbooru 账号",
+  "danbooru_blacklistPushFailed": "推送 Danbooru 黑名单失败",
+  "danbooru_blacklistSyncFailed": "同步失败: {error}",
+  "@danbooru_blacklistSyncFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "comfyui_submitFailed": "提交工作流失败: {detail}",
+  "@comfyui_submitFailed": {
+    "placeholders": {
+      "detail": {}
+    }
+  },
+  "comfyui_uploadFailed": "上传图像失败: {detail}",
+  "@comfyui_uploadFailed": {
+    "placeholders": {
+      "detail": {}
+    }
+  },
+  "comfyui_fetchImageFailed": "获取图像失败: {detail}",
+  "@comfyui_fetchImageFailed": {
+    "placeholders": {
+      "detail": {}
+    }
+  },
+  "comfyui_historyMissing": "未找到任务历史: {id}",
+  "@comfyui_historyMissing": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "comfyui_unknownError": "未知错误",
+  "comfyui_cannotConnect": "无法连接到 ComfyUI 服务器 ({url})",
+  "@comfyui_cannotConnect": {
+    "placeholders": {
+      "url": {}
+    }
+  },
+  "comfyui_noOutput": "任务无输出",
+  "comfyui_nodesNoImage": "指定输出节点无图像输出: {nodes}",
+  "@comfyui_nodesNoImage": {
+    "placeholders": {
+      "nodes": {}
+    }
+  },
+  "comfyui_noImageOutput": "任务无图像输出",
+  "comfyui_executionError": "执行出错",
+  "comfyui_missingNodes": "缺少 ComfyUI 节点: {nodes}。请在 ComfyUI 中安装或启用对应自定义节点后重启 ComfyUI。",
+  "@comfyui_missingNodes": {
+    "placeholders": {
+      "nodes": {}
+    }
+  },
+  "enhance_cannotReadSize": "无法解析图像尺寸",
+  "enhance_upscaleFailed": "图像放大失败: {error}",
+  "@enhance_upscaleFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "enhance_vibeEncodeFailed": "Vibe编码失败: {error}",
+  "@enhance_vibeEncodeFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "enhance_enhanceFailed": "图像增强失败: {error}",
+  "@enhance_enhanceFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "enhance_annotateFailed": "图像标注失败: {error}",
+  "@enhance_annotateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "enhance_timeout": "请求超时",
+  "enhance_networkError": "网络连接错误",
+  "enhance_serverError": "服务器返回错误: {status}",
+  "@enhance_serverError": {
+    "placeholders": {
+      "status": {}
+    }
+  },
+  "enhance_serverErrorDetail": "服务器返回错误: {status} ({detail})",
+  "@enhance_serverErrorDetail": {
+    "placeholders": {
+      "status": {},
+      "detail": {}
+    }
+  },
+  "proxy_connectTimeout": "连接超时",
+  "proxy_cannotConnect": "无法连接到服务器",
+  "proxy_connectFailed": "连接失败",
+  "proxy_testServerUnreachable": "无法连接到测试服务器",
+  "proxy_testFailed": "测试失败: {error}",
+  "@proxy_testFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "avatar_noFilePath": "无法获取文件路径",
+  "avatar_sourceMissing": "源文件不存在或已被删除",
+  "avatar_copyFailed": "无法复制文件：{error}",
+  "@avatar_copyFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "avatar_saveFailed": "无法保存头像：{error}",
+  "@avatar_saveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "avatar_operationFailed": "操作失败：{error}",
+  "@avatar_operationFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "vibeExport_rawImage": "原始图片",
+  "vibeExport_vibePreview": "Vibe 预览图",
+  "vibeExport_libraryThumbnail": "库缩略图",
+  "vibeExport_pngTitle": "导出 PNG Vibe 图片",
+  "vibeExport_pngDirectoryTitle": "选择 PNG 导出目录",
+  "vibeExport_fileTitle": "导出 Vibe 文件",
+  "vibeExport_bundleTitle": "导出 Vibe Bundle",
+  "vibeExport_zipTitle": "导出 Vibe ZIP",
+  "vibeExport_nothingToExport": "没有可导出的 Vibe 条目",
+  "vibeImport_fileParseFailed": "文件解析失败",
+  "vibeImport_importFiles": "导入文件",
+  "vibeImport_noVibeData": "图片不包含有效 Vibe 数据",
+  "vibeImport_importImages": "导入图片",
+  "vibeImport_encodingParseFailed": "编码解析失败",
+  "vibeImport_importEncodings": "导入编码",
+  "vibeImport_namingCancelled": "用户取消命名，已跳过: {name}",
+  "@vibeImport_namingCancelled": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "vibeImport_nameEmpty": "名称为空，已跳过: {name}",
+  "@vibeImport_nameEmpty": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "vibeImport_nameConflict": "名称冲突，已跳过: {name}",
+  "@vibeImport_nameConflict": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "vibeImport_saveFailed": "保存失败",
+  "vibeFile_missingRawImage": "文件缺少可用的原图数据: {file} (type=image). 此文件可能已损坏或不完整，建议删除后重新保存。",
+  "@vibeFile_missingRawImage": {
+    "placeholders": {
+      "file": {}
+    }
+  },
+  "generation_countMustBePositive": "生成数量必须大于0",
+  "generation_allTasksFailed": "所有生成任务失败",
+  "generation_failedShort": "生成失败",
+  "generation_tasksFailedAfterRetry": "{count} 个任务重试后仍失败",
+  "@generation_tasksFailedAfterRetry": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "generation_streamFallbackUnavailable": "流式生成不支持且无法自动回退（参数丢失）",
+  "generation_streamFallbackFailed": "回退到非流式生成失败: {error}",
+  "@generation_streamFallbackFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "generation_batchSizeMustBePositive": "批次数量和批次大小必须大于0",
+  "clipboard_unsupportedPlatform": "当前平台不支持系统剪贴板",
+  "clipboard_decodeFailed": "无法解码图片用于复制到剪贴板",
+  "drop_remoteImageTooLarge": "远程图片原始下载超过 {size}MB",
+  "@drop_remoteImageTooLarge": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "apiEndpoint_empty": "API 地址不能为空",
+  "apiEndpoint_invalid": "API 地址无效",
+  "apiEndpoint_httpOnly": "仅支持 http 或 https API 地址",
+  "apiEndpoint_noExtras": "API 地址不能包含查询参数、片段或用户信息",
+  "gallery_initFailed": "初始化失败: {error}",
+  "@gallery_initFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_loadFoldersFailed": "加载文件夹失败: {error}",
+  "@gallery_loadFoldersFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_refreshFailed": "刷新失败: {error}",
+  "@gallery_refreshFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_clearCacheFailed": "清除缓存失败: {error}",
+  "@gallery_clearCacheFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_folderInaccessible": "无法访问图片文件夹: {error}",
+  "@gallery_folderInaccessible": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_scanFailed": "扫描图片失败: {error}",
+  "@gallery_scanFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_galleryInitFailed": "画廊初始化失败: {error}",
+  "@gallery_galleryInitFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cache_clearInProgress": "清除操作正在进行中",
+  "vibeImport_imageProgress": "导入图片({current}/{total}): {source}",
+  "@vibeImport_imageProgress": {
+    "placeholders": {
+      "current": {},
+      "total": {},
+      "source": {}
+    }
+  },
+  "vibeImport_clipboardSource": "剪贴板",
+  "resolution_noAdjustment": "无需调整",
+  "dataRefresh_updating": "正在更新数据...",
+  "dataRefresh_updatingService": "正在更新 {service}...",
+  "@dataRefresh_updatingService": {
+    "placeholders": {
+      "service": {}
+    }
+  }
 }

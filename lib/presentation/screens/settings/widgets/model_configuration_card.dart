@@ -5,6 +5,7 @@ import 'model_compact_dropdown.dart';
 import 'model_square_checkbox.dart';
 import 'model_request_overrides_editor.dart';
 import '../../../prompt_assistant/models/model_request_overrides.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 class ModelConfigurationCard extends StatefulWidget {
   const ModelConfigurationCard({
@@ -73,12 +74,16 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
   String? _capacityError(TextEditingController controller, int? limit) {
     if (controller.text.trim().isEmpty) return null;
     final value = int.tryParse(controller.text.trim());
-    if (value == null || value <= 0) return '请输入正整数';
-    if (limit != null && value > limit) return '目录上限 ${modelTokenLabel(limit)}';
+    if (value == null || value <= 0) {
+      return context.l10n.modelCard_positiveInteger;
+    }
+    if (limit != null && value > limit) {
+      return context.l10n.modelCard_catalogLimit(modelTokenLabel(limit));
+    }
     if (controller == _output &&
         _model.contextWindow != null &&
         value > _model.contextWindow!) {
-      return '输出不能超过上下文窗口';
+      return context.l10n.modelCard_outputExceedsContext;
     }
     return null;
   }
@@ -213,7 +218,11 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _label(contextWindow ? '上下文窗口' : '最大输出'),
+        _label(
+          contextWindow
+              ? context.l10n.modelCard_contextWindow
+              : context.l10n.modelCard_maxOutput,
+        ),
         const SizedBox(height: 4),
         TextField(
           key: contextWindow
@@ -225,7 +234,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
           keyboardType: TextInputType.number,
           decoration:
               _decoration(
-                hint: '未标注',
+                hint: context.l10n.modelCard_unlabeled,
                 error: _capacityError(controller, limit),
               ).copyWith(
                 suffixText: 'tokens',
@@ -261,10 +270,13 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
       compact: true,
       value: _model.reasoningProtocol,
       choices: [
-        const ModelDropdownChoice(ModelReasoningProtocol.standard, '标准'),
+        ModelDropdownChoice(
+          ModelReasoningProtocol.standard,
+          context.l10n.modelCard_protocolStandard,
+        ),
         ModelDropdownChoice(
           ModelReasoningProtocol.adaptive,
-          '自适应',
+          context.l10n.modelCard_protocolAdaptive,
           enabled: widget.protocol == ProviderProtocol.anthropicMessages,
         ),
       ],
@@ -280,7 +292,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
       compact: true,
       value: current ?? '',
       choices: [
-        const ModelDropdownChoice('', '默认'),
+        ModelDropdownChoice('', context.l10n.modelCard_default),
         for (final value in defaults)
           ModelDropdownChoice(value, value == 'none' ? 'off' : value),
       ],
@@ -295,17 +307,17 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
           : null,
     );
     final title = _label(
-      '思考等级',
+      context.l10n.modelCard_thinkingLevels,
       _model.catalogEntry?.reasoningEfforts == null
-          ? '目录未标注，可手动开启'
-          : '已按本地目录勾选支持的等级；可按实际接口调整。',
+          ? context.l10n.modelCard_thinkingLevelsUnlisted
+          : context.l10n.modelCard_thinkingLevelsFromCatalog,
     );
     final scale = MediaQuery.textScalerOf(context).scale(1);
     final groups = [
       Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _label('思考协议'),
+          _label(context.l10n.modelCard_thinkingProtocol),
           const SizedBox(width: 4),
           SizedBox(width: 67 * scale, child: protocol),
         ],
@@ -313,7 +325,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
       Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _label('默认思考等级'),
+          _label(context.l10n.modelCard_defaultThinkingLevel),
           const SizedBox(width: 4),
           SizedBox(width: 76 * scale, child: effort),
         ],
@@ -326,9 +338,9 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
       maxLines: 1,
     )..layout()).width;
     final inlineWidth =
-        labelWidth('思考等级') +
-        labelWidth('思考协议') +
-        labelWidth('默认思考等级') +
+        labelWidth(context.l10n.modelCard_thinkingLevels) +
+        labelWidth(context.l10n.modelCard_thinkingProtocol) +
+        labelWidth(context.l10n.modelCard_defaultThinkingLevel) +
         143 * scale +
         38;
     return LayoutBuilder(
@@ -387,14 +399,17 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _label('别名', '在显示模型名称的地方生效；请求仍使用模型 ID。'),
+          _label(
+            context.l10n.modelCard_alias,
+            context.l10n.modelCard_aliasHelp,
+          ),
           const SizedBox(height: 4),
           TextField(
             key: ValueKey('alias-${_model.name}'),
             controller: _alias,
             enabled: widget.enabled,
             style: Theme.of(context).textTheme.bodySmall,
-            decoration: _decoration(hint: '例如 fast'),
+            decoration: _decoration(hint: context.l10n.modelCard_aliasExample),
             onChanged: (value) => _emit(
               _model.copyWith(
                 displayName: value.trim().isEmpty ? _model.name : value,
@@ -479,7 +494,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _label('能力'),
+                    _label(context.l10n.modelCard_capabilities),
                     const SizedBox(width: 7),
                     Container(
                       key: const Key('model-capability-divider'),
@@ -490,7 +505,7 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
                   ],
                 ),
                 capability(
-                  '图片',
+                  context.l10n.modelCard_images,
                   _model.supportsVision,
                   (v) => _emit(
                     _model.copyWith(supportsVision: v),
@@ -498,13 +513,13 @@ class _ModelConfigurationCardState extends State<ModelConfigurationCard> {
                   ),
                 ),
                 capability(
-                  '原生网络搜索',
+                  context.l10n.modelCard_nativeSearch,
                   _model.supportsNativeSearch,
                   (v) => _emit(
                     _model.copyWith(supportsNativeSearch: v),
                     'supportsNativeSearch',
                   ),
-                  '应用尚未适配此连接的原生搜索；不代表厂商网站或其他 API 不支持搜索。',
+                  context.l10n.modelCard_nativeSearchHelp,
                 ),
               ],
             ),

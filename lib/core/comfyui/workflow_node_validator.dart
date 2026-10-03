@@ -1,3 +1,5 @@
+import '../utils/localization_extension.dart';
+
 // Utilities for checking whether a ComfyUI workflow can run in the connected
 // server before submitting it to `/prompt`.
 Set<String> extractWorkflowNodeTypes(Map<String, dynamic> workflow) {
@@ -29,5 +31,5 @@ List<String> findMissingWorkflowNodeTypes({
 
 String formatMissingWorkflowNodeTypesMessage(List<String> missingNodeTypes) {
   final joined = missingNodeTypes.join(', ');
-  return '缺少 ComfyUI 节点: $joined。请在 ComfyUI 中安装或启用对应自定义节点后重启 ComfyUI。';
+  return currentL10n.comfyui_missingNodes(joined);
 }

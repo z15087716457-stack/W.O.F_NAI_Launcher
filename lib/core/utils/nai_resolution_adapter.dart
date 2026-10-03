@@ -5,6 +5,7 @@ import 'package:image/image.dart' as img;
 
 import 'isolate_pool.dart';
 import 'pica_lanczos_resizer.dart';
+import 'localization_extension.dart';
 
 /// NovelAI 分辨率适配器
 ///
@@ -583,7 +584,7 @@ class NaiAdaptedImage {
   });
 
   String get resizeDescription {
-    if (!wasResized) return '无需调整';
+    if (!wasResized) return currentL10n.resolution_noAdjustment;
     return '$originalWidth×$originalHeight → $width×$height';
   }
 }
@@ -609,7 +610,7 @@ class NaiImportImageInfo {
   bool get sizeChanged => originalWidth != width || originalHeight != height;
 
   String get resizeDescription {
-    if (!sizeChanged) return '无需调整';
+    if (!sizeChanged) return currentL10n.resolution_noAdjustment;
     return '$originalWidth×$originalHeight → $width×$height';
   }
 }

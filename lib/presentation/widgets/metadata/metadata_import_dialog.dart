@@ -849,8 +849,7 @@ class _OfficialMetadataImportDialogState
             _buildCheckTile(
               title: l10n.metadataImport_characterPrompts,
               subtitle: widget.metadata.characterPrompts.isEmpty
-                  ? '无角色数据；替换模式会清空当前角色 / '
-                        'No character data; replace clears current characters'
+                  ? l10n.metadataImport_noCharactersReplaceClears
                   : '${widget.metadata.characterPrompts.length} '
                         '${l10n.metadataImport_charactersCount}',
               value: _selection.importCharacters,
@@ -948,14 +947,14 @@ class _OfficialMetadataImportDialogState
       child: SizedBox(
         width: double.infinity,
         child: SegmentedButton<OfficialCharacterImportMode>(
-          segments: const [
+          segments: [
             ButtonSegment(
               value: OfficialCharacterImportMode.replace,
-              label: Text('替换角色 / Replace'),
+              label: Text(context.l10n.metadataImport_replaceCharacters),
             ),
             ButtonSegment(
               value: OfficialCharacterImportMode.append,
-              label: Text('追加角色 / Append'),
+              label: Text(context.l10n.metadataImport_appendCharacters),
             ),
           ],
           selected: {_selection.characterMode},

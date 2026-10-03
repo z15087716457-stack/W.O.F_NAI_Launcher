@@ -10,7 +10,6 @@ import '../auth/subscription_expiry_text.dart';
 import '../common/app_toast.dart';
 import '../../screens/settings/widgets/settings_dialog.dart';
 import '../../screens/settings/widgets/settings_tile.dart';
-import '../../screens/settings/widgets/settings_ui_theme.dart';
 
 /// 居中的桌面账号资料面板，保留类名以兼容现有入口。
 class AccountProfileBottomSheet extends ConsumerStatefulWidget {
@@ -203,7 +202,7 @@ class _AccountProfileBottomSheetState
     final theme = Theme.of(context);
     final isDefault = current.isDefault;
     return SettingsDialogFrame(
-      title: settingsText(context, '账号详情', 'Account details', 'アカウントの詳細'),
+      title: context.l10n.settings_accountDetails,
       width: 480,
       child: SingleChildScrollView(
         child: Column(
@@ -229,12 +228,7 @@ class _AccountProfileBottomSheetState
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        settingsText(
-                          context,
-                          '本地账号资料',
-                          'Local account profile',
-                          'ローカル情報',
-                        ),
+                        context.l10n.settings_localAccountProfile,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -308,9 +302,7 @@ class _AccountProfileBottomSheetState
                       )
                     : OutlinedButton(
                         onPressed: _setAsDefault,
-                        child: Text(
-                          settingsText(context, '设为默认', 'Set default', '既定にする'),
-                        ),
+                        child: Text(context.l10n.settings_setDefault2),
                       ),
               ),
           ],

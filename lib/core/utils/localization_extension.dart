@@ -10,7 +10,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 /// ```
 extension LocalizationExtension on BuildContext {
   /// 获取当前语言环境的 AppLocalizations 实例
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
+  AppLocalizations get l10n => AppLocalizations.of(this) ?? currentL10n;
 
   /// 获取 timeago 使用的本地化代码
   String get timeagoLocaleCode {
@@ -37,4 +37,21 @@ extension LocalizationExtension on BuildContext {
         return l10n.vibe_sourceType_image;
     }
   }
+}
+
+AppLocalizations? _currentL10n;
+
+/// Localizations for code that has no BuildContext, such as models, services
+/// and errors raised below the UI. It follows [setCurrentL10nLocale], which the
+/// locale provider calls; before that it uses the app's default language.
+AppLocalizations get currentL10n =>
+    _currentL10n ??= lookupAppLocalizations(const Locale('zh'));
+
+void setCurrentL10nLocale(Locale locale) {
+  final supported = AppLocalizations.supportedLocales.any(
+    (item) => item.languageCode == locale.languageCode,
+  );
+  _currentL10n = lookupAppLocalizations(
+    supported ? locale : const Locale('en'),
+  );
 }

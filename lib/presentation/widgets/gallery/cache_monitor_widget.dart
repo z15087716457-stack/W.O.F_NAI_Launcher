@@ -80,7 +80,7 @@ class CacheMonitorController extends StateNotifier<CacheMonitorState> {
       AppLogger.e('刷新缓存统计失败', e, stack, 'CacheMonitorController');
       state = state.copyWith(
         isLoading: false,
-        error: '刷新失败: $e',
+        error: currentL10n.gallery_refreshFailed('$e'),
         lastRefreshTime: DateTime.now(),
       );
     }
@@ -96,7 +96,10 @@ class CacheMonitorController extends StateNotifier<CacheMonitorState> {
       AppLogger.i('所有缓存已清除', 'CacheMonitorController');
     } catch (e, stack) {
       AppLogger.e('清除缓存失败', e, stack, 'CacheMonitorController');
-      state = state.copyWith(isLoading: false, error: '清除缓存失败: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: currentL10n.gallery_clearCacheFailed('$e'),
+      );
     }
   }
 

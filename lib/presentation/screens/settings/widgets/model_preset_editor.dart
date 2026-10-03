@@ -6,6 +6,7 @@ import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dar
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import 'model_management_widgets.dart';
 import 'model_draft_save_controller.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 class ModelPresetEditor extends ConsumerStatefulWidget {
   const ModelPresetEditor({
@@ -39,7 +40,10 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
   @override
   void initState() {
     super.initState();
-    _name = TextEditingController(text: widget.preset.name);
+    // Built-in presets keep a stable stored name; show it in the UI language.
+    _name = TextEditingController(
+      text: _builtin ? widget.preset.task.title : widget.preset.name,
+    );
     _prompt = TextEditingController(text: widget.preset.prompt);
     _newPreset =
         !_builtin &&
@@ -65,7 +69,7 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
 
   TaskPresetConfig get _draft => TaskPresetConfig(
     id: widget.preset.id,
-    name: _name.text.trim(),
+    name: _builtin ? widget.preset.name : _name.text.trim(),
     task: widget.preset.task,
     prompt: _prompt.text.trim(),
   );
@@ -89,7 +93,7 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
           .where((item) => item.id == widget.preset.id)
           .firstOrNull;
       if (latest?.toJson().toString() != _observedPreset) {
-        throw StateError('预设已在别处修改，请重新打开后编辑。');
+        throw StateError(context.l10n.modelPreset_changedElsewhere);
       }
       if (_newPreset &&
           ref
@@ -97,7 +101,7 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                   .interfaceFor(widget.preset.task)
                   .presetId !=
               _observedInterfacePreset) {
-        throw StateError('接口使用的预设已在别处修改，请重新打开后新建。');
+        throw StateError(context.l10n.modelPreset_interfacePresetChanged);
       }
       await ref
           .read(promptAssistantConfigProvider.notifier)
@@ -124,8 +128,10 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ManagementHeading(
-            _builtin ? widget.preset.task.title : _name.text,
-            description: _builtin ? '内置 · 只读' : '用户',
+            _builtin ? widget.preset.task.titleIn(context.l10n) : _name.text,
+            description: _builtin
+                ? context.l10n.modelPreset_builtinReadOnly
+                : context.l10n.modelSettings_presetUser,
             actions: [
               GestureDetector(
                 onTapDown: (details) =>
@@ -143,13 +149,16 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                           if (mounted && task != null) widget.onCreate(task);
                         },
                   icon: const Icon(Icons.add, size: 16),
-                  label: const Text('新建接口预设'),
+                  label: Text(context.l10n.modelPreset_newInterfacePreset),
                 ),
               ),
             ],
           ),
           ManagementTabs(
-            labels: const ['提示词', '输出约定'],
+            labels: [
+              context.l10n.modelPreset_tabPrompt,
+              context.l10n.modelPreset_tabOutputContract,
+            ],
             selected: _tab,
             onSelected: (value) => setState(() => _tab = value),
           ),
@@ -172,18 +181,24 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                       key: const Key('preset-name'),
                       controller: _name,
                       readOnly: _builtin,
-                      decoration: const InputDecoration(labelText: '预设名称'),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.modelPreset_name,
+                      ),
                       onChanged: _changed,
-                      validator: (value) =>
-                          value?.trim().isEmpty != false ? '请输入名称' : null,
+                      validator: (value) => value?.trim().isEmpty != false
+                          ? context.l10n.modelPreset_nameRequired
+                          : null,
                     ),
                     const SizedBox(height: 24),
-                    Text('行为与翻译策略', style: theme.textTheme.titleSmall),
+                    Text(
+                      context.l10n.modelPreset_behavior,
+                      style: theme.textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       _builtin
-                          ? '内置规则已锁定。新建接口预设后可编辑自己的翻译偏好。'
-                          : '此处修改翻译偏好；返回格式由应用单独维护。',
+                          ? context.l10n.modelPreset_builtinLocked
+                          : context.l10n.modelPreset_editHint,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -196,13 +211,14 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                       minLines: 12,
                       maxLines: 24,
                       style: theme.textTheme.bodySmall?.copyWith(height: 1.65),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         alignLabelWithHint: true,
-                        hintText: '输入翻译策略',
+                        hintText: context.l10n.modelPreset_strategyHint,
                       ),
                       onChanged: _changed,
-                      validator: (value) =>
-                          value?.trim().isEmpty != false ? '提示词不能为空' : null,
+                      validator: (value) => value?.trim().isEmpty != false
+                          ? context.l10n.modelPreset_promptRequired
+                          : null,
                     ),
                     if (!_builtin)
                       Align(
@@ -212,15 +228,18 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                             _prompt.text = widget.preset.task.builtinPrompt;
                             _changed('');
                           },
-                          child: const Text('将策略恢复为内置内容'),
+                          child: Text(context.l10n.modelPreset_restoreStrategy),
                         ),
                       ),
                   ],
                   if (_tab == 1) ...[
-                    Text('应用输出约定', style: theme.textTheme.titleSmall),
+                    Text(
+                      context.l10n.modelSettings_outputContract,
+                      style: theme.textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 8),
                     Text(
-                      '此部分保证翻译结果可以回填和显示，由应用维护。',
+                      context.l10n.modelPreset_outputContractNote,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -240,7 +259,7 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
                       child: FilledButton(
                         key: const Key('preset-save'),
                         onPressed: _busy ? null : _save,
-                        child: const Text('保存预设'),
+                        child: Text(context.l10n.modelPreset_save),
                       ),
                     ),
                   ],

@@ -413,7 +413,10 @@ void main() {
       expect(calls, 1);
       expect(
         history.records.map((item) => item.status),
-        containsAll(['成功', '已取消']),
+        containsAll([
+          ModelRequestStatus.success,
+          ModelRequestStatus.cancelled,
+        ]),
       );
       expect(
         history.records.map((item) => item.parameters.toString()).join(),
@@ -468,7 +471,7 @@ void main() {
           .toList();
       expect(calls, 2);
       expect(history.records.single.attempts, 2);
-      expect(history.records.single.status, '成功');
+      expect(history.records.single.status, ModelRequestStatus.success);
     },
   );
 

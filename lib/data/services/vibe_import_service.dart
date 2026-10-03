@@ -8,6 +8,7 @@ import '../../core/utils/app_logger.dart';
 import '../../core/utils/vibe_file_parser.dart';
 import '../models/vibe/vibe_library_entry.dart';
 import '../models/vibe/vibe_reference.dart';
+import '../../core/utils/localization_extension.dart';
 
 typedef ImportProgressCallback =
     void Function(int current, int total, String message);
@@ -156,7 +157,13 @@ class VibeImportService {
           stackTrace,
           'VibeImportService',
         );
-        errors.add(ImportError(source: file.name, error: '文件解析失败', details: e));
+        errors.add(
+          ImportError(
+            source: file.name,
+            error: currentL10n.vibeImport_fileParseFailed,
+            details: e,
+          ),
+        );
       }
     }
 
@@ -167,7 +174,7 @@ class VibeImportService {
       conflictResolution: conflictResolution,
       onProgress: onProgress,
       onNaming: onNaming,
-      progressPrefix: '导入文件',
+      progressPrefix: currentL10n.vibeImport_importFiles,
     );
 
     return _mergeImportResult(result, errors);
@@ -225,7 +232,7 @@ class VibeImportService {
         errors.add(
           ImportError(
             source: image.source,
-            error: '图片不包含有效 Vibe 数据',
+            error: currentL10n.vibeImport_noVibeData,
             details: e,
           ),
         );
@@ -239,7 +246,7 @@ class VibeImportService {
       conflictResolution: conflictResolution,
       onProgress: onProgress,
       onNaming: null,
-      progressPrefix: '导入图片',
+      progressPrefix: currentL10n.vibeImport_importImages,
     );
 
     return _mergeImportResult(result, errors);
@@ -273,7 +280,11 @@ class VibeImportService {
           'VibeImportService',
         );
         errors.add(
-          ImportError(source: item.source, error: '编码解析失败', details: e),
+          ImportError(
+            source: item.source,
+            error: currentL10n.vibeImport_encodingParseFailed,
+            details: e,
+          ),
         );
       }
     }
@@ -285,7 +296,7 @@ class VibeImportService {
       conflictResolution: conflictResolution,
       onProgress: onProgress,
       onNaming: null,
-      progressPrefix: '导入编码',
+      progressPrefix: currentL10n.vibeImport_importEncodings,
     );
 
     return _mergeImportResult(result, errors);
@@ -338,8 +349,8 @@ class VibeImportService {
             ImportError(
               source: source.source,
               error: customName == null
-                  ? '用户取消命名，已跳过: $baseName'
-                  : '名称为空，已跳过: $baseName',
+                  ? currentL10n.vibeImport_namingCancelled(baseName)
+                  : currentL10n.vibeImport_nameEmpty(baseName),
             ),
           );
           continue;
@@ -378,7 +389,10 @@ class VibeImportService {
         if (resolvedName == null) {
           skipCount++;
           errors.add(
-            ImportError(source: source.source, error: '名称冲突，已跳过: $baseName'),
+            ImportError(
+              source: source.source,
+              error: currentL10n.vibeImport_nameConflict(baseName),
+            ),
           );
           continue;
         }
@@ -428,7 +442,11 @@ class VibeImportService {
           'VibeImportService',
         );
         errors.add(
-          ImportError(source: source.source, error: '保存失败', details: e),
+          ImportError(
+            source: source.source,
+            error: currentL10n.vibeImport_saveFailed,
+            details: e,
+          ),
         );
         failCount++;
       }

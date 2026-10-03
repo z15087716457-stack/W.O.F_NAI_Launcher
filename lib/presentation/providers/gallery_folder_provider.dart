@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/models/gallery/gallery_folder.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
+import '../../core/utils/localization_extension.dart';
 
 part 'gallery_folder_provider.g.dart';
 
@@ -92,7 +93,10 @@ class GalleryFolderNotifier extends _$GalleryFolderNotifier {
       // 初始加载
       await _loadFolders();
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: '初始化失败: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: currentL10n.gallery_initFailed('$e'),
+      );
     }
   }
 
@@ -115,7 +119,10 @@ class GalleryFolderNotifier extends _$GalleryFolderNotifier {
         isLoading: false,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: '加载文件夹失败: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: currentL10n.gallery_loadFoldersFailed('$e'),
+      );
     }
   }
 

@@ -8,6 +8,7 @@ import 'package:super_clipboard/super_clipboard.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/file_name_sanitizer.dart';
 import '../../core/utils/vibe_file_parser.dart';
+import '../../core/utils/localization_extension.dart';
 
 class DroppedFileData {
   const DroppedFileData({
@@ -341,7 +342,9 @@ class DroppedFileReader {
         totalBytes += chunk.length;
         if (totalBytes > maxRemoteRawImageBytes) {
           throw StateError(
-            '远程图片原始下载超过 ${maxRemoteRawImageBytes ~/ (1024 * 1024)}MB',
+            currentL10n.drop_remoteImageTooLarge(
+              maxRemoteRawImageBytes ~/ (1024 * 1024),
+            ),
           );
         }
         builder.add(chunk);

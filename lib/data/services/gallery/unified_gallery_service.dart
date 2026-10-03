@@ -20,6 +20,7 @@ import 'gallery_sort.dart';
 import 'gallery_stream_scanner.dart';
 import 'scan_state_manager.dart';
 import 'scan_config.dart' show ScanConfig;
+import '../../../core/utils/localization_extension.dart';
 
 part 'unified_gallery_service.g.dart';
 
@@ -1734,10 +1735,14 @@ class GalleryService extends _$GalleryService {
     } on GalleryPermissionDeniedException catch (e) {
       AppLogger.e('Gallery permission denied', e, null, 'GalleryService');
       // 创建错误状态的服务
-      state = ErrorGalleryService(error: '无法访问图片文件夹: ${e.message}');
+      state = ErrorGalleryService(
+        error: currentL10n.gallery_folderInaccessible(e.message),
+      );
     } on GalleryScanException catch (e) {
       AppLogger.e('Gallery scan failed', e, null, 'GalleryService');
-      state = ErrorGalleryService(error: '扫描图片失败: ${e.message}');
+      state = ErrorGalleryService(
+        error: currentL10n.gallery_scanFailed(e.message),
+      );
     } catch (e) {
       AppLogger.e(
         'Failed to initialize gallery service',
@@ -1746,7 +1751,9 @@ class GalleryService extends _$GalleryService {
         'GalleryService',
       );
       // 创建错误状态的服务，让调用方知道初始化失败
-      state = ErrorGalleryService(error: '画廊初始化失败: $e');
+      state = ErrorGalleryService(
+        error: currentL10n.gallery_galleryInitFailed('$e'),
+      );
     }
   }
 

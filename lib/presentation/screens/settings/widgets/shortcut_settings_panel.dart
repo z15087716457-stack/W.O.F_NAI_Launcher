@@ -353,7 +353,7 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
               Expanded(
                 child: Text(
                   searching
-                      ? settingsText(context, '搜索结果', 'Search results', '検索結果')
+                      ? context.l10n.settings_searchResults
                       : selected == null
                       ? context.l10n.shortcut_settings_no_matches
                       : _getContextDisplayName(selected),

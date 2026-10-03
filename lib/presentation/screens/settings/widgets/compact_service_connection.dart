@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'model_compact_dropdown.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import 'provider_logo.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 class CompactServiceConnection extends StatelessWidget {
   const CompactServiceConnection({
@@ -42,7 +43,7 @@ class CompactServiceConnection extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
     );
     final provider = field(
-      '服务商',
+      context.l10n.modelConnection_provider,
       InkWell(
         key: const Key('service-provider-picker'),
         borderRadius: BorderRadius.circular(8),
@@ -55,7 +56,7 @@ class CompactServiceConnection extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  preset.label,
+                  preset.labelIn(context.l10n),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall,
@@ -68,16 +69,16 @@ class CompactServiceConnection extends StatelessWidget {
       ),
     );
     final title = field(
-      '名称',
+      context.l10n.modelConnection_name,
       TextField(
         controller: name,
         enabled: enabled,
         style: theme.textTheme.bodySmall,
-        decoration: decoration('例如：自用中转'),
+        decoration: decoration(context.l10n.modelConnection_nameExample),
       ),
     );
     final format = field(
-      '接口协议',
+      context.l10n.modelConnection_protocol,
       DropdownButtonFormField<ProviderProtocol>(
         borderRadius: modelMenuRadius,
         elevation: 3,
@@ -106,7 +107,7 @@ class CompactServiceConnection extends StatelessWidget {
       ),
     );
     final address = field(
-      '接口地址',
+      context.l10n.modelConnection_address,
       TextField(
         controller: url,
         enabled: enabled,
@@ -115,7 +116,7 @@ class CompactServiceConnection extends StatelessWidget {
       ),
     );
     final secret = field(
-      'API 密钥',
+      context.l10n.modelConnection_apiKey,
       TextField(
         controller: apiKey,
         obscureText: true,
@@ -176,7 +177,7 @@ class CompactServiceConnection extends StatelessWidget {
               pair(address, secret, leftFlex: 6, rightFlex: 4),
             const SizedBox(height: 8),
             Text(
-              preset.connectionHint,
+              preset.connectionHintIn(context.l10n),
               style: labelStyle?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

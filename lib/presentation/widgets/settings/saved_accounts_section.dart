@@ -6,7 +6,6 @@ import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../screens/settings/widgets/settings_card.dart';
-import '../../screens/settings/widgets/settings_ui_theme.dart';
 import '../auth/account_avatar.dart';
 import '../auth/account_switch_helper.dart';
 import '../auth/add_account_dialog.dart';
@@ -39,12 +38,7 @@ class SavedAccountsSection extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: Text(
-                settingsText(
-                  context,
-                  '添加账号后，可以在这里快速切换。',
-                  'Add accounts to switch between them here.',
-                  '追加したアカウントをここで切り替えられます。',
-                ),
+                context.l10n.settings_addAccountsSwitchBetweenThem,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -135,10 +129,7 @@ class _SavedAccountTile extends ConsumerWidget {
                           : context.l10n.subscriptionTierNone,
                     ),
                   if (isCurrent)
-                    badge(
-                      settingsText(context, '当前', 'Current', '現在'),
-                      active: true,
-                    ),
+                    badge(context.l10n.settings_current, active: true),
                   if (isDefault) badge(context.l10n.settings_defaultAccount),
                 ],
               ),
@@ -146,7 +137,7 @@ class _SavedAccountTile extends ConsumerWidget {
               Text(
                 account.accountType == AccountType.token
                     ? 'API Token'
-                    : settingsText(context, '邮箱登录', 'Email login', 'メールログイン'),
+                    : context.l10n.settings_emailLogin,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -163,7 +154,7 @@ class _SavedAccountTile extends ConsumerWidget {
           Icon(Icons.circle, size: 7, color: colors.onSurfaceVariant),
           const SizedBox(width: 6),
           Text(
-            settingsText(context, '已登录', 'Signed in', 'ログイン済み'),
+            context.l10n.settings_signedIn,
             style: theme.textTheme.bodySmall?.copyWith(
               color: colors.onSurfaceVariant,
             ),
@@ -186,11 +177,11 @@ class _SavedAccountTile extends ConsumerWidget {
             style: buttonStyle,
             onPressed: () =>
                 AccountSwitchHelper.switchToAccount(context, ref, account),
-            child: Text(settingsText(context, '切换', 'Switch', '切替')),
+            child: Text(context.l10n.settings_switch),
           ),
         PopupMenuButton<String>(
           key: ValueKey('settings-account-menu-${account.id}'),
-          tooltip: settingsText(context, '账号操作', 'Account actions', 'アカウント操作'),
+          tooltip: context.l10n.settings_accountActions,
           icon: Icon(
             Icons.more_horiz,
             size: 18,
@@ -200,17 +191,13 @@ class _SavedAccountTile extends ConsumerWidget {
             PopupMenuItem(
               value: 'profile',
               height: 36,
-              child: Text(
-                settingsText(context, '编辑资料', 'Edit profile', '情報を編集'),
-              ),
+              child: Text(context.l10n.settings_editProfile),
             ),
             if (!isDefault)
               PopupMenuItem(
                 value: 'default',
                 height: 36,
-                child: Text(
-                  settingsText(context, '设为默认账号', 'Set as default', '既定に設定'),
-                ),
+                child: Text(context.l10n.settings_setDefault),
               ),
             PopupMenuItem(
               value: 'delete',
@@ -286,23 +273,11 @@ class _SavedAccountTile extends ConsumerWidget {
                   if (changed == true && context.mounted) {
                     AppToast.success(
                       context,
-                      settingsText(
-                        context,
-                        '登录凭据已更新',
-                        'Credentials updated',
-                        '認証情報を更新しました',
-                      ),
+                      context.l10n.settings_credentialsUpdated,
                     );
                   }
                 },
-                child: Text(
-                  settingsText(
-                    context,
-                    '更新凭据',
-                    'Update credentials',
-                    '認証情報を更新',
-                  ),
-                ),
+                child: Text(context.l10n.settings_updateCredentials),
               ),
             ),
           ],

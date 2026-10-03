@@ -562,15 +562,21 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
             .read(promptTranslationCoordinatorProvider)
             .retranslateSingle(widget.pillScope, marker);
         if (mounted && !updated) {
-          ScaffoldMessenger.maybeOf(
-            context,
-          )?.showSnackBar(const SnackBar(content: Text('原文已变化，请重新打开翻译块')));
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.promptTranslation_sourceChanged),
+            ),
+          );
         }
       } catch (error) {
         if (mounted) {
-          ScaffoldMessenger.maybeOf(
-            context,
-          )?.showSnackBar(SnackBar(content: Text('重新翻译失败：$error')));
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text(
+                context.l10n.promptTranslation_retranslateFailed('$error'),
+              ),
+            ),
+          );
         }
       }
     } else if (result is TranslationPill) {

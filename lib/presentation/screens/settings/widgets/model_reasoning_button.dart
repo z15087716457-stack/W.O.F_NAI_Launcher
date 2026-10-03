@@ -3,6 +3,7 @@ import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import 'model_compact_dropdown.dart';
 import 'settings_hover_line.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 class ModelReasoningButton extends StatelessWidget {
   const ModelReasoningButton({
@@ -24,18 +25,22 @@ class ModelReasoningButton extends StatelessWidget {
     final unsupported = model?.reasoningEfforts?.isEmpty == true;
     final selected = choices.contains(value) ? value : null;
     final label = unsupported
-        ? '不支持'
+        ? context.l10n.modelReasoning_unsupported
         : selected == null
         ? model?.reasoningEffort == null
-              ? '跟随模型'
-              : '跟随模型（${reasoningEffortLabel(model!.reasoningEffort)}）'
-        : reasoningEffortLabel(selected);
+              ? context.l10n.modelReasoning_followModel
+              : context.l10n.modelReasoning_followModelLevel(
+                  reasoningEffortLabel(context.l10n, model!.reasoningEffort),
+                )
+        : reasoningEffortLabel(context.l10n, selected);
     final canChoose = enabled && model != null && !unsupported;
     return SettingsHoverLine(
       enabled: canChoose,
       child: PopupMenuButton<String>(
         key: const Key('task-reasoning'),
-        tooltip: unsupported ? '此模型不支持思考调节' : '思考强度',
+        tooltip: unsupported
+            ? context.l10n.modelReasoning_notAdjustable
+            : context.l10n.modelReasoning_strength,
         shadowColor: colors.shadow.withValues(alpha: .14),
         elevation: 3,
         shape: modelMenuShape,
@@ -50,33 +55,38 @@ class ModelReasoningButton extends StatelessWidget {
           PopupMenuItem<String>(
             enabled: false,
             height: 30,
-            child: Text('思考强度', style: Theme.of(context).textTheme.labelSmall),
+            child: Text(
+              context.l10n.modelReasoning_strength,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
           ),
           _item(
             context,
             'inherit',
-            '跟随模型',
+            context.l10n.modelReasoning_followModel,
             selected == null,
-            subtitle: '模型默认：${reasoningEffortLabel(model?.reasoningEffort)}',
+            subtitle: context.l10n.modelReasoning_modelDefault(
+              reasoningEffortLabel(context.l10n, model?.reasoningEffort),
+            ),
           ),
           if (choices.isNotEmpty) const PopupMenuDivider(),
           for (final choice in choices)
             _item(
               context,
               choice,
-              reasoningEffortLabel(choice),
+              reasoningEffortLabel(context.l10n, choice),
               selected == choice,
             ),
           if (choices.isEmpty)
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               enabled: false,
-              child: Text('可调档位尚未确认\n可在服务商的模型配置中设置'),
+              child: Text(context.l10n.modelReasoning_levelsUnknown),
             ),
         ],
         child: Semantics(
           button: true,
           enabled: canChoose,
-          label: '思考强度：$label',
+          label: context.l10n.modelReasoning_strengthValue(label),
           child: Container(
             constraints: const BoxConstraints(minHeight: 42),
             padding: const EdgeInsets.symmetric(vertical: 10),

@@ -7,6 +7,7 @@ import 'package:image/image.dart' as img;
 import '../../data/models/vibe/vibe_reference.dart';
 import 'app_logger.dart';
 import 'novelai_vibe_codec.dart';
+import 'localization_extension.dart';
 
 // 注意：已移除 png_chunks_extract 依赖，使用 image 包替代
 // image 包的 PngDecoder.startDecode() 提供纯 Dart 的 PNG chunks 解析
@@ -595,10 +596,7 @@ class VibeFileParser {
 
     if (type == 'image') {
       if (rawImageData == null || rawImageData.isEmpty) {
-        throw ArgumentError(
-          '文件缺少可用的原图数据: $fileName '
-          '(type=image). 此文件可能已损坏或不完整，建议删除后重新保存。',
-        );
+        throw ArgumentError(currentL10n.vibeFile_missingRawImage(fileName));
       }
 
       return VibeReference(

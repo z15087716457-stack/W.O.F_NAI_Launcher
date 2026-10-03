@@ -8,7 +8,6 @@ import '../../../../core/cache/gallery_cache_manager.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'settings_tile.dart';
-import 'settings_ui_theme.dart';
 
 /// 缓存统计 Provider
 ///
@@ -113,32 +112,30 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
   ) {
     final theme = Theme.of(context);
     final scale = MediaQuery.textScalerOf(context).scale(1);
-    String text(String zh, String en, String ja) =>
-        settingsText(context, zh, en, ja);
     final metrics = [
       _CacheMetric(
         key: const Key('settings-cache-l1'),
         label: context.l10n.cacheStats_l1Memory,
         count: stats.l1MemorySize,
-        unit: text('条记录', 'records', '件'),
+        unit: context.l10n.settings_records,
         detail:
-            '${text('命中率', 'Hit rate', 'ヒット率')} ${(stats.l1HitRate * 100).toStringAsFixed(1)}%',
+            '${context.l10n.settings_hitRate} ${(stats.l1HitRate * 100).toStringAsFixed(1)}%',
       ),
       _CacheMetric(
         key: const Key('settings-cache-l2'),
         label: context.l10n.cacheStats_l2Hive,
         count: stats.l2HiveSize,
-        unit: text('条记录', 'records', '件'),
+        unit: context.l10n.settings_records,
         detail:
-            '${text('命中率', 'Hit rate', 'ヒット率')} ${(stats.l2HitRate * 100).toStringAsFixed(1)}%',
+            '${context.l10n.settings_hitRate} ${(stats.l2HitRate * 100).toStringAsFixed(1)}%',
       ),
       _CacheMetric(
         key: const Key('settings-cache-l3'),
         label: context.l10n.cacheStats_l3Sqlite,
         count: stats.l3DatabaseImageCount,
-        unit: text('张图片', 'images', '画像'),
+        unit: context.l10n.settings_images,
         detail:
-            '${text('元数据', 'Metadata', 'メタデータ')} ${NumberFormat.decimalPattern(Localizations.localeOf(context).languageCode).format(stats.l3DatabaseMetadataCount)}',
+            '${context.l10n.detail_metadata} ${NumberFormat.decimalPattern(Localizations.localeOf(context).languageCode).format(stats.l3DatabaseMetadataCount)}',
       ),
     ];
     return Column(
@@ -147,7 +144,7 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
         SettingsTile(
           hoverFeedback: false,
           title: Text(
-            text('缓存概览', 'Cache overview', 'キャッシュの概要'),
+            context.l10n.settings_cacheOverview,
             style: theme.textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -165,18 +162,23 @@ class _CacheStatisticsTileState extends ConsumerState<CacheStatisticsTile> {
                 key: Key('settings-auto-refresh-indicator'),
               ),
               const SizedBox(width: 8),
-              TextButton.icon(
-                key: const Key('settings-reset-cache-statistics'),
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.colorScheme.onSurfaceVariant,
+              Flexible(
+                child: TextButton.icon(
+                  key: const Key('settings-reset-cache-statistics'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  icon: const Icon(Icons.delete_sweep_outlined, size: 18),
+                  label: Text(context.l10n.cacheStats_resetStats),
+                  onPressed: () {
+                    GalleryCacheManager().resetStatistics();
+                    _refreshStats();
+                    AppToast.success(
+                      context,
+                      context.l10n.cacheStats_statsReset,
+                    );
+                  },
                 ),
-                icon: const Icon(Icons.delete_sweep_outlined, size: 18),
-                label: Text(context.l10n.cacheStats_resetStats),
-                onPressed: () {
-                  GalleryCacheManager().resetStatistics();
-                  _refreshStats();
-                  AppToast.success(context, context.l10n.cacheStats_statsReset);
-                },
               ),
             ],
           ),
@@ -265,7 +267,7 @@ class _AutoRefreshIndicatorState extends State<_AutoRefreshIndicator>
 
   @override
   Widget build(BuildContext context) => Tooltip(
-    message: settingsText(context, '自动刷新', 'Auto refresh', '自動更新'),
+    message: context.l10n.settings_autoRefresh,
     child: SizedBox(
       width: 16,
       height: 16,

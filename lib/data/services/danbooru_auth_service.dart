@@ -9,6 +9,7 @@ import '../../core/storage/secure_storage_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../datasources/remote/danbooru_api_service.dart';
 import '../models/danbooru/danbooru_user.dart';
+import '../../core/utils/localization_extension.dart';
 
 part 'danbooru_auth_service.g.dart';
 
@@ -192,7 +193,7 @@ class DanbooruAuth extends _$DanbooruAuth {
             clearCredentials: true,
             clearUser: true,
             isLoading: false,
-            error: '凭据已失效，请重新登录',
+            error: currentL10n.danbooru_credentialsExpired,
           );
           AppLogger.w(
             'Saved credentials invalid (401), cleared',
@@ -264,18 +265,24 @@ class DanbooruAuth extends _$DanbooruAuth {
         return CredentialVerifyResult.success;
       } else if (isNetworkError) {
         // 网络错误，保留凭据
-        state = state.copyWith(isLoading: false, error: '网络连接失败，将在网络恢复后重试');
+        state = state.copyWith(
+          isLoading: false,
+          error: currentL10n.danbooru_networkRetryLater,
+        );
         return CredentialVerifyResult.networkError;
       } else {
         // 凭据无效
         state = state.copyWith(
           isLoading: false,
-          error: '无法验证凭据，请检查用户名和 API Key 是否正确',
+          error: currentL10n.danbooru_invalidCredentials,
         );
         return CredentialVerifyResult.invalidCredentials;
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: '验证失败: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: currentL10n.danbooru_verifyFailed('$e'),
+      );
       // 未知异常视为网络错误，不删除凭据
       return CredentialVerifyResult.networkError;
     }
@@ -290,7 +297,7 @@ class DanbooruAuth extends _$DanbooruAuth {
   /// 4. 更新状态
   Future<bool> login(String username, String apiKey) async {
     if (username.isEmpty || apiKey.isEmpty) {
-      state = state.copyWith(error: '用户名和 API Key 不能为空');
+      state = state.copyWith(error: currentL10n.danbooru_credentialsRequired);
       return false;
     }
 
@@ -311,11 +318,14 @@ class DanbooruAuth extends _$DanbooruAuth {
 
       if (user == null) {
         if (isNetworkError) {
-          state = state.copyWith(isLoading: false, error: '网络连接失败，请检查网络连接');
+          state = state.copyWith(
+            isLoading: false,
+            error: currentL10n.danbooru_networkCheck,
+          );
         } else {
           state = state.copyWith(
             isLoading: false,
-            error: '无法验证凭据，请检查用户名和 API Key 是否正确',
+            error: currentL10n.danbooru_invalidCredentials,
           );
         }
         AppLogger.w('Danbooru credential verification failed', 'DanbooruAuth');
@@ -347,7 +357,10 @@ class DanbooruAuth extends _$DanbooruAuth {
       return true;
     } catch (e, stack) {
       AppLogger.e('Danbooru login failed', e, stack, 'DanbooruAuth');
-      state = state.copyWith(isLoading: false, error: '登录失败，请检查网络连接');
+      state = state.copyWith(
+        isLoading: false,
+        error: currentL10n.danbooru_loginFailedNetwork,
+      );
       return false;
     }
   }

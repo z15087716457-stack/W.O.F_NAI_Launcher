@@ -5,6 +5,7 @@ import '../autocomplete/autocomplete_providers.dart';
 import '../constants/storage_keys.dart';
 import '../database/providers/database_state_providers.dart';
 import '../utils/app_logger.dart';
+import '../utils/localization_extension.dart';
 
 /// 清除结果
 class ClearResult {
@@ -54,7 +55,10 @@ class CacheClearService {
     ServiceClearCallback? serviceClearCallback,
   }) async {
     if (_isClearing) {
-      return ClearResult(success: false, error: '清除操作正在进行中');
+      return ClearResult(
+        success: false,
+        error: currentL10n.cache_clearInProgress,
+      );
     }
 
     if (_ref == null) {

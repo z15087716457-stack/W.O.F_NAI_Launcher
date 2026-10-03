@@ -15,7 +15,6 @@ import '../widgets/settings_labeled_group.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/settings_dialog.dart';
 import '../widgets/settings_font_dialog.dart';
-import '../widgets/settings_ui_theme.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'generation_settings_section.dart';
 
@@ -59,13 +58,8 @@ class _AppearanceSettingsSectionState
       return Column(
         children: [
           SettingsLabeledGroup(
-            title: settingsText(context, '浏览方式', 'Browsing', '閲覧方法'),
-            description: settingsText(
-              context,
-              '选择图片的查看习惯',
-              'Choose how to view images',
-              '画像の閲覧方法を選択',
-            ),
+            title: context.l10n.settings_browsing,
+            description: context.l10n.settings_chooseHowViewImages,
             child: Column(
               children: [
                 SettingsTile(
@@ -105,13 +99,8 @@ class _AppearanceSettingsSectionState
             ),
           ),
           SettingsLabeledGroup(
-            title: settingsText(context, '画布操作', 'Canvas controls', 'キャンバス操作'),
-            description: settingsText(
-              context,
-              '保持视角稳定',
-              'Keep the view steady',
-              '視点を固定',
-            ),
+            title: context.l10n.settings_canvasControls,
+            description: context.l10n.settings_keepViewSteady,
             child: SettingsSwitchTile(
               title: Text(l10n.settings_canvasLockCamera),
               subtitle: Text(l10n.settings_canvasLockCameraDescription),
@@ -133,23 +122,13 @@ class _AppearanceSettingsSectionState
     return Column(
       children: [
         SettingsLabeledGroup(
-          title: settingsText(context, '外观样式', 'Appearance', '外観スタイル'),
-          description: settingsText(
-            context,
-            '选择工作台的明暗风格',
-            'Choose a light or dark workspace',
-            '明るい・暗いスタイルを選択',
-          ),
+          title: context.l10n.settings_appearance2,
+          description: context.l10n.settings_chooseLightDarkWorkspace,
           child: const StudioThemePicker(compact: true),
         ),
         SettingsLabeledGroup(
-          title: settingsText(context, '文字与语言', 'Text & language', '文字と言語'),
-          description: settingsText(
-            context,
-            '统一阅读体验',
-            'Make reading comfortable',
-            '読みやすさを統一',
-          ),
+          title: context.l10n.settings_textLanguage,
+          description: context.l10n.settings_makeReadingComfortable,
           child: Column(
             children: [
               SettingsTile(
@@ -165,12 +144,7 @@ class _AppearanceSettingsSectionState
                 controlWrapWidth: wrapWidth,
                 title: Text(l10n.settings_fontScale),
                 subtitle: Text(
-                  settingsText(
-                    context,
-                    '仅调整设置页面与设置弹窗的字号',
-                    'Adjust settings pages and dialogs only',
-                    '設定画面と設定ダイアログの文字サイズ',
-                  ),
+                  context.l10n.settings_adjustSettingsPagesDialogsOnly,
                 ),
                 trailing: _valueControl(
                   '${(fontScale * 100).round()}%',
@@ -191,18 +165,8 @@ class _AppearanceSettingsSectionState
           ),
         ),
         SettingsLabeledGroup(
-          title: settingsText(
-            context,
-            '动效与提醒',
-            'Motion & notifications',
-            '動きと通知',
-          ),
-          description: settingsText(
-            context,
-            '减少打扰，及时获知完成',
-            'Reduce distractions, know when work finishes',
-            '邪魔を減らし、完了をお知らせ',
-          ),
+          title: context.l10n.settings_motionNotifications,
+          description: context.l10n.settings_reduceDistractionsKnowWorkFinishes,
           showDivider: false,
           child: Column(
             children: [
@@ -222,22 +186,15 @@ class _AppearanceSettingsSectionState
                 explicitSoundPicker: true,
               ),
               SettingsTile(
-                title: Text(
-                  settingsText(context, '通知样式', 'Notification style', '通知スタイル'),
-                ),
+                title: Text(context.l10n.settings_notificationStyle),
                 trailing: OutlinedButton.icon(
                   key: const Key('settings-preview-notification'),
                   onPressed: () => AppToast.info(
                     context,
-                    settingsText(
-                      context,
-                      '通知会显示在右上角，长文本自动换行，进度任务完成后自动收起。',
-                      'Notifications appear at the upper right, wrap long messages, and close when progress tasks finish.',
-                      '通知は右上に表示され、長い文章は折り返し、進行中のタスクは完了後に閉じます。',
-                    ),
+                    context.l10n.settings_notificationsAppearUpperRightWrap,
                   ),
                   icon: const Icon(Icons.info_outline, size: 16),
-                  label: Text(settingsText(context, '预览', 'Preview', 'プレビュー')),
+                  label: Text(context.l10n.settings_preview),
                 ),
               ),
             ],

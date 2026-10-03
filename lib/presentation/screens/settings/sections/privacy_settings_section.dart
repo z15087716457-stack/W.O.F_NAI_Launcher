@@ -5,7 +5,6 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/share_image_settings_provider.dart';
 import '../../../widgets/online_gallery/blacklist_settings_panel.dart';
 import '../widgets/settings_card.dart';
-import '../widgets/settings_ui_theme.dart';
 import '../widgets/settings_number_dialog.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/settings_section_label.dart';
@@ -198,7 +197,7 @@ class _PrivacySettingsSectionState
       children: [
         SettingsCard(
           title: widget.generationOnly
-              ? settingsText(context, '消耗提醒', 'Cost reminders', '消費の通知')
+              ? context.l10n.settings_costReminders
               : null,
           child: Column(
             children: [
@@ -233,9 +232,7 @@ class _PrivacySettingsSectionState
                       ? _editHighAnlasThreshold
                       : null,
                 ),
-                SettingsSectionLabel(
-                  settingsText(context, '请求节奏', 'Request pacing', 'リクエスト間隔'),
-                ),
+                SettingsSectionLabel(context.l10n.settings_requestPacing),
                 SettingsSwitchTile(
                   secondary: const Icon(Icons.timer_outlined),
                   title: Text(

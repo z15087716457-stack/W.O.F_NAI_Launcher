@@ -209,7 +209,6 @@
   "settings_title": "Settings",
   "settings_account": "Account",
   "settings_savedAccounts": "Saved Accounts",
-  "settings_appearance": "Appearance",
   "settings_style": "Style",
   "settings_font": "Font",
   "settings_language": "Language",
@@ -217,13 +216,8 @@
   "settings_languageEnglish": "English",
   "settings_languageJapanese": "日本語",
   "settings_shortcuts": "Shortcuts",
-  "settings_generation": "Generation",
-  "settings_dataStorage": "Data & Storage",
-  "settings_privacySharing": "Privacy & Sharing",
-  "settings_integrations": "Integrations",
   "settings_generationInputSection": "Input",
   "settings_generationFeedbackSection": "Completion Alert",
-  "settings_selectStyle": "Select Style",
   "settings_selectFont": "Select Font",
   "settings_selectLanguage": "Select Language",
   "settings_loadFailed": "Load failed: {error}",
@@ -300,7 +294,6 @@
     }
   },
   "settings_extraRootsIndexImportConfirm": "Import Now",
-  "settings_about": "About",
   "settings_version": "Version {version}",
   "@settings_version": {
     "placeholders": {
@@ -322,10 +315,7 @@
   "settings_accountType": "Account Type",
   "settings_subscriptionExpiry": "Subscription Expires",
   "settings_thirdPartyApiAccount": "Third-party Site API",
-  "settings_apiSite": "API Site",
-  "settings_notLoggedIn": "Log in to set avatar and nickname",
   "settings_goToLogin": "Go to Login",
-  "settings_tapToChangeAvatar": "Tap to change avatar",
   "settings_changeAvatar": "Change Avatar",
   "settings_removeAvatar": "Remove Avatar",
   "settings_accountEmail": "Account Email",
@@ -361,8 +351,6 @@
   "generation_cancelGeneration": "Cancel Generation",
   "generation_stopGeneration": "Stop Generation",
   "generation_pleaseInputPrompt": "Please enter prompt",
-  "generation_emptyPromptHint": "Enter prompt and click generate",
-  "generation_imageWillShowHere": "Image will be displayed here",
   "generation_generationFailed": "Generation failed",
   "generation_progress": "Generating... {progress}%",
   "@generation_progress": {
@@ -1460,7 +1448,6 @@
   "api_error_network": "Network error",
   "api_error_network_hint": "Cannot connect to server. Please check your network",
   "drop_processing": "Processing image...",
-  "characterEditor_close": "Close",
   "characterEditor_clearAll": "Clear All",
   "characterEditor_clearAllTitle": "Clear All Characters",
   "characterEditor_clearAllConfirm": "Are you sure you want to delete all characters? This action cannot be undone.",
@@ -2048,12 +2035,8 @@
   },
   "localGallery_folderDeleted": "Folder deleted",
   "localGallery_folderDeleteFailed": "Failed to delete folder",
-  "localGallery_cachingMetadata": "Caching metadata...",
-  "localGallery_metadataCacheStats": "Metadata Cache Stats",
-  "localGallery_totalImages": "Total Images",
   "localGallery_withMetadata": "With Metadata",
   "localGallery_skipped": "Skipped",
-  "localGallery_remaining": "Remaining",
   "localGallery_cacheMonitor": "Cache Monitor",
   "localGallery_threeLayerCacheStats": "Three-layer Cache Stats",
   "localGallery_updatedAt": "Updated: {time}",
@@ -2442,11 +2425,9 @@
       "count": {}
     }
   },
-  "autocomplete_keyNavigate": "↑↓/Scroll",
   "autocomplete_actionSelect": "Select",
   "autocomplete_actionConfirm": "Confirm",
   "autocomplete_actionClose": "Close",
-  "autocomplete_categoryRecommended": "Recommended",
   "autocomplete_categoryCharacter": "Character",
   "autocomplete_categoryCopyright": "Copyright",
   "autocomplete_categoryArtist": "Artist",
@@ -3665,16 +3646,12 @@
   "settings_shortcutsSubtitle": "Customize keyboard shortcuts",
   "settings_openFolder": "Open folder",
   "settings_openFolderFailed": "Failed to open folder",
-  "settings_pleaseLoginFirst": "Please login first",
-  "settings_accountNotFound": "Account information not found",
-  "settings_goToLoginPage": "Go to login page",
   "settings_vibePathSaved": "Vibe library path saved",
   "settings_selectFolderFailed": "Failed to select folder",
   "settings_hivePathSaved": "Data storage path saved, effective after restart",
   "settings_restartRequiredTitle": "Restart Required",
   "settings_changePathConfirm": "After changing the data storage path, the app needs to restart to take effect.\\n\\nThe new path will take effect on the next startup. Continue?",
   "settings_resetPathConfirm": "After resetting the data storage path, the app needs to restart to take effect.\\n\\nThe default path will take effect on the next startup. Continue?",
-  "settings_kritaBridgeTitle": "Krita Bridge",
   "settings_kritaBridgeEnable": "Enable Krita local bridge",
   "settings_kritaBridgeDisabledText": "Off by default; listens only on local 127.0.0.1 when enabled",
   "settings_kritaBridgeStartingText": "Starting local bridge service...",
@@ -3696,11 +3673,9 @@
     }
   },
   "settings_fontScale": "Font Size",
-  "settings_fontScale_description": "Adjust global font scale",
   "settings_fontScale_previewSmall": "光影落在画布上。",
   "settings_fontScale_previewMedium": "色から物語が生まれる。",
   "settings_fontScale_previewLarge": "Let colors tell a story.",
-  "settings_fontScale_reset": "Reset",
   "settings_fontScale_done": "Done",
   "settings_historyClickBehavior": "History click behavior",
   "settings_historyClickBehavior_classic": "Classic",
@@ -3718,15 +3693,7 @@
   "settings_canvasReducedMotionDescription": "Camera flights, zooms and inertia become instant, reducing animation",
   "image_viewDetail": "View details",
   "settings_defaultImagesPath": "Default (Documents/NAI_Launcher/images/)",
-  "settings_defaultVibePath": "{path} (Default)",
-  "@settings_defaultVibePath": {
-    "placeholders": {
-      "path": {}
-    }
-  },
   "settings_defaultHivePath": "Default (%APPDATA%/NAI_Launcher/hive/)",
-  "settings_protectionMode": "Protection Mode",
-  "settings_protectionModeSubtitle": "Protect local assets, shared copies, and high-cost or high-frequency generation operations through the options below. Turning this off keeps the option values but disables them.",
   "settings_protectionFeatures": "Protection Features",
   "settings_stripMetadataTitle": "Remove all metadata when copying or dragging",
   "settings_stripMetadataSubtitle": "Create a sanitized copy, remove PNG text chunks, EXIF, and NAI steganographic watermark data, and avoid exposing the original path while dragging.",
@@ -3893,26 +3860,11 @@
       "seconds": {}
     }
   },
-  "cacheStats_refreshNow": "Refresh now",
-  "cacheStats_refreshed": "Refreshed",
   "cacheStats_resetStats": "Reset statistics",
   "cacheStats_statsReset": "Statistics reset",
   "cacheStats_l1Memory": "L1 Memory Cache",
   "cacheStats_l2Hive": "L2 Hive Cache",
   "cacheStats_l3Sqlite": "L3 SQLite Database",
-  "cacheStats_recordCount": "{count} records",
-  "@cacheStats_recordCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "cacheStats_databaseValue": "{imageCount} images · {metadataCount} metadata rows",
-  "@cacheStats_databaseValue": {
-    "placeholders": {
-      "imageCount": {},
-      "metadataCount": {}
-    }
-  },
   "galleryCache_rescanTitle": "Rescan Gallery",
   "galleryCache_rescanContent": "This will:\n\n1. Check data consistency and mark missing files\n2. Scan new and changed files\n3. Retry metadata extraction that failed before, including failed records\n\nThis will not clear existing data or delete image files.",
   "galleryCache_startScan": "Start Scan",
@@ -4344,7 +4296,6 @@
   "currentVersion": "Current Version",
   "latestVersion": "Latest Version",
   "releaseNotes": "Release Notes",
-  "updatePortableManualHint": "This build cannot update in-app. Please download the new version from the Release page.",
   "updateDownloadingProgress": "Downloading update package: {percent}%",
   "@updateDownloadingProgress": {
     "placeholders": {
@@ -4374,10 +4325,7 @@
   "updateDownloadFailed": "Failed to download the update",
   "updateInstallFailed": "Failed to install the update",
   "updateInstallingHint": "The installer has started. The app will close and finish updating automatically.",
-  "updateInstallConfirmationTitle": "Install the update now?",
-  "updateInstallConfirmationBody": "The app will shut down safely, install the update, and restart automatically. Active generation and download tasks will stop, so save anything important first.",
   "remindMeLater": "Remind Me in 4 Hours",
-  "skipThisVersion": "Skip This Version",
   "updateNoticeAvailable": "Version v{version} is available",
   "@updateNoticeAvailable": {
     "placeholders": {
@@ -4408,7 +4356,6 @@
     }
   },
   "goToDownload": "Go to Download",
-  "versionSkipped": "Version skipped",
   "cannotOpenUrl": "Cannot open link",
   "model3d_editorTitle": "3D Model Layer",
   "model3d_addMannequin": "Add Built-in Mannequin",
@@ -4828,22 +4775,6 @@
     }
   },
   "localGallery_createFolder": "Create Folder",
-  "galleryScan_skipped": "Skipped {count}",
-  "@galleryScan_skipped": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "galleryScan_withMetadata": "With metadata {count}",
-  "@galleryScan_withMetadata": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "galleryScan_failed": "Failed {count}",
   "@galleryScan_failed": {
     "placeholders": {
@@ -4854,7 +4785,6 @@
   },
   "galleryScan_organizingGallery": "Organizing gallery",
   "galleryScan_processing": "Processing",
-  "galleryScan_pending": "Pending",
   "vibeDetail_useAll": "Use All",
   "vibeDetail_longPressSetCover": "Long-press to set as cover",
   "vibeDetail_noPreviewImage": "No preview image",
@@ -4993,14 +4923,7 @@
       }
     }
   },
-  "autocomplete_settingsTitle": "Autocomplete",
-  "autocomplete_enable": "Enable autocomplete",
   "autocomplete_resultLimit": "Result count",
-  "autocomplete_allResults": "All",
-  "autocomplete_showAliases": "Show matched aliases",
-  "autocomplete_showTranslations": "Show Chinese translations",
-  "autocomplete_autoComma": "Add a comma after insertion",
-  "autocomplete_dataSourcesTitle": "Data Sources & Cache",
   "autocomplete_relatedTagsTitle": "Tag Expansion",
   "autocomplete_relatedTagsSubtitle": "Ctrl+click to search local tags; Ctrl+drag to explore related tags",
   "tagExpansion_searchHint": "Search tags, aliases, or translations",
@@ -5014,18 +4937,7 @@
   "tagExpansion_tabComplete": "Tab to complete:",
   "tagExpansion_wikiTitle": "Tag wiki",
   "tagExpansion_wikiUnavailable": "No local article for this tag yet.",
-  "autocomplete_danbooruApi": "Danbooru online supplement",
   "autocomplete_danbooruPrivacy": "Only the current English tag is sent; the full prompt is never uploaded",
-  "autocomplete_llmTranslation": "Use Prompt Assistant for missing translations",
-  "autocomplete_llmRouteMissing": "Configure a Translate route in Prompt Assistant first",
-  "autocomplete_llmRoute": "Current route: {route}. Model usage may incur fees.",
-  "@autocomplete_llmRoute": {
-    "placeholders": {
-      "route": {
-        "type": "String"
-      }
-    }
-  },
   "autocomplete_cooccurrence": "Offline related-tag database",
   "autocomplete_entryCount": "{count} entries",
   "@autocomplete_entryCount": {
@@ -5035,7 +4947,6 @@
       }
     }
   },
-  "autocomplete_cacheTitle": "Online & AI Cache",
   "autocomplete_clearDanbooruCache": "Clear Danbooru cache",
   "autocomplete_clearAiCache": "Clear AI translation cache",
   "autocomplete_cacheCleared": "Cleared {count} cached entries",
@@ -5200,7 +5111,6 @@
   "promptBlockLibrary_collectionNameHint": "Collection name",
   "promptBlockLibrary_noCollections": "No collections yet — use the + next to Favorites, or drag a block onto a collection",
   "promptBlockLibrary_noFolders": "No folders yet",
-  "promptBlockLibrary_favoriteMenuEmptyCollections": "No collections yet — create one next to Favorites in the sidebar",
   "promptBlockLibrary_emptyFavorites": "No favorite blocks yet — tap the ★ on a block to favorite it",
   "promptBlockLibrary_emptyCollection": "This collection is empty",
   "promptBlockLibrary_deleteCollectionConfirm": "Delete collection \"{name}\"? Blocks inside are not deleted, only unlinked from the collection.",
@@ -5225,15 +5135,12 @@
   "promptBlockLibrary_folder": "Folder",
   "promptBlockLibrary_folderName": "Folder name",
   "promptBlockLibrary_folderNameHint": "Folder name",
-  "promptBlockLibrary_blockContent": "Content",
   "promptBlockLibrary_basicPrompt": "Base Prompt",
   "promptBlockLibrary_generationSettings": "Settings",
   "promptBlockLibrary_settingsOptionalHint": "Only filled parameters are saved. Apply settings manually after inserting the block.",
   "promptBlockLibrary_notSpecified": "Not specified",
   "promptBlockLibrary_stepsLabel": "Steps",
-  "promptBlockLibrary_cfgLabel": "PG",
   "promptBlockLibrary_noiseScheduleLabel": "Noise Schedule",
-  "promptBlockLibrary_cfgRescaleLabel": "PGR",
   "promptBlockLibrary_invalidGenerationSettings": "Check settings: steps 1–50, PG 1–20, PGR 0–1, and model compatibility.",
   "promptBlockLibrary_applySettings": "Import settings",
   "promptBlockLibrary_settingsApplied": "Block settings imported to the current image",
@@ -5280,40 +5187,8 @@
       }
     }
   },
-  "promptBlockLibrary_favoriteSelected": "Favorite {count} selected blocks",
-  "@promptBlockLibrary_favoriteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_unfavoriteSelected": "Unfavorite {count} selected blocks",
-  "@promptBlockLibrary_unfavoriteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_moveToSelected": "Move {count} blocks to…",
-  "@promptBlockLibrary_moveToSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_deleteSelected": "Delete {count} selected blocks",
   "@promptBlockLibrary_deleteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_blocksMoved": "Moved {count} blocks",
-  "@promptBlockLibrary_blocksMoved": {
     "placeholders": {
       "count": {
         "type": "int"
@@ -5350,16 +5225,6 @@
   "promptBlockLibrary_importFromFolder": "Import from folder…",
   "promptBlockLibrary_exportLibraryBackup": "Export library backup…",
   "promptBlockLibrary_importLibraryBackup": "Import library backup…",
-  "promptBlockLibrary_exportBlockAsTxt": "Export as TXT",
-  "promptBlockLibrary_exportTxtDone": "TXT exported",
-  "promptBlockLibrary_exportTxtFailed": "Export failed: {error}",
-  "@promptBlockLibrary_exportTxtFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "promptBlockLibrary_importTxtTitle": "Select TXT files",
   "promptBlockLibrary_txtImportDone": "Imported {created} blocks, skipped {skipped} existing sources",
   "@promptBlockLibrary_txtImportDone": {
@@ -6005,8 +5870,6 @@
   "wiki_addBookmark": "Bookmark",
   "wiki_removeBookmark": "Remove bookmark",
   "wiki_addToCollection": "Add to collection",
-  "wiki_importBlock": "Save as single-atom block",
-  "wiki_inBlockLibrary": "In block library",
   "wiki_loadMore": "Load more",
   "wiki_noResults": "No matching tags",
   "wiki_noSelection": "Select a tag to read its description",
@@ -6015,5 +5878,1215 @@
   "wiki_directorySource": "Official group directory snapshot",
   "wiki_openFull": "Open in Tag Wiki",
   "shortcut_action_vibe_detail_prev_sub_vibe": "Previous sub-Vibe",
-  "shortcut_action_vibe_detail_next_sub_vibe": "Next sub-Vibe"
+  "shortcut_action_vibe_detail_next_sub_vibe": "Next sub-Vibe",
+  "settings_addAccountsSwitchBetweenThem": "Add accounts to switch between them here.",
+  "settings_current": "Current",
+  "settings_emailLogin": "Email login",
+  "settings_signedIn": "Signed in",
+  "settings_switch": "Switch",
+  "settings_accountActions": "Account actions",
+  "settings_editProfile": "Edit profile",
+  "settings_setDefault": "Set as default",
+  "settings_credentialsUpdated": "Credentials updated",
+  "settings_updateCredentials": "Update credentials",
+  "settings_accountDetails": "Account details",
+  "settings_localAccountProfile": "Local account profile",
+  "settings_setDefault2": "Set default",
+  "settings_credentialsWereNotUpdatedCheck": "Credentials were not updated. Check the token and connection.",
+  "settings_updateCredentials2": "Update credentials",
+  "settings_checking": "Checking…",
+  "settings_enterNewSignInToken": "Enter a new sign-in token. This account updates after validation.",
+  "auth_signInAccounts": "Sign-in & accounts",
+  "auth_notSignedIn": "Not signed in",
+  "auth_chooseAccountContinue": "Choose an account to continue",
+  "auth_manageAccounts2": "Manage accounts",
+  "auth_subscriptionExpired": "Subscription expired",
+  "settings_tagExpansion": "Tag expansion",
+  "settings_tagDictionaries": "Tag dictionaries",
+  "settings_cacheMaintenance": "Cache maintenance",
+  "settings_clear": "Clear",
+  "settings_autoRefresh": "Auto refresh",
+  "settings_searchFonts": "Search fonts",
+  "settings_couldNotLoadFonts": "Could not load fonts",
+  "settings_recommended": "Recommended",
+  "settings_included": "Included",
+  "settings_systemFonts": "System fonts",
+  "settings_fontPreview": "Font preview",
+  "settings_onlineFontsLoadAfterApplying": "Online fonts load after applying; preview uses the interface font.",
+  "settings_saving": "Saving",
+  "settings_howGeneratedImagesSaved": "How generated images are saved",
+  "settings_assetsDisplay": "Assets & display",
+  "settings_vibeLocationThumbnailQuality": "Vibe location and thumbnail quality",
+  "settings_applicationData": "Application data",
+  "settings_gallerySources": "Gallery sources",
+  "settings_manageAdditionalGalleryFolders": "Manage additional gallery folders",
+  "settings_default": "Default",
+  "settings_keyboard": "Keyboard",
+  "settings_customizeFrequentlyUsedActions": "Customize frequently used actions",
+  "settings_manageShortcuts": "Manage shortcuts",
+  "settings_costReminders": "Cost reminders",
+  "settings_requestPacing": "Request pacing",
+  "settings_notificationsSound": "Notifications & sound",
+  "settings_lockCanvasCamera": "Lock canvas camera",
+  "settings_dictionariesCache": "Dictionaries & cache",
+  "settings_defaultAccount2": "Default account",
+  "settings_signInAutomatically": "Sign in automatically",
+  "settings_signInCredentials": "Sign-in credentials",
+  "settings_translationInterfaces": "Translation interfaces",
+  "settings_presetsBuiltInRules": "Presets & built-in rules",
+  "settings_preferenceBackupRestore": "Preference backup & restore",
+  "settings_searchSettingsFeatures": "Search settings and features",
+  "settings_noMatchingSettings": "No matching settings",
+  "settings_change": "Change",
+  "settings_couldNotPlaySoundCheck": "Could not play the sound. Check the audio file.",
+  "settings_useDefaultCompletionSound": "Use the default completion sound",
+  "settings_soundPreview": "Sound preview",
+  "settings_listenCurrentCompletionSound": "Listen to the current completion sound",
+  "settings_playSound": "Play sound",
+  "settings_searchResults": "Search results",
+  "settings_promptInput": "Prompt input",
+  "settings_manageTranslationModelsRules": "Manage translation models & rules",
+  "settings_browsing": "Browsing",
+  "settings_chooseHowViewImages": "Choose how to view images",
+  "settings_canvasControls": "Canvas controls",
+  "settings_keepViewSteady": "Keep the view steady",
+  "settings_appearance2": "Appearance",
+  "settings_chooseLightDarkWorkspace": "Choose a light or dark workspace",
+  "settings_textLanguage": "Text & language",
+  "settings_makeReadingComfortable": "Make reading comfortable",
+  "settings_adjustSettingsPagesDialogsOnly": "Adjust settings pages and dialogs only",
+  "settings_motionNotifications": "Motion & notifications",
+  "settings_reduceDistractionsKnowWorkFinishes": "Reduce distractions, know when work finishes",
+  "settings_notificationStyle": "Notification style",
+  "settings_notificationsAppearUpperRightWrap": "Notifications appear at the upper right, wrap long messages, and close when progress tasks finish.",
+  "settings_preview": "Preview",
+  "settings_versionUpdates": "Version & updates",
+  "settings_currentVersionUpdateOptions": "Current version and update options",
+  "settings_diagnosticsResources": "Diagnostics & resources",
+  "settings_logsFontsOpenSourceProject": "Logs, fonts and the open-source project",
+  "settings_viewLicenses": "View licenses",
+  "settings_openProject": "Open project",
+  "settings_actionIncomplete": "Action incomplete",
+  "settings_exportPreferences": "Export preferences",
+  "settings_preferencesExported": "Preferences exported",
+  "settings_noAutomaticBackupYet": "No automatic backup yet",
+  "settings_restorePreviousPreferences": "Restore previous preferences",
+  "settings_importPreferences": "Import preferences",
+  "settings_apply": "Apply",
+  "settings_preferencesAppliedPreviousSettingsBacked": "Preferences applied; previous settings backed up",
+  "settings_restoreDefaultPreferences": "Restore default preferences",
+  "settings_choosePreferencesResetCurrentSettings": "Choose the preferences to reset. Current settings will be backed up.",
+  "settings_appearanceSoundControls": "Appearance, sound & controls",
+  "settings_inputAutocomplete": "Input & autocomplete",
+  "settings_privacyGenerationProtection": "Privacy & generation protection",
+  "settings_moveAppearanceControlsInputProtection": "Move appearance, controls, input and protection preferences between devices.",
+  "settings_rollbackCopySavedBeforeImport": "A rollback copy is saved before an import or reset.",
+  "settings_resetSelectedScopeWhileKeeping": "Reset a selected scope while keeping accounts, models, libraries and creative work.",
+  "settings_chooseScope": "Choose scope",
+  "settings_preferenceManagement": "Preference management",
+  "settings_backupMigrationRecovery": "Backup, migration and recovery",
+  "settings_generalAppearance": "General & appearance",
+  "settings_makeWorkspaceComfortableReadUse": "Make the workspace comfortable to read and use.",
+  "settings_controlsShortcuts": "Controls & shortcuts",
+  "settings_chooseInteractionCanvasControlsKeyboard": "Choose interaction, canvas controls and keyboard shortcuts.",
+  "settings_generationPrompts": "Generation & prompts",
+  "settings_managePromptInputGenerationReminders": "Manage prompt input, generation reminders and request pacing.",
+  "settings_galleryFiles": "Gallery & files",
+  "settings_manageImageSavingGallerySources": "Manage image saving, gallery sources and display.",
+  "settings_manageTagDictionariesIndexesCache": "Manage tag dictionaries, indexes and cache maintenance.",
+  "settings_novelaiAccounts": "NovelAI accounts",
+  "settings_viewAccountManageSignIn": "View your account and manage sign-in and the default account.",
+  "settings_connectionsIntegrations": "Connections & integrations",
+  "settings_manageExternalToolsBridgesNetwork": "Manage external tools, bridges and network settings.",
+  "settings_privacySharing2": "Privacy & sharing",
+  "settings_controlSharedInformationConfirmationBefore": "Control shared information and confirmation before sensitive actions.",
+  "settings_aboutDiagnostics": "About & diagnostics",
+  "settings_updatesLogsProjectInformation": "Updates, logs and project information.",
+  "settings_searchSettings": "Search settings",
+  "settings_preferences": "Preferences",
+  "settings_creationResources": "Creation & resources",
+  "settings_servicesConnections": "Services & connections",
+  "settings_safetyMaintenance": "Safety & maintenance",
+  "settings_subscriptionActive": "Subscription active",
+  "settings_availableBalance": "Available balance",
+  "settings_subscriptionExpiry2": "Subscription expiry",
+  "settings_subscriptionDetailsUnavailable": "Subscription details are unavailable",
+  "settings_loadingSubscriptionDetails": "Loading subscription details…",
+  "settings_localDataStaysAvailableAfter": "Local data stays available after expiry.",
+  "settings_records": "records",
+  "settings_hitRate": "Hit rate",
+  "settings_images": "images",
+  "settings_cacheOverview": "Cache overview",
+  "settings_loginPreferences": "Login preferences",
+  "settings_preselectedSignInPage": "Preselected on the sign-in page.",
+  "settings_noAccounts": "No accounts",
+  "settings_useLastSessionOffNext": "Use the last session. When off, the next launch opens sign-in.",
+  "settings_couldNotSaveLoginPreference": "Could not save the login preference.",
+  "settings_loginPreferencesUnavailable": "Login preferences are unavailable.",
+  "settings_applyPreferencesConfirm": "Apply {count} preferences. Current preferences are backed up automatically and can be recovered from “Restore previous preferences”. Accounts, secrets, drafts, libraries and model configurations are kept separately.",
+  "@settings_applyPreferencesConfirm": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "settings_restore": "Restore",
+  "wiki_translating": "Translating",
+  "wiki_back": "Back",
+  "wiki_readingTranslation": "Translation",
+  "wiki_readingOriginal": "Original",
+  "wiki_switchToOriginal": "Show original",
+  "wiki_switchToTranslation": "Show translation",
+  "wiki_retranslate": "Retranslate",
+  "wiki_onThisPage": "On this page",
+  "wiki_overview": "Overview",
+  "wiki_untranslated": "Not translated yet",
+  "wiki_autoTranslateTagsArticles": "Auto-translate tags and articles",
+  "wiki_readingContent": "Content",
+  "wiki_categoryGeneral": "General",
+  "wiki_categoryArtist": "Artist",
+  "wiki_categoryCopyright": "Copyright",
+  "wiki_categoryCharacter": "Character",
+  "wiki_categoryMeta": "Meta",
+  "wiki_categoryContributor": "Contributor",
+  "wiki_categorySpecies": "Species",
+  "wiki_categoryLore": "Lore",
+  "wiki_categoryLibrary": "Library",
+  "toast_titleSuccess": "Completed",
+  "toast_titleError": "Action failed",
+  "toast_titleWarning": "Please note",
+  "toast_titleInfo": "Notice",
+  "toast_titleProgress": "In progress",
+  "tagExpansion_autoTranslateVisible": "Auto-translate visible tags",
+  "translationEditor_title": "Translation block",
+  "translationEditor_source": "Original",
+  "translationEditor_sourcePrefix": "Src",
+  "translationEditor_generation": "Generation",
+  "translationEditor_editable": "Editable",
+  "translationEditor_modified": "Modified",
+  "translationEditor_edited": "Edited",
+  "translationEditor_close": "Close",
+  "translationEditor_save": "Save",
+  "translationEditor_delete": "Delete block",
+  "translationEditor_restore": "Restore original text",
+  "translationEditor_configure": "Configure translation model",
+  "translationEditor_readingFieldTitle": "{language} reading text",
+  "@translationEditor_readingFieldTitle": {
+    "placeholders": {
+      "language": {}
+    }
+  },
+  "translationEditor_sourceWarning": "Original modified; {language} needs syncing",
+  "@translationEditor_sourceWarning": {
+    "placeholders": {
+      "language": {}
+    }
+  },
+  "translationEditor_editHint": "Translation edited manually; original review status is unchanged",
+  "translationLanguage_chinese": "Chinese",
+  "translationLanguage_english": "English",
+  "translationLanguage_japanese": "Japanese",
+  "translationLanguage_korean": "Korean",
+  "promptBlockEditor_translationNeedsReview": "Original changed; translation needs updating",
+  "promptBlockEditor_translationReviewHint": "After editing the original, review this translation as well",
+  "modelTask_translateTitle": "Original → reading language",
+  "modelTask_promptReverseTitle": "Reading language → original",
+  "modelTask_tagTranslateTitle": "Tag name translation",
+  "modelTask_wikiTranslateTitle": "Wiki article translation",
+  "modelTask_translateDescription": "Translate prompts and blocks while preserving weights, groups and tag meaning.",
+  "modelTask_promptReverseDescription": "Apply additions, deletions and edits from the translation to the original, then return it for review.",
+  "modelTask_tagTranslateDescription": "Give visible tags concise, accurate names.",
+  "modelTask_wikiTranslateDescription": "Translate wiki articles, tidy the layout and choose clickable tags from context.",
+  "modelTask_connectionTest": "Model connection test",
+  "modelReasoning_serviceDefault": "Service default",
+  "modelReasoning_off": "Off",
+  "modelReasoning_on": "On",
+  "modelReasoning_minimal": "Minimal",
+  "modelReasoning_low": "Low",
+  "modelReasoning_medium": "Medium",
+  "modelReasoning_high": "High",
+  "modelReasoning_xhigh": "Extra high",
+  "modelReasoning_max": "Max",
+  "modelProvider_custom": "Custom service",
+  "modelProvider_qwen": "Qwen · Alibaba Model Studio",
+  "modelProvider_moonshot": "Kimi · Moonshot AI",
+  "modelProvider_zhipu": "Zhipu GLM",
+  "modelProvider_doubao": "Doubao · Volcano Ark",
+  "modelProvider_hunyuan": "Tencent Hunyuan",
+  "modelProvider_qianfan": "Baidu Qianfan",
+  "modelProvider_siliconflow": "SiliconFlow",
+  "modelProvider_zai": "Z.AI · International",
+  "modelProvider_zhipuCodingPlan": "Zhipu Coding Plan",
+  "modelProvider_kimiCoding": "Kimi Coding",
+  "modelProvider_moonshotInternational": "Moonshot AI · International",
+  "modelProvider_minimaxChinaChat": "MiniMax · China OpenAI",
+  "modelProvider_minimaxChinaMessages": "MiniMax · China Anthropic",
+  "modelProvider_minimaxInternationalMessages": "MiniMax · International Anthropic",
+  "modelProvider_xiaomi": "Xiaomi MiMo",
+  "modelProvider_antLing": "Ant Ling",
+  "modelProvider_stepfunPlan": "StepFun Step Plan",
+  "modelProvider_qwenTokenPlanChina": "Qwen Token Plan · China",
+  "modelProvider_hintHuggingFace": "Use a Hugging Face token with inference permission; router model IDs can be added manually.",
+  "modelProvider_hintPlanKey": "Use the API key for this plan; available models and scope follow what the plan returns.",
+  "modelProvider_hintInternationalEndpoint": "International endpoint; use an API key from the international platform.",
+  "modelProvider_hintRegionOpenAi": "Use the API key for the matching region; the OpenAI Chat Completions compatible address is prefilled.",
+  "modelProvider_hintRegionAnthropic": "Use the API key for the matching region; the Anthropic Messages compatible address is prefilled.",
+  "modelProvider_hintQwen": "Defaults to the Beijing region; for other regions use the matching key and change the endpoint.",
+  "modelProvider_hintMinimax": "Defaults to the international pay-as-you-go endpoint; for the China platform use its key and endpoint.",
+  "modelProvider_hintMoonshot": "Defaults to the China platform; for the international platform use its key and endpoint.",
+  "modelProvider_hintZhipu": "Defaults to the pay-as-you-go endpoint; Coding Plan uses its own address.",
+  "modelProvider_hintDoubao": "Use an Ark API key; enable the model first, or add an inference endpoint ID.",
+  "modelProvider_hintCustom": "Enter the compatible service address and key, then choose the protocol in the connection details.",
+  "modelProvider_hintLocal": "Start the local service first, then read the loaded model list.",
+  "modelProvider_hintDefault": "Address and protocol are prefilled; save a key to start choosing models.",
+  "modelParams_temperatureRange": "Temperature must be between 0 and 2.",
+  "modelParams_topPRange": "Top P must be greater than 0 and at most 1.",
+  "modelParams_maxOutputPositive": "Max output tokens must be greater than 0.",
+  "modelParams_anthropicTemperatureRange": "Anthropic temperature must be between 0 and 1.",
+  "modelParams_anthropicSamplingConflict": "Anthropic accepts either temperature or Top P; check the model parameters.",
+  "modelParams_thinkingBudgetTooSmall": "Max output must be larger than the minimum thinking budget of {minimum}.",
+  "@modelParams_thinkingBudgetTooSmall": {
+    "placeholders": {
+      "minimum": {}
+    }
+  },
+  "modelOverrides_invalidHeaderName": "Enter a valid header name",
+  "modelOverrides_invalidHeaderValue": "Header values cannot contain line breaks or control characters",
+  "modelOverrides_emptyBodyField": "Body field names cannot be empty",
+  "modelOverrides_modelFromList": "Set the model ID from the model list",
+  "modelOverrides_streamMustBeFalse": "This connection uses non-streaming requests; stream must be false",
+  "modelConfig_changedSaveAgain": "The configuration changed. Save again.",
+  "modelConfig_presetChanged": "The selected preset changed. Choose again.",
+  "modelConfig_serviceDisabled": "The selected service was disabled. Choose again.",
+  "modelConfig_modelChanged": "The selected model changed. Choose again.",
+  "modelConfig_reasoningChanged": "The model’s reasoning levels changed. Choose again or follow the model.",
+  "modelConfig_presetIdRequired": "Preset ID cannot be empty.",
+  "modelConfig_saveBuiltinAsCustom": "Save the built-in preset as a custom preset.",
+  "modelConfig_namePromptRequired": "Name and prompt cannot be empty.",
+  "modelConfig_builtinNotDeletable": "Built-in rules cannot be deleted.",
+  "modelConfig_pasteFullJson": "Paste the complete model configuration JSON.",
+  "modelConfig_builtinNotOverwritable": "Built-in presets cannot be overwritten; copy them as custom presets.",
+  "modelConfig_invalidProvider": "Invalid service ID, name or address.",
+  "modelConfig_missingProvider": "The model’s service does not exist.",
+  "modelConfig_invalidCustomPreset": "Invalid custom preset ID, name or prompt.",
+  "modelConfig_changedImportAgain": "The configuration changed. Import again.",
+  "modelHealth_unverified": "Connection not verified yet; it updates after using a model or “Test connection”.",
+  "modelHealth_healthy": "The last request succeeded",
+  "modelHealth_limited": "Reachable, but the last request was rate limited (HTTP 429); try later or check your quota",
+  "modelHealth_authentication": "Authentication failed; check the API key",
+  "modelHealth_permission": "Access denied; check the service permissions",
+  "modelHealth_timeout": "The last request timed out",
+  "modelHealth_network": "The last request could not reach the service",
+  "modelHealth_invalidResponse": "The last response was invalid; see the request log for details",
+  "modelHealth_failed": "The last request failed",
+  "modelHealth_failedStatus": "The last request failed (HTTP {status})",
+  "@modelHealth_failedStatus": {
+    "placeholders": {
+      "status": {}
+    }
+  },
+  "modelRequest_statusPending": "Waiting",
+  "modelRequest_statusRunning": "Requesting",
+  "modelRequest_statusSuccess": "Succeeded",
+  "modelRequest_statusFailed": "Failed",
+  "modelRequest_statusCancelled": "Cancelled",
+  "modelRequest_fieldTime": "Time",
+  "modelRequest_fieldMethod": "Method",
+  "modelRequest_fieldUrl": "URL",
+  "modelRequest_fieldRequestHeaders": "Request headers",
+  "modelRequest_fieldBody": "Body",
+  "modelRequest_fieldStatusCode": "Status code",
+  "modelRequest_fieldResponseHeaders": "Response headers",
+  "modelRequest_fieldError": "Error",
+  "modelRequest_fieldInterface": "Interface",
+  "modelRequest_fieldProvider": "Service",
+  "modelRequest_fieldModel": "Model",
+  "modelRequest_fieldProtocol": "Protocol",
+  "modelRequest_fieldStatus": "Status",
+  "modelRequest_fieldElapsed": "Elapsed (ms)",
+  "modelRequest_fieldAttempts": "Attempts",
+  "modelRequest_fieldHttpRequests": "HTTP requests",
+  "modelRequest_fieldParameters": "Effective parameters",
+  "modelRequest_redacted": "[redacted]",
+  "modelRequest_emptyResponse": "The model returned empty content.",
+  "modelService_testFieldsIncomplete": "The test response is missing fields.",
+  "modelService_testFieldsInvalid": "The test response has invalid fields.",
+  "modelService_testGroupsInvalid": "The test response has invalid groups.",
+  "modelService_testSourceEmpty": "The test response returned an empty original.",
+  "modelService_conversionCancelled": "Conversion cancelled",
+  "modelService_chooseInterfaceModel": "Choose a service and model in Settings → Models & APIs → Interfaces first.",
+  "modelService_enableServiceModel": "Enable a service in Settings, then fetch or add a model and select it.",
+  "modelSettings_keepEditsTitle": "Keep current edits?",
+  "modelSettings_keepEditsBody": "Your changes are not saved yet. Save before switching?",
+  "modelSettings_discard": "Discard",
+  "modelSettings_saveAndSwitch": "Save and switch",
+  "modelSettings_addProvider": "Add service",
+  "modelSettings_deleteProviderTitle": "Delete {name}?",
+  "@modelSettings_deleteProviderTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "modelSettings_deleteProviderBody": "This service’s connection, key and selected models will be deleted.",
+  "modelSettings_deleteProviderBindings": "{count} interface model bindings will be cleared; presets are kept.",
+  "@modelSettings_deleteProviderBindings": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelSettings_deletePresetTitle": "Delete “{name}”?",
+  "@modelSettings_deletePresetTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "modelSettings_deletePresetBody": "Interfaces using this preset return to the built-in preset. Model bindings are kept.",
+  "modelSettings_configCopied": "Configuration copied, without keys, custom headers or bodies.",
+  "modelSettings_importConfig": "Import configuration",
+  "modelSettings_importConfigHint": "Paste an exported configuration. The current configuration is backed up first; keys stay stored separately.",
+  "modelSettings_configJson": "Configuration JSON",
+  "modelSettings_importPreview": "Imports {providers} services, {models} models and {presets} custom presets.",
+  "@modelSettings_importPreview": {
+    "placeholders": {
+      "providers": {},
+      "models": {},
+      "presets": {}
+    }
+  },
+  "modelSettings_importMissingProviders": "Service or model configuration is missing.",
+  "modelSettings_checkConfig": "Check configuration",
+  "modelSettings_importAndReplace": "Import and replace",
+  "modelSettings_configImported": "Configuration imported",
+  "modelSettings_description": "Manage service connections and translation preferences.",
+  "modelSettings_configMenu": "Configuration",
+  "modelSettings_copyConfig": "Copy configuration",
+  "modelSettings_tabProviders": "Services",
+  "modelSettings_tabInterfaces": "Interfaces",
+  "modelSettings_tabPresets": "Presets & prompts",
+  "modelSettings_tabRequests": "Request log",
+  "modelSettings_providersCount": "Services · {count}",
+  "@modelSettings_providersCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelSettings_providerModelCount": "{count} models",
+  "@modelSettings_providerModelCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelSettings_providerDisabledSuffix": " · Disabled",
+  "modelSettings_emptyTitle": "Add your first model service",
+  "modelSettings_emptyBody": "Choose a common service or connect a custom endpoint.",
+  "modelSettings_customService": "Custom service",
+  "modelSettings_notConfigured": "Not configured",
+  "modelSettings_preset": "Preset",
+  "modelSettings_presetBuiltin": "Built-in",
+  "modelSettings_presetUser": "User",
+  "modelSettings_deletePreset": "Delete preset",
+  "modelSettings_presetCopyName": "{title} ({number})",
+  "@modelSettings_presetCopyName": {
+    "placeholders": {
+      "title": {},
+      "number": {}
+    }
+  },
+  "modelSettings_recentRequests": "Recent requests",
+  "modelSettings_recentRequestsHint": "Last 100 in this session · full requests and responses, with authentication redacted",
+  "modelSettings_clearRequests": "Clear",
+  "modelSettings_requestsEmpty": "Requests appear here after you translate or test a model.",
+  "modelSettings_interfaceChangedElsewhere": "The interface configuration changed elsewhere. Reopen it to edit.",
+  "modelSettings_configSaved": "Configuration saved",
+  "modelSettings_viewBuiltinRules": "View built-in rules",
+  "modelSettings_viewEditPreset": "View and edit preset",
+  "modelSettings_restoreBuiltinPreset": "Restore built-in preset",
+  "modelSettings_followUiLanguage": "Follow interface language",
+  "modelSettings_providerAndModel": "Service and model",
+  "modelSettings_providerAndModelHelp": "Only selected models from enabled services are listed",
+  "modelSettings_chooseProviderModel": "Choose a service and model",
+  "modelSettings_reasoning": "Thinking",
+  "modelSettings_reasoningHelp": "Plain translation usually needs no thinking. For tagging, semantic grouping and similar work, use the lowest thinking level the model supports.",
+  "modelSettings_reasoningHelpLabel": "Thinking level advice",
+  "modelSettings_usePreset": "Preset",
+  "modelSettings_outputLanguage": "Output language",
+  "modelSettings_englishPrompt": "English generation prompt",
+  "modelSettings_englishPromptHelp": "Applies the edits against the original and outputs an English generation prompt.",
+  "modelSettings_targetLanguage": "Target language",
+  "modelSettings_effective": "Effective",
+  "modelSettings_noModelSelected": "No available model selected",
+  "modelSettings_reasoningSummaryInterface": "Thinking: {level} (this interface)",
+  "@modelSettings_reasoningSummaryInterface": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelSettings_reasoningSummaryModel": "Thinking: {level} (follows model)",
+  "@modelSettings_reasoningSummaryModel": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelSettings_promptBlocksHint": "When translation isn’t needed, you can also split prompts into blocks and arrange them freely with the block feature.",
+  "modelSettings_wikiFormatHint": "When translation isn’t needed, it can still tidy the layout and link related tags.",
+  "modelSettings_unsavedChanges": "Unsaved changes",
+  "modelSettings_testPreset": "Test preset",
+  "modelSettings_tabModelPreset": "Model & preset",
+  "modelSettings_tabPromptOutput": "Prompt & output",
+  "modelSettings_translationStrategy": "Translation strategy",
+  "modelSettings_editPreset": "Edit preset",
+  "modelSettings_outputContract": "App output contract",
+  "modelSettings_outputContractHint": "Returned fields and validation rules are maintained by the app",
+  "modelSettings_testResult": "Test result",
+  "modelRequest_detailsRequests": "Requests",
+  "modelRequest_detailsIndex": "No.",
+  "modelRequest_detailsResponses": "Responses",
+  "modelRequest_detailsOutput": "Extracted result",
+  "modelRequest_detailsTitle": "Request log",
+  "modelRequest_detailsCopied": "Copied",
+  "modelRequest_detailsCopyPage": "Copy this page",
+  "modelRequest_detailsOverview": "Overview",
+  "modelRequest_detailsMissing": "This record was cleared or is older than the last 100.",
+  "modelPreset_changedElsewhere": "The preset changed elsewhere. Reopen it to edit.",
+  "modelPreset_interfacePresetChanged": "The interface’s preset changed elsewhere. Reopen it to create a new one.",
+  "modelPreset_builtinReadOnly": "Built-in · Read only",
+  "modelPreset_newInterfacePreset": "New interface preset",
+  "modelPreset_tabPrompt": "Prompt",
+  "modelPreset_tabOutputContract": "Output contract",
+  "modelPreset_name": "Preset name",
+  "modelPreset_nameRequired": "Enter a name",
+  "modelPreset_behavior": "Behavior & translation strategy",
+  "modelPreset_builtinLocked": "Built-in rules are locked. Create an interface preset to edit your own translation preferences.",
+  "modelPreset_editHint": "Edit translation preferences here; the response format is maintained by the app.",
+  "modelPreset_strategyHint": "Enter a translation strategy",
+  "modelPreset_promptRequired": "Prompt cannot be empty",
+  "modelPreset_restoreStrategy": "Restore built-in strategy",
+  "modelPreset_outputContractNote": "This section keeps translation results writable back and displayable; the app maintains it.",
+  "modelPreset_save": "Save preset",
+  "modelReasoning_unsupported": "Not supported",
+  "modelReasoning_followModel": "Follow model",
+  "modelReasoning_followModelLevel": "Follow model ({level})",
+  "@modelReasoning_followModelLevel": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelReasoning_notAdjustable": "This model does not support thinking adjustment",
+  "modelReasoning_strength": "Thinking strength",
+  "modelReasoning_modelDefault": "Model default: {level}",
+  "@modelReasoning_modelDefault": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelReasoning_levelsUnknown": "Available levels are not confirmed yet\nSet them in the service’s model settings",
+  "modelReasoning_strengthValue": "Thinking strength: {level}",
+  "@modelReasoning_strengthValue": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "modelProvider_customEndpoint": "Custom endpoint",
+  "modelProvider_pickerTitle": "Choose a service",
+  "modelProvider_pickerSearch": "Search vendors, platforms or local services",
+  "modelProvider_pickerEmpty": "No matching services",
+  "modelProvider_groupApiKey": "API key connections",
+  "modelProvider_groupLocal": "Local services",
+  "modelProvider_enterCompatibleAddress": "Enter a compatible endpoint address",
+  "modelConnection_provider": "Service",
+  "modelConnection_name": "Name",
+  "modelConnection_nameExample": "e.g. my relay",
+  "modelConnection_protocol": "Protocol",
+  "modelConnection_address": "Endpoint address",
+  "modelConnection_apiKey": "API key",
+  "modelControls_decrease": "Decrease {label} ({step} {unit})",
+  "@modelControls_decrease": {
+    "placeholders": {
+      "label": {},
+      "step": {},
+      "unit": {}
+    }
+  },
+  "modelControls_increase": "Increase {label} ({step} {unit})",
+  "@modelControls_increase": {
+    "placeholders": {
+      "label": {},
+      "step": {},
+      "unit": {}
+    }
+  },
+  "modelControls_retryOff": "Off",
+  "modelControls_retryTimes": "{count}×",
+  "@modelControls_retryTimes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "settings_positiveIntegerRequired": "Enter an integer greater than 0",
+  "modelSettings_testingPreset": "Testing preset",
+  "modelHealth_lastUpdated": "Last updated: {time}",
+  "@modelHealth_lastUpdated": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "modelSettings_backToEditing": "Back to editing",
+  "modelService_loadOverridesFailed": "Could not read custom request settings: {error}",
+  "@modelService_loadOverridesFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "modelService_timeoutRange": "Request timeout must be between 10 and 600 seconds.",
+  "modelService_concurrencyRange": "Max concurrency must be between 1 and 20.",
+  "modelService_nameRequired": "Enter a service name.",
+  "modelService_invalidUrl": "The endpoint must be a complete http:// or https:// URL.",
+  "modelService_contextPositive": "Context window must be greater than 0.",
+  "modelService_readingCatalog": "Reading the model list…",
+  "modelService_catalogReturned": "The service returned {count} models. Check the ones you want to use.",
+  "@modelService_catalogReturned": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelService_catalogUnavailable": "Model list unavailable: {error}. You can add model IDs manually.",
+  "@modelService_catalogUnavailable": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "modelService_catalogCached": "Loaded {count} models fetched last time. Click “Fetch list” to refresh.",
+  "@modelService_catalogCached": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelService_catalogCacheFailed": "Model list fetched, but saving the local cache failed; fetch again next time.",
+  "modelService_selectModelFirst": "Select a model first.",
+  "modelService_testingModel": "Testing a model request…",
+  "modelService_testSucceeded": "Model request succeeded: {reply}",
+  "@modelService_testSucceeded": {
+    "placeholders": {
+      "reply": {}
+    }
+  },
+  "modelService_testFailed": "Model request failed: {error}",
+  "@modelService_testFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "modelService_tokensPositive": "Token counts for model “{name}” must be greater than 0.",
+  "@modelService_tokensPositive": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "modelService_changedElsewhere": "The service configuration changed elsewhere. Reopen it to edit.",
+  "modelService_overridesChangedElsewhere": "Model request settings changed elsewhere. Reopen them to edit.",
+  "modelService_saveFailed": "Save failed: {error}",
+  "@modelService_saveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "modelService_keyHintNew": "Enter a key; local services can leave it empty",
+  "modelService_keyHintVendor": "Enter the key for this service",
+  "modelService_keyHintSaved": "Saved; leave empty to keep it",
+  "modelService_enabledModels": "{count} enabled models",
+  "@modelService_enabledModels": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelService_pendingSave": "Not saved",
+  "modelService_saved": "Saved",
+  "modelService_enable": "Enable",
+  "modelService_testConnection": "Test connection",
+  "modelService_delete": "Delete service",
+  "modelService_save": "Save service",
+  "modelService_saving": "Saving service",
+  "modelService_notConfigured": "Not configured",
+  "modelService_optional": "Optional",
+  "modelService_editConnection": "Edit",
+  "modelService_collapse": "Collapse",
+  "modelService_connectionSettings": "Connection settings",
+  "modelService_dragToReorder": "Drag to reorder models",
+  "modelService_capacityTooltip": "Context / max output; adjust in Advanced",
+  "modelService_advanced": "Advanced",
+  "modelService_removeModel": "Remove model {name}",
+  "@modelService_removeModel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "modelService_linkedInterfaces": "Linked interfaces",
+  "modelService_noLinkedInterfaces": "No linked interfaces yet",
+  "modelService_advancedSettings": "Advanced settings",
+  "modelService_requestTimeout": "Request timeout",
+  "modelService_requestTimeoutHelp": "Longest wait for a single request",
+  "modelService_seconds": "s",
+  "modelService_maxConcurrency": "Max concurrency",
+  "modelService_maxConcurrencyHelp": "Requests this service handles at once",
+  "modelService_countUnit": "",
+  "modelService_retry": "Retry on failure",
+  "modelService_retryHelp": "Retry when the connection fails or the service is busy",
+  "modelService_searchModelId": "Search model IDs…",
+  "modelService_serviceModels": "Available models",
+  "modelService_fetchList": "Fetch list",
+  "modelService_catalogEmpty": "Click “Fetch list” to read this service’s models,\nor add model IDs on the right.",
+  "modelService_noMatchingModels": "No matching models",
+  "modelService_catalogLimitTooltip": "Catalog limits: context / max output",
+  "modelService_searchAddedModels": "Search added models…",
+  "modelService_modelSettings": "Model settings",
+  "modelService_addedEmpty": "Check models on the left, or add one below",
+  "modelService_customModelId": "Custom model ID",
+  "modelService_customModelHelp": "Add models the catalog cannot list",
+  "modelService_addCustomModel": "Add custom model",
+  "modelCard_positiveInteger": "Enter a positive integer",
+  "modelCard_catalogLimit": "Catalog limit {limit}",
+  "@modelCard_catalogLimit": {
+    "placeholders": {
+      "limit": {}
+    }
+  },
+  "modelCard_outputExceedsContext": "Output cannot exceed the context window",
+  "modelCard_contextWindow": "Context window",
+  "modelCard_maxOutput": "Max output",
+  "modelCard_unlabeled": "Not listed",
+  "modelCard_protocolStandard": "Standard",
+  "modelCard_protocolAdaptive": "Adaptive",
+  "modelCard_default": "Default",
+  "modelCard_thinkingLevels": "Thinking levels",
+  "modelCard_thinkingLevelsUnlisted": "Not listed in the catalog; you can enable them manually",
+  "modelCard_thinkingLevelsFromCatalog": "Supported levels are checked from the local catalog; adjust them to match the actual API.",
+  "modelCard_thinkingProtocol": "Thinking protocol",
+  "modelCard_defaultThinkingLevel": "Default level",
+  "modelCard_alias": "Alias",
+  "modelCard_aliasHelp": "Shown wherever the model name appears; requests still use the model ID.",
+  "modelCard_aliasExample": "e.g. fast",
+  "modelCard_capabilities": "Capabilities",
+  "modelCard_images": "Images",
+  "modelCard_nativeSearch": "Native web search",
+  "modelCard_nativeSearchHelp": "The app does not use native search on this connection yet; this does not mean the vendor or other APIs lack search.",
+  "modelOverrides_duplicateHeader": "Duplicate header name",
+  "modelOverrides_fieldNameRequired": "Enter a field name",
+  "modelOverrides_duplicateField": "Duplicate field name",
+  "modelOverrides_invalidJson": "Enter a valid JSON value",
+  "modelOverrides_customBody": "Custom body",
+  "modelOverrides_customHeaders": "Custom headers",
+  "modelOverrides_fieldName": "Field name",
+  "modelOverrides_headerName": "Header name",
+  "modelOverrides_valueJson": "Value (JSON)",
+  "modelOverrides_value": "Value",
+  "modelOverrides_removeItem": "Remove item",
+  "modelOverrides_body": "Request body",
+  "modelOverrides_headers": "Request headers",
+  "modelOverrides_itemCount": "{count} items",
+  "@modelOverrides_itemCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "modelOverrides_valueTypes": "Supports strings, numbers, booleans, arrays and objects",
+  "modelOverrides_addBodyField": "Add body field",
+  "modelOverrides_addHeader": "Add header",
+  "promptTranslation_translating": "Translating",
+  "promptTranslation_needsModel": "Translate · configure a model first",
+  "promptTranslation_withRoute": "Translate · {provider} / {model}",
+  "@promptTranslation_withRoute": {
+    "placeholders": {
+      "provider": {},
+      "model": {}
+    }
+  },
+  "promptTranslation_actions": "Translation actions",
+  "promptTranslation_promptChanged": "The prompt changed; new edits were not overwritten",
+  "promptTranslation_nothingToTranslate": "There is no plain text to translate",
+  "promptTranslation_failed": "Translation failed: {error}",
+  "@promptTranslation_failed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "promptTranslation_setupTitle": "Configure a translation model first",
+  "promptTranslation_setupBody": "Translation needs an explicitly selected service and model. Go to Settings → Integrations → Models & APIs, add a service and fetch its model list, then choose a model for prompt translation.",
+  "promptTranslation_later": "Later",
+  "promptTranslation_openSettings": "Open settings",
+  "promptTranslation_toolTitle": "Translate",
+  "promptTranslation_noModel": "No model configured",
+  "promptTranslation_configureModel": "Configure translation model",
+  "promptTranslation_translateNew": "Translate new content",
+  "promptTranslation_undoRestore": "Undo the restore and bring translation blocks back",
+  "promptTranslation_restoreAll": "Restore all translation blocks to original text",
+  "promptTranslation_tutorial": "How it works",
+  "promptTranslation_guideBack": "Back to actions",
+  "promptTranslation_guideMiddleTitle": "Middle-click a block",
+  "promptTranslation_guideMiddleText": "Switch original and translation",
+  "promptTranslation_guideSourceTitle": "Left-click the original",
+  "promptTranslation_guideSourceText": "Place the cursor and edit directly",
+  "promptTranslation_guideReadingTitle": "Left-click the translation",
+  "promptTranslation_guideReadingText": "Open the block editor",
+  "promptTranslation_guideCtrlTitle": "Ctrl + click / drag-select",
+  "promptTranslation_guideCtrlText": "Search tags / find related tags in the editor",
+  "promptTranslation_guideConvertTitle": "↑ Translation to original",
+  "promptTranslation_guideConvertText": "↓ Original to translation; review before saving",
+  "promptTranslation_guideRestoreTitle": "A / Restore",
+  "promptTranslation_guideRestoreText": "Restore the whole group / bring blocks back",
+  "promptTranslation_middleButton": "Middle mouse button",
+  "promptTranslation_leftButton": "Left mouse button",
+  "promptTranslation_blockShowingOriginal": "Translation block, showing original",
+  "promptTranslation_blockShowingReading": "Translation block, showing translation",
+  "promptTranslation_blockNeedsReview": "Original changed · translation needs updating",
+  "promptTranslation_badgeTooltip": "Original changed; translation needs syncing",
+  "promptTranslation_sourceChanged": "The original changed; reopen the translation block",
+  "promptTranslation_retranslateFailed": "Retranslation failed: {error}",
+  "@promptTranslation_retranslateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "promptTranslation_draftChanged": "Content changed; convert again. The new draft is kept.",
+  "promptTranslation_convertFailed": "Conversion failed; the draft is kept: {error}",
+  "@promptTranslation_convertFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "promptTranslation_invalidResultFormat": "The conversion result format is invalid; the draft is kept",
+  "promptTranslation_noValidText": "The model returned no valid text; the draft is kept",
+  "promptTranslation_invalidResultContent": "The conversion result contains invalid formatting; the draft is kept",
+  "promptTranslation_incompleteStructure": "The conversion result has incomplete weights or groups; the draft is kept",
+  "promptTranslation_inputRequired": "Enter the content to convert first",
+  "wiki_configureTagModel": "Configure an available tag translation model in Models & APIs first.",
+  "blockOrganizer_barrierLabel": "Block organizer",
+  "blockOrganizer_replaceTitle": "Replace copies from the same source?",
+  "blockOrganizer_replaceMoveBody": "The target already has {count} copies from the same source. After replacing, the source is hidden from the library; instances already inserted in prompts can still reference the original block.",
+  "@blockOrganizer_replaceMoveBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockOrganizer_replaceCopyBody": "The target already has {count} copies from the same source. Replacing updates the target copies; the source is kept.",
+  "@blockOrganizer_replaceCopyBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockOrganizer_replace": "Replace",
+  "blockOrganizer_customTagColor": "Custom tag color",
+  "blockOrganizer_colorHint": "#RRGGBB or #AARRGGBB",
+  "blockOrganizer_invalidColor": "Enter a 6- or 8-digit hexadecimal color",
+  "blockOrganizer_deleteFolderConfirm": "Delete “{name}”? Its blocks will move to the root folder.",
+  "@blockOrganizer_deleteFolderConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "blockOrganizer_deleteCollectionConfirm": "Delete “{name}”? The blocks themselves are kept.",
+  "@blockOrganizer_deleteCollectionConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "blockOrganizer_titleFavorites": "Favorites & collections",
+  "blockOrganizer_titleFolders": "Choose a folder",
+  "blockOrganizer_itemCount": "{count} items",
+  "@blockOrganizer_itemCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockOrganizer_search": "Search",
+  "blockOrganizer_name": "Name",
+  "blockOrganizer_customColor": "Custom color…",
+  "blockOrganizer_newCollection": "New collection",
+  "blockOrganizer_newCollectionFolder": "New collection folder",
+  "blockOrganizer_newTag": "New tag",
+  "blockOrganizer_newFolder": "New folder",
+  "blockOrganizer_rootUncategorized": "Root / Uncategorized",
+  "blockOrganizer_manageDrag": "Manage; drag to reorder",
+  "blockLibrary_dragSelectedHint": "Drag the selected blocks onto a favorite or folder on the left, then choose copy or move when you release.",
+  "blockLibrary_blockCount": "{count} blocks",
+  "@blockLibrary_blockCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blockLibrary_changedSelectAgain": "The block library changed. Select again and retry.",
+  "blockLibrary_hiddenSource": "Hidden blocks cannot be organized",
+  "blockLibrary_sameSourceSelected": "The selection contains copies from the same source; organize them separately",
+  "blockLibrary_sameSourceExists": "Copies from the same source already exist; confirm replacement",
+  "blockLibrary_collectionMissing": "The collection does not exist",
+  "promptBlockEditor_appearance": "Block appearance",
+  "promptBlockEditor_imageUnreadable": "Could not read the selected image",
+  "blockAppearance_classic": "Classic",
+  "blockAppearance_stripes": "Fine stripes",
+  "blockAppearance_dots": "Dots",
+  "blockAppearance_solid": "Solid",
+  "blockAppearance_gradient": "Gradient",
+  "blockAppearance_translation": "Translation",
+  "opusUsage_exhausted": "Free account quota used up; V5 generation is billed in Anlas",
+  "opusUsage_remaining": "Free account quota remaining: {percent}%",
+  "@opusUsage_remaining": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_recharging": "Recharging: next +1% in {time}",
+  "@opusUsage_recharging": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "opusUsage_notRecharging": "Not recharging (the pool is above the threshold or used up)",
+  "opusUsage_clickToRefresh": "Click to refresh",
+  "opusUsage_hoursMinutes": "{hours} h {minutes} min",
+  "@opusUsage_hoursMinutes": {
+    "placeholders": {
+      "hours": {},
+      "minutes": {}
+    }
+  },
+  "opusUsage_hours": "{hours} h",
+  "@opusUsage_hours": {
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "opusUsage_minutesSeconds": "{minutes} min {seconds} s",
+  "@opusUsage_minutesSeconds": {
+    "placeholders": {
+      "minutes": {},
+      "seconds": {}
+    }
+  },
+  "opusUsage_minutes": "{minutes} min",
+  "@opusUsage_minutes": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "opusUsage_seconds": "{seconds} s",
+  "@opusUsage_seconds": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "metadataImport_noCharactersReplaceClears": "No character data; replace clears current characters",
+  "metadataImport_replaceCharacters": "Replace characters",
+  "metadataImport_appendCharacters": "Append characters",
+  "drop_dragToShare": "Drag to share",
+  "progress_cancelled": "Cancelled",
+  "promptSyntax_weightTooLarge": "Numeric weight is too large: {value}::",
+  "@promptSyntax_weightTooLarge": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "promptSyntax_spaceBeforeColons": "No space allowed between the weight and :: : {value} ::",
+  "@promptSyntax_spaceBeforeColons": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "promptSyntax_weightAfterColons": "Numeric weights go before :: : ::{value}",
+  "@promptSyntax_weightAfterColons": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "update_errorInAppUnsupported": "This version does not support automatic in-app updates",
+  "update_errorNoInstallablePackage": "No automatically installable update package was found",
+  "update_errorMissingSha256": "The update package is missing its SHA256 checksum",
+  "update_errorDiskFull": "Not enough disk space to save the update package",
+  "update_errorWriteFailed": "Failed to write the update package",
+  "update_errorDownloadFailed": "Failed to download the update package",
+  "update_errorSizeMismatch": "The update package size check failed",
+  "update_errorChecksumMismatch": "The update package checksum failed",
+  "update_errorResumeRejected": "The server rejected resuming the update download",
+  "update_errorEmptyResponse": "The update server returned an empty response",
+  "update_errorPlatformUnsupported": "In-app updates are not supported on this platform",
+  "update_errorPackageRemoved": "The update package was cleaned up; download it again",
+  "update_errorPackageCorrupted": "The update package is corrupted; download it again",
+  "update_errorLaunchFailed": "Failed to start the updater",
+  "update_errorCheckFailed": "Failed to check for updates",
+  "update_errorCheckUnknown": "An unknown error occurred while checking for updates",
+  "update_errorLogPath": "Log: {path}",
+  "@update_errorLogPath": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "update_errorInstallFailed": "Failed to install the update",
+  "update_errorInstallFailedSeeLog": "Failed to install the update; see the update log",
+  "auth_tokenEmpty": "The token is empty and cannot be verified",
+  "auth_tokenFormatInvalid": "Invalid token format",
+  "auth_tokenInvalidOrExpired": "The token is invalid or expired; check that it is correct. A persistent token starts with pst-.",
+  "auth_tokenMustStartPst": "Invalid token format; it should start with pst-",
+  "auth_tokenFormatDetail": "Invalid token format. A persistent token starts with pst- followed by at least 10 characters. Check the token you entered.",
+  "danbooru_credentialsExpired": "Credentials expired; sign in again",
+  "danbooru_networkRetryLater": "Network connection failed; it will retry when the network is back",
+  "danbooru_invalidCredentials": "Could not verify the credentials; check the username and API key",
+  "danbooru_verifyFailed": "Verification failed: {error}",
+  "@danbooru_verifyFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "danbooru_credentialsRequired": "Username and API key cannot be empty",
+  "danbooru_networkCheck": "Network connection failed; check your connection",
+  "danbooru_loginFailedNetwork": "Sign-in failed; check your network connection",
+  "danbooru_blacklistLoginRequired": "Sign in to a Danbooru account first",
+  "danbooru_blacklistPushFailed": "Failed to push the Danbooru blacklist",
+  "danbooru_blacklistSyncFailed": "Sync failed: {error}",
+  "@danbooru_blacklistSyncFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "comfyui_submitFailed": "Failed to submit the workflow: {detail}",
+  "@comfyui_submitFailed": {
+    "placeholders": {
+      "detail": {}
+    }
+  },
+  "comfyui_uploadFailed": "Failed to upload the image: {detail}",
+  "@comfyui_uploadFailed": {
+    "placeholders": {
+      "detail": {}
+    }
+  },
+  "comfyui_fetchImageFailed": "Failed to fetch the image: {detail}",
+  "@comfyui_fetchImageFailed": {
+    "placeholders": {
+      "detail": {}
+    }
+  },
+  "comfyui_historyMissing": "Task history not found: {id}",
+  "@comfyui_historyMissing": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "comfyui_unknownError": "Unknown error",
+  "comfyui_cannotConnect": "Cannot connect to the ComfyUI server ({url})",
+  "@comfyui_cannotConnect": {
+    "placeholders": {
+      "url": {}
+    }
+  },
+  "comfyui_noOutput": "The task produced no output",
+  "comfyui_nodesNoImage": "The specified output nodes produced no image: {nodes}",
+  "@comfyui_nodesNoImage": {
+    "placeholders": {
+      "nodes": {}
+    }
+  },
+  "comfyui_noImageOutput": "The task produced no image",
+  "comfyui_executionError": "Execution error",
+  "comfyui_missingNodes": "Missing ComfyUI nodes: {nodes}. Install or enable the custom nodes in ComfyUI, then restart ComfyUI.",
+  "@comfyui_missingNodes": {
+    "placeholders": {
+      "nodes": {}
+    }
+  },
+  "enhance_cannotReadSize": "Could not read the image size",
+  "enhance_upscaleFailed": "Upscale failed: {error}",
+  "@enhance_upscaleFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "enhance_vibeEncodeFailed": "Vibe encoding failed: {error}",
+  "@enhance_vibeEncodeFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "enhance_enhanceFailed": "Image enhancement failed: {error}",
+  "@enhance_enhanceFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "enhance_annotateFailed": "Image annotation failed: {error}",
+  "@enhance_annotateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "enhance_timeout": "Request timed out",
+  "enhance_networkError": "Network connection error",
+  "enhance_serverError": "Server returned an error: {status}",
+  "@enhance_serverError": {
+    "placeholders": {
+      "status": {}
+    }
+  },
+  "enhance_serverErrorDetail": "Server returned an error: {status} ({detail})",
+  "@enhance_serverErrorDetail": {
+    "placeholders": {
+      "status": {},
+      "detail": {}
+    }
+  },
+  "proxy_connectTimeout": "Connection timed out",
+  "proxy_cannotConnect": "Cannot connect to the server",
+  "proxy_connectFailed": "Connection failed",
+  "proxy_testServerUnreachable": "Cannot connect to the test server",
+  "proxy_testFailed": "Test failed: {error}",
+  "@proxy_testFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "avatar_noFilePath": "Could not get the file path",
+  "avatar_sourceMissing": "The source file does not exist or was deleted",
+  "avatar_copyFailed": "Could not copy the file: {error}",
+  "@avatar_copyFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "avatar_saveFailed": "Could not save the avatar: {error}",
+  "@avatar_saveFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "avatar_operationFailed": "Operation failed: {error}",
+  "@avatar_operationFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "vibeExport_rawImage": "Original image",
+  "vibeExport_vibePreview": "Vibe preview",
+  "vibeExport_libraryThumbnail": "Library thumbnail",
+  "vibeExport_pngTitle": "Export PNG Vibe image",
+  "vibeExport_pngDirectoryTitle": "Choose a PNG export folder",
+  "vibeExport_fileTitle": "Export Vibe file",
+  "vibeExport_bundleTitle": "Export Vibe bundle",
+  "vibeExport_zipTitle": "Export Vibe ZIP",
+  "vibeExport_nothingToExport": "No Vibe entries to export",
+  "vibeImport_fileParseFailed": "Failed to parse the file",
+  "vibeImport_importFiles": "Importing files",
+  "vibeImport_noVibeData": "The image contains no valid Vibe data",
+  "vibeImport_importImages": "Importing images",
+  "vibeImport_encodingParseFailed": "Failed to parse the encoding",
+  "vibeImport_importEncodings": "Importing encodings",
+  "vibeImport_namingCancelled": "Naming cancelled; skipped: {name}",
+  "@vibeImport_namingCancelled": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "vibeImport_nameEmpty": "Name is empty; skipped: {name}",
+  "@vibeImport_nameEmpty": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "vibeImport_nameConflict": "Name conflict; skipped: {name}",
+  "@vibeImport_nameConflict": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "vibeImport_saveFailed": "Save failed",
+  "vibeFile_missingRawImage": "The file has no usable original image data: {file} (type=image). It may be damaged or incomplete; delete it and save again.",
+  "@vibeFile_missingRawImage": {
+    "placeholders": {
+      "file": {}
+    }
+  },
+  "generation_countMustBePositive": "Generation count must be greater than 0",
+  "generation_allTasksFailed": "All generation tasks failed",
+  "generation_failedShort": "Generation failed",
+  "generation_tasksFailedAfterRetry": "{count} tasks still failed after retrying",
+  "@generation_tasksFailedAfterRetry": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "generation_streamFallbackUnavailable": "Streaming generation is unsupported and cannot fall back automatically (parameters were lost)",
+  "generation_streamFallbackFailed": "Falling back to non-streaming generation failed: {error}",
+  "@generation_streamFallbackFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "generation_batchSizeMustBePositive": "Batch count and batch size must be greater than 0",
+  "clipboard_unsupportedPlatform": "The system clipboard is not supported on this platform",
+  "clipboard_decodeFailed": "Could not decode the image to copy it to the clipboard",
+  "drop_remoteImageTooLarge": "The remote image download exceeds {size} MB",
+  "@drop_remoteImageTooLarge": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "apiEndpoint_empty": "API address cannot be empty",
+  "apiEndpoint_invalid": "Invalid API address",
+  "apiEndpoint_httpOnly": "Only http or https API addresses are supported",
+  "apiEndpoint_noExtras": "The API address cannot contain query parameters, fragments or user info",
+  "gallery_initFailed": "Initialization failed: {error}",
+  "@gallery_initFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_loadFoldersFailed": "Failed to load folders: {error}",
+  "@gallery_loadFoldersFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_refreshFailed": "Refresh failed: {error}",
+  "@gallery_refreshFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_clearCacheFailed": "Failed to clear the cache: {error}",
+  "@gallery_clearCacheFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_folderInaccessible": "Cannot access the image folder: {error}",
+  "@gallery_folderInaccessible": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_scanFailed": "Image scan failed: {error}",
+  "@gallery_scanFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "gallery_galleryInitFailed": "Gallery initialization failed: {error}",
+  "@gallery_galleryInitFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "cache_clearInProgress": "A clear operation is already in progress",
+  "vibeImport_imageProgress": "Importing image ({current}/{total}): {source}",
+  "@vibeImport_imageProgress": {
+    "placeholders": {
+      "current": {},
+      "total": {},
+      "source": {}
+    }
+  },
+  "vibeImport_clipboardSource": "Clipboard",
+  "resolution_noAdjustment": "No adjustment needed",
+  "dataRefresh_updating": "Updating data...",
+  "dataRefresh_updatingService": "Updating {service}...",
+  "@dataRefresh_updatingService": {
+    "placeholders": {
+      "service": {}
+    }
+  }
 }

@@ -6,6 +6,7 @@ import '../../../data/models/image/image_params.dart';
 import '../../../data/models/user/user_subscription.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../../../core/utils/localization_extension.dart';
 
 /// Opus 免费额度芯片（V5 起）
 ///
@@ -178,17 +179,19 @@ class OpusUsageChip extends ConsumerWidget {
   String _tooltip(OpusUsage usage) {
     final lines = <String>[
       usage.isNegative
-          ? '账号免费额度已用尽，V5 生成按 Anlas 计费'
-          : '账号免费额度剩余 ${usage.percent.toStringAsFixed(1)}%',
+          ? currentL10n.opusUsage_exhausted
+          : currentL10n.opusUsage_remaining(usage.percent.toStringAsFixed(1)),
     ];
 
     lines.add(
       usage.timeUntilNextPercent > 0
-          ? '回充中：下一 +1% 还需 ${_fmtCountdown(usage.timeUntilNextPercent)}'
-          : '当前不回充（池子在回充阈值之上或已用尽）',
+          ? currentL10n.opusUsage_recharging(
+              _fmtCountdown(usage.timeUntilNextPercent),
+            )
+          : currentL10n.opusUsage_notRecharging,
     );
 
-    lines.add('点击刷新');
+    lines.add(currentL10n.opusUsage_clickToRefresh);
     return lines.join('\n');
   }
 
@@ -197,14 +200,18 @@ class OpusUsageChip extends ConsumerWidget {
     if (seconds >= 3600) {
       final h = seconds ~/ 3600;
       final m = (seconds % 3600) ~/ 60;
-      return m > 0 ? '$h 小时 $m 分' : '$h 小时';
+      return m > 0
+          ? currentL10n.opusUsage_hoursMinutes(h, m)
+          : currentL10n.opusUsage_hours(h);
     }
     if (seconds >= 60) {
       final m = seconds ~/ 60;
       final s = seconds % 60;
-      return s > 0 ? '$m 分 $s 秒' : '$m 分';
+      return s > 0
+          ? currentL10n.opusUsage_minutesSeconds(m, s)
+          : currentL10n.opusUsage_minutes(m);
     }
-    return '$seconds 秒';
+    return currentL10n.opusUsage_seconds(seconds);
   }
 }
 

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/storage/local_storage_service.dart';
+import '../../core/utils/localization_extension.dart';
 
 part 'locale_provider.g.dart';
 
@@ -15,14 +16,16 @@ class LocaleNotifier extends _$LocaleNotifier {
   Locale build() {
     // 从本地存储加载语言设置
     final storage = ref.read(localStorageServiceProvider);
-    final code = storage.getLocaleCode();
-
-    return Locale(code);
+    final locale = Locale(storage.getLocaleCode());
+    setCurrentL10nLocale(locale);
+    return locale;
   }
 
   /// 设置语言
   Future<void> setLocale(String languageCode) async {
-    state = Locale(languageCode);
+    final locale = Locale(languageCode);
+    setCurrentL10nLocale(locale);
+    state = locale;
 
     // 保存到本地存储
     final storage = ref.read(localStorageServiceProvider);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../prompt_assistant/providers/provider_connection_health_provider.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 class ProviderConnectionStatusDot extends StatelessWidget {
   const ProviderConnectionStatusDot({
@@ -25,7 +26,7 @@ class ProviderConnectionStatusDot extends StatelessWidget {
     final time = result.checkedAt?.toLocal();
     String two(int value) => value.toString().padLeft(2, '0');
     final message =
-        '${result.description}${time == null ? '' : '\n最近更新：${time.year}-${two(time.month)}-${two(time.day)} ${two(time.hour)}:${two(time.minute)}'}';
+        '${result.descriptionIn(context.l10n)}${time == null ? '' : '\n${context.l10n.modelHealth_lastUpdated('${time.year}-${two(time.month)}-${two(time.day)} ${two(time.hour)}:${two(time.minute)}')}'}';
     return Tooltip(
       message: message,
       child: Semantics(

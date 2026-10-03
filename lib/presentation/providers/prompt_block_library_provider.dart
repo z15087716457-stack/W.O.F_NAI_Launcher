@@ -14,6 +14,7 @@ import '../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../data/repositories/prompt_block_repository.dart';
 import '../../data/services/fixed_tag_migration_service.dart';
 import '../../data/services/tag_library_migration_service.dart';
+import '../../core/utils/localization_extension.dart';
 
 part 'prompt_block_library_provider.g.dart';
 
@@ -457,14 +458,14 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
         if (current.blockById(id) case final block?) block,
     ];
     if (sources.length != ids.toSet().length) {
-      throw StateError('块库已变化，请重新选择后再试');
+      throw StateError(currentL10n.blockLibrary_changedSelectAgain);
     }
     if (sources.any((block) => block.isArchived)) {
-      throw StateError('隐藏的块不能作为整理来源');
+      throw StateError(currentL10n.blockLibrary_hiddenSource);
     }
     if (sources.map((block) => block.lineageKey).toSet().length !=
         sources.length) {
-      throw StateError('所选块包含同源副本，请分开整理');
+      throw StateError(currentL10n.blockLibrary_sameSourceSelected);
     }
     final conflicts = <String, PromptBlock>{};
     for (final source in sources) {
@@ -476,7 +477,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
       }
     }
     if (conflicts.isNotEmpty && !replaceConflicts) {
-      throw StateError('同源块已存在，请确认替换');
+      throw StateError(currentL10n.blockLibrary_sameSourceExists);
     }
     final createdThumbnails = <String>[];
     final oldThumbnails = <String>[];
@@ -552,7 +553,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
               target.id!,
             );
             if (collection == null || collection.isFolder) {
-              throw StateError('收藏集不存在');
+              throw StateError(currentL10n.blockLibrary_collectionMissing);
             }
             if (!collection.blockIds.contains(placed.id)) {
               await repository.toggleBlockInCollection(target.id!, placed.id);

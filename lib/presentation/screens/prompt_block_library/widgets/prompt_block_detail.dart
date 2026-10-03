@@ -918,7 +918,9 @@ class PromptBlockDetailPanel extends StatelessWidget {
                                   );
                                 },
                                 icon: const Icon(Icons.sell_outlined, size: 18),
-                                label: const Text('添加标签'),
+                                label: Text(
+                                  context.l10n.promptBlockLibrary_addTag,
+                                ),
                               ),
                             ),
                             TextButton.icon(

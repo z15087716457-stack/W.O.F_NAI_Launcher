@@ -9,6 +9,7 @@ import 'model_management_widgets.dart';
 import 'model_reasoning_button.dart';
 import 'model_draft_save_controller.dart';
 import 'model_compact_dropdown.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 typedef _ModelRoute = ({ProviderConfig provider, ModelConfig model});
 
@@ -81,7 +82,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                 .toJson(),
           ) !=
           _observedSlot) {
-        throw StateError('功能配置已在别处修改，请重新打开后编辑。');
+        throw StateError(context.l10n.modelSettings_interfaceChangedElsewhere);
       }
       await ref
           .read(promptAssistantConfigProvider.notifier)
@@ -90,7 +91,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
       _initial = jsonEncode(_slot.toJson());
       _observedSlot = _initial;
       widget.onDirtyChanged(false);
-      setState(() => _message = '配置已保存');
+      setState(() => _message = context.l10n.modelSettings_configSaved);
       return true;
     } catch (error) {
       if (mounted) setState(() => _message = '$error');
@@ -264,7 +265,11 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
           padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
           minimumSize: const Size(0, 24),
         ),
-        child: Text(preset.id.startsWith('builtin:') ? '查看内置规则' : '查看与编辑预设'),
+        child: Text(
+          preset.id.startsWith('builtin:')
+              ? context.l10n.modelSettings_viewBuiltinRules
+              : context.l10n.modelSettings_viewEditPreset,
+        ),
       ),
       if (!preset.id.startsWith('builtin:'))
         TextButton(
@@ -275,11 +280,11 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
             minimumSize: const Size(0, 24),
           ),
-          child: const Text('恢复内置预设'),
+          child: Text(context.l10n.modelSettings_restoreBuiltinPreset),
         ),
     ];
-    const languages = {
-      'auto': '跟随界面语言',
+    final languages = {
+      'auto': context.l10n.modelSettings_followUiLanguage,
       'zh': '简体中文',
       'en': 'English',
       'ja': '日本語',
@@ -302,8 +307,8 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
           key: const Key('task-model-properties'),
           firstFlex: 2,
           first: _property(
-            label: '服务商与模型',
-            help: '仅列出启用服务中的已选模型',
+            label: context.l10n.modelSettings_providerAndModel,
+            help: context.l10n.modelSettings_providerAndModelHelp,
             control: ModelCompactDropdown<String>(
               key: ValueKey(
                 'task-route-${widget.task.name}-${selected?.model.name}',
@@ -313,7 +318,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                   : jsonEncode([selected.provider.id, selected.model.name]),
               decoration: decoration,
               textStyle: valueStyle,
-              hint: '选择服务商与模型',
+              hint: context.l10n.modelSettings_chooseProviderModel,
               choices: [
                 for (final item in choices)
                   ModelDropdownChoice(
@@ -336,10 +341,10 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
             ),
           ),
           second: _property(
-            label: '思考',
+            label: context.l10n.modelSettings_reasoning,
             labelHelp: Tooltip(
               key: _reasoningHelpKey,
-              message: '纯翻译通常无需开启思考；为兼顾打标、语义分类等处理，建议开启该模型支持的最低思考档位。',
+              message: context.l10n.modelSettings_reasoningHelp,
               waitDuration: const Duration(milliseconds: 450),
               child: IconButton(
                 key: const Key('task-reasoning-help'),
@@ -352,10 +357,10 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                 ),
-                icon: const Icon(
+                icon: Icon(
                   Icons.help_outline,
                   size: 13,
-                  semanticLabel: '思考档位建议',
+                  semanticLabel: context.l10n.modelSettings_reasoningHelpLabel,
                 ),
               ),
             ),
@@ -378,7 +383,7 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
         _propertyRow(
           key: const Key('task-output-properties'),
           first: _property(
-            label: '使用预设',
+            label: context.l10n.modelSettings_usePreset,
             actions: presetActions,
             control: ModelCompactDropdown<String>(
               key: ValueKey('task-preset-${preset.id}'),
@@ -387,7 +392,10 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
               textStyle: valueStyle,
               choices: [
                 for (final item in presets)
-                  ModelDropdownChoice(item.id, item.name),
+                  ModelDropdownChoice(
+                    item.id,
+                    item.displayNameIn(context.l10n),
+                  ),
               ],
               onChanged: _busy
                   ? null
@@ -396,15 +404,18 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
           ),
           second: widget.task == LauncherInterface.promptReverse
               ? _property(
-                  label: '输出语言',
+                  label: context.l10n.modelSettings_outputLanguage,
                   control: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Text('英文生成提示词', style: valueStyle),
+                    child: Text(
+                      context.l10n.modelSettings_englishPrompt,
+                      style: valueStyle,
+                    ),
                   ),
-                  help: '结合原文落实修改，输出英文生成提示词。',
+                  help: context.l10n.modelSettings_englishPromptHelp,
                 )
               : _property(
-                  label: '目标语言',
+                  label: context.l10n.modelSettings_targetLanguage,
                   control: ModelCompactDropdown<String>(
                     key: const Key('task-language'),
                     value: _slot.targetLanguage,
@@ -436,25 +447,38 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
-                  '当前生效',
+                  context.l10n.modelSettings_effective,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   selected == null
-                      ? '尚未选择可用模型'
+                      ? context.l10n.modelSettings_noModelSelected
                       : '${selected.provider.name} · ${selected.model.name}',
                 ),
                 if (effectiveModel != null)
                   Text(
-                    '思考：${reasoningEffortLabel(effectiveModel.reasoningEffort)}${usesInterfaceReasoning ? '（本接口）' : '（跟随模型）'}',
+                    usesInterfaceReasoning
+                        ? context.l10n.modelSettings_reasoningSummaryInterface(
+                            reasoningEffortLabel(
+                              context.l10n,
+                              effectiveModel.reasoningEffort,
+                            ),
+                          )
+                        : context.l10n.modelSettings_reasoningSummaryModel(
+                            reasoningEffortLabel(
+                              context.l10n,
+                              effectiveModel.reasoningEffort,
+                            ),
+                          ),
                   ),
-                Text(preset.name),
+                Text(preset.displayNameIn(context.l10n)),
                 Text(
                   widget.task == LauncherInterface.promptReverse
-                      ? '英文生成提示词'
-                      : languages[_slot.targetLanguage] ?? '跟随界面语言',
+                      ? context.l10n.modelSettings_englishPrompt
+                      : languages[_slot.targetLanguage] ??
+                            context.l10n.modelSettings_followUiLanguage,
                 ),
               ],
             ),
@@ -469,7 +493,9 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
         widget.task == LauncherInterface.translate ||
         widget.task == LauncherInterface.promptReverse;
     final hint = Text(
-      promptTask ? '无需翻译时，也可将提示词拆分为模块，通过积木功能自由拼装。' : '无需翻译时，也可整理排版并为相关标签添加链接。',
+      promptTask
+          ? context.l10n.modelSettings_promptBlocksHint
+          : context.l10n.modelSettings_wikiFormatHint,
       key: const Key('task-format-hint'),
       textAlign: TextAlign.right,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -534,9 +560,11 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ManagementHeading(
-            widget.task.title,
+            widget.task.titleIn(context.l10n),
             titleSize: 16,
-            description: changed ? '有未保存的修改' : widget.task.description,
+            description: changed
+                ? context.l10n.modelSettings_unsavedChanges
+                : widget.task.descriptionIn(context.l10n),
             actions: [
               TextButton.icon(
                 key: const Key('task-test'),
@@ -544,17 +572,20 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                     ? null
                     : () => _test(preset),
                 icon: const Icon(Icons.science_outlined, size: 16),
-                label: const Text('测试预设'),
+                label: Text(context.l10n.modelSettings_testPreset),
               ),
               FilledButton(
                 key: const Key('task-save'),
                 onPressed: _busy ? null : _save,
-                child: const Text('保存'),
+                child: Text(context.l10n.common_save),
               ),
             ],
           ),
           ManagementTabs(
-            labels: const ['模型与预设', '提示词与输出'],
+            labels: [
+              context.l10n.modelSettings_tabModelPreset,
+              context.l10n.modelSettings_tabPromptOutput,
+            ],
             selected: _tab,
             inProgress: _testSession != null,
             onSelected: (value) => setState(() => _tab = value),
@@ -570,7 +601,8 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                       _message!,
                       key: const Key('task-message'),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: _message == '配置已保存'
+                        color:
+                            _message == context.l10n.modelSettings_configSaved
                             ? theme.colorScheme.primary
                             : theme.colorScheme.error,
                       ),
@@ -591,13 +623,13 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                       children: [
                         Expanded(
                           child: Text(
-                            '翻译策略',
+                            context.l10n.modelSettings_translationStrategy,
                             style: theme.textTheme.titleSmall,
                           ),
                         ),
                         TextButton(
                           onPressed: () => widget.onEditPreset(preset.id),
-                          child: const Text('编辑预设'),
+                          child: Text(context.l10n.modelSettings_editPreset),
                         ),
                       ],
                     ),
@@ -609,8 +641,10 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                     const SizedBox(height: 24),
                     ExpansionTile(
                       tilePadding: EdgeInsets.zero,
-                      title: const Text('应用输出约定'),
-                      subtitle: const Text('返回字段与校验规则由应用维护'),
+                      title: Text(context.l10n.modelSettings_outputContract),
+                      subtitle: Text(
+                        context.l10n.modelSettings_outputContractHint,
+                      ),
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(bottom: 16),
@@ -630,7 +664,10 @@ class _ModelTaskEditorState extends ConsumerState<ModelTaskEditor> {
                     const SizedBox(height: 24),
                     const Divider(),
                     const SizedBox(height: 12),
-                    Text('测试结果', style: theme.textTheme.titleSmall),
+                    Text(
+                      context.l10n.modelSettings_testResult,
+                      style: theme.textTheme.titleSmall,
+                    ),
                     const SizedBox(height: 8),
                     SelectableText(
                       _testResult!,

@@ -8,6 +8,7 @@ import '../../../data/datasources/remote/nai_image_generation_api_service.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/image/image_stream_chunk.dart';
 import 'generation_models.dart';
+import '../../../core/utils/localization_extension.dart';
 
 part 'stream_generation_notifier.g.dart';
 
@@ -326,7 +327,7 @@ class StreamGenerationNotifier extends _$StreamGenerationNotifier {
         );
         state = state.copyWith(
           status: StreamGenerationStatus.error,
-          errorMessage: '流式生成不支持且无法自动回退（参数丢失）',
+          errorMessage: currentL10n.generation_streamFallbackUnavailable,
           endTime: DateTime.now(),
         );
         return;
@@ -372,7 +373,7 @@ class StreamGenerationNotifier extends _$StreamGenerationNotifier {
         throw Exception('No image data returned from non-stream API');
       }
     } catch (e) {
-      _handleError('回退到非流式生成失败: $e');
+      _handleError(currentL10n.generation_streamFallbackFailed('$e'));
     }
   }
 

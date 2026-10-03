@@ -666,13 +666,13 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
             ),
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'tags',
           child: ListTile(
             dense: true,
             contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.sell_outlined, size: 18),
-            title: Text('添加标签'),
+            leading: const Icon(Icons.sell_outlined, size: 18),
+            title: Text(context.l10n.promptBlockLibrary_addTag),
           ),
         ),
         PopupMenuItem(

@@ -18,6 +18,7 @@ import '../widgets/provider_logo.dart';
 import '../widgets/provider_picker.dart';
 import '../widgets/provider_connection_status_dot.dart';
 import '../widgets/model_draft_save_controller.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 enum _LeaveAction { discard, save }
 
@@ -62,16 +63,16 @@ class ModelManagementSectionState
       final action = await showDialog<_LeaveAction>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('保留当前编辑？'),
-          content: const Text('当前修改尚未保存。是否保存后切换？'),
+          title: Text(context.l10n.modelSettings_keepEditsTitle),
+          content: Text(context.l10n.modelSettings_keepEditsBody),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, _LeaveAction.discard),
-              child: const Text('放弃'),
+              child: Text(context.l10n.modelSettings_discard),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, _LeaveAction.save),
-              child: const Text('保存并切换'),
+              child: Text(context.l10n.modelSettings_saveAndSwitch),
             ),
           ],
         ),
@@ -116,7 +117,7 @@ class ModelManagementSectionState
     final colors = Theme.of(context).colorScheme;
     return IconButton(
       key: const Key('service-add'),
-      tooltip: '添加服务商',
+      tooltip: context.l10n.modelSettings_addProvider,
       onPressed: _add,
       style: IconButton.styleFrom(
         foregroundColor: colors.onSurface,
@@ -151,7 +152,12 @@ class ModelManagementSectionState
         .length;
     final preset = TaskPresetConfig(
       id: 'preset-${DateTime.now().microsecondsSinceEpoch}',
-      name: count == 0 ? task.title : '${task.title}（${count + 1}）',
+      name: count == 0
+          ? task.titleIn(context.l10n)
+          : context.l10n.modelSettings_presetCopyName(
+              task.titleIn(context.l10n),
+              count + 1,
+            ),
       task: task,
       prompt: task.builtinPrompt,
     );
@@ -178,18 +184,22 @@ class ModelManagementSectionState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('删除 ${provider.name}？'),
+        title: Text(
+          context.l10n.modelSettings_deleteProviderTitle(provider.name),
+        ),
         content: Text(
-          '此服务的连接、密钥和已选模型将被删除。${used == 0 ? '' : '$used 个功能的模型绑定会被清除，预设保留。'}',
+          used == 0
+              ? context.l10n.modelSettings_deleteProviderBody
+              : '${context.l10n.modelSettings_deleteProviderBody}${context.l10n.modelSettings_deleteProviderBindings(used)}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(context.l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除'),
+            child: Text(context.l10n.common_delete),
           ),
         ],
       ),
@@ -216,16 +226,16 @@ class ModelManagementSectionState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('删除“${preset.name}”？'),
-        content: const Text('使用此预设的功能将恢复内置方案。模型绑定保留。'),
+        title: Text(context.l10n.modelSettings_deletePresetTitle(preset.name)),
+        content: Text(context.l10n.modelSettings_deletePresetBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(context.l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('删除'),
+            child: Text(context.l10n.common_delete),
           ),
         ],
       ),
@@ -262,7 +272,8 @@ class ModelManagementSectionState
         ).convert(ref.read(promptAssistantConfigProvider).toJson()),
       ),
     );
-    _message('配置已复制，不包含密钥、自定义请求头或请求体。');
+    if (!mounted) return;
+    _message(context.l10n.modelSettings_configCopied);
   }
 
   Future<void> _import() async {
@@ -274,7 +285,7 @@ class ModelManagementSectionState
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, update) => AlertDialog(
-          title: const Text('导入配置'),
+          title: Text(context.l10n.modelSettings_importConfig),
           content: SizedBox(
             width: 580,
             child: SingleChildScrollView(
@@ -282,13 +293,15 @@ class ModelManagementSectionState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('粘贴导出的配置。导入前会备份当前配置；密钥继续独立保存。'),
+                  Text(context.l10n.modelSettings_importConfigHint),
                   const SizedBox(height: 16),
                   TextField(
                     controller: input,
                     minLines: 7,
                     maxLines: 12,
-                    decoration: const InputDecoration(hintText: '配置 JSON'),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.modelSettings_configJson,
+                    ),
                     onChanged: (_) => update(() {
                       preview = null;
                       error = null;
@@ -308,7 +321,11 @@ class ModelManagementSectionState
                     Padding(
                       padding: const EdgeInsets.only(top: 12),
                       child: Text(
-                        '将导入 ${preview!.providers.length} 个服务商、${preview!.models.length} 个模型和 ${preview!.presets.length} 个自定义预设。',
+                        context.l10n.modelSettings_importPreview(
+                          preview!.providers.length,
+                          preview!.models.length,
+                          preview!.presets.length,
+                        ),
                       ),
                     ),
                 ],
@@ -318,7 +335,7 @@ class ModelManagementSectionState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: Text(context.l10n.common_cancel),
             ),
             FilledButton(
               onPressed: () {
@@ -331,7 +348,9 @@ class ModelManagementSectionState
                   if (decoded is! Map ||
                       decoded['providers'] is! List ||
                       decoded['models'] is! List) {
-                    throw const FormatException('缺少服务商或模型配置。');
+                    throw FormatException(
+                      context.l10n.modelSettings_importMissingProviders,
+                    );
                   }
                   update(
                     () =>
@@ -341,7 +360,11 @@ class ModelManagementSectionState
                   update(() => error = '$exception');
                 }
               },
-              child: Text(preview == null ? '检查配置' : '导入并替换'),
+              child: Text(
+                preview == null
+                    ? context.l10n.modelSettings_checkConfig
+                    : context.l10n.modelSettings_importAndReplace,
+              ),
             ),
           ],
         ),
@@ -363,7 +386,7 @@ class ModelManagementSectionState
           _editorRevision++;
         });
       }
-      _message('配置已导入');
+      if (mounted) _message(context.l10n.modelSettings_configImported);
     } catch (exception) {
       _message('$exception');
     }
@@ -413,27 +436,38 @@ class ModelManagementSectionState
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ManagementHeading(
-                  '模型与接口',
-                  description: '管理服务连接与翻译偏好。',
+                  context.l10n.settings_modelsAndInterfaces,
+                  description: context.l10n.modelSettings_description,
                   actions: [
                     PopupMenuButton<String>(
                       shape: modelMenuShape,
                       elevation: 3,
                       clipBehavior: Clip.antiAlias,
-                      tooltip: '配置管理',
+                      tooltip: context.l10n.modelSettings_configMenu,
                       icon: const Icon(Icons.more_horiz),
                       onSelected: (value) =>
                           value == 'export' ? _export() : _import(),
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(value: 'export', child: Text('复制配置')),
-                        PopupMenuItem(value: 'import', child: Text('导入配置')),
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                          value: 'export',
+                          child: Text(context.l10n.modelSettings_copyConfig),
+                        ),
+                        PopupMenuItem(
+                          value: 'import',
+                          child: Text(context.l10n.modelSettings_importConfig),
+                        ),
                       ],
                     ),
                   ],
                 ),
                 ManagementTabs(
                   key: const Key('model-management-tabs'),
-                  labels: const ['服务商', '功能接口', '预设与提示词', '请求记录'],
+                  labels: [
+                    context.l10n.modelSettings_tabProviders,
+                    context.l10n.modelSettings_tabInterfaces,
+                    context.l10n.modelSettings_tabPresets,
+                    context.l10n.modelSettings_tabRequests,
+                  ],
                   selected: _tab,
                   onSelected: (value) => _switch(() => _tab = value),
                 ),
@@ -453,8 +487,9 @@ class ModelManagementSectionState
                                   ),
                                   initialValue: provider?.id,
                                   isExpanded: true,
-                                  decoration: const InputDecoration(
-                                    labelText: '服务商',
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        context.l10n.modelSettings_tabProviders,
                                     isDense: true,
                                   ),
                                   items: [
@@ -507,7 +542,10 @@ class ModelManagementSectionState
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        '服务商 · ${config.providers.length}',
+                                        context.l10n
+                                            .modelSettings_providersCount(
+                                              config.providers.length,
+                                            ),
                                         style: theme.textTheme.labelSmall
                                             ?.copyWith(
                                               color: theme
@@ -527,7 +565,7 @@ class ModelManagementSectionState
                                       ManagementListItem(
                                         title: item.name,
                                         subtitle:
-                                            '${config.modelsForProvider(providerId: item.id).where((m) => !m.isPlaceholder).length} 个模型${item.enabled ? '' : ' · 未启用'}',
+                                            '${context.l10n.modelSettings_providerModelCount(config.modelsForProvider(providerId: item.id).where((m) => !m.isPlaceholder).length)}${item.enabled ? '' : context.l10n.modelSettings_providerDisabledSuffix}',
                                         selected: provider?.id == item.id,
                                         icon: _ProviderMonogram(
                                           item,
@@ -587,12 +625,12 @@ class ModelManagementSectionState
                                         ),
                                         const SizedBox(height: 18),
                                         Text(
-                                          '添加你的第一个模型服务',
+                                          context.l10n.modelSettings_emptyTitle,
                                           style: theme.textTheme.titleMedium,
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          '选择常用服务，或连接自定义接口。',
+                                          context.l10n.modelSettings_emptyBody,
                                           style: theme.textTheme.bodySmall,
                                         ),
                                         const SizedBox(height: 24),
@@ -617,7 +655,11 @@ class ModelManagementSectionState
                                                 ProviderPreset
                                                     .openaiCompatibleChat,
                                               ),
-                                              child: const Text('自定义服务'),
+                                              child: Text(
+                                                context
+                                                    .l10n
+                                                    .modelSettings_customService,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -636,15 +678,16 @@ class ModelManagementSectionState
                                     theme.colorScheme.surfaceContainerLow,
                                 initialValue: _task,
                                 isExpanded: true,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   isDense: true,
-                                  labelText: '功能接口',
+                                  labelText:
+                                      context.l10n.modelSettings_tabInterfaces,
                                 ),
                                 items: [
                                   for (final task in LauncherInterface.values)
                                     DropdownMenuItem(
                                       value: task,
-                                      child: Text(task.title),
+                                      child: Text(task.titleIn(context.l10n)),
                                     ),
                                 ],
                                 onChanged: (value) => _openTask(value!),
@@ -654,10 +697,10 @@ class ModelManagementSectionState
                             children: [
                               for (final task in LauncherInterface.values)
                                 ManagementListItem(
-                                  title: task.title,
+                                  title: task.titleIn(context.l10n),
                                   subtitle:
                                       config.interfaceFor(task).model.isEmpty
-                                      ? '待配置'
+                                      ? context.l10n.modelSettings_notConfigured
                                       : config.interfaceFor(task).model,
                                   selected: task == _task,
                                   icon: Icon(interfaceIcon(task)),
@@ -685,16 +728,16 @@ class ModelManagementSectionState
                             key: ValueKey('preset-picker-${preset.id}'),
                             initialValue: preset.id,
                             isExpanded: true,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               isDense: true,
-                              labelText: '预设',
+                              labelText: context.l10n.modelSettings_preset,
                             ),
                             items: [
                               for (final item in presets)
                                 DropdownMenuItem(
                                   value: item.id,
                                   child: Text(
-                                    item.name,
+                                    item.displayNameIn(context.l10n),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -706,10 +749,10 @@ class ModelManagementSectionState
                             children: [
                               for (final item in presets)
                                 ManagementListItem(
-                                  title: item.name,
+                                  title: item.displayNameIn(context.l10n),
                                   subtitle: item.id.startsWith('builtin:')
-                                      ? '内置'
-                                      : '用户',
+                                      ? context.l10n.modelSettings_presetBuiltin
+                                      : context.l10n.modelSettings_presetUser,
                                   selected: item.id == preset.id,
                                   icon: Icon(interfaceIcon(item.task)),
                                   onTap: () => _openPreset(item.id),
@@ -718,7 +761,9 @@ class ModelManagementSectionState
                                           item == _newPreset
                                       ? null
                                       : IconButton(
-                                          tooltip: '删除预设',
+                                          tooltip: context
+                                              .l10n
+                                              .modelSettings_deletePreset,
                                           icon: const Icon(
                                             Icons.more_horiz,
                                             size: 16,
@@ -763,13 +808,13 @@ class ModelManagementSectionState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ManagementHeading(
-          '最近请求',
-          description: '本次会话最近 100 条 · 完整请求与响应，认证信息已脱敏',
+          context.l10n.modelSettings_recentRequests,
+          description: context.l10n.modelSettings_recentRequestsHint,
           actions: [
             TextButton.icon(
               onPressed: history.records.isEmpty ? null : history.clear,
               icon: const Icon(Icons.delete_outline, size: 16),
-              label: const Text('清空'),
+              label: Text(context.l10n.modelSettings_clearRequests),
             ),
           ],
         ),
@@ -778,7 +823,7 @@ class ModelManagementSectionState
           child: history.records.isEmpty
               ? Center(
                   child: Text(
-                    '翻译或测试模型后，请求记录会出现在这里。',
+                    context.l10n.modelSettings_requestsEmpty,
                     style: theme.textTheme.bodySmall,
                   ),
                 )
@@ -795,13 +840,13 @@ class ModelManagementSectionState
                         vertical: 8,
                       ),
                       leading: Icon(
-                        record.status == '成功'
+                        record.status == ModelRequestStatus.success
                             ? Icons.check_circle_outline
-                            : record.status == '失败'
+                            : record.status == ModelRequestStatus.failed
                             ? Icons.error_outline
                             : Icons.schedule,
                         size: 18,
-                        color: record.status == '失败'
+                        color: record.status == ModelRequestStatus.failed
                             ? theme.colorScheme.error
                             : theme.colorScheme.onSurfaceVariant,
                       ),
@@ -820,7 +865,7 @@ class ModelManagementSectionState
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            record.status,
+                            record.status.labelIn(context.l10n),
                             style: theme.textTheme.labelSmall,
                           ),
                           const SizedBox(height: 3),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../../prompt_assistant/models/prompt_task_definitions.dart';
 import 'model_compact_dropdown.dart';
+import '../../../../core/utils/localization_extension.dart';
 
 IconData interfaceIcon(LauncherInterface task) => switch (task) {
   LauncherInterface.translate => Icons.south,
@@ -37,7 +38,7 @@ Future<LauncherInterface?> showInterfacePresetMenu(
             children: [
               Icon(interfaceIcon(task), size: 18),
               const SizedBox(width: 12),
-              Text(task.title),
+              Text(task.titleIn(context.l10n)),
             ],
           ),
         ),
@@ -159,7 +160,7 @@ class _TabUnderlineState extends State<_TabUnderline>
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: widget.inProgress ? '正在测试预设' : null,
+    label: widget.inProgress ? context.l10n.modelSettings_testingPreset : null,
     child: AnimatedBuilder(
       animation: _motion,
       builder: (context, _) => AnimatedAlign(

@@ -12,7 +12,6 @@ import '../../../providers/update_provider.dart';
 import '../../../widgets/common/update_check_dialog.dart';
 import '../widgets/settings_labeled_group.dart';
 import '../widgets/settings_preferences_panel.dart';
-import '../widgets/settings_ui_theme.dart';
 
 /// 关于设置板块
 ///
@@ -34,8 +33,6 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
         .watch(updateCheckServiceReadyProvider)
         .valueOrNull;
     final storage = ref.watch(localStorageServiceProvider);
-    String text(String zh, String en, String ja) =>
-        settingsText(context, zh, en, ja);
     final VoidCallback? check = updateState.isChecking || updateService == null
         ? null
         : () async {
@@ -65,12 +62,8 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
       children: [
         SettingsLabeledGroup(
           key: const Key('about-version-group'),
-          title: text('版本与更新', 'Version & updates', 'バージョンと更新'),
-          description: text(
-            '当前版本与更新选项',
-            'Current version and update options',
-            '現在のバージョンと更新設定',
-          ),
+          title: context.l10n.settings_versionUpdates,
+          description: context.l10n.settings_currentVersionUpdateOptions,
           child: Column(
             children: [
               SettingsTile(
@@ -149,12 +142,8 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
         const SettingsPreferencesPanel(labeled: true),
         SettingsLabeledGroup(
           key: const Key('about-diagnostics-group'),
-          title: text('诊断与资料', 'Diagnostics & resources', '診断と資料'),
-          description: text(
-            '日志、字体与开源项目',
-            'Logs, fonts and the open-source project',
-            'ログ・フォント・オープンソース',
-          ),
+          title: context.l10n.settings_diagnosticsResources,
+          description: context.l10n.settings_logsFontsOpenSourceProject,
           showDivider: false,
           child: Column(
             children: [
@@ -179,7 +168,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
                 trailing: OutlinedButton(
                   key: const Key('about-view-licenses'),
                   onPressed: licenses,
-                  child: Text(text('查看许可', 'View licenses', 'ライセンスを見る')),
+                  child: Text(context.l10n.settings_viewLicenses),
                 ),
                 onTap: licenses,
               ),
@@ -190,7 +179,7 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
                   key: const Key('about-open-project'),
                   onPressed: project,
                   icon: const Icon(Icons.open_in_new, size: 16),
-                  label: Text(text('打开项目', 'Open project', 'プロジェクトを開く')),
+                  label: Text(context.l10n.settings_openProject),
                 ),
                 onTap: project,
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/localization_extension.dart';
 
 class PromptTranslationGuide extends StatelessWidget {
   const PromptTranslationGuide({super.key, required this.onBack});
@@ -12,7 +13,7 @@ class PromptTranslationGuide extends StatelessWidget {
         children: [
           IconButton(
             key: const Key('translation-guide-back'),
-            tooltip: '返回操作',
+            tooltip: context.l10n.promptTranslation_guideBack,
             onPressed: onBack,
             icon: const Icon(Icons.arrow_back, size: 15),
             constraints: const BoxConstraints.tightFor(width: 26, height: 26),
@@ -20,7 +21,7 @@ class PromptTranslationGuide extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            '操作教程',
+            context.l10n.promptTranslation_tutorial,
             style: Theme.of(
               context,
             ).textTheme.titleSmall?.copyWith(fontSize: 12),
@@ -28,40 +29,40 @@ class PromptTranslationGuide extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 8),
-      const Flexible(
+      Flexible(
         fit: FlexFit.loose,
         child: SingleChildScrollView(
           child: Column(
             children: [
               _GuideRow(
-                icon: MouseGestureIcon(middle: true),
-                title: '中键点块',
-                text: '切换原文与译文',
+                icon: const MouseGestureIcon(middle: true),
+                title: context.l10n.promptTranslation_guideMiddleTitle,
+                text: context.l10n.promptTranslation_guideMiddleText,
               ),
               _GuideRow(
-                icon: MouseGestureIcon(),
-                title: '左键点原文',
-                text: '定位光标，直接修改',
+                icon: const MouseGestureIcon(),
+                title: context.l10n.promptTranslation_guideSourceTitle,
+                text: context.l10n.promptTranslation_guideSourceText,
               ),
               _GuideRow(
-                icon: MouseGestureIcon(),
-                title: '左键点译文',
-                text: '打开块编辑窗',
+                icon: const MouseGestureIcon(),
+                title: context.l10n.promptTranslation_guideReadingTitle,
+                text: context.l10n.promptTranslation_guideReadingText,
               ),
               _GuideRow(
-                icon: Icon(Icons.keyboard, size: 20),
-                title: 'Ctrl + 点击 / 拖选',
-                text: '编辑窗内搜索标签 / 查关联',
+                icon: const Icon(Icons.keyboard, size: 20),
+                title: context.l10n.promptTranslation_guideCtrlTitle,
+                text: context.l10n.promptTranslation_guideCtrlText,
               ),
               _GuideRow(
-                icon: Icon(Icons.swap_vert, size: 21),
-                title: '↑ 中文转原文',
-                text: '↓ 原文转中文，检查后保存',
+                icon: const Icon(Icons.swap_vert, size: 21),
+                title: context.l10n.promptTranslation_guideConvertTitle,
+                text: context.l10n.promptTranslation_guideConvertText,
               ),
               _GuideRow(
-                icon: Icon(Icons.undo, size: 20),
-                title: 'A / 恢复',
-                text: '整组还原原文 / 恢复翻译块',
+                icon: const Icon(Icons.undo, size: 20),
+                title: context.l10n.promptTranslation_guideRestoreTitle,
+                text: context.l10n.promptTranslation_guideRestoreText,
                 bottomGap: 0,
               ),
             ],
@@ -131,7 +132,9 @@ class MouseGestureIcon extends StatelessWidget {
   final bool middle;
   @override
   Widget build(BuildContext context) => Semantics(
-    label: middle ? '鼠标中键' : '鼠标左键',
+    label: middle
+        ? context.l10n.promptTranslation_middleButton
+        : context.l10n.promptTranslation_leftButton,
     child: CustomPaint(
       size: const Size(20, 25),
       painter: _MousePainter(

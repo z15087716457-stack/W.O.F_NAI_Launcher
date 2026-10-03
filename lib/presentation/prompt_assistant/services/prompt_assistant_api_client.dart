@@ -12,6 +12,7 @@ import 'provider_adapters/gemini_generate_content_adapter.dart';
 import 'provider_adapters/openai_chat_completions_adapter.dart';
 import 'provider_adapters/openai_responses_adapter.dart';
 import 'provider_adapters/prompt_assistant_adapter.dart';
+import '../../../core/utils/localization_extension.dart';
 
 class PromptAssistantApiClient {
   PromptAssistantApiClient({
@@ -156,7 +157,7 @@ class PromptAssistantApiClient {
         cancelToken,
       );
       acquired = true;
-      if (record != null) history?.update(record, '请求中');
+      if (record != null) history?.update(record, ModelRequestStatus.running);
       final upload = await optimizePromptAssistantRequestImagesForUpload(
         request,
         maxBytes: imageUploadMaxBytes,
@@ -188,7 +189,9 @@ class PromptAssistantApiClient {
         }
       }
       final trimmed = content.trim();
-      if (trimmed.isEmpty) throw StateError('模型返回了空内容。');
+      if (trimmed.isEmpty) {
+        throw StateError(currentL10n.modelRequest_emptyResponse);
+      }
       AppLogger.d(
         'response done provider=${request.provider.id} model=${request.model} outputLen=${trimmed.length}',
         'PromptAssistant',
@@ -196,7 +199,7 @@ class PromptAssistantApiClient {
       if (record != null) {
         history?.update(
           record,
-          '成功',
+          ModelRequestStatus.success,
           elapsedMs: watch.elapsedMilliseconds,
           attempts: attempts,
           output: redactor.text(trimmed),
@@ -212,7 +215,9 @@ class PromptAssistantApiClient {
       if (record != null) {
         history?.update(
           record,
-          cancelToken.isCancelled ? '已取消' : '失败',
+          cancelToken.isCancelled
+              ? ModelRequestStatus.cancelled
+              : ModelRequestStatus.failed,
           elapsedMs: watch.elapsedMilliseconds,
           attempts: attempts,
           error: error.response?.statusCode == null
@@ -228,7 +233,7 @@ class PromptAssistantApiClient {
       if (record != null) {
         history?.update(
           record,
-          '失败',
+          ModelRequestStatus.failed,
           elapsedMs: watch.elapsedMilliseconds,
           attempts: attempts,
           error: redactor.text(error.toString()),

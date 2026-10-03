@@ -7,6 +7,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import '../utils/app_logger.dart';
 import 'comfyui_models.dart';
 import 'comfyui_url_utils.dart';
+import '../utils/localization_extension.dart';
 
 /// ComfyUI WebSocket 服务
 ///
@@ -179,7 +180,7 @@ class ComfyUIWebSocketService {
                 errorMessage:
                     errData?['exception_message'] as String? ??
                     errData?['exception_type'] as String? ??
-                    '执行出错',
+                    currentL10n.comfyui_executionError,
               ),
             );
           }

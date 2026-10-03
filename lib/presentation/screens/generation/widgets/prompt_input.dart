@@ -560,10 +560,13 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             constraints: const BoxConstraints.tightFor(width: 24, height: 22),
             padding: EdgeInsets.zero,
             tooltip: busy
-                ? '正在翻译'
+                ? context.l10n.promptTranslation_translating
                 : route == null
-                ? '翻译 · 先配置模型'
-                : '翻译 · ${route.provider.name} / ${route.model.displayName}',
+                ? context.l10n.promptTranslation_needsModel
+                : context.l10n.promptTranslation_withRoute(
+                    route.provider.name,
+                    route.model.displayName,
+                  ),
             onPressed: busy ? null : () => _handleTranslationButton(),
             style: IconButton.styleFrom(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -582,7 +585,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             height: 22,
             child: PopupMenuButton<String>(
               key: const Key('prompt-translation-actions'),
-              tooltip: '翻译操作',
+              tooltip: context.l10n.promptTranslation_actions,
               padding: EdgeInsets.zero,
               position: PopupMenuPosition.under,
               constraints: const BoxConstraints.tightFor(width: 176),
@@ -634,12 +637,19 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       if (result.convertedFields == 0) {
         AppToast.info(
           context,
-          result.skippedChangedFields > 0 ? '提示词已变化，未覆盖新编辑' : '当前没有需要翻译的普通文字',
+          result.skippedChangedFields > 0
+              ? context.l10n.promptTranslation_promptChanged
+              : context.l10n.promptTranslation_nothingToTranslate,
         );
         return;
       }
     } catch (error) {
-      if (mounted) AppToast.error(context, '翻译失败：$error');
+      if (mounted) {
+        AppToast.error(
+          context,
+          context.l10n.promptTranslation_failed('$error'),
+        );
+      }
     }
   }
 
@@ -647,18 +657,16 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     final openSettings = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('先配置翻译模型'),
-        content: const Text(
-          '翻译需要明确选择服务商和模型。前往「设置 → 集成 → 模型与接口」，先添加服务商并取得模型列表，再在「提示词翻译」卡片中完成选择。',
-        ),
+        title: Text(context.l10n.promptTranslation_setupTitle),
+        content: Text(context.l10n.promptTranslation_setupBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('稍后'),
+            child: Text(context.l10n.promptTranslation_later),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('前往设置'),
+            child: Text(context.l10n.promptTranslation_openSettings),
           ),
         ],
       ),
@@ -725,7 +733,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             size: 18,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          title: '翻译',
+          title: context.l10n.promptTranslation_toolTitle,
           theme: theme,
           onTap: () => ref
               .read(layoutStateNotifierProvider.notifier)
@@ -2041,7 +2049,7 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
         final restores = coordinator.canRestoreTranslations(widget.negative);
         final canConvert = coordinator.hasAnyTranslations(widget.negative);
         final modelLabel = route == null
-            ? '未配置模型'
+            ? context.l10n.promptTranslation_noModel
             : '${route.provider.name} / ${route.model.displayName}';
         return Container(
           key: const Key('prompt-translation-menu'),
@@ -2067,7 +2075,8 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
                               child: Tooltip(
                                 message: modelLabel,
                                 child: Text(
-                                  route?.model.displayName ?? '未配置模型',
+                                  route?.model.displayName ??
+                                      context.l10n.promptTranslation_noModel,
                                   key: const Key('prompt-translation-model'),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -2081,7 +2090,8 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
                             const SizedBox(width: 6),
                             IconButton(
                               key: const Key('prompt-translation-configure'),
-                              tooltip: '配置翻译模型',
+                              tooltip:
+                                  context.l10n.promptTranslation_configureModel,
                               constraints: const BoxConstraints.tightFor(
                                 width: 26,
                                 height: 26,
@@ -2110,7 +2120,8 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
                           Expanded(
                             child: _TranslationMenuAction(
                               buttonKey: const Key('prompt-translation-add'),
-                              tooltip: '翻译新增内容',
+                              tooltip:
+                                  context.l10n.promptTranslation_translateNew,
                               primary: true,
                               onPressed: busy ? null : widget.onTranslate,
                               icon: Stack(
@@ -2144,8 +2155,8 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
                                 'prompt-translation-plain-text',
                               ),
                               tooltip: restores
-                                  ? '撤销原文还原，恢复翻译块'
-                                  : '全部翻译块还原为原文文本',
+                                  ? context.l10n.promptTranslation_undoRestore
+                                  : context.l10n.promptTranslation_restoreAll,
                               onPressed: !busy && (restores || canConvert)
                                   ? () {
                                       if (coordinator.canRestoreTranslations(
@@ -2182,7 +2193,7 @@ class _TranslationMenuContentsState extends State<_TranslationMenuContents> {
                           key: const Key('prompt-translation-tutorial'),
                           onPressed: () => setState(() => _showGuide = true),
                           icon: const Icon(Icons.info_outline, size: 13),
-                          label: const Text('操作教程'),
+                          label: Text(context.l10n.promptTranslation_tutorial),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
                             minimumSize: Size.zero,

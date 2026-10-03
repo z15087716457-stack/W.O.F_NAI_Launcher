@@ -15,6 +15,7 @@ import '../../data/datasources/remote/nai_user_info_api_service.dart';
 import '../../data/models/auth/saved_account.dart';
 import 'account_manager_provider.dart';
 import 'guest_session_provider.dart';
+import '../../core/utils/localization_extension.dart';
 
 part 'auth_provider.g.dart';
 
@@ -348,7 +349,7 @@ class AuthNotifier extends _$AuthNotifier {
             );
             if (accountEndpoint.isOfficial &&
                 !NAIAuthApiService.isValidTokenFormat(accountToken)) {
-              throw Exception('Token 格式无效，应以 pst- 开头');
+              throw Exception(currentL10n.auth_tokenMustStartPst);
             }
             subscriptionInfo = await apiService
                 .validateToken(
@@ -515,10 +516,7 @@ class AuthNotifier extends _$AuthNotifier {
           'Invalid token format: length=${token.length}, prefix="$prefix"',
           'Auth',
         );
-        throw Exception(
-          'Token 格式无效。Persistent Token 应以 pst- 开头，'
-          '后跟至少10位字符。请检查输入的 Token 是否正确。',
-        );
+        throw Exception(currentL10n.auth_tokenFormatDetail);
       }
 
       final apiService = ref.read(naiAuthApiServiceProvider);
@@ -622,7 +620,7 @@ class AuthNotifier extends _$AuthNotifier {
     try {
       final normalizedToken = token.trim();
       if (normalizedToken.isEmpty) {
-        throw ArgumentError('Token 为空，无法验证');
+        throw ArgumentError(currentL10n.auth_tokenEmpty);
       }
 
       final apiService = ref.read(naiAuthApiServiceProvider);

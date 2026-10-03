@@ -8,7 +8,6 @@ import '../../../core/utils/subscription_expiry_utils.dart';
 import '../../../data/models/auth/saved_account.dart';
 import '../../providers/account_manager_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../screens/settings/widgets/settings_ui_theme.dart';
 import '../common/studio_icons.dart';
 import 'account_avatar.dart';
 import 'subscription_expiry_text.dart';
@@ -101,12 +100,7 @@ class AccountPopover extends ConsumerWidget {
         : null;
     final others = accounts.where((a) => a.id != current?.id).toList();
     final busy = auth.isLoading;
-    final title = settingsText(
-      context,
-      '登录与账号',
-      'Sign-in & accounts',
-      'ログインとアカウント',
-    );
+    final title = context.l10n.auth_signInAccounts;
     final muted = colors.onSurfaceVariant;
     TextStyle text(double size, {Color? color, FontWeight? weight}) =>
         theme.textTheme.bodyMedium!.copyWith(
@@ -171,12 +165,7 @@ class AccountPopover extends ConsumerWidget {
                               (auth.isAuthenticated
                                   ? auth.displayName ??
                                         context.l10n.auth_currentAccount
-                                  : settingsText(
-                                      context,
-                                      '尚未登录',
-                                      'Not signed in',
-                                      '未ログイン',
-                                    )),
+                                  : context.l10n.auth_notSignedIn),
                           key: const Key('account-popover-current-name'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -204,7 +193,7 @@ class AccountPopover extends ConsumerWidget {
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                settingsText(context, '当前', 'Current', '現在'),
+                                context.l10n.settings_current,
                                 style: text(10, color: colors.primary),
                               ),
                             ],
@@ -216,12 +205,7 @@ class AccountPopover extends ConsumerWidget {
                   const SizedBox(height: 3),
                   Text(
                     current == null
-                        ? settingsText(
-                            context,
-                            '选择账号，继续创作',
-                            'Choose an account to continue',
-                            'アカウントを選択して続ける',
-                          )
+                        ? context.l10n.auth_chooseAccountContinue
                         : _loginMethod(context, current),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -377,7 +361,7 @@ class AccountPopover extends ConsumerWidget {
                 style: quietButton,
                 icon: const Icon(StudioIcons.settingsGeneration, size: 14),
                 label: Text(
-                  settingsText(context, '管理账号', 'Manage accounts', 'アカウント管理'),
+                  context.l10n.auth_manageAccounts2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -492,7 +476,7 @@ String _loginMethod(BuildContext context, SavedAccount account) =>
 String _subscriptionLabel(BuildContext context, SavedAccount account) {
   final info = getSubscriptionExpiryInfo(account.subscriptionExpiresAt!);
   return info.isExpired
-      ? settingsText(context, '订阅已到期', 'Subscription expired', 'サブスクリプションの期限切れ')
+      ? context.l10n.auth_subscriptionExpired
       : SubscriptionExpiryText.dateStatusTextOf(
           context,
           info,

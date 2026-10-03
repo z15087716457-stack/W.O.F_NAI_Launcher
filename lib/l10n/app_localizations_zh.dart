@@ -527,9 +527,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_savedAccounts => '已保存账号';
 
   @override
-  String get settings_appearance => '外观';
-
-  @override
   String get settings_style => '风格';
 
   @override
@@ -551,25 +548,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_shortcuts => '快捷键';
 
   @override
-  String get settings_generation => '生成';
-
-  @override
-  String get settings_dataStorage => '数据与存储';
-
-  @override
-  String get settings_privacySharing => '安全与分享';
-
-  @override
-  String get settings_integrations => '集成';
-
-  @override
   String get settings_generationInputSection => '输入';
 
   @override
   String get settings_generationFeedbackSection => '完成提醒';
-
-  @override
-  String get settings_selectStyle => '选择风格';
 
   @override
   String get settings_selectFont => '选择字体';
@@ -681,9 +663,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_extraRootsIndexImportConfirm => '现在导入';
 
   @override
-  String get settings_about => '关于';
-
-  @override
   String settings_version(Object version) {
     return '版本 $version';
   }
@@ -735,16 +714,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_thirdPartyApiAccount => '第三方站点 API';
 
   @override
-  String get settings_apiSite => 'API 站点';
-
-  @override
-  String get settings_notLoggedIn => '登录后可设置头像和昵称';
-
-  @override
   String get settings_goToLogin => '去登录';
-
-  @override
-  String get settings_tapToChangeAvatar => '点击更换头像';
 
   @override
   String get settings_changeAvatar => '更换头像';
@@ -818,12 +788,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generation_pleaseInputPrompt => '请输入提示词';
-
-  @override
-  String get generation_emptyPromptHint => '输入提示词并点击生成';
-
-  @override
-  String get generation_imageWillShowHere => '图像将在这里显示';
 
   @override
   String get generation_generationFailed => '生成失败';
@@ -3166,9 +3130,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get drop_processing => '正在解析图片...';
 
   @override
-  String get characterEditor_close => '关闭';
-
-  @override
   String get characterEditor_clearAll => '清空所有';
 
   @override
@@ -4026,22 +3987,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_folderDeleteFailed => '删除文件夹失败';
 
   @override
-  String get localGallery_cachingMetadata => '正在缓存元数据...';
-
-  @override
-  String get localGallery_metadataCacheStats => '元数据缓存统计';
-
-  @override
-  String get localGallery_totalImages => '总图片';
-
-  @override
   String get localGallery_withMetadata => '有元数据';
 
   @override
   String get localGallery_skipped => '跳过';
-
-  @override
-  String get localGallery_remaining => '剩余';
 
   @override
   String get localGallery_cacheMonitor => '缓存监控';
@@ -4694,9 +4643,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_keyNavigate => '↑↓/滚轮';
-
-  @override
   String get autocomplete_actionSelect => '选择';
 
   @override
@@ -4704,9 +4650,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get autocomplete_actionClose => '关闭';
-
-  @override
-  String get autocomplete_categoryRecommended => '推荐';
 
   @override
   String get autocomplete_categoryCharacter => '角色';
@@ -6464,15 +6407,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_openFolderFailed => '打开文件夹失败';
 
   @override
-  String get settings_pleaseLoginFirst => '请先登录';
-
-  @override
-  String get settings_accountNotFound => '未找到账号信息';
-
-  @override
-  String get settings_goToLoginPage => '请前往登录页面';
-
-  @override
   String get settings_vibePathSaved => 'Vibe 库路径已保存';
 
   @override
@@ -6491,9 +6425,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get settings_resetPathConfirm =>
       '重置数据存储路径后，需要重启应用才能生效。\\n\\n默认路径将在下次启动时生效。是否继续？';
-
-  @override
-  String get settings_kritaBridgeTitle => 'Krita Bridge';
 
   @override
   String get settings_kritaBridgeEnable => '启用 Krita 本地桥接';
@@ -6546,9 +6477,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_fontScale => '字体大小';
 
   @override
-  String get settings_fontScale_description => '调整应用全局字体缩放比例';
-
-  @override
   String get settings_fontScale_previewSmall => '光影落在画布上。';
 
   @override
@@ -6556,9 +6484,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_fontScale_previewLarge => 'Let colors tell a story.';
-
-  @override
-  String get settings_fontScale_reset => '重置';
 
   @override
   String get settings_fontScale_done => '完成';
@@ -6617,19 +6542,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '默认 (Documents/NAI_Launcher/images/)';
 
   @override
-  String settings_defaultVibePath(Object path) {
-    return '$path (默认)';
-  }
-
-  @override
   String get settings_defaultHivePath => '默认 (%APPDATA%/NAI_Launcher/hive/)';
-
-  @override
-  String get settings_protectionMode => '保护模式';
-
-  @override
-  String get settings_protectionModeSubtitle =>
-      '开启后按下方子项保护本地资产、分享副本、高消耗和高频生图操作；关闭时保留子项配置但不生效。';
 
   @override
   String get settings_protectionFeatures => '保护功能';
@@ -6949,12 +6862,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get cacheStats_refreshNow => '立即刷新';
-
-  @override
-  String get cacheStats_refreshed => '已刷新';
-
-  @override
   String get cacheStats_resetStats => '重置统计';
 
   @override
@@ -6968,16 +6875,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cacheStats_l3Sqlite => 'L3 SQLite 数据库';
-
-  @override
-  String cacheStats_recordCount(Object count) {
-    return '$count 条记录';
-  }
-
-  @override
-  String cacheStats_databaseValue(Object imageCount, Object metadataCount) {
-    return '$imageCount 张图片 · $metadataCount 条元数据';
-  }
 
   @override
   String get galleryCache_rescanTitle => '重新扫描画廊';
@@ -7728,9 +7625,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get releaseNotes => '更新日志';
 
   @override
-  String get updatePortableManualHint => '当前构建不支持应用内更新，请前往 Release 页面手动下载新版。';
-
-  @override
   String updateDownloadingProgress(Object percent) {
     return '正在下载更新包：$percent%';
   }
@@ -7773,17 +7667,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get updateInstallingHint => '安装程序已启动，应用即将关闭并自动完成更新。';
 
   @override
-  String get updateInstallConfirmationTitle => '现在安装更新？';
-
-  @override
-  String get updateInstallConfirmationBody =>
-      '应用将安全关闭并安装更新，完成后自动重新启动。进行中的生成和下载任务会停止，请先保存必要内容。';
-
-  @override
   String get remindMeLater => '4 小时后提醒';
-
-  @override
-  String get skipThisVersion => '忽略此版本';
 
   @override
   String updateNoticeAvailable(Object version) {
@@ -7822,9 +7706,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get goToDownload => '前往下载';
-
-  @override
-  String get versionSkipped => '已忽略此版本';
 
   @override
   String get cannotOpenUrl => '无法打开链接';
@@ -8199,16 +8080,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_createFolder => '创建文件夹';
 
   @override
-  String galleryScan_skipped(int count) {
-    return '跳过 $count';
-  }
-
-  @override
-  String galleryScan_withMetadata(int count) {
-    return '有元数据 $count';
-  }
-
-  @override
   String galleryScan_failed(int count) {
     return '失败 $count';
   }
@@ -8218,9 +8089,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get galleryScan_processing => '处理中';
-
-  @override
-  String get galleryScan_pending => '待处理';
 
   @override
   String get vibeDetail_useAll => '使用全部';
@@ -8344,28 +8212,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get autocomplete_settingsTitle => '自动补全';
-
-  @override
-  String get autocomplete_enable => '启用自动补全';
-
-  @override
   String get autocomplete_resultLimit => '结果数量';
-
-  @override
-  String get autocomplete_allResults => '全部';
-
-  @override
-  String get autocomplete_showAliases => '显示命中的别名';
-
-  @override
-  String get autocomplete_showTranslations => '显示中文汉化';
-
-  @override
-  String get autocomplete_autoComma => '插入后自动添加逗号';
-
-  @override
-  String get autocomplete_dataSourcesTitle => '数据源与缓存';
 
   @override
   String get autocomplete_relatedTagsTitle => '标签扩展';
@@ -8407,22 +8254,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagExpansion_wikiUnavailable => '本地暂未收录这个标签的释义。';
 
   @override
-  String get autocomplete_danbooruApi => 'Danbooru 在线补充';
-
-  @override
   String get autocomplete_danbooruPrivacy => '仅发送当前英文标签，不会上传完整提示词';
-
-  @override
-  String get autocomplete_llmTranslation => '使用 Prompt Assistant 补译缺失汉化';
-
-  @override
-  String get autocomplete_llmRouteMissing =>
-      '请先在 Prompt Assistant 中配置 Translate 路由';
-
-  @override
-  String autocomplete_llmRoute(String route) {
-    return '当前路由：$route。调用模型可能产生费用。';
-  }
 
   @override
   String get autocomplete_cooccurrence => '离线相关标签库';
@@ -8431,9 +8263,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String autocomplete_entryCount(int count) {
     return '$count 条记录';
   }
-
-  @override
-  String get autocomplete_cacheTitle => '在线与 AI 缓存';
 
   @override
   String get autocomplete_clearDanbooruCache => '清除 Danbooru 缓存';
@@ -8789,10 +8618,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_noFolders => '还没有文件夹';
 
   @override
-  String get promptBlockLibrary_favoriteMenuEmptyCollections =>
-      '还没有收藏集，可在侧栏「收藏」旁新建';
-
-  @override
   String get promptBlockLibrary_emptyFavorites => '还没有收藏的块，点块上的 ★ 即可收藏';
 
   @override
@@ -8827,9 +8652,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_folderNameHint => '文件夹名称';
 
   @override
-  String get promptBlockLibrary_blockContent => '正文';
-
-  @override
   String get promptBlockLibrary_basicPrompt => '基础提示词';
 
   @override
@@ -8845,13 +8667,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_stepsLabel => '步数';
 
   @override
-  String get promptBlockLibrary_cfgLabel => 'PG';
-
-  @override
   String get promptBlockLibrary_noiseScheduleLabel => '噪声调度';
-
-  @override
-  String get promptBlockLibrary_cfgRescaleLabel => 'PGR';
 
   @override
   String get promptBlockLibrary_invalidGenerationSettings =>
@@ -8956,28 +8772,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String promptBlockLibrary_favoriteSelected(int count) {
-    return '收藏选中的 $count 个块';
-  }
-
-  @override
-  String promptBlockLibrary_unfavoriteSelected(int count) {
-    return '取消收藏选中的 $count 个块';
-  }
-
-  @override
-  String promptBlockLibrary_moveToSelected(int count) {
-    return '移动 $count 个块到…';
-  }
-
-  @override
   String promptBlockLibrary_deleteSelected(int count) {
     return '删除选中的 $count 个块';
-  }
-
-  @override
-  String promptBlockLibrary_blocksMoved(int count) {
-    return '已移动 $count 个块';
   }
 
   @override
@@ -9038,17 +8834,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_importLibraryBackup => '导入库备份…';
-
-  @override
-  String get promptBlockLibrary_exportBlockAsTxt => '导出为 TXT';
-
-  @override
-  String get promptBlockLibrary_exportTxtDone => '已导出 TXT';
-
-  @override
-  String promptBlockLibrary_exportTxtFailed(String error) {
-    return '导出失败：$error';
-  }
 
   @override
   String get promptBlockLibrary_importTxtTitle => '选择 TXT 文件';
@@ -10103,12 +9888,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_addToCollection => '加入书签集';
 
   @override
-  String get wiki_importBlock => '存为单原子块';
-
-  @override
-  String get wiki_inBlockLibrary => '已在块库';
-
-  @override
   String get wiki_loadMore => '加载更多';
 
   @override
@@ -10134,4 +9913,2464 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortcut_action_vibe_detail_next_sub_vibe => '下一个子 Vibe';
+
+  @override
+  String get settings_addAccountsSwitchBetweenThem => '添加账号后，可以在这里快速切换。';
+
+  @override
+  String get settings_current => '当前';
+
+  @override
+  String get settings_emailLogin => '邮箱登录';
+
+  @override
+  String get settings_signedIn => '已登录';
+
+  @override
+  String get settings_switch => '切换';
+
+  @override
+  String get settings_accountActions => '账号操作';
+
+  @override
+  String get settings_editProfile => '编辑资料';
+
+  @override
+  String get settings_setDefault => '设为默认账号';
+
+  @override
+  String get settings_credentialsUpdated => '登录凭据已更新';
+
+  @override
+  String get settings_updateCredentials => '更新凭据';
+
+  @override
+  String get settings_accountDetails => '账号详情';
+
+  @override
+  String get settings_localAccountProfile => '本地账号资料';
+
+  @override
+  String get settings_setDefault2 => '设为默认';
+
+  @override
+  String get settings_credentialsWereNotUpdatedCheck => '凭据未更新，请检查令牌与连接后重试。';
+
+  @override
+  String get settings_updateCredentials2 => '更新登录凭据';
+
+  @override
+  String get settings_checking => '正在验证…';
+
+  @override
+  String get settings_enterNewSignInToken => '输入新的登录令牌，验证成功后更新此账号。';
+
+  @override
+  String get auth_signInAccounts => '登录与账号';
+
+  @override
+  String get auth_notSignedIn => '尚未登录';
+
+  @override
+  String get auth_chooseAccountContinue => '选择账号，继续创作';
+
+  @override
+  String get auth_manageAccounts2 => '管理账号';
+
+  @override
+  String get auth_subscriptionExpired => '订阅已到期';
+
+  @override
+  String get settings_tagExpansion => '标签扩展';
+
+  @override
+  String get settings_tagDictionaries => '标签词库';
+
+  @override
+  String get settings_cacheMaintenance => '缓存维护';
+
+  @override
+  String get settings_clear => '清理';
+
+  @override
+  String get settings_autoRefresh => '自动刷新';
+
+  @override
+  String get settings_searchFonts => '搜索字体名称';
+
+  @override
+  String get settings_couldNotLoadFonts => '暂时无法读取字体';
+
+  @override
+  String get settings_recommended => '推荐';
+
+  @override
+  String get settings_included => '随应用提供';
+
+  @override
+  String get settings_systemFonts => '系统字体';
+
+  @override
+  String get settings_fontPreview => '字体预览';
+
+  @override
+  String get settings_onlineFontsLoadAfterApplying => '在线字体将在应用后加载，当前显示界面字体。';
+
+  @override
+  String get settings_saving => '保存设置';
+
+  @override
+  String get settings_howGeneratedImagesSaved => '生成图片的保存方式';
+
+  @override
+  String get settings_assetsDisplay => '素材与显示';
+
+  @override
+  String get settings_vibeLocationThumbnailQuality => 'Vibe 位置与缩略图质量';
+
+  @override
+  String get settings_applicationData => '应用数据';
+
+  @override
+  String get settings_gallerySources => '图库来源';
+
+  @override
+  String get settings_manageAdditionalGalleryFolders => '管理额外图库文件夹';
+
+  @override
+  String get settings_default => '默认';
+
+  @override
+  String get settings_keyboard => '键盘操作';
+
+  @override
+  String get settings_customizeFrequentlyUsedActions => '按习惯配置常用操作';
+
+  @override
+  String get settings_manageShortcuts => '管理快捷键';
+
+  @override
+  String get settings_costReminders => '消耗提醒';
+
+  @override
+  String get settings_requestPacing => '请求节奏';
+
+  @override
+  String get settings_notificationsSound => '完成提醒与声音';
+
+  @override
+  String get settings_lockCanvasCamera => '锁定画布相机';
+
+  @override
+  String get settings_dictionariesCache => '词库与缓存';
+
+  @override
+  String get settings_defaultAccount2 => '默认账号';
+
+  @override
+  String get settings_signInAutomatically => '启动时自动登录';
+
+  @override
+  String get settings_signInCredentials => '登录凭据';
+
+  @override
+  String get settings_translationInterfaces => '翻译功能接口';
+
+  @override
+  String get settings_presetsBuiltInRules => '预设与内置规则';
+
+  @override
+  String get settings_preferenceBackupRestore => '偏好备份与恢复';
+
+  @override
+  String get settings_searchSettingsFeatures => '搜索设置、功能或关键词';
+
+  @override
+  String get settings_noMatchingSettings => '没有找到匹配设置';
+
+  @override
+  String get settings_change => '更改';
+
+  @override
+  String get settings_couldNotPlaySoundCheck => '无法播放音效，请检查音频文件。';
+
+  @override
+  String get settings_useDefaultCompletionSound => '使用默认完成音效';
+
+  @override
+  String get settings_soundPreview => '音效预览';
+
+  @override
+  String get settings_listenCurrentCompletionSound => '试听当前完成音效';
+
+  @override
+  String get settings_playSound => '试听音效';
+
+  @override
+  String get settings_searchResults => '搜索结果';
+
+  @override
+  String get settings_promptInput => '提示词输入';
+
+  @override
+  String get settings_manageTranslationModelsRules => '管理翻译模型与规则';
+
+  @override
+  String get settings_browsing => '浏览方式';
+
+  @override
+  String get settings_chooseHowViewImages => '选择图片的查看习惯';
+
+  @override
+  String get settings_canvasControls => '画布操作';
+
+  @override
+  String get settings_keepViewSteady => '保持视角稳定';
+
+  @override
+  String get settings_appearance2 => '外观样式';
+
+  @override
+  String get settings_chooseLightDarkWorkspace => '选择工作台的明暗风格';
+
+  @override
+  String get settings_textLanguage => '文字与语言';
+
+  @override
+  String get settings_makeReadingComfortable => '统一阅读体验';
+
+  @override
+  String get settings_adjustSettingsPagesDialogsOnly => '仅调整设置页面与设置弹窗的字号';
+
+  @override
+  String get settings_motionNotifications => '动效与提醒';
+
+  @override
+  String get settings_reduceDistractionsKnowWorkFinishes => '减少打扰，及时获知完成';
+
+  @override
+  String get settings_notificationStyle => '通知样式';
+
+  @override
+  String get settings_notificationsAppearUpperRightWrap =>
+      '通知会显示在右上角，长文本自动换行，进度任务完成后自动收起。';
+
+  @override
+  String get settings_preview => '预览';
+
+  @override
+  String get settings_versionUpdates => '版本与更新';
+
+  @override
+  String get settings_currentVersionUpdateOptions => '当前版本与更新选项';
+
+  @override
+  String get settings_diagnosticsResources => '诊断与资料';
+
+  @override
+  String get settings_logsFontsOpenSourceProject => '日志、字体与开源项目';
+
+  @override
+  String get settings_viewLicenses => '查看许可';
+
+  @override
+  String get settings_openProject => '打开项目';
+
+  @override
+  String get settings_actionIncomplete => '操作未完成';
+
+  @override
+  String get settings_exportPreferences => '导出偏好';
+
+  @override
+  String get settings_preferencesExported => '偏好已导出';
+
+  @override
+  String get settings_noAutomaticBackupYet => '尚无自动回退备份';
+
+  @override
+  String get settings_restorePreviousPreferences => '恢复上次偏好';
+
+  @override
+  String get settings_importPreferences => '导入偏好';
+
+  @override
+  String get settings_apply => '确认应用';
+
+  @override
+  String get settings_preferencesAppliedPreviousSettingsBacked =>
+      '偏好已应用，旧设置已自动备份';
+
+  @override
+  String get settings_restoreDefaultPreferences => '恢复默认偏好';
+
+  @override
+  String get settings_choosePreferencesResetCurrentSettings =>
+      '选择需要恢复的范围，当前偏好将自动备份。';
+
+  @override
+  String get settings_appearanceSoundControls => '外观、声音与操作';
+
+  @override
+  String get settings_inputAutocomplete => '输入与自动补全';
+
+  @override
+  String get settings_privacyGenerationProtection => '隐私与生成保护';
+
+  @override
+  String get settings_moveAppearanceControlsInputProtection =>
+      '界面、操作、输入和保护偏好，可跨设备迁移。';
+
+  @override
+  String get settings_rollbackCopySavedBeforeImport => '导入或恢复默认前会自动保存回退副本。';
+
+  @override
+  String get settings_resetSelectedScopeWhileKeeping =>
+      '按范围恢复，保留账号、模型、图库和创作内容。';
+
+  @override
+  String get settings_chooseScope => '选择范围';
+
+  @override
+  String get settings_preferenceManagement => '偏好管理';
+
+  @override
+  String get settings_backupMigrationRecovery => '备份、迁移与恢复';
+
+  @override
+  String get settings_generalAppearance => '常规与外观';
+
+  @override
+  String get settings_makeWorkspaceComfortableReadUse => '让工作台符合你的阅读与使用习惯。';
+
+  @override
+  String get settings_controlsShortcuts => '操作与快捷键';
+
+  @override
+  String get settings_chooseInteractionCanvasControlsKeyboard =>
+      '设置交互方式、画布操作和键盘快捷键。';
+
+  @override
+  String get settings_generationPrompts => '生成与提示词';
+
+  @override
+  String get settings_managePromptInputGenerationReminders =>
+      '管理提示词输入、生成提醒与请求节奏。';
+
+  @override
+  String get settings_galleryFiles => '图库与文件';
+
+  @override
+  String get settings_manageImageSavingGallerySources => '管理图片保存、图库来源与浏览显示。';
+
+  @override
+  String get settings_manageTagDictionariesIndexesCache => '管理标签词库、索引与缓存维护。';
+
+  @override
+  String get settings_novelaiAccounts => 'NovelAI 账号';
+
+  @override
+  String get settings_viewAccountManageSignIn => '查看当前账号，管理登录与默认账号。';
+
+  @override
+  String get settings_connectionsIntegrations => '连接与集成';
+
+  @override
+  String get settings_manageExternalToolsBridgesNetwork => '管理外部工具、桥接连接与网络设置。';
+
+  @override
+  String get settings_privacySharing2 => '隐私与分享';
+
+  @override
+  String get settings_controlSharedInformationConfirmationBefore =>
+      '控制分享信息与需要确认的操作。';
+
+  @override
+  String get settings_aboutDiagnostics => '关于与诊断';
+
+  @override
+  String get settings_updatesLogsProjectInformation => '版本更新、日志与项目资料。';
+
+  @override
+  String get settings_searchSettings => '搜索设置';
+
+  @override
+  String get settings_preferences => '使用偏好';
+
+  @override
+  String get settings_creationResources => '创作与资源';
+
+  @override
+  String get settings_servicesConnections => '服务与连接';
+
+  @override
+  String get settings_safetyMaintenance => '安全与维护';
+
+  @override
+  String get settings_subscriptionActive => '订阅有效';
+
+  @override
+  String get settings_availableBalance => '可用余额';
+
+  @override
+  String get settings_subscriptionExpiry2 => '订阅有效期';
+
+  @override
+  String get settings_subscriptionDetailsUnavailable => '订阅信息暂不可用';
+
+  @override
+  String get settings_loadingSubscriptionDetails => '正在读取订阅信息…';
+
+  @override
+  String get settings_localDataStaysAvailableAfter => '账号到期后仍保留本地数据。';
+
+  @override
+  String get settings_records => '条记录';
+
+  @override
+  String get settings_hitRate => '命中率';
+
+  @override
+  String get settings_images => '张图片';
+
+  @override
+  String get settings_cacheOverview => '缓存概览';
+
+  @override
+  String get settings_loginPreferences => '登录偏好';
+
+  @override
+  String get settings_preselectedSignInPage => '在登录页优先选中此账号。';
+
+  @override
+  String get settings_noAccounts => '暂无账号';
+
+  @override
+  String get settings_useLastSessionOffNext => '使用上次的登录凭据；关闭后，下次启动进入登录页。';
+
+  @override
+  String get settings_couldNotSaveLoginPreference => '登录偏好未保存，请重试。';
+
+  @override
+  String get settings_loginPreferencesUnavailable => '无法读取登录偏好。';
+
+  @override
+  String settings_applyPreferencesConfirm(Object count) {
+    return '将应用 $count 项偏好。当前偏好会自动备份，可从“恢复上次偏好”找回。账号、密钥、草稿、图库和模型配置保持独立。';
+  }
+
+  @override
+  String get settings_restore => '恢复';
+
+  @override
+  String get wiki_translating => '正在翻译中';
+
+  @override
+  String get wiki_back => '返回上一次';
+
+  @override
+  String get wiki_readingTranslation => '译文';
+
+  @override
+  String get wiki_readingOriginal => '原文';
+
+  @override
+  String get wiki_switchToOriginal => '切换到原文';
+
+  @override
+  String get wiki_switchToTranslation => '切换到译文';
+
+  @override
+  String get wiki_retranslate => '重新翻译';
+
+  @override
+  String get wiki_onThisPage => '本文目录';
+
+  @override
+  String get wiki_overview => '简介';
+
+  @override
+  String get wiki_untranslated => '暂未翻译';
+
+  @override
+  String get wiki_autoTranslateTagsArticles => '自动翻译标签与百科';
+
+  @override
+  String get wiki_readingContent => '阅读内容';
+
+  @override
+  String get wiki_categoryGeneral => '一般';
+
+  @override
+  String get wiki_categoryArtist => '画师';
+
+  @override
+  String get wiki_categoryCopyright => '作品';
+
+  @override
+  String get wiki_categoryCharacter => '角色';
+
+  @override
+  String get wiki_categoryMeta => '元标签';
+
+  @override
+  String get wiki_categoryContributor => '贡献者';
+
+  @override
+  String get wiki_categorySpecies => '物种';
+
+  @override
+  String get wiki_categoryLore => '设定';
+
+  @override
+  String get wiki_categoryLibrary => '本地';
+
+  @override
+  String get toast_titleSuccess => '已完成';
+
+  @override
+  String get toast_titleError => '操作失败';
+
+  @override
+  String get toast_titleWarning => '请留意';
+
+  @override
+  String get toast_titleInfo => '提示';
+
+  @override
+  String get toast_titleProgress => '正在处理';
+
+  @override
+  String get tagExpansion_autoTranslateVisible => '自动翻译可见标签';
+
+  @override
+  String get translationEditor_title => '翻译块';
+
+  @override
+  String get translationEditor_source => '原文';
+
+  @override
+  String get translationEditor_sourcePrefix => '原';
+
+  @override
+  String get translationEditor_generation => '生图使用';
+
+  @override
+  String get translationEditor_editable => '可改写';
+
+  @override
+  String get translationEditor_modified => '被修改';
+
+  @override
+  String get translationEditor_edited => '已编辑';
+
+  @override
+  String get translationEditor_close => '关闭';
+
+  @override
+  String get translationEditor_save => '保存';
+
+  @override
+  String get translationEditor_delete => '删除整块';
+
+  @override
+  String get translationEditor_restore => '还原为原文文本';
+
+  @override
+  String get translationEditor_configure => '配置翻译模型';
+
+  @override
+  String translationEditor_readingFieldTitle(Object language) {
+    return '$language阅读文本';
+  }
+
+  @override
+  String translationEditor_sourceWarning(Object language) {
+    return '原文已修改，$language待同步';
+  }
+
+  @override
+  String get translationEditor_editHint => '译文已手工编辑；这是编辑记录，不触发原文修改提醒';
+
+  @override
+  String get translationLanguage_chinese => '中文';
+
+  @override
+  String get translationLanguage_english => '英语';
+
+  @override
+  String get translationLanguage_japanese => '日语';
+
+  @override
+  String get translationLanguage_korean => '韩语';
+
+  @override
+  String get promptBlockEditor_translationNeedsReview => '原文已修改，译文待更新';
+
+  @override
+  String get promptBlockEditor_translationReviewHint => '修改原文后请同步校对这里的译文';
+
+  @override
+  String get modelTask_translateTitle => '原文 → 阅读语言';
+
+  @override
+  String get modelTask_promptReverseTitle => '阅读语言 → 原文';
+
+  @override
+  String get modelTask_tagTranslateTitle => '标签名称翻译';
+
+  @override
+  String get modelTask_wikiTranslateTitle => '百科正文翻译';
+
+  @override
+  String get modelTask_translateDescription => '翻译提示词与积木，保留权重、分组和标签语义。';
+
+  @override
+  String get modelTask_promptReverseDescription => '结合原文落实译文中的增删修改，结果填回原文供确认。';
+
+  @override
+  String get modelTask_tagTranslateDescription => '为可见标签提供简洁、准确的名称释义。';
+
+  @override
+  String get modelTask_wikiTranslateDescription => '翻译百科正文、整理排版，并按语境选择可点击标签。';
+
+  @override
+  String get modelTask_connectionTest => '模型连接测试';
+
+  @override
+  String get modelReasoning_serviceDefault => '服务默认';
+
+  @override
+  String get modelReasoning_off => '关闭';
+
+  @override
+  String get modelReasoning_on => '开启';
+
+  @override
+  String get modelReasoning_minimal => '极低';
+
+  @override
+  String get modelReasoning_low => '低';
+
+  @override
+  String get modelReasoning_medium => '中';
+
+  @override
+  String get modelReasoning_high => '高';
+
+  @override
+  String get modelReasoning_xhigh => '极高';
+
+  @override
+  String get modelReasoning_max => '最高';
+
+  @override
+  String get modelProvider_custom => '自定义服务';
+
+  @override
+  String get modelProvider_qwen => '通义千问 · 百炼';
+
+  @override
+  String get modelProvider_moonshot => 'Kimi · 月之暗面';
+
+  @override
+  String get modelProvider_zhipu => '智谱 GLM';
+
+  @override
+  String get modelProvider_doubao => '豆包 · 火山方舟';
+
+  @override
+  String get modelProvider_hunyuan => '腾讯混元';
+
+  @override
+  String get modelProvider_qianfan => '百度千帆';
+
+  @override
+  String get modelProvider_siliconflow => '硅基流动';
+
+  @override
+  String get modelProvider_zai => 'Z.AI · 国际';
+
+  @override
+  String get modelProvider_zhipuCodingPlan => '智谱 Coding Plan';
+
+  @override
+  String get modelProvider_kimiCoding => 'Kimi 编程';
+
+  @override
+  String get modelProvider_moonshotInternational => 'Moonshot AI · 国际';
+
+  @override
+  String get modelProvider_minimaxChinaChat => 'MiniMax · 国内 OpenAI';
+
+  @override
+  String get modelProvider_minimaxChinaMessages => 'MiniMax · 国内 Anthropic';
+
+  @override
+  String get modelProvider_minimaxInternationalMessages =>
+      'MiniMax · 国际 Anthropic';
+
+  @override
+  String get modelProvider_xiaomi => '小米 MiMo';
+
+  @override
+  String get modelProvider_antLing => '蚂蚁 Ling';
+
+  @override
+  String get modelProvider_stepfunPlan => '阶跃 Step Plan';
+
+  @override
+  String get modelProvider_qwenTokenPlanChina => '通义 Token 套餐 · 国内';
+
+  @override
+  String get modelProvider_hintHuggingFace =>
+      '使用具有推理权限的 Hugging Face Token；可手动填写路由模型 ID。';
+
+  @override
+  String get modelProvider_hintPlanKey => '使用套餐专用 API Key；模型与可用范围以该套餐实际返回为准。';
+
+  @override
+  String get modelProvider_hintInternationalEndpoint =>
+      '国际平台端点；使用国际平台的 API Key。';
+
+  @override
+  String get modelProvider_hintRegionOpenAi =>
+      '使用对应地区的 API Key；当前预填 OpenAI Chat Completions 兼容地址。';
+
+  @override
+  String get modelProvider_hintRegionAnthropic =>
+      '使用对应地区的 API Key；当前预填 Anthropic Messages 兼容地址。';
+
+  @override
+  String get modelProvider_hintQwen => '默认北京区域；其他区域请使用对应 Key 并修改接口地址。';
+
+  @override
+  String get modelProvider_hintMinimax => '默认国际按量接口；国内平台请使用对应区域的 Key 和接口地址。';
+
+  @override
+  String get modelProvider_hintMoonshot => '默认国内平台；国际平台请使用对应区域的 Key 和接口地址。';
+
+  @override
+  String get modelProvider_hintZhipu => '默认按量接口；Coding Plan 请使用套餐专用地址。';
+
+  @override
+  String get modelProvider_hintDoubao => '使用方舟 API Key；需先开通模型，也可添加推理接入点 ID。';
+
+  @override
+  String get modelProvider_hintCustom => '填写兼容服务的地址与 Key，并在连接信息中选择接口协议。';
+
+  @override
+  String get modelProvider_hintLocal => '先启动本地服务，再读取已加载的模型目录。';
+
+  @override
+  String get modelProvider_hintDefault => '地址与协议已预填；保存 Key 后即可选择模型使用。';
+
+  @override
+  String get modelParams_temperatureRange => 'Temperature 应在 0–2 之间。';
+
+  @override
+  String get modelParams_topPRange => 'Top P 应大于 0 且不超过 1。';
+
+  @override
+  String get modelParams_maxOutputPositive => '最大输出 token 必须大于 0。';
+
+  @override
+  String get modelParams_anthropicTemperatureRange =>
+      'Anthropic 的 Temperature 应在 0–1 之间。';
+
+  @override
+  String get modelParams_anthropicSamplingConflict =>
+      'Anthropic 的 Temperature 与 Top P 请选择一项；请检查模型参数。';
+
+  @override
+  String modelParams_thinkingBudgetTooSmall(Object minimum) {
+    return '最大输出必须大于思考预算下限 $minimum。';
+  }
+
+  @override
+  String get modelOverrides_invalidHeaderName => '请输入有效的请求头名称';
+
+  @override
+  String get modelOverrides_invalidHeaderValue => '请求头值不能包含换行或控制字符';
+
+  @override
+  String get modelOverrides_emptyBodyField => '请求体字段名不能为空';
+
+  @override
+  String get modelOverrides_modelFromList => '模型 ID 请通过模型列表设置';
+
+  @override
+  String get modelOverrides_streamMustBeFalse => '当前接口使用非流式请求，stream 应为 false';
+
+  @override
+  String get modelConfig_changedSaveAgain => '配置已变化，请重新保存。';
+
+  @override
+  String get modelConfig_presetChanged => '所选预设已变化，请重新选择。';
+
+  @override
+  String get modelConfig_serviceDisabled => '所选服务已停用，请重新选择。';
+
+  @override
+  String get modelConfig_modelChanged => '所选模型已变化，请重新选择。';
+
+  @override
+  String get modelConfig_reasoningChanged => '模型支持的思考档位已变化，请重新选择或跟随模型。';
+
+  @override
+  String get modelConfig_presetIdRequired => '预设 ID 不能为空。';
+
+  @override
+  String get modelConfig_saveBuiltinAsCustom => '请将内置方案另存为自定义预设。';
+
+  @override
+  String get modelConfig_namePromptRequired => '名称和提示词不能为空。';
+
+  @override
+  String get modelConfig_builtinNotDeletable => '内置规则不可删除。';
+
+  @override
+  String get modelConfig_pasteFullJson => '请粘贴完整的模型配置 JSON。';
+
+  @override
+  String get modelConfig_builtinNotOverwritable => '内置方案不可覆盖，请复制为自定义预设。';
+
+  @override
+  String get modelConfig_invalidProvider => '服务商 ID、名称或地址无效。';
+
+  @override
+  String get modelConfig_missingProvider => '模型对应的服务商不存在。';
+
+  @override
+  String get modelConfig_invalidCustomPreset => '自定义预设的 ID、名称或提示词无效。';
+
+  @override
+  String get modelConfig_changedImportAgain => '配置已变化，请重新导入。';
+
+  @override
+  String get modelHealth_unverified => '尚未验证连接；使用模型或点击“测试连接”后更新';
+
+  @override
+  String get modelHealth_healthy => '最近一次请求成功';
+
+  @override
+  String get modelHealth_limited => '接口可达，但最近请求被限流（HTTP 429）；请稍后重试或检查额度';
+
+  @override
+  String get modelHealth_authentication => '认证失败；请检查 API 密钥';
+
+  @override
+  String get modelHealth_permission => '访问被拒绝；请检查服务权限';
+
+  @override
+  String get modelHealth_timeout => '最近一次请求超时';
+
+  @override
+  String get modelHealth_network => '最近一次请求无法连接服务';
+
+  @override
+  String get modelHealth_invalidResponse => '最近一次响应异常；可在请求记录中查看详情';
+
+  @override
+  String get modelHealth_failed => '最近一次请求失败';
+
+  @override
+  String modelHealth_failedStatus(Object status) {
+    return '最近一次请求失败（HTTP $status）';
+  }
+
+  @override
+  String get modelRequest_statusPending => '等待中';
+
+  @override
+  String get modelRequest_statusRunning => '请求中';
+
+  @override
+  String get modelRequest_statusSuccess => '成功';
+
+  @override
+  String get modelRequest_statusFailed => '失败';
+
+  @override
+  String get modelRequest_statusCancelled => '已取消';
+
+  @override
+  String get modelRequest_fieldTime => '时间';
+
+  @override
+  String get modelRequest_fieldMethod => '方法';
+
+  @override
+  String get modelRequest_fieldUrl => '地址';
+
+  @override
+  String get modelRequest_fieldRequestHeaders => '请求头';
+
+  @override
+  String get modelRequest_fieldBody => '正文';
+
+  @override
+  String get modelRequest_fieldStatusCode => '状态码';
+
+  @override
+  String get modelRequest_fieldResponseHeaders => '响应头';
+
+  @override
+  String get modelRequest_fieldError => '错误';
+
+  @override
+  String get modelRequest_fieldInterface => '接口';
+
+  @override
+  String get modelRequest_fieldProvider => '服务商';
+
+  @override
+  String get modelRequest_fieldModel => '模型';
+
+  @override
+  String get modelRequest_fieldProtocol => '协议';
+
+  @override
+  String get modelRequest_fieldStatus => '状态';
+
+  @override
+  String get modelRequest_fieldElapsed => '耗时（毫秒）';
+
+  @override
+  String get modelRequest_fieldAttempts => '执行次数';
+
+  @override
+  String get modelRequest_fieldHttpRequests => 'HTTP 请求数';
+
+  @override
+  String get modelRequest_fieldParameters => '生效参数';
+
+  @override
+  String get modelRequest_redacted => '[已脱敏]';
+
+  @override
+  String get modelRequest_emptyResponse => '模型返回了空内容。';
+
+  @override
+  String get modelService_testFieldsIncomplete => '测试返回的字段不完整。';
+
+  @override
+  String get modelService_testFieldsInvalid => '测试返回的字段不正确。';
+
+  @override
+  String get modelService_testGroupsInvalid => '测试返回的分组不正确。';
+
+  @override
+  String get modelService_testSourceEmpty => '测试返回的原文为空。';
+
+  @override
+  String get modelService_conversionCancelled => '转换已取消';
+
+  @override
+  String get modelService_chooseInterfaceModel =>
+      '请先在「设置 → 模型与接口 → 功能接口」选择服务商和模型。';
+
+  @override
+  String get modelService_enableServiceModel => '请先在设置中启用服务，并获取或手动添加后选中一个模型。';
+
+  @override
+  String get modelSettings_keepEditsTitle => '保留当前编辑？';
+
+  @override
+  String get modelSettings_keepEditsBody => '当前修改尚未保存。是否保存后切换？';
+
+  @override
+  String get modelSettings_discard => '放弃';
+
+  @override
+  String get modelSettings_saveAndSwitch => '保存并切换';
+
+  @override
+  String get modelSettings_addProvider => '添加服务商';
+
+  @override
+  String modelSettings_deleteProviderTitle(Object name) {
+    return '删除 $name？';
+  }
+
+  @override
+  String get modelSettings_deleteProviderBody => '此服务的连接、密钥和已选模型将被删除。';
+
+  @override
+  String modelSettings_deleteProviderBindings(Object count) {
+    return '$count 个功能的模型绑定会被清除，预设保留。';
+  }
+
+  @override
+  String modelSettings_deletePresetTitle(Object name) {
+    return '删除“$name”？';
+  }
+
+  @override
+  String get modelSettings_deletePresetBody => '使用此预设的功能将恢复内置方案。模型绑定保留。';
+
+  @override
+  String get modelSettings_configCopied => '配置已复制，不包含密钥、自定义请求头或请求体。';
+
+  @override
+  String get modelSettings_importConfig => '导入配置';
+
+  @override
+  String get modelSettings_importConfigHint => '粘贴导出的配置。导入前会备份当前配置；密钥继续独立保存。';
+
+  @override
+  String get modelSettings_configJson => '配置 JSON';
+
+  @override
+  String modelSettings_importPreview(
+    Object providers,
+    Object models,
+    Object presets,
+  ) {
+    return '将导入 $providers 个服务商、$models 个模型和 $presets 个自定义预设。';
+  }
+
+  @override
+  String get modelSettings_importMissingProviders => '缺少服务商或模型配置。';
+
+  @override
+  String get modelSettings_checkConfig => '检查配置';
+
+  @override
+  String get modelSettings_importAndReplace => '导入并替换';
+
+  @override
+  String get modelSettings_configImported => '配置已导入';
+
+  @override
+  String get modelSettings_description => '管理服务连接与翻译偏好。';
+
+  @override
+  String get modelSettings_configMenu => '配置管理';
+
+  @override
+  String get modelSettings_copyConfig => '复制配置';
+
+  @override
+  String get modelSettings_tabProviders => '服务商';
+
+  @override
+  String get modelSettings_tabInterfaces => '功能接口';
+
+  @override
+  String get modelSettings_tabPresets => '预设与提示词';
+
+  @override
+  String get modelSettings_tabRequests => '请求记录';
+
+  @override
+  String modelSettings_providersCount(Object count) {
+    return '服务商 · $count';
+  }
+
+  @override
+  String modelSettings_providerModelCount(Object count) {
+    return '$count 个模型';
+  }
+
+  @override
+  String get modelSettings_providerDisabledSuffix => ' · 未启用';
+
+  @override
+  String get modelSettings_emptyTitle => '添加你的第一个模型服务';
+
+  @override
+  String get modelSettings_emptyBody => '选择常用服务，或连接自定义接口。';
+
+  @override
+  String get modelSettings_customService => '自定义服务';
+
+  @override
+  String get modelSettings_notConfigured => '待配置';
+
+  @override
+  String get modelSettings_preset => '预设';
+
+  @override
+  String get modelSettings_presetBuiltin => '内置';
+
+  @override
+  String get modelSettings_presetUser => '用户';
+
+  @override
+  String get modelSettings_deletePreset => '删除预设';
+
+  @override
+  String modelSettings_presetCopyName(Object title, Object number) {
+    return '$title（$number）';
+  }
+
+  @override
+  String get modelSettings_recentRequests => '最近请求';
+
+  @override
+  String get modelSettings_recentRequestsHint =>
+      '本次会话最近 100 条 · 完整请求与响应，认证信息已脱敏';
+
+  @override
+  String get modelSettings_clearRequests => '清空';
+
+  @override
+  String get modelSettings_requestsEmpty => '翻译或测试模型后，请求记录会出现在这里。';
+
+  @override
+  String get modelSettings_interfaceChangedElsewhere => '功能配置已在别处修改，请重新打开后编辑。';
+
+  @override
+  String get modelSettings_configSaved => '配置已保存';
+
+  @override
+  String get modelSettings_viewBuiltinRules => '查看内置规则';
+
+  @override
+  String get modelSettings_viewEditPreset => '查看与编辑预设';
+
+  @override
+  String get modelSettings_restoreBuiltinPreset => '恢复内置预设';
+
+  @override
+  String get modelSettings_followUiLanguage => '跟随界面语言';
+
+  @override
+  String get modelSettings_providerAndModel => '服务商与模型';
+
+  @override
+  String get modelSettings_providerAndModelHelp => '仅列出启用服务中的已选模型';
+
+  @override
+  String get modelSettings_chooseProviderModel => '选择服务商与模型';
+
+  @override
+  String get modelSettings_reasoning => '思考';
+
+  @override
+  String get modelSettings_reasoningHelp =>
+      '纯翻译通常无需开启思考；为兼顾打标、语义分类等处理，建议开启该模型支持的最低思考档位。';
+
+  @override
+  String get modelSettings_reasoningHelpLabel => '思考档位建议';
+
+  @override
+  String get modelSettings_usePreset => '使用预设';
+
+  @override
+  String get modelSettings_outputLanguage => '输出语言';
+
+  @override
+  String get modelSettings_englishPrompt => '英文生成提示词';
+
+  @override
+  String get modelSettings_englishPromptHelp => '结合原文落实修改，输出英文生成提示词。';
+
+  @override
+  String get modelSettings_targetLanguage => '目标语言';
+
+  @override
+  String get modelSettings_effective => '当前生效';
+
+  @override
+  String get modelSettings_noModelSelected => '尚未选择可用模型';
+
+  @override
+  String modelSettings_reasoningSummaryInterface(Object level) {
+    return '思考：$level（本接口）';
+  }
+
+  @override
+  String modelSettings_reasoningSummaryModel(Object level) {
+    return '思考：$level（跟随模型）';
+  }
+
+  @override
+  String get modelSettings_promptBlocksHint => '无需翻译时，也可将提示词拆分为模块，通过积木功能自由拼装。';
+
+  @override
+  String get modelSettings_wikiFormatHint => '无需翻译时，也可整理排版并为相关标签添加链接。';
+
+  @override
+  String get modelSettings_unsavedChanges => '有未保存的修改';
+
+  @override
+  String get modelSettings_testPreset => '测试预设';
+
+  @override
+  String get modelSettings_tabModelPreset => '模型与预设';
+
+  @override
+  String get modelSettings_tabPromptOutput => '提示词与输出';
+
+  @override
+  String get modelSettings_translationStrategy => '翻译策略';
+
+  @override
+  String get modelSettings_editPreset => '编辑预设';
+
+  @override
+  String get modelSettings_outputContract => '应用输出约定';
+
+  @override
+  String get modelSettings_outputContractHint => '返回字段与校验规则由应用维护';
+
+  @override
+  String get modelSettings_testResult => '测试结果';
+
+  @override
+  String get modelRequest_detailsRequests => '请求';
+
+  @override
+  String get modelRequest_detailsIndex => '序号';
+
+  @override
+  String get modelRequest_detailsResponses => '响应';
+
+  @override
+  String get modelRequest_detailsOutput => '提取结果';
+
+  @override
+  String get modelRequest_detailsTitle => '请求记录';
+
+  @override
+  String get modelRequest_detailsCopied => '已复制';
+
+  @override
+  String get modelRequest_detailsCopyPage => '复制当前页';
+
+  @override
+  String get modelRequest_detailsOverview => '概览';
+
+  @override
+  String get modelRequest_detailsMissing => '此记录已清空或已超出最近 100 条。';
+
+  @override
+  String get modelPreset_changedElsewhere => '预设已在别处修改，请重新打开后编辑。';
+
+  @override
+  String get modelPreset_interfacePresetChanged => '接口使用的预设已在别处修改，请重新打开后新建。';
+
+  @override
+  String get modelPreset_builtinReadOnly => '内置 · 只读';
+
+  @override
+  String get modelPreset_newInterfacePreset => '新建接口预设';
+
+  @override
+  String get modelPreset_tabPrompt => '提示词';
+
+  @override
+  String get modelPreset_tabOutputContract => '输出约定';
+
+  @override
+  String get modelPreset_name => '预设名称';
+
+  @override
+  String get modelPreset_nameRequired => '请输入名称';
+
+  @override
+  String get modelPreset_behavior => '行为与翻译策略';
+
+  @override
+  String get modelPreset_builtinLocked => '内置规则已锁定。新建接口预设后可编辑自己的翻译偏好。';
+
+  @override
+  String get modelPreset_editHint => '此处修改翻译偏好；返回格式由应用单独维护。';
+
+  @override
+  String get modelPreset_strategyHint => '输入翻译策略';
+
+  @override
+  String get modelPreset_promptRequired => '提示词不能为空';
+
+  @override
+  String get modelPreset_restoreStrategy => '将策略恢复为内置内容';
+
+  @override
+  String get modelPreset_outputContractNote => '此部分保证翻译结果可以回填和显示，由应用维护。';
+
+  @override
+  String get modelPreset_save => '保存预设';
+
+  @override
+  String get modelReasoning_unsupported => '不支持';
+
+  @override
+  String get modelReasoning_followModel => '跟随模型';
+
+  @override
+  String modelReasoning_followModelLevel(Object level) {
+    return '跟随模型（$level）';
+  }
+
+  @override
+  String get modelReasoning_notAdjustable => '此模型不支持思考调节';
+
+  @override
+  String get modelReasoning_strength => '思考强度';
+
+  @override
+  String modelReasoning_modelDefault(Object level) {
+    return '模型默认：$level';
+  }
+
+  @override
+  String get modelReasoning_levelsUnknown => '可调档位尚未确认\n可在服务商的模型配置中设置';
+
+  @override
+  String modelReasoning_strengthValue(Object level) {
+    return '思考强度：$level';
+  }
+
+  @override
+  String get modelProvider_customEndpoint => '自定义端点';
+
+  @override
+  String get modelProvider_pickerTitle => '选择服务商';
+
+  @override
+  String get modelProvider_pickerSearch => '搜索厂商、平台或本地服务';
+
+  @override
+  String get modelProvider_pickerEmpty => '没有匹配的服务商';
+
+  @override
+  String get modelProvider_groupApiKey => 'API Key 连接';
+
+  @override
+  String get modelProvider_groupLocal => '本地服务';
+
+  @override
+  String get modelProvider_enterCompatibleAddress => '填写兼容接口地址';
+
+  @override
+  String get modelConnection_provider => '服务商';
+
+  @override
+  String get modelConnection_name => '名称';
+
+  @override
+  String get modelConnection_nameExample => '例如：自用中转';
+
+  @override
+  String get modelConnection_protocol => '接口协议';
+
+  @override
+  String get modelConnection_address => '接口地址';
+
+  @override
+  String get modelConnection_apiKey => 'API 密钥';
+
+  @override
+  String modelControls_decrease(Object label, Object step, Object unit) {
+    return '减少$label（$step $unit）';
+  }
+
+  @override
+  String modelControls_increase(Object label, Object step, Object unit) {
+    return '增加$label（$step $unit）';
+  }
+
+  @override
+  String get modelControls_retryOff => '关闭';
+
+  @override
+  String modelControls_retryTimes(Object count) {
+    return '$count 次';
+  }
+
+  @override
+  String get settings_positiveIntegerRequired => '请输入大于 0 的整数';
+
+  @override
+  String get modelSettings_testingPreset => '正在测试预设';
+
+  @override
+  String modelHealth_lastUpdated(Object time) {
+    return '最近更新：$time';
+  }
+
+  @override
+  String get modelSettings_backToEditing => '返回编辑';
+
+  @override
+  String modelService_loadOverridesFailed(Object error) {
+    return '读取自定义请求设置失败：$error';
+  }
+
+  @override
+  String get modelService_timeoutRange => '请求超时应在 10–600 秒之间。';
+
+  @override
+  String get modelService_concurrencyRange => '最大并发数量应在 1–20 个之间。';
+
+  @override
+  String get modelService_nameRequired => '请输入服务名称。';
+
+  @override
+  String get modelService_invalidUrl => '接口地址必须是完整的 http:// 或 https:// URL。';
+
+  @override
+  String get modelService_contextPositive => '上下文窗口必须大于 0。';
+
+  @override
+  String get modelService_readingCatalog => '正在读取模型目录…';
+
+  @override
+  String modelService_catalogReturned(Object count) {
+    return '目录返回 $count 个模型。勾选需要使用的模型。';
+  }
+
+  @override
+  String modelService_catalogUnavailable(Object error) {
+    return '目录不可用：$error。可以手动添加模型 ID。';
+  }
+
+  @override
+  String modelService_catalogCached(Object count) {
+    return '已载入上次获取的 $count 个模型。点击“获取列表”可刷新。';
+  }
+
+  @override
+  String get modelService_catalogCacheFailed => '模型列表已获取，但本地缓存保存失败，下次需重新获取。';
+
+  @override
+  String get modelService_selectModelFirst => '请先选中一个模型。';
+
+  @override
+  String get modelService_testingModel => '正在测试模型请求…';
+
+  @override
+  String modelService_testSucceeded(Object reply) {
+    return '模型请求成功：$reply';
+  }
+
+  @override
+  String modelService_testFailed(Object error) {
+    return '模型请求失败：$error';
+  }
+
+  @override
+  String modelService_tokensPositive(Object name) {
+    return '模型“$name”的 token 数量必须大于 0。';
+  }
+
+  @override
+  String get modelService_changedElsewhere => '服务配置已在别处修改，请重新打开后编辑。';
+
+  @override
+  String get modelService_overridesChangedElsewhere => '模型请求设置已在别处修改，请重新打开后编辑。';
+
+  @override
+  String modelService_saveFailed(Object error) {
+    return '保存失败：$error';
+  }
+
+  @override
+  String get modelService_keyHintNew => '输入 Key；本地服务可留空';
+
+  @override
+  String get modelService_keyHintVendor => '输入此服务商的 Key';
+
+  @override
+  String get modelService_keyHintSaved => '已保存；留空保持原值';
+
+  @override
+  String modelService_enabledModels(Object count) {
+    return '$count 个启用模型';
+  }
+
+  @override
+  String get modelService_pendingSave => '待保存';
+
+  @override
+  String get modelService_saved => '已保存';
+
+  @override
+  String get modelService_enable => '启用';
+
+  @override
+  String get modelService_testConnection => '测试连接';
+
+  @override
+  String get modelService_delete => '删除服务';
+
+  @override
+  String get modelService_save => '保存服务';
+
+  @override
+  String get modelService_saving => '正在保存服务';
+
+  @override
+  String get modelService_notConfigured => '尚未配置';
+
+  @override
+  String get modelService_optional => '可留空';
+
+  @override
+  String get modelService_editConnection => '编辑';
+
+  @override
+  String get modelService_collapse => '收起';
+
+  @override
+  String get modelService_connectionSettings => '连接设置';
+
+  @override
+  String get modelService_dragToReorder => '拖拽调整模型排序';
+
+  @override
+  String get modelService_capacityTooltip => '上下文 / 最大输出；可在高级中调整';
+
+  @override
+  String get modelService_advanced => '高级';
+
+  @override
+  String modelService_removeModel(Object name) {
+    return '删除模型 $name';
+  }
+
+  @override
+  String get modelService_linkedInterfaces => '关联功能';
+
+  @override
+  String get modelService_noLinkedInterfaces => '尚未关联功能';
+
+  @override
+  String get modelService_advancedSettings => '高级设置';
+
+  @override
+  String get modelService_requestTimeout => '请求超时';
+
+  @override
+  String get modelService_requestTimeoutHelp => '单次请求最长等待时间';
+
+  @override
+  String get modelService_seconds => '秒';
+
+  @override
+  String get modelService_maxConcurrency => '最大并发数量';
+
+  @override
+  String get modelService_maxConcurrencyHelp => '此服务同时处理的请求数';
+
+  @override
+  String get modelService_countUnit => '个';
+
+  @override
+  String get modelService_retry => '失败重试';
+
+  @override
+  String get modelService_retryHelp => '连接失败或服务繁忙时重试';
+
+  @override
+  String get modelService_searchModelId => '搜索模型 ID…';
+
+  @override
+  String get modelService_serviceModels => '该服务的模型';
+
+  @override
+  String get modelService_fetchList => '获取列表';
+
+  @override
+  String get modelService_catalogEmpty => '点击“获取列表”读取此服务的模型，\n或在右侧手动添加模型 ID。';
+
+  @override
+  String get modelService_noMatchingModels => '没有匹配的模型';
+
+  @override
+  String get modelService_catalogLimitTooltip => '目录上限：上下文 / 最大输出';
+
+  @override
+  String get modelService_searchAddedModels => '搜索已添加模型…';
+
+  @override
+  String get modelService_modelSettings => '模型设置';
+
+  @override
+  String get modelService_addedEmpty => '从左侧勾选，或在下方添加模型';
+
+  @override
+  String get modelService_customModelId => '自定义模型 ID';
+
+  @override
+  String get modelService_customModelHelp => '添加模型目录无法拉取到的模型';
+
+  @override
+  String get modelService_addCustomModel => '添加自定义模型';
+
+  @override
+  String get modelCard_positiveInteger => '请输入正整数';
+
+  @override
+  String modelCard_catalogLimit(Object limit) {
+    return '目录上限 $limit';
+  }
+
+  @override
+  String get modelCard_outputExceedsContext => '输出不能超过上下文窗口';
+
+  @override
+  String get modelCard_contextWindow => '上下文窗口';
+
+  @override
+  String get modelCard_maxOutput => '最大输出';
+
+  @override
+  String get modelCard_unlabeled => '未标注';
+
+  @override
+  String get modelCard_protocolStandard => '标准';
+
+  @override
+  String get modelCard_protocolAdaptive => '自适应';
+
+  @override
+  String get modelCard_default => '默认';
+
+  @override
+  String get modelCard_thinkingLevels => '思考等级';
+
+  @override
+  String get modelCard_thinkingLevelsUnlisted => '目录未标注，可手动开启';
+
+  @override
+  String get modelCard_thinkingLevelsFromCatalog => '已按本地目录勾选支持的等级；可按实际接口调整。';
+
+  @override
+  String get modelCard_thinkingProtocol => '思考协议';
+
+  @override
+  String get modelCard_defaultThinkingLevel => '默认思考等级';
+
+  @override
+  String get modelCard_alias => '别名';
+
+  @override
+  String get modelCard_aliasHelp => '在显示模型名称的地方生效；请求仍使用模型 ID。';
+
+  @override
+  String get modelCard_aliasExample => '例如 fast';
+
+  @override
+  String get modelCard_capabilities => '能力';
+
+  @override
+  String get modelCard_images => '图片';
+
+  @override
+  String get modelCard_nativeSearch => '原生网络搜索';
+
+  @override
+  String get modelCard_nativeSearchHelp =>
+      '应用尚未适配此连接的原生搜索；不代表厂商网站或其他 API 不支持搜索。';
+
+  @override
+  String get modelOverrides_duplicateHeader => '请求头名称重复';
+
+  @override
+  String get modelOverrides_fieldNameRequired => '请输入字段名';
+
+  @override
+  String get modelOverrides_duplicateField => '字段名重复';
+
+  @override
+  String get modelOverrides_invalidJson => '请输入有效的 JSON 值';
+
+  @override
+  String get modelOverrides_customBody => '自定义 Body';
+
+  @override
+  String get modelOverrides_customHeaders => '自定义 Headers';
+
+  @override
+  String get modelOverrides_fieldName => '字段名';
+
+  @override
+  String get modelOverrides_headerName => '请求头名称';
+
+  @override
+  String get modelOverrides_valueJson => '值（JSON）';
+
+  @override
+  String get modelOverrides_value => '值';
+
+  @override
+  String get modelOverrides_removeItem => '删除此项';
+
+  @override
+  String get modelOverrides_body => '请求体';
+
+  @override
+  String get modelOverrides_headers => '请求头';
+
+  @override
+  String modelOverrides_itemCount(Object count) {
+    return '$count 项';
+  }
+
+  @override
+  String get modelOverrides_valueTypes => '支持字符串、数字、布尔值、数组和对象';
+
+  @override
+  String get modelOverrides_addBodyField => '添加请求体字段';
+
+  @override
+  String get modelOverrides_addHeader => '添加请求头';
+
+  @override
+  String get promptTranslation_translating => '正在翻译';
+
+  @override
+  String get promptTranslation_needsModel => '翻译 · 先配置模型';
+
+  @override
+  String promptTranslation_withRoute(Object provider, Object model) {
+    return '翻译 · $provider / $model';
+  }
+
+  @override
+  String get promptTranslation_actions => '翻译操作';
+
+  @override
+  String get promptTranslation_promptChanged => '提示词已变化，未覆盖新编辑';
+
+  @override
+  String get promptTranslation_nothingToTranslate => '当前没有需要翻译的普通文字';
+
+  @override
+  String promptTranslation_failed(Object error) {
+    return '翻译失败：$error';
+  }
+
+  @override
+  String get promptTranslation_setupTitle => '先配置翻译模型';
+
+  @override
+  String get promptTranslation_setupBody =>
+      '翻译需要明确选择服务商和模型。前往「设置 → 集成 → 模型与接口」，先添加服务商并取得模型列表，再在「提示词翻译」卡片中完成选择。';
+
+  @override
+  String get promptTranslation_later => '稍后';
+
+  @override
+  String get promptTranslation_openSettings => '前往设置';
+
+  @override
+  String get promptTranslation_toolTitle => '翻译';
+
+  @override
+  String get promptTranslation_noModel => '未配置模型';
+
+  @override
+  String get promptTranslation_configureModel => '配置翻译模型';
+
+  @override
+  String get promptTranslation_translateNew => '翻译新增内容';
+
+  @override
+  String get promptTranslation_undoRestore => '撤销原文还原，恢复翻译块';
+
+  @override
+  String get promptTranslation_restoreAll => '全部翻译块还原为原文文本';
+
+  @override
+  String get promptTranslation_tutorial => '操作教程';
+
+  @override
+  String get promptTranslation_guideBack => '返回操作';
+
+  @override
+  String get promptTranslation_guideMiddleTitle => '中键点块';
+
+  @override
+  String get promptTranslation_guideMiddleText => '切换原文与译文';
+
+  @override
+  String get promptTranslation_guideSourceTitle => '左键点原文';
+
+  @override
+  String get promptTranslation_guideSourceText => '定位光标，直接修改';
+
+  @override
+  String get promptTranslation_guideReadingTitle => '左键点译文';
+
+  @override
+  String get promptTranslation_guideReadingText => '打开块编辑窗';
+
+  @override
+  String get promptTranslation_guideCtrlTitle => 'Ctrl + 点击 / 拖选';
+
+  @override
+  String get promptTranslation_guideCtrlText => '编辑窗内搜索标签 / 查关联';
+
+  @override
+  String get promptTranslation_guideConvertTitle => '↑ 中文转原文';
+
+  @override
+  String get promptTranslation_guideConvertText => '↓ 原文转中文，检查后保存';
+
+  @override
+  String get promptTranslation_guideRestoreTitle => 'A / 恢复';
+
+  @override
+  String get promptTranslation_guideRestoreText => '整组还原原文 / 恢复翻译块';
+
+  @override
+  String get promptTranslation_middleButton => '鼠标中键';
+
+  @override
+  String get promptTranslation_leftButton => '鼠标左键';
+
+  @override
+  String get promptTranslation_blockShowingOriginal => '翻译块，显示原文';
+
+  @override
+  String get promptTranslation_blockShowingReading => '翻译块，显示译文';
+
+  @override
+  String get promptTranslation_blockNeedsReview => '原文已修改 · 译文待更新';
+
+  @override
+  String get promptTranslation_badgeTooltip => '原文已修改，中文待同步';
+
+  @override
+  String get promptTranslation_sourceChanged => '原文已变化，请重新打开翻译块';
+
+  @override
+  String promptTranslation_retranslateFailed(Object error) {
+    return '重新翻译失败：$error';
+  }
+
+  @override
+  String get promptTranslation_draftChanged => '内容已修改，请重新转换；新草稿已保留';
+
+  @override
+  String promptTranslation_convertFailed(Object error) {
+    return '转换失败，草稿已保留：$error';
+  }
+
+  @override
+  String get promptTranslation_invalidResultFormat => '转换结果格式不正确，草稿已保留';
+
+  @override
+  String get promptTranslation_noValidText => '模型没有返回有效文字，草稿已保留';
+
+  @override
+  String get promptTranslation_invalidResultContent => '转换结果包含无效格式，草稿已保留';
+
+  @override
+  String get promptTranslation_incompleteStructure => '转换结果的权重或分组不完整，草稿已保留';
+
+  @override
+  String get promptTranslation_inputRequired => '请先输入需要转换的内容';
+
+  @override
+  String get wiki_configureTagModel => '请先在「模型与接口」配置可用的标签翻译模型。';
+
+  @override
+  String get blockOrganizer_barrierLabel => '块分类';
+
+  @override
+  String get blockOrganizer_replaceTitle => '替换同源块？';
+
+  @override
+  String blockOrganizer_replaceMoveBody(Object count) {
+    return '目标中已有 $count 个同源副本。替换后来源从块库隐藏；已插入提示词的实例仍可引用原块。';
+  }
+
+  @override
+  String blockOrganizer_replaceCopyBody(Object count) {
+    return '目标中已有 $count 个同源副本。替换会更新目标副本的内容，来源保留。';
+  }
+
+  @override
+  String get blockOrganizer_replace => '替换';
+
+  @override
+  String get blockOrganizer_customTagColor => '自定义标签颜色';
+
+  @override
+  String get blockOrganizer_colorHint => '#RRGGBB 或 #AARRGGBB';
+
+  @override
+  String get blockOrganizer_invalidColor => '请输入六位或八位十六进制颜色';
+
+  @override
+  String blockOrganizer_deleteFolderConfirm(Object name) {
+    return '删除「$name」？其中的块会移至根目录。';
+  }
+
+  @override
+  String blockOrganizer_deleteCollectionConfirm(Object name) {
+    return '删除「$name」？块本体会保留。';
+  }
+
+  @override
+  String get blockOrganizer_titleFavorites => '收藏与收藏集';
+
+  @override
+  String get blockOrganizer_titleFolders => '选择文件夹';
+
+  @override
+  String blockOrganizer_itemCount(Object count) {
+    return '$count 项';
+  }
+
+  @override
+  String get blockOrganizer_search => '搜索';
+
+  @override
+  String get blockOrganizer_name => '名称';
+
+  @override
+  String get blockOrganizer_customColor => '自定义颜色…';
+
+  @override
+  String get blockOrganizer_newCollection => '新建收藏集';
+
+  @override
+  String get blockOrganizer_newCollectionFolder => '新建收藏文件夹';
+
+  @override
+  String get blockOrganizer_newTag => '新标签';
+
+  @override
+  String get blockOrganizer_newFolder => '新建文件夹';
+
+  @override
+  String get blockOrganizer_rootUncategorized => '根目录 / 未分类';
+
+  @override
+  String get blockOrganizer_manageDrag => '管理；拖动排序';
+
+  @override
+  String get blockLibrary_dragSelectedHint => '拖动已选块到左侧的收藏或文件夹，松开后选择复制或移动。';
+
+  @override
+  String blockLibrary_blockCount(Object count) {
+    return '$count 个块';
+  }
+
+  @override
+  String get blockLibrary_changedSelectAgain => '块库已变化，请重新选择后再试';
+
+  @override
+  String get blockLibrary_hiddenSource => '隐藏的块不能作为整理来源';
+
+  @override
+  String get blockLibrary_sameSourceSelected => '所选块包含同源副本，请分开整理';
+
+  @override
+  String get blockLibrary_sameSourceExists => '同源块已存在，请确认替换';
+
+  @override
+  String get blockLibrary_collectionMissing => '收藏集不存在';
+
+  @override
+  String get promptBlockEditor_appearance => '块外观';
+
+  @override
+  String get promptBlockEditor_imageUnreadable => '无法读取所选图像';
+
+  @override
+  String get blockAppearance_classic => '经典';
+
+  @override
+  String get blockAppearance_stripes => '细条纹';
+
+  @override
+  String get blockAppearance_dots => '圆点';
+
+  @override
+  String get blockAppearance_solid => '实心';
+
+  @override
+  String get blockAppearance_gradient => '渐变';
+
+  @override
+  String get blockAppearance_translation => '翻译';
+
+  @override
+  String get opusUsage_exhausted => '账号免费额度已用尽，V5 生成按 Anlas 计费';
+
+  @override
+  String opusUsage_remaining(Object percent) {
+    return '账号免费额度剩余 $percent%';
+  }
+
+  @override
+  String opusUsage_recharging(Object time) {
+    return '回充中：下一 +1% 还需 $time';
+  }
+
+  @override
+  String get opusUsage_notRecharging => '当前不回充（池子在回充阈值之上或已用尽）';
+
+  @override
+  String get opusUsage_clickToRefresh => '点击刷新';
+
+  @override
+  String opusUsage_hoursMinutes(Object hours, Object minutes) {
+    return '$hours 小时 $minutes 分';
+  }
+
+  @override
+  String opusUsage_hours(Object hours) {
+    return '$hours 小时';
+  }
+
+  @override
+  String opusUsage_minutesSeconds(Object minutes, Object seconds) {
+    return '$minutes 分 $seconds 秒';
+  }
+
+  @override
+  String opusUsage_minutes(Object minutes) {
+    return '$minutes 分';
+  }
+
+  @override
+  String opusUsage_seconds(Object seconds) {
+    return '$seconds 秒';
+  }
+
+  @override
+  String get metadataImport_noCharactersReplaceClears => '无角色数据；替换模式会清空当前角色';
+
+  @override
+  String get metadataImport_replaceCharacters => '替换角色';
+
+  @override
+  String get metadataImport_appendCharacters => '追加角色';
+
+  @override
+  String get drop_dragToShare => '拖拽以分享';
+
+  @override
+  String get progress_cancelled => '已取消';
+
+  @override
+  String promptSyntax_weightTooLarge(Object value) {
+    return '数值权重绝对值过大：$value::';
+  }
+
+  @override
+  String promptSyntax_spaceBeforeColons(Object value) {
+    return '权重数字与 :: 之间不能有空格：$value ::';
+  }
+
+  @override
+  String promptSyntax_weightAfterColons(Object value) {
+    return '数值权重应写在 :: 前：::$value';
+  }
+
+  @override
+  String get update_errorInAppUnsupported => '当前版本不支持应用内自动安装更新';
+
+  @override
+  String get update_errorNoInstallablePackage => '未找到可自动安装的更新包';
+
+  @override
+  String get update_errorMissingSha256 => '更新包缺少 SHA256 校验信息';
+
+  @override
+  String get update_errorDiskFull => '磁盘空间不足，无法保存更新包';
+
+  @override
+  String get update_errorWriteFailed => '写入更新包失败';
+
+  @override
+  String get update_errorDownloadFailed => '下载更新包失败';
+
+  @override
+  String get update_errorSizeMismatch => '更新包大小校验失败';
+
+  @override
+  String get update_errorChecksumMismatch => '更新包校验失败';
+
+  @override
+  String get update_errorResumeRejected => '服务器拒绝了更新包续传请求';
+
+  @override
+  String get update_errorEmptyResponse => '更新服务器返回了空响应';
+
+  @override
+  String get update_errorPlatformUnsupported => '当前平台不支持应用内自动更新';
+
+  @override
+  String get update_errorPackageRemoved => '更新包已被清理，请重新下载';
+
+  @override
+  String get update_errorPackageCorrupted => '更新包已损坏，请重新下载';
+
+  @override
+  String get update_errorLaunchFailed => '启动更新程序失败';
+
+  @override
+  String get update_errorCheckFailed => '检查更新失败';
+
+  @override
+  String get update_errorCheckUnknown => '检查更新时发生未知错误';
+
+  @override
+  String update_errorLogPath(Object path) {
+    return '日志：$path';
+  }
+
+  @override
+  String get update_errorInstallFailed => '安装更新失败';
+
+  @override
+  String get update_errorInstallFailedSeeLog => '安装更新失败，请查看更新日志';
+
+  @override
+  String get auth_tokenEmpty => 'Token 为空，无法验证';
+
+  @override
+  String get auth_tokenFormatInvalid => 'Token 格式无效';
+
+  @override
+  String get auth_tokenInvalidOrExpired =>
+      'Token无效或已过期，请检查Token是否正确。如果是Persistent Token，应以pst-开头。';
+
+  @override
+  String get auth_tokenMustStartPst => 'Token 格式无效，应以 pst- 开头';
+
+  @override
+  String get auth_tokenFormatDetail =>
+      'Token 格式无效。Persistent Token 应以 pst- 开头，后跟至少10位字符。请检查输入的 Token 是否正确。';
+
+  @override
+  String get danbooru_credentialsExpired => '凭据已失效，请重新登录';
+
+  @override
+  String get danbooru_networkRetryLater => '网络连接失败，将在网络恢复后重试';
+
+  @override
+  String get danbooru_invalidCredentials => '无法验证凭据，请检查用户名和 API Key 是否正确';
+
+  @override
+  String danbooru_verifyFailed(Object error) {
+    return '验证失败: $error';
+  }
+
+  @override
+  String get danbooru_credentialsRequired => '用户名和 API Key 不能为空';
+
+  @override
+  String get danbooru_networkCheck => '网络连接失败，请检查网络连接';
+
+  @override
+  String get danbooru_loginFailedNetwork => '登录失败，请检查网络连接';
+
+  @override
+  String get danbooru_blacklistLoginRequired => '请先登录 Danbooru 账号';
+
+  @override
+  String get danbooru_blacklistPushFailed => '推送 Danbooru 黑名单失败';
+
+  @override
+  String danbooru_blacklistSyncFailed(Object error) {
+    return '同步失败: $error';
+  }
+
+  @override
+  String comfyui_submitFailed(Object detail) {
+    return '提交工作流失败: $detail';
+  }
+
+  @override
+  String comfyui_uploadFailed(Object detail) {
+    return '上传图像失败: $detail';
+  }
+
+  @override
+  String comfyui_fetchImageFailed(Object detail) {
+    return '获取图像失败: $detail';
+  }
+
+  @override
+  String comfyui_historyMissing(Object id) {
+    return '未找到任务历史: $id';
+  }
+
+  @override
+  String get comfyui_unknownError => '未知错误';
+
+  @override
+  String comfyui_cannotConnect(Object url) {
+    return '无法连接到 ComfyUI 服务器 ($url)';
+  }
+
+  @override
+  String get comfyui_noOutput => '任务无输出';
+
+  @override
+  String comfyui_nodesNoImage(Object nodes) {
+    return '指定输出节点无图像输出: $nodes';
+  }
+
+  @override
+  String get comfyui_noImageOutput => '任务无图像输出';
+
+  @override
+  String get comfyui_executionError => '执行出错';
+
+  @override
+  String comfyui_missingNodes(Object nodes) {
+    return '缺少 ComfyUI 节点: $nodes。请在 ComfyUI 中安装或启用对应自定义节点后重启 ComfyUI。';
+  }
+
+  @override
+  String get enhance_cannotReadSize => '无法解析图像尺寸';
+
+  @override
+  String enhance_upscaleFailed(Object error) {
+    return '图像放大失败: $error';
+  }
+
+  @override
+  String enhance_vibeEncodeFailed(Object error) {
+    return 'Vibe编码失败: $error';
+  }
+
+  @override
+  String enhance_enhanceFailed(Object error) {
+    return '图像增强失败: $error';
+  }
+
+  @override
+  String enhance_annotateFailed(Object error) {
+    return '图像标注失败: $error';
+  }
+
+  @override
+  String get enhance_timeout => '请求超时';
+
+  @override
+  String get enhance_networkError => '网络连接错误';
+
+  @override
+  String enhance_serverError(Object status) {
+    return '服务器返回错误: $status';
+  }
+
+  @override
+  String enhance_serverErrorDetail(Object status, Object detail) {
+    return '服务器返回错误: $status ($detail)';
+  }
+
+  @override
+  String get proxy_connectTimeout => '连接超时';
+
+  @override
+  String get proxy_cannotConnect => '无法连接到服务器';
+
+  @override
+  String get proxy_connectFailed => '连接失败';
+
+  @override
+  String get proxy_testServerUnreachable => '无法连接到测试服务器';
+
+  @override
+  String proxy_testFailed(Object error) {
+    return '测试失败: $error';
+  }
+
+  @override
+  String get avatar_noFilePath => '无法获取文件路径';
+
+  @override
+  String get avatar_sourceMissing => '源文件不存在或已被删除';
+
+  @override
+  String avatar_copyFailed(Object error) {
+    return '无法复制文件：$error';
+  }
+
+  @override
+  String avatar_saveFailed(Object error) {
+    return '无法保存头像：$error';
+  }
+
+  @override
+  String avatar_operationFailed(Object error) {
+    return '操作失败：$error';
+  }
+
+  @override
+  String get vibeExport_rawImage => '原始图片';
+
+  @override
+  String get vibeExport_vibePreview => 'Vibe 预览图';
+
+  @override
+  String get vibeExport_libraryThumbnail => '库缩略图';
+
+  @override
+  String get vibeExport_pngTitle => '导出 PNG Vibe 图片';
+
+  @override
+  String get vibeExport_pngDirectoryTitle => '选择 PNG 导出目录';
+
+  @override
+  String get vibeExport_fileTitle => '导出 Vibe 文件';
+
+  @override
+  String get vibeExport_bundleTitle => '导出 Vibe Bundle';
+
+  @override
+  String get vibeExport_zipTitle => '导出 Vibe ZIP';
+
+  @override
+  String get vibeExport_nothingToExport => '没有可导出的 Vibe 条目';
+
+  @override
+  String get vibeImport_fileParseFailed => '文件解析失败';
+
+  @override
+  String get vibeImport_importFiles => '导入文件';
+
+  @override
+  String get vibeImport_noVibeData => '图片不包含有效 Vibe 数据';
+
+  @override
+  String get vibeImport_importImages => '导入图片';
+
+  @override
+  String get vibeImport_encodingParseFailed => '编码解析失败';
+
+  @override
+  String get vibeImport_importEncodings => '导入编码';
+
+  @override
+  String vibeImport_namingCancelled(Object name) {
+    return '用户取消命名，已跳过: $name';
+  }
+
+  @override
+  String vibeImport_nameEmpty(Object name) {
+    return '名称为空，已跳过: $name';
+  }
+
+  @override
+  String vibeImport_nameConflict(Object name) {
+    return '名称冲突，已跳过: $name';
+  }
+
+  @override
+  String get vibeImport_saveFailed => '保存失败';
+
+  @override
+  String vibeFile_missingRawImage(Object file) {
+    return '文件缺少可用的原图数据: $file (type=image). 此文件可能已损坏或不完整，建议删除后重新保存。';
+  }
+
+  @override
+  String get generation_countMustBePositive => '生成数量必须大于0';
+
+  @override
+  String get generation_allTasksFailed => '所有生成任务失败';
+
+  @override
+  String get generation_failedShort => '生成失败';
+
+  @override
+  String generation_tasksFailedAfterRetry(Object count) {
+    return '$count 个任务重试后仍失败';
+  }
+
+  @override
+  String get generation_streamFallbackUnavailable => '流式生成不支持且无法自动回退（参数丢失）';
+
+  @override
+  String generation_streamFallbackFailed(Object error) {
+    return '回退到非流式生成失败: $error';
+  }
+
+  @override
+  String get generation_batchSizeMustBePositive => '批次数量和批次大小必须大于0';
+
+  @override
+  String get clipboard_unsupportedPlatform => '当前平台不支持系统剪贴板';
+
+  @override
+  String get clipboard_decodeFailed => '无法解码图片用于复制到剪贴板';
+
+  @override
+  String drop_remoteImageTooLarge(Object size) {
+    return '远程图片原始下载超过 ${size}MB';
+  }
+
+  @override
+  String get apiEndpoint_empty => 'API 地址不能为空';
+
+  @override
+  String get apiEndpoint_invalid => 'API 地址无效';
+
+  @override
+  String get apiEndpoint_httpOnly => '仅支持 http 或 https API 地址';
+
+  @override
+  String get apiEndpoint_noExtras => 'API 地址不能包含查询参数、片段或用户信息';
+
+  @override
+  String gallery_initFailed(Object error) {
+    return '初始化失败: $error';
+  }
+
+  @override
+  String gallery_loadFoldersFailed(Object error) {
+    return '加载文件夹失败: $error';
+  }
+
+  @override
+  String gallery_refreshFailed(Object error) {
+    return '刷新失败: $error';
+  }
+
+  @override
+  String gallery_clearCacheFailed(Object error) {
+    return '清除缓存失败: $error';
+  }
+
+  @override
+  String gallery_folderInaccessible(Object error) {
+    return '无法访问图片文件夹: $error';
+  }
+
+  @override
+  String gallery_scanFailed(Object error) {
+    return '扫描图片失败: $error';
+  }
+
+  @override
+  String gallery_galleryInitFailed(Object error) {
+    return '画廊初始化失败: $error';
+  }
+
+  @override
+  String get cache_clearInProgress => '清除操作正在进行中';
+
+  @override
+  String vibeImport_imageProgress(Object current, Object total, Object source) {
+    return '导入图片($current/$total): $source';
+  }
+
+  @override
+  String get vibeImport_clipboardSource => '剪贴板';
+
+  @override
+  String get resolution_noAdjustment => '无需调整';
+
+  @override
+  String get dataRefresh_updating => '正在更新数据...';
+
+  @override
+  String dataRefresh_updatingService(Object service) {
+    return '正在更新 $service...';
+  }
 }

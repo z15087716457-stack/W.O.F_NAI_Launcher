@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../../../core/utils/localization_extension.dart';
+
 /// Model-specific HTTP options. Values are stored in secure storage, not in
 /// the ordinary settings JSON or configuration exports.
 class ModelRequestOverrides {
@@ -25,10 +27,10 @@ class ModelRequestOverrides {
 
   static String? headerError(String name, String value) {
     if (!RegExp(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$").hasMatch(name)) {
-      return '请输入有效的请求头名称';
+      return currentL10n.modelOverrides_invalidHeaderName;
     }
     if (RegExp(r'[\x00-\x08\x0A-\x1F\x7F]').hasMatch(value)) {
-      return '请求头值不能包含换行或控制字符';
+      return currentL10n.modelOverrides_invalidHeaderValue;
     }
     return null;
   }
@@ -38,12 +40,14 @@ class ModelRequestOverrides {
       final error = headerError(entry.key, entry.value);
       if (error != null) return error;
     }
-    if (body.keys.any((key) => key.trim().isEmpty)) return '请求体字段名不能为空';
+    if (body.keys.any((key) => key.trim().isEmpty)) {
+      return currentL10n.modelOverrides_emptyBodyField;
+    }
     if (body.containsKey('model') && body['model'] != model) {
-      return '模型 ID 请通过模型列表设置';
+      return currentL10n.modelOverrides_modelFromList;
     }
     if (body.containsKey('stream') && body['stream'] != false) {
-      return '当前接口使用非流式请求，stream 应为 false';
+      return currentL10n.modelOverrides_streamMustBeFalse;
     }
     return null;
   }

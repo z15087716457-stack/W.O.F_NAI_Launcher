@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/alias_parser.dart';
 import '../../../core/utils/pill_document_editor.dart';
+import '../../../core/utils/localization_extension.dart';
 
 /// 药丸 span 构建器：把文本中的块标记字符渲染为内联 widget。
 ///
@@ -343,7 +344,7 @@ class NaiSyntaxController extends TextEditingController {
         _fillMarks(marks, numberStart, index + 2, mark);
 
         if (emphasis.abs() > 70) {
-          errors.add('数值权重绝对值过大：$numberText::');
+          errors.add(currentL10n.promptSyntax_weightTooLarge(numberText));
         }
         if (emphasis == 1.0 && previousEmphasis == 1.0) {
           _collectNumericPlacementErrors(text, index, errors);
@@ -393,7 +394,7 @@ class NaiSyntaxController extends TextEditingController {
     if (beforeValue.isNotEmpty &&
         parsedBefore != null &&
         parsedBefore.abs() < 21) {
-      errors.add('权重数字与 :: 之间不能有空格：$beforeValue ::');
+      errors.add(currentL10n.promptSyntax_spaceBeforeColons(beforeValue));
     }
 
     final after = text.substring(separatorStart + 2);
@@ -404,7 +405,7 @@ class NaiSyntaxController extends TextEditingController {
         parsedAfter != null &&
         parsedAfter.abs() < 21 &&
         !RegExp(r'^ ?[\d.\-]*::').hasMatch(after)) {
-      errors.add('数值权重应写在 :: 前：::$afterValue');
+      errors.add(currentL10n.promptSyntax_weightAfterColons(afterValue));
     }
   }
 

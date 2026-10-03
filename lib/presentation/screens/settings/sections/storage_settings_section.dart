@@ -21,7 +21,6 @@ import '../widgets/data_source_cache_settings.dart';
 import '../widgets/gallery_cache_actions.dart';
 import '../widgets/gallery_thumbnail_quality_settings_tile.dart';
 import '../widgets/settings_card.dart';
-import '../widgets/settings_ui_theme.dart';
 import '../widgets/settings_labeled_group.dart';
 import '../widgets/settings_path_tile.dart';
 
@@ -82,13 +81,8 @@ class _StorageSettingsSectionState
       children: [
         SettingsLabeledGroup(
           key: const Key('gallery-save-group'),
-          title: settingsText(context, '保存设置', 'Saving', '保存設定'),
-          description: settingsText(
-            context,
-            '生成图片的保存方式',
-            'How generated images are saved',
-            '生成画像の保存方法',
-          ),
+          title: context.l10n.settings_saving,
+          description: context.l10n.settings_howGeneratedImagesSaved,
           child: Column(
             children: [
               SettingsPathTile(
@@ -127,13 +121,8 @@ class _StorageSettingsSectionState
         ),
         SettingsLabeledGroup(
           key: const Key('gallery-display-group'),
-          title: settingsText(context, '素材与显示', 'Assets & display', '素材と表示'),
-          description: settingsText(
-            context,
-            'Vibe 位置与缩略图质量',
-            'Vibe location and thumbnail quality',
-            'Vibe の保存先とサムネイル品質',
-          ),
+          title: context.l10n.settings_assetsDisplay,
+          description: context.l10n.settings_vibeLocationThumbnailQuality,
           child: const Column(
             children: [
               VibeLibraryPathTile(),
@@ -160,7 +149,7 @@ class StorageMaintenanceSection extends StatelessWidget {
       ),
       const DataSourceCacheSettings(cacheOnly: true),
       SettingsCard(
-        title: settingsText(context, '应用数据', 'Application data', 'アプリデータ'),
+        title: context.l10n.settings_applicationData,
         child: const HiveStoragePathTile(),
       ),
     ],
@@ -370,13 +359,8 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
     if (widget.labeled) {
       return SettingsLabeledGroup(
         key: const Key('gallery-sources-group'),
-        title: settingsText(context, '图库来源', 'Gallery sources', 'ギャラリーのソース'),
-        description: settingsText(
-          context,
-          '管理额外图库文件夹',
-          'Manage additional gallery folders',
-          '追加のギャラリーフォルダーを管理',
-        ),
+        title: context.l10n.settings_gallerySources,
+        description: context.l10n.settings_manageAdditionalGalleryFolders,
         showDivider: false,
         child: content,
       );
@@ -461,9 +445,7 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
             snapshot.data ??
             _pathHelper.getCustomPath() ??
             'Documents/NAI_Launcher/vibes/',
-        defaultLabel: hasCustomPath
-            ? null
-            : settingsText(context, '默认', 'Default', '既定'),
+        defaultLabel: hasCustomPath ? null : context.l10n.settings_default,
         onOpen: () async {
           final openFolderFailed = context.l10n.settings_openFolderFailed;
           try {
