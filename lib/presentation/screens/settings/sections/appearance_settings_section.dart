@@ -10,9 +10,8 @@ import '../../../providers/settings_font_scale_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
-import '../../../providers/theme_provider.dart';
 import '../../../widgets/settings/studio_theme_picker.dart';
-import '../widgets/settings_card.dart';
+import '../widgets/settings_labeled_group.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/settings_dialog.dart';
 import '../widgets/settings_font_dialog.dart';
@@ -34,164 +33,217 @@ class AppearanceSettingsSection extends ConsumerStatefulWidget {
 
 class _AppearanceSettingsSectionState
     extends ConsumerState<AppearanceSettingsSection> {
-  @override
-  Widget build(BuildContext context) {
-    final currentTheme = ref.watch(themeNotifierProvider);
-    final currentFont = ref.watch(fontNotifierProvider);
-    final currentLocale = ref.watch(localeNotifierProvider);
-    final fontScale = ref.watch(settingsFontScaleProvider);
-    final historyClickBehavior = ref.watch(
-      historyClickBehaviorNotifierProvider,
-    );
-    final simpleOutputViewer = ref.watch(simpleOutputViewerNotifierProvider);
-
-    Widget valueControl(String value) => ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 220),
+  Widget _valueControl(String value, VoidCallback onPressed) => SizedBox(
+    width: 200 * MediaQuery.textScalerOf(context).scale(1),
+    child: OutlinedButton(
+      onPressed: onPressed,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodySmall,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+          Expanded(
+            child: Text(value, maxLines: 2, overflow: TextOverflow.ellipsis),
           ),
           const SizedBox(width: 8),
-          const Icon(Icons.chevron_right, size: 16),
+          const Icon(Icons.keyboard_arrow_down, size: 16),
         ],
       ),
-    );
-    return SettingsCard(
-      child: Column(
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final wrapWidth = 500 * MediaQuery.textScalerOf(context).scale(1);
+    if (widget.controlsOnly) {
+      final behavior = ref.watch(historyClickBehaviorNotifierProvider);
+      final simple = ref.watch(simpleOutputViewerNotifierProvider);
+      return Column(
         children: [
-          if (!widget.controlsOnly) ...[
-            // 主题选择
-            SettingsTile(
-              leading: const Icon(Icons.palette_outlined),
-              title: Text(context.l10n.settings_style),
-              trailing: valueControl(
-                currentTheme == Brightness.dark
-                    ? context.l10n.settings_geistDark
-                    : context.l10n.settings_geistLight,
-              ),
-              onTap: () => _showThemeDialog(context),
+          SettingsLabeledGroup(
+            title: settingsText(context, '浏览方式', 'Browsing', '閲覧方法'),
+            description: settingsText(
+              context,
+              '选择图片的查看习惯',
+              'Choose how to view images',
+              '画像の閲覧方法を選択',
             ),
-
-            // 字体选择
-            SettingsTile(
-              leading: const Icon(Icons.text_fields),
-              title: Text(context.l10n.settings_font),
-              trailing: valueControl(currentFont.displayName),
-              onTap: () => _showFontDialog(context, currentFont),
-            ),
-
-            // 字体大小选择
-            SettingsTile(
-              leading: const Icon(Icons.format_size),
-              title: Text(context.l10n.settings_fontScale),
-              subtitle: Text(
-                settingsText(
-                  context,
-                  '仅调整设置页面与设置弹窗的字号',
-                  'Adjust settings pages and dialogs only',
-                  '設定画面と設定ダイアログの文字サイズ',
+            child: Column(
+              children: [
+                SettingsTile(
+                  controlWrapWidth: wrapWidth,
+                  title: Text(l10n.settings_historyClickBehavior),
+                  subtitle: Text(
+                    behavior == HistoryClickBehavior.selectPreview
+                        ? l10n.settings_historyClickBehavior_linkedDescription
+                        : l10n.settings_historyClickBehavior_classicDescription,
+                  ),
+                  trailing: _valueControl(
+                    behavior == HistoryClickBehavior.selectPreview
+                        ? l10n.settings_historyClickBehavior_linked
+                        : l10n.settings_historyClickBehavior_classic,
+                    () => _showHistoryClickBehaviorDialog(context, behavior),
+                  ),
+                  onTap: () =>
+                      _showHistoryClickBehaviorDialog(context, behavior),
                 ),
-              ),
-              trailing: valueControl('${(fontScale * 100).round()}%'),
-              onTap: () => _showFontScaleDialog(context, fontScale),
+                SettingsTile(
+                  controlWrapWidth: wrapWidth,
+                  title: Text(l10n.settings_outputViewer),
+                  subtitle: Text(
+                    simple
+                        ? l10n.settings_outputViewer_simpleDescription
+                        : l10n.settings_outputViewer_canvasDescription,
+                  ),
+                  trailing: _valueControl(
+                    simple
+                        ? l10n.settings_outputViewer_simple
+                        : l10n.settings_outputViewer_canvas,
+                    () => _showOutputViewerDialog(context, simple),
+                  ),
+                  onTap: () => _showOutputViewerDialog(context, simple),
+                ),
+              ],
             ),
-
-            // 语言选择
-            SettingsTile(
-              leading: const Icon(Icons.language),
-              title: Text(context.l10n.settings_language),
-              trailing: valueControl(
-                _languageLabel(context, currentLocale.languageCode),
-              ),
-              onTap: () => _showLanguageDialog(context, currentLocale),
+          ),
+          SettingsLabeledGroup(
+            title: settingsText(context, '画布操作', 'Canvas controls', 'キャンバス操作'),
+            description: settingsText(
+              context,
+              '保持视角稳定',
+              'Keep the view steady',
+              '視点を固定',
             ),
-          ],
-          if (widget.controlsOnly) ...[
-            SettingsTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: Text(context.l10n.settings_historyClickBehavior),
-              subtitle: Text(
-                historyClickBehavior == HistoryClickBehavior.selectPreview
-                    ? context.l10n.settings_historyClickBehavior_linked
-                    : context.l10n.settings_historyClickBehavior_classic,
-              ),
-              onTap: () => _showHistoryClickBehaviorDialog(
-                context,
-                historyClickBehavior,
-              ),
-            ),
-
-            // 输出查看器模式（G11 自由画布 / 简单视图）
-            SettingsTile(
-              leading: const Icon(Icons.dashboard_outlined),
-              title: Text(context.l10n.settings_outputViewer),
-              subtitle: Text(
-                simpleOutputViewer
-                    ? context.l10n.settings_outputViewer_simple
-                    : context.l10n.settings_outputViewer_canvas,
-              ),
-              onTap: () => _showOutputViewerDialog(context, simpleOutputViewer),
-            ),
-
-            // 画布门控（官网 canvasLockCamera / canvasReducedMotion）
-            SettingsSwitchTile(
-              secondary: const Icon(Icons.lock_outline),
-              title: Text(context.l10n.settings_canvasLockCamera),
-              subtitle: Text(context.l10n.settings_canvasLockCameraDescription),
+            child: SettingsSwitchTile(
+              title: Text(l10n.settings_canvasLockCamera),
+              subtitle: Text(l10n.settings_canvasLockCameraDescription),
               value: ref.watch(canvasLockCameraNotifierProvider),
-              onChanged: (v) => unawaited(
+              onChanged: (value) => unawaited(
                 ref
                     .read(canvasLockCameraNotifierProvider.notifier)
-                    .setLocked(v),
+                    .setLocked(value),
               ),
             ),
-          ],
-          if (!widget.controlsOnly) ...[
-            SettingsSwitchTile(
-              secondary: const Icon(Icons.motion_photos_off_outlined),
-              title: Text(context.l10n.settings_canvasReducedMotion),
-              subtitle: Text(
-                context.l10n.settings_canvasReducedMotionDescription,
-              ),
-              value: ref.watch(canvasReducedMotionNotifierProvider),
-              onChanged: (v) => unawaited(
-                ref
-                    .read(canvasReducedMotionNotifierProvider.notifier)
-                    .setReduced(v),
-              ),
-            ),
-            const GenerationSettingsSection(feedbackOnly: true),
-            SettingsTile(
-              title: Text(
-                Localizations.localeOf(context).languageCode == 'zh'
-                    ? '通知样式'
-                    : 'Notification style',
-              ),
-              trailing: OutlinedButton.icon(
-                onPressed: () => AppToast.info(
-                  context,
-                  Localizations.localeOf(context).languageCode == 'zh'
-                      ? '通知会显示在右上角，长文本自动换行，进度任务完成后自动收起。'
-                      : 'Notifications appear at the upper right, wrap long messages, and close when progress tasks finish.',
-                ),
-                icon: const Icon(Icons.info_outline, size: 16),
-                label: Text(
-                  Localizations.localeOf(context).languageCode == 'zh'
-                      ? '预览'
-                      : 'Preview',
-                ),
-              ),
-            ),
-          ],
+          ),
         ],
-      ),
+      );
+    }
+
+    final font = ref.watch(fontNotifierProvider);
+    final locale = ref.watch(localeNotifierProvider);
+    final fontScale = ref.watch(settingsFontScaleProvider);
+    return Column(
+      children: [
+        SettingsLabeledGroup(
+          title: settingsText(context, '外观样式', 'Appearance', '外観スタイル'),
+          description: settingsText(
+            context,
+            '选择工作台的明暗风格',
+            'Choose a light or dark workspace',
+            '明るい・暗いスタイルを選択',
+          ),
+          child: const StudioThemePicker(compact: true),
+        ),
+        SettingsLabeledGroup(
+          title: settingsText(context, '文字与语言', 'Text & language', '文字と言語'),
+          description: settingsText(
+            context,
+            '统一阅读体验',
+            'Make reading comfortable',
+            '読みやすさを統一',
+          ),
+          child: Column(
+            children: [
+              SettingsTile(
+                controlWrapWidth: wrapWidth,
+                title: Text(l10n.settings_font),
+                trailing: _valueControl(
+                  font.displayName,
+                  () => _showFontDialog(context, font),
+                ),
+                onTap: () => _showFontDialog(context, font),
+              ),
+              SettingsTile(
+                controlWrapWidth: wrapWidth,
+                title: Text(l10n.settings_fontScale),
+                subtitle: Text(
+                  settingsText(
+                    context,
+                    '仅调整设置页面与设置弹窗的字号',
+                    'Adjust settings pages and dialogs only',
+                    '設定画面と設定ダイアログの文字サイズ',
+                  ),
+                ),
+                trailing: _valueControl(
+                  '${(fontScale * 100).round()}%',
+                  () => _showFontScaleDialog(context, fontScale),
+                ),
+                onTap: () => _showFontScaleDialog(context, fontScale),
+              ),
+              SettingsTile(
+                controlWrapWidth: wrapWidth,
+                title: Text(l10n.settings_language),
+                trailing: _valueControl(
+                  _languageLabel(context, locale.languageCode),
+                  () => _showLanguageDialog(context, locale),
+                ),
+                onTap: () => _showLanguageDialog(context, locale),
+              ),
+            ],
+          ),
+        ),
+        SettingsLabeledGroup(
+          title: settingsText(
+            context,
+            '动效与提醒',
+            'Motion & notifications',
+            '動きと通知',
+          ),
+          description: settingsText(
+            context,
+            '减少打扰，及时获知完成',
+            'Reduce distractions, know when work finishes',
+            '邪魔を減らし、完了をお知らせ',
+          ),
+          showDivider: false,
+          child: Column(
+            children: [
+              SettingsSwitchTile(
+                title: Text(l10n.settings_canvasReducedMotion),
+                subtitle: Text(l10n.settings_canvasReducedMotionDescription),
+                value: ref.watch(canvasReducedMotionNotifierProvider),
+                onChanged: (value) => unawaited(
+                  ref
+                      .read(canvasReducedMotionNotifierProvider.notifier)
+                      .setReduced(value),
+                ),
+              ),
+              const GenerationSettingsSection(
+                feedbackOnly: true,
+                showHeading: false,
+                explicitSoundPicker: true,
+              ),
+              SettingsTile(
+                title: Text(
+                  settingsText(context, '通知样式', 'Notification style', '通知スタイル'),
+                ),
+                trailing: OutlinedButton.icon(
+                  key: const Key('settings-preview-notification'),
+                  onPressed: () => AppToast.info(
+                    context,
+                    settingsText(
+                      context,
+                      '通知会显示在右上角，长文本自动换行，进度任务完成后自动收起。',
+                      'Notifications appear at the upper right, wrap long messages, and close when progress tasks finish.',
+                      '通知は右上に表示され、長い文章は折り返し、進行中のタスクは完了後に閉じます。',
+                    ),
+                  ),
+                  icon: const Icon(Icons.info_outline, size: 16),
+                  label: Text(settingsText(context, '预览', 'Preview', 'プレビュー')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -223,22 +275,6 @@ class _AppearanceSettingsSectionState
           .read(simpleOutputViewerNotifierProvider.notifier)
           .setSimple(value);
     }
-  }
-
-  void _showThemeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.settings_selectStyle),
-        content: const SizedBox(width: 420, child: StudioThemePicker()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(context.l10n.common_close),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _showFontDialog(

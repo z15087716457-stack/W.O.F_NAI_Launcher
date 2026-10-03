@@ -20,8 +20,9 @@ class GenerationSettingsSection extends ConsumerStatefulWidget {
     super.key,
     this.feedbackOnly = false,
     this.showHeading = true,
+    this.explicitSoundPicker = false,
   });
-  final bool feedbackOnly, showHeading;
+  final bool feedbackOnly, showHeading, explicitSoundPicker;
 
   @override
   ConsumerState<GenerationSettingsSection> createState() =>
@@ -180,7 +181,8 @@ class _GenerationSettingsSectionState
             ),
           ],
           if (widget.feedbackOnly) ...[
-            SettingsSectionLabel(l10n.settings_generationFeedbackSection),
+            if (widget.showHeading)
+              SettingsSectionLabel(l10n.settings_generationFeedbackSection),
             SettingsSwitchTile(
               secondary: const Icon(Icons.volume_up_outlined),
               title: Text(l10n.settings_notificationSound),
@@ -196,6 +198,13 @@ class _GenerationSettingsSectionState
                     ? Uri.file(
                         notificationSettings.customSoundPath!,
                       ).pathSegments.last
+                    : widget.explicitSoundPicker
+                    ? settingsText(
+                        context,
+                        '使用默认完成音效',
+                        'Use the default completion sound',
+                        '既定の完了音を使用',
+                      )
                     : l10n.settings_notificationSelectSound,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -210,7 +219,15 @@ class _GenerationSettingsSectionState
                       onPressed: () =>
                           notificationNotifier.setCustomSoundPath(null),
                     ),
-                  const Icon(Icons.chevron_right),
+                  if (widget.explicitSoundPicker)
+                    OutlinedButton.icon(
+                      key: const Key('settings-select-sound'),
+                      onPressed: () => _selectCustomSound(notificationNotifier),
+                      icon: const Icon(Icons.folder_open_outlined, size: 16),
+                      label: Text(l10n.settings_notificationSelectSound),
+                    )
+                  else
+                    const Icon(Icons.chevron_right),
                 ],
               ),
               onTap: () => _selectCustomSound(notificationNotifier),

@@ -65,8 +65,20 @@ void main() {
     await tester.tap(find.text('历史记录点击行为'));
     await tester.pumpAndSettle();
 
-    expect(find.text('单击历史图片直接打开详情'), findsOneWidget);
-    expect(find.textContaining('单击切换中央预览'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(Dialog),
+        matching: find.text('单击历史图片直接打开详情'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(Dialog),
+        matching: find.textContaining('单击切换中央预览'),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.text('官网式联动'));
     await tester.pumpAndSettle();
 

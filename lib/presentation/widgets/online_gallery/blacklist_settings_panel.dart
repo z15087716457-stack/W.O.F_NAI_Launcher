@@ -183,10 +183,13 @@ class _OnlineGalleryBlacklistSettingsPanelState
                   )
                   .toList(),
             ),
-          const SizedBox(height: 8),
+          SizedBox(height: widget.flat ? 16 : 8),
           SettingsSwitchTile(
-            contentPadding: EdgeInsets.zero,
-            dense: true,
+            key: const Key('blacklist-startup-sync'),
+            contentPadding: widget.flat
+                ? const EdgeInsets.symmetric(vertical: 16)
+                : EdgeInsets.zero,
+            dense: !widget.flat,
             title: Text(context.l10n.onlineGallery_autoSyncOnStartup),
             subtitle: Text(
               context.l10n.onlineGallery_autoSyncOnStartupSubtitle,
@@ -195,8 +198,12 @@ class _OnlineGalleryBlacklistSettingsPanelState
             onChanged: notifier.setAutoSyncOnStartup,
           ),
           if (widget.showSyncStatus) ...[
-            const SizedBox(height: 4),
-            _buildSyncStatus(theme, state),
+            SizedBox(height: widget.flat ? 12 : 4),
+            Padding(
+              key: const Key('blacklist-sync-status'),
+              padding: EdgeInsets.only(bottom: widget.flat ? 4 : 0),
+              child: _buildSyncStatus(theme, state),
+            ),
           ],
         ],
       ),
