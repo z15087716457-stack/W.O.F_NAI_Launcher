@@ -110,9 +110,81 @@ Future<void> _capture(
   });
 }
 
+Future<void> _captureWikiMotion(
+  WidgetTester tester,
+  GlobalKey boundary,
+  bool dark,
+) async {
+  if (Platform.environment['CAPTURE_WIKI_MOTION'] != '1') return;
+  final icon = find.byWidgetPredicate(
+    (w) => w is StudioAnimatedIcon && w.icon == StudioIcons.tagWiki,
+  );
+  final button = find.ancestor(of: icon, matching: find.byType(InkWell));
+  final rect = tester.getRect(button);
+  expect(rect.size, const Size(44, 44));
+  final local = rect.topLeft - tester.getTopLeft(find.byKey(boundary));
+  final folder = Directory('.dart_tool/wiki-motion-captures')
+    ..createSync(recursive: true);
+  Future<void> frame(int index) => tester
+      .runAsync(() async {
+        const ratio = 3.0;
+        final render =
+            boundary.currentContext!.findRenderObject()!
+                as RenderRepaintBoundary;
+        final full = await render.toImage(pixelRatio: ratio);
+        final recorder = ui.PictureRecorder();
+        Canvas(recorder).drawImageRect(
+          full,
+          Rect.fromLTWH(
+            local.dx * ratio,
+            local.dy * ratio,
+            rect.width * ratio,
+            rect.height * ratio,
+          ),
+          Rect.fromLTWH(0, 0, rect.width * ratio, rect.height * ratio),
+          Paint(),
+        );
+        final picture = recorder.endRecording();
+        final cropped = await picture.toImage(
+          (rect.width * ratio).round(),
+          (rect.height * ratio).round(),
+        );
+        final bytes = (await cropped.toByteData(
+          format: ui.ImageByteFormat.png,
+        ))!;
+        File(
+          '${folder.path}/nav-${dark ? 'dark' : 'light'}-${index.toString().padLeft(2, '0')}.png',
+        ).writeAsBytesSync(bytes.buffer.asUint8List());
+        cropped.dispose();
+        picture.dispose();
+        full.dispose();
+      })
+      .then((_) {});
+  await frame(0);
+  await tester.tap(button);
+  await tester.pump();
+  for (var i = 1; i <= 20; i++) {
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(
+      tester.getRect(button),
+      rect,
+      reason: 'Click motion must not move the target or surrounding layout.',
+    );
+    await frame(i);
+  }
+  expect(
+    find.descendant(of: button, matching: find.byIcon(StudioIcons.tagWiki)),
+    findsOneWidget,
+  );
+  expect(tester.takeException(), isNull);
+}
+
 void main() {
   setUpAll(() async {
-    if (Platform.environment['CAPTURE_STUDIO_UI'] != '1') return;
+    if (Platform.environment['CAPTURE_STUDIO_UI'] != '1' &&
+        Platform.environment['CAPTURE_WIKI_MOTION'] != '1') {
+      return;
+    }
     await loadStudioCaptureFonts();
     await (FontLoader(
       'MaterialIcons',
@@ -367,6 +439,16 @@ void main() {
       );
       final mode = dark ? 'dark' : 'light';
       await _capture(tester, boundary, '$mode-collapsed');
+      if (Platform.environment['CAPTURE_WIKI_MOTION'] == '1') {
+        when(() => shell.currentIndex).thenReturn(AppBranch.tagWiki.index);
+        tester.element(find.byType(MainNavRail)).markNeedsBuild();
+        await tester.pumpAndSettle();
+        await _captureWikiMotion(tester, boundary, dark);
+        verify(() => shell.goBranch(AppBranch.tagWiki.index)).called(1);
+        when(() => shell.currentIndex).thenReturn(AppBranch.generation.index);
+        tester.element(find.byType(MainNavRail)).markNeedsBuild();
+        await tester.pumpAndSettle();
+      }
 
       final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await mouse.addPointer(location: tester.getCenter(generation));

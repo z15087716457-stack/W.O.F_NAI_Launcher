@@ -85,7 +85,7 @@ class _StudioAnimatedIconState extends State<StudioAnimatedIcon>
           0xe90b => 560, // Source pulse, orbit, result.
           0xe90c => 580, // Carry the style into the target.
           0xe90d => 520, // Focus corners settle around the features.
-          0xe918 => 620, // Fold lifts, index tabs follow, then settle.
+          0xe918 => 760, // Page flips, index tabs fan out, book springs back.
           _ => 500,
         },
       );
@@ -212,6 +212,33 @@ class StudioIconPainter extends CustomPainter {
     final t = progress.value.clamp(0.0, 1.0);
     canvas.save();
     canvas.scale(size.width / 24, size.height / 24);
+    if (icon == StudioIcons.tagWiki) {
+      final scale = _keys(t, [
+        (0, 1),
+        (.12, .92),
+        (.32, 1.15),
+        (.55, 1.06),
+        (.78, .99),
+        (1, 1),
+      ]);
+      final tilt = _keys(t, [
+        (0, 0),
+        (.28, -.18),
+        (.56, .09),
+        (.78, -.025),
+        (1, 0),
+      ]);
+      final hop = _keys(t, [
+        (0, 0),
+        (.1, .6),
+        (.32, -1.3),
+        (.64, .25),
+        (.84, 0),
+        (1, 0),
+      ]);
+      canvas.translate(0, hop);
+      _around(canvas, 12, 12, sx: scale, sy: scale, angle: tilt);
+    }
     for (final part in parts) {
       canvas.save();
       var opacity = 1.0;
@@ -409,13 +436,45 @@ class StudioIconPainter extends CustomPainter {
             );
           }
         case 0xe918:
+          if (part.name != 'spine') {
+            final turn = _keys(t, [
+              (0, 1),
+              (.14, .78),
+              (.3, .48),
+              (.52, 1.08),
+              (.72, .97),
+              (1, 1),
+            ]);
+            _around(canvas, 8.8, 12, sx: turn);
+          }
           if (part.name == 'fold') {
-            final lift = _pulse(t, .02, .6);
-            _around(canvas, 15.5, 7.5, sx: 1 - .22 * lift, angle: -.22 * lift);
+            final lift = _pulse(t, .06, .68);
+            _around(canvas, 15.5, 7.5, sx: 1 - .8 * lift, angle: -.75 * lift);
           } else if (part.name == 'topIndex' || part.name == 'bottomIndex') {
             final first = part.name == 'topIndex';
-            final lift = _pulse(t, first ? .15 : .3, first ? .7 : .88);
-            canvas.translate(.65 * lift, -.2 * lift);
+            final spread = _keys(
+              t,
+              first
+                  ? [
+                      (0, 0),
+                      (.08, 0),
+                      (.34, 2.1),
+                      (.55, -.25),
+                      (.82, 0),
+                      (1, 0),
+                    ]
+                  : [
+                      (0, 0),
+                      (.19, 0),
+                      (.46, 2.1),
+                      (.66, -.25),
+                      (.94, 0),
+                      (1, 0),
+                    ],
+            );
+            canvas.translate(spread, -.3 * spread);
+          } else if (part.name == 'text') {
+            trim = _keys(t, [(0, 1), (.28, .25), (.65, 1), (1, 1)]);
           }
       }
       _draw(canvas, part, opacity: opacity, trim: trim);

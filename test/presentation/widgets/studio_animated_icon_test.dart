@@ -151,7 +151,11 @@ void main() {
     'all paths return to their starting silhouette and stay inside a 32px envelope',
     (tester) async {
       final key = GlobalKey();
-      Future<ui.Image> render(IconData icon, double t) async {
+      Future<ui.Image> render(
+        IconData icon,
+        double t, {
+        double size = 24,
+      }) async {
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -161,7 +165,7 @@ void main() {
                 child: Padding(
                   padding: const EdgeInsets.all(4),
                   child: CustomPaint(
-                    size: const Size.square(24),
+                    size: Size.square(size),
                     painter: StudioIconPainter(
                       icon: icon,
                       progress: AlwaysStoppedAnimation(t),
@@ -204,7 +208,34 @@ void main() {
         );
         first.dispose();
         last.dispose();
-        for (final t in [.2, .4, .6, .8]) {
+        if (entry.value == StudioIcons.tagWiki) {
+          final idle = await render(entry.value, 0, size: 20);
+          final peak = await render(entry.value, .32, size: 20);
+          final idlePixels = (await tester.runAsync(
+            () => idle.toByteData(),
+          ))!.buffer.asUint8List();
+          final peakPixels = (await tester.runAsync(
+            () => peak.toByteData(),
+          ))!.buffer.asUint8List();
+          var inkPixels = 0;
+          var changedPixels = 0;
+          for (var i = 3; i < idlePixels.length; i += 4) {
+            if (idlePixels[i] > 16) inkPixels++;
+            if ((idlePixels[i] - peakPixels[i]).abs() > 32) changedPixels++;
+          }
+          expect(
+            changedPixels,
+            greaterThan(inkPixels * .45),
+            reason:
+                'The actual 20px Wiki icon needs a clearly visible click gesture.',
+          );
+          idle.dispose();
+          peak.dispose();
+        }
+        for (final t
+            in entry.value == StudioIcons.tagWiki
+                ? [.1, .2, .3, .4, .5, .6, .7, .8, .9]
+                : [.2, .4, .6, .8]) {
           final image = await render(entry.value, t);
           final pixels = (await tester.runAsync(
             () => image.toByteData(),
@@ -300,8 +331,13 @@ void main() {
                       as RenderRepaintBoundary)
                   .toImage(pixelRatio: 1.5);
           final data = await image.toByteData(format: ui.ImageByteFormat.png);
+          final folder = Platform.environment['CAPTURE_WIKI_MOTION'] == '1'
+              ? 'wiki-motion-captures/'
+              : Platform.environment['CAPTURE_WIKI_POLISH'] == '1'
+              ? 'wiki-polish-captures/'
+              : '';
           File(
-            '.dart_tool/${Platform.environment['CAPTURE_WIKI_POLISH'] == '1' ? 'wiki-polish-captures/' : ''}studio-motion-${dark ? 'dark' : 'light'}.png',
+            '.dart_tool/${folder}studio-motion-${dark ? 'dark' : 'light'}.png',
           ).writeAsBytesSync(data!.buffer.asUint8List());
           image.dispose();
         });
