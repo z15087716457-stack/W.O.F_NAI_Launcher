@@ -13,6 +13,7 @@ NovelAI Flutter 桌面客户端。业务按 `lib/core/`、`lib/data/`、`lib/pre
 ## 修改与验证
 
 - 依赖变化后 `flutter pub get`；修改 Riverpod、Freezed、JSON、Hive 或路由的生成输入后运行 `dart run build_runner build --delete-conflicting-outputs`。
+- 界面文案统一写进 `lib/l10n/` 的 ARB，各语言同步补齐，改后运行 `flutter gen-l10n`；有 BuildContext 用 `context.l10n`，模型、服务等无 context 的代码用 `currentL10n`。不要在代码里内联 `zh/en/ja` 三元或只写中文；英日等布局回归用真实字体（`test/helpers/studio_capture_fonts.dart`）。
 - 代码按 Dart formatter 与现有分层风格编写。逻辑修复验证受影响路径；UI 行为变更验证实际界面，需要稳定回归覆盖时补对应测试。
 - 测试放在 `test/` 对应功能目录，使用 `flutter_test` / `mocktail`。按影响选择测试和分析范围；仅文档修改不运行 Flutter 全量测试或构建。
 - 已有开发会话时，代码修改完成必要验证后运行 `scripts/trigger_hot_reload.ps1`；需要重置状态用 `-Restart`，不要再启动第二个 attach。
