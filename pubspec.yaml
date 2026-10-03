@@ -147,7 +147,6 @@ flutter:
     - assets/icons/
     - assets/icons/providers/
     - assets/licenses/
-    - assets/translations/
     - assets/data/
     - assets/data/wordlists/
     - assets/data/tokenizers/
