@@ -930,6 +930,20 @@ void main() {
         closeTo(tester.getRect(viewport).top + 8, .5),
       );
       await capture(tester, 'translation-first-outline');
+      auto.bodyOverride = '简介。\n\n## 示例\n\n示例正文。\n\n## 音乐\n\n音乐正文。';
+      await auto.setEnabled(true);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('wiki-outline-1')));
+      await tester.pumpAndSettle();
+      final shortOutline = find.byKey(const ValueKey('wiki-outline-1'));
+      expect(
+        tester
+            .widget<TextButton>(shortOutline)
+            .style!
+            .foregroundColor!
+            .resolve({}),
+        Theme.of(tester.element(shortOutline)).colorScheme.primary,
+      );
       expect(tester.takeException(), isNull);
     },
   );

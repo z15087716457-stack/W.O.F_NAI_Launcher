@@ -116,6 +116,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   double _toolbarHeight = 63;
   bool _headerScheduled = false;
   GlobalKey? _activeOutline;
+  GlobalKey? _clampedOutline;
+  double? _clampedOutlineOffset;
   bool _outlineScheduled = false;
   bool _wideArticle = false;
   bool _showTranslation = true;
@@ -1287,6 +1289,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _outlineBody = body;
       _headings = wikiArticleHeadings(body);
       _activeOutline = null;
+      _clampedOutline = null;
+      _clampedOutlineOffset = null;
     }
     _scheduleOutlineUpdate();
     return _headings;
@@ -1309,8 +1313,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
 
   void _jumpToOutline(GlobalKey anchor) {
     if (!_articleScroll.hasClients) return;
+    _clampedOutline = null;
+    _clampedOutlineOffset = null;
     if (anchor == _articleStart) {
       _articleScroll.jumpTo(0);
+      _scheduleOutlineUpdate();
       return;
     }
     final target = anchor.currentContext?.findRenderObject();
@@ -1322,6 +1329,12 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _articleScroll.jumpTo(
       offset.clamp(0, _articleScroll.position.maxScrollExtent),
     );
+    if (offset > _articleScroll.position.maxScrollExtent || offset < 0) {
+      // At the end of a short article the target cannot reach the top. Keep
+      // the clicked section until the reader scrolls or the body changes.
+      _clampedOutline = anchor;
+      _clampedOutlineOffset = _articleScroll.offset;
+    }
     _scheduleOutlineUpdate();
   }
 
@@ -1335,12 +1348,20 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       if (viewport is! RenderBox || !viewport.hasSize) return;
       final top = viewport.localToGlobal(Offset.zero).dy + 28;
       GlobalKey? active;
-      for (final heading in _headings) {
-        final render = heading.anchor.currentContext?.findRenderObject();
-        if (render is RenderBox &&
-            render.hasSize &&
-            render.localToGlobal(Offset.zero).dy <= top) {
-          active = heading.anchor;
+      if (_clampedOutlineOffset != null &&
+          _articleScroll.hasClients &&
+          (_articleScroll.offset - _clampedOutlineOffset!).abs() < .5) {
+        active = _clampedOutline;
+      } else {
+        _clampedOutline = null;
+        _clampedOutlineOffset = null;
+        for (final heading in _headings) {
+          final render = heading.anchor.currentContext?.findRenderObject();
+          if (render is RenderBox &&
+              render.hasSize &&
+              render.localToGlobal(Offset.zero).dy <= top) {
+            active = heading.anchor;
+          }
         }
       }
       if (active != _activeOutline) setState(() => _activeOutline = active);
