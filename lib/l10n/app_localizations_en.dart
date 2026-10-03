@@ -938,7 +938,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_stepsLabel => 'Steps';
 
   @override
-  String get generation_guidance => 'Prompt Guidance';
+  String get generation_guidance => 'Guidance';
 
   @override
   String generation_cfgScale(Object scale) {

@@ -922,7 +922,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_stepsLabel => 'ステップ';
 
   @override
-  String get generation_guidance => 'プロンプトガイダンス';
+  String get generation_guidance => 'ガイダンス';
 
   @override
   String generation_cfgScale(Object scale) {

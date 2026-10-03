@@ -907,7 +907,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_stepsLabel => '步数';
 
   @override
-  String get generation_guidance => '提示词引导';
+  String get generation_guidance => '引导';
 
   @override
   String generation_cfgScale(Object scale) {
@@ -13075,7 +13075,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get generation_stepsLabel => '步數';
 
   @override
-  String get generation_guidance => '提示詞引導';
+  String get generation_guidance => '引導';
 
   @override
   String generation_cfgScale(Object scale) {

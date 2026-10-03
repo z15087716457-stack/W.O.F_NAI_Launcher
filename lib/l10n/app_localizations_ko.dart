@@ -919,7 +919,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_stepsLabel => '스텝';
 
   @override
-  String get generation_guidance => '프롬프트 가이던스';
+  String get generation_guidance => '가이던스';
 
   @override
   String generation_cfgScale(Object scale) {

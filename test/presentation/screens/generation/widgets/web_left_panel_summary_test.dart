@@ -47,7 +47,7 @@ void main() {
     final params = container.read(generationParamsNotifierProvider);
 
     expect(find.text('步数'), findsOneWidget);
-    expect(find.text('提示词引导'), findsOneWidget);
+    expect(find.text('引导'), findsOneWidget);
     expect(find.text('种子'), findsOneWidget);
     expect(find.text('采样器'), findsOneWidget);
     expect(find.text(params.steps.toString()), findsOneWidget);
@@ -97,7 +97,7 @@ void main() {
     await tester.pump();
     expect(toggleCount, 0);
 
-    await tester.tap(find.text('提示词引导'));
+    await tester.tap(find.text('引导'));
     await tester.pump();
     expect(toggleCount, 0);
   });

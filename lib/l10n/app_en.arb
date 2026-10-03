@@ -413,7 +413,7 @@
     }
   },
   "generation_stepsLabel": "Steps",
-  "generation_guidance": "Prompt Guidance",
+  "generation_guidance": "Guidance",
   "generation_cfgScale": "Prompt Guidance: {scale}",
   "@generation_cfgScale": {
     "placeholders": {

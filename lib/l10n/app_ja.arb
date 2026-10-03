@@ -412,7 +412,7 @@
     }
   },
   "generation_stepsLabel": "ステップ",
-  "generation_guidance": "プロンプトガイダンス",
+  "generation_guidance": "ガイダンス",
   "generation_cfgScale": "プロンプトガイダンス: {scale}",
   "@generation_cfgScale": {
     "placeholders": {

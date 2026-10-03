@@ -393,7 +393,7 @@
   "generation_sampler": "采样器",
   "generation_steps": "步数: {steps}",
   "generation_stepsLabel": "步数",
-  "generation_guidance": "提示词引导",
+  "generation_guidance": "引导",
   "generation_cfgScale": "提示词引导：{scale}",
   "generation_seed": "种子",
   "generation_seedRandom": "随机",

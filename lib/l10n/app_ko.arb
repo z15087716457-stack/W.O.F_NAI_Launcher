@@ -412,7 +412,7 @@
     }
   },
   "generation_stepsLabel": "스텝",
-  "generation_guidance": "프롬프트 가이던스",
+  "generation_guidance": "가이던스",
   "generation_cfgScale": "프롬프트 가이던스: {scale}",
   "@generation_cfgScale": {
     "placeholders": {

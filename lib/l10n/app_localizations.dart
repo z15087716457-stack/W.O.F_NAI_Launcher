@@ -1803,7 +1803,7 @@ abstract class AppLocalizations {
   /// No description provided for @generation_guidance.
   ///
   /// In en, this message translates to:
-  /// **'Prompt Guidance'**
+  /// **'Guidance'**
   String get generation_guidance;
 
   /// No description provided for @generation_cfgScale.
