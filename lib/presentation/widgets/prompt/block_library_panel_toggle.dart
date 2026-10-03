@@ -34,6 +34,7 @@ class _BlockLibraryPanelToggleButtonState
         visualDensity: VisualDensity.compact,
         style: IconButton.styleFrom(
           backgroundColor: Colors.transparent,
+          hoverColor: Colors.transparent,
           foregroundColor: theme.colorScheme.onSurfaceVariant,
         ),
         onPressed: () {
