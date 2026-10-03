@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/services/alias_resolver_service.dart';
 import '../../presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import '../database/services/service_providers.dart';
+import '../utils/app_logger.dart';
 import 'autocomplete_cache_database.dart';
 import 'autocomplete_settings.dart';
 import 'cooccurrence_completion_source.dart';
@@ -34,12 +35,16 @@ final tagCatalogRepositoryProvider = Provider<TagCatalogRepository>((ref) {
 final zhDictionaryServiceProvider = ChangeNotifierProvider<ZhDictionaryService>(
   (ref) {
     final service = ZhDictionaryService();
-    unawaited(() async {
-      await service.initialize();
-      if (service.state.isInstalled) {
-        await service.checkForUpdate();
-      }
-    }());
+    unawaited(
+      () async {
+        await service.initialize();
+        if (service.state.isInstalled) {
+          await service.checkForUpdate();
+        }
+      }().catchError((Object error, StackTrace stack) {
+        AppLogger.e('ffdkj dictionary initialization failed', error, stack);
+      }),
+    );
     return service;
   },
 );

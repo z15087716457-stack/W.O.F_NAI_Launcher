@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
 import 'package:nai_launcher/core/autocomplete/zh_dictionary_service.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -61,6 +63,28 @@ void main() {
     },
   );
 
+  test(
+    'background provider initialization failure is logged and retried later',
+    () async {
+      final previous = PathProviderPlatform.instance;
+      PathProviderPlatform.instance = _FailingPaths();
+      addTearDown(() => PathProviderPlatform.instance = previous);
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final provided = container.read(zhDictionaryServiceProvider);
+      await pumpEventQueue();
+      expect(provided.state.isInstalled, isFalse);
+      PathProviderPlatform.instance = _Paths(
+        Completer<String>()..complete(temp.path),
+      );
+      await provided.initialize();
+      expect(
+        await Directory(p.join(temp.path, 'autocomplete', 'ffdkj')).exists(),
+        isTrue,
+      );
+    },
+  );
+
   test('rejects a corrupt SQLite file', () async {
     final file = File('${temp.path}/corrupt.sqlite');
     await file.writeAsString('not a sqlite database');
@@ -117,4 +141,10 @@ class _Paths extends PathProviderPlatform {
   final Completer<String> gate;
   @override
   Future<String?> getApplicationSupportPath() => gate.future;
+}
+
+class _FailingPaths extends PathProviderPlatform {
+  @override
+  Future<String?> getApplicationSupportPath() async =>
+      throw StateError('application support directory unavailable');
 }
