@@ -33,6 +33,7 @@ class WikiSidebar extends StatelessWidget {
     required this.onSelect,
     this.width = 216,
     this.headerHeight = 62,
+    this.navigationHeight,
   });
 
   final WikiDirectory directory;
@@ -41,6 +42,9 @@ class WikiSidebar extends StatelessWidget {
   final ValueChanged<WikiScope> onSelect;
   final double width;
   final double headerHeight;
+  // The first two rows share the results toolbar's height; collections below
+  // them can still expand the directory naturally.
+  final double? navigationHeight;
 
   Future<void> _create(BuildContext context, {String? parentId}) async {
     final name = await ThemedInputDialog.show(
@@ -213,6 +217,7 @@ class WikiSidebar extends StatelessWidget {
     bool selected = false,
     int? count,
     Widget? trailing,
+    double height = 36,
   }) {
     final scheme = Theme.of(context).colorScheme;
     return Padding(
@@ -226,7 +231,7 @@ class WikiSidebar extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           onTap: onTap,
           child: SizedBox(
-            height: 36,
+            height: height,
             child: Row(
               children: [
                 const SizedBox(width: 10),
@@ -318,9 +323,13 @@ class WikiSidebar extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  const SizedBox(height: 9),
+                  SizedBox(height: navigationHeight == null ? 9 : 5),
+                  // Reserve 5px above, 4px around rows and 10px to the divider.
                   _row(
                     context,
+                    height: navigationHeight == null
+                        ? 36
+                        : (navigationHeight! - 19) / 2,
                     icon: Icons.library_books_outlined,
                     label: context.l10n.wiki_allTags,
                     selected: selection.kind == WikiScopeKind.all,
@@ -334,6 +343,9 @@ class WikiSidebar extends StatelessWidget {
                   ),
                   _row(
                     context,
+                    height: navigationHeight == null
+                        ? 36
+                        : (navigationHeight! - 19) / 2,
                     icon: Icons.bookmark_outline,
                     label: context.l10n.wiki_bookmarks,
                     count: bookmarks.bookmarkCount,
@@ -350,7 +362,10 @@ class WikiSidebar extends StatelessWidget {
                     _collection(context, item, 1),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 9),
-                    child: Divider(height: 1),
+                    child: Divider(
+                      key: ValueKey('wiki-official-directory-divider'),
+                      height: 1,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(17, 0, 8, 7),

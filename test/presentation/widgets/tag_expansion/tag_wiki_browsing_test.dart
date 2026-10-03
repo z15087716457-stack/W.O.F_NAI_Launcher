@@ -227,12 +227,17 @@ Future<void> capture(WidgetTester tester, String name) async {
     final polish = Platform.environment['CAPTURE_WIKI_POLISH'] == '1';
     final separators = Platform.environment['CAPTURE_WIKI_SEPARATORS'] == '1';
     final feedback = Platform.environment['CAPTURE_WIKI_FEEDBACK'] == '1';
+    final alignment = Platform.environment['CAPTURE_WIKI_ALIGNMENT'] == '1';
     final image = await render.toImage(
-      pixelRatio: redesign || polish || separators || feedback ? 1 : 2,
+      pixelRatio: redesign || polish || separators || feedback || alignment
+          ? 1
+          : 2,
     );
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final folder = Directory(
-      feedback
+      alignment
+          ? '.dart_tool/wiki-alignment-captures'
+          : feedback
           ? '.dart_tool/wiki-feedback-captures'
           : separators
           ? '.dart_tool/wiki-separators-captures'
@@ -694,6 +699,25 @@ void main() {
         final rect = tester.getRect(copy);
         expect(rect.left, greaterThanOrEqualTo(0));
         expect(rect.right, lessThanOrEqualTo(scenario.$2.width));
+        if (const ['2k', 'wide', 'short', 'en'].contains(scenario.$1)) {
+          final listTop = tester
+              .getRect(find.byKey(const ValueKey('wiki-results-list')))
+              .top;
+          expect(
+            tester
+                .getRect(find.byKey(const ValueKey('wiki-article-header')))
+                .bottom,
+            closeTo(listTop, .1),
+          );
+          expect(
+            tester
+                .getRect(
+                  find.byKey(const ValueKey('wiki-official-directory-divider')),
+                )
+                .bottom,
+            closeTo(listTop, .1),
+          );
+        }
         if (scenario.$1 == '2k' || scenario.$1 == 'wide') {
           expect(
             find.byKey(const ValueKey('wiki-reading-rail')),
@@ -846,6 +870,17 @@ void main() {
       expect(icon.icon, Icons.copyright_rounded);
       expect(icon.color, expectedColor);
       expect(tester.widget<Text>(category).style!.color, expectedColor);
+      final articleHeader = tester.getRect(
+        find.byKey(const ValueKey('wiki-article-header')),
+      );
+      final resultsList = tester.getRect(
+        find.byKey(const ValueKey('wiki-results-list')),
+      );
+      final directoryDivider = tester.getRect(
+        find.byKey(const ValueKey('wiki-official-directory-divider')),
+      );
+      expect(articleHeader.bottom, closeTo(resultsList.top, .1));
+      expect(directoryDivider.bottom, closeTo(resultsList.top, .1));
       final source = find.byKey(const ValueKey('wiki-article-source'));
       final toggle = find.byKey(const ValueKey('wiki-reading-toggle-touhou'));
       final retry = find.byKey(const ValueKey('wiki-retranslate-touhou'));

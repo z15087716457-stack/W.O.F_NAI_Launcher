@@ -113,7 +113,9 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   final _articleStart = GlobalKey();
   final _articleViewport = GlobalKey();
   final _toolbarKey = GlobalKey();
+  final _resultsToolbarKey = GlobalKey();
   double _toolbarHeight = 63;
+  double _resultsToolbarHeight = 94;
   bool _headerScheduled = false;
   GlobalKey? _activeOutline;
   GlobalKey? _clampedOutline;
@@ -593,6 +595,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             if (!_compactNavigation)
               WikiSidebar(
                 headerHeight: _toolbarHeight - 1,
+                navigationHeight: _resultsToolbarHeight,
                 width: 216.0 * scale.clamp(1, 1.12),
                 directory: directory,
                 bookmarks: bookmarks,
@@ -753,6 +756,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   Widget _resultsToolbar() {
     final theme = Theme.of(context);
     return Container(
+      key: _resultsToolbarKey,
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: theme.dividerColor)),
@@ -1202,8 +1206,9 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         : null;
     return Container(
       key: const ValueKey('wiki-article-header'),
+      constraints: BoxConstraints(minHeight: _resultsToolbarHeight),
       // Compensate for the arrow's 4.5px optical inset inside its 28px target.
-      padding: EdgeInsets.fromLTRB(back == null ? 24 : 19.5, 20, 24, 18),
+      padding: EdgeInsets.fromLTRB(back == null ? 24 : 19.5, 12, 24, 10),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
@@ -1212,6 +1217,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
           final compact = constraints.maxWidth < 650 * scale;
           return Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -1301,12 +1308,21 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _headerScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _headerScheduled = false;
-      if (!mounted || _compactNavigation) return;
+      if (!mounted) return;
       final render = _toolbarKey.currentContext?.findRenderObject();
-      if (render is RenderBox &&
-          render.hasSize &&
-          (render.size.height - _toolbarHeight).abs() > .1) {
-        setState(() => _toolbarHeight = render.size.height);
+      final results = _resultsToolbarKey.currentContext?.findRenderObject();
+      final toolbarHeight = render is RenderBox && render.hasSize
+          ? render.size.height
+          : _toolbarHeight;
+      final resultsHeight = results is RenderBox && results.hasSize
+          ? results.size.height
+          : _resultsToolbarHeight;
+      if ((toolbarHeight - _toolbarHeight).abs() > .1 ||
+          (resultsHeight - _resultsToolbarHeight).abs() > .1) {
+        setState(() {
+          _toolbarHeight = toolbarHeight;
+          _resultsToolbarHeight = resultsHeight;
+        });
       }
     });
   }
