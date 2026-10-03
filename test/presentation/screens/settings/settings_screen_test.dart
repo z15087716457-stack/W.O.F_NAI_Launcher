@@ -340,7 +340,7 @@ void main() {
       final container = await pumpPolish(tester);
       await tester.tap(find.text('常规与外观'));
       await tester.pumpAndSettle();
-      expect(find.text('风格'), findsOneWidget);
+      expect(find.text('外观样式'), findsOneWidget);
       container.read(settingsAccountOpenRequestProvider.notifier).state++;
       await tester.pumpAndSettle();
       expect(find.byType(AccountSubscriptionSummary), findsOneWidget);
@@ -411,7 +411,7 @@ void main() {
   });
 
   testWidgets(
-    'wide settings center in their pane, unified surfaces and full blank header drag',
+    'sidebar search stays below native captions and the blank header remains draggable',
     (tester) async {
       final windowCalls = <String>[];
       final messenger =
@@ -446,8 +446,20 @@ void main() {
       final captions = tester.getRect(
         find.byKey(const Key('window-caption-controls')),
       );
-      expect(search.center.dy, captions.center.dy);
-      expect(search.height, captions.height);
+      final sidebar = tester.getRect(
+        find.byKey(const Key('settings-sidebar-surface')),
+      );
+      expect(search.top, greaterThanOrEqualTo(captions.bottom));
+      expect(search.left, greaterThan(sidebar.left));
+      expect(search.right, lessThan(sidebar.right));
+      expect(
+        search.bottom,
+        lessThan(
+          tester
+              .getRect(find.byKey(const ValueKey('settings-nav-appearance')))
+              .top,
+        ),
+      );
       await capturePolish(tester, 'settings-header-aligned');
       final hover = await tester.createGesture(
         kind: ui.PointerDeviceKind.mouse,
@@ -709,7 +721,10 @@ void main() {
             debugPrint(
               "Render ${destination.name}/${width.toInt()}/$scale/${brightness.name}",
             );
-            if (width < 650) {
+            if (find
+                .byType(DropdownButtonFormField<SettingsDestination>)
+                .evaluate()
+                .isNotEmpty) {
               await tester.tap(
                 find.byWidgetPredicate(
                   (widget) =>
@@ -862,6 +877,7 @@ void main() {
         );
 
         await navigate(SettingsDestination.appearance, '常规与外观');
+        await tester.ensureVisible(find.text('字体').last);
         await tester.tap(find.text('字体').last);
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('settings-font-preview')), findsOneWidget);
@@ -877,6 +893,7 @@ void main() {
         expect(find.text('Geist + HarmonyOS Sans'), findsOneWidget);
         await tester.tap(find.byTooltip('关闭').last);
         await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('语言').last);
         await tester.tap(find.text('语言').last);
         await tester.pumpAndSettle();
         await capturePolish(
@@ -914,6 +931,7 @@ void main() {
         await tester.tap(find.byTooltip('关闭').last);
         await tester.pumpAndSettle();
         await navigate(SettingsDestination.controls, '操作与快捷键');
+        await tester.ensureVisible(find.text('键盘快捷键').last);
         await tester.tap(find.text('键盘快捷键').last);
         await tester.pumpAndSettle();
         await capturePolish(

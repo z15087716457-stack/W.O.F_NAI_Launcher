@@ -67,6 +67,13 @@ List<SettingsSearchEntry> settingsSearchEntries(
     item('generation', l.settings_generationIntervalTitle, 'interval 间隔 节奏'),
     item('storage', l.settings_imageSavePath, 'path 保存 路径'),
     item('storage', l.settings_autoSave, 'save 自动保存'),
+    item('storage', l.settings_vibeLibraryPath, 'Vibe path 素材 路径'),
+    item(
+      'storage',
+      l.settings_galleryThumbnailQuality,
+      'thumbnail quality 缩略图 清晰度',
+    ),
+    item('storage', l.settings_extraRootsTitle, 'gallery folder 图库来源 文件夹'),
     item(
       'data',
       settingsText(context, '词库与缓存', 'Dictionaries & cache', '辞書とキャッシュ'),

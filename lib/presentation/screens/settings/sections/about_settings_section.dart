@@ -9,9 +9,10 @@ import '../../../../core/services/update_check_service.dart';
 import '../../../../core/storage/local_storage_service.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../providers/update_provider.dart';
-import '../../../widgets/common/github_icon.dart';
 import '../../../widgets/common/update_check_dialog.dart';
-import '../widgets/settings_card.dart';
+import '../widgets/settings_labeled_group.dart';
+import '../widgets/settings_preferences_panel.dart';
+import '../widgets/settings_ui_theme.dart';
 
 /// 关于设置板块
 ///
@@ -29,140 +30,174 @@ class _AboutSettingsSectionState extends ConsumerState<AboutSettingsSection> {
   Widget build(BuildContext context) {
     final updateState = ref.watch(updateStateProvider);
     final updateNotifier = ref.read(updateStateProvider.notifier);
-    final updateServiceState = ref.watch(updateCheckServiceReadyProvider);
-    final updateService = updateServiceState.valueOrNull;
-    final localStorageService = ref.watch(localStorageServiceProvider);
-    final fileLoggingEnabled = localStorageService.getFileLoggingEnabled();
+    final updateService = ref
+        .watch(updateCheckServiceReadyProvider)
+        .valueOrNull;
+    final storage = ref.watch(localStorageServiceProvider);
+    String text(String zh, String en, String ja) =>
+        settingsText(context, zh, en, ja);
+    final VoidCallback? check = updateState.isChecking || updateService == null
+        ? null
+        : () async {
+            if (updateState.hasNewVersion || updateState.hasDownloadedUpdate) {
+              updateNotifier.showNotification();
+            } else {
+              await updateNotifier.checkForUpdates(manual: true);
+            }
+            if (context.mounted) await UpdateCheckDialog.show(context);
+          };
+    void licenses() => showLicensePage(
+      context: context,
+      applicationName: context.l10n.app_title,
+      applicationVersion: AppVersion.versionName,
+    );
+    Future<void> project() async {
+      final uri = Uri.parse(
+        'https://github.com/z15087716457-stack/W.O.F_NAI_Launcher',
+      );
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
 
-    return SettingsCard(
-      child: Column(
-        children: [
-          SettingsTile(
-            leading: const Icon(Icons.info_outline),
-            title: Text(context.l10n.app_title),
-            subtitle: Text(
-              context.l10n.settings_version(AppVersion.versionName),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsLabeledGroup(
+          key: const Key('about-version-group'),
+          title: text('版本与更新', 'Version & updates', 'バージョンと更新'),
+          description: text(
+            '当前版本与更新选项',
+            'Current version and update options',
+            '現在のバージョンと更新設定',
           ),
-          SettingsTile(
-            leading: const Icon(Icons.text_fields),
-            title: Text(context.l10n.settings_visualAssets),
-            subtitle: const Text(
-              'Geist Sans / Mono / Pixel Line · HarmonyOS Sans SC',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => showLicensePage(
-              context: context,
-              applicationName: context.l10n.app_title,
-              applicationVersion: AppVersion.versionName,
-            ),
-          ),
-          SettingsSwitchTile(
-            secondary: const Icon(Icons.article_outlined),
-            title: Text(context.l10n.settings_fileLogging),
-            subtitle: Text(context.l10n.settings_fileLoggingSubtitle),
-            value: fileLoggingEnabled,
-            onChanged: (value) async {
-              await AppLogger.setFileLoggingEnabled(value);
-              await localStorageService.setFileLoggingEnabled(
-                AppLogger.fileLoggingEnabled,
-              );
-              if (mounted) {
-                setState(() {});
-              }
-            },
-          ),
-          // 检查更新按钮
-          FutureBuilder<DateTime?>(
-            future: updateService?.getLastCheckTime() ?? Future.value(null),
-            builder: (context, snapshot) {
-              final lastCheckTime = snapshot.data;
-              return SettingsTile(
-                hoverFeedback: !updateState.isChecking && updateService != null,
-                leading: Badge(
-                  isLabelVisible: updateState.hasNewVersion,
-                  smallSize: 7,
-                  child: const Icon(Icons.system_update),
-                ),
-                title: Text(context.l10n.checkForUpdate),
+          child: Column(
+            children: [
+              SettingsTile(
+                hoverFeedback: false,
+                title: Text(context.l10n.app_title),
                 subtitle: Text(
-                  updateState.hasDownloadedUpdate
-                      ? context.l10n.updateSettingsReady(
-                          updateState.versionInfo?.version ?? '',
-                        )
-                      : updateState.hasNewVersion
-                      ? context.l10n.updateSettingsAvailable(
-                          updateState.versionInfo?.version ?? '',
-                        )
-                      : _formatLastCheckTime(context, lastCheckTime),
+                  context.l10n.settings_version(AppVersion.versionName),
                 ),
-                trailing: updateState.isChecking
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.chevron_right),
-                onTap: updateState.isChecking || updateService == null
-                    ? null
-                    : () async {
-                        if (updateState.hasNewVersion ||
-                            updateState.hasDownloadedUpdate) {
-                          updateNotifier.showNotification();
-                        } else {
-                          await updateNotifier.checkForUpdates(manual: true);
-                        }
-                        if (context.mounted) {
-                          await UpdateCheckDialog.show(context);
-                        }
-                      },
-              );
-            },
-          ),
-          // 包含预发布版本开关
-          FutureBuilder<bool>(
-            future: Future.value(
-              updateService?.shouldIncludePrerelease() ??
-                  localStorageService.getIncludePrereleaseUpdates(),
-            ),
-            builder: (context, snapshot) {
-              final includePrerelease = snapshot.data ?? false;
-              return SettingsSwitchTile(
-                secondary: const Icon(Icons.new_releases_outlined),
-                title: Text(context.l10n.includePrereleaseUpdates),
-                subtitle: Text(
-                  context.l10n.includePrereleaseUpdatesDescription,
+              ),
+              FutureBuilder<DateTime?>(
+                future: updateService?.getLastCheckTime() ?? Future.value(null),
+                builder: (context, snapshot) => SettingsTile(
+                  hoverFeedback: check != null,
+                  title: Text(context.l10n.checkForUpdate),
+                  subtitle: Text(
+                    updateState.hasDownloadedUpdate
+                        ? context.l10n.updateSettingsReady(
+                            updateState.versionInfo?.version ?? '',
+                          )
+                        : updateState.hasNewVersion
+                        ? context.l10n.updateSettingsAvailable(
+                            updateState.versionInfo?.version ?? '',
+                          )
+                        : _formatLastCheckTime(context, snapshot.data),
+                  ),
+                  trailing: OutlinedButton(
+                    key: const Key('about-check-update'),
+                    onPressed: check,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (updateState.isChecking) ...[
+                          const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          const SizedBox(width: 8),
+                        ] else if (updateState.hasNewVersion) ...[
+                          const Badge(
+                            smallSize: 6,
+                            child: SizedBox(width: 4, height: 12),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Text(context.l10n.checkForUpdate),
+                      ],
+                    ),
+                  ),
+                  onTap: check,
                 ),
-                value: includePrerelease,
-                onChanged: updateService == null
-                    ? null
-                    : (value) async {
-                        await updateNotifier.setIncludePrerelease(value);
-                        if (mounted) {
-                          setState(
-                            () {},
-                          ); // Force widget rebuild to refresh value
-                        }
-                      },
-              );
-            },
+              ),
+              FutureBuilder<bool>(
+                future: Future.value(
+                  updateService?.shouldIncludePrerelease() ??
+                      storage.getIncludePrereleaseUpdates(),
+                ),
+                builder: (context, snapshot) => SettingsSwitchTile(
+                  key: const Key('about-prerelease-setting'),
+                  title: Text(context.l10n.includePrereleaseUpdates),
+                  subtitle: Text(
+                    context.l10n.includePrereleaseUpdatesDescription,
+                  ),
+                  value: snapshot.data ?? false,
+                  onChanged: updateService == null
+                      ? null
+                      : (value) async {
+                          await updateNotifier.setIncludePrerelease(value);
+                          if (mounted) setState(() {});
+                        },
+                ),
+              ),
+            ],
           ),
-          SettingsTile(
-            leading: const GitHubIcon(),
-            title: Text(context.l10n.settings_openSource),
-            subtitle: Text(context.l10n.settings_openSourceSubtitle),
-            trailing: const Icon(Icons.open_in_new),
-            onTap: () async {
-              final uri = Uri.parse(
-                'https://github.com/z15087716457-stack/W.O.F_NAI_Launcher',
-              );
-              if (await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
+        ),
+        const SettingsPreferencesPanel(labeled: true),
+        SettingsLabeledGroup(
+          key: const Key('about-diagnostics-group'),
+          title: text('诊断与资料', 'Diagnostics & resources', '診断と資料'),
+          description: text(
+            '日志、字体与开源项目',
+            'Logs, fonts and the open-source project',
+            'ログ・フォント・オープンソース',
           ),
-        ],
-      ),
+          showDivider: false,
+          child: Column(
+            children: [
+              SettingsSwitchTile(
+                key: const Key('about-logging-setting'),
+                title: Text(context.l10n.settings_fileLogging),
+                subtitle: Text(context.l10n.settings_fileLoggingSubtitle),
+                value: storage.getFileLoggingEnabled(),
+                onChanged: (value) async {
+                  await AppLogger.setFileLoggingEnabled(value);
+                  await storage.setFileLoggingEnabled(
+                    AppLogger.fileLoggingEnabled,
+                  );
+                  if (mounted) setState(() {});
+                },
+              ),
+              SettingsTile(
+                title: Text(context.l10n.settings_visualAssets),
+                subtitle: const Text(
+                  'Geist Sans / Mono / Pixel Line · HarmonyOS Sans SC',
+                ),
+                trailing: OutlinedButton(
+                  key: const Key('about-view-licenses'),
+                  onPressed: licenses,
+                  child: Text(text('查看许可', 'View licenses', 'ライセンスを見る')),
+                ),
+                onTap: licenses,
+              ),
+              SettingsTile(
+                title: Text(context.l10n.settings_openSource),
+                subtitle: Text(context.l10n.settings_openSourceSubtitle),
+                trailing: OutlinedButton.icon(
+                  key: const Key('about-open-project'),
+                  onPressed: project,
+                  icon: const Icon(Icons.open_in_new, size: 16),
+                  label: Text(text('打开项目', 'Open project', 'プロジェクトを開く')),
+                ),
+                onTap: project,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

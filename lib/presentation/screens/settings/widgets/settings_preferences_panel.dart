@@ -20,11 +20,13 @@ import '../../../providers/generation/generation_settings_notifiers.dart'
     as generation;
 import '../../../widgets/common/app_toast.dart';
 import 'settings_card.dart';
+import 'settings_labeled_group.dart';
 import 'settings_tile.dart';
 import 'settings_ui_theme.dart';
 
 class SettingsPreferencesPanel extends ConsumerStatefulWidget {
-  const SettingsPreferencesPanel({super.key});
+  const SettingsPreferencesPanel({super.key, this.labeled = false});
+  final bool labeled;
   @override
   ConsumerState<SettingsPreferencesPanel> createState() =>
       _SettingsPreferencesPanelState();
@@ -240,9 +242,8 @@ class _SettingsPreferencesPanelState
     }
   });
   @override
-  Widget build(BuildContext context) => SettingsCard(
-    title: text('偏好管理', 'Preference management', '設定の管理'),
-    child: Column(
+  Widget build(BuildContext context) {
+    final content = Column(
       children: [
         SettingsTile(
           hoverFeedback: !busy,
@@ -261,11 +262,13 @@ class _SettingsPreferencesPanelState
             runSpacing: 6,
             children: [
               OutlinedButton.icon(
+                key: const Key('preferences-export'),
                 onPressed: busy ? null : exportPreferences,
                 icon: const Icon(Icons.upload_outlined, size: 16),
                 label: Text(text('导出', 'Export', 'エクスポート')),
               ),
               OutlinedButton.icon(
+                key: const Key('preferences-import'),
                 onPressed: busy ? null : importPreferences,
                 icon: const Icon(Icons.download_outlined, size: 16),
                 label: Text(text('导入', 'Import', 'インポート')),
@@ -274,6 +277,7 @@ class _SettingsPreferencesPanelState
           ),
         ),
         SettingsTile(
+          hoverFeedback: !busy,
           title: Text(
             text('恢复上次偏好', 'Restore previous preferences', '前の設定に復元'),
           ),
@@ -284,9 +288,15 @@ class _SettingsPreferencesPanelState
               'インポートやリセットの前に元の設定を自動保存します。',
             ),
           ),
+          trailing: OutlinedButton(
+            key: const Key('preferences-restore-previous'),
+            onPressed: busy ? null : () => importPreferences(true),
+            child: Text(text('恢复', 'Restore', '復元')),
+          ),
           onTap: busy ? null : () => importPreferences(true),
         ),
         SettingsTile(
+          hoverFeedback: !busy,
           title: Text(
             text('恢复默认偏好', 'Restore default preferences', '既定の設定に戻す'),
           ),
@@ -297,9 +307,30 @@ class _SettingsPreferencesPanelState
               '範囲を選んでリセットし、アカウント・モデル・ライブラリ・創作内容を保持します。',
             ),
           ),
+          trailing: OutlinedButton(
+            key: const Key('preferences-restore-defaults'),
+            onPressed: busy ? null : reset,
+            child: Text(text('选择范围', 'Choose scope', '範囲を選択')),
+          ),
           onTap: busy ? null : reset,
         ),
       ],
-    ),
-  );
+    );
+    if (widget.labeled) {
+      return SettingsLabeledGroup(
+        key: const Key('about-preferences-group'),
+        title: text('偏好管理', 'Preference management', '設定の管理'),
+        description: text(
+          '备份、迁移与恢复',
+          'Backup, migration and recovery',
+          'バックアップ・移行・復元',
+        ),
+        child: content,
+      );
+    }
+    return SettingsCard(
+      title: text('偏好管理', 'Preference management', '設定の管理'),
+      child: content,
+    );
+  }
 }

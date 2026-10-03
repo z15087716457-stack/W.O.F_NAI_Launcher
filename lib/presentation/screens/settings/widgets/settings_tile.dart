@@ -19,6 +19,7 @@ class SettingsTile extends StatelessWidget {
     this.isThreeLine = false,
     this.controlWrapWidth = 520,
     this.hoverFeedback,
+    this.showNavigationArrow = true,
   });
   final Widget title;
   final Widget? subtitle, leading, trailing;
@@ -26,6 +27,7 @@ class SettingsTile extends StatelessWidget {
   final bool enabled, selected, dense, isThreeLine;
   final EdgeInsetsGeometry? contentPadding;
   final double controlWrapWidth;
+  final bool showNavigationArrow;
 
   /// Informational or temporarily unavailable controls can suppress feedback.
   final bool? hoverFeedback;
@@ -63,7 +65,7 @@ class SettingsTile extends StatelessWidget {
     );
     final control =
         trailing ??
-        (onTap == null
+        (onTap == null || !showNavigationArrow
             ? null
             : Icon(
                 Icons.chevron_right,

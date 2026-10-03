@@ -6,7 +6,6 @@ import 'widgets/settings_search.dart';
 import 'widgets/settings_tile.dart';
 import 'widgets/settings_ui_theme.dart';
 import 'widgets/settings_typography_scope.dart';
-import 'widgets/settings_preferences_panel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_icons.dart';
@@ -234,9 +233,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         StudioIcons.settingsStorage,
         text('图库与文件', 'Gallery & files', 'ギャラリーとファイル'),
         text(
-          '图片保存位置、图库来源与本地缓存。',
-          'Image locations, gallery sources and local caches.',
-          '画像の保存先、ギャラリーとキャッシュ。',
+          '管理图片保存、图库来源与浏览显示。',
+          'Manage image saving, gallery sources and display.',
+          '画像の保存、ギャラリーのソースと表示を管理。',
         ),
         const StorageSettingsSection(),
       ),
@@ -303,49 +302,73 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           'Updates, logs and project information.',
           '更新、ログとプロジェクト情報。',
         ),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [SettingsPreferencesPanel(), AboutSettingsSection()],
-        ),
+        const AboutSettingsSection(),
       ),
     ];
     final section = sections.firstWhere(
       (item) => item.destination == _destination,
     );
-    final narrow = MediaQuery.sizeOf(context).width < 650;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final narrow = MediaQuery.sizeOf(context).width < 730 * scale;
+    Widget searchButton() => OutlinedButton.icon(
+      key: const Key('settings-open-search'),
+      onPressed: () => _search(context, sections),
+      icon: const Icon(Icons.search, size: 17),
+      label: Text(text('搜索设置', 'Search settings', '設定を検索')),
+      style: OutlinedButton.styleFrom(
+        alignment: Alignment.centerLeft,
+        minimumSize: const Size.fromHeight(38),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        foregroundColor: scheme.onSurfaceVariant,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      ),
+    );
     Widget navItem(_SettingsSection item) {
       final selected = item.destination == _destination;
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-        child: Material(
-          color: selected
-              ? scheme.primary.withValues(alpha: .08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(7),
-          child: InkWell(
-            key: ValueKey('settings-nav-${item.destination.name}'),
-            borderRadius: BorderRadius.circular(7),
-            onTap: () => _select(item.destination),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-              child: Row(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+        child: Semantics(
+          selected: selected,
+          child: Material(
+            color: selected
+                ? scheme.onSurface.withValues(alpha: .06)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(4),
+            child: InkWell(
+              key: ValueKey('settings-nav-${item.destination.name}'),
+              borderRadius: BorderRadius.circular(4),
+              onTap: () => _select(item.destination),
+              child: Stack(
                 children: [
-                  Icon(
-                    item.icon,
-                    size: 19,
-                    color: selected ? scheme.primary : scheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                  if (selected)
+                    PositionedDirectional(
+                      start: 0,
+                      top: 10,
+                      bottom: 10,
+                      child: Container(
+                        key: const Key('settings-nav-selection-line'),
+                        width: 2,
+                        decoration: BoxDecoration(
+                          color: scheme.primary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                  Container(
+                    constraints: const BoxConstraints(minHeight: 40),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     child: Text(
                       item.label,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 12,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: 13,
                         fontWeight: selected
                             ? FontWeight.w600
                             : FontWeight.w400,
                         color: selected
-                            ? scheme.primary
+                            ? scheme.onSurface
                             : scheme.onSurfaceVariant,
                       ),
                     ),
@@ -359,15 +382,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
 
     Widget group(String title, Iterable<_SettingsSection> items) => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(22, 22, 16, 8),
+          padding: const EdgeInsetsDirectional.fromSTEB(26, 20, 16, 6),
           child: Text(
             title,
             style: theme.textTheme.labelSmall?.copyWith(
-              fontSize: 10,
-              color: scheme.onSurfaceVariant.withValues(alpha: .65),
+              fontSize: 11,
+              color: scheme.onSurfaceVariant.withValues(alpha: .7),
             ),
           ),
         ),
@@ -401,7 +424,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   SizedBox(
-                    height: captionHeight,
+                    height: headerHeight,
                     child: Row(
                       children: [
                         Padding(
@@ -416,18 +439,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ),
                         const Spacer(),
-                        TextButton.icon(
-                          key: const Key('settings-open-search'),
-                          onPressed: () => _search(context, sections),
-                          icon: const Icon(Icons.search, size: 16),
-                          label: Text(text('搜索设置', 'Search settings', '設定を検索')),
-                          style: TextButton.styleFrom(
-                            minimumSize: Size(0, captionHeight),
-                            fixedSize: Size.fromHeight(captionHeight),
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            foregroundColor: scheme.onSurfaceVariant,
-                          ),
-                        ),
                         SizedBox(
                           width:
                               WindowChromeScope.reservedWidthOf(context) + 12,
@@ -443,28 +454,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             children: [
               if (!narrow)
                 SizedBox(
-                  width: 190,
+                  width: 230 * scale,
                   child: Material(
                     key: const Key('settings-sidebar-surface'),
                     color: scheme.surface,
-                    child: ListView(
+                    child: Column(
                       children: [
-                        group(
-                          text('使用偏好', 'PREFERENCES', '使い方'),
-                          sections.take(2),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 2),
+                          child: searchButton(),
                         ),
-                        group(
-                          text('创作与资源', 'CREATION & RESOURCES', '制作とリソース'),
-                          sections.skip(2).take(3),
+                        Expanded(
+                          child: ListView(
+                            key: const Key('settings-navigation-list'),
+                            padding: const EdgeInsets.only(bottom: 16),
+                            children: [
+                              group(
+                                text('使用偏好', 'Preferences', '使い方'),
+                                sections.take(2),
+                              ),
+                              group(
+                                text(
+                                  '创作与资源',
+                                  'Creation & resources',
+                                  '制作とリソース',
+                                ),
+                                sections.skip(2).take(3),
+                              ),
+                              group(
+                                text(
+                                  '服务与连接',
+                                  'Services & connections',
+                                  'サービスと接続',
+                                ),
+                                sections.skip(5).take(3),
+                              ),
+                              group(
+                                text(
+                                  '安全与维护',
+                                  'Safety & maintenance',
+                                  '安全とメンテナンス',
+                                ),
+                                sections.skip(8),
+                              ),
+                            ],
+                          ),
                         ),
-                        group(
-                          text('服务与连接', 'SERVICES & CONNECTIONS', 'サービスと接続'),
-                          sections.skip(5).take(3),
-                        ),
-                        const SizedBox(height: 24),
-                        Divider(height: 1, color: scheme.outlineVariant),
-                        const SizedBox(height: 12),
-                        ...sections.skip(8).map(navItem),
                       ],
                     ),
                   ),
@@ -478,6 +513,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Column(
                   key: const Key('settings-content-pane'),
                   children: [
+                    if (narrow)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                        child: searchButton(),
+                      ),
                     if (narrow)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -495,13 +535,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               .map(
                                 (item) => DropdownMenuItem(
                                   value: item.destination,
-                                  child: Row(
-                                    children: [
-                                      Icon(item.icon, size: 18),
-                                      const SizedBox(width: 10),
-                                      Expanded(child: Text(item.label)),
-                                    ],
-                                  ),
+                                  child: Text(item.label),
                                 ),
                               )
                               .toList(),

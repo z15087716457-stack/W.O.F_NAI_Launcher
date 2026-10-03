@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/hive_storage_helper.dart';
@@ -23,6 +22,8 @@ import '../widgets/gallery_cache_actions.dart';
 import '../widgets/gallery_thumbnail_quality_settings_tile.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_ui_theme.dart';
+import '../widgets/settings_labeled_group.dart';
+import '../widgets/settings_path_tile.dart';
 
 /// 存储设置板块
 class StorageSettingsSection extends ConsumerStatefulWidget {
@@ -57,95 +58,90 @@ class _StorageSettingsSectionState
     }
   }
 
+  Future<void> _openSaveDirectory() async {
+    final openFolderFailed = context.l10n.settings_openFolderFailed;
+    try {
+      final current = ref.read(imageSaveSettingsNotifierProvider);
+      final path = current.hasCustomPath
+          ? current.customPath!
+          : '${(await getApplicationDocumentsDirectory()).path}${Platform.pathSeparator}NAI_Launcher${Platform.pathSeparator}images';
+      await launchUrl(
+        Uri.directory(path),
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (error) {
+      AppLogger.e(openFolderFailed, error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final saveSettings = ref.watch(imageSaveSettingsNotifierProvider);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SettingsCard(
+        SettingsLabeledGroup(
+          key: const Key('gallery-save-group'),
+          title: settingsText(context, '保存设置', 'Saving', '保存設定'),
+          description: settingsText(
+            context,
+            '生成图片的保存方式',
+            'How generated images are saved',
+            '生成画像の保存方法',
+          ),
           child: Column(
             children: [
-              // 图片保存路径设置
-              SettingsTile(
-                leading: const Icon(Icons.folder_outlined),
-                title: Text(context.l10n.settings_imageSavePath),
-                subtitle: Text(
-                  saveSettings.getDisplayPath(
-                    context.l10n.settings_defaultImagesPath,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              SettingsPathTile(
+                key: const Key('image-save-path-setting'),
+                title: context.l10n.settings_imageSavePath,
+                path: saveSettings.getDisplayPath(
+                  context.l10n.settings_defaultImagesPath,
                 ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.folder_open, size: 20),
-                      tooltip: context.l10n.settings_openFolder,
-                      onPressed: () async {
-                        final openFolderFailed =
-                            context.l10n.settings_openFolderFailed;
-                        try {
-                          String path;
-                          if (saveSettings.hasCustomPath) {
-                            path = saveSettings.customPath!;
-                          } else {
-                            final docDir =
-                                await getApplicationDocumentsDirectory();
-                            path =
-                                '${docDir.path}${Platform.pathSeparator}NAI_Launcher${Platform.pathSeparator}images';
-                          }
-                          await launchUrl(
-                            Uri.directory(path),
-                            mode: LaunchMode.externalApplication,
+                onOpen: _openSaveDirectory,
+                onChange: () => _selectSaveDirectory(context),
+                onReset: saveSettings.hasCustomPath
+                    ? () async {
+                        await ref
+                            .read(imageSaveSettingsNotifierProvider.notifier)
+                            .resetToDefault();
+                        if (context.mounted) {
+                          AppToast.success(
+                            context,
+                            context.l10n.settings_pathReset,
                           );
-                        } catch (e) {
-                          AppLogger.e(openFolderFailed, e);
                         }
-                      },
-                    ),
-                    if (saveSettings.hasCustomPath)
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 20),
-                        tooltip: context.l10n.common_reset,
-                        onPressed: () async {
-                          await ref
-                              .read(imageSaveSettingsNotifierProvider.notifier)
-                              .resetToDefault();
-                          if (context.mounted) {
-                            AppToast.success(
-                              context,
-                              context.l10n.settings_pathReset,
-                            );
-                          }
-                        },
-                      ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-                onTap: () => _selectSaveDirectory(context),
+                      }
+                    : null,
               ),
-              // 自动保存开关
               SettingsSwitchTile(
-                secondary: const Icon(Icons.save_outlined),
+                key: const Key('gallery-auto-save-setting'),
                 title: Text(context.l10n.settings_autoSave),
                 subtitle: Text(context.l10n.settings_autoSaveSubtitle),
                 value: saveSettings.autoSave,
-                onChanged: (value) async {
-                  await ref
-                      .read(imageSaveSettingsNotifierProvider.notifier)
-                      .setAutoSave(value);
-                },
+                onChanged: (value) => ref
+                    .read(imageSaveSettingsNotifierProvider.notifier)
+                    .setAutoSave(value),
               ),
-              const VibeLibraryPathTile(),
-              const GalleryThumbnailQualitySettingsTile(),
             ],
           ),
         ),
-        // 图库源管理（主源 + 额外图库源）
-        const GalleryExtraRootsCard(),
+        SettingsLabeledGroup(
+          key: const Key('gallery-display-group'),
+          title: settingsText(context, '素材与显示', 'Assets & display', '素材と表示'),
+          description: settingsText(
+            context,
+            'Vibe 位置与缩略图质量',
+            'Vibe location and thumbnail quality',
+            'Vibe の保存先とサムネイル品質',
+          ),
+          child: const Column(
+            children: [
+              VibeLibraryPathTile(),
+              GalleryThumbnailQualitySettingsTile(),
+            ],
+          ),
+        ),
+        const GalleryExtraRootsCard(labeled: true),
       ],
     );
   }
@@ -176,7 +172,9 @@ class StorageMaintenanceSection extends StatelessWidget {
 /// 额外图库源：任意文件夹加入画廊，可浏览可搜索，不参与自动保存。
 /// 图片级移动/复制仍遵循画廊现有的保护与确认流程。
 class GalleryExtraRootsCard extends ConsumerStatefulWidget {
-  const GalleryExtraRootsCard({super.key});
+  const GalleryExtraRootsCard({super.key, this.labeled = false});
+
+  final bool labeled;
 
   @override
   ConsumerState<GalleryExtraRootsCard> createState() =>
@@ -285,98 +283,107 @@ class _GalleryExtraRootsCardState extends ConsumerState<GalleryExtraRootsCard> {
     final theme = Theme.of(context);
     final importState = ref.watch(tagIndexImportProvider);
 
-    return SettingsCard(
-      title: context.l10n.settings_extraRootsTitle,
-      icon: Icons.library_books_outlined,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
+          child: Text(
+            context.l10n.settings_extraRootsHint,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+        if (_extraRoots.isEmpty)
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              context.l10n.settings_extraRootsHint,
+              context.l10n.settings_extraRootsEmpty,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: theme.colorScheme.outline,
+              ),
+            ),
+          )
+        else
+          ..._extraRoots.map(
+            (path) => SettingsTile(
+              dense: true,
+              leading: const Icon(Icons.folder_outlined, size: 20),
+              title: SelectableText(
+                path,
+                style: theme.textTheme.bodySmall?.copyWith(height: 1.5),
+              ),
+              trailing: OutlinedButton(
+                onPressed: () => _removeExtraRoot(path),
+                child: Text(context.l10n.settings_extraRootsRemove),
               ),
             ),
           ),
-          if (_extraRoots.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                context.l10n.settings_extraRootsEmpty,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-              ),
-            )
-          else
-            ..._extraRoots.map(
-              (path) => SettingsTile(
-                dense: true,
-                leading: const Icon(Icons.folder_outlined, size: 20),
-                title: Text(
-                  path,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall,
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  tooltip: context.l10n.settings_extraRootsRemove,
-                  onPressed: () => _removeExtraRoot(path),
-                ),
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: _addExtraRoot,
-                      icon: const Icon(
-                        Icons.create_new_folder_outlined,
-                        size: 17,
-                      ),
-                      label: Text(context.l10n.settings_extraRootsAdd),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _addExtraRoot,
+                    icon: const Icon(
+                      Icons.create_new_folder_outlined,
+                      size: 17,
                     ),
-                    OutlinedButton.icon(
-                      onPressed: importState.isImporting
-                          ? null
-                          : _importTagIndex,
-                      icon: const Icon(Icons.upload_file_outlined, size: 17),
-                      label: Text(context.l10n.settings_importTagIndex),
-                    ),
-                  ],
-                ),
-                if (importState.isImporting) ...[
-                  const SizedBox(height: 10),
-                  LinearProgressIndicator(
-                    value: importState.totalLines > 0
-                        ? importState.progress
-                        : null,
+                    label: Text(context.l10n.settings_extraRootsAdd),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    context.l10n.settings_importTagIndexProgress(
-                      importState.processedLines,
-                      importState.totalLines,
-                    ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                  OutlinedButton.icon(
+                    onPressed: importState.isImporting ? null : _importTagIndex,
+                    icon: const Icon(Icons.upload_file_outlined, size: 17),
+                    label: Text(context.l10n.settings_importTagIndex),
                   ),
                 ],
+              ),
+              if (importState.isImporting) ...[
+                const SizedBox(height: 10),
+                LinearProgressIndicator(
+                  value: importState.totalLines > 0
+                      ? importState.progress
+                      : null,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.l10n.settings_importTagIndexProgress(
+                    importState.processedLines,
+                    importState.totalLines,
+                  ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+    if (widget.labeled) {
+      return SettingsLabeledGroup(
+        key: const Key('gallery-sources-group'),
+        title: settingsText(context, '图库来源', 'Gallery sources', 'ギャラリーのソース'),
+        description: settingsText(
+          context,
+          '管理额外图库文件夹',
+          'Manage additional gallery folders',
+          '追加のギャラリーフォルダーを管理',
+        ),
+        showDivider: false,
+        child: content,
+      );
+    }
+    return SettingsCard(
+      title: context.l10n.settings_extraRootsTitle,
+      child: content,
     );
   }
 }
@@ -391,6 +398,13 @@ class VibeLibraryPathTile extends StatefulWidget {
 
 class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
   final _pathHelper = VibeLibraryPathHelper.instance;
+  late Future<String> _path;
+
+  @override
+  void initState() {
+    super.initState();
+    _path = _pathHelper.getPath();
+  }
 
   Future<void> _selectVibeLibraryDirectory(BuildContext context) async {
     try {
@@ -401,7 +415,11 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
       if (result != null && context.mounted) {
         await _pathHelper.setPath(result);
         await _pathHelper.ensurePathExists(result);
-        setState(() {});
+        final path = await _pathHelper.getPath();
+        if (!mounted) return;
+        setState(() {
+          _path = Future.value(path);
+        });
 
         if (context.mounted) {
           AppToast.success(context, context.l10n.settings_vibePathSaved);
@@ -419,7 +437,11 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
 
   Future<void> _resetToDefault(BuildContext context) async {
     await _pathHelper.resetToDefault();
-    setState(() {});
+    final path = await _pathHelper.getPath();
+    if (!mounted) return;
+    setState(() {
+      _path = Future.value(path);
+    });
 
     if (context.mounted) {
       AppToast.success(context, context.l10n.settings_pathReset);
@@ -428,58 +450,35 @@ class _VibeLibraryPathTileState extends State<VibeLibraryPathTile> {
 
   @override
   Widget build(BuildContext context) {
-    final customPath = _pathHelper.getCustomPath();
     final hasCustomPath = _pathHelper.hasCustomPath;
-
-    return SettingsTile(
-      leading: const Icon(StudioIcons.vibeLibrary),
-      title: Text(context.l10n.settings_vibeLibraryPath),
-      subtitle: FutureBuilder<String>(
-        future: _pathHelper.getPath(),
-        builder: (context, snapshot) {
-          final displayPath = hasCustomPath
-              ? (customPath ?? '')
-              : (snapshot.data != null
-                    ? context.l10n.settings_defaultVibePath(snapshot.data!)
-                    : context.l10n.settings_defaultVibePath(
-                        'Documents/NAI_Launcher/vibes/',
-                      ));
-          return Text(
-            displayPath,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          );
+    return FutureBuilder<String>(
+      key: ValueKey(_pathHelper.getCustomPath()),
+      future: _path,
+      builder: (context, snapshot) => SettingsPathTile(
+        key: const Key('vibe-library-path-setting'),
+        title: context.l10n.settings_vibeLibraryPath,
+        path:
+            snapshot.data ??
+            _pathHelper.getCustomPath() ??
+            'Documents/NAI_Launcher/vibes/',
+        defaultLabel: hasCustomPath
+            ? null
+            : settingsText(context, '默认', 'Default', '既定'),
+        onOpen: () async {
+          final openFolderFailed = context.l10n.settings_openFolderFailed;
+          try {
+            final path = await _pathHelper.getPath();
+            await launchUrl(
+              Uri.directory(path),
+              mode: LaunchMode.externalApplication,
+            );
+          } catch (error) {
+            AppLogger.e(openFolderFailed, error);
+          }
         },
+        onChange: () => _selectVibeLibraryDirectory(context),
+        onReset: hasCustomPath ? () => _resetToDefault(context) : null,
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.folder_open, size: 20),
-            tooltip: context.l10n.settings_openFolder,
-            onPressed: () async {
-              final openFolderFailed = context.l10n.settings_openFolderFailed;
-              try {
-                final path = await _pathHelper.getPath();
-                await launchUrl(
-                  Uri.directory(path),
-                  mode: LaunchMode.externalApplication,
-                );
-              } catch (e) {
-                AppLogger.e(openFolderFailed, e);
-              }
-            },
-          ),
-          if (hasCustomPath)
-            IconButton(
-              icon: const Icon(Icons.close, size: 20),
-              tooltip: context.l10n.common_reset,
-              onPressed: () => _resetToDefault(context),
-            ),
-          const Icon(Icons.chevron_right),
-        ],
-      ),
-      onTap: () => _selectVibeLibraryDirectory(context),
     );
   }
 }

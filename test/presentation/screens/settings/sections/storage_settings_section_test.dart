@@ -12,7 +12,7 @@ import 'package:nai_launcher/presentation/providers/data_source_cache_provider.d
 import 'package:nai_launcher/presentation/screens/settings/sections/storage_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/cache_statistics_tile.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/data_source_cache_settings.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_card.dart';
+import 'package:nai_launcher/presentation/screens/settings/widgets/settings_labeled_group.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 void main() {
@@ -79,7 +79,7 @@ void main() {
     );
   });
 
-  testWidgets('数据源缓存卡片与主设置卡片宽度一致', (tester) async {
+  testWidgets('保存、素材与图库来源三个分组保持全宽对齐', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -87,12 +87,12 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    final settingsCards = find.byType(SettingsCard);
-    expect(settingsCards, findsNWidgets(2));
+    final settingsCards = find.byType(SettingsLabeledGroup);
+    expect(settingsCards, findsNWidgets(3));
 
     final primaryRect = tester.getRect(settingsCards.at(0));
 
-    for (var i = 1; i < 2; i++) {
+    for (var i = 1; i < 3; i++) {
       final cardRect = tester.getRect(settingsCards.at(i));
       expect(cardRect.left, primaryRect.left);
       expect(cardRect.right, primaryRect.right);
