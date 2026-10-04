@@ -75,7 +75,7 @@ class CanvasEdgeToolbar extends ConsumerWidget {
       image: image,
       group: group,
       focus: focus,
-      useGradient: zone != CanvasToolbarZone.top,
+      useGradient: false,
     );
   }
 }

@@ -18,7 +18,6 @@ import '../../providers/share_image_settings_provider.dart';
 import '../../utils/clipboard_image.dart';
 import '../common/app_toast.dart';
 import 'gallery_nai_versions.dart';
-import 'local_image_context_menu.dart';
 import '../common/studio_icons.dart';
 
 /// 缩略图失败后的自动重试延迟（蓝图 P5：失败不再永久回退解码原图）。
@@ -56,8 +55,9 @@ class LocalImageCard extends ConsumerStatefulWidget {
   /// 多选进行中：所有卡片显示选择圈
   final bool selectionMode;
   final void Function(Offset anchor)? onFavoriteToggle;
-  final Future<void> Function(LocalImageContextAction action)? onSendAction;
-  final bool isKritaConnected;
+
+  /// Open the shared image-use dialog directly from the card arrow.
+  final Future<void> Function()? onUseImage;
   final bool isVisible;
   final int priority;
 
@@ -80,8 +80,7 @@ class LocalImageCard extends ConsumerStatefulWidget {
     this.isFocused = false,
     this.selectionMode = false,
     this.onFavoriteToggle,
-    this.onSendAction,
-    this.isKritaConnected = false,
+    this.onUseImage,
     this.isVisible = false,
     this.priority = 5,
     this.dragWrapper,
@@ -355,19 +354,6 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
     widget.onFavoriteToggle?.call(cardBox.localToGlobal(Offset.zero));
   }
 
-  Future<void> _showSendMenu(Offset globalPosition) async {
-    const menuWidth = 320.0;
-    var left = globalPosition.dx - menuWidth - 8;
-    if (left < 8) left = globalPosition.dx + 8;
-    final action = await LocalImageContextMenu.showSendActions(
-      context,
-      position: Offset(left, globalPosition.dy),
-      isKritaConnected: widget.isKritaConnected,
-    );
-    if (action == null || !mounted) return;
-    await widget.onSendAction?.call(action);
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen<GalleryThumbnailQuality>(
@@ -567,11 +553,11 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
               tooltip: l10n.common_copy,
               onTap: (_) => unawaited(_copyImageToClipboard()),
             ),
-          if (widget.onSendAction != null)
+          if (widget.onUseImage != null)
             _HoverAction(
               icon: StudioIcons.gallerySend,
-              tooltip: l10n.localGallery_sendTo,
-              onTap: (position) => unawaited(_showSendMenu(position)),
+              tooltip: l10n.imageUse_title,
+              onTap: (_) => unawaited(widget.onUseImage!()),
             ),
         ],
       ),

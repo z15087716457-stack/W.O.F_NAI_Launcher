@@ -374,69 +374,73 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           width: 1,
         ),
       ),
-      child: TextField(
-        key: const Key('gallery-search-field'),
-        controller: _searchController,
-        focusNode: widget.searchFocusNode,
-        style: theme.textTheme.bodyMedium,
-        textAlignVertical: TextAlignVertical.center,
-        decoration: InputDecoration(
-          hintText: scopeLabel != null
-              ? context.l10n.localGallery_searchInScope(scopeLabel)
-              : watchTipHint(
-                  ref,
-                  context.l10n,
-                  TipSurface.gallerySearch,
-                  firstEpoch: _tipMountEpoch ??= currentTipEpoch(),
-                ),
-          hintMaxLines: 1,
-          hintStyle: theme.textTheme.bodyMedium?.copyWith(
-            color: colors.onSurfaceVariant.withValues(alpha: 0.8),
-          ),
-          prefixIcon: Icon(
-            StudioIcons.gallerySearch,
-            size: 17,
-            color: colors.onSurfaceVariant,
-          ),
-          prefixIconConstraints: const BoxConstraints(minWidth: 36),
-          suffixIcon: hasText
-              ? IconButton(
-                  icon: Icon(
-                    StudioIcons.galleryClose,
-                    size: 16,
-                    color: colors.onSurfaceVariant,
+      child: Center(
+        child: TextField(
+          key: const Key('gallery-search-field'),
+          controller: _searchController,
+          focusNode: widget.searchFocusNode,
+          style: theme.textTheme.bodyMedium,
+          textAlignVertical: TextAlignVertical.center,
+          decoration: InputDecoration(
+            hintText: scopeLabel != null
+                ? context.l10n.localGallery_searchInScope(scopeLabel)
+                : watchTipHint(
+                    ref,
+                    context.l10n,
+                    TipSurface.gallerySearch,
+                    firstEpoch: _tipMountEpoch ??= currentTipEpoch(),
                   ),
-                  tooltip: context.l10n.common_clear,
-                  onPressed: () {
-                    _searchController.clear();
-                    ref
-                        .read(localGalleryNotifierProvider.notifier)
-                        .setSearchQuery('');
-                    setState(() {});
-                  },
-                )
-              : focused
-              ? null
-              : const Padding(
-                  padding: EdgeInsets.only(right: 6),
-                  child: _KeyHint(label: 'Ctrl F'),
-                ),
-          suffixIconConstraints: const BoxConstraints(minWidth: 30),
-          filled: false,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          contentPadding: EdgeInsets.zero,
-          isDense: true,
+            hintMaxLines: 1,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant.withValues(alpha: 0.8),
+            ),
+            prefixIcon: Icon(
+              StudioIcons.gallerySearch,
+              size: 17,
+              color: colors.onSurfaceVariant,
+            ),
+            prefixIconConstraints: const BoxConstraints(minWidth: 36),
+            suffixIcon: hasText
+                ? IconButton(
+                    icon: Icon(
+                      StudioIcons.galleryClose,
+                      size: 16,
+                      color: colors.onSurfaceVariant,
+                    ),
+                    tooltip: context.l10n.common_clear,
+                    onPressed: () {
+                      _searchController.clear();
+                      ref
+                          .read(localGalleryNotifierProvider.notifier)
+                          .setSearchQuery('');
+                      setState(() {});
+                    },
+                  )
+                : focused
+                ? null
+                : const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: _KeyHint(label: 'Ctrl F'),
+                  ),
+            suffixIconConstraints: const BoxConstraints(minWidth: 30),
+            filled: false,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            contentPadding: EdgeInsets.zero,
+            isDense: true,
+          ),
+          onChanged: (value) {
+            setState(() {}); // 更新清除按钮可见性
+            _onSearchChanged(value);
+          },
+          onSubmitted: (value) {
+            _debounceTimer?.cancel();
+            ref
+                .read(localGalleryNotifierProvider.notifier)
+                .setSearchQuery(value);
+          },
         ),
-        onChanged: (value) {
-          setState(() {}); // 更新清除按钮可见性
-          _onSearchChanged(value);
-        },
-        onSubmitted: (value) {
-          _debounceTimer?.cancel();
-          ref.read(localGalleryNotifierProvider.notifier).setSearchQuery(value);
-        },
       ),
     );
 

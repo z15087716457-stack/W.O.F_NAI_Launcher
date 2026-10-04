@@ -65,15 +65,19 @@ Widget _wrap(Widget child, {Brightness? brightness, GlobalKey? captureKey}) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.environment['GALLERY_FEEDBACK_CAPTURE'] == '1') {
+  if (Platform.environment['GALLERY_FEEDBACK_CAPTURE'] == '1' ||
+      Platform.environment['GALLERY_FOLLOWUP_CAPTURE'] == '1') {
     testWidgets(
-      'real-font toolbar surfaces preserve controls and remove top tint gradient',
+      'real-font toolbar surfaces preserve controls with uniform tint in all zones',
       (tester) async {
         await tester.runAsync(loadStudioCaptureFonts);
         await tester.binding.setSurfaceSize(const Size(760, 420));
         addTearDown(() => tester.binding.setSurfaceSize(null));
-        final folder = Directory('.dart_tool/gallery-feedback-captures')
-          ..createSync(recursive: true);
+        final folder = Directory(
+          Platform.environment['GALLERY_FOLLOWUP_CAPTURE'] == '1'
+              ? '.dart_tool/gallery-followup-captures'
+              : '.dart_tool/gallery-feedback-captures',
+        )..createSync(recursive: true);
         final oldShadows = debugDisableShadows;
         debugDisableShadows = false;
         addTearDown(() => debugDisableShadows = oldShadows);

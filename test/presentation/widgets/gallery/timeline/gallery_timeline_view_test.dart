@@ -100,7 +100,7 @@ void main() {
             body: GalleryTimelineView(
               onOpenViewer: opened.add,
               onContextMenu: (record, _) => contextMenus.add(record.path),
-              onSendAction: (_, __) async {},
+              onUseImage: (_) async {},
               onFavoriteMenu: (_, __) {},
               onClearFilters: () {},
             ),

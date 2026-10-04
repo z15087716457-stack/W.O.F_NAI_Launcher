@@ -16,14 +16,87 @@ import 'package:nai_launcher/presentation/providers/gallery_category_provider.da
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/providers/font_provider.dart';
+import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_gallery_toolbar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../helpers/studio_capture_fonts.dart';
 
 /// 顶栏：范围面包屑与数量、搜索标签、排序菜单、视图切换、多选与详情开关。
 void main() {
+  setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  for (final locale in ['zh', 'zh-TW', 'en', 'ja', 'ko']) {
+    for (final dark in [false, true]) {
+      for (final width in [900.0, 1400.0]) {
+        testWidgets('search contents centered $locale dark=$dark width=$width', (
+          tester,
+        ) async {
+          await _pumpToolbar(
+            tester,
+            width: width,
+            pixelRatio: width == 900 ? 1.25 : 1,
+            locale: Locale.fromSubtags(
+              languageCode: locale.split('-').first,
+              countryCode: locale.contains('-') ? 'TW' : null,
+            ),
+            theme: AppTheme.getTheme(
+              AppStyle.geist,
+              dark ? Brightness.dark : Brightness.light,
+              fontConfig: FontConfig.defaultFont,
+            ),
+          );
+          final field = find.byKey(const Key('gallery-search-field'));
+          final surface = find
+              .ancestor(of: field, matching: find.byType(AnimatedContainer))
+              .first;
+          final center = tester.getCenter(surface).dy;
+          expect(tester.getSize(surface).height, 34);
+          final hint = tester.widget<TextField>(field).decoration!.hintText!;
+          expect(
+            tester.getCenter(find.text(hint)).dy,
+            closeTo(center, 1),
+            reason:
+                'Hint must align to the outer 34px surface, not a shorter dense decorator.',
+          );
+          expect(
+            tester.getCenter(find.byIcon(StudioIcons.gallerySearch)).dy,
+            closeTo(center, 1),
+          );
+          expect(tester.getCenter(find.text('Ctrl F')).dy, closeTo(center, 1));
+          await tester.tap(field);
+          await tester.pumpAndSettle();
+          expect(
+            tester.getCenter(find.byIcon(StudioIcons.gallerySearch)).dy,
+            closeTo(center, 1),
+          );
+          await tester.enterText(field, '测试 blue eyes');
+          await tester.pumpAndSettle();
+          expect(
+            tester.getCenter(find.byType(EditableText)).dy,
+            closeTo(center, 1),
+          );
+          expect(
+            tester.getCenter(find.byIcon(StudioIcons.galleryClose)).dy,
+            closeTo(center, 1),
+          );
+          await tester.tap(find.byIcon(StudioIcons.galleryClose));
+          await tester.pumpAndSettle();
+          tester.widget<TextField>(field).focusNode!.unfocus();
+          await tester.pumpAndSettle();
+          expect(
+            tester.getCenter(find.byIcon(StudioIcons.gallerySearch)).dy,
+            closeTo(center, 1),
+          );
+          expect(tester.takeException(), isNull);
+          await tester.pumpWidget(const SizedBox.shrink());
+        });
+      }
+    }
+  }
 
   testWidgets('breadcrumb shows the folder path and the result count', (
     tester,
@@ -248,13 +321,16 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
     totalCount: 3,
   ),
   double width = 1400,
+  double pixelRatio = 1,
   bool inspectorAvailable = true,
   VoidCallback? onToggleInspector,
   bool autocomplete = false,
   bool windowChrome = false,
+  ThemeData? theme,
+  Locale locale = const Locale('zh'),
 }) async {
-  tester.view.physicalSize = Size(width, 400);
-  tester.view.devicePixelRatio = 1.0;
+  tester.view.physicalSize = Size(width * pixelRatio, 400 * pixelRatio);
+  tester.view.devicePixelRatio = pixelRatio;
   addTearDown(tester.view.reset);
   final focusNode = FocusNode();
   addTearDown(focusNode.dispose);
@@ -278,7 +354,8 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
         ),
       ],
       child: MaterialApp(
-        locale: const Locale('zh'),
+        locale: locale,
+        theme: theme,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
@@ -317,6 +394,13 @@ class _FakeGalleryNotifier extends LocalGalleryNotifier {
 
   @override
   LocalGalleryState build() => _initialState;
+
+  @override
+  Future<void> setSearchQuery(String query) async {
+    state = state.copyWith(
+      filterCriteria: state.filterCriteria.copyWith(searchQuery: query),
+    );
+  }
 
   @override
   Future<void> setSort(

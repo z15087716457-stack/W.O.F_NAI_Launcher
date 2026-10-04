@@ -93,39 +93,6 @@ void main() {
     expect(selected, LocalImageContextAction.details);
     expect(find.byType(MenuAnchor), findsNothing);
   });
-
-  testWidgets('send button menu reuses the context menu send action group', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      const _MenuHarness(isKritaConnected: true, sendOnly: true),
-    );
-
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
-
-    final actions = tester
-        .widgetList<PopupMenuItem<LocalImageContextAction>>(
-          find.byWidgetPredicate(
-            (widget) => widget is PopupMenuItem<LocalImageContextAction>,
-          ),
-        )
-        .map((item) => item.value)
-        .toList();
-
-    expect(actions, const [
-      LocalImageContextAction.sendToTextToImage,
-      LocalImageContextAction.sendToImg2Img,
-      LocalImageContextAction.sendToStyleTransfer,
-      LocalImageContextAction.sendToPreciseReference,
-      LocalImageContextAction.saveToPreciseRefLibrary,
-      LocalImageContextAction.sendToKrita,
-      LocalImageContextAction.upscale,
-    ]);
-    expect(find.text('Import Image Metadata'), findsNothing);
-    expect(find.text('Show in Folder'), findsNothing);
-    expect(find.text('Delete'), findsNothing);
-  });
 }
 
 class _MenuHarness extends StatelessWidget {
@@ -134,7 +101,6 @@ class _MenuHarness extends StatelessWidget {
     this.hasPrompt = true,
     this.hasSeed = true,
     required this.isKritaConnected,
-    this.sendOnly = false,
     this.onSelected,
     this.position = const Offset(20, 20),
   });
@@ -144,7 +110,6 @@ class _MenuHarness extends StatelessWidget {
   final bool hasPrompt;
   final bool hasSeed;
   final bool isKritaConnected;
-  final bool sendOnly;
   final ValueChanged<LocalImageContextAction?>? onSelected;
 
   @override
@@ -157,20 +122,14 @@ class _MenuHarness extends StatelessWidget {
         body: Builder(
           builder: (context) => ElevatedButton(
             onPressed: () async {
-              final selected = sendOnly
-                  ? await LocalImageContextMenu.showSendActions(
-                      context,
-                      position: position,
-                      isKritaConnected: isKritaConnected,
-                    )
-                  : await LocalImageContextMenu.show(
-                      context,
-                      position: position,
-                      hasImportableMetadata: hasImportableMetadata,
-                      hasPrompt: hasPrompt,
-                      hasSeed: hasSeed,
-                      isKritaConnected: isKritaConnected,
-                    );
+              final selected = await LocalImageContextMenu.show(
+                context,
+                position: position,
+                hasImportableMetadata: hasImportableMetadata,
+                hasPrompt: hasPrompt,
+                hasSeed: hasSeed,
+                isKritaConnected: isKritaConnected,
+              );
               onSelected?.call(selected);
             },
             child: const Text('Open'),

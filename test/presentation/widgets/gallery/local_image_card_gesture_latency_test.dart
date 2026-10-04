@@ -6,7 +6,6 @@ import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/thumbnail_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart';
-import 'package:nai_launcher/presentation/widgets/gallery/local_image_context_menu.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 /// 卡片手势：单击立即生效（不挂双击识别器），双击在单击之后追加；
@@ -27,7 +26,7 @@ void main() {
     bool selectionMode = false,
     double width = 200,
     double height = 260,
-    Future<void> Function(LocalImageContextAction action)? onSendAction,
+    Future<void> Function()? onUseImage,
   }) {
     return ProviderScope(
       child: MaterialApp(
@@ -46,7 +45,7 @@ void main() {
               onDoubleTap: onDoubleTap,
               onSelectionToggle: onSelectionToggle,
               onFavoriteToggle: onFavoriteToggle,
-              onSendAction: onSendAction,
+              onUseImage: onUseImage,
               isSelected: isSelected,
               isFocused: isFocused,
               selectionMode: selectionMode,
@@ -126,7 +125,7 @@ void main() {
         width: 940,
         height: 532,
         onFavoriteToggle: (_) {},
-        onSendAction: (_) async {},
+        onUseImage: () async {},
       ),
     );
     await hover(tester);
@@ -158,6 +157,24 @@ void main() {
     expect(toggles, 1);
     expect(taps, 0);
   });
+
+  testWidgets(
+    'card arrow directly requests image use without a menu or card tap',
+    (tester) async {
+      var uses = 0;
+      var taps = 0;
+      await tester.pumpWidget(
+        cardApp(onTap: () => taps++, onUseImage: () async => uses++),
+      );
+      await hover(tester);
+      await tester.tap(find.byIcon(StudioIcons.gallerySend));
+      await tester.pumpAndSettle();
+      expect(uses, 1);
+      expect(taps, 0);
+      expect(find.byType(MenuItemButton), findsNothing);
+      expect(find.byType(PopupMenuItem<Object>), findsNothing);
+    },
+  );
 
   testWidgets('focused and selected cards draw the accent ring', (
     tester,

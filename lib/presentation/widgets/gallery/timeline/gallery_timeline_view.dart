@@ -17,14 +17,12 @@ import '../../../../data/services/gallery/unified_gallery_service.dart'
 import '../../../../data/services/thumbnail_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../providers/canvas_settings_provider.dart';
-import '../../../providers/krita/krita_bridge_notifier.dart';
 import '../../../providers/local_gallery_focus_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
 import '../../../providers/selection_mode_provider.dart';
 import '../draggable_image_card.dart';
 import '../gallery_state_views.dart';
 import '../local_image_card.dart';
-import '../local_image_context_menu.dart';
 import 'gallery_timeline_layout.dart';
 import 'gallery_timeline_scrubber.dart';
 import '../../common/studio_icons.dart';
@@ -59,7 +57,7 @@ class GalleryTimelineView extends ConsumerStatefulWidget {
     this.controller,
     required this.onOpenViewer,
     required this.onContextMenu,
-    required this.onSendAction,
+    required this.onUseImage,
     required this.onFavoriteMenu,
     required this.onClearFilters,
     this.onDeleteRequested,
@@ -70,11 +68,7 @@ class GalleryTimelineView extends ConsumerStatefulWidget {
   /// 打开大图（双击、空格、回车）
   final void Function(int index) onOpenViewer;
   final void Function(LocalImageRecord record, Offset position) onContextMenu;
-  final Future<void> Function(
-    LocalImageRecord record,
-    LocalImageContextAction action,
-  )
-  onSendAction;
+  final Future<void> Function(LocalImageRecord record) onUseImage;
   final void Function(LocalImageRecord record, Offset anchor) onFavoriteMenu;
   final VoidCallback onClearFilters;
 
@@ -483,7 +477,7 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
                           onToggleSelection: _toggleSelection,
                           onToggleSection: _toggleSection,
                           onContextMenu: widget.onContextMenu,
-                          onSendAction: widget.onSendAction,
+                          onUseImage: widget.onUseImage,
                           onFavoriteMenu: widget.onFavoriteMenu,
                           onWindowBuilt: _afterWindowBuilt,
                         ),
@@ -612,7 +606,7 @@ class _TimelineTiles extends ConsumerStatefulWidget {
     required this.onToggleSelection,
     required this.onToggleSection,
     required this.onContextMenu,
-    required this.onSendAction,
+    required this.onUseImage,
     required this.onFavoriteMenu,
     required this.onWindowBuilt,
   });
@@ -627,11 +621,7 @@ class _TimelineTiles extends ConsumerStatefulWidget {
   final void Function(int index) onToggleSelection;
   final void Function(GalleryTimelineSection section) onToggleSection;
   final void Function(LocalImageRecord record, Offset position) onContextMenu;
-  final Future<void> Function(
-    LocalImageRecord record,
-    LocalImageContextAction action,
-  )
-  onSendAction;
+  final Future<void> Function(LocalImageRecord record) onUseImage;
   final void Function(LocalImageRecord record, Offset anchor) onFavoriteMenu;
   final void Function(List<int> visibleIndices) onWindowBuilt;
 
@@ -660,11 +650,6 @@ class _TimelineTilesState extends ConsumerState<_TimelineTiles> {
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
     final selection = ref.watch(localGallerySelectionNotifierProvider);
     final focused = ref.watch(localGalleryFocusNotifierProvider);
-    final isKritaConnected = ref.watch(
-      kritaBridgeNotifierProvider.select(
-        (state) => state.status == KritaBridgeStatus.connected,
-      ),
-    );
     final entries = timeline.entries;
     final layout = widget.layout;
     final offset = widget.scrollController.hasClients
@@ -731,8 +716,7 @@ class _TimelineTilesState extends ConsumerState<_TimelineTiles> {
                   widget.onContextMenu(record, details.globalPosition),
               onFavoriteToggle: (anchor) =>
                   widget.onFavoriteMenu(record, anchor),
-              onSendAction: (action) => widget.onSendAction(record, action),
-              isKritaConnected: isKritaConnected,
+              onUseImage: () => widget.onUseImage(record),
               dragWrapper: DraggableImageCard.createDragWrapper(
                 record: record,
                 selectedPaths: selection.isActive && isSelected

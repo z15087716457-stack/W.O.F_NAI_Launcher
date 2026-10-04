@@ -144,7 +144,7 @@ void main() {
               body: GalleryTimelineView(
                 onOpenViewer: (_) {},
                 onContextMenu: (_, __) {},
-                onSendAction: (_, __) async {},
+                onUseImage: (_) async {},
                 onFavoriteMenu: (_, __) {},
                 onClearFilters: () {},
               ),

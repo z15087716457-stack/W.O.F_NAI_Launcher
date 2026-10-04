@@ -311,7 +311,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         border: Border(right: BorderSide(color: theme.dividerColor)),
       ),
       child: Transform.translate(
-        offset: const Offset(0, -2),
+        offset: const Offset(0, -1),
         child: Column(
           children: [
             SizedBox(
@@ -404,8 +404,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
             onOpenViewer: _openViewerAt,
             onContextMenu: (record, position) =>
                 _showImageContextMenu(record, position),
-            onSendAction: (record, action) =>
-                _handleImageAction(record, action),
+            onUseImage: _importImageMetadata,
             onFavoriteMenu: _showFavoriteMenu,
             onClearFilters: _clearFilters,
             onDeleteRequested: () => unawaited(_deleteFocusedOrSelected()),

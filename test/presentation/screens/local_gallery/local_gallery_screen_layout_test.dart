@@ -32,7 +32,9 @@ import 'package:nai_launcher/presentation/providers/local_gallery_focus_provider
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/screens/local_gallery/local_gallery_screen.dart';
-import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
+import 'package:nai_launcher/presentation/themes/app_theme.dart';
+import 'package:nai_launcher/presentation/providers/font_provider.dart';
+import 'package:nai_launcher/presentation/widgets/drop/image_destination_dialog.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_inspector_panel.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_section.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_translation.dart';
@@ -204,6 +206,52 @@ void main() {
   }
 
   testWidgets(
+    'card arrow opens the shared import dialog and cancellation preserves gallery state',
+    (tester) async {
+      final container = await _pumpScreen(
+        tester,
+        records: records,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: false,
+        size: const Size(1600, 1000),
+      );
+      final focusBefore = container.read(localGalleryFocusNotifierProvider);
+      final recordBefore = records[1];
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(
+        location: tester.getCenter(_cardFor(recordBefore)),
+      );
+      await tester.pumpAndSettle();
+      final arrow = find.descendant(
+        of: _cardFor(recordBefore),
+        matching: find.byIcon(StudioIcons.gallerySend),
+      );
+      expect(arrow, findsOneWidget);
+      await tester.tap(arrow);
+      await _settle(tester, rounds: 20);
+      expect(find.byType(ImageDestinationDialog), findsOneWidget);
+      expect(find.byType(MenuItemButton), findsNothing);
+      final dialog = tester.widget<ImageDestinationDialog>(
+        find.byType(ImageDestinationDialog),
+      );
+      expect(dialog.metadata?.prompt, recordBefore.metadata?.prompt);
+      expect(dialog.fileName, 'image_1.png');
+      await _capture(tester, 'card-arrow-import-dialog');
+      await tester.tap(find.byTooltip('关闭').last);
+      await tester.pumpAndSettle();
+      expect(find.byType(ImageDestinationDialog), findsNothing);
+      expect(container.read(localGalleryFocusNotifierProvider), focusBefore);
+      expect(records[1], recordBefore);
+      expect(tester.takeException(), isNull);
+      await mouse.removePointer();
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+  );
+
+  testWidgets(
     'inspector translates each field independently and stores at the click point',
     (tester) async {
       final disableShadows = debugDisableShadows;
@@ -357,7 +405,11 @@ Future<ProviderContainer> _pumpScreen(
       ),
     ],
   );
-  final theme = dark ? GeistTheme.dark : GeistTheme.light;
+  final theme = AppTheme.getTheme(
+    AppStyle.geist,
+    dark ? Brightness.dark : Brightness.light,
+    fontConfig: FontConfig.defaultFont,
+  );
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -398,7 +450,9 @@ Future<void> _capture(WidgetTester tester, String name) async {
     final image = await boundary.toImage();
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final dir = Directory(
-      Platform.environment['GALLERY_FEEDBACK_CAPTURE'] == '1'
+      Platform.environment['GALLERY_FOLLOWUP_CAPTURE'] == '1'
+          ? '.dart_tool/gallery-followup-captures/gallery'
+          : Platform.environment['GALLERY_FEEDBACK_CAPTURE'] == '1'
           ? '.dart_tool/gallery-feedback-captures/gallery'
           : '.dart_tool/local-gallery-captures',
     )..createSync(recursive: true);
