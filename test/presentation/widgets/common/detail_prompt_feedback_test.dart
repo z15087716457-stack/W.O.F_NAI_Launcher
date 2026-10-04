@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,7 +15,9 @@ import 'package:nai_launcher/presentation/utils/translation_palette_drop.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
+import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:nai_launcher/presentation/widgets/common/anlas_cost_dialog.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_context_menu.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/components/prompt_section.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_translation.dart';
@@ -51,6 +54,8 @@ Widget app({
   GlobalKey? captureKey,
   WidgetBuilder? bodyBuilder,
   PromptBlockStorage? blockStorage,
+  bool inspectorStyle = false,
+  bool captureOverlay = false,
 }) => ProviderScope(
   overrides: [
     localStorageServiceProvider.overrideWithValue(_Storage()),
@@ -63,7 +68,7 @@ Widget app({
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     theme: AppTheme.getTheme(AppStyle.geist, brightness),
-    builder: bodyBuilder == null
+    builder: bodyBuilder == null && !captureOverlay
         ? null
         : (_, child) => RepaintBoundary(key: captureKey, child: child!),
     home: Scaffold(
@@ -71,9 +76,9 @@ Widget app({
           ? Builder(builder: bodyBuilder)
           : Center(
               child: SizedBox(
-                width: 320,
+                width: inspectorStyle ? 340 : 320,
                 child: RepaintBoundary(
-                  key: captureKey,
+                  key: captureOverlay ? null : captureKey,
                   child: Material(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -85,6 +90,10 @@ Widget app({
                           icon: Icons.text_fields,
                           content: content,
                           initiallyExpanded: true,
+                          inspectorStyle: inspectorStyle,
+                          contentStyle: inspectorStyle
+                              ? StudioTypography.data
+                              : null,
                         ),
                       ),
                     ),
@@ -184,6 +193,8 @@ void main() {
       await tester.tap(find.textContaining('废墟城市'));
       await tester.pumpAndSettle();
       expect(find.text('存入积木'), findsOneWidget);
+      expect(find.byIcon(StudioIcons.promptBlockPalette), findsOneWidget);
+      expect(tester.getSize(find.byType(MenuItemButton)).width, lessThan(190));
       await tester.tapAt(const Offset(5, 5));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('detail-prompt-translate')));
@@ -193,6 +204,103 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('gallery translation only appears in the hovered prompt region', (
+    tester,
+  ) async {
+    final translateButton = find
+        .byKey(const Key('detail-prompt-translate'))
+        .hitTestable();
+    final requests = <String>[];
+    Future<PillDocument> convert(PillDocument doc, String _) async {
+      requests.add(doc.text);
+      return translated(doc);
+    }
+
+    await tester.pumpWidget(
+      app(
+        content: original,
+        translator: convert,
+        bodyBuilder: (_) => const SizedBox(),
+      ),
+    );
+    await tester.pumpWidget(
+      app(
+        content: original,
+        translator: convert,
+        bodyBuilder: (_) => const Center(
+          child: SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PromptSection(
+                  key: Key('gallery-positive'),
+                  title: 'Positive',
+                  icon: Icons.text_fields,
+                  content: original,
+                  inspectorStyle: true,
+                ),
+                PromptSection(
+                  key: Key('gallery-negative'),
+                  title: 'Negative',
+                  icon: Icons.block,
+                  content: 'negative source',
+                  inspectorStyle: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(translateButton, findsNothing);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: Offset.zero);
+    await mouse.moveTo(
+      tester.getCenter(find.byKey(const Key('gallery-positive'))),
+    );
+    await tester.pumpAndSettle();
+    expect(translateButton, findsOneWidget);
+    await tester.tap(translateButton);
+    await tester.pumpAndSettle();
+    expect(requests, [original]);
+    expect(find.text('negative source'), findsOneWidget);
+    final block = find.byWidgetPredicate(
+      (w) => w is Draggable<PromptBlockDragData>,
+    );
+    expect(
+      tester
+          .widget<Draggable<PromptBlockDragData>>(block)
+          .data!
+          .translation!
+          .source,
+      original,
+    );
+    final point = tester.getCenter(find.textContaining('废墟城市'));
+    await tester.tapAt(point);
+    await tester.pumpAndSettle();
+    final action = tester.getRect(find.byType(MenuItemButton));
+    expect(action.width, lessThan(190));
+    expect(action.left, closeTo(point.dx + 6, 1));
+    expect(find.byIcon(StudioIcons.promptBlockPalette), findsOneWidget);
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    await mouse.moveTo(
+      tester.getCenter(find.byKey(const Key('gallery-negative'))),
+    );
+    await tester.pumpAndSettle();
+    expect(translateButton, findsOneWidget);
+    await tester.tap(translateButton);
+    await tester.pumpAndSettle();
+    expect(requests, [original, 'negative source']);
+    await mouse.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(translateButton, findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('late translation cannot replace a newer image prompt', (
     tester,
@@ -256,6 +364,89 @@ void main() {
         expect(result, confirm);
       },
     );
+  }
+
+  if (Platform.environment['CAPTURE_GALLERY_PROMPTS'] == '1') {
+    testWidgets('real-font hovered gallery prompts and compact store menu', (
+      tester,
+    ) async {
+      await tester.runAsync(() async {
+        await loadStudioCaptureFonts();
+        await (FontLoader(
+          'MaterialIcons',
+        )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+      });
+      await tester.binding.setSurfaceSize(const Size(640, 600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final oldShadows = debugDisableShadows;
+      debugDisableShadows = false;
+      addTearDown(() => debugDisableShadows = oldShadows);
+      final folder = Directory('.dart_tool/gallery-feedback-captures')
+        ..createSync(recursive: true);
+      Future<void> capture(GlobalKey key, String name) async {
+        await tester.runAsync(() async {
+          final boundary =
+              key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+          final rendered = await boundary.toImage(pixelRatio: 2);
+          final bytes = await rendered.toByteData(
+            format: ui.ImageByteFormat.png,
+          );
+          File(
+            '${folder.path}/$name.png',
+          ).writeAsBytesSync(bytes!.buffer.asUint8List());
+          rendered.dispose();
+        });
+      }
+
+      for (final locale in const [
+        Locale('zh'),
+        Locale('zh', 'TW'),
+        Locale('en'),
+        Locale('ja'),
+        Locale('ko'),
+      ]) {
+        for (final brightness in Brightness.values) {
+          final key = GlobalKey();
+          final name = 'inspector-${locale.toLanguageTag()}-${brightness.name}';
+          await tester.pumpWidget(
+            app(
+              content: original,
+              translator: (doc, _) async => translated(doc),
+              locale: locale,
+              brightness: brightness,
+              inspectorStyle: true,
+              captureKey: key,
+              captureOverlay: true,
+            ),
+          );
+          await tester.pumpAndSettle();
+          await capture(key, '$name-original');
+          final mouse = await tester.createGesture(
+            kind: PointerDeviceKind.mouse,
+          );
+          await mouse.addPointer(location: Offset.zero);
+          await mouse.moveTo(tester.getCenter(find.byType(PromptSection)));
+          await tester.pumpAndSettle();
+          await capture(key, '$name-hover');
+          await tester.tap(
+            find.byKey(const Key('detail-prompt-translate')).hitTestable(),
+          );
+          await tester.pumpAndSettle();
+          await capture(key, '$name-blocks');
+          await tester.tap(find.textContaining('废墟城市'));
+          await tester.pumpAndSettle();
+          await capture(key, '$name-store');
+          expect(
+            tester.getSize(find.byType(MenuItemButton)).width,
+            lessThan(250),
+          );
+          expect(tester.takeException(), isNull);
+          await mouse.removePointer();
+          await tester.pumpWidget(const SizedBox());
+        }
+      }
+      debugDisableShadows = oldShadows;
+    });
   }
 
   if (Platform.environment['CAPTURE_FEEDBACK_UI'] == '1') {

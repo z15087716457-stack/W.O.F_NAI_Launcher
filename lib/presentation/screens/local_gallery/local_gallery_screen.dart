@@ -310,76 +310,79 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         color: theme.colorScheme.surfaceContainerLow,
         border: Border(right: BorderSide(color: theme.dividerColor)),
       ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: localGalleryToolbarHeight,
-            child: Stack(
-              children: [
-                if (WindowChromeScope.activeOf(context))
-                  const Positioned.fill(
-                    child: WindowDragArea(key: Key('gallery-sidebar-drag')),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: IgnorePointer(
-                          child: Text(
-                            context.l10n.localGallery_title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
+      child: Transform.translate(
+        offset: const Offset(0, -2),
+        child: Column(
+          children: [
+            SizedBox(
+              height: localGalleryToolbarHeight,
+              child: Stack(
+                children: [
+                  if (WindowChromeScope.activeOf(context))
+                    const Positioned.fill(
+                      child: WindowDragArea(key: Key('gallery-sidebar-drag')),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: IgnorePointer(
+                            child: Text(
+                              context.l10n.localGallery_title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      GalleryAddMenuButton(
-                        onCreateCategory: _createCategory,
-                        onImportFolder: _importFolder,
-                      ),
-                    ],
+                        GalleryAddMenuButton(
+                          onCreateCategory: _createCategory,
+                          onImportFolder: _importFolder,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: GalleryCategoryTreeView(
-              categories: categoryState.categories,
-              totalImageCount: totalCount,
-              favoriteCount: favoriteTotal,
-              selectedCategoryId: categoryState.selectedCategoryId,
-              onCategorySelected: _handleCategorySelected,
-              onCategoryRename: (id, newName) => ref
-                  .read(galleryCategoryNotifierProvider.notifier)
-                  .renameCategory(id, newName),
-              onCategoryDelete: _handleCategoryDelete,
-              onAddSubCategory: _handleAddSubCategory,
-              onCategoryMove: (categoryId, newParentId) => ref
-                  .read(galleryCategoryNotifierProvider.notifier)
-                  .moveCategory(categoryId, newParentId),
-              onCategoryReorder: (parentId, oldIndex, newIndex) => ref
-                  .read(galleryCategoryNotifierProvider.notifier)
-                  .reorderCategories(parentId, oldIndex, newIndex),
-              onImageDrop: _handleImageDrop,
-              onBatchImageDrop: _handleBatchImageDrop,
-              onSyncWithFileSystem: _handleSyncWithFileSystem,
-              collections: collectionState.collections,
-              onCreateCollection: _createCollection,
-              onRenameCollection: _handleRenameCollection,
-              onDeleteCollection: _handleDeleteCollection,
-              onCollectionReorder: _handleCollectionReorder,
-              onMoveCollection: _handleMoveCollection,
-              onOpenTrash: () => showGalleryTrashPanel(context, ref),
-              onRefresh: _refreshGallery,
-              indexedCount: totalCount,
+            Expanded(
+              child: GalleryCategoryTreeView(
+                categories: categoryState.categories,
+                totalImageCount: totalCount,
+                favoriteCount: favoriteTotal,
+                selectedCategoryId: categoryState.selectedCategoryId,
+                onCategorySelected: _handleCategorySelected,
+                onCategoryRename: (id, newName) => ref
+                    .read(galleryCategoryNotifierProvider.notifier)
+                    .renameCategory(id, newName),
+                onCategoryDelete: _handleCategoryDelete,
+                onAddSubCategory: _handleAddSubCategory,
+                onCategoryMove: (categoryId, newParentId) => ref
+                    .read(galleryCategoryNotifierProvider.notifier)
+                    .moveCategory(categoryId, newParentId),
+                onCategoryReorder: (parentId, oldIndex, newIndex) => ref
+                    .read(galleryCategoryNotifierProvider.notifier)
+                    .reorderCategories(parentId, oldIndex, newIndex),
+                onImageDrop: _handleImageDrop,
+                onBatchImageDrop: _handleBatchImageDrop,
+                onSyncWithFileSystem: _handleSyncWithFileSystem,
+                collections: collectionState.collections,
+                onCreateCollection: _createCollection,
+                onRenameCollection: _handleRenameCollection,
+                onDeleteCollection: _handleDeleteCollection,
+                onCollectionReorder: _handleCollectionReorder,
+                onMoveCollection: _handleMoveCollection,
+                onOpenTrash: () => showGalleryTrashPanel(context, ref),
+                onRefresh: _refreshGallery,
+                indexedCount: totalCount,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

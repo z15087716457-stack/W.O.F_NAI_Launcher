@@ -37,6 +37,7 @@ class ImageActionMenu {
     required Offset position,
     required List<ImageMenuAction<T>> actions,
     List<ImageMenuAction<T>> quickActions = const [],
+    double? width = 248,
   }) async {
     final overlay = Navigator.of(context).overlay!;
     final box = overlay.context.findRenderObject()! as RenderBox;
@@ -44,6 +45,7 @@ class ImageActionMenu {
       position: box.globalToLocal(position),
       actions: actions,
       quickActions: quickActions,
+      width: width,
       barrierText: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     );
     final result = await Navigator.of(context).push<T>(route);
@@ -57,11 +59,13 @@ class _ImageMenuRoute<T> extends PopupRoute<T> {
     required this.position,
     required this.actions,
     required this.quickActions,
+    required this.width,
     required this.barrierText,
   });
   final Offset position;
   final List<ImageMenuAction<T>> actions;
   final List<ImageMenuAction<T>> quickActions;
+  final double? width;
   final String barrierText;
   @override
   Color? get barrierColor => null;
@@ -106,7 +110,7 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
     Navigator.of(context).pop(value);
   }
 
-  MenuStyle _menuStyle({double width = 248}) {
+  MenuStyle _menuStyle({double? width = 248}) {
     final colors = Theme.of(context).colorScheme;
     return MenuStyle(
       alignment: Alignment.topLeft,
@@ -115,8 +119,8 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
       elevation: const WidgetStatePropertyAll(4),
       shadowColor: WidgetStatePropertyAll(Colors.black.withValues(alpha: .16)),
       padding: const WidgetStatePropertyAll(EdgeInsets.all(6)),
-      minimumSize: WidgetStatePropertyAll(Size(width, 0)),
-      maximumSize: WidgetStatePropertyAll(Size(width, double.infinity)),
+      minimumSize: WidgetStatePropertyAll(Size(width ?? 0, 0)),
+      maximumSize: WidgetStatePropertyAll(Size(width ?? 320, double.infinity)),
       shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -193,7 +197,7 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
     controller: _controller,
     useRootOverlay: true,
     crossAxisUnconstrained: false,
-    style: _menuStyle(),
+    style: _menuStyle(width: widget.route.width),
     onClose: () => _select(null),
     menuChildren: [
       if (widget.route.quickActions.isNotEmpty) ...[

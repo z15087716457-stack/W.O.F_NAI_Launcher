@@ -426,7 +426,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+          contentPadding: EdgeInsets.zero,
           isDense: true,
         ),
         onChanged: (value) {

@@ -75,6 +75,7 @@ class CanvasEdgeToolbar extends ConsumerWidget {
       image: image,
       group: group,
       focus: focus,
+      useGradient: zone != CanvasToolbarZone.top,
     );
   }
 }
@@ -178,12 +179,14 @@ class _ToolbarStrip extends ConsumerWidget {
     required this.image,
     required this.group,
     this.focus,
+    required this.useGradient,
   });
 
   final List<_ToolbarItem> items;
   final GeneratedImage image;
   final CanvasFeedGroup group;
   final CanvasFocus? focus;
+  final bool useGradient;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -205,6 +208,7 @@ class _ToolbarStrip extends ConsumerWidget {
       child: StudioGlassSurface(
         borderRadius: radius,
         backdropBlur: true,
+        useGradient: useGradient,
         child: Material(
           color: Colors.transparent,
           child: Padding(

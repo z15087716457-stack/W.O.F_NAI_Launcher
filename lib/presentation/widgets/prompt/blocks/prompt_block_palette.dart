@@ -163,6 +163,7 @@ class _PromptBlockPaletteButtonState
       builder: (context, _, _) => Tooltip(
         message: context.l10n.promptBlockPalette_tooltip,
         waitDuration: const Duration(milliseconds: 300),
+        verticalOffset: 18,
         child: IconButton(
           key: const Key('prompt-block-palette-toggle'),
           iconSize: 18,

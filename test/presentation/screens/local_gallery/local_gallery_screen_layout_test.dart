@@ -20,6 +20,7 @@ import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/data/models/gallery/image_collection.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_column_width_store.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/data/services/thumbnail_service.dart';
@@ -33,6 +34,10 @@ import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/screens/local_gallery/local_gallery_screen.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_inspector_panel.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_section.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_translation.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/timeline/gallery_timeline_view.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
@@ -94,6 +99,13 @@ void main() {
     (const Locale('ja'), true, const Size(1600, 1000), 'ja-dark-wide'),
     (const Locale('ko'), false, const Size(1366, 768), 'ko-light-laptop'),
     (const Locale('zh'), false, const Size(1100, 760), 'zh-light-narrow'),
+    (
+      const Locale('zh', 'TW'),
+      false,
+      const Size(1600, 1000),
+      'zh-TW-light-wide',
+    ),
+    (const Locale('zh', 'TW'), true, const Size(1600, 1000), 'zh-TW-dark-wide'),
   ];
 
   for (final (locale, dark, size, name) in cases) {
@@ -190,6 +202,119 @@ void main() {
       await tester.pump(const Duration(minutes: 1));
     });
   }
+
+  testWidgets(
+    'inspector translates each field independently and stores at the click point',
+    (tester) async {
+      final disableShadows = debugDisableShadows;
+      debugDisableShadows = false;
+      addTearDown(() => debugDisableShadows = disableShadows);
+      final metadata = records[1].metadata!.copyWith(
+        prompt: '1.5::blue eyes, white hair ::, scenery',
+        characterPrompts: ['girl, 1.3::long hair::'],
+        negativePrompt: 'lowres, 0.8::bad quality::',
+      );
+      final samples = [...records];
+      samples[1] = samples[1].copyWith(metadata: metadata);
+      final requests = <String>[];
+      final container = await _pumpScreen(
+        tester,
+        records: samples,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: false,
+        size: const Size(1600, 1000),
+        translator: (doc, _) async {
+          requests.add(doc.text);
+          return PillDocument(
+            text: '\uE000',
+            instances: {
+              '\uE000': PillInstance(
+                blockId: '',
+                translation: TranslationPill(
+                  source: doc.text,
+                  zh: '测试译文：${doc.text}',
+                  languageCode: 'zh',
+                ),
+              ),
+            },
+          );
+        },
+      );
+      await tester.tap(_cardFor(samples[1]));
+      await _settle(tester);
+      expect(find.byType(PromptSection), findsAtLeastNWidgets(1));
+      expect(requests, isEmpty);
+      await _capture(tester, 'feedback-aligned-original');
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(mouse.removePointer);
+      await mouse.addPointer(location: Offset.zero);
+      for (var i = 0; i < 3; i++) {
+        final field = ['positive', 'character-0', 'negative'][i];
+        final section = find.byKey(
+          ValueKey('gallery-prompt-${samples[1].path}-$field'),
+        );
+        await tester.scrollUntilVisible(
+          section,
+          200,
+          scrollable: find
+              .descendant(
+                of: find.byType(GalleryInspectorPanel),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await Scrollable.ensureVisible(tester.element(section), alignment: .3);
+        await tester.pumpAndSettle();
+        await mouse.moveTo(tester.getCenter(section));
+        await tester.pumpAndSettle();
+        final button = find
+            .descendant(
+              of: section,
+              matching: find.byKey(const Key('detail-prompt-translate')),
+            )
+            .hitTestable();
+        expect(button, findsOneWidget);
+        await _capture(tester, 'feedback-hover-field-$i');
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        await _capture(tester, 'feedback-blocks-field-$i');
+      }
+      expect(requests, [
+        metadata.prompt,
+        metadata.characterPrompts.single,
+        metadata.negativePrompt,
+      ]);
+      final section = find.byType(PromptSection).first;
+      await Scrollable.ensureVisible(tester.element(section), alignment: .3);
+      await tester.pumpAndSettle();
+      final block = find.descendant(
+        of: section,
+        matching: find.byWidgetPredicate(
+          (w) => w is Draggable<PromptBlockDragData>,
+        ),
+      );
+      expect(
+        tester
+            .widget<Draggable<PromptBlockDragData>>(block)
+            .data!
+            .translation!
+            .source,
+        metadata.prompt,
+      );
+      await tester.tap(block);
+      await tester.pumpAndSettle();
+      expect(find.text('存入积木'), findsOneWidget);
+      expect(find.byIcon(StudioIcons.promptBlockPalette), findsOneWidget);
+      expect(tester.getSize(find.byType(MenuItemButton)).width, lessThan(190));
+      await _capture(tester, 'feedback-gallery-store');
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+      debugDisableShadows = disableShadows;
+    },
+  );
 }
 
 final _captureKey = GlobalKey();
@@ -208,6 +333,7 @@ Future<ProviderContainer> _pumpScreen(
   required Locale locale,
   required bool dark,
   required Size size,
+  Future<PillDocument> Function(PillDocument, String)? translator,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
@@ -216,6 +342,8 @@ Future<ProviderContainer> _pumpScreen(
   final service = FakeLocalGalleryService(records, dimensions: dimensions);
   final container = ProviderContainer(
     overrides: [
+      if (translator != null)
+        detailPromptTranslatorProvider.overrideWithValue(translator),
       galleryServiceProvider.overrideWith(
         () => FakeGalleryServiceNotifier(service),
       ),
@@ -269,8 +397,11 @@ Future<void> _capture(WidgetTester tester, String name) async {
             as RenderRepaintBoundary;
     final image = await boundary.toImage();
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    final dir = Directory('.dart_tool/local-gallery-captures')
-      ..createSync(recursive: true);
+    final dir = Directory(
+      Platform.environment['GALLERY_FEEDBACK_CAPTURE'] == '1'
+          ? '.dart_tool/gallery-feedback-captures/gallery'
+          : '.dart_tool/local-gallery-captures',
+    )..createSync(recursive: true);
     File('${dir.path}/$name.png').writeAsBytesSync(bytes!.buffer.asUint8List());
     image.dispose();
   });

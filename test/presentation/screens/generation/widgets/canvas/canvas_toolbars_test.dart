@@ -1,5 +1,8 @@
 import 'package:flutter/gestures.dart';
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,6 +18,8 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canv
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_view.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
+import 'package:nai_launcher/presentation/themes/app_theme.dart';
+import '../../../../../helpers/studio_capture_fonts.dart';
 
 GeneratedImage _img({required String id, int width = 832, int height = 1216}) {
   return GeneratedImage(
@@ -35,7 +40,7 @@ CanvasFeedGroup _group(GeneratedImage img) => CanvasFeedGroup(
   requestedCount: 1,
 );
 
-Widget _wrap(Widget child) {
+Widget _wrap(Widget child, {Brightness? brightness, GlobalKey? captureKey}) {
   return ProviderScope(
     overrides: [
       localStorageServiceProvider.overrideWith((ref) => _FakeCanvasStorage()),
@@ -43,6 +48,12 @@ Widget _wrap(Widget child) {
       imageUpscaleCostProvider.overrideWith((ref, image) => 7),
     ],
     child: MaterialApp(
+      theme: brightness == null
+          ? null
+          : AppTheme.getTheme(AppStyle.geist, brightness),
+      builder: captureKey == null
+          ? null
+          : (_, child) => RepaintBoundary(key: captureKey, child: child!),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('zh'),
@@ -53,6 +64,64 @@ Widget _wrap(Widget child) {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.environment['GALLERY_FEEDBACK_CAPTURE'] == '1') {
+    testWidgets(
+      'real-font toolbar surfaces preserve controls and remove top tint gradient',
+      (tester) async {
+        await tester.runAsync(loadStudioCaptureFonts);
+        await tester.binding.setSurfaceSize(const Size(760, 420));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final folder = Directory('.dart_tool/gallery-feedback-captures')
+          ..createSync(recursive: true);
+        final oldShadows = debugDisableShadows;
+        debugDisableShadows = false;
+        addTearDown(() => debugDisableShadows = oldShadows);
+        for (final brightness in Brightness.values) {
+          final image = _img(id: 'capture');
+          final key = GlobalKey();
+          await tester.pumpWidget(
+            _wrap(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final zone in CanvasToolbarZone.values)
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: CanvasEdgeToolbar(
+                        zone: zone,
+                        image: image,
+                        group: _group(image),
+                        focus: null,
+                      ),
+                    ),
+                ],
+              ),
+              brightness: brightness,
+              captureKey: key,
+            ),
+          );
+          await tester.pumpAndSettle();
+          await tester.runAsync(() async {
+            final boundary =
+                key.currentContext!.findRenderObject()!
+                    as RenderRepaintBoundary;
+            final rendered = await boundary.toImage(pixelRatio: 2);
+            final bytes = await rendered.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            File(
+              '${folder.path}/canvas-toolbars-${brightness.name}.png',
+            ).writeAsBytesSync(bytes!.buffer.asUint8List());
+            rendered.dispose();
+          });
+          expect(tester.takeException(), isNull);
+          await tester.pumpWidget(const SizedBox());
+        }
+        debugDisableShadows = oldShadows;
+      },
+    );
+  }
 
   group('CanvasEdgeToolbar', () {
     testWidgets('cost pills show amount then Anlas icon for each priced tool', (

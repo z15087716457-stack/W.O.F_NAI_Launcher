@@ -11,6 +11,7 @@ class StudioGlassSurface extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(10)),
     this.nativeBackdrop = false,
     this.backdropBlur = false,
+    this.useGradient = true,
     this.clipBehavior = Clip.antiAlias,
   });
 
@@ -18,6 +19,7 @@ class StudioGlassSurface extends StatelessWidget {
   final BorderRadius borderRadius;
   final bool nativeBackdrop;
   final bool backdropBlur;
+  final bool useGradient;
   final Clip clipBehavior;
 
   @override
@@ -62,11 +64,14 @@ class StudioGlassSurface extends StatelessWidget {
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: colors,
-              ),
+              color: useGradient ? null : colors[1],
+              gradient: useGradient
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: colors,
+                    )
+                  : null,
             ),
             child: CustomPaint(
               painter: _GlassGrain(dark),
@@ -97,8 +102,12 @@ class StudioGlassSurface extends StatelessWidget {
       clipBehavior: clipBehavior,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: highContrast ? theme.colorScheme.surface : null,
-          gradient: highContrast
+          color: highContrast
+              ? theme.colorScheme.surface
+              : useGradient
+              ? null
+              : base,
+          gradient: highContrast || !useGradient
               ? null
               : LinearGradient(
                   begin: Alignment.topLeft,

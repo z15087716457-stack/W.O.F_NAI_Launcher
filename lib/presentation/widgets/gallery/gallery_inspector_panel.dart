@@ -18,6 +18,7 @@ import '../../themes/studio_typography.dart';
 import '../../utils/local_gallery_metadata_resolver.dart';
 import '../common/app_toast.dart';
 import '../common/studio_icons.dart';
+import '../common/image_detail/components/detail_prompt_section.dart';
 import 'local_image_context_menu.dart';
 
 /// 详情面板宽度
@@ -381,34 +382,43 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
                 style: mono,
               ),
               if (metadata.prompt.isNotEmpty) ...[
-                _SectionTitle(
-                  label: l10n.prompt_positivePrompt,
+                PromptSection(
+                  key: ValueKey('gallery-prompt-${record.path}-positive'),
+                  title: l10n.prompt_positivePrompt,
+                  icon: Icons.text_fields,
+                  content: metadata.prompt,
+                  inspectorStyle: true,
+                  contentStyle: mono,
                   onCopy: () =>
                       _copy(metadata.prompt, l10n.localGallery_promptCopied),
                 ),
-                _TextBox(text: metadata.prompt, style: mono),
               ],
               for (var i = 0; i < metadata.characterPrompts.length; i++)
                 if (metadata.characterPrompts[i].trim().isNotEmpty) ...[
-                  _SectionTitle(
-                    label: l10n.character_number(i + 1),
+                  PromptSection(
+                    key: ValueKey('gallery-prompt-${record.path}-character-$i'),
+                    title: l10n.character_number(i + 1),
+                    icon: Icons.person_outline,
+                    content: metadata.characterPrompts[i],
+                    inspectorStyle: true,
+                    contentStyle: mono,
                     onCopy: () => _copy(
                       metadata.characterPrompts[i],
                       l10n.toast_characterPromptCopied,
                     ),
                   ),
-                  _TextBox(text: metadata.characterPrompts[i], style: mono),
                 ],
               if (metadata.displayNegativePrompt.isNotEmpty) ...[
-                _SectionTitle(
-                  label: l10n.prompt_negativePrompt,
+                PromptSection(
+                  key: ValueKey('gallery-prompt-${record.path}-negative'),
+                  title: l10n.prompt_negativePrompt,
+                  icon: Icons.block,
+                  content: metadata.displayNegativePrompt,
+                  inspectorStyle: true,
+                  contentStyle: mono,
+                  previewLines: _negativeExpanded ? null : 3,
                   onCopy: () =>
                       _copy(metadata.displayNegativePrompt, l10n.common_copied),
-                ),
-                _TextBox(
-                  text: metadata.displayNegativePrompt,
-                  style: mono,
-                  maxLines: _negativeExpanded ? null : 3,
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -666,10 +676,9 @@ class _InfoTable extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.label, this.onCopy});
+  const _SectionTitle({required this.label});
 
   final String label;
-  final VoidCallback? onCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -690,18 +699,6 @@ class _SectionTitle extends StatelessWidget {
                 ),
               ),
             ),
-            if (onCopy != null)
-              IconButton(
-                onPressed: onCopy,
-                tooltip: context.l10n.common_copy,
-                icon: const Icon(StudioIcons.galleryCopy, size: 14),
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints.tightFor(
-                  width: 24,
-                  height: 24,
-                ),
-              ),
           ],
         ),
       ),
@@ -779,40 +776,6 @@ class _ParamGrid extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _TextBox extends StatelessWidget {
-  const _TextBox({required this.text, required this.style, this.maxLines});
-
-  final String text;
-  final TextStyle style;
-  final int? maxLines;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainer,
-        border: Border.all(color: theme.dividerColor),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: maxLines == null
-          ? SelectableText(
-              text.trim(),
-              style: style.copyWith(fontSize: 12, height: 1.6),
-            )
-          : Text(
-              text.trim(),
-              maxLines: maxLines,
-              overflow: TextOverflow.ellipsis,
-              style: style.copyWith(fontSize: 12, height: 1.6),
-            ),
     );
   }
 }

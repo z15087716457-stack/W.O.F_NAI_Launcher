@@ -13,6 +13,7 @@ import '../../../prompt/unified/unified_prompt_input.dart';
 import '../../app_toast.dart';
 import '../../image_action_menu.dart';
 import '../../translation_icon.dart';
+import '../../studio_icons.dart';
 import 'detail_prompt_translation.dart';
 
 /// Read-only reuse of the prompt editor, with an isolated translation document.
@@ -26,6 +27,10 @@ class PromptSection extends ConsumerStatefulWidget {
     this.contentColor,
     this.borderColor,
     this.customContent,
+    this.inspectorStyle = false,
+    this.contentStyle,
+    this.previewLines,
+    this.onCopy,
   });
 
   final String title;
@@ -35,6 +40,10 @@ class PromptSection extends ConsumerStatefulWidget {
   final Color? contentColor;
   final Color? borderColor;
   final Widget? customContent;
+  final bool inspectorStyle;
+  final TextStyle? contentStyle;
+  final int? previewLines;
+  final VoidCallback? onCopy;
 
   @override
   ConsumerState<PromptSection> createState() => _PromptSectionState();
@@ -45,6 +54,7 @@ class _PromptSectionState extends ConsumerState<PromptSection> {
   late PillDocument _document;
   late final TextEditingController _controller;
   bool _busy = false;
+  bool _hovered = false;
   int _request = 0;
 
   @override
@@ -116,11 +126,12 @@ class _PromptSectionState extends ConsumerState<PromptSection> {
     final store = await ImageActionMenu.show<bool>(
       context,
       position: position,
+      width: null,
       actions: [
         ImageMenuAction(
           value: true,
           label: context.l10n.imageMenu_saveToBlock,
-          icon: Icons.widgets_outlined,
+          icon: StudioIcons.promptBlockPalette,
         ),
       ],
     );
@@ -188,6 +199,7 @@ class _PromptSectionState extends ConsumerState<PromptSection> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final hasContent = widget.content.isNotEmpty;
+    if (widget.inspectorStyle) return _buildInspector(context);
     final buttonStyle = IconButton.styleFrom(
       padding: const EdgeInsets.all(4),
       minimumSize: const Size(28, 28),
@@ -282,6 +294,121 @@ class _PromptSectionState extends ConsumerState<PromptSection> {
               ),
         ],
       ],
+    );
+  }
+
+  Widget _buildInspector(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final buttonStyle = IconButton.styleFrom(
+      padding: EdgeInsets.zero,
+      minimumSize: const Size(24, 24),
+      maximumSize: const Size(24, 24),
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      overlayColor: Colors.transparent,
+      splashFactory: NoSplash.splashFactory,
+    );
+    final textStyle = widget.contentStyle?.copyWith(fontSize: 12, height: 1.6);
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 16, bottom: 6),
+            child: SizedBox(
+              height: 24,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: _hovered,
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    child: IconButton(
+                      key: const Key('detail-prompt-translate'),
+                      style: buttonStyle,
+                      tooltip: _translated
+                          ? context.l10n.promptTranslation_restoreAll
+                          : context.l10n.promptTranslation_translateNew,
+                      onPressed: _busy ? null : _translate,
+                      icon: TranslationIcon(
+                        size: 15,
+                        busy: _busy,
+                        color: _translated
+                            ? colors.primary
+                            : colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    style: buttonStyle,
+                    tooltip: context.l10n.common_copy,
+                    icon: const Icon(StudioIcons.galleryCopy, size: 14),
+                    onPressed:
+                        widget.onCopy ??
+                        () => Clipboard.setData(
+                          ClipboardData(text: widget.content),
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: colors.surfaceContainer,
+              border: Border.all(color: theme.dividerColor),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: _translated
+                ? UnifiedPromptInput(
+                    key: const Key('detail-prompt-original-input'),
+                    controller: _controller,
+                    showCursor: false,
+                    fitContent: true,
+                    minLines: 1,
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    config: UnifiedPromptConfig(
+                      readOnly: true,
+                      embedded: true,
+                      compact: true,
+                      enableAutoFormat: false,
+                      enableSdSyntaxAutoConvert: false,
+                      enableSyntaxHighlight: ref.watch(
+                        highlightEmphasisSettingsProvider,
+                      ),
+                      pillBuilder: _span,
+                      pillVisualsSignature: identityHashCode(_document),
+                    ),
+                  )
+                : widget.previewLines == null
+                ? SelectableText(widget.content, style: textStyle)
+                : Text(
+                    widget.content,
+                    style: textStyle,
+                    maxLines: widget.previewLines,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
