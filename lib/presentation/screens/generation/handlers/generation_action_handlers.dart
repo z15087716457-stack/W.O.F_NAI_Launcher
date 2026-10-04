@@ -28,6 +28,7 @@ Future<void> generateWithProtection(BuildContext context, WidgetRef ref) async {
   );
   if (!confirmed ||
       !context.mounted ||
+      ref.read(kritaBridgeNotifierProvider).isBridgeGenerating ||
       ref.read(imageWorkflowControllerProvider).isToolRunning) {
     return;
   }
