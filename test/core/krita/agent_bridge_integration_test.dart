@@ -546,21 +546,27 @@ void main() {
   );
   if (Platform.environment['BRIDGE_CLIENT_EXE'] != null) {
     test('compiled Windows client performs an offline round trip', () async {
+      f.params = f.params.copyWith(prompt: '中文提示词 · 模块复用');
       final executable = Platform.environment['BRIDGE_CLIENT_EXE']!;
       final base = '${f.dir.path}/exe-current.json';
-      final result = await Process.run(executable, [
-        'get',
-        '--out',
-        base,
-        '--name',
-        'Exe Agent',
-        '--discovery',
-        f.notifier.state.discoveryFilePath!,
-      ]);
+      final result = await Process.run(
+        executable,
+        [
+          'get',
+          '--out',
+          base,
+          '--name',
+          'Exe Agent',
+          '--discovery',
+          f.notifier.state.discoveryFilePath!,
+        ],
+        stdoutEncoding: utf8,
+        stderrEncoding: utf8,
+      );
       expect(result.exitCode, 0, reason: result.stderr.toString());
       expect(
         jsonDecode(result.stdout as String)['_draft']['fields']['prompt'],
-        'original',
+        '中文提示词 · 模块复用',
       );
       final written = await Process.run(executable, [
         'set',

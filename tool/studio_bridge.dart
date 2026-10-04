@@ -18,6 +18,8 @@ Only one image is generated. status/get/quote never generate or edit a draft.
 ''';
 
 Future<void> main(List<String> args) async {
+  stdout.encoding = utf8;
+  stderr.encoding = utf8;
   exitCode = await studioBridgeMain(args);
 }
 
