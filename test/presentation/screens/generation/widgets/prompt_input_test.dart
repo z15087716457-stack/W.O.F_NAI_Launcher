@@ -342,6 +342,9 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         generationParamsNotifierProvider.overrideWith(_UnopenedDraftParams.new),
+        localStorageServiceProvider.overrideWith(
+          (ref) => _TestLocalStorageService(),
+        ),
         characterPromptNotifierProvider.overrideWith(
           _TestCharacterPromptNotifier.new,
         ),

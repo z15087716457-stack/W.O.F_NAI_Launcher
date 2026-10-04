@@ -12,6 +12,9 @@ import '../character_prompt_provider.dart';
 import '../image_generation_provider.dart';
 import '../pill_workspace_provider.dart';
 import '../subscription_provider.dart';
+import '../quality_preset_provider.dart';
+import '../uc_preset_provider.dart';
+import '../prompt_block_library_provider.dart';
 
 BridgeDraftSnapshot readBridgeDraft(Ref ref) {
   final p = ref.read(generationParamsNotifierProvider);
@@ -31,6 +34,21 @@ BridgeDraftSnapshot readBridgeDraft(Ref ref) {
   final main = lane(PillScopes.main, p.prompt);
   final negative = lane(PillScopes.negative, p.negativePrompt);
   final config = ref.read(characterPromptNotifierProvider);
+  final quality = ref.read(qualityPresetNotifierProvider);
+  final uc = ref.read(ucPresetNotifierProvider);
+  Map<String, dynamic>? selectedPreset(String? id) {
+    if (id == null) return null;
+    final block = ref
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.blockById(id);
+    return {
+      'id': id,
+      'content': block?.content,
+      'negative_content': block?.negativeContent,
+    };
+  }
+
   final positives = {
     for (final c in config.characters)
       c.id: lane(PillScopes.charPos(c.id), c.prompt),
@@ -78,6 +96,14 @@ BridgeDraftSnapshot readBridgeDraft(Ref ref) {
       ],
     },
     documents: {
+      'quality_preset': {
+        'mode': quality.mode.name,
+        'selected': selectedPreset(quality.customEntryId),
+      },
+      'uc_preset': {
+        'type': uc.presetType.name,
+        'selected': selectedPreset(uc.customEntryId),
+      },
       'prompt': main.document.toJson(),
       'negative_prompt': negative.document.toJson(),
       'characters': {

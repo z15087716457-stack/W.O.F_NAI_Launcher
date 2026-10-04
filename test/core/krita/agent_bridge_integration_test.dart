@@ -52,6 +52,7 @@ class Fixture {
   int cancelled = 0;
   bool uiBusy = false, alive = true, holdImage = false;
   String account = 'fake-account';
+  String preset = '';
   DateTime now = DateTime.utc(2026, 10, 4);
   Completer<void>? backupGate;
   final imageEntered = Completer<void>();
@@ -78,6 +79,7 @@ class Fixture {
       ),
       serviceFactory: (server) => service = KritaBridgeService(
         readBaseParams: () => params,
+        prepareParams: (p, _) => p.copyWith(prompt: p.prompt + preset),
         send: server.send,
         isUiGenerating: () => uiBusy,
         isAgentRequest: () => server.currentClient?.isAgent ?? false,
@@ -408,6 +410,20 @@ void main() {
         ))['code'],
         'conflict',
       );
+    },
+  );
+  test(
+    'quote rejects changed effective presets while raw draft is unchanged',
+    () async {
+      final a = await f.connect('Codex');
+      final q = await a.rpc('quote');
+      f.preset = ', changed custom quality';
+      final result = await a.rpc(
+        'generate',
+        payload: {'_authorized': true, '_quote_id': q['quote_id']},
+      );
+      expect(result['code'], 'conflict');
+      expect(f.generated, isEmpty);
     },
   );
   for (final change in ['draft', 'account', 'expiry', 'client']) {

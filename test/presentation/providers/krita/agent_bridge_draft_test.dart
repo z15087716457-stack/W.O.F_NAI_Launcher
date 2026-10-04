@@ -1,3 +1,5 @@
+import 'package:nai_launcher/core/constants/api_constants.dart';
+import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -169,6 +171,18 @@ void main() {
       expect(
         readback['_draft']['fields']['characters'][0]['uc'],
         'new negative',
+      );
+      container
+          .read(ucPresetNotifierProvider.notifier)
+          .setPresetType(UcPresetType.none);
+      final stalePreset = await peer.rpc(
+        'set_params',
+        payload: {'uc_preset': 0, '_expected': draft['field_versions']},
+      );
+      expect(stalePreset['code'], 'conflict');
+      expect(
+        container.read(ucPresetNotifierProvider).presetType,
+        UcPresetType.none,
       );
       final stale = await peer.rpc(
         'set_params',

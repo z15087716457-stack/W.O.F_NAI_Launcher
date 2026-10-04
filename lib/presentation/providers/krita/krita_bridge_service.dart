@@ -239,6 +239,14 @@ class KritaBridgeService implements KritaBridgeMessageService {
               !draft.matches(draft.fields, quote.versions) ||
               _readBilling?.call(quote.prepared)['estimated_anlas'] !=
                   quote.estimatedAnlas ||
+              _prepareParams(
+                    applyKritaParamsOverlay(
+                      quote.base,
+                      quote.payload,
+                    ).copyWith(nSamples: 1),
+                    quote.payload,
+                  ) !=
+                  quote.prepared ||
               _readBaseParams() != quote.base) {
             _sendError(
               message.id,
