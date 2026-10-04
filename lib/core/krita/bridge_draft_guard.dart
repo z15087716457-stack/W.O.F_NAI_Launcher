@@ -4,9 +4,24 @@ import 'package:crypto/crypto.dart';
 /// Only editable fields are compared. Document identity also protects a block
 /// edit whose text projection happens to be unchanged.
 class BridgeDraftSnapshot {
-  BridgeDraftSnapshot({required this.fields, this.documents = const {}});
+  BridgeDraftSnapshot({
+    required this.fields,
+    this.documents = const {},
+    this.acknowledgementContext,
+  });
   final Map<String, dynamic> fields;
   final Map<String, dynamic> documents;
+
+  /// In-process visual acknowledgement; never used as a write authorization.
+  final Object? acknowledgementContext;
+
+  String get acknowledgementVersion => sha256
+      .convert(
+        utf8.encode(
+          jsonEncode(_canonical([fieldVersions, acknowledgementContext])),
+        ),
+      )
+      .toString();
 
   Map<String, String> get fieldVersions => {
     for (final e in fields.entries)

@@ -7193,6 +7193,8 @@
   "bridge_title": "로컬 연결",
   "bridge_agent": "외부 Agent",
   "bridge_agentHint": "로컬 명령을 실행할 수 있는 Agent에게 안내를 전달하세요.",
+  "bridge_synced": "현재 내용 확인됨",
+  "bridge_changed": "내용이 변경되었습니다. 다시 확인 대기 중",
   "bridge_waiting": "연결 대기 중",
   "bridge_ready": "작업 대기 중",
   "bridge_clients": "Agent {count}개 연결됨",

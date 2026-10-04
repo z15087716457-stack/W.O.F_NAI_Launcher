@@ -12356,6 +12356,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get bridge_agentHint => '로컬 명령을 실행할 수 있는 Agent에게 안내를 전달하세요.';
 
   @override
+  String get bridge_synced => '현재 내용 확인됨';
+
+  @override
+  String get bridge_changed => '내용이 변경되었습니다. 다시 확인 대기 중';
+
+  @override
   String get bridge_waiting => '연결 대기 중';
 
   @override

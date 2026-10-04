@@ -9,10 +9,11 @@ import '../../../core/krita/bridge_session.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
+import '../../providers/krita/bridge_agent_feedback.dart';
 import '../../providers/settings_navigation_provider.dart';
 import '../../router/app_router.dart';
 import '../common/app_toast.dart';
-import '../common/studio_icons.dart';
+import 'bridge_link_icon.dart';
 
 class BridgeClientBundle {
   const BridgeClientBundle(this.path, {required this.available});
@@ -58,13 +59,20 @@ String bridgeActivityLabel(AppLocalizations l, BridgeActivity activity) {
   return action;
 }
 
-String bridgeAgentStatus(AppLocalizations l, KritaBridgeState state) {
-  final current = state.session.agentActivity;
-  if (current != null) return bridgeActivityLabel(l, current);
-  final latest = state.session.latestAgentActivity;
-  if (latest != null) return bridgeActivityLabel(l, latest);
-  return state.session.agents.isEmpty ? l.bridge_waiting : l.bridge_ready;
-}
+String bridgeAgentStatus(
+  AppLocalizations l,
+  KritaBridgeState state,
+  BridgeAgentFeedback feedback,
+) => switch (feedback.phase) {
+  BridgeAgentPhase.synced => l.bridge_synced,
+  BridgeAgentPhase.changed => l.bridge_changed,
+  BridgeAgentPhase.working || BridgeAgentPhase.failed =>
+    feedback.activity == null
+        ? l.bridge_ready
+        : bridgeActivityLabel(l, feedback.activity!),
+  BridgeAgentPhase.waiting =>
+    state.session.agents.isEmpty ? l.bridge_waiting : l.bridge_ready,
+};
 
 class AgentBridgeIndicator extends ConsumerWidget {
   const AgentBridgeIndicator({super.key});
@@ -73,25 +81,33 @@ class AgentBridgeIndicator extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(kritaBridgeNotifierProvider);
     if (!state.enabled) return const SizedBox.shrink();
-    final active = state.session.agentActivity != null;
-    final latest = state.session.latestAgentActivity;
-    final failed =
-        latest?.status == BridgeActivityStatus.failed ||
-        latest?.status == BridgeActivityStatus.disconnected;
+    final feedback = ref.watch(bridgeAgentFeedbackProvider);
     final scheme = Theme.of(context).colorScheme;
-    final color = active
-        ? scheme.primary
-        : failed
-        ? Colors.orange
-        : scheme.onSurfaceVariant.withValues(alpha: 0.55);
+    final color = switch (feedback.phase) {
+      BridgeAgentPhase.working => scheme.primary,
+      BridgeAgentPhase.synced =>
+        Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF63D79C)
+            : const Color(0xFF17965F),
+      BridgeAgentPhase.failed => Colors.orange,
+      _ => scheme.onSurfaceVariant.withValues(alpha: 0.55),
+    };
+    final label = bridgeAgentStatus(context.l10n, state, feedback);
     return Padding(
       padding: const EdgeInsets.only(left: 3),
       child: Tooltip(
-        message: bridgeAgentStatus(context.l10n, state),
+        message: label,
         verticalOffset: 18,
         child: IconButton(
           key: const Key('agent-bridge-indicator'),
-          icon: Icon(StudioIcons.settingsIntegrations, size: 14, color: color),
+          tooltip: null,
+          icon: Semantics(
+            label: label,
+            child: BridgeLinkIcon(
+              color: color,
+              working: feedback.phase == BridgeAgentPhase.working,
+            ),
+          ),
           style: IconButton.styleFrom(
             minimumSize: const Size(24, 24),
             maximumSize: const Size(24, 24),
@@ -173,6 +189,7 @@ class BridgeAgentPanel extends ConsumerWidget {
     final l = context.l10n;
     final theme = Theme.of(context);
     final state = ref.watch(kritaBridgeNotifierProvider);
+    final feedback = ref.watch(bridgeAgentFeedbackProvider);
     final bundle = ref.watch(bridgeClientBundleProvider).asData?.value;
     final activities = state.session.activities
         .where((a) => a.client.isAgent)
@@ -187,7 +204,7 @@ class BridgeAgentPanel extends ConsumerWidget {
           Text(l.bridge_agent, style: theme.textTheme.titleSmall),
           const SizedBox(height: 6),
           Text(
-            bridgeAgentStatus(l, state),
+            bridgeAgentStatus(l, state, feedback),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall,

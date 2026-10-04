@@ -12122,6 +12122,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bridge_agentHint => '复制说明，交给能执行本机命令的 Agent。';
 
   @override
+  String get bridge_synced => '当前内容已确认';
+
+  @override
+  String get bridge_changed => '内容已变化，等待重新确认';
+
+  @override
   String get bridge_waiting => '等待连接';
 
   @override
@@ -24313,6 +24319,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get bridge_agentHint => '複製說明，交給能執行本機命令的 Agent。';
+
+  @override
+  String get bridge_synced => '當前內容已確認';
+
+  @override
+  String get bridge_changed => '內容已變化，等待重新確認';
 
   @override
   String get bridge_waiting => '等待連線';

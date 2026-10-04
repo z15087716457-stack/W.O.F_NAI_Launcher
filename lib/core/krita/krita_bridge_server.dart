@@ -45,6 +45,7 @@ class KritaBridgeServer {
   final _clients = <String, BridgeClient>{};
   final _pending = <String, BridgeRequest>{};
   final _activities = <BridgeActivity>[];
+  BridgeActivity? _latestAgentOutcome;
   static final _clientScope = Object();
   int _nextClient = 0;
   int _nextActivity = 0;
@@ -74,7 +75,17 @@ class KritaBridgeServer {
   BridgeSession get session => BridgeSession(
     clients: List.unmodifiable(_clients.values),
     activities: List.unmodifiable(_activities),
+    latestAgentOutcome: _latestAgentOutcome,
   );
+  void acknowledgeDraft(String version) {
+    final request = Zone.current[_clientScope] as BridgeRequest?;
+    if (request == null || !request.client.isAgent) return;
+    final i = _activities.indexWhere(
+      (a) => a.key == request.key && a.status == BridgeActivityStatus.running,
+    );
+    if (i >= 0) _activities[i] = _activities[i].confirm(version);
+  }
+
   BridgeClient? get currentClient =>
       (Zone.current[_clientScope] as BridgeRequest?)?.client;
   bool ownsActiveOperation(String clientId) =>
@@ -129,6 +140,7 @@ class KritaBridgeServer {
     _pending.clear();
     _mutationOwner = null;
     _activities.clear();
+    _latestAgentOutcome = null;
     if (!_authenticationController.isClosed) {
       _authenticationController.add(false);
     }
@@ -371,7 +383,12 @@ class KritaBridgeServer {
   void _finish(String key, BridgeActivityStatus status, {String? errorCode}) {
     final i = _activities.indexWhere((a) => a.key == key);
     if (i < 0 || _activities[i].status != BridgeActivityStatus.running) return;
-    _activities[i] = _activities[i].finish(status, errorCode: errorCode);
+    _activities[i] = _activities[i].finish(
+      status,
+      errorCode: errorCode,
+      finishedAt: _clock(),
+    );
+    if (_activities[i].client.isAgent) _latestAgentOutcome = _activities[i];
     _publishSession();
   }
 

@@ -33,6 +33,8 @@ class BridgeActivity {
     required this.at,
     this.status = BridgeActivityStatus.running,
     this.errorCode,
+    this.confirmedDraftVersion,
+    this.finishedAt,
   });
   final String key;
   final BridgeClient client;
@@ -40,22 +42,47 @@ class BridgeActivity {
   final DateTime at;
   final BridgeActivityStatus status;
   final String? errorCode;
+  final String? confirmedDraftVersion;
+  final DateTime? finishedAt;
 
-  BridgeActivity finish(BridgeActivityStatus status, {String? errorCode}) =>
-      BridgeActivity(
-        key: key,
-        client: client,
-        operation: operation,
-        at: at,
-        status: status,
-        errorCode: errorCode ?? this.errorCode,
-      );
+  BridgeActivity confirm(String version) => BridgeActivity(
+    key: key,
+    client: client,
+    operation: operation,
+    at: at,
+    status: status,
+    errorCode: errorCode,
+    confirmedDraftVersion: version,
+    finishedAt: finishedAt,
+  );
+
+  BridgeActivity finish(
+    BridgeActivityStatus status, {
+    String? errorCode,
+    DateTime? finishedAt,
+  }) => BridgeActivity(
+    key: key,
+    client: client,
+    operation: operation,
+    at: at,
+    status: status,
+    errorCode: errorCode ?? this.errorCode,
+    confirmedDraftVersion: confirmedDraftVersion,
+    finishedAt: finishedAt,
+  );
 }
 
 class BridgeSession {
-  const BridgeSession({this.clients = const [], this.activities = const []});
+  const BridgeSession({
+    this.clients = const [],
+    this.activities = const [],
+    this.latestAgentOutcome,
+  });
   final List<BridgeClient> clients;
   final List<BridgeActivity> activities;
+
+  /// Completion order can differ from request order when reads overlap a task.
+  final BridgeActivity? latestAgentOutcome;
 
   List<BridgeClient> get agents => clients.where((c) => c.isAgent).toList();
   BridgeActivity? get agentActivity {

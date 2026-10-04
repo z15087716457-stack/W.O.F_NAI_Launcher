@@ -12338,6 +12338,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get bridge_agentHint => 'ローカルコマンドを実行できる Agent に手順を渡します。';
 
   @override
+  String get bridge_synced => '現在の内容を確認済み';
+
+  @override
+  String get bridge_changed => '内容が変わりました。再確認待ち';
+
+  @override
   String get bridge_waiting => '接続待ち';
 
   @override

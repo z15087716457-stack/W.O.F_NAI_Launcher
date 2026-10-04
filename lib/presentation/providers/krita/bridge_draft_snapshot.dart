@@ -16,8 +16,45 @@ import '../quality_preset_provider.dart';
 import '../uc_preset_provider.dart';
 import '../prompt_block_library_provider.dart';
 
-BridgeDraftSnapshot readBridgeDraft(Ref ref) {
-  final p = ref.read(generationParamsNotifierProvider);
+final _bridgeDraftFingerprintProvider = Provider<String>((ref) {
+  ref.watch(pillWorkspaceRevisionProvider);
+  return readBridgeDraft(
+    ref,
+    reactive: true,
+    includeEpoch: false,
+  ).acknowledgementVersion;
+});
+
+// A content edit invalidates an acknowledgement even when it is later undone.
+// Keep the counter in this container, independently of header widget lifetime.
+final _bridgeDraftEpochProvider = NotifierProvider<_BridgeDraftEpoch, int>(
+  _BridgeDraftEpoch.new,
+);
+
+class _BridgeDraftEpoch extends Notifier<int> {
+  @override
+  int build() {
+    ref.listen(_bridgeDraftFingerprintProvider, (previous, next) {
+      if (previous != null && previous != next) state++;
+    });
+    return 0;
+  }
+}
+
+final bridgeDraftVersionProvider = Provider<String>((ref) {
+  ref.watch(_bridgeDraftFingerprintProvider);
+  ref.watch(_bridgeDraftEpochProvider);
+  return readBridgeDraft(ref).acknowledgementVersion;
+});
+
+BridgeDraftSnapshot readBridgeDraft(
+  Ref ref, {
+  bool reactive = false,
+  bool includeEpoch = true,
+}) {
+  T read<T>(ProviderListenable<T> provider) =>
+      reactive ? ref.watch(provider) : ref.read(provider);
+  final p = read(generationParamsNotifierProvider);
   // An unopened lane has no document yet. Reads must not initialize or rewrite it.
   PillWorkspaceState lane(String scope, String fallback) {
     final provider = pillWorkspaceProvider(scope);
@@ -28,20 +65,20 @@ BridgeDraftSnapshot readBridgeDraft(Ref ref) {
         projection: fallback,
       );
     }
-    return ref.read(provider);
+    return read(provider);
   }
 
   final main = lane(PillScopes.main, p.prompt);
   final negative = lane(PillScopes.negative, p.negativePrompt);
-  final config = ref.read(characterPromptNotifierProvider);
-  final quality = ref.read(qualityPresetNotifierProvider);
-  final uc = ref.read(ucPresetNotifierProvider);
+  final config = read(characterPromptNotifierProvider);
+  final quality = read(qualityPresetNotifierProvider);
+  final uc = read(ucPresetNotifierProvider);
+  final library = quality.customEntryId != null || uc.customEntryId != null
+      ? read(promptBlockLibraryNotifierProvider).valueOrNull
+      : null;
   Map<String, dynamic>? selectedPreset(String? id) {
     if (id == null) return null;
-    final block = ref
-        .read(promptBlockLibraryNotifierProvider)
-        .valueOrNull
-        ?.blockById(id);
+    final block = library?.blockById(id);
     return {
       'id': id,
       'content': block?.content,
@@ -58,6 +95,14 @@ BridgeDraftSnapshot readBridgeDraft(Ref ref) {
       c.id: lane(PillScopes.charNeg(c.id), c.negativePrompt),
   };
   return BridgeDraftSnapshot(
+    acknowledgementContext: [
+      // Includes reference images and other read-only generation parameters.
+      // Structural Freezed hash avoids serializing image bytes on every edit.
+      p.copyWith(advancedOptionsExpanded: false).hashCode,
+      read(autoFormatPromptSettingsProvider),
+      read(sdSyntaxAutoConvertSettingsProvider),
+      if (includeEpoch) ref.read(_bridgeDraftEpochProvider),
+    ],
     fields: {
       'prompt': main.projection,
       'negative_prompt': negative.projection,

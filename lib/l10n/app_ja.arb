@@ -7193,6 +7193,8 @@
   "bridge_title": "ローカル接続",
   "bridge_agent": "外部 Agent",
   "bridge_agentHint": "ローカルコマンドを実行できる Agent に手順を渡します。",
+  "bridge_synced": "現在の内容を確認済み",
+  "bridge_changed": "内容が変わりました。再確認待ち",
   "bridge_waiting": "接続待ち",
   "bridge_ready": "操作待ち",
   "bridge_clients": "{count} 個の Agent が接続中",

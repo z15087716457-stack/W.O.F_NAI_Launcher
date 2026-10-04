@@ -1,5 +1,6 @@
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
+import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -168,9 +169,31 @@ void main() {
         document.toJson(),
       );
       final readback = await peer.rpc('get_params');
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        bridge.state.session.latestAgentOutcome!.confirmedDraftVersion,
+        container.read(bridgeDraftVersionProvider),
+      );
       expect(
         readback['_draft']['fields']['characters'][0]['uc'],
         'new negative',
+      );
+      await peer.rpc(
+        'set_params',
+        payload: {
+          'prompt': 'confirmed prompt',
+          'negative_prompt': 'confirmed negative',
+          '_expected': readback['_draft']['field_versions'],
+        },
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        container.read(generationParamsNotifierProvider).prompt,
+        'confirmed prompt',
+      );
+      expect(
+        bridge.state.session.latestAgentOutcome!.confirmedDraftVersion,
+        container.read(bridgeDraftVersionProvider),
       );
       container
           .read(ucPresetNotifierProvider.notifier)

@@ -12727,6 +12727,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Copy the instructions to an Agent that can run local commands.';
 
   @override
+  String get bridge_synced => 'Current content confirmed';
+
+  @override
+  String get bridge_changed => 'Content changed. Awaiting confirmation';
+
+  @override
   String get bridge_waiting => 'Waiting for connection';
 
   @override

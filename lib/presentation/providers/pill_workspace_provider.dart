@@ -46,6 +46,9 @@ final pillWorkspaceStorageProvider = Provider<PillWorkspaceStorage>(
   (ref) => PillWorkspaceStorage(),
 );
 
+/// Observers can notice document-only edits without initializing unopened lanes.
+final pillWorkspaceRevisionProvider = StateProvider<int>((ref) => 0);
+
 /// 药丸工作区 scope 集中定义（P3 多 lane）。
 abstract final class PillScopes {
   /// 生成页正向主提示词。
@@ -661,6 +664,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
       document: document,
       projection: _project(document),
     );
+    ref.read(pillWorkspaceRevisionProvider.notifier).state++;
     _persist(document);
   }
 

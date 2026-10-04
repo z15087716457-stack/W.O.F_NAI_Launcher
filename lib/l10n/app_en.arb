@@ -7193,6 +7193,8 @@
   "bridge_title": "Local bridge",
   "bridge_agent": "External Agent",
   "bridge_agentHint": "Copy the instructions to an Agent that can run local commands.",
+  "bridge_synced": "Current content confirmed",
+  "bridge_changed": "Content changed. Awaiting confirmation",
   "bridge_waiting": "Waiting for connection",
   "bridge_ready": "Waiting for activity",
   "bridge_clients": "{count} Agent(s) connected",

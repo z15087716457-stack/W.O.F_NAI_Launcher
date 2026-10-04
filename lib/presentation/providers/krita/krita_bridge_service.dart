@@ -43,6 +43,7 @@ class _BridgeQuote {
     required this.payload,
     required this.versions,
     required this.estimatedAnlas,
+    this.acknowledgedVersion,
   });
   final String client;
   final String? account;
@@ -50,6 +51,7 @@ class _BridgeQuote {
   final ImageParams base, prepared;
   final Map<String, dynamic> payload, versions;
   final Object? estimatedAnlas;
+  final String? acknowledgedVersion;
 }
 
 typedef KritaBridgeActiveRequestReporter = void Function(String? requestId);
@@ -105,6 +107,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
     String Function()? requesterName,
     String? Function()? readAccountIdentity,
     bool Function()? isRequestAlive,
+    void Function(String version)? acknowledgeDraft,
     KritaBridgeClock? clock,
     Duration failureCooldown = const Duration(seconds: 2),
   }) : _readBaseParams = readBaseParams,
@@ -132,7 +135,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _readBilling = readBilling,
        _requesterName = requesterName ?? (() => 'External Agent'),
        _readAccountIdentity = readAccountIdentity,
-       _isRequestAlive = isRequestAlive ?? (() => true);
+       _isRequestAlive = isRequestAlive ?? (() => true),
+       _acknowledgeDraft = acknowledgeDraft;
 
   final KritaBridgeBaseParamsReader _readBaseParams;
   final KritaBridgePromptSnapshotReader _readPromptSnapshot;
@@ -160,6 +164,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
   final String Function() _requesterName;
   final String? Function()? _readAccountIdentity;
   final bool Function() _isRequestAlive;
+  final void Function(String version)? _acknowledgeDraft;
   final _quotes = <String, _BridgeQuote>{};
 
   bool _isBridgeGenerating = false;
@@ -260,6 +265,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
             KritaImageParamsMapping(params: quote.prepared),
             overrides: quote.payload,
             alreadyPrepared: true,
+            acknowledgedVersion: quote.acknowledgedVersion,
           );
           return;
         }
@@ -290,7 +296,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
         final quoteId = base64UrlEncode(
           List.generate(24, (_) => random.nextInt(256)),
         );
-        final versions = _readDraft?.call().fieldVersions ?? <String, String>{};
+        final draft = _readDraft?.call();
+        final versions = draft?.fieldVersions ?? <String, String>{};
         _quotes.removeWhere((_, q) => _clock().isAfter(q.expires));
         if (_quotes.length >= 32) _quotes.remove(_quotes.keys.first);
         final billing = _readBilling?.call(prepared);
@@ -303,7 +310,9 @@ class KritaBridgeService implements KritaBridgeMessageService {
           payload: Map.of(message.payload),
           versions: versions,
           estimatedAnlas: billing?['estimated_anlas'],
+          acknowledgedVersion: draft?.acknowledgementVersion,
         );
+        _acknowledge(draft?.acknowledgementVersion);
         _send({
           'type': 'quote',
           'id': message.id,
@@ -379,7 +388,15 @@ class KritaBridgeService implements KritaBridgeMessageService {
           return;
         }
       }
-      final applied = await writer(patch);
+      final result = writer(patch);
+      // The production writer commits synchronously. Freeze its version before
+      // awaiting, so a user edit in the next microtask is never acknowledged.
+      // Async third-party writers have no reliable commit boundary here.
+      final committedVersion = result is Future<List<String>>
+          ? null
+          : _readDraft?.call().acknowledgementVersion;
+      final applied = await result;
+      _acknowledge(committedVersion);
       _send({
         'type': 'params_set',
         'id': message.id,
@@ -408,6 +425,8 @@ class KritaBridgeService implements KritaBridgeMessageService {
     // build_runner 捆的 analyzer 尚不支持，会让四个 builder 全部报语法错。
     final seedLock = _readSeedLock?.call();
     final characters = _readCharacters?.call();
+    final draft = _isAgentRequest() ? _readDraft?.call() : null;
+    _acknowledge(draft?.acknowledgementVersion);
     _send({
       'type': 'params',
       'id': message.id,
@@ -459,8 +478,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
       ],
       'img2img': params.sourceImage != null,
       if (tokens != null) ...tokens,
-      if (_isAgentRequest() && _readDraft != null)
-        '_draft': _readDraft().toJson(),
+      if (draft != null) '_draft': draft.toJson(),
       if (_readBilling != null)
         'billing': _readBilling(params.copyWith(nSamples: 1)),
     });
@@ -488,6 +506,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
     KritaImageParamsMapping mapping, {
     Map<String, dynamic> overrides = const {},
     bool alreadyPrepared = false,
+    String? acknowledgedVersion,
   }) async {
     if (_isUiGenerating() || _isBridgeGenerating) {
       AppLogger.w('Rejected Krita request as busy: $id', _logTag);
@@ -553,6 +572,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
         params: request.params,
         addToDisplay: true,
       );
+      _acknowledge(acknowledgedVersion);
       _sendResult(
         request,
         artifact.transparentPatchBytes ?? artifact.displayImageBytes,
@@ -651,6 +671,12 @@ class KritaBridgeService implements KritaBridgeMessageService {
       return;
     }
     _failureCooldownUntil = _clock().add(_failureCooldown);
+  }
+
+  void _acknowledge(String? version) {
+    if (_isAgentRequest() && _isRequestAlive() && version != null) {
+      _acknowledgeDraft?.call(version);
+    }
   }
 
   void _sendProgress(

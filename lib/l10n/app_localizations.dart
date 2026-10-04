@@ -22042,6 +22042,18 @@ abstract class AppLocalizations {
   /// **'Copy the instructions to an Agent that can run local commands.'**
   String get bridge_agentHint;
 
+  /// No description provided for @bridge_synced.
+  ///
+  /// In en, this message translates to:
+  /// **'Current content confirmed'**
+  String get bridge_synced;
+
+  /// No description provided for @bridge_changed.
+  ///
+  /// In en, this message translates to:
+  /// **'Content changed. Awaiting confirmation'**
+  String get bridge_changed;
+
   /// No description provided for @bridge_waiting.
   ///
   /// In en, this message translates to:

@@ -1,5 +1,6 @@
 import 'package:nai_launcher/core/krita/bridge_session.dart';
 import 'package:nai_launcher/presentation/widgets/bridge/agent_bridge_indicator.dart';
+import 'package:nai_launcher/presentation/widgets/bridge/bridge_link_icon.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart'
     as image_model;
@@ -153,8 +154,11 @@ void main() {
           expect(tester.getRect(icon), before);
           expect(
             tester
-                .widget<Icon>(
-                  find.descendant(of: icon, matching: find.byType(Icon)),
+                .widget<BridgeLinkIcon>(
+                  find.descendant(
+                    of: icon,
+                    matching: find.byType(BridgeLinkIcon),
+                  ),
                 )
                 .color,
             Theme.of(tester.element(icon)).colorScheme.primary,
@@ -164,7 +168,7 @@ void main() {
                 .ancestor(of: negative, matching: find.byType(GestureDetector))
                 .first,
           );
-          await tester.pumpAndSettle();
+          await tester.pump(const Duration(milliseconds: 400));
           final afterTab = tester.getRect(icon);
           expect(afterTab.size, before.size);
           expect(afterTab.center.dy, before.center.dy);
@@ -185,16 +189,81 @@ void main() {
               ),
             ),
           );
-          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 700));
           expect(tester.getRect(icon), afterTab);
           expect(
             tester
-                .widget<Icon>(
-                  find.descendant(of: icon, matching: find.byType(Icon)),
+                .widget<BridgeLinkIcon>(
+                  find.descendant(
+                    of: icon,
+                    matching: find.byType(BridgeLinkIcon),
+                  ),
                 )
                 .color,
             Colors.orange,
           );
+          final container = ProviderScope.containerOf(tester.element(icon));
+          final confirmed = BridgeActivity(
+            key: 'confirmed',
+            client: agent,
+            operation: 'get_params',
+            at: DateTime(2026, 10, 4, 19),
+            finishedAt: DateTime(2026, 10, 4, 19),
+            status: BridgeActivityStatus.completed,
+            confirmedDraftVersion: container.read(bridgeDraftVersionProvider),
+          );
+          bridge.show(
+            KritaBridgeState(
+              enabled: true,
+              session: BridgeSession(
+                activities: [confirmed],
+                latestAgentOutcome: confirmed,
+              ),
+            ),
+          );
+          await tester.pump();
+          BridgeLinkIcon glyph() => tester.widget<BridgeLinkIcon>(
+            find.descendant(of: icon, matching: find.byType(BridgeLinkIcon)),
+          );
+          expect(
+            glyph().color,
+            brightness == Brightness.dark
+                ? const Color(0xFF63D79C)
+                : const Color(0xFF17965F),
+          );
+          Future<void> captureState(String phase) async {
+            if (Platform.environment['CAPTURE_AGENT_BRIDGE'] != '1') return;
+            await tester.runAsync(() async {
+              final render =
+                  boundary.currentContext!.findRenderObject()!
+                      as RenderRepaintBoundary;
+              final image = await render.toImage(pixelRatio: 1.25);
+              final bytes = await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              image.dispose();
+              final file = File(
+                '.dart_tool/bridge-motion-captures/$phase-${locale.toLanguageTag()}-${brightness.name}-${width.toInt()}.png',
+              );
+              await file.parent.create(recursive: true);
+              await file.writeAsBytes(bytes!.buffer.asUint8List());
+            });
+          }
+
+          await captureState('synced');
+          final parameters = container.read(generationParamsNotifierProvider);
+          container
+              .read(generationParamsNotifierProvider.notifier)
+              .updateSteps(parameters.steps + 1);
+          await tester.pump();
+          expect(
+            glyph().color,
+            Theme.of(
+              tester.element(icon),
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+          );
+          expect(tester.getRect(icon), afterTab);
+          await captureState('changed');
           await tester.tap(icon);
           await tester.pumpAndSettle();
           final panel = tester.getRect(find.byType(BridgeAgentPanel));
@@ -286,6 +355,13 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         kritaBridgeNotifierProvider.overrideWith((ref) => bridge),
+        generationParamsNotifierProvider.overrideWith(_UnopenedDraftParams.new),
+        localStorageServiceProvider.overrideWith(
+          (ref) => _TestLocalStorageService(),
+        ),
+        characterPromptNotifierProvider.overrideWith(
+          _TestCharacterPromptNotifier.new,
+        ),
         bridgeClientBundleProvider.overrideWith(
           (ref) async => BridgeClientBundle(
             r'C:\Studio Folder	ools\studio-bridge.exe',
@@ -1417,6 +1493,8 @@ class _TestPromptAssistantConfigNotifier extends PromptAssistantConfigNotifier {
 }
 
 class _TestLocalStorageService extends LocalStorageService {
+  @override
+  Future<void> setSetting<T>(String key, T value) async {}
   _TestLocalStorageService({this.enablePromptWeightScroll = true});
 
   final bool enablePromptWeightScroll;

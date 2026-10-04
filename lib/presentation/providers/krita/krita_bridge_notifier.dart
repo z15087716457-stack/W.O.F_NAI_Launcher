@@ -335,6 +335,7 @@ final kritaBridgeNotifierProvider =
             (c) => c.id == server.currentClient?.id,
           ),
           readDraft: () => readBridgeDraft(ref),
+          acknowledgeDraft: server.acknowledgeDraft,
           backupDraft: (draft) =>
               backupBridgeDraft(server.discoveryFile.parent, draft),
           readBilling: (params) => readBridgeBilling(ref, params),
@@ -401,11 +402,15 @@ final kritaBridgeNotifierProvider =
               }
             }
 
-            apply<String>('prompt', str('prompt'), notifier.updatePrompt);
+            apply<String>(
+              'prompt',
+              str('prompt'),
+              notifier.updatePromptImmediately,
+            );
             apply<String>(
               'negative_prompt',
               str('negative_prompt'),
-              notifier.updateNegativePrompt,
+              notifier.updateNegativePromptImmediately,
             );
             apply<String>('model', str('model'), notifier.updateModel);
             apply<int>('steps', integer('steps'), notifier.updateSteps);

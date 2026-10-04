@@ -7193,6 +7193,8 @@
   "bridge_title": "本机桥接",
   "bridge_agent": "外部 Agent",
   "bridge_agentHint": "复制说明，交给能执行本机命令的 Agent。",
+  "bridge_synced": "当前内容已确认",
+  "bridge_changed": "内容已变化，等待重新确认",
   "bridge_waiting": "等待连接",
   "bridge_ready": "等待操作",
   "bridge_clients": "{count} 个 Agent 已连接",

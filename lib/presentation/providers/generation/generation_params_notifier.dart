@@ -175,31 +175,36 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   /// 更新提示词
   void updatePrompt(String prompt) {
     // 使用 Future.microtask 延迟更新，避免在 widget tree 构建期间修改 provider
-    Future.microtask(() {
-      if (state.prompt == prompt) return;
-      state = state.copyWith(prompt: prompt);
-      _storage.setLastPrompt(prompt);
-      // 外部写入与药丸工作区文档保持一致：
-      // 所有外部路径（Krita/元数据导入/画廊复用/反推/随机/快捷键）都以本方法为
-      // 唯一汇点，在这里完成一次文档事务；投影等价时保留药丸结构。
-      ref
-          .read(pillWorkspaceNotifierProvider.notifier)
-          .syncFromPlainText(prompt);
-    });
+    Future.microtask(() => updatePromptImmediately(prompt));
+  }
+
+  /// Commit outside widget build (e.g. a guarded bridge transaction), so its
+  /// reply and acknowledgement refer to the same committed document.
+  void updatePromptImmediately(String prompt) {
+    if (state.prompt == prompt) return;
+    state = state.copyWith(prompt: prompt);
+    _storage.setLastPrompt(prompt);
+    // 外部写入与药丸工作区文档保持一致：
+    // 所有外部路径（Krita/元数据导入/画廊复用/反推/随机/快捷键）都以本方法为
+    // 唯一汇点，在这里完成一次文档事务；投影等价时保留药丸结构。
+    ref.read(pillWorkspaceNotifierProvider.notifier).syncFromPlainText(prompt);
   }
 
   /// 更新负向提示词
   void updateNegativePrompt(String negativePrompt) {
     // 使用 Future.microtask 延迟更新，避免在 widget tree 构建期间修改 provider
-    Future.microtask(() {
-      if (state.negativePrompt == negativePrompt) return;
-      state = state.copyWith(negativePrompt: negativePrompt);
-      _storage.setLastNegativePrompt(negativePrompt);
-      // 药丸工作区负向 lane 对称同步（P3，与正向 updatePrompt 同规）。
-      ref
-          .read(pillWorkspaceProvider(PillScopes.negative).notifier)
-          .syncFromPlainText(negativePrompt);
-    });
+    Future.microtask(() => updateNegativePromptImmediately(negativePrompt));
+  }
+
+  /// Synchronous counterpart for transactions outside widget build.
+  void updateNegativePromptImmediately(String negativePrompt) {
+    if (state.negativePrompt == negativePrompt) return;
+    state = state.copyWith(negativePrompt: negativePrompt);
+    _storage.setLastNegativePrompt(negativePrompt);
+    // 药丸工作区负向 lane 对称同步（P3，与正向 updatePrompt 同规）。
+    ref
+        .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+        .syncFromPlainText(negativePrompt);
   }
 
   /// 药丸工作区投影写回。异步提交前再次核对当前投影，避免删除实例后

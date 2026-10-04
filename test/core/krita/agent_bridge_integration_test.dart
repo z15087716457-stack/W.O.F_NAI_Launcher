@@ -79,6 +79,7 @@ class Fixture {
       ),
       serviceFactory: (server) => service = KritaBridgeService(
         readBaseParams: () => params,
+        acknowledgeDraft: server.acknowledgeDraft,
         prepareParams: (p, _) => p.copyWith(prompt: p.prompt + preset),
         send: server.send,
         isUiGenerating: () => uiBusy,
@@ -229,6 +230,44 @@ void main() {
     await f.start();
   });
   tearDown(() async => f.close());
+
+  test('Agent读写和报价确认精确快照；正常断连保留完成，错误不确认', () async {
+    final peer = await f.connect('Codex');
+    final read = await peer.rpc('get_params');
+    await Future<void>.delayed(Duration.zero);
+    expect(
+      f.notifier.state.session.latestAgentOutcome!.confirmedDraftVersion,
+      f.draft().acknowledgementVersion,
+    );
+    await peer.rpc(
+      'set_params',
+      payload: {'steps': 29, '_expected': read['_draft']['field_versions']},
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(f.params.steps, 29);
+    expect(
+      f.notifier.state.session.latestAgentOutcome!.confirmedDraftVersion,
+      f.draft().acknowledgementVersion,
+    );
+    await peer.rpc('quote');
+    await Future<void>.delayed(Duration.zero);
+    expect(f.notifier.state.session.latestAgentOutcome!.operation, 'quote');
+    expect(
+      f.notifier.state.session.latestAgentOutcome!.confirmedDraftVersion,
+      f.draft().acknowledgementVersion,
+    );
+    await peer.rpc(
+      'set_params',
+      payload: {'steps': 30, '_expected': read['_draft']['field_versions']},
+    );
+    await Future<void>.delayed(Duration.zero);
+    final failed = f.notifier.state.session.latestAgentOutcome!;
+    expect(failed.status, BridgeActivityStatus.failed);
+    expect(failed.confirmedDraftVersion, isNull);
+    await peer.close();
+    await Future<void>.delayed(Duration.zero);
+    expect(f.notifier.state.session.latestAgentOutcome, same(failed));
+  });
 
   test(
     'Krita and multiple Agents coexist; equal IDs get private replies',
