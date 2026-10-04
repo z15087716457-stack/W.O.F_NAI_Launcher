@@ -294,7 +294,12 @@ void main() {
     () async {
       final storage = _Memory()
         ..values[StorageKeys.promptAssistantConfigJson] = _config().encode();
-      final api = _CaptureApi();
+      // 有 Wiki 原文的名称请求必须带简短释义（标签释义合同）
+      final api = _CaptureApi(
+        output:
+            '{"tag":"blue_eyes","name_zh":"蓝眼睛",'
+            '"definition":"Eyes with blue irises."}',
+      );
       final container = ProviderContainer(
         overrides: [
           localStorageServiceProvider.overrideWithValue(storage),
