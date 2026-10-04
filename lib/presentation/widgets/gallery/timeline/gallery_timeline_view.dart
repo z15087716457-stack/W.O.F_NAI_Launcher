@@ -27,6 +27,7 @@ import '../local_image_card.dart';
 import '../local_image_context_menu.dart';
 import 'gallery_timeline_layout.dart';
 import 'gallery_timeline_scrubber.dart';
+import '../../common/studio_icons.dart';
 
 /// 卡片间距与内容边距（右侧留出时间轴宽度）
 const double galleryTimelineGap = 4;
@@ -844,7 +845,7 @@ class _GalleryTimelineSectionHeaderState
                             ),
                             child: allSelected
                                 ? Icon(
-                                    Icons.check_rounded,
+                                    StudioIcons.galleryCheckBold,
                                     size: 13,
                                     color: colors.onPrimary,
                                   )

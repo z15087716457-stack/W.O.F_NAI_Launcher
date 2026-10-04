@@ -11,6 +11,7 @@ import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart'
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/collection_provider.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_favorite_menu.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 /// 收藏菜单首行「收藏」的即时反馈回归：
 ///
@@ -105,14 +106,14 @@ void main() {
 
     // 初始未收藏：首行未勾选，且收藏集行也未勾选
     expect(find.text('Favorite'), findsOneWidget);
-    expect(find.byIcon(Icons.check), findsNothing);
+    expect(find.byIcon(StudioIcons.gallerySelect), findsNothing);
 
     await tester.tap(find.text('Favorite'));
     await tester.pump();
 
     // 落库尚未返回，勾选与文案已经翻转
     expect(
-      find.byIcon(Icons.check),
+      find.byIcon(StudioIcons.gallerySelect),
       findsOneWidget,
       reason: '点击后当帧即应显示已收藏，不等落库返回',
     );

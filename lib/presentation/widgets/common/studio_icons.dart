@@ -35,6 +35,50 @@ abstract final class StudioIcons {
   static const settingsData = IconData(0xe917, fontFamily: _family);
   static const tagWiki = IconData(0xe918, fontFamily: _family);
 
+  // Local gallery line icons: the prototype set, 1.7 stroke on a 24 grid.
+  static const gallerySearch = IconData(0xe919, fontFamily: _family);
+  static const galleryPlus = IconData(0xe91a, fontFamily: _family);
+  static const galleryChevronRight = IconData(0xe91b, fontFamily: _family);
+  static const galleryChevronDown = IconData(0xe91c, fontFamily: _family);
+  static const galleryImage = IconData(0xe91d, fontFamily: _family);
+  static const galleryHeart = IconData(0xe91e, fontFamily: _family);
+  static const galleryHeartFilled = IconData(0xe91f, fontFamily: _family);
+  static const galleryTrash = IconData(0xe920, fontFamily: _family);
+  static const galleryCollection = IconData(0xe921, fontFamily: _family);
+  static const galleryFolder = IconData(0xe922, fontFamily: _family);
+  static const galleryCalendar = IconData(0xe923, fontFamily: _family);
+  static const gallerySortDesc = IconData(0xe924, fontFamily: _family);
+  static const gallerySortAsc = IconData(0xe925, fontFamily: _family);
+  static const gallerySelect = IconData(0xe926, fontFamily: _family);
+  static const galleryPanelRight = IconData(0xe927, fontFamily: _family);
+  static const galleryPanelLeft = IconData(0xe928, fontFamily: _family);
+  static const galleryMore = IconData(0xe929, fontFamily: _family);
+  static const galleryCopy = IconData(0xe92a, fontFamily: _family);
+  static const galleryClose = IconData(0xe92b, fontFamily: _family);
+  static const galleryReveal = IconData(0xe92c, fontFamily: _family);
+  static const galleryRefresh = IconData(0xe92d, fontFamily: _family);
+  static const gallerySend = IconData(0xe92e, fontFamily: _family);
+  static const galleryUpscale = IconData(0xe92f, fontFamily: _family);
+  static const galleryBrush = IconData(0xe930, fontFamily: _family);
+  static const galleryBookmarkAdd = IconData(0xe931, fontFamily: _family);
+  static const galleryBookmarkRemove = IconData(0xe932, fontFamily: _family);
+  static const gallerySpark = IconData(0xe933, fontFamily: _family);
+  static const galleryCheck = IconData(0xe934, fontFamily: _family);
+  static const galleryCheckBold = IconData(0xe935, fontFamily: _family);
+  static const galleryMove = IconData(0xe936, fontFamily: _family);
+  static const galleryArchive = IconData(0xe937, fontFamily: _family);
+  static const galleryEdit = IconData(0xe938, fontFamily: _family);
+  static const gallerySizeSmall = IconData(0xe939, fontFamily: _family);
+  static const gallerySizeLarge = IconData(0xe93a, fontFamily: _family);
+  static const galleryTag = IconData(0xe93b, fontFamily: _family);
+  static const galleryUndo = IconData(0xe93c, fontFamily: _family);
+  static const galleryRedo = IconData(0xe93d, fontFamily: _family);
+  static const galleryImport = IconData(0xe93e, fontFamily: _family);
+  static const galleryHash = IconData(0xe93f, fontFamily: _family);
+  static const galleryFolderPlus = IconData(0xe940, fontFamily: _family);
+  static const galleryFolderImport = IconData(0xe941, fontFamily: _family);
+  static const galleryBox = IconData(0xe942, fontFamily: _family);
+
   static bool supportsMotion(IconData icon) =>
       icon.fontFamily == _family &&
       icon.codePoint >= 0xe900 &&

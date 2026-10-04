@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../common/studio_icons.dart';
 
 enum _GalleryAddAction { createCategory, importFolder }
 
@@ -53,7 +54,7 @@ class _GalleryAddMenuButtonState extends State<GalleryAddMenuButton> {
           height: 42,
           child: Row(
             children: [
-              const Icon(Icons.create_new_folder_outlined, size: 18),
+              const Icon(StudioIcons.galleryFolderPlus, size: 18),
               const SizedBox(width: 10),
               Text(l10n.localGallery_createCategoryTitle),
             ],
@@ -64,7 +65,7 @@ class _GalleryAddMenuButtonState extends State<GalleryAddMenuButton> {
           height: 42,
           child: Row(
             children: [
-              const Icon(Icons.drive_folder_upload_outlined, size: 18),
+              const Icon(StudioIcons.galleryFolderImport, size: 18),
               const SizedBox(width: 10),
               Text(l10n.localGallery_importFolder),
             ],
@@ -89,7 +90,7 @@ class _GalleryAddMenuButtonState extends State<GalleryAddMenuButton> {
       key: _buttonKey,
       onPressed: _showMenu,
       tooltip: context.l10n.localGallery_newOrImport,
-      icon: const Icon(Icons.add, size: 18),
+      icon: const Icon(StudioIcons.galleryPlus, size: 18),
       visualDensity: VisualDensity.compact,
       style: IconButton.styleFrom(
         fixedSize: const Size(30, 30),

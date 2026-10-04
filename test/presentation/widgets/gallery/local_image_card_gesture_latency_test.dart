@@ -6,6 +6,7 @@ import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/thumbnail_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 /// 卡片手势：单击立即生效（不挂双击识别器），双击在单击之后追加；
 /// 选择圈与悬停按钮是手势层的兄弟节点，点击即时响应且不触发卡片单击。
@@ -101,7 +102,7 @@ void main() {
     );
     await hover(tester);
 
-    await tester.tap(find.byIcon(Icons.favorite_border));
+    await tester.tap(find.byIcon(StudioIcons.galleryHeart));
     await tester.pump(const Duration(milliseconds: 16));
     expect(favoriteTaps, 1);
     expect(taps, 0);
@@ -134,12 +135,12 @@ void main() {
 
     await tester.pumpWidget(cardApp(isFocused: true));
     expect(find.byKey(const Key('gallery-card-highlight')), findsOneWidget);
-    expect(find.byIcon(Icons.check_rounded), findsNothing);
+    expect(find.byIcon(StudioIcons.galleryCheckBold), findsNothing);
 
     await tester.pumpWidget(
       cardApp(isSelected: true, selectionMode: true, onSelectionToggle: () {}),
     );
     expect(find.byKey(const Key('gallery-card-highlight')), findsOneWidget);
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    expect(find.byIcon(StudioIcons.galleryCheckBold), findsOneWidget);
   });
 }

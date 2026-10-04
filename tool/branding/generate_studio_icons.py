@@ -21,7 +21,21 @@ NAMES = ['style_explore', 'inherit', 'online_gallery', 'prompt_blocks',
          'precise_reference', 'vibe_library', 'generation', 'local_gallery',
          'statistics', 'settings', 'prompt_block_palette',
          'image_to_image', 'style_transfer', 'reference_focus',
-         'settings_appearance', 'settings_controls', 'settings_generation', 'settings_storage', 'settings_account', 'settings_models', 'settings_integrations', 'settings_privacy', 'settings_about', 'settings_data', 'tag_wiki']
+         'settings_appearance', 'settings_controls', 'settings_generation', 'settings_storage', 'settings_account', 'settings_models', 'settings_integrations', 'settings_privacy', 'settings_about', 'settings_data', 'tag_wiki',
+         # Local gallery line icons (prototype set, 1.7 stroke).
+         'gallery_search', 'gallery_plus', 'gallery_chevron_right',
+         'gallery_chevron_down', 'gallery_image', 'gallery_heart',
+         'gallery_heart_filled', 'gallery_trash', 'gallery_collection',
+         'gallery_folder', 'gallery_calendar', 'gallery_sort_desc',
+         'gallery_sort_asc', 'gallery_select', 'gallery_panel_right',
+         'gallery_panel_left', 'gallery_more', 'gallery_copy', 'gallery_close',
+         'gallery_reveal', 'gallery_refresh', 'gallery_send', 'gallery_upscale',
+         'gallery_brush', 'gallery_bookmark_add', 'gallery_bookmark_remove',
+         'gallery_spark', 'gallery_check', 'gallery_check_bold', 'gallery_move',
+         'gallery_archive', 'gallery_edit', 'gallery_size_small',
+         'gallery_size_large', 'gallery_tag', 'gallery_undo', 'gallery_redo',
+         'gallery_import', 'gallery_hash', 'gallery_folder_plus',
+         'gallery_folder_import', 'gallery_box']
 
 
 class DartPathPen(BasePen):

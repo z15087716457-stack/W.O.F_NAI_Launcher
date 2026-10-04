@@ -6,6 +6,7 @@ import '../../../data/models/gallery/image_collection.dart';
 import '../../../data/models/gallery/local_image_record.dart';
 import '../../providers/collection_provider.dart';
 import '../../providers/local_gallery_provider.dart';
+import '../common/studio_icons.dart';
 
 /// 心形收藏按钮菜单：收藏/取消收藏 + 各收藏集快捷成员切换
 ///
@@ -172,8 +173,8 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
                   children: [
                     _MenuRow(
                       icon: _isFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
+                          ? StudioIcons.galleryHeartFilled
+                          : StudioIcons.galleryHeart,
                       iconColor: _isFavorite ? Colors.red.shade400 : null,
                       label: _isFavorite
                           ? l10n.localGallery_unfavorite
@@ -210,7 +211,7 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
                         child: Row(
                           children: [
                             Icon(
-                              Icons.collections_bookmark_outlined,
+                              StudioIcons.galleryCollection,
                               size: 16,
                               color: theme.colorScheme.outline,
                             ),
@@ -250,8 +251,7 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
         final expanded = !_collapsedFolderIds.contains(node.id);
         rows.add(
           _MenuRow(
-            icon: expanded ? Icons.folder_open : Icons.folder,
-            iconColor: Colors.amber.shade700,
+            icon: StudioIcons.galleryFolder,
             label: node.name,
             count: node.imageCount,
             depth: depth,
@@ -273,8 +273,7 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
       } else {
         rows.add(
           _MenuRow(
-            icon: Icons.collections_bookmark,
-            iconColor: Colors.amber.shade700,
+            icon: StudioIcons.galleryCollection,
             label: node.name,
             count: node.imageCount,
             depth: depth,
@@ -326,7 +325,11 @@ class _MenuRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: 17, color: iconColor ?? theme.colorScheme.primary),
+            Icon(
+              icon,
+              size: 17,
+              color: iconColor ?? theme.colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -348,7 +351,7 @@ class _MenuRow extends StatelessWidget {
             const SizedBox(width: 6),
             if (checked != null)
               Icon(
-                checked! ? Icons.check : Icons.check_box_outline_blank,
+                checked! ? StudioIcons.gallerySelect : StudioIcons.galleryBox,
                 size: 16,
                 color: checked!
                     ? theme.colorScheme.primary
@@ -356,7 +359,9 @@ class _MenuRow extends StatelessWidget {
               )
             else if (isExpanded != null)
               Icon(
-                isExpanded! ? Icons.expand_more : Icons.chevron_right,
+                isExpanded!
+                    ? StudioIcons.galleryChevronDown
+                    : StudioIcons.galleryChevronRight,
                 size: 16,
                 color: theme.colorScheme.outline,
               ),

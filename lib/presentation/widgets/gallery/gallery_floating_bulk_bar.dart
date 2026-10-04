@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../providers/selection_mode_provider.dart';
+import '../common/studio_icons.dart';
 
 /// 多选时浮在内容底部中央的操作条（不替换顶栏，筛选与搜索保持可见）。
 class GalleryFloatingBulkBar extends ConsumerWidget {
@@ -125,7 +126,7 @@ class GalleryFloatingBulkBar extends ConsumerWidget {
                       key: const Key('gallery-bulk-exit'),
                       onPressed: notifier.exit,
                       tooltip: l10n.common_exit,
-                      icon: const Icon(Icons.close, size: 18),
+                      icon: const Icon(StudioIcons.galleryClose, size: 18),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 2, right: 8),
@@ -156,39 +157,39 @@ class GalleryFloatingBulkBar extends ConsumerWidget {
                     ),
                     divider(),
                     action(
-                      Icons.drive_file_move_outline,
+                      StudioIcons.galleryMove,
                       l10n.localGallery_moveSelected,
                       hasSelection ? onMove : null,
                     ),
                     action(
-                      Icons.file_copy_outlined,
+                      StudioIcons.galleryCopy,
                       l10n.localGallery_copyTo,
                       hasSelection ? onCopy : null,
                     ),
                     action(
-                      Icons.archive_outlined,
+                      StudioIcons.galleryArchive,
                       l10n.localGallery_packSelected,
                       hasSelection ? onPack : null,
                     ),
                     action(
-                      Icons.edit_outlined,
+                      StudioIcons.galleryEdit,
                       l10n.localGallery_editMetadata,
                       hasSelection ? onEditMetadata : null,
                     ),
                     action(
-                      Icons.bookmark_add_outlined,
+                      StudioIcons.galleryCollection,
                       l10n.localGallery_addToCollection,
                       hasSelection ? onAddToCollection : null,
                     ),
                     if (onRemoveFromCollection != null)
                       action(
-                        Icons.bookmark_remove_outlined,
+                        StudioIcons.galleryBookmarkRemove,
                         l10n.localGallery_removeFromCollection,
                         hasSelection ? onRemoveFromCollection : null,
                       ),
                     divider(),
                     action(
-                      Icons.delete_outline,
+                      StudioIcons.galleryTrash,
                       l10n.common_delete,
                       hasSelection ? onDelete : null,
                       danger: true,

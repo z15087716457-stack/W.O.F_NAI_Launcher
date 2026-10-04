@@ -9,6 +9,7 @@ import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_category_tree_view.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 void main() {
   late Directory hiveTempDir;
@@ -100,7 +101,7 @@ void main() {
       expect(find.text('child'), findsNothing);
 
       // 点展开箭头 → child 出现
-      await tester.tap(find.byIcon(Icons.chevron_right));
+      await tester.tap(find.byIcon(StudioIcons.galleryChevronRight));
       await settle(tester);
       expect(find.text('child'), findsOneWidget);
 
@@ -136,7 +137,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: parentRow,
-          matching: find.byIcon(Icons.expand_more),
+          matching: find.byIcon(StudioIcons.galleryChevronDown),
         ),
       );
       await settle(tester);

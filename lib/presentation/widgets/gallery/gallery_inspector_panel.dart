@@ -169,8 +169,8 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
               Builder(
                 builder: (buttonContext) => _HeaderButton(
                   icon: record.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border,
+                      ? StudioIcons.galleryHeartFilled
+                      : StudioIcons.galleryHeart,
                   tooltip: l10n.common_favorite,
                   onPressed: () {
                     final box = buttonContext.findRenderObject() as RenderBox?;
@@ -183,7 +183,7 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
                 ),
               ),
               _HeaderButton(
-                icon: Icons.folder_open_outlined,
+                icon: StudioIcons.galleryReveal,
                 tooltip: l10n.localGallery_showInFolder,
                 onPressed: () => widget.onAction(
                   record,
@@ -191,14 +191,14 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
                 ),
               ),
               _HeaderButton(
-                icon: Icons.delete_outline,
+                icon: StudioIcons.galleryTrash,
                 tooltip: l10n.common_delete,
                 onPressed: () =>
                     widget.onAction(record, LocalImageContextAction.delete),
               ),
             ],
             _HeaderButton(
-              icon: Icons.close,
+              icon: StudioIcons.galleryClose,
               tooltip: l10n.localGallery_hideInspector,
               onPressed: widget.onClose,
             ),
@@ -219,7 +219,7 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.photo_outlined,
+              StudioIcons.galleryImage,
               size: 32,
               color: colors.onSurfaceVariant.withValues(alpha: 0.6),
             ),
@@ -291,7 +291,7 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
             Row(
               children: [
                 Icon(
-                  Icons.folder_outlined,
+                  StudioIcons.galleryFolder,
                   size: 13,
                   color: colors.onSurfaceVariant,
                 ),
@@ -459,7 +459,7 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
           FilledButton.icon(
             key: const Key('gallery-inspector-reuse'),
             onPressed: () => run(LocalImageContextAction.sendToTextToImage),
-            icon: const Icon(Icons.auto_awesome_outlined, size: 16),
+            icon: const Icon(StudioIcons.gallerySpark, size: 16),
             label: Text(l10n.localGallery_reuseParams),
           ),
           const SizedBox(height: 8),
@@ -472,33 +472,33 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
             childAspectRatio: compact ? 2.3 : 1.75,
             children: [
               _ActionTile(
-                icon: Icons.image_outlined,
+                icon: StudioIcons.imageToImage,
                 label: l10n.localGallery_actionImg2Img,
                 tooltip: l10n.localGallery_sendToImg2Img,
                 onTap: () => run(LocalImageContextAction.sendToImg2Img),
               ),
               _ActionTile(
-                icon: StudioIcons.vibeLibrary,
+                icon: StudioIcons.styleTransfer,
                 label: l10n.localGallery_actionStyleTransfer,
                 tooltip: l10n.localGallery_sendToStyleTransfer,
                 onTap: () => run(LocalImageContextAction.sendToStyleTransfer),
               ),
               _ActionTile(
-                icon: StudioIcons.preciseReference,
+                icon: StudioIcons.referenceFocus,
                 label: l10n.localGallery_actionPreciseReference,
                 tooltip: l10n.localGallery_sendToPreciseReference,
                 onTap: () =>
                     run(LocalImageContextAction.sendToPreciseReference),
               ),
               _ActionTile(
-                icon: Icons.bookmark_add_outlined,
+                icon: StudioIcons.galleryBookmarkAdd,
                 label: l10n.localGallery_actionSaveReference,
                 tooltip: l10n.localGallery_saveToPreciseRefLibrary,
                 onTap: () =>
                     run(LocalImageContextAction.saveToPreciseRefLibrary),
               ),
               _ActionTile(
-                icon: Icons.brush_outlined,
+                icon: StudioIcons.galleryBrush,
                 label: l10n.localGallery_actionKrita,
                 tooltip: l10n.localGallery_sendToKrita,
                 onTap: isKritaConnected
@@ -506,7 +506,7 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
                     : null,
               ),
               _ActionTile(
-                icon: Icons.zoom_in,
+                icon: StudioIcons.galleryUpscale,
                 label: l10n.gallery_upscale,
                 tooltip: l10n.gallery_upscale,
                 onTap: () => run(LocalImageContextAction.upscale),
@@ -694,7 +694,7 @@ class _SectionTitle extends StatelessWidget {
               IconButton(
                 onPressed: onCopy,
                 tooltip: context.l10n.common_copy,
-                icon: const Icon(Icons.content_copy_outlined, size: 14),
+                icon: const Icon(StudioIcons.galleryCopy, size: 14),
                 visualDensity: VisualDensity.compact,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints.tightFor(
@@ -765,7 +765,7 @@ class _ParamGrid extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.all(2),
                               child: Icon(
-                                Icons.content_copy_outlined,
+                                StudioIcons.galleryCopy,
                                 size: 13,
                                 color: colors.onSurfaceVariant,
                               ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ import '../../utils/clipboard_image.dart';
 import '../common/app_toast.dart';
 import 'gallery_nai_versions.dart';
 import 'local_image_context_menu.dart';
+import '../common/studio_icons.dart';
 
 /// 缩略图失败后的自动重试延迟（蓝图 P5：失败不再永久回退解码原图）。
 const Duration _thumbnailFailureRetryDelay = Duration(seconds: 30);
@@ -406,7 +408,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
               right: 8,
               child: IgnorePointer(
                 child: Icon(
-                  Icons.favorite,
+                  StudioIcons.galleryHeartFilled,
                   size: 16,
                   color: Colors.white,
                   shadows: [Shadow(color: Color(0x8C000000), blurRadius: 3)],
@@ -512,20 +514,25 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
       child: Row(
         children: [
           if (version != null && !compact)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              margin: const EdgeInsets.only(right: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                version,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  height: 1.4,
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: _FrostedChip(
+                radius: 4,
+                opacity: 0.2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 1,
+                  ),
+                  child: Text(
+                    version,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -546,20 +553,20 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
           if (widget.onFavoriteToggle != null)
             _HoverAction(
               icon: widget.record.isFavorite
-                  ? Icons.favorite
-                  : Icons.favorite_border,
+                  ? StudioIcons.galleryHeartFilled
+                  : StudioIcons.galleryHeart,
               tooltip: l10n.common_favorite,
               onTap: (_) => _openFavoriteMenu(),
             ),
           if (!compact)
             _HoverAction(
-              icon: Icons.content_copy_outlined,
+              icon: StudioIcons.galleryCopy,
               tooltip: l10n.common_copy,
               onTap: (_) => unawaited(_copyImageToClipboard()),
             ),
           if (widget.onSendAction != null)
             _HoverAction(
-              icon: Icons.send_outlined,
+              icon: StudioIcons.gallerySend,
               tooltip: l10n.localGallery_sendTo,
               onTap: (position) => unawaited(_showSendMenu(position)),
             ),
@@ -672,7 +679,11 @@ class _SelectionCircle extends StatelessWidget {
             ),
           ),
           child: selected
-              ? Icon(Icons.check_rounded, size: 14, color: colors.onPrimary)
+              ? Icon(
+                  StudioIcons.galleryCheckBold,
+                  size: 14,
+                  color: colors.onPrimary,
+                )
               : null,
         ),
       ),
@@ -702,15 +713,47 @@ class _HoverAction extends StatelessWidget {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapUp: (details) => onTap(details.globalPosition),
-          child: Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(5),
+          child: _FrostedChip(
+            radius: 5,
+            opacity: 0.16,
+            child: SizedBox(
+              width: 26,
+              height: 26,
+              child: Icon(icon, size: 14, color: Colors.white),
             ),
-            child: Icon(icon, size: 14, color: Colors.white),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 悬停底栏的磨砂小块：模糊下方图像后叠半透明白底（原型 blur 6px）。
+class _FrostedChip extends StatelessWidget {
+  const _FrostedChip({
+    required this.radius,
+    required this.opacity,
+    required this.child,
+  });
+
+  final double radius;
+  final double opacity;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.circular(radius);
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: DecoratedBox(
+          key: const Key('gallery-card-frosted'),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: opacity),
+            borderRadius: borderRadius,
+          ),
+          child: child,
         ),
       ),
     );

@@ -18,6 +18,7 @@ import '../../providers/gallery_scan_progress_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'gallery_scan_progress_panel.dart';
 import '../../../core/storage/local_storage_service.dart';
+import '../common/studio_icons.dart';
 
 String? galleryInternalDragPathFromLocalData(Object? localData) {
   if (localData is! Map) return null;
@@ -182,7 +183,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
         categoryId: null,
         child: _CategoryItem(
           key: const Key('gallery-sidebar-all'),
-          icon: Icons.photo_library_outlined,
+          icon: StudioIcons.galleryImage,
           label: l10n.localGallery_allImages,
           count: widget.totalImageCount,
           isSelected: widget.selectedCategoryId == null,
@@ -193,8 +194,8 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       _CategoryItem(
         key: const Key('gallery-sidebar-favorites'),
         icon: widget.selectedCategoryId == 'favorites'
-            ? Icons.favorite
-            : Icons.favorite_border,
+            ? StudioIcons.galleryHeartFilled
+            : StudioIcons.galleryHeart,
         label: l10n.common_favorite,
         count: widget.favoriteCount,
         isSelected: widget.selectedCategoryId == 'favorites',
@@ -204,7 +205,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       if (widget.onOpenTrash != null)
         _CategoryItem(
           key: const Key('gallery-sidebar-trash'),
-          icon: Icons.delete_outline,
+          icon: StudioIcons.galleryTrash,
           label: l10n.localGallery_trashTitle,
           isSelected: false,
           showChevronSlot: false,
@@ -291,7 +292,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           onTap: () => widget.onAddSubCategory?.call(null),
           child: Row(
             children: [
-              const Icon(Icons.create_new_folder, size: 18),
+              const Icon(StudioIcons.galleryFolderPlus, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.localGallery_createCategoryTitle),
             ],
@@ -313,9 +314,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     final isReadOnly = category.isExternal;
 
     Widget categoryItem = _CategoryItem(
-      icon: isExpanded && hasChildren
-          ? Icons.folder_open_outlined
-          : Icons.folder_outlined,
+      icon: StudioIcons.galleryFolder,
       label: category.displayName,
       count: category.imageCount,
       isSelected: widget.selectedCategoryId == category.id,
@@ -452,7 +451,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       entries.add(
         _CategoryItem(
           key: const Key('gallery-sidebar-date-folders'),
-          icon: Icons.calendar_month_outlined,
+          icon: StudioIcons.galleryCalendar,
           label: context.l10n.localGallery_dateFolders,
           count: dated.fold<int>(0, (sum, c) => sum + c.imageCount),
           isSelected: false,
@@ -542,9 +541,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     final isExpanded = _expandedIds.contains(folder.id);
 
     Widget row = _CategoryItem(
-      icon: isExpanded && hasChildren
-          ? Icons.folder_open_outlined
-          : Icons.folder_outlined,
+      icon: StudioIcons.galleryFolder,
       label: folder.name,
       count: folder.imageCount,
       depth: depth,
@@ -604,7 +601,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     final selectedId = '$collectionSelectedIdPrefix${collection.id}';
 
     final row = _CategoryItem(
-      icon: Icons.bookmark_border,
+      icon: StudioIcons.galleryCollection,
       label: collection.name,
       count: collection.imageCount,
       depth: depth,
@@ -636,7 +633,9 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       data: node,
       feedback: _buildDragFeedback(
         theme,
-        icon: node.isFolder ? Icons.folder : Icons.collections_bookmark,
+        icon: node.isFolder
+            ? StudioIcons.galleryFolder
+            : StudioIcons.galleryCollection,
         label: node.name,
       ),
       childWhenDragging: Opacity(opacity: 0.4, child: child),
@@ -783,7 +782,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           onTap: () => widget.onCreateCollection?.call(parentId, false),
           child: Row(
             children: [
-              const Icon(Icons.add, size: 18),
+              const Icon(StudioIcons.galleryPlus, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.localGallery_createCollectionTitle),
             ],
@@ -793,7 +792,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           onTap: () => widget.onCreateCollection?.call(parentId, true),
           child: Row(
             children: [
-              const Icon(Icons.create_new_folder, size: 18),
+              const Icon(StudioIcons.galleryFolderPlus, size: 18),
               const SizedBox(width: 8),
               Text(context.l10n.localGallery_createCollectionFolderTitle),
             ],
@@ -884,7 +883,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       data: category,
       feedback: _buildDragFeedback(
         theme,
-        icon: Icons.folder,
+        icon: StudioIcons.galleryFolder,
         label: category.displayName,
       ),
       childWhenDragging: Opacity(opacity: 0.4, child: child),
@@ -1211,8 +1210,8 @@ class _CategoryItemState extends State<_CategoryItem> {
                         onTap: widget.onExpand,
                         child: Icon(
                           widget.isExpanded
-                              ? Icons.expand_more
-                              : Icons.chevron_right,
+                              ? StudioIcons.galleryChevronDown
+                              : StudioIcons.galleryChevronRight,
                           size: 15,
                           color: colors.onSurfaceVariant,
                         ),
@@ -1345,7 +1344,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             }),
             child: Row(
               children: [
-                const Icon(Icons.edit, size: 18),
+                const Icon(StudioIcons.galleryEdit, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.common_rename),
               ],
@@ -1356,7 +1355,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onAddSubCategory,
             child: Row(
               children: [
-                const Icon(Icons.create_new_folder, size: 18),
+                const Icon(StudioIcons.galleryFolderPlus, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_createSubCategoryTitle),
               ],
@@ -1367,7 +1366,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onAddSubCollection,
             child: Row(
               children: [
-                const Icon(Icons.add, size: 18),
+                const Icon(StudioIcons.galleryPlus, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_createCollectionTitle),
               ],
@@ -1378,7 +1377,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onAddSubFolder,
             child: Row(
               children: [
-                const Icon(Icons.create_new_folder, size: 18),
+                const Icon(StudioIcons.galleryFolderPlus, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_createCollectionFolderTitle),
               ],
@@ -1389,7 +1388,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             onTap: widget.onMoveToRoot,
             child: Row(
               children: [
-                const Icon(Icons.drive_file_move_outline, size: 18),
+                const Icon(StudioIcons.galleryMove, size: 18),
                 const SizedBox(width: 8),
                 Text(context.l10n.localGallery_moveToRoot),
               ],
@@ -1401,7 +1400,7 @@ class _CategoryItemState extends State<_CategoryItem> {
             child: Row(
               children: [
                 Icon(
-                  Icons.delete,
+                  StudioIcons.galleryTrash,
                   size: 18,
                   color: Theme.of(context).colorScheme.error,
                 ),
@@ -1481,8 +1480,8 @@ class _SidebarSectionHeaderState extends State<_SidebarSectionHeader> {
                           duration: const Duration(milliseconds: 120),
                           child: Icon(
                             widget.expanded!
-                                ? Icons.expand_more
-                                : Icons.chevron_right,
+                                ? StudioIcons.galleryChevronDown
+                                : StudioIcons.galleryChevronRight,
                             size: 14,
                             color: colors.onSurfaceVariant,
                           ),
@@ -1498,7 +1497,7 @@ class _SidebarSectionHeaderState extends State<_SidebarSectionHeader> {
                 IconButton(
                   onPressed: widget.onAdd,
                   tooltip: widget.addTooltip,
-                  icon: const Icon(Icons.add, size: 16),
+                  icon: const Icon(StudioIcons.galleryPlus, size: 16),
                   color: colors.onSurfaceVariant,
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
@@ -1565,7 +1564,7 @@ class _SidebarFooter extends StatelessWidget {
               key: const Key('gallery-sidebar-refresh'),
               onPressed: onRefresh,
               tooltip: l10n.localGallery_refreshTooltip,
-              icon: const Icon(Icons.refresh, size: 16),
+              icon: const Icon(StudioIcons.galleryRefresh, size: 16),
               color: colors.onSurfaceVariant,
               visualDensity: VisualDensity.compact,
               constraints: const BoxConstraints.tightFor(width: 28, height: 28),

@@ -10,6 +10,7 @@ import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../providers/local_gallery_provider.dart';
 import 'date_range_picker_dialog.dart';
 import 'gallery_nai_versions.dart';
+import '../common/studio_icons.dart';
 
 /// 筛选条高度
 const double localGalleryFilterBarHeight = 46;
@@ -42,7 +43,7 @@ class LocalGalleryFilterBar extends ConsumerWidget {
         label: l10n.localGallery_naiOnlyChip,
         tooltip: l10n.localGallery_naiOnlyTooltip,
         active: criteria.naiOnly,
-        icon: criteria.naiOnly ? Icons.check : null,
+        icon: criteria.naiOnly ? StudioIcons.galleryCheck : null,
         onTap: () {
           final next = !criteria.naiOnly;
           notifier.setNaiOnly(next);
@@ -96,7 +97,7 @@ class LocalGalleryFilterBar extends ConsumerWidget {
           label: tag,
           tooltip: l10n.localGallery_tagIntersection,
           active: true,
-          icon: Icons.tag,
+          icon: StudioIcons.galleryTag,
           onTap: () => notifier.removeSelectedTag(tag),
           onClear: () => notifier.removeSelectedTag(tag),
         ),
@@ -210,7 +211,11 @@ class _FilterChip extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     child: Padding(
                       padding: const EdgeInsets.all(3),
-                      child: Icon(Icons.close, size: 13, color: foreground),
+                      child: Icon(
+                        StudioIcons.galleryClose,
+                        size: 13,
+                        color: foreground,
+                      ),
                     ),
                   ),
               ],
@@ -381,7 +386,7 @@ class _VariantMenu extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Icon(
-          Icons.expand_more,
+          StudioIcons.galleryChevronDown,
           size: 15,
           color: colors.onSurfaceVariant,
         ),
@@ -426,7 +431,7 @@ class _DateRangeChip extends StatelessWidget {
       label: label,
       tooltip: l10n.localGallery_dateRangeChip,
       active: active,
-      icon: Icons.calendar_today_outlined,
+      icon: StudioIcons.galleryCalendar,
       onTap: () => unawaited(onPick()),
       onClear: active ? onClear : null,
     );
@@ -477,7 +482,11 @@ class _GroupModeButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 2),
-            Icon(Icons.expand_more, size: 15, color: colors.onSurfaceVariant),
+            Icon(
+              StudioIcons.galleryChevronDown,
+              size: 15,
+              color: colors.onSurfaceVariant,
+            ),
           ],
         ),
       ),

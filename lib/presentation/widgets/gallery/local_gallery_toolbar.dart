@@ -21,6 +21,7 @@ import '../../providers/selection_mode_provider.dart';
 import '../../providers/tips_provider.dart';
 import '../shortcuts/shortcut_tooltip.dart';
 import '../tag_expansion/tag_expansion_wrapper.dart';
+import '../common/studio_icons.dart';
 
 /// 顶栏高度（与块库等资料页一致）
 const double localGalleryToolbarHeight = 62;
@@ -186,7 +187,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                 _divider(theme),
                 _ToolbarIconButton(
                   key: const Key('gallery-toolbar-multiselect'),
-                  icon: Icons.checklist_rtl,
+                  icon: StudioIcons.gallerySelect,
                   tooltip: l10n.common_multiSelect,
                   shortcutId: ShortcutIds.enterSelectionMode,
                   active: selectionActive,
@@ -199,7 +200,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                 ),
                 _ToolbarIconButton(
                   key: const Key('gallery-toolbar-inspector'),
-                  icon: Icons.view_sidebar_outlined,
+                  icon: StudioIcons.galleryPanelRight,
                   tooltip: widget.inspectorVisible
                       ? l10n.localGallery_hideInspector
                       : l10n.localGallery_showInspector,
@@ -239,7 +240,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Icon(
-              Icons.chevron_right,
+              StudioIcons.galleryChevronRight,
               size: 14,
               color: colors.onSurfaceVariant,
             ),
@@ -369,7 +370,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
             color: colors.onSurfaceVariant.withValues(alpha: 0.8),
           ),
           prefixIcon: Icon(
-            Icons.search,
+            StudioIcons.gallerySearch,
             size: 17,
             color: colors.onSurfaceVariant,
           ),
@@ -377,7 +378,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           suffixIcon: hasText
               ? IconButton(
                   icon: Icon(
-                    Icons.close,
+                    StudioIcons.galleryClose,
                     size: 16,
                     color: colors.onSurfaceVariant,
                   ),
@@ -498,7 +499,9 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              descending ? Icons.arrow_downward : Icons.arrow_upward,
+              descending
+                  ? StudioIcons.gallerySortDesc
+                  : StudioIcons.gallerySortAsc,
               size: 15,
               color: colors.onSurfaceVariant,
             ),
@@ -518,7 +521,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
       tooltip: context.l10n.localGallery_moreActions,
       position: PopupMenuPosition.under,
       offset: const Offset(0, 4),
-      icon: const Icon(Icons.more_horiz, size: 20),
+      icon: const Icon(StudioIcons.galleryMore, size: 20),
       onSelected: (action) {
         switch (action) {
           case _MoreAction.openFolder:
@@ -565,21 +568,25 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
         return [
           item(
             _MoreAction.openFolder,
-            Icons.folder_open_outlined,
+            StudioIcons.galleryFolder,
             l10n.shortcut_action_open_folder,
           ),
-          item(_MoreAction.refresh, Icons.refresh, l10n.common_refresh),
+          item(
+            _MoreAction.refresh,
+            StudioIcons.galleryRefresh,
+            l10n.common_refresh,
+          ),
           const PopupMenuDivider(),
           item(
             _MoreAction.undo,
-            Icons.undo,
+            StudioIcons.galleryUndo,
             l10n.common_undo,
             enabled: widget.onUndo != null,
             shortcut: 'Ctrl+Z',
           ),
           item(
             _MoreAction.redo,
-            Icons.redo,
+            StudioIcons.galleryRedo,
             l10n.common_redo,
             enabled: widget.onRedo != null,
             shortcut: 'Ctrl+Y',
@@ -587,9 +594,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           const PopupMenuDivider(),
           item(
             _MoreAction.toggleSidebar,
-            widget.showCategoryPanel
-                ? Icons.view_sidebar
-                : Icons.view_sidebar_outlined,
+            StudioIcons.galleryPanelLeft,
             widget.showCategoryPanel
                 ? l10n.localGallery_hideCategoryPanel
                 : l10n.localGallery_showCategoryPanel,
@@ -705,7 +710,7 @@ class _ThumbnailSizeSlider extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.photo_size_select_small,
+            StudioIcons.gallerySizeSmall,
             size: 14,
             color: colors.onSurfaceVariant,
           ),
@@ -739,7 +744,7 @@ class _ThumbnailSizeSlider extends ConsumerWidget {
             ),
           ),
           Icon(
-            Icons.photo_size_select_large,
+            StudioIcons.gallerySizeLarge,
             size: 16,
             color: colors.onSurfaceVariant,
           ),

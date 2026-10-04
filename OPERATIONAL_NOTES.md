@@ -59,7 +59,7 @@
 - 交互：单击=查看（`localGalleryFocusNotifierProvider`，详情面板读它），双击/空格/回车开大图（以当前图为中心读前后各 60 张），方向键移动查看对象，Delete 删多选或当前图，Esc 先退多选再清查看；Ctrl+单击把当前查看图和点击图一起带入多选，Shift+单击从锚点选范围，卡片左上选择圈与分组标题选择圈直接进多选。多选操作条浮在内容底部，不替换顶栏。Ctrl+A=选中全部结果，PageUp/PageDown 按屏滚动，Ctrl+G 跳到某天（非时间排序时改为按日期筛选）。详情面板开关持久化于 `local_gallery_inspector_visible`，窗口过窄（内容区 < 560px）时自动收起。高级筛选面板与其快捷键已删除，筛选条只保留仅 NAI、模型版本（V4 起可切 Full/Curated）、日期范围与标签 chip。
 - 本地图库默认火车流，可切网格、瀑布流；缩略图大小、视图、排序、分组、NAI-only 偏好持久化。删除采用删除池：先软删并从时间线与记录缓存摘除，DB 的 `is_deleted` 是权威；同一会话不得因重扫复活（`_recentlyDeletedKeys` 在时间线出口过滤），恢复和彻底删除走删除池面板。
 - 本地画廊卡片 `LocalImageCard` 沿用 `DraggableImageCard` wrapper；多选中拖动已选卡片时带上全部选中路径，拖出格式继续由脱敏设置和可用文件路径决定。
-- **卡片手势**：卡片手势层只挂 `onTapUp` 与右键/长按，双击由卡片自己按 `kDoubleTapTimeout`/`kDoubleTapSlop` 判定——单击立即生效，第二下再追加双击回调，不挂 `onDoubleTap` 识别器（它会 hold 手势竞技场约 300ms，2026-09-10 修过一次按钮点击延迟）。选择圈与悬停底栏的收藏/复制/发送按钮是手势层的兄弟节点，点击即时响应且不触发单击。
+- **卡片手势**：卡片手势层只挂 `onTapUp` 与右键/长按，双击由卡片自己按 `kDoubleTapTimeout`/`kDoubleTapSlop` 判定——单击立即生效，第二下再追加双击回调，不挂 `onDoubleTap` 识别器（它会 hold 手势竞技场约 300ms，2026-09-10 修过一次按钮点击延迟）。选择圈与悬停底栏的收藏/复制/发送按钮是手势层的兄弟节点，点击即时响应且不触发单击。悬停底栏的版本标签与按钮为磨砂底（`BackdropFilter` 模糊 6 + 半透明白），只在悬停时构建，不常驻每张卡片。画廊图标使用 `StudioIcons.gallery*`（见 `tool/branding/README.md`），不要回退成 Material 图标。
 - **收藏菜单即时反馈（2026-09-10 修）**：菜单首行「收藏」与收藏集勾选改为乐观更新——点击当帧先就地翻转勾选/红心，落库结果回来再以服务端口径校准；收藏切换按请求序号回写，连点时只认最后一次结果。旧实现等 `toggleFavorite` 整个链路（落库 + 取消收藏时的集合刷新 + 过滤视图重载）返回才 `setState`，点一下要愣一拍才见变化。
 - 本地 NAI-only 判定为三通道任一命中：`gallery_metadata` 的 software/source 含 NovelAI 指纹、model 为 `nai-diffusion-*`，或 raw_json 含 NAI 参数特征键。版本筛选按 model 精确匹配；历史空 model 由启动迁移按元数据指纹回填。数据库位于 `%APPDATA%/com.example/nai_launcher/databases/danbooru.db`。
 - 收藏是根-子集关系：心形根集包含全部收藏；加入子集自动加入根集，取消根集会清掉所有子集关系，从子集移出不影响根集。
