@@ -11,6 +11,7 @@ import 'package:image/image.dart' as img;
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
+import '../../../../core/constants/api_constants.dart';
 import '../../../../core/comfyui/comfyui_models.dart';
 import '../../../../core/comfyui/workflow_template.dart';
 import '../../../../core/utils/app_logger.dart';
@@ -818,8 +819,13 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     }
 
     final bool canStart;
+    final cloudSizeSupported =
+        (workflow.sourceWidth ?? 0) > 0 &&
+        (workflow.sourceHeight ?? 0) > 0 &&
+        workflow.sourceWidth! * workflow.sourceHeight! <=
+            ApiConstants.upscaleMaxInputPixels;
     if (isNai) {
-      canStart = hasSourceImage && !_naiUpscaling;
+      canStart = hasSourceImage && cloudSizeSupported && !_naiUpscaling;
     } else {
       final hasRequiredComfyModel = isComfyRtx || resolvedComfyModel != null;
       canStart =
@@ -872,6 +878,13 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+            if (hasSourceImage && !cloudSizeSupported)
+              Text(
+                context.l10n.img2img_cloudUpscaleSizeLimit,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
           ] else ...[
             if (!comfyEnabled)
               Text(
@@ -1466,7 +1479,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     try {
       final apiService = ref.read(naiImageEnhancementApiServiceProvider);
       AppLogger.d('NovelAI upscale API request start', _upscaleLogTag);
-      final result = await apiService.upscaleImage(src, scale: 4);
+      final result = await apiService.upscaleImage(src);
       AppLogger.i(
         'NovelAI upscale API returned: bytes=${result.length}',
         _upscaleLogTag,

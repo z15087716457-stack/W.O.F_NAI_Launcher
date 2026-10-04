@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../data/models/image/image_params.dart';
+import '../constants/api_constants.dart';
 import '../constants/model_spec.dart';
 
 /// Anlas 消耗计算器
@@ -14,7 +15,6 @@ class AnlasCalculator {
   static const int opusTier = 3;
   static const int invalidCost = -3;
   static const int maximumPerSampleCost = 140;
-  static const int novelAiUpscaleOpusFreeMaxInputPixels = 640 * 640;
 
   static const double _areaCoefficient = 2.951823174884865e-6;
   static const double _stepAreaCoefficient = 5.753298233447344e-7;
@@ -149,29 +149,21 @@ class AnlasCalculator {
 
   /// 计算 NovelAI 云端超分消耗。
   ///
-  /// 当前网页端按输入面积分档计费，放大倍数不参与价格计算。Opus 用户输入不超过
-  /// 640×640 时免费；超过服务端支持的 1MP 输入范围时返回 [invalidCost]。
+  /// 当前官网按输入面积收取 1/2/3/4 Anlas，不再提供旧版 Opus 免费档。
+  /// 最大输入 3MP；倍率由服务端固定为 2x。
   static int calculateNovelAiUpscaleCost({
     required int inputWidth,
     required int inputHeight,
-    required int scale,
-    int subscriptionTier = 0,
   }) {
-    if (inputWidth <= 0 || inputHeight <= 0 || scale <= 0) {
+    if (inputWidth <= 0 || inputHeight <= 0) {
       return invalidCost;
     }
 
     final inputPixels = inputWidth * inputHeight;
-    if (subscriptionTier >= opusTier &&
-        inputPixels <= novelAiUpscaleOpusFreeMaxInputPixels) {
-      return 0;
-    }
-
-    if (inputPixels <= 512 * 512) return 1;
-    if (inputPixels <= 640 * 640) return 2;
-    if (inputPixels <= 512 * 1024) return 3;
-    if (inputPixels <= 768 * 1024) return 5;
-    if (inputPixels <= 1024 * 1024) return 7;
+    if (inputPixels <= 1048576) return 1;
+    if (inputPixels <= 1747627) return 2;
+    if (inputPixels <= 2446678) return 3;
+    if (inputPixels <= ApiConstants.upscaleMaxInputPixels) return 4;
     return invalidCost;
   }
 

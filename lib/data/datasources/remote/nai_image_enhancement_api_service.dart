@@ -41,10 +41,9 @@ class NAIImageEnhancementApiService {
   // ==================== 图像放大 API ====================
 
   /// 调用 NovelAI `/ai/upscale` 端点进行超分辨率放大。
-  /// 该端点位于主 API (`api.novelai.net`)，而非图像生成域。
+  /// 与当前官网一致：图像服务、V5 Curated、固定 2x，不发送旧版 scale 字段。
   Future<Uint8List> upscaleImage(
     Uint8List image, {
-    int scale = 4,
     void Function(int, int)? onProgress,
   }) async {
     try {
@@ -53,13 +52,16 @@ class NAIImageEnhancementApiService {
         throw Exception(currentL10n.enhance_cannotReadSize);
       }
 
+      if (decoded.width * decoded.height > ApiConstants.upscaleMaxInputPixels) {
+        throw ArgumentError(currentL10n.img2img_cloudUpscaleSizeLimit);
+      }
+
       final response = await _dio.post(
-        _endpointService.mainUrl(ApiConstants.upscaleEndpoint),
+        _endpointService.imageUrl(ApiConstants.upscaleEndpoint),
         data: {
           'image': base64Encode(image),
-          'scale': scale,
-          'width': decoded.width,
-          'height': decoded.height,
+          'model': ApiConstants.upscaleModel,
+          'declared_blur_sigma': 0,
         },
         options: Options(
           responseType: ResponseType.bytes,
@@ -70,8 +72,11 @@ class NAIImageEnhancementApiService {
 
       final raw = response.data as Uint8List;
       final images = ZipUtils.extractAllImages(raw);
-      if (images.isNotEmpty) return images.first;
-      return raw;
+      final result = images.isNotEmpty ? images.first : raw;
+      // Compatible image services may return PNG directly. Do not register a
+      // successful HTTP response containing JSON/HTML as an image.
+      if (img.decodeImage(result) != null) return result;
+      throw FormatException(currentL10n.preciseRefLib_invalidImage);
     } on DioException catch (e) {
       AppLogger.w('Upscale image failed: ${e.message}', 'NAIEnhancement');
       throw Exception(currentL10n.enhance_upscaleFailed(_mapDioError(e)));

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/utils/nai_resolution_adapter.dart';
+import 'package:nai_launcher/core/utils/pica_lanczos_resizer.dart';
 
 void main() {
   group('NaiResolutionAdapter official import sizing', () {
@@ -129,6 +130,33 @@ void main() {
         expect((decoded!.width, decoded.height), equals((1472, 896)));
       },
     );
+
+    test('resized request PNG preserves every RGBA pixel', () {
+      final source = img.Image(width: 9, height: 7, numChannels: 4);
+      for (final pixel in source) {
+        pixel.setRgba(
+          pixel.x * 25,
+          pixel.y * 35,
+          127,
+          (pixel.x + pixel.y) * 15,
+        );
+      }
+      final expected = PicaLanczosResizer.resizeImage(
+        source,
+        width: 18,
+        height: 14,
+      );
+      final normalized = NaiResolutionAdapter.normalizeImageForRequest(
+        Uint8List.fromList(img.encodePng(source)),
+        targetWidth: 18,
+        targetHeight: 14,
+      )!;
+      final actual = img.decodePng(normalized)!;
+      expect(
+        actual.getBytes(order: img.ChannelOrder.rgba),
+        orderedEquals(expected.getBytes(order: img.ChannelOrder.rgba)),
+      );
+    });
 
     test('uses Lanczos3 resampling instead of package cubic resizing', () {
       final source = img.Image(width: 7, height: 5);

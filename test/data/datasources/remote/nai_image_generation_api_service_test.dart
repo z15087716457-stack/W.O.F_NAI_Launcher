@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -14,6 +15,116 @@ import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_se
 import 'package:nai_launcher/data/models/image/image_params.dart';
 
 void main() {
+  test(
+    'stream gateway HTML is mapped through the common error formatter',
+    () async {
+      final adapter = _PendingDioAdapter();
+      final dio = Dio()..httpClientAdapter = adapter;
+      final endpoint = NaiApiEndpointService();
+      final service = NAIImageGenerationApiService(
+        dio,
+        NAIImageEnhancementApiService(dio, endpoint),
+        endpoint,
+      );
+      final result = service
+          .generateImageStream(const ImageParams(prompt: 'test'))
+          .toList();
+      await _waitForRequestCount(adapter, 1);
+      adapter.requests.single.response.complete(
+        ResponseBody.fromString(
+          '<!DOCTYPE html><html><body>gateway error</body></html>',
+          504,
+          statusMessage: 'Gateway Time-out',
+          headers: {
+            Headers.contentTypeHeader: ['text/html'],
+          },
+        ),
+      );
+      final chunks = await result;
+      expect(chunks.last.error, 'API_ERROR_HTTP_504|Gateway Time-out');
+    },
+  );
+
+  for (final streamed in [false, true]) {
+    test(
+      'uploads source and mask as binary multipart (stream=$streamed)',
+      () async {
+        final adapter = _PendingDioAdapter();
+        final dio = Dio()..httpClientAdapter = adapter;
+        final endpoint = NaiApiEndpointService();
+        final service = NAIImageGenerationApiService(
+          dio,
+          NAIImageEnhancementApiService(dio, endpoint),
+          endpoint,
+        );
+        final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
+        final mask = _rectMaskPng(
+          width: 256,
+          height: 256,
+          x: 112,
+          y: 112,
+          rectWidth: 32,
+          rectHeight: 32,
+        );
+        final params = ImageParams(
+          prompt: 'source prompt',
+          negativePrompt: 'source negative',
+          seed: 123,
+          action: ImageGenerationAction.infill,
+          model: 'nai-diffusion-4-5-full-inpainting',
+          width: 256,
+          height: 256,
+          sourceImage: source,
+          maskImage: mask,
+        );
+        final operation = streamed
+            ? service.generateImageStream(params).drain<Object?>()
+            : service.generateImage(params).then<Object?>((_) => null);
+        final handled = operation.catchError((_) => null);
+        await _waitForRequestCount(adapter, 1);
+        final request = adapter.requests.single;
+        expect(request.options.contentType, contains('multipart/form-data'));
+        final form = request.options.data as FormData;
+        final parts = Map.fromEntries(form.files);
+        expect(parts.keys, unorderedEquals(['image', 'mask', 'request']));
+        final bytes = await parts['image']!
+            .clone()
+            .finalize()
+            .expand((b) => b)
+            .toList();
+        expect(bytes, orderedEquals(source));
+        final maskBytes = await parts['mask']!
+            .clone()
+            .finalize()
+            .expand((b) => b)
+            .toList();
+        expect(img.decodeImage(Uint8List.fromList(maskBytes)), isNotNull);
+        final jsonBytes = await parts['request']!
+            .clone()
+            .finalize()
+            .expand((b) => b)
+            .toList();
+        final payload = jsonDecode(utf8.decode(jsonBytes)) as Map;
+        expect(payload['input'], contains('source prompt'));
+        expect(payload['parameters']['image'], 'image');
+        expect(payload['parameters']['mask'], 'mask');
+        expect(
+          payload['parameters']['negative_prompt'],
+          contains('source negative'),
+        );
+        expect(payload['parameters']['seed'], 123);
+        expect(params.sourceImage, same(source));
+        expect(params.maskImage, same(mask));
+        if (streamed) {
+          request.completeWithEmptyStream();
+        } else {
+          request.completeWithEmptyZip();
+        }
+        await handled;
+      },
+    );
+  }
+
   test('completed older request must not clear newer cancel token', () async {
     final adapter = _PendingDioAdapter();
     final dio = Dio()..httpClientAdapter = adapter;

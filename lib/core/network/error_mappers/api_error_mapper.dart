@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -26,6 +27,7 @@ class ApiErrorMapper {
       return statusCodeError;
     }
 
+    final detail = e.message ?? e.error?.toString();
     return switch (e.type) {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
@@ -33,9 +35,14 @@ class ApiErrorMapper {
         'API_ERROR_TIMEOUT|${e.message ?? "Timeout"}',
       DioExceptionType.connectionError =>
         'API_ERROR_NETWORK|${e.message ?? "Connection error"}',
+      DioExceptionType.unknown
+          when e.error is SocketException ||
+              e.error is HttpException ||
+              e.error is HandshakeException =>
+        'API_ERROR_NETWORK|${detail ?? "Connection error"}',
       _ when statusCode != null =>
-        'API_ERROR_HTTP_$statusCode|${e.message ?? "Unknown error"}',
-      _ => 'API_ERROR_UNKNOWN|${e.message ?? "Unknown error"}',
+        'API_ERROR_HTTP_$statusCode|${serverMessage ?? e.response?.statusMessage ?? "HTTP $statusCode"}',
+      _ => 'API_ERROR_UNKNOWN|${detail ?? "Unknown error"}',
     };
   }
 
@@ -43,7 +50,7 @@ class ApiErrorMapper {
     try {
       return switch (data) {
         Map() => data['message']?.toString() ?? data['error']?.toString(),
-        String() when data.isNotEmpty => data,
+        String() when data.isNotEmpty => _plainServerMessage(data),
         Uint8List() => _extractServerMessageFromBytes(data),
         List<int>() => _extractServerMessageFromBytes(Uint8List.fromList(data)),
         _ => null,
@@ -57,17 +64,25 @@ class ApiErrorMapper {
     }
   }
 
-  static String _extractServerMessageFromBytes(Uint8List bytes) {
+  static String? _plainServerMessage(String text) {
+    final start = text.trimLeft().toLowerCase();
+    if (start.startsWith('<!doctype html') || start.startsWith('<html')) {
+      return null;
+    }
+    return text;
+  }
+
+  static String? _extractServerMessageFromBytes(Uint8List bytes) {
     final text = utf8.decode(bytes, allowMalformed: true);
     try {
       final json = jsonDecode(text);
       if (json is Map) {
         return json['message']?.toString() ?? json['error']?.toString() ?? text;
       }
-      return text;
+      return _plainServerMessage(text);
     } catch (jsonError) {
       AppLogger.w('Failed to parse error response JSON: $jsonError', 'Utils');
-      return text;
+      return _plainServerMessage(text);
     }
   }
 }

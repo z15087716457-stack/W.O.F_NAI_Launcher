@@ -2523,8 +2523,14 @@ abstract class AppLocalizations {
   /// No description provided for @img2img_novelAiCloudUpscale.
   ///
   /// In en, this message translates to:
-  /// **'NovelAI cloud upscale (fixed 4x)'**
+  /// **'NovelAI cloud upscale (fixed 2x)'**
   String get img2img_novelAiCloudUpscale;
+
+  /// No description provided for @img2img_cloudUpscaleSizeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'NovelAI cloud upscale supports input images up to 3MP.'**
+  String get img2img_cloudUpscaleSizeLimit;
 
   /// No description provided for @img2img_comfyuiEnableHint.
   ///

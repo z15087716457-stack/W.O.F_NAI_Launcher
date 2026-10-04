@@ -1311,7 +1311,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_enhanceMax => '최대✨';
 
   @override
-  String get img2img_novelAiCloudUpscale => 'NovelAI 클라우드 업스케일(4배 고정)';
+  String get img2img_novelAiCloudUpscale => 'NovelAI 클라우드 업스케일(2배 고정)';
+
+  @override
+  String get img2img_cloudUpscaleSizeLimit =>
+      'NovelAI 클라우드 업스케일은 최대 3MP 입력 이미지를 지원합니다.';
 
   @override
   String get img2img_comfyuiEnableHint =>

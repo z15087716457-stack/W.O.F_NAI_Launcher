@@ -39,6 +39,11 @@ final imageVariationCostProvider = Provider.autoDispose
         smea: metadata.smea ?? current.smea,
         smeaDyn: metadata.smeaDyn ?? current.smeaDyn,
         strength: metadata.strength ?? 0.45,
+        action: ImageGenerationAction.img2img,
+        maskImage: null,
+        sourceImage: image.bytes,
+        preciseReferences: metadata.preciseReferences,
+        vibeReferencesV4: metadata.vibeReferences,
       );
       final subscription = ref.watch(subscriptionNotifierProvider).subscription;
       return AnlasCalculator.calculateRequestCost(
@@ -75,14 +80,9 @@ final imageUpscaleCostProvider = Provider.autoDispose
         ),
       );
       if (backend == UpscaleBackend.comfyui) return 0;
-      final subscription = ref.watch(subscriptionNotifierProvider).subscription;
       final cost = AnlasCalculator.calculateNovelAiUpscaleCost(
         inputWidth: image.width,
         inputHeight: image.height,
-        scale: 4,
-        subscriptionTier: subscription?.isOpus == true
-            ? AnlasCalculator.opusTier
-            : 0,
       );
       return cost < 0 ? null : cost;
     });

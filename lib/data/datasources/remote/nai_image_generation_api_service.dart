@@ -40,6 +40,46 @@ class NAIImageGenerationApiService {
     this._endpointService,
   );
 
+  /// Match the website's image/request multipart protocol. Binary image parts
+  /// avoid base64's upload overhead without changing pixels or prompt metadata.
+  Object _requestBody(NAIImageRequestBuildResult result) {
+    final source = result.normalizedSourceImageBytes;
+    if (source == null) return result.requestData;
+
+    final parameters = Map<String, dynamic>.from(result.requestParameters);
+    parameters['image'] = 'image';
+    final fields = <String, dynamic>{
+      'image': MultipartFile.fromBytes(
+        source,
+        filename: 'blob',
+        contentType: DioMediaType.parse(
+          source.length >= 8 &&
+                  source[0] == 137 &&
+                  source[1] == 80 &&
+                  source[2] == 78 &&
+                  source[3] == 71
+              ? 'image/png'
+              : 'application/octet-stream',
+        ),
+      ),
+    };
+    final mask = parameters['mask'];
+    if (mask is String && mask.isNotEmpty) {
+      fields['mask'] = MultipartFile.fromBytes(
+        base64Decode(mask),
+        filename: 'blob',
+        contentType: DioMediaType.parse('image/png'),
+      );
+      parameters['mask'] = 'mask';
+    }
+    fields['request'] = MultipartFile.fromString(
+      jsonEncode({...result.requestData, 'parameters': parameters}),
+      filename: 'blob',
+      contentType: DioMediaType.parse('application/json'),
+    );
+    return FormData.fromMap(fields);
+  }
+
   // ==================== 采样器映射 ====================
 
   /// 根据模型版本映射采样器
@@ -272,7 +312,7 @@ class NAIImageGenerationApiService {
       // 5. 发送请求
       final response = await _dio.post(
         _endpointService.imageUrl(ApiConstants.generateImageEndpoint),
-        data: requestData,
+        data: _requestBody(requestBuildResult),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
         options: Options(
@@ -524,7 +564,7 @@ class NAIImageGenerationApiService {
 
       final response = await _dio.post<ResponseBody>(
         _endpointService.imageUrl(ApiConstants.generateImageStreamEndpoint),
-        data: requestData,
+        data: _requestBody(requestBuildResult),
         cancelToken: cancelToken,
         options: Options(
           responseType: ResponseType.stream,
@@ -842,20 +882,16 @@ class NAIImageGenerationApiService {
             await for (final chunk in responseBody.stream) {
               chunks.addAll(chunk);
             }
-            final text = utf8.decode(chunks, allowMalformed: true);
-            AppLogger.e('Stream API error response: $text', 'ImgGen');
-            try {
-              final json = jsonDecode(text);
-              if (json is Map) {
-                errorMsg =
-                    'API_ERROR_${e.response?.statusCode}|${json['message'] ?? json['error'] ?? text}';
-              } else {
-                errorMsg = 'API_ERROR_${e.response?.statusCode}|$text';
-              }
-            } catch (jsonError) {
-              AppLogger.w('Failed to parse error JSON: $jsonError', 'ImgGen');
-              errorMsg = 'API_ERROR_${e.response?.statusCode}|$text';
-            }
+            errorMsg = NAIApiUtils.formatDioError(
+              e.copyWith(
+                response: Response<dynamic>(
+                  requestOptions: e.requestOptions,
+                  statusCode: e.response?.statusCode,
+                  statusMessage: e.response?.statusMessage,
+                  data: Uint8List.fromList(chunks),
+                ),
+              ),
+            );
           } catch (readError) {
             AppLogger.e('Failed to read error response: $readError', 'ImgGen');
             errorMsg = NAIApiUtils.formatDioError(e);

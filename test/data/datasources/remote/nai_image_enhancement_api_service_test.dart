@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -5,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
+import 'package:nai_launcher/core/network/nai_api_endpoint.dart';
+import 'package:nai_launcher/core/network/nai_api_endpoint_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 
 class _MockDio extends Mock implements Dio {}
@@ -51,7 +54,7 @@ void main() {
     );
 
     test(
-      'upscaleImage should send scale alongside source dimensions',
+      'upscale uses the current image host and V5 request instead of the retired main host',
       () async {
         final dio = _MockDio();
         final sourceImage = _buildPng(width: 48, height: 32);
@@ -76,14 +79,94 @@ void main() {
         });
 
         final service = NAIImageEnhancementApiService(dio);
-        final result = await service.upscaleImage(sourceImage, scale: 2);
+        final result = await service.upscaleImage(sourceImage);
 
         expect(result, isNotEmpty);
-        expect(capturedData?['scale'], equals(2));
-        expect(capturedData?['width'], equals(48));
-        expect(capturedData?['height'], equals(32));
+        expect(
+          capturedData,
+          equals({
+            'image': base64Encode(sourceImage),
+            'model': 'nai-diffusion-5-curated',
+            'declared_blur_sigma': 0,
+          }),
+        );
+        verify(
+          () => dio.post<dynamic>(
+            'https://image.novelai.net/ai/upscale',
+            data: any(named: 'data'),
+            options: any(named: 'options'),
+            onReceiveProgress: any(named: 'onReceiveProgress'),
+          ),
+        ).called(1);
       },
     );
+
+    for (final rawPng in [true, false]) {
+      test(
+        'upscale honors a custom image endpoint and rejects non-image HTTP 200 ($rawPng)',
+        () async {
+          final dio = _MockDio();
+          final source = _buildPng(width: 48, height: 32);
+          final endpoint = NaiApiEndpointService()
+            ..setCurrent(
+              const NaiApiEndpointConfig(
+                mainBaseUrl: 'https://main.example',
+                imageBaseUrl: 'https://images.example',
+              ),
+            );
+          when(
+            () => dio.post<dynamic>(
+              any(),
+              data: any(named: 'data'),
+              options: any(named: 'options'),
+              onReceiveProgress: any(named: 'onReceiveProgress'),
+            ),
+          ).thenAnswer(
+            (_) async => Response(
+              data: rawPng
+                  ? source
+                  : Uint8List.fromList(utf8.encode('{"error":"not an image"}')),
+              requestOptions: RequestOptions(path: '/ai/upscale'),
+            ),
+          );
+          final result = NAIImageEnhancementApiService(
+            dio,
+            endpoint,
+          ).upscaleImage(source);
+          if (rawPng) {
+            expect(await result, source);
+          } else {
+            await expectLater(result, throwsFormatException);
+          }
+          verify(
+            () => dio.post<dynamic>(
+              'https://images.example/ai/upscale',
+              data: any(named: 'data'),
+              options: any(named: 'options'),
+              onReceiveProgress: any(named: 'onReceiveProgress'),
+            ),
+          ).called(1);
+        },
+      );
+    }
+
+    test('unsupported upscale inputs fail before a billable request', () async {
+      final dio = _MockDio();
+      await expectLater(
+        NAIImageEnhancementApiService(
+          dio,
+        ).upscaleImage(_buildPng(width: 2048, height: 2048)),
+        throwsArgumentError,
+      );
+      verifyNever(
+        () => dio.post<dynamic>(
+          any(),
+          data: any(named: 'data'),
+          options: any(named: 'options'),
+          onReceiveProgress: any(named: 'onReceiveProgress'),
+        ),
+      );
+    });
 
     test(
       'should send source image width and height for director tools',

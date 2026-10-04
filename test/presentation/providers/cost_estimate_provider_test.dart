@@ -128,7 +128,7 @@ void main() {
         workflow.enterUpscaleMode();
         workflow.updateUpscaleBackend(UpscaleBackend.novelai);
 
-        expect(container.read(estimatedCostProvider), equals(2));
+        expect(container.read(estimatedCostProvider), equals(1));
       },
     );
 

@@ -103,9 +103,12 @@ class AgentBridgeIndicator extends ConsumerWidget {
           tooltip: null,
           icon: Semantics(
             label: label,
-            child: BridgeLinkIcon(
-              color: color,
-              working: feedback.phase == BridgeAgentPhase.working,
+            child: Transform.translate(
+              offset: const Offset(0, 1),
+              child: BridgeLinkIcon(
+                color: color,
+                working: feedback.phase == BridgeAgentPhase.working,
+              ),
             ),
           ),
           style: IconButton.styleFrom(

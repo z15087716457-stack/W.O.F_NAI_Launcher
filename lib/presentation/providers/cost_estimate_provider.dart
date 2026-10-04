@@ -84,8 +84,6 @@ int _calculateEstimatedCost(
     return AnlasCalculator.calculateNovelAiUpscaleCost(
       inputWidth: inputWidth,
       inputHeight: inputHeight,
-      scale: 4,
-      subscriptionTier: subscriptionTier,
     );
   }
 

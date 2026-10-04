@@ -6,16 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/inpaint_mask_utils.dart';
 import '../../core/utils/localization_extension.dart';
-import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../data/models/image/image_operation.dart';
-import '../../data/models/metadata/metadata_import_options.dart';
 import '../../data/services/image_metadata_service.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
 import '../screens/director_tools/director_tools_screen.dart';
-import '../utils/metadata_import_applier.dart';
-import '../utils/prompt_preset_import_utils.dart';
+import '../utils/metadata_import_coordinator.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/image_editor/image_editor_screen.dart';
 
@@ -202,18 +199,23 @@ class ImageWorkflowLauncher {
       workflowNotifier.setPanelExpanded(true);
 
       if (metadata != null && metadata.hasData) {
-        _applyVariationMetadata(
-          metadata,
-          ref,
-          paramsNotifier,
-          fallbackModel: ref.read(generationParamsNotifierProvider).model,
+        // Await the existing full import: prompt setters queue microtasks.
+        // The request must capture imported prompts/characters/presets, not
+        // the draft that was current before those setters committed.
+        await MetadataImportCoordinator.applyOfficialFullReplacement(
+          read: ref.read,
+          metadata: metadata,
         );
+        paramsNotifier.randomizeSeed();
+        paramsNotifier.updateStrength(metadata.strength ?? 0.45);
+        paramsNotifier.updateNoise(metadata.noise ?? 0.0);
       } else {
         paramsNotifier.randomizeSeed();
         paramsNotifier.updateStrength(0.45);
         paramsNotifier.updateNoise(0.0);
       }
 
+      if (!context.mounted || _isVariationLaunchBlocked(context, ref)) return;
       AppToast.info(context, context.l10n.img2img_variationsStarted);
       final currentParams = ref.read(generationParamsNotifierProvider);
       ref
@@ -254,45 +256,5 @@ class ImageWorkflowLauncher {
       return true;
     }
     return false;
-  }
-
-  static void _applyVariationMetadata(
-    NaiImageMetadata metadata,
-    WidgetRef ref,
-    GenerationParamsNotifier notifier, {
-    required String fallbackModel,
-  }) {
-    MetadataImportApplier.applyPromptAndGenerationParams(
-      metadata: metadata,
-      options: MetadataImportOptions.all(),
-      currentModel: fallbackModel,
-      target: MetadataImportTarget(
-        updatePrompt: notifier.updatePrompt,
-        updateNegativePrompt: notifier.updateNegativePrompt,
-        updateSeed: notifier.updateSeed,
-        updateSteps: notifier.updateSteps,
-        updateScale: notifier.updateScale,
-        updateSize: notifier.updateSize,
-        updateSampler: notifier.updateSampler,
-        updateModel: notifier.updateModel,
-        updateSmea: notifier.updateSmea,
-        updateSmeaDyn: notifier.updateSmeaDyn,
-        updateVarietyPlus: notifier.updateVarietyPlus,
-        updateNoiseSchedule: notifier.updateNoiseSchedule,
-        updateCfgRescale: notifier.updateCfgRescale,
-        updateQualityToggle: (value) {
-          notifier.updateQualityToggle(value);
-          applyImportedQualityToggle(ref.read, value);
-        },
-        updateUcPreset: (value) {
-          notifier.updateUcPreset(value);
-          applyImportedUcPreset(ref.read, value);
-        },
-      ),
-    );
-
-    notifier.randomizeSeed();
-    notifier.updateStrength(metadata.strength ?? 0.45);
-    notifier.updateNoise(metadata.noise ?? 0.0);
   }
 }

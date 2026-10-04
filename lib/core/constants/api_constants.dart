@@ -21,6 +21,10 @@ class ApiConstants {
   static const String userDataEndpoint = '/user/data';
   static const String suggestTagsEndpoint = '/ai/generate-image/suggest-tags';
   static const String upscaleEndpoint = '/ai/upscale';
+  // Current official upscale is a fixed 2x V5 Curated request on imageBaseUrl.
+  static const String upscaleModel = 'nai-diffusion-5-curated';
+  static const int upscaleFactor = 2;
+  static const int upscaleMaxInputPixels = 3145728;
   static const String userSubscriptionEndpoint = '/user/subscription';
   static const String encodeVibeEndpoint = '/ai/encode-vibe';
   static const String augmentImageEndpoint = '/ai/augment-image';

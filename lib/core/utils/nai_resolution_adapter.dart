@@ -326,8 +326,8 @@ class NaiResolutionAdapter {
       height: targetHeight,
     );
 
-    // 仅作为请求载体、不落盘：用最快压缩等级换编码时间（像素无损）。
-    return Uint8List.fromList(img.encodePng(resized, level: 1));
+    // 请求图在 isolate 内编码：提高 PNG 压缩，减少大图上传体积，保留 RGBA。
+    return Uint8List.fromList(img.encodePng(resized, level: 9));
   }
 
   /// 异步版本，适合大图在 isolate 中处理

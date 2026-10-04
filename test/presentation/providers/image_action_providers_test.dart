@@ -84,7 +84,7 @@ void main() {
       );
       addTearDown(subscription.close);
       expect(container.read(imageUpscaleCostProvider(small)), 1);
-      expect(container.read(imageUpscaleCostProvider(large)), 7);
+      expect(container.read(imageUpscaleCostProvider(large)), 1);
       expect(container.read(imageUpscaleCostProvider(invalid)), isNull);
       (container.read(imageWorkflowControllerProvider.notifier) as _Workflow)
           .backend(UpscaleBackend.comfyui);

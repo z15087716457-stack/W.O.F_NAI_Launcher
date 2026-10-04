@@ -278,51 +278,42 @@ void main() {
   });
 
   group('AnlasCalculator upscale pricing', () {
-    test(
-      'uses the official input-area tiers instead of output generation cost',
-      () {
+    test('matches the current official V5 upscale input-area boundaries', () {
+      const tiers = [(1048576, 1), (1747627, 2), (2446678, 3), (3145728, 4)];
+      for (final (area, cost) in tiers) {
         expect(
           AnlasCalculator.calculateNovelAiUpscaleCost(
-            inputWidth: 512,
-            inputHeight: 512,
-            scale: 4,
+            inputWidth: area,
+            inputHeight: 1,
           ),
-          1,
+          cost,
         );
         expect(
           AnlasCalculator.calculateNovelAiUpscaleCost(
-            inputWidth: 512,
-            inputHeight: 768,
-            scale: 4,
+            inputWidth: area + 1,
+            inputHeight: 1,
           ),
-          2,
+          cost == 4 ? AnlasCalculator.invalidCost : cost + 1,
         );
-        expect(
-          AnlasCalculator.calculateNovelAiUpscaleCost(
-            inputWidth: 1024,
-            inputHeight: 1024,
-            scale: 4,
-          ),
-          7,
-        );
-      },
-    );
-
-    test('applies the Opus threshold and reports unsupported input sizes', () {
+      }
+      expect(
+        AnlasCalculator.calculateNovelAiUpscaleCost(
+          inputWidth: 512,
+          inputHeight: 768,
+        ),
+        1,
+      );
       expect(
         AnlasCalculator.calculateNovelAiUpscaleCost(
           inputWidth: 640,
           inputHeight: 640,
-          scale: 4,
-          subscriptionTier: AnlasCalculator.opusTier,
         ),
-        0,
+        1,
       );
       expect(
         AnlasCalculator.calculateNovelAiUpscaleCost(
-          inputWidth: 1025,
-          inputHeight: 1024,
-          scale: 4,
+          inputWidth: 0,
+          inputHeight: 640,
         ),
         AnlasCalculator.invalidCost,
       );
