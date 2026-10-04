@@ -43,6 +43,7 @@ import '../../../widgets/character/character_prompt_button.dart';
 import '../../../providers/pending_prompt_provider.dart';
 import 'generation_sidebar_style.dart';
 import '../../../widgets/common/translation_icon.dart';
+import '../../../widgets/bridge/agent_bridge_indicator.dart';
 
 /// 提示词页签是否使用富文本 Tooltip。当前仅维护 Windows，
 /// 恒为 false；保留签名以兼容既有调用与测试。
@@ -959,6 +960,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             ),
           ),
         ),
+        const AgentBridgeIndicator(),
       ],
     );
   }

@@ -67,7 +67,9 @@ class _WebStyleGenerationLayoutState
         }
       },
       ShortcutIds.cancelGeneration: () {
-        if (isLauncherGenerating) {
+        if (ref.read(kritaBridgeNotifierProvider).isBridgeGenerating) {
+          ref.read(kritaBridgeNotifierProvider.notifier).cancelActiveRequest();
+        } else if (isLauncherGenerating) {
           ref.read(imageGenerationNotifierProvider.notifier).cancel();
         } else if (ref.read(generationPreviewSelectionProvider) != null) {
           ref.read(generationPreviewSelectionProvider.notifier).clear();

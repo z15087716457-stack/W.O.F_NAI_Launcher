@@ -803,7 +803,15 @@ void main() {
             }
             if (destination == SettingsDestination.integrations) {
               expect(find.text('ComfyUI'), findsOneWidget);
-              await tester.tap(find.text('Krita'));
+              await tester.tap(
+                find
+                    .text(
+                      AppLocalizations.of(
+                        tester.element(find.byType(SettingsScreen)),
+                      )!.bridge_title,
+                    )
+                    .first,
+              );
               await tester.pump(const Duration(milliseconds: 250));
               expect(find.text('Krita Bridge'), findsNothing);
             }
@@ -1051,7 +1059,7 @@ void main() {
     expect(tabsFinder, findsOneWidget);
     final segmentLabels = tester.widget<ManagementTabs>(tabsFinder).labels;
     expect(find.byType(PromptAssistantSettingsSection), findsNothing);
-    expect(segmentLabels, const ['ComfyUI', 'Krita', '网络']);
+    expect(segmentLabels, const ['ComfyUI', '本机桥接', '网络']);
     await tester.tap(find.byKey(const ValueKey('settings-nav-models')));
     await tester.pumpAndSettle();
     expect(find.text('服务商'), findsOneWidget);

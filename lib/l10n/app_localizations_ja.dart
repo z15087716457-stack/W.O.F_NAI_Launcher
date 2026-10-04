@@ -5792,7 +5792,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'データ ストレージ パスをリセットした後、反映するにはアプリの再起動が必要です。\\n\\nデフォルトのパスは次回起動時に有効になります。続行しますか？';
 
   @override
-  String get settings_kritaBridgeEnable => 'Krita ローカル ブリッジを有効にする';
+  String get settings_kritaBridgeEnable => 'ローカル接続を有効にする';
 
   @override
   String get settings_kritaBridgeDisabledText =>
@@ -5802,7 +5802,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_kritaBridgeStartingText => 'ローカル ブリッジ サービスを開始しています...';
 
   @override
-  String get settings_kritaBridgeListeningText => 'Krita プラグインの接続を待機しています';
+  String get settings_kritaBridgeListeningText => '外部 Agent または Krita の接続待ち';
 
   @override
   String get settings_kritaBridgeConnectedText => 'Krita プラグインが接続されました';
@@ -12327,4 +12327,88 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_highAnlasCostQuestion => 'このまま生成しますか？';
+
+  @override
+  String get bridge_title => 'ローカル接続';
+
+  @override
+  String get bridge_agent => '外部 Agent';
+
+  @override
+  String get bridge_agentHint => 'ローカルコマンドを実行できる Agent に手順を渡します。';
+
+  @override
+  String get bridge_waiting => '接続待ち';
+
+  @override
+  String get bridge_ready => '操作待ち';
+
+  @override
+  String bridge_clients(int count) {
+    return '$count 個の Agent が接続中';
+  }
+
+  @override
+  String bridge_activity(Object client, Object action) {
+    return '$client：$action';
+  }
+
+  @override
+  String get bridge_read => '設定を読み取り';
+
+  @override
+  String get bridge_write => '設定を更新';
+
+  @override
+  String get bridge_quote => '消費量を見積もり';
+
+  @override
+  String get bridge_generate => '画像を生成';
+
+  @override
+  String get bridge_cancel => '生成を停止';
+
+  @override
+  String get bridge_recent => '最近の操作';
+
+  @override
+  String get bridge_empty => '操作履歴はありません';
+
+  @override
+  String get bridge_copyGuide => '接続手順をコピー';
+
+  @override
+  String get bridge_showGuide => '手順を表示';
+
+  @override
+  String get bridge_copied => '手順をコピーしました';
+
+  @override
+  String get bridge_disconnect => 'Agent の接続を終了';
+
+  @override
+  String get bridge_settings => '接続設定';
+
+  @override
+  String get bridge_clientMissing => '同梱クライアントがありません。Studio を更新してください。';
+
+  @override
+  String get bridge_conflict => '内容が変更されました。再度読み取ってください。';
+
+  @override
+  String get bridge_busy => '別の操作が進行中です';
+
+  @override
+  String get bridge_interrupted => '操作が中断されました';
+
+  @override
+  String get bridge_failed => '操作に失敗しました。Agent の応答を確認してください。';
+
+  @override
+  String get bridge_timeout => '操作がタイムアウトしました。再試行してください。';
+
+  @override
+  String bridge_guide(Object clientPath) {
+    return 'ローカル接続で W.O.F NAI Studio の操作を支援してください。\nクライアント：$clientPath\n\n1. シェルに合わせてパスを引用し、status --name <名前> で接続を確認してください。手順のコピーだけでは接続されません。\n2. get --name <名前> --out current.json で現在の状態を読み取ります。編集可能な原文は _draft.fields、競合確認用の値は field_versions にあります。他の値に含まれる品質タグを原文へ重複して書き戻さないでください。\n3. ユーザーが許可した項目だけを changes.json に保存し、set-json changes.json --base current.json --name <名前> を実行します。Studio はバックアップ後に対象項目を再確認します。競合時は中止して再読込し、新しい編集を上書きしないでください。readback を確認します。characters はリスト全体の置換です。無関係な名前、有効状態、位置、id を保持してください。参照画像は現在読み取り専用です。\n4. 接続や設定編集は生成の許可を意味しません。明示的な生成指示がある場合、quote --out quote.json --name <名前> を実行し、推定 Anlas 単価と読込済みの残高を報告します。最終請求はサーバーによります。許可と報告の後に gen --quote quote.json --authorized --name <名前> を実行します。1 回 1 枚、設定変更後は再見積もりが必要です。\n5. 操作完了後は切断します。Krita と同時接続できます。busy は処理完了を待ち、エラー後に即座の再試行を繰り返さないでください。Studio の停止、Ctrl+C、または返された request_id を使った cancel <request_id> --name <同じ名前> で生成を停止できます。発見ファイルのセッション秘密鍵を出力しないでください。\n';
+  }
 }

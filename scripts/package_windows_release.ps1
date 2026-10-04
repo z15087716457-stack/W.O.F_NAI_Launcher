@@ -61,6 +61,7 @@ if (-not (Test-Path -LiteralPath $exePath)) {
 }
 
 & (Join-Path $PSScriptRoot 'validate_windows_data_identity.ps1') -ExecutablePath $exePath
+& (Join-Path $PSScriptRoot 'build_bridge_client.ps1') -OutputDirectory 'build/windows/x64/runner/Release/tools'
 
 # 便携版更新使用该清单区分应用文件与用户放在程序目录中的个人文件。
 $filesManifestPath = Join-Path $buildPath "app_files_manifest.json"

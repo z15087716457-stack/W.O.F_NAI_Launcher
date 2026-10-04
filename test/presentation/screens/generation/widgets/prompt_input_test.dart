@@ -1,3 +1,9 @@
+import 'package:nai_launcher/core/krita/bridge_session.dart';
+import 'package:nai_launcher/presentation/widgets/bridge/agent_bridge_indicator.dart';
+import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart'
+    as image_model;
+import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -41,6 +47,317 @@ void main() {
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
 
+  testWidgets('连接标识在负面右侧固定；真实字体五语言深浅色及窄窗弹层', (tester) async {
+    await loadStudioCaptureFonts();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+    const agent = BridgeClient(
+      id: 'test-agent',
+      kind: BridgeClientKind.agent,
+      name: 'Codex',
+    );
+    for (final locale in const [
+      Locale('zh'),
+      Locale('zh', 'TW'),
+      Locale('en'),
+      Locale('ja'),
+      Locale('ko'),
+    ]) {
+      for (final brightness in Brightness.values) {
+        for (final width in [360.0, 480.0]) {
+          tester.view.devicePixelRatio = 1.25;
+          tester.view.physicalSize = Size(width * 1.25, 680 * 1.25);
+          final bridge = _VisibleAgentBridgeNotifier();
+          final boundary = GlobalKey();
+          bridge.show(
+            const KritaBridgeState(
+              enabled: true,
+              status: KritaBridgeStatus.listening,
+            ),
+          );
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                kritaBridgeNotifierProvider.overrideWith((ref) => bridge),
+                bridgeClientBundleProvider.overrideWith(
+                  (ref) async => const BridgeClientBundle(
+                    r'C:\Studio Folder	ools\studio-bridge.exe',
+                    available: true,
+                  ),
+                ),
+                promptAssistantConfigProvider.overrideWith(
+                  _TestPromptAssistantConfigNotifier.new,
+                ),
+                promptBlockLibraryNotifierProvider.overrideWith(
+                  _EmptyPromptBlockLibraryNotifier.new,
+                ),
+                localStorageServiceProvider.overrideWith(
+                  (ref) => _TestLocalStorageService(),
+                ),
+                characterPromptNotifierProvider.overrideWith(
+                  _TestCharacterPromptNotifier.new,
+                ),
+                for (final target in PromptTokenCountTarget.values)
+                  promptTokenUsageProvider(target).overrideWith(
+                    (ref) async =>
+                        const PromptTokenUsage(usedTokens: 0, limit: 512),
+                  ),
+              ],
+              child: MaterialApp(
+                theme: AppTheme.getTheme(AppStyle.geist, brightness),
+                locale: locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                builder: (_, child) =>
+                    RepaintBoundary(key: boundary, child: child!),
+                home: const Scaffold(
+                  body: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: PromptInputWidget(autoGrow: true),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final icon = find.byKey(const Key('agent-bridge-indicator'));
+          final l = AppLocalizations.of(tester.element(icon))!;
+          final negative = find.text(l.prompt_negativeTab);
+          final before = tester.getRect(icon);
+          expect(
+            before.left,
+            greaterThanOrEqualTo(tester.getRect(negative).right),
+          );
+          expect(
+            (before.center.dy - tester.getRect(negative).center.dy).abs(),
+            lessThan(2),
+          );
+          bridge.show(
+            KritaBridgeState(
+              enabled: true,
+              session: BridgeSession(
+                clients: const [agent],
+                activities: [
+                  BridgeActivity(
+                    key: 'active',
+                    client: agent,
+                    operation: 'set_params',
+                    at: DateTime(2026, 10, 4, 19, 0),
+                  ),
+                ],
+              ),
+            ),
+          );
+          await tester.pump();
+          expect(tester.getRect(icon), before);
+          expect(
+            tester
+                .widget<Icon>(
+                  find.descendant(of: icon, matching: find.byType(Icon)),
+                )
+                .color,
+            Theme.of(tester.element(icon)).colorScheme.primary,
+          );
+          await tester.tap(
+            find
+                .ancestor(of: negative, matching: find.byType(GestureDetector))
+                .first,
+          );
+          await tester.pumpAndSettle();
+          final afterTab = tester.getRect(icon);
+          expect(afterTab.size, before.size);
+          expect(afterTab.center.dy, before.center.dy);
+          bridge.show(
+            KritaBridgeState(
+              enabled: true,
+              session: BridgeSession(
+                activities: [
+                  BridgeActivity(
+                    key: 'failure',
+                    client: agent,
+                    operation: 'set_params',
+                    at: DateTime(2026, 10, 4, 19, 0),
+                    status: BridgeActivityStatus.failed,
+                    errorCode: 'conflict',
+                  ),
+                ],
+              ),
+            ),
+          );
+          await tester.pump();
+          expect(tester.getRect(icon), afterTab);
+          expect(
+            tester
+                .widget<Icon>(
+                  find.descendant(of: icon, matching: find.byType(Icon)),
+                )
+                .color,
+            Colors.orange,
+          );
+          await tester.tap(icon);
+          await tester.pumpAndSettle();
+          final panel = tester.getRect(find.byType(BridgeAgentPanel));
+          expect(panel.left, greaterThanOrEqualTo(0));
+          expect(panel.right, lessThanOrEqualTo(width));
+          expect(panel.top, greaterThanOrEqualTo(before.bottom));
+          expect(panel.top - before.bottom, lessThan(20));
+          expect(tester.takeException(), isNull);
+          if (Platform.environment['CAPTURE_AGENT_BRIDGE'] == '1') {
+            final previousShadows = debugDisableShadows;
+            debugDisableShadows = false;
+            for (final render
+                in tester.allRenderObjects.whereType<RenderPhysicalShape>()) {
+              render.markNeedsPaint();
+            }
+            await tester.pump();
+            await tester.runAsync(() async {
+              final render =
+                  boundary.currentContext!.findRenderObject()!
+                      as RenderRepaintBoundary;
+              final image = await render.toImage(pixelRatio: 1.25);
+              final bytes = await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              image.dispose();
+              final file = File(
+                '.dart_tool/agent-bridge-captures/${locale.toLanguageTag()}-${brightness.name}-${width.toInt()}.png',
+              );
+              await file.parent.create(recursive: true);
+              await file.writeAsBytes(bytes!.buffer.asUint8List());
+            });
+            debugDisableShadows = previousShadows;
+          }
+          await tester.pumpWidget(const SizedBox());
+          await tester.pump();
+        }
+      }
+    }
+    tester.view.resetDevicePixelRatio();
+    tester.view.resetPhysicalSize();
+  });
+
+  testWidgets('复制完整接手说明；客户端缺失禁用；最近活动限五项', (tester) async {
+    final bridge = _VisibleAgentBridgeNotifier();
+    const agent = BridgeClient(
+      id: 'owner',
+      kind: BridgeClientKind.agent,
+      name: 'Codex',
+    );
+    bridge.show(
+      KritaBridgeState(
+        enabled: true,
+        session: BridgeSession(
+          clients: const [agent],
+          activities: [
+            for (var i = 0; i < 8; i++)
+              BridgeActivity(
+                key: '$i',
+                client: BridgeClient(
+                  id: '$i',
+                  kind: BridgeClientKind.agent,
+                  name: 'Agent-$i',
+                ),
+                operation: 'get_params',
+                at: DateTime(2026, 10, 4),
+                status: BridgeActivityStatus.completed,
+              ),
+          ],
+        ),
+      ),
+    );
+    var available = true;
+    String? copied;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String;
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        kritaBridgeNotifierProvider.overrideWith((ref) => bridge),
+        bridgeClientBundleProvider.overrideWith(
+          (ref) async => BridgeClientBundle(
+            r'C:\Studio Folder	ools\studio-bridge.exe',
+            available: available,
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: SizedBox(width: 340, child: BridgeAgentPanel()),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Agent-4'), findsOneWidget);
+    expect(find.textContaining('Agent-5'), findsNothing);
+    await tester.tap(find.byKey(const Key('bridge-copy-guide')));
+    await tester.pump();
+    expect(copied, contains(r'C:\Studio Folder	ools\studio-bridge.exe'));
+    expect(copied, contains('--base current.json'));
+    expect(copied, contains('--quote quote.json --authorized'));
+    expect(copied, contains('_draft.fields'));
+    await tester.ensureVisible(
+      find.byKey(const Key('bridge-disconnect-agents')),
+    );
+    await tester.tap(find.byKey(const Key('bridge-disconnect-agents')));
+    expect(bridge.disconnects, 1);
+    available = false;
+    container.invalidate(bridgeClientBundleProvider);
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<OutlinedButton>(find.byKey(const Key('bridge-copy-guide')))
+          .onPressed,
+      isNull,
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  test('桥接回读未打开的文本框不创建或清空文档', () {
+    final container = ProviderContainer(
+      overrides: [
+        generationParamsNotifierProvider.overrideWith(_UnopenedDraftParams.new),
+        characterPromptNotifierProvider.overrideWith(
+          _TestCharacterPromptNotifier.new,
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    final draft = container.read(Provider((ref) => readBridgeDraft(ref)));
+    expect(draft.fields['prompt'], 'unopened main');
+    expect(draft.fields['negative_prompt'], 'unopened negative');
+    expect(container.exists(pillWorkspaceProvider(PillScopes.main)), isFalse);
+    expect(
+      container.exists(pillWorkspaceProvider(PillScopes.negative)),
+      isFalse,
+    );
+  });
+
   test('Windows 下提示词切换按钮不使用富文本 Tooltip', () {
     expect(usesRichPromptTypeTooltip(TargetPlatform.windows), isFalse);
   });
@@ -50,6 +367,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => KritaBridgeNotifier(),
+          ),
           promptAssistantConfigProvider.overrideWith(
             _TestPromptAssistantConfigNotifier.new,
           ),
@@ -380,6 +700,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            kritaBridgeNotifierProvider.overrideWith(
+              (ref) => KritaBridgeNotifier(),
+            ),
             promptAssistantConfigProvider.overrideWith(
               _TestPromptAssistantConfigNotifier.new,
             ),
@@ -451,6 +774,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => KritaBridgeNotifier(),
+          ),
           promptBlockLibraryNotifierProvider.overrideWith(
             _EmptyPromptBlockLibraryNotifier.new,
           ),
@@ -500,6 +826,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => KritaBridgeNotifier(),
+          ),
           promptBlockLibraryNotifierProvider.overrideWith(
             () => _EmptyPromptBlockLibraryNotifier(
               PromptBlockLibraryState(
@@ -594,6 +923,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            kritaBridgeNotifierProvider.overrideWith(
+              (ref) => KritaBridgeNotifier(),
+            ),
             promptBlockLibraryNotifierProvider.overrideWith(
               _EmptyPromptBlockLibraryNotifier.new,
             ),
@@ -710,6 +1042,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            kritaBridgeNotifierProvider.overrideWith(
+              (ref) => KritaBridgeNotifier(),
+            ),
             promptBlockLibraryNotifierProvider.overrideWith(
               _EmptyPromptBlockLibraryNotifier.new,
             ),
@@ -831,6 +1166,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => KritaBridgeNotifier(),
+          ),
           promptBlockLibraryNotifierProvider.overrideWith(
             _EmptyPromptBlockLibraryNotifier.new,
           ),
@@ -875,6 +1213,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => KritaBridgeNotifier(),
+          ),
           promptBlockLibraryNotifierProvider.overrideWith(
             _EmptyPromptBlockLibraryNotifier.new,
           ),
@@ -931,6 +1272,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => KritaBridgeNotifier(),
+          ),
           promptBlockLibraryNotifierProvider.overrideWith(
             () => _EmptyPromptBlockLibraryNotifier(
               PromptBlockLibraryState(
@@ -1149,4 +1493,24 @@ class _EmptyPromptBlockLibraryNotifier extends PromptBlockLibraryNotifier {
   @override
   Future<PromptBlockLibraryState> build() async =>
       initial ?? PromptBlockLibraryState(blocks: [], folders: []);
+}
+
+class _VisibleAgentBridgeNotifier extends KritaBridgeNotifier {
+  int disconnects = 0;
+  @override
+  Future<void> disconnectAgents() async {
+    disconnects++;
+  }
+
+  void show(KritaBridgeState value) => state = value;
+  @override
+  Future<void> close() async {}
+}
+
+class _UnopenedDraftParams extends GenerationParamsNotifier {
+  @override
+  image_model.ImageParams build() => const image_model.ImageParams(
+    prompt: 'unopened main',
+    negativePrompt: 'unopened negative',
+  );
 }

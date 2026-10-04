@@ -163,7 +163,7 @@ void main() {
   );
 
   test(
-    'new authenticated client replaces the old authenticated client',
+    'new authenticated client keeps the previous client connected',
     () async {
       await server.start(preferredPort: 0);
       final first = await WebSocket.connect(
@@ -187,18 +187,17 @@ void main() {
           jsonDecode(secondIterator.current as String) as Map<String, dynamic>;
 
       expect(pong['type'], 'pong');
-      await expectLater(
-        firstIterator.moveNext().timeout(const Duration(seconds: 2)),
-        completion(isFalse),
-      );
+      expect(first.closeCode, isNull);
+      expect(server.session.clients, hasLength(2));
 
       await firstIterator.cancel();
       await secondIterator.cancel();
       await second.close();
+      await first.close();
     },
   );
 
-  test('replaced authenticated client cannot forward messages', () async {
+  test('both authenticated clients can forward messages', () async {
     await server.start(preferredPort: 0);
     final messages = <KritaBridgeMessage>[];
     final subscription = server.messages.listen(messages.add);
@@ -224,16 +223,16 @@ void main() {
     first.add(jsonEncode({'type': 'get_params', 'id': 'from-old'}));
     second.add(jsonEncode({'type': 'get_params', 'id': 'from-current'}));
 
-    final currentMessage = await server.messages.first.timeout(
-      const Duration(seconds: 2),
-    );
+    final currentMessage = await server.messages
+        .firstWhere((m) => m.id == 'from-current')
+        .timeout(const Duration(seconds: 2));
     await Future<void>.delayed(Duration.zero);
 
     expect(currentMessage, isA<KritaGetParamsMessage>());
     expect(currentMessage.id, 'from-current');
     expect(
       messages.whereType<KritaGetParamsMessage>().map((message) => message.id),
-      isNot(contains('from-old')),
+      contains('from-old'),
     );
 
     await subscription.cancel();

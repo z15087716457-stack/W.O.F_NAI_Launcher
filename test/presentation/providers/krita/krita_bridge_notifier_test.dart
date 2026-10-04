@@ -169,7 +169,7 @@ void main() {
     );
     await socket.first;
     expect(notifier.state.status, KritaBridgeStatus.connected);
-    expect(notifier.state.connectedClientLabel, contains('127.0.0.1'));
+    expect(notifier.state.connectedClientLabel, 'Krita');
 
     final nextMessage = bridgeService.stream.first;
     socket.add(jsonEncode({'type': 'get_params', 'id': 'params-1'}));

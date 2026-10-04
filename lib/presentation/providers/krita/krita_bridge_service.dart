@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:math';
 
 import '../../../core/krita/krita_bridge_models.dart';
 import '../../../core/models/image_generation_artifact.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/image/image_params.dart';
+import '../../../core/krita/bridge_draft_guard.dart';
 import '../../../data/models/image/image_stream_chunk.dart';
 
 typedef KritaBridgeBaseParamsReader = ImageParams Function();
@@ -30,11 +32,31 @@ typedef KritaBridgeExternalImageRegistrar =
     });
 typedef KritaBridgeCancelGeneration = void Function();
 typedef KritaBridgeClock = DateTime Function();
+
+class _BridgeQuote {
+  const _BridgeQuote({
+    required this.client,
+    required this.account,
+    required this.expires,
+    required this.base,
+    required this.prepared,
+    required this.payload,
+    required this.versions,
+    required this.estimatedAnlas,
+  });
+  final String client;
+  final String? account;
+  final DateTime expires;
+  final ImageParams base, prepared;
+  final Map<String, dynamic> payload, versions;
+  final Object? estimatedAnlas;
+}
+
 typedef KritaBridgeActiveRequestReporter = void Function(String? requestId);
 
 /// AI 接管扩展：将 set_params 载荷写入 UI 参数状态，返回已应用的键列表。
 typedef KritaBridgeParamsWriter =
-    List<String> Function(Map<String, dynamic> payload);
+    FutureOr<List<String>> Function(Map<String, dynamic> payload);
 
 /// AI 接管扩展：读取种子锁状态（锁在 storage 而非 ImageParams）。
 typedef KritaBridgeSeedLockReader = bool Function();
@@ -76,6 +98,13 @@ class KritaBridgeService implements KritaBridgeMessageService {
     KritaBridgeCharactersReader? readCharacters,
     KritaBridgeTokensReader? readTokens,
     KritaBridgePromptSnapshotReader? readPromptSnapshot,
+    bool Function()? isAgentRequest,
+    BridgeDraftSnapshot Function()? readDraft,
+    Future<String> Function(BridgeDraftSnapshot)? backupDraft,
+    Map<String, dynamic> Function(ImageParams)? readBilling,
+    String Function()? requesterName,
+    String? Function()? readAccountIdentity,
+    bool Function()? isRequestAlive,
     KritaBridgeClock? clock,
     Duration failureCooldown = const Duration(seconds: 2),
   }) : _readBaseParams = readBaseParams,
@@ -96,7 +125,14 @@ class KritaBridgeService implements KritaBridgeMessageService {
        _readCharacters = readCharacters,
        _readTokens = readTokens,
        _clock = clock ?? DateTime.now,
-       _failureCooldown = failureCooldown;
+       _failureCooldown = failureCooldown,
+       _isAgentRequest = isAgentRequest ?? (() => false),
+       _readDraft = readDraft,
+       _backupDraft = backupDraft,
+       _readBilling = readBilling,
+       _requesterName = requesterName ?? (() => 'External Agent'),
+       _readAccountIdentity = readAccountIdentity,
+       _isRequestAlive = isRequestAlive ?? (() => true);
 
   final KritaBridgeBaseParamsReader _readBaseParams;
   final KritaBridgePromptSnapshotReader _readPromptSnapshot;
@@ -117,6 +153,14 @@ class KritaBridgeService implements KritaBridgeMessageService {
   final KritaBridgeTokensReader? _readTokens;
   final KritaBridgeClock _clock;
   final Duration _failureCooldown;
+  final bool Function() _isAgentRequest;
+  final BridgeDraftSnapshot Function()? _readDraft;
+  final Future<String> Function(BridgeDraftSnapshot)? _backupDraft;
+  final Map<String, dynamic> Function(ImageParams)? _readBilling;
+  final String Function() _requesterName;
+  final String? Function()? _readAccountIdentity;
+  final bool Function() _isRequestAlive;
+  final _quotes = <String, _BridgeQuote>{};
 
   bool _isBridgeGenerating = false;
   String? _activeRequestId;
@@ -154,12 +198,63 @@ class KritaBridgeService implements KritaBridgeMessageService {
       case KritaCancelMessage():
         _cancel(message);
       case KritaImg2ImgMessage():
+        if (_isAgentRequest()) {
+          _sendError(
+            message.id,
+            KritaBridgeErrorCode.invalidRequest,
+            'Agents must quote the current image workflow before generating.',
+          );
+          return;
+        }
         await _generate(message.id, message.toImageParams(_readBaseParams()));
       case KritaInpaintMessage():
+        if (_isAgentRequest()) {
+          _sendError(
+            message.id,
+            KritaBridgeErrorCode.invalidRequest,
+            'Agents must quote the current image workflow before generating.',
+          );
+          return;
+        }
         await _generate(message.id, message.toImageParams(_readBaseParams()));
       case KritaSetParamsMessage():
-        _setParams(message);
+        await _setParams(message);
       case KritaGenerateMessage():
+        if (_isAgentRequest() && message.payload['_authorized'] != true) {
+          _sendError(
+            message.id,
+            KritaBridgeErrorCode.invalidRequest,
+            'Generation requires explicit user authorization.',
+          );
+          return;
+        }
+        if (_isAgentRequest()) {
+          final quote = _quotes.remove(message.payload['_quote_id']);
+          final draft = _readDraft?.call();
+          if (quote == null ||
+              quote.client != _requesterName() ||
+              quote.account != _readAccountIdentity?.call() ||
+              _clock().isAfter(quote.expires) ||
+              draft == null ||
+              !draft.matches(draft.fields, quote.versions) ||
+              _readBilling?.call(quote.prepared)['estimated_anlas'] !=
+                  quote.estimatedAnlas ||
+              _readBaseParams() != quote.base) {
+            _sendError(
+              message.id,
+              KritaBridgeErrorCode.conflict,
+              'The quoted draft changed. Quote again before generating.',
+            );
+            return;
+          }
+          await _generate(
+            message.id,
+            KritaImageParamsMapping(params: quote.prepared),
+            overrides: quote.payload,
+            alreadyPrepared: true,
+          );
+          return;
+        }
         await _generate(
           message.id,
           message.toImageParams(_readBaseParams()),
@@ -167,10 +262,61 @@ class KritaBridgeService implements KritaBridgeMessageService {
         );
       case KritaPingMessage():
         break;
+      case KritaQuoteMessage():
+        try {
+          validateBridgePatch(message.payload);
+        } on FormatException {
+          _sendError(
+            message.id,
+            KritaBridgeErrorCode.invalidRequest,
+            'Invalid quote fields.',
+          );
+          return;
+        }
+        final base = _readBaseParams();
+        final prepared = _prepareParams(
+          applyKritaParamsOverlay(base, message.payload).copyWith(nSamples: 1),
+          message.payload,
+        );
+        final random = Random.secure();
+        final quoteId = base64UrlEncode(
+          List.generate(24, (_) => random.nextInt(256)),
+        );
+        final versions = _readDraft?.call().fieldVersions ?? <String, String>{};
+        _quotes.removeWhere((_, q) => _clock().isAfter(q.expires));
+        if (_quotes.length >= 32) _quotes.remove(_quotes.keys.first);
+        final billing = _readBilling?.call(prepared);
+        _quotes[quoteId] = _BridgeQuote(
+          client: _requesterName(),
+          account: _readAccountIdentity?.call(),
+          expires: _clock().add(const Duration(minutes: 5)),
+          base: base,
+          prepared: prepared,
+          payload: Map.of(message.payload),
+          versions: versions,
+          estimatedAnlas: billing?['estimated_anlas'],
+        );
+        _send({
+          'type': 'quote',
+          'id': message.id,
+          'payload': message.payload,
+          'field_versions': versions,
+          'quote_id': quoteId,
+          'billing': billing,
+          'quoted_at': _clock().toUtc().toIso8601String(),
+        });
     }
   }
 
-  void _setParams(KritaSetParamsMessage message) {
+  Future<void> _setParams(KritaSetParamsMessage message) async {
+    if (_isUiGenerating() || _isBridgeGenerating) {
+      _sendError(
+        message.id,
+        KritaBridgeErrorCode.busy,
+        'Launcher is already generating.',
+      );
+      return;
+    }
     final writer = _writeParams;
     if (writer == null) {
       _sendError(
@@ -181,8 +327,57 @@ class KritaBridgeService implements KritaBridgeMessageService {
       return;
     }
     try {
-      final applied = writer(message.payload);
-      _send({'type': 'params_set', 'id': message.id, 'applied': applied});
+      final patch = Map<String, dynamic>.from(message.payload)
+        ..remove('_expected');
+      validateBridgePatch(patch);
+      String? backupPath;
+      final expected = message.payload['_expected'];
+      if (_isAgentRequest()) {
+        final snapshot = _readDraft?.call();
+        if (snapshot == null ||
+            _backupDraft == null ||
+            expected is! Map<String, dynamic>) {
+          _sendError(
+            message.id,
+            KritaBridgeErrorCode.invalidRequest,
+            'Read a draft snapshot and provide its field_versions before writing.',
+          );
+          return;
+        }
+        if (!snapshot.matches(patch, expected)) {
+          _sendError(
+            message.id,
+            KritaBridgeErrorCode.conflict,
+            'The edited fields have changed. Read the current draft again.',
+          );
+          return;
+        }
+        backupPath = await _backupDraft(snapshot);
+        if (!_isRequestAlive()) return;
+        if (!_readDraft!().matches(patch, expected)) {
+          _sendError(
+            message.id,
+            KritaBridgeErrorCode.conflict,
+            'The draft changed during backup. No fields were written.',
+          );
+          return;
+        }
+        if (_isUiGenerating()) {
+          _sendError(
+            message.id,
+            KritaBridgeErrorCode.busy,
+            'Launcher started generating. No fields were written.',
+          );
+          return;
+        }
+      }
+      final applied = await writer(patch);
+      _send({
+        'type': 'params_set',
+        'id': message.id,
+        'applied': applied,
+        if (backupPath != null) 'backup_path': backupPath,
+      });
       AppLogger.i(
         'Applied set_params (${applied.length} keys): ${message.id}',
         _logTag,
@@ -197,9 +392,9 @@ class KritaBridgeService implements KritaBridgeMessageService {
   }
 
   Future<void> _sendParams(KritaGetParamsMessage message) async {
+    final tokens = _readTokens == null ? null : await _readTokens.call();
     final params = _readBaseParams();
     final promptSnapshot = _readPromptSnapshot(params);
-    final tokens = _readTokens == null ? null : await _readTokens.call();
     // 用局部变量 + collection-if 表达「值为 null 则整条省略」。
     // 等价写法 `'k': ?expr` 是 Dart 3.9 的 null-aware element，
     // build_runner 捆的 analyzer 尚不支持，会让四个 builder 全部报语法错。
@@ -256,6 +451,10 @@ class KritaBridgeService implements KritaBridgeMessageService {
       ],
       'img2img': params.sourceImage != null,
       if (tokens != null) ...tokens,
+      if (_isAgentRequest() && _readDraft != null)
+        '_draft': _readDraft().toJson(),
+      if (_readBilling != null)
+        'billing': _readBilling(params.copyWith(nSamples: 1)),
     });
     AppLogger.d('Sent params snapshot to Krita: ${message.id}', _logTag);
   }
@@ -280,6 +479,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
     String id,
     KritaImageParamsMapping mapping, {
     Map<String, dynamic> overrides = const {},
+    bool alreadyPrepared = false,
   }) async {
     if (_isUiGenerating() || _isBridgeGenerating) {
       AppLogger.w('Rejected Krita request as busy: $id', _logTag);
@@ -307,7 +507,9 @@ class KritaBridgeService implements KritaBridgeMessageService {
 
     final request = KritaBridgeGenerateRequest(
       id: id,
-      params: _prepareParams(mapping.params.copyWith(nSamples: 1), overrides),
+      params: alreadyPrepared
+          ? mapping.params
+          : _prepareParams(mapping.params.copyWith(nSamples: 1), overrides),
     );
 
     // 角色、预设和规范化设置也已冻结，下一张的 roll 不影响流式或回退请求。
@@ -325,6 +527,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
     try {
       final artifact = await _generateImage(request);
       if (_cancelled) {
+        _send({'type': 'cancelled', 'id': id});
         return;
       }
       if (artifact == null) {
@@ -349,7 +552,9 @@ class KritaBridgeService implements KritaBridgeMessageService {
       );
       AppLogger.i('Completed Krita request: ${request.id}', _logTag);
     } catch (error) {
-      if (!_cancelled) {
+      if (_cancelled) {
+        _send({'type': 'cancelled', 'id': id});
+      } else {
         final code = _mapErrorCode(error);
         AppLogger.e(
           'Krita request failed: $id code=${code.value}',

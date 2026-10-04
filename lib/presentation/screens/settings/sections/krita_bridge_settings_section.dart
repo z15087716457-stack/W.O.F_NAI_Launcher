@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/krita/krita_bridge_notifier.dart';
 import '../widgets/settings_card.dart';
+import '../../../widgets/bridge/agent_bridge_indicator.dart';
+import '../../../widgets/common/studio_icons.dart';
 
 class KritaBridgeSettingsSection extends ConsumerWidget {
   const KritaBridgeSettingsSection({super.key});
@@ -17,7 +19,7 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
     final l10n = context.l10n;
 
     return SettingsCard(
-      icon: Icons.brush_outlined,
+      icon: StudioIcons.settingsIntegrations,
       child: Column(
         children: [
           SettingsSwitchTile(
@@ -33,6 +35,8 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
           ),
           if (state.enabled) ...[
             const Divider(height: 1),
+            const BridgeAgentPanel(),
+            const Divider(height: 1),
             SettingsTile(
               dense: true,
               hoverFeedback: state.status != KritaBridgeStatus.starting,
@@ -41,8 +45,14 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
                 size: 12,
                 color: _statusColor(theme, state.status),
               ),
-              title: Text(_statusLabel(context, state.status)),
-              subtitle: SelectableText(_connectionDetails(context, state)),
+              title: const Text('Krita'),
+              subtitle: Text(
+                state.connectedClientLabel == null
+                    ? l10n.bridge_waiting
+                    : l10n.settings_kritaBridgeClient(
+                        state.connectedClientLabel!,
+                      ),
+              ),
               trailing: OutlinedButton.icon(
                 key: const Key('settings-krita-regenerate'),
                 onPressed: state.status == KritaBridgeStatus.starting
@@ -55,36 +65,43 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
               ),
             ),
             if (state.discoveryFilePath != null)
-              SettingsTile(
-                dense: true,
-                hoverFeedback: false,
-                leading: const Icon(Icons.description_outlined),
-                title: Text(l10n.settings_kritaBridgeDiscoveryFile),
-                subtitle: SelectableText(state.discoveryFilePath!),
-              ),
-            if (state.errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 16,
-                      color: theme.colorScheme.error,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        state.errorMessage!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                    ),
-                  ],
+              ExpansionTile(
+                title: Text(
+                  l10n.settings_kritaBridgeDiscoveryFile,
+                  style: theme.textTheme.bodySmall,
                 ),
+                children: [
+                  SettingsTile(
+                    dense: true,
+                    hoverFeedback: false,
+                    title: SelectableText(_connectionDetails(context, state)),
+                    subtitle: SelectableText(state.discoveryFilePath!),
+                  ),
+                ],
               ),
           ],
+          if (state.errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 16,
+                    color: theme.colorScheme.error,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      state.errorMessage!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -98,17 +115,6 @@ class KritaBridgeSettingsSection extends ConsumerWidget {
       KritaBridgeStatus.listening => l10n.settings_kritaBridgeListeningText,
       KritaBridgeStatus.connected => l10n.settings_kritaBridgeConnectedText,
       KritaBridgeStatus.error => l10n.settings_kritaBridgeErrorText,
-    };
-  }
-
-  String _statusLabel(BuildContext context, KritaBridgeStatus status) {
-    final l10n = context.l10n;
-    return switch (status) {
-      KritaBridgeStatus.disabled => l10n.settings_kritaBridgeDisabled,
-      KritaBridgeStatus.starting => l10n.settings_kritaBridgeStarting,
-      KritaBridgeStatus.listening => l10n.settings_kritaBridgeListening,
-      KritaBridgeStatus.connected => l10n.settings_kritaBridgeConnected,
-      KritaBridgeStatus.error => l10n.settings_kritaBridgeError,
     };
   }
 

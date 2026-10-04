@@ -48,10 +48,15 @@ class _SettingsSection {
 }
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key, this.initialSectionIndex = 0});
+  const SettingsScreen({
+    super.key,
+    this.initialSectionIndex = 0,
+    this.initialIntegrationTab,
+  });
 
   /// Keep existing deep links stable while redistributing the settings pages.
   final int initialSectionIndex;
+  final int? initialIntegrationTab;
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
@@ -81,14 +86,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void initState() {
     super.initState();
     _destination = _legacyDestination(widget.initialSectionIndex);
+    _integrationSearchTab = widget.initialIntegrationTab;
   }
 
   @override
   void didUpdateWidget(covariant SettingsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialSectionIndex != widget.initialSectionIndex) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _select(_legacyDestination(widget.initialSectionIndex));
+    if (oldWidget.initialSectionIndex != widget.initialSectionIndex ||
+        oldWidget.initialIntegrationTab != widget.initialIntegrationTab) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await _select(_legacyDestination(widget.initialSectionIndex));
+        if (mounted &&
+            _destination == SettingsDestination.integrations &&
+            widget.initialIntegrationTab != null) {
+          setState(() => _integrationSearchTab = widget.initialIntegrationTab);
+        }
       });
     }
   }
@@ -168,6 +181,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(settingsBridgeOpenRequestProvider, (previous, next) async {
+      if (previous == next) return;
+      await _select(SettingsDestination.integrations);
+      if (mounted && _destination == SettingsDestination.integrations) {
+        setState(() => _integrationSearchTab = 1);
+      }
+    });
     ref.listen(settingsAccountOpenRequestProvider, (previous, next) {
       if (previous != next) _select(SettingsDestination.account);
     });

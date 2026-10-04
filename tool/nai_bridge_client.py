@@ -9,10 +9,9 @@
   python nai_bridge_client.py get                          # 读当前参数
   python nai_bridge_client.py set steps=32 seed=12345      # 写入 UI 参数（界面实时可见）
   python nai_bridge_client.py set-json '{"prompt":"1girl"}' # 复杂参数（含角色框 characters）
-  python nai_bridge_client.py gen [payload.json]           # 静默生成（不改 UI），图存图库并回传路径
-  python nai_bridge_client.py ui-gen                       # 远程点 Generate（用 UI 当前参数）
+  生图使用安装包 tools/studio-bridge.exe：先 quote，再 gen --quote FILE --authorized。
 
-支持的 set/gen 键（均为可选，未传保持原值）:
+支持的 set 键（均为可选，未传保持原值）:
   prompt, negative_prompt, model, width, height, steps, cfg_scale, sampler,
   seed, n_samples, uc_preset, quality_preset=standard|light|none,
   quality_toggle, cfg_rescale, noise_schedule, variety_plus, smea_auto, smea,
@@ -22,7 +21,6 @@
 quality_preset 与 quality_toggle 同时出现时新键优先；旧布尔键仍映射 Standard/None。
 """
 import asyncio
-import base64
 import json
 import sys
 import time
@@ -34,6 +32,7 @@ DISCOVERY = Path.home() / 'AppData' / 'Roaming' / 'nai-launcher' / 'krita-bridge
 class Bridge:
     def __init__(self):
         self.ws = None
+        self.last_params = None
 
     async def connect(self):
         import websockets
@@ -44,6 +43,7 @@ class Bridge:
         )
         await self.ws.send(json.dumps({
             'type': 'ping', 'version': 1, 'secret': info['secret'],
+            'client': {'kind': 'agent', 'name': 'Python bridge'},
         }))
         resp = json.loads(await self.ws.recv())
         if resp.get('type') != 'pong':
@@ -51,6 +51,13 @@ class Bridge:
         return info
 
     async def rpc(self, type_, payload=None, on_progress=None):
+        payload = dict(payload or {})
+        if type_ == 'set_params' and '_expected' not in payload:
+            baseline = self.last_params or await self.rpc('get_params')
+            draft = baseline.get('_draft')
+            if not isinstance(draft, dict) or not isinstance(draft.get('field_versions'), dict):
+                raise RuntimeError('Studio does not support protected Agent writes; update Studio.')
+            payload['_expected'] = draft['field_versions']
         rid = f'{type_}-{int(time.time() * 1000)}'
         await self.ws.send(json.dumps({
             'type': type_, 'id': rid, 'payload': payload or {},
@@ -63,6 +70,8 @@ class Bridge:
                     on_progress(resp)
                 continue
             if resp.get('id') == rid or rtype == 'error' and resp.get('id') == rid:
+                if rtype == 'params':
+                    self.last_params = resp
                 return resp
 
     async def close(self):
@@ -95,6 +104,9 @@ async def main():
         print(__doc__)
         return 1
     cmd = sys.argv[1]
+    if cmd in ('gen', 'ui-gen'):
+        print('Use tools/studio-bridge.exe: quote first, report price/balance, then gen --quote FILE --authorized.', file=sys.stderr)
+        return 2
     b = Bridge()
     info = await b.connect()
     try:
@@ -112,27 +124,6 @@ async def main():
                 json.loads(Path(arg).read_text(encoding='utf-8'))
             resp = await b.rpc('set_params', payload)
             print(json.dumps(resp, ensure_ascii=False))
-        elif cmd == 'gen':
-            payload = json.loads(Path(sys.argv[2]).read_text(encoding='utf-8')) \
-                if len(sys.argv) > 2 else {}
-            def prog(r):
-                print(f"  生成中 {r.get('step')}/{r.get('total_steps')}", flush=True)
-            resp = await b.rpc('generate', payload, on_progress=prog)
-            if resp.get('type') == 'result':
-                img = base64.b64decode(resp['image'])
-                out = Path(f"bridge_result_{int(time.time())}.png")
-                out.write_bytes(img)
-                print(json.dumps({
-                    'saved_path': resp.get('saved_path'),
-                    'local_copy': str(out.resolve()),
-                    'params': resp.get('params'),
-                }, ensure_ascii=False, indent=2))
-            else:
-                print(json.dumps(resp, ensure_ascii=False))
-        elif cmd == 'ui-gen':
-            resp = await b.rpc('generate', {}, on_progress=lambda r: None)
-            print(json.dumps({k: v for k, v in resp.items() if k != 'image'},
-                             ensure_ascii=False))
         else:
             print(f'未知命令: {cmd}')
             return 1

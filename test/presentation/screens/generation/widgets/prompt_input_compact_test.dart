@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          kritaBridgeNotifierProvider.overrideWith(
+            (ref) => KritaBridgeNotifier(),
+          ),
           promptBlockLibraryNotifierProvider.overrideWith(
             _EmptyPromptBlockLibraryNotifier.new,
           ),

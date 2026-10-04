@@ -28,13 +28,16 @@
 
 - 魔改版可执行文件：`build/windows/x64/runner/Release/nai_launcher.exe`。
 - Krita 桥接：`ws://127.0.0.1:<port>/krita`；端口和 secret 从 `%APPDATA%/nai-launcher/krita-bridge.json` 发现，每次启动会重生成。
-- 常用客户端入口：`get`、`set k=v`、`set-json <JSON 或文件>`、`ui-gen`、`gen`、`cancel`。`gen` 强制单张；批量由客户端循环，失败间隔至少 2 秒。
+- Windows 包在可执行文件同级 `tools/studio-bridge.exe` 附带独立客户端，不依赖 Python 或源码树。入口 `status`、`get --out current.json`、`set k=v --base current.json`、`set-json changes.json --base current.json`、`quote --out quote.json`、`gen --quote quote.json --authorized`、`cancel REQUEST_ID`；每个命令均携带同一 `--name`。生成固定一张，报价有效期 5 分钟且只可使用一次，失败至少隔 2 秒再尝试。完整契约见 [外部 Agent 桥接](docs/agent-bridge.md)。
+- 本机桥接共享开关，Agent 与 Krita 状态分开展示。`ping.client` 中 kind/name 为通过本机会话密钥认证的客户端自报名称，不代表厂商身份认证；旧 Krita ping 仍兼容。Agent 命令按需连接、完成后断开，不能把最近活动当作在线 Agent。多个连接可同时读，修改 / 生成串行，busy 明确拒绝；结果、进度与二进制只返回发起客户端，未指定请求的图片推送只给 Krita。
+- 负面页签右侧的 14px 细线标识启用时占固定位置，灰色等待或最近活动、蓝色执行中、橙色失败 / 中断；点击打开就近浮层。服务仅存 8 条不含正文的动作摘要，面板最多显示 5 条。结束 Agent 连接保留 Krita；断开其他客户端不取消当前请求。
 - `/user/*` 与生图请求都走 `image.novelai.net`，不要把用户接口改回 `api.novelai.net`。
 - `get`/`set` 参数应保持对称。可写项包括 prompt、negative_prompt、尺寸、seed/seed_lock、steps、CFG、sampler、质量词档、UC 预设、SMEA、模型、透明背景和 characters 等。`seed_lock` 是协议兼容派生值：无独立锁标志，`seed != -1` 即视为锁定；`set seed_lock=false` 等价于 `set seed=-1`，`seed_lock=true` 在随机态下钉一个新随机种子。
 - `set` 是部分更新；`characters` 传数组表示整表替换，空数组表示清空。角色框必须同时维护 UI 的 `characterPromptNotifier` 和桥接使用的 `ImageParams.characters`，不能只改其中一套。
-- `prompt`/`negative_prompt` 的读数是应用 fixedTags 后的生效版。vibe、precise reference、img2img 目前可读但不可由桥接写入；UI 中设定后，后续 generate 会继承。
+- 顶层 `prompt`/`negative_prompt` 可能是应用预设后的生效版；Agent 可编辑原文必须读取 `_draft.fields`，其 documents 包含积木结构、field_versions 检查冲突。不要把生效质量词重复写回原文。vibe、precise reference、img2img 只读；UI 设定后，后续生成继承。
 - `uc_preset` 的权威源是 UI 下拉值，桥接读数只是副本，不能根据返回的 `0` 反推 UI 状态；桥接设置该项时会同步 UI。
-- set 后立即 get 可能碰到 token 沉淀竞态，隔一拍再读。写参数前最后几秒必须重新 get，并与最近一次落盘备份核对；每次 get 都落盘到 `nai-workspace/backups/`，禁止凭旧读数拼 payload。
+- Agent 写入必须携带原读数的 `_expected` 字段版本；整表先验证，备份至发现目录 `draft-backups/`，落盘后再次比较目标字段及积木结构，变化则 conflict 并整次停止。模型写入同时检查采样器；其他用户修改保留。角色回填保留匹配 id 的名称、性别、缩略图、启用状态及等价积木；未挂载 lane 也同步。客户端写完立即回读，不凭旧读数覆盖。
+- 接入 / 填参不授权生图。Agent 先取得绑定账号、草稿、参考图和预估单价的 quote，报告单价与已载入账号余额；明确授权后带 `_authorized` 与 quote_id 执行。单价变化或过期 / 重放会拒绝；客户端缺余额不发起生成，quote 不新增网络请求。桥接生成复用停止按钮与 Esc；Ctrl+C 或同名称 + request_id 的 cancel 也可停止。Python 兼容工具只保留受保护的读写，生成请用独立客户端。
 - `autoFormatPrompt` 只规范逗号/空白并保护 NAI 权重结构，不再把提示词中的空格自动改成下划线；数据库和搜索层的 canonical 下划线规则不变。
 - `sdSyntaxAutoConvert` 在失焦和实际生成/桥接请求副本阶段均按设置门控；SD 转换在格式化之前执行，两个开关都关闭时请求副本保留原文。
 

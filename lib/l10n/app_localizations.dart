@@ -10506,7 +10506,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_kritaBridgeEnable.
   ///
   /// In en, this message translates to:
-  /// **'Enable Krita local bridge'**
+  /// **'Enable local bridge'**
   String get settings_kritaBridgeEnable;
 
   /// No description provided for @settings_kritaBridgeDisabledText.
@@ -10524,7 +10524,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_kritaBridgeListeningText.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for Krita plugin connection'**
+  /// **'Waiting for an external Agent or Krita'**
   String get settings_kritaBridgeListeningText;
 
   /// No description provided for @settings_kritaBridgeConnectedText.
@@ -22023,6 +22023,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue with this generation?'**
   String get settings_highAnlasCostQuestion;
+
+  /// No description provided for @bridge_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Local bridge'**
+  String get bridge_title;
+
+  /// No description provided for @bridge_agent.
+  ///
+  /// In en, this message translates to:
+  /// **'External Agent'**
+  String get bridge_agent;
+
+  /// No description provided for @bridge_agentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the instructions to an Agent that can run local commands.'**
+  String get bridge_agentHint;
+
+  /// No description provided for @bridge_waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for connection'**
+  String get bridge_waiting;
+
+  /// No description provided for @bridge_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for activity'**
+  String get bridge_ready;
+
+  /// No description provided for @bridge_clients.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Agent(s) connected'**
+  String bridge_clients(int count);
+
+  /// No description provided for @bridge_activity.
+  ///
+  /// In en, this message translates to:
+  /// **'{client}: {action}'**
+  String bridge_activity(Object client, Object action);
+
+  /// No description provided for @bridge_read.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading parameters'**
+  String get bridge_read;
+
+  /// No description provided for @bridge_write.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating parameters'**
+  String get bridge_write;
+
+  /// No description provided for @bridge_quote.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimating cost'**
+  String get bridge_quote;
+
+  /// No description provided for @bridge_generate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating an image'**
+  String get bridge_generate;
+
+  /// No description provided for @bridge_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping generation'**
+  String get bridge_cancel;
+
+  /// No description provided for @bridge_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get bridge_recent;
+
+  /// No description provided for @bridge_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity yet'**
+  String get bridge_empty;
+
+  /// No description provided for @bridge_copyGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy connection instructions'**
+  String get bridge_copyGuide;
+
+  /// No description provided for @bridge_showGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'View instructions'**
+  String get bridge_showGuide;
+
+  /// No description provided for @bridge_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions copied'**
+  String get bridge_copied;
+
+  /// No description provided for @bridge_disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'End Agent connections'**
+  String get bridge_disconnect;
+
+  /// No description provided for @bridge_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bridge settings'**
+  String get bridge_settings;
+
+  /// No description provided for @bridge_clientMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The bundled client is unavailable. Update Studio.'**
+  String get bridge_clientMissing;
+
+  /// No description provided for @bridge_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Content changed. Read it again.'**
+  String get bridge_conflict;
+
+  /// No description provided for @bridge_busy.
+  ///
+  /// In en, this message translates to:
+  /// **'Another operation is in progress'**
+  String get bridge_busy;
+
+  /// No description provided for @bridge_interrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation interrupted'**
+  String get bridge_interrupted;
+
+  /// No description provided for @bridge_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed. Check the Agent response.'**
+  String get bridge_failed;
+
+  /// No description provided for @bridge_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation timed out. Retry.'**
+  String get bridge_timeout;
+
+  /// No description provided for @bridge_guide.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the local bridge to assist with W.O.F NAI Studio.\nClient: {clientPath}\n\n1. Quote the path correctly for your shell. Run status --name <your-name> and verify success; copying these instructions does not connect.\n2. Run get --name <your-name> --out current.json. Editable original text is in _draft.fields; field_versions protect against concurrent edits. Other fields may include effective quality tags. Do not duplicate them into the original text.\n3. Change only user-authorized fields. Save a patch to changes.json, then run set-json changes.json --base current.json --name <your-name>. Studio backs up and rechecks the edited fields. On conflict, stop and read again; never automatically overwrite newer user edits. Verify readback. characters replaces the entire list: preserve unrelated names, enabled flags, positions, and IDs. Reference images are currently read-only.\n4. Connecting or editing does not authorize generation. Only after an explicit generation request, run quote --out quote.json --name <your-name> and report the estimated Anlas price and cached account balance; server billing is authoritative. After authorization and reporting, run gen --quote quote.json --authorized --name <your-name>. One image per request; a changed draft invalidates the quote.\n5. Each command disconnects when done. Krita can remain connected. Wait on busy and avoid immediate retry loops after errors. Stop generation in Studio, use Ctrl+C, or cancel <request_id> --name <same-name> using the returned request ID. Never print the discovery-file session secret.\n'**
+  String bridge_guide(Object clientPath);
 }
 
 class _AppLocalizationsDelegate

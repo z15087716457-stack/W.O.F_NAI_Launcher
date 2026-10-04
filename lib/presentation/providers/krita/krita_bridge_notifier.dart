@@ -8,12 +8,16 @@ import 'package:hive/hive.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/enums/quality_tag_preset.dart';
 import '../../../core/krita/krita_bridge_server.dart';
+import '../../../core/krita/bridge_session.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/datasources/remote/nai_image_generation_api_service.dart';
 import '../image_generation_provider.dart';
 import '../image_save_settings_provider.dart';
 import '../pill_roll_coordinator.dart';
 import 'krita_bridge_service.dart';
+import 'bridge_draft_snapshot.dart';
+import '../auth_provider.dart';
+import '../pill_workspace_provider.dart';
 
 import 'package:uuid/uuid.dart';
 
@@ -23,6 +27,10 @@ import '../character_prompt_provider.dart';
 import '../prompt_token_counter_provider.dart';
 
 typedef KritaBridgeServerFactory = KritaBridgeServer Function();
+final kritaBridgeServerFactoryProvider = Provider<KritaBridgeServerFactory>(
+  (ref) =>
+      () => KritaBridgeServer(),
+);
 typedef KritaBridgeEnabledPersister = FutureOr<void> Function(bool enabled);
 typedef KritaBridgeServiceFactory =
     KritaBridgeMessageService Function(KritaBridgeServer server);
@@ -39,6 +47,7 @@ class KritaBridgeState {
     this.connectedClientLabel,
     this.activeRequestId,
     this.errorMessage,
+    this.session = const BridgeSession(),
   });
 
   final bool enabled;
@@ -49,6 +58,7 @@ class KritaBridgeState {
   final String? connectedClientLabel;
   final String? activeRequestId;
   final String? errorMessage;
+  final BridgeSession session;
 
   bool get isActive =>
       status == KritaBridgeStatus.listening ||
@@ -69,6 +79,7 @@ class KritaBridgeState {
     bool clearConnectedClientLabel = false,
     bool clearActiveRequest = false,
     bool clearError = false,
+    BridgeSession? session,
   }) {
     return KritaBridgeState(
       enabled: enabled ?? this.enabled,
@@ -85,6 +96,7 @@ class KritaBridgeState {
           ? null
           : (activeRequestId ?? this.activeRequestId),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      session: clearSession ? const BridgeSession() : (session ?? this.session),
     );
   }
 }
@@ -106,6 +118,8 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
   KritaBridgeMessageService? _service;
   StreamSubscription? _messagesSubscription;
   StreamSubscription<bool>? _connectionSubscription;
+  StreamSubscription<BridgeSession>? _sessionSubscription;
+  StreamSubscription<BridgeClient>? _disconnectSubscription;
   static const String _logTag = 'KritaBridge';
 
   KritaBridgeServer? get server => _server;
@@ -137,21 +151,28 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
       _server = server;
       _service = _serviceFactory?.call(server);
       _service?.setActiveRequestReporter(_setActiveRequest);
-      _messagesSubscription = server.messages.listen((message) {
+      _messagesSubscription = server.requests.listen((request) {
         final service = _service;
         if (service == null) {
           return;
         }
-        unawaited(service.handle(message));
+        unawaited(
+          server.inClientScope(request, () => service.handle(request.message)),
+        );
+      });
+      _sessionSubscription = server.sessionChanges.listen((session) {
+        if (mounted && state.enabled) state = state.copyWith(session: session);
+      });
+      _disconnectSubscription = server.disconnections.listen((client) {
+        if (server.ownsActiveOperation(client.id)) {
+          _service?.handleClientDisconnected();
+        }
       });
       _connectionSubscription = server.authenticationChanges.listen((
         connected,
       ) {
         if (!mounted || !state.enabled) {
           return;
-        }
-        if (!connected) {
-          _service?.handleClientDisconnected();
         }
         AppLogger.i(
           connected ? 'Krita client connected' : 'Krita client disconnected',
@@ -166,7 +187,7 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
         );
       });
       if (!mounted) {
-        await server.stop();
+        await server.dispose();
         return;
       }
       state = KritaBridgeState(
@@ -180,12 +201,12 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
         await _persistEnabled?.call(true);
       }
       if (!mounted) {
-        await server.stop();
+        await server.dispose();
         return;
       }
       AppLogger.i('Krita bridge enabled on port ${server.port}', _logTag);
     } catch (error) {
-      await server.stop();
+      await server.dispose();
       AppLogger.e('Failed to enable Krita bridge', error, null, _logTag);
       if (!mounted) {
         return;
@@ -205,15 +226,19 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
 
     await _messagesSubscription?.cancel();
     await _connectionSubscription?.cancel();
+    await _sessionSubscription?.cancel();
+    await _disconnectSubscription?.cancel();
     _messagesSubscription = null;
     _connectionSubscription = null;
+    _sessionSubscription = null;
+    _disconnectSubscription = null;
     _service = null;
 
     final server = _server;
     _server = null;
     if (server != null) {
       AppLogger.i('Disabling Krita bridge', _logTag);
-      await server.stop();
+      await server.dispose();
     }
 
     if (!mounted) {
@@ -265,6 +290,9 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
     AppLogger.i('Krita bridge session regenerated', _logTag);
   }
 
+  Future<void> disconnectAgents() async => _server?.disconnectAgents();
+  void cancelActiveRequest() => _service?.handleClientDisconnected();
+
   Future<void> close() async {
     await disable(persist: false);
   }
@@ -296,9 +324,20 @@ final kritaBridgeNotifierProvider =
     StateNotifierProvider<KritaBridgeNotifier, KritaBridgeState>((ref) {
       final box = Hive.box(StorageKeys.settingsBox);
       final notifier = KritaBridgeNotifier(
+        serverFactory: ref.read(kritaBridgeServerFactoryProvider),
         persistEnabled: (enabled) =>
             box.put(StorageKeys.kritaBridgeEnabled, enabled),
         serviceFactory: (server) => KritaBridgeService(
+          isAgentRequest: () => server.currentClient?.isAgent ?? false,
+          requesterName: () => server.currentClient?.name ?? 'External Agent',
+          readAccountIdentity: () => ref.read(authNotifierProvider).accountId,
+          isRequestAlive: () => server.session.clients.any(
+            (c) => c.id == server.currentClient?.id,
+          ),
+          readDraft: () => readBridgeDraft(ref),
+          backupDraft: (draft) =>
+              backupBridgeDraft(server.discoveryFile.parent, draft),
+          readBilling: (params) => readBridgeBilling(ref, params),
           readBaseParams: () => ref.read(generationParamsNotifierProvider),
           prepareParams: ref.read(kritaBridgePromptPreparerProvider),
           // P2.5：桥接生成受理后重 roll 随机块实例（逐张重抽）
@@ -473,38 +512,73 @@ final kritaBridgeNotifierProvider =
                     ? (entry['y'] as num).toDouble()
                     : null;
                 final hasPos = x != null && y != null;
+                final existing = ref
+                    .read(characterPromptNotifierProvider)
+                    .characters
+                    .where((c) => c.id == entry['id'])
+                    .firstOrNull;
                 uiChars.add(
-                  char_model.CharacterPrompt(
-                    id: const Uuid().v4(),
-                    prompt: prompt,
-                    negativePrompt: uc,
-                    positionMode: hasPos
-                        ? char_model.CharacterPositionMode.custom
-                        : char_model.CharacterPositionMode.aiChoice,
-                    customPosition: hasPos
-                        ? char_model.CharacterPosition(
-                            mode: char_model.CharacterPositionMode.custom,
-                            row: y,
-                            column: x,
-                          )
-                        : null,
-                  ),
+                  (existing ??
+                          char_model.CharacterPrompt(
+                            id: entry['id'] is String
+                                ? entry['id'] as String
+                                : const Uuid().v4(),
+                          ))
+                      .copyWith(
+                        name: entry['name'] is String
+                            ? entry['name'] as String
+                            : existing?.name ?? '',
+                        nameIsCustom: entry['name_is_custom'] is bool
+                            ? entry['name_is_custom'] as bool
+                            : existing?.nameIsCustom ??
+                                  (entry['name'] is String &&
+                                      (entry['name'] as String).isNotEmpty),
+                        prompt: prompt,
+                        negativePrompt: uc,
+                        enabled: entry['enabled'] is bool
+                            ? entry['enabled'] as bool
+                            : existing?.enabled ?? true,
+                        positionMode: hasPos
+                            ? char_model.CharacterPositionMode.custom
+                            : char_model.CharacterPositionMode.aiChoice,
+                        customPosition: hasPos
+                            ? char_model.CharacterPosition(
+                                mode: char_model.CharacterPositionMode.custom,
+                                row: y,
+                                column: x,
+                              )
+                            : null,
+                      ),
                 );
-                paramChars.add(
-                  CharacterPrompt(
-                    prompt: prompt,
-                    negativePrompt: uc,
-                    position: entry['position'] is String
-                        ? entry['position'] as String
-                        : null,
-                    positionX: x,
-                    positionY: y,
-                  ),
-                );
+                if (uiChars.last.enabled) {
+                  paramChars.add(
+                    CharacterPrompt(
+                      prompt: prompt,
+                      negativePrompt: uc,
+                      position: entry['position'] is String
+                          ? entry['position'] as String
+                          : null,
+                      positionX: x,
+                      positionY: y,
+                    ),
+                  );
+                }
               }
               ref
                   .read(characterPromptNotifierProvider.notifier)
                   .replaceAll(uiChars);
+              for (final c in uiChars) {
+                ref
+                    .read(
+                      pillWorkspaceProvider(PillScopes.charPos(c.id)).notifier,
+                    )
+                    .syncFromPlainText(c.prompt);
+                ref
+                    .read(
+                      pillWorkspaceProvider(PillScopes.charNeg(c.id)).notifier,
+                    )
+                    .syncFromPlainText(c.negativePrompt);
+              }
               notifier.clearCharacters();
               for (final c in paramChars) {
                 notifier.addCharacter(c);

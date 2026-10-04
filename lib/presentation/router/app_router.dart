@@ -258,6 +258,8 @@ GoRouter appRouter(Ref ref) {
                 name: 'settings',
                 builder: (context, state) => WindowChromePage(
                   child: SettingsScreen(
+                    initialIntegrationTab:
+                        state.uri.queryParameters['bridge'] == '1' ? 1 : null,
                     initialSectionIndex:
                         state.uri.queryParameters['section'] == 'storage'
                         ? 3

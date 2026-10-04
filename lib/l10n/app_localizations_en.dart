@@ -5922,7 +5922,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'After resetting the data storage path, the app needs to restart to take effect.\\n\\nThe default path will take effect on the next startup. Continue?';
 
   @override
-  String get settings_kritaBridgeEnable => 'Enable Krita local bridge';
+  String get settings_kritaBridgeEnable => 'Enable local bridge';
 
   @override
   String get settings_kritaBridgeDisabledText =>
@@ -5934,7 +5934,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_kritaBridgeListeningText =>
-      'Waiting for Krita plugin connection';
+      'Waiting for an external Agent or Krita';
 
   @override
   String get settings_kritaBridgeConnectedText => 'Krita plugin connected';
@@ -12715,4 +12715,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_highAnlasCostQuestion => 'Continue with this generation?';
+
+  @override
+  String get bridge_title => 'Local bridge';
+
+  @override
+  String get bridge_agent => 'External Agent';
+
+  @override
+  String get bridge_agentHint =>
+      'Copy the instructions to an Agent that can run local commands.';
+
+  @override
+  String get bridge_waiting => 'Waiting for connection';
+
+  @override
+  String get bridge_ready => 'Waiting for activity';
+
+  @override
+  String bridge_clients(int count) {
+    return '$count Agent(s) connected';
+  }
+
+  @override
+  String bridge_activity(Object client, Object action) {
+    return '$client: $action';
+  }
+
+  @override
+  String get bridge_read => 'Reading parameters';
+
+  @override
+  String get bridge_write => 'Updating parameters';
+
+  @override
+  String get bridge_quote => 'Estimating cost';
+
+  @override
+  String get bridge_generate => 'Generating an image';
+
+  @override
+  String get bridge_cancel => 'Stopping generation';
+
+  @override
+  String get bridge_recent => 'Recent activity';
+
+  @override
+  String get bridge_empty => 'No activity yet';
+
+  @override
+  String get bridge_copyGuide => 'Copy connection instructions';
+
+  @override
+  String get bridge_showGuide => 'View instructions';
+
+  @override
+  String get bridge_copied => 'Instructions copied';
+
+  @override
+  String get bridge_disconnect => 'End Agent connections';
+
+  @override
+  String get bridge_settings => 'Bridge settings';
+
+  @override
+  String get bridge_clientMissing =>
+      'The bundled client is unavailable. Update Studio.';
+
+  @override
+  String get bridge_conflict => 'Content changed. Read it again.';
+
+  @override
+  String get bridge_busy => 'Another operation is in progress';
+
+  @override
+  String get bridge_interrupted => 'Operation interrupted';
+
+  @override
+  String get bridge_failed => 'Operation failed. Check the Agent response.';
+
+  @override
+  String get bridge_timeout => 'Operation timed out. Retry.';
+
+  @override
+  String bridge_guide(Object clientPath) {
+    return 'Use the local bridge to assist with W.O.F NAI Studio.\nClient: $clientPath\n\n1. Quote the path correctly for your shell. Run status --name <your-name> and verify success; copying these instructions does not connect.\n2. Run get --name <your-name> --out current.json. Editable original text is in _draft.fields; field_versions protect against concurrent edits. Other fields may include effective quality tags. Do not duplicate them into the original text.\n3. Change only user-authorized fields. Save a patch to changes.json, then run set-json changes.json --base current.json --name <your-name>. Studio backs up and rechecks the edited fields. On conflict, stop and read again; never automatically overwrite newer user edits. Verify readback. characters replaces the entire list: preserve unrelated names, enabled flags, positions, and IDs. Reference images are currently read-only.\n4. Connecting or editing does not authorize generation. Only after an explicit generation request, run quote --out quote.json --name <your-name> and report the estimated Anlas price and cached account balance; server billing is authoritative. After authorization and reporting, run gen --quote quote.json --authorized --name <your-name>. One image per request; a changed draft invalidates the quote.\n5. Each command disconnects when done. Krita can remain connected. Wait on busy and avoid immediate retry loops after errors. Stop generation in Studio, use Ctrl+C, or cancel <request_id> --name <same-name> using the returned request ID. Never print the discovery-file session secret.\n';
+  }
 }

@@ -282,7 +282,7 @@ void main() {
             expect(find.text('立即同步'), findsOneWidget);
           } else {
             expect(find.text('ComfyUI'), findsOneWidget);
-            expect(find.text('Krita'), findsOneWidget);
+            expect(find.text('本机桥接'), findsOneWidget);
             expect(find.text('网络'), findsOneWidget);
             if (tab == 0) {
               expect(find.text('SeedVR2 超分'), findsOneWidget);
@@ -332,7 +332,7 @@ void main() {
     expect(settings.warnExternalImageSend, isFalse);
     expect(settings.confirmDangerousActions, isFalse);
     expect(settings.preventOverwrite, isFalse);
-    expect(settings.warnHighAnlasCost, isTrue);
+    expect(settings.warnHighAnlasCost, isFalse);
   });
 
   testWidgets(

@@ -5709,7 +5709,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '重置数据存储路径后，需要重启应用才能生效。\\n\\n默认路径将在下次启动时生效。是否继续？';
 
   @override
-  String get settings_kritaBridgeEnable => '启用 Krita 本地桥接';
+  String get settings_kritaBridgeEnable => '启用本机桥接';
 
   @override
   String get settings_kritaBridgeDisabledText => '默认关闭；开启后只监听本机 127.0.0.1';
@@ -5718,7 +5718,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_kritaBridgeStartingText => '正在启动本地桥接服务...';
 
   @override
-  String get settings_kritaBridgeListeningText => '等待 Krita 插件连接';
+  String get settings_kritaBridgeListeningText => '等待外部 Agent 或 Krita 连接';
 
   @override
   String get settings_kritaBridgeConnectedText => 'Krita 插件已连接';
@@ -12111,6 +12111,90 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_highAnlasCostQuestion => '是否继续本次生成？';
+
+  @override
+  String get bridge_title => '本机桥接';
+
+  @override
+  String get bridge_agent => '外部 Agent';
+
+  @override
+  String get bridge_agentHint => '复制说明，交给能执行本机命令的 Agent。';
+
+  @override
+  String get bridge_waiting => '等待连接';
+
+  @override
+  String get bridge_ready => '等待操作';
+
+  @override
+  String bridge_clients(int count) {
+    return '$count 个 Agent 已连接';
+  }
+
+  @override
+  String bridge_activity(Object client, Object action) {
+    return '$client：$action';
+  }
+
+  @override
+  String get bridge_read => '读取参数';
+
+  @override
+  String get bridge_write => '修改参数';
+
+  @override
+  String get bridge_quote => '预估消耗';
+
+  @override
+  String get bridge_generate => '生成图片';
+
+  @override
+  String get bridge_cancel => '停止生成';
+
+  @override
+  String get bridge_recent => '最近活动';
+
+  @override
+  String get bridge_empty => '尚无活动';
+
+  @override
+  String get bridge_copyGuide => '复制接管说明';
+
+  @override
+  String get bridge_showGuide => '查看说明';
+
+  @override
+  String get bridge_copied => '接管说明已复制';
+
+  @override
+  String get bridge_disconnect => '结束 Agent 连接';
+
+  @override
+  String get bridge_settings => '桥接设置';
+
+  @override
+  String get bridge_clientMissing => '随包客户端尚未就绪，请更新 Studio。';
+
+  @override
+  String get bridge_conflict => '内容已修改，请重新读取';
+
+  @override
+  String get bridge_busy => '另有操作正在进行';
+
+  @override
+  String get bridge_interrupted => '操作已中断';
+
+  @override
+  String get bridge_failed => '操作失败，请查看 Agent 返回的信息';
+
+  @override
+  String get bridge_timeout => '操作超时，请重试';
+
+  @override
+  String bridge_guide(Object clientPath) {
+    return '请通过本机桥接协助操作 W.O.F NAI Studio。\n客户端：$clientPath\n\n1. 根据你的 shell 正确引用这个路径。先运行 status --name <你的名称>，确认连接成功；复制本说明不代表已连接。\n2. 运行 get --name <你的名称> --out current.json，读取当前状态。可编辑原文在 _draft.fields，field_versions 用于检查冲突；其余读数可能包含质量词等生效内容。不要把生效内容重复写回原文。\n3. 只修改用户授权的字段。将修改写入 changes.json，再运行 set-json changes.json --base current.json --name <你的名称>。应用会先备份，再核对这些字段；冲突时停止并重新读取，不能自动覆盖用户新修改。返回 readback 用于核对写入。characters 是整个列表替换，请保留无关角色的名称、启用状态、位置和 id。参考图目前只读，请保留 Studio 中的设置。\n4. 接入或填参不代表授权生图。只有用户明确要求生成时，先运行 quote --out quote.json --name <你的名称>，向用户报告预计 Anlas 单价和余额（余额来自当前已载入账号，实际计费以服务端为准）。授权与报告完成后运行 gen --quote quote.json --authorized --name <你的名称>。每次只生成一张；草稿改变会拒绝旧估价。\n5. 操作结束自动断开。Krita 可同时连接；busy 时等待当前操作结束，失败后不要无间隔重试。生成可在 Studio 中停止；客户端也支持 Ctrl+C，或用返回的 request_id 执行 cancel <request_id> --name <同一名称>。不要输出发现文件中的会话密钥。\n';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -17818,7 +17902,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
       '重設資料儲存路徑後，需要重啟應用才能生效。\\n\\n預設路徑將在下次啟動時生效。是否繼續？';
 
   @override
-  String get settings_kritaBridgeEnable => '啟用 Krita 本地橋接';
+  String get settings_kritaBridgeEnable => '啟用本機橋接';
 
   @override
   String get settings_kritaBridgeDisabledText => '預設關閉；開啟後只監聽本機 127.0.0.1';
@@ -17827,7 +17911,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_kritaBridgeStartingText => '正在啟動本地橋接服務...';
 
   @override
-  String get settings_kritaBridgeListeningText => '等待 Krita 外掛連線';
+  String get settings_kritaBridgeListeningText => '等待外部 Agent 或 Krita 連線';
 
   @override
   String get settings_kritaBridgeConnectedText => 'Krita 外掛已連線';
@@ -24220,4 +24304,88 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get settings_highAnlasCostQuestion => '是否繼續本次生成？';
+
+  @override
+  String get bridge_title => '本機橋接';
+
+  @override
+  String get bridge_agent => '外部 Agent';
+
+  @override
+  String get bridge_agentHint => '複製說明，交給能執行本機命令的 Agent。';
+
+  @override
+  String get bridge_waiting => '等待連線';
+
+  @override
+  String get bridge_ready => '等待操作';
+
+  @override
+  String bridge_clients(int count) {
+    return '$count 個 Agent 已連線';
+  }
+
+  @override
+  String bridge_activity(Object client, Object action) {
+    return '$client：$action';
+  }
+
+  @override
+  String get bridge_read => '讀取參數';
+
+  @override
+  String get bridge_write => '修改參數';
+
+  @override
+  String get bridge_quote => '預估消耗';
+
+  @override
+  String get bridge_generate => '生成圖片';
+
+  @override
+  String get bridge_cancel => '停止生成';
+
+  @override
+  String get bridge_recent => '最近活動';
+
+  @override
+  String get bridge_empty => '尚無活動';
+
+  @override
+  String get bridge_copyGuide => '複製接管說明';
+
+  @override
+  String get bridge_showGuide => '檢視說明';
+
+  @override
+  String get bridge_copied => '接管說明已複製';
+
+  @override
+  String get bridge_disconnect => '結束 Agent 連線';
+
+  @override
+  String get bridge_settings => '橋接設定';
+
+  @override
+  String get bridge_clientMissing => '隨包客戶端尚未就緒，請更新 Studio。';
+
+  @override
+  String get bridge_conflict => '內容已修改，請重新讀取';
+
+  @override
+  String get bridge_busy => '另有操作正在進行';
+
+  @override
+  String get bridge_interrupted => '操作已中斷';
+
+  @override
+  String get bridge_failed => '操作失敗，請檢視 Agent 返回的資訊';
+
+  @override
+  String get bridge_timeout => '操作逾時，請重試';
+
+  @override
+  String bridge_guide(Object clientPath) {
+    return '請通過本機橋接協助操作 W.O.F NAI Studio。\n客戶端：$clientPath\n\n1. 根據你的 shell 正確引用這個路徑。先執行 status --name <你的名稱>，確認連線成功；複製本說明不代表已連線。\n2. 執行 get --name <你的名稱> --out current.json，讀取當前狀態。可編輯原文在 _draft.fields，field_versions 用於檢查衝突；其餘讀數可能包含品質詞等生效內容。不要把生效內容重複寫回原文。\n3. 只修改使用者授權的欄位。將修改寫入 changes.json，再執行 set-json changes.json --base current.json --name <你的名稱>。應用會先備份，再核對這些欄位；衝突時停止並重新讀取，不能自動覆蓋使用者新修改。返回 readback 用於核對寫入。characters 是整個列表替換，請保留無關角色的名稱、啟用狀態、位置和 id。參考圖目前只讀，請保留 Studio 中的設定。\n4. 接入或填參不代表授權生圖。只有使用者明確要求生成時，先執行 quote --out quote.json --name <你的名稱>，向用戶報告預計 Anlas 單價和餘額（餘額來自當前已載入帳號，實際計費以服務端為準）。授權與報告完成後執行 gen --quote quote.json --authorized --name <你的名稱>。每次只生成一張；草稿改變會拒絕舊估價。\n5. 操作結束自動斷開。Krita 可同時連線；busy 時等待當前操作結束，失敗後不要無間隔重試。生成可在 Studio 中停止；客戶端也支援 Ctrl+C，或用返回的 request_id 執行 cancel <request_id> --name <同一名稱>。不要輸出發現檔案中的會話金鑰。\n';
+  }
 }

@@ -21,6 +21,49 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/generation_
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 
 void main() {
+  testWidgets('桥接生成使用现有停止按钮且不调用 UI 生成', (tester) async {
+    final bridge = _ActiveBridgeNotifier();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(
+            _MemoryLocalStorageService({}),
+          ),
+          imageGenerationNotifierProvider.overrideWith(_CaptureGeneration.new),
+          kritaBridgeNotifierProvider.overrideWith((ref) => bridge),
+          subscriptionNotifierProvider.overrideWith(
+            _TestSubscriptionNotifier.new,
+          ),
+          estimatedCostProvider.overrideWithValue(0),
+          isFreeGenerationProvider.overrideWithValue(true),
+        ],
+        child: const MaterialApp(
+          locale: Locale('zh'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SizedBox(
+              width: 400,
+              height: 60,
+              child: GenerationControls(
+                compact: true,
+                showBalanceChips: false,
+                showAutoSaveChip: false,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('停止生成'), findsOneWidget);
+    await tester.tap(find.text('停止生成'));
+    await tester.pump();
+    expect(bridge.stops, 1);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets(
     'enhance button submits tool parameters while the img2img draft stays untouched',
     (tester) async {
@@ -273,4 +316,18 @@ class _TestSubscriptionNotifier extends SubscriptionNotifier {
 class _TestExploreRunner extends ExploreRunRunner {
   @override
   ExploreRunRunnerState build() => const ExploreRunRunnerState();
+}
+
+class _ActiveBridgeNotifier extends _TestKritaBridgeNotifier {
+  _ActiveBridgeNotifier() {
+    state = const KritaBridgeState(
+      enabled: true,
+      activeRequestId: 'offline-test',
+    );
+  }
+  int stops = 0;
+  @override
+  void cancelActiveRequest() {
+    stops++;
+  }
 }

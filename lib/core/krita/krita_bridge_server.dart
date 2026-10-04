@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import '../utils/app_logger.dart';
 import 'krita_bridge_models.dart';
 import 'krita_bridge_protocol.dart';
+import 'bridge_session.dart';
 
 typedef KritaBridgeSecretGenerator = String Function();
 typedef KritaBridgePidProvider = int Function();
@@ -37,11 +38,19 @@ class KritaBridgeServer {
       StreamController<KritaBridgeMessage>.broadcast();
   final StreamController<bool> _authenticationController =
       StreamController<bool>.broadcast();
+  final _requests = StreamController<BridgeRequest>.broadcast();
+  final _sessions = StreamController<BridgeSession>.broadcast();
+  final _disconnections = StreamController<BridgeClient>.broadcast();
+  final _sockets = <String, WebSocket>{};
+  final _clients = <String, BridgeClient>{};
+  final _pending = <String, BridgeRequest>{};
+  final _activities = <BridgeActivity>[];
+  static final _clientScope = Object();
+  int _nextClient = 0;
+  int _nextActivity = 0;
+  BridgeRequest? _mutationOwner;
 
   HttpServer? _server;
-  WebSocket? _client;
-  bool _clientAuthenticated = false;
-  String? _connectedClientLabel;
   String? _secret;
   DateTime? _startedAt;
 
@@ -55,9 +64,44 @@ class KritaBridgeServer {
 
   bool get isListening => _server != null;
 
-  bool get isClientAuthenticated => _clientAuthenticated;
+  bool get isClientAuthenticated => _clients.values.any((c) => !c.isAgent);
 
-  String? get connectedClientLabel => _connectedClientLabel;
+  String? get connectedClientLabel =>
+      _clients.values.where((c) => !c.isAgent).map((c) => c.name).lastOrNull;
+  Stream<BridgeRequest> get requests => _requests.stream;
+  Stream<BridgeSession> get sessionChanges => _sessions.stream;
+  Stream<BridgeClient> get disconnections => _disconnections.stream;
+  BridgeSession get session => BridgeSession(
+    clients: List.unmodifiable(_clients.values),
+    activities: List.unmodifiable(_activities),
+  );
+  BridgeClient? get currentClient =>
+      (Zone.current[_clientScope] as BridgeRequest?)?.client;
+  bool ownsActiveOperation(String clientId) =>
+      _mutationOwner?.client.id == clientId;
+
+  Future<void> inClientScope(
+    BridgeRequest request,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await runZoned(action, zoneValues: {_clientScope: request});
+    } catch (_) {
+      runZoned(
+        () => send({
+          'type': 'error',
+          'id': request.message.id,
+          'code': 'server_error',
+          'message': 'Bridge operation failed.',
+        }),
+        zoneValues: {_clientScope: request},
+      );
+    } finally {
+      _pending.remove(request.key);
+      if (_mutationOwner?.key == request.key) _mutationOwner = null;
+      _finish(request.key, BridgeActivityStatus.completed);
+    }
+  }
 
   File get discoveryFile =>
       File(_join(_discoveryDirectory.path, discoveryFileName));
@@ -79,17 +123,18 @@ class KritaBridgeServer {
   }
 
   Future<void> stop() async {
-    final client = _client;
-    _client = null;
-    _clientAuthenticated = false;
-    _connectedClientLabel = null;
+    final sockets = _sockets.values.toList();
+    _sockets.clear();
+    _clients.clear();
+    _pending.clear();
+    _mutationOwner = null;
+    _activities.clear();
     if (!_authenticationController.isClosed) {
       _authenticationController.add(false);
     }
 
-    if (client != null) {
-      await client.close();
-    }
+    _publishSession();
+    await Future.wait(sockets.map((s) => s.close()));
 
     final server = _server;
     _server = null;
@@ -109,24 +154,33 @@ class KritaBridgeServer {
     await stop();
     await _messageController.close();
     await _authenticationController.close();
+    await _requests.close();
+    await _sessions.close();
+    await _disconnections.close();
   }
 
   void send(Map<String, dynamic> message) {
-    final client = _client;
-    if (client == null || !_clientAuthenticated) {
+    final request = Zone.current[_clientScope] as BridgeRequest?;
+    if (request == null) {
+      // Unsolicited image pushes are exclusively for Krita.
+      for (final c in _clients.values.where((c) => !c.isAgent)) {
+        _sockets[c.id]?.add(jsonEncode(message));
+      }
       return;
     }
-
-    client.add(jsonEncode(message));
+    _sockets[request.client.id]?.add(jsonEncode(message));
+    if (message['type'] == 'error') {
+      _finish(
+        request.key,
+        BridgeActivityStatus.failed,
+        errorCode: message['code'] as String?,
+      );
+    }
   }
 
   void sendBinary(Uint8List bytes) {
-    final client = _client;
-    if (client == null || !_clientAuthenticated) {
-      return;
-    }
-
-    client.add(bytes);
+    final client = currentClient;
+    if (client != null) _sockets[client.id]?.add(bytes);
   }
 
   Future<void> _acceptRequests(HttpServer server) async {
@@ -138,18 +192,28 @@ class KritaBridgeServer {
         continue;
       }
 
-      final clientLabel = _clientLabelFor(request);
+      if (_sockets.length >= 16) {
+        request.response.statusCode = HttpStatus.serviceUnavailable;
+        await request.response.close();
+        continue;
+      }
       final socket = await WebSocketTransformer.upgrade(request);
+      final clientId = 'client-${++_nextClient}';
+      _sockets[clientId] = socket;
+      socket.pingInterval = const Duration(seconds: 30);
       AppLogger.i('Incoming WebSocket connection', _logTag);
-      unawaited(_handleSocket(socket, clientLabel: clientLabel));
+      unawaited(_handleSocket(socket, clientId: clientId));
     }
   }
 
   Future<void> _handleSocket(
     WebSocket socket, {
-    required String clientLabel,
+    required String clientId,
   }) async {
     var socketAuthenticated = false;
+    final authTimeout = Timer(const Duration(seconds: 5), () {
+      if (!socketAuthenticated) unawaited(socket.close());
+    });
 
     try {
       await for (final data in socket) {
@@ -203,50 +267,143 @@ class KritaBridgeServer {
         }
 
         if (message is KritaPingMessage) {
-          await _authenticateSocket(socket, clientLabel: clientLabel);
+          _clients.putIfAbsent(
+            clientId,
+            () => BridgeClient(
+              id: clientId,
+              kind: message.clientKind == 'agent'
+                  ? BridgeClientKind.agent
+                  : BridgeClientKind.krita,
+              name: message.clientName,
+            ),
+          );
           socketAuthenticated = true;
-          socket.add(jsonEncode(KritaBridgeProtocol.encodePong()));
+          authTimeout.cancel();
+          _authenticationController.add(isClientAuthenticated);
+          _publishSession();
+          socket.add(
+            jsonEncode({
+              ...KritaBridgeProtocol.encodePong(),
+              'capabilities': ['multi_client', 'guarded_set', 'raw_draft'],
+              'client_id': clientId,
+            }),
+          );
           AppLogger.i('Bridge client authenticated', _logTag);
           continue;
         }
 
-        if (!identical(_client, socket)) {
-          AppLogger.w(
-            'Dropped message from replaced client'
-            '${message.id == null ? '' : ' id=${message.id}'}',
-            _logTag,
+        final request = BridgeRequest(
+          client: _clients[clientId]!,
+          message: message,
+        );
+        final mutates = const {
+          'set_params',
+          'generate',
+          'inpaint',
+          'img2img',
+        }.contains(message.type);
+        if (_pending.containsKey(request.key) ||
+            (mutates && _mutationOwner != null)) {
+          _reject(request, socket, 'busy', 'Another operation is in progress.');
+          continue;
+        }
+        if (message is KritaCancelMessage &&
+            _mutationOwner != null &&
+            _mutationOwner!.client.id != clientId &&
+            !(request.client.isAgent &&
+                _mutationOwner!.client.isAgent &&
+                request.client.name == _mutationOwner!.client.name &&
+                message.id == _mutationOwner!.message.id)) {
+          _reject(
+            request,
+            socket,
+            'busy',
+            'This request belongs to another client.',
           );
           continue;
         }
-
+        if (mutates) _mutationOwner = request;
+        _pending[request.key] = request;
+        _record(request);
         _messageController.add(message);
+        _requests.add(request);
       }
+    } catch (_) {
+      // Socket failures are represented in session state without raw payloads.
     } finally {
-      if (identical(_client, socket)) {
-        _client = null;
-        _clientAuthenticated = false;
-        _connectedClientLabel = null;
-        if (!_authenticationController.isClosed) {
-          _authenticationController.add(false);
+      authTimeout.cancel();
+      _sockets.remove(clientId);
+      final client = _clients.remove(clientId);
+      if (client != null) {
+        _disconnections.add(client);
+        for (final r in _pending.values.where((r) => r.client.id == clientId)) {
+          _finish(r.key, BridgeActivityStatus.disconnected);
         }
+        _authenticationController.add(isClientAuthenticated);
+        _publishSession();
       }
     }
   }
 
-  Future<void> _authenticateSocket(
-    WebSocket socket, {
-    required String clientLabel,
-  }) async {
-    final previousClient = _client;
-    if (previousClient != null && !identical(previousClient, socket)) {
-      unawaited(previousClient.close());
+  void _record(BridgeRequest request, {String? activityKey}) {
+    _activities.insert(
+      0,
+      BridgeActivity(
+        key: activityKey ?? request.key,
+        client: request.client,
+        operation: request.message.type,
+        at: _clock(),
+      ),
+    );
+    if (_activities.length > 8) {
+      // Keep a long generation visible when other clients repeatedly read.
+      final completed = _activities.lastIndexWhere(
+        (a) => a.status != BridgeActivityStatus.running,
+      );
+      final removable = completed >= 0
+          ? completed
+          : _activities.lastIndexWhere((a) => a.key != _mutationOwner?.key);
+      if (removable >= 0) _activities.removeAt(removable);
     }
+    _publishSession();
+  }
 
-    _client = socket;
-    _clientAuthenticated = true;
-    _connectedClientLabel = clientLabel;
-    _authenticationController.add(true);
-    AppLogger.i('Authenticated client is active', _logTag);
+  void _finish(String key, BridgeActivityStatus status, {String? errorCode}) {
+    final i = _activities.indexWhere((a) => a.key == key);
+    if (i < 0 || _activities[i].status != BridgeActivityStatus.running) return;
+    _activities[i] = _activities[i].finish(status, errorCode: errorCode);
+    _publishSession();
+  }
+
+  void _reject(
+    BridgeRequest request,
+    WebSocket socket,
+    String code,
+    String message,
+  ) {
+    // A duplicate request must not mark its still-running original as failed.
+    final activityKey = '${request.key}:rejected-${++_nextActivity}';
+    _record(request, activityKey: activityKey);
+    _finish(activityKey, BridgeActivityStatus.failed, errorCode: code);
+    socket.add(
+      jsonEncode({
+        'type': 'error',
+        'id': request.message.id,
+        'code': code,
+        'message': message,
+      }),
+    );
+  }
+
+  void _publishSession() {
+    if (!_sessions.isClosed) _sessions.add(session);
+  }
+
+  Future<void> disconnectAgents() async {
+    final agents = _clients.values.where((c) => c.isAgent).toList();
+    await Future.wait(
+      agents.map((c) => _sockets[c.id]?.close() ?? Future.value()),
+    );
   }
 
   void _sendError(WebSocket socket, KritaBridgeError error) {
@@ -297,20 +454,6 @@ class KritaBridgeServer {
     final random = Random.secure();
     final bytes = List<int>.generate(32, (_) => random.nextInt(256));
     return base64UrlEncode(bytes).replaceAll('=', '');
-  }
-
-  static String _clientLabelFor(HttpRequest request) {
-    final address =
-        request.connectionInfo?.remoteAddress.address ?? 'unknown client';
-    final userAgent = request.headers.value(HttpHeaders.userAgentHeader);
-    if (userAgent == null || userAgent.isEmpty) {
-      return address;
-    }
-
-    final safeUserAgent = userAgent.length > 80
-        ? '${userAgent.substring(0, 80)}...'
-        : userAgent;
-    return '$address ($safeUserAgent)';
   }
 
   static String _join(String left, String right) {

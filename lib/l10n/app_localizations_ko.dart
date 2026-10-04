@@ -5785,7 +5785,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '데이터 저장 경로를 초기화하면 앱을 다시 시작해야 적용됩니다.\\n\\n기본 경로는 다음 실행 때 적용됩니다. 계속하시겠습니까?';
 
   @override
-  String get settings_kritaBridgeEnable => 'Krita 로컬 브리지 사용';
+  String get settings_kritaBridgeEnable => '로컬 연결 활성화';
 
   @override
   String get settings_kritaBridgeDisabledText =>
@@ -5795,7 +5795,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_kritaBridgeStartingText => '로컬 브리지 서비스 시작 중...';
 
   @override
-  String get settings_kritaBridgeListeningText => 'Krita 플러그인 연결 대기 중';
+  String get settings_kritaBridgeListeningText => '외부 Agent 또는 Krita 연결 대기 중';
 
   @override
   String get settings_kritaBridgeConnectedText => 'Krita 플러그인 연결됨';
@@ -12345,4 +12345,88 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_highAnlasCostQuestion => '이번 생성을 계속할까요?';
+
+  @override
+  String get bridge_title => '로컬 연결';
+
+  @override
+  String get bridge_agent => '외부 Agent';
+
+  @override
+  String get bridge_agentHint => '로컬 명령을 실행할 수 있는 Agent에게 안내를 전달하세요.';
+
+  @override
+  String get bridge_waiting => '연결 대기 중';
+
+  @override
+  String get bridge_ready => '작업 대기 중';
+
+  @override
+  String bridge_clients(int count) {
+    return 'Agent $count개 연결됨';
+  }
+
+  @override
+  String bridge_activity(Object client, Object action) {
+    return '$client: $action';
+  }
+
+  @override
+  String get bridge_read => '매개변수 읽기';
+
+  @override
+  String get bridge_write => '매개변수 수정';
+
+  @override
+  String get bridge_quote => '소모량 계산';
+
+  @override
+  String get bridge_generate => '이미지 생성';
+
+  @override
+  String get bridge_cancel => '생성 중지';
+
+  @override
+  String get bridge_recent => '최근 활동';
+
+  @override
+  String get bridge_empty => '아직 활동 없음';
+
+  @override
+  String get bridge_copyGuide => '연결 안내 복사';
+
+  @override
+  String get bridge_showGuide => '안내 보기';
+
+  @override
+  String get bridge_copied => '안내를 복사했습니다';
+
+  @override
+  String get bridge_disconnect => 'Agent 연결 종료';
+
+  @override
+  String get bridge_settings => '연결 설정';
+
+  @override
+  String get bridge_clientMissing => '번들 클라이언트가 없습니다. Studio를 업데이트하세요.';
+
+  @override
+  String get bridge_conflict => '내용이 변경되었습니다. 다시 읽어주세요.';
+
+  @override
+  String get bridge_busy => '다른 작업이 진행 중입니다';
+
+  @override
+  String get bridge_interrupted => '작업 중단됨';
+
+  @override
+  String get bridge_failed => '작업에 실패했습니다. Agent 응답을 확인하세요.';
+
+  @override
+  String get bridge_timeout => '작업 시간이 초과되었습니다. 다시 시도하세요.';
+
+  @override
+  String bridge_guide(Object clientPath) {
+    return '로컬 연결로 W.O.F NAI Studio 작업을 도와주세요.\n클라이언트: $clientPath\n\n1. 셸에 맞게 경로를 인용하고 status --name <이름>으로 연결 성공을 확인하세요. 안내 복사만으로 연결되지는 않습니다.\n2. get --name <이름> --out current.json으로 현재 상태를 읽으세요. 편집할 원문은 _draft.fields, 충돌 확인 값은 field_versions입니다. 다른 값에 포함된 품질 태그를 원문에 중복해서 쓰지 마세요.\n3. 사용자가 허용한 필드만 changes.json에 저장하고 set-json changes.json --base current.json --name <이름>을 실행하세요. Studio는 백업 후 해당 필드를 다시 확인합니다. 충돌 시 중단하고 다시 읽으며 최신 사용자 편집을 덮어쓰지 마세요. readback을 확인하세요. characters는 목록 전체를 교체하므로 무관한 이름, 활성 상태, 위치와 id를 보존하세요. 참조 이미지는 현재 읽기 전용입니다.\n4. 연결이나 매개변수 편집은 생성 허가가 아닙니다. 명시적인 생성 요청이 있으면 quote --out quote.json --name <이름>을 실행해 예상 Anlas 단가와 로드된 계정 잔액을 알리세요. 실제 요금은 서버 기준입니다. 허가와 안내 후 gen --quote quote.json --authorized --name <이름>을 실행하세요. 요청당 한 장이며 초안이 바뀌면 다시 계산해야 합니다.\n5. 각 작업이 끝나면 연결이 종료됩니다. Krita와 동시에 연결할 수 있습니다. busy에서는 진행 중인 작업이 끝날 때까지 기다리고 오류 직후 재시도를 반복하지 마세요. Studio의 중지, Ctrl+C 또는 반환된 request_id로 cancel <request_id> --name <같은 이름>을 실행해 생성을 중지할 수 있습니다. 검색 파일의 세션 비밀 키를 출력하지 마세요.\n';
+  }
 }

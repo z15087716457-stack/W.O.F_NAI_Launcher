@@ -89,6 +89,11 @@ class KritaBridgeProtocol {
         return _decodePassThrough(id, payload, isSetParams: true);
       case 'generate':
         return _decodePassThrough(id, payload, isSetParams: false);
+      case 'quote':
+        if (id == null || id.isEmpty) return _invalid(id, 'Missing request id');
+        return KritaBridgeDecodeResult.message(
+          KritaQuoteMessage(id: id, payload: payload),
+        );
       default:
         return KritaBridgeDecodeResult.error(
           KritaBridgeError(
@@ -136,8 +141,26 @@ class KritaBridgeProtocol {
       );
     }
 
+    final client = data['client'];
+    if (client != null && client is! Map<String, dynamic>) {
+      return _invalid(null, 'Invalid client identity');
+    }
+    final kind = client is Map ? client['kind'] ?? 'krita' : 'krita';
+    final name = client is Map ? client['name'] ?? 'Krita' : 'Krita';
+    if ((kind != 'agent' && kind != 'krita') ||
+        name is! String ||
+        name.trim().isEmpty ||
+        name.length > 64 ||
+        RegExp(r'[\x00-\x1f\x7f]').hasMatch(name)) {
+      return _invalid(null, 'Invalid client identity');
+    }
     return KritaBridgeDecodeResult.message(
-      KritaPingMessage(version: requestVersion, secret: secret!),
+      KritaPingMessage(
+        version: requestVersion,
+        secret: secret!,
+        clientKind: kind as String,
+        clientName: name.trim(),
+      ),
     );
   }
 

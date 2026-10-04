@@ -77,7 +77,7 @@ class _IntegrationsSettingsSectionState
   Widget build(BuildContext context) {
     final labels = [
       'ComfyUI',
-      'Krita',
+      context.l10n.bridge_title,
       if (widget.panelBuilders == null) context.l10n.settings_network,
     ];
 

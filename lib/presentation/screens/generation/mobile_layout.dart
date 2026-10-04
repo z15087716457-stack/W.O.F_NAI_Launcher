@@ -155,12 +155,22 @@ class _MobileGenerationLayoutState
               Expanded(
                 child: _MobileGenerateButton(
                   isGenerating: isGenerating,
-                  showCancel: isLauncherGenerating,
+                  showCancel:
+                      isLauncherGenerating ||
+                      kritaBridgeState.isBridgeGenerating,
                   cooldownRemainingSeconds: cooldownState.remainingSeconds,
                   onGenerate: () => _handleGenerate(context, ref),
-                  onCancel: () => ref
-                      .read(imageGenerationNotifierProvider.notifier)
-                      .cancel(),
+                  onCancel: () {
+                    if (kritaBridgeState.isBridgeGenerating) {
+                      ref
+                          .read(kritaBridgeNotifierProvider.notifier)
+                          .cancelActiveRequest();
+                    } else {
+                      ref
+                          .read(imageGenerationNotifierProvider.notifier)
+                          .cancel();
+                    }
+                  },
                 ),
               ),
             ],

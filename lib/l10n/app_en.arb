@@ -3174,10 +3174,10 @@
   "settings_restartRequiredTitle": "Restart Required",
   "settings_changePathConfirm": "After changing the data storage path, the app needs to restart to take effect.\\n\\nThe new path will take effect on the next startup. Continue?",
   "settings_resetPathConfirm": "After resetting the data storage path, the app needs to restart to take effect.\\n\\nThe default path will take effect on the next startup. Continue?",
-  "settings_kritaBridgeEnable": "Enable Krita local bridge",
+  "settings_kritaBridgeEnable": "Enable local bridge",
   "settings_kritaBridgeDisabledText": "Off by default; listens only on local 127.0.0.1 when enabled",
   "settings_kritaBridgeStartingText": "Starting local bridge service...",
-  "settings_kritaBridgeListeningText": "Waiting for Krita plugin connection",
+  "settings_kritaBridgeListeningText": "Waiting for an external Agent or Krita",
   "settings_kritaBridgeConnectedText": "Krita plugin connected",
   "settings_kritaBridgeErrorText": "Startup failed, check the error message",
   "settings_kritaBridgeDisabled": "Disabled",
@@ -7189,5 +7189,49 @@
   "imageMenu_saveToBlock": "Save to blocks",
   "settings_highAnlasCostEstimate": "Estimated usage",
   "settings_highAnlasCostThresholdLabel": "Reminder threshold",
-  "settings_highAnlasCostQuestion": "Continue with this generation?"
+  "settings_highAnlasCostQuestion": "Continue with this generation?",
+  "bridge_title": "Local bridge",
+  "bridge_agent": "External Agent",
+  "bridge_agentHint": "Copy the instructions to an Agent that can run local commands.",
+  "bridge_waiting": "Waiting for connection",
+  "bridge_ready": "Waiting for activity",
+  "bridge_clients": "{count} Agent(s) connected",
+  "@bridge_clients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bridge_activity": "{client}: {action}",
+  "@bridge_activity": {
+    "placeholders": {
+      "client": {},
+      "action": {}
+    }
+  },
+  "bridge_read": "Reading parameters",
+  "bridge_write": "Updating parameters",
+  "bridge_quote": "Estimating cost",
+  "bridge_generate": "Generating an image",
+  "bridge_cancel": "Stopping generation",
+  "bridge_recent": "Recent activity",
+  "bridge_empty": "No activity yet",
+  "bridge_copyGuide": "Copy connection instructions",
+  "bridge_showGuide": "View instructions",
+  "bridge_copied": "Instructions copied",
+  "bridge_disconnect": "End Agent connections",
+  "bridge_settings": "Bridge settings",
+  "bridge_clientMissing": "The bundled client is unavailable. Update Studio.",
+  "bridge_conflict": "Content changed. Read it again.",
+  "bridge_busy": "Another operation is in progress",
+  "bridge_interrupted": "Operation interrupted",
+  "bridge_failed": "Operation failed. Check the Agent response.",
+  "bridge_timeout": "Operation timed out. Retry.",
+  "bridge_guide": "Use the local bridge to assist with W.O.F NAI Studio.\nClient: {clientPath}\n\n1. Quote the path correctly for your shell. Run status --name <your-name> and verify success; copying these instructions does not connect.\n2. Run get --name <your-name> --out current.json. Editable original text is in _draft.fields; field_versions protect against concurrent edits. Other fields may include effective quality tags. Do not duplicate them into the original text.\n3. Change only user-authorized fields. Save a patch to changes.json, then run set-json changes.json --base current.json --name <your-name>. Studio backs up and rechecks the edited fields. On conflict, stop and read again; never automatically overwrite newer user edits. Verify readback. characters replaces the entire list: preserve unrelated names, enabled flags, positions, and IDs. Reference images are currently read-only.\n4. Connecting or editing does not authorize generation. Only after an explicit generation request, run quote --out quote.json --name <your-name> and report the estimated Anlas price and cached account balance; server billing is authoritative. After authorization and reporting, run gen --quote quote.json --authorized --name <your-name>. One image per request; a changed draft invalidates the quote.\n5. Each command disconnects when done. Krita can remain connected. Wait on busy and avoid immediate retry loops after errors. Stop generation in Studio, use Ctrl+C, or cancel <request_id> --name <same-name> using the returned request ID. Never print the discovery-file session secret.\n",
+  "@bridge_guide": {
+    "placeholders": {
+      "clientPath": {}
+    }
+  }
 }

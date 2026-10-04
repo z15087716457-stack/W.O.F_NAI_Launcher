@@ -10,6 +10,7 @@ enum KritaBridgeErrorCode {
   payloadTooLarge('payload_too_large'),
   authFailed('auth_failed'),
   unauthorizedBridgeClient('unauthorized_bridge_client'),
+  conflict('conflict'),
   busy('busy'),
   emptyMask('empty_mask'),
   timeout('timeout'),
@@ -63,7 +64,12 @@ abstract class KritaBridgeMessage {
 }
 
 class KritaPingMessage extends KritaBridgeMessage {
-  const KritaPingMessage({required this.version, required this.secret});
+  const KritaPingMessage({
+    required this.version,
+    required this.secret,
+    this.clientKind = 'krita',
+    this.clientName = 'Krita',
+  });
 
   @override
   String get type => 'ping';
@@ -73,6 +79,8 @@ class KritaPingMessage extends KritaBridgeMessage {
 
   final int version;
   final String secret;
+  final String clientKind;
+  final String clientName;
 }
 
 class KritaUnsupportedPingVersionMessage extends KritaBridgeMessage {
@@ -201,6 +209,15 @@ class KritaGenerateMessage extends KritaBridgeMessage {
   }
 }
 
+class KritaQuoteMessage extends KritaBridgeMessage {
+  const KritaQuoteMessage({required this.id, required this.payload});
+  @override
+  String get type => 'quote';
+  @override
+  final String id;
+  final Map<String, dynamic> payload;
+}
+
 /// 将 JSON 覆盖层应用到 [base] 参数上（generate 消息用）。
 /// 未出现的键保持 base 原值；characters 键为整体替换；
 /// clear_characters=true 清空角色列表。
@@ -215,7 +232,9 @@ ImageParams applyKritaParamsOverlay(ImageParams base, Map<String, dynamic> p) {
   if (charactersValue is List) {
     characters = [
       for (final entry in charactersValue)
-        if (entry is Map && entry['prompt'] is String)
+        if (entry is Map &&
+            entry['prompt'] is String &&
+            entry['enabled'] != false)
           CharacterPrompt(
             prompt: entry['prompt'] as String,
             negativePrompt: entry['uc'] is String ? entry['uc'] as String : '',

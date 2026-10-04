@@ -84,7 +84,8 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         exploreRunnerBusy;
 
     // 生成中常驻显示取消入口（与移动端一致）
-    final showCancel = isLauncherGenerating;
+    final showCancel =
+        isLauncherGenerating || kritaBridgeState.isBridgeGenerating;
 
     // 探索页强制逐张请求：文案张数只反映请求次数
     final imageCount = widget.exploreMode
@@ -118,8 +119,13 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
       imageCount: imageCount,
       copySeed: _copySeed,
       onGenerate: () => unawaited(_handleGenerate(context, ref)),
-      onCancel: () =>
-          ref.read(imageGenerationNotifierProvider.notifier).cancel(),
+      onCancel: () {
+        if (kritaBridgeState.isBridgeGenerating) {
+          ref.read(kritaBridgeNotifierProvider.notifier).cancelActiveRequest();
+        } else {
+          ref.read(imageGenerationNotifierProvider.notifier).cancel();
+        }
+      },
     );
 
     final autoSaveChip = widget.showAutoSaveChip
