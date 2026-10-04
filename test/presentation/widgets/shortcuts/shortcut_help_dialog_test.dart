@@ -205,7 +205,6 @@ void main() {
             final l10n = AppLocalizations.of(
               tester.element(find.byType(ShortcutHelpDialog)),
             )!;
-            expect(find.text(l10n.shortcut_help_tip), findsNothing);
             expect(
               find.byKey(const Key('shortcut-help-customize')),
               findsOneWidget,

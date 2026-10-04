@@ -12,6 +12,7 @@ import 'package:nai_launcher/core/database/connection_pool_holder.dart';
 import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart';
 import 'package:nai_launcher/core/utils/app_logger.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_view_mode.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/presentation/providers/collection_provider.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
@@ -30,7 +31,7 @@ class _InjectedGalleryService extends GalleryService {
 /// ① 第 2 页（index 2）取消一张后应停在第 2 页；
 /// ② 末页唯一一张被取消后应回退到相邻末页（index 1），而不是第 0 页。
 void main() {
-  group('favorite toggle pagination (provider level)', () {
+  group('favorite toggle keeps timeline position (provider level)', () {
     late Directory tempDir;
     late Directory galleryRoot;
     late GalleryDataSource dataSource;
@@ -46,7 +47,7 @@ void main() {
     setUp(() async {
       SharedPreferences.setMockInitialValues({});
       tempDir = await Directory.systemTemp.createTemp(
-        'nai_launcher_fav_pagination_',
+        'nai_launcher_fav_timeline_',
       );
       galleryRoot = Directory(p.join(tempDir.path, 'gallery'));
       await galleryRoot.create(recursive: true);
@@ -118,80 +119,50 @@ void main() {
       await service.initialize();
     }
 
-    test('取消收藏后停留在原页（第 2 页）', () async {
-      // 26 张收藏 + pageSize 10 → 3 页：page2 = 最旧的 6 张
+    test('收藏视图取消收藏：图即时消失且保持滚动位置（同一数据集）', () async {
       final files = await createFavoriteFiles(26);
       await indexAllFavorites(files);
 
       final notifier = container.read(localGalleryNotifierProvider.notifier);
       await notifier.initialize();
       await notifier.setShowFavoritesOnly(true);
-      await notifier.setPageSize(10);
-      await notifier.loadPage(2);
 
       var state = container.read(localGalleryNotifierProvider);
-      expect(state.currentPage, 2, reason: '应停在第 2 页');
-      expect(state.currentImages.length, 6);
-      expect(state.totalPages, 3);
+      expect(state.timeline.length, 26);
+      final datasetId = state.timeline.datasetId;
 
-      final target = state.currentImages.first.path;
+      final target = state.timeline.entries[20].path;
       await notifier.toggleFavorite(target);
 
       state = container.read(localGalleryNotifierProvider);
-      expect(state.currentPage, 2, reason: '取消收藏后不得跳回第 0 页');
       expect(
-        state.currentImages.map((r) => r.path),
+        state.timeline.entries.map((e) => e.path),
         isNot(contains(target)),
-        reason: '取消收藏的图应即时从当前页消失',
+        reason: '取消收藏的图应即时从时间线消失',
       );
-      expect(state.currentImages.length, 5);
+      expect(state.timeline.length, 25);
       expect(state.filteredCount, 25);
+      expect(state.timeline.datasetId, datasetId, reason: '内容变化不回到顶部');
     });
 
-    test('末页唯一一张被取消后回退到相邻末页而非第 0 页', () async {
-      // 21 张收藏 + pageSize 10 → 3 页：page2 只有最旧的 1 张
-      final files = await createFavoriteFiles(21);
+    test('切换筛选是新数据集（回到顶部），视图模式切换不重读', () async {
+      final files = await createFavoriteFiles(12);
       await indexAllFavorites(files);
 
       final notifier = container.read(localGalleryNotifierProvider.notifier);
       await notifier.initialize();
+      final first = container.read(localGalleryNotifierProvider).timeline;
+
       await notifier.setShowFavoritesOnly(true);
-      await notifier.setPageSize(10);
-      await notifier.loadPage(2);
+      final favorites = container.read(localGalleryNotifierProvider).timeline;
+      expect(favorites.datasetId, first.datasetId + 1);
 
-      var state = container.read(localGalleryNotifierProvider);
-      expect(state.currentPage, 2);
-      expect(state.currentImages.length, 1);
-
-      final target = state.currentImages.single.path;
-      await notifier.toggleFavorite(target);
-
-      state = container.read(localGalleryNotifierProvider);
-      expect(state.currentPage, 1, reason: '回退到相邻末页（index 1）');
-      expect(state.totalPages, 2);
-      expect(state.filteredCount, 20);
-    });
-
-    test('分组视图切换回网格保持页码（视图切换≠条件变更）', () async {
-      final files = await createFavoriteFiles(26);
-      await indexAllFavorites(files);
-
-      final notifier = container.read(localGalleryNotifierProvider.notifier);
-      await notifier.initialize();
-      await notifier.setShowFavoritesOnly(true);
-      await notifier.setPageSize(10);
-      await notifier.loadPage(2);
-      expect(container.read(localGalleryNotifierProvider).currentPage, 2);
-
-      await notifier.setGroupedView(true);
-      final grouped = container.read(localGalleryNotifierProvider);
-      expect(grouped.isGroupedView, isTrue);
-      expect(grouped.groupedImages, hasLength(26));
-
-      await notifier.setGroupedView(false);
-      final state = container.read(localGalleryNotifierProvider);
-      expect(state.currentPage, 2, reason: '分组切回网格不得跳回第一页');
-      expect(state.currentImages.length, 6);
+      notifier.setViewMode(GalleryViewMode.masonry);
+      expect(
+        container.read(localGalleryNotifierProvider).timeline,
+        same(favorites),
+        reason: '视图切换≠条件变更',
+      );
     });
 
     test('取消收藏后侧栏收藏计数重查为减一（普通与收藏视图）', () async {

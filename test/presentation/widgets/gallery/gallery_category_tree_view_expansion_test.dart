@@ -129,7 +129,16 @@ void main() {
       expect(find.text('child'), findsOneWidget);
 
       // 收起 → child 消失、存储清空
-      await tester.tap(find.byIcon(Icons.expand_more));
+      // 分组标题也有 expand_more：限定在「parent」这一行里找展开箭头
+      final parentRow = find
+          .ancestor(of: find.text('parent'), matching: find.byType(Row))
+          .first;
+      await tester.tap(
+        find.descendant(
+          of: parentRow,
+          matching: find.byIcon(Icons.expand_more),
+        ),
+      );
       await settle(tester);
       expect(find.text('child'), findsNothing);
       expect(

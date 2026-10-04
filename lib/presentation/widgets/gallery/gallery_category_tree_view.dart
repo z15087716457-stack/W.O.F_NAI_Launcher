@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
@@ -12,9 +14,8 @@ import '../../../data/models/gallery/image_collection.dart';
 import '../../../data/models/gallery/local_image_record.dart';
 import '../../providers/gallery_category_provider.dart'
     show collectionSelectedIdPrefix;
-import '../../themes/theme_extension.dart';
+import '../../providers/gallery_scan_progress_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'gallery_scan_progress_panel.dart';
 import '../../../core/storage/local_storage_service.dart';
 
@@ -78,6 +79,15 @@ class GalleryCategoryTreeView extends StatefulWidget {
   onCollectionReorder;
   final void Function(String id, String? newParentId)? onMoveCollection;
 
+  /// 资料库「删除池」入口
+  final VoidCallback? onOpenTrash;
+
+  /// 底部索引状态旁的刷新
+  final VoidCallback? onRefresh;
+
+  /// 已索引图片总数（底部状态显示）
+  final int indexedCount;
+
   const GalleryCategoryTreeView({
     super.key,
     required this.categories,
@@ -99,6 +109,9 @@ class GalleryCategoryTreeView extends StatefulWidget {
     this.onDeleteCollection,
     this.onCollectionReorder,
     this.onMoveCollection,
+    this.onOpenTrash,
+    this.onRefresh,
+    this.indexedCount = 0,
   });
 
   @override
@@ -107,21 +120,23 @@ class GalleryCategoryTreeView extends StatefulWidget {
 }
 
 class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
+  static const _collectionsSection = 'collections';
+  static const _foldersSection = 'folders';
+  static const _dateFoldersId = '__date_folders__';
+  static final _datePattern = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+
   final Set<String> _expandedIds = {};
+  final Set<String> _collapsedSections = {};
   String? _hoveredCategoryId;
   Timer? _autoExpandTimer;
-  double _splitRatio = 0.45;
-  double _dragStartRatio = 0.45;
-  double _dragStartGlobalY = 0.0;
 
   @override
   void initState() {
     super.initState();
     // 恢复上次关闭时的展开状态（持久化记忆）
-    _expandedIds.addAll(
-      LocalStorageService().getGalleryCategoryTreeExpandedIds(),
-    );
-    _splitRatio = LocalStorageService().getGallerySidebarCollectionSplit();
+    final storage = LocalStorageService();
+    _expandedIds.addAll(storage.getGalleryCategoryTreeExpandedIds());
+    _collapsedSections.addAll(storage.getGallerySidebarCollapsedSections());
   }
 
   /// 展开状态持久化（分类与收藏集文件夹混存，id 命名空间不冲突）
@@ -131,9 +146,13 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     );
   }
 
-  /// 收藏区与分类区高度分割比例持久化
-  void _persistSplitRatio() {
-    LocalStorageService().setGallerySidebarCollectionSplit(_splitRatio);
+  void _toggleSection(String section) {
+    setState(() {
+      if (!_collapsedSections.remove(section)) _collapsedSections.add(section);
+    });
+    LocalStorageService().setGallerySidebarCollapsedSections(
+      _collapsedSections,
+    );
   }
 
   final Set<String> _superDraggingCategoryIds = {};
@@ -154,114 +173,107 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     });
   }
 
-  /// 上区容器：「全部图片」「收藏」固定不随滚动，收藏集列表独立滚动
-  Widget _buildCollectionPane(ThemeData theme) {
-    return Padding(
-      key: const Key('gallery-sidebar-collection-pane'),
-      padding: const EdgeInsets.only(top: 8),
-      child: Column(
-        children: [
-          ..._buildFixedCollectionHeaderEntries(),
-          Expanded(
-            child: ListView(
-              key: const Key('gallery-sidebar-collection-list'),
-              padding: const EdgeInsets.only(bottom: 8),
-              children: _buildCollectionItems(theme),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 固定头部（不随收藏集列表滚动）：全部图片 + 收藏
-  List<Widget> _buildFixedCollectionHeaderEntries() {
+  /// 资料库：全部图片 / 收藏 / 删除池
+  List<Widget> _buildLibraryEntries() {
+    final l10n = context.l10n;
     return [
+      _SidebarSectionHeader(label: l10n.localGallery_sectionLibrary),
       _buildImageDropTarget(
         categoryId: null,
         child: _CategoryItem(
-          icon: StudioIcons.localGallery,
-          label: context.l10n.localGallery_allImages,
+          key: const Key('gallery-sidebar-all'),
+          icon: Icons.photo_library_outlined,
+          label: l10n.localGallery_allImages,
           count: widget.totalImageCount,
           isSelected: widget.selectedCategoryId == null,
+          showChevronSlot: false,
           onTap: () => widget.onCategorySelected(null),
         ),
       ),
       _CategoryItem(
+        key: const Key('gallery-sidebar-favorites'),
         icon: widget.selectedCategoryId == 'favorites'
             ? Icons.favorite
             : Icons.favorite_border,
-        iconColor: Colors.red.shade400,
-        label: context.l10n.common_favorite,
+        label: l10n.common_favorite,
         count: widget.favoriteCount,
         isSelected: widget.selectedCategoryId == 'favorites',
+        showChevronSlot: false,
         onTap: () => widget.onCategorySelected('favorites'),
-        onHoverAction: widget.onCreateCollection != null
-            ? () => _showCreateCollectionMenu(context, null)
-            : null,
       ),
+      if (widget.onOpenTrash != null)
+        _CategoryItem(
+          key: const Key('gallery-sidebar-trash'),
+          icon: Icons.delete_outline,
+          label: l10n.localGallery_trashTitle,
+          isSelected: false,
+          showChevronSlot: false,
+          onTap: widget.onOpenTrash!,
+        ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final collectionsOpen = !_collapsedSections.contains(_collectionsSection);
+    final foldersOpen = !_collapsedSections.contains(_foldersSection);
 
-    return GestureDetector(
-      onSecondaryTapUp: widget.onAddSubCategory != null
-          ? (details) =>
-                _showEmptyAreaContextMenu(context, details.globalPosition)
-          : null,
-      behavior: HitTestBehavior.translucent,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final totalHeight = constraints.maxHeight;
-          final topFlex = (_splitRatio * 1000).round().clamp(1, 999);
-          final bottomFlex = ((1.0 - _splitRatio) * 1000).round().clamp(1, 999);
-
-          return Column(
-            children: [
-              if (widget.categories.isEmpty)
-                // 退化规则：分类为空时不拆区、不显示手柄，固定头语义与双区一致
-                Expanded(child: _buildCollectionPane(theme))
-              else ...[
-                // 上区：全部图片 + 收藏 固定不滚，收藏集独立滚动
-                Expanded(flex: topFlex, child: _buildCollectionPane(theme)),
-                // 拖拽手柄（替代原 ThemedDivider 位置）
-                _GallerySidebarResizeHandle(
-                  key: const Key('gallery-sidebar-resize-handle'),
-                  onVerticalDragStart: (details) {
-                    _dragStartRatio = _splitRatio;
-                    _dragStartGlobalY = details.globalPosition.dy;
-                  },
-                  onVerticalDragUpdate: (details) {
-                    if (totalHeight > 0 && !totalHeight.isInfinite) {
-                      final dy = details.globalPosition.dy - _dragStartGlobalY;
-                      final newRatio = (_dragStartRatio + dy / totalHeight)
-                          .clamp(0.2, 0.8);
-                      if (newRatio != _splitRatio) {
-                        setState(() => _splitRatio = newRatio);
-                      }
-                    }
-                  },
-                  onVerticalDragEnd: (_) => _persistSplitRatio(),
-                  onVerticalDragCancel: () => _persistSplitRatio(),
+    return Column(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onSecondaryTapUp: widget.onAddSubCategory != null
+                ? (details) =>
+                      _showEmptyAreaContextMenu(context, details.globalPosition)
+                : null,
+            behavior: HitTestBehavior.translucent,
+            child: ListView(
+              key: const Key('gallery-sidebar-list'),
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+              children: [
+                ..._buildLibraryEntries(),
+                _SidebarSectionHeader(
+                  key: const Key('gallery-sidebar-section-collections'),
+                  label: l10n.localGallery_sectionCollections,
+                  expanded: collectionsOpen,
+                  onToggle: () => _toggleSection(_collectionsSection),
+                  addTooltip: l10n.localGallery_createCollectionTitle,
+                  onAdd: widget.onCreateCollection != null
+                      ? () => _showCreateCollectionMenu(context, null)
+                      : null,
                 ),
-                // 下区：分类树（独立滚动）
-                Expanded(
-                  flex: bottomFlex,
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    children: _buildRootCategoryEntries(theme),
-                  ),
+                if (collectionsOpen) ..._buildCollectionItems(theme),
+                _SidebarSectionHeader(
+                  key: const Key('gallery-sidebar-section-folders'),
+                  label: l10n.localGallery_sectionFolders,
+                  expanded: foldersOpen,
+                  onToggle: () => _toggleSection(_foldersSection),
+                  addTooltip: l10n.localGallery_createCategoryTitle,
+                  onAdd: widget.onAddSubCategory != null
+                      ? () => widget.onAddSubCategory!(null)
+                      : null,
                 ),
+                if (foldersOpen) ..._buildRootCategoryEntries(theme),
               ],
-              // 扫描进度面板（底部）
-              const GalleryScanProgressPanel(),
-            ],
-          );
-        },
-      ),
+            ),
+          ),
+        ),
+        // 扫描时显示进度卡，平时显示索引状态与刷新
+        Consumer(
+          builder: (context, ref, _) {
+            final scanning = ref.watch(
+              galleryScanProgressProvider.select((s) => s.isScanning),
+            );
+            if (scanning) return const GalleryScanProgressPanel();
+            return _SidebarFooter(
+              indexedCount: widget.indexedCount,
+              onRefresh: widget.onRefresh,
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -301,8 +313,8 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     final isReadOnly = category.isExternal;
 
     Widget categoryItem = _CategoryItem(
-      icon: hasChildren
-          ? (isExpanded ? Icons.folder_open : Icons.folder)
+      icon: isExpanded && hasChildren
+          ? Icons.folder_open_outlined
           : Icons.folder_outlined,
       label: category.displayName,
       count: category.imageCount,
@@ -376,38 +388,85 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     return !isReadOnly && widget.onCategoryMove != null;
   }
 
-  /// 根级分类条目（条目间穿插插入条，支持同级拖拽排序）
+  /// 根级分类条目（条目间穿插插入条，支持同级拖拽排序）。
+  ///
+  /// 以日期命名（yyyy-MM-dd）的根文件夹在 2 个以上时收进「日期文件夹」
+  /// 分组，只改变侧栏展示；排序索引仍按完整根列表计算。
   List<Widget> _buildRootCategoryEntries(ThemeData theme) {
     final roots = widget.categories.rootCategories.sortedByOrder();
+    final dated = roots
+        .where((c) => _datePattern.hasMatch(c.displayName))
+        .toList();
+    final groupDates = dated.length >= 2;
+    final normal = groupDates
+        ? roots.where((c) => !dated.contains(c)).toList()
+        : roots;
     final entries = <Widget>[];
 
-    for (var i = 0; i < roots.length; i++) {
+    for (var i = 0; i < normal.length; i++) {
       if (widget.onCategoryReorder != null) {
+        final targetIndex = roots.indexOf(normal[i]);
         entries.add(
           _buildInsertStrip<GalleryCategory>(
             canAccept: (dragged) =>
-                dragged.parentId == null && dragged.id != roots[i].id,
-            onAccept: (dragged) =>
-                _handleRootReorder(roots, dragged, i, insertAfter: false),
+                dragged.parentId == null && dragged.id != normal[i].id,
+            onAccept: (dragged) => _handleRootReorder(
+              roots,
+              dragged,
+              targetIndex,
+              insertAfter: false,
+            ),
           ),
         );
       }
-      entries.add(_buildCategoryNode(theme, roots[i], 0));
+      entries.add(_buildCategoryNode(theme, normal[i], 0));
     }
 
     // 末尾插入条：允许拖到列表最后
-    if (widget.onCategoryReorder != null && roots.isNotEmpty) {
+    if (widget.onCategoryReorder != null && normal.isNotEmpty) {
+      final targetIndex = roots.indexOf(normal.last);
       entries.add(
         _buildInsertStrip<GalleryCategory>(
           canAccept: (dragged) => dragged.parentId == null,
           onAccept: (dragged) => _handleRootReorder(
             roots,
             dragged,
-            roots.length - 1,
+            targetIndex,
             insertAfter: true,
           ),
         ),
       );
+    }
+
+    if (groupDates) {
+      final expanded = _expandedIds.contains(_dateFoldersId);
+      void toggle() {
+        setState(() {
+          if (!_expandedIds.remove(_dateFoldersId)) {
+            _expandedIds.add(_dateFoldersId);
+          }
+        });
+        _persistExpandedIds();
+      }
+
+      entries.add(
+        _CategoryItem(
+          key: const Key('gallery-sidebar-date-folders'),
+          icon: Icons.calendar_month_outlined,
+          label: context.l10n.localGallery_dateFolders,
+          count: dated.fold<int>(0, (sum, c) => sum + c.imageCount),
+          isSelected: false,
+          hasChildren: true,
+          isExpanded: expanded,
+          onTap: toggle,
+          onExpand: toggle,
+        ),
+      );
+      if (expanded) {
+        for (final category in dated) {
+          entries.add(_buildCategoryNode(theme, category, 1));
+        }
+      }
     }
 
     return entries;
@@ -415,7 +474,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
 
   /// 收藏区条目（树形：文件夹可无限嵌套，同父级内插入条排序）
   List<Widget> _buildCollectionItems(ThemeData theme) {
-    return _buildCollectionChildren(theme, null, 1);
+    return _buildCollectionChildren(theme, null, 0);
   }
 
   /// 渲染某父级（null=收藏根级平铺）下的收藏子树
@@ -483,10 +542,9 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     final isExpanded = _expandedIds.contains(folder.id);
 
     Widget row = _CategoryItem(
-      icon: hasChildren
-          ? (isExpanded ? Icons.folder_open : Icons.folder)
+      icon: isExpanded && hasChildren
+          ? Icons.folder_open_outlined
           : Icons.folder_outlined,
-      iconColor: Colors.amber.shade700,
       label: folder.name,
       count: folder.imageCount,
       depth: depth,
@@ -546,8 +604,7 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     final selectedId = '$collectionSelectedIdPrefix${collection.id}';
 
     final row = _CategoryItem(
-      icon: Icons.collections_bookmark,
-      iconColor: Colors.amber.shade700,
+      icon: Icons.bookmark_border,
       label: collection.name,
       count: collection.imageCount,
       depth: depth,
@@ -1058,9 +1115,8 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
 
 class _CategoryItem extends StatefulWidget {
   final IconData icon;
-  final Color? iconColor;
   final String label;
-  final int count;
+  final int? count;
   final bool isSelected;
   final int depth;
   final bool hasChildren;
@@ -1077,14 +1133,14 @@ class _CategoryItem extends StatefulWidget {
   /// 是否显示拖拽小点（悬停时；与 onRename 解耦，外部图源根级排序也显示）
   final bool showDragHandle;
 
-  /// 悬停时显示的快捷操作（如「收藏」行的 + 按钮）
-  final VoidCallback? onHoverAction;
+  /// 树形行预留展开箭头位，资料库行不需要
+  final bool showChevronSlot;
 
   const _CategoryItem({
+    super.key,
     required this.icon,
-    this.iconColor,
     required this.label,
-    required this.count,
+    this.count,
     required this.isSelected,
     this.depth = 0,
     this.hasChildren = false,
@@ -1098,7 +1154,7 @@ class _CategoryItem extends StatefulWidget {
     this.onAddSubFolder,
     this.onMoveToRoot,
     this.showDragHandle = false,
-    this.onHoverAction,
+    this.showChevronSlot = true,
   });
 
   @override
@@ -1133,7 +1189,99 @@ class _CategoryItemState extends State<_CategoryItem> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final indent = 12.0 + widget.depth * 16.0;
+    final colors = theme.colorScheme;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final indent = 6.0 + widget.depth * 14.0;
+    // 下划线开头的系统/杂项文件夹降低存在感
+    final dim = widget.label.startsWith('_') && !widget.isSelected;
+    final count = widget.count;
+
+    final row = SizedBox(
+      height: 30,
+      child: Padding(
+        padding: EdgeInsets.only(left: indent, right: 8),
+        child: Row(
+          children: [
+            if (widget.showChevronSlot)
+              SizedBox(
+                width: 16,
+                child: widget.hasChildren
+                    ? GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: widget.onExpand,
+                        child: Icon(
+                          widget.isExpanded
+                              ? Icons.expand_more
+                              : Icons.chevron_right,
+                          size: 15,
+                          color: colors.onSurfaceVariant,
+                        ),
+                      )
+                    : null,
+              ),
+            const SizedBox(width: 3),
+            Icon(
+              widget.icon,
+              size: 16,
+              color: widget.isSelected
+                  ? colors.onSurface
+                  : colors.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _isEditing
+                  ? ThemedInput(
+                      controller: _editController,
+                      autofocus: true,
+                      style: const TextStyle(fontSize: 13),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onSubmitted: (value) {
+                        if (value.trim().isNotEmpty) {
+                          widget.onRename?.call(value.trim());
+                        }
+                        setState(() => _isEditing = false);
+                      },
+                      onTapOutside: (_) => setState(() => _isEditing = false),
+                    )
+                  : Text(
+                      widget.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: 13,
+                        fontWeight: widget.isSelected
+                            ? FontWeight.w500
+                            : FontWeight.w400,
+                        color: colors.onSurface,
+                      ),
+                    ),
+            ),
+            if (_isHovering && widget.showDragHandle)
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Icon(
+                  Icons.drag_indicator,
+                  size: 14,
+                  color: colors.outline.withValues(alpha: 0.6),
+                ),
+              ),
+            if (count != null)
+              Text(
+                NumberFormat.decimalPattern(locale).format(count),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 12,
+                  color: colors.onSurfaceVariant,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -1142,118 +1290,36 @@ class _CategoryItemState extends State<_CategoryItem> {
         onSecondaryTapUp: widget.onRename != null
             ? (details) => _showContextMenu(context, details.globalPosition)
             : null,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+        child: Opacity(
+          opacity: dim ? 0.55 : 1,
           child: Material(
             color: widget.isSelected
-                ? theme.colorScheme.primaryContainer
+                ? colors.surfaceContainerHighest
+                : _isHovering
+                ? colors.surfaceContainerHighest.withValues(alpha: 0.55)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
             child: InkWell(
               onTap: widget.onTap,
-              borderRadius: BorderRadius.circular(8),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: indent,
-                  right: 8,
-                  top: 8,
-                  bottom: 8,
-                ),
-                child: Row(
-                  children: [
-                    if (widget.hasChildren)
-                      GestureDetector(
-                        onTap: widget.onExpand,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Icon(
-                            widget.isExpanded
-                                ? Icons.expand_more
-                                : Icons.chevron_right,
-                            size: 16,
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                      )
-                    else
-                      const SizedBox(width: 20),
-                    Icon(
-                      widget.icon,
-                      size: 18,
-                      color:
-                          widget.iconColor ??
-                          (widget.isSelected
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _isEditing
-                          ? ThemedInput(
-                              controller: _editController,
-                              autofocus: true,
-                              style: const TextStyle(fontSize: 13),
-                              decoration: const InputDecoration(
-                                isDense: true,
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              onSubmitted: (value) {
-                                if (value.trim().isNotEmpty) {
-                                  widget.onRename?.call(value.trim());
-                                }
-                                setState(() => _isEditing = false);
-                              },
-                              onTapOutside: (_) =>
-                                  setState(() => _isEditing = false),
-                            )
-                          : Text(
-                              widget.label,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: widget.isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.w500,
-                                color: widget.isSelected
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurface,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                    ),
-                    if (_isHovering && widget.onHoverAction != null)
-                      InkWell(
-                        onTap: widget.onHoverAction,
-                        borderRadius: BorderRadius.circular(4),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Icon(
-                            Icons.add,
-                            size: 16,
-                            color: theme.colorScheme.primary,
-                          ),
+              borderRadius: BorderRadius.circular(6),
+              hoverColor: Colors.transparent,
+              child: Stack(
+                children: [
+                  row,
+                  if (widget.isSelected)
+                    Positioned(
+                      left: 0,
+                      top: 7,
+                      bottom: 7,
+                      width: 2,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                    if (_isHovering && widget.showDragHandle)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: Icon(
-                          Icons.drag_indicator,
-                          size: 14,
-                          color: theme.colorScheme.outline.withValues(
-                            alpha: 0.5,
-                          ),
-                        ),
-                      ),
-                    Text(
-                      widget.count.toString(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
                     ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
@@ -1352,81 +1418,160 @@ class _CategoryItemState extends State<_CategoryItem> {
   }
 }
 
-/// 本地画廊左侧栏收藏区与分类区之间的水平拖拽手柄
-class _GallerySidebarResizeHandle extends StatefulWidget {
-  final GestureDragStartCallback onVerticalDragStart;
-  final GestureDragUpdateCallback onVerticalDragUpdate;
-  final GestureDragEndCallback onVerticalDragEnd;
-  final GestureDragCancelCallback? onVerticalDragCancel;
-
-  const _GallerySidebarResizeHandle({
+/// 侧栏分组标题（资料库 / 收藏集 / 文件夹）：可收起，右侧可带新建按钮。
+class _SidebarSectionHeader extends StatefulWidget {
+  const _SidebarSectionHeader({
     super.key,
-    required this.onVerticalDragStart,
-    required this.onVerticalDragUpdate,
-    required this.onVerticalDragEnd,
-    this.onVerticalDragCancel,
+    required this.label,
+    this.expanded,
+    this.onToggle,
+    this.onAdd,
+    this.addTooltip,
   });
 
+  final String label;
+
+  /// null 表示不可收起
+  final bool? expanded;
+  final VoidCallback? onToggle;
+  final VoidCallback? onAdd;
+  final String? addTooltip;
+
   @override
-  State<_GallerySidebarResizeHandle> createState() =>
-      _GallerySidebarResizeHandleState();
+  State<_SidebarSectionHeader> createState() => _SidebarSectionHeaderState();
 }
 
-class _GallerySidebarResizeHandleState
-    extends State<_GallerySidebarResizeHandle> {
+class _SidebarSectionHeaderState extends State<_SidebarSectionHeader> {
   bool _hovered = false;
-  bool _dragging = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final extension = theme.extension<AppThemeExtension>();
-    final isDark = theme.brightness == Brightness.dark;
-
-    final normalDividerColor =
-        extension?.dividerColor ??
-        (isDark
-            ? Colors.white.withValues(alpha: 0.1)
-            : Colors.black.withValues(alpha: 0.1));
-    final highlightColor = theme.colorScheme.primary;
-    final isActive = _hovered || _dragging;
-
+    final colors = theme.colorScheme;
+    final collapsible = widget.expanded != null && widget.onToggle != null;
+    final label = Text(
+      widget.label,
+      style: theme.textTheme.labelSmall?.copyWith(
+        color: colors.onSurfaceVariant,
+        fontWeight: FontWeight.w500,
+      ),
+    );
     return MouseRegion(
-      cursor: SystemMouseCursors.resizeUpDown,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onVerticalDragStart: (details) {
-          setState(() => _dragging = true);
-          widget.onVerticalDragStart(details);
-        },
-        onVerticalDragUpdate: widget.onVerticalDragUpdate,
-        onVerticalDragEnd: (details) {
-          setState(() => _dragging = false);
-          widget.onVerticalDragEnd(details);
-        },
-        onVerticalDragCancel: () {
-          setState(() => _dragging = false);
-          widget.onVerticalDragCancel?.call();
-        },
-        child: Container(
-          height: 10.0,
-          color: Colors.transparent,
-          child: Center(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              height: isActive ? 2.0 : 1.0,
-              margin: const EdgeInsets.symmetric(horizontal: 12.0),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? highlightColor.withValues(alpha: 0.8)
-                    : normalDividerColor,
-                borderRadius: BorderRadius.circular(1.0),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 12, bottom: 2, left: 8),
+        child: SizedBox(
+          height: 26,
+          child: Row(
+            children: [
+              if (collapsible)
+                InkWell(
+                  onTap: widget.onToggle,
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        label,
+                        const SizedBox(width: 2),
+                        AnimatedOpacity(
+                          opacity: _hovered || widget.expanded == false ? 1 : 0,
+                          duration: const Duration(milliseconds: 120),
+                          child: Icon(
+                            widget.expanded!
+                                ? Icons.expand_more
+                                : Icons.chevron_right,
+                            size: 14,
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                label,
+              const Spacer(),
+              if (widget.onAdd != null)
+                IconButton(
+                  onPressed: widget.onAdd,
+                  tooltip: widget.addTooltip,
+                  icon: const Icon(Icons.add, size: 16),
+                  color: colors.onSurfaceVariant,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 24,
+                    height: 24,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 侧栏底部：索引状态与刷新
+class _SidebarFooter extends StatelessWidget {
+  const _SidebarFooter({required this.indexedCount, this.onRefresh});
+
+  final int indexedCount;
+  final VoidCallback? onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    return Container(
+      key: const Key('gallery-sidebar-footer'),
+      height: 40,
+      padding: const EdgeInsets.only(left: 16, right: 6),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: theme.dividerColor)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF3FCF7E)
+                  : const Color(0xFF2FB26A),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.localGallery_indexSynced(
+                NumberFormat.decimalPattern(locale).format(indexedCount),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colors.onSurfaceVariant,
               ),
             ),
           ),
-        ),
+          if (onRefresh != null)
+            IconButton(
+              key: const Key('gallery-sidebar-refresh'),
+              onPressed: onRefresh,
+              tooltip: l10n.localGallery_refreshTooltip,
+              icon: const Icon(Icons.refresh, size: 16),
+              color: colors.onSurfaceVariant,
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+              padding: EdgeInsets.zero,
+            ),
+        ],
       ),
     );
   }

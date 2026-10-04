@@ -200,13 +200,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_folder => '文件夹';
 
   @override
-  String get common_filter => '筛选';
-
-  @override
   String get common_grid => '网格';
-
-  @override
-  String get common_date => '日期';
 
   @override
   String get common_pack => '打包';
@@ -3195,9 +3189,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_progressiveLoadError => '图片加载失败';
 
   @override
-  String get localGallery_noImagesFound => '未找到图片';
-
-  @override
   String get localGallery_unknownError => '未知错误';
 
   @override
@@ -3218,22 +3209,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_noMatchingResults => '无匹配结果';
 
   @override
-  String get localGallery_loadingGroupedImages => '加载分组图片中...';
-
-  @override
   String get localGallery_title => '本地画廊';
 
   @override
   String get localGallery_allImages => '全部图片';
-
-  @override
-  String get localGallery_categoryPanelTitle => '分类';
-
-  @override
-  String get localGallery_selectCurrentPage => '选择本页';
-
-  @override
-  String get localGallery_deselectCurrentPage => '取消本页';
 
   @override
   String get localGallery_selectAllResults => '选择全部';
@@ -3272,9 +3251,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_sortFieldDimensions => '图像尺寸';
 
   @override
-  String get localGallery_sortToggleDirection => '切换排序方向';
-
-  @override
   String localGallery_aboutColumns(Object count) {
     return '约 $count 列';
   }
@@ -3295,13 +3271,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_galleryThumbnailQualitySubtitle => '缩略图显示质量，默认高清';
 
   @override
-  String get localGallery_naiOnly => 'NAI';
-
-  @override
   String get localGallery_naiOnlyTooltip => '仅显示 NAI 生成的图片';
-
-  @override
-  String get localGallery_naiVersionFilterLabel => 'Ver';
 
   @override
   String get localGallery_naiVersionFilterTooltip => '按 NAI 模型版本过滤';
@@ -3310,16 +3280,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_masonryViewLabel => '瀑布流';
 
   @override
-  String get localGallery_switchToMasonryView => '切换到瀑布流视图';
-
-  @override
-  String get localGallery_switchToGridLayout => '切换到网格视图';
-
-  @override
   String get localGallery_justifiedViewLabel => '火车流';
-
-  @override
-  String get localGallery_switchToJustifiedView => '切换到火车流视图';
 
   @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {
@@ -3341,31 +3302,16 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get localGallery_openFilterPanel => '打开筛选面板';
-
-  @override
   String get localGallery_hideCategoryPanel => '隐藏分类面板';
 
   @override
   String get localGallery_showCategoryPanel => '显示分类面板';
 
   @override
-  String get localGallery_enterSelectionMode => '进入选择模式';
-
-  @override
   String get localGallery_refreshTooltip => '刷新画廊\n\n自动检测新增/修改的图片并更新索引';
 
   @override
   String get localGallery_tagIntersection => '标签交集';
-
-  @override
-  String get localGallery_filterByTags => '按标签筛选';
-
-  @override
-  String get localGallery_tagInputHint => '输入标签，回车添加';
-
-  @override
-  String get localGallery_addTag => '添加';
 
   @override
   String get localGallery_createCategoryTitle => '新建分类';
@@ -3750,88 +3696,125 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statistics_timeNight => '深夜';
 
   @override
-  String get localGallery_advancedFilters => '高级筛选';
-
-  @override
-  String get localGallery_filterByModel => '按模型筛选';
-
-  @override
-  String get localGallery_filterBySampler => '按采样器筛选';
-
-  @override
-  String get localGallery_filterBySteps => '按步数筛选';
-
-  @override
-  String get localGallery_filterByCfg => '按 提示词引导 筛选';
-
-  @override
-  String get localGallery_filterByResolution => '按分辨率筛选';
-
-  @override
-  String get localGallery_filterSubtitle => '精确筛选您的图片集合';
-
-  @override
-  String get localGallery_filterOrientation => '画面方向';
-
-  @override
-  String get localGallery_orientationAny => '全部';
-
-  @override
-  String get localGallery_orientationLandscape => '横版';
-
-  @override
-  String get localGallery_orientationPortrait => '竖版';
-
-  @override
-  String get localGallery_orientationSquare => '方图';
-
-  @override
-  String get localGallery_filterNsfw => '内容分级';
-
-  @override
-  String get localGallery_nsfwAny => '全部';
-
-  @override
-  String get localGallery_nsfwSfw => '全年龄';
-
-  @override
-  String get localGallery_nsfwOnly => '仅 NSFW';
-
-  @override
-  String get localGallery_noModelCandidates => '暂无模型元数据，导入标签索引或扫描后可用';
-
-  @override
-  String get localGallery_noSamplerCandidates => '暂无采样器元数据，导入标签索引或扫描后可用';
-
-  @override
-  String get localGallery_noResolutionCandidates => '暂无分辨率元数据';
-
-  @override
-  String get localGallery_candidatesLoadFailed => '候选加载失败';
-
-  @override
-  String get localGallery_noTagSuggestions => '无匹配标签';
-
-  @override
-  String get localGallery_activeFiltersSet => '已设置筛选';
-
-  @override
-  String get localGallery_applyFilters => '应用筛选';
-
-  @override
-  String get localGallery_resetAdvancedFilters => '重置高级筛选';
-
-  @override
   String get localGallery_group_today => '今天';
 
   @override
   String get localGallery_group_yesterday => '昨天';
 
   @override
-  String get localGallery_group_thisWeek => '本周';
+  String get localGallery_sendTo => '发送到…';
 
   @override
-  String get localGallery_group_earlier => '更早';
+  String localGallery_groupImageCount(int count, String formatted) {
+    return '$formatted 张';
+  }
+
+  @override
+  String localGallery_imageCountLabel(int count, String formatted) {
+    return '$formatted 张';
+  }
+
+  @override
+  String get localGallery_selectGroup => '选择整组';
+
+  @override
+  String get localGallery_inspectorTitle => '详情';
+
+  @override
+  String localGallery_inspectorPosition(String index, String total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get localGallery_inspectorEmpty => '选择一张图片查看详情';
+
+  @override
+  String get localGallery_inspectorEmptyHint => '双击或按空格键打开大图';
+
+  @override
+  String get localGallery_hideInspector => '收起详情面板';
+
+  @override
+  String get localGallery_showInspector => '显示详情面板';
+
+  @override
+  String get localGallery_reuseParams => '复用参数';
+
+  @override
+  String get localGallery_actionImg2Img => '图生图';
+
+  @override
+  String get localGallery_actionStyleTransfer => '风格迁移';
+
+  @override
+  String get localGallery_actionPreciseReference => '精准参考';
+
+  @override
+  String get localGallery_actionSaveReference => '存入参考库';
+
+  @override
+  String get localGallery_actionKrita => 'Krita';
+
+  @override
+  String localGallery_selectedImages(String count) {
+    return '已选 $count 张';
+  }
+
+  @override
+  String get localGallery_sortDescending => '降序';
+
+  @override
+  String get localGallery_sortAscending => '升序';
+
+  @override
+  String get localGallery_moreActions => '更多';
+
+  @override
+  String get localGallery_thumbnailSize => '缩略图大小';
+
+  @override
+  String get localGallery_naiOnlyChip => '仅 NAI 图片';
+
+  @override
+  String get localGallery_modelLabel => '模型';
+
+  @override
+  String get localGallery_allVersions => '全部';
+
+  @override
+  String get localGallery_allVariants => '全部变体';
+
+  @override
+  String get localGallery_dateRangeChip => '日期范围';
+
+  @override
+  String get localGallery_groupByDay => '按天分组';
+
+  @override
+  String get localGallery_groupByMonth => '按月分组';
+
+  @override
+  String get localGallery_groupNone => '不分组';
+
+  @override
+  String get localGallery_groupModeTooltip => '按时间分组';
+
+  @override
+  String get localGallery_sectionLibrary => '资料库';
+
+  @override
+  String get localGallery_sectionCollections => '收藏集';
+
+  @override
+  String get localGallery_sectionFolders => '文件夹';
+
+  @override
+  String get localGallery_dateFolders => '日期文件夹';
+
+  @override
+  String localGallery_indexSynced(String count) {
+    return '索引已同步 · $count';
+  }
 
   @override
   String localGallery_cannotOpenFolder(Object error) {
@@ -4612,10 +4595,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_delete_image => '删除图片';
 
   @override
-  String get shortcut_action_previous_page => '上一页';
+  String get shortcut_action_previous_page => '向上翻一屏';
 
   @override
-  String get shortcut_action_next_page => '下一页';
+  String get shortcut_action_next_page => '向下翻一屏';
 
   @override
   String get shortcut_action_refresh_gallery => '刷新';
@@ -4624,10 +4607,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_focus_search => '搜索聚焦';
 
   @override
-  String get shortcut_action_enter_selection_mode => '进入选择模式';
-
-  @override
-  String get shortcut_action_open_filter_panel => '打开筛选面板';
+  String get shortcut_action_enter_selection_mode => '全选';
 
   @override
   String get shortcut_action_clear_filter => '清除筛选';
@@ -4684,9 +4664,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_help_all => '全部';
 
   @override
-  String get shortcut_help_tip => '提示：按 F1 或 ? 键可随时打开此帮助对话框';
-
-  @override
   String get shortcut_help_fabTooltip => '快捷键帮助 (F1)';
 
   @override
@@ -4702,9 +4679,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String shortcut_editor_conflictWith(Object action) {
     return '此快捷键与 \"$action\" 冲突';
   }
-
-  @override
-  String get drop_dialogTitle => '如何使用这张图片？';
 
   @override
   String get drop_hint => '拖拽图片到这里';
@@ -4736,35 +4710,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get drop_addedToCharacterRef => '已添加到精准参考';
 
   @override
-  String get drop_extractMetadata => '提取元数据';
-
-  @override
-  String get drop_extractMetadataSubtitle => '读取图片中的 Prompt、Seed 等参数';
-
-  @override
   String get drop_vibeDetected => '检测到预编码 Vibe（可节省 2 Anlas）';
-
-  @override
-  String drop_vibeStrength(Object value) {
-    return '强度: $value%';
-  }
-
-  @override
-  String drop_vibeInfoExtracted(Object value) {
-    return '信息提取: $value%';
-  }
 
   @override
   String get drop_reuseVibe => '复用 Vibe';
 
   @override
-  String get drop_reuseVibeSubtitle => '直接使用预编码数据（免费）';
-
-  @override
   String get drop_useAsRawImage => '作为原始图片';
-
-  @override
-  String get drop_useAsRawImageSubtitle => '重新编码（消耗 2 Anlas）';
 
   @override
   String get drop_dragToImg2ImgOrOther => '拖拽到图生图或其他区域';
@@ -6853,30 +6805,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get detail_saveToVibeLibrary => '保存到 Vibe 库';
 
   @override
-  String get pagination_firstPage => '首页';
-
-  @override
-  String get pagination_previousPage => '上一页';
-
-  @override
-  String get pagination_nextPage => '下一页';
-
-  @override
-  String get pagination_lastPage => '末页';
-
-  @override
-  String get pagination_jumpToPage => '跳转到页面';
-
-  @override
-  String get pagination_jump => '跳转';
-
-  @override
-  String get pagination_itemsPerPage => '每页';
-
-  @override
-  String get pagination_itemUnit => '项';
-
-  @override
   String get comfyImport_detectedTitle => '检测到 ComfyUI 多角色提示词';
 
   @override
@@ -7356,12 +7284,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_swap => '交换';
 
   @override
-  String get common_minimum => '最小值';
-
-  @override
-  String get common_maximum => '最大值';
-
-  @override
   String get addToLibrary_displayNameHint => '输入便于识别此条目的名称';
 
   @override
@@ -7369,14 +7291,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get drop_saveVibeBundle => '保存 Vibe Bundle';
-
-  @override
-  String drop_saveVibeBundleSubtitle(String name) {
-    return '将 $name 等 Vibe 保存到库中';
-  }
-
-  @override
-  String get drop_saveEncodedVibeSubtitle => '将预编码 Vibe 数据保存到库中';
 
   @override
   String get history_dragFilePreparationFailed => '拖拽文件准备失败，请稍后重试';
@@ -12368,13 +12282,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get common_folder => '資料夾';
 
   @override
-  String get common_filter => '篩選';
-
-  @override
   String get common_grid => '網格';
-
-  @override
-  String get common_date => '日期';
 
   @override
   String get common_pack => '打包';
@@ -15363,9 +15271,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_progressiveLoadError => '圖片載入失敗';
 
   @override
-  String get localGallery_noImagesFound => '未找到圖片';
-
-  @override
   String get localGallery_unknownError => '未知錯誤';
 
   @override
@@ -15386,22 +15291,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_noMatchingResults => '無匹配結果';
 
   @override
-  String get localGallery_loadingGroupedImages => '載入分組圖片中...';
-
-  @override
   String get localGallery_title => '本地畫廊';
 
   @override
   String get localGallery_allImages => '全部圖片';
-
-  @override
-  String get localGallery_categoryPanelTitle => '分類';
-
-  @override
-  String get localGallery_selectCurrentPage => '選擇本頁';
-
-  @override
-  String get localGallery_deselectCurrentPage => '取消本頁';
 
   @override
   String get localGallery_selectAllResults => '選擇全部';
@@ -15440,9 +15333,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_sortFieldDimensions => '影像尺寸';
 
   @override
-  String get localGallery_sortToggleDirection => '切換排序方向';
-
-  @override
   String localGallery_aboutColumns(Object count) {
     return '約 $count 列';
   }
@@ -15463,13 +15353,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_galleryThumbnailQualitySubtitle => '縮圖顯示品質，預設高畫質';
 
   @override
-  String get localGallery_naiOnly => 'NAI';
-
-  @override
   String get localGallery_naiOnlyTooltip => '僅顯示 NAI 生成的圖片';
-
-  @override
-  String get localGallery_naiVersionFilterLabel => 'Ver';
 
   @override
   String get localGallery_naiVersionFilterTooltip => '按 NAI 模型版本過濾';
@@ -15478,16 +15362,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_masonryViewLabel => '瀑布流';
 
   @override
-  String get localGallery_switchToMasonryView => '切換到瀑布流檢視';
-
-  @override
-  String get localGallery_switchToGridLayout => '切換到網格檢視';
-
-  @override
   String get localGallery_justifiedViewLabel => '火車流';
-
-  @override
-  String get localGallery_switchToJustifiedView => '切換到火車流檢視';
 
   @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {
@@ -15509,31 +15384,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get localGallery_openFilterPanel => '開啟篩選面板';
-
-  @override
   String get localGallery_hideCategoryPanel => '隱藏分類面板';
 
   @override
   String get localGallery_showCategoryPanel => '顯示分類面板';
 
   @override
-  String get localGallery_enterSelectionMode => '進入選擇模式';
-
-  @override
   String get localGallery_refreshTooltip => '重新整理畫廊\n\n自動檢測新增/修改的圖片並更新索引';
 
   @override
   String get localGallery_tagIntersection => '標籤交集';
-
-  @override
-  String get localGallery_filterByTags => '按標籤篩選';
-
-  @override
-  String get localGallery_tagInputHint => '輸入標籤，回車新增';
-
-  @override
-  String get localGallery_addTag => '新增';
 
   @override
   String get localGallery_createCategoryTitle => '新增分類';
@@ -15918,88 +15778,125 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get statistics_timeNight => '深夜';
 
   @override
-  String get localGallery_advancedFilters => '進階篩選';
-
-  @override
-  String get localGallery_filterByModel => '按模型篩選';
-
-  @override
-  String get localGallery_filterBySampler => '按取樣器篩選';
-
-  @override
-  String get localGallery_filterBySteps => '按步數篩選';
-
-  @override
-  String get localGallery_filterByCfg => '按 提示詞引導 篩選';
-
-  @override
-  String get localGallery_filterByResolution => '按解析度篩選';
-
-  @override
-  String get localGallery_filterSubtitle => '精確篩選您的圖片集合';
-
-  @override
-  String get localGallery_filterOrientation => '畫面方向';
-
-  @override
-  String get localGallery_orientationAny => '全部';
-
-  @override
-  String get localGallery_orientationLandscape => '橫版';
-
-  @override
-  String get localGallery_orientationPortrait => '豎版';
-
-  @override
-  String get localGallery_orientationSquare => '方圖';
-
-  @override
-  String get localGallery_filterNsfw => '內容分級';
-
-  @override
-  String get localGallery_nsfwAny => '全部';
-
-  @override
-  String get localGallery_nsfwSfw => '全年齡';
-
-  @override
-  String get localGallery_nsfwOnly => '僅 NSFW';
-
-  @override
-  String get localGallery_noModelCandidates => '暫無模型後設資料，匯入標籤索引或掃描後可用';
-
-  @override
-  String get localGallery_noSamplerCandidates => '暫無取樣器後設資料，匯入標籤索引或掃描後可用';
-
-  @override
-  String get localGallery_noResolutionCandidates => '暫無解析度後設資料';
-
-  @override
-  String get localGallery_candidatesLoadFailed => '候選載入失敗';
-
-  @override
-  String get localGallery_noTagSuggestions => '無匹配標籤';
-
-  @override
-  String get localGallery_activeFiltersSet => '已設定篩選';
-
-  @override
-  String get localGallery_applyFilters => '應用篩選';
-
-  @override
-  String get localGallery_resetAdvancedFilters => '重設進階篩選';
-
-  @override
   String get localGallery_group_today => '今天';
 
   @override
   String get localGallery_group_yesterday => '昨天';
 
   @override
-  String get localGallery_group_thisWeek => '本週';
+  String get localGallery_sendTo => '傳送到…';
 
   @override
-  String get localGallery_group_earlier => '更早';
+  String localGallery_groupImageCount(int count, String formatted) {
+    return '$formatted 張';
+  }
+
+  @override
+  String localGallery_imageCountLabel(int count, String formatted) {
+    return '$formatted 張';
+  }
+
+  @override
+  String get localGallery_selectGroup => '選擇整組';
+
+  @override
+  String get localGallery_inspectorTitle => '詳情';
+
+  @override
+  String localGallery_inspectorPosition(String index, String total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get localGallery_inspectorEmpty => '選擇一張圖片檢視詳情';
+
+  @override
+  String get localGallery_inspectorEmptyHint => '雙擊或按空格鍵開啟大圖';
+
+  @override
+  String get localGallery_hideInspector => '收起詳情面板';
+
+  @override
+  String get localGallery_showInspector => '顯示詳情面板';
+
+  @override
+  String get localGallery_reuseParams => '複用參數';
+
+  @override
+  String get localGallery_actionImg2Img => '圖生圖';
+
+  @override
+  String get localGallery_actionStyleTransfer => '風格遷移';
+
+  @override
+  String get localGallery_actionPreciseReference => '精準參考';
+
+  @override
+  String get localGallery_actionSaveReference => '存入參考庫';
+
+  @override
+  String get localGallery_actionKrita => 'Krita';
+
+  @override
+  String localGallery_selectedImages(String count) {
+    return '已選 $count 張';
+  }
+
+  @override
+  String get localGallery_sortDescending => '降序';
+
+  @override
+  String get localGallery_sortAscending => '升序';
+
+  @override
+  String get localGallery_moreActions => '更多';
+
+  @override
+  String get localGallery_thumbnailSize => '縮圖大小';
+
+  @override
+  String get localGallery_naiOnlyChip => '僅 NAI 圖片';
+
+  @override
+  String get localGallery_modelLabel => '模型';
+
+  @override
+  String get localGallery_allVersions => '全部';
+
+  @override
+  String get localGallery_allVariants => '全部變體';
+
+  @override
+  String get localGallery_dateRangeChip => '日期範圍';
+
+  @override
+  String get localGallery_groupByDay => '按天分組';
+
+  @override
+  String get localGallery_groupByMonth => '按月分組';
+
+  @override
+  String get localGallery_groupNone => '不分組';
+
+  @override
+  String get localGallery_groupModeTooltip => '按時間分組';
+
+  @override
+  String get localGallery_sectionLibrary => '資料庫';
+
+  @override
+  String get localGallery_sectionCollections => '收藏集';
+
+  @override
+  String get localGallery_sectionFolders => '資料夾';
+
+  @override
+  String get localGallery_dateFolders => '日期資料夾';
+
+  @override
+  String localGallery_indexSynced(String count) {
+    return '索引已同步 · $count';
+  }
 
   @override
   String localGallery_cannotOpenFolder(Object error) {
@@ -16780,10 +16677,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get shortcut_action_delete_image => '刪除圖片';
 
   @override
-  String get shortcut_action_previous_page => '上一頁';
+  String get shortcut_action_previous_page => '向上翻一屏';
 
   @override
-  String get shortcut_action_next_page => '下一頁';
+  String get shortcut_action_next_page => '向下翻一屏';
 
   @override
   String get shortcut_action_refresh_gallery => '重新整理';
@@ -16792,10 +16689,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get shortcut_action_focus_search => '搜尋聚焦';
 
   @override
-  String get shortcut_action_enter_selection_mode => '進入選擇模式';
-
-  @override
-  String get shortcut_action_open_filter_panel => '開啟篩選面板';
+  String get shortcut_action_enter_selection_mode => '全選';
 
   @override
   String get shortcut_action_clear_filter => '清除篩選';
@@ -16852,9 +16746,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get shortcut_help_all => '全部';
 
   @override
-  String get shortcut_help_tip => '提示：按 F1 或 ? 鍵可隨時開啟此幫助對話方塊';
-
-  @override
   String get shortcut_help_fabTooltip => '快速鍵幫助 (F1)';
 
   @override
@@ -16870,9 +16761,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String shortcut_editor_conflictWith(Object action) {
     return '此快速鍵與 \"$action\" 衝突';
   }
-
-  @override
-  String get drop_dialogTitle => '如何使用這張圖片？';
 
   @override
   String get drop_hint => '拖曳圖片到這裡';
@@ -16904,35 +16792,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get drop_addedToCharacterRef => '已新增到精準參考';
 
   @override
-  String get drop_extractMetadata => '提取後設資料';
-
-  @override
-  String get drop_extractMetadataSubtitle => '讀取圖片中的 Prompt、Seed 等參數';
-
-  @override
   String get drop_vibeDetected => '檢測到預編碼 Vibe（可節省 2 Anlas）';
-
-  @override
-  String drop_vibeStrength(Object value) {
-    return '強度: $value%';
-  }
-
-  @override
-  String drop_vibeInfoExtracted(Object value) {
-    return '資訊提取: $value%';
-  }
 
   @override
   String get drop_reuseVibe => '複用 Vibe';
 
   @override
-  String get drop_reuseVibeSubtitle => '直接使用預編碼資料（免費）';
-
-  @override
   String get drop_useAsRawImage => '作為原始圖片';
-
-  @override
-  String get drop_useAsRawImageSubtitle => '重新編碼（消耗 2 Anlas）';
 
   @override
   String get drop_dragToImg2ImgOrOther => '拖曳到圖生圖或其他區域';
@@ -19021,30 +18887,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get detail_saveToVibeLibrary => '儲存到 Vibe 庫';
 
   @override
-  String get pagination_firstPage => '首頁';
-
-  @override
-  String get pagination_previousPage => '上一頁';
-
-  @override
-  String get pagination_nextPage => '下一頁';
-
-  @override
-  String get pagination_lastPage => '末頁';
-
-  @override
-  String get pagination_jumpToPage => '跳轉到頁面';
-
-  @override
-  String get pagination_jump => '跳轉';
-
-  @override
-  String get pagination_itemsPerPage => '每頁';
-
-  @override
-  String get pagination_itemUnit => '項';
-
-  @override
   String get comfyImport_detectedTitle => '檢測到 ComfyUI 多角色提示詞';
 
   @override
@@ -19524,12 +19366,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get common_swap => '交換';
 
   @override
-  String get common_minimum => '最小值';
-
-  @override
-  String get common_maximum => '最大值';
-
-  @override
   String get addToLibrary_displayNameHint => '輸入便於識別此條目的名稱';
 
   @override
@@ -19537,14 +19373,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get drop_saveVibeBundle => '儲存 Vibe Bundle';
-
-  @override
-  String drop_saveVibeBundleSubtitle(String name) {
-    return '將 $name 等 Vibe 儲存到庫中';
-  }
-
-  @override
-  String get drop_saveEncodedVibeSubtitle => '將預編碼 Vibe 資料儲存到庫中';
 
   @override
   String get history_dragFilePreparationFailed => '拖曳檔案準備失敗，請稍後重試';

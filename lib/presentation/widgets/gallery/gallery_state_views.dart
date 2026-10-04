@@ -213,28 +213,3 @@ class GalleryNoResultsView extends ConsumerWidget {
     );
   }
 }
-
-/// Grouped loading view for gallery
-/// 画廊分组加载视图
-class GalleryGroupedLoadingView extends StatelessWidget {
-  const GalleryGroupedLoadingView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: theme.colorScheme.primary),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.localGallery_loadingGroupedImages,
-            style: TextStyle(color: theme.colorScheme.onSurface),
-          ),
-        ],
-      ),
-    );
-  }
-}

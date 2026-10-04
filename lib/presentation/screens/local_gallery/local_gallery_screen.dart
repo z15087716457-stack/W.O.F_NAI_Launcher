@@ -1,13 +1,13 @@
-import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,55 +17,63 @@ import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/file_explorer_utils.dart';
 import '../../../core/utils/gallery_path_utils.dart';
-import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../core/utils/zip_utils.dart';
 import '../../../data/models/gallery/gallery_category.dart';
 import '../../../data/models/gallery/local_image_record.dart';
-import '../../../data/services/gallery/gallery_view_mode_store.dart';
+import '../../../data/models/gallery/nai_image_metadata.dart';
+import '../../../data/repositories/gallery_category_repository.dart';
+import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../../data/services/gallery/gallery_column_width_store.dart';
+import '../../../data/services/gallery/gallery_group_mode.dart';
 import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../../data/services/gallery/gallery_sort_store.dart';
 import '../../../data/services/gallery/gallery_thumbnail_quality_store.dart';
-import '../../../data/repositories/gallery_category_repository.dart';
-import '../../../data/repositories/gallery_folder_repository.dart';
+import '../../../data/services/gallery/gallery_view_mode_store.dart';
 import '../../providers/bulk_operation_provider.dart';
 import '../../providers/collection_provider.dart';
 import '../../providers/gallery_category_provider.dart';
+import '../../providers/gallery_scan_progress_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
+import '../../providers/local_gallery_focus_provider.dart';
 import '../../providers/local_gallery_provider.dart';
-import '../../providers/gallery_scan_progress_provider.dart';
+import '../../providers/selection_mode_provider.dart';
 import '../../router/app_router.dart';
 import '../../services/image_workflow_launcher.dart';
 import '../../utils/asset_protection_guard.dart';
 import '../../utils/gallery_extra_root_add_flow.dart';
+import '../../utils/image_detail_opener.dart';
 import '../../utils/krita_send_helper.dart';
-import '../../utils/local_gallery_reference_factory.dart';
 import '../../utils/local_gallery_metadata_resolver.dart';
+import '../../utils/local_gallery_reference_factory.dart';
 import '../../utils/metadata_import_coordinator.dart';
-import '../../providers/selection_mode_provider.dart';
+import '../../utils/precise_ref_library_import_helper.dart';
 import '../../widgets/bulk_metadata_edit_dialog.dart';
 import '../../widgets/collection_select_dialog.dart';
-import '../../widgets/gallery/category_picker_dialog.dart';
 import '../../widgets/common/app_toast.dart';
-import '../../widgets/common/pagination_bar.dart';
-import '../../utils/precise_ref_library_import_helper.dart';
+import '../../widgets/common/image_detail/image_detail_data.dart';
+import '../../widgets/common/image_detail/image_detail_viewer.dart';
 import '../../widgets/common/precise_reference_type_dialog.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import '../../widgets/common/themed_input_dialog.dart';
-import '../../widgets/gallery/gallery_category_tree_view.dart';
-import '../../widgets/gallery/gallery_add_menu_button.dart';
-import '../../widgets/gallery/gallery_content_view.dart';
-import '../../widgets/gallery/gallery_state_views.dart';
-import '../../widgets/gallery/local_image_context_menu.dart';
-import '../../widgets/gallery/local_gallery_toolbar.dart';
-import '../../widgets/gallery/date_range_picker_dialog.dart';
 import '../../widgets/drop/image_destination_dialog.dart';
-import '../../widgets/gallery_filter_panel.dart';
-import '../../widgets/grouped_grid_view.dart' show GroupedGridViewState;
+import '../../widgets/gallery/category_picker_dialog.dart';
+import '../../widgets/gallery/date_range_picker_dialog.dart';
+import '../../widgets/gallery/gallery_add_menu_button.dart';
+import '../../widgets/gallery/gallery_category_tree_view.dart';
+import '../../widgets/gallery/gallery_favorite_menu.dart';
+import '../../widgets/gallery/gallery_floating_bulk_bar.dart';
+import '../../widgets/gallery/gallery_inspector_panel.dart';
+import '../../widgets/gallery/gallery_state_views.dart';
+import '../../widgets/gallery/gallery_trash_panel.dart';
+import '../../widgets/gallery/local_gallery_filter_bar.dart';
+import '../../widgets/gallery/local_gallery_toolbar.dart';
+import '../../widgets/gallery/local_image_context_menu.dart';
+import '../../widgets/gallery/timeline/gallery_timeline_view.dart';
+import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../widgets/shortcuts/shortcut_aware_widget.dart';
 
-/// 本地画廊屏幕
+/// 本地画廊屏幕：侧栏 / 连续时间线 / 右侧详情三栏。
 class LocalGalleryScreen extends ConsumerStatefulWidget {
   const LocalGalleryScreen({super.key});
 
@@ -74,12 +82,16 @@ class LocalGalleryScreen extends ConsumerStatefulWidget {
 }
 
 class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
-  final GlobalKey<GroupedGridViewState> _groupedGridViewKey =
-      GlobalKey<GroupedGridViewState>();
-  final FocusNode _shortcutsFocusNode = FocusNode();
+  static const double _sidebarWidth = 240;
+  static const double _minContentWidth = 560;
 
-  final bool _use3DCardView = true;
+  final FocusNode _shortcutsFocusNode = FocusNode();
+  final FocusNode _searchFocusNode = FocusNode(debugLabel: 'gallery-search');
+  final GalleryTimelineController _timelineController =
+      GalleryTimelineController();
+
   bool _showCategoryPanel = true;
+  bool _inspectorVisible = true;
   AppLifecycleListener? _lifecycleListener;
 
   // 防抖计时器，防止频繁触发刷新
@@ -92,15 +104,14 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
   static const int _minRefreshIntervalMs = 5000; // 5秒
 
   late final Map<String, VoidCallback> _shortcuts = {
-    ShortcutIds.previousPage: _goToPreviousPage,
-    ShortcutIds.nextPage: _goToNextPage,
+    ShortcutIds.previousPage: () => _timelineController.scrollByViewport(-1),
+    ShortcutIds.nextPage: () => _timelineController.scrollByViewport(1),
     ShortcutIds.refreshGallery: _refreshGallery,
     ShortcutIds.focusSearch: _focusSearch,
-    ShortcutIds.enterSelectionMode: _enterSelectionMode,
-    ShortcutIds.openFilterPanel: () => showGalleryFilterPanel(context),
+    ShortcutIds.enterSelectionMode: () => unawaited(_selectAllResults()),
     ShortcutIds.clearFilter: _clearFilters,
     ShortcutIds.toggleCategoryPanel: _toggleCategoryPanel,
-    ShortcutIds.jumpToDate: _pickDateRange,
+    ShortcutIds.jumpToDate: () => unawaited(_jumpToDate()),
     ShortcutIds.openFolder: _openGalleryFolder,
   };
 
@@ -132,37 +143,12 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // 把真实 DPR 上报给 provider：缩略图预取档位与卡片同算法同 DPR
-    final dpr = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1.0;
-    ref.read(localGalleryNotifierProvider.notifier).updateDevicePixelRatio(dpr);
-  }
-
-  @override
   void dispose() {
     _refreshDebounceTimer?.cancel();
     _lifecycleListener?.dispose();
     _shortcutsFocusNode.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
-  }
-
-  void _goToPreviousPage() {
-    final state = ref.read(localGalleryNotifierProvider);
-    if (state.currentPage > 0) {
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .loadPage(state.currentPage - 1);
-    }
-  }
-
-  void _goToNextPage() {
-    final state = ref.read(localGalleryNotifierProvider);
-    if (state.currentPage < state.totalPages - 1) {
-      ref
-          .read(localGalleryNotifierProvider.notifier)
-          .loadPage(state.currentPage + 1);
-    }
   }
 
   void _refreshGallery() {
@@ -170,24 +156,31 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
   }
 
   void _focusSearch() {
-    final focusNode = FocusManager.instance.primaryFocus;
-    focusNode?.unfocus();
-    Future.delayed(const Duration(milliseconds: 50), () {
-      FocusManager.instance.primaryFocus?.requestFocus();
-    });
+    _searchFocusNode.requestFocus();
   }
 
-  void _enterSelectionMode() {
-    ref.read(localGallerySelectionNotifierProvider.notifier).enter();
+  /// Ctrl+A：选中当前结果的全部图片（进入多选）
+  Future<void> _selectAllResults() async {
+    final paths = await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .getFilteredImagePaths();
+    if (!mounted) return;
+    final notifier = ref.read(localGallerySelectionNotifierProvider.notifier);
+    notifier.enter();
+    notifier.replaceSelection(paths);
   }
 
   void _clearFilters() {
     ref.read(localGalleryNotifierProvider.notifier).clearAllFilters();
   }
 
+  void _toggleInspector() {
+    setState(() => _inspectorVisible = !_inspectorVisible);
+    unawaited(const GalleryInspectorVisibilityStore().save(_inspectorVisible));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(localGalleryNotifierProvider);
     final bulkOpState = ref.watch(bulkOperationNotifierProvider);
     final categoryState = ref.watch(galleryCategoryNotifierProvider);
     ref.listen(galleryCategoryNotifierProvider.select((value) => value.error), (
@@ -198,15 +191,26 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       AppToast.error(context, error.localized(context.l10n));
       ref.read(galleryCategoryNotifierProvider.notifier).clearError();
     });
-    final screenWidth = MediaQuery.of(context).size.width;
+    // 当前查看的图片离开数据集（删除、换文件夹、筛选）时清空详情
+    ref.listen(localGalleryNotifierProvider.select((s) => s.timeline), (
+      previous,
+      timeline,
+    ) {
+      final focused = ref.read(localGalleryFocusNotifierProvider);
+      if (focused != null && timeline.indexOfPath(focused) < 0) {
+        ref.read(localGalleryFocusNotifierProvider.notifier).clear();
+      }
+    });
     final theme = Theme.of(context);
-
-    final contentWidth = _showCategoryPanel && screenWidth > 800
-        ? screenWidth - 250
-        : screenWidth;
-    // 列数由「可用宽度 / 逻辑列宽」推导（瀑布流内另有 LayoutBuilder 精算，两者同源）
-    final columns = (contentWidth / state.columnWidth).floor().clamp(1, 8);
-    final itemWidth = contentWidth / columns;
+    final state = ref.watch(
+      localGalleryNotifierProvider.select(
+        (s) => (
+          error: s.error,
+          collectionId: s.filterCriteria.collectionId,
+          totalCount: s.totalCount,
+        ),
+      ),
+    );
 
     return PageShortcuts(
       contextType: ShortcutContext.gallery,
@@ -216,114 +220,152 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         autofocus: true,
         onKeyEvent: (event) => _handleKeyEvent(event, bulkOpState),
         child: Scaffold(
-          body: Row(
-            children: [
-              if (_showCategoryPanel && screenWidth > 800)
-                _buildCategoryPanel(theme, state, categoryState),
-              Expanded(
-                child: Column(
-                  children: [
-                    LibraryWindowHeader(
-                      child: _buildToolbarOrSelectionBar(state, bulkOpState),
-                    ),
-                    Expanded(child: _buildBody(state, columns, itemWidth)),
-                    if (!state.isIndexing &&
-                        state.filteredFiles.isNotEmpty &&
-                        state.totalPages > 0)
-                      PaginationBar(
-                        currentPage: state.currentPage,
-                        totalPages: state.totalPages,
-                        totalItems: state.filteredCount,
-                        itemsPerPage: state.pageSize,
-                        onPageChanged: (p) => ref
-                            .read(localGalleryNotifierProvider.notifier)
-                            .loadPage(p),
-                        onItemsPerPageChanged: (size) => ref
-                            .read(localGalleryNotifierProvider.notifier)
-                            .setPageSize(size),
-                        columnWidth: state.columnWidth,
-                        onColumnWidthChanged: (width) => ref
-                            .read(localGalleryNotifierProvider.notifier)
-                            .setColumnWidth(width),
-                        onColumnWidthChangeEnd: (width) => unawaited(
-                          const GalleryColumnWidthStore().save(width),
+          backgroundColor: theme.colorScheme.surface,
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final showSidebar =
+                  _showCategoryPanel && constraints.maxWidth > 800;
+              final pageWidth =
+                  constraints.maxWidth - (showSidebar ? _sidebarWidth : 0);
+              final inspectorAvailable =
+                  pageWidth - galleryInspectorWidth >= _minContentWidth;
+              final showInspector = _inspectorVisible && inspectorAvailable;
+              return Row(
+                children: [
+                  if (showSidebar) _buildSidebar(theme, categoryState),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        LibraryWindowHeader(
+                          inlineDragWidth: 17,
+                          showCaptionDivider: true,
+                          child: LocalGalleryToolbar(
+                            searchFocusNode: _searchFocusNode,
+                            inspectorVisible: _inspectorVisible,
+                            inspectorAvailable: inspectorAvailable,
+                            onToggleInspector: _toggleInspector,
+                            onOpenFolder: _openGalleryFolder,
+                            onRefresh: _refreshGallery,
+                            showCategoryPanel: _showCategoryPanel,
+                            onToggleCategoryPanel: _toggleCategoryPanel,
+                            onUndo: bulkOpState.canUndo ? _undo : null,
+                            onRedo: bulkOpState.canRedo ? _redo : null,
+                          ),
                         ),
-                        showItemsPerPage: true,
-                        showTotalInfo: true,
-                        compact: contentWidth < 600,
-                      ),
-                  ],
-                ),
-              ),
-            ],
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    const LocalGalleryFilterBar(),
+                                    Expanded(
+                                      child: _buildBody(
+                                        state.error,
+                                        state.collectionId,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (showInspector)
+                                SizedBox(
+                                  width: galleryInspectorWidth,
+                                  child: GalleryInspectorPanel(
+                                    onAction: (record, action) =>
+                                        _handleImageAction(record, action),
+                                    onOpenViewer: _openViewerForPath,
+                                    onClose: _toggleInspector,
+                                    onFavoriteMenu: _showFavoriteMenu,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCategoryPanel(
-    ThemeData theme,
-    LocalGalleryState state,
-    GalleryCategoryState categoryState,
-  ) {
+  Widget _buildSidebar(ThemeData theme, GalleryCategoryState categoryState) {
     final collectionState = ref.watch(collectionNotifierProvider);
+    final totalCount = ref.watch(
+      localGalleryNotifierProvider.select((s) => s.totalCount),
+    );
+    // 「收藏」节点计数=收藏表计数：根-子集模型下子集成员必已入根
+    // （进集合自动心形 + 启动迁移补写），收藏表即全集，不再叠加集合计数。
+    final favoriteTotal = ref.watch(galleryFavoriteCountProvider).value ?? 0;
 
     return Container(
-      width: 250,
+      width: _sidebarWidth,
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
-        border: Border(
-          right: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
+        border: Border(right: BorderSide(color: theme.dividerColor)),
       ),
       child: Column(
         children: [
-          _buildCategoryPanelHeader(theme),
-          Divider(
-            height: 1,
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          SizedBox(
+            height: localGalleryToolbarHeight,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.l10n.localGallery_title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  GalleryAddMenuButton(
+                    onCreateCategory: _createCategory,
+                    onImportFolder: _importFolder,
+                  ),
+                ],
+              ),
+            ),
           ),
           Expanded(
-            child: Builder(
-              builder: (context) {
-                // 「收藏」节点计数=收藏表计数：根-子集模型下子集成员必已入根
-                // （进集合自动心形 + 启动迁移补写），收藏表即全集，不再叠加集合计数。
-                // 计数走 galleryFavoriteCountProvider：跟随画廊状态自动重查，
-                // 删除/恢复/收藏增删后即时刷新。
-                final favoriteTotal =
-                    ref.watch(galleryFavoriteCountProvider).value ?? 0;
-                return GalleryCategoryTreeView(
-                  categories: categoryState.categories,
-                  totalImageCount: state.totalCount,
-                  favoriteCount: favoriteTotal,
-                  selectedCategoryId: categoryState.selectedCategoryId,
-                  onCategorySelected: _handleCategorySelected,
-                  onCategoryRename: (id, newName) => ref
-                      .read(galleryCategoryNotifierProvider.notifier)
-                      .renameCategory(id, newName),
-                  onCategoryDelete: _handleCategoryDelete,
-                  onAddSubCategory: _handleAddSubCategory,
-                  onCategoryMove: (categoryId, newParentId) => ref
-                      .read(galleryCategoryNotifierProvider.notifier)
-                      .moveCategory(categoryId, newParentId),
-                  onCategoryReorder: (parentId, oldIndex, newIndex) => ref
-                      .read(galleryCategoryNotifierProvider.notifier)
-                      .reorderCategories(parentId, oldIndex, newIndex),
-                  onImageDrop: _handleImageDrop,
-                  onBatchImageDrop: _handleBatchImageDrop,
-                  onSyncWithFileSystem: _handleSyncWithFileSystem,
-                  collections: collectionState.collections,
-                  onCreateCollection: _createCollection,
-                  onRenameCollection: _handleRenameCollection,
-                  onDeleteCollection: _handleDeleteCollection,
-                  onCollectionReorder: _handleCollectionReorder,
-                  onMoveCollection: _handleMoveCollection,
-                );
-              },
+            child: GalleryCategoryTreeView(
+              categories: categoryState.categories,
+              totalImageCount: totalCount,
+              favoriteCount: favoriteTotal,
+              selectedCategoryId: categoryState.selectedCategoryId,
+              onCategorySelected: _handleCategorySelected,
+              onCategoryRename: (id, newName) => ref
+                  .read(galleryCategoryNotifierProvider.notifier)
+                  .renameCategory(id, newName),
+              onCategoryDelete: _handleCategoryDelete,
+              onAddSubCategory: _handleAddSubCategory,
+              onCategoryMove: (categoryId, newParentId) => ref
+                  .read(galleryCategoryNotifierProvider.notifier)
+                  .moveCategory(categoryId, newParentId),
+              onCategoryReorder: (parentId, oldIndex, newIndex) => ref
+                  .read(galleryCategoryNotifierProvider.notifier)
+                  .reorderCategories(parentId, oldIndex, newIndex),
+              onImageDrop: _handleImageDrop,
+              onBatchImageDrop: _handleBatchImageDrop,
+              onSyncWithFileSystem: _handleSyncWithFileSystem,
+              collections: collectionState.collections,
+              onCreateCollection: _createCollection,
+              onRenameCollection: _handleRenameCollection,
+              onDeleteCollection: _handleDeleteCollection,
+              onCollectionReorder: _handleCollectionReorder,
+              onMoveCollection: _handleMoveCollection,
+              onOpenTrash: () => showGalleryTrashPanel(context, ref),
+              onRefresh: _refreshGallery,
+              indexedCount: totalCount,
             ),
           ),
         ],
@@ -331,33 +373,139 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     );
   }
 
-  Widget _buildCategoryPanelHeader(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      constraints: const BoxConstraints(minHeight: 62),
-      child: Row(
-        children: [
-          Icon(
-            Icons.folder_outlined,
-            size: 20,
-            color: theme.colorScheme.primary,
+  Widget _buildBody(LocalGalleryError? error, String? collectionId) {
+    if (error != null) {
+      return GalleryErrorView(
+        error: error.localized(context.l10n),
+        onRetry: () =>
+            ref.read(localGalleryNotifierProvider.notifier).refresh(),
+      );
+    }
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GalleryTimelineView(
+            controller: _timelineController,
+            onOpenViewer: _openViewerAt,
+            onContextMenu: (record, position) =>
+                _showImageContextMenu(record, position),
+            onSendAction: (record, action) =>
+                _handleImageAction(record, action),
+            onFavoriteMenu: _showFavoriteMenu,
+            onClearFilters: _clearFilters,
+            onDeleteRequested: () => unawaited(_deleteFocusedOrSelected()),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              context.l10n.localGallery_categoryPanelTitle,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+        ),
+        Positioned(
+          left: 16,
+          right: galleryTimelineRightPadding,
+          bottom: 20,
+          child: Center(
+            child: GalleryFloatingBulkBar(
+              onSelectAllResults: _selectAllResults,
+              onMove: _moveSelectedToCategory,
+              onCopy: _copySelectedToCategory,
+              onPack: _packSelectedImages,
+              onEditMetadata: _editSelectedMetadata,
+              onAddToCollection: _addSelectedToCollection,
+              onRemoveFromCollection: collectionId != null
+                  ? _removeSelectedFromCollection
+                  : null,
+              onDelete: _deleteSelectedImages,
             ),
           ),
-          GalleryAddMenuButton(
-            onCreateCategory: _createCategory,
-            onImportFolder: _importFolder,
-          ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  void _showFavoriteMenu(LocalImageRecord record, Offset anchor) {
+    unawaited(
+      showGalleryFavoriteMenu(
+        context,
+        ref: ref,
+        record: record,
+        anchor: anchor,
+      ),
+    );
+  }
+
+  /// Delete 键：多选时删除选中内容，否则删除当前查看的图片
+  Future<void> _deleteFocusedOrSelected() async {
+    final selection = ref.read(localGallerySelectionNotifierProvider);
+    if (selection.isActive && selection.selectedIds.isNotEmpty) {
+      await _deleteSelectedImages();
+      return;
+    }
+    final focused = ref.read(localGalleryFocusNotifierProvider);
+    if (focused == null) return;
+    final records = await ref
+        .read(localGalleryNotifierProvider.notifier)
+        .loadRecords([focused]);
+    if (records.isEmpty || !mounted) return;
+    await _confirmDeleteImage(records.first);
+  }
+
+  void _openViewerForPath(String path) {
+    final index = ref
+        .read(localGalleryNotifierProvider)
+        .timeline
+        .indexOfPath(path);
+    if (index >= 0) unawaited(_openViewerAt(index));
+  }
+
+  /// 打开大图：以当前图片为中心读取前后各 60 张的完整记录供左右切换
+  Future<void> _openViewerAt(int index) async {
+    final notifier = ref.read(localGalleryNotifierProvider.notifier);
+    final entries = ref.read(localGalleryNotifierProvider).timeline.entries;
+    if (index < 0 || index >= entries.length) return;
+    final start = math.max(0, index - 60);
+    final end = math.min(entries.length, index + 61);
+    final target = entries[index].path;
+    final records = await notifier.loadRecords([
+      for (var i = start; i < end; i++) entries[i].path,
+    ]);
+    if (!mounted || records.isEmpty) return;
+    final initialIndex = math.max(
+      0,
+      records.indexWhere((r) => galleryFilePathsEqual(r.path, target)),
+    );
+    ref.read(localGalleryFocusNotifierProvider.notifier).focus(target);
+
+    bool getFavoriteStatus(String path) =>
+        notifier.cachedRecord(path)?.isFavorite ?? false;
+
+    ImageDetailOpener.showMultipleImmediate(
+      context,
+      images: [
+        for (final record in records)
+          LocalImageDetailData(record, getFavoriteStatus: getFavoriteStatus),
+      ],
+      initialIndex: initialIndex,
+      showMetadataPanel: true,
+      showThumbnails: records.length > 1,
+      callbacks: ImageDetailCallbacks(
+        onReuseMetadata: (data) =>
+            _importImageMetadata((data as LocalImageDetailData).record),
+        onFavoriteToggle: (data) =>
+            notifier.toggleFavorite((data as LocalImageDetailData).record.path),
+        onSendToImg2Img: (data) async {
+          try {
+            final bytes = await data.getImageBytes();
+            ImageWorkflowLauncher.openImageToImage(ref, bytes);
+            if (!mounted) return;
+            Navigator.of(context).pop();
+            context.go(AppRoutes.home);
+            AppToast.success(context, context.l10n.gallery_sentToImg2Img);
+          } catch (e) {
+            if (mounted) {
+              AppToast.error(context, context.l10n.gallery_sendFailed('$e'));
+            }
+          }
+        },
+        onDelete: (data) =>
+            _confirmDeleteImage((data as LocalImageDetailData).record),
       ),
     );
   }
@@ -719,72 +867,6 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     });
   }
 
-  // 元数据在扫描新文件时已自动提取，如需手动补全旧文件元数据，请使用设置页面的"补全元数据"功能
-
-  Widget _buildToolbarOrSelectionBar(
-    LocalGalleryState state,
-    BulkOperationState bulkOpState,
-  ) {
-    return LocalGalleryToolbar(
-      framed: false,
-      onRefresh: () =>
-          ref.read(localGalleryNotifierProvider.notifier).refresh(),
-      onEnterSelectionMode: () =>
-          ref.read(localGallerySelectionNotifierProvider.notifier).enter(),
-      canUndo: bulkOpState.canUndo,
-      canRedo: bulkOpState.canRedo,
-      onUndo: bulkOpState.canUndo
-          ? () => ref.read(bulkOperationNotifierProvider.notifier).undo()
-          : null,
-      onRedo: bulkOpState.canRedo
-          ? () => ref.read(bulkOperationNotifierProvider.notifier).redo()
-          : null,
-      groupedGridViewKey: _groupedGridViewKey,
-      onAddToCollection: _addSelectedToCollection,
-      onRemoveFromCollection: state.filterCriteria.collectionId != null
-          ? _removeSelectedFromCollection
-          : null,
-      onDeleteSelected: _deleteSelectedImages,
-      onPackSelected: _packSelectedImages,
-      onEditMetadata: _editSelectedMetadata,
-      onMoveToFolder: _moveSelectedToCategory,
-      onCopyToFolder: _copySelectedToCategory,
-      showCategoryPanel: _showCategoryPanel,
-      onOpenFolder: () => _openGalleryFolder(),
-    );
-  }
-
-  Widget _buildBody(LocalGalleryState state, int columns, double itemWidth) {
-    if (state.error != null) {
-      return GalleryErrorView(
-        error: state.error!.localized(context.l10n),
-        onRetry: () =>
-            ref.read(localGalleryNotifierProvider.notifier).refresh(),
-      );
-    }
-
-    if ((!state.isInitialized || state.isLoading) && state.allFiles.isEmpty) {
-      return const GalleryLoadingView();
-    }
-
-    if (state.allFiles.isEmpty) {
-      return const GalleryEmptyView();
-    }
-
-    return GalleryContentView(
-      use3DCardView: _use3DCardView,
-      columns: columns,
-      itemWidth: itemWidth,
-      columnWidth: state.columnWidth,
-      groupedGridViewKey: _groupedGridViewKey,
-      onReuseMetadata: _importImageMetadata,
-      onSendAction: (record, action) => _handleImageAction(record, action),
-      onContextMenu: (record, position) =>
-          _showImageContextMenu(record, position),
-      onViewerDelete: _confirmDeleteImage,
-    );
-  }
-
   void _handleKeyEvent(KeyEvent event, BulkOperationState bulkOpState) {
     if (event is! KeyDownEvent) return;
 
@@ -943,13 +1025,10 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
 
     ref.read(localGallerySelectionNotifierProvider.notifier).exit();
 
-    // 兜底重载：从（已摘除被删文件的）服务层内存列表重取当前页，
+    // 兜底重载：从（已摘除被删文件的）服务层内存列表重读条目，
     // 保证视图与内存状态一致——即使内存即时移除被任何竞态吞掉。
     if (result.success > 0) {
-      final page = ref.read(localGalleryNotifierProvider).currentPage;
-      await ref
-          .read(localGalleryNotifierProvider.notifier)
-          .loadPage(page, showLoading: false);
+      await ref.read(localGalleryNotifierProvider.notifier).reloadTimeline();
     }
 
     // 计数联动（内存/DB 层面，不等启动）：收藏集计数走 DB 重查，
@@ -1879,10 +1958,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
           .bulkDelete([record.path]);
       // 兜底重载：与批量删除同保险——视图与内存状态强制对齐
       if (result.success > 0) {
-        final page = ref.read(localGalleryNotifierProvider).currentPage;
-        await ref
-            .read(localGalleryNotifierProvider.notifier)
-            .loadPage(page, showLoading: false);
+        await ref.read(localGalleryNotifierProvider.notifier).reloadTimeline();
       }
       await ref.read(collectionNotifierProvider.notifier).refresh();
       await ref
@@ -1900,7 +1976,8 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     setState(() => _showCategoryPanel = !_showCategoryPanel);
   }
 
-  /// 恢复持久化的画廊偏好：视图模式 / 列宽 / 缩略图质量 / 排序 / NAI-only 过滤
+  /// 恢复持久化的画廊偏好：视图模式 / 缩略图大小 / 质量 / 排序 / 分组 /
+  /// 详情面板 / NAI-only 过滤
   Future<void> _restoreGalleryPreferences() async {
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
 
@@ -1909,10 +1986,15 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     final sort = await const GallerySortStore().load();
     final naiOnly = await const GalleryNaiOnlyStore().load();
     final thumbnailQuality = await const GalleryThumbnailQualityStore().load();
+    final groupMode = await const GalleryGroupModeStore().load();
+    final inspectorVisible = await const GalleryInspectorVisibilityStore()
+        .load();
     if (!mounted) return;
 
+    setState(() => _inspectorVisible = inspectorVisible);
     notifier.setViewMode(viewMode);
     notifier.setColumnWidth(columnWidth);
+    notifier.setGroupMode(groupMode);
     await notifier.setThumbnailQuality(thumbnailQuality);
     // 排序：持久化优先，无记录时保持默认（修改时间 新→旧）
     if (sort != null) {
@@ -1922,8 +2004,8 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     await notifier.setNaiOnly(naiOnly);
   }
 
-  /// 打开点选式日期范围面板（替换旧的"跳转到日期分组"行为）
-  Future<void> _pickDateRange() async {
+  /// Ctrl+G：选一天，时间线滚动到该日（按时间排序时）；其他排序下改为按日期筛选
+  Future<void> _jumpToDate() async {
     final state = ref.read(localGalleryNotifierProvider);
     final result = await showDateRangePickerDialog(
       context,
@@ -1931,6 +2013,11 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       initialEnd: state.filterCriteria.dateEnd,
     );
     if (result == null || !mounted) return;
+    final date = result.start ?? result.end;
+    if (date != null && state.isTimeSorted) {
+      _timelineController.jumpToDate(date);
+      return;
+    }
     await ref
         .read(localGalleryNotifierProvider.notifier)
         .setDateRange(result.start, result.end);

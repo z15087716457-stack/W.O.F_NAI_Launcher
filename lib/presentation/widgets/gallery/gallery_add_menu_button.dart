@@ -4,7 +4,7 @@ import '../../../core/utils/localization_extension.dart';
 
 enum _GalleryAddAction { createCategory, importFolder }
 
-/// Compact add menu anchored to the Local Gallery category-panel button.
+/// Compact add menu anchored to the Local Gallery sidebar title button.
 class GalleryAddMenuButton extends StatefulWidget {
   const GalleryAddMenuButton({
     super.key,
@@ -85,16 +85,15 @@ class _GalleryAddMenuButtonState extends State<GalleryAddMenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton.tonalIcon(
+    return IconButton(
       key: _buttonKey,
       onPressed: _showMenu,
+      tooltip: context.l10n.localGallery_newOrImport,
       icon: const Icon(Icons.add, size: 18),
-      label: Text(
-        context.l10n.localGallery_newOrImport,
-        style: const TextStyle(fontSize: 13),
-      ),
-      style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      visualDensity: VisualDensity.compact,
+      style: IconButton.styleFrom(
+        fixedSize: const Size(30, 30),
+        minimumSize: const Size(30, 30),
       ),
     );
   }

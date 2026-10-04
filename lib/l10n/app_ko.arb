@@ -81,9 +81,7 @@
   "common_ok": "확인",
   "common_exit": "종료",
   "common_folder": "폴더",
-  "common_filter": "필터",
   "common_grid": "그리드",
-  "common_date": "날짜",
   "common_pack": "묶기",
   "common_multiSelect": "다중 선택",
   "common_category": "분류",
@@ -1602,7 +1600,6 @@
   },
   "vibeParseFailed": "Vibe 파일을 분석하지 못했습니다",
   "localGallery_progressiveLoadError": "이미지를 불러오지 못했습니다",
-  "localGallery_noImagesFound": "이미지를 찾을 수 없습니다",
   "localGallery_unknownError": "알 수 없는 오류",
   "localGallery_loadFailed": "불러오지 못했습니다: {error}",
   "@localGallery_loadFailed": {
@@ -1614,12 +1611,8 @@
   "localGallery_emptyTitle": "로컬 이미지가 없습니다",
   "localGallery_emptySubtitle": "생성한 이미지가 여기에 저장됩니다",
   "localGallery_noMatchingResults": "일치하는 결과가 없습니다",
-  "localGallery_loadingGroupedImages": "그룹별 이미지 불러오는 중...",
   "localGallery_title": "로컬 갤러리",
   "localGallery_allImages": "모든 이미지",
-  "localGallery_categoryPanelTitle": "분류",
-  "localGallery_selectCurrentPage": "현재 페이지 선택",
-  "localGallery_deselectCurrentPage": "현재 페이지 선택 해제",
   "localGallery_selectAllResults": "모두 선택",
   "localGallery_deselectAllResults": "모두 선택 해제",
   "localGallery_moveSelected": "이동",
@@ -1632,7 +1625,6 @@
   "localGallery_sortFieldName": "파일 이름",
   "localGallery_sortFieldSize": "파일 크기",
   "localGallery_sortFieldDimensions": "이미지 크기",
-  "localGallery_sortToggleDirection": "정렬 방향 전환",
   "localGallery_aboutColumns": "약 {count}열",
   "@localGallery_aboutColumns": {
     "placeholders": {
@@ -1644,15 +1636,10 @@
   "localGallery_thumbnailQualityHd": "높음",
   "settings_galleryThumbnailQuality": "로컬 갤러리 화질",
   "settings_galleryThumbnailQualitySubtitle": "썸네일 표시 화질이며 기본값은 높음입니다",
-  "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "NAI로 생성한 이미지만 표시",
-  "localGallery_naiVersionFilterLabel": "버전",
   "localGallery_naiVersionFilterTooltip": "NAI 모델 버전으로 필터",
   "localGallery_masonryViewLabel": "폭포형",
-  "localGallery_switchToMasonryView": "폭포형 보기로 전환",
-  "localGallery_switchToGridLayout": "그리드 보기로 전환",
   "localGallery_justifiedViewLabel": "양쪽 맞춤",
-  "localGallery_switchToJustifiedView": "양쪽 맞춤 보기로 전환",
   "localGallery_dateRangeYearMonth": "{year}/{month}",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {
@@ -1669,15 +1656,10 @@
       "scope": {}
     }
   },
-  "localGallery_openFilterPanel": "필터 패널 열기",
   "localGallery_hideCategoryPanel": "분류 패널 숨기기",
   "localGallery_showCategoryPanel": "분류 패널 표시",
-  "localGallery_enterSelectionMode": "선택 모드 시작",
   "localGallery_refreshTooltip": "갤러리 새로 고침\n\n새로 추가되거나 바뀐 이미지를 자동으로 찾아 인덱스를 업데이트합니다",
   "localGallery_tagIntersection": "태그 교집합",
-  "localGallery_filterByTags": "태그로 필터",
-  "localGallery_tagInputHint": "태그를 입력하고 Enter를 눌러 추가",
-  "localGallery_addTag": "추가",
   "localGallery_createCategoryTitle": "새 분류",
   "localGallery_newOrImport": "새로 만들기 / 가져오기",
   "localGallery_importFolder": "폴더 가져오기",
@@ -1898,34 +1880,87 @@
   "statistics_timeAfternoon": "오후",
   "statistics_timeEvening": "저녁",
   "statistics_timeNight": "밤",
-  "localGallery_advancedFilters": "고급 필터",
-  "localGallery_filterByModel": "모델로 필터",
-  "localGallery_filterBySampler": "샘플러로 필터",
-  "localGallery_filterBySteps": "스텝으로 필터",
-  "localGallery_filterByCfg": "프롬프트 가이던스로 필터",
-  "localGallery_filterByResolution": "해상도로 필터",
-  "localGallery_filterSubtitle": "이미지 모음을 정밀하게 필터링합니다",
-  "localGallery_filterOrientation": "방향",
-  "localGallery_orientationAny": "전체",
-  "localGallery_orientationLandscape": "가로",
-  "localGallery_orientationPortrait": "세로",
-  "localGallery_orientationSquare": "정사각형",
-  "localGallery_filterNsfw": "콘텐츠 등급",
-  "localGallery_nsfwAny": "전체",
-  "localGallery_nsfwSfw": "안전",
-  "localGallery_nsfwOnly": "NSFW만",
-  "localGallery_noModelCandidates": "아직 모델 메타데이터가 없습니다",
-  "localGallery_noSamplerCandidates": "아직 샘플러 메타데이터가 없습니다",
-  "localGallery_noResolutionCandidates": "아직 해상도 메타데이터가 없습니다",
-  "localGallery_candidatesLoadFailed": "후보를 불러오지 못했습니다",
-  "localGallery_noTagSuggestions": "일치하는 태그가 없습니다",
-  "localGallery_activeFiltersSet": "필터 설정됨",
-  "localGallery_applyFilters": "필터 적용",
-  "localGallery_resetAdvancedFilters": "고급 필터 초기화",
   "localGallery_group_today": "오늘",
   "localGallery_group_yesterday": "어제",
-  "localGallery_group_thisWeek": "이번 주",
-  "localGallery_group_earlier": "이전",
+  "localGallery_sendTo": "보내기…",
+  "localGallery_groupImageCount": "{formatted}장",
+  "@localGallery_groupImageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_imageCountLabel": "{formatted}장",
+  "@localGallery_imageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_selectGroup": "그룹 선택",
+  "localGallery_inspectorTitle": "상세 정보",
+  "localGallery_inspectorPosition": "{index} / {total}",
+  "@localGallery_inspectorPosition": {
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_inspectorEmpty": "이미지를 선택하면 상세 정보가 표시됩니다",
+  "localGallery_inspectorEmptyHint": "더블클릭하거나 Space 키를 눌러 크게 보기",
+  "localGallery_hideInspector": "상세 패널 숨기기",
+  "localGallery_showInspector": "상세 패널 표시",
+  "localGallery_reuseParams": "파라미터 재사용",
+  "localGallery_actionImg2Img": "Image2Image",
+  "localGallery_actionStyleTransfer": "Vibe 트랜스퍼",
+  "localGallery_actionPreciseReference": "정밀 참조",
+  "localGallery_actionSaveReference": "라이브러리 저장",
+  "localGallery_actionKrita": "Krita",
+  "localGallery_selectedImages": "{count}장 선택됨",
+  "@localGallery_selectedImages": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_sortDescending": "내림차순",
+  "localGallery_sortAscending": "오름차순",
+  "localGallery_moreActions": "더 보기",
+  "localGallery_thumbnailSize": "썸네일 크기",
+  "localGallery_naiOnlyChip": "NAI 이미지만",
+  "localGallery_modelLabel": "모델",
+  "localGallery_allVersions": "전체",
+  "localGallery_allVariants": "모든 변형",
+  "localGallery_dateRangeChip": "기간",
+  "localGallery_groupByDay": "일별 묶기",
+  "localGallery_groupByMonth": "월별 묶기",
+  "localGallery_groupNone": "묶지 않음",
+  "localGallery_groupModeTooltip": "시간별 묶기",
+  "localGallery_sectionLibrary": "라이브러리",
+  "localGallery_sectionCollections": "컬렉션",
+  "localGallery_sectionFolders": "폴더",
+  "localGallery_dateFolders": "날짜 폴더",
+  "localGallery_indexSynced": "색인 동기화됨 · {count}",
+  "@localGallery_indexSynced": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "localGallery_cannotOpenFolder": "폴더를 열 수 없습니다: {error}",
   "@localGallery_cannotOpenFolder": {
     "placeholders": {
@@ -2392,12 +2427,11 @@
   "shortcut_action_copy_prompt": "프롬프트 복사",
   "shortcut_action_reuse_gallery_params": "매개변수 재사용",
   "shortcut_action_delete_image": "이미지 삭제",
-  "shortcut_action_previous_page": "이전 페이지",
-  "shortcut_action_next_page": "다음 페이지",
+  "shortcut_action_previous_page": "한 화면 위로",
+  "shortcut_action_next_page": "한 화면 아래로",
   "shortcut_action_refresh_gallery": "갤러리 새로 고침",
   "shortcut_action_focus_search": "검색으로 이동",
-  "shortcut_action_enter_selection_mode": "선택 모드 시작",
-  "shortcut_action_open_filter_panel": "필터 패널 열기",
+  "shortcut_action_enter_selection_mode": "모두 선택",
   "shortcut_action_clear_filter": "필터 지우기",
   "shortcut_action_toggle_category_panel": "분류 패널 전환",
   "shortcut_action_jump_to_date": "날짜로 이동",
@@ -2422,7 +2456,6 @@
   "shortcut_help_title": "키보드 단축키 도움말",
   "shortcut_help_search": "단축키 검색...",
   "shortcut_help_all": "전체",
-  "shortcut_help_tip": "팁: 언제든 F1 또는 ?를 눌러 이 도움말을 열 수 있습니다",
   "shortcut_help_fabTooltip": "키보드 단축키 도움말(F1)",
   "shortcut_editor_recordingInline": "단축키를 누르세요...",
   "shortcut_editor_pressEscToCancel": "Esc를 눌러 취소",
@@ -2433,7 +2466,6 @@
       "action": {}
     }
   },
-  "drop_dialogTitle": "이 이미지를 어떻게 사용할까요?",
   "drop_hint": "여기에 이미지를 놓으세요",
   "drop_img2img": "Image2Image",
   "drop_vibeTransfer": "Vibe 트랜스퍼",
@@ -2450,25 +2482,9 @@
     }
   },
   "drop_addedToCharacterRef": "정밀 참조에 추가했습니다",
-  "drop_extractMetadata": "메타데이터 추출",
-  "drop_extractMetadataSubtitle": "이미지에서 프롬프트, 시드 등 매개변수를 읽습니다",
   "drop_vibeDetected": "미리 인코딩된 Vibe를 감지했습니다(2 Anlas 절약)",
-  "drop_vibeStrength": "강도: {value}%",
-  "@drop_vibeStrength": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-  "drop_vibeInfoExtracted": "정보 추출량: {value}%",
-  "@drop_vibeInfoExtracted": {
-    "placeholders": {
-      "value": {}
-    }
-  },
   "drop_reuseVibe": "Vibe 재사용",
-  "drop_reuseVibeSubtitle": "미리 인코딩된 데이터를 바로 사용(무료)",
   "drop_useAsRawImage": "원본 이미지로 사용",
-  "drop_useAsRawImageSubtitle": "다시 인코딩(2 Anlas 소비)",
   "drop_dragToImg2ImgOrOther": "Image2Image나 다른 대상으로 끌어 놓으세요",
   "preciseRef_title": "정밀 참조",
   "preciseRef_subtitle": "캐릭터나 스타일 참조에 맞춰 생성합니다",
@@ -3750,14 +3766,6 @@
   "detail_copyCharacterPrompt": "캐릭터 프롬프트 복사",
   "detail_copyAllVibeData": "모든 Vibe 데이터 복사",
   "detail_saveToVibeLibrary": "Vibe 라이브러리에 저장",
-  "pagination_firstPage": "첫 페이지",
-  "pagination_previousPage": "이전 페이지",
-  "pagination_nextPage": "다음 페이지",
-  "pagination_lastPage": "마지막 페이지",
-  "pagination_jumpToPage": "페이지로 이동",
-  "pagination_jump": "이동",
-  "pagination_itemsPerPage": "페이지당",
-  "pagination_itemUnit": "개",
   "comfyImport_detectedTitle": "ComfyUI 다중 캐릭터 프롬프트를 감지했습니다",
   "comfyImport_characterList": "캐릭터 목록({count})",
   "@comfyImport_characterList": {
@@ -4244,20 +4252,9 @@
   "common_clickToRetry": "클릭하여 다시 시도",
   "common_opening": "여는 중...",
   "common_swap": "바꾸기",
-  "common_minimum": "최소",
-  "common_maximum": "최대",
   "addToLibrary_displayNameHint": "이 항목을 알아보기 쉬운 이름을 입력하세요",
   "addToLibrary_tagHint": "태그를 입력하고 Enter를 눌러 추가하세요",
   "drop_saveVibeBundle": "Vibe 번들 저장",
-  "drop_saveVibeBundleSubtitle": "{name} 등 Vibe를 라이브러리에 저장합니다",
-  "@drop_saveVibeBundleSubtitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "drop_saveEncodedVibeSubtitle": "미리 인코딩된 Vibe 데이터를 라이브러리에 저장합니다",
   "history_dragFilePreparationFailed": "끌기용 파일을 준비하지 못했습니다. 잠시 후 다시 시도하세요.",
   "history_dragFilePreparing": "끌기용 파일 준비 중...",
   "history_dragFileNotReady": "끌기용 파일이 아직 준비되지 않았습니다",

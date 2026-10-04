@@ -469,23 +469,11 @@ abstract class AppLocalizations {
   /// **'Folder'**
   String get common_folder;
 
-  /// No description provided for @common_filter.
-  ///
-  /// In en, this message translates to:
-  /// **'Filter'**
-  String get common_filter;
-
   /// No description provided for @common_grid.
   ///
   /// In en, this message translates to:
   /// **'Grid'**
   String get common_grid;
-
-  /// No description provided for @common_date.
-  ///
-  /// In en, this message translates to:
-  /// **'Date'**
-  String get common_date;
 
   /// No description provided for @common_pack.
   ///
@@ -6040,12 +6028,6 @@ abstract class AppLocalizations {
   /// **'Failed to load image'**
   String get localGallery_progressiveLoadError;
 
-  /// No description provided for @localGallery_noImagesFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No images found'**
-  String get localGallery_noImagesFound;
-
   /// No description provided for @localGallery_unknownError.
   ///
   /// In en, this message translates to:
@@ -6082,12 +6064,6 @@ abstract class AppLocalizations {
   /// **'No matching results'**
   String get localGallery_noMatchingResults;
 
-  /// No description provided for @localGallery_loadingGroupedImages.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading grouped images...'**
-  String get localGallery_loadingGroupedImages;
-
   /// No description provided for @localGallery_title.
   ///
   /// In en, this message translates to:
@@ -6099,24 +6075,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All Images'**
   String get localGallery_allImages;
-
-  /// No description provided for @localGallery_categoryPanelTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get localGallery_categoryPanelTitle;
-
-  /// No description provided for @localGallery_selectCurrentPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Page'**
-  String get localGallery_selectCurrentPage;
-
-  /// No description provided for @localGallery_deselectCurrentPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Deselect Page'**
-  String get localGallery_deselectCurrentPage;
 
   /// No description provided for @localGallery_selectAllResults.
   ///
@@ -6190,12 +6148,6 @@ abstract class AppLocalizations {
   /// **'Image size'**
   String get localGallery_sortFieldDimensions;
 
-  /// No description provided for @localGallery_sortToggleDirection.
-  ///
-  /// In en, this message translates to:
-  /// **'Toggle sort direction'**
-  String get localGallery_sortToggleDirection;
-
   /// No description provided for @localGallery_aboutColumns.
   ///
   /// In en, this message translates to:
@@ -6232,23 +6184,11 @@ abstract class AppLocalizations {
   /// **'Thumbnail display quality; defaults to High'**
   String get settings_galleryThumbnailQualitySubtitle;
 
-  /// No description provided for @localGallery_naiOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'NAI'**
-  String get localGallery_naiOnly;
-
   /// No description provided for @localGallery_naiOnlyTooltip.
   ///
   /// In en, this message translates to:
   /// **'Only show NAI-generated images'**
   String get localGallery_naiOnlyTooltip;
-
-  /// No description provided for @localGallery_naiVersionFilterLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Ver'**
-  String get localGallery_naiVersionFilterLabel;
 
   /// No description provided for @localGallery_naiVersionFilterTooltip.
   ///
@@ -6262,29 +6202,11 @@ abstract class AppLocalizations {
   /// **'Waterfall'**
   String get localGallery_masonryViewLabel;
 
-  /// No description provided for @localGallery_switchToMasonryView.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to waterfall view'**
-  String get localGallery_switchToMasonryView;
-
-  /// No description provided for @localGallery_switchToGridLayout.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to grid view'**
-  String get localGallery_switchToGridLayout;
-
   /// No description provided for @localGallery_justifiedViewLabel.
   ///
   /// In en, this message translates to:
   /// **'Justified'**
   String get localGallery_justifiedViewLabel;
-
-  /// No description provided for @localGallery_switchToJustifiedView.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to justified view'**
-  String get localGallery_switchToJustifiedView;
 
   /// No description provided for @localGallery_dateRangeYearMonth.
   ///
@@ -6316,12 +6238,6 @@ abstract class AppLocalizations {
   /// **'Search: {scope}'**
   String localGallery_searchInScope(Object scope);
 
-  /// No description provided for @localGallery_openFilterPanel.
-  ///
-  /// In en, this message translates to:
-  /// **'Open filter panel'**
-  String get localGallery_openFilterPanel;
-
   /// No description provided for @localGallery_hideCategoryPanel.
   ///
   /// In en, this message translates to:
@@ -6334,12 +6250,6 @@ abstract class AppLocalizations {
   /// **'Show category panel'**
   String get localGallery_showCategoryPanel;
 
-  /// No description provided for @localGallery_enterSelectionMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter selection mode'**
-  String get localGallery_enterSelectionMode;
-
   /// No description provided for @localGallery_refreshTooltip.
   ///
   /// In en, this message translates to:
@@ -6351,24 +6261,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tag Intersection'**
   String get localGallery_tagIntersection;
-
-  /// No description provided for @localGallery_filterByTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Filter by Tags'**
-  String get localGallery_filterByTags;
-
-  /// No description provided for @localGallery_tagInputHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Type a tag, press Enter to add'**
-  String get localGallery_tagInputHint;
-
-  /// No description provided for @localGallery_addTag.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get localGallery_addTag;
 
   /// No description provided for @localGallery_createCategoryTitle.
   ///
@@ -7042,150 +6934,6 @@ abstract class AppLocalizations {
   /// **'Night'**
   String get statistics_timeNight;
 
-  /// No description provided for @localGallery_advancedFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Advanced Filters'**
-  String get localGallery_advancedFilters;
-
-  /// No description provided for @localGallery_filterByModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Filter by Model'**
-  String get localGallery_filterByModel;
-
-  /// No description provided for @localGallery_filterBySampler.
-  ///
-  /// In en, this message translates to:
-  /// **'Filter by Sampler'**
-  String get localGallery_filterBySampler;
-
-  /// No description provided for @localGallery_filterBySteps.
-  ///
-  /// In en, this message translates to:
-  /// **'Filter by Steps'**
-  String get localGallery_filterBySteps;
-
-  /// No description provided for @localGallery_filterByCfg.
-  ///
-  /// In en, this message translates to:
-  /// **'Filter by Prompt Guidance'**
-  String get localGallery_filterByCfg;
-
-  /// No description provided for @localGallery_filterByResolution.
-  ///
-  /// In en, this message translates to:
-  /// **'Filter by Resolution'**
-  String get localGallery_filterByResolution;
-
-  /// No description provided for @localGallery_filterSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Precisely filter your image collection'**
-  String get localGallery_filterSubtitle;
-
-  /// No description provided for @localGallery_filterOrientation.
-  ///
-  /// In en, this message translates to:
-  /// **'Orientation'**
-  String get localGallery_filterOrientation;
-
-  /// No description provided for @localGallery_orientationAny.
-  ///
-  /// In en, this message translates to:
-  /// **'Any'**
-  String get localGallery_orientationAny;
-
-  /// No description provided for @localGallery_orientationLandscape.
-  ///
-  /// In en, this message translates to:
-  /// **'Landscape'**
-  String get localGallery_orientationLandscape;
-
-  /// No description provided for @localGallery_orientationPortrait.
-  ///
-  /// In en, this message translates to:
-  /// **'Portrait'**
-  String get localGallery_orientationPortrait;
-
-  /// No description provided for @localGallery_orientationSquare.
-  ///
-  /// In en, this message translates to:
-  /// **'Square'**
-  String get localGallery_orientationSquare;
-
-  /// No description provided for @localGallery_filterNsfw.
-  ///
-  /// In en, this message translates to:
-  /// **'Content Rating'**
-  String get localGallery_filterNsfw;
-
-  /// No description provided for @localGallery_nsfwAny.
-  ///
-  /// In en, this message translates to:
-  /// **'Any'**
-  String get localGallery_nsfwAny;
-
-  /// No description provided for @localGallery_nsfwSfw.
-  ///
-  /// In en, this message translates to:
-  /// **'Safe'**
-  String get localGallery_nsfwSfw;
-
-  /// No description provided for @localGallery_nsfwOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'NSFW only'**
-  String get localGallery_nsfwOnly;
-
-  /// No description provided for @localGallery_noModelCandidates.
-  ///
-  /// In en, this message translates to:
-  /// **'No model metadata found yet'**
-  String get localGallery_noModelCandidates;
-
-  /// No description provided for @localGallery_noSamplerCandidates.
-  ///
-  /// In en, this message translates to:
-  /// **'No sampler metadata found yet'**
-  String get localGallery_noSamplerCandidates;
-
-  /// No description provided for @localGallery_noResolutionCandidates.
-  ///
-  /// In en, this message translates to:
-  /// **'No resolution metadata found yet'**
-  String get localGallery_noResolutionCandidates;
-
-  /// No description provided for @localGallery_candidatesLoadFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load candidates'**
-  String get localGallery_candidatesLoadFailed;
-
-  /// No description provided for @localGallery_noTagSuggestions.
-  ///
-  /// In en, this message translates to:
-  /// **'No matching tags'**
-  String get localGallery_noTagSuggestions;
-
-  /// No description provided for @localGallery_activeFiltersSet.
-  ///
-  /// In en, this message translates to:
-  /// **'Filters set'**
-  String get localGallery_activeFiltersSet;
-
-  /// No description provided for @localGallery_applyFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply Filters'**
-  String get localGallery_applyFilters;
-
-  /// No description provided for @localGallery_resetAdvancedFilters.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset Advanced Filters'**
-  String get localGallery_resetAdvancedFilters;
-
   /// No description provided for @localGallery_group_today.
   ///
   /// In en, this message translates to:
@@ -7198,17 +6946,215 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get localGallery_group_yesterday;
 
-  /// No description provided for @localGallery_group_thisWeek.
+  /// No description provided for @localGallery_sendTo.
   ///
   /// In en, this message translates to:
-  /// **'This Week'**
-  String get localGallery_group_thisWeek;
+  /// **'Send to…'**
+  String get localGallery_sendTo;
 
-  /// No description provided for @localGallery_group_earlier.
+  /// No description provided for @localGallery_groupImageCount.
   ///
   /// In en, this message translates to:
-  /// **'Earlier'**
-  String get localGallery_group_earlier;
+  /// **'{count, plural, =1{{formatted} image} other{{formatted} images}}'**
+  String localGallery_groupImageCount(int count, String formatted);
+
+  /// No description provided for @localGallery_imageCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{formatted} image} other{{formatted} images}}'**
+  String localGallery_imageCountLabel(int count, String formatted);
+
+  /// No description provided for @localGallery_selectGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Select group'**
+  String get localGallery_selectGroup;
+
+  /// No description provided for @localGallery_inspectorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get localGallery_inspectorTitle;
+
+  /// No description provided for @localGallery_inspectorPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'{index} / {total}'**
+  String localGallery_inspectorPosition(String index, String total);
+
+  /// No description provided for @localGallery_inspectorEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an image to see its details'**
+  String get localGallery_inspectorEmpty;
+
+  /// No description provided for @localGallery_inspectorEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-click or press Space to view it full size'**
+  String get localGallery_inspectorEmptyHint;
+
+  /// No description provided for @localGallery_hideInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide details panel'**
+  String get localGallery_hideInspector;
+
+  /// No description provided for @localGallery_showInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Show details panel'**
+  String get localGallery_showInspector;
+
+  /// No description provided for @localGallery_reuseParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse parameters'**
+  String get localGallery_reuseParams;
+
+  /// No description provided for @localGallery_actionImg2Img.
+  ///
+  /// In en, this message translates to:
+  /// **'Image2Image'**
+  String get localGallery_actionImg2Img;
+
+  /// No description provided for @localGallery_actionStyleTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe Transfer'**
+  String get localGallery_actionStyleTransfer;
+
+  /// No description provided for @localGallery_actionPreciseReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise Ref.'**
+  String get localGallery_actionPreciseReference;
+
+  /// No description provided for @localGallery_actionSaveReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Library'**
+  String get localGallery_actionSaveReference;
+
+  /// No description provided for @localGallery_actionKrita.
+  ///
+  /// In en, this message translates to:
+  /// **'Krita'**
+  String get localGallery_actionKrita;
+
+  /// No description provided for @localGallery_selectedImages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String localGallery_selectedImages(String count);
+
+  /// No description provided for @localGallery_sortDescending.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get localGallery_sortDescending;
+
+  /// No description provided for @localGallery_sortAscending.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get localGallery_sortAscending;
+
+  /// No description provided for @localGallery_moreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get localGallery_moreActions;
+
+  /// No description provided for @localGallery_thumbnailSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail size'**
+  String get localGallery_thumbnailSize;
+
+  /// No description provided for @localGallery_naiOnlyChip.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI images only'**
+  String get localGallery_naiOnlyChip;
+
+  /// No description provided for @localGallery_modelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get localGallery_modelLabel;
+
+  /// No description provided for @localGallery_allVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get localGallery_allVersions;
+
+  /// No description provided for @localGallery_allVariants.
+  ///
+  /// In en, this message translates to:
+  /// **'All variants'**
+  String get localGallery_allVariants;
+
+  /// No description provided for @localGallery_dateRangeChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Date range'**
+  String get localGallery_dateRangeChip;
+
+  /// No description provided for @localGallery_groupByDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by day'**
+  String get localGallery_groupByDay;
+
+  /// No description provided for @localGallery_groupByMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by month'**
+  String get localGallery_groupByMonth;
+
+  /// No description provided for @localGallery_groupNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No grouping'**
+  String get localGallery_groupNone;
+
+  /// No description provided for @localGallery_groupModeTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by time'**
+  String get localGallery_groupModeTooltip;
+
+  /// No description provided for @localGallery_sectionLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get localGallery_sectionLibrary;
+
+  /// No description provided for @localGallery_sectionCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections'**
+  String get localGallery_sectionCollections;
+
+  /// No description provided for @localGallery_sectionFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders'**
+  String get localGallery_sectionFolders;
+
+  /// No description provided for @localGallery_dateFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Dated folders'**
+  String get localGallery_dateFolders;
+
+  /// No description provided for @localGallery_indexSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Index up to date · {count}'**
+  String localGallery_indexSynced(String count);
 
   /// No description provided for @localGallery_cannotOpenFolder.
   ///
@@ -8598,13 +8544,13 @@ abstract class AppLocalizations {
   /// No description provided for @shortcut_action_previous_page.
   ///
   /// In en, this message translates to:
-  /// **'Previous Page'**
+  /// **'Scroll Up One Screen'**
   String get shortcut_action_previous_page;
 
   /// No description provided for @shortcut_action_next_page.
   ///
   /// In en, this message translates to:
-  /// **'Next Page'**
+  /// **'Scroll Down One Screen'**
   String get shortcut_action_next_page;
 
   /// No description provided for @shortcut_action_refresh_gallery.
@@ -8622,14 +8568,8 @@ abstract class AppLocalizations {
   /// No description provided for @shortcut_action_enter_selection_mode.
   ///
   /// In en, this message translates to:
-  /// **'Enter Selection Mode'**
+  /// **'Select All'**
   String get shortcut_action_enter_selection_mode;
-
-  /// No description provided for @shortcut_action_open_filter_panel.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Filter Panel'**
-  String get shortcut_action_open_filter_panel;
 
   /// No description provided for @shortcut_action_clear_filter.
   ///
@@ -8739,12 +8679,6 @@ abstract class AppLocalizations {
   /// **'All'**
   String get shortcut_help_all;
 
-  /// No description provided for @shortcut_help_tip.
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: press F1 or ? anytime to open this help dialog'**
-  String get shortcut_help_tip;
-
   /// No description provided for @shortcut_help_fabTooltip.
   ///
   /// In en, this message translates to:
@@ -8774,12 +8708,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This shortcut conflicts with \"{action}\"'**
   String shortcut_editor_conflictWith(Object action);
-
-  /// No description provided for @drop_dialogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'How to use this image?'**
-  String get drop_dialogTitle;
 
   /// No description provided for @drop_hint.
   ///
@@ -8835,35 +8763,11 @@ abstract class AppLocalizations {
   /// **'Added to Precise Reference'**
   String get drop_addedToCharacterRef;
 
-  /// No description provided for @drop_extractMetadata.
-  ///
-  /// In en, this message translates to:
-  /// **'Extract Metadata'**
-  String get drop_extractMetadata;
-
-  /// No description provided for @drop_extractMetadataSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Read Prompt, Seed and other parameters from image'**
-  String get drop_extractMetadataSubtitle;
-
   /// No description provided for @drop_vibeDetected.
   ///
   /// In en, this message translates to:
   /// **'Pre-encoded Vibe detected (saves 2 Anlas)'**
   String get drop_vibeDetected;
-
-  /// No description provided for @drop_vibeStrength.
-  ///
-  /// In en, this message translates to:
-  /// **'Strength: {value}%'**
-  String drop_vibeStrength(Object value);
-
-  /// No description provided for @drop_vibeInfoExtracted.
-  ///
-  /// In en, this message translates to:
-  /// **'Information Extracted: {value}%'**
-  String drop_vibeInfoExtracted(Object value);
 
   /// No description provided for @drop_reuseVibe.
   ///
@@ -8871,23 +8775,11 @@ abstract class AppLocalizations {
   /// **'Reuse Vibe'**
   String get drop_reuseVibe;
 
-  /// No description provided for @drop_reuseVibeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Use pre-encoded data directly (free)'**
-  String get drop_reuseVibeSubtitle;
-
   /// No description provided for @drop_useAsRawImage.
   ///
   /// In en, this message translates to:
   /// **'Use as Raw Image'**
   String get drop_useAsRawImage;
-
-  /// No description provided for @drop_useAsRawImageSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Re-encode (costs 2 Anlas)'**
-  String get drop_useAsRawImageSubtitle;
 
   /// No description provided for @drop_dragToImg2ImgOrOther.
   ///
@@ -12555,54 +12447,6 @@ abstract class AppLocalizations {
   /// **'Save to Vibe Library'**
   String get detail_saveToVibeLibrary;
 
-  /// No description provided for @pagination_firstPage.
-  ///
-  /// In en, this message translates to:
-  /// **'First page'**
-  String get pagination_firstPage;
-
-  /// No description provided for @pagination_previousPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous page'**
-  String get pagination_previousPage;
-
-  /// No description provided for @pagination_nextPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Next page'**
-  String get pagination_nextPage;
-
-  /// No description provided for @pagination_lastPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Last page'**
-  String get pagination_lastPage;
-
-  /// No description provided for @pagination_jumpToPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Jump to page'**
-  String get pagination_jumpToPage;
-
-  /// No description provided for @pagination_jump.
-  ///
-  /// In en, this message translates to:
-  /// **'Jump'**
-  String get pagination_jump;
-
-  /// No description provided for @pagination_itemsPerPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Per page'**
-  String get pagination_itemsPerPage;
-
-  /// No description provided for @pagination_itemUnit.
-  ///
-  /// In en, this message translates to:
-  /// **'items'**
-  String get pagination_itemUnit;
-
   /// No description provided for @comfyImport_detectedTitle.
   ///
   /// In en, this message translates to:
@@ -13431,18 +13275,6 @@ abstract class AppLocalizations {
   /// **'Swap'**
   String get common_swap;
 
-  /// No description provided for @common_minimum.
-  ///
-  /// In en, this message translates to:
-  /// **'Minimum'**
-  String get common_minimum;
-
-  /// No description provided for @common_maximum.
-  ///
-  /// In en, this message translates to:
-  /// **'Maximum'**
-  String get common_maximum;
-
   /// No description provided for @addToLibrary_displayNameHint.
   ///
   /// In en, this message translates to:
@@ -13460,18 +13292,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save Vibe Bundle'**
   String get drop_saveVibeBundle;
-
-  /// No description provided for @drop_saveVibeBundleSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Save {name} and the other Vibes to the library'**
-  String drop_saveVibeBundleSubtitle(String name);
-
-  /// No description provided for @drop_saveEncodedVibeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Save the pre-encoded Vibe data to the library'**
-  String get drop_saveEncodedVibeSubtitle;
 
   /// No description provided for @history_dragFilePreparationFailed.
   ///

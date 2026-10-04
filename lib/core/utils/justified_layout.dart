@@ -435,6 +435,22 @@ List<JustifiedRow> computeJustifiedRows({
       if (logA < minLog) minLog = logA;
       if (logA > maxLog) maxLog = logA;
       if (maxLog - minLog > justifiedAspectSpreadCap) break;
+      // 多图行的 r 随 j 单调递减、欠填内容宽单调递增：一旦 r 落到裁剪带
+      // 以下且欠填超出溢出守卫，更长的行全部不可行（与逐个评估结果一致），
+      // 提前结束让整库长序列保持 O(n·行长)。
+      if (j > i) {
+        final count = j - i + 1;
+        final rowSumA = sumA[j + 1] - sumA[i];
+        final imageW = availableWidth - spacing * (count - 1);
+        if (imageW <= 0) break;
+        final anchoredW =
+            (t / math.sqrt(rowSumA / count)).clamp(minH, maxH) * rowSumA;
+        if (imageW / anchoredW < 1 - cap &&
+            anchoredW + spacing * (count - 1) >
+                availableWidth * (1 + justifiedJustifyTolerance)) {
+          break;
+        }
+      }
       final candidate = evaluateRow(i, j);
       if (candidate == null) continue;
       final total = f[i] + candidate.$3;
@@ -452,8 +468,7 @@ List<JustifiedRow> computeJustifiedRows({
   while (end > 0) {
     final start = prev[end] >= 0 && prev[end] < end ? prev[end] : end - 1;
     final candidate = evaluateRow(start, end - 1);
-    rows.insert(
-      0,
+    rows.add(
       JustifiedRow(
         startIndex: start,
         endIndex: end - 1,
@@ -463,5 +478,5 @@ List<JustifiedRow> computeJustifiedRows({
     );
     end = start;
   }
-  return rows;
+  return rows.reversed.toList(growable: false);
 }

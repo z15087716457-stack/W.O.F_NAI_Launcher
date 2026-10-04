@@ -82,9 +82,7 @@
   "common_ok": "OK",
   "common_exit": "Exit",
   "common_folder": "Folder",
-  "common_filter": "Filter",
   "common_grid": "Grid",
-  "common_date": "Date",
   "common_pack": "Pack",
   "common_multiSelect": "Multi-select",
   "common_category": "Category",
@@ -1602,7 +1600,6 @@
   },
   "vibeParseFailed": "Failed to parse Vibe file",
   "localGallery_progressiveLoadError": "Failed to load image",
-  "localGallery_noImagesFound": "No images found",
   "localGallery_unknownError": "Unknown error",
   "localGallery_loadFailed": "Load failed: {error}",
   "@localGallery_loadFailed": {
@@ -1614,12 +1611,8 @@
   "localGallery_emptyTitle": "No local images",
   "localGallery_emptySubtitle": "Generated images will be saved here",
   "localGallery_noMatchingResults": "No matching results",
-  "localGallery_loadingGroupedImages": "Loading grouped images...",
   "localGallery_title": "Local Gallery",
   "localGallery_allImages": "All Images",
-  "localGallery_categoryPanelTitle": "Categories",
-  "localGallery_selectCurrentPage": "Select Page",
-  "localGallery_deselectCurrentPage": "Deselect Page",
   "localGallery_selectAllResults": "Select All",
   "localGallery_deselectAllResults": "Deselect All",
   "localGallery_moveSelected": "Move",
@@ -1632,7 +1625,6 @@
   "localGallery_sortFieldName": "File name",
   "localGallery_sortFieldSize": "File size",
   "localGallery_sortFieldDimensions": "Image size",
-  "localGallery_sortToggleDirection": "Toggle sort direction",
   "localGallery_aboutColumns": "≈ {count} columns",
   "@localGallery_aboutColumns": {
     "placeholders": {
@@ -1644,15 +1636,10 @@
   "localGallery_thumbnailQualityHd": "High",
   "settings_galleryThumbnailQuality": "Local gallery quality",
   "settings_galleryThumbnailQualitySubtitle": "Thumbnail display quality; defaults to High",
-  "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "Only show NAI-generated images",
-  "localGallery_naiVersionFilterLabel": "Ver",
   "localGallery_naiVersionFilterTooltip": "Filter by NAI model version",
   "localGallery_masonryViewLabel": "Waterfall",
-  "localGallery_switchToMasonryView": "Switch to waterfall view",
-  "localGallery_switchToGridLayout": "Switch to grid view",
   "localGallery_justifiedViewLabel": "Justified",
-  "localGallery_switchToJustifiedView": "Switch to justified view",
   "localGallery_dateRangeYearMonth": "{year}/{month}",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {
@@ -1669,15 +1656,10 @@
       "scope": {}
     }
   },
-  "localGallery_openFilterPanel": "Open filter panel",
   "localGallery_hideCategoryPanel": "Hide category panel",
   "localGallery_showCategoryPanel": "Show category panel",
-  "localGallery_enterSelectionMode": "Enter selection mode",
   "localGallery_refreshTooltip": "Refresh gallery\n\nAutomatically detects new or changed images and updates the index",
   "localGallery_tagIntersection": "Tag Intersection",
-  "localGallery_filterByTags": "Filter by Tags",
-  "localGallery_tagInputHint": "Type a tag, press Enter to add",
-  "localGallery_addTag": "Add",
   "localGallery_createCategoryTitle": "New Category",
   "localGallery_newOrImport": "New / Import",
   "localGallery_importFolder": "Import Folder",
@@ -1898,34 +1880,87 @@
   "statistics_timeAfternoon": "Afternoon",
   "statistics_timeEvening": "Evening",
   "statistics_timeNight": "Night",
-  "localGallery_advancedFilters": "Advanced Filters",
-  "localGallery_filterByModel": "Filter by Model",
-  "localGallery_filterBySampler": "Filter by Sampler",
-  "localGallery_filterBySteps": "Filter by Steps",
-  "localGallery_filterByCfg": "Filter by Prompt Guidance",
-  "localGallery_filterByResolution": "Filter by Resolution",
-  "localGallery_filterSubtitle": "Precisely filter your image collection",
-  "localGallery_filterOrientation": "Orientation",
-  "localGallery_orientationAny": "Any",
-  "localGallery_orientationLandscape": "Landscape",
-  "localGallery_orientationPortrait": "Portrait",
-  "localGallery_orientationSquare": "Square",
-  "localGallery_filterNsfw": "Content Rating",
-  "localGallery_nsfwAny": "Any",
-  "localGallery_nsfwSfw": "Safe",
-  "localGallery_nsfwOnly": "NSFW only",
-  "localGallery_noModelCandidates": "No model metadata found yet",
-  "localGallery_noSamplerCandidates": "No sampler metadata found yet",
-  "localGallery_noResolutionCandidates": "No resolution metadata found yet",
-  "localGallery_candidatesLoadFailed": "Failed to load candidates",
-  "localGallery_noTagSuggestions": "No matching tags",
-  "localGallery_activeFiltersSet": "Filters set",
-  "localGallery_applyFilters": "Apply Filters",
-  "localGallery_resetAdvancedFilters": "Reset Advanced Filters",
   "localGallery_group_today": "Today",
   "localGallery_group_yesterday": "Yesterday",
-  "localGallery_group_thisWeek": "This Week",
-  "localGallery_group_earlier": "Earlier",
+  "localGallery_sendTo": "Send to…",
+  "localGallery_groupImageCount": "{count, plural, =1{{formatted} image} other{{formatted} images}}",
+  "@localGallery_groupImageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_imageCountLabel": "{count, plural, =1{{formatted} image} other{{formatted} images}}",
+  "@localGallery_imageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_selectGroup": "Select group",
+  "localGallery_inspectorTitle": "Details",
+  "localGallery_inspectorPosition": "{index} / {total}",
+  "@localGallery_inspectorPosition": {
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_inspectorEmpty": "Select an image to see its details",
+  "localGallery_inspectorEmptyHint": "Double-click or press Space to view it full size",
+  "localGallery_hideInspector": "Hide details panel",
+  "localGallery_showInspector": "Show details panel",
+  "localGallery_reuseParams": "Reuse parameters",
+  "localGallery_actionImg2Img": "Image2Image",
+  "localGallery_actionStyleTransfer": "Vibe Transfer",
+  "localGallery_actionPreciseReference": "Precise Ref.",
+  "localGallery_actionSaveReference": "Save to Library",
+  "localGallery_actionKrita": "Krita",
+  "localGallery_selectedImages": "{count} selected",
+  "@localGallery_selectedImages": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_sortDescending": "Descending",
+  "localGallery_sortAscending": "Ascending",
+  "localGallery_moreActions": "More",
+  "localGallery_thumbnailSize": "Thumbnail size",
+  "localGallery_naiOnlyChip": "NAI images only",
+  "localGallery_modelLabel": "Model",
+  "localGallery_allVersions": "All",
+  "localGallery_allVariants": "All variants",
+  "localGallery_dateRangeChip": "Date range",
+  "localGallery_groupByDay": "Group by day",
+  "localGallery_groupByMonth": "Group by month",
+  "localGallery_groupNone": "No grouping",
+  "localGallery_groupModeTooltip": "Group by time",
+  "localGallery_sectionLibrary": "Library",
+  "localGallery_sectionCollections": "Collections",
+  "localGallery_sectionFolders": "Folders",
+  "localGallery_dateFolders": "Dated folders",
+  "localGallery_indexSynced": "Index up to date · {count}",
+  "@localGallery_indexSynced": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "localGallery_cannotOpenFolder": "Cannot open folder: {error}",
   "@localGallery_cannotOpenFolder": {
     "placeholders": {
@@ -2398,12 +2433,11 @@
   "shortcut_action_copy_prompt": "Copy Prompt",
   "shortcut_action_reuse_gallery_params": "Reuse Parameters",
   "shortcut_action_delete_image": "Delete Image",
-  "shortcut_action_previous_page": "Previous Page",
-  "shortcut_action_next_page": "Next Page",
+  "shortcut_action_previous_page": "Scroll Up One Screen",
+  "shortcut_action_next_page": "Scroll Down One Screen",
   "shortcut_action_refresh_gallery": "Refresh Gallery",
   "shortcut_action_focus_search": "Focus Search",
-  "shortcut_action_enter_selection_mode": "Enter Selection Mode",
-  "shortcut_action_open_filter_panel": "Open Filter Panel",
+  "shortcut_action_enter_selection_mode": "Select All",
   "shortcut_action_clear_filter": "Clear Filter",
   "shortcut_action_toggle_category_panel": "Toggle Category Panel",
   "shortcut_action_jump_to_date": "Jump to Date",
@@ -2422,7 +2456,6 @@
   "shortcut_help_title": "Keyboard Shortcuts Help",
   "shortcut_help_search": "Search shortcuts...",
   "shortcut_help_all": "All",
-  "shortcut_help_tip": "Tip: press F1 or ? anytime to open this help dialog",
   "shortcut_help_fabTooltip": "Keyboard Shortcuts Help (F1)",
   "shortcut_editor_recordingInline": "Press shortcut...",
   "shortcut_editor_pressEscToCancel": "Press Esc to cancel",
@@ -2433,7 +2466,6 @@
       "action": {}
     }
   },
-  "drop_dialogTitle": "How to use this image?",
   "drop_hint": "Drop image here",
   "drop_img2img": "Image2Image",
   "drop_vibeTransfer": "Vibe Transfer",
@@ -2450,25 +2482,9 @@
     }
   },
   "drop_addedToCharacterRef": "Added to Precise Reference",
-  "drop_extractMetadata": "Extract Metadata",
-  "drop_extractMetadataSubtitle": "Read Prompt, Seed and other parameters from image",
   "drop_vibeDetected": "Pre-encoded Vibe detected (saves 2 Anlas)",
-  "drop_vibeStrength": "Strength: {value}%",
-  "@drop_vibeStrength": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-  "drop_vibeInfoExtracted": "Information Extracted: {value}%",
-  "@drop_vibeInfoExtracted": {
-    "placeholders": {
-      "value": {}
-    }
-  },
   "drop_reuseVibe": "Reuse Vibe",
-  "drop_reuseVibeSubtitle": "Use pre-encoded data directly (free)",
   "drop_useAsRawImage": "Use as Raw Image",
-  "drop_useAsRawImageSubtitle": "Re-encode (costs 2 Anlas)",
   "drop_dragToImg2ImgOrOther": "Drag to Image2Image or another target",
   "preciseRef_title": "Precise Reference",
   "preciseRef_subtitle": "Tie generation to a character or style reference",
@@ -3750,14 +3766,6 @@
   "detail_copyCharacterPrompt": "Copy Character Prompt",
   "detail_copyAllVibeData": "Copy all Vibe data",
   "detail_saveToVibeLibrary": "Save to Vibe Library",
-  "pagination_firstPage": "First page",
-  "pagination_previousPage": "Previous page",
-  "pagination_nextPage": "Next page",
-  "pagination_lastPage": "Last page",
-  "pagination_jumpToPage": "Jump to page",
-  "pagination_jump": "Jump",
-  "pagination_itemsPerPage": "Per page",
-  "pagination_itemUnit": "items",
   "comfyImport_detectedTitle": "Detected ComfyUI multi-character prompt",
   "comfyImport_characterList": "Character List ({count})",
   "@comfyImport_characterList": {
@@ -4244,20 +4252,9 @@
   "common_clickToRetry": "Click to retry",
   "common_opening": "Opening...",
   "common_swap": "Swap",
-  "common_minimum": "Minimum",
-  "common_maximum": "Maximum",
   "addToLibrary_displayNameHint": "Enter a name to identify this entry",
   "addToLibrary_tagHint": "Enter a tag and press Enter to add it",
   "drop_saveVibeBundle": "Save Vibe Bundle",
-  "drop_saveVibeBundleSubtitle": "Save {name} and the other Vibes to the library",
-  "@drop_saveVibeBundleSubtitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "drop_saveEncodedVibeSubtitle": "Save the pre-encoded Vibe data to the library",
   "history_dragFilePreparationFailed": "Failed to prepare the drag file. Try again later.",
   "history_dragFilePreparing": "Preparing the drag file...",
   "history_dragFileNotReady": "The drag file is not ready yet",

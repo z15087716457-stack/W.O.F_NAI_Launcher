@@ -24,23 +24,30 @@ import '../../../core/utils/localization_extension.dart';
 
 part 'unified_gallery_service.g.dart';
 
-/// 相邻页缩略图预取所需的轻量条目（[LocalGalleryService.getPagePreloadItems]）。
+/// 连续画廊的轻量条目（[LocalGalleryService.getTimelineEntries]）。
 ///
-/// 只带路径与可选的图像宽高（火车流视图按「列宽×宽高比」估卡片宽用），
-/// 不做 stat / 收藏 / 标签 / 完整元数据构建。
-class GalleryPagePreloadItem {
+/// 只带路径、排序 stat 缓存里的修改时间与 gallery_images 的宽高，
+/// 不做收藏 / 标签 / 元数据构建；整库排版与日期分组只依赖这些字段。
+class GalleryTimelineEntry {
   final String path;
+  final DateTime modifiedAt;
   final int? width;
   final int? height;
 
-  const GalleryPagePreloadItem({required this.path, this.width, this.height});
+  const GalleryTimelineEntry({
+    required this.path,
+    required this.modifiedAt,
+    this.width,
+    this.height,
+  });
 
-  /// 宽高比（宽/高）；无尺寸或非法时为 null（调用方按 1.0 处理）
+  bool get hasDimensions =>
+      width != null && height != null && width! > 0 && height! > 0;
+
+  /// 宽高比（宽/高）；无尺寸或非法时为 null（排版按 1.0 处理）
   double? get aspectRatio {
-    final w = width;
-    final h = height;
-    if (w == null || h == null || w <= 0 || h <= 0) return null;
-    final ratio = w / h;
+    if (!hasDimensions) return null;
+    final ratio = width! / height!;
     return ratio.isFinite ? ratio : null;
   }
 }
@@ -130,15 +137,15 @@ abstract class LocalGalleryService {
   /// - [GalleryDatabaseException] 数据库错误
   Future<List<LocalImageRecord>> getPage(int page, {int? pageSize});
 
-  /// 获取指定页面的预取条目（轻量：路径 + 宽高）
+  /// 当前过滤与排序下的全部条目（路径、修改时间、宽高），供连续画廊排版。
   ///
-  /// 供相邻页缩略图预取用：与 [getPage] 同一分页源（排序过滤后 sublist），
-  /// 但只查 gallery_images 的宽高，不做 stat / 收藏 / 标签 / 完整元数据。
-  /// DB 失败时退化为无尺寸条目（宽高比按 1.0 处理），不抛异常。
-  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
-    int page, {
-    int? pageSize,
-  });
+  /// 宽高来自 gallery_images 并在服务内缓存；未入库或无尺寸的条目宽高为
+  /// null。DB 失败时退化为无尺寸条目，不抛异常。
+  Future<List<GalleryTimelineEntry>> getTimelineEntries();
+
+  /// 按路径批量加载完整记录（复用排序 stat 缓存，按传入顺序返回；
+  /// 已不存在的文件跳过）。
+  Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths);
 
   /// 应用过滤条件
   ///
@@ -227,9 +234,6 @@ abstract class LocalGalleryService {
   /// 设置仅显示收藏
   Future<void> setShowFavoritesOnly(bool value);
 
-  /// 设置分页大小
-  Future<void> setPageSize(int size);
-
   /// 设置排序（字段 + 方向）
   Future<void> setSort(GallerySort sort);
 
@@ -272,7 +276,11 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   FilterCriteria _currentFilter = const FilterCriteria();
   int _filterGeneration = 0;
   String? _activeFilterOperationId;
-  int _pageSize = 50;
+
+  /// 图像宽高缓存（连续画廊排版用）；[_dimensionsChecked] 记录已查过 DB
+  /// 的路径（含无尺寸条目），避免反复补查。refresh 时整体失效。
+  final Map<String, (int, int)> _dimensions = {};
+  final Set<String> _dimensionsChecked = {};
 
   /// 当前排序（默认修改时间 新→旧，与历史行为一致）
   GallerySort _sort = const GallerySort.modifiedAtDesc();
@@ -882,7 +890,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   Future<List<LocalImageRecord>> getPage(int page, {int? pageSize}) async {
     _ensureInitialized();
 
-    final effectivePageSize = pageSize ?? _pageSize;
+    final effectivePageSize = pageSize ?? 50;
     final totalPages = (_effectiveFiles.length / effectivePageSize).ceil();
 
     if (page < 0 || (totalPages > 0 && page >= totalPages)) {
@@ -897,59 +905,51 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   }
 
   @override
-  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
-    int page, {
-    int? pageSize,
-  }) async {
+  Future<List<GalleryTimelineEntry>> getTimelineEntries() async {
     _ensureInitialized();
 
-    final effectivePageSize = pageSize ?? _pageSize;
-    final totalPages = (_effectiveFiles.length / effectivePageSize).ceil();
-
-    if (page < 0 || (totalPages > 0 && page >= totalPages)) {
-      return [];
-    }
-
-    final start = page * effectivePageSize;
-    final end = min(start + effectivePageSize, _effectiveFiles.length);
-    final batch = _effectiveFiles.sublist(start, end);
-    if (batch.isEmpty) return [];
-
-    final fallback = [
-      for (final file in batch) GalleryPagePreloadItem(path: file.path),
+    final files = List<File>.of(_effectiveFiles);
+    if (files.isEmpty) return const [];
+    await _ensureFileStats(files);
+    await _ensureDimensions(files);
+    return [
+      for (final file in files)
+        GalleryTimelineEntry(
+          path: file.path,
+          modifiedAt: (_fileStats[file.path] ?? _missingSortStats).modified,
+          width: _dimensions[file.path]?.$1,
+          height: _dimensions[file.path]?.$2,
+        ),
     ];
+  }
 
-    // 宽高来自 gallery_images（新图/未入库条目为 null，调用方按 1.0 宽高比处理）
+  /// 补齐宽高缓存：缺得多时一次读全表，少量时按路径批查。
+  Future<void> _ensureDimensions(List<File> files) async {
+    final missing = [
+      for (final file in files)
+        if (!_dimensionsChecked.contains(file.path)) file.path,
+    ];
+    if (missing.isEmpty) return;
     try {
-      final paths = batch.map((file) => file.path).toList();
-      final pathToIdMap = await _dataSource.getImageIdsByPaths(paths);
-      final imageIds = pathToIdMap.values.whereType<int>().toList();
-      if (imageIds.isEmpty) return fallback;
-
-      final records = await _dataSource.getImagesByIds(imageIds);
-      if (records.isEmpty) return fallback;
-
-      final dimsByPath = <String, (int?, int?)>{
-        for (final record in records)
-          record.filePath: (record.width, record.height),
-      };
-
-      return [
-        for (final file in batch)
-          GalleryPagePreloadItem(
-            path: file.path,
-            width: dimsByPath[file.path]?.$1,
-            height: dimsByPath[file.path]?.$2,
-          ),
-      ];
+      final found = missing.length > 4000
+          ? await _dataSource.getAllImageDimensions()
+          : await _dataSource.getImageDimensionsByPaths(missing);
+      _dimensions.addAll(found);
+      _dimensionsChecked.addAll(missing);
     } catch (e) {
-      // 预取是纯优化路径：DB 失败不抛出，退化为无尺寸条目
+      // 排版是纯展示路径：DB 失败不抛出，退化为无尺寸条目（下次再查）
       AppLogger.w(
-        'getPagePreloadItems fallback to size-less items: $e',
+        'Timeline dimensions fallback to size-less entries: $e',
         'LocalGalleryService',
       );
-      return fallback;
     }
+  }
+
+  @override
+  Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths) async {
+    _ensureInitialized();
+    if (paths.isEmpty) return const [];
+    return _loadRecords([for (final path in paths) File(path)]);
   }
 
   @override
@@ -981,6 +981,8 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         missingStatFiles.map((file) async {
           try {
             final stat = await file.stat();
+            // stat 不会对缺失文件抛异常：notFound 直接跳过，不产出记录
+            if (stat.type == FileSystemEntityType.notFound) return;
             fileStats[file.path] = (modified: stat.modified, size: stat.size);
             // 回填排序缓存（与 _ensureFileStats 同口径：created=modified、area=0）
             _fileStats[file.path] = (
@@ -1331,11 +1333,6 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   }
 
   @override
-  Future<void> setPageSize(int size) async {
-    _pageSize = size;
-  }
-
-  @override
   Future<void> setSort(GallerySort sort) async {
     if (_sort == sort) return;
 
@@ -1567,6 +1564,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         size: stat.size,
         area: _calculateArea(metadata?.width, metadata?.height),
       );
+      _dimensionsChecked.remove(file.path);
       _allFiles.add(file);
       await _sortFileList(_allFiles);
       // 全量重排后列表与当前排序一致，无需再做收藏变更时的兜底重排
@@ -1609,6 +1607,8 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       final previousCount = _allFiles.length;
       final countChanged = files.length != previousCount;
       _allFiles = files;
+      _dimensions.clear();
+      _dimensionsChecked.clear();
       // refresh 重建的列表只按「修改时间/大小/文件名」有序：与当前排序可能
       // 不一致时，沿用旧的「下次收藏变更触发全量重排」可观察序列
       // （见 _allFilesNeedsResort 注释）。
@@ -1797,10 +1797,11 @@ class ErrorGalleryService implements LocalGalleryService {
       _throwError();
 
   @override
-  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
-    int page, {
-    int? pageSize,
-  }) => _throwError();
+  Future<List<GalleryTimelineEntry>> getTimelineEntries() => _throwError();
+
+  @override
+  Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths) =>
+      _throwError();
 
   @override
   Future<void> applyFilter(FilterCriteria criteria) => _throwError();
@@ -1837,9 +1838,6 @@ class ErrorGalleryService implements LocalGalleryService {
 
   @override
   Future<void> setShowFavoritesOnly(bool value) => _throwError();
-
-  @override
-  Future<void> setPageSize(int size) => _throwError();
 
   @override
   Future<void> setSort(GallerySort sort) => _throwError();
@@ -1891,10 +1889,12 @@ class _PlaceholderGalleryService implements LocalGalleryService {
       _throwNotInitialized();
 
   @override
-  Future<List<GalleryPagePreloadItem>> getPagePreloadItems(
-    int page, {
-    int? pageSize,
-  }) => _throwNotInitialized();
+  Future<List<GalleryTimelineEntry>> getTimelineEntries() =>
+      _throwNotInitialized();
+
+  @override
+  Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths) =>
+      _throwNotInitialized();
 
   @override
   Future<void> applyFilter(FilterCriteria criteria) => _throwNotInitialized();
@@ -1934,9 +1934,6 @@ class _PlaceholderGalleryService implements LocalGalleryService {
 
   @override
   Future<void> setShowFavoritesOnly(bool value) => _throwNotInitialized();
-
-  @override
-  Future<void> setPageSize(int size) => _throwNotInitialized();
 
   @override
   Future<void> setSort(GallerySort sort) => _throwNotInitialized();

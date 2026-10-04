@@ -35,7 +35,7 @@ W.O.F NAI Studio is a third-party client for NovelAI built with Flutter. It inte
 | 🖼️ Image-to-Image & Editing | Supports img2img, inpainting, Outpaint, virtual canvas expansion, hard-edge masks, and click-to-fill region selection. |
 | 🌈 Reference & Style | Supports Vibe Transfer, Precise Reference, multi-image references, Vibe pack import/export, and PNG metadata embedding/export. |
 | ✍️ Prompt Tools | Includes the complete offline merged Danbooru/e621 tag and alias catalog plus Danbooru co-occurrence recommendations. Press `Ctrl/⌘+Shift+Space` for tags related to the tag before the cursor, pin the source tag for continuous insertion, and optionally merge Danbooru online relations and AI tag translations. Also includes NAI/SD weight syntax assistance, token counting, in-box prompt search, and pinned words — plus the app-wide pill prompt-block system described in the highlights below. |
-| 📚 Local Gallery | Supports multi-source recursive scanning, default masonry layout, SQLite full-text search, categories/collections/trash pool, model-version filters, metadata parsing, batch operations, and large image previews. |
+| 📚 Local Gallery | Supports multi-source recursive scanning, a sidebar / image wall / details three-pane layout, continuous day-grouped browsing with a timeline scrubber, SQLite full-text search, categories/collections/trash pool, model-version filters, one-click parameter reuse from the details panel, batch operations, and large image previews. |
 | 🌐 Online Gallery | Supports Danbooru / Safebooru / Gelbooru / AI TAG search, native rankings, multi-image details, metadata reuse, and batch downloads. |
 | 📦 Generation Queue | Supports task sorting, batch generation, pause/resume, failure handling strategies, progress statistics, and queue import/export. |
 | 🔌 External Integration | Supports full-parameter Krita bridging (AI takeover), local ComfyUI workflows, system proxy, image copying, and file location. |
@@ -102,7 +102,7 @@ The launcher exposes a local bridge protocol that **any external agent tool, scr
 
 ### 🖼️ Gallery Overhaul
 
-Multi-source galleries, default masonry layout, collections (root/subset linking), soft-delete trash pool, three-channel NAI-only filtering, precise local model-version filters, HD/SD thumbnail quality tiers, unified drag-out across all three views, envelope-metadata backfill, and byte-level dedup on image save — plus local favorites (works + subsets + authors) for the online gallery, with in-app author-work browsing on AI TAG.
+Multi-source galleries, a three-pane layout (continuous timeline + details panel), collections (root/subset linking), soft-delete trash pool, three-channel NAI-only filtering, precise local model-version filters, HD/SD thumbnail quality tiers, unified drag-out across all three views, envelope-metadata backfill, and byte-level dedup on image save — plus local favorites (works + subsets + authors) for the online gallery, with in-app author-work browsing on AI TAG.
 
 <p align="center">
   <img src="screenshots/local_gallery_masonry.png" alt="Local gallery masonry" width="80%">

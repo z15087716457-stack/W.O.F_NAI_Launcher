@@ -324,22 +324,21 @@ class LocalStorageService {
     await setSetting(StorageKeys.galleryCategoryTreeExpandedIds, ids);
   }
 
-  /// 获取本地画廊分类树收藏区与分类区的高度分割比例 (0.2~0.8，默认 0.45)
-  double getGallerySidebarCollectionSplit() {
-    final value = getSetting(StorageKeys.gallerySidebarCollectionSplit);
-    if (value is num) {
-      return value.toDouble().clamp(0.2, 0.8);
-    }
-    return 0.45;
+  /// 获取本地画廊侧栏已收起的分组 id（collections / folders / dateFolders）
+  Set<String> getGallerySidebarCollapsedSections() {
+    final data = getSetting<List<dynamic>>(
+      StorageKeys.gallerySidebarCollapsedSections,
+    );
+    return data?.whereType<String>().toSet() ?? <String>{};
   }
 
-  /// 保存本地画廊分类树收藏区与分类区的高度分割比例
-  Future<void> setGallerySidebarCollectionSplit(double ratio) async {
+  /// 保存本地画廊侧栏已收起的分组 id
+  Future<void> setGallerySidebarCollapsedSections(Set<String> ids) async {
     // 与 getSetting 同款守卫：box 未打开（如 widget 测试环境）直接跳过
     if (!Hive.isBoxOpen(StorageKeys.settingsBox)) return;
     await setSetting(
-      StorageKeys.gallerySidebarCollectionSplit,
-      ratio.clamp(0.2, 0.8),
+      StorageKeys.gallerySidebarCollapsedSections,
+      ids.toList()..sort(),
     );
   }
 

@@ -200,13 +200,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_folder => '폴더';
 
   @override
-  String get common_filter => '필터';
-
-  @override
   String get common_grid => '그리드';
-
-  @override
-  String get common_date => '날짜';
 
   @override
   String get common_pack => '묶기';
@@ -3243,9 +3237,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_progressiveLoadError => '이미지를 불러오지 못했습니다';
 
   @override
-  String get localGallery_noImagesFound => '이미지를 찾을 수 없습니다';
-
-  @override
   String get localGallery_unknownError => '알 수 없는 오류';
 
   @override
@@ -3266,22 +3257,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_noMatchingResults => '일치하는 결과가 없습니다';
 
   @override
-  String get localGallery_loadingGroupedImages => '그룹별 이미지 불러오는 중...';
-
-  @override
   String get localGallery_title => '로컬 갤러리';
 
   @override
   String get localGallery_allImages => '모든 이미지';
-
-  @override
-  String get localGallery_categoryPanelTitle => '분류';
-
-  @override
-  String get localGallery_selectCurrentPage => '현재 페이지 선택';
-
-  @override
-  String get localGallery_deselectCurrentPage => '현재 페이지 선택 해제';
 
   @override
   String get localGallery_selectAllResults => '모두 선택';
@@ -3320,9 +3299,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_sortFieldDimensions => '이미지 크기';
 
   @override
-  String get localGallery_sortToggleDirection => '정렬 방향 전환';
-
-  @override
   String localGallery_aboutColumns(Object count) {
     return '약 $count열';
   }
@@ -3344,13 +3320,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '썸네일 표시 화질이며 기본값은 높음입니다';
 
   @override
-  String get localGallery_naiOnly => 'NAI';
-
-  @override
   String get localGallery_naiOnlyTooltip => 'NAI로 생성한 이미지만 표시';
-
-  @override
-  String get localGallery_naiVersionFilterLabel => '버전';
 
   @override
   String get localGallery_naiVersionFilterTooltip => 'NAI 모델 버전으로 필터';
@@ -3359,16 +3329,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_masonryViewLabel => '폭포형';
 
   @override
-  String get localGallery_switchToMasonryView => '폭포형 보기로 전환';
-
-  @override
-  String get localGallery_switchToGridLayout => '그리드 보기로 전환';
-
-  @override
   String get localGallery_justifiedViewLabel => '양쪽 맞춤';
-
-  @override
-  String get localGallery_switchToJustifiedView => '양쪽 맞춤 보기로 전환';
 
   @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {
@@ -3390,16 +3351,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get localGallery_openFilterPanel => '필터 패널 열기';
-
-  @override
   String get localGallery_hideCategoryPanel => '분류 패널 숨기기';
 
   @override
   String get localGallery_showCategoryPanel => '분류 패널 표시';
-
-  @override
-  String get localGallery_enterSelectionMode => '선택 모드 시작';
 
   @override
   String get localGallery_refreshTooltip =>
@@ -3407,15 +3362,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localGallery_tagIntersection => '태그 교집합';
-
-  @override
-  String get localGallery_filterByTags => '태그로 필터';
-
-  @override
-  String get localGallery_tagInputHint => '태그를 입력하고 Enter를 눌러 추가';
-
-  @override
-  String get localGallery_addTag => '추가';
 
   @override
   String get localGallery_createCategoryTitle => '새 분류';
@@ -3809,88 +3755,125 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statistics_timeNight => '밤';
 
   @override
-  String get localGallery_advancedFilters => '고급 필터';
-
-  @override
-  String get localGallery_filterByModel => '모델로 필터';
-
-  @override
-  String get localGallery_filterBySampler => '샘플러로 필터';
-
-  @override
-  String get localGallery_filterBySteps => '스텝으로 필터';
-
-  @override
-  String get localGallery_filterByCfg => '프롬프트 가이던스로 필터';
-
-  @override
-  String get localGallery_filterByResolution => '해상도로 필터';
-
-  @override
-  String get localGallery_filterSubtitle => '이미지 모음을 정밀하게 필터링합니다';
-
-  @override
-  String get localGallery_filterOrientation => '방향';
-
-  @override
-  String get localGallery_orientationAny => '전체';
-
-  @override
-  String get localGallery_orientationLandscape => '가로';
-
-  @override
-  String get localGallery_orientationPortrait => '세로';
-
-  @override
-  String get localGallery_orientationSquare => '정사각형';
-
-  @override
-  String get localGallery_filterNsfw => '콘텐츠 등급';
-
-  @override
-  String get localGallery_nsfwAny => '전체';
-
-  @override
-  String get localGallery_nsfwSfw => '안전';
-
-  @override
-  String get localGallery_nsfwOnly => 'NSFW만';
-
-  @override
-  String get localGallery_noModelCandidates => '아직 모델 메타데이터가 없습니다';
-
-  @override
-  String get localGallery_noSamplerCandidates => '아직 샘플러 메타데이터가 없습니다';
-
-  @override
-  String get localGallery_noResolutionCandidates => '아직 해상도 메타데이터가 없습니다';
-
-  @override
-  String get localGallery_candidatesLoadFailed => '후보를 불러오지 못했습니다';
-
-  @override
-  String get localGallery_noTagSuggestions => '일치하는 태그가 없습니다';
-
-  @override
-  String get localGallery_activeFiltersSet => '필터 설정됨';
-
-  @override
-  String get localGallery_applyFilters => '필터 적용';
-
-  @override
-  String get localGallery_resetAdvancedFilters => '고급 필터 초기화';
-
-  @override
   String get localGallery_group_today => '오늘';
 
   @override
   String get localGallery_group_yesterday => '어제';
 
   @override
-  String get localGallery_group_thisWeek => '이번 주';
+  String get localGallery_sendTo => '보내기…';
 
   @override
-  String get localGallery_group_earlier => '이전';
+  String localGallery_groupImageCount(int count, String formatted) {
+    return '$formatted장';
+  }
+
+  @override
+  String localGallery_imageCountLabel(int count, String formatted) {
+    return '$formatted장';
+  }
+
+  @override
+  String get localGallery_selectGroup => '그룹 선택';
+
+  @override
+  String get localGallery_inspectorTitle => '상세 정보';
+
+  @override
+  String localGallery_inspectorPosition(String index, String total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get localGallery_inspectorEmpty => '이미지를 선택하면 상세 정보가 표시됩니다';
+
+  @override
+  String get localGallery_inspectorEmptyHint => '더블클릭하거나 Space 키를 눌러 크게 보기';
+
+  @override
+  String get localGallery_hideInspector => '상세 패널 숨기기';
+
+  @override
+  String get localGallery_showInspector => '상세 패널 표시';
+
+  @override
+  String get localGallery_reuseParams => '파라미터 재사용';
+
+  @override
+  String get localGallery_actionImg2Img => 'Image2Image';
+
+  @override
+  String get localGallery_actionStyleTransfer => 'Vibe 트랜스퍼';
+
+  @override
+  String get localGallery_actionPreciseReference => '정밀 참조';
+
+  @override
+  String get localGallery_actionSaveReference => '라이브러리 저장';
+
+  @override
+  String get localGallery_actionKrita => 'Krita';
+
+  @override
+  String localGallery_selectedImages(String count) {
+    return '$count장 선택됨';
+  }
+
+  @override
+  String get localGallery_sortDescending => '내림차순';
+
+  @override
+  String get localGallery_sortAscending => '오름차순';
+
+  @override
+  String get localGallery_moreActions => '더 보기';
+
+  @override
+  String get localGallery_thumbnailSize => '썸네일 크기';
+
+  @override
+  String get localGallery_naiOnlyChip => 'NAI 이미지만';
+
+  @override
+  String get localGallery_modelLabel => '모델';
+
+  @override
+  String get localGallery_allVersions => '전체';
+
+  @override
+  String get localGallery_allVariants => '모든 변형';
+
+  @override
+  String get localGallery_dateRangeChip => '기간';
+
+  @override
+  String get localGallery_groupByDay => '일별 묶기';
+
+  @override
+  String get localGallery_groupByMonth => '월별 묶기';
+
+  @override
+  String get localGallery_groupNone => '묶지 않음';
+
+  @override
+  String get localGallery_groupModeTooltip => '시간별 묶기';
+
+  @override
+  String get localGallery_sectionLibrary => '라이브러리';
+
+  @override
+  String get localGallery_sectionCollections => '컬렉션';
+
+  @override
+  String get localGallery_sectionFolders => '폴더';
+
+  @override
+  String get localGallery_dateFolders => '날짜 폴더';
+
+  @override
+  String localGallery_indexSynced(String count) {
+    return '색인 동기화됨 · $count';
+  }
 
   @override
   String localGallery_cannotOpenFolder(Object error) {
@@ -4673,10 +4656,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shortcut_action_delete_image => '이미지 삭제';
 
   @override
-  String get shortcut_action_previous_page => '이전 페이지';
+  String get shortcut_action_previous_page => '한 화면 위로';
 
   @override
-  String get shortcut_action_next_page => '다음 페이지';
+  String get shortcut_action_next_page => '한 화면 아래로';
 
   @override
   String get shortcut_action_refresh_gallery => '갤러리 새로 고침';
@@ -4685,10 +4668,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shortcut_action_focus_search => '검색으로 이동';
 
   @override
-  String get shortcut_action_enter_selection_mode => '선택 모드 시작';
-
-  @override
-  String get shortcut_action_open_filter_panel => '필터 패널 열기';
+  String get shortcut_action_enter_selection_mode => '모두 선택';
 
   @override
   String get shortcut_action_clear_filter => '필터 지우기';
@@ -4745,9 +4725,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shortcut_help_all => '전체';
 
   @override
-  String get shortcut_help_tip => '팁: 언제든 F1 또는 ?를 눌러 이 도움말을 열 수 있습니다';
-
-  @override
   String get shortcut_help_fabTooltip => '키보드 단축키 도움말(F1)';
 
   @override
@@ -4763,9 +4740,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String shortcut_editor_conflictWith(Object action) {
     return '이 단축키는 \"$action\"과(와) 충돌합니다';
   }
-
-  @override
-  String get drop_dialogTitle => '이 이미지를 어떻게 사용할까요?';
 
   @override
   String get drop_hint => '여기에 이미지를 놓으세요';
@@ -4797,35 +4771,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get drop_addedToCharacterRef => '정밀 참조에 추가했습니다';
 
   @override
-  String get drop_extractMetadata => '메타데이터 추출';
-
-  @override
-  String get drop_extractMetadataSubtitle => '이미지에서 프롬프트, 시드 등 매개변수를 읽습니다';
-
-  @override
   String get drop_vibeDetected => '미리 인코딩된 Vibe를 감지했습니다(2 Anlas 절약)';
-
-  @override
-  String drop_vibeStrength(Object value) {
-    return '강도: $value%';
-  }
-
-  @override
-  String drop_vibeInfoExtracted(Object value) {
-    return '정보 추출량: $value%';
-  }
 
   @override
   String get drop_reuseVibe => 'Vibe 재사용';
 
   @override
-  String get drop_reuseVibeSubtitle => '미리 인코딩된 데이터를 바로 사용(무료)';
-
-  @override
   String get drop_useAsRawImage => '원본 이미지로 사용';
-
-  @override
-  String get drop_useAsRawImageSubtitle => '다시 인코딩(2 Anlas 소비)';
 
   @override
   String get drop_dragToImg2ImgOrOther => 'Image2Image나 다른 대상으로 끌어 놓으세요';
@@ -6952,30 +6904,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get detail_saveToVibeLibrary => 'Vibe 라이브러리에 저장';
 
   @override
-  String get pagination_firstPage => '첫 페이지';
-
-  @override
-  String get pagination_previousPage => '이전 페이지';
-
-  @override
-  String get pagination_nextPage => '다음 페이지';
-
-  @override
-  String get pagination_lastPage => '마지막 페이지';
-
-  @override
-  String get pagination_jumpToPage => '페이지로 이동';
-
-  @override
-  String get pagination_jump => '이동';
-
-  @override
-  String get pagination_itemsPerPage => '페이지당';
-
-  @override
-  String get pagination_itemUnit => '개';
-
-  @override
   String get comfyImport_detectedTitle => 'ComfyUI 다중 캐릭터 프롬프트를 감지했습니다';
 
   @override
@@ -7462,12 +7390,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_swap => '바꾸기';
 
   @override
-  String get common_minimum => '최소';
-
-  @override
-  String get common_maximum => '최대';
-
-  @override
   String get addToLibrary_displayNameHint => '이 항목을 알아보기 쉬운 이름을 입력하세요';
 
   @override
@@ -7475,14 +7397,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get drop_saveVibeBundle => 'Vibe 번들 저장';
-
-  @override
-  String drop_saveVibeBundleSubtitle(String name) {
-    return '$name 등 Vibe를 라이브러리에 저장합니다';
-  }
-
-  @override
-  String get drop_saveEncodedVibeSubtitle => '미리 인코딩된 Vibe 데이터를 라이브러리에 저장합니다';
 
   @override
   String get history_dragFilePreparationFailed =>

@@ -154,12 +154,9 @@ class _GalleryTrashPanelDialogState
       // 成功删除的出池；失败的留着下次再试——与启动清理同一语义
       await const GalleryDeletePoolStore().removeAll(purged);
       // 画廊列表轻量对齐：被彻底删除的图不该还挂在视图里
-      // （软删时内存已摘；这里兜底重取当前页，配合数据集重挂刷新）
+      // （软删时内存已摘；这里兜底重读条目，保持滚动位置）
       try {
-        final galleryState = ref.read(localGalleryNotifierProvider);
-        await ref
-            .read(localGalleryNotifierProvider.notifier)
-            .loadPage(galleryState.currentPage, showLoading: false);
+        await ref.read(localGalleryNotifierProvider.notifier).reloadTimeline();
         await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
       } catch (e) {
         AppLogger.w('Trash purge gallery refresh failed: $e', 'Trash');

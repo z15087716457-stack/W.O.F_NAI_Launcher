@@ -26,7 +26,7 @@ class _InjectedGalleryService extends GalleryService {
   LocalGalleryService build() => _injected;
 }
 
-/// 删除后图片应立即从 provider 的 currentImages 消失（内存级即时移除）。
+/// 删除后图片应立即从 provider 的时间线消失（内存级即时移除）。
 ///
 /// 复现链路与 BulkOperationNotifier.bulkDelete 完全一致：
 /// ① DB 软删 + ② 入池 + ③ removeDeletedImagesFromMemory。
@@ -117,15 +117,16 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    test('bulkDelete 后 currentImages 立即不含被删路径（不调 loadPage）', () async {
+    test('bulkDelete 后时间线立即不含被删路径（不重扫）', () async {
       final galleryNotifier = container.read(
         localGalleryNotifierProvider.notifier,
       );
       await galleryNotifier.initialize();
-      await galleryNotifier.loadPage(0);
 
       var state = container.read(localGalleryNotifierProvider);
-      expect(state.currentImages.length, 3, reason: '删除前当前页 3 张');
+      List<String> paths() => [for (final e in state.timeline.entries) e.path];
+      expect(paths(), [fileA.path, fileC.path, fileB.path], reason: '修改时间 新→旧');
+      final datasetId = state.timeline.datasetId;
 
       // 与 BulkOperationNotifier.bulkDelete 相同的编排
       await dataSource.batchMarkAsDeleted([fileA.path]);
@@ -133,22 +134,15 @@ void main() {
       await galleryNotifier.removeDeletedImagesFromMemory([fileA.path]);
 
       state = container.read(localGalleryNotifierProvider);
-      expect(
-        state.currentImages.map((r) => r.path),
-        isNot(contains(fileA.path)),
-        reason: '删除后 currentImages 应立即不含被删路径',
-      );
-      expect(state.currentImages.length, 2);
+      expect(paths(), isNot(contains(fileA.path)), reason: '删除后时间线应立即不含被删路径');
+      expect(paths(), hasLength(2));
       expect(state.totalCount, 2);
+      expect(state.timeline.datasetId, datasetId, reason: '内容变化保持滚动位置');
 
-      // 防线：随后任何 loadPage 也不得复活
-      await galleryNotifier.loadPage(state.currentPage);
+      // 防线：随后任何重读也不得复活
+      await galleryNotifier.reloadTimeline();
       state = container.read(localGalleryNotifierProvider);
-      expect(
-        state.currentImages.map((r) => r.path),
-        isNot(contains(fileA.path)),
-        reason: 'loadPage 不得复活软删文件',
-      );
+      expect(paths(), isNot(contains(fileA.path)), reason: '重读不得复活软删文件');
     });
   });
 }

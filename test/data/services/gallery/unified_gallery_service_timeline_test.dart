@@ -13,7 +13,7 @@ import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 
 void main() {
-  group('LocalGalleryService 相邻页预取与 stat 缓存', () {
+  group('LocalGalleryService 时间线条目与 stat 缓存', () {
     late Directory tempDir;
     late Directory galleryRoot;
     late GalleryDataSource dataSource;
@@ -27,7 +27,7 @@ void main() {
 
     setUp(() async {
       tempDir = await Directory.systemTemp.createTemp(
-        'nai_launcher_gallery_service_preload_',
+        'nai_launcher_gallery_service_timeline_',
       );
       galleryRoot = Directory(p.join(tempDir.path, 'gallery'));
       await galleryRoot.create(recursive: true);
@@ -64,7 +64,7 @@ void main() {
       }
     });
 
-    test('getPagePreloadItems 返回分页路径并带 DB 宽高，无尺寸条目为 null', () async {
+    test('getTimelineEntries 返回全部条目并带 DB 宽高，无尺寸条目为 null', () async {
       final portrait = File(p.join(galleryRoot.path, 'portrait.png'));
       final landscape = File(p.join(galleryRoot.path, 'landscape.png'));
       final nodims = File(p.join(galleryRoot.path, 'nodims.png'));
@@ -101,8 +101,11 @@ void main() {
 
       await service.initialize();
 
-      final items = await service.getPagePreloadItems(0, pageSize: 10);
+      final items = await service.getTimelineEntries();
       expect(items, hasLength(3));
+      for (final item in items) {
+        expect(item.modifiedAt, (await File(item.path).stat()).modified);
+      }
 
       final byPath = {for (final item in items) item.path: item};
       expect(byPath[portrait.path]?.width, 832);
@@ -113,28 +116,40 @@ void main() {
       expect(byPath[nodims.path]?.aspectRatio, isNull);
     });
 
-    test('getPagePreloadItems 越界页返回空', () async {
-      final file = File(p.join(galleryRoot.path, 'only.png'));
-      await file.writeAsBytes(<int>[137, 80, 78, 71]);
+    test('getTimelineEntries 与分页同一排序源', () async {
+      for (final (name, day) in [('a', 3), ('b', 1), ('c', 2)]) {
+        File(p.join(galleryRoot.path, '$name.png'))
+          ..writeAsBytesSync(<int>[137, 80, 78, 71])
+          ..setLastModifiedSync(DateTime(2026, 8, day, 10));
+      }
 
       await service.initialize();
 
-      expect(await service.getPagePreloadItems(99, pageSize: 10), isEmpty);
-      expect(await service.getPagePreloadItems(-1, pageSize: 10), isEmpty);
+      final entries = await service.getTimelineEntries();
+      final page = await service.getPage(0, pageSize: 10);
+      expect(entries.map((e) => e.path), page.map((r) => r.path));
+      expect(entries.map((e) => p.basename(e.path)), [
+        'a.png',
+        'c.png',
+        'b.png',
+      ]);
     });
 
-    test('getPagePreloadItems 与 getPage 同一分页源（条目路径一致）', () async {
+    test('getRecordsForPaths 按传入顺序返回并跳过不存在的文件', () async {
       final fileA = File(p.join(galleryRoot.path, 'a.png'));
       final fileB = File(p.join(galleryRoot.path, 'b.png'));
-      await fileA.writeAsBytes(<int>[137, 80, 78, 71]);
-      await fileB.writeAsBytes(<int>[137, 80, 78, 71]);
+      await fileA.writeAsBytes(List.filled(10, 1));
+      await fileB.writeAsBytes(List.filled(20, 1));
 
       await service.initialize();
 
-      final records = await service.getPage(0, pageSize: 1);
-      final items = await service.getPagePreloadItems(0, pageSize: 1);
-
-      expect(records.map((record) => record.path), [items.single.path]);
+      final records = await service.getRecordsForPaths([
+        fileB.path,
+        p.join(galleryRoot.path, 'missing.png'),
+        fileA.path,
+      ]);
+      expect(records.map((r) => r.path), [fileB.path, fileA.path]);
+      expect(records.map((r) => r.size), [20, 10]);
     });
 
     test('重复 getPage 走 stat 缓存：两次结果逐项一致', () async {

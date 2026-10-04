@@ -725,8 +725,6 @@ class _ShortcutSettingsPanelState extends ConsumerState<ShortcutSettingsPanel> {
         return l10n.shortcut_action_focus_search;
       case 'shortcut_action_enter_selection_mode':
         return l10n.shortcut_action_enter_selection_mode;
-      case 'shortcut_action_open_filter_panel':
-        return l10n.shortcut_action_open_filter_panel;
       case 'shortcut_action_clear_filter':
         return l10n.shortcut_action_clear_filter;
       case 'shortcut_action_toggle_category_panel':

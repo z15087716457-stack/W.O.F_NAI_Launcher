@@ -55,24 +55,26 @@
 - 本地搜索、在线图库标签搜索（含 AI TAG 全文／提示词框）、在线黑名单、批量元数据增删标签框和块管理顶部搜索使用显式本地标签扩展。Ctrl+单击打开搜索，Ctrl+拖选查询关联；选择标签后分别生成本地筛选 chip、追加在线查询词、加入黑名单、加入相应批量编辑列表或筛选块。在线全文查询按空格分词，AI TAG 提示词按逗号追加；普通打字不弹旧补全。块管理匹配标签原名及下划线转空格的内容写法。
 
 - 本地图库支持多个根目录；发现根目录下 `_索引/index.jsonl` 时可幂等导入 tag 和元数据，扫描期间拒绝导入。**外部源图片级移动/复制已放开（QoL-L5，2026-09-09）**：右键菜单「移动到…/复制到…」与批量栏同款，目标是分类树（`CategoryPickerDialog`，含外部分类）；源或目标任一为外部源时移动弹专用强制确认（不受保护模式开关影响，移出/写入/双向三情形文案），复制只走普通保护确认；分类树的外部分类只读保留范围=重命名/删除/加子分类/分类排序，图片拖入已双向放开。移动底层 `moveFileCrossVolume`（rename 优先，跨卷回退 copy+字节校验+保 mtime+删源，校验失败不删源），复制强制新 mtime 防扫描器签名撞车；移动成功当场按旧路径查 id 直更 DB（不等扫描）。目录计数递归聚合。
-- 本地图库默认瀑布流，可切网格；列宽、视图、排序和 NAI-only 偏好持久化。删除采用删除池：先软删并从当前 state 摘除，DB 的 `is_deleted` 是权威；同一会话不得因重扫复活，恢复和彻底删除走删除池面板。
-- 本地画廊固定网格、分组和瀑布流的 `LocalImageCard3D` 均沿用 `DraggableImageCard` wrapper；选择模式禁用外拖，拖出格式继续由脱敏设置和可用文件路径决定。
-- **卡片手势响应（2026-09-10 修）**：① 卡片右上角三个悬浮按钮（心形/复制/发送）从双击手势子树移出，改为同一 `Stack` 的兄弟节点——此前它们作为卡片 `GestureDetector` 的子节点，双击识别器在首次抬手后会 hold 整个手势竞技场直到双击窗口（约 300ms）结束，导致按钮点下去要等约 300ms 才响应、窗口内连点被判成双击而整体丢失（含心形按钮打开收藏菜单）。② 非多选态不再给卡片挂 `onDoubleTap`（那时双击与单击同义，都开大图）；多选态保留双击开大图。启用选择=「双击语义与单击不同」时才挂双击。
+- **本地画廊三栏（2026-10-04 重做）**：侧栏（资料库/收藏集/文件夹三组，日期命名的根文件夹 ≥2 个时收进「日期文件夹」）、连续时间线、右侧详情面板。没有分页：`LocalGalleryState.timeline` 持有当前过滤与排序下的全部轻量条目（`GalleryTimelineEntry`：路径、修改时间、宽高，来自 `getTimelineEntries`，宽高按路径缓存、refresh 时失效），`computeGalleryTimelineLayout` 整库一次排版（火车流按分组各自断行，网格/瀑布流由同一「缩略图大小」推导），视图只构建可见附近的卡片；完整 `LocalImageRecord` 由 notifier 的 LRU 记录缓存按可见窗口合批读取（`ensureRecords`/`loadRecords`，上限 6000），收藏、标签等就地更新缓存并递增 `recordsRevision`。`timeline.datasetId` 只在筛选/范围/排序变化时递增（视图回到顶部）；收藏、删除、新增、刷新只递增 `contentRevision` 并保持滚动位置。按天/月分组只在修改/创建时间排序下生效，偏好 `local_gallery_group_mode`；右侧时间轴按比例标年月，拖动或点击定位。
+- 交互：单击=查看（`localGalleryFocusNotifierProvider`，详情面板读它），双击/空格/回车开大图（以当前图为中心读前后各 60 张），方向键移动查看对象，Delete 删多选或当前图，Esc 先退多选再清查看；Ctrl+单击把当前查看图和点击图一起带入多选，Shift+单击从锚点选范围，卡片左上选择圈与分组标题选择圈直接进多选。多选操作条浮在内容底部，不替换顶栏。Ctrl+A=选中全部结果，PageUp/PageDown 按屏滚动，Ctrl+G 跳到某天（非时间排序时改为按日期筛选）。详情面板开关持久化于 `local_gallery_inspector_visible`，窗口过窄（内容区 < 560px）时自动收起。高级筛选面板与其快捷键已删除，筛选条只保留仅 NAI、模型版本（V4 起可切 Full/Curated）、日期范围与标签 chip。
+- 本地图库默认火车流，可切网格、瀑布流；缩略图大小、视图、排序、分组、NAI-only 偏好持久化。删除采用删除池：先软删并从时间线与记录缓存摘除，DB 的 `is_deleted` 是权威；同一会话不得因重扫复活（`_recentlyDeletedKeys` 在时间线出口过滤），恢复和彻底删除走删除池面板。
+- 本地画廊卡片 `LocalImageCard` 沿用 `DraggableImageCard` wrapper；多选中拖动已选卡片时带上全部选中路径，拖出格式继续由脱敏设置和可用文件路径决定。
+- **卡片手势**：卡片手势层只挂 `onTapUp` 与右键/长按，双击由卡片自己按 `kDoubleTapTimeout`/`kDoubleTapSlop` 判定——单击立即生效，第二下再追加双击回调，不挂 `onDoubleTap` 识别器（它会 hold 手势竞技场约 300ms，2026-09-10 修过一次按钮点击延迟）。选择圈与悬停底栏的收藏/复制/发送按钮是手势层的兄弟节点，点击即时响应且不触发单击。
 - **收藏菜单即时反馈（2026-09-10 修）**：菜单首行「收藏」与收藏集勾选改为乐观更新——点击当帧先就地翻转勾选/红心，落库结果回来再以服务端口径校准；收藏切换按请求序号回写，连点时只认最后一次结果。旧实现等 `toggleFavorite` 整个链路（落库 + 取消收藏时的集合刷新 + 过滤视图重载）返回才 `setState`，点一下要愣一拍才见变化。
 - 本地 NAI-only 判定为三通道任一命中：`gallery_metadata` 的 software/source 含 NovelAI 指纹、model 为 `nai-diffusion-*`，或 raw_json 含 NAI 参数特征键。版本筛选按 model 精确匹配；历史空 model 由启动迁移按元数据指纹回填。数据库位于 `%APPDATA%/com.example/nai_launcher/databases/danbooru.db`。
 - 收藏是根-子集关系：心形根集包含全部收藏；加入子集自动加入根集，取消根集会清掉所有子集关系，从子集移出不影响根集。
-- 收藏集支持文件夹无限嵌套（`gallery_collections.parent_id` + `is_folder`）：文件夹是纯组织节点不参与成员关系，只有文件夹可拥有子节点；老数据 parent_id=NULL 留在收藏根级平铺。选中文件夹浏览=全部子孙收藏集成员的去重并集（`getCollectionImageIds` 递归语义，按各图最早加入时间排序）；文件夹计数同为递归并集去重（一图多集不重复计）。`moveCollection` 拒绝非文件夹目标与成环移动（UI 层和 DB 层双校验）；非空文件夹禁止删除；`reorderCollections` 按同父级分组重排并写回 parent_id。收藏操作只动链接表（image_id 锚定），不触碰文件路径；磁盘文件移动=前端移动当场 `updateFilePath` 直更 DB + 扫描器 size+mtime 签名匹配兜底（签名命中还要求原路径文件已不存在才判移动，同签名副本按新文件入库不抢 id）；签名失配则旧行软删、收藏跟丢。分类树展开状态持久化于 `gallery_category_tree_expanded_ids`（重启恢复）；「移动到…」对话框展开状态为会话级（重启重置）。
+- 收藏集支持文件夹无限嵌套（`gallery_collections.parent_id` + `is_folder`）：文件夹是纯组织节点不参与成员关系，只有文件夹可拥有子节点；老数据 parent_id=NULL 留在收藏根级平铺。选中文件夹浏览=全部子孙收藏集成员的去重并集（`getCollectionImageIds` 递归语义，按各图最早加入时间排序）；文件夹计数同为递归并集去重（一图多集不重复计）。`moveCollection` 拒绝非文件夹目标与成环移动（UI 层和 DB 层双校验）；非空文件夹禁止删除；`reorderCollections` 按同父级分组重排并写回 parent_id。收藏操作只动链接表（image_id 锚定），不触碰文件路径；磁盘文件移动=前端移动当场 `updateFilePath` 直更 DB + 扫描器 size+mtime 签名匹配兜底（签名命中还要求原路径文件已不存在才判移动，同签名副本按新文件入库不抢 id）；签名失配则旧行软删、收藏跟丢。分类树展开状态持久化于 `gallery_category_tree_expanded_ids`，侧栏分组收起状态持久化于 `gallery_sidebar_collapsed_sections`（重启恢复）；「移动到…」对话框展开状态为会话级（重启重置）。
 - 在线 AItag 列表走 `/api/ai_works_search`，详情走 `/api/work/{id}`；列表图使用 pximg 缩略图并带 Pixiv Referer。详情元数据优先读取 `images[].ai_json`，顶层 `model` 可作为 Source 兜底。作者搜索有一级返回快照，晚到请求不得覆盖原页面。
 - 元数据解析按文件签名和统一读取链执行，细节见 `.kimi-code/skills/nai/refs/metadata.md`；不要按扩展名判断 PNG/WebP/JPEG 或 NAI 版本。
 
 ## 本地画廊缩略图
 
 - 本地画廊缩略图质量由 `GalleryThumbnailQuality` 控制，默认 `hd`；`hd` 保持既有 `pickThumbnailSize(columnWidth, DPR)` 和显示端 1.5 倍过采样，`sd` 固定使用 `ThumbnailSize.small` 且显示端过采样为 1.0。
-- 质量偏好保存在 SharedPreferences 的 `local_gallery_thumbnail_quality`，非法或缺失值回退 `hd`；入口在「设置 → 数据与存储」，进入设置时先恢复已有偏好，画廊分页条不再显示质量按钮。
-- 质量切换会立即更新画廊状态，并主动预取当前页、上一页和下一页；分页预取与卡片统一使用 `resolveThumbnailTier`。
+- 质量偏好保存在 SharedPreferences 的 `local_gallery_thumbnail_quality`，非法或缺失值回退 `hd`；入口在「设置 → 数据与存储」，进入设置时先恢复已有偏好。
+- 质量切换立即更新画廊状态，可见卡片监听后换档重载；时间线在可见窗口变化后低优先级预取下一屏缩略图，预取与卡片统一使用 `resolveThumbnailTier`。
 - 缩略图生成的去重身份必须是「原图路径 + `ThumbnailSize`」；CacheService 的生成集合/Completer/队列和 ThumbnailService 的活跃任务都不能只按路径去重，否则切换质量或列宽换档会串档。
 - 该设置只影响本地画廊卡片缩略图；详情大图、详情轮播、复制、发送、打包和拖拽仍使用原图路径。`.thumbs` 磁盘缓存已接入 LRU 清档（P7）：启动后台按「最久未使用」淘汰超限缓存，设置页「清理缩略图缓存」提供手动入口；默认上限 2048MB / 50000 个文件（每个图库源独立，`setCacheLimits` 可调），只删除 `.thumbs` 目录内的 `.thumb.jpg`，不触碰原图。
-- 缩略图生成失败或 30s 超时**不再回退解码原图**（原实现会让卡片永久顶着数 MB 原图跑）：卡片保持灰块占位图标，并在 30s 后自动重试一次（每次挂载至多一次，翻页重新挂载会再走完整加载）。失败的**重试入队时间被安排到缓存层 10s 失败冷却截止之后**，不再出现「冷却期内被弹回、3 次重试毫秒级烧完判 failed」的失效路径；重试执行前先走 `getThumbnailPath` 快速路径，首次任务超时后晚到落盘的缩略图会被直接吃掉。冷却时长与重试延迟均为可覆写常量（`setFailureRetryCooldownForTesting` / `thumbnailFailureRetryDelayForTesting`），生产值 10s / 30s 不变。
+- 缩略图生成失败或 30s 超时**不再回退解码原图**（原实现会让卡片永久顶着数 MB 原图跑）：卡片保持灰块占位图标，并在 30s 后自动重试一次（每次挂载至多一次，滚动重新挂载会再走完整加载）。失败的**重试入队时间被安排到缓存层 10s 失败冷却截止之后**，不再出现「冷却期内被弹回、3 次重试毫秒级烧完判 failed」的失效路径；重试执行前先走 `getThumbnailPath` 快速路径，首次任务超时后晚到落盘的缩略图会被直接吃掉。冷却时长与重试延迟均为可覆写常量（`setFailureRetryCooldownForTesting` / `thumbnailFailureRetryDelayForTesting`），生产值 10s / 30s 不变。
 
 ## Q5：AI TAG 图片请求
 

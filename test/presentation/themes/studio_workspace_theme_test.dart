@@ -8,7 +8,6 @@ import 'package:nai_launcher/data/services/danbooru_auth_service.dart';
 import 'package:nai_launcher/data/services/gelbooru_auth_service.dart';
 import 'package:nai_launcher/presentation/providers/precise_ref_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
-import 'package:nai_launcher/presentation/widgets/bulk_action_bar.dart';
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
@@ -405,12 +404,15 @@ void main() {
               .read(localGallerySelectionNotifierProvider.notifier)
               .enter();
           await tester.pumpAndSettle();
-          final bulk = tester.getRect(find.byType(BulkActionBar));
-          final captions = tester.getRect(
-            find.byKey(const Key('window-caption-controls')),
+          // 多选操作条浮在内容底部，顶栏搜索保持可见
+          final bulk = tester.getRect(
+            find.byKey(const Key('gallery-floating-bulk-bar')),
           );
-          expect(bulk.height, 62);
-          expect(bulk.center.dy, captions.center.dy);
+          final view = tester.getRect(find.byWidget(screen));
+          expect(bulk.height, 48);
+          expect(bulk.bottom, lessThan(view.bottom));
+          expect(bulk.top, greaterThan(view.center.dy));
+          expect(find.byType(TextField), findsWidgets);
           expect(tester.takeException(), isNull);
           container.read(localGallerySelectionNotifierProvider.notifier).exit();
           await tester.pumpAndSettle();

@@ -29,14 +29,16 @@ void main() {
       ),
     );
 
-    final button = find.text('新建/导入');
+    final button = find.byTooltip('新建/导入');
     final buttonBottom = tester.getRect(button).bottom;
     await tester.tap(button);
     await tester.pumpAndSettle();
 
     expect(find.text('新建分类'), findsOneWidget);
     expect(find.text('导入文件夹'), findsOneWidget);
-    final menuItems = find.byWidgetPredicate((widget) => widget is PopupMenuItem);
+    final menuItems = find.byWidgetPredicate(
+      (widget) => widget is PopupMenuItem,
+    );
     expect(menuItems, findsNWidgets(2));
     final menuRect = tester.getRect(menuItems.first);
     expect(menuRect.top, greaterThanOrEqualTo(buttonBottom));

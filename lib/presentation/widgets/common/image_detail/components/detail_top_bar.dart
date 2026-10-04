@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/utils/localization_extension.dart';
-import '../../../../../data/models/gallery/local_image_record.dart';
 import '../../../../providers/local_gallery_provider.dart';
 import '../../animated_favorite_button.dart';
 import '../image_detail_data.dart';
@@ -140,15 +139,14 @@ class DetailTopBar extends StatelessWidget {
                   bool isFavorite = currentImage.isFavorite;
 
                   if (isLocalImage) {
-                    final galleryState = ref.watch(
-                      localGalleryNotifierProvider,
+                    ref.watch(
+                      localGalleryNotifierProvider.select(
+                        (s) => s.recordsRevision,
+                      ),
                     );
-                    final record = galleryState.currentImages
-                        .cast<LocalImageRecord?>()
-                        .firstWhere(
-                          (img) => img?.path == currentImage.identifier,
-                          orElse: () => null,
-                        );
+                    final record = ref
+                        .read(localGalleryNotifierProvider.notifier)
+                        .cachedRecord(currentImage.identifier);
                     if (record != null) {
                       isFavorite = record.isFavorite;
                     }

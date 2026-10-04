@@ -141,6 +141,8 @@ void main() {
     testWidgets('本地画廊搜索框 Ctrl+A 应选择文本而不是进入多选', (tester) async {
       var enteredSelectionMode = false;
       const query = 'a';
+      final searchFocusNode = FocusNode();
+      addTearDown(searchFocusNode.dispose);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -164,7 +166,15 @@ void main() {
                     enteredSelectionMode = true;
                   },
                 },
-                child: const LocalGalleryToolbar(
+                child: LocalGalleryToolbar(
+                  searchFocusNode: searchFocusNode,
+                  inspectorVisible: true,
+                  inspectorAvailable: true,
+                  onToggleInspector: () {},
+                  onOpenFolder: () {},
+                  onRefresh: () {},
+                  showCategoryPanel: true,
+                  onToggleCategoryPanel: () {},
                   enableSearchAutocomplete: false,
                 ),
               ),
@@ -2122,8 +2132,7 @@ void main() {
 
 class _FakeLocalGalleryNotifier extends LocalGalleryNotifier {
   @override
-  LocalGalleryState build() =>
-      const LocalGalleryState(isInitialized: true, totalPages: 1);
+  LocalGalleryState build() => const LocalGalleryState(isInitialized: true);
 
   @override
   Future<void> setSearchQuery(String query) async {}

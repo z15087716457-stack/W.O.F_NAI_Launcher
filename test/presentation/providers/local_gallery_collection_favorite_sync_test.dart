@@ -26,7 +26,7 @@ class _InjectedGalleryService extends GalleryService {
   LocalGalleryService build() => _injected;
 }
 
-/// 收藏菜单「加入子集=入根」后，当前页记录的 isFavorite 必须同步：
+/// 收藏菜单「加入子集=入根」后，已缓存记录的 isFavorite 必须同步：
 /// 缩略图红心/预览图收藏按钮读的就是它——不同步则红心不点亮（回归）。
 void main() {
   group('collection membership syncs favorite flag (provider level)', () {
@@ -116,7 +116,7 @@ void main() {
       await service.initialize();
     }
 
-    test('直接加入子集后当前页记录 isFavorite 同步为 true（未收藏起点）', () async {
+    test('直接加入子集后已缓存记录 isFavorite 同步为 true（未收藏起点）', () async {
       final files = await createImageFiles(3);
       await indexImages(files);
 
@@ -125,13 +125,15 @@ void main() {
       );
       await galleryNotifier.initialize();
 
-      var state = container.read(localGalleryNotifierProvider);
-      final target = state.currentImages.first.path;
-      expect(
-        state.currentImages.firstWhere((r) => r.path == target).isFavorite,
-        isFalse,
-        reason: '初始未收藏',
-      );
+      final target = container
+          .read(localGalleryNotifierProvider)
+          .timeline
+          .entries
+          .first
+          .path;
+      await galleryNotifier.loadRecords([target]);
+      bool isFavorite() => galleryNotifier.cachedRecord(target)!.isFavorite;
+      expect(isFavorite(), isFalse, reason: '初始未收藏');
 
       // 直接加入子集（入子集即入根）
       final collectionId = await dataSource.createCollection('test');
@@ -139,22 +141,12 @@ void main() {
           .read(collectionNotifierProvider.notifier)
           .toggleImageInCollection(collectionId, target);
 
-      // 同步前 DB 已是收藏态，但当前页记录还是旧值（修复点）
-      state = container.read(localGalleryNotifierProvider);
-      expect(
-        state.currentImages.firstWhere((r) => r.path == target).isFavorite,
-        isFalse,
-        reason: '未调同步前红心状态保持旧值（复现 bug 前提）',
-      );
+      // 同步前 DB 已是收藏态，但已缓存记录还是旧值（修复点）
+      expect(isFavorite(), isFalse, reason: '未调同步前红心状态保持旧值（复现 bug 前提）');
 
       final synced = await galleryNotifier.syncFavoriteStatus(target);
-      state = container.read(localGalleryNotifierProvider);
       expect(synced, isTrue);
-      expect(
-        state.currentImages.firstWhere((r) => r.path == target).isFavorite,
-        isTrue,
-        reason: '同步后缩略图/预览图红心应点亮',
-      );
+      expect(isFavorite(), isTrue, reason: '同步后缩略图/预览图红心应点亮');
     });
 
     test('已收藏图片移出子集后 isFavorite 保持 true（移出子集不动根）', () async {
@@ -166,18 +158,16 @@ void main() {
       );
       await galleryNotifier.initialize();
 
-      var state = container.read(localGalleryNotifierProvider);
-      final target = state.currentImages.first.path;
+      final target = container
+          .read(localGalleryNotifierProvider)
+          .timeline
+          .entries
+          .first
+          .path;
+      await galleryNotifier.loadRecords([target]);
+      bool isFavorite() => galleryNotifier.cachedRecord(target)!.isFavorite;
       await galleryNotifier.toggleFavorite(target);
-      expect(
-        container
-            .read(localGalleryNotifierProvider)
-            .currentImages
-            .firstWhere((r) => r.path == target)
-            .isFavorite,
-        isTrue,
-        reason: '先收藏进根',
-      );
+      expect(isFavorite(), isTrue, reason: '先收藏进根');
 
       final collectionId = await dataSource.createCollection('test');
       final collectionNotifier = container.read(
@@ -186,15 +176,9 @@ void main() {
       await collectionNotifier.toggleImageInCollection(collectionId, target);
 
       // 移出子集：根不动，红心应保持点亮
-      state = container.read(localGalleryNotifierProvider);
       final synced = await galleryNotifier.syncFavoriteStatus(target);
-      state = container.read(localGalleryNotifierProvider);
       expect(synced, isTrue);
-      expect(
-        state.currentImages.firstWhere((r) => r.path == target).isFavorite,
-        isTrue,
-        reason: '移出子集不应熄灭根收藏红心',
-      );
+      expect(isFavorite(), isTrue, reason: '移出子集不应熄灭根收藏红心');
     });
   });
 }

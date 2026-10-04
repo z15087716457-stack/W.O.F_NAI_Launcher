@@ -45,7 +45,6 @@ class ShortcutIds {
   static const String refreshGallery = 'refresh_gallery';
   static const String focusSearch = 'focus_search';
   static const String enterSelectionMode = 'enter_selection_mode';
-  static const String openFilterPanel = 'open_filter_panel';
   static const String clearFilter = 'clear_filter';
   static const String toggleCategoryPanel = 'toggle_category_panel';
   static const String jumpToDate = 'jump_to_date';
@@ -128,7 +127,6 @@ class DefaultShortcuts {
     ShortcutIds.refreshGallery: 'f5',
     ShortcutIds.focusSearch: 'ctrl+f',
     ShortcutIds.enterSelectionMode: 'ctrl+a',
-    ShortcutIds.openFilterPanel: 'ctrl+shift+f',
     ShortcutIds.clearFilter: 'ctrl+shift+c',
     ShortcutIds.toggleCategoryPanel: 'ctrl+b',
     ShortcutIds.jumpToDate: 'ctrl+g',
@@ -203,7 +201,6 @@ class DefaultShortcuts {
       case ShortcutIds.refreshGallery:
       case ShortcutIds.focusSearch:
       case ShortcutIds.enterSelectionMode:
-      case ShortcutIds.openFilterPanel:
       case ShortcutIds.clearFilter:
       case ShortcutIds.toggleCategoryPanel:
       case ShortcutIds.jumpToDate:

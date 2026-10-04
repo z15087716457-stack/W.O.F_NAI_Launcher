@@ -9,7 +9,7 @@ import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/services/thumbnail_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/widgets/gallery/local_image_card_3d.dart';
+import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart';
 
 /// P5 回归：缩略图生成失败时卡片保持轻量占位、不再回退解码数 MB 原图。
 ///
@@ -72,7 +72,9 @@ void main() {
       locale: const Locale('en'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: LocalImageCard3D(record: record, width: 180)),
+      home: Scaffold(
+        body: LocalImageCard(record: record, width: 180, height: 180),
+      ),
     ),
   );
 

@@ -21,6 +21,7 @@ import '../utils/lru_cache.dart';
 part 'gallery_data_source_records.dart';
 part 'gallery_data_source_schema.dart';
 part 'gallery_data_source_statistics.dart';
+part 'gallery_data_source_dimensions.dart';
 part 'gallery_data_source_import.dart';
 part 'gallery_data_source_advanced_search.dart';
 part 'gallery_data_source_collections.dart';
@@ -1375,9 +1376,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   ///
   /// 全库标签过滤只需要这一列参与匹配，避免把 raw_json 等大列搬进 Dart
   /// （全库 4.9 万行约 518MB → 84MB）。
-  Future<Map<int, String>> getFullPromptTextsByImageIds(
-    List<int> imageIds,
-  ) {
+  Future<Map<int, String>> getFullPromptTextsByImageIds(List<int> imageIds) {
     return _getPromptTextsByImageIds(imageIds, 'full_prompt_text');
   }
 
@@ -1413,8 +1412,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
                 batch,
               );
               for (final row in dbResults) {
-                results[row['image_id'] as int] =
-                    row[column] as String? ?? '';
+                results[row['image_id'] as int] = row[column] as String? ?? '';
               }
             },
             timeout: const Duration(seconds: 30),
@@ -1820,9 +1818,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
         // 可搜索列统一收敛到 positive_prompt_text：主/角色负面提示词
         // 不命中（见 _buildSearchablePromptText 口径），且单列 LIKE 比
         // 逐列 OR 少一次表达式求值。
-        const searchableColumns = [
-          'm.positive_prompt_text',
-        ];
+        const searchableColumns = ['m.positive_prompt_text'];
 
         final termConditions = <String>[];
         final likeArgs = <String>[];

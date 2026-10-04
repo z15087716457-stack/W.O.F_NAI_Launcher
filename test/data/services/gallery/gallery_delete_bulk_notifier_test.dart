@@ -121,7 +121,6 @@ void main() {
       );
       final notifier = container.read(localGalleryNotifierProvider.notifier);
       await notifier.initialize();
-      await notifier.loadPage(0);
     });
 
     tearDown(() async {
@@ -133,11 +132,12 @@ void main() {
       await tempDir.delete(recursive: true);
     });
 
-    test('BulkOperationNotifier.bulkDelete 后 currentImages 立即减少', () async {
+    test('BulkOperationNotifier.bulkDelete 后时间线立即减少', () async {
       var state = container.read(localGalleryNotifierProvider);
-      expect(state.currentImages.length, 3);
+      List<String> paths() => [for (final e in state.timeline.entries) e.path];
+      expect(paths(), hasLength(3));
 
-      final deletedPath = state.currentImages.first.path;
+      final deletedPath = paths().first;
       final result = await container
           .read(bulkOperationNotifierProvider.notifier)
           .bulkDelete([deletedPath]);
@@ -145,11 +145,11 @@ void main() {
       expect(result.success, 1);
       state = container.read(localGalleryNotifierProvider);
       expect(
-        state.currentImages.map((r) => r.path),
+        paths(),
         isNot(contains(deletedPath)),
-        reason: 'bulkDelete 组合链应立即从 currentImages 移除被删图',
+        reason: 'bulkDelete 组合链应立即从时间线移除被删图',
       );
-      expect(state.currentImages.length, 2);
+      expect(paths(), hasLength(2));
       expect(state.totalCount, 2);
     });
   });

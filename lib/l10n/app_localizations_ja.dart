@@ -200,13 +200,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get common_folder => 'フォルダー';
 
   @override
-  String get common_filter => 'フィルター';
-
-  @override
   String get common_grid => 'グリッド';
-
-  @override
-  String get common_date => '日付';
 
   @override
   String get common_pack => 'パック';
@@ -3249,9 +3243,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_progressiveLoadError => '画像のロードに失敗しました';
 
   @override
-  String get localGallery_noImagesFound => '画像が見つかりませんでした';
-
-  @override
   String get localGallery_unknownError => '不明なエラー';
 
   @override
@@ -3272,22 +3263,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_noMatchingResults => '一致する結果はありません';
 
   @override
-  String get localGallery_loadingGroupedImages => 'グループ化された画像を読み込み中...';
-
-  @override
   String get localGallery_title => 'ローカル ギャラリー';
 
   @override
   String get localGallery_allImages => 'すべての画像';
-
-  @override
-  String get localGallery_categoryPanelTitle => 'カテゴリ';
-
-  @override
-  String get localGallery_selectCurrentPage => 'ページを選択';
-
-  @override
-  String get localGallery_deselectCurrentPage => 'ページの選択を解除';
 
   @override
   String get localGallery_selectAllResults => 'すべて選択';
@@ -3326,9 +3305,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_sortFieldDimensions => '画像サイズ';
 
   @override
-  String get localGallery_sortToggleDirection => '並べ替え方向を切り替え';
-
-  @override
   String localGallery_aboutColumns(Object count) {
     return '約 $count 列';
   }
@@ -3349,13 +3325,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_galleryThumbnailQualitySubtitle => 'サムネイルの表示画質。初期設定は高画質';
 
   @override
-  String get localGallery_naiOnly => 'NAI';
-
-  @override
   String get localGallery_naiOnlyTooltip => 'NAI 生成画像のみ表示';
-
-  @override
-  String get localGallery_naiVersionFilterLabel => 'Ver';
 
   @override
   String get localGallery_naiVersionFilterTooltip => 'NAI モデルのバージョンで絞り込み';
@@ -3364,16 +3334,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_masonryViewLabel => 'ウォーターフォール';
 
   @override
-  String get localGallery_switchToMasonryView => 'ウォーターフォール ビューに切り替える';
-
-  @override
-  String get localGallery_switchToGridLayout => 'グリッド ビューに切り替える';
-
-  @override
   String get localGallery_justifiedViewLabel => 'ジャスティファイ';
-
-  @override
-  String get localGallery_switchToJustifiedView => 'ジャスティファイ ビューに切り替える';
 
   @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {
@@ -3395,16 +3356,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get localGallery_openFilterPanel => 'フィルター パネルを開く';
-
-  @override
   String get localGallery_hideCategoryPanel => 'カテゴリ パネルを非表示にする';
 
   @override
   String get localGallery_showCategoryPanel => 'カテゴリ パネルを表示';
-
-  @override
-  String get localGallery_enterSelectionMode => '選択モードに入ります';
 
   @override
   String get localGallery_refreshTooltip =>
@@ -3412,15 +3367,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_tagIntersection => 'タグの交差';
-
-  @override
-  String get localGallery_filterByTags => 'タグで絞り込み';
-
-  @override
-  String get localGallery_tagInputHint => 'タグを入力して Enter で追加';
-
-  @override
-  String get localGallery_addTag => '追加';
 
   @override
   String get localGallery_createCategoryTitle => '新しいカテゴリ';
@@ -3811,88 +3757,125 @@ class AppLocalizationsJa extends AppLocalizations {
   String get statistics_timeNight => '夜';
 
   @override
-  String get localGallery_advancedFilters => '高度なフィルター';
-
-  @override
-  String get localGallery_filterByModel => 'モデルによるフィルター';
-
-  @override
-  String get localGallery_filterBySampler => 'サンプラーによるフィルター';
-
-  @override
-  String get localGallery_filterBySteps => 'ステップごとにフィルターする';
-
-  @override
-  String get localGallery_filterByCfg => 'プロンプトガイダンス で絞り込む';
-
-  @override
-  String get localGallery_filterByResolution => '解像度によるフィルター';
-
-  @override
-  String get localGallery_filterSubtitle => '画像コレクションを正確にフィルタリングします';
-
-  @override
-  String get localGallery_filterOrientation => '向き';
-
-  @override
-  String get localGallery_orientationAny => 'すべて';
-
-  @override
-  String get localGallery_orientationLandscape => '横長';
-
-  @override
-  String get localGallery_orientationPortrait => '縦長';
-
-  @override
-  String get localGallery_orientationSquare => '正方形';
-
-  @override
-  String get localGallery_filterNsfw => 'コンテンツ区分';
-
-  @override
-  String get localGallery_nsfwAny => 'すべて';
-
-  @override
-  String get localGallery_nsfwSfw => '全年齢';
-
-  @override
-  String get localGallery_nsfwOnly => 'NSFW のみ';
-
-  @override
-  String get localGallery_noModelCandidates => 'モデルのメタデータがまだありません';
-
-  @override
-  String get localGallery_noSamplerCandidates => 'サンプラーのメタデータがまだありません';
-
-  @override
-  String get localGallery_noResolutionCandidates => '解像度のメタデータがまだありません';
-
-  @override
-  String get localGallery_candidatesLoadFailed => '候補の読み込みに失敗しました';
-
-  @override
-  String get localGallery_noTagSuggestions => '一致するタグがありません';
-
-  @override
-  String get localGallery_activeFiltersSet => 'フィルターセット';
-
-  @override
-  String get localGallery_applyFilters => 'フィルターを適用する';
-
-  @override
-  String get localGallery_resetAdvancedFilters => '詳細フィルターをリセット';
-
-  @override
   String get localGallery_group_today => '今日';
 
   @override
   String get localGallery_group_yesterday => '昨日';
 
   @override
-  String get localGallery_group_thisWeek => '今週';
+  String get localGallery_sendTo => '送信先…';
 
   @override
-  String get localGallery_group_earlier => '以前';
+  String localGallery_groupImageCount(int count, String formatted) {
+    return '$formatted 枚';
+  }
+
+  @override
+  String localGallery_imageCountLabel(int count, String formatted) {
+    return '$formatted 枚';
+  }
+
+  @override
+  String get localGallery_selectGroup => 'グループを選択';
+
+  @override
+  String get localGallery_inspectorTitle => '詳細';
+
+  @override
+  String localGallery_inspectorPosition(String index, String total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get localGallery_inspectorEmpty => '画像を選ぶと詳細が表示されます';
+
+  @override
+  String get localGallery_inspectorEmptyHint => 'ダブルクリックまたは Space キーで大きく表示';
+
+  @override
+  String get localGallery_hideInspector => '詳細パネルを隠す';
+
+  @override
+  String get localGallery_showInspector => '詳細パネルを表示';
+
+  @override
+  String get localGallery_reuseParams => 'パラメータを再利用';
+
+  @override
+  String get localGallery_actionImg2Img => 'Image2Image';
+
+  @override
+  String get localGallery_actionStyleTransfer => 'Vibe 転送';
+
+  @override
+  String get localGallery_actionPreciseReference => '精密参照';
+
+  @override
+  String get localGallery_actionSaveReference => 'ライブラリ保存';
+
+  @override
+  String get localGallery_actionKrita => 'Krita';
+
+  @override
+  String localGallery_selectedImages(String count) {
+    return '$count 枚選択中';
+  }
+
+  @override
+  String get localGallery_sortDescending => '降順';
+
+  @override
+  String get localGallery_sortAscending => '昇順';
+
+  @override
+  String get localGallery_moreActions => 'その他';
+
+  @override
+  String get localGallery_thumbnailSize => 'サムネイルの大きさ';
+
+  @override
+  String get localGallery_naiOnlyChip => 'NAI 画像のみ';
+
+  @override
+  String get localGallery_modelLabel => 'モデル';
+
+  @override
+  String get localGallery_allVersions => 'すべて';
+
+  @override
+  String get localGallery_allVariants => 'すべてのバリアント';
+
+  @override
+  String get localGallery_dateRangeChip => '期間';
+
+  @override
+  String get localGallery_groupByDay => '日ごとにまとめる';
+
+  @override
+  String get localGallery_groupByMonth => '月ごとにまとめる';
+
+  @override
+  String get localGallery_groupNone => 'まとめない';
+
+  @override
+  String get localGallery_groupModeTooltip => '時間でまとめる';
+
+  @override
+  String get localGallery_sectionLibrary => 'ライブラリ';
+
+  @override
+  String get localGallery_sectionCollections => 'コレクション';
+
+  @override
+  String get localGallery_sectionFolders => 'フォルダー';
+
+  @override
+  String get localGallery_dateFolders => '日付フォルダー';
+
+  @override
+  String localGallery_indexSynced(String count) {
+    return 'インデックス同期済み · $count';
+  }
 
   @override
   String localGallery_cannotOpenFolder(Object error) {
@@ -4675,10 +4658,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_action_delete_image => '画像を削除';
 
   @override
-  String get shortcut_action_previous_page => '前のページ';
+  String get shortcut_action_previous_page => '1 画面上へ';
 
   @override
-  String get shortcut_action_next_page => '次のページ';
+  String get shortcut_action_next_page => '1 画面下へ';
 
   @override
   String get shortcut_action_refresh_gallery => 'ギャラリーを更新';
@@ -4687,10 +4670,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_action_focus_search => '検索にフォーカス';
 
   @override
-  String get shortcut_action_enter_selection_mode => '選択モードに入る';
-
-  @override
-  String get shortcut_action_open_filter_panel => 'フィルター パネルを開く';
+  String get shortcut_action_enter_selection_mode => 'すべて選択';
 
   @override
   String get shortcut_action_clear_filter => 'フィルターをクリア';
@@ -4747,10 +4727,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_help_all => 'すべて';
 
   @override
-  String get shortcut_help_tip =>
-      'ヒント: F1 または ? を押します。いつでもこのヘルプ ダイアログを開くことができます';
-
-  @override
   String get shortcut_help_fabTooltip => 'キーボード ショートカット ヘルプ (F1)';
 
   @override
@@ -4766,9 +4742,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String shortcut_editor_conflictWith(Object action) {
     return 'このショートカットは「$action」と競合します';
   }
-
-  @override
-  String get drop_dialogTitle => 'この画像はどのように使用しますか?';
 
   @override
   String get drop_hint => 'ここに画像をドロップしてください';
@@ -4800,35 +4773,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get drop_addedToCharacterRef => '精密参照に追加しました';
 
   @override
-  String get drop_extractMetadata => 'メタデータの抽出';
-
-  @override
-  String get drop_extractMetadataSubtitle => '画像からプロンプト、シード、その他のパラメーターを読み取ります';
-
-  @override
   String get drop_vibeDetected => '事前にエンコードされた Vibe を検出しました (2 Anlas を節約)';
-
-  @override
-  String drop_vibeStrength(Object value) {
-    return '強度: $value%';
-  }
-
-  @override
-  String drop_vibeInfoExtracted(Object value) {
-    return '抽出情報: $value%';
-  }
 
   @override
   String get drop_reuseVibe => 'バイブを再利用';
 
   @override
-  String get drop_reuseVibeSubtitle => '事前にエンコードされたデータを直接使用する (無料)';
-
-  @override
   String get drop_useAsRawImage => 'Raw 画像として使用';
-
-  @override
-  String get drop_useAsRawImageSubtitle => '再エンコード (2 Anlas を消費します)';
 
   @override
   String get drop_dragToImg2ImgOrOther => 'Image2Image または別のターゲットにドラッグします';
@@ -6961,30 +6912,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get detail_saveToVibeLibrary => 'バイブライブラリに保存';
 
   @override
-  String get pagination_firstPage => '最初のページ';
-
-  @override
-  String get pagination_previousPage => '前のページ';
-
-  @override
-  String get pagination_nextPage => '次のページ';
-
-  @override
-  String get pagination_lastPage => '最後のページ';
-
-  @override
-  String get pagination_jumpToPage => 'ページへジャンプ';
-
-  @override
-  String get pagination_jump => 'ジャンプ';
-
-  @override
-  String get pagination_itemsPerPage => 'ページごと';
-
-  @override
-  String get pagination_itemUnit => 'アイテム';
-
-  @override
   String get comfyImport_detectedTitle => 'ComfyUI の複数キャラクタープロンプトを検出しました';
 
   @override
@@ -7470,12 +7397,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get common_swap => '入れ替え';
 
   @override
-  String get common_minimum => '最小';
-
-  @override
-  String get common_maximum => '最大';
-
-  @override
   String get addToLibrary_displayNameHint => 'この項目を識別する名前を入力';
 
   @override
@@ -7483,14 +7404,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get drop_saveVibeBundle => 'Vibe Bundleを保存';
-
-  @override
-  String drop_saveVibeBundleSubtitle(String name) {
-    return '$name などのVibeをライブラリに保存';
-  }
-
-  @override
-  String get drop_saveEncodedVibeSubtitle => 'エンコード済みVibeデータをライブラリに保存';
 
   @override
   String get history_dragFilePreparationFailed =>

@@ -82,9 +82,7 @@
   "common_ok": "确定",
   "common_exit": "退出",
   "common_folder": "文件夹",
-  "common_filter": "筛选",
   "common_grid": "网格",
-  "common_date": "日期",
   "common_pack": "打包",
   "common_multiSelect": "多选",
   "common_category": "分类",
@@ -1315,7 +1313,6 @@
   "api_error_timeout_hint": "网络连接超时，请检查网络后重试",
   "api_error_network": "网络错误",
   "api_error_network_hint": "无法连接到服务器，请检查网络",
-  "drop_dialogTitle": "如何使用这张图片？",
   "drop_hint": "拖拽图片到这里",
   "drop_processing": "正在解析图片...",
   "drop_img2img": "图生图",
@@ -1333,25 +1330,9 @@
     }
   },
   "drop_addedToCharacterRef": "已添加到精准参考",
-  "drop_extractMetadata": "提取元数据",
-  "drop_extractMetadataSubtitle": "读取图片中的 Prompt、Seed 等参数",
   "drop_vibeDetected": "检测到预编码 Vibe（可节省 2 Anlas）",
-  "drop_vibeStrength": "强度: {value}%",
-  "@drop_vibeStrength": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-  "drop_vibeInfoExtracted": "信息提取: {value}%",
-  "@drop_vibeInfoExtracted": {
-    "placeholders": {
-      "value": {}
-    }
-  },
   "drop_reuseVibe": "复用 Vibe",
-  "drop_reuseVibeSubtitle": "直接使用预编码数据（免费）",
   "drop_useAsRawImage": "作为原始图片",
-  "drop_useAsRawImageSubtitle": "重新编码（消耗 2 Anlas）",
   "drop_dragToImg2ImgOrOther": "拖拽到图生图或其他区域",
   "preciseRef_title": "精准参考",
   "preciseRef_subtitle": "将生成绑定到角色或风格参考",
@@ -1597,7 +1578,6 @@
   },
   "vibeParseFailed": "无法解析 Vibe 文件",
   "localGallery_progressiveLoadError": "图片加载失败",
-  "localGallery_noImagesFound": "未找到图片",
   "localGallery_unknownError": "未知错误",
   "localGallery_loadFailed": "加载失败: {error}",
   "@localGallery_loadFailed": {
@@ -1609,12 +1589,8 @@
   "localGallery_emptyTitle": "暂无本地图片",
   "localGallery_emptySubtitle": "生成的图片将保存在此处",
   "localGallery_noMatchingResults": "无匹配结果",
-  "localGallery_loadingGroupedImages": "加载分组图片中...",
   "localGallery_title": "本地画廊",
   "localGallery_allImages": "全部图片",
-  "localGallery_categoryPanelTitle": "分类",
-  "localGallery_selectCurrentPage": "选择本页",
-  "localGallery_deselectCurrentPage": "取消本页",
   "localGallery_selectAllResults": "选择全部",
   "localGallery_deselectAllResults": "取消全部",
   "localGallery_moveSelected": "移动",
@@ -1627,7 +1603,6 @@
   "localGallery_sortFieldName": "文件名",
   "localGallery_sortFieldSize": "文件大小",
   "localGallery_sortFieldDimensions": "图像尺寸",
-  "localGallery_sortToggleDirection": "切换排序方向",
   "localGallery_aboutColumns": "约 {count} 列",
   "@localGallery_aboutColumns": {
     "placeholders": {
@@ -1639,15 +1614,10 @@
   "localGallery_thumbnailQualityHd": "高清",
   "settings_galleryThumbnailQuality": "本地画廊清晰度",
   "settings_galleryThumbnailQualitySubtitle": "缩略图显示质量，默认高清",
-  "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "仅显示 NAI 生成的图片",
-  "localGallery_naiVersionFilterLabel": "Ver",
   "localGallery_naiVersionFilterTooltip": "按 NAI 模型版本过滤",
   "localGallery_masonryViewLabel": "瀑布流",
-  "localGallery_switchToMasonryView": "切换到瀑布流视图",
-  "localGallery_switchToGridLayout": "切换到网格视图",
   "localGallery_justifiedViewLabel": "火车流",
-  "localGallery_switchToJustifiedView": "切换到火车流视图",
   "localGallery_dateRangeYearMonth": "{year}年{month}月",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {
@@ -1664,15 +1634,10 @@
       "scope": {}
     }
   },
-  "localGallery_openFilterPanel": "打开筛选面板",
   "localGallery_hideCategoryPanel": "隐藏分类面板",
   "localGallery_showCategoryPanel": "显示分类面板",
-  "localGallery_enterSelectionMode": "进入选择模式",
   "localGallery_refreshTooltip": "刷新画廊\n\n自动检测新增/修改的图片并更新索引",
   "localGallery_tagIntersection": "标签交集",
-  "localGallery_filterByTags": "按标签筛选",
-  "localGallery_tagInputHint": "输入标签，回车添加",
-  "localGallery_addTag": "添加",
   "localGallery_createCategoryTitle": "新建分类",
   "localGallery_newOrImport": "新建/导入",
   "localGallery_importFolder": "导入文件夹",
@@ -1901,34 +1866,87 @@
   "layer_rename": "重命名",
   "layer_moveUp": "上移",
   "layer_moveDown": "下移",
-  "localGallery_advancedFilters": "高级筛选",
-  "localGallery_filterByModel": "按模型筛选",
-  "localGallery_filterBySampler": "按采样器筛选",
-  "localGallery_filterBySteps": "按步数筛选",
-  "localGallery_filterByCfg": "按 提示词引导 筛选",
-  "localGallery_filterByResolution": "按分辨率筛选",
-  "localGallery_filterSubtitle": "精确筛选您的图片集合",
-  "localGallery_filterOrientation": "画面方向",
-  "localGallery_orientationAny": "全部",
-  "localGallery_orientationLandscape": "横版",
-  "localGallery_orientationPortrait": "竖版",
-  "localGallery_orientationSquare": "方图",
-  "localGallery_filterNsfw": "内容分级",
-  "localGallery_nsfwAny": "全部",
-  "localGallery_nsfwSfw": "全年龄",
-  "localGallery_nsfwOnly": "仅 NSFW",
-  "localGallery_noModelCandidates": "暂无模型元数据，导入标签索引或扫描后可用",
-  "localGallery_noSamplerCandidates": "暂无采样器元数据，导入标签索引或扫描后可用",
-  "localGallery_noResolutionCandidates": "暂无分辨率元数据",
-  "localGallery_candidatesLoadFailed": "候选加载失败",
-  "localGallery_noTagSuggestions": "无匹配标签",
-  "localGallery_activeFiltersSet": "已设置筛选",
-  "localGallery_applyFilters": "应用筛选",
-  "localGallery_resetAdvancedFilters": "重置高级筛选",
   "localGallery_group_today": "今天",
   "localGallery_group_yesterday": "昨天",
-  "localGallery_group_thisWeek": "本周",
-  "localGallery_group_earlier": "更早",
+  "localGallery_sendTo": "发送到…",
+  "localGallery_groupImageCount": "{formatted} 张",
+  "@localGallery_groupImageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_imageCountLabel": "{formatted} 张",
+  "@localGallery_imageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_selectGroup": "选择整组",
+  "localGallery_inspectorTitle": "详情",
+  "localGallery_inspectorPosition": "{index} / {total}",
+  "@localGallery_inspectorPosition": {
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_inspectorEmpty": "选择一张图片查看详情",
+  "localGallery_inspectorEmptyHint": "双击或按空格键打开大图",
+  "localGallery_hideInspector": "收起详情面板",
+  "localGallery_showInspector": "显示详情面板",
+  "localGallery_reuseParams": "复用参数",
+  "localGallery_actionImg2Img": "图生图",
+  "localGallery_actionStyleTransfer": "风格迁移",
+  "localGallery_actionPreciseReference": "精准参考",
+  "localGallery_actionSaveReference": "存入参考库",
+  "localGallery_actionKrita": "Krita",
+  "localGallery_selectedImages": "已选 {count} 张",
+  "@localGallery_selectedImages": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_sortDescending": "降序",
+  "localGallery_sortAscending": "升序",
+  "localGallery_moreActions": "更多",
+  "localGallery_thumbnailSize": "缩略图大小",
+  "localGallery_naiOnlyChip": "仅 NAI 图片",
+  "localGallery_modelLabel": "模型",
+  "localGallery_allVersions": "全部",
+  "localGallery_allVariants": "全部变体",
+  "localGallery_dateRangeChip": "日期范围",
+  "localGallery_groupByDay": "按天分组",
+  "localGallery_groupByMonth": "按月分组",
+  "localGallery_groupNone": "不分组",
+  "localGallery_groupModeTooltip": "按时间分组",
+  "localGallery_sectionLibrary": "资料库",
+  "localGallery_sectionCollections": "收藏集",
+  "localGallery_sectionFolders": "文件夹",
+  "localGallery_dateFolders": "日期文件夹",
+  "localGallery_indexSynced": "索引已同步 · {count}",
+  "@localGallery_indexSynced": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "localGallery_cannotOpenFolder": "无法打开文件夹: {error}",
   "@localGallery_cannotOpenFolder": {
     "placeholders": {
@@ -2401,12 +2419,11 @@
   "shortcut_action_copy_prompt": "复制Prompt",
   "shortcut_action_reuse_gallery_params": "复用参数",
   "shortcut_action_delete_image": "删除图片",
-  "shortcut_action_previous_page": "上一页",
-  "shortcut_action_next_page": "下一页",
+  "shortcut_action_previous_page": "向上翻一屏",
+  "shortcut_action_next_page": "向下翻一屏",
   "shortcut_action_refresh_gallery": "刷新",
   "shortcut_action_focus_search": "搜索聚焦",
-  "shortcut_action_enter_selection_mode": "进入选择模式",
-  "shortcut_action_open_filter_panel": "打开筛选面板",
+  "shortcut_action_enter_selection_mode": "全选",
   "shortcut_action_clear_filter": "清除筛选",
   "shortcut_action_toggle_category_panel": "切换分类面板",
   "shortcut_action_jump_to_date": "跳转到日期",
@@ -2425,7 +2442,6 @@
   "shortcut_help_title": "快捷键帮助",
   "shortcut_help_search": "搜索快捷键...",
   "shortcut_help_all": "全部",
-  "shortcut_help_tip": "提示：按 F1 或 ? 键可随时打开此帮助对话框",
   "shortcut_help_fabTooltip": "快捷键帮助 (F1)",
   "shortcut_editor_recordingInline": "按快捷键...",
   "shortcut_editor_pressEscToCancel": "按 Esc 取消",
@@ -3509,14 +3525,6 @@
   "detail_copyCharacterPrompt": "复制角色提示词",
   "detail_copyAllVibeData": "复制全部 Vibe 数据",
   "detail_saveToVibeLibrary": "保存到 Vibe 库",
-  "pagination_firstPage": "首页",
-  "pagination_previousPage": "上一页",
-  "pagination_nextPage": "下一页",
-  "pagination_lastPage": "末页",
-  "pagination_jumpToPage": "跳转到页面",
-  "pagination_jump": "跳转",
-  "pagination_itemsPerPage": "每页",
-  "pagination_itemUnit": "项",
   "comfyImport_detectedTitle": "检测到 ComfyUI 多角色提示词",
   "comfyImport_characterList": "角色列表 ({count})",
   "@comfyImport_characterList": {
@@ -4244,20 +4252,9 @@
   "common_clickToRetry": "点击重试",
   "common_opening": "正在打开...",
   "common_swap": "交换",
-  "common_minimum": "最小值",
-  "common_maximum": "最大值",
   "addToLibrary_displayNameHint": "输入便于识别此条目的名称",
   "addToLibrary_tagHint": "输入标签并按 Enter 添加",
   "drop_saveVibeBundle": "保存 Vibe Bundle",
-  "drop_saveVibeBundleSubtitle": "将 {name} 等 Vibe 保存到库中",
-  "@drop_saveVibeBundleSubtitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "drop_saveEncodedVibeSubtitle": "将预编码 Vibe 数据保存到库中",
   "history_dragFilePreparationFailed": "拖拽文件准备失败，请稍后重试",
   "history_dragFilePreparing": "正在准备拖拽文件...",
   "history_dragFileNotReady": "拖拽文件尚未准备完成",

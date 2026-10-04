@@ -81,9 +81,7 @@
   "common_ok": "OK",
   "common_exit": "終了",
   "common_folder": "フォルダー",
-  "common_filter": "フィルター",
   "common_grid": "グリッド",
-  "common_date": "日付",
   "common_pack": "パック",
   "common_multiSelect": "複数選択",
   "common_category": "カテゴリ",
@@ -1602,7 +1600,6 @@
   },
   "vibeParseFailed": "Vibe ファイルの解析に失敗しました",
   "localGallery_progressiveLoadError": "画像のロードに失敗しました",
-  "localGallery_noImagesFound": "画像が見つかりませんでした",
   "localGallery_unknownError": "不明なエラー",
   "localGallery_loadFailed": "ロードに失敗しました: {error}",
   "@localGallery_loadFailed": {
@@ -1614,12 +1611,8 @@
   "localGallery_emptyTitle": "ローカル イメージがありません",
   "localGallery_emptySubtitle": "生成された画像はここに保存されます",
   "localGallery_noMatchingResults": "一致する結果はありません",
-  "localGallery_loadingGroupedImages": "グループ化された画像を読み込み中...",
   "localGallery_title": "ローカル ギャラリー",
   "localGallery_allImages": "すべての画像",
-  "localGallery_categoryPanelTitle": "カテゴリ",
-  "localGallery_selectCurrentPage": "ページを選択",
-  "localGallery_deselectCurrentPage": "ページの選択を解除",
   "localGallery_selectAllResults": "すべて選択",
   "localGallery_deselectAllResults": "すべての選択を解除",
   "localGallery_moveSelected": "移動",
@@ -1632,7 +1625,6 @@
   "localGallery_sortFieldName": "ファイル名",
   "localGallery_sortFieldSize": "ファイルサイズ",
   "localGallery_sortFieldDimensions": "画像サイズ",
-  "localGallery_sortToggleDirection": "並べ替え方向を切り替え",
   "localGallery_aboutColumns": "約 {count} 列",
   "@localGallery_aboutColumns": {
     "placeholders": {
@@ -1644,15 +1636,10 @@
   "localGallery_thumbnailQualityHd": "高画質",
   "settings_galleryThumbnailQuality": "ローカルギャラリーの画質",
   "settings_galleryThumbnailQualitySubtitle": "サムネイルの表示画質。初期設定は高画質",
-  "localGallery_naiOnly": "NAI",
   "localGallery_naiOnlyTooltip": "NAI 生成画像のみ表示",
-  "localGallery_naiVersionFilterLabel": "Ver",
   "localGallery_naiVersionFilterTooltip": "NAI モデルのバージョンで絞り込み",
   "localGallery_masonryViewLabel": "ウォーターフォール",
-  "localGallery_switchToMasonryView": "ウォーターフォール ビューに切り替える",
-  "localGallery_switchToGridLayout": "グリッド ビューに切り替える",
   "localGallery_justifiedViewLabel": "ジャスティファイ",
-  "localGallery_switchToJustifiedView": "ジャスティファイ ビューに切り替える",
   "localGallery_dateRangeYearMonth": "{year}年{month}月",
   "@localGallery_dateRangeYearMonth": {
     "placeholders": {
@@ -1669,15 +1656,10 @@
       "scope": {}
     }
   },
-  "localGallery_openFilterPanel": "フィルター パネルを開く",
   "localGallery_hideCategoryPanel": "カテゴリ パネルを非表示にする",
   "localGallery_showCategoryPanel": "カテゴリ パネルを表示",
-  "localGallery_enterSelectionMode": "選択モードに入ります",
   "localGallery_refreshTooltip": "ギャラリーを更新\n\n新しい画像または変更された画像を自動的に検出し、インデックスを更新します",
   "localGallery_tagIntersection": "タグの交差",
-  "localGallery_filterByTags": "タグで絞り込み",
-  "localGallery_tagInputHint": "タグを入力して Enter で追加",
-  "localGallery_addTag": "追加",
   "localGallery_createCategoryTitle": "新しいカテゴリ",
   "localGallery_newOrImport": "新規/インポート",
   "localGallery_importFolder": "フォルダをインポート",
@@ -1898,34 +1880,87 @@
   "statistics_timeAfternoon": "午後",
   "statistics_timeEvening": "夕方",
   "statistics_timeNight": "夜",
-  "localGallery_advancedFilters": "高度なフィルター",
-  "localGallery_filterByModel": "モデルによるフィルター",
-  "localGallery_filterBySampler": "サンプラーによるフィルター",
-  "localGallery_filterBySteps": "ステップごとにフィルターする",
-  "localGallery_filterByCfg": "プロンプトガイダンス で絞り込む",
-  "localGallery_filterByResolution": "解像度によるフィルター",
-  "localGallery_filterSubtitle": "画像コレクションを正確にフィルタリングします",
-  "localGallery_filterOrientation": "向き",
-  "localGallery_orientationAny": "すべて",
-  "localGallery_orientationLandscape": "横長",
-  "localGallery_orientationPortrait": "縦長",
-  "localGallery_orientationSquare": "正方形",
-  "localGallery_filterNsfw": "コンテンツ区分",
-  "localGallery_nsfwAny": "すべて",
-  "localGallery_nsfwSfw": "全年齢",
-  "localGallery_nsfwOnly": "NSFW のみ",
-  "localGallery_noModelCandidates": "モデルのメタデータがまだありません",
-  "localGallery_noSamplerCandidates": "サンプラーのメタデータがまだありません",
-  "localGallery_noResolutionCandidates": "解像度のメタデータがまだありません",
-  "localGallery_candidatesLoadFailed": "候補の読み込みに失敗しました",
-  "localGallery_noTagSuggestions": "一致するタグがありません",
-  "localGallery_activeFiltersSet": "フィルターセット",
-  "localGallery_applyFilters": "フィルターを適用する",
-  "localGallery_resetAdvancedFilters": "詳細フィルターをリセット",
   "localGallery_group_today": "今日",
   "localGallery_group_yesterday": "昨日",
-  "localGallery_group_thisWeek": "今週",
-  "localGallery_group_earlier": "以前",
+  "localGallery_sendTo": "送信先…",
+  "localGallery_groupImageCount": "{formatted} 枚",
+  "@localGallery_groupImageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_imageCountLabel": "{formatted} 枚",
+  "@localGallery_imageCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_selectGroup": "グループを選択",
+  "localGallery_inspectorTitle": "詳細",
+  "localGallery_inspectorPosition": "{index} / {total}",
+  "@localGallery_inspectorPosition": {
+    "placeholders": {
+      "index": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_inspectorEmpty": "画像を選ぶと詳細が表示されます",
+  "localGallery_inspectorEmptyHint": "ダブルクリックまたは Space キーで大きく表示",
+  "localGallery_hideInspector": "詳細パネルを隠す",
+  "localGallery_showInspector": "詳細パネルを表示",
+  "localGallery_reuseParams": "パラメータを再利用",
+  "localGallery_actionImg2Img": "Image2Image",
+  "localGallery_actionStyleTransfer": "Vibe 転送",
+  "localGallery_actionPreciseReference": "精密参照",
+  "localGallery_actionSaveReference": "ライブラリ保存",
+  "localGallery_actionKrita": "Krita",
+  "localGallery_selectedImages": "{count} 枚選択中",
+  "@localGallery_selectedImages": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "localGallery_sortDescending": "降順",
+  "localGallery_sortAscending": "昇順",
+  "localGallery_moreActions": "その他",
+  "localGallery_thumbnailSize": "サムネイルの大きさ",
+  "localGallery_naiOnlyChip": "NAI 画像のみ",
+  "localGallery_modelLabel": "モデル",
+  "localGallery_allVersions": "すべて",
+  "localGallery_allVariants": "すべてのバリアント",
+  "localGallery_dateRangeChip": "期間",
+  "localGallery_groupByDay": "日ごとにまとめる",
+  "localGallery_groupByMonth": "月ごとにまとめる",
+  "localGallery_groupNone": "まとめない",
+  "localGallery_groupModeTooltip": "時間でまとめる",
+  "localGallery_sectionLibrary": "ライブラリ",
+  "localGallery_sectionCollections": "コレクション",
+  "localGallery_sectionFolders": "フォルダー",
+  "localGallery_dateFolders": "日付フォルダー",
+  "localGallery_indexSynced": "インデックス同期済み · {count}",
+  "@localGallery_indexSynced": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "localGallery_cannotOpenFolder": "フォルダーを開けません: {error}",
   "@localGallery_cannotOpenFolder": {
     "placeholders": {
@@ -2392,12 +2427,11 @@
   "shortcut_action_copy_prompt": "プロンプトのコピー",
   "shortcut_action_reuse_gallery_params": "パラメータの再利用",
   "shortcut_action_delete_image": "画像を削除",
-  "shortcut_action_previous_page": "前のページ",
-  "shortcut_action_next_page": "次のページ",
+  "shortcut_action_previous_page": "1 画面上へ",
+  "shortcut_action_next_page": "1 画面下へ",
   "shortcut_action_refresh_gallery": "ギャラリーを更新",
   "shortcut_action_focus_search": "検索にフォーカス",
-  "shortcut_action_enter_selection_mode": "選択モードに入る",
-  "shortcut_action_open_filter_panel": "フィルター パネルを開く",
+  "shortcut_action_enter_selection_mode": "すべて選択",
   "shortcut_action_clear_filter": "フィルターをクリア",
   "shortcut_action_toggle_category_panel": "カテゴリ パネルの切り替え",
   "shortcut_action_jump_to_date": "日付に移動",
@@ -2422,7 +2456,6 @@
   "shortcut_help_title": "キーボード ショートカットのヘルプ",
   "shortcut_help_search": "ショートカットを検索...",
   "shortcut_help_all": "すべて",
-  "shortcut_help_tip": "ヒント: F1 または ? を押します。いつでもこのヘルプ ダイアログを開くことができます",
   "shortcut_help_fabTooltip": "キーボード ショートカット ヘルプ (F1)",
   "shortcut_editor_recordingInline": "ショートカットを押してください...",
   "shortcut_editor_pressEscToCancel": "キャンセルするには Esc キーを押してください",
@@ -2433,7 +2466,6 @@
       "action": {}
     }
   },
-  "drop_dialogTitle": "この画像はどのように使用しますか?",
   "drop_hint": "ここに画像をドロップしてください",
   "drop_img2img": "Image2Image",
   "drop_vibeTransfer": "バイブストランスファー",
@@ -2450,25 +2482,9 @@
     }
   },
   "drop_addedToCharacterRef": "精密参照に追加しました",
-  "drop_extractMetadata": "メタデータの抽出",
-  "drop_extractMetadataSubtitle": "画像からプロンプト、シード、その他のパラメーターを読み取ります",
   "drop_vibeDetected": "事前にエンコードされた Vibe を検出しました (2 Anlas を節約)",
-  "drop_vibeStrength": "強度: {value}%",
-  "@drop_vibeStrength": {
-    "placeholders": {
-      "value": {}
-    }
-  },
-  "drop_vibeInfoExtracted": "抽出情報: {value}%",
-  "@drop_vibeInfoExtracted": {
-    "placeholders": {
-      "value": {}
-    }
-  },
   "drop_reuseVibe": "バイブを再利用",
-  "drop_reuseVibeSubtitle": "事前にエンコードされたデータを直接使用する (無料)",
   "drop_useAsRawImage": "Raw 画像として使用",
-  "drop_useAsRawImageSubtitle": "再エンコード (2 Anlas を消費します)",
   "drop_dragToImg2ImgOrOther": "Image2Image または別のターゲットにドラッグします",
   "preciseRef_title": "精密参照",
   "preciseRef_subtitle": "キャラクターやスタイル参照に生成を結び付ける",
@@ -3750,14 +3766,6 @@
   "detail_copyCharacterPrompt": "キャラクタープロンプトをコピー",
   "detail_copyAllVibeData": "すべての Vibe データをコピーします",
   "detail_saveToVibeLibrary": "バイブライブラリに保存",
-  "pagination_firstPage": "最初のページ",
-  "pagination_previousPage": "前のページ",
-  "pagination_nextPage": "次のページ",
-  "pagination_lastPage": "最後のページ",
-  "pagination_jumpToPage": "ページへジャンプ",
-  "pagination_jump": "ジャンプ",
-  "pagination_itemsPerPage": "ページごと",
-  "pagination_itemUnit": "アイテム",
   "comfyImport_detectedTitle": "ComfyUI の複数キャラクタープロンプトを検出しました",
   "comfyImport_characterList": "キャラクター一覧 ({count})",
   "@comfyImport_characterList": {
@@ -4244,20 +4252,9 @@
   "common_clickToRetry": "クリックして再試行",
   "common_opening": "開いています...",
   "common_swap": "入れ替え",
-  "common_minimum": "最小",
-  "common_maximum": "最大",
   "addToLibrary_displayNameHint": "この項目を識別する名前を入力",
   "addToLibrary_tagHint": "タグを入力して Enter キーで追加",
   "drop_saveVibeBundle": "Vibe Bundleを保存",
-  "drop_saveVibeBundleSubtitle": "{name} などのVibeをライブラリに保存",
-  "@drop_saveVibeBundleSubtitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "drop_saveEncodedVibeSubtitle": "エンコード済みVibeデータをライブラリに保存",
   "history_dragFilePreparationFailed": "ドラッグ用ファイルの準備に失敗しました。後でもう一度お試しください。",
   "history_dragFilePreparing": "ドラッグ用ファイルを準備しています...",
   "history_dragFileNotReady": "ドラッグ用ファイルはまだ準備できていません",

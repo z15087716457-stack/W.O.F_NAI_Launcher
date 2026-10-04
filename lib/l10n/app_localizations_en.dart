@@ -200,13 +200,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_folder => 'Folder';
 
   @override
-  String get common_filter => 'Filter';
-
-  @override
   String get common_grid => 'Grid';
-
-  @override
-  String get common_date => 'Date';
 
   @override
   String get common_pack => 'Pack';
@@ -3320,9 +3314,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_progressiveLoadError => 'Failed to load image';
 
   @override
-  String get localGallery_noImagesFound => 'No images found';
-
-  @override
   String get localGallery_unknownError => 'Unknown error';
 
   @override
@@ -3344,22 +3335,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_noMatchingResults => 'No matching results';
 
   @override
-  String get localGallery_loadingGroupedImages => 'Loading grouped images...';
-
-  @override
   String get localGallery_title => 'Local Gallery';
 
   @override
   String get localGallery_allImages => 'All Images';
-
-  @override
-  String get localGallery_categoryPanelTitle => 'Categories';
-
-  @override
-  String get localGallery_selectCurrentPage => 'Select Page';
-
-  @override
-  String get localGallery_deselectCurrentPage => 'Deselect Page';
 
   @override
   String get localGallery_selectAllResults => 'Select All';
@@ -3398,9 +3377,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_sortFieldDimensions => 'Image size';
 
   @override
-  String get localGallery_sortToggleDirection => 'Toggle sort direction';
-
-  @override
   String localGallery_aboutColumns(Object count) {
     return '≈ $count columns';
   }
@@ -3422,13 +3398,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Thumbnail display quality; defaults to High';
 
   @override
-  String get localGallery_naiOnly => 'NAI';
-
-  @override
   String get localGallery_naiOnlyTooltip => 'Only show NAI-generated images';
-
-  @override
-  String get localGallery_naiVersionFilterLabel => 'Ver';
 
   @override
   String get localGallery_naiVersionFilterTooltip =>
@@ -3438,16 +3408,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_masonryViewLabel => 'Waterfall';
 
   @override
-  String get localGallery_switchToMasonryView => 'Switch to waterfall view';
-
-  @override
-  String get localGallery_switchToGridLayout => 'Switch to grid view';
-
-  @override
   String get localGallery_justifiedViewLabel => 'Justified';
-
-  @override
-  String get localGallery_switchToJustifiedView => 'Switch to justified view';
 
   @override
   String localGallery_dateRangeYearMonth(Object year, Object month) {
@@ -3469,16 +3430,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get localGallery_openFilterPanel => 'Open filter panel';
-
-  @override
   String get localGallery_hideCategoryPanel => 'Hide category panel';
 
   @override
   String get localGallery_showCategoryPanel => 'Show category panel';
-
-  @override
-  String get localGallery_enterSelectionMode => 'Enter selection mode';
 
   @override
   String get localGallery_refreshTooltip =>
@@ -3486,15 +3441,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_tagIntersection => 'Tag Intersection';
-
-  @override
-  String get localGallery_filterByTags => 'Filter by Tags';
-
-  @override
-  String get localGallery_tagInputHint => 'Type a tag, press Enter to add';
-
-  @override
-  String get localGallery_addTag => 'Add';
 
   @override
   String get localGallery_createCategoryTitle => 'New Category';
@@ -3897,91 +3843,139 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statistics_timeNight => 'Night';
 
   @override
-  String get localGallery_advancedFilters => 'Advanced Filters';
-
-  @override
-  String get localGallery_filterByModel => 'Filter by Model';
-
-  @override
-  String get localGallery_filterBySampler => 'Filter by Sampler';
-
-  @override
-  String get localGallery_filterBySteps => 'Filter by Steps';
-
-  @override
-  String get localGallery_filterByCfg => 'Filter by Prompt Guidance';
-
-  @override
-  String get localGallery_filterByResolution => 'Filter by Resolution';
-
-  @override
-  String get localGallery_filterSubtitle =>
-      'Precisely filter your image collection';
-
-  @override
-  String get localGallery_filterOrientation => 'Orientation';
-
-  @override
-  String get localGallery_orientationAny => 'Any';
-
-  @override
-  String get localGallery_orientationLandscape => 'Landscape';
-
-  @override
-  String get localGallery_orientationPortrait => 'Portrait';
-
-  @override
-  String get localGallery_orientationSquare => 'Square';
-
-  @override
-  String get localGallery_filterNsfw => 'Content Rating';
-
-  @override
-  String get localGallery_nsfwAny => 'Any';
-
-  @override
-  String get localGallery_nsfwSfw => 'Safe';
-
-  @override
-  String get localGallery_nsfwOnly => 'NSFW only';
-
-  @override
-  String get localGallery_noModelCandidates => 'No model metadata found yet';
-
-  @override
-  String get localGallery_noSamplerCandidates =>
-      'No sampler metadata found yet';
-
-  @override
-  String get localGallery_noResolutionCandidates =>
-      'No resolution metadata found yet';
-
-  @override
-  String get localGallery_candidatesLoadFailed => 'Failed to load candidates';
-
-  @override
-  String get localGallery_noTagSuggestions => 'No matching tags';
-
-  @override
-  String get localGallery_activeFiltersSet => 'Filters set';
-
-  @override
-  String get localGallery_applyFilters => 'Apply Filters';
-
-  @override
-  String get localGallery_resetAdvancedFilters => 'Reset Advanced Filters';
-
-  @override
   String get localGallery_group_today => 'Today';
 
   @override
   String get localGallery_group_yesterday => 'Yesterday';
 
   @override
-  String get localGallery_group_thisWeek => 'This Week';
+  String get localGallery_sendTo => 'Send to…';
 
   @override
-  String get localGallery_group_earlier => 'Earlier';
+  String localGallery_groupImageCount(int count, String formatted) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$formatted images',
+      one: '$formatted image',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String localGallery_imageCountLabel(int count, String formatted) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$formatted images',
+      one: '$formatted image',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get localGallery_selectGroup => 'Select group';
+
+  @override
+  String get localGallery_inspectorTitle => 'Details';
+
+  @override
+  String localGallery_inspectorPosition(String index, String total) {
+    return '$index / $total';
+  }
+
+  @override
+  String get localGallery_inspectorEmpty =>
+      'Select an image to see its details';
+
+  @override
+  String get localGallery_inspectorEmptyHint =>
+      'Double-click or press Space to view it full size';
+
+  @override
+  String get localGallery_hideInspector => 'Hide details panel';
+
+  @override
+  String get localGallery_showInspector => 'Show details panel';
+
+  @override
+  String get localGallery_reuseParams => 'Reuse parameters';
+
+  @override
+  String get localGallery_actionImg2Img => 'Image2Image';
+
+  @override
+  String get localGallery_actionStyleTransfer => 'Vibe Transfer';
+
+  @override
+  String get localGallery_actionPreciseReference => 'Precise Ref.';
+
+  @override
+  String get localGallery_actionSaveReference => 'Save to Library';
+
+  @override
+  String get localGallery_actionKrita => 'Krita';
+
+  @override
+  String localGallery_selectedImages(String count) {
+    return '$count selected';
+  }
+
+  @override
+  String get localGallery_sortDescending => 'Descending';
+
+  @override
+  String get localGallery_sortAscending => 'Ascending';
+
+  @override
+  String get localGallery_moreActions => 'More';
+
+  @override
+  String get localGallery_thumbnailSize => 'Thumbnail size';
+
+  @override
+  String get localGallery_naiOnlyChip => 'NAI images only';
+
+  @override
+  String get localGallery_modelLabel => 'Model';
+
+  @override
+  String get localGallery_allVersions => 'All';
+
+  @override
+  String get localGallery_allVariants => 'All variants';
+
+  @override
+  String get localGallery_dateRangeChip => 'Date range';
+
+  @override
+  String get localGallery_groupByDay => 'Group by day';
+
+  @override
+  String get localGallery_groupByMonth => 'Group by month';
+
+  @override
+  String get localGallery_groupNone => 'No grouping';
+
+  @override
+  String get localGallery_groupModeTooltip => 'Group by time';
+
+  @override
+  String get localGallery_sectionLibrary => 'Library';
+
+  @override
+  String get localGallery_sectionCollections => 'Collections';
+
+  @override
+  String get localGallery_sectionFolders => 'Folders';
+
+  @override
+  String get localGallery_dateFolders => 'Dated folders';
+
+  @override
+  String localGallery_indexSynced(String count) {
+    return 'Index up to date · $count';
+  }
 
   @override
   String localGallery_cannotOpenFolder(Object error) {
@@ -4778,10 +4772,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_delete_image => 'Delete Image';
 
   @override
-  String get shortcut_action_previous_page => 'Previous Page';
+  String get shortcut_action_previous_page => 'Scroll Up One Screen';
 
   @override
-  String get shortcut_action_next_page => 'Next Page';
+  String get shortcut_action_next_page => 'Scroll Down One Screen';
 
   @override
   String get shortcut_action_refresh_gallery => 'Refresh Gallery';
@@ -4790,10 +4784,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_focus_search => 'Focus Search';
 
   @override
-  String get shortcut_action_enter_selection_mode => 'Enter Selection Mode';
-
-  @override
-  String get shortcut_action_open_filter_panel => 'Open Filter Panel';
+  String get shortcut_action_enter_selection_mode => 'Select All';
 
   @override
   String get shortcut_action_clear_filter => 'Clear Filter';
@@ -4850,10 +4841,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_help_all => 'All';
 
   @override
-  String get shortcut_help_tip =>
-      'Tip: press F1 or ? anytime to open this help dialog';
-
-  @override
   String get shortcut_help_fabTooltip => 'Keyboard Shortcuts Help (F1)';
 
   @override
@@ -4869,9 +4856,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String shortcut_editor_conflictWith(Object action) {
     return 'This shortcut conflicts with \"$action\"';
   }
-
-  @override
-  String get drop_dialogTitle => 'How to use this image?';
 
   @override
   String get drop_hint => 'Drop image here';
@@ -4903,36 +4887,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drop_addedToCharacterRef => 'Added to Precise Reference';
 
   @override
-  String get drop_extractMetadata => 'Extract Metadata';
-
-  @override
-  String get drop_extractMetadataSubtitle =>
-      'Read Prompt, Seed and other parameters from image';
-
-  @override
   String get drop_vibeDetected => 'Pre-encoded Vibe detected (saves 2 Anlas)';
-
-  @override
-  String drop_vibeStrength(Object value) {
-    return 'Strength: $value%';
-  }
-
-  @override
-  String drop_vibeInfoExtracted(Object value) {
-    return 'Information Extracted: $value%';
-  }
 
   @override
   String get drop_reuseVibe => 'Reuse Vibe';
 
   @override
-  String get drop_reuseVibeSubtitle => 'Use pre-encoded data directly (free)';
-
-  @override
   String get drop_useAsRawImage => 'Use as Raw Image';
-
-  @override
-  String get drop_useAsRawImageSubtitle => 'Re-encode (costs 2 Anlas)';
 
   @override
   String get drop_dragToImg2ImgOrOther =>
@@ -7108,30 +7069,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detail_saveToVibeLibrary => 'Save to Vibe Library';
 
   @override
-  String get pagination_firstPage => 'First page';
-
-  @override
-  String get pagination_previousPage => 'Previous page';
-
-  @override
-  String get pagination_nextPage => 'Next page';
-
-  @override
-  String get pagination_lastPage => 'Last page';
-
-  @override
-  String get pagination_jumpToPage => 'Jump to page';
-
-  @override
-  String get pagination_jump => 'Jump';
-
-  @override
-  String get pagination_itemsPerPage => 'Per page';
-
-  @override
-  String get pagination_itemUnit => 'items';
-
-  @override
   String get comfyImport_detectedTitle =>
       'Detected ComfyUI multi-character prompt';
 
@@ -7634,12 +7571,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_swap => 'Swap';
 
   @override
-  String get common_minimum => 'Minimum';
-
-  @override
-  String get common_maximum => 'Maximum';
-
-  @override
   String get addToLibrary_displayNameHint =>
       'Enter a name to identify this entry';
 
@@ -7648,15 +7579,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get drop_saveVibeBundle => 'Save Vibe Bundle';
-
-  @override
-  String drop_saveVibeBundleSubtitle(String name) {
-    return 'Save $name and the other Vibes to the library';
-  }
-
-  @override
-  String get drop_saveEncodedVibeSubtitle =>
-      'Save the pre-encoded Vibe data to the library';
 
   @override
   String get history_dragFilePreparationFailed =>
