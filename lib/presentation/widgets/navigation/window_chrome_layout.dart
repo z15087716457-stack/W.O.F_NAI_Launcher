@@ -89,6 +89,7 @@ class WindowHeader extends StatelessWidget {
     this.inlineDragWidth = WindowChromeScope.dragWidth,
     this.showCaptionDivider = false,
     this.outsideRightWidth = 0,
+    this.dragBelowCaptions = false,
     this.decoration,
   });
   final Widget child;
@@ -99,6 +100,10 @@ class WindowHeader extends StatelessWidget {
 
   /// Width of an adjacent pane already underneath the window controls.
   final double outsideRightWidth;
+
+  /// Headers taller than the caption cluster: the reserved strip below the
+  /// window controls also moves the window instead of being dead space.
+  final bool dragBelowCaptions;
   final Decoration? decoration;
 
   @override
@@ -128,6 +133,16 @@ class WindowHeader extends StatelessWidget {
                     : EdgeInsets.only(right: reserved + inlineDragWidth),
                 child: child,
               ),
+              if (dragBelowCaptions && !narrow)
+                Positioned(
+                  top: WindowChromeScope.heightOf(context),
+                  right: 0,
+                  bottom: 0,
+                  width: reserved + inlineDragWidth,
+                  child: const WindowDragArea(
+                    key: Key('window-header-drag-below-captions'),
+                  ),
+                ),
               Positioned(
                 top: 0,
                 left: narrow ? 0 : null,
@@ -174,6 +189,7 @@ class LibraryWindowHeader extends StatelessWidget {
     this.inlineDragWidth = WindowChromeScope.dragWidth,
     this.showCaptionDivider = false,
     this.outsideRightWidth = 0,
+    this.dragBelowCaptions = false,
   });
   final Widget child;
   final bool enabled;
@@ -181,6 +197,7 @@ class LibraryWindowHeader extends StatelessWidget {
   final double inlineDragWidth;
   final bool showCaptionDivider;
   final double outsideRightWidth;
+  final bool dragBelowCaptions;
   @override
   Widget build(BuildContext context) => WindowHeader(
     enabled: enabled,
@@ -188,6 +205,7 @@ class LibraryWindowHeader extends StatelessWidget {
     inlineDragWidth: inlineDragWidth,
     showCaptionDivider: showCaptionDivider,
     outsideRightWidth: outsideRightWidth,
+    dragBelowCaptions: dragBelowCaptions,
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
       border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),

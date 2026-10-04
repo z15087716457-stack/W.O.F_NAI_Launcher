@@ -239,6 +239,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
                         LibraryWindowHeader(
                           inlineDragWidth: 17,
                           showCaptionDivider: true,
+                          dragBelowCaptions: true,
                           child: LocalGalleryToolbar(
                             searchFocusNode: _searchFocusNode,
                             inspectorVisible: _inspectorVisible,
@@ -313,27 +314,37 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
         children: [
           SizedBox(
             height: localGalleryToolbarHeight,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.l10n.localGallery_title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+            child: Stack(
+              children: [
+                if (WindowChromeScope.activeOf(context))
+                  const Positioned.fill(
+                    child: WindowDragArea(key: Key('gallery-sidebar-drag')),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: IgnorePointer(
+                          child: Text(
+                            context.l10n.localGallery_title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      GalleryAddMenuButton(
+                        onCreateCategory: _createCategory,
+                        onImportFolder: _importFolder,
+                      ),
+                    ],
                   ),
-                  GalleryAddMenuButton(
-                    onCreateCategory: _createCategory,
-                    onImportFolder: _importFolder,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           Expanded(

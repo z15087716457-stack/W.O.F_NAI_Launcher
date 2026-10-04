@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_group_mode.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_view_mode.dart';
@@ -108,19 +106,57 @@ void main() {
     });
   }
 
-  test('justified rows that are not underfilled span the full width', () {
-    final result = layout(_entries(40), group: GalleryGroupMode.none);
-    final rows = <double, List<Rect>>{};
-    for (final rect in result.tiles) {
-      rows.putIfAbsent(rect.top, () => []).add(rect);
+  test('justified rows keep each image ratio; only the last row is short', () {
+    final entries = _entries(40);
+    final result = layout(entries, group: GalleryGroupMode.none);
+    final rows = <double, List<int>>{};
+    for (var i = 0; i < result.tiles.length; i++) {
+      rows.putIfAbsent(result.tiles[i].top, () => []).add(i);
     }
-    final full = rows.values.where(
-      (row) => (row.last.right - (width - right)).abs() < 0.5,
-    );
-    expect(full.length, greaterThan(rows.length ~/ 2));
-    for (final row in full) {
-      expect(row.first.left, closeTo(left, 0.01));
+    final ordered = rows.values.toList();
+    for (final row in ordered) {
+      final first = result.tiles[row.first];
+      final last = result.tiles[row.last];
+      expect(first.left, closeTo(left, 0.01));
+      for (final i in row) {
+        final rect = result.tiles[i];
+        expect(rect.height, first.height, reason: 'one height per row');
+        expect(
+          rect.width / rect.height,
+          closeTo(entries[i].aspectRatio!, 0.01),
+          reason: 'tile $i is cropped or stretched',
+        );
+      }
+      if (row != ordered.last) {
+        expect(last.right, closeTo(width - right, 0.01));
+      }
     }
+    expect(result.tiles.last.height, lessThanOrEqualTo(220 * 1.15 + 0.01));
+  });
+
+  test('justified: a lone image in a day is not blown up to full width', () {
+    final entries = [
+      GalleryTimelineEntry(
+        path: 'C:/gallery/wide.png',
+        modifiedAt: DateTime(2026, 9, 22, 12),
+        width: 1920,
+        height: 1088,
+      ),
+      ..._entries(8).map(
+        (e) => GalleryTimelineEntry(
+          path: e.path,
+          modifiedAt: DateTime(2026, 9, 21, 12),
+          width: e.width,
+          height: e.height,
+        ),
+      ),
+    ];
+    final result = layout(entries);
+    expect(result.sections.first.count, 1);
+    final lone = result.tiles.first;
+    expect(lone.height, 220);
+    expect(lone.width, closeTo(220 * 1920 / 1088, 0.01));
+    expect(lone.right, lessThan(width - right));
   });
 
   test('lays out a 45k-image library without quadratic blowup', () {

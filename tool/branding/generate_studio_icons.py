@@ -35,7 +35,8 @@ NAMES = ['style_explore', 'inherit', 'online_gallery', 'prompt_blocks',
          'gallery_archive', 'gallery_edit', 'gallery_size_small',
          'gallery_size_large', 'gallery_tag', 'gallery_undo', 'gallery_redo',
          'gallery_import', 'gallery_hash', 'gallery_folder_plus',
-         'gallery_folder_import', 'gallery_box']
+         'gallery_folder_import', 'gallery_box',
+         'gallery_view_grid', 'gallery_view_masonry', 'gallery_view_rows']
 
 
 class DartPathPen(BasePen):

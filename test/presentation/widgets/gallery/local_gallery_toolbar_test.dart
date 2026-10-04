@@ -16,7 +16,9 @@ import 'package:nai_launcher/presentation/providers/gallery_category_provider.da
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_gallery_toolbar.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 顶栏：范围面包屑与数量、搜索标签、排序菜单、视图切换、多选与详情开关。
@@ -123,6 +125,95 @@ void main() {
     });
   }
 
+  testWidgets('view segment uses the line icon set', (tester) async {
+    await _pumpToolbar(tester);
+    for (final (mode, icon) in [
+      ('grid', StudioIcons.galleryViewGrid),
+      ('masonry', StudioIcons.galleryViewMasonry),
+      ('justified', StudioIcons.galleryViewRows),
+    ]) {
+      final button = find.byKey(ValueKey('gallery-view-$mode'));
+      expect(
+        tester
+            .widget<Icon>(
+              find.descendant(of: button, matching: find.byType(Icon)),
+            )
+            .icon,
+        icon,
+      );
+    }
+  });
+
+  double searchGap(WidgetTester tester) =>
+      tester.getRect(find.byKey(const Key('gallery-toolbar-sort'))).left -
+      tester.getRect(find.byKey(const Key('gallery-search-field'))).right;
+
+  testWidgets('search grows to fill the space between title and tools', (
+    tester,
+  ) async {
+    await _pumpToolbar(tester, width: 1100);
+    final search = tester.getSize(
+      find.byKey(const Key('gallery-search-field')),
+    );
+    expect(search.width, greaterThan(420), reason: '搜索框应占满中间空白');
+    expect(searchGap(tester), inInclusiveRange(24, 26.5));
+  });
+
+  testWidgets('search stops growing on very wide windows', (tester) async {
+    await _pumpToolbar(tester, width: 2200);
+    final search = tester.getSize(
+      find.byKey(const Key('gallery-search-field')),
+    );
+    expect(search.width, inInclusiveRange(876, 880), reason: '超宽窗口不无限拉长');
+    expect(searchGap(tester), greaterThan(200));
+  });
+
+  testWidgets('blank toolbar space drags the window; controls do not', (
+    tester,
+  ) async {
+    final windowCalls = <String>[];
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(const MethodChannel('window_manager'), (
+      call,
+    ) async {
+      windowCalls.add(call.method);
+      return call.method == 'isMaximized' || call.method == 'isFullScreen'
+          ? false
+          : null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(
+        const MethodChannel('window_manager'),
+        null,
+      ),
+    );
+    await _pumpToolbar(tester, width: 2200, windowChrome: true);
+
+    final search = tester.getRect(
+      find.byKey(const Key('gallery-search-field')),
+    );
+    final sort = tester.getRect(find.byKey(const Key('gallery-toolbar-sort')));
+    final count = tester.getRect(
+      find.byKey(const Key('gallery-toolbar-count')),
+    );
+    for (final point in [
+      Offset((search.right + sort.left) / 2, search.center.dy),
+      count.center,
+      Offset(search.center.dx, 4),
+    ]) {
+      await tester.dragFrom(point, const Offset(60, 20));
+      await tester.pumpAndSettle();
+      expect(windowCalls, contains('startDragging'), reason: '$point');
+      windowCalls.clear();
+    }
+
+    await tester.dragFrom(search.center, const Offset(60, 0));
+    await tester.tap(find.byKey(const Key('gallery-toolbar-multiselect')));
+    await tester.pumpAndSettle();
+    expect(windowCalls, isNot(contains('startDragging')));
+  });
+
   testWidgets('Ctrl+click selects a local tag as a gallery filter chip', (
     tester,
   ) async {
@@ -158,6 +249,7 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
   bool inspectorAvailable = true,
   VoidCallback? onToggleInspector,
   bool autocomplete = false,
+  bool windowChrome = false,
 }) async {
   tester.view.physicalSize = Size(width, 400);
   tester.view.devicePixelRatio = 1.0;
@@ -188,18 +280,21 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: Align(
-            alignment: Alignment.topCenter,
-            child: LocalGalleryToolbar(
-              searchFocusNode: focusNode,
-              inspectorVisible: true,
-              inspectorAvailable: inspectorAvailable,
-              onToggleInspector: onToggleInspector ?? () {},
-              onOpenFolder: () {},
-              onRefresh: () {},
-              showCategoryPanel: true,
-              onToggleCategoryPanel: () {},
-              enableSearchAutocomplete: autocomplete,
+          body: WindowChromeScope(
+            enabled: windowChrome,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: LocalGalleryToolbar(
+                searchFocusNode: focusNode,
+                inspectorVisible: true,
+                inspectorAvailable: inspectorAvailable,
+                onToggleInspector: onToggleInspector ?? () {},
+                onOpenFolder: () {},
+                onRefresh: () {},
+                showCategoryPanel: true,
+                onToggleCategoryPanel: () {},
+                enableSearchAutocomplete: autocomplete,
+              ),
             ),
           ),
         ),

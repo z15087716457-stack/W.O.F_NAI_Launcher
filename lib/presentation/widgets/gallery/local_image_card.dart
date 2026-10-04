@@ -507,10 +507,11 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
     final width = widget.imageWidth ?? metadata?.width;
     final height = widget.imageHeight ?? metadata?.height;
     final compact = widget.width < 150;
+    // 版本和尺寸靠左，按钮贴右下角（原型 .ov：底 8、右 8、左 10）。
     return Positioned(
       left: 10,
-      right: 6,
-      bottom: 6,
+      right: 8,
+      bottom: 8,
       child: Row(
         children: [
           if (version != null && !compact)
@@ -536,20 +537,22 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
                 ),
               ),
             ),
-          if (width != null && height != null && widget.width >= 190)
-            Flexible(
-              child: Text(
-                '$width×$height',
-                maxLines: 1,
-                overflow: TextOverflow.fade,
-                softWrap: false,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.92),
-                  fontSize: 11.5,
-                ),
-              ),
-            ),
-          const Spacer(),
+          // 尺寸独占剩余宽度（而不是和 Spacer 平分），按钮因此总在最右。
+          Expanded(
+            child: width != null && height != null && widget.width >= 190
+                ? Text(
+                    '$width×$height',
+                    key: const Key('gallery-card-dimensions'),
+                    maxLines: 1,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.92),
+                      fontSize: 11.5,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
           if (widget.onFavoriteToggle != null)
             _HoverAction(
               icon: widget.record.isFavorite

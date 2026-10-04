@@ -148,7 +148,7 @@ DateTime galleryGroupDate(DateTime time, GalleryGroupMode mode) =>
 /// 计算整个数据集的排版。
 ///
 /// - justified：每个分组独立做等高行断行（[computeJustifiedRows]），
-///   [tileSize] 为目标行高锚；
+///   [tileSize] 为目标行高，分组末行不拉满；
 /// - grid：方格，列数由 [tileSize] 推导；
 /// - masonry：瀑布流，列宽由 [tileSize] 推导，按最短列放置。
 GalleryTimelineLayout computeGalleryTimelineLayout({
@@ -191,45 +191,24 @@ GalleryTimelineLayout computeGalleryTimelineLayout({
     switch (viewMode) {
       case GalleryViewMode.justified:
         final rows = computeJustifiedRows(
-          aspectRatios: aspects.sublist(start, end),
+          aspectRatios: Float64List.sublistView(aspects, start, end),
           availableWidth: contentWidth,
           targetHeight: tileSize,
           spacing: gap,
         );
         var rowTop = top;
         for (final row in rows) {
-          final first = start + row.startIndex;
-          final count = row.endIndex - row.startIndex + 1;
-          var sum = 0.0;
-          for (var k = 0; k < count; k++) {
-            sum += aspects[first + k];
+          var x = 0.0;
+          for (var k = row.start; k < row.end; k++) {
+            final index = start + k;
+            // 满行最后一张吸收舍入误差，右缘与内容区精确对齐
+            final w = row.filled && k == row.end - 1
+                ? contentWidth - x
+                : row.height * aspects[index];
+            place(index, x, rowTop, w, row.height);
+            x += w + gap;
           }
-          if (row.isUnderfilled) {
-            final natural = row.height * sum;
-            final available = contentWidth - gap * (count - 1);
-            final shrink = natural > available && natural > 0
-                ? (available / natural).clamp(0.0, 1.0)
-                : 1.0;
-            final h = row.height * shrink;
-            var x = 0.0;
-            for (var k = 0; k < count; k++) {
-              final w = h * aspects[first + k];
-              place(first + k, x, rowTop, w, h);
-              x += w + gap;
-            }
-            rowTop += h + gap;
-          } else {
-            final imageWidth = contentWidth - gap * (count - 1);
-            var x = 0.0;
-            for (var k = 0; k < count; k++) {
-              final w = k == count - 1
-                  ? contentWidth - x
-                  : imageWidth * aspects[first + k] / sum;
-              place(first + k, x, rowTop, w, row.height);
-              x += w + gap;
-            }
-            rowTop += row.height + gap;
-          }
+          rowTop += row.height + gap;
         }
         return rowTop - gap;
       case GalleryViewMode.grid:

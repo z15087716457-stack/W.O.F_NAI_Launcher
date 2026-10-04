@@ -20,11 +20,15 @@ import '../../providers/local_gallery_provider.dart';
 import '../../providers/selection_mode_provider.dart';
 import '../../providers/tips_provider.dart';
 import '../shortcuts/shortcut_tooltip.dart';
+import '../navigation/window_chrome_layout.dart';
 import '../tag_expansion/tag_expansion_wrapper.dart';
 import '../common/studio_icons.dart';
 
 /// 顶栏高度（与块库等资料页一致）
 const double localGalleryToolbarHeight = 62;
+
+/// 搜索框最宽值：1080p 及以下窗口正好占满，更宽的窗口也不拉成整条横线。
+const double _searchMaxWidth = 880;
 
 enum _MoreAction { openFolder, refresh, undo, redo, toggleSidebar }
 
@@ -140,81 +144,101 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
       localGallerySelectionNotifierProvider.select((s) => s.isActive),
     );
     final theme = Theme.of(context);
-    final l10n = context.l10n;
 
+    // 空白处（标题、搜索框右侧留白）都能拖动窗口；按钮与搜索框照常响应。
     return SizedBox(
       height: localGalleryToolbarHeight,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 8),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final compact = constraints.maxWidth < 900;
-            return Row(
-              children: [
-                Flexible(
-                  flex: 0,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: compact ? 200 : 340),
-                    child: _buildBreadcrumb(theme, state),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 520),
-                      child: _buildSearchField(theme, state),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                _buildSortButton(theme, state, showLabel: !compact),
-                const SizedBox(width: 4),
-                _ViewModeSegment(
-                  value: state.viewMode,
-                  onChanged: (mode) {
-                    ref
-                        .read(localGalleryNotifierProvider.notifier)
-                        .setViewMode(mode);
-                    unawaited(const GalleryViewModeStore().save(mode));
-                  },
-                ),
-                if (!compact) ...[
-                  const SizedBox(width: 4),
-                  _ThumbnailSizeSlider(value: state.columnWidth),
-                ],
-                _divider(theme),
-                _ToolbarIconButton(
-                  key: const Key('gallery-toolbar-multiselect'),
-                  icon: StudioIcons.gallerySelect,
-                  tooltip: l10n.common_multiSelect,
-                  shortcutId: ShortcutIds.enterSelectionMode,
-                  active: selectionActive,
-                  onPressed: () {
-                    final notifier = ref.read(
-                      localGallerySelectionNotifierProvider.notifier,
-                    );
-                    selectionActive ? notifier.exit() : notifier.enter();
-                  },
-                ),
-                _ToolbarIconButton(
-                  key: const Key('gallery-toolbar-inspector'),
-                  icon: StudioIcons.galleryPanelRight,
-                  tooltip: widget.inspectorVisible
-                      ? l10n.localGallery_hideInspector
-                      : l10n.localGallery_showInspector,
-                  active: widget.inspectorVisible && widget.inspectorAvailable,
-                  onPressed: widget.inspectorAvailable
-                      ? widget.onToggleInspector
-                      : null,
-                ),
-                _buildMoreMenu(),
-              ],
-            );
+      child: Stack(
+        children: [
+          if (WindowChromeScope.activeOf(context))
+            const Positioned.fill(
+              child: WindowDragArea(key: Key('gallery-toolbar-drag')),
+            ),
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 8),
+            child: LayoutBuilder(
+              builder: (context, constraints) => _buildRow(
+                theme,
+                state,
+                selectionActive,
+                compact: constraints.maxWidth < 900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRow(
+    ThemeData theme,
+    LocalGalleryState state,
+    bool selectionActive, {
+    required bool compact,
+  }) {
+    final l10n = context.l10n;
+    return Row(
+      children: [
+        Flexible(
+          flex: 0,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: compact ? 200 : 340),
+            child: IgnorePointer(child: _buildBreadcrumb(theme, state)),
+          ),
+        ),
+        const SizedBox(width: 16),
+        // 搜索框随窗口宽度伸缩，占满标题与工具之间的空间（上限
+        // [_searchMaxWidth]）；超出的部分和右侧留缝都是拖动区。
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _searchMaxWidth),
+              child: _buildSearchField(theme, state),
+            ),
+          ),
+        ),
+        SizedBox(width: compact ? 12 : 24),
+        _buildSortButton(theme, state, showLabel: !compact),
+        const SizedBox(width: 4),
+        _ViewModeSegment(
+          value: state.viewMode,
+          onChanged: (mode) {
+            ref.read(localGalleryNotifierProvider.notifier).setViewMode(mode);
+            unawaited(const GalleryViewModeStore().save(mode));
           },
         ),
-      ),
+        if (!compact) ...[
+          const SizedBox(width: 4),
+          _ThumbnailSizeSlider(value: state.columnWidth),
+        ],
+        _divider(theme),
+        _ToolbarIconButton(
+          key: const Key('gallery-toolbar-multiselect'),
+          icon: StudioIcons.gallerySelect,
+          tooltip: l10n.common_multiSelect,
+          shortcutId: ShortcutIds.enterSelectionMode,
+          active: selectionActive,
+          onPressed: () {
+            final notifier = ref.read(
+              localGallerySelectionNotifierProvider.notifier,
+            );
+            selectionActive ? notifier.exit() : notifier.enter();
+          },
+        ),
+        _ToolbarIconButton(
+          key: const Key('gallery-toolbar-inspector'),
+          icon: StudioIcons.galleryPanelRight,
+          tooltip: widget.inspectorVisible
+              ? l10n.localGallery_hideInspector
+              : l10n.localGallery_showInspector,
+          active: widget.inspectorVisible && widget.inspectorAvailable,
+          onPressed: widget.inspectorAvailable
+              ? widget.onToggleInspector
+              : null,
+        ),
+        _buildMoreMenu(),
+      ],
     );
   }
 
@@ -619,15 +643,15 @@ class _ViewModeSegment extends StatelessWidget {
     final l10n = context.l10n;
     final dark = theme.brightness == Brightness.dark;
     final items = <(GalleryViewMode, IconData, String)>[
-      (GalleryViewMode.grid, Icons.grid_view_outlined, l10n.common_grid),
+      (GalleryViewMode.grid, StudioIcons.galleryViewGrid, l10n.common_grid),
       (
         GalleryViewMode.masonry,
-        Icons.dashboard_outlined,
+        StudioIcons.galleryViewMasonry,
         l10n.localGallery_masonryViewLabel,
       ),
       (
         GalleryViewMode.justified,
-        Icons.view_day_outlined,
+        StudioIcons.galleryViewRows,
         l10n.localGallery_justifiedViewLabel,
       ),
     ];

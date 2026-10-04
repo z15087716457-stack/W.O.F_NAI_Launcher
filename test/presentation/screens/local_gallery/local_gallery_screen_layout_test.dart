@@ -20,6 +20,7 @@ import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/data/models/gallery/image_collection.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_column_width_store.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/data/services/thumbnail_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -33,6 +34,7 @@ import 'package:nai_launcher/presentation/screens/local_gallery/local_gallery_sc
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_inspector_panel.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart';
+import 'package:nai_launcher/presentation/widgets/gallery/timeline/gallery_timeline_view.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -87,6 +89,7 @@ void main() {
   final cases = <(Locale, bool, Size, String)>[
     (const Locale('zh'), false, const Size(1600, 1000), 'zh-light-wide'),
     (const Locale('zh'), true, const Size(1600, 1000), 'zh-dark-wide'),
+    (const Locale('zh'), true, const Size(1920, 1080), 'zh-dark-1080p'),
     (const Locale('en'), false, const Size(1600, 1000), 'en-light-wide'),
     (const Locale('ja'), true, const Size(1600, 1000), 'ja-dark-wide'),
     (const Locale('ko'), false, const Size(1366, 768), 'ko-light-laptop'),
@@ -147,6 +150,41 @@ void main() {
       expect(tester.takeException(), isNull);
       await _capture(tester, '$name-selection');
 
+      // 只有一张图的那天：保持目标行高靠左，不被拉满整行；悬停按钮在右下角
+      container.read(localGallerySelectionNotifierProvider.notifier).exit();
+      final position = tester
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byType(GalleryTimelineView),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
+          .position;
+      final lone = _cardFor(records[_loneIndex]);
+      while (lone.evaluate().isEmpty &&
+          position.pixels < position.maxScrollExtent) {
+        position.jumpTo(
+          (position.pixels + 300).clamp(0.0, position.maxScrollExtent),
+        );
+        await _settle(tester, rounds: 2);
+      }
+      await Scrollable.ensureVisible(
+        tester.element(lone),
+        alignment: 0.4,
+        duration: Duration.zero,
+      );
+      await _settle(tester, rounds: 4);
+      final loneCard = tester.widget<LocalImageCard>(lone);
+      expect(loneCard.height, GalleryColumnWidthStore.defaultColumnWidth);
+      final (w, h) = dimensions[records[_loneIndex].path]!;
+      expect(loneCard.width, closeTo(loneCard.height * w / h, 0.5));
+      await gesture.moveTo(tester.getCenter(lone));
+      await _settle(tester, rounds: 4);
+      expect(tester.takeException(), isNull);
+      await _capture(tester, '$name-lone');
+
       await tester.pumpWidget(const SizedBox.shrink());
       container.dispose();
       await tester.pump(const Duration(minutes: 1));
@@ -155,6 +193,13 @@ void main() {
 }
 
 final _captureKey = GlobalKey();
+
+/// 样本里独占一天的那张（真实样本中是 1920×1088 横图）
+const _loneIndex = 10;
+
+Finder _cardFor(LocalImageRecord record) => find.byWidgetPredicate(
+  (widget) => widget is LocalImageCard && widget.record.path == record.path,
+);
 
 Future<ProviderContainer> _pumpScreen(
   WidgetTester tester, {
@@ -365,11 +410,13 @@ Future<(List<LocalImageRecord>, Map<String, (int, int)>)> _prepareImages(
 ) async {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day, 14);
+  // 样本按时间倒序：今天 6 张、昨天 4 张、前天只有 [_loneIndex] 一张、更早 31 张
   final dates = [
     for (var i = 0; i < 6; i++) today.subtract(Duration(minutes: i * 7)),
-    for (var i = 0; i < 10; i++)
+    for (var i = 0; i < 4; i++)
       today.subtract(Duration(days: 1, minutes: i * 9)),
-    for (var i = 0; i < 26; i++)
+    today.subtract(const Duration(days: 2)),
+    for (var i = 0; i < 31; i++)
       today.subtract(Duration(days: 3 + i ~/ 9, minutes: i * 11)),
   ];
 

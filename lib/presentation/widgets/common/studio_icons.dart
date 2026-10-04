@@ -78,6 +78,9 @@ abstract final class StudioIcons {
   static const galleryFolderPlus = IconData(0xe940, fontFamily: _family);
   static const galleryFolderImport = IconData(0xe941, fontFamily: _family);
   static const galleryBox = IconData(0xe942, fontFamily: _family);
+  static const galleryViewGrid = IconData(0xe943, fontFamily: _family);
+  static const galleryViewMasonry = IconData(0xe944, fontFamily: _family);
+  static const galleryViewRows = IconData(0xe945, fontFamily: _family);
 
   static bool supportsMotion(IconData icon) =>
       icon.fontFamily == _family &&
