@@ -125,12 +125,14 @@ void main() {
     });
   }
 
-  testWidgets('view segment uses the line icon set', (tester) async {
+  testWidgets('view segment uses line icons; justified keeps view_day', (
+    tester,
+  ) async {
     await _pumpToolbar(tester);
     for (final (mode, icon) in [
       ('grid', StudioIcons.galleryViewGrid),
       ('masonry', StudioIcons.galleryViewMasonry),
-      ('justified', StudioIcons.galleryViewRows),
+      ('justified', Icons.view_day_outlined),
     ]) {
       final button = find.byKey(ValueKey('gallery-view-$mode'));
       expect(

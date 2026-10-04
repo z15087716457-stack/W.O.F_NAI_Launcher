@@ -649,9 +649,10 @@ class _ViewModeSegment extends StatelessWidget {
         StudioIcons.galleryViewMasonry,
         l10n.localGallery_masonryViewLabel,
       ),
+      // 火车流按用户选择保留原来的 Material 图标（更能看出是一行行排的）
       (
         GalleryViewMode.justified,
-        StudioIcons.galleryViewRows,
+        Icons.view_day_outlined,
         l10n.localGallery_justifiedViewLabel,
       ),
     ];
