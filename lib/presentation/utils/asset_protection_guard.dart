@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../providers/cost_estimate_provider.dart';
 import '../providers/share_image_settings_provider.dart';
 import '../widgets/common/themed_confirm_dialog.dart';
+import '../widgets/common/anlas_cost_dialog.dart';
 import '../../core/utils/localization_extension.dart';
 
 class AssetProtectionGuard {
@@ -78,18 +79,10 @@ class AssetProtectionGuard {
       return Future.value(true);
     }
 
-    final l10n = context.l10n;
-    return ThemedConfirmDialog.show(
-      context: context,
-      title: l10n.settings_highAnlasCostTitle,
-      content: l10n.settings_highAnlasCostContent(
-        estimatedCost,
-        settings.highAnlasCostThreshold,
-      ),
-      confirmText: l10n.settings_continueGeneration,
-      cancelText: l10n.common_cancel,
-      type: ThemedConfirmDialogType.warning,
-      icon: Icons.toll_outlined,
+    return AnlasCostDialog.show(
+      context,
+      cost: estimatedCost,
+      threshold: settings.highAnlasCostThreshold,
     );
   }
 

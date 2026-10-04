@@ -533,6 +533,10 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
               padding: EdgeInsets.zero,
               iconSize: 18,
               visualDensity: VisualDensity.compact,
+              style: IconButton.styleFrom(
+                overlayColor: Colors.transparent,
+                splashFactory: NoSplash.splashFactory,
+              ),
               tooltip: context.l10n.toolbar_fullscreenEdit,
               onPressed:
                   widget.onToggleMaximize ??
@@ -580,6 +584,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
                   ),
             onPressed: busy ? null : () => _handleTranslationButton(),
             style: IconButton.styleFrom(
+              overlayColor: Colors.transparent,
+              splashFactory: NoSplash.splashFactory,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             icon: TranslationIcon(
@@ -700,6 +706,8 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
       style: IconButton.styleFrom(
+        overlayColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
         minimumSize: const Size(28, 28),
         maximumSize: const Size(28, 28),
         padding: EdgeInsets.zero,

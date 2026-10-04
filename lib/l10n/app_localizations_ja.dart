@@ -6014,7 +6014,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_confirmExternalSend => '送信';
 
   @override
-  String get settings_highAnlasCostTitle => '保護モード: 高 Anlas コスト';
+  String get settings_highAnlasCostTitle => 'Anlas 消費の確認';
 
   @override
   String settings_highAnlasCostContent(Object cost, Object threshold) {
@@ -12300,4 +12300,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get imageUse_characterMode => 'キャラクターの処理';
+
+  @override
+  String get imageMenu_details => '詳細';
+
+  @override
+  String get imageMenu_creation => '生成・参照';
+
+  @override
+  String get imageMenu_editAndDerive => '編集・派生';
+
+  @override
+  String get imageMenu_more => 'その他の操作';
+
+  @override
+  String get imageMenu_fileActions => 'ファイル操作';
+
+  @override
+  String get imageMenu_saveToBlock => 'ブロックに保存';
+
+  @override
+  String get settings_highAnlasCostEstimate => '推定消費量';
+
+  @override
+  String get settings_highAnlasCostThresholdLabel => '通知のしきい値';
+
+  @override
+  String get settings_highAnlasCostQuestion => 'このまま生成しますか？';
 }

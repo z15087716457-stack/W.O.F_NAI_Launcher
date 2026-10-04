@@ -3024,7 +3024,7 @@
     }
   },
   "settings_confirmExternalSend": "确认发送",
-  "settings_highAnlasCostTitle": "保护模式：Anlas 消耗较高",
+  "settings_highAnlasCostTitle": "Anlas 消耗提醒",
   "settings_highAnlasCostContent": "本次预计消耗 {cost} Anlas，已达到或超过你设置的 {threshold} Anlas 警告阈值。请确认是否继续生成。",
   "@settings_highAnlasCostContent": {
     "placeholders": {
@@ -7180,5 +7180,14 @@
   "imageUse_title": "使用图片",
   "imageUse_importContent": "导入内容",
   "imageUse_characters": "多角色",
-  "imageUse_characterMode": "角色处理"
+  "imageUse_characterMode": "角色处理",
+  "imageMenu_details": "详情",
+  "imageMenu_creation": "创作与参考",
+  "imageMenu_editAndDerive": "编辑与派生",
+  "imageMenu_more": "更多操作",
+  "imageMenu_fileActions": "文件操作",
+  "imageMenu_saveToBlock": "存入积木",
+  "settings_highAnlasCostEstimate": "预计消耗",
+  "settings_highAnlasCostThresholdLabel": "提醒阈值",
+  "settings_highAnlasCostQuestion": "是否继续本次生成？"
 }

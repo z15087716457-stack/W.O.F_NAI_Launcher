@@ -10896,7 +10896,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_highAnlasCostTitle.
   ///
   /// In en, this message translates to:
-  /// **'Protection Mode: High Anlas Cost'**
+  /// **'Anlas usage reminder'**
   String get settings_highAnlasCostTitle;
 
   /// No description provided for @settings_highAnlasCostContent.
@@ -21969,6 +21969,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Character handling'**
   String get imageUse_characterMode;
+
+  /// No description provided for @imageMenu_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get imageMenu_details;
+
+  /// No description provided for @imageMenu_creation.
+  ///
+  /// In en, this message translates to:
+  /// **'Create & reference'**
+  String get imageMenu_creation;
+
+  /// No description provided for @imageMenu_editAndDerive.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit & derive'**
+  String get imageMenu_editAndDerive;
+
+  /// No description provided for @imageMenu_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get imageMenu_more;
+
+  /// No description provided for @imageMenu_fileActions.
+  ///
+  /// In en, this message translates to:
+  /// **'File actions'**
+  String get imageMenu_fileActions;
+
+  /// No description provided for @imageMenu_saveToBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to blocks'**
+  String get imageMenu_saveToBlock;
+
+  /// No description provided for @settings_highAnlasCostEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated usage'**
+  String get settings_highAnlasCostEstimate;
+
+  /// No description provided for @settings_highAnlasCostThresholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder threshold'**
+  String get settings_highAnlasCostThresholdLabel;
+
+  /// No description provided for @settings_highAnlasCostQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with this generation?'**
+  String get settings_highAnlasCostQuestion;
 }
 
 class _AppLocalizationsDelegate

@@ -18,6 +18,24 @@ class _Storage extends LocalStorageService {
 }
 
 void main() {
+  test('Anlas warning is opt-in and preserves an explicitly saved choice', () {
+    expect(const ShareImageSettings().warnHighAnlasCost, isFalse);
+    final storage = _Storage();
+    final container = ProviderContainer(
+      overrides: [localStorageServiceProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    expect(
+      container.read(shareImageSettingsProvider).warnHighAnlasCost,
+      isFalse,
+    );
+    storage.values[StorageKeys.protectionWarnHighAnlasCost] = true;
+    container.invalidate(shareImageSettingsProvider);
+    expect(
+      container.read(shareImageSettingsProvider).warnHighAnlasCost,
+      isTrue,
+    );
+  });
   test(
     'settings default 100 is former 110 while workspace preferences stay intact',
     () {
@@ -70,6 +88,7 @@ void main() {
   test('all protection children work when the retired master is off', () {
     const settings = ShareImageSettings(
       protectionMode: false,
+      warnHighAnlasCost: true,
       stripMetadataForCopyAndDrag: true,
       limitGenerationInterval: true,
       generationIntervalSeconds: 15,

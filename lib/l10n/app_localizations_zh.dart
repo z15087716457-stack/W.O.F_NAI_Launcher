@@ -5924,7 +5924,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_confirmExternalSend => '确认发送';
 
   @override
-  String get settings_highAnlasCostTitle => '保护模式：Anlas 消耗较高';
+  String get settings_highAnlasCostTitle => 'Anlas 消耗提醒';
 
   @override
   String settings_highAnlasCostContent(Object cost, Object threshold) {
@@ -12084,6 +12084,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get imageUse_characterMode => '角色处理';
+
+  @override
+  String get imageMenu_details => '详情';
+
+  @override
+  String get imageMenu_creation => '创作与参考';
+
+  @override
+  String get imageMenu_editAndDerive => '编辑与派生';
+
+  @override
+  String get imageMenu_more => '更多操作';
+
+  @override
+  String get imageMenu_fileActions => '文件操作';
+
+  @override
+  String get imageMenu_saveToBlock => '存入积木';
+
+  @override
+  String get settings_highAnlasCostEstimate => '预计消耗';
+
+  @override
+  String get settings_highAnlasCostThresholdLabel => '提醒阈值';
+
+  @override
+  String get settings_highAnlasCostQuestion => '是否继续本次生成？';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -18006,7 +18033,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_confirmExternalSend => '確認傳送';
 
   @override
-  String get settings_highAnlasCostTitle => '保護模式：Anlas 消耗較高';
+  String get settings_highAnlasCostTitle => 'Anlas 消耗提醒';
 
   @override
   String settings_highAnlasCostContent(Object cost, Object threshold) {
@@ -24166,4 +24193,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get imageUse_characterMode => '角色處理';
+
+  @override
+  String get imageMenu_details => '詳情';
+
+  @override
+  String get imageMenu_creation => '創作與參考';
+
+  @override
+  String get imageMenu_editAndDerive => '編輯與派生';
+
+  @override
+  String get imageMenu_more => '更多操作';
+
+  @override
+  String get imageMenu_fileActions => '檔案操作';
+
+  @override
+  String get imageMenu_saveToBlock => '存入積木';
+
+  @override
+  String get settings_highAnlasCostEstimate => '預計消耗';
+
+  @override
+  String get settings_highAnlasCostThresholdLabel => '提醒閾值';
+
+  @override
+  String get settings_highAnlasCostQuestion => '是否繼續本次生成？';
 }

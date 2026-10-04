@@ -19,6 +19,7 @@ import '../../providers/image_generation_provider.dart';
 import '../../themes/theme_extension.dart';
 import '../../utils/clipboard_image.dart';
 import 'pro_context_menu.dart';
+import 'image_action_menu.dart';
 import 'app_toast.dart';
 import 'decoded_memory_image.dart';
 
@@ -1638,7 +1639,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       items.add(
         ProMenuItem(
           id: 'view_detail',
-          label: context.l10n.image_viewDetail,
+          label: context.l10n.imageMenu_details,
           icon: Icons.open_in_full,
           onTap: widget.onFullscreen,
         ),
@@ -1813,113 +1814,64 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       return;
     }
 
-    final navigator = Navigator.of(context);
-    final route = _ContextMenuRoute(position: position, items: items);
-    final selectedItem = await navigator.push<ProMenuItem>(route);
-    await route.completed;
-    if (selectedItem == null) {
-      return;
+    final byId = {
+      for (final item in items)
+        if (!item.isDivider) item.id: item,
+    };
+    ImageMenuAction<ProMenuItem> action(String id) {
+      final item = byId[id]!;
+      return ImageMenuAction(
+        value: item,
+        label: item.label,
+        icon: item.icon ?? Icons.more_horiz,
+      );
     }
-    selectedItem.onTap?.call();
-  }
-}
 
-/// 右键菜单路由
-class _ContextMenuRoute extends PopupRoute<ProMenuItem> {
-  final Offset position;
-  final List<ProMenuItem> items;
-
-  _ContextMenuRoute({required this.position, required this.items});
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeLeft: true,
-      removeRight: true,
-      removeBottom: true,
-      child: Builder(
-        builder: (context) {
-          final screenSize = MediaQuery.of(context).size;
-          const menuWidth = 180.0;
-          final menuHeight =
-              items.where((i) => !i.isDivider).length * 36.0 +
-              items.where((i) => i.isDivider).length * 1.0;
-
-          double left = position.dx;
-          double top = position.dy;
-
-          if (left + menuWidth > screenSize.width) {
-            left = screenSize.width - menuWidth - 16;
-          }
-
-          if (top + menuHeight > screenSize.height) {
-            top = screenSize.height - menuHeight - 16;
-          }
-
-          return GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () => Navigator.of(context).pop(),
-            child: Stack(
-              children: [
-                ProContextMenu(
-                  position: Offset(left, top),
-                  items: items,
-                  onSelect: (item) {
-                    Navigator.of(context).pop(item);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+    final editIds = [
+      'edit_image',
+      'inpaint',
+      'generate_variations',
+      'director_tools',
+      'enhance',
+      'upscale',
+    ].where(byId.containsKey).toList();
+    final moreIds = [
+      'save_to_precise_ref_library',
+      'open_folder',
+      'send_to_krita',
+    ].where(byId.containsKey).toList();
+    final selectedItem = await ImageActionMenu.show<ProMenuItem>(
+      context,
+      position: position,
+      quickActions: [
+        for (final id in ['save', 'copy'])
+          if (byId.containsKey(id)) action(id),
+      ],
+      actions: [
+        for (final id in [
+          'view_detail',
+          'image_to_image',
+          'vibe_transfer',
+          'precise_reference',
+        ])
+          if (byId.containsKey(id)) action(id),
+        if (editIds.isNotEmpty || moreIds.isNotEmpty)
+          const ImageMenuAction.divider(),
+        if (editIds.isNotEmpty)
+          ImageMenuAction(
+            label: context.l10n.imageMenu_editAndDerive,
+            icon: Icons.auto_fix_high_outlined,
+            children: editIds.map(action).toList(),
+          ),
+        if (moreIds.isNotEmpty)
+          ImageMenuAction(
+            label: context.l10n.imageMenu_more,
+            icon: Icons.more_horiz,
+            children: moreIds.map(action).toList(),
+          ),
+      ],
     );
-  }
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 200);
-
-  @override
-  Duration get reverseTransitionDuration => Duration.zero;
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    final fadeAnimation = CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeOut,
-      reverseCurve: Curves.easeIn,
-    );
-    final scaleAnimation = Tween<double>(begin: 0.96, end: 1).animate(
-      CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      ),
-    );
-    return FadeTransition(
-      opacity: fadeAnimation,
-      child: ScaleTransition(scale: scaleAnimation, child: child),
-    );
+    selectedItem?.onTap?.call();
   }
 }
 

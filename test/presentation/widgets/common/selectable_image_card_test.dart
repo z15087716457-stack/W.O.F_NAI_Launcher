@@ -1,8 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -15,8 +17,9 @@ import 'package:nai_launcher/presentation/providers/simple_output_viewer_provide
 import 'package:nai_launcher/presentation/screens/generation/widgets/history_panel.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/image_preview.dart';
 import 'package:nai_launcher/presentation/widgets/common/draggable_memory_image.dart';
-import 'package:nai_launcher/presentation/widgets/common/pro_context_menu.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
+import 'package:nai_launcher/presentation/themes/app_theme.dart';
+import '../../../helpers/studio_capture_fonts.dart';
 
 void main() {
   late Directory hiveTempDir;
@@ -41,6 +44,89 @@ void main() {
   tearDown(() async {
     await Hive.box(StorageKeys.settingsBox).clear();
   });
+
+  if (Platform.environment['CAPTURE_FEEDBACK_UI'] == '1') {
+    testWidgets('generation menu real-font locale and theme captures', (
+      tester,
+    ) async {
+      final oldShadows = debugDisableShadows;
+      debugDisableShadows = false;
+      addTearDown(() => debugDisableShadows = oldShadows);
+      await tester.runAsync(() async {
+        await loadStudioCaptureFonts();
+        final file = File(
+          'C:/flutter/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
+        );
+        await (FontLoader(
+          'MaterialIcons',
+        )..addFont(file.readAsBytes().then(ByteData.sublistView))).load();
+      });
+      await tester.binding.setSurfaceSize(const Size(760, 740));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final folder = Directory('.dart_tool/feedback-ui-captures')
+        ..createSync(recursive: true);
+      for (final locale in const [
+        Locale('zh'),
+        Locale('zh', 'TW'),
+        Locale('en'),
+        Locale('ja'),
+        Locale('ko'),
+      ]) {
+        for (final brightness in Brightness.values) {
+          final key = GlobalKey();
+          await tester.pumpWidget(
+            _buildCardApp(
+              locale: locale,
+              brightness: brightness,
+              captureKey: key,
+              onFullscreen: _noop,
+              onImageToImage: _noop,
+              onVibeTransfer: _noop,
+              onPreciseReference: _noop,
+              onEditImage: _noop,
+              onGenerateVariations: _noop,
+              onDirectorTools: _noop,
+              onEnhance: _noop,
+              onOpenInExplorer: _noop,
+              onSendToKrita: _noop,
+              onSaveToPreciseRefLibrary: _noop,
+            ),
+          );
+          await tester.pumpAndSettle();
+          final gesture = await tester.startGesture(
+            tester.getCenter(find.byType(SelectableImageCard)),
+            kind: PointerDeviceKind.mouse,
+            buttons: kSecondaryMouseButton,
+          );
+          await gesture.up();
+          await tester.pumpAndSettle();
+          final boundary =
+              key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+          await tester.runAsync(() async {
+            final image = await boundary.toImage(pixelRatio: 2);
+            final bytes = await image.toByteData(
+              format: ui.ImageByteFormat.png,
+            );
+            File(
+              '${folder.path}/generation-${locale.toLanguageTag()}-${brightness.name}.png',
+            ).writeAsBytesSync(bytes!.buffer.asUint8List());
+            image.dispose();
+          });
+          final l = AppLocalizations.of(
+            tester.element(find.byType(SelectableImageCard)),
+          )!;
+          expect(
+            tester.getTopLeft(find.text(l.imageMenu_details)).dy,
+            lessThan(tester.getTopLeft(find.text(l.drop_img2img)).dy),
+          );
+          expect(tester.takeException(), isNull);
+          await gesture.removePointer();
+          await tester.pumpWidget(const SizedBox());
+        }
+      }
+      debugDisableShadows = oldShadows;
+    });
+  }
 
   testWidgets(
     'hover actions should expose inpaint and upscale shortcuts',
@@ -79,6 +165,9 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
+    expect(find.text('局部重绘'), findsNothing);
+    await tester.tap(find.text('编辑与派生'));
+    await tester.pumpAndSettle();
     expect(find.text('局部重绘'), findsOneWidget);
     expect(find.text('放大'), findsOneWidget);
   });
@@ -112,11 +201,13 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
+    await tester.tap(find.text('编辑与派生'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('局部重绘'));
     await tester.pumpAndSettle();
 
     expect(find.text('inpaint route'), findsOneWidget);
-    expect(find.byType(ProContextMenu), findsNothing);
+    expect(find.byKey(const Key('image-action-menu')), findsNothing);
   });
 
   testWidgets(
@@ -226,7 +317,7 @@ void main() {
       final container = _createContainerWithPreviewImage(
         clipboardWriter: (bytes) async {
           menuVisibleWhenCopyStarted = find
-              .byType(ProContextMenu)
+              .byKey(const Key('image-action-menu'))
               .evaluate()
               .isNotEmpty;
           copiedBytes = bytes;
@@ -244,14 +335,14 @@ void main() {
       await _openImageContextMenu(tester);
 
       await tester.tap(find.text('复制图像'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(copiedBytes, orderedEquals(expectedBytes));
       expect(menuVisibleWhenCopyStarted, isFalse);
-      expect(find.byType(ProContextMenu), findsNothing);
+      expect(find.byKey(const Key('image-action-menu')), findsNothing);
       await tester.pumpAndSettle();
 
-      expect(find.byType(ProContextMenu), findsNothing);
+      expect(find.byKey(const Key('image-action-menu')), findsNothing);
       await tester.pump(const Duration(seconds: 4));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
@@ -293,7 +384,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(copiedBytes, orderedEquals(bytes));
-    expect(find.byType(ProContextMenu), findsNothing);
+    expect(find.byKey(const Key('image-action-menu')), findsNothing);
     await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
   });
@@ -527,7 +618,7 @@ void main() {
 
     expect(find.text('保存图片'), findsNothing);
     expect(find.text('复制图片'), findsNothing);
-    expect(find.byType(ProContextMenu), findsNothing);
+    expect(find.byKey(const Key('image-action-menu')), findsNothing);
   });
 }
 
@@ -617,6 +708,17 @@ Widget _buildCardApp({
   VoidCallback? onImageToImage,
   VoidCallback? onVibeTransfer,
   VoidCallback? onPreciseReference,
+  VoidCallback? onFullscreen,
+  VoidCallback? onEditImage,
+  VoidCallback? onGenerateVariations,
+  VoidCallback? onDirectorTools,
+  VoidCallback? onEnhance,
+  VoidCallback? onOpenInExplorer,
+  VoidCallback? onSendToKrita,
+  VoidCallback? onSaveToPreciseRefLibrary,
+  Locale locale = const Locale('zh'),
+  Brightness brightness = Brightness.light,
+  GlobalKey? captureKey,
   GlobalKey<NavigatorState>? navigatorKey,
 }) {
   final bytes = Uint8List.fromList(
@@ -626,7 +728,11 @@ Widget _buildCardApp({
   return ProviderScope(
     child: MaterialApp(
       navigatorKey: navigatorKey,
-      locale: const Locale('zh'),
+      locale: locale,
+      theme: AppTheme.getTheme(AppStyle.geist, brightness),
+      builder: captureKey == null
+          ? null
+          : (_, child) => RepaintBoundary(key: captureKey, child: child!),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
@@ -648,6 +754,14 @@ Widget _buildCardApp({
               onImageToImage: onImageToImage,
               onVibeTransfer: onVibeTransfer,
               onPreciseReference: onPreciseReference,
+              onFullscreen: onFullscreen,
+              onEditImage: onEditImage,
+              onGenerateVariations: onGenerateVariations,
+              onDirectorTools: onDirectorTools,
+              onEnhance: onEnhance,
+              onOpenInExplorer: onOpenInExplorer,
+              onSendToKrita: onSendToKrita,
+              onSaveToPreciseRefLibrary: onSaveToPreciseRefLibrary,
             ),
           ),
         ),

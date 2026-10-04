@@ -169,6 +169,8 @@ class _PromptBlockPaletteButtonState
           visualDensity: VisualDensity.compact,
           style: IconButton.styleFrom(
             hoverColor: Colors.transparent,
+            overlayColor: Colors.transparent,
+            splashFactory: NoSplash.splashFactory,
             backgroundColor: _dragHover
                 ? theme.colorScheme.primaryContainer
                 : Colors.transparent,

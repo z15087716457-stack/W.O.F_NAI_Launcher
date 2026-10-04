@@ -3265,7 +3265,7 @@
     }
   },
   "settings_confirmExternalSend": "보내기",
-  "settings_highAnlasCostTitle": "보호 모드: 높은 Anlas 비용",
+  "settings_highAnlasCostTitle": "Anlas 사용량 확인",
   "settings_highAnlasCostContent": "이번 요청의 예상 비용은 {cost} Anlas로, 설정한 경고 기준값 {threshold} Anlas 이상입니다. 생성을 계속하시겠습니까?",
   "@settings_highAnlasCostContent": {
     "placeholders": {
@@ -7180,5 +7180,14 @@
   "imageUse_title": "이미지 사용",
   "imageUse_importContent": "가져올 항목",
   "imageUse_characters": "캐릭터",
-  "imageUse_characterMode": "캐릭터 처리"
+  "imageUse_characterMode": "캐릭터 처리",
+  "imageMenu_details": "상세 정보",
+  "imageMenu_creation": "생성 및 참조",
+  "imageMenu_editAndDerive": "편집 및 파생",
+  "imageMenu_more": "추가 작업",
+  "imageMenu_fileActions": "파일 작업",
+  "imageMenu_saveToBlock": "블록에 저장",
+  "settings_highAnlasCostEstimate": "예상 사용량",
+  "settings_highAnlasCostThresholdLabel": "알림 기준",
+  "settings_highAnlasCostQuestion": "이번 생성을 계속할까요?"
 }

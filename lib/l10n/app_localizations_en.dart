@@ -6155,7 +6155,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_confirmExternalSend => 'Send';
 
   @override
-  String get settings_highAnlasCostTitle => 'Protection Mode: High Anlas Cost';
+  String get settings_highAnlasCostTitle => 'Anlas usage reminder';
 
   @override
   String settings_highAnlasCostContent(Object cost, Object threshold) {
@@ -12688,4 +12688,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get imageUse_characterMode => 'Character handling';
+
+  @override
+  String get imageMenu_details => 'Details';
+
+  @override
+  String get imageMenu_creation => 'Create & reference';
+
+  @override
+  String get imageMenu_editAndDerive => 'Edit & derive';
+
+  @override
+  String get imageMenu_more => 'More actions';
+
+  @override
+  String get imageMenu_fileActions => 'File actions';
+
+  @override
+  String get imageMenu_saveToBlock => 'Save to blocks';
+
+  @override
+  String get settings_highAnlasCostEstimate => 'Estimated usage';
+
+  @override
+  String get settings_highAnlasCostThresholdLabel => 'Reminder threshold';
+
+  @override
+  String get settings_highAnlasCostQuestion => 'Continue with this generation?';
 }

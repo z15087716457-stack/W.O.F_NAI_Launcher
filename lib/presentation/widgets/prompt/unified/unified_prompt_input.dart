@@ -1028,7 +1028,9 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
 
   /// 构建文本输入框
   Widget _buildTextField() {
-    final enableWheelAdjustment = ref.watch(promptWeightScrollSettingsProvider);
+    final enableWheelAdjustment =
+        !widget.config.readOnly &&
+        ref.watch(promptWeightScrollSettingsProvider);
     final wheelModifier = PromptWeightScrollModifier.parse(
       ref.watch(promptWeightScrollModifierSettingsProvider),
     );

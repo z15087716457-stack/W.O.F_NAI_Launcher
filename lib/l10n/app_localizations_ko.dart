@@ -6006,7 +6006,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_confirmExternalSend => '보내기';
 
   @override
-  String get settings_highAnlasCostTitle => '보호 모드: 높은 Anlas 비용';
+  String get settings_highAnlasCostTitle => 'Anlas 사용량 확인';
 
   @override
   String settings_highAnlasCostContent(Object cost, Object threshold) {
@@ -12318,4 +12318,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get imageUse_characterMode => '캐릭터 처리';
+
+  @override
+  String get imageMenu_details => '상세 정보';
+
+  @override
+  String get imageMenu_creation => '생성 및 참조';
+
+  @override
+  String get imageMenu_editAndDerive => '편집 및 파생';
+
+  @override
+  String get imageMenu_more => '추가 작업';
+
+  @override
+  String get imageMenu_fileActions => '파일 작업';
+
+  @override
+  String get imageMenu_saveToBlock => '블록에 저장';
+
+  @override
+  String get settings_highAnlasCostEstimate => '예상 사용량';
+
+  @override
+  String get settings_highAnlasCostThresholdLabel => '알림 기준';
+
+  @override
+  String get settings_highAnlasCostQuestion => '이번 생성을 계속할까요?';
 }

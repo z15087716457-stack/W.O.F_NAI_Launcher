@@ -35,6 +35,8 @@ class _BlockLibraryPanelToggleButtonState
         style: IconButton.styleFrom(
           backgroundColor: Colors.transparent,
           hoverColor: Colors.transparent,
+          overlayColor: Colors.transparent,
+          splashFactory: NoSplash.splashFactory,
           foregroundColor: theme.colorScheme.onSurfaceVariant,
         ),
         onPressed: () {

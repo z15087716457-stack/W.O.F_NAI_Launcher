@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../common/image_action_menu.dart';
 
 enum LocalImageContextAction {
+  details,
   sendToTextToImage,
   sendToImg2Img,
   sendToStyleTransfer,
@@ -31,22 +33,122 @@ class LocalImageContextMenu {
     required bool hasSeed,
     required bool isKritaConnected,
   }) {
-    return showMenu<LocalImageContextAction>(
-      context: context,
-      constraints: const BoxConstraints(minWidth: 320, maxWidth: 420),
-      position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        position.dx + 1,
-        position.dy + 1,
-      ),
-      items: buildEntries(
-        context,
-        hasImportableMetadata: hasImportableMetadata,
-        hasPrompt: hasPrompt,
-        hasSeed: hasSeed,
-        isKritaConnected: isKritaConnected,
-      ),
+    final l = context.l10n;
+    ImageMenuAction<LocalImageContextAction> item(
+      LocalImageContextAction value,
+      String label,
+      IconData icon, {
+      bool enabled = true,
+      bool destructive = false,
+    }) => ImageMenuAction(
+      value: value,
+      label: label,
+      icon: icon,
+      enabled: enabled,
+      destructive: destructive,
+    );
+    return ImageActionMenu.show<LocalImageContextAction>(
+      context,
+      position: position,
+      quickActions: [
+        if (hasPrompt)
+          item(
+            LocalImageContextAction.copyPrompt,
+            l.localGallery_copyPrompt,
+            StudioIcons.galleryCopy,
+          ),
+        if (hasSeed)
+          item(
+            LocalImageContextAction.copySeed,
+            l.localGallery_copySeed,
+            StudioIcons.galleryHash,
+          ),
+      ],
+      actions: [
+        item(
+          LocalImageContextAction.details,
+          l.imageMenu_details,
+          Icons.info_outline,
+        ),
+        item(
+          LocalImageContextAction.sendToImg2Img,
+          l.drop_img2img,
+          StudioIcons.imageToImage,
+        ),
+        if (hasImportableMetadata)
+          item(
+            LocalImageContextAction.importMetadata,
+            l.localGallery_importImageMetadata,
+            StudioIcons.galleryImport,
+          ),
+        item(
+          LocalImageContextAction.showInFolder,
+          l.localGallery_showInFolder,
+          StudioIcons.galleryReveal,
+        ),
+        const ImageMenuAction.divider(),
+        ImageMenuAction(
+          label: l.imageMenu_creation,
+          icon: StudioIcons.referenceFocus,
+          children: [
+            item(
+              LocalImageContextAction.sendToTextToImage,
+              l.onlineGallery_sendToTextToImage,
+              StudioIcons.gallerySpark,
+              enabled: hasImportableMetadata,
+            ),
+            item(
+              LocalImageContextAction.sendToStyleTransfer,
+              l.drop_vibeTransfer,
+              StudioIcons.styleTransfer,
+            ),
+            item(
+              LocalImageContextAction.sendToPreciseReference,
+              l.drop_characterReference,
+              StudioIcons.referenceFocus,
+            ),
+            item(
+              LocalImageContextAction.saveToPreciseRefLibrary,
+              l.drop_saveToPreciseRefLibrary,
+              StudioIcons.galleryBookmarkAdd,
+            ),
+            item(
+              LocalImageContextAction.upscale,
+              l.gallery_upscale,
+              StudioIcons.galleryUpscale,
+            ),
+            item(
+              LocalImageContextAction.sendToKrita,
+              l.localGallery_sendToKrita,
+              StudioIcons.galleryBrush,
+              enabled: isKritaConnected,
+            ),
+          ],
+        ),
+        ImageMenuAction(
+          label: l.imageMenu_fileActions,
+          icon: Icons.folder_outlined,
+          children: [
+            item(
+              LocalImageContextAction.moveTo,
+              l.localGallery_moveTo,
+              StudioIcons.galleryMove,
+            ),
+            item(
+              LocalImageContextAction.copyTo,
+              l.localGallery_copyTo,
+              StudioIcons.galleryCopy,
+            ),
+          ],
+        ),
+        const ImageMenuAction.divider(),
+        item(
+          LocalImageContextAction.delete,
+          l.common_delete,
+          StudioIcons.galleryTrash,
+          destructive: true,
+        ),
+      ],
     );
   }
 
@@ -57,7 +159,7 @@ class LocalImageContextMenu {
   }) {
     return showMenu<LocalImageContextAction>(
       context: context,
-      constraints: const BoxConstraints(minWidth: 320, maxWidth: 420),
+      constraints: const BoxConstraints(minWidth: 248, maxWidth: 280),
       position: RelativeRect.fromLTRB(
         position.dx,
         position.dy,
@@ -66,68 +168,6 @@ class LocalImageContextMenu {
       ),
       items: buildSendEntries(context, isKritaConnected: isKritaConnected),
     );
-  }
-
-  static List<PopupMenuEntry<LocalImageContextAction>> buildEntries(
-    BuildContext context, {
-    required bool hasImportableMetadata,
-    required bool hasPrompt,
-    required bool hasSeed,
-    required bool isKritaConnected,
-  }) {
-    final hasImageInfoActions = hasImportableMetadata || hasPrompt || hasSeed;
-
-    return [
-      ...buildSendEntries(context, isKritaConnected: isKritaConnected),
-      if (hasImageInfoActions) const PopupMenuDivider(),
-      if (hasImportableMetadata)
-        _item(
-          context,
-          value: LocalImageContextAction.importMetadata,
-          icon: StudioIcons.galleryImport,
-          label: context.l10n.localGallery_importImageMetadata,
-        ),
-      if (hasPrompt)
-        _item(
-          context,
-          value: LocalImageContextAction.copyPrompt,
-          icon: StudioIcons.galleryCopy,
-          label: context.l10n.localGallery_copyPrompt,
-        ),
-      if (hasSeed)
-        _item(
-          context,
-          value: LocalImageContextAction.copySeed,
-          icon: StudioIcons.galleryHash,
-          label: context.l10n.localGallery_copySeed,
-        ),
-      const PopupMenuDivider(),
-      _item(
-        context,
-        value: LocalImageContextAction.moveTo,
-        icon: StudioIcons.galleryMove,
-        label: context.l10n.localGallery_moveTo,
-      ),
-      _item(
-        context,
-        value: LocalImageContextAction.copyTo,
-        icon: StudioIcons.galleryCopy,
-        label: context.l10n.localGallery_copyTo,
-      ),
-      _item(
-        context,
-        value: LocalImageContextAction.showInFolder,
-        icon: StudioIcons.galleryReveal,
-        label: context.l10n.localGallery_showInFolder,
-      ),
-      _item(
-        context,
-        value: LocalImageContextAction.delete,
-        icon: StudioIcons.galleryTrash,
-        label: context.l10n.common_delete,
-        destructive: true,
-      ),
-    ];
   }
 
   static List<PopupMenuEntry<LocalImageContextAction>> buildSendEntries(
@@ -197,6 +237,7 @@ class LocalImageContextMenu {
 
     return PopupMenuItem<LocalImageContextAction>(
       value: value,
+      height: 34,
       enabled: enabled,
       child: Row(
         children: [

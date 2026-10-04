@@ -4,97 +4,94 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_context_menu.dart';
 
 void main() {
-  testWidgets('shows direct send actions in the agreed order', (tester) async {
-    LocalImageContextAction? selected;
+  testWidgets(
+    'compact menu has details before img2img and quick parameter copy',
+    (tester) async {
+      LocalImageContextAction? selected;
+      await tester.pumpWidget(
+        _MenuHarness(
+          isKritaConnected: false,
+          onSelected: (value) => selected = value,
+        ),
+      );
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      expect(find.text('Copy Prompt'), findsOneWidget);
+      expect(find.text('Copy Seed'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Details')).dy,
+        lessThan(tester.getTopLeft(find.text('Image2Image')).dy),
+      );
+      expect(find.text('Move to…'), findsNothing);
+      expect(find.text('Send to Krita'), findsNothing);
+      await tester.tap(find.text('Create & reference'));
+      await tester.pumpAndSettle();
+      expect(find.text('Send to Text to Image'), findsOneWidget);
+      expect(find.text('Vibe Transfer'), findsOneWidget);
+      final krita = tester.widget<MenuItemButton>(
+        find.ancestor(
+          of: find.text('Send to Krita'),
+          matching: find.byType(MenuItemButton),
+        ),
+      );
+      expect(krita.onPressed, isNull);
+      await tester.tap(find.text('Send to Krita'));
+      await tester.pumpAndSettle();
+      expect(selected, isNull);
+      await tester.tap(find.text('Vibe Transfer'));
+      await tester.pumpAndSettle();
+      expect(selected, LocalImageContextAction.sendToStyleTransfer);
+      expect(find.byType(MenuAnchor), findsNothing);
+    },
+  );
 
-    await tester.pumpWidget(
-      _MenuHarness(
-        isKritaConnected: false,
-        onSelected: (value) => selected = value,
-      ),
-    );
-
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
-
-    final items = tester
-        .widgetList<PopupMenuItem<LocalImageContextAction>>(
-          find.byWidgetPredicate(
-            (widget) => widget is PopupMenuItem<LocalImageContextAction>,
-          ),
-        )
-        .toList();
-
-    expect(items.map((item) => item.value).toList(), const [
-      LocalImageContextAction.sendToTextToImage,
-      LocalImageContextAction.sendToImg2Img,
-      LocalImageContextAction.sendToStyleTransfer,
-      LocalImageContextAction.sendToPreciseReference,
-      LocalImageContextAction.saveToPreciseRefLibrary,
-      LocalImageContextAction.sendToKrita,
-      LocalImageContextAction.upscale,
-      LocalImageContextAction.importMetadata,
-      LocalImageContextAction.copyPrompt,
-      LocalImageContextAction.copySeed,
-      LocalImageContextAction.moveTo,
-      LocalImageContextAction.copyTo,
-      LocalImageContextAction.showInFolder,
-      LocalImageContextAction.delete,
-    ]);
-    expect(find.text('Send to...'), findsNothing);
-    expect(find.text('Send to Text to Image'), findsOneWidget);
-    expect(find.text('Send to Image2Image'), findsOneWidget);
-    expect(find.text('Send to Vibe Transfer'), findsOneWidget);
-    expect(find.text('Send to Precise Reference'), findsOneWidget);
-    expect(find.text('Upscale'), findsOneWidget);
-    expect(find.text('Import Image Metadata'), findsOneWidget);
-    expect(find.text('Move to…'), findsOneWidget);
-    expect(find.text('Copy to…'), findsOneWidget);
-
-    final kritaItem = items.singleWhere(
-      (item) => item.value == LocalImageContextAction.sendToKrita,
-    );
-    expect(kritaItem.enabled, isFalse);
-
-    await tester.tap(find.text('Send to Krita'));
-    await tester.pump();
-    expect(selected, isNull);
-    expect(find.text('Send to Krita'), findsOneWidget);
-
-    await tester.tap(find.text('Send to Vibe Transfer'));
-    await tester.pumpAndSettle();
-    expect(selected, LocalImageContextAction.sendToStyleTransfer);
-  });
-
-  testWidgets('hides image information actions when metadata is unavailable', (
+  testWidgets('no metadata still permits details and file actions', (
     tester,
   ) async {
+    LocalImageContextAction? selected;
     await tester.pumpWidget(
-      const _MenuHarness(
+      _MenuHarness(
         hasImportableMetadata: false,
         hasPrompt: false,
         hasSeed: false,
         isKritaConnected: true,
+        onSelected: (value) => selected = value,
       ),
     );
-
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-
-    expect(find.text('Import Image Metadata'), findsNothing);
     expect(find.text('Copy Prompt'), findsNothing);
     expect(find.text('Copy Seed'), findsNothing);
+    expect(find.text('Import Image Metadata'), findsNothing);
+    await tester.tap(find.text('File actions'));
+    await tester.pumpAndSettle();
+    expect(find.text('Move to…'), findsOneWidget);
+    expect(find.text('Copy to…'), findsOneWidget);
+    await tester.tap(find.text('Move to…'));
+    await tester.pumpAndSettle();
+    expect(selected, LocalImageContextAction.moveTo);
+  });
 
-    final kritaItem = tester
-        .widgetList<PopupMenuItem<LocalImageContextAction>>(
-          find.byWidgetPredicate(
-            (widget) => widget is PopupMenuItem<LocalImageContextAction>,
-          ),
-        )
-        .singleWhere(
-          (item) => item.value == LocalImageContextAction.sendToKrita,
-        );
-    expect(kritaItem.enabled, isTrue);
+  testWidgets('details closes the menu and returns the viewer action', (
+    tester,
+  ) async {
+    LocalImageContextAction? selected;
+    await tester.pumpWidget(
+      _MenuHarness(
+        isKritaConnected: true,
+        position: const Offset(790, 590),
+        onSelected: (value) => selected = value,
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    final rect = tester.getRect(find.text('Details'));
+    expect(rect.right, lessThanOrEqualTo(800));
+    expect(rect.bottom, lessThanOrEqualTo(600));
+    await tester.tap(find.text('Details'));
+    await tester.pumpAndSettle();
+    expect(selected, LocalImageContextAction.details);
+    expect(find.byType(MenuAnchor), findsNothing);
   });
 
   testWidgets('send button menu reuses the context menu send action group', (
@@ -139,8 +136,10 @@ class _MenuHarness extends StatelessWidget {
     required this.isKritaConnected,
     this.sendOnly = false,
     this.onSelected,
+    this.position = const Offset(20, 20),
   });
 
+  final Offset position;
   final bool hasImportableMetadata;
   final bool hasPrompt;
   final bool hasSeed;
@@ -161,12 +160,12 @@ class _MenuHarness extends StatelessWidget {
               final selected = sendOnly
                   ? await LocalImageContextMenu.showSendActions(
                       context,
-                      position: const Offset(20, 20),
+                      position: position,
                       isKritaConnected: isKritaConnected,
                     )
                   : await LocalImageContextMenu.show(
                       context,
-                      position: const Offset(20, 20),
+                      position: position,
                       hasImportableMetadata: hasImportableMetadata,
                       hasPrompt: hasPrompt,
                       hasSeed: hasSeed,

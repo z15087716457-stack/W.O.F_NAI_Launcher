@@ -1758,6 +1758,8 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     final availableMetadata = metadata ?? record.metadata;
 
     switch (action) {
+      case LocalImageContextAction.details:
+        _openViewerForPath(record.path);
       case LocalImageContextAction.sendToTextToImage:
         await _importImageMetadata(record);
       case LocalImageContextAction.sendToImg2Img:

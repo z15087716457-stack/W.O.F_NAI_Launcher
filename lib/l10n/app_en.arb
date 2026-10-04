@@ -3265,7 +3265,7 @@
     }
   },
   "settings_confirmExternalSend": "Send",
-  "settings_highAnlasCostTitle": "Protection Mode: High Anlas Cost",
+  "settings_highAnlasCostTitle": "Anlas usage reminder",
   "settings_highAnlasCostContent": "This request is estimated to cost {cost} Anlas, which reaches or exceeds your {threshold} Anlas warning threshold. Continue generation?",
   "@settings_highAnlasCostContent": {
     "placeholders": {
@@ -7180,5 +7180,14 @@
   "imageUse_title": "Use image",
   "imageUse_importContent": "Import content",
   "imageUse_characters": "Characters",
-  "imageUse_characterMode": "Character handling"
+  "imageUse_characterMode": "Character handling",
+  "imageMenu_details": "Details",
+  "imageMenu_creation": "Create & reference",
+  "imageMenu_editAndDerive": "Edit & derive",
+  "imageMenu_more": "More actions",
+  "imageMenu_fileActions": "File actions",
+  "imageMenu_saveToBlock": "Save to blocks",
+  "settings_highAnlasCostEstimate": "Estimated usage",
+  "settings_highAnlasCostThresholdLabel": "Reminder threshold",
+  "settings_highAnlasCostQuestion": "Continue with this generation?"
 }

@@ -11,7 +11,6 @@ import '../../../../../core/utils/localization_extension.dart';
 import '../../../../../core/utils/nai_resolution_adapter.dart';
 import '../../../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../../../data/models/vibe/vibe_reference.dart';
-import '../../add_to_library_dialog.dart';
 import '../../app_toast.dart';
 import '../../save_as_block_dialog.dart';
 import '../../save_vibe_dialog.dart';
@@ -544,182 +543,40 @@ class _MetadataContent extends StatelessWidget {
   }
 
   /// 构建提示词分组
-  Widget _buildPromptSections(BuildContext context) {
-    // 如果有分离的字段，使用分组展示
-    if (metadata.hasSeparatedFields) {
-      // 合并固定词（前缀+后缀）
-      final fixedTags = [
-        ...metadata.fixedPrefixTags,
-        ...metadata.fixedSuffixTags,
-      ];
-      final fixedNegativeTags = [
-        ...metadata.fixedNegativePrefixTags,
-        ...metadata.fixedNegativeSuffixTags,
-      ];
-
-      // 主提示词包含角色提示词
-      final mainPromptWithChars = _buildMainPromptWithCharacters();
-      final mainPromptTags = _extractTags(mainPromptWithChars);
-
-      // 负面提示词标签
-      final negativePrompt = metadata.displayNegativePrompt;
-      final negativeTags = _extractTags(negativePrompt);
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 主提示词（包含角色提示词）
-          PromptSection(
-            title: context.l10n.metadataImport_mainPrompt,
-            icon: Icons.text_fields,
-            content: mainPromptWithChars,
-            tags: mainPromptTags,
-            initiallyExpanded: true,
-            showAddToLibrary: mainPromptWithChars.isNotEmpty,
-            onAddToLibrary: () =>
-                _showAddToLibraryDialog(context, mainPromptWithChars),
-          ),
-          // 固定词（前缀+后缀合并）
-          if (fixedTags.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            PromptSection(
-              title: context.l10n.metadataImport_fixedTags,
-              icon: Icons.push_pin_outlined,
-              content: fixedTags.join(', '),
-              tags: fixedTags,
-              initiallyExpanded: false,
-            ),
-          ],
-          // 负向固定词（前缀+后缀合并）
-          if (fixedNegativeTags.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            PromptSection(
-              title: context.l10n.fixedTags_negativeTitle,
-              icon: Icons.push_pin_outlined,
-              content: fixedNegativeTags.join(', '),
-              tags: fixedNegativeTags,
-              initiallyExpanded: false,
-              contentColor: Theme.of(
-                context,
-              ).colorScheme.error.withValues(alpha: 0.8),
-              borderColor: Theme.of(context).colorScheme.error,
-            ),
-          ],
-          // 质量词
-          if (metadata.qualityTags.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            PromptSection(
-              title: context.l10n.qualityTags_label,
-              icon: Icons.high_quality,
-              content: metadata.qualityTags.join(', '),
-              tags: metadata.qualityTags,
-              initiallyExpanded: false,
-              showAddToLibrary: true,
-              onAddToLibrary: () => _showAddToLibraryDialog(
-                context,
-                metadata.qualityTags.join(', '),
-              ),
-            ),
-          ],
-          // 角色提示词详细卡片
-          if (metadata.characterInfos.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            _buildCharacterSection(context),
-          ],
-          // Vibe数据
-          if (metadata.vibeReferences.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            VibeSection(
-              vibes: metadata.vibeReferences,
-              initiallyExpanded: true,
-              onSaveToLibrary: (vibe) => _showSaveVibeDialog(context, vibe),
-            ),
-          ],
-          // 负向提示词（使用标签形式）
-          if (negativePrompt.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            PromptSection(
-              title: context.l10n.prompt_negativePrompt,
-              icon: Icons.block,
-              content: negativePrompt,
-              tags: negativeTags,
-              initiallyExpanded: false,
-              contentColor: Theme.of(
-                context,
-              ).colorScheme.error.withValues(alpha: 0.8),
-              borderColor: Theme.of(context).colorScheme.error,
-            ),
-          ],
-        ],
-      );
-    }
-
-    // 旧数据：使用简单展示
-    final mainPromptTags = _extractTags(metadata.fullPrompt);
-    final negativePrompt = metadata.displayNegativePrompt;
-    final negativeTags = _extractTags(negativePrompt);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 主提示词
-        PromptSection(
-          title: context.l10n.prompt_positivePrompt,
-          icon: Icons.text_fields,
-          content: metadata.fullPrompt.isNotEmpty
-              ? metadata.fullPrompt
-              : context.l10n.metadataImport_noData,
-          tags: mainPromptTags,
-          initiallyExpanded: true,
-          showAddToLibrary: metadata.fullPrompt.isNotEmpty,
-          onAddToLibrary: () =>
-              _showAddToLibraryDialog(context, metadata.fullPrompt),
-        ),
-        // 负向提示词（使用标签形式）
-        if (negativePrompt.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          PromptSection(
-            title: context.l10n.prompt_negativePrompt,
-            icon: Icons.block,
-            content: negativePrompt,
-            tags: negativeTags,
-            initiallyExpanded: false,
-            contentColor: Theme.of(
-              context,
-            ).colorScheme.error.withValues(alpha: 0.8),
-            borderColor: Theme.of(context).colorScheme.error,
-          ),
-        ],
+  Widget _buildPromptSections(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Read the actual metadata field; mainPrompt/fullPrompt are derived
+      // projections that split commas or append synthetic character separators.
+      PromptSection(
+        title: context.l10n.metadataImport_mainPrompt,
+        icon: Icons.text_fields,
+        content: metadata.prompt,
+        initiallyExpanded: true,
+      ),
+      if (metadata.characterInfos.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        _buildCharacterSection(context),
       ],
-    );
-  }
-
-  /// 构建包含角色提示词的主提示词
-  String _buildMainPromptWithCharacters() {
-    final buffer = StringBuffer(metadata.mainPrompt);
-
-    // 添加角色提示词到主提示词
-    for (final character in metadata.characterInfos) {
-      if (character.prompt.isNotEmpty) {
-        if (buffer.isNotEmpty) {
-          buffer.write(', ');
-        }
-        buffer.write(character.prompt);
-      }
-    }
-
-    return buffer.toString();
-  }
-
-  /// 从提示词文本提取标签列表
-  List<String> _extractTags(String prompt) {
-    if (prompt.isEmpty) return [];
-    return prompt
-        .split(',')
-        .map((t) => t.trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
-  }
+      if (metadata.vibeReferences.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        VibeSection(
+          vibes: metadata.vibeReferences,
+          initiallyExpanded: true,
+          onSaveToLibrary: (vibe) => _showSaveVibeDialog(context, vibe),
+        ),
+      ],
+      if (metadata.negativePrompt.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        PromptSection(
+          title: context.l10n.prompt_negativePrompt,
+          icon: Icons.block,
+          content: metadata.negativePrompt,
+          contentColor: Theme.of(context).colorScheme.error,
+        ),
+      ],
+    ],
+  );
 
   /// 构建角色提示词分组（带折叠功能）
   Widget _buildCharacterSection(BuildContext context) {
@@ -728,7 +585,7 @@ class _MetadataContent extends StatelessWidget {
       icon: Icons.people_outline,
       content: metadata.characterInfos.map((c) => c.prompt).join(', '),
       initiallyExpanded: false,
-      showAddToLibrary: false,
+
       // 使用自定义内容展示角色卡片
       customContent: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -748,18 +605,6 @@ class _MetadataContent extends StatelessWidget {
           );
         }).toList(),
       ),
-    );
-  }
-
-  /// 显示添加到词库对话框
-  Future<void> _showAddToLibraryDialog(
-    BuildContext context,
-    String content,
-  ) async {
-    await AddToLibraryDialog.show(
-      context,
-      content: content,
-      sourceTag: 'from_image',
     );
   }
 

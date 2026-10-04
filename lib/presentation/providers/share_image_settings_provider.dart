@@ -10,7 +10,7 @@ class ShareImageSettings {
     this.confirmDangerousActions = true,
     this.warnExternalImageSend = true,
     this.preventOverwrite = true,
-    this.warnHighAnlasCost = true,
+    this.warnHighAnlasCost = false,
     this.highAnlasCostThreshold = 50,
     this.limitGenerationInterval = false,
     this.generationIntervalSeconds = 5,
@@ -153,9 +153,9 @@ class ShareImageSettingsNotifier extends Notifier<ShareImageSettings> {
       warnHighAnlasCost:
           _storage.getSetting<bool>(
             StorageKeys.protectionWarnHighAnlasCost,
-            defaultValue: true,
+            defaultValue: false,
           ) ??
-          true,
+          false,
       highAnlasCostThreshold:
           _storage.getSetting<int>(
             StorageKeys.protectionHighAnlasCostThreshold,

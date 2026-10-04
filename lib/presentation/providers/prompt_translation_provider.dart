@@ -371,6 +371,41 @@ class PromptTranslationCoordinator {
     }
   }
 
+  /// Translate an isolated, read-only image detail snapshot. No generation
+  /// lane, persisted workspace or global undo history is read or changed.
+  Future<PillDocument> translateDocument(
+    PillDocument document, {
+    required String sessionId,
+  }) async {
+    final batch = PromptTranslationBatch.prepare({'detail': document});
+    if (batch.isEmpty) return document;
+    final language = _interfaceReadingLanguage().code;
+    final groups = <String, List<PromptTranslationGroup>>{};
+    for (final part in batch.partitions()) {
+      final glossary = await _glossaryFor(part);
+      final raw = await _ref
+          .read(promptAssistantServiceProvider)
+          .translatePromptGroup(
+            part.requestJson(glossary, languageCode: language),
+            sessionId: sessionId,
+          );
+      final parsed = part.parseGroups(
+        raw,
+        glossary: glossary,
+        verifiedTags: await _verifyProposedTags(part, raw, glossary),
+      );
+      for (final entry in parsed.entries) {
+        groups.putIfAbsent(entry.key, () => []).addAll(entry.value);
+      }
+    }
+    return batch.buildFromGroups(
+          groups,
+          autoFormat: false,
+          languageCode: language,
+        )['detail'] ??
+        document;
+  }
+
   Future<bool> retranslateSingle(String scope, String marker) async {
     if (_ref.read(promptTranslationBusyProvider)) return false;
     final initial = _ref

@@ -3265,7 +3265,7 @@
     }
   },
   "settings_confirmExternalSend": "送信",
-  "settings_highAnlasCostTitle": "保護モード: 高 Anlas コスト",
+  "settings_highAnlasCostTitle": "Anlas 消費の確認",
   "settings_highAnlasCostContent": "このリクエストには {cost} Anlas の費用がかかると推定されており、{threshold} Anlas の警告しきい値に達するか超えています。生成を継続しますか?",
   "@settings_highAnlasCostContent": {
     "placeholders": {
@@ -7180,5 +7180,14 @@
   "imageUse_title": "画像を使用",
   "imageUse_importContent": "取り込む内容",
   "imageUse_characters": "キャラクター",
-  "imageUse_characterMode": "キャラクターの処理"
+  "imageUse_characterMode": "キャラクターの処理",
+  "imageMenu_details": "詳細",
+  "imageMenu_creation": "生成・参照",
+  "imageMenu_editAndDerive": "編集・派生",
+  "imageMenu_more": "その他の操作",
+  "imageMenu_fileActions": "ファイル操作",
+  "imageMenu_saveToBlock": "ブロックに保存",
+  "settings_highAnlasCostEstimate": "推定消費量",
+  "settings_highAnlasCostThresholdLabel": "通知のしきい値",
+  "settings_highAnlasCostQuestion": "このまま生成しますか？"
 }

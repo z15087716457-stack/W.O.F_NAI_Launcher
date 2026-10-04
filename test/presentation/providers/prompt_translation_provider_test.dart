@@ -25,6 +25,86 @@ import 'package:nai_launcher/core/wiki/tag_translation_glossary.dart';
 import '../../helpers/fake_tag_translation_glossary.dart';
 
 void main() {
+  test(
+    'detail translation preserves raw source and never changes a generation lane',
+    () async {
+      const source = ''' 1.5::blue eyes, white hair ::,
+A ruined city, (floating towers:1.2) ''';
+      final service = _TranslationService();
+      when(
+        () => service.translatePromptGroup(
+          any(),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((call) async {
+        final request =
+            jsonDecode(call.positionalArguments.single as String) as Map;
+        final field = (request['fields'] as List).single as Map;
+        return jsonEncode({
+          'fields': [
+            {
+              'id': field['id'],
+              'groups': [
+                {
+                  'ids': [
+                    for (final segment in field['segments'] as List)
+                      (segment as Map)['id'],
+                  ],
+                  'zh': '蓝眼睛与废墟城市',
+                },
+              ],
+            },
+          ],
+        });
+      });
+      final container = ProviderContainer(
+        overrides: [
+          tagTranslationGlossaryProvider.overrideWith(
+            (ref) => const FakeTagTranslationGlossary(),
+          ),
+          characterPromptNotifierProvider.overrideWith(_Characters.new),
+          promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+          promptAssistantServiceProvider.overrideWith((ref) => service),
+          unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+          localeNotifierProvider.overrideWith(() => _Locale('zh')),
+        ],
+      );
+      addTearDown(container.dispose);
+      final workspace = container.read(
+        pillWorkspaceProvider(PillScopes.main).notifier,
+      );
+      workspace.replaceWithPlainText('current user draft');
+      final before = container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document;
+      final result = await container
+          .read(promptTranslationCoordinatorProvider)
+          .translateDocument(
+            const PillDocument(text: source, instances: {}),
+            sessionId: 'detail-offline-test',
+          );
+      final projected = result.text
+          .split('')
+          .map((char) => result.instances[char]?.translation?.source ?? char)
+          .join();
+      expect(projected, source);
+      expect(
+        identical(
+          before,
+          container.read(pillWorkspaceProvider(PillScopes.main)).document,
+        ),
+        isTrue,
+      );
+      expect(container.read(promptTranslationBusyProvider), isFalse);
+      verify(
+        () => service.translatePromptGroup(
+          any(),
+          sessionId: 'detail-offline-test',
+        ),
+      ).called(1);
+    },
+  );
+
   for (final (localeCode, language) in const [
     ('zh', 'zh'),
     ('zh_TW', 'zh-TW'),
