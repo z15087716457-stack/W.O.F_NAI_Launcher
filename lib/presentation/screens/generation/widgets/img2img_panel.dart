@@ -27,7 +27,6 @@ import '../../../providers/image_save_settings_provider.dart';
 import '../../../providers/generation/image_workflow_controller.dart';
 import '../../../providers/precise_ref_library_provider.dart';
 import '../../../providers/subscription_provider.dart';
-import '../../../services/image_workflow_launcher.dart';
 import '../../../utils/dropped_file_reader.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
@@ -120,11 +119,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     if (widget.toolOnly) return _buildUpscalePanel(theme, workflow);
     final hasSourceImage = params.sourceImage != null;
     final showBackground = hasSourceImage && !workflow.isPanelExpanded;
-    final supportsInpaint = ref.watch(
-      generationParamsNotifierProvider.select(
-        (params) => params.modelSpec.img2imgInpainting,
-      ),
-    );
 
     return CollapsibleImagePanel(
       frosted: true,
@@ -144,8 +138,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
       headerActions: hasSourceImage
           ? _buildLoadedHeaderActions(
               params: params,
-              workflow: workflow,
-              supportsInpaint: supportsInpaint,
               showBackground: showBackground,
               compactHeader: compactHeader,
             )
@@ -275,11 +267,9 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
   }
 
   /// 已载入底图时的头部操作列（官网式）：
-  /// 微倾斜缩略图 + 放入画布 / 重绘 / 编辑 / 换图 / 清除。
+  /// 微倾斜缩略图 + 放入画布 / 换图 / 清除。
   List<Widget> _buildLoadedHeaderActions({
     required Img2ImgPanelViewData params,
-    required ImageWorkflowState workflow,
-    required bool supportsInpaint,
     required bool showBackground,
     required bool compactHeader,
   }) {
@@ -300,32 +290,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
         tooltip: context.l10n.img2img_placeOnCanvas,
         color: foreground,
         onPressed: isGenerating ? null : _placeSourceOnCanvas,
-      ),
-      if (supportsInpaint)
-        PanelHeaderIconButton(
-          key: const Key('img2img-action-inpaint'),
-          iconAsset: 'assets/icons/nai-icon-inpaint.svg',
-          tooltip: context.l10n.img2img_inpaint,
-          selected: workflow.isInpaint,
-          color: foreground,
-          onPressed: () => ImageWorkflowLauncher.openEditor(
-            context,
-            ref,
-            sourceImage,
-            mode: ImageEditorMode.inpaint,
-          ),
-        ),
-      PanelHeaderIconButton(
-        key: const Key('img2img-action-edit'),
-        icon: Icons.edit_outlined,
-        tooltip: context.l10n.img2img_editImage,
-        color: foreground,
-        onPressed: () => ImageWorkflowLauncher.openEditor(
-          context,
-          ref,
-          sourceImage,
-          mode: ImageEditorMode.edit,
-        ),
       ),
       PanelHeaderIconButton(
         key: const Key('img2img-action-replace'),

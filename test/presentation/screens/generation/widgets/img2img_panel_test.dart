@@ -133,6 +133,10 @@ void main() {
       final draft = container.read(generationParamsNotifierProvider);
       final workflow = container.read(draftImageWorkflowProvider);
       expect(find.byKey(const Key('img2img-overflow-menu')), findsNothing);
+      expect(find.byKey(const Key('img2img-action-edit')), findsNothing);
+      expect(find.byKey(const Key('img2img-action-inpaint')), findsNothing);
+      expect(find.byKey(const Key('img2img-action-replace')), findsOneWidget);
+      expect(find.byKey(const Key('img2img-action-clear')), findsOneWidget);
       final button = find.byKey(const Key('img2img-action-place-on-canvas'));
       expect(button, findsOneWidget);
       expect(find.byTooltip('放入画布'), findsOneWidget);

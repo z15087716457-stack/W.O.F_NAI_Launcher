@@ -98,6 +98,14 @@ void main() {
                 find.byKey(const Key('img2img-overflow-menu')),
                 findsNothing,
               );
+              expect(
+                find.byKey(const Key('img2img-action-edit')),
+                findsNothing,
+              );
+              expect(
+                find.byKey(const Key('img2img-action-inpaint')),
+                findsNothing,
+              );
               expect(tester.takeException(), isNull);
               if (Platform.environment['IMG2IMG_CAPTURE'] == '1') {
                 await tester.runAsync(() async {
