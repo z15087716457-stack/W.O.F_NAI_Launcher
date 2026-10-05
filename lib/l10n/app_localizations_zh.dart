@@ -839,7 +839,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_canvasSetInitImage => '设为图生图底图';
 
   @override
-  String get generation_canvasSendToTools => '发送到图像工具';
+  String get generation_canvasSendToTools => '发送至导演工具';
 
   @override
   String get generation_canvasPinImage => '固定图片';
@@ -1232,7 +1232,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_directorTools => '导演工具';
 
   @override
-  String get img2img_directorPrompt => '附加提示词';
+  String get img2img_directorPrompt => '提示词（可选）';
 
   @override
   String get img2img_directorPromptHint => '需要时补充描述，例如目标情绪或上色方向';
@@ -12399,6 +12399,63 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get model3d_toolPose => '模型姿势';
+
+  @override
+  String get img2img_directorEmotionHint => '仅适用于动漫图像，请从表情中性的图像开始。';
+
+  @override
+  String get img2img_emotionStrengthNormal => '正常';
+
+  @override
+  String get img2img_emotionStrengthSlightlyWeak => '稍弱';
+
+  @override
+  String get img2img_emotionStrengthWeak => '弱';
+
+  @override
+  String get img2img_emotionStrengthWeaker => '更弱';
+
+  @override
+  String get img2img_emotionStrengthVeryWeak => '很弱';
+
+  @override
+  String get img2img_emotionStrengthWeakest => '最弱';
+
+  @override
+  String get img2img_directorWeaken => '减弱表情';
+
+  @override
+  String get img2img_directorStrengthen => '增强表情';
+
+  @override
+  String get img2img_emotionScared => '害怕';
+
+  @override
+  String get img2img_emotionNervous => '紧张';
+
+  @override
+  String get img2img_emotionThinking => '思考';
+
+  @override
+  String get img2img_emotionConfused => '困惑';
+
+  @override
+  String get img2img_emotionBored => '无聊';
+
+  @override
+  String get img2img_emotionIrritated => '恼火';
+
+  @override
+  String get img2img_emotionAroused => '情欲';
+
+  @override
+  String get img2img_emotionEmbarrassed => '尴尬';
+
+  @override
+  String get img2img_emotionDetermined => '坚定';
+
+  @override
+  String get img2img_emotionHurt => '受伤';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -13236,7 +13293,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get generation_canvasSetInitImage => '設為圖生圖底圖';
 
   @override
-  String get generation_canvasSendToTools => '傳送到影像工具';
+  String get generation_canvasSendToTools => '傳送至導演工具';
 
   @override
   String get generation_canvasPinImage => '固定圖片';
@@ -13629,7 +13686,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_directorTools => '導演工具';
 
   @override
-  String get img2img_directorPrompt => '附加提示詞';
+  String get img2img_directorPrompt => '提示詞（可選）';
 
   @override
   String get img2img_directorPromptHint => '需要時補充描述，例如目標情緒或上色方向';
@@ -24796,4 +24853,61 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get model3d_toolPose => '模型姿勢';
+
+  @override
+  String get img2img_directorEmotionHint => '僅適用於動漫影像，請從表情中性的影像開始。';
+
+  @override
+  String get img2img_emotionStrengthNormal => '正常';
+
+  @override
+  String get img2img_emotionStrengthSlightlyWeak => '稍弱';
+
+  @override
+  String get img2img_emotionStrengthWeak => '弱';
+
+  @override
+  String get img2img_emotionStrengthWeaker => '更弱';
+
+  @override
+  String get img2img_emotionStrengthVeryWeak => '很弱';
+
+  @override
+  String get img2img_emotionStrengthWeakest => '最弱';
+
+  @override
+  String get img2img_directorWeaken => '減弱表情';
+
+  @override
+  String get img2img_directorStrengthen => '增強表情';
+
+  @override
+  String get img2img_emotionScared => '害怕';
+
+  @override
+  String get img2img_emotionNervous => '緊張';
+
+  @override
+  String get img2img_emotionThinking => '思考';
+
+  @override
+  String get img2img_emotionConfused => '困惑';
+
+  @override
+  String get img2img_emotionBored => '無聊';
+
+  @override
+  String get img2img_emotionIrritated => '惱火';
+
+  @override
+  String get img2img_emotionAroused => '情慾';
+
+  @override
+  String get img2img_emotionEmbarrassed => '尷尬';
+
+  @override
+  String get img2img_emotionDetermined => '堅定';
+
+  @override
+  String get img2img_emotionHurt => '受傷';
 }

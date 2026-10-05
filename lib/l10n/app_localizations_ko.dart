@@ -850,7 +850,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_canvasSetInitImage => 'Image2Image 원본으로 사용';
 
   @override
-  String get generation_canvasSendToTools => '이미지 도구로 보내기';
+  String get generation_canvasSendToTools => '디렉터 도구로 보내기';
 
   @override
   String get generation_canvasPinImage => '이미지 고정';
@@ -1251,7 +1251,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_directorTools => '디렉터 도구';
 
   @override
-  String get img2img_directorPrompt => '추가 프롬프트';
+  String get img2img_directorPrompt => '프롬프트 (선택 사항)';
 
   @override
   String get img2img_directorPromptHint => '필요할 때 목표 감정이나 채색 방향 같은 안내를 추가하세요';
@@ -12634,4 +12634,62 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get model3d_toolPose => '모델 포즈';
+
+  @override
+  String get img2img_directorEmotionHint =>
+      '애니메이션 이미지 전용입니다. 중립적인 표정의 이미지로 시작하세요.';
+
+  @override
+  String get img2img_emotionStrengthNormal => '보통';
+
+  @override
+  String get img2img_emotionStrengthSlightlyWeak => '약간 약함';
+
+  @override
+  String get img2img_emotionStrengthWeak => '약함';
+
+  @override
+  String get img2img_emotionStrengthWeaker => '더 약함';
+
+  @override
+  String get img2img_emotionStrengthVeryWeak => '매우 약함';
+
+  @override
+  String get img2img_emotionStrengthWeakest => '가장 약함';
+
+  @override
+  String get img2img_directorWeaken => '표정 약하게';
+
+  @override
+  String get img2img_directorStrengthen => '표정 강하게';
+
+  @override
+  String get img2img_emotionScared => '두려움';
+
+  @override
+  String get img2img_emotionNervous => '긴장';
+
+  @override
+  String get img2img_emotionThinking => '생각 중';
+
+  @override
+  String get img2img_emotionConfused => '혼란';
+
+  @override
+  String get img2img_emotionBored => '지루함';
+
+  @override
+  String get img2img_emotionIrritated => '짜증';
+
+  @override
+  String get img2img_emotionAroused => '성적 흥분';
+
+  @override
+  String get img2img_emotionEmbarrassed => '당황';
+
+  @override
+  String get img2img_emotionDetermined => '결의';
+
+  @override
+  String get img2img_emotionHurt => '상처받음';
 }

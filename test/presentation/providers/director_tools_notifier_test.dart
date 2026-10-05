@@ -45,6 +45,72 @@ void main() {
   tearDown(() => container.dispose());
 
   test(
+    'all 24 website emotions retain their request values and extra prompt',
+    () async {
+      // Current official menu order and enum values, verified in browser and
+      // public component 266 on 2026-10-05; see the Director UI audit.
+      const moods = [
+        'neutral',
+        'happy',
+        'sad',
+        'angry',
+        'scared',
+        'surprised',
+        'tired',
+        'excited',
+        'nervous',
+        'thinking',
+        'confused',
+        'shy',
+        'disgusted',
+        'smug',
+        'bored',
+        'laughing',
+        'irritated',
+        'aroused',
+        'embarrassed',
+        'worried',
+        'love',
+        'determined',
+        'hurt',
+        'playful',
+      ];
+      expect(emotionPresets.map((p) => p.mood).toList(), moods);
+      final source = _png(24);
+      final controller = container.read(directorToolsNotifierProvider.notifier);
+      controller.addSource(source);
+      controller.selectTool(DirectorToolType.fixEmotion);
+      controller.updateDefry(5);
+      controller.updatePrompt('extra guidance');
+      for (final mood in moods) {
+        when(
+          () => api.augmentImages(
+            source,
+            reqType: 'emotion',
+            prompt: '$mood;;extra guidance',
+            defry: 5,
+          ),
+        ).thenAnswer((_) async => [_png(16)]);
+        controller.updateEmotion(mood);
+        await controller.runTool();
+        verify(
+          () => api.augmentImages(
+            source,
+            reqType: 'emotion',
+            prompt: '$mood;;extra guidance',
+            defry: 5,
+          ),
+        ).called(1);
+        expect(container.read(directorToolsNotifierProvider).error, isNull);
+      }
+      expect(
+        container.read(generationParamsNotifierProvider).prompt,
+        'unrelated draft',
+      );
+    },
+  );
+
+  test(
     'queue deduplicates, removes and reuses results; requests lock source and settings',
     () async {
       final source = _png(24);

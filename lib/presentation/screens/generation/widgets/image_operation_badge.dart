@@ -33,16 +33,13 @@ class ImageOperationBadge extends StatelessWidget {
       ImageOperation.variations => 'variations',
       ImageOperation.upscale => 'upscale',
       ImageOperation.vibeTransfer => 'vibe-transfer',
-      _ => null,
-    };
-    final icon = switch (operation) {
-      ImageOperation.removeBackground => Icons.content_cut,
-      ImageOperation.lineArt => Icons.draw_outlined,
-      ImageOperation.sketch => Icons.gesture,
-      ImageOperation.colorize => Icons.palette_outlined,
-      ImageOperation.emotion => Icons.mood_outlined,
-      ImageOperation.declutter => Icons.cleaning_services_outlined,
-      _ => Icons.grid_view,
+      ImageOperation.removeBackground => 'director_remove_bg',
+      ImageOperation.lineArt => 'director_line_art',
+      ImageOperation.sketch => 'director_sketch',
+      ImageOperation.colorize => 'director_colorize',
+      ImageOperation.emotion => 'director_emotion',
+      ImageOperation.declutter => 'director_declutter',
+      ImageOperation.pixelSnap => 'director_pixel_snap',
     };
     return Tooltip(
       message: label,
@@ -54,18 +51,16 @@ class ImageOperationBadge extends StatelessWidget {
             borderRadius: BorderRadius.circular(3),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(5),
-            child: asset == null
-                ? Icon(icon, size: 16)
-                : SvgPicture.asset(
-                    'assets/icons/nai-icon-$asset.svg',
-                    width: 16,
-                    height: 16,
-                    colorFilter: ColorFilter.mode(
-                      Theme.of(context).colorScheme.onSurface,
-                      BlendMode.srcIn,
-                    ),
-                  ),
+            padding: const EdgeInsets.all(3),
+            child: SvgPicture.asset(
+              'assets/icons/${asset.startsWith('director_') ? asset : 'nai-icon-$asset'}.svg',
+              width: 16,
+              height: 16,
+              colorFilter: ColorFilter.mode(
+                Theme.of(context).colorScheme.onSurface,
+                BlendMode.srcIn,
+              ),
+            ),
           ),
         ),
       ),

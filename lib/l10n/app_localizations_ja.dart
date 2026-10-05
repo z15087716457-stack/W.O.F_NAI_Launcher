@@ -853,7 +853,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_canvasSetInitImage => '画像から生成の元画像に設定';
 
   @override
-  String get generation_canvasSendToTools => '画像ツールに送る';
+  String get generation_canvasSendToTools => 'ディレクターツールに送る';
 
   @override
   String get generation_canvasPinImage => '画像を固定';
@@ -1253,7 +1253,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_directorTools => 'ディレクターツール';
 
   @override
-  String get img2img_directorPrompt => '追加のプロンプト';
+  String get img2img_directorPrompt => 'プロンプト（任意）';
 
   @override
   String get img2img_directorPromptHint => 'ターゲットの感情や色の方向など、必要に応じてガイダンスを追加します';
@@ -12616,4 +12616,61 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get model3d_toolPose => 'モデルポーズ';
+
+  @override
+  String get img2img_directorEmotionHint => 'アニメ画像専用。表情がニュートラルな画像から始めてください。';
+
+  @override
+  String get img2img_emotionStrengthNormal => '通常';
+
+  @override
+  String get img2img_emotionStrengthSlightlyWeak => 'やや弱い';
+
+  @override
+  String get img2img_emotionStrengthWeak => '弱い';
+
+  @override
+  String get img2img_emotionStrengthWeaker => 'さらに弱い';
+
+  @override
+  String get img2img_emotionStrengthVeryWeak => 'とても弱い';
+
+  @override
+  String get img2img_emotionStrengthWeakest => '最も弱い';
+
+  @override
+  String get img2img_directorWeaken => '表情を弱める';
+
+  @override
+  String get img2img_directorStrengthen => '表情を強める';
+
+  @override
+  String get img2img_emotionScared => '怖がる';
+
+  @override
+  String get img2img_emotionNervous => '緊張';
+
+  @override
+  String get img2img_emotionThinking => '考え中';
+
+  @override
+  String get img2img_emotionConfused => '困惑';
+
+  @override
+  String get img2img_emotionBored => '退屈';
+
+  @override
+  String get img2img_emotionIrritated => 'いら立ち';
+
+  @override
+  String get img2img_emotionAroused => '性的興奮';
+
+  @override
+  String get img2img_emotionEmbarrassed => '恥ずかしい';
+
+  @override
+  String get img2img_emotionDetermined => '決意';
+
+  @override
+  String get img2img_emotionHurt => '傷ついた';
 }

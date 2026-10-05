@@ -1677,7 +1677,7 @@ abstract class AppLocalizations {
   /// No description provided for @generation_canvasSendToTools.
   ///
   /// In en, this message translates to:
-  /// **'Send to image tools'**
+  /// **'Send to Director Tools'**
   String get generation_canvasSendToTools;
 
   /// No description provided for @generation_canvasPinImage.
@@ -2403,7 +2403,7 @@ abstract class AppLocalizations {
   /// No description provided for @img2img_directorPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Extra Prompt'**
+  /// **'Prompt (Optional)'**
   String get img2img_directorPrompt;
 
   /// No description provided for @img2img_directorPromptHint.
@@ -22587,6 +22587,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Model Pose'**
   String get model3d_toolPose;
+
+  /// No description provided for @img2img_directorEmotionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anime only. Start with a neutral emotion image.'**
+  String get img2img_directorEmotionHint;
+
+  /// No description provided for @img2img_emotionStrengthNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get img2img_emotionStrengthNormal;
+
+  /// No description provided for @img2img_emotionStrengthSlightlyWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Slightly Weak'**
+  String get img2img_emotionStrengthSlightlyWeak;
+
+  /// No description provided for @img2img_emotionStrengthWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak'**
+  String get img2img_emotionStrengthWeak;
+
+  /// No description provided for @img2img_emotionStrengthWeaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Even Weaker'**
+  String get img2img_emotionStrengthWeaker;
+
+  /// No description provided for @img2img_emotionStrengthVeryWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Weak'**
+  String get img2img_emotionStrengthVeryWeak;
+
+  /// No description provided for @img2img_emotionStrengthWeakest.
+  ///
+  /// In en, this message translates to:
+  /// **'Weakest'**
+  String get img2img_emotionStrengthWeakest;
+
+  /// No description provided for @img2img_directorWeaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Weaken emotion'**
+  String get img2img_directorWeaken;
+
+  /// No description provided for @img2img_directorStrengthen.
+  ///
+  /// In en, this message translates to:
+  /// **'Strengthen emotion'**
+  String get img2img_directorStrengthen;
+
+  /// No description provided for @img2img_emotionScared.
+  ///
+  /// In en, this message translates to:
+  /// **'Scared'**
+  String get img2img_emotionScared;
+
+  /// No description provided for @img2img_emotionNervous.
+  ///
+  /// In en, this message translates to:
+  /// **'Nervous'**
+  String get img2img_emotionNervous;
+
+  /// No description provided for @img2img_emotionThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get img2img_emotionThinking;
+
+  /// No description provided for @img2img_emotionConfused.
+  ///
+  /// In en, this message translates to:
+  /// **'Confused'**
+  String get img2img_emotionConfused;
+
+  /// No description provided for @img2img_emotionBored.
+  ///
+  /// In en, this message translates to:
+  /// **'Bored'**
+  String get img2img_emotionBored;
+
+  /// No description provided for @img2img_emotionIrritated.
+  ///
+  /// In en, this message translates to:
+  /// **'Irritated'**
+  String get img2img_emotionIrritated;
+
+  /// No description provided for @img2img_emotionAroused.
+  ///
+  /// In en, this message translates to:
+  /// **'Aroused'**
+  String get img2img_emotionAroused;
+
+  /// No description provided for @img2img_emotionEmbarrassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Embarrassed'**
+  String get img2img_emotionEmbarrassed;
+
+  /// No description provided for @img2img_emotionDetermined.
+  ///
+  /// In en, this message translates to:
+  /// **'Determined'**
+  String get img2img_emotionDetermined;
+
+  /// No description provided for @img2img_emotionHurt.
+  ///
+  /// In en, this message translates to:
+  /// **'Hurt'**
+  String get img2img_emotionHurt;
 }
 
 class _AppLocalizationsDelegate

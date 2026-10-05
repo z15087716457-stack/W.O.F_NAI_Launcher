@@ -869,7 +869,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_canvasSetInitImage => 'Use as img2img source';
 
   @override
-  String get generation_canvasSendToTools => 'Send to image tools';
+  String get generation_canvasSendToTools => 'Send to Director Tools';
 
   @override
   String get generation_canvasPinImage => 'Pin image';
@@ -1277,7 +1277,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_directorTools => 'Director Tools';
 
   @override
-  String get img2img_directorPrompt => 'Extra Prompt';
+  String get img2img_directorPrompt => 'Prompt (Optional)';
 
   @override
   String get img2img_directorPromptHint =>
@@ -13008,4 +13008,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get model3d_toolPose => 'Model Pose';
+
+  @override
+  String get img2img_directorEmotionHint =>
+      'Anime only. Start with a neutral emotion image.';
+
+  @override
+  String get img2img_emotionStrengthNormal => 'Normal';
+
+  @override
+  String get img2img_emotionStrengthSlightlyWeak => 'Slightly Weak';
+
+  @override
+  String get img2img_emotionStrengthWeak => 'Weak';
+
+  @override
+  String get img2img_emotionStrengthWeaker => 'Even Weaker';
+
+  @override
+  String get img2img_emotionStrengthVeryWeak => 'Very Weak';
+
+  @override
+  String get img2img_emotionStrengthWeakest => 'Weakest';
+
+  @override
+  String get img2img_directorWeaken => 'Weaken emotion';
+
+  @override
+  String get img2img_directorStrengthen => 'Strengthen emotion';
+
+  @override
+  String get img2img_emotionScared => 'Scared';
+
+  @override
+  String get img2img_emotionNervous => 'Nervous';
+
+  @override
+  String get img2img_emotionThinking => 'Thinking';
+
+  @override
+  String get img2img_emotionConfused => 'Confused';
+
+  @override
+  String get img2img_emotionBored => 'Bored';
+
+  @override
+  String get img2img_emotionIrritated => 'Irritated';
+
+  @override
+  String get img2img_emotionAroused => 'Aroused';
+
+  @override
+  String get img2img_emotionEmbarrassed => 'Embarrassed';
+
+  @override
+  String get img2img_emotionDetermined => 'Determined';
+
+  @override
+  String get img2img_emotionHurt => 'Hurt';
 }

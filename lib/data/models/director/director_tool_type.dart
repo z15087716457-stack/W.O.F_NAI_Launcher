@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import '../image/image_operation.dart';
 
@@ -39,24 +38,15 @@ extension DirectorToolTypeExtension on DirectorToolType {
   bool get supportsDefry =>
       this == DirectorToolType.colorize || this == DirectorToolType.fixEmotion;
 
-  IconData get icon {
-    switch (this) {
-      case DirectorToolType.removeBackground:
-        return Icons.content_cut;
-      case DirectorToolType.extractLineArt:
-        return Icons.draw_outlined;
-      case DirectorToolType.toSketch:
-        return Icons.gesture;
-      case DirectorToolType.colorize:
-        return Icons.palette_outlined;
-      case DirectorToolType.fixEmotion:
-        return Icons.mood_outlined;
-      case DirectorToolType.declutter:
-        return Icons.cleaning_services_outlined;
-      case DirectorToolType.pixelSnap:
-        return Icons.grid_view;
-    }
-  }
+  String get iconAsset => switch (this) {
+    DirectorToolType.removeBackground => 'director_remove_bg',
+    DirectorToolType.extractLineArt => 'director_line_art',
+    DirectorToolType.toSketch => 'director_sketch',
+    DirectorToolType.colorize => 'director_colorize',
+    DirectorToolType.fixEmotion => 'director_emotion',
+    DirectorToolType.declutter => 'director_declutter',
+    DirectorToolType.pixelSnap => 'director_pixel_snap',
+  };
 
   String labelKey(AppLocalizations l10n) {
     switch (this) {
