@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/desktop_app_shutdown_service.dart';
 
 import '../../../data/models/image/image_operation.dart';
 import '../../../data/models/upscale/local_upscale_models.dart';
@@ -44,10 +45,15 @@ final localUpscaleTaskProvider =
 
 class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
   LocalUpscaleCancellation? _cancellation;
+  Future<void>? _pending;
   bool _disposed = false;
   @override
   LocalUpscaleTaskState build() {
     _disposed = false;
+    final removeCleanup = DesktopAppShutdownService.registerCleanup(() async {
+      _cancellation?.cancel();
+      await _pending;
+    });
     ref.listen(generationParamsNotifierProvider, (previous, next) {
       if (!_disposed &&
           !state.running &&
@@ -56,6 +62,7 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
       }
     });
     ref.onDispose(() {
+      removeCleanup();
       _disposed = true;
       _cancellation?.cancel();
     });
@@ -72,7 +79,14 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
     _cancellation?.cancel();
   }
 
-  Future<void> start() async {
+  Future<void> start() {
+    if (_pending != null) return _pending!;
+    final work = _start();
+    _pending = work;
+    return work.whenComplete(() => _pending = null);
+  }
+
+  Future<void> _start() async {
     final workflow = ref.read(imageWorkflowControllerProvider);
     final generation = ref.read(imageGenerationNotifierProvider);
     if (state.running ||

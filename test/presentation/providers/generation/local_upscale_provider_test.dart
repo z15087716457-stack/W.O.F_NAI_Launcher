@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/services/desktop_app_shutdown_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/utils/image_save_utils.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -67,6 +68,7 @@ void main() {
     'selection-back',
     'source-back',
     'cancel',
+    'shutdown',
   ]) {
     test('local tool $scenario protects source provenance and draft', () async {
       final service = _Service();
@@ -137,8 +139,12 @@ void main() {
             .setSourceImage(source);
       }
       if (scenario == 'cancel') task.cancel();
+      Future<void>? shutdown;
+      if (scenario == 'shutdown')
+        shutdown = DesktopAppShutdownService.prepareBackgroundShutdown();
       pending.complete(LocalUpscaleResult(_png(72, 48), 72, 48));
       await done;
+      await shutdown;
       final state = container.read(imageGenerationNotifierProvider);
       expect(
         container.read(imageWorkflowControllerProvider).isToolRunning,
@@ -151,7 +157,8 @@ void main() {
       expect(container.read(generationParamsNotifierProvider).seed, 999);
       if (scenario == 'new-source' ||
           scenario == 'source-back' ||
-          scenario == 'cancel') {
+          scenario == 'cancel' ||
+          scenario == 'shutdown') {
         expect(state.history, isEmpty);
       } else {
         expect(state.history, hasLength(1));

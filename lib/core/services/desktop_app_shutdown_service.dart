@@ -16,6 +16,23 @@ class DesktopAppShutdownService {
   DesktopAppShutdownService._();
 
   static Future<void>? _shutdownFuture;
+  static final _cleanups = <Future<void> Function()>{};
+
+  /// Register owned background work that must finish before stores are closed.
+  static void Function() registerCleanup(Future<void> Function() cleanup) {
+    _cleanups.add(cleanup);
+    return () => _cleanups.remove(cleanup);
+  }
+
+  static Future<void> prepareBackgroundShutdown() async {
+    for (final cleanup in List.of(_cleanups)) {
+      try {
+        await cleanup();
+      } catch (error) {
+        AppLogger.w('Background shutdown failed: $error', 'AppShutdown');
+      }
+    }
+  }
 
   static Future<void> shutdownAndExit(int code) {
     return _shutdownFuture ??= _performShutdown(code);
@@ -23,6 +40,7 @@ class DesktopAppShutdownService {
 
   static Future<void> _performShutdown(int code) async {
     AppLogger.i('Application shutdown started', 'AppShutdown');
+    await prepareBackgroundShutdown();
 
     try {
       await DatabaseManager.instance.dispose();
