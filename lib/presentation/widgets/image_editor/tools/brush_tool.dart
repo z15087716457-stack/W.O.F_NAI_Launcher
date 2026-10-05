@@ -148,8 +148,9 @@ class BrushTool extends EditorTool {
   @override
   void onPointerDown(PointerDownEvent event, EditorState state) {
     // Alt 模式下不开始绘画，等待 pointerUp 取色
-    if (state.isAltPressed) return;
+    if (state.isAltPressed && !state.inpaint) return;
 
+    state.ensureInpaintMaskLayer();
     // 如果上一个笔画还在进行中（快速连续点击），先提交它
     if (state.isDrawing && state.currentStrokePoints.isNotEmpty) {
       _commitCurrentStroke(state);
@@ -162,7 +163,7 @@ class BrushTool extends EditorTool {
   @override
   void onPointerMove(PointerMoveEvent event, EditorState state) {
     // Alt 模式下不更新笔画
-    if (state.isAltPressed) return;
+    if (state.isAltPressed && !state.inpaint) return;
 
     if (state.isDrawing) {
       // 坐标已由 EditorCanvas 统一转换为画布坐标
@@ -173,7 +174,7 @@ class BrushTool extends EditorTool {
   @override
   void onPointerUp(PointerUpEvent event, EditorState state) {
     // Alt 模式：取色
-    if (state.isAltPressed) {
+    if (state.isAltPressed && !state.inpaint) {
       _pickColorAndApply(event.localPosition, state);
       return;
     }
@@ -188,15 +189,18 @@ class BrushTool extends EditorTool {
   /// 提交当前笔画（抽取公共逻辑，供 onPointerDown 和 onPointerUp 调用）
   void _commitCurrentStroke(EditorState state) {
     final activeLayer = state.layerManager.activeLayer;
-    if (activeLayer != null && !activeLayer.locked) {
+    if (activeLayer != null &&
+        !activeLayer.locked &&
+        (!state.inpaint || activeLayer.inpaintMask)) {
       // 创建笔画数据
       final stroke = StrokeData(
         points: List.from(state.currentStrokePoints),
         size: _settings.size,
-        color: state.foregroundColor,
+        color: state.inpaint ? Colors.white : state.foregroundColor,
         opacity: _settings.opacity,
         hardness: _settings.hardness,
         isEraser: false,
+        square: _settings.square,
       );
 
       // 执行添加笔画操作

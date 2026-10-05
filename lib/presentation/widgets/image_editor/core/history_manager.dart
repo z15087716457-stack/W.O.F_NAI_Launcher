@@ -463,6 +463,7 @@ class StrokeData {
   final double opacity;
   final double hardness;
   final bool isEraser;
+  final bool square;
 
   StrokeData({
     required this.points,
@@ -471,6 +472,7 @@ class StrokeData {
     required this.opacity,
     required this.hardness,
     this.isEraser = false,
+    this.square = false,
   });
 
   StrokeData copyWith({
@@ -480,6 +482,7 @@ class StrokeData {
     double? opacity,
     double? hardness,
     bool? isEraser,
+    bool? square,
   }) {
     return StrokeData(
       points: points ?? this.points,
@@ -488,6 +491,7 @@ class StrokeData {
       opacity: opacity ?? this.opacity,
       hardness: hardness ?? this.hardness,
       isEraser: isEraser ?? this.isEraser,
+      square: square ?? this.square,
     );
   }
 }
@@ -498,6 +502,7 @@ class LayerData {
   final String name;
   final bool visible;
   final bool locked;
+  final bool inpaintMask;
   final double opacity;
   final LayerBlendMode blendMode;
   final List<StrokeData> strokes;
@@ -507,8 +512,146 @@ class LayerData {
     required this.name,
     required this.visible,
     required this.locked,
+    this.inpaintMask = false,
     required this.opacity,
     this.blendMode = LayerBlendMode.normal,
     required this.strokes,
   });
+}
+
+/// Focus edits share the same undo order as painted mask strokes.
+class SetInpaintFocusAction extends EditorAction {
+  SetInpaintFocusAction({required this.before, required this.after});
+  final Rect? before, after;
+  @override
+  void execute(EditorState state) => state.setInpaintFocusRegion(after);
+  @override
+  void undo(EditorState state) => state.setInpaintFocusRegion(before);
+  @override
+  String get description => 'Focused Area';
+}
+
+class ClearInpaintMasksAction extends EditorAction {
+  List<ClearLayerAction>? _layers;
+  Rect? _focus;
+  @override
+  void execute(EditorState state) {
+    _layers ??= state.layerManager.layers
+        .where((layer) => layer.inpaintMask)
+        .map((layer) => ClearLayerAction(layerId: layer.id))
+        .toList();
+    _focus = state.inpaintFocusRegion;
+    for (final action in _layers!) {
+      action.execute(state);
+    }
+    state.setInpaintFocusRegion(null);
+  }
+
+  @override
+  void undo(EditorState state) {
+    for (final action in _layers ?? <ClearLayerAction>[]) {
+      action.undo(state);
+    }
+    state.setInpaintFocusRegion(_focus);
+  }
+
+  @override
+  void dispose() {
+    for (final action in _layers ?? <ClearLayerAction>[]) {
+      action.dispose();
+    }
+  }
+
+  @override
+  String get description => 'Clear Mask';
+}
+
+class AddInpaintMaskLayerAction extends EditorAction {
+  AddInpaintMaskLayerAction({required this.name});
+  final String name;
+  LayerData? _data;
+  @override
+  void execute(EditorState state) {
+    if (_data == null) {
+      final layer = state.layerManager.addLayer(name: name);
+      layer.inpaintMask = true;
+      _data = layer.toData();
+    } else {
+      state.layerManager.insertLayerFromData(
+        _data!,
+        state.layerManager.layers.length,
+        setActive: true,
+      );
+    }
+  }
+
+  @override
+  void undo(EditorState state) {
+    if (_data != null) state.layerManager.removeLayer(_data!.id);
+  }
+
+  @override
+  String get description => 'Add Mask Layer';
+}
+
+/// Mask and 3D layers may contain raster images, which the ordinary stroke-only
+/// LayerData snapshot cannot restore by itself.
+class DeleteInpaintLayerAction extends EditorAction {
+  DeleteInpaintLayerAction({required this.layerId});
+  final String layerId;
+  Layer? _snapshot;
+  Image? _image;
+  int? _index;
+  bool _wasActive = false;
+  @override
+  void execute(EditorState state) {
+    final layer = state.layerManager.getLayerById(layerId);
+    if (layer == null || layerId == state.inpaintSourceLayerId) return;
+    _snapshot?.dispose();
+    _image?.dispose();
+    _snapshot = layer.clone();
+    _image = layer.baseImage?.clone();
+    _index = state.layerManager.layers.indexOf(layer);
+    _wasActive = state.layerManager.activeLayerId == layerId;
+    state.layerManager.removeLayer(layerId);
+  }
+
+  @override
+  void undo(EditorState state) {
+    if (_snapshot == null || _index == null) return;
+    final data = _snapshot!.toData();
+    // clone() creates a fresh id, while history must restore the original id.
+    final original = LayerData(
+      id: layerId,
+      name: data.name,
+      visible: data.visible,
+      locked: data.locked,
+      inpaintMask: data.inpaintMask,
+      opacity: data.opacity,
+      blendMode: data.blendMode,
+      strokes: data.strokes,
+    );
+    final layer = state.layerManager.insertLayerFromData(
+      original,
+      _index!,
+      setActive: _wasActive,
+    );
+    if (_image != null) {
+      layer.setBaseImageSync(_image!.clone(), _snapshot!.baseImageBytes);
+    }
+    layer.setBaseImageOffset(_snapshot!.baseImageOffset);
+    layer.model3d = _snapshot!.model3d;
+    state.requestUiUpdate();
+  }
+
+  @override
+  void dispose() {
+    _snapshot?.dispose();
+    _image?.dispose();
+    _snapshot = null;
+    _image = null;
+  }
+
+  @override
+  String get description => 'Delete Layer';
 }

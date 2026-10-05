@@ -13,6 +13,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/contiguous_region_selector.dart';
 import '../../../core/utils/editor_compression_utils.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
+import '../../../core/utils/inpaint_focus_region.dart';
 import '../../../core/utils/inpaint_outpaint_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
@@ -35,7 +36,9 @@ import 'widgets/panels/editor_quick_settings.dart';
 import 'widgets/panels/color_panel.dart';
 import 'widgets/panels/canvas_size_dialog.dart';
 import 'widgets/panels/shift_edges_dialog.dart';
-import 'widgets/outpaint_edge_drag_overlay.dart';
+import 'widgets/panels/inpaint_controls.dart';
+import '../model3d_editor/model3d_editor_screen.dart';
+import 'layers/model3d_layer_data.dart';
 import 'canvas/layer_painter.dart';
 import 'export/image_exporter_new.dart';
 import '../../widgets/common/themed_divider.dart';
@@ -56,6 +59,7 @@ class ImageEditorScreen extends StatefulWidget {
 
   /// 已有的蒙版图像
   final Uint8List? existingMask;
+  final InpaintFocusRegion? existingFocusRegion;
 
   /// 是否显示蒙版导出选项
   final bool showMaskExport;
@@ -86,6 +90,7 @@ class ImageEditorScreen extends StatefulWidget {
     this.initialImage,
     this.initialSize,
     this.existingMask,
+    this.existingFocusRegion,
     this.showMaskExport = true,
     this.mode = ImageEditorMode.edit,
     this.title = '',
@@ -102,6 +107,7 @@ class ImageEditorScreen extends StatefulWidget {
     Uint8List? initialImage,
     Size? initialSize,
     Uint8List? existingMask,
+    InpaintFocusRegion? existingFocusRegion,
     bool showMaskExport = true,
     ImageEditorMode mode = ImageEditorMode.edit,
     String? title,
@@ -113,6 +119,7 @@ class ImageEditorScreen extends StatefulWidget {
           initialImage: initialImage,
           initialSize: initialSize,
           existingMask: existingMask,
+          existingFocusRegion: existingFocusRegion,
           showMaskExport: showMaskExport,
           mode: mode,
           title: title ?? context.l10n.editor_defaultTitle,
@@ -128,18 +135,8 @@ class ImageEditorScreen extends StatefulWidget {
 class _ImageEditorScreenState extends State<ImageEditorScreen> {
   static const bool _useVirtualOutpaint = true;
   static const int _maxImportedImageBytes = 50 * 1024 * 1024;
-  static const Set<String> _inpaintToolIds = {
-    'brush',
-    'eraser',
-    'fill',
-    'magic_wand',
-    'rect_selection',
-    'ellipse_selection',
-    'lasso_selection',
-  };
 
   late EditorState _state;
-  bool _isMaskFillMode = false;
   EditorCompressionPlan? _compressionPlan;
   EditorCompressionTarget? _compressionTarget;
   bool _isInitialized = false;
@@ -362,6 +359,15 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   @visibleForTesting
+  EditorState get debugEditorState => _state;
+
+  @visibleForTesting
+  Future<Uint8List> debugExportMask() =>
+      _exportInpaintLayerMaskAtCompressionTarget(
+        _virtualOutpaintFrame?.outpaintMaskRects ?? const [],
+      );
+
+  @visibleForTesting
   void debugSetToolById(String toolId) {
     _state.setToolById(toolId);
   }
@@ -395,8 +401,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   void initState() {
     super.initState();
     _efficientVitSamService = EfficientVitSamService();
-    _state = EditorState();
-    _state.setMagicWandHandler(_applyMagicWandAt);
+    _state = EditorState(inpaint: _isInpaintMode);
+    if (!_isInpaintMode) _state.setMagicWandHandler(_applyMagicWandAt);
     _isOutpaintCommitPending = widget.initialOutpaintCommitPending;
     _showLayerPanel = widget.initialShowLayerPanel;
   }
@@ -434,10 +440,16 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     });
 
     if (_isInpaintMode) {
-      _state.setForegroundColor(const Color(0xFF60AAFF));
-      _state.setBrushOpacity(0.55);
-      _state.setBrushHardness(1.0);
+      _state.setForegroundColor(Colors.white);
+      for (final layer in _state.layerManager.layers) {
+        if (layer.id != _sourceLayerId) layer.inpaintMask = true;
+      }
+      _state.setBrushSize(32);
       _state.setToolById('brush');
+      _state.setInpaintFocusRegion(widget.existingFocusRegion?.rect);
+      _state.setInpaintContextSize(
+        widget.existingFocusRegion?.context.toDouble() ?? 96,
+      );
     }
 
     // 适应视口
@@ -493,6 +505,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         name: baseLayerName,
       );
       _sourceLayerId = sourceLayer?.id;
+      _state.inpaintSourceLayerId = _sourceLayerId;
       if (_isInpaintMode && sourceLayer != null) {
         _virtualOutpaintFrame = OutpaintVirtualFrame.fromSource(
           sourceWidth: image.width,
@@ -584,7 +597,10 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         targetWidth: _state.canvasSize.width.round(),
         targetHeight: _state.canvasSize.height.round(),
       );
-      final overlayBytes = InpaintMaskUtils.maskToEditorOverlay(resizedMask);
+      final overlayBytes = InpaintMaskUtils.maskToEditorOverlay(
+        resizedMask,
+        overlayAlpha: 255,
+      );
 
       // 将已有蒙版添加为图层
       final layer = await _addMaskLayerAboveSource(
@@ -626,7 +642,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       LayoutBuilder(
         builder: (context, constraints) {
           final isDesktop = constraints.maxWidth > 900;
-          return isDesktop ? _buildDesktopLayout() : _buildMobileLayout();
+          return isDesktop || _isInpaintMode
+              ? _buildDesktopLayout(constraints.biggest)
+              : _buildMobileLayout();
         },
       ),
     );
@@ -685,14 +703,22 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   Future<void> _showShiftEdgesDialog() async {
     if (!_isInpaintMode) return;
+    final source = await _prepareInpaintSourceAtCompressionTarget();
+    if (!mounted) return;
     final result = await ShiftEdgesDialog.show(
       context,
       sourceWidth: _state.canvasSize.width.round(),
       sourceHeight: _state.canvasSize.height.round(),
+      previewImage: source,
     );
     if (result == null || !mounted) return;
-    await _applyOutpaintEdges(
-      result.requestedEdges,
+    await _applyOutpaintFrameDelta(
+      OutpaintFrameDelta(
+        left: result.requestedEdges.left,
+        top: result.requestedEdges.top,
+        right: result.requestedEdges.right,
+        bottom: result.requestedEdges.bottom,
+      ),
       horizontalSnapTarget: result.horizontalSnapTarget,
       verticalSnapTarget: result.verticalSnapTarget,
     );
@@ -793,7 +819,10 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       final virtualOutpaintMaskRects =
           _virtualOutpaintFrame?.outpaintMaskRects ?? const <Rect>[];
       final hasMaskChanges =
-          _hasMaskContent() || virtualOutpaintMaskRects.isNotEmpty;
+          _hasMaskContent() ||
+          virtualOutpaintMaskRects.isNotEmpty ||
+          (_state.inpaintFocusInterior != null &&
+              !_state.inpaintFocusInterior!.isEmpty);
       AppLogger.d(
         'Export editor result: inpaint=$_isInpaintMode, '
             'hasImageChanges=$hasImageChanges, hasMaskChanges=$hasMaskChanges, '
@@ -835,6 +864,12 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
           ImageEditorResult(
             modifiedImage: modifiedImage,
             maskImage: maskImage,
+            inpaintFocusRegion: _state.inpaintFocusRegion == null
+                ? null
+                : InpaintFocusRegion.fromRect(
+                    _state.inpaintFocusRegion!,
+                    context: _state.inpaintContextSize.round(),
+                  ),
             hasImageChanges: !_isInpaintMode && hasImageChanges,
             hasMaskChanges: _isInpaintMode && hasMaskChanges,
             outpaintSourceImage: _isInpaintMode && _hasOutpaintChanges
@@ -908,7 +943,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   bool _hasMaskContent() {
     for (final layer in _state.layerManager.layers) {
-      if (!layer.visible || layer.id == _sourceLayerId) {
+      if (!layer.visible || (_isInpaintMode && !layer.inpaintMask)) {
         continue;
       }
       if (layer.hasBaseImage || layer.strokes.isNotEmpty) {
@@ -916,93 +951,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       }
     }
     return false;
-  }
-
-  void _handleFillClosedMaskRegions() {
-    if (!_isInpaintMode) {
-      return;
-    }
-
-    setState(() {
-      _isMaskFillMode = !_isMaskFillMode;
-    });
-
-    if (_isMaskFillMode) {
-      AppToast.info(context, context.l10n.editor_clickInsideClosedRegion);
-    }
-  }
-
-  Future<void> _fillClosedMaskRegionsAt(Offset localPosition) async {
-    if (!_isInpaintMode || !mounted) {
-      return;
-    }
-    final l10n = context.l10n;
-    final maskLayerName = l10n.editor_maskLayerName;
-
-    try {
-      final canvasPoint = _state.canvasController.screenToCanvas(
-        localPosition,
-        canvasSize: _state.canvasSize,
-      );
-      final originalMask = await ImageExporterNew.exportMaskFromLayers(
-        _state.layerManager,
-        _state.canvasSize,
-        excludedBaseImageLayerIds: {
-          if (_sourceLayerId != null) _sourceLayerId!,
-        },
-        forceHardEdges: true,
-        preferCpuHardEdgeExport: true,
-      );
-      if (!mounted) {
-        return;
-      }
-
-      final fillResult =
-          await InpaintMaskUtils.fillEditorMaskRegionAtPointAsync(
-            originalMask,
-            x: canvasPoint.dx.floor(),
-            y: canvasPoint.dy.floor(),
-          );
-      if (!mounted) {
-        return;
-      }
-      switch (fillResult.status) {
-        case MaskFillRegionStatus.emptyMask:
-          AppToast.warning(context, l10n.editor_drawClosedMaskOutlineFirst);
-          return;
-        case MaskFillRegionStatus.outOfBounds:
-        case MaskFillRegionStatus.clickedMaskedPixel:
-        case MaskFillRegionStatus.openRegion:
-          AppToast.info(context, l10n.editor_noClosedRegionAtPosition);
-          return;
-        case MaskFillRegionStatus.filled:
-          break;
-      }
-
-      final overlayBytes = fillResult.overlayBytes;
-      if (overlayBytes == null) {
-        throw Exception(l10n.editor_generateMaskOverlayFailed);
-      }
-      _removeAllMaskLayers();
-      final layer = await _addMaskLayerAboveSource(
-        overlayBytes,
-        name: maskLayerName,
-      );
-      if (layer == null) {
-        throw Exception(l10n.editor_updateMaskLayerFailed);
-      }
-
-      _state.requestUiUpdate();
-      if (mounted) {
-        _isMaskFillMode = false;
-        setState(() {});
-        AppToast.success(context, l10n.editor_closedRegionFilled);
-      }
-    } catch (e) {
-      if (mounted) {
-        AppToast.error(context, l10n.editor_fillMaskFailed(e));
-      }
-    }
   }
 
   int? _resolveMaskLayerInsertIndex() {
@@ -1024,27 +972,29 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   Future<Layer?> _addMaskLayerAboveSource(
     Uint8List imageBytes, {
     required String name,
-  }) {
-    return _state.layerManager.addLayerFromImage(
+  }) async {
+    final layer = await _state.layerManager.addLayerFromImage(
       imageBytes,
       name: name,
       index: _resolveMaskLayerInsertIndex(),
     );
+    if (layer != null) layer.inpaintMask = true;
+    return layer;
   }
 
   Layer _addEmptyMaskLayerAboveSource({required String name}) {
-    return _state.layerManager.addLayer(
+    final layer = _state.layerManager.addLayer(
       name: name,
       index: _resolveMaskLayerInsertIndex(),
     );
+    layer.inpaintMask = true;
+    return layer;
   }
 
   void _removeAllMaskLayers({Set<String> preservedLayerIds = const {}}) {
     final removableLayerIds = _state.layerManager.layers
         .where(
-          (layer) =>
-              layer.id != _sourceLayerId &&
-              !preservedLayerIds.contains(layer.id),
+          (layer) => layer.inpaintMask && !preservedLayerIds.contains(layer.id),
         )
         .map((layer) => layer.id)
         .toList(growable: false);
@@ -1056,7 +1006,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   bool _hasVisibleMaskContent(String sourceLayerId) {
     return _state.layerManager.layers.any(
-      (layer) => layer.id != sourceLayerId && layer.visible && layer.hasContent,
+      (layer) => layer.inpaintMask && layer.visible && layer.hasContent,
     );
   }
 
@@ -1126,23 +1076,47 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         .toList(growable: false);
     final resizedCanvasSize = applied.frame.canvasSize;
 
+    final beforeFocus = _state.inpaintFocusRegion;
+    final shiftedFocus = beforeFocus
+        ?.shift(applied.contentShift)
+        .intersect(Offset.zero & resizedCanvasSize);
+    _state.historyManager.execute(
+      _VirtualOutpaintFrameAction(
+        screen: this,
+        before: _effectiveOutpaintFrame,
+        after: applied.frame,
+        shift: applied.contentShift,
+        layerIds: nonSourceLayerIds,
+        compressionScale: compressionScale,
+        beforeFocus: beforeFocus,
+        afterFocus: shiftedFocus?.isEmpty == true ? null : shiftedFocus,
+      ),
+      _state,
+    );
+  }
+
+  void _applyVirtualOutpaintHistoryFrame(
+    OutpaintVirtualFrame frame,
+    Offset shift,
+    List<String> layerIds,
+    double compressionScale,
+    Rect? focus,
+  ) {
+    final sourceLayer = _state.layerManager.getLayerById(_sourceLayerId!);
+    if (sourceLayer == null) return;
     _state.canvasController.beginBatch();
     try {
       _state.runBatch(() {
-        sourceLayer.setBaseImageOffset(applied.frame.sourceDrawOffset);
-        _state.layerManager.translateLayersContent(
-          nonSourceLayerIds,
-          applied.contentShift,
-        );
+        sourceLayer.setBaseImageOffset(frame.sourceDrawOffset);
+        _state.layerManager.translateLayersContent(layerIds, shift);
         _state.layerManager.invalidateSnapshot();
-
-        _virtualOutpaintFrame = applied.frame;
+        _virtualOutpaintFrame = frame;
         _outpaintSourceImage = null;
-        _outpaintSourceWidth = applied.frame.width;
-        _outpaintSourceHeight = applied.frame.height;
-        _hasOutpaintChanges = applied.frame.hasOutpaintChanges;
-
-        _state.setCanvasSize(resizedCanvasSize);
+        _outpaintSourceWidth = frame.width;
+        _outpaintSourceHeight = frame.height;
+        _hasOutpaintChanges = frame.hasOutpaintChanges;
+        _state.setCanvasSize(frame.canvasSize);
+        _state.setInpaintFocusRegion(focus);
         _refreshCompressionPlan(desiredScale: compressionScale);
         _state.canvasController.fitToViewport(_state.canvasSize);
         _state.requestUiUpdate();
@@ -1150,10 +1124,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     } finally {
       _state.canvasController.endBatch();
     }
-
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _applyOutpaintFrameDeltaMaterialized(
@@ -1217,6 +1188,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       final result = await InpaintOutpaintUtils.resizeFrameAsync(
         sourceImage: sourceBytes,
         existingMask: existingMask,
+
         delta: delta,
         horizontalSnapTarget: horizontalSnapTarget,
         verticalSnapTarget: verticalSnapTarget,
@@ -1383,12 +1355,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       return;
     }
 
-    _removeAllMaskLayers();
-    _state.clearSelection(saveHistory: false);
+    _state.historyManager.execute(ClearInpaintMasksAction(), _state);
     _state.clearPreview();
-    _isMaskFillMode = false;
-    _addEmptyMaskLayerAboveSource(name: context.l10n.editor_maskLayerName);
-    _state.setToolById('brush');
     _refreshCompressionPlan();
     _state.requestUiUpdate();
     setState(() {});
@@ -1625,7 +1593,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               state: _state,
               showTransparentCanvasBackground:
                   _isInpaintMode || _hasTransparentCutout,
-              shouldSuppressPointerInput: _shouldSuppressCanvasPointerInput,
             ),
           ),
         ),
@@ -1642,167 +1609,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               ),
             ),
           ),
-        if (_isInpaintMode && !_isMaskFillMode)
-          Positioned.fill(
-            child: OutpaintEdgeDragOverlay(
-              canvasSize: _state.canvasSize,
-              controller: _state.canvasController,
-              enabled: !_isOutpaintCommitPending,
-              onCommitted: _applyOutpaintEdges,
-              onFrameResizeCommitted: _applyOutpaintFrameDelta,
-            ),
-          ),
-        if (_isInpaintMode && _isMaskFillMode)
-          Positioned.fill(
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Listener(
-                behavior: HitTestBehavior.opaque,
-                onPointerDown: (event) {
-                  unawaited(_fillClosedMaskRegionsAt(event.localPosition));
-                },
-                child: const SizedBox.expand(),
-              ),
-            ),
-          ),
         if (_isMagicWandProcessing)
           Positioned.fill(child: _buildMagicWandProgressOverlay()),
       ],
     );
-  }
-
-  bool _shouldSuppressCanvasPointerInput(Offset localPosition) {
-    if (!_isInpaintMode || _isMaskFillMode || _isOutpaintCommitPending) {
-      return false;
-    }
-
-    final viewportSize = _state.canvasController.viewportSize;
-    if (viewportSize == Size.zero) {
-      return false;
-    }
-
-    return OutpaintEdgeDragOverlay.isResizeInteractionPoint(
-      localPosition: localPosition,
-      viewportSize: viewportSize,
-      canvasSize: _state.canvasSize,
-      controller: _state.canvasController,
-    );
-  }
-
-  /// 加载蒙版文件
-  Future<void> _loadMaskFile() async {
-    final l10n = context.l10n;
-    final maskLayerName = l10n.editor_maskLayerName;
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      );
-
-      if (result == null || result.files.isEmpty) {
-        // 用户取消了文件选择
-        return;
-      }
-
-      final file = result.files.first;
-
-      // 验证文件扩展名（额外的安全检查）
-      if (file.path != null) {
-        final extension = file.path!.split('.').last.toLowerCase();
-        const validImageExtensions = [
-          'png',
-          'jpg',
-          'jpeg',
-          'webp',
-          'bmp',
-          'gif',
-        ];
-
-        if (!validImageExtensions.contains(extension)) {
-          AppLogger.w('Invalid file extension: $extension', 'ImageEditor');
-          if (mounted) {
-            AppToast.error(
-              context,
-              context.l10n.editor_unsupportedImageFormat(extension),
-            );
-          }
-          return;
-        }
-      }
-
-      // 读取文件字节数据
-      Uint8List? bytes;
-      if (file.bytes != null) {
-        bytes = file.bytes;
-      } else if (file.path != null) {
-        try {
-          bytes = await File(file.path!).readAsBytes();
-        } catch (e) {
-          AppLogger.e('Failed to read file: $e', 'ImageEditor');
-          if (mounted) {
-            AppToast.error(context, context.l10n.editor_readFileFailed(e));
-          }
-          return;
-        }
-      }
-
-      // 验证字节数据
-      if (bytes == null) {
-        AppLogger.w('File bytes is null', 'ImageEditor');
-        if (mounted) {
-          AppToast.error(context, l10n.editor_noFileData);
-        }
-        return;
-      }
-
-      // 检查文件是否为空
-      if (bytes.isEmpty) {
-        AppLogger.w('File is empty (0 bytes)', 'ImageEditor');
-        if (mounted) {
-          AppToast.error(context, l10n.editor_emptyImageFile);
-        }
-        return;
-      }
-
-      // 检查文件大小（限制为 50MB 以防止内存问题）
-      const maxFileSize = 50 * 1024 * 1024; // 50MB
-      if (bytes.length > maxFileSize) {
-        final sizeMB = (bytes.length / (1024 * 1024)).toStringAsFixed(1);
-        AppLogger.w('File too large: ${bytes.length} bytes', 'ImageEditor');
-        if (mounted) {
-          AppToast.error(context, l10n.editor_fileTooLarge(sizeMB));
-        }
-        return;
-      }
-
-      // 将蒙版添加为新图层
-      final layer = await _addMaskLayerAboveSource(bytes, name: maskLayerName);
-
-      if (layer != null) {
-        AppLogger.i('Mask layer added: ${layer.id}', 'ImageEditor');
-        if (mounted) {
-          AppToast.success(context, l10n.editor_maskLayerAdded);
-        }
-      } else {
-        // 图像解码失败或格式不支持
-        AppLogger.w(
-          'Failed to decode image or unsupported format',
-          'ImageEditor',
-        );
-        if (mounted) {
-          AppToast.error(context, l10n.editor_parseImageFailed);
-        }
-      }
-    } catch (e) {
-      AppLogger.e('Unexpected error loading mask file: $e', 'ImageEditor');
-      if (mounted) {
-        AppToast.error(context, l10n.editor_loadMaskFailed(e));
-      }
-    }
-  }
-
-  /// 加载蒙版
-  Future<void> _loadMask() async {
-    await _loadMaskFile();
   }
 }

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import '../tools/square_stroke.dart';
 
 import '../../../../core/utils/editor_compression_utils.dart';
 import '../../../../core/utils/hard_edge_mask_exporter.dart';
@@ -253,6 +254,11 @@ class ImageExporterNew {
     if (!forceHardEdges && stroke.hardness < 1.0) {
       final sigma = stroke.size * (1.0 - stroke.hardness) * 0.5;
       paint.maskFilter = MaskFilter.blur(BlurStyle.normal, sigma);
+    }
+
+    if (stroke.square) {
+      drawSquareStroke(canvas, stroke.points, stroke.size, paint);
+      return;
     }
 
     if (stroke.points.length == 1) {

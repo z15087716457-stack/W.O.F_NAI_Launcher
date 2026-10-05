@@ -81,34 +81,6 @@ extension _ImageEditorScreenMagicWand on _ImageEditorScreenState {
     return null;
   }
 
-  Layer? _resolveMagicWandSourceLayer() {
-    final sourceLayerId = _sourceLayerId;
-    if (sourceLayerId == null) {
-      return null;
-    }
-    final sourceLayer = _state.layerManager.getLayerById(sourceLayerId);
-    return sourceLayer?.hasContent == true ? sourceLayer : null;
-  }
-
-  Layer _resolveMagicWandMaskTarget() {
-    final activeLayer = _state.layerManager.activeLayer;
-    if (activeLayer != null &&
-        activeLayer.id != _sourceLayerId &&
-        !activeLayer.locked) {
-      return activeLayer;
-    }
-
-    for (final layer in _state.layerManager.layers) {
-      if (layer.id != _sourceLayerId && !layer.locked) {
-        return layer;
-      }
-    }
-
-    return _addEmptyMaskLayerAboveSource(
-      name: context.l10n.editor_maskLayerName,
-    );
-  }
-
   Future<EditorRawRgbaImage> _renderMagicWandSource(Layer layer) async {
     final width = _state.canvasSize.width.round();
     final height = _state.canvasSize.height.round();
@@ -155,36 +127,6 @@ extension _ImageEditorScreenMagicWand on _ImageEditorScreenState {
     }
   }
 
-  Future<Uint8List> _readExistingMagicWandMask(int width, int height) async {
-    final excludedLayerIds = {if (_sourceLayerId != null) _sourceLayerId!};
-    final raster = await ImageExporterNew.tryExportHardEdgeMaskRasterFromLayers(
-      _state.layerManager,
-      _state.canvasSize,
-      excludedBaseImageLayerIds: excludedLayerIds,
-    );
-    if (raster != null &&
-        raster.width == width &&
-        raster.height == height &&
-        raster.mask.length == width * height) {
-      return Uint8List.fromList(raster.mask);
-    }
-
-    final encodedMask = await ImageExporterNew.exportMaskFromLayers(
-      _state.layerManager,
-      _state.canvasSize,
-      excludedBaseImageLayerIds: excludedLayerIds,
-      forceHardEdges: true,
-      preferCpuHardEdgeExport: true,
-    );
-    final decodedMask = InpaintMaskUtils.decodeBinaryMask(encodedMask);
-    if (decodedMask == null ||
-        decodedMask.width != width ||
-        decodedMask.height != height) {
-      throw StateError('Failed to read the current inpaint mask.');
-    }
-    return Uint8List.fromList(decodedMask.mask);
-  }
-
   Future<ContiguousRegionSelection> _selectMagicWandRegion({
     required EditorRawRgbaImage source,
     required MagicWandSelectionMode mode,
@@ -225,7 +167,7 @@ extension _ImageEditorScreenMagicWand on _ImageEditorScreenState {
     required int tolerance,
     required bool invert,
   }) async {
-    if (!mounted || _isMagicWandProcessing) {
+    if (_isInpaintMode || !mounted || _isMagicWandProcessing) {
       return;
     }
 
@@ -242,9 +184,7 @@ extension _ImageEditorScreenMagicWand on _ImageEditorScreenState {
       return;
     }
 
-    final targetLayer = _isInpaintMode
-        ? _resolveMagicWandSourceLayer()
-        : _resolveMagicWandEditTarget();
+    final targetLayer = _resolveMagicWandEditTarget();
     if (targetLayer == null) {
       AppToast.warning(context, context.l10n.editor_magicWandNoSource);
       return;
@@ -271,86 +211,45 @@ extension _ImageEditorScreenMagicWand on _ImageEditorScreenState {
         throw StateError('Magic Wand returned an invalid selection mask.');
       }
 
-      if (_isInpaintMode) {
-        final combinedMask = await _readExistingMagicWandMask(width, height);
-        if (!mounted) {
-          return;
+      final editedBytes = Uint8List.fromList(source.bytes);
+      var erasedPixelCount = 0;
+      for (var index = 0; index < selection.mask.length; index++) {
+        if (selection.mask[index] == 1 && editedBytes[index * 4 + 3] != 0) {
+          editedBytes[index * 4 + 3] = 0;
+          erasedPixelCount++;
         }
-        var addedPixelCount = 0;
-        for (var index = 0; index < combinedMask.length; index++) {
-          if (selection.mask[index] == 1 && combinedMask[index] == 0) {
-            combinedMask[index] = 1;
-            addedPixelCount++;
-          }
-        }
-        if (addedPixelCount == 0) {
-          AppToast.info(context, context.l10n.editor_magicWandNothingChanged);
-          return;
-        }
+      }
+      if (erasedPixelCount == 0) {
+        AppToast.info(context, context.l10n.editor_magicWandNothingChanged);
+        return;
+      }
 
-        final overlayBytes =
-            await InpaintMaskUtils.encodeEditorOverlayFromBinaryMaskAsync(
-              combinedMask,
+      final editedImageBytes =
+          await EditorCompressionEncoder.encodeRgbaPngAsync(
+            EditorRawRgbaImage(
+              bytes: editedBytes,
               width: width,
               height: height,
-            );
-        final overlayImage = await _decodeMagicWandImage(overlayBytes);
-        if (!mounted) {
-          overlayImage.dispose();
-          return;
-        }
-        final maskLayer = _resolveMagicWandMaskTarget();
-        _state.historyManager.execute(
-          ReplaceLayerImageAction(
-            layerId: maskLayer.id,
-            newImageBytes: overlayBytes,
-            newImage: overlayImage,
-            actionDescription: 'Apply Magic Wand Mask',
-          ),
-          _state,
-        );
-        _state.layerManager.setActiveLayer(maskLayer.id);
-      } else {
-        final editedBytes = Uint8List.fromList(source.bytes);
-        var erasedPixelCount = 0;
-        for (var index = 0; index < selection.mask.length; index++) {
-          if (selection.mask[index] == 1 && editedBytes[index * 4 + 3] != 0) {
-            editedBytes[index * 4 + 3] = 0;
-            erasedPixelCount++;
-          }
-        }
-        if (erasedPixelCount == 0) {
-          AppToast.info(context, context.l10n.editor_magicWandNothingChanged);
-          return;
-        }
-
-        final editedImageBytes =
-            await EditorCompressionEncoder.encodeRgbaPngAsync(
-              EditorRawRgbaImage(
-                bytes: editedBytes,
-                width: width,
-                height: height,
-              ),
-              targetWidth: width,
-              targetHeight: height,
-            );
-        final editedImage = await _decodeMagicWandImage(editedImageBytes);
-        if (!mounted) {
-          editedImage.dispose();
-          return;
-        }
-        _state.historyManager.execute(
-          ReplaceLayerImageAction(
-            layerId: targetLayer.id,
-            newImageBytes: editedImageBytes,
-            newImage: editedImage,
-            actionDescription: 'Erase Magic Wand Region',
-          ),
-          _state,
-        );
-        _state.layerManager.setActiveLayer(targetLayer.id);
-        _hasTransparentCutout = true;
+            ),
+            targetWidth: width,
+            targetHeight: height,
+          );
+      final editedImage = await _decodeMagicWandImage(editedImageBytes);
+      if (!mounted) {
+        editedImage.dispose();
+        return;
       }
+      _state.historyManager.execute(
+        ReplaceLayerImageAction(
+          layerId: targetLayer.id,
+          newImageBytes: editedImageBytes,
+          newImage: editedImage,
+          actionDescription: 'Erase Magic Wand Region',
+        ),
+        _state,
+      );
+      _state.layerManager.setActiveLayer(targetLayer.id);
+      _hasTransparentCutout = true;
 
       _state.layerManager.invalidateSnapshot();
       _state.notifyRenderChange();

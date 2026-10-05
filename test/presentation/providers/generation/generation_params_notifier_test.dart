@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/utils/inpaint_focus_region.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
 import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
@@ -46,6 +47,43 @@ void main() {
     await Hive.box(StorageKeys.settingsBox).clear();
     await Hive.box(StorageKeys.historyBox).clear();
   });
+
+  test(
+    'focused inpaint fields survive tool rollback and clear with a new source',
+    () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      final source = Uint8List.fromList([1, 2, 3]);
+      notifier.setSourceImage(source);
+      const focus = InpaintFocusRegion(x: 64, y: 64, width: 384, height: 256);
+      notifier.setMaskImage(Uint8List.fromList([4, 5, 6]), focusRegion: focus);
+      final snapshot = container.read(generationParamsNotifierProvider);
+      notifier.setMaskImage(null);
+      expect(
+        container.read(generationParamsNotifierProvider).inpaintFocusRegion,
+        isNull,
+      );
+      notifier.restoreImageToolFields(snapshot);
+      expect(
+        container.read(generationParamsNotifierProvider).inpaintFocusRegion,
+        same(focus),
+      );
+      notifier.setSourceImage(Uint8List.fromList([7, 8, 9]));
+      expect(
+        container.read(generationParamsNotifierProvider).inpaintFocusRegion,
+        isNull,
+      );
+      notifier.restoreImageToolFields(snapshot);
+      notifier.clearInpainting();
+      expect(
+        container.read(generationParamsNotifierProvider).inpaintFocusRegion,
+        isNull,
+      );
+    },
+  );
 
   test('build should restore persisted variety plus state', () async {
     final storage = LocalStorageService();

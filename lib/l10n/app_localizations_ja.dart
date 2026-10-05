@@ -12421,4 +12421,61 @@ class AppLocalizationsJa extends AppLocalizations {
   String bridge_guide(Object clientPath) {
     return 'ローカル接続で W.O.F NAI Studio の操作を支援してください。\nクライアント：$clientPath\n\n1. シェルに合わせてパスを引用し、status --name <名前> で接続を確認してください。手順のコピーだけでは接続されません。\n2. get --name <名前> --out current.json で現在の状態を読み取ります。編集可能な原文は _draft.fields、競合確認用の値は field_versions にあります。他の値に含まれる品質タグを原文へ重複して書き戻さないでください。\n3. ユーザーが許可した項目だけを changes.json に保存し、set-json changes.json --base current.json --name <名前> を実行します。Studio はバックアップ後に対象項目を再確認します。競合時は中止して再読込し、新しい編集を上書きしないでください。readback を確認します。characters はリスト全体の置換です。無関係な名前、有効状態、位置、id を保持してください。参照画像は現在読み取り専用です。\n4. 接続や設定編集は生成の許可を意味しません。明示的な生成指示がある場合、quote --out quote.json --name <名前> を実行し、推定 Anlas 単価と読込済みの残高を報告します。最終請求はサーバーによります。許可と報告の後に gen --quote quote.json --authorized --name <名前> を実行します。1 回 1 枚、設定変更後は再見積もりが必要です。\n5. 操作完了後は切断します。Krita と同時接続できます。busy は処理完了を待ち、エラー後に即座の再試行を繰り返さないでください。Studio の停止、Ctrl+C、または返された request_id を使った cancel <request_id> --name <同じ名前> で生成を停止できます。発見ファイルのセッション秘密鍵を出力しないでください。\n';
   }
+
+  @override
+  String get editor_drawMask => 'マスクを描画';
+
+  @override
+  String get editor_eraseMask => 'マスクを消去';
+
+  @override
+  String get editor_squareBrush => '四角形ブラシ';
+
+  @override
+  String get editor_focusedArea => '注目範囲';
+
+  @override
+  String get editor_minimumContext => '最小参照範囲';
+
+  @override
+  String get editor_maskAppearance => 'マスクの表示';
+
+  @override
+  String get editor_maskColor => 'マスクの色';
+
+  @override
+  String get editor_maskOpacity => 'マスクの不透明度';
+
+  @override
+  String get editor_maskBorder => '境界線';
+
+  @override
+  String get editor_patternSolid => '単色';
+
+  @override
+  String get editor_patternLines => '斜線';
+
+  @override
+  String get editor_patternCrosshatch => 'クロスハッチ';
+
+  @override
+  String get editor_patternDots => 'ドット';
+
+  @override
+  String get editor_patternGrid => 'グリッド';
+
+  @override
+  String get editor_patternChecker => '市松模様';
+
+  @override
+  String get editor_patternHearts => 'ハート';
+
+  @override
+  String get editor_resize => 'サイズ変更';
+
+  @override
+  String get editor_penSize => 'ペンのサイズ';
+
+  @override
+  String get editor_sourceChanged => '編集中に元画像が変更されました。エディターを開き直してください。';
 }

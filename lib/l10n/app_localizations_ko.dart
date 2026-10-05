@@ -12439,4 +12439,61 @@ class AppLocalizationsKo extends AppLocalizations {
   String bridge_guide(Object clientPath) {
     return '로컬 연결로 W.O.F NAI Studio 작업을 도와주세요.\n클라이언트: $clientPath\n\n1. 셸에 맞게 경로를 인용하고 status --name <이름>으로 연결 성공을 확인하세요. 안내 복사만으로 연결되지는 않습니다.\n2. get --name <이름> --out current.json으로 현재 상태를 읽으세요. 편집할 원문은 _draft.fields, 충돌 확인 값은 field_versions입니다. 다른 값에 포함된 품질 태그를 원문에 중복해서 쓰지 마세요.\n3. 사용자가 허용한 필드만 changes.json에 저장하고 set-json changes.json --base current.json --name <이름>을 실행하세요. Studio는 백업 후 해당 필드를 다시 확인합니다. 충돌 시 중단하고 다시 읽으며 최신 사용자 편집을 덮어쓰지 마세요. readback을 확인하세요. characters는 목록 전체를 교체하므로 무관한 이름, 활성 상태, 위치와 id를 보존하세요. 참조 이미지는 현재 읽기 전용입니다.\n4. 연결이나 매개변수 편집은 생성 허가가 아닙니다. 명시적인 생성 요청이 있으면 quote --out quote.json --name <이름>을 실행해 예상 Anlas 단가와 로드된 계정 잔액을 알리세요. 실제 요금은 서버 기준입니다. 허가와 안내 후 gen --quote quote.json --authorized --name <이름>을 실행하세요. 요청당 한 장이며 초안이 바뀌면 다시 계산해야 합니다.\n5. 각 작업이 끝나면 연결이 종료됩니다. Krita와 동시에 연결할 수 있습니다. busy에서는 진행 중인 작업이 끝날 때까지 기다리고 오류 직후 재시도를 반복하지 마세요. Studio의 중지, Ctrl+C 또는 반환된 request_id로 cancel <request_id> --name <같은 이름>을 실행해 생성을 중지할 수 있습니다. 검색 파일의 세션 비밀 키를 출력하지 마세요.\n';
   }
+
+  @override
+  String get editor_drawMask => '마스크 그리기';
+
+  @override
+  String get editor_eraseMask => '마스크 지우기';
+
+  @override
+  String get editor_squareBrush => '사각형 브러시';
+
+  @override
+  String get editor_focusedArea => '집중 영역';
+
+  @override
+  String get editor_minimumContext => '최소 문맥 영역';
+
+  @override
+  String get editor_maskAppearance => '마스크 표시';
+
+  @override
+  String get editor_maskColor => '마스크 색상';
+
+  @override
+  String get editor_maskOpacity => '마스크 불투명도';
+
+  @override
+  String get editor_maskBorder => '테두리';
+
+  @override
+  String get editor_patternSolid => '단색';
+
+  @override
+  String get editor_patternLines => '선';
+
+  @override
+  String get editor_patternCrosshatch => '교차선';
+
+  @override
+  String get editor_patternDots => '점';
+
+  @override
+  String get editor_patternGrid => '격자';
+
+  @override
+  String get editor_patternChecker => '체커';
+
+  @override
+  String get editor_patternHearts => '하트';
+
+  @override
+  String get editor_resize => '크기 조정';
+
+  @override
+  String get editor_penSize => '펜 크기';
+
+  @override
+  String get editor_sourceChanged => '편집 중 원본 이미지가 변경되었습니다. 편집기를 다시 열어 주세요.';
 }

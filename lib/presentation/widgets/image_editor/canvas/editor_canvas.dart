@@ -103,7 +103,8 @@ class _EditorCanvasState extends State<EditorCanvas>
                     // Alt 模式或拾色器工具时都显示拾色器界面
                     final isColorPicker =
                         toolId == 'color_picker' ||
-                        _inputHandler.keyboard.isAltPressed;
+                        (!widget.state.inpaint &&
+                            _inputHandler.keyboard.isAltPressed);
                     final cursorPosition = _inputHandler.cursorPosition;
 
                     return ClipRect(

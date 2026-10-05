@@ -6,6 +6,7 @@ import '../../constants/api_constants.dart';
 import '../../enums/precise_ref_type.dart';
 import '../../utils/app_logger.dart';
 import '../../utils/inpaint_mask_utils.dart';
+import '../../utils/inpaint_focus_region.dart';
 import '../../utils/nai_resolution_adapter.dart';
 import '../../utils/nai_api_utils.dart';
 import '../../utils/nai_weight_syntax.dart';
@@ -31,6 +32,8 @@ class NAIImageRequestBuildResult {
     this.vibeEncodingMap = const {},
     this.normalizedSourceImageBytes,
     this.inpaintMaskArtifacts,
+    this.inpaintFocusRegion,
+    this.fullInpaintSourceImageBytes,
   });
 
   final int seed;
@@ -41,6 +44,8 @@ class NAIImageRequestBuildResult {
   final Map<int, String> vibeEncodingMap;
   final Uint8List? normalizedSourceImageBytes;
   final NovelAiInpaintMaskArtifacts? inpaintMaskArtifacts;
+  final InpaintFocusRegion? inpaintFocusRegion;
+  final Uint8List? fullInpaintSourceImageBytes;
 }
 
 class NAIImageRequestBuilder {
@@ -490,6 +495,8 @@ class NAIImageRequestBuilder {
     );
     Uint8List? normalizedSourceImageBytes;
     NovelAiInpaintMaskArtifacts? inpaintMaskArtifacts;
+    InpaintFocusRegion? focusRegion;
+    Uint8List? fullSourceImage;
 
     if (params.isV4Model) {
       buildV4Parameters(
@@ -513,19 +520,43 @@ class NAIImageRequestBuilder {
     if (params.action == ImageGenerationAction.infill &&
         params.sourceImage != null &&
         params.maskImage != null) {
-      final maskArtifactsFuture =
-          InpaintMaskUtils.prepareNovelAiInpaintMaskArtifactsAsync(
-            params.maskImage!,
-            targetWidth: params.width,
-            targetHeight: params.height,
+      var maskBytes = params.maskImage!;
+      var normalizedSource = await _normalizeRequestSourceImage(
+        params.sourceImage!,
+      );
+      var targetWidth = params.width, targetHeight = params.height;
+      if (params.inpaintFocusRegion != null) {
+        focusRegion = params.inpaintFocusRegion!.clamped(
+          params.width,
+          params.height,
+        );
+        fullSourceImage = normalizedSource;
+        final target = focusRegion.requestSize;
+        targetWidth = target.width;
+        targetHeight = target.height;
+        final cropped = await focusRegion.cropBytes(normalizedSource);
+        final resized =
+            await NaiResolutionAdapter.normalizeImageForRequestAsync(
+              cropped,
+              targetWidth: targetWidth,
+              targetHeight: targetHeight,
+            );
+        if (resized == null) {
+          throw StateError('Failed to resize focused inpaint source');
+        }
+        normalizedSource = resized;
+        maskBytes = await focusRegion.cropBytes(maskBytes);
+        requestParameters['width'] = targetWidth;
+        requestParameters['height'] = targetHeight;
+      }
+      inpaintMaskArtifacts =
+          await InpaintMaskUtils.prepareNovelAiInpaintMaskArtifactsAsync(
+            maskBytes,
+            targetWidth: targetWidth,
+            targetHeight: targetHeight,
             closingIterations: params.inpaintMaskClosingIterations,
             expansionIterations: params.inpaintMaskExpansionIterations,
           );
-      final normalizedSourceFuture = _normalizeRequestSourceImage(
-        params.sourceImage!,
-      );
-      final normalizedSource = await normalizedSourceFuture;
-      inpaintMaskArtifacts = await maskArtifactsFuture;
       normalizedSourceImageBytes = normalizedSource;
       requestParameters['image'] = base64Encode(normalizedSource);
       requestParameters['mask'] = base64Encode(
@@ -566,6 +597,8 @@ class NAIImageRequestBuilder {
       vibeEncodingMap: vibeEncodingMap,
       normalizedSourceImageBytes: normalizedSourceImageBytes,
       inpaintMaskArtifacts: inpaintMaskArtifacts,
+      inpaintFocusRegion: focusRegion,
+      fullInpaintSourceImageBytes: fullSourceImage,
     );
   }
 }

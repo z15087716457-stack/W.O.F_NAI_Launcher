@@ -131,72 +131,6 @@ void main() {
     expect((decoded!.width, decoded.height), (192, 128));
   });
 
-  testWidgets('outpaint edge resize does not paint brush strokes', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('zh'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: ImageEditorScreen(
-          initialImage: _buildSolidPng(128, 128, const Color(0xFF224466)),
-          mode: ImageEditorMode.inpaint,
-          title: 'Inpaint edge resize test',
-          initialShowLayerPanel: false,
-        ),
-      ),
-    );
-    await _pumpForAsyncEditorWork(tester);
-    await _pumpUntil(tester, () {
-      final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-      return state.debugActiveLayerName == '图层 1' &&
-          state.debugCurrentToolId == 'brush' &&
-          find.byType(EditorCanvas).evaluate().isNotEmpty;
-    });
-
-    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-    expect(state.debugCanvasSize, const Size(128, 128));
-    expect(state.debugActiveLayerStrokeCount, 0);
-
-    final rightEdge = find.byKey(const Key('outpaint_edge_right'));
-    expect(rightEdge, findsOneWidget);
-    final edgeRect = tester.getRect(rightEdge);
-    final start = edgeRect.center;
-    final inwardBy64 =
-        (state.debugCanvasToScreen(const Offset(64, 64)) as Offset) -
-        (state.debugCanvasToScreen(const Offset(128, 64)) as Offset);
-
-    final gesture = await tester.startGesture(
-      start,
-      kind: PointerDeviceKind.mouse,
-      buttons: kPrimaryButton,
-    );
-    await tester.pump();
-    await gesture.moveBy(inwardBy64);
-    await tester.pump();
-
-    expect(state.debugIsDrawing, isFalse);
-    expect(state.debugCurrentStrokePointCount, 0);
-
-    await gesture.up();
-    await _pumpUntil(
-      tester,
-      () => state.debugCanvasSize == const Size(64, 128),
-    );
-
-    expect(state.debugCanvasSize, const Size(64, 128));
-    expect(state.debugActiveLayerStrokeCount, 0);
-    expect(state.debugHasMaskContent, isFalse);
-    expect(state.debugHasOutpaintChanges, isTrue);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
-  });
-
   testWidgets('inpaint brush paints after virtual outpaint shift', (
     tester,
   ) async {
@@ -273,70 +207,68 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('near-edge outpaint drag does not fall through to brush', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets(
+    'near-edge mask strokes stay drawable without old resize handles',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('zh'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: ImageEditorScreen(
-          initialImage: _buildSolidPng(128, 128, const Color(0xFF224466)),
-          mode: ImageEditorMode.inpaint,
-          title: 'Inpaint near-edge resize test',
-          initialShowLayerPanel: false,
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ImageEditorScreen(
+            initialImage: _buildSolidPng(128, 128, const Color(0xFF224466)),
+            mode: ImageEditorMode.inpaint,
+            title: 'Inpaint near-edge resize test',
+            initialShowLayerPanel: false,
+          ),
         ),
-      ),
-    );
-    await _pumpForAsyncEditorWork(tester);
-    await _pumpUntil(tester, () {
+      );
+      await _pumpForAsyncEditorWork(tester);
+      await _pumpUntil(tester, () {
+        final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
+        return state.debugActiveLayerName == '图层 1' &&
+            state.debugCurrentToolId == 'brush' &&
+            find.byType(EditorCanvas).evaluate().isNotEmpty;
+      });
+
       final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-      return state.debugActiveLayerName == '图层 1' &&
-          state.debugCurrentToolId == 'brush' &&
-          find.byType(EditorCanvas).evaluate().isNotEmpty;
-    });
+      final editorCanvas = find.byType(EditorCanvas);
+      final canvasTopLeft = tester.getTopLeft(editorCanvas);
+      final rightEdge =
+          canvasTopLeft +
+          (state.debugCanvasToScreen(const Offset(128, 64)) as Offset);
+      final start = rightEdge - const Offset(16, 0);
+      final inwardBy64 =
+          (state.debugCanvasToScreen(const Offset(64, 64)) as Offset) -
+          (state.debugCanvasToScreen(const Offset(128, 64)) as Offset);
 
-    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-    final editorCanvas = find.byType(EditorCanvas);
-    final canvasTopLeft = tester.getTopLeft(editorCanvas);
-    final rightEdge =
-        canvasTopLeft +
-        (state.debugCanvasToScreen(const Offset(128, 64)) as Offset);
-    final start = rightEdge - const Offset(16, 0);
-    final inwardBy64 =
-        (state.debugCanvasToScreen(const Offset(64, 64)) as Offset) -
-        (state.debugCanvasToScreen(const Offset(128, 64)) as Offset);
+      final gesture = await tester.startGesture(
+        start,
+        kind: PointerDeviceKind.mouse,
+        buttons: kPrimaryButton,
+      );
+      await tester.pump();
+      await gesture.moveBy(inwardBy64);
+      await tester.pump();
 
-    final gesture = await tester.startGesture(
-      start,
-      kind: PointerDeviceKind.mouse,
-      buttons: kPrimaryButton,
-    );
-    await tester.pump();
-    await gesture.moveBy(inwardBy64);
-    await tester.pump();
+      expect(state.debugIsDrawing, isTrue);
+      expect(state.debugCurrentStrokePointCount, greaterThan(0));
 
-    expect(state.debugIsDrawing, isFalse);
-    expect(state.debugCurrentStrokePointCount, 0);
+      await gesture.up();
+      await tester.pump();
 
-    await gesture.up();
-    await _pumpUntil(
-      tester,
-      () => state.debugCanvasSize == const Size(64, 128),
-    );
+      expect(state.debugCanvasSize, const Size(128, 128));
+      expect(state.debugActiveLayerStrokeCount, 1);
+      expect(state.debugHasMaskContent, isTrue);
+      expect(state.debugHasOutpaintChanges, isFalse);
 
-    expect(state.debugCanvasSize, const Size(64, 128));
-    expect(state.debugActiveLayerStrokeCount, 0);
-    expect(state.debugHasMaskContent, isFalse);
-    expect(state.debugHasOutpaintChanges, isTrue);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
-  });
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    },
+  );
 }
 
 Future<void> _pumpForAsyncEditorWork(WidgetTester tester) async {

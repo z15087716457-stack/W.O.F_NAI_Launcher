@@ -9,6 +9,7 @@ class ImageEditorResult {
 
   /// Inpainting蒙版图像
   final Uint8List? maskImage;
+  final InpaintFocusRegion? inpaintFocusRegion;
 
   /// 是否有图像修改
   final bool hasImageChanges;
@@ -47,6 +48,7 @@ class ImageEditorResult {
   const ImageEditorResult({
     this.modifiedImage,
     this.maskImage,
+    this.inpaintFocusRegion,
     this.hasImageChanges = false,
     this.hasMaskChanges = false,
     this.outpaintSourceImage,
@@ -61,4 +63,43 @@ class ImageEditorResult {
     this.outputHeight,
     this.compressionApplied = false,
   });
+}
+
+/// The virtual frame keeps source pixels intact, so reversible geometry changes
+/// can share the mask history without encoding an image on each resize.
+class _VirtualOutpaintFrameAction extends EditorAction {
+  _VirtualOutpaintFrameAction({
+    required this.screen,
+    required this.before,
+    required this.after,
+    required this.shift,
+    required this.layerIds,
+    required this.compressionScale,
+    required this.beforeFocus,
+    required this.afterFocus,
+  });
+  final _ImageEditorScreenState screen;
+  final OutpaintVirtualFrame before, after;
+  final Offset shift;
+  final List<String> layerIds;
+  final double compressionScale;
+  final Rect? beforeFocus, afterFocus;
+  @override
+  void execute(EditorState state) => screen._applyVirtualOutpaintHistoryFrame(
+    after,
+    shift,
+    layerIds,
+    compressionScale,
+    afterFocus,
+  );
+  @override
+  void undo(EditorState state) => screen._applyVirtualOutpaintHistoryFrame(
+    before,
+    -shift,
+    layerIds,
+    compressionScale,
+    beforeFocus,
+  );
+  @override
+  String get description => 'Shift Edges';
 }

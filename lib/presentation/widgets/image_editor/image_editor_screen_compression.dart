@@ -80,7 +80,10 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
   Future<Uint8List> _exportInpaintLayerMaskAtCompressionTarget(
     List<Rect> additionalMaskRects,
   ) async {
-    final excludedSourceIds = {if (_sourceLayerId != null) _sourceLayerId!};
+    final excludedSourceIds = {
+      for (final layer in _state.layerManager.layers)
+        if (!layer.inpaintMask) layer.id,
+    };
     final target = _activeCompressionTarget;
     final raster = await ImageExporterNew.tryExportHardEdgeMaskRasterFromLayers(
       _state.layerManager,
@@ -89,6 +92,13 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
       additionalMaskRects: additionalMaskRects,
     );
     if (raster != null) {
+      final focus = _state.inpaintFocusRegion;
+      if (focus != null) {
+        InpaintFocusRegion.fromRect(
+          focus,
+          context: _state.inpaintContextSize.round(),
+        ).applyToBinaryMask(raster.mask, raster.width, raster.height);
+      }
       return InpaintMaskUtils.resizeBinaryMaskToPngAsync(
         raster.mask,
         sourceWidth: raster.width,
@@ -105,6 +115,21 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
       forceHardEdges: true,
       additionalMaskRects: additionalMaskRects,
     );
+    final focus = _state.inpaintFocusRegion;
+    final binary = InpaintMaskUtils.decodeBinaryMask(mask);
+    if (focus != null && binary != null) {
+      InpaintFocusRegion.fromRect(
+        focus,
+        context: _state.inpaintContextSize.round(),
+      ).applyToBinaryMask(binary.mask, binary.width, binary.height);
+      return InpaintMaskUtils.resizeBinaryMaskToPngAsync(
+        binary.mask,
+        sourceWidth: binary.width,
+        sourceHeight: binary.height,
+        targetWidth: target.width,
+        targetHeight: target.height,
+      );
+    }
     return InpaintMaskUtils.resizeMaskBytesAsync(
       mask,
       targetWidth: target.width,
@@ -124,6 +149,33 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
       source = _inpaintWorkingSourceImage;
     }
     if (source == null) return null;
+    final imageLayers = _state.layerManager.layers
+        .where(
+          (layer) =>
+              !layer.inpaintMask && layer.id != _sourceLayerId && layer.visible,
+        )
+        .toList();
+    if (imageLayers.isNotEmpty) {
+      final codec = await ui.instantiateImageCodec(source);
+      final image = (await codec.getNextFrame()).image;
+      codec.dispose();
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      canvas.drawImage(image, Offset.zero, Paint());
+      for (final layer in imageLayers.reversed) {
+        layer.render(canvas, _state.canvasSize);
+      }
+      final picture = recorder.endRecording();
+      final merged = await picture.toImage(
+        _state.canvasSize.width.round(),
+        _state.canvasSize.height.round(),
+      );
+      picture.dispose();
+      final data = await merged.toByteData(format: ui.ImageByteFormat.png);
+      merged.dispose();
+      image.dispose();
+      if (data != null) source = data.buffer.asUint8List();
+    }
 
     final normalized = await NaiResolutionAdapter.normalizeImageForRequestAsync(
       source,

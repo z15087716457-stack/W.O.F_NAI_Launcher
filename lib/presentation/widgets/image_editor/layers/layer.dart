@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import '../tools/square_stroke.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/utils/app_logger.dart';
@@ -139,6 +140,9 @@ class Layer {
   /// 是否锁定
   bool locked;
 
+  /// Mask layers export coverage; image/3D layers remain in the source.
+  bool inpaintMask;
+
   /// 不透明度 (0.0 - 1.0)
   double opacity;
 
@@ -215,6 +219,7 @@ class Layer {
     this.name = 'New Layer',
     this.visible = true,
     this.locked = false,
+    this.inpaintMask = false,
     this.opacity = 1.0,
     this.blendMode = LayerBlendMode.normal,
   }) : id = id ?? const Uuid().v4();
@@ -250,6 +255,7 @@ class Layer {
         points: List<Offset>.from(stroke.points),
         size: stroke.size,
         isEraser: stroke.isEraser,
+        square: stroke.square,
       );
     }).toList();
   }
@@ -644,6 +650,11 @@ class Layer {
       paint.maskFilter = MaskFilter.blur(BlurStyle.normal, sigma);
     }
 
+    if (stroke.square) {
+      drawSquareStroke(canvas, stroke.points, stroke.size, paint);
+      return;
+    }
+
     if (stroke.points.length == 1) {
       // 单点绘制圆形
       canvas.drawCircle(
@@ -882,6 +893,7 @@ class Layer {
       name: name,
       visible: visible,
       locked: locked,
+      inpaintMask: inpaintMask,
       opacity: opacity,
       blendMode: blendMode,
       strokes: List.from(_strokes),
@@ -895,6 +907,7 @@ class Layer {
       name: data.name,
       visible: data.visible,
       locked: data.locked,
+      inpaintMask: data.inpaintMask,
       opacity: data.opacity,
       blendMode: data.blendMode,
     );
@@ -912,6 +925,7 @@ class Layer {
       name: newName ?? '$name Copy',
       visible: visible,
       locked: locked,
+      inpaintMask: inpaintMask,
       opacity: opacity,
       blendMode: blendMode,
     );

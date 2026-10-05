@@ -7236,5 +7236,24 @@
     "placeholders": {
       "clientPath": {}
     }
-  }
+  },
+  "editor_drawMask": "Draw Mask",
+  "editor_eraseMask": "Erase Mask",
+  "editor_squareBrush": "Square Brush",
+  "editor_focusedArea": "Focused Area",
+  "editor_minimumContext": "Minimum Context Area",
+  "editor_maskAppearance": "Mask Appearance",
+  "editor_maskColor": "Mask Color",
+  "editor_maskOpacity": "Mask Opacity",
+  "editor_maskBorder": "Border",
+  "editor_patternSolid": "Solid",
+  "editor_patternLines": "Lines",
+  "editor_patternCrosshatch": "Crosshatch",
+  "editor_patternDots": "Dots",
+  "editor_patternGrid": "Grid",
+  "editor_patternChecker": "Checker",
+  "editor_patternHearts": "Hearts",
+  "editor_resize": "Resize",
+  "editor_penSize": "Pen Size",
+  "editor_sourceChanged": "The source image changed while editing. Please reopen the editor."
 }

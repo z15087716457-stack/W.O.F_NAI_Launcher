@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,23 +28,27 @@ class ShiftEdgesResult {
 class ShiftEdgesDialog extends StatefulWidget {
   final int sourceWidth;
   final int sourceHeight;
+  final Uint8List? previewImage;
 
   const ShiftEdgesDialog({
     super.key,
     required this.sourceWidth,
     required this.sourceHeight,
+    this.previewImage,
   });
 
   static Future<ShiftEdgesResult?> show(
     BuildContext context, {
     required int sourceWidth,
     required int sourceHeight,
+    Uint8List? previewImage,
   }) {
     return showDialog<ShiftEdgesResult>(
       context: context,
       builder: (context) => ShiftEdgesDialog(
         sourceWidth: sourceWidth,
         sourceHeight: sourceHeight,
+        previewImage: previewImage,
       ),
     );
   }
@@ -77,7 +82,6 @@ class _ShiftEdgesDialogState extends State<ShiftEdgesDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final preview = _preview;
 
     return Shortcuts(
@@ -102,49 +106,38 @@ class _ShiftEdgesDialogState extends State<ShiftEdgesDialog> {
             },
           ),
         },
-        child: AlertDialog(
-          title: Text(context.l10n.editor_shiftEdges),
-          content: SizedBox(
-            width: 360,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  context.l10n.editor_currentSize(
-                    widget.sourceWidth,
-                    widget.sourceHeight,
-                  ),
-                  style: theme.textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                Row(
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+          insetPadding: const EdgeInsets.all(16),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 390),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: _EdgeInput(
-                        key: const Key('shift_edges_left'),
-                        label: context.l10n.editor_edgeLeft,
-                        controller: _leftController,
-                        errorText: _edgeErrorText(_leftController.text),
-                        onChanged: _handleChanged,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            context.l10n.editor_shiftEdges,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: context.l10n.common_close,
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _EdgeInput(
-                        key: const Key('shift_edges_right'),
-                        label: context.l10n.editor_edgeRight,
-                        controller: _rightController,
-                        errorText: _edgeErrorText(_rightController.text),
-                        onChanged: _handleChanged,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: 80,
                       child: _EdgeInput(
                         key: const Key('shift_edges_top'),
                         label: context.l10n.editor_edgeTop,
@@ -153,8 +146,42 @@ class _ShiftEdgesDialogState extends State<ShiftEdgesDialog> {
                         onChanged: _handleChanged,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 76,
+                          child: _EdgeInput(
+                            key: const Key('shift_edges_left'),
+                            label: context.l10n.editor_edgeLeft,
+                            controller: _leftController,
+                            errorText: _edgeErrorText(_leftController.text),
+                            onChanged: _handleChanged,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: SizedBox(
+                            height: 160,
+                            child: _buildPreview(preview),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 76,
+                          child: _EdgeInput(
+                            key: const Key('shift_edges_right'),
+                            label: context.l10n.editor_edgeRight,
+                            controller: _rightController,
+                            errorText: _edgeErrorText(_rightController.text),
+                            onChanged: _handleChanged,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: 80,
                       child: _EdgeInput(
                         key: const Key('shift_edges_bottom'),
                         label: context.l10n.editor_edgeBottom,
@@ -163,27 +190,115 @@ class _ShiftEdgesDialogState extends State<ShiftEdgesDialog> {
                         onChanged: _handleChanged,
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 40,
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          shape: const RoundedRectangleBorder(),
+                        ),
+                        onPressed: _canConfirm(preview)
+                            ? () => _confirm(preview)
+                            : null,
+                        child: Text(context.l10n.editor_resize),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                _SizeSummary(preview: preview),
-              ],
+              ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(context.l10n.common_cancel),
-            ),
-            FilledButton(
-              onPressed: _canConfirm(preview) ? () => _confirm(preview) : null,
-              child: Text(context.l10n.editor_shiftEdges),
-            ),
-          ],
         ),
       ),
     );
   }
+
+  Widget _buildPreview(_ShiftEdgesPreview preview) {
+    final valid =
+        preview.isValid &&
+        preview.appliedWidth > 0 &&
+        preview.appliedHeight > 0;
+    final width = valid ? preview.appliedWidth : widget.sourceWidth;
+    final height = valid ? preview.appliedHeight : widget.sourceHeight;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scale = math.min(
+          constraints.maxWidth / width,
+          constraints.maxHeight / height,
+        );
+        return Center(
+          child: SizedBox(
+            width: width * scale,
+            height: height * scale,
+            child: ClipRect(
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ColoredBox(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                    ),
+                  ),
+                  if (widget.previewImage != null)
+                    Positioned(
+                      left: valid ? preview.appliedEdges.left * scale : 0,
+                      top: valid ? preview.appliedEdges.top * scale : 0,
+                      width: widget.sourceWidth * scale,
+                      height: widget.sourceHeight * scale,
+                      child: Image.memory(
+                        widget.previewImage!,
+                        fit: BoxFit.fill,
+                        gaplessPlayback: true,
+                      ),
+                    ),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _dimensionLabel(
+                                '${widget.sourceWidth} × ${widget.sourceHeight}',
+                              ),
+                              if (valid && !preview.requestedEdges.isEmpty)
+                                _dimensionLabel('$width × $height'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _dimensionLabel(String value) => Container(
+    margin: const EdgeInsets.symmetric(vertical: 2),
+    padding: const EdgeInsets.all(4),
+    color: Theme.of(context).colorScheme.surface.withValues(alpha: .85),
+    child: Text(
+      value,
+      style: const TextStyle(
+        fontSize: 10,
+        fontFamily: StudioTypography.mono,
+        fontFamilyFallback: StudioTypography.fallback,
+      ),
+    ),
+  );
 
   _ShiftEdgesPreview get _preview {
     final left = _parseEdge(_leftController.text);
@@ -239,7 +354,7 @@ class _ShiftEdgesDialogState extends State<ShiftEdgesDialog> {
 
   int? _parseEdge(String value) {
     final parsed = int.tryParse(value.trim());
-    if (parsed == null || parsed < 0) {
+    if (parsed == null) {
       return null;
     }
     return parsed;
@@ -249,9 +364,6 @@ class _ShiftEdgesDialogState extends State<ShiftEdgesDialog> {
     final parsed = int.tryParse(value.trim());
     if (parsed == null) {
       return context.l10n.editor_enterNumber;
-    }
-    if (parsed < 0) {
-      return context.l10n.editor_nonNegativeNumber;
     }
     return null;
   }
@@ -267,7 +379,9 @@ class _ShiftEdgesDialogState extends State<ShiftEdgesDialog> {
     if (preview.requestedEdges.isEmpty) {
       return false;
     }
-    return preview.appliedWidth <= _maxDimension &&
+    return preview.requestedWidth >= 64 &&
+        preview.requestedHeight >= 64 &&
+        preview.appliedWidth <= _maxDimension &&
         preview.appliedHeight <= _maxDimension;
   }
 
@@ -314,95 +428,9 @@ class _EdgeInput extends StatelessWidget {
         isDense: true,
         errorText: errorText,
       ),
-      keyboardType: TextInputType.number,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      keyboardType: const TextInputType.numberWithOptions(signed: true),
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^-?\d*$'))],
       onChanged: onChanged,
-    );
-  }
-}
-
-class _SizeSummary extends StatelessWidget {
-  final _ShiftEdgesPreview preview;
-
-  const _SizeSummary({required this.preview});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final hasOversizedAppliedDimensions =
-        preview.isValid &&
-        (preview.appliedWidth > _ShiftEdgesDialogState._maxDimension ||
-            preview.appliedHeight > _ShiftEdgesDialogState._maxDimension);
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            preview.isValid
-                ? l10n.editor_requestedSize(
-                    preview.requestedWidth,
-                    preview.requestedHeight,
-                  )
-                : l10n.editor_requestedSizeInvalid,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            preview.isValid
-                ? l10n.editor_appliedSize(
-                    preview.appliedWidth,
-                    preview.appliedHeight,
-                  )
-                : l10n.editor_appliedSizeInvalid,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: hasOversizedAppliedDimensions
-                  ? theme.colorScheme.error
-                  : theme.colorScheme.primary,
-              fontWeight: FontWeight.w600,
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            preview.isValid
-                ? l10n.editor_appliedEdges(
-                    preview.appliedEdges.left,
-                    preview.appliedEdges.top,
-                    preview.appliedEdges.right,
-                    preview.appliedEdges.bottom,
-                  )
-                : l10n.editor_appliedEdgesInvalid,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontFamily: StudioTypography.mono,
-              fontFamilyFallback: StudioTypography.fallback,
-            ),
-          ),
-          if (hasOversizedAppliedDimensions) ...[
-            const SizedBox(height: 8),
-            Text(
-              l10n.editor_appliedDimensionLimit(
-                _ShiftEdgesDialogState._maxDimension,
-              ),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -46,73 +45,68 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets(
-    'outpaint drag commit updates virtual state without pending commit',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(1200, 800));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets('Shift Edges updates virtual state without old drag handles', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: ImageEditorScreen(
-            initialImage: _buildSolidPng(128, 128, const Color(0xFFAA3322)),
-            mode: ImageEditorMode.inpaint,
-            title: 'Inpaint test',
-            initialShowLayerPanel: false,
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: ImageEditorScreen(
+          initialImage: _buildSolidPng(128, 128, const Color(0xFFAA3322)),
+          mode: ImageEditorMode.inpaint,
+          title: 'Inpaint test',
+          initialShowLayerPanel: false,
         ),
-      );
-      await _pumpForAsyncEditorWork(tester);
-      await _pumpUntil(tester, () {
-        final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-        return List<String>.from(state.debugLayerNames).contains('底图') &&
-            find.byType(EditorCanvas).evaluate().isNotEmpty;
-      });
-
+      ),
+    );
+    await _pumpForAsyncEditorWork(tester);
+    await _pumpUntil(tester, () {
       final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-      expect(state.debugCanvasSize, const Size(128, 128));
-      expect(state.debugOutpaintCommitPending, isFalse);
-      expect(state.debugHasOutpaintChanges, isFalse);
-      expect(state.debugVirtualOutpaintMaskRects, isEmpty);
+      return List<String>.from(state.debugLayerNames).contains('底图') &&
+          find.byType(EditorCanvas).evaluate().isNotEmpty;
+    });
 
-      final rightEdge = find.byKey(const Key('outpaint_edge_right'));
-      expect(rightEdge, findsOneWidget);
-      final edgeRect = tester.getRect(rightEdge);
-      final outwardBy64 =
-          (state.debugCanvasToScreen(const Offset(192, 64)) as Offset) -
-          (state.debugCanvasToScreen(const Offset(128, 64)) as Offset);
+    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
+    expect(state.debugCanvasSize, const Size(128, 128));
+    expect(state.debugOutpaintCommitPending, isFalse);
+    expect(state.debugHasOutpaintChanges, isFalse);
+    expect(state.debugVirtualOutpaintMaskRects, isEmpty);
 
-      final gesture = await tester.startGesture(
-        edgeRect.center,
-        kind: PointerDeviceKind.mouse,
-        buttons: kPrimaryButton,
+    expect(find.byKey(const Key('outpaint_edge_right')), findsNothing);
+    await tester.runAsync(() async {
+      await state.debugApplyOutpaintFrameDelta(
+        const OutpaintFrameDelta(right: 64),
       );
-      await tester.pump();
-      await gesture.moveBy(outwardBy64);
-      await tester.pump();
-      await gesture.up();
-      await _pumpUntil(
-        tester,
-        () => state.debugCanvasSize == const Size(192, 128),
-      );
+    });
+    await tester.pump();
 
-      expect(state.debugOutpaintCommitPending, isFalse);
-      expect(state.debugCanvasSize, const Size(192, 128));
-      expect(state.debugOutpaintSourceWidth, 192);
-      expect(state.debugOutpaintSourceHeight, 128);
-      expect(state.debugHasOutpaintChanges, isTrue);
-      expect(
-        state.debugVirtualOutpaintMaskRects,
-        contains(const Rect.fromLTRB(127, 0, 192, 128)),
-      );
+    expect(state.debugOutpaintCommitPending, isFalse);
+    expect(state.debugCanvasSize, const Size(192, 128));
+    expect(state.debugOutpaintSourceWidth, 192);
+    expect(state.debugOutpaintSourceHeight, 128);
+    expect(state.debugHasOutpaintChanges, isTrue);
+    expect(
+      state.debugVirtualOutpaintMaskRects,
+      contains(const Rect.fromLTRB(127, 0, 192, 128)),
+    );
 
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump();
-    },
-  );
+    expect(state.debugUndo(), isTrue);
+    await tester.pump();
+    expect(state.debugCanvasSize, const Size(128, 128));
+    expect(state.debugHasOutpaintChanges, isFalse);
+    final editor = state.debugEditorState;
+    editor.redo();
+    await tester.pump();
+    expect(state.debugCanvasSize, const Size(192, 128));
+    expect(state.debugHasOutpaintChanges, isTrue);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
 
   testWidgets('Save and Close materializes virtual outpaint source and mask', (
     tester,

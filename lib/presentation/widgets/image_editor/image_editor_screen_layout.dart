@@ -2,12 +2,10 @@ part of 'image_editor_screen.dart';
 
 extension _ImageEditorScreenLayout on _ImageEditorScreenState {
   /// 浮层与屏幕边缘的间距
-  static const double _overlayInset = 12;
+  static const double _overlayInset = 10;
 
   /// 桌面端布局 - 官方风格全屏画布 + 四角浮层
-  Widget _buildDesktopLayout() {
-    final mediaSize = MediaQuery.sizeOf(context);
-
+  Widget _buildDesktopLayout(Size mediaSize) {
     return Scaffold(
       body: Stack(
         children: [
@@ -16,7 +14,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
 
           // 左上：焦点蒙版卡片 + 当前工具设置
           Positioned(
-            top: _overlayInset,
+            top: _isInpaintMode && mediaSize.width < 560 ? 66 : _overlayInset,
             left: _overlayInset,
             child: _buildTopLeftOverlay(mediaSize),
           ),
@@ -40,12 +38,12 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
           if (_showLayerPanel)
             Positioned(
               right: _overlayInset,
-              bottom: _overlayInset,
+              bottom: _isInpaintMode ? _overlayInset + 50 : _overlayInset,
               child: _buildLayerTrayOverlay(),
             ),
 
           // 详细图层面板 flyout（非模态浮层，避开右下托盘与顶部栏）
-          if (_showLayerPanel && _showLayerFlyout)
+          if (!_isInpaintMode && _showLayerPanel && _showLayerFlyout)
             Positioned(
               top: _overlayInset + 56,
               right: _overlayInset + 92,
@@ -71,19 +69,6 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
             onPressed: _showMobileLayerSheet,
             tooltip: context.l10n.editor_layers,
           ),
-          // 加载蒙版按钮
-          if (_isInpaintMode)
-            IconButton(
-              icon: const Icon(Icons.upload_file),
-              onPressed: _loadMask,
-              tooltip: context.l10n.editor_loadMask,
-            ),
-          if (_isInpaintMode)
-            IconButton(
-              icon: const Icon(Icons.open_in_full),
-              onPressed: _showShiftEdgesDialog,
-              tooltip: context.l10n.editor_shiftEdges,
-            ),
           if (!_isInpaintMode)
             IconButton(
               icon: const Icon(Icons.tune_rounded),
@@ -111,16 +96,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
           _buildMobileToolSettings(),
 
           // 底部工具栏
-          MobileToolbar(
-            state: _state,
-            onClear: _isInpaintMode ? _resetInpaintMask : null,
-            onFillMask: _isInpaintMode ? _handleFillClosedMaskRegions : null,
-            canFillMask: _isInpaintMode ? _hasMaskContent : null,
-            onLayersPressed: _showMobileLayerSheet,
-            allowedToolIds: _isInpaintMode
-                ? _ImageEditorScreenState._inpaintToolIds
-                : null,
-          ),
+          MobileToolbar(state: _state, onLayersPressed: _showMobileLayerSheet),
         ],
       ),
     );
@@ -130,7 +106,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
   Widget _buildTopLeftOverlay(Size mediaSize) {
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxWidth: 264,
+        maxWidth: _isInpaintMode ? 280 : 264,
         maxHeight: mediaSize.height * 0.72,
       ),
       child: SingleChildScrollView(
@@ -145,6 +121,43 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
 
   /// 右上浮层：压缩控制、下载画布、保存并关闭、退出
   Widget _buildTopRightActions(Size mediaSize) {
+    if (_isInpaintMode) {
+      final l10n = context.l10n;
+      return InpaintPanel(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            InpaintButton(
+              icon: Icons.download_outlined,
+              glyph: 'download',
+              tooltip: l10n.common_download,
+              onPressed: _downloadCanvasImage,
+            ),
+            SizedBox(
+              height: 44,
+              child: FilledButton(
+                onPressed: _canExportAndClose ? _exportAndClose : null,
+                style: FilledButton.styleFrom(
+                  shape: const RoundedRectangleBorder(),
+                  minimumSize: const Size(120, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+                child: Text(
+                  l10n.editor_saveAndExit,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ),
+            InpaintButton(
+              icon: Icons.close,
+              glyph: 'close',
+              tooltip: l10n.common_close,
+              onPressed: _confirmExit,
+            ),
+          ],
+        ),
+      );
+    }
     final l10n = context.l10n;
 
     return EditorOverlayCard(
@@ -192,23 +205,25 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
 
   /// 底部悬浮工具栏
   Widget _buildFloatingToolbar(Size mediaSize) {
-    final l10n = context.l10n;
+    if (_isInpaintMode) {
+      return InpaintToolbar(
+        state: _state,
+        width: (mediaSize.width * 0.74).clamp(
+          288,
+          (mediaSize.width - 20).clamp(288, 1100),
+        ),
+        onClear: _resetInpaintMask,
+        onShiftEdges: _showShiftEdgesDialog,
+      );
+    }
     // 为右下图层托盘预留水平空间，避免窄窗口下重叠
     final reservedRight = _showLayerPanel ? 200.0 : 40.0;
 
     return EditorFloatingToolbar(
       state: _state,
-      allowedToolIds: _isInpaintMode
-          ? _ImageEditorScreenState._inpaintToolIds
-          : null,
       maxWidth: (mediaSize.width - reservedRight)
           .clamp(240.0, 1100.0)
           .toDouble(),
-      onClear: _isInpaintMode ? _resetInpaintMask : null,
-      clearTooltip: _isInpaintMode ? l10n.editor_resetMask : null,
-      onFillMask: _isInpaintMode ? _handleFillClosedMaskRegions : null,
-      canFillMask: _isInpaintMode ? _hasMaskContent : null,
-      fillMaskActive: _isMaskFillMode,
       menuActions: _buildMoreMenuActions(),
     );
   }
@@ -217,18 +232,6 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
   List<EditorMenuAction?> _buildMoreMenuActions() {
     final l10n = context.l10n;
     return [
-      if (_isInpaintMode)
-        EditorMenuAction(
-          icon: Icons.upload_file,
-          label: l10n.editor_loadMask,
-          onPressed: _loadMask,
-        ),
-      if (_isInpaintMode)
-        EditorMenuAction(
-          icon: Icons.open_in_full,
-          label: l10n.editor_shiftEdges,
-          onPressed: _showShiftEdgesDialog,
-        ),
       if (!_isInpaintMode)
         EditorMenuAction(
           icon: Icons.tune_rounded,
@@ -277,11 +280,42 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
   Widget _buildLayerTrayOverlay() {
     return EditorLayerTray(
       state: _state,
+      inpaint: _isInpaintMode,
+      onAdd3dLayer: () => _addInpaint3dLayer(),
+      onEdit3dLayer: (layer) => _addInpaint3dLayer(layer: layer),
       detailsOpen: _showLayerFlyout,
       onOpenDetails: () => _updateLayoutState(() {
         _showLayerFlyout = !_showLayerFlyout;
       }),
     );
+  }
+
+  Future<void> _addInpaint3dLayer({Layer? layer}) async {
+    final result = await Model3dEditorScreen.show(
+      context,
+      renderWidth: _state.canvasSize.width.round(),
+      renderHeight: _state.canvasSize.height.round(),
+      existing: layer?.model3d,
+    );
+    if (result == null || !mounted) return;
+    final added =
+        layer ??
+        await _state.layerManager.addLayerFromImage(
+          result.pngBytes,
+          name: context.l10n.model3d_editorTitle,
+        );
+    if (added == null || !mounted) return;
+    if (layer != null) await layer.setBaseImage(result.pngBytes);
+    added.inpaintMask = false;
+    added.model3d = Model3dLayerData(
+      modelRef: result.modelRef,
+      sceneState: result.sceneState,
+    );
+    final maskLayer = _state.layerManager.layers
+        .where((layer) => layer.inpaintMask)
+        .firstOrNull;
+    if (maskLayer != null) _state.layerManager.setActiveLayer(maskLayer.id);
+    _state.requestUiUpdate();
   }
 
   /// 详细图层面板浮层：完整 LayerPanel + 颜色面板（编辑模式）
@@ -333,10 +367,33 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
   Future<void> _downloadCanvasImage() async {
     final l10n = context.l10n;
     try {
-      final bytes = await ImageExporterNew.exportMergedImage(
-        _state.layerManager,
-        _state.canvasSize,
-      );
+      var bytes = _isInpaintMode
+          ? await _exportInpaintLayerMaskAtCompressionTarget(
+              _virtualOutpaintFrame?.outpaintMaskRects ?? const [],
+            )
+          : await ImageExporterNew.exportMergedImage(
+              _state.layerManager,
+              _state.canvasSize,
+            );
+      if (_isInpaintMode) {
+        final binary = InpaintMaskUtils.decodeBinaryMask(bytes);
+        if (binary == null) throw StateError('Invalid exported mask');
+        final width = (binary.width / 8).round(),
+            height = (binary.height / 8).round();
+        final latent = InpaintMaskUtils.resizeBinaryMask(
+          binary.mask,
+          sourceWidth: binary.width,
+          sourceHeight: binary.height,
+          targetWidth: width,
+          targetHeight: height,
+        );
+        bytes = await InpaintMaskUtils.encodeEditorOverlayFromBinaryMaskAsync(
+          latent,
+          width: width,
+          height: height,
+          overlayAlpha: 255,
+        );
+      }
       if (!mounted) return;
       final path = await FilePicker.platform.saveFile(
         dialogTitle: l10n.common_download,
@@ -360,6 +417,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
   /// 工具设置面板 - 左上紧凑卡片，跟随当前工具
   /// 使用 toolChangeNotifier 实现细粒度监听，仅在工具切换时重建
   Widget _buildToolSettingsPanel() {
+    if (_isInpaintMode) return InpaintToolSettings(state: _state);
     return ValueListenableBuilder<EditorTool?>(
       valueListenable: _state.toolChangeNotifier,
       builder: (context, tool, _) {

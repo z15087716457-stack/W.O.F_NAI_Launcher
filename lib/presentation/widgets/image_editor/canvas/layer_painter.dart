@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../core/editor_state.dart';
+import 'inpaint_mask_appearance.dart';
 
 class CheckerboardCacheKey {
   const CheckerboardCacheKey({
@@ -178,12 +179,70 @@ class LayerPainter extends CustomPainter {
     final viewportBounds = controller.viewportBounds;
 
     // 绘制所有图层（传入视口边界以启用空间剔除优化）
-    state.layerManager.renderAll(
-      canvas,
-      canvasSize,
-      viewportBounds: viewportBounds,
-      filterQuality: FilterQuality.medium,
-    );
+    if (!state.inpaint) {
+      state.layerManager.renderAll(
+        canvas,
+        canvasSize,
+        viewportBounds: viewportBounds,
+        filterQuality: FilterQuality.medium,
+      );
+    } else {
+      final layers = state.layerManager.layers;
+      for (final layer in layers.reversed.where(
+        (layer) => !layer.inpaintMask,
+      )) {
+        layer.renderWithCache(
+          canvas,
+          canvasSize,
+          viewportBounds: viewportBounds,
+          filterQuality: FilterQuality.none,
+        );
+      }
+      final bounds = Offset.zero & canvasSize;
+      final inner = state.inpaintFocusInterior;
+      final masks = layers.where((layer) => layer.inpaintMask && layer.visible);
+      drawInpaintMaskAppearance(canvas, bounds, viewportBounds, state, (
+        maskCanvas,
+      ) {
+        maskCanvas.save();
+        if (inner != null) maskCanvas.clipRect(inner);
+        for (final layer in masks) {
+          layer.render(
+            maskCanvas,
+            canvasSize,
+            filterQuality: FilterQuality.none,
+          );
+        }
+        maskCanvas.restore();
+      });
+      final focus = state.inpaintFocusRegion;
+      if (focus != null) {
+        final contextPath = Path()
+          ..fillType = PathFillType.evenOdd
+          ..addRect(focus)
+          ..addRect(inner ?? Rect.zero);
+        canvas.drawPath(
+          contextPath,
+          Paint()..color = const Color(0xFF996644).withValues(alpha: 0.25),
+        );
+        canvas.drawRect(
+          focus,
+          Paint()
+            ..color = const Color(0xFF302018)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2 / controller.scale,
+        );
+        final handleSize = 6 / controller.scale;
+        canvas.drawRect(
+          Rect.fromCenter(
+            center: focus.bottomRight,
+            width: handleSize,
+            height: handleSize,
+          ),
+          Paint()..color = const Color(0xFF302018),
+        );
+      }
+    }
 
     // 恢复状态
     canvas.restore();
@@ -251,16 +310,23 @@ class VirtualOutpaintMaskPainter extends CustomPainter {
     canvas.scale(controller.scale);
     canvas.clipRect(Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height));
 
-    final fill = Paint()..color = const Color(0x5560AAFF);
-    final outline = Paint()
-      ..color = const Color(0xFF60AAFF)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0 / controller.scale.clamp(0.01, double.infinity);
-
-    for (final rect in maskRects) {
-      canvas.drawRect(rect, fill);
-      canvas.drawRect(rect, outline);
-    }
+    final bounds = Offset.zero & canvasSize;
+    drawInpaintMaskAppearance(
+      canvas,
+      bounds,
+      controller.viewportBounds,
+      state,
+      (maskCanvas) {
+        maskCanvas.save();
+        final inner = state.inpaintFocusInterior;
+        if (inner != null) maskCanvas.clipRect(inner);
+        final fill = Paint()..color = Colors.white;
+        for (final rect in maskRects) {
+          maskCanvas.drawRect(rect, fill);
+        }
+        maskCanvas.restore();
+      },
+    );
 
     canvas.restore();
   }
@@ -473,6 +539,19 @@ class CursorPainter extends CustomPainter {
     final scale = state.canvasController.scale;
     Offset iconPosition;
 
+    if (state.inpaint &&
+        state.squareBrush &&
+        (tool.id == 'brush' || tool.id == 'eraser')) {
+      final side = state.brushSize * scale;
+      canvas.drawRect(
+        Rect.fromCenter(center: cursorPosition!, width: side, height: side),
+        Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1,
+      );
+      return;
+    }
     // 绘画工具：绘制圆圈光标
     if (tool.isPaintTool) {
       final radius = tool.getCursorRadius(state);
@@ -506,6 +585,10 @@ class CursorPainter extends CustomPainter {
       // 非绘画工具：图标在光标右下角
       iconPosition = cursorPosition! + const Offset(8, 8);
     }
+
+    // Official mask cursors show coverage only, without the ordinary editor's
+    // tool badge (whose eraser glyph is a cleaning brush).
+    if (state.inpaint) return;
 
     // 绘制工具图标
     _drawToolIcon(canvas, iconPosition, tool.icon);

@@ -148,6 +148,7 @@ class InputHandler {
     // Alt 键 - 临时切换到拾色器（当前工具自行处理 Alt 时跳过）
     if (event.logicalKey == LogicalKeyboardKey.altLeft ||
         event.logicalKey == LogicalKeyboardKey.altRight) {
+      if (state.inpaint) return KeyEventResult.handled;
       final currentTool = state.currentTool;
       if (currentTool != null && currentTool.handlesAltKey) {
         return KeyEventResult.handled;
@@ -214,13 +215,13 @@ class InputHandler {
           state.canvasController.resetView(state.canvasSize);
           return KeyEventResult.handled;
         case LogicalKeyboardKey.keyX:
-          state.swapColors();
+          if (!state.inpaint) state.swapColors();
           return KeyEventResult.handled;
         case LogicalKeyboardKey.bracketLeft:
-          state.setBrushSize(state.brushSize - 5);
+          state.setBrushSize(state.brushSize - (state.inpaint ? 8 : 5));
           return KeyEventResult.handled;
         case LogicalKeyboardKey.bracketRight:
-          state.setBrushSize(state.brushSize + 5);
+          state.setBrushSize(state.brushSize + (state.inpaint ? 8 : 5));
           return KeyEventResult.handled;
         case LogicalKeyboardKey.keyI:
           state.decreaseBrushOpacity();
@@ -230,6 +231,7 @@ class InputHandler {
           return KeyEventResult.handled;
         case LogicalKeyboardKey.escape:
           state.cancelStroke();
+          if (state.inpaint) state.setInpaintFocusRegion(null);
           return KeyEventResult.handled;
         case LogicalKeyboardKey.delete:
         case LogicalKeyboardKey.backspace:
@@ -531,7 +533,7 @@ class InputHandler {
     }
 
     // Alt 键按下时显示拾色器光标
-    if (keyboard.isAltPressed) {
+    if (keyboard.isAltPressed && !state.inpaint) {
       return SystemMouseCursors.precise;
     }
 
@@ -542,6 +544,7 @@ class InputHandler {
       case 'brush':
       case 'eraser':
         return SystemMouseCursors.none;
+      case 'inpaint_focus':
       case 'rect_selection':
       case 'ellipse_selection':
       case 'lasso_selection':

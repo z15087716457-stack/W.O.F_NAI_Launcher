@@ -10,6 +10,7 @@ import 'package:nai_launcher/presentation/widgets/image_editor/canvas/editor_can
 import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_screen.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/widgets/panels/editor_quick_settings.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/widgets/toolbar/editor_overlay_toolbar.dart';
+import 'package:nai_launcher/presentation/widgets/image_editor/widgets/panels/inpaint_controls.dart';
 import '../../../helpers/official_ui_capture_fonts.dart';
 
 void main() {
@@ -60,17 +61,48 @@ void main() {
               () => Future<void>.delayed(const Duration(milliseconds: 40)),
             );
             await tester.pump(const Duration(milliseconds: 60));
-            if (find.byType(EditorQuickSettings).evaluate().isNotEmpty) break;
+            if (find
+                .byType(
+                  mode == ImageEditorMode.inpaint
+                      ? InpaintToolSettings
+                      : EditorQuickSettings,
+                )
+                .evaluate()
+                .isNotEmpty) {
+              break;
+            }
           }
           expect(find.byType(EditorCanvas), findsOneWidget);
           await tester.pump();
-          expect(find.byType(EditorQuickSettings), findsOneWidget);
+          expect(
+            find.byType(
+              mode == ImageEditorMode.inpaint
+                  ? InpaintToolSettings
+                  : EditorQuickSettings,
+            ),
+            findsOneWidget,
+          );
           expect(tester.getSize(find.byType(EditorCanvas)), size);
           expect(
-            tester.getSize(find.byType(EditorQuickSettings)).height,
+            tester
+                .getSize(
+                  find.byType(
+                    mode == ImageEditorMode.inpaint
+                        ? InpaintToolSettings
+                        : EditorQuickSettings,
+                  ),
+                )
+                .height,
             lessThan(140),
           );
-          expect(find.byType(EditorFloatingToolbar), findsOneWidget);
+          expect(
+            find.byType(
+              mode == ImageEditorMode.inpaint
+                  ? InpaintToolbar
+                  : EditorFloatingToolbar,
+            ),
+            findsOneWidget,
+          );
           expect(tester.takeException(), isNull);
           if (Platform.environment['CAPTURE_OFFICIAL_UI'] == '1' &&
               size.width == 1440) {

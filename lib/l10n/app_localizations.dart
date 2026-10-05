@@ -22197,6 +22197,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use the local bridge to assist with W.O.F NAI Studio.\nClient: {clientPath}\n\n1. Quote the path correctly for your shell. Run status --name <your-name> and verify success; copying these instructions does not connect.\n2. Run get --name <your-name> --out current.json. Editable original text is in _draft.fields; field_versions protect against concurrent edits. Other fields may include effective quality tags. Do not duplicate them into the original text.\n3. Change only user-authorized fields. Save a patch to changes.json, then run set-json changes.json --base current.json --name <your-name>. Studio backs up and rechecks the edited fields. On conflict, stop and read again; never automatically overwrite newer user edits. Verify readback. characters replaces the entire list: preserve unrelated names, enabled flags, positions, and IDs. Reference images are currently read-only.\n4. Connecting or editing does not authorize generation. Only after an explicit generation request, run quote --out quote.json --name <your-name> and report the estimated Anlas price and cached account balance; server billing is authoritative. After authorization and reporting, run gen --quote quote.json --authorized --name <your-name>. One image per request; a changed draft invalidates the quote.\n5. Each command disconnects when done. Krita can remain connected. Wait on busy and avoid immediate retry loops after errors. Stop generation in Studio, use Ctrl+C, or cancel <request_id> --name <same-name> using the returned request ID. Never print the discovery-file session secret.\n'**
   String bridge_guide(Object clientPath);
+
+  /// No description provided for @editor_drawMask.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw Mask'**
+  String get editor_drawMask;
+
+  /// No description provided for @editor_eraseMask.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase Mask'**
+  String get editor_eraseMask;
+
+  /// No description provided for @editor_squareBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Square Brush'**
+  String get editor_squareBrush;
+
+  /// No description provided for @editor_focusedArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused Area'**
+  String get editor_focusedArea;
+
+  /// No description provided for @editor_minimumContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Context Area'**
+  String get editor_minimumContext;
+
+  /// No description provided for @editor_maskAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask Appearance'**
+  String get editor_maskAppearance;
+
+  /// No description provided for @editor_maskColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask Color'**
+  String get editor_maskColor;
+
+  /// No description provided for @editor_maskOpacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask Opacity'**
+  String get editor_maskOpacity;
+
+  /// No description provided for @editor_maskBorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Border'**
+  String get editor_maskBorder;
+
+  /// No description provided for @editor_patternSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid'**
+  String get editor_patternSolid;
+
+  /// No description provided for @editor_patternLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get editor_patternLines;
+
+  /// No description provided for @editor_patternCrosshatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Crosshatch'**
+  String get editor_patternCrosshatch;
+
+  /// No description provided for @editor_patternDots.
+  ///
+  /// In en, this message translates to:
+  /// **'Dots'**
+  String get editor_patternDots;
+
+  /// No description provided for @editor_patternGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get editor_patternGrid;
+
+  /// No description provided for @editor_patternChecker.
+  ///
+  /// In en, this message translates to:
+  /// **'Checker'**
+  String get editor_patternChecker;
+
+  /// No description provided for @editor_patternHearts.
+  ///
+  /// In en, this message translates to:
+  /// **'Hearts'**
+  String get editor_patternHearts;
+
+  /// No description provided for @editor_resize.
+  ///
+  /// In en, this message translates to:
+  /// **'Resize'**
+  String get editor_resize;
+
+  /// No description provided for @editor_penSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen Size'**
+  String get editor_penSize;
+
+  /// No description provided for @editor_sourceChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The source image changed while editing. Please reopen the editor.'**
+  String get editor_sourceChanged;
 }
 
 class _AppLocalizationsDelegate

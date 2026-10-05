@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
+import '../../../core/utils/inpaint_focus_region.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -349,7 +350,12 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 设置源图像
   void setSourceImage(Uint8List? image) {
-    state = state.copyWith(sourceImage: image);
+    state = state.copyWith(
+      sourceImage: image,
+      inpaintFocusRegion: identical(image, state.sourceImage)
+          ? state.inpaintFocusRegion
+          : null,
+    );
   }
 
   /// Restore only fields temporarily owned by an image tool. Prompt, seed,
@@ -358,6 +364,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     state = state.copyWith(
       sourceImage: snapshot.sourceImage,
       maskImage: snapshot.maskImage,
+      inpaintFocusRegion: snapshot.inpaintFocusRegion,
       width: snapshot.width,
       height: snapshot.height,
       action: snapshot.action,
@@ -398,6 +405,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     state = state.copyWith(
       action: ImageGenerationAction.generate,
       sourceImage: null,
+      inpaintFocusRegion: null,
       strength: 0.7,
       noise: 0.0,
       inpaintStrength: 1.0,
@@ -408,8 +416,8 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   // ==================== Inpainting 参数 ====================
 
   /// 设置蒙版图像
-  void setMaskImage(Uint8List? mask) {
-    state = state.copyWith(maskImage: mask);
+  void setMaskImage(Uint8List? mask, {InpaintFocusRegion? focusRegion}) {
+    state = state.copyWith(maskImage: mask, inpaintFocusRegion: focusRegion);
   }
 
   /// 清除 Inpainting 设置
@@ -418,6 +426,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       action: ImageGenerationAction.generate,
       sourceImage: null,
       maskImage: null,
+      inpaintFocusRegion: null,
       inpaintStrength: 1.0,
       isOutpaint: false,
     );

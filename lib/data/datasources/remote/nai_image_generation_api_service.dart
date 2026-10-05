@@ -916,7 +916,8 @@ class NAIImageGenerationApiService {
     ImageParams params,
     NAIImageRequestBuildResult requestBuildResult,
   ) {
-    if (params.action != ImageGenerationAction.infill || params.isOutpaint) {
+    if (params.action != ImageGenerationAction.infill ||
+        (params.isOutpaint && params.inpaintFocusRegion == null)) {
       return null;
     }
 
@@ -926,17 +927,23 @@ class NAIImageGenerationApiService {
       return null;
     }
 
-    final normalizedSource = requestBuildResult.normalizedSourceImageBytes;
+    final normalizedSource =
+        requestBuildResult.fullInpaintSourceImageBytes ??
+        requestBuildResult.normalizedSourceImageBytes;
     if (normalizedSource == null) {
       return null;
     }
     return InpaintStreamPreviewPlacement(
       sourceImage: normalizedSource,
       maskImage: compositeMaskBytes,
-      xPercent: 0,
-      yPercent: 0,
-      widthPercent: 1,
-      heightPercent: 1,
+      xPercent: (requestBuildResult.inpaintFocusRegion?.x ?? 0) / params.width,
+      yPercent: (requestBuildResult.inpaintFocusRegion?.y ?? 0) / params.height,
+      widthPercent:
+          (requestBuildResult.inpaintFocusRegion?.width ?? params.width) /
+          params.width,
+      heightPercent:
+          (requestBuildResult.inpaintFocusRegion?.height ?? params.height) /
+          params.height,
     );
   }
 
@@ -963,12 +970,15 @@ class NAIImageGenerationApiService {
     NAIImageRequestBuildResult requestBuildResult,
   ) {
     final maskArtifacts = requestBuildResult.inpaintMaskArtifacts;
-    if (params.isOutpaint) {
+    if (params.isOutpaint && requestBuildResult.inpaintFocusRegion == null) {
       return Future.value(
         ImageGenerationArtifact(displayImageBytes: imageBytes),
       );
     }
-    final sourceImage = requestBuildResult.normalizedSourceImageBytes;
+    final sourceImage =
+        requestBuildResult.fullInpaintSourceImageBytes ??
+        requestBuildResult.normalizedSourceImageBytes;
+    final focusRegion = requestBuildResult.inpaintFocusRegion;
     if (params.action != ImageGenerationAction.infill ||
         sourceImage == null ||
         maskArtifacts == null) {
@@ -982,6 +992,7 @@ class NAIImageGenerationApiService {
         normalizedSourceImage: sourceImage,
         compositeMaskImage: maskArtifacts.compositeMaskBytes,
         generatedImage: imageBytes,
+        focusRegion: focusRegion,
       );
     });
   }

@@ -12204,6 +12204,63 @@ class AppLocalizationsZh extends AppLocalizations {
   String bridge_guide(Object clientPath) {
     return '请通过本机桥接协助操作 W.O.F NAI Studio。\n客户端：$clientPath\n\n1. 根据你的 shell 正确引用这个路径。先运行 status --name <你的名称>，确认连接成功；复制本说明不代表已连接。\n2. 运行 get --name <你的名称> --out current.json，读取当前状态。可编辑原文在 _draft.fields，field_versions 用于检查冲突；其余读数可能包含质量词等生效内容。不要把生效内容重复写回原文。\n3. 只修改用户授权的字段。将修改写入 changes.json，再运行 set-json changes.json --base current.json --name <你的名称>。应用会先备份，再核对这些字段；冲突时停止并重新读取，不能自动覆盖用户新修改。返回 readback 用于核对写入。characters 是整个列表替换，请保留无关角色的名称、启用状态、位置和 id。参考图目前只读，请保留 Studio 中的设置。\n4. 接入或填参不代表授权生图。只有用户明确要求生成时，先运行 quote --out quote.json --name <你的名称>，向用户报告预计 Anlas 单价和余额（余额来自当前已载入账号，实际计费以服务端为准）。授权与报告完成后运行 gen --quote quote.json --authorized --name <你的名称>。每次只生成一张；草稿改变会拒绝旧估价。\n5. 操作结束自动断开。Krita 可同时连接；busy 时等待当前操作结束，失败后不要无间隔重试。生成可在 Studio 中停止；客户端也支持 Ctrl+C，或用返回的 request_id 执行 cancel <request_id> --name <同一名称>。不要输出发现文件中的会话密钥。\n';
   }
+
+  @override
+  String get editor_drawMask => '绘制蒙版';
+
+  @override
+  String get editor_eraseMask => '擦除蒙版';
+
+  @override
+  String get editor_squareBrush => '方形画笔';
+
+  @override
+  String get editor_focusedArea => '聚焦区域';
+
+  @override
+  String get editor_minimumContext => '最小上下文边距';
+
+  @override
+  String get editor_maskAppearance => '蒙版外观';
+
+  @override
+  String get editor_maskColor => '蒙版颜色';
+
+  @override
+  String get editor_maskOpacity => '蒙版透明度';
+
+  @override
+  String get editor_maskBorder => '边框';
+
+  @override
+  String get editor_patternSolid => '纯色';
+
+  @override
+  String get editor_patternLines => '斜线';
+
+  @override
+  String get editor_patternCrosshatch => '交叉线';
+
+  @override
+  String get editor_patternDots => '圆点';
+
+  @override
+  String get editor_patternGrid => '网格';
+
+  @override
+  String get editor_patternChecker => '棋盘格';
+
+  @override
+  String get editor_patternHearts => '爱心';
+
+  @override
+  String get editor_resize => '调整尺寸';
+
+  @override
+  String get editor_penSize => '画笔大小';
+
+  @override
+  String get editor_sourceChanged => '源图已在编辑期间发生变化，请重新打开编辑器。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24406,4 +24463,61 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String bridge_guide(Object clientPath) {
     return '請通過本機橋接協助操作 W.O.F NAI Studio。\n客戶端：$clientPath\n\n1. 根據你的 shell 正確引用這個路徑。先執行 status --name <你的名稱>，確認連線成功；複製本說明不代表已連線。\n2. 執行 get --name <你的名稱> --out current.json，讀取當前狀態。可編輯原文在 _draft.fields，field_versions 用於檢查衝突；其餘讀數可能包含品質詞等生效內容。不要把生效內容重複寫回原文。\n3. 只修改使用者授權的欄位。將修改寫入 changes.json，再執行 set-json changes.json --base current.json --name <你的名稱>。應用會先備份，再核對這些欄位；衝突時停止並重新讀取，不能自動覆蓋使用者新修改。返回 readback 用於核對寫入。characters 是整個列表替換，請保留無關角色的名稱、啟用狀態、位置和 id。參考圖目前只讀，請保留 Studio 中的設定。\n4. 接入或填參不代表授權生圖。只有使用者明確要求生成時，先執行 quote --out quote.json --name <你的名稱>，向用戶報告預計 Anlas 單價和餘額（餘額來自當前已載入帳號，實際計費以服務端為準）。授權與報告完成後執行 gen --quote quote.json --authorized --name <你的名稱>。每次只生成一張；草稿改變會拒絕舊估價。\n5. 操作結束自動斷開。Krita 可同時連線；busy 時等待當前操作結束，失敗後不要無間隔重試。生成可在 Studio 中停止；客戶端也支援 Ctrl+C，或用返回的 request_id 執行 cancel <request_id> --name <同一名稱>。不要輸出發現檔案中的會話金鑰。\n';
   }
+
+  @override
+  String get editor_drawMask => '繪製遮罩';
+
+  @override
+  String get editor_eraseMask => '擦除遮罩';
+
+  @override
+  String get editor_squareBrush => '方形畫筆';
+
+  @override
+  String get editor_focusedArea => '聚焦區域';
+
+  @override
+  String get editor_minimumContext => '最小上下文邊距';
+
+  @override
+  String get editor_maskAppearance => '遮罩外觀';
+
+  @override
+  String get editor_maskColor => '遮罩顏色';
+
+  @override
+  String get editor_maskOpacity => '遮罩透明度';
+
+  @override
+  String get editor_maskBorder => '邊框';
+
+  @override
+  String get editor_patternSolid => '純色';
+
+  @override
+  String get editor_patternLines => '斜線';
+
+  @override
+  String get editor_patternCrosshatch => '交叉線';
+
+  @override
+  String get editor_patternDots => '圓點';
+
+  @override
+  String get editor_patternGrid => '網格';
+
+  @override
+  String get editor_patternChecker => '棋盤格';
+
+  @override
+  String get editor_patternHearts => '愛心';
+
+  @override
+  String get editor_resize => '調整尺寸';
+
+  @override
+  String get editor_penSize => '畫筆大小';
+
+  @override
+  String get editor_sourceChanged => '來源圖已在編輯期間發生變化，請重新開啟編輯器。';
 }

@@ -42,11 +42,13 @@ class HardEdgeMaskStroke {
     required this.points,
     required this.size,
     required this.isEraser,
+    this.square = false,
   });
 
   final List<Offset> points;
   final double size;
   final bool isEraser;
+  final bool square;
 }
 
 class HardEdgeMaskBaseImage {
@@ -220,6 +222,34 @@ class HardEdgeMaskExporter {
       return;
     }
 
+    if (stroke.square) {
+      void stamp(Offset point) {
+        final radius = stroke.size / 2;
+        final left = math.max(0, (point.dx - radius).ceil());
+        final top = math.max(0, (point.dy - radius).ceil());
+        final right = math.min(mask.width, (point.dx + radius).ceil());
+        final bottom = math.min(mask.height, (point.dy + radius).ceil());
+        final value = stroke.isEraser ? 0 : 255;
+        for (var y = top; y < bottom; y++) {
+          for (var x = left; x < right; x++) {
+            mask.setPixelRgba(x, y, value, value, value, 255);
+          }
+        }
+      }
+
+      stamp(stroke.points.first);
+      for (var i = 1; i < stroke.points.length; i++) {
+        final from = stroke.points[i - 1];
+        final to = stroke.points[i];
+        final steps = math
+            .max((to.dx - from.dx).abs(), (to.dy - from.dy).abs())
+            .ceil();
+        for (var step = 1; step <= steps; step++) {
+          stamp(Offset.lerp(from, to, step / steps)!);
+        }
+      }
+      return;
+    }
     if (stroke.points.length == 1) {
       _drawDisc(
         mask,

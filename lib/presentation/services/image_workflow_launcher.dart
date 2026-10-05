@@ -49,12 +49,29 @@ class ImageWorkflowLauncher {
           : null,
       showMaskExport: mode == ImageEditorMode.inpaint,
       mode: mode,
+      existingFocusRegion: editingCurrentSource
+          ? params.inpaintFocusRegion
+          : null,
       title: mode == ImageEditorMode.edit
           ? context.l10n.img2img_editImage
           : context.l10n.img2img_inpaint,
     );
 
     if (result == null || !context.mounted) {
+      return;
+    }
+
+    final current = ref.read(generationParamsNotifierProvider);
+    if (!identical(current.sourceImage, params.sourceImage) ||
+        (editingCurrentSource &&
+            (!identical(current.maskImage, params.maskImage) ||
+                !identical(
+                  current.inpaintFocusRegion,
+                  params.inpaintFocusRegion,
+                ))) ||
+        current.width != params.width ||
+        current.height != params.height) {
+      AppToast.warning(context, context.l10n.editor_sourceChanged);
       return;
     }
 
@@ -116,6 +133,7 @@ class ImageWorkflowLauncher {
           ? result.outpaintSourceHeight
           : result.inpaintSourceHeight,
       maskImage: effectiveMask,
+      focusRegion: result.inpaintFocusRegion,
       sourceIsOutpaint: result.hasOutpaintChanges,
       useExactSourceDimensions: result.compressionApplied,
     );

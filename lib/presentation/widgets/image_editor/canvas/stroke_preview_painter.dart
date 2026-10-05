@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../tools/square_stroke.dart';
 
 import '../core/editor_state.dart';
 import '../tools/blur_tool.dart';
@@ -53,6 +54,9 @@ class StrokePreviewPainter extends CustomPainter {
 
     canvas.scale(controller.scale);
     canvas.clipRect(Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height));
+    if (state.inpaintFocusInterior != null) {
+      canvas.clipRect(state.inpaintFocusInterior!);
+    }
     _drawCurrentStroke(canvas, points);
     canvas.restore();
   }
@@ -69,7 +73,10 @@ class StrokePreviewPainter extends CustomPainter {
 
     if (tool is BrushTool) {
       size = tool.settings.size;
-      opacity = tool.settings.opacity;
+      opacity = state.inpaint
+          ? state.maskDisplayOpacity
+          : tool.settings.opacity;
+      if (state.inpaint) color = state.maskDisplayColor;
       hardness = tool.settings.hardness;
     } else if (tool is EraserTool) {
       size = tool.size;
@@ -103,6 +110,11 @@ class StrokePreviewPainter extends CustomPainter {
     if (hardness < 1.0) {
       final sigma = size * (1.0 - hardness) * 0.5;
       paint.maskFilter = MaskFilter.blur(BlurStyle.normal, sigma);
+    }
+
+    if (state.squareBrush) {
+      drawSquareStroke(canvas, points, size, paint);
+      return;
     }
 
     if (points.length == 1) {

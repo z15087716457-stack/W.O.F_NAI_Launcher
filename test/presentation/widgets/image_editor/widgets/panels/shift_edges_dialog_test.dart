@@ -49,12 +49,8 @@ void main() {
     await tester.enterText(find.byKey(const Key('shift_edges_bottom')), '200');
     await tester.pump();
 
-    expect(find.text('Requested: 1424 x 1616'), findsOneWidget);
-    expect(find.text('Applied: 1472 x 1664'), findsOneWidget);
-    expect(
-      find.text('Applied edges: L 200, T 200, R 248, B 248'),
-      findsOneWidget,
-    );
+    expect(find.text('1024 × 1216'), findsOneWidget);
+    expect(find.text('1472 × 1664'), findsOneWidget);
   });
 
   testWidgets('returns requested and snapped edge payload', (tester) async {
@@ -73,7 +69,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('shift_edges_right')), '200');
     await tester.enterText(find.byKey(const Key('shift_edges_bottom')), '200');
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Shift Edges'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Resize'));
     await tester.pumpAndSettle();
 
     expect(result, isNotNull);
@@ -99,7 +95,7 @@ void main() {
 
     FilledButton confirm() {
       return tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'Shift Edges'),
+        find.widgetWithText(FilledButton, 'Resize'),
       );
     }
 
@@ -108,6 +104,37 @@ void main() {
     await tester.enterText(find.byKey(const Key('shift_edges_right')), '4000');
     await tester.pump();
     expect(confirm().onPressed, isNull);
+  });
+
+  testWidgets('negative edge inputs crop inward and reject an empty frame', (
+    tester,
+  ) async {
+    ShiftEdgesResult? result;
+    await tester.pumpWidget(
+      _wrapDialog(
+        sourceWidth: 512,
+        sourceHeight: 768,
+        onResult: (value) => result = value,
+      ),
+    );
+    await _openDialog(tester);
+    await tester.enterText(find.byKey(const Key('shift_edges_left')), '-64');
+    await tester.pump();
+    expect(find.text('448 × 768'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Resize'));
+    await tester.pumpAndSettle();
+    expect(result!.requestedEdges.left, -64);
+    expect(result!.width, 448);
+    await _openDialog(tester);
+    await tester.enterText(find.byKey(const Key('shift_edges_left')), '-512');
+    await tester.pump();
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Resize'))
+          .onPressed,
+      isNull,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('escape cancels and enter confirms when valid', (tester) async {

@@ -188,8 +188,8 @@ Map<String, dynamic> readBridgeBilling(Ref ref, ImageParams p) {
   final subscription =
       loaded ?? (raw == null ? null : UserSubscription.fromJson(raw));
   final cost = AnlasCalculator.calculateRequestCost(
-    width: p.width,
-    height: p.height,
+    width: p.effectiveInpaintRequestSize.width,
+    height: p.effectiveInpaintRequestSize.height,
     steps: p.steps,
     batchCount: 1,
     batchSize: 1,

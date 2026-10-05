@@ -46,8 +46,8 @@ _GenerationCostInput _resolveGenerationCostInput(
   }
 
   return _GenerationCostInput(
-    width: params.width,
-    height: params.height,
+    width: params.effectiveInpaintRequestSize.width,
+    height: params.effectiveInpaintRequestSize.height,
     strength: switch (params.action) {
       ImageGenerationAction.img2img => params.strength,
       ImageGenerationAction.infill => params.inpaintStrength,

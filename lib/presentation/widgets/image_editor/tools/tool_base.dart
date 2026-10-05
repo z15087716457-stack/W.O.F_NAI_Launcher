@@ -83,11 +83,14 @@ class BrushSettings {
   /// 画笔间距 (0.01-1)
   final double spacing;
 
+  final bool square;
+
   const BrushSettings({
     this.size = 20.0,
     this.opacity = 1.0,
     this.hardness = 0.8,
     this.spacing = 0.1,
+    this.square = false,
   });
 
   BrushSettings copyWith({
@@ -95,12 +98,14 @@ class BrushSettings {
     double? opacity,
     double? hardness,
     double? spacing,
+    bool? square,
   }) {
     return BrushSettings(
       size: size ?? this.size,
       opacity: opacity ?? this.opacity,
       hardness: hardness ?? this.hardness,
       spacing: spacing ?? this.spacing,
+      square: square ?? this.square,
     );
   }
 
@@ -110,6 +115,7 @@ class BrushSettings {
       'opacity': opacity,
       'hardness': hardness,
       'spacing': spacing,
+      'square': square,
     };
   }
 
@@ -119,6 +125,7 @@ class BrushSettings {
       opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
       hardness: (json['hardness'] as num?)?.toDouble() ?? 0.8,
       spacing: (json['spacing'] as num?)?.toDouble() ?? 0.1,
+      square: json['square'] == true,
     );
   }
 }

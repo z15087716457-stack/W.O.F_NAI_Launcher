@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'inpaint_focus_region.dart';
 import 'package:image/image.dart' as img;
 
 import '../models/image_generation_artifact.dart';
@@ -580,6 +581,7 @@ class InpaintMaskUtils {
     required Uint8List normalizedSourceImage,
     required Uint8List compositeMaskImage,
     required Uint8List generatedImage,
+    InpaintFocusRegion? focusRegion,
   }) {
     img.Image? source;
     img.Image? mask;
@@ -594,8 +596,49 @@ class InpaintMaskUtils {
     if (source == null || mask == null || generated == null) {
       return ImageGenerationArtifact(displayImageBytes: generatedImage);
     }
-    if (source.width != mask.width || source.height != mask.height) {
+    if (focusRegion == null &&
+        (source.width != mask.width || source.height != mask.height)) {
       return ImageGenerationArtifact(displayImageBytes: generatedImage);
+    }
+
+    if (focusRegion != null) {
+      final generatedAtRequestSize =
+          generated.width == mask.width && generated.height == mask.height
+          ? generated
+          : PicaLanczosResizer.resizeImage(
+              generated,
+              width: mask.width,
+              height: mask.height,
+            );
+      final requestPatch = applyCompositeMaskToGeneratedImage(
+        generatedAtRequestSize,
+        mask,
+      );
+      final cropPatch = PicaLanczosResizer.resizeImage(
+        requestPatch,
+        width: focusRegion.width,
+        height: focusRegion.height,
+      );
+      final patch = img.Image(
+        width: source.width,
+        height: source.height,
+        numChannels: 4,
+      );
+      img.compositeImage(
+        patch,
+        cropPatch,
+        dstX: focusRegion.x,
+        dstY: focusRegion.y,
+        blend: img.BlendMode.direct,
+      );
+      final display = img.Image.from(source, noAnimation: true);
+      img.compositeImage(display, patch, blend: img.BlendMode.alpha);
+      return ImageGenerationArtifact(
+        displayImageBytes: Uint8List.fromList(img.encodePng(display, level: 1)),
+        transparentPatchBytes: Uint8List.fromList(
+          img.encodePng(patch, level: 1),
+        ),
+      );
     }
 
     final generatedCanvas =

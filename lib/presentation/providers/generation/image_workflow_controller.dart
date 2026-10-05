@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import '../../../core/utils/inpaint_focus_region.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -1193,6 +1194,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     int? sourceWidth,
     int? sourceHeight,
     required Uint8List? maskImage,
+    InpaintFocusRegion? focusRegion,
     bool sourceIsOutpaint = true,
     bool useExactSourceDimensions = false,
   }) {
@@ -1259,7 +1261,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     );
 
     _applySourceSizeToParams();
-    _paramsNotifier.setMaskImage(maskImage);
+    _paramsNotifier.setMaskImage(maskImage, focusRegion: focusRegion);
     _syncInpaintRequestState();
   }
 

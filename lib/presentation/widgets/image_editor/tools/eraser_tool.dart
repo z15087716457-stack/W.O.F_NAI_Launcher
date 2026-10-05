@@ -18,6 +18,8 @@ class EraserTool extends EditorTool {
   double _hardness = 1.0;
   double get hardness => _hardness;
 
+  bool square = false;
+
   @override
   String get id => 'eraser';
 
@@ -34,8 +36,8 @@ class EraserTool extends EditorTool {
   bool get isPaintTool => true;
 
   /// 设置大小
-  void setSize(double size) {
-    _size = size.clamp(1.0, 500.0);
+  void setSize(double size, {double maximum = 500}) {
+    _size = size.clamp(1.0, maximum);
   }
 
   /// 设置硬度
@@ -46,8 +48,9 @@ class EraserTool extends EditorTool {
   @override
   void onPointerDown(PointerDownEvent event, EditorState state) {
     // Alt 模式下不开始擦除，等待 pointerUp 取色
-    if (state.isAltPressed) return;
+    if (state.isAltPressed && !state.inpaint) return;
 
+    state.ensureInpaintMaskLayer();
     // 如果上一个笔画还在进行中（快速连续点击），先提交它
     if (state.isDrawing && state.currentStrokePoints.isNotEmpty) {
       _commitCurrentStroke(state);
@@ -60,7 +63,7 @@ class EraserTool extends EditorTool {
   @override
   void onPointerMove(PointerMoveEvent event, EditorState state) {
     // Alt 模式下不更新笔画
-    if (state.isAltPressed) return;
+    if (state.isAltPressed && !state.inpaint) return;
 
     if (state.isDrawing) {
       // 坐标已由 EditorCanvas 统一转换为画布坐标
@@ -71,7 +74,7 @@ class EraserTool extends EditorTool {
   @override
   void onPointerUp(PointerUpEvent event, EditorState state) {
     // Alt 模式：取色
-    if (state.isAltPressed) {
+    if (state.isAltPressed && !state.inpaint) {
       _pickColorAndApply(event.localPosition, state);
       return;
     }
@@ -86,7 +89,9 @@ class EraserTool extends EditorTool {
   /// 提交当前笔画（抽取公共逻辑，供 onPointerDown 和 onPointerUp 调用）
   void _commitCurrentStroke(EditorState state) {
     final activeLayer = state.layerManager.activeLayer;
-    if (activeLayer != null && !activeLayer.locked) {
+    if (activeLayer != null &&
+        !activeLayer.locked &&
+        (!state.inpaint || activeLayer.inpaintMask)) {
       // 创建橡皮擦笔画数据
       final stroke = StrokeData(
         points: List.from(state.currentStrokePoints),
@@ -95,6 +100,7 @@ class EraserTool extends EditorTool {
         opacity: 1.0,
         hardness: _hardness,
         isEraser: true,
+        square: square,
       );
 
       // 执行添加笔画操作

@@ -5,6 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../layers/layer.dart';
+import '../../../../core/utils/localization_extension.dart';
 import '../layers/layer_manager.dart';
 import '../tools/tool_base.dart';
 import '../tools/brush_tool.dart';
@@ -15,6 +16,16 @@ import 'history_manager.dart';
 import 'selection_manager.dart';
 import 'stroke_manager.dart';
 import 'tool_manager.dart';
+
+enum MaskDisplayPattern {
+  solid,
+  lines,
+  crosshatch,
+  dots,
+  grid,
+  checker,
+  hearts,
+}
 
 enum MagicWandSelectionMode { colorArea, smartObject }
 
@@ -32,7 +43,57 @@ class EditorState extends ChangeNotifier {
   // ===== 子管理器 =====
 
   /// 工具管理器
-  final ToolManager toolManager = ToolManager();
+  final ToolManager toolManager;
+  final bool inpaint;
+  String? inpaintSourceLayerId;
+  Rect? inpaintFocusRegion;
+  double inpaintContextSize = 96;
+  Color maskDisplayColor = const Color(0xFF6464C8);
+  double maskDisplayOpacity = 0.5;
+  bool maskDisplayBorder = true;
+  MaskDisplayPattern maskDisplayPattern = MaskDisplayPattern.solid;
+  bool get isDisposed => _isDisposed;
+
+  void setInpaintFocusRegion(Rect? region) {
+    inpaintFocusRegion = region == null
+        ? null
+        : Rect.fromLTRB(
+            (region.left / 8).round() * 8.0,
+            (region.top / 8).round() * 8.0,
+            (region.right / 8).round() * 8.0,
+            (region.bottom / 8).round() * 8.0,
+          );
+    _notifyRenderChange();
+    _safeNotifyListeners();
+  }
+
+  void setInpaintContextSize(double value) {
+    inpaintContextSize = value.roundToDouble().clamp(0, double.infinity);
+    _notifyRenderChange();
+    _safeNotifyListeners();
+  }
+
+  Rect? get inpaintFocusInterior {
+    final rect = inpaintFocusRegion;
+    if (rect == null) return null;
+    final inner = rect.deflate(inpaintContextSize);
+    return inner.width > 0 && inner.height > 0 ? inner : Rect.zero;
+  }
+
+  void setMaskAppearance({
+    Color? color,
+    double? opacity,
+    bool? border,
+    MaskDisplayPattern? pattern,
+  }) {
+    maskDisplayBorder = border ?? maskDisplayBorder;
+    maskDisplayPattern = pattern ?? maskDisplayPattern;
+    maskDisplayColor = color ?? maskDisplayColor;
+    maskDisplayOpacity = opacity?.clamp(0, 1) ?? maskDisplayOpacity;
+    _notifyRenderChange();
+    _notifyStrokePreviewChange();
+    _safeNotifyListeners();
+  }
 
   /// 颜色管理器
   final ColorManager colorManager = ColorManager();
@@ -146,7 +207,14 @@ class EditorState extends ChangeNotifier {
 
   // ===== 构造函数 =====
 
-  EditorState() {
+  EditorState({this.inpaint = false})
+    : toolManager = ToolManager(inpaint: inpaint) {
+    if (inpaint) {
+      toolManager.tools.whereType<BrushTool>().first.updateSettings(
+        const BrushSettings(size: 32, opacity: 1, hardness: 1),
+      );
+      toolManager.tools.whereType<EraserTool>().first.setSize(32);
+    }
     _setupListeners();
     // 同步初始工具到通知器（确保构造后立即一致）
     toolChangeNotifier.value = toolManager.currentTool;
@@ -311,6 +379,24 @@ class EditorState extends ChangeNotifier {
 
   // ===== 笔刷方法 =====
 
+  bool get squareBrush {
+    final tool = currentTool;
+    return tool is BrushTool
+        ? tool.settings.square
+        : tool is EraserTool && tool.square;
+  }
+
+  void setSquareBrush(bool value) {
+    for (final tool in tools) {
+      if (tool is BrushTool) {
+        tool.updateSettings(tool.settings.copyWith(square: value));
+      }
+      if (tool is EraserTool) tool.square = value;
+    }
+    _notifyStrokePreviewChange();
+    _safeNotifyListeners();
+  }
+
   double get brushSize {
     final tool = toolManager.currentTool;
     if (tool is BrushTool) {
@@ -322,12 +408,33 @@ class EditorState extends ChangeNotifier {
     return brushTool?.settings.size ?? 20.0;
   }
 
+  void ensureInpaintMaskLayer() {
+    if (!inpaint || layerManager.activeLayer?.inpaintMask == true) return;
+    final mask = layerManager.layers
+        .where((layer) => layer.inpaintMask && !layer.locked)
+        .firstOrNull;
+    if (mask != null) {
+      layerManager.setActiveLayer(mask.id);
+    } else {
+      historyManager.execute(
+        AddInpaintMaskLayerAction(name: currentL10n.editor_maskLayerName),
+        this,
+      );
+    }
+  }
+
   void setBrushSize(double size) {
     final tool = toolManager.currentTool;
     if (tool is BrushTool) {
-      tool.setSize(size);
+      if (inpaint) {
+        tool.updateSettings(
+          tool.settings.copyWith(size: size.clamp(8, double.infinity)),
+        );
+      } else {
+        tool.setSize(size);
+      }
     } else if (tool is EraserTool) {
-      tool.setSize(size);
+      tool.setSize(size, maximum: inpaint ? double.infinity : 500);
     }
     notifyListeners();
   }
@@ -341,6 +448,7 @@ class EditorState extends ChangeNotifier {
   }
 
   void setBrushOpacity(double opacity) {
+    if (inpaint) return;
     final tool = toolManager.currentTool;
     if (tool is BrushTool) {
       tool.setOpacity(opacity);
@@ -357,6 +465,7 @@ class EditorState extends ChangeNotifier {
   }
 
   void setBrushHardness(double hardness) {
+    if (inpaint) return;
     final tool = toolManager.currentTool;
     if (tool is BrushTool) {
       tool.setHardness(hardness);

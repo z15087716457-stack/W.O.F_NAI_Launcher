@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import '../../../core/utils/inpaint_focus_region.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -204,6 +205,9 @@ class ImageParams with _$ImageParams {
     /// 蒙版图像 (白色区域为修补区域)
     @JsonKey(includeFromJson: false, includeToJson: false) Uint8List? maskImage,
 
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    InpaintFocusRegion? inpaintFocusRegion,
+
     /// 局部重绘强度 (0-1)
     @Default(1.0) double inpaintStrength,
 
@@ -260,6 +264,11 @@ class ImageParams with _$ImageParams {
 
 /// ImageParams 扩展方法
 extension ImageParamsExtension on ImageParams {
+  ({int width, int height}) get effectiveInpaintRequestSize =>
+      action == ImageGenerationAction.infill && inpaintFocusRegion != null
+      ? inpaintFocusRegion!.clamped(width, height).requestSize
+      : (width: width, height: height);
+
   /// 检查是否为 V3 模型
   bool get isV3Model =>
       model.contains('diffusion-3') || model.contains('diffusion-furry-3');

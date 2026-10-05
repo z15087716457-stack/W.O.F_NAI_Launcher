@@ -12811,4 +12811,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String bridge_guide(Object clientPath) {
     return 'Use the local bridge to assist with W.O.F NAI Studio.\nClient: $clientPath\n\n1. Quote the path correctly for your shell. Run status --name <your-name> and verify success; copying these instructions does not connect.\n2. Run get --name <your-name> --out current.json. Editable original text is in _draft.fields; field_versions protect against concurrent edits. Other fields may include effective quality tags. Do not duplicate them into the original text.\n3. Change only user-authorized fields. Save a patch to changes.json, then run set-json changes.json --base current.json --name <your-name>. Studio backs up and rechecks the edited fields. On conflict, stop and read again; never automatically overwrite newer user edits. Verify readback. characters replaces the entire list: preserve unrelated names, enabled flags, positions, and IDs. Reference images are currently read-only.\n4. Connecting or editing does not authorize generation. Only after an explicit generation request, run quote --out quote.json --name <your-name> and report the estimated Anlas price and cached account balance; server billing is authoritative. After authorization and reporting, run gen --quote quote.json --authorized --name <your-name>. One image per request; a changed draft invalidates the quote.\n5. Each command disconnects when done. Krita can remain connected. Wait on busy and avoid immediate retry loops after errors. Stop generation in Studio, use Ctrl+C, or cancel <request_id> --name <same-name> using the returned request ID. Never print the discovery-file session secret.\n';
   }
+
+  @override
+  String get editor_drawMask => 'Draw Mask';
+
+  @override
+  String get editor_eraseMask => 'Erase Mask';
+
+  @override
+  String get editor_squareBrush => 'Square Brush';
+
+  @override
+  String get editor_focusedArea => 'Focused Area';
+
+  @override
+  String get editor_minimumContext => 'Minimum Context Area';
+
+  @override
+  String get editor_maskAppearance => 'Mask Appearance';
+
+  @override
+  String get editor_maskColor => 'Mask Color';
+
+  @override
+  String get editor_maskOpacity => 'Mask Opacity';
+
+  @override
+  String get editor_maskBorder => 'Border';
+
+  @override
+  String get editor_patternSolid => 'Solid';
+
+  @override
+  String get editor_patternLines => 'Lines';
+
+  @override
+  String get editor_patternCrosshatch => 'Crosshatch';
+
+  @override
+  String get editor_patternDots => 'Dots';
+
+  @override
+  String get editor_patternGrid => 'Grid';
+
+  @override
+  String get editor_patternChecker => 'Checker';
+
+  @override
+  String get editor_patternHearts => 'Hearts';
+
+  @override
+  String get editor_resize => 'Resize';
+
+  @override
+  String get editor_penSize => 'Pen Size';
+
+  @override
+  String get editor_sourceChanged =>
+      'The source image changed while editing. Please reopen the editor.';
 }

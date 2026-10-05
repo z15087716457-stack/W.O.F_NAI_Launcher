@@ -83,8 +83,8 @@ class AnlasCalculator {
   }) {
     return calculateRequestCost(
       opusUsageExhausted: opusUsageExhausted,
-      width: params.width,
-      height: params.height,
+      width: params.effectiveInpaintRequestSize.width,
+      height: params.effectiveInpaintRequestSize.height,
       steps: params.steps,
       batchCount: params.nSamples,
       batchSize: 1,

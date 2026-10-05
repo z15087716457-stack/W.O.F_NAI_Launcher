@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../tools/blur_tool.dart';
 import '../tools/brush_tool.dart';
+import '../tools/inpaint_focus_tool.dart';
 import '../tools/clone_stamp_tool.dart';
 import '../tools/color_picker_tool.dart';
 import '../tools/eraser_tool.dart';
@@ -47,14 +48,19 @@ class ToolManager extends ChangeNotifier {
   bool get _isBatching => _batchDepth > 0;
 
   /// 构造函数
-  ToolManager() : _tools = _createTools() {
+  final bool inpaint;
+
+  ToolManager({this.inpaint = false})
+    : _tools = inpaint
+          ? [BrushTool(), EraserTool(), FillTool(), InpaintFocusTool()]
+          : _createTools() {
     // 初始化时选中第一个工具
     if (_tools.isNotEmpty) {
       _currentTool = _tools.first;
       toolNotifier.value = _currentTool?.id;
     }
     // 异步加载持久化设置
-    _loadSettingsAsync();
+    if (!inpaint) _loadSettingsAsync();
   }
 
   /// 异步加载持久化设置
@@ -90,6 +96,7 @@ class ToolManager extends ChangeNotifier {
 
   /// 保存工具设置
   void _saveToolSettings(EditorTool tool) {
+    if (inpaint) return;
     if (tool is BrushTool) {
       settingsManager.setSetting(tool.id, 'settings', tool.settings.toJson());
       settingsManager.setSetting(
@@ -110,6 +117,7 @@ class ToolManager extends ChangeNotifier {
 
   /// 恢复工具设置
   void _restoreToolSettings(EditorTool tool) {
+    if (inpaint) return;
     final settings = settingsManager.getToolSettings(tool.id);
     if (settings == null) return;
 

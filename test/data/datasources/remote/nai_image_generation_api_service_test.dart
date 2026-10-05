@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:nai_launcher/core/utils/inpaint_focus_region.dart';
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -417,6 +418,83 @@ void main() {
     expect(chunks[1].finalImage, orderedEquals(first));
     expect(chunks.any((chunk) => chunk.hasError), isFalse);
   });
+
+  test(
+    'focused inpaint stream places its crop and returns full-source artifacts',
+    () async {
+      final adapter = _PendingDioAdapter();
+      final dio = Dio()..httpClientAdapter = adapter;
+      final endpointService = NaiApiEndpointService();
+      final service = NAIImageGenerationApiService(
+        dio,
+        NAIImageEnhancementApiService(dio, endpointService),
+        endpointService,
+      );
+      final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
+      final mask = _rectMaskPng(
+        width: 256,
+        height: 256,
+        x: 80,
+        y: 80,
+        rectWidth: 96,
+        rectHeight: 96,
+      );
+      final generated = _solidPng(
+        width: 1024,
+        height: 1024,
+        r: 200,
+        g: 210,
+        b: 220,
+      );
+      final future = service
+          .generateImageStream(
+            ImageParams(
+              action: ImageGenerationAction.infill,
+              model: 'nai-diffusion-4-5-full',
+              width: 256,
+              height: 256,
+              sourceImage: source,
+              maskImage: mask,
+              inpaintFocusRegion: const InpaintFocusRegion(
+                x: 64,
+                y: 64,
+                width: 128,
+                height: 128,
+                context: 16,
+              ),
+            ),
+          )
+          .toList();
+      await _waitForRequestCount(adapter, 1);
+      adapter.requests.single.completeWithMsgpackMessages([
+        {
+          'event_type': 'intermediate',
+          'samp_ix': 0,
+          'step_ix': 0,
+          'image': generated,
+        },
+        {'event_type': 'final', 'samp_ix': 0, 'image': generated},
+      ]);
+      final chunks = await future.timeout(const Duration(seconds: 10));
+      expect(chunks.any((chunk) => chunk.hasError), isFalse);
+      final placement = chunks.first.inpaintPreviewPlacement!;
+      expect(placement.sourceImage, source);
+      expect(
+        (
+          placement.xPercent,
+          placement.yPercent,
+          placement.widthPercent,
+          placement.heightPercent,
+        ),
+        (.25, .25, .5, .5),
+      );
+      final display = img.decodePng(chunks.last.finalImage!)!;
+      expect((display.width, display.height), (256, 256));
+      expect(display.getPixel(0, 0).r.toInt(), 10);
+      expect(display.getPixel(128, 128).r.toInt(), greaterThan(190));
+      dio.close(force: true);
+    },
+  );
 
   test(
     'stream inpaint preview reuses full-frame artifacts and final composites',

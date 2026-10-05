@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/utils/contiguous_region_selector.dart';
-import 'package:nai_launcher/core/utils/inpaint_mask_utils.dart';
 import 'package:nai_launcher/data/services/efficient_vit_sam_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/canvas/editor_canvas.dart';
@@ -51,44 +50,31 @@ void main() {
     expect(output.getPixel(96, 16).a.toInt(), 255);
   });
 
-  testWidgets('Magic Wand adds a contiguous region to the inpaint mask', (
+  testWidgets('ordinary selection tools cannot activate in mask mode', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    ImageEditorResult? result;
-
     await _openEditor(
       tester,
       mode: ImageEditorMode.inpaint,
       image: _buildTwoColorPng(),
-      onResult: (value) => result = value,
+      onResult: (_) {},
     );
-
-    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-    state.debugSetToolById('magic_wand');
-    expect(state.debugCurrentToolId, 'magic_wand');
-
-    await tester.runAsync(() async {
-      await state.debugApplyMagicWand(const Offset(16, 16), tolerance: 0);
-    });
+    final screen = tester.state(find.byType(ImageEditorScreen)) as dynamic;
+    final EditorState state = screen.debugEditorState;
+    for (final id in [
+      'magic_wand',
+      'ellipse_selection',
+      'lasso_selection',
+      'color_picker',
+    ]) {
+      state.setToolById(id);
+      expect(state.currentTool!.id, 'brush');
+    }
+    expect(screen.debugHasMaskContent, isFalse);
+    await tester.pumpWidget(const SizedBox());
     await tester.pump();
-
-    expect(state.debugHasMaskContent, isTrue);
-    expect(state.debugUndo(), isTrue);
-    expect(state.debugHasMaskContent, isFalse);
-
-    await tester.runAsync(() async {
-      await state.debugApplyMagicWand(const Offset(16, 16), tolerance: 0);
-      await state.debugExportAndClose();
-    });
-    await _pumpUntil(tester, () => result != null);
-
-    expect(result!.hasMaskChanges, isTrue);
-    final mask = InpaintMaskUtils.decodeBinaryMask(result!.maskImage!);
-    expect(mask, isNotNull);
-    expect(mask!.mask[16 * mask.width + 16], 1);
-    expect(mask.mask[16 * mask.width + 96], 0);
   });
 
   testWidgets('Smart Magic Wand uses EfficientViT selection for editing', (
