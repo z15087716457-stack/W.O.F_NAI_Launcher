@@ -45,7 +45,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Shift Edges updates virtual state without old drag handles', (
+  testWidgets('Shift Edges updates virtual state alongside thin drag edges', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
@@ -77,7 +77,7 @@ void main() {
     expect(state.debugHasOutpaintChanges, isFalse);
     expect(state.debugVirtualOutpaintMaskRects, isEmpty);
 
-    expect(find.byKey(const Key('outpaint_edge_right')), findsNothing);
+    expect(find.byKey(const Key('outpaint_edge_right')), findsOneWidget);
     await tester.runAsync(() async {
       await state.debugApplyOutpaintFrameDelta(
         const OutpaintFrameDelta(right: 64),

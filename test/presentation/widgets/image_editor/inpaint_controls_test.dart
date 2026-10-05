@@ -196,7 +196,7 @@ void main() {
           expect(find.byIcon(Icons.more_horiz), findsNothing);
           expect(find.byIcon(Icons.more_vert), findsNothing);
           expect(find.byIcon(Icons.compress), findsNothing);
-          expect(find.byKey(const Key('outpaint_edge_right')), findsNothing);
+          expect(find.byKey(const Key('outpaint_edge_right')), findsOneWidget);
           expect(tester.getSize(find.byType(EditorCanvas)), size);
           expect(tester.takeException(), isNull);
           if (Platform.environment['CAPTURE_INPAINT_UI'] == '1') {

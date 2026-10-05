@@ -37,6 +37,7 @@ import 'widgets/panels/color_panel.dart';
 import 'widgets/panels/canvas_size_dialog.dart';
 import 'widgets/panels/shift_edges_dialog.dart';
 import 'widgets/panels/inpaint_controls.dart';
+import 'widgets/outpaint_edge_drag_overlay.dart';
 import '../model3d_editor/model3d_editor_screen.dart';
 import 'layers/model3d_layer_data.dart';
 import 'canvas/layer_painter.dart';
@@ -1031,6 +1032,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         OutpaintHorizontalSnapTarget.right,
     OutpaintVerticalSnapTarget verticalSnapTarget =
         OutpaintVerticalSnapTarget.bottom,
+    bool preserveViewport = false,
   }) async {
     if (!_useVirtualOutpaint) {
       return _applyOutpaintFrameDeltaMaterialized(
@@ -1090,6 +1092,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         compressionScale: compressionScale,
         beforeFocus: beforeFocus,
         afterFocus: shiftedFocus?.isEmpty == true ? null : shiftedFocus,
+        preserveViewport: preserveViewport,
       ),
       _state,
     );
@@ -1101,6 +1104,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     List<String> layerIds,
     double compressionScale,
     Rect? focus,
+    bool preserveViewport,
   ) {
     final sourceLayer = _state.layerManager.getLayerById(_sourceLayerId!);
     if (sourceLayer == null) return;
@@ -1118,7 +1122,11 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         _state.setCanvasSize(frame.canvasSize);
         _state.setInpaintFocusRegion(focus);
         _refreshCompressionPlan(desiredScale: compressionScale);
-        _state.canvasController.fitToViewport(_state.canvasSize);
+        if (preserveViewport) {
+          _state.canvasController.pan(-shift * _state.canvasController.scale);
+        } else {
+          _state.canvasController.fitToViewport(_state.canvasSize);
+        }
         _state.requestUiUpdate();
       });
     } finally {
@@ -1585,33 +1593,66 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     final virtualOutpaintMaskRects =
         _virtualOutpaintFrame?.outpaintMaskRects ?? const <Rect>[];
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: RepaintBoundary(
-            child: EditorCanvas(
-              state: _state,
-              showTransparentCanvasBackground:
-                  _isInpaintMode || _hasTransparentCutout,
-            ),
-          ),
-        ),
-        if (_isInpaintMode && virtualOutpaintMaskRects.isNotEmpty)
-          Positioned.fill(
-            child: IgnorePointer(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            Positioned.fill(
               child: RepaintBoundary(
-                child: CustomPaint(
-                  painter: VirtualOutpaintMaskPainter(
-                    state: _state,
-                    maskRects: virtualOutpaintMaskRects,
-                  ),
+                child: EditorCanvas(
+                  state: _state,
+                  showTransparentCanvasBackground:
+                      _isInpaintMode || _hasTransparentCutout,
+                  shouldSuppressPointerInput: _isInpaintMode
+                      ? (position) =>
+                            OutpaintEdgeDragOverlay.isResizeInteractionPoint(
+                              localPosition: position,
+                              viewportSize: constraints.biggest,
+                              canvasSize: _state.canvasSize,
+                              controller: _state.canvasController,
+                            )
+                      : null,
                 ),
               ),
             ),
-          ),
-        if (_isMagicWandProcessing)
-          Positioned.fill(child: _buildMagicWandProgressOverlay()),
-      ],
+            if (_isInpaintMode && virtualOutpaintMaskRects.isNotEmpty)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      painter: VirtualOutpaintMaskPainter(
+                        state: _state,
+                        maskRects: virtualOutpaintMaskRects,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (_isInpaintMode)
+              Positioned.fill(
+                child: OutpaintEdgeDragOverlay(
+                  canvasSize: _state.canvasSize,
+                  controller: _state.canvasController,
+                  enabled: !_isOutpaintCommitPending,
+                  onCommitted: _applyOutpaintEdges,
+                  onFrameResizeCommitted:
+                      (
+                        delta, {
+                        required horizontalSnapTarget,
+                        required verticalSnapTarget,
+                      }) => _applyOutpaintFrameDelta(
+                        delta,
+                        horizontalSnapTarget: horizontalSnapTarget,
+                        verticalSnapTarget: verticalSnapTarget,
+                        preserveViewport: true,
+                      ),
+                ),
+              ),
+            if (_isMagicWandProcessing)
+              Positioned.fill(child: _buildMagicWandProgressOverlay()),
+          ],
+        );
+      },
     );
   }
 }

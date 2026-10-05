@@ -77,6 +77,7 @@ class _VirtualOutpaintFrameAction extends EditorAction {
     required this.compressionScale,
     required this.beforeFocus,
     required this.afterFocus,
+    this.preserveViewport = false,
   });
   final _ImageEditorScreenState screen;
   final OutpaintVirtualFrame before, after;
@@ -84,6 +85,7 @@ class _VirtualOutpaintFrameAction extends EditorAction {
   final List<String> layerIds;
   final double compressionScale;
   final Rect? beforeFocus, afterFocus;
+  final bool preserveViewport;
   @override
   void execute(EditorState state) => screen._applyVirtualOutpaintHistoryFrame(
     after,
@@ -91,6 +93,7 @@ class _VirtualOutpaintFrameAction extends EditorAction {
     layerIds,
     compressionScale,
     afterFocus,
+    preserveViewport,
   );
   @override
   void undo(EditorState state) => screen._applyVirtualOutpaintHistoryFrame(
@@ -99,6 +102,7 @@ class _VirtualOutpaintFrameAction extends EditorAction {
     layerIds,
     compressionScale,
     beforeFocus,
+    preserveViewport,
   );
   @override
   String get description => 'Shift Edges';

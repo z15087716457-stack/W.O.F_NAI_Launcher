@@ -1,12 +1,10 @@
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'dart:async';
 import 'dart:math' as math;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-
 import '../../../../core/utils/inpaint_outpaint_utils.dart';
+import '../../../../core/utils/localization_extension.dart';
+import '../../../themes/studio_typography.dart';
 import '../core/canvas_controller.dart';
 
 typedef OutpaintEdgeDragPreviewChanged = void Function(OutpaintEdges edges);
@@ -23,111 +21,85 @@ typedef OutpaintFrameResizeCommitted =
       required OutpaintVerticalSnapTarget verticalSnapTarget,
     });
 
+/// Four thin edges and four transparent corners, with feedback only on hover
+/// or drag. No floating knobs or automatic commit before pointer release.
 class OutpaintEdgeDragOverlay extends StatefulWidget {
-  static const double edgeHitSlop = 48;
-
+  static const double edgeHitSlop = 8;
   final Size canvasSize;
   final CanvasController controller;
   final OutpaintEdgeDragPreviewChanged? onPreviewChanged;
   final OutpaintEdgeDragCommitted onCommitted;
   final OutpaintFrameResizeCommitted? onFrameResizeCommitted;
   final bool enabled;
-
   const OutpaintEdgeDragOverlay({
     super.key,
     required this.canvasSize,
     required this.controller,
-    this.onPreviewChanged,
     required this.onCommitted,
     this.onFrameResizeCommitted,
+    this.onPreviewChanged,
     this.enabled = true,
   });
+
+  static Rect screenCanvasRect(CanvasController controller, Size canvasSize) =>
+      Rect.fromPoints(
+        controller.canvasToScreen(Offset.zero, canvasSize: canvasSize),
+        controller.canvasToScreen(
+          Offset(canvasSize.width, canvasSize.height),
+          canvasSize: canvasSize,
+        ),
+      );
 
   static bool isResizeInteractionPoint({
     required Offset localPosition,
     required Size viewportSize,
     required Size canvasSize,
     required CanvasController controller,
-  }) {
-    if (controller.rotation != 0 || controller.isMirroredHorizontally) {
-      return false;
-    }
-
-    final canvasRect = _screenCanvasRectFor(
-      controller: controller,
-      canvasSize: canvasSize,
-    );
-    return _resizeZoneRects(
-      canvasRect,
-      viewportSize,
-    ).any((rect) => rect.contains(localPosition));
-  }
-
-  static Rect _screenCanvasRectFor({
-    required CanvasController controller,
-    required Size canvasSize,
-  }) {
-    final topLeft = controller.canvasToScreen(
-      Offset.zero,
-      canvasSize: canvasSize,
-    );
-    final bottomRight = controller.canvasToScreen(
-      Offset(canvasSize.width, canvasSize.height),
-      canvasSize: canvasSize,
-    );
-    return Rect.fromPoints(topLeft, bottomRight);
-  }
-
-  static List<Rect> _resizeZoneRects(Rect canvasRect, Size viewportSize) {
-    return [
-      _clampZoneRect(
-        Rect.fromLTRB(
-          canvasRect.left - edgeHitSlop / 2,
-          canvasRect.top,
-          canvasRect.left + edgeHitSlop / 2,
-          canvasRect.bottom,
-        ),
+  }) =>
+      controller.rotation == 0 &&
+      !controller.isMirroredHorizontally &&
+      _zones(
+        screenCanvasRect(controller, canvasSize),
+        controller.scale,
         viewportSize,
-      ),
-      _clampZoneRect(
-        Rect.fromLTRB(
-          canvasRect.right - edgeHitSlop / 2,
-          canvasRect.top,
-          canvasRect.right + edgeHitSlop / 2,
-          canvasRect.bottom,
-        ),
-        viewportSize,
-      ),
-      _clampZoneRect(
-        Rect.fromLTRB(
-          canvasRect.left,
-          canvasRect.top - edgeHitSlop / 2,
-          canvasRect.right,
-          canvasRect.top + edgeHitSlop / 2,
-        ),
-        viewportSize,
-      ),
-      _clampZoneRect(
-        Rect.fromLTRB(
-          canvasRect.left,
-          canvasRect.bottom - edgeHitSlop / 2,
-          canvasRect.right,
-          canvasRect.bottom + edgeHitSlop / 2,
-        ),
-        viewportSize,
-      ),
-    ].where((rect) => !rect.isEmpty).toList();
-  }
+      ).values.any((rect) => rect.contains(localPosition));
 
-  static Rect _clampZoneRect(Rect rect, Size viewportSize) {
-    final left = rect.left.clamp(0.0, viewportSize.width).toDouble();
-    final top = rect.top.clamp(0.0, viewportSize.height).toDouble();
-    final right = rect.right.clamp(0.0, viewportSize.width).toDouble();
-    final bottom = rect.bottom.clamp(0.0, viewportSize.height).toDouble();
-    if (right <= left || bottom <= top) {
-      return Rect.zero;
-    }
-    return Rect.fromLTRB(left, top, right, bottom);
+  static Map<_Handle, Rect> _zones(Rect r, double scale, Size viewport) {
+    final edge = math.max(edgeHitSlop, 2 * scale),
+        corner = math.max(12.0, 4 * scale);
+    final half = corner / 2, bounds = Offset.zero & viewport;
+    Rect point(Offset center) =>
+        Rect.fromCenter(center: center, width: corner, height: corner);
+    return {
+      _Handle.left: Rect.fromLTRB(
+        r.left - edge / 2,
+        r.top + half,
+        r.left + edge / 2,
+        r.bottom - half,
+      ),
+      _Handle.right: Rect.fromLTRB(
+        r.right - edge / 2,
+        r.top + half,
+        r.right + edge / 2,
+        r.bottom - half,
+      ),
+      _Handle.top: Rect.fromLTRB(
+        r.left + half,
+        r.top - edge / 2,
+        r.right - half,
+        r.top + edge / 2,
+      ),
+      _Handle.bottom: Rect.fromLTRB(
+        r.left + half,
+        r.bottom - edge / 2,
+        r.right - half,
+        r.bottom + edge / 2,
+      ),
+      _Handle.topLeft: point(r.topLeft),
+      _Handle.topRight: point(r.topRight),
+      _Handle.bottomLeft: point(r.bottomLeft),
+      _Handle.bottomRight: point(r.bottomRight),
+    }.map((handle, rect) => MapEntry(handle, rect.intersect(bounds)));
   }
 
   @override
@@ -136,700 +108,313 @@ class OutpaintEdgeDragOverlay extends StatefulWidget {
 }
 
 class _OutpaintEdgeDragOverlayState extends State<OutpaintEdgeDragOverlay> {
-  static const double _handleSize = 22;
-  static const double _cornerHandleSize = 24;
-
-  _OutpaintDragHandle? _activeHandle;
-  _OutpaintDragHandle? _hoveredHandle;
-  int? _activePointer;
-  Offset? _lastGlobalPosition;
-  Offset _dragDelta = Offset.zero;
-  OutpaintFrameDelta _previewDelta = const OutpaintFrameDelta();
-  OutpaintFrameResolvedGeometry? _previewGeometry;
-  _OutpaintPreviewGeometryKey? _visiblePreviewKey;
-  bool _previewUpdateScheduled = false;
-  bool _isCommitting = false;
-  Timer? _outsideCommitTimer;
-
-  bool get _canRenderOverlay =>
+  _Handle? _active, _hover;
+  int? _pointer;
+  Offset? _startPosition;
+  Offset _drag = Offset.zero;
+  double _startScale = 1;
+  Size? _startCanvasSize;
+  Rect? _startCanvasRect;
+  bool _committing = false;
+  bool get _available =>
+      widget.enabled &&
+      !_committing &&
       widget.controller.rotation == 0 &&
       !widget.controller.isMirroredHorizontally;
 
-  bool get _canShowHandles =>
-      _canRenderOverlay && widget.enabled && !_isCommitting;
-
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
-
-        return ListenableBuilder(
-          listenable: widget.controller,
-          builder: (context, _) {
-            if (!_canRenderOverlay) {
-              return const SizedBox.shrink();
-            }
-
-            final canvasRect = _screenCanvasRect;
-            final preview = _activeHandle == null ? null : _previewGeometry;
-            final highlightedHandle = _activeHandle ?? _hoveredHandle;
-
-            return MouseRegion(
-              opaque: false,
-              hitTestBehavior: HitTestBehavior.deferToChild,
-              onExit: (_) {
-                if (_activeHandle != null && _hasVisiblePreview) {
-                  _scheduleOutsideCommit();
-                }
-              },
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  if (preview != null && preview.hasAppliedChange)
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: RepaintBoundary(
-                          child: CustomPaint(
-                            painter: _OutpaintEdgePreviewPainter(
-                              canvasRect: canvasRect,
-                              preview: preview,
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final viewport = constraints.biggest;
+      return ListenableBuilder(
+        listenable: widget.controller,
+        builder: (context, _) {
+          final currentCanvas = OutpaintEdgeDragOverlay.screenCanvasRect(
+            widget.controller,
+            widget.canvasSize,
+          );
+          final canvas = _active == null ? currentCanvas : _startCanvasRect!;
+          final resolved = _resolve(), preview = resolved?.geometry;
+          final color = Theme.of(context).colorScheme.primary;
+          return Stack(
+            children: [
+              if (preview != null && preview.hasAppliedChange) ...[
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _PreviewPainter(
+                        _previewRect(canvas, preview),
+                        color,
+                      ),
+                    ),
+                  ),
+                ),
+                ..._labels(context, viewport, canvas, resolved!),
+              ],
+              if (_available)
+                for (final entry in OutpaintEdgeDragOverlay._zones(
+                  currentCanvas,
+                  widget.controller.scale,
+                  viewport,
+                ).entries)
+                  if (!entry.value.isEmpty)
+                    Positioned.fromRect(
+                      rect: entry.value,
+                      child: MouseRegion(
+                        key: Key('outpaint_edge_${entry.key.suffix}'),
+                        cursor: entry.key.cursor,
+                        opaque: true,
+                        onEnter: (_) {
+                          if (_active == null) {
+                            setState(() => _hover = entry.key);
+                          }
+                        },
+                        onExit: (_) {
+                          if (_active == null) setState(() => _hover = null);
+                        },
+                        child: Listener(
+                          key: Key('outpaint_handle_${entry.key.suffix}'),
+                          behavior: HitTestBehavior.opaque,
+                          onPointerDown: (event) => _down(event, entry.key),
+                          child: DecoratedBox(
+                            key: _active == entry.key || _hover == entry.key
+                                ? Key('outpaint_highlight_${entry.key.suffix}')
+                                : null,
+                            decoration: BoxDecoration(
+                              color: color.withValues(
+                                alpha: _active == entry.key
+                                    ? .3
+                                    : _hover == entry.key
+                                    ? .15
+                                    : 0,
+                              ),
+                              borderRadius: BorderRadius.circular(3),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  if (preview != null && preview.hasAppliedChange)
-                    _PreviewLabel(
-                      canvasRect: canvasRect,
-                      handle: _activeHandle!,
-                      preview: preview,
-                      viewportSize: viewportSize,
-                    ),
-                  if (highlightedHandle != null)
-                    Positioned.fill(
-                      key: Key(
-                        'outpaint_highlight_${highlightedHandle.keySuffix}',
-                      ),
-                      child: IgnorePointer(
-                        child: CustomPaint(
-                          painter: _OutpaintEdgeHighlightPainter(
-                            canvasRect: canvasRect,
-                            handle: highlightedHandle,
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (_canShowHandles)
-                    ..._buildEdgeZones(canvasRect, viewportSize),
-                  if (_canShowHandles)
-                    ..._buildHandles(canvasRect, viewportSize),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+            ],
+          );
+        },
+      );
+    },
+  );
 
-  bool get _hasVisiblePreview => _previewGeometry?.hasAppliedChange == true;
-
-  Rect get _screenCanvasRect {
-    return OutpaintEdgeDragOverlay._screenCanvasRectFor(
-      controller: widget.controller,
-      canvasSize: widget.canvasSize,
-    );
-  }
-
-  List<Widget> _buildHandles(Rect canvasRect, Size viewportSize) {
-    return [
-      _buildHandle(
-        key: const Key('outpaint_handle_left'),
-        handle: _OutpaintDragHandle.left,
-        center: Offset(canvasRect.left, canvasRect.center.dy),
-        viewportSize: viewportSize,
-      ),
-      _buildHandle(
-        key: const Key('outpaint_handle_right'),
-        handle: _OutpaintDragHandle.right,
-        center: Offset(canvasRect.right, canvasRect.center.dy),
-        viewportSize: viewportSize,
-      ),
-      _buildHandle(
-        key: const Key('outpaint_handle_top'),
-        handle: _OutpaintDragHandle.top,
-        center: Offset(canvasRect.center.dx, canvasRect.top),
-        viewportSize: viewportSize,
-      ),
-      _buildHandle(
-        key: const Key('outpaint_handle_bottom'),
-        handle: _OutpaintDragHandle.bottom,
-        center: Offset(canvasRect.center.dx, canvasRect.bottom),
-        viewportSize: viewportSize,
-      ),
-      _buildHandle(
-        key: const Key('outpaint_handle_top_left'),
-        handle: _OutpaintDragHandle.topLeft,
-        center: canvasRect.topLeft,
-        isCorner: true,
-        viewportSize: viewportSize,
-      ),
-      _buildHandle(
-        key: const Key('outpaint_handle_top_right'),
-        handle: _OutpaintDragHandle.topRight,
-        center: canvasRect.topRight,
-        isCorner: true,
-        viewportSize: viewportSize,
-      ),
-      _buildHandle(
-        key: const Key('outpaint_handle_bottom_left'),
-        handle: _OutpaintDragHandle.bottomLeft,
-        center: canvasRect.bottomLeft,
-        isCorner: true,
-        viewportSize: viewportSize,
-      ),
-      _buildHandle(
-        key: const Key('outpaint_handle_bottom_right'),
-        handle: _OutpaintDragHandle.bottomRight,
-        center: canvasRect.bottomRight,
-        isCorner: true,
-        viewportSize: viewportSize,
-      ),
+  List<Widget> _labels(
+    BuildContext context,
+    Size viewport,
+    Rect canvas,
+    _Resize resolved,
+  ) {
+    final r = _previewRect(canvas, resolved.geometry),
+        d = resolved.delta,
+        l10n = context.l10n;
+    String amount(int n) => '${n > 0 ? '+' : ''}${n}px';
+    final labels = [
+      if (d.left != 0) '${l10n.editor_edgeLeft}: ${amount(d.left)}',
+      if (d.right != 0) '${l10n.editor_edgeRight}: ${amount(d.right)}',
+      if (d.top != 0) '${l10n.editor_edgeTop}: ${amount(d.top)}',
+      if (d.bottom != 0) '${l10n.editor_edgeBottom}: ${amount(d.bottom)}',
     ];
-  }
-
-  List<Widget> _buildEdgeZones(Rect canvasRect, Size viewportSize) {
-    return [
-      _buildEdgeZone(
-        key: const Key('outpaint_edge_left'),
-        handle: _OutpaintDragHandle.left,
-        rect: Rect.fromLTRB(
-          canvasRect.left - OutpaintEdgeDragOverlay.edgeHitSlop / 2,
-          canvasRect.top,
-          canvasRect.left + OutpaintEdgeDragOverlay.edgeHitSlop / 2,
-          canvasRect.bottom,
-        ),
-        viewportSize: viewportSize,
-      ),
-      _buildEdgeZone(
-        key: const Key('outpaint_edge_right'),
-        handle: _OutpaintDragHandle.right,
-        rect: Rect.fromLTRB(
-          canvasRect.right - OutpaintEdgeDragOverlay.edgeHitSlop / 2,
-          canvasRect.top,
-          canvasRect.right + OutpaintEdgeDragOverlay.edgeHitSlop / 2,
-          canvasRect.bottom,
-        ),
-        viewportSize: viewportSize,
-      ),
-      _buildEdgeZone(
-        key: const Key('outpaint_edge_top'),
-        handle: _OutpaintDragHandle.top,
-        rect: Rect.fromLTRB(
-          canvasRect.left,
-          canvasRect.top - OutpaintEdgeDragOverlay.edgeHitSlop / 2,
-          canvasRect.right,
-          canvasRect.top + OutpaintEdgeDragOverlay.edgeHitSlop / 2,
-        ),
-        viewportSize: viewportSize,
-      ),
-      _buildEdgeZone(
-        key: const Key('outpaint_edge_bottom'),
-        handle: _OutpaintDragHandle.bottom,
-        rect: Rect.fromLTRB(
-          canvasRect.left,
-          canvasRect.bottom - OutpaintEdgeDragOverlay.edgeHitSlop / 2,
-          canvasRect.right,
-          canvasRect.bottom + OutpaintEdgeDragOverlay.edgeHitSlop / 2,
-        ),
-        viewportSize: viewportSize,
-      ),
-    ];
-  }
-
-  Widget _buildEdgeZone({
-    required Key key,
-    required _OutpaintDragHandle handle,
-    required Rect rect,
-    required Size viewportSize,
-  }) {
-    final clampedRect = _clampZoneRect(rect, viewportSize);
-    if (clampedRect.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Positioned.fromRect(
-      rect: clampedRect,
-      child: MouseRegion(
-        key: key,
-        opaque: true,
-        hitTestBehavior: HitTestBehavior.opaque,
-        cursor: handle.cursor,
-        onEnter: (_) => _setHoveredHandle(handle),
-        onExit: (_) => _clearHoveredHandle(handle),
-        child: Listener(
-          behavior: HitTestBehavior.opaque,
-          onPointerDown: (event) => _handlePointerDown(event, handle),
-          child: const SizedBox.expand(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHandle({
-    required Key key,
-    required _OutpaintDragHandle handle,
-    required Offset center,
-    required Size viewportSize,
-    bool isCorner = false,
-  }) {
-    final size = isCorner ? _cornerHandleSize : _handleSize;
-    final visibleCenter = _clampHandleCenter(center, size, viewportSize);
-    return Positioned(
-      left: visibleCenter.dx - size / 2,
-      top: visibleCenter.dy - size / 2,
-      width: size,
-      height: size,
-      child: MouseRegion(
-        opaque: true,
-        hitTestBehavior: HitTestBehavior.opaque,
-        cursor: handle.cursor,
-        onEnter: (_) => _setHoveredHandle(handle),
-        onExit: (_) => _clearHoveredHandle(handle),
-        child: Listener(
-          key: key,
-          behavior: HitTestBehavior.opaque,
-          onPointerDown: (event) => _handlePointerDown(event, handle),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.circular(isCorner ? 6 : 999),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.onPrimary,
-                width: 2,
+    Widget text(String value, double y, String key, double opacity) {
+      final width = math.min(
+        math.max(0.0, viewport.width - 16),
+        math.max(r.width, 160.0),
+      );
+      final left = (r.center.dx - width / 2).clamp(
+        8.0,
+        math.max(8.0, viewport.width - width - 8),
+      );
+      return Positioned(
+        left: left.toDouble(),
+        top: y.clamp(0.0, math.max(0.0, viewport.height - 20)),
+        width: width,
+        height: 20,
+        child: IgnorePointer(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: .88),
+                borderRadius: BorderRadius.circular(2),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  value,
+                  key: Key(key),
+                  style: TextStyle(
+                    fontFamily: StudioTypography.mono,
+                    fontFamilyFallback: StudioTypography.fallback,
+                    fontSize: 12,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: opacity),
+                  ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
+      );
+    }
+
+    return [
+      text(labels.join('  '), r.top - 24, 'outpaint_drag_delta', .6),
+      text(
+        '${resolved.geometry.width} × ${resolved.geometry.height}',
+        math.min(r.bottom + 8, viewport.height - 80),
+        'outpaint_drag_size',
+        1,
       ),
+    ];
+  }
+
+  Rect _previewRect(Rect canvas, OutpaintFrameResolvedGeometry geometry) {
+    final sx = canvas.width / geometry.sourceWidth,
+        sy = canvas.height / geometry.sourceHeight;
+    return Rect.fromLTRB(
+      canvas.left + geometry.appliedFrameLeft * sx,
+      canvas.top + geometry.appliedFrameTop * sy,
+      canvas.left + geometry.appliedFrameRight * sx,
+      canvas.top + geometry.appliedFrameBottom * sy,
     );
   }
 
-  void _handlePointerDown(PointerDownEvent event, _OutpaintDragHandle handle) {
-    if (!widget.enabled || _isCommitting || _activePointer != null) {
+  void _down(PointerDownEvent event, _Handle handle) {
+    if (!_available || _pointer != null || event.buttons != kPrimaryButton) {
       return;
     }
-
-    _activePointer = event.pointer;
-    _lastGlobalPosition = event.position;
-    GestureBinding.instance.pointerRouter.addRoute(
-      event.pointer,
-      _handleRoutedPointerEvent,
+    _pointer = event.pointer;
+    _startPosition = event.position;
+    _startScale = widget.controller.scale;
+    _startCanvasSize = widget.canvasSize;
+    _startCanvasRect = OutpaintEdgeDragOverlay.screenCanvasRect(
+      widget.controller,
+      widget.canvasSize,
     );
-    _startDrag(handle);
+    GestureBinding.instance.pointerRouter.addRoute(event.pointer, _route);
+    setState(() {
+      _active = handle;
+      _hover = null;
+      _drag = Offset.zero;
+    });
   }
 
-  void _handleRoutedPointerEvent(PointerEvent event) {
-    if (event.pointer != _activePointer) {
-      return;
-    }
-
+  void _route(PointerEvent event) {
+    if (event.pointer != _pointer) return;
     if (event is PointerMoveEvent) {
-      final previousPosition = _lastGlobalPosition ?? event.position;
-      _lastGlobalPosition = event.position;
-      _updateDrag(
-        event.position - previousPosition,
-        globalPosition: event.position,
-      );
-      return;
-    }
-
-    if (event is PointerUpEvent) {
-      _stopPointerRoute();
-      unawaited(_commitDrag());
-      return;
-    }
-
-    if (event is PointerCancelEvent) {
-      _stopPointerRoute();
-      unawaited(_commitDrag());
+      final before = _resolve()?.delta;
+      setState(() => _drag = event.position - _startPosition!);
+      final after = _resolve()?.delta;
+      if (after != null &&
+          (after.left, after.right, after.top, after.bottom) !=
+              (before?.left, before?.right, before?.top, before?.bottom) &&
+          !after.expansionEdges.isEmpty) {
+        widget.onPreviewChanged?.call(after.expansionEdges);
+      }
+    } else if (event is PointerUpEvent) {
+      _stopRoute();
+      unawaited(_commit());
+    } else if (event is PointerCancelEvent) {
+      _reset();
     }
   }
 
-  void _stopPointerRoute() {
-    final activePointer = _activePointer;
-    if (activePointer != null) {
-      GestureBinding.instance.pointerRouter.removeRoute(
-        activePointer,
-        _handleRoutedPointerEvent,
-      );
-    }
-    _activePointer = null;
-    _lastGlobalPosition = null;
-  }
-
-  Offset _clampHandleCenter(Offset center, double size, Size viewportSize) {
-    final halfSize = size / 2;
-    final maxX = math.max(halfSize, viewportSize.width - halfSize);
-    final maxY = math.max(halfSize, viewportSize.height - halfSize);
-    return Offset(
-      center.dx.clamp(halfSize, maxX).toDouble(),
-      center.dy.clamp(halfSize, maxY).toDouble(),
+  _Resize? _resolve() {
+    final handle = _active;
+    if (handle == null) return null;
+    final source = _startCanvasSize!;
+    // Mask editor uses the official 64px increment, including JS half ties.
+    // Preview and commit receive precisely the same snapped frame.
+    int snap(double value) => ((value / 64) + .5).floor() * 64;
+    final x = snap(
+      _drag.dx / _startScale * (handle.affectsLeft ? -1 : 1),
+    ).clamp(64 - source.width.round(), 4096 - source.width.round()).toInt();
+    final y = snap(
+      _drag.dy / _startScale * (handle.affectsTop ? -1 : 1),
+    ).clamp(64 - source.height.round(), 4096 - source.height.round()).toInt();
+    final delta = OutpaintFrameDelta(
+      left: handle.affectsLeft ? x : 0,
+      right: handle.affectsRight ? x : 0,
+      top: handle.affectsTop ? y : 0,
+      bottom: handle.affectsBottom ? y : 0,
     );
-  }
-
-  Rect _clampZoneRect(Rect rect, Size viewportSize) {
-    return OutpaintEdgeDragOverlay._clampZoneRect(rect, viewportSize);
-  }
-
-  void _setHoveredHandle(_OutpaintDragHandle handle) {
-    if (_hoveredHandle == handle || _activeHandle != null) {
-      return;
-    }
-    setState(() {
-      _hoveredHandle = handle;
-    });
-  }
-
-  void _clearHoveredHandle(_OutpaintDragHandle handle) {
-    if (_hoveredHandle != handle || _activeHandle != null) {
-      return;
-    }
-    setState(() {
-      _hoveredHandle = null;
-    });
-  }
-
-  void _startDrag(_OutpaintDragHandle handle) {
-    if (_isCommitting) {
-      return;
-    }
-
-    setState(() {
-      _activeHandle = handle;
-      _hoveredHandle = null;
-      _dragDelta = Offset.zero;
-      _previewDelta = const OutpaintFrameDelta();
-      _previewGeometry = null;
-      _visiblePreviewKey = null;
-    });
-  }
-
-  void _updateDrag(Offset delta, {required Offset globalPosition}) {
-    if (_isCommitting) {
-      return;
-    }
-
-    final activeHandle = _activeHandle;
-    if (activeHandle == null) {
-      return;
-    }
-
-    _dragDelta += delta;
-    _schedulePreviewUpdate();
-
-    final pendingPreview = _resolveCurrentDragPreview();
-    if (pendingPreview != null &&
-        pendingPreview.canPreview &&
-        pendingPreview.hasAppliedChange &&
-        (activeHandle.affectsLeft || _isOutsideOverlay(globalPosition))) {
-      _scheduleOutsideCommit();
-    } else {
-      _outsideCommitTimer?.cancel();
-    }
-  }
-
-  bool _isOutsideOverlay(Offset globalPosition) {
-    final renderBox = context.findRenderObject();
-    if (renderBox is! RenderBox || !renderBox.hasSize) {
-      return false;
-    }
-
-    final localPosition = renderBox.globalToLocal(globalPosition);
-    return localPosition.dx < 0 ||
-        localPosition.dy < 0 ||
-        localPosition.dx > renderBox.size.width ||
-        localPosition.dy > renderBox.size.height;
-  }
-
-  OutpaintFrameDelta _deltaForDrag(
-    _OutpaintDragHandle handle,
-    int sourceDx,
-    int sourceDy,
-  ) {
-    return OutpaintFrameDelta(
-      left: handle.affectsLeft ? -sourceDx : 0,
-      top: handle.affectsTop ? -sourceDy : 0,
-      right: handle.affectsRight ? sourceDx : 0,
-      bottom: handle.affectsBottom ? sourceDy : 0,
+    if (delta.isEmpty) return null;
+    final geometry = InpaintOutpaintUtils.tryResolveFrameGeometry(
+      sourceWidth: source.width.round(),
+      sourceHeight: source.height.round(),
+      delta: delta,
+      horizontalSnapTarget: handle.horizontalTarget,
+      verticalSnapTarget: handle.verticalTarget,
     );
-  }
-
-  _ResolvedOutpaintDragPreview? _resolveCurrentDragPreview() {
-    final activeHandle = _activeHandle;
-    if (activeHandle == null) {
-      return null;
-    }
-
-    final scale = widget.controller.scale;
-    final sourceDx = (_dragDelta.dx / scale).round();
-    final sourceDy = (_dragDelta.dy / scale).round();
-    final delta = _deltaForDrag(activeHandle, sourceDx, sourceDy);
-    final geometry = delta.isEmpty
+    return geometry == null || !geometry.hasAppliedChange
         ? null
-        : _resolvePreviewGeometry(activeHandle, delta);
-    return _ResolvedOutpaintDragPreview(
-      delta: delta,
-      geometry: geometry,
-      canPreview: delta.isEmpty || geometry != null,
-    );
+        : _Resize(delta, geometry);
   }
 
-  void _schedulePreviewUpdate() {
-    if (_previewUpdateScheduled) {
+  Future<void> _commit() async {
+    final resolved = _resolve(), handle = _active;
+    if (resolved == null || handle == null) {
+      _reset();
       return;
     }
-
-    _previewUpdateScheduled = true;
-    SchedulerBinding.instance.scheduleFrameCallback((_) {
-      if (!_previewUpdateScheduled || !mounted) {
-        return;
-      }
-      _flushPreviewUpdate();
-    });
-  }
-
-  void _flushPreviewUpdate() {
-    _previewUpdateScheduled = false;
-
-    final resolved = _resolveCurrentDragPreview();
-    if (resolved == null) {
-      return;
-    }
-
-    if (!resolved.canPreview || !resolved.hasAppliedChange) {
-      final hadVisiblePreview =
-          !_previewDelta.isEmpty || _previewGeometry != null;
-      _previewDelta = const OutpaintFrameDelta();
-      _previewGeometry = null;
-      _visiblePreviewKey = null;
-      if (hadVisiblePreview && mounted) {
-        setState(() {});
-      }
-      return;
-    }
-
-    final geometry = resolved.geometry!;
-    final previewKey = _OutpaintPreviewGeometryKey.from(geometry);
-    final shouldEmit = previewKey != _visiblePreviewKey;
-
-    _previewDelta = resolved.delta;
-    if (!shouldEmit) {
-      return;
-    }
-
-    _previewGeometry = geometry;
-    _visiblePreviewKey = previewKey;
-    if (mounted) {
-      setState(() {});
-      final expansionEdges = resolved.delta.expansionEdges;
-      if (!expansionEdges.isEmpty) {
-        widget.onPreviewChanged?.call(expansionEdges);
-      }
-    }
-  }
-
-  OutpaintFrameResolvedGeometry? _resolvePreviewGeometry(
-    _OutpaintDragHandle handle,
-    OutpaintFrameDelta delta,
-  ) {
-    return InpaintOutpaintUtils.tryResolveFrameGeometry(
-      sourceWidth: widget.canvasSize.width.round(),
-      sourceHeight: widget.canvasSize.height.round(),
-      delta: delta,
-      horizontalSnapTarget: _horizontalSnapTarget(handle),
-      verticalSnapTarget: _verticalSnapTarget(handle),
-    );
-  }
-
-  Future<void> _commitDrag() async {
-    if (_isCommitting) {
-      return;
-    }
-
-    _flushPreviewUpdate();
-    _stopPointerRoute();
-    _outsideCommitTimer?.cancel();
-
-    final activeHandle = _activeHandle;
-    final delta = _previewDelta;
-    final geometry = _previewGeometry;
-
-    if (activeHandle == null ||
-        geometry == null ||
-        !geometry.hasAppliedChange) {
-      _resetDrag();
-      return;
-    }
-
-    setState(() {
-      _isCommitting = true;
-    });
-
+    setState(() => _committing = true);
     try {
-      final horizontalSnapTarget = _horizontalSnapTarget(activeHandle);
-      final verticalSnapTarget = _verticalSnapTarget(activeHandle);
       if (widget.onFrameResizeCommitted != null) {
         await widget.onFrameResizeCommitted!(
-          delta,
-          horizontalSnapTarget: horizontalSnapTarget,
-          verticalSnapTarget: verticalSnapTarget,
+          resolved.delta,
+          horizontalSnapTarget: handle.horizontalTarget,
+          verticalSnapTarget: handle.verticalTarget,
         );
-      } else if (delta.cropEdges.isEmpty) {
+      } else if (resolved.delta.cropEdges.isEmpty) {
         await widget.onCommitted(
-          delta.expansionEdges,
-          horizontalSnapTarget: horizontalSnapTarget,
-          verticalSnapTarget: verticalSnapTarget,
+          resolved.delta.expansionEdges,
+          horizontalSnapTarget: handle.horizontalTarget,
+          verticalSnapTarget: handle.verticalTarget,
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isCommitting = false;
-          _activeHandle = null;
-          _dragDelta = Offset.zero;
-          _previewDelta = const OutpaintFrameDelta();
-          _previewGeometry = null;
-          _visiblePreviewKey = null;
-        });
-      }
+      if (mounted) _reset();
     }
   }
 
-  void _resetDrag() {
-    if (_isCommitting) {
-      return;
+  void _stopRoute() {
+    if (_pointer != null) {
+      GestureBinding.instance.pointerRouter.removeRoute(_pointer!, _route);
     }
-    _stopPointerRoute();
-    _outsideCommitTimer?.cancel();
-    _previewUpdateScheduled = false;
+    _pointer = null;
+  }
 
+  void _reset() {
+    _stopRoute();
     setState(() {
-      _activeHandle = null;
-      _hoveredHandle = null;
-      _dragDelta = Offset.zero;
-      _previewDelta = const OutpaintFrameDelta();
-      _previewGeometry = null;
-      _visiblePreviewKey = null;
-    });
-  }
-
-  void _scheduleOutsideCommit() {
-    if (_isCommitting) {
-      return;
-    }
-
-    _outsideCommitTimer?.cancel();
-    _outsideCommitTimer = Timer(const Duration(milliseconds: 500), () {
-      if (!mounted) {
-        return;
-      }
-      unawaited(_commitDrag());
+      _active = null;
+      _hover = null;
+      _committing = false;
+      _drag = Offset.zero;
+      _startCanvasSize = null;
+      _startCanvasRect = null;
     });
   }
 
   @override
   void dispose() {
-    _stopPointerRoute();
-    _outsideCommitTimer?.cancel();
-    _previewUpdateScheduled = false;
+    _stopRoute();
     super.dispose();
   }
-
-  OutpaintHorizontalSnapTarget _horizontalSnapTarget(
-    _OutpaintDragHandle handle,
-  ) {
-    return handle.affectsLeft
-        ? OutpaintHorizontalSnapTarget.left
-        : OutpaintHorizontalSnapTarget.right;
-  }
-
-  OutpaintVerticalSnapTarget _verticalSnapTarget(_OutpaintDragHandle handle) {
-    return handle.affectsTop
-        ? OutpaintVerticalSnapTarget.top
-        : OutpaintVerticalSnapTarget.bottom;
-  }
 }
 
-class _ResolvedOutpaintDragPreview {
+class _Resize {
   final OutpaintFrameDelta delta;
-  final OutpaintFrameResolvedGeometry? geometry;
-  final bool canPreview;
-
-  const _ResolvedOutpaintDragPreview({
-    required this.delta,
-    required this.geometry,
-    required this.canPreview,
-  });
-
-  bool get hasAppliedChange => geometry?.hasAppliedChange == true;
+  final OutpaintFrameResolvedGeometry geometry;
+  _Resize(this.delta, this.geometry);
 }
 
-class _OutpaintPreviewGeometryKey {
-  final int width;
-  final int height;
-  final int frameLeft;
-  final int frameTop;
-  final int frameRight;
-  final int frameBottom;
-
-  const _OutpaintPreviewGeometryKey({
-    required this.width,
-    required this.height,
-    required this.frameLeft,
-    required this.frameTop,
-    required this.frameRight,
-    required this.frameBottom,
-  });
-
-  factory _OutpaintPreviewGeometryKey.from(
-    OutpaintFrameResolvedGeometry geometry,
-  ) {
-    return _OutpaintPreviewGeometryKey(
-      width: geometry.width,
-      height: geometry.height,
-      frameLeft: geometry.appliedFrameLeft,
-      frameTop: geometry.appliedFrameTop,
-      frameRight: geometry.appliedFrameRight,
-      frameBottom: geometry.appliedFrameBottom,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is _OutpaintPreviewGeometryKey &&
-            width == other.width &&
-            height == other.height &&
-            frameLeft == other.frameLeft &&
-            frameTop == other.frameTop &&
-            frameRight == other.frameRight &&
-            frameBottom == other.frameBottom;
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(width, height, frameLeft, frameTop, frameRight, frameBottom);
-}
-
-enum _OutpaintDragHandle {
+enum _Handle {
   left,
   right,
   top,
@@ -839,283 +424,54 @@ enum _OutpaintDragHandle {
   bottomLeft,
   bottomRight;
 
+  String get suffix => switch (this) {
+    topLeft => 'top_left',
+    topRight => 'top_right',
+    bottomLeft => 'bottom_left',
+    bottomRight => 'bottom_right',
+    _ => name,
+  };
   bool get affectsLeft => this == left || this == topLeft || this == bottomLeft;
   bool get affectsRight =>
       this == right || this == topRight || this == bottomRight;
   bool get affectsTop => this == top || this == topLeft || this == topRight;
   bool get affectsBottom =>
       this == bottom || this == bottomLeft || this == bottomRight;
-
-  String get keySuffix {
-    switch (this) {
-      case _OutpaintDragHandle.left:
-        return 'left';
-      case _OutpaintDragHandle.right:
-        return 'right';
-      case _OutpaintDragHandle.top:
-        return 'top';
-      case _OutpaintDragHandle.bottom:
-        return 'bottom';
-      case _OutpaintDragHandle.topLeft:
-        return 'top_left';
-      case _OutpaintDragHandle.topRight:
-        return 'top_right';
-      case _OutpaintDragHandle.bottomLeft:
-        return 'bottom_left';
-      case _OutpaintDragHandle.bottomRight:
-        return 'bottom_right';
-    }
-  }
-
-  MouseCursor get cursor {
-    switch (this) {
-      case _OutpaintDragHandle.left:
-      case _OutpaintDragHandle.right:
-        return SystemMouseCursors.resizeLeftRight;
-      case _OutpaintDragHandle.top:
-      case _OutpaintDragHandle.bottom:
-        return SystemMouseCursors.resizeUpDown;
-      case _OutpaintDragHandle.topLeft:
-      case _OutpaintDragHandle.bottomRight:
-        return SystemMouseCursors.resizeUpLeftDownRight;
-      case _OutpaintDragHandle.topRight:
-      case _OutpaintDragHandle.bottomLeft:
-        return SystemMouseCursors.resizeUpRightDownLeft;
-    }
-  }
+  OutpaintHorizontalSnapTarget get horizontalTarget => affectsLeft
+      ? OutpaintHorizontalSnapTarget.left
+      : OutpaintHorizontalSnapTarget.right;
+  OutpaintVerticalSnapTarget get verticalTarget => affectsTop
+      ? OutpaintVerticalSnapTarget.top
+      : OutpaintVerticalSnapTarget.bottom;
+  MouseCursor get cursor => switch (this) {
+    left || right => SystemMouseCursors.resizeLeftRight,
+    top || bottom => SystemMouseCursors.resizeUpDown,
+    topLeft || bottomRight => SystemMouseCursors.resizeUpLeftDownRight,
+    topRight || bottomLeft => SystemMouseCursors.resizeUpRightDownLeft,
+  };
 }
 
-class _PreviewLabel extends StatelessWidget {
-  static const double _width = 128;
-  static const double _height = 28;
-
-  final Rect canvasRect;
-  final _OutpaintDragHandle handle;
-  final OutpaintFrameResolvedGeometry preview;
-  final Size viewportSize;
-
-  const _PreviewLabel({
-    required this.canvasRect,
-    required this.handle,
-    required this.preview,
-    required this.viewportSize,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final topLeft = _labelTopLeft;
-    return Positioned(
-      left: topLeft.dx,
-      top: topLeft.dy,
-      width: _width,
-      height: _height,
-      child: IgnorePointer(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.inverseSurface,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              'Applied: ${preview.width} x ${preview.height}',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onInverseSurface,
-                fontWeight: FontWeight.w700,
-                fontFamily: StudioTypography.mono,
-                fontFamilyFallback: StudioTypography.fallback,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Offset get _labelTopLeft {
-    final center = _labelCenter;
-    final maxX = math.max(0.0, viewportSize.width - _width);
-    final maxY = math.max(0.0, viewportSize.height - _height);
-    return Offset(
-      (center.dx - _width / 2).clamp(0.0, maxX).toDouble(),
-      (center.dy - _height / 2).clamp(0.0, maxY).toDouble(),
-    );
-  }
-
-  Offset get _labelCenter {
-    if (handle.affectsLeft) {
-      return Offset(canvasRect.left - 72, canvasRect.center.dy);
-    }
-    if (handle.affectsRight) {
-      return Offset(canvasRect.right + 72, canvasRect.center.dy);
-    }
-    if (handle.affectsTop) {
-      return Offset(canvasRect.center.dx, canvasRect.top - 28);
-    }
-    return Offset(canvasRect.center.dx, canvasRect.bottom + 28);
-  }
-}
-
-class _OutpaintEdgePreviewPainter extends CustomPainter {
-  final Rect canvasRect;
-  final OutpaintFrameResolvedGeometry preview;
-
-  const _OutpaintEdgePreviewPainter({
-    required this.canvasRect,
-    required this.preview,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final scaleX = canvasRect.width / preview.sourceWidth;
-    final scaleY = canvasRect.height / preview.sourceHeight;
-    final frameRect = Rect.fromLTRB(
-      canvasRect.left + preview.appliedFrameLeft * scaleX,
-      canvasRect.top + preview.appliedFrameTop * scaleY,
-      canvasRect.left + preview.appliedFrameRight * scaleX,
-      canvasRect.top + preview.appliedFrameBottom * scaleY,
-    );
-
-    final fill = Paint()..color = const Color(0x5560AAFF);
-    for (final edgeRect in _expansionRects(frameRect)) {
-      canvas.drawRect(edgeRect, fill);
-    }
-    final cropFill = Paint()..color = const Color(0x33000000);
-    for (final edgeRect in _cropRects(frameRect)) {
-      canvas.drawRect(edgeRect, cropFill);
-    }
-
-    canvas.drawRect(
-      frameRect,
-      Paint()
-        ..color = const Color(0xFF60AAFF)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
-    );
-  }
-
-  Iterable<Rect> _expansionRects(Rect frameRect) sync* {
-    if (preview.appliedExpansionEdges.top > 0) {
-      yield Rect.fromLTRB(
-        frameRect.left,
-        frameRect.top,
-        frameRect.right,
-        canvasRect.top,
-      );
-    }
-    if (preview.appliedExpansionEdges.bottom > 0) {
-      yield Rect.fromLTRB(
-        frameRect.left,
-        canvasRect.bottom,
-        frameRect.right,
-        frameRect.bottom,
-      );
-    }
-    if (preview.appliedExpansionEdges.left > 0) {
-      yield Rect.fromLTRB(
-        frameRect.left,
-        canvasRect.top,
-        canvasRect.left,
-        canvasRect.bottom,
-      );
-    }
-    if (preview.appliedExpansionEdges.right > 0) {
-      yield Rect.fromLTRB(
-        canvasRect.right,
-        canvasRect.top,
-        frameRect.right,
-        canvasRect.bottom,
-      );
-    }
-  }
-
-  Iterable<Rect> _cropRects(Rect frameRect) sync* {
-    if (preview.appliedCropEdges.top > 0) {
-      yield Rect.fromLTRB(
-        canvasRect.left,
-        canvasRect.top,
-        canvasRect.right,
-        frameRect.top,
-      );
-    }
-    if (preview.appliedCropEdges.bottom > 0) {
-      yield Rect.fromLTRB(
-        canvasRect.left,
-        frameRect.bottom,
-        canvasRect.right,
-        canvasRect.bottom,
-      );
-    }
-    if (preview.appliedCropEdges.left > 0) {
-      yield Rect.fromLTRB(
-        canvasRect.left,
-        canvasRect.top,
-        frameRect.left,
-        canvasRect.bottom,
-      );
-    }
-    if (preview.appliedCropEdges.right > 0) {
-      yield Rect.fromLTRB(
-        frameRect.right,
-        canvasRect.top,
-        canvasRect.right,
-        canvasRect.bottom,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _OutpaintEdgePreviewPainter oldDelegate) {
-    return canvasRect != oldDelegate.canvasRect ||
-        preview.width != oldDelegate.preview.width ||
-        preview.height != oldDelegate.preview.height ||
-        preview.appliedFrameLeft != oldDelegate.preview.appliedFrameLeft ||
-        preview.appliedFrameTop != oldDelegate.preview.appliedFrameTop ||
-        preview.appliedFrameRight != oldDelegate.preview.appliedFrameRight ||
-        preview.appliedFrameBottom != oldDelegate.preview.appliedFrameBottom;
-  }
-}
-
-class _OutpaintEdgeHighlightPainter extends CustomPainter {
-  static const double _strokeWidth = 10;
-
-  final Rect canvasRect;
-  final _OutpaintDragHandle handle;
-
-  const _OutpaintEdgeHighlightPainter({
-    required this.canvasRect,
-    required this.handle,
-  });
-
+class _PreviewPainter extends CustomPainter {
+  final Rect rect;
+  final Color color;
+  _PreviewPainter(this.rect, this.color);
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xAA8DD8FF)
-      ..strokeWidth = _strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    if (handle.affectsLeft) {
-      canvas.drawLine(canvasRect.topLeft, canvasRect.bottomLeft, paint);
-    }
-    if (handle.affectsRight) {
-      canvas.drawLine(canvasRect.topRight, canvasRect.bottomRight, paint);
-    }
-    if (handle.affectsTop) {
-      canvas.drawLine(canvasRect.topLeft, canvasRect.topRight, paint);
-    }
-    if (handle.affectsBottom) {
-      canvas.drawLine(canvasRect.bottomLeft, canvasRect.bottomRight, paint);
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    for (final metric in (Path()..addRect(rect)).computeMetrics()) {
+      for (var start = 0.0; start < metric.length; start += 10) {
+        canvas.drawPath(
+          metric.extractPath(start, math.min(start + 6, metric.length)),
+          paint,
+        );
+      }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _OutpaintEdgeHighlightPainter oldDelegate) {
-    return canvasRect != oldDelegate.canvasRect || handle != oldDelegate.handle;
-  }
+  bool shouldRepaint(covariant _PreviewPainter old) =>
+      old.rect != rect || old.color != color;
 }
