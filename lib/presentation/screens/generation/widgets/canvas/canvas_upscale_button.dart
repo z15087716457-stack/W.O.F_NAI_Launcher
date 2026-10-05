@@ -34,16 +34,18 @@ class CanvasUpscaleButton extends ConsumerWidget {
       imageGenerationNotifierProvider.select((s) => s.isGenerating),
     );
     final isCloud = workflow.upscale.backend == UpscaleBackend.novelai;
+    final cost = isCloud
+        ? AnlasCalculator.calculateNovelAiUpscaleCost(
+            inputWidth: image.width,
+            inputHeight: image.height,
+          )
+        : null;
     final running = local.running || cloud.running;
     final models = isCloud
         ? null
         : ref.watch(localUpscaleModelsProvider).valueOrNull;
     final supported = isCloud
-        ? AnlasCalculator.calculateNovelAiUpscaleCost(
-                inputWidth: image.width,
-                inputHeight: image.height,
-              ) >=
-              0
+        ? cost! >= 0
         : Platform.isWindows &&
               (models?.any(
                     (model) =>
@@ -98,13 +100,50 @@ class CanvasUpscaleButton extends ConsumerWidget {
                       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
                     ),
                   const SizedBox(width: 4),
-                  Text(
-                    '∞',
-                    key: const Key('canvas-upscale-infinity'),
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontSize: 18,
-                      height: 1,
-                      color: color,
+                  Ink(
+                    key: ValueKey(
+                      isCloud && cost! >= 0
+                          ? 'canvas-cost-nai-icon-upscale.svg'
+                          : 'canvas-upscale-inset',
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: .6),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isCloud ? (cost! >= 0 ? '$cost' : '—') : '∞',
+                          key: isCloud
+                              ? null
+                              : const Key('canvas-upscale-infinity'),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            fontSize: isCloud ? 12 : 14,
+                            height: 1.2,
+                            fontWeight: FontWeight.w600,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                            color: color,
+                          ),
+                        ),
+                        if (isCloud && cost! >= 0) ...[
+                          const SizedBox(width: 3),
+                          SvgPicture.asset(
+                            'assets/icons/nai-icon-anlas.svg',
+                            width: 12,
+                            height: 12,
+                            colorFilter: ColorFilter.mode(
+                              color,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],
@@ -158,7 +197,7 @@ class CanvasUpscaleButton extends ConsumerWidget {
           menuChildren: [
             SizedBox(
               key: const Key('canvas-upscale-popover'),
-              width: math.min(360, MediaQuery.sizeOf(context).width - 48),
+              width: math.min(320, MediaQuery.sizeOf(context).width - 48),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxHeight: math.max(

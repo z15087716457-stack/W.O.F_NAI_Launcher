@@ -6,6 +6,7 @@ import '../../../providers/image_generation_provider.dart';
 import 'img2img_panel.dart';
 import 'generation_sidebar_style.dart';
 import 'local_upscale_panel.dart';
+import 'upscale_control_style.dart';
 
 /// Screen-space tool controls leave the image and camera free to move.
 class GenerationToolPanel extends ConsumerWidget {
@@ -43,7 +44,7 @@ class GenerationToolPanel extends ConsumerWidget {
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: workflow.isEnhance ? 520 : 540,
+                maxWidth: workflow.isEnhance ? 560 : 540,
                 maxHeight: (constraints.maxHeight - 128).clamp(120, 640),
               ),
               child: Material(
@@ -139,42 +140,44 @@ class GenerationToolPanel extends ConsumerWidget {
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: GenSidebarStyle.border(Theme.of(context)),
-                ),
-              ),
-              child: Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: [
-                  for (final factor in controller.availableEnhanceFactors)
-                    _option(
-                      context,
-                      '${factor == factor.roundToDouble() ? factor.toInt() : factor}x',
-                      !settings.localUpscale &&
-                          !settings.maxUpscale &&
-                          settings.upscaleFactor == factor,
-                      () => controller.updateEnhanceUpscaleFactor(factor),
-                    ),
-                  if (controller.isEnhanceMaxUpscaleEligible)
-                    _option(
-                      context,
-                      context.l10n.img2img_enhanceMax,
-                      settings.maxUpscale && !settings.localUpscale,
-                      () => controller.setEnhanceMaxUpscale(true),
-                    ),
-                  _option(
-                    context,
-                    context.l10n.localUpscale_local,
-                    settings.localUpscale,
-                    controller.setEnhanceLocalUpscale,
+            UpscaleChoiceBar<String>(
+              equalWidths: false,
+              selected: settings.localUpscale
+                  ? 'local'
+                  : settings.maxUpscale
+                  ? 'max'
+                  : 'factor:${settings.upscaleFactor}',
+              choices: [
+                for (final factor in controller.availableEnhanceFactors)
+                  (
+                    value: 'factor:$factor',
+                    label:
+                        '${factor == factor.roundToDouble() ? factor.toInt() : factor}x',
+                    icon: null,
                   ),
-                ],
-              ),
+                if (controller.isEnhanceMaxUpscaleEligible)
+                  (
+                    value: 'max',
+                    label: context.l10n.img2img_enhanceMax,
+                    icon: null,
+                  ),
+                (
+                  value: 'local',
+                  label: context.l10n.localUpscale_local,
+                  icon: null,
+                ),
+              ],
+              onSelected: (value) {
+                if (value == 'local') {
+                  controller.setEnhanceLocalUpscale();
+                } else if (value == 'max') {
+                  controller.setEnhanceMaxUpscale(true);
+                } else {
+                  controller.updateEnhanceUpscaleFactor(
+                    double.parse(value.substring(7)),
+                  );
+                }
+              },
             ),
           ],
         );
@@ -185,9 +188,9 @@ class GenerationToolPanel extends ConsumerWidget {
                 children: [
                   Text(
                     context.l10n.enhance_localAfterGeneration,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: UpscaleControlStyle.caption(Theme.of(context)),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   LocalUpscalePanel(
                     onCloudStart: () {},
                     cloudRunning: false,
@@ -260,7 +263,7 @@ class GenerationToolPanel extends ConsumerWidget {
                   ),
                 ],
               );
-        if (constraints.maxWidth < (settings.localUpscale ? 480 : 350)) {
+        if (constraints.maxWidth < (settings.localUpscale ? 520 : 420)) {
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -270,37 +273,14 @@ class GenerationToolPanel extends ConsumerWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: constraints.maxWidth * .34, child: scaleOptions),
-            const SizedBox(width: 20),
+            SizedBox(width: 220, child: scaleOptions),
+            const SizedBox(width: 16),
             Expanded(child: parameters),
           ],
         );
       },
     );
   }
-
-  Widget _option(
-    BuildContext context,
-    String label,
-    bool selected,
-    VoidCallback action,
-  ) => Material(
-    color: selected
-        ? GenSidebarStyle.selectedSurface(Theme.of(context))
-        : Colors.transparent,
-    borderRadius: BorderRadius.circular(3),
-    child: InkWell(
-      onTap: action,
-      borderRadius: BorderRadius.circular(3),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-        ),
-      ),
-    ),
-  );
 
   Widget _slider(
     BuildContext context,

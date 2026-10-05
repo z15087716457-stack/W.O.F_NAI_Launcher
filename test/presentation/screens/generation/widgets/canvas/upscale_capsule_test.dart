@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
@@ -14,6 +15,7 @@ import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/cloud_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_upscale_button.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_tool_panel.dart';
@@ -58,6 +60,16 @@ class _Task extends LocalUpscaleTask {
   }
 }
 
+class _CloudTask extends CloudUpscaleTask {
+  int calls = 0;
+  @override
+  CloudUpscaleState build() => const CloudUpscaleState();
+  @override
+  Future<void> start({GeneratedImage? image}) async {
+    calls++;
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
@@ -87,6 +99,7 @@ void main() {
           addTearDown(tester.view.resetPhysicalSize);
           addTearDown(tester.view.resetDevicePixelRatio);
           final task = _Task();
+          final cloudTask = _CloudTask();
           final storage = _Storage();
           final container = ProviderContainer(
             overrides: [
@@ -94,6 +107,7 @@ void main() {
               generationParamsNotifierProvider.overrideWith(_Params.new),
               imageGenerationNotifierProvider.overrideWith(_Generation.new),
               localUpscaleTaskProvider.overrideWith(() => task),
+              cloudUpscaleTaskProvider.overrideWith(() => cloudTask),
               localUpscaleModelsProvider.overrideWith(
                 (ref) async => [localUpscaleCatalog.first.withInstalled(true)],
               ),
@@ -162,16 +176,56 @@ void main() {
           );
           expect(find.text(l.img2img_startUpscale), findsNothing);
           expect(task.calls, 0);
+          final inset = find.byKey(const ValueKey('canvas-upscale-inset'));
+          expect(inset, findsOneWidget);
+          expect(tester.getSize(inset).height, lessThanOrEqualTo(26));
+          final dropdown = tester.widget<DropdownButton<String>>(
+            find.byType(DropdownButton<String>),
+          );
+          expect(dropdown.style!.fontSize, 12);
+          expect(
+            tester
+                .renderObject<RenderParagraph>(
+                  find.text(l.img2img_upscaleRegularModel),
+                )
+                .didExceedMaxLines,
+            isFalse,
+          );
           expect(container.read(generationParamsNotifierProvider), same(draft));
-          if (Platform.environment['CAPTURE_UPSCALE_CAPSULE'] == '1') {
+          if (Platform.environment['CAPTURE_UPSCALE_CONTROLS'] == '1') {
             await _capture(tester, capture, '$id-upscale');
           }
           await tester.tap(find.text('NovelAI'));
           await tester.pumpAndSettle();
           expect(find.text(l.upscale_cloudCost(3)), findsOneWidget);
+          final cloudBadge = find.byKey(
+            const ValueKey('canvas-cost-nai-icon-upscale.svg'),
+          );
+          expect(cloudBadge, findsOneWidget);
+          expect(
+            find.descendant(of: cloudBadge, matching: find.text('3')),
+            findsOneWidget,
+          );
+          expect(
+            find.descendant(of: cloudBadge, matching: find.byType(SvgPicture)),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const Key('canvas-upscale-infinity')),
+            findsNothing,
+          );
+          expect(cloudTask.calls, 0);
+          if (Platform.environment['CAPTURE_UPSCALE_CONTROLS'] == '1') {
+            await _capture(tester, capture, '$id-cloud');
+          }
           expect(task.calls, 0);
           await tester.tap(find.text(l.localUpscale_local));
           await tester.pumpAndSettle();
+          expect(
+            find.byKey(const Key('canvas-upscale-infinity')),
+            findsOneWidget,
+          );
+          expect(cloudBadge, findsNothing);
           await tester.tapAt(const Offset(4, 790));
           await tester.pumpAndSettle();
           expect(find.byKey(const Key('canvas-upscale-popover')), findsNothing);
@@ -184,9 +238,19 @@ void main() {
             container.read(imageWorkflowControllerProvider).isUpscale,
             isFalse,
           );
-          workflow.openTemporaryTool(image.bytes, ImageWorkflowMode.enhance);
+          workflow.openTemporaryTool(
+            Uint8List.fromList(
+              img.encodePng(img.Image(width: 832, height: 1216)),
+            ),
+            ImageWorkflowMode.enhance,
+          );
           await tester.pumpAndSettle();
           expect(find.text(l.img2img_enhanceMax), findsOneWidget);
+          expect(find.text('1.5x'), findsOneWidget);
+          expect(
+            tester.getTopLeft(find.text('1.5x')).dy,
+            closeTo(tester.getTopLeft(find.text(l.localUpscale_local)).dy, 1),
+          );
           await tester.tap(find.text(l.localUpscale_local));
           await tester.pumpAndSettle();
           expect(find.text(l.enhance_localAfterGeneration), findsOneWidget);
@@ -201,7 +265,7 @@ void main() {
           );
           expect(container.read(generationParamsNotifierProvider), same(draft));
           expect(tester.takeException(), isNull);
-          if (Platform.environment['CAPTURE_UPSCALE_CAPSULE'] == '1') {
+          if (Platform.environment['CAPTURE_UPSCALE_CONTROLS'] == '1') {
             await _capture(tester, capture, '$id-enhance');
           }
           await tester.tap(find.text('SeedVR2'));
@@ -237,7 +301,7 @@ Future<void> _capture(WidgetTester tester, GlobalKey key, String id) async {
         key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final pixels = await boundary.toImage();
     final bytes = await pixels.toByteData(format: ui.ImageByteFormat.png);
-    final file = File('.dart_tool/upscale-capsule-20261005/captures/$id.png');
+    final file = File('.dart_tool/upscale-controls-20261005/captures/$id.png');
     await file.parent.create(recursive: true);
     await file.writeAsBytes(bytes!.buffer.asUint8List());
     pixels.dispose();

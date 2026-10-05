@@ -12,6 +12,8 @@ import '../../../providers/generation/local_upscale_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../widgets/common/editable_double_field.dart';
 import '../../settings/sections/local_upscale_settings_section.dart';
+import 'generation_sidebar_style.dart';
+import 'upscale_control_style.dart';
 
 class LocalUpscalePanel extends ConsumerWidget {
   const LocalUpscalePanel({
@@ -37,6 +39,8 @@ class LocalUpscalePanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final theme = Theme.of(context);
+    final labelStyle = UpscaleControlStyle.label(theme);
+    final captionStyle = UpscaleControlStyle.caption(theme);
     final workflow = ref.watch(imageWorkflowControllerProvider);
     final controller = ref.read(imageWorkflowControllerProvider.notifier);
     final task = ref.watch(localUpscaleTaskProvider);
@@ -137,38 +141,26 @@ class LocalUpscalePanel extends ConsumerWidget {
           const SizedBox(height: 12),
         ],
         if (!localOnly) ...[
-          SegmentedButton<UpscaleBackend>(
-            segments: [
-              ButtonSegment(
+          UpscaleChoiceBar<UpscaleBackend>(
+            choices: [
+              (
                 value: UpscaleBackend.local,
-                label: Text(l.localUpscale_local),
-                icon: const Icon(Icons.computer_outlined, size: 16),
+                label: l.localUpscale_local,
+                icon: Icons.computer_outlined,
               ),
-              const ButtonSegment(
+              (
                 value: UpscaleBackend.novelai,
-                label: Text('NovelAI'),
-                icon: Icon(Icons.cloud_outlined, size: 16),
+                label: 'NovelAI',
+                icon: Icons.cloud_outlined,
               ),
             ],
-            selected: {cloud ? UpscaleBackend.novelai : UpscaleBackend.local},
-            showSelectedIcon: false,
-            onSelectionChanged: busy
-                ? null
-                : (value) => controller.updateUpscaleBackend(value.first),
-            style: const ButtonStyle(
-              visualDensity: VisualDensity.compact,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
+            selected: cloud ? UpscaleBackend.novelai : UpscaleBackend.local,
+            onSelected: busy ? null : controller.updateUpscaleBackend,
           ),
           const SizedBox(height: 12),
         ],
         if (cloud) ...[
-          Text(
-            l.img2img_novelAiCloudUpscale,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
+          Text(l.img2img_novelAiCloudUpscale, style: captionStyle),
           if (cloudSupported)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -179,7 +171,7 @@ class LocalUpscalePanel extends ConsumerWidget {
                     inputHeight: height,
                   ),
                 ),
-                style: theme.textTheme.bodySmall,
+                style: labelStyle,
               ),
             ),
           if (hasSource && !cloudSupported)
@@ -193,27 +185,20 @@ class LocalUpscalePanel extends ConsumerWidget {
               child: LinearProgressIndicator(),
             ),
         ] else ...[
-          SegmentedButton<LocalUpscaleMethod>(
-            segments: [
-              ButtonSegment(
+          UpscaleChoiceBar<LocalUpscaleMethod>(
+            choices: [
+              (
                 value: LocalUpscaleMethod.standard,
-                label: Text(l.img2img_upscaleRegularModel),
+                label: l.img2img_upscaleRegularModel,
+                icon: null,
               ),
-              const ButtonSegment(
-                value: LocalUpscaleMethod.seedvr2,
-                label: Text('SeedVR2'),
-              ),
-              const ButtonSegment(
-                value: LocalUpscaleMethod.rtx,
-                label: Text('RTX'),
-              ),
+              (value: LocalUpscaleMethod.seedvr2, label: 'SeedVR2', icon: null),
+              (value: LocalUpscaleMethod.rtx, label: 'RTX', icon: null),
             ],
-            selected: {method},
-            showSelectedIcon: false,
-            onSelectionChanged: busy
+            selected: method,
+            onSelected: busy
                 ? null
-                : (values) {
-                    final next = values.first;
+                : (next) {
                     controller.updateLocalUpscaleModel(
                       next == LocalUpscaleMethod.standard
                           ? localUpscaleDefaultModel
@@ -222,24 +207,21 @@ class LocalUpscalePanel extends ConsumerWidget {
                                 .id,
                     );
                   },
-            style: const ButtonStyle(
-              visualDensity: VisualDensity.compact,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  l.img2img_upscaleModel,
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ),
+              Expanded(child: Text(l.img2img_upscaleModel, style: labelStyle)),
               TextButton(
                 onPressed: busy
                     ? null
                     : () => context.go('/settings?section=local-upscale'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  minimumSize: const Size(0, 24),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  textStyle: labelStyle,
+                ),
                 child: Text(l.localUpscale_manage),
               ),
             ],
@@ -248,13 +230,34 @@ class LocalUpscalePanel extends ConsumerWidget {
             key: ValueKey('local-upscale-model-${selected?.id}'),
             initialValue: selected?.id,
             isExpanded: true,
-            decoration: const InputDecoration(isDense: true),
+            style: labelStyle,
+            iconSize: 16,
+            borderRadius: BorderRadius.circular(4),
+            dropdownColor: UpscaleControlStyle.selected(theme),
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 8,
+              ),
+              filled: true,
+              fillColor: UpscaleControlStyle.selected(theme),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(color: GenSidebarStyle.border(theme)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(color: GenSidebarStyle.border(theme)),
+              ),
+            ),
             hint: Text(
               method == LocalUpscaleMethod.standard
                   ? l.localUpscale_modelMissing
                   : l.localUpscale_notInstalled,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              style: captionStyle,
             ),
             items: methodModels
                 .map(
@@ -264,6 +267,7 @@ class LocalUpscalePanel extends ConsumerWidget {
                       localUpscaleModelName(context, model),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: labelStyle,
                     ),
                   ),
                 )
@@ -277,43 +281,48 @@ class LocalUpscalePanel extends ConsumerWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: Text(l.upscale_scale)),
+              Expanded(child: Text(l.upscale_scale, style: labelStyle)),
               EditableDoubleField(
                 value: scale,
                 min: 1,
                 max: 4,
                 decimals: 2,
-                width: 66,
+                width: 58,
+                textStyle: labelStyle,
                 enabled: !busy,
                 onChanged: controller.updateLocalUpscaleScale,
               ),
-              const Text(' ×'),
+              Text(' ×', style: captionStyle),
             ],
           ),
-          Slider(
-            value: scale,
-            min: 1,
-            max: 4,
-            onChanged: busy ? null : controller.updateLocalUpscaleScale,
+          SizedBox(
+            height: 28,
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 3,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
+              ),
+              child: Slider(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                value: scale,
+                min: 1,
+                max: 4,
+                onChanged: busy ? null : controller.updateLocalUpscaleScale,
+              ),
+            ),
           ),
           if (width > 0 && height > 0)
             Text(
               '$width × $height  →  ${(width * scale).round()} × ${(height * scale).round()}',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              style: captionStyle,
             ),
           const SizedBox(height: 8),
-          Text(
-            switch (method) {
-              LocalUpscaleMethod.standard => l.localUpscale_description,
-              LocalUpscaleMethod.seedvr2 => l.localUpscale_seedvr2Help,
-              LocalUpscaleMethod.rtx => l.localUpscale_rtxHelp,
-            },
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
+          Text(switch (method) {
+            LocalUpscaleMethod.standard => l.localUpscale_description,
+            LocalUpscaleMethod.seedvr2 => l.localUpscale_seedvr2Help,
+            LocalUpscaleMethod.rtx => l.localUpscale_rtxHelp,
+          }, style: captionStyle),
           if (!Platform.isWindows)
             Text(
               l.localUpscale_unsupportedPlatform,
@@ -395,7 +404,11 @@ class LocalUpscalePanel extends ConsumerWidget {
         ],
       ],
     );
-    if (!framed) return content;
+    final styledContent = DefaultTextStyle.merge(
+      style: labelStyle,
+      child: content,
+    );
+    if (!framed) return styledContent;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -405,7 +418,7 @@ class LocalUpscalePanel extends ConsumerWidget {
           color: theme.colorScheme.outlineVariant.withValues(alpha: .4),
         ),
       ),
-      child: content,
+      child: styledContent,
     );
   }
 }
