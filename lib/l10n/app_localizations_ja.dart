@@ -10269,6 +10269,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wiki_readingOriginal => '原文';
 
   @override
+  String get wiki_readingBilingual => '対訳';
+
+  @override
+  String get wiki_bilingualUnavailable => 'この翻訳には段落ごとに対応する原文がありません。訳文を表示しています';
+
+  @override
+  String get wiki_open => '開く';
+
+  @override
   String get wiki_switchToOriginal => '原文に切り替え';
 
   @override

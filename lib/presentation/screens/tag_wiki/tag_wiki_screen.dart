@@ -19,6 +19,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
 import '../../../core/wiki/auto_tag_translation_controller.dart';
+import '../../../core/wiki/wiki_bilingual.dart';
 import '../../../core/wiki/wiki_bookmark_store.dart';
 import '../../../core/wiki/wiki_directory.dart';
 import '../../../core/wiki/wiki_directory_labels.dart';
@@ -27,11 +28,16 @@ import '../../providers/generation/generation_params_notifier.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../widgets/autocomplete/tag_category_visuals.dart';
 import 'wiki_sidebar.dart';
+import 'wiki_tag_preview.dart';
 import 'wiki_tag_row.dart';
 import 'wiki_article_outline.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/common/wiki_linked_body.dart';
 import '../../widgets/common/wiki_retranslate_button.dart';
+
+/// Which body the article pane shows: source only, translation only, or the
+/// two interleaved block by block.
+enum WikiReadingMode { original, translation, bilingual }
 
 class _WikiVisit {
   const _WikiVisit({
@@ -50,14 +56,15 @@ class _WikiVisit {
     required this.loadError,
     required this.listOffset,
     required this.articleOffset,
-    required this.showTranslation,
+    required this.readingMode,
     required this.linkedCandidate,
   });
   final TextEditingValue query;
   final WikiScope? scope;
   final TagCategory? category;
   final bool? hasArticle;
-  final bool alphabetical, searchAll, more, loading, showTranslation;
+  final bool alphabetical, searchAll, more, loading;
+  final WikiReadingMode readingMode;
   final String selected;
   final String? loadError;
   final List<CompletionCandidate> items;
@@ -126,7 +133,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   double? _clampedOutlineOffset;
   bool _outlineScheduled = false;
   bool _wideArticle = false;
-  bool _showTranslation = true;
+  WikiReadingMode _readingMode = WikiReadingMode.translation;
+  WikiTagPreviewHost? _preview;
   double _fontSize = 14;
   int _epoch = 0;
   int? _total;
@@ -144,7 +152,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     super.initState();
     _autoTranslation = ref.read(autoTagTranslationProvider);
     _listScroll.addListener(_scheduleVisibleUpdate);
-    _articleScroll.addListener(_scheduleOutlineUpdate);
+    _articleScroll.addListener(_onArticleScroll);
     _searchFocus.addListener(_onSearchFocusChange);
     _initialize();
   }
@@ -163,7 +171,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         _scope = WikiScope(WikiScopeKind.all, null, context.l10n.wiki_allTags);
         _fontSize = prefs.getDouble('wiki_text_size') ?? 14;
         _wideArticle = prefs.getBool('wiki_wide_article') ?? false;
-        _showTranslation = prefs.getBool('wiki_show_translation') ?? true;
+        _readingMode = (prefs.getBool('wiki_show_translation') ?? true)
+            ? (prefs.getBool('wiki_bilingual') ?? false)
+                  ? WikiReadingMode.bilingual
+                  : WikiReadingMode.translation
+            : WikiReadingMode.original;
       });
       if (widget.initialTag case final tag?) {
         final normalized = TagNormalizer.normalize(tag);
@@ -205,6 +217,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _listScroll.dispose();
     _articleScroll.dispose();
     _typeFilterScroll.dispose();
+    _preview?.dispose();
     super.dispose();
   }
 
@@ -237,7 +250,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     more: _more,
     loading: _loading,
     loadError: _loadError,
-    showTranslation: _showTranslation,
+    readingMode: _readingMode,
     listOffset: _listScroll.hasClients ? _listScroll.offset : 0,
     articleOffset: _articleScroll.hasClients ? _articleScroll.offset : 0,
     linkedCandidate: _linkedCandidate,
@@ -249,6 +262,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     bool reveal = true,
     CompletionCandidate? linkedCandidate,
   }) {
+    _preview?.dismiss();
     if (_selected == tag) {
       if (reveal && !_showCompactArticle) {
         setState(() => _showCompactArticle = true);
@@ -301,6 +315,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   void _applyVisit(_WikiVisit visit) {
     _searchTimer?.cancel();
     _epoch++;
+    _preview?.dismiss();
     _autoTranslation.clearSurface(_listSurface);
     _autoTranslation.clearSurface(_articleSurface);
     _listVisible.clear();
@@ -319,7 +334,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _more = visit.more;
       _loading = false;
       _loadError = visit.loadError;
-      _showTranslation = visit.showTranslation;
+      _readingMode = visit.readingMode;
       _linkedCandidate = visit.linkedCandidate;
       _restoreArticleOffset = visit.articleOffset;
     });
@@ -757,7 +772,16 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('wiki_text_size', _fontSize);
     await prefs.setBool('wiki_wide_article', _wideArticle);
-    await prefs.setBool('wiki_show_translation', _showTranslation);
+    // bilingual implies show_translation so pre-bilingual installs upgrade
+    // cleanly and downgrades keep their last mode.
+    await prefs.setBool(
+      'wiki_show_translation',
+      _readingMode != WikiReadingMode.original,
+    );
+    await prefs.setBool(
+      'wiki_bilingual',
+      _readingMode == WikiReadingMode.bilingual,
+    );
   }
 
   Future<void> _copyTag(String tag) async {
@@ -1819,14 +1843,33 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         ),
       );
 
+  /// The markdown rendered as the primary body — the translation when shown,
+  /// otherwise the article's source text. In bilingual mode this is the
+  /// translated side, which also owns the outline headings.
   String _visibleBody(TagWikiEntry? article) {
     if (article?.body.trim().isNotEmpty != true) {
       return context.l10n.wiki_articleMissing;
     }
     final auto = ref.read(autoTagTranslationProvider);
-    return _showTranslation
-        ? auto.wikiFor(_selected!) ?? article!.body
-        : auto.wikiOriginalFor(_selected!) ?? article!.body;
+    return switch (_readingMode) {
+      WikiReadingMode.translation => auto.wikiFor(_selected!) ?? article!.body,
+      WikiReadingMode.bilingual => auto.wikiFor(_selected!) ?? article!.body,
+      WikiReadingMode.original =>
+        auto.wikiOriginalFor(_selected!) ?? article!.body,
+    };
+  }
+
+  /// Both sides aligned, or null when bilingual rendering must fall back.
+  List<WikiBilingualBlock>? _bilingualBlocks(TagWikiEntry? article) {
+    if (_readingMode != WikiReadingMode.bilingual ||
+        article?.body.trim().isNotEmpty != true) {
+      return null;
+    }
+    final auto = ref.read(autoTagTranslationProvider);
+    final translated = auto.wikiFor(_selected!);
+    final original = auto.wikiOriginalFor(_selected!);
+    if (translated == null || original == null) return null;
+    return alignWikiBlocks(translated, original);
   }
 
   List<WikiArticleHeading> _outlineFor(String body) {
@@ -1902,6 +1945,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _clampedOutline = anchor;
       _clampedOutlineOffset = _articleScroll.offset;
     }
+    _scheduleOutlineUpdate();
+  }
+
+  void _onArticleScroll() {
+    _preview?.dismiss();
     _scheduleOutlineUpdate();
   }
 
@@ -2026,6 +2074,328 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     );
   }
 
+  WikiTagPreviewHost get _previewHost =>
+      _preview ??= WikiTagPreviewHost(context: context, builder: _previewCard);
+
+  Widget _previewCard(CompletionCandidate candidate) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tag = candidate.canonicalTag;
+    final translation =
+        ref.read(autoTagTranslationProvider).nameFor(tag) ??
+        candidate.translation;
+    final definition = ref.read(autoTagTranslationProvider).definitionFor(tag);
+    return Material(
+      key: const ValueKey('wiki-tag-preview-card'),
+      elevation: 8,
+      color: scheme.surface,
+      shadowColor: Colors.black45,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: theme.dividerColor),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: TagCategoryVisuals.color(
+                      context,
+                      candidate.category,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    TagNormalizer.toDisplay(tag),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _postCount(candidate.postCount),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            if (translation != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                translation,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (definition != null && definition.trim().isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                definition,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  height: 1.45,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  key: const ValueKey('wiki-preview-open'),
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    minimumSize: const Size(0, 28),
+                    textStyle: theme.textTheme.labelMedium?.copyWith(
+                      fontSize: 12,
+                    ),
+                  ),
+                  onPressed: () {
+                    _preview?.dismiss();
+                    _selectTag(tag, linkedCandidate: candidate);
+                  },
+                  child: Text(context.l10n.wiki_open),
+                ),
+                const SizedBox(width: 4),
+                TextButton(
+                  key: const ValueKey('wiki-preview-add'),
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    minimumSize: const Size(0, 28),
+                    textStyle: theme.textTheme.labelMedium?.copyWith(
+                      fontSize: 12,
+                    ),
+                  ),
+                  onPressed: () {
+                    _preview?.dismiss();
+                    _addTagToPrompt(tag);
+                  },
+                  child: Text('＋ ${context.l10n.wiki_addToPrompt}'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The article body: single markdown body in original/translation modes, or
+  /// interleaved translated/original blocks in bilingual mode.
+  Widget _articleBody(TagWikiEntry? article, String tag, String? translated) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final body = _visibleBody(article);
+    final blocks = _bilingualBlocks(article);
+    final hint = theme.textTheme.bodySmall?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
+    Widget linked(
+      String markdown, {
+      Key? key,
+      List<GlobalKey> headingAnchors = const [],
+      TextStyle? style,
+      TextStyle? headingStyle,
+      String? initialSection,
+    }) => WikiLinkedBody(
+      key: key,
+      body: markdown,
+      headingAnchors: headingAnchors,
+      linkListsAsChips: true,
+      exampleCards: true,
+      initialSectionTitle: initialSection,
+      onTagAdd: (candidate) => _addTagToPrompt(candidate.canonicalTag),
+      onTagHover: _previewHost.hover,
+      onTagLeave: _previewHost.leave,
+      style:
+          style ??
+          TextStyle(fontSize: _fontSize, height: 1.68, color: scheme.onSurface),
+      headingStyle: headingStyle,
+      onTagTap: (candidate) =>
+          _selectTag(candidate.canonicalTag, linkedCandidate: candidate),
+    );
+    if (_readingMode == WikiReadingMode.bilingual && blocks != null) {
+      return KeyedSubtree(
+        key: _articleStart,
+        child: _bilingualBody(tag, blocks, linked),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_readingMode == WikiReadingMode.bilingual &&
+            translated != null &&
+            article?.body.trim().isNotEmpty == true)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              context.l10n.wiki_bilingualUnavailable,
+              key: const Key('wiki-bilingual-unavailable'),
+              style: hint,
+            ),
+          ),
+        KeyedSubtree(
+          key: _articleStart,
+          child: linked(
+            body,
+            key: ValueKey('wiki-body-$tag'),
+            headingAnchors: _outlineFor(
+              body,
+            ).map((heading) => heading.anchor).toList(),
+          ),
+        ),
+        if (_readingMode != WikiReadingMode.original &&
+            translated == null &&
+            article?.body.trim().isNotEmpty == true)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(
+              context.l10n.wiki_untranslated,
+              key: const Key('wiki-untranslated'),
+              style: hint,
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Interleaved translated/original blocks. Translated headings keep their
+  /// outline anchors; matching original blocks render smaller and muted with
+  /// a divider-colored leading rule.
+  Widget _bilingualBody(
+    String tag,
+    List<WikiBilingualBlock> blocks,
+    Widget Function(
+      String markdown, {
+      Key? key,
+      List<GlobalKey> headingAnchors,
+      TextStyle? style,
+      TextStyle? headingStyle,
+      String? initialSection,
+    })
+    linked,
+  ) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final headings = _headings;
+    var headingIndex = 0;
+    // Section titles carry across blocks so example-card detection works in
+    // list blocks that arrive after the heading that opened their section.
+    var translatedSection = '';
+    var originalSection = '';
+    final originalStyle = TextStyle(
+      fontSize: _fontSize - 1,
+      height: 1.6,
+      color: scheme.onSurfaceVariant,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var index = 0; index < blocks.length; index++) ...[
+          if (index > 0) const SizedBox(height: 14),
+          Builder(
+            builder: (context) {
+              final block = blocks[index];
+              // Count headings with the same parser the outline uses so
+              // fenced code and setext headings stay consistent.
+              final translatedHeadings = wikiArticleHeadings(block.translated);
+              final originalHeadings = wikiArticleHeadings(block.original);
+              final count = translatedHeadings.length;
+              final start = math.min(headingIndex, headings.length);
+              final anchors = headings
+                  .sublist(start, math.min(start + count, headings.length))
+                  .map((heading) => heading.anchor)
+                  .toList();
+              headingIndex = start + count;
+              final translatedSeed = translatedSection;
+              final originalSeed = originalSection;
+              if (translatedHeadings.isNotEmpty) {
+                translatedSection = translatedHeadings.last.label;
+              }
+              if (originalHeadings.isNotEmpty) {
+                originalSection = originalHeadings.last.label;
+              }
+              final originalHeading = block.original.replaceFirst(
+                RegExp(r'^#{1,6}\s+'),
+                '',
+              );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  linked(
+                    block.translated,
+                    key: ValueKey('wiki-bilingual-$tag-$index'),
+                    headingAnchors: anchors,
+                    initialSection: translatedSeed.isEmpty
+                        ? null
+                        : translatedSeed,
+                  ),
+                  const SizedBox(height: 4),
+                  if (block.heading)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child: Text(
+                        originalHeading,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: originalStyle,
+                      ),
+                    )
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(color: theme.dividerColor, width: 2),
+                        ),
+                      ),
+                      padding: const EdgeInsets.only(left: 10),
+                      child: linked(
+                        block.original,
+                        headingStyle: originalStyle.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        style: originalStyle,
+                        initialSection: originalSeed.isEmpty
+                            ? null
+                            : originalSeed,
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _detail(WikiBookmarkStore bookmarks) {
     final tag = _selected;
     if (tag == null) {
@@ -2117,49 +2487,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    KeyedSubtree(
-                                      key: _articleStart,
-                                      child: WikiLinkedBody(
-                                        key: ValueKey('wiki-body-$tag'),
-                                        body: _visibleBody(article),
-                                        headingAnchors:
-                                            _outlineFor(_visibleBody(article))
-                                                .map(
-                                                  (heading) => heading.anchor,
-                                                )
-                                                .toList(),
-                                        linkListsAsChips: true,
-                                        onTagAdd: (candidate) =>
-                                            _addTagToPrompt(
-                                              candidate.canonicalTag,
-                                            ),
-                                        style: TextStyle(
-                                          fontSize: _fontSize,
-                                          height: 1.68,
-                                          color: scheme.onSurface,
-                                        ),
-                                        onTagTap: (candidate) => _selectTag(
-                                          candidate.canonicalTag,
-                                          linkedCandidate: candidate,
-                                        ),
-                                      ),
-                                    ),
-                                    if (_showTranslation &&
-                                        translated == null &&
-                                        article?.body.trim().isNotEmpty == true)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 10),
-                                        child: Text(
-                                          context.l10n.wiki_untranslated,
-                                          key: const Key('wiki-untranslated'),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                color: scheme.onSurfaceVariant,
-                                              ),
-                                        ),
-                                      ),
+                                    _articleBody(article, tag, translated),
                                     _relatedSection(tag, candidate),
                                     _directorySection(tag),
                                     const SizedBox(height: 26),
@@ -2218,11 +2546,22 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                               compact: false,
                                               tag: tag,
                                               surface: _articleSurface,
-                                              showTranslation: _showTranslation,
+                                              showTranslation:
+                                                  _readingMode !=
+                                                  WikiReadingMode.original,
                                               onToggle: () {
+                                                // The footer toggle stays
+                                                // two-state: from bilingual it
+                                                // switches to the source.
                                                 setState(
-                                                  () => _showTranslation =
-                                                      !_showTranslation,
+                                                  () => _readingMode =
+                                                      _readingMode ==
+                                                          WikiReadingMode
+                                                              .original
+                                                      ? WikiReadingMode
+                                                            .translation
+                                                      : WikiReadingMode
+                                                            .original,
                                                 );
                                                 _saveReadingSettings();
                                               },
@@ -2338,13 +2677,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     final percent = share == null ? null : '${(share * 100).round()}%';
     final translation =
         item.translation ?? _autoTranslation.nameFor(item.canonicalTag);
-    final tooltip = [
-      '${_categoryName(item.category)} · '
-          '${_postCount(item.postCount)} ${context.l10n.wiki_posts}',
-      if (percent != null) context.l10n.wiki_relatedShare(percent),
-    ].join('\n');
-    return Tooltip(
-      message: tooltip,
+    return MouseRegion(
+      onEnter: (event) => _previewHost.hover(item, event.position),
+      onHover: (event) => _previewHost.hover(item, event.position),
+      onExit: (_) => _previewHost.leave(),
       child: Material(
         color: Colors.transparent,
         shape: RoundedRectangleBorder(
@@ -2718,23 +3054,27 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         key: const ValueKey('wiki-reading-content-controls'),
         children: [
           Expanded(
-            child: SegmentedButton<bool>(
+            child: SegmentedButton<WikiReadingMode>(
               key: const Key('wiki-reading-language'),
               style: _readingSegmentStyle(),
               showSelectedIcon: false,
               segments: [
                 ButtonSegment(
-                  value: false,
+                  value: WikiReadingMode.original,
                   label: _readingLabel(wikiReadingStateLabel(context, false)),
                 ),
                 ButtonSegment(
-                  value: true,
+                  value: WikiReadingMode.translation,
                   label: _readingLabel(wikiReadingStateLabel(context, true)),
                 ),
+                ButtonSegment(
+                  value: WikiReadingMode.bilingual,
+                  label: _readingLabel(context.l10n.wiki_readingBilingual),
+                ),
               ],
-              selected: {_showTranslation},
+              selected: {_readingMode},
               onSelectionChanged: (values) {
-                setState(() => _showTranslation = values.first);
+                setState(() => _readingMode = values.first);
                 refreshDialog?.call();
                 _saveReadingSettings();
               },

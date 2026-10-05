@@ -226,11 +226,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .widget<SegmentedButton<bool>>(
+            .widget<SegmentedButton<WikiReadingMode>>(
               find.byKey(const Key('wiki-reading-language')),
             )
             .selected,
-        {false},
+        {WikiReadingMode.original},
       );
       await tester.tap(find.text('译文'));
       await tester.pumpAndSettle();

@@ -10547,6 +10547,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wiki_readingOriginal => 'Original';
 
   @override
+  String get wiki_readingBilingual => 'Bilingual';
+
+  @override
+  String get wiki_bilingualUnavailable =>
+      'No aligned source text for this translation; showing the translation';
+
+  @override
+  String get wiki_open => 'Open';
+
+  @override
   String get wiki_switchToOriginal => 'Show original';
 
   @override

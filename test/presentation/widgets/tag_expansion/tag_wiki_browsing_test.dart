@@ -402,6 +402,42 @@ const _uiDirectory = WikiDirectory(
   groups: {},
 );
 
+/// Finds the innermost paragraph/editable render object below [node].
+RenderObject? _textRenderUnder(RenderObject node) {
+  if (node is RenderParagraph || node is RenderEditable) return node;
+  RenderObject? found;
+  node.visitChildren((child) {
+    found ??= _textRenderUnder(child);
+  });
+  return found;
+}
+
+/// Global center of the glyphs for [needle] inside the rich text found by
+/// [paragraphText]. Needed because `find.text` matches a whole selectable
+/// paragraph, not the inline link span inside it.
+Offset _inlineTextCenter(
+  WidgetTester tester,
+  String paragraphText,
+  String needle,
+) {
+  final finder = find.textContaining(paragraphText, findRichText: true).first;
+  final render = _textRenderUnder(tester.renderObject(finder))!;
+  final InlineSpan root = render is RenderParagraph
+      ? render.text
+      : (render as RenderEditable).text!;
+  final plain = root.toPlainText();
+  final start = plain.indexOf(needle);
+  expect(start, greaterThanOrEqualTo(0));
+  final selection = TextSelection(
+    baseOffset: start,
+    extentOffset: start + needle.length,
+  );
+  final boxes = render is RenderParagraph
+      ? render.getBoxesForSelection(selection)
+      : (render as RenderEditable).getBoxesForSelection(selection);
+  return (render as RenderBox).localToGlobal(boxes.first.toRect().center);
+}
+
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
   setUpAll(() async {
@@ -1505,11 +1541,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .widget<SegmentedButton<bool>>(
+            .widget<SegmentedButton<WikiReadingMode>>(
               find.byKey(const Key('wiki-reading-language')),
             )
             .selected,
-        {false},
+        {WikiReadingMode.original},
       );
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
@@ -1525,11 +1561,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .widget<SegmentedButton<bool>>(
+            .widget<SegmentedButton<WikiReadingMode>>(
               find.byKey(const Key('wiki-reading-language')),
             )
             .selected,
-        {true},
+        {WikiReadingMode.translation},
       );
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
@@ -1795,6 +1831,484 @@ void main() {
     },
   );
 
+  testWidgets(
+    'bilingual mode interleaves muted original blocks under the translation',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      SharedPreferences.setMockInitialValues({
+        'wiki_show_translation': true,
+        'wiki_bilingual': true,
+      });
+      final auto = _Auto()
+        ..bodyOverride =
+            '一张包含一名女性角色的图片。\n\n'
+            '## 示例\n\n'
+            '- [1girl](wof-tag:1girl) [solo](wof-tag:solo)\n\n'
+            '## 另见\n\n- [1boy](wof-tag:1boy)\n- [1other](wof-tag:1other)'
+        ..originalOverride =
+            'An image containing a single female character.\n\n'
+            '## Examples\n\n'
+            '- [1girl](wof-tag:1girl) [solo](wof-tag:solo)\n\n'
+            '## See also\n\n- [1boy](wof-tag:1boy)\n- [1other](wof-tag:1other)';
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        auto,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      // One translated body per block plus its muted original counterpart.
+      expect(
+        find.byType(WikiLinkedBody).evaluate().length,
+        greaterThanOrEqualTo(6),
+      );
+      expect(
+        find.text(
+          'An image containing a single female character.',
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('一张包含一名女性角色的图片。', findRichText: true), findsOneWidget);
+      final scheme = Theme.of(
+        tester.element(find.byType(Scaffold).first),
+      ).colorScheme;
+      final originalBlocks = tester
+          .widgetList<WikiLinkedBody>(find.byType(WikiLinkedBody))
+          .where((body) => body.body.contains('An image containing'))
+          .toList();
+      expect(originalBlocks, hasLength(1));
+      expect(originalBlocks.single.style?.fontSize, 13);
+      expect(originalBlocks.single.style?.color, scheme.onSurfaceVariant);
+      // The original heading renders as a small muted line, not in the TOC.
+      final originalHeading = find.text('Examples');
+      expect(originalHeading, findsOneWidget);
+      expect(tester.widget<Text>(originalHeading).style?.fontSize, 13);
+      expect(find.byKey(const Key('wiki-bilingual-unavailable')), findsNothing);
+      await capture(tester, 'bilingual-1440');
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'bilingual segment persists and restores across sessions and history',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auto = _Auto()
+        ..bodyOverride =
+            '译文段落。\n\n## 另见\n\n- [blue_eyes](wof-tag:blue_eyes)\n- [1boy](wof-tag:1boy)\n- [1other](wof-tag:1other)'
+        ..originalOverride =
+            'Translated paragraph.\n\n## See also\n\n- [blue_eyes](wof-tag:blue_eyes)\n- [1boy](wof-tag:1boy)\n- [1other](wof-tag:1other)';
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        auto,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
+      await tester.pumpAndSettle();
+      tester
+          .widget<SegmentedButton<WikiReadingMode>>(
+            find.byKey(const Key('wiki-reading-language')),
+          )
+          .onSelectionChanged!({WikiReadingMode.bilingual});
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('wiki_bilingual'), isTrue);
+      expect(prefs.getBool('wiki_show_translation'), isTrue);
+      expect(find.byType(WikiLinkedBody).evaluate().length, greaterThan(1));
+      // Follow a tag link, then history back restores the bilingual mode.
+      // Both bilingual halves render the cloud, so the chip exists twice.
+      await tester.tap(find.byKey(const Key('wiki-chip-blue_eyes')).first);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('wiki-article-title')))
+            .data,
+        'blue eyes',
+      );
+      await tester.tap(find.byKey(const Key('wiki-history-back')));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('wiki-article-title')))
+            .data,
+        '1girl',
+      );
+      expect(find.byType(WikiLinkedBody).evaluate().length, greaterThan(1));
+      // A fresh session restores the persisted bilingual mode.
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        auto,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      expect(find.byType(WikiLinkedBody).evaluate().length, greaterThan(1));
+      expect(
+        find.text('Translated paragraph.', findRichText: true),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'bilingual falls back to the translation when no aligned original exists',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      SharedPreferences.setMockInitialValues({
+        'wiki_show_translation': true,
+        'wiki_bilingual': true,
+      });
+      final auto = _Auto()
+        ..bodyOverride = '译文段落。\n\n## 另见\n\n- [1boy](wof-tag:1boy)';
+      // originalOverride stays null → wikiOriginalFor returns null.
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        auto,
+      );
+      expect(
+        find.byKey(const Key('wiki-bilingual-unavailable')),
+        findsOneWidget,
+      );
+      expect(find.byType(WikiLinkedBody), findsOneWidget);
+      expect(
+        tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
+        auto.bodyOverride,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('bilingual outline anchors land on translated headings', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({
+      'wiki_show_translation': true,
+      'wiki_bilingual': true,
+    });
+    final filler = List.filled(40, '填充段落 filler.').join('\n\n');
+    final fillerEn = List.filled(40, 'Filler paragraph.').join('\n\n');
+    final auto = _Auto()
+      ..bodyOverride =
+          '首段。\n\n## 示例\n\n- [1girl](wof-tag:1girl)\n\n$filler\n\n'
+          '## 另见\n\n- [1boy](wof-tag:1boy)'
+      ..originalOverride =
+          'Intro.\n\n## Examples\n\n- [1girl](wof-tag:1girl)\n\n$fillerEn\n\n'
+          '## See also\n\n- [1boy](wof-tag:1boy)';
+    await _pump(
+      tester,
+      const TagWikiScreen(
+        initialTag: '1girl',
+        directory: WikiDirectory(roots: [], groups: {}),
+      ),
+      auto,
+    );
+    final scroll = tester
+        .widget<SingleChildScrollView>(
+          find
+              .ancestor(
+                of: find.byType(WikiLinkedBody).first,
+                matching: find.byType(SingleChildScrollView),
+              )
+              .first,
+        )
+        .controller!;
+    expect(scroll.offset, 0);
+    await tester.tap(find.byKey(const ValueKey('wiki-outline-1')));
+    await tester.pumpAndSettle();
+    expect(scroll.offset, greaterThan(400));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'example sections render clickable cards while other lists keep their form',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auto = _Auto()
+        ..bodyOverride =
+            '引言。\n\n'
+            '## 示例\n\n'
+            '- [1girl](wof-tag:1girl)\n'
+            '- [solo](wof-tag:solo)\n'
+            '- [1boy](wof-tag:1boy)\n\n'
+            '## 例外\n\n'
+            '- 不计入的项甲\n'
+            '- 不计入的项乙\n\n'
+            '## 用例\n\n'
+            '- [1girl](wof-tag:1girl)\n'
+            '  - 内层说明\n'
+            '- [solo](wof-tag:solo)\n\n'
+            '## 另见\n\n'
+            '- [1boy](wof-tag:1boy)\n'
+            '- [1other](wof-tag:1other)\n'
+            '- [2girls](wof-tag:2girls)';
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        auto,
+        catalog: _Tags(entries: _uiTags()),
+      );
+      // The pure-link list inside 示例 becomes cards, not a chip cloud.
+      for (var i = 0; i < 3; i++) {
+        expect(find.byKey(ValueKey('wiki-example-card-$i')), findsOneWidget);
+      }
+      expect(find.byKey(const Key('wiki-chip-1girl')), findsNothing);
+      // 「例外」 is not an example keyword; its list stays a bullet list.
+      expect(find.textContaining('不计入的项甲'), findsOneWidget);
+      // The nested list under 用例 also keeps default rendering.
+      expect(find.textContaining('内层说明'), findsOneWidget);
+      // A pure-link list outside an example section is still a chip cloud.
+      expect(find.byKey(const Key('wiki-chip-2girls')), findsOneWidget);
+      await capture(tester, 'example-cards-1440-zh');
+      // Links inside example cards navigate like body links.
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(const ValueKey('wiki-example-card-1')),
+          matching: find.text('solo', findRichText: true),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('wiki-body-solo')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('bilingual example sections render cards on both sides', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({
+      'wiki_show_translation': true,
+      'wiki_bilingual': true,
+    });
+    final auto = _Auto()
+      ..bodyOverride =
+          '引言。\n\n'
+          '## 示例\n\n'
+          '- [1girl](wof-tag:1girl)\n'
+          '- [solo](wof-tag:solo)\n'
+          '- [1boy](wof-tag:1boy)\n\n'
+          '## 另见\n\n'
+          '- [2girls](wof-tag:2girls)\n'
+          '- [1other](wof-tag:1other)\n'
+          '- [multiple_girls](wof-tag:multiple_girls)'
+      ..originalOverride =
+          'Intro.\n\n'
+          '## Examples\n\n'
+          '- [1girl](wof-tag:1girl)\n'
+          '- [solo](wof-tag:solo)\n'
+          '- [1boy](wof-tag:1boy)\n\n'
+          '## See also\n\n'
+          '- [2girls](wof-tag:2girls)\n'
+          '- [1other](wof-tag:1other)\n'
+          '- [multiple_girls](wof-tag:multiple_girls)';
+    await _pump(
+      tester,
+      const TagWikiScreen(
+        initialTag: '1girl',
+        directory: WikiDirectory(roots: [], groups: {}),
+      ),
+      auto,
+      catalog: _Tags(entries: _uiTags()),
+    );
+    // Card keys restart inside each markdown pass, so the translated and
+    // the original example list each produce cards 0..2.
+    for (var i = 0; i < 3; i++) {
+      expect(find.byKey(ValueKey('wiki-example-card-$i')), findsNWidgets(2));
+    }
+    // The 「另见」 list is not in an example section; it stays a chip cloud
+    // on both halves.
+    expect(find.byKey(const Key('wiki-chip-2girls')), findsNWidgets(2));
+    expect(find.byKey(const Key('wiki-chip-1girl')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('example card keeps inline content on one line', (tester) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final auto = _Auto()
+      ..bodyOverride =
+          '引言。\n\n'
+          '## 示例\n\n'
+          '- [1girl](wof-tag:1girl) 与 [1boy](wof-tag:1boy)\n\n'
+          '## 例子\n\n'
+          '- [solo](wof-tag:solo) 与 [1boy](wof-tag:1boy)\n\n'
+          '- [1girl](wof-tag:1girl) 补充\n';
+    await _pump(
+      tester,
+      const TagWikiScreen(
+        initialTag: '1girl',
+        directory: WikiDirectory(roots: [], groups: {}),
+      ),
+      auto,
+      catalog: _Tags(entries: _uiTags()),
+    );
+    // Each mixed li must land in one paragraph inside one card, not split
+    // into one block per child node. The 「例子」 list is loose (blank line
+    // between items), so its li children arrive wrapped in `p`.
+    final inCard = find.byWidgetPredicate(
+      (widget) =>
+          widget.key is ValueKey &&
+          (widget.key! as ValueKey).value.toString().startsWith(
+            'wiki-example-card-',
+          ),
+    );
+    for (final text in const ['1girl 与 1boy', 'solo 与 1boy', '1girl 补充']) {
+      final line = find.text(text, findRichText: true);
+      expect(line, findsOneWidget, reason: '$text should render inline');
+      expect(find.ancestor(of: line, matching: inCard), findsWidgets);
+    }
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'hovering body links, chips and related cells shows the preview card',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final params = _Params();
+      final auto = _Auto()
+        ..bodyOverride =
+            '一名女性角色的图片。请参见 [solo](wof-tag:solo) 了解更多。\n\n'
+            '## 另见\n\n'
+            '- [1boy](wof-tag:1boy)\n'
+            '- [1other](wof-tag:1other)\n'
+            '- [2girls](wof-tag:2girls)';
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        auto,
+        catalog: _Tags(entries: _uiTags()),
+        params: params,
+        related: const [
+          CompletionCandidate(
+            canonicalTag: 'smile',
+            translation: '微笑',
+            postCount: 1000,
+            cooccurrenceCount: 400,
+            category: TagCategory.general,
+            matchKind: CompletionMatchKind.englishExact,
+            sources: {CompletionSourceKind.base},
+          ),
+        ],
+      );
+      final gesture = await tester.createGesture(
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      // Plain text does not open the card.
+      await gesture.moveTo(_inlineTextCenter(tester, '一名女性角色', '了解更多'));
+      await tester.pump(const Duration(milliseconds: 450));
+      expect(find.byKey(const Key('wiki-preview-open')), findsNothing);
+      // Hovering the inline link for 300ms opens it.
+      await gesture.moveTo(_inlineTextCenter(tester, '一名女性角色', 'solo'));
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump();
+      expect(find.byKey(const Key('wiki-preview-open')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('wiki-tag-preview-card')),
+          matching: find.text('单人'),
+        ),
+        findsOneWidget,
+      );
+      await capture(tester, 'hover-card-1440-zh');
+      // The pointer can move into the card without it closing.
+      await gesture.moveTo(
+        tester.getCenter(find.byKey(const Key('wiki-preview-open'))),
+      );
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const Key('wiki-preview-open')), findsOneWidget);
+      // The add button runs the usual add-to-prompt flow.
+      await tester.tap(find.byKey(const Key('wiki-preview-add')));
+      // Dismissal re-evaluates hover at the resting pointer spot, which may
+      // land on another previewable target, so park the pointer first.
+      await gesture.moveTo(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(params.state.prompt, contains('solo'));
+      expect(find.byKey(const Key('wiki-preview-open')), findsNothing);
+      // A chip opens the same card.
+      final chip = find.byKey(const Key('wiki-chip-1boy'));
+      expect(chip, findsOneWidget);
+      await gesture.moveTo(tester.getCenter(chip));
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump();
+      expect(find.byKey(const Key('wiki-preview-open')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('wiki-tag-preview-card')),
+          matching: find.text('1个男孩'),
+        ),
+        findsOneWidget,
+      );
+      // Moving onto ordinary space closes it after the leave delay.
+      await gesture.moveTo(_inlineTextCenter(tester, '一名女性角色', '了解更多'));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const Key('wiki-preview-open')), findsNothing);
+      // So does a related-grid cell.
+      await tester.ensureVisible(find.byKey(const Key('wiki-related-smile')));
+      await gesture.moveTo(
+        tester.getCenter(find.byKey(const Key('wiki-related-smile'))),
+      );
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump();
+      expect(find.byKey(const Key('wiki-preview-open')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('wiki-tag-preview-card')),
+          matching: find.text('微笑'),
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   // CAPTURE_WIKI_REDESIGN=1 records the confirmed three-column matrix:
   // five locales × light/dark × 1440/1100/680 (680 is single-column) plus an
   // Aa reading-settings overlay shot per locale/theme at 1440.
@@ -1847,6 +2361,74 @@ void main() {
         }
       }
     }
+    // Bilingual reading captures: zh/en × light/dark at 1440 plus zh light
+    // at 1100 where the outline rail hides.
+    const bilingualOriginal =
+        'An image containing a single female character. '
+        'Only living characters visibly present in the image count toward '
+        'this tag.\n\n'
+        'For images containing a single character, see [solo](wof-tag:solo).\n\n'
+        '## Examples\n\n'
+        '- [1girl](wof-tag:1girl) [solo](wof-tag:solo)\n'
+        '- [1girl](wof-tag:1girl) and [1boy](wof-tag:1boy)\n\n'
+        '## See also\n\n- [1boy](wof-tag:1boy)\n- [1other](wof-tag:1other)\n'
+        '- [2girls](wof-tag:2girls)\n- [multiple girls](wof-tag:multiple_girls)';
+    for (final lang in const ['zh', 'en']) {
+      for (final brightness in Brightness.values) {
+        testWidgets('wiki bilingual capture $lang ${brightness.name} 1440', (
+          tester,
+        ) async {
+          tester.view.physicalSize = const Size(1440, 900);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          SharedPreferences.setMockInitialValues({
+            'wiki_show_translation': true,
+            'wiki_bilingual': true,
+          });
+          await _pump(
+            tester,
+            const TagWikiScreen(
+              initialTag: '1girl',
+              directory: _captureDirectory,
+            ),
+            _Auto()
+              ..bodyOverride = _uiBody
+              ..originalOverride = bilingualOriginal,
+            catalog: _Tags(entries: _uiTags()),
+            related: _captureRelated(),
+            locale: Locale(lang),
+            brightness: brightness,
+            chrome: true,
+          );
+          expect(tester.takeException(), isNull);
+          await capture(tester, 'bilingual-1440-$lang', brightness.name);
+        });
+      }
+    }
+    testWidgets('wiki bilingual capture zh light 1100', (tester) async {
+      tester.view.physicalSize = const Size(1100, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      SharedPreferences.setMockInitialValues({
+        'wiki_show_translation': true,
+        'wiki_bilingual': true,
+      });
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: '1girl', directory: _captureDirectory),
+        _Auto()
+          ..bodyOverride = _uiBody
+          ..originalOverride = bilingualOriginal,
+        catalog: _Tags(entries: _uiTags()),
+        related: _captureRelated(),
+        brightness: Brightness.light,
+        chrome: true,
+      );
+      expect(tester.takeException(), isNull);
+      await capture(tester, 'bilingual-1100-zh', 'light');
+    });
   }
 }
 

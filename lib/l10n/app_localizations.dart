@@ -18372,6 +18372,24 @@ abstract class AppLocalizations {
   /// **'Original'**
   String get wiki_readingOriginal;
 
+  /// No description provided for @wiki_readingBilingual.
+  ///
+  /// In en, this message translates to:
+  /// **'Bilingual'**
+  String get wiki_readingBilingual;
+
+  /// No description provided for @wiki_bilingualUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No aligned source text for this translation; showing the translation'**
+  String get wiki_bilingualUnavailable;
+
+  /// No description provided for @wiki_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get wiki_open;
+
   /// No description provided for @wiki_switchToOriginal.
   ///
   /// In en, this message translates to:

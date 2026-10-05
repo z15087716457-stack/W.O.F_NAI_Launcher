@@ -10283,6 +10283,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get wiki_readingOriginal => '원문';
 
   @override
+  String get wiki_readingBilingual => '대역';
+
+  @override
+  String get wiki_bilingualUnavailable => '이 번역문에 대응되는 원문이 없어 번역문을 표시합니다';
+
+  @override
+  String get wiki_open => '열기';
+
+  @override
   String get wiki_switchToOriginal => '원문으로 전환';
 
   @override

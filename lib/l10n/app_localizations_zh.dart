@@ -10103,6 +10103,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_readingOriginal => '原文';
 
   @override
+  String get wiki_readingBilingual => '对照';
+
+  @override
+  String get wiki_bilingualUnavailable => '这篇译文没有可逐段对照的原文，已显示译文';
+
+  @override
+  String get wiki_open => '打开';
+
+  @override
   String get wiki_switchToOriginal => '切换到原文';
 
   @override
@@ -22769,6 +22778,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get wiki_readingOriginal => '原文';
+
+  @override
+  String get wiki_readingBilingual => '對照';
+
+  @override
+  String get wiki_bilingualUnavailable => '這篇譯文沒有可逐段對照的原文，已顯示譯文';
+
+  @override
+  String get wiki_open => '開啟';
 
   @override
   String get wiki_switchToOriginal => '切換到原文';
