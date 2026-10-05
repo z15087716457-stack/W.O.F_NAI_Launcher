@@ -1211,6 +1211,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_editImage => '画像を編集';
 
   @override
+  String get img2img_placeOnCanvas => 'キャンバスに配置';
+
+  @override
   String get img2img_editApplied => '編集された画像が新しいソース画像になりました';
 
   @override

@@ -558,6 +558,7 @@
     }
   },
   "img2img_editImage": "Edit Image",
+  "img2img_placeOnCanvas": "Place on canvas",
   "img2img_editApplied": "The edited image is now the new source image",
   "img2img_uploadImage": "Upload Image",
   "img2img_dropToAdd": "Release to set as source image",

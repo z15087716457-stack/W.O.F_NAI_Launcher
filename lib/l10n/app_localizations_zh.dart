@@ -1192,6 +1192,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_editImage => '编辑图像';
 
   @override
+  String get img2img_placeOnCanvas => '放入画布';
+
+  @override
   String get img2img_editApplied => '已将编辑结果设为新的源图';
 
   @override
@@ -13644,6 +13647,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get img2img_editImage => '編輯影像';
+
+  @override
+  String get img2img_placeOnCanvas => '放入畫布';
 
   @override
   String get img2img_editApplied => '已將編輯結果設為新的來源圖';

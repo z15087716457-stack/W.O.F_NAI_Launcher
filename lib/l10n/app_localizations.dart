@@ -2322,6 +2322,12 @@ abstract class AppLocalizations {
   /// **'Edit Image'**
   String get img2img_editImage;
 
+  /// No description provided for @img2img_placeOnCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Place on canvas'**
+  String get img2img_placeOnCanvas;
+
   /// No description provided for @img2img_editApplied.
   ///
   /// In en, this message translates to:

@@ -13,7 +13,6 @@ import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/comfyui/comfyui_models.dart';
-import '../../../../core/comfyui/workflow_template.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/datasources/remote/nai_image_enhancement_api_service.dart';
@@ -22,15 +21,14 @@ import '../../../../data/models/image/image_operation.dart';
 import '../../../../data/services/precise_ref_library_storage_service.dart';
 import '../../../providers/comfyui/comfyui_provider.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
+import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/image_save_settings_provider.dart';
 import '../../../providers/generation/image_workflow_controller.dart';
 import '../../../providers/precise_ref_library_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../services/image_workflow_launcher.dart';
-import '../../../utils/comfyui_workflow_l10n.dart';
 import '../../../utils/dropped_file_reader.dart';
-import '../../../utils/precise_ref_library_import_helper.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
 import '../../../widgets/common/decoded_memory_image.dart';
@@ -40,7 +38,7 @@ import '../../../widgets/common/themed_divider.dart';
 import '../../../widgets/image_editor/image_editor_screen.dart';
 import '../../precise_ref_library/widgets/precise_ref_selector_dialog.dart';
 import 'img2img_preview_cache.dart';
-import 'comfyui_workflow_dialog.dart';
+import 'canvas/canvas_feed_layout.dart';
 
 enum _UpscaleMetricLevel { low, medium, high }
 
@@ -107,6 +105,13 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _buildPanel(context, compactHeader: constraints.maxWidth < 360),
+    );
+  }
+
+  Widget _buildPanel(BuildContext context, {required bool compactHeader}) {
     final theme = Theme.of(context);
     final params = ref.watch(
       generationParamsNotifierProvider.select(selectImg2ImgPanelViewData),
@@ -142,6 +147,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
               workflow: workflow,
               supportsInpaint: supportsInpaint,
               showBackground: showBackground,
+              compactHeader: compactHeader,
             )
           : [
               _buildImportDropTarget(
@@ -179,23 +185,25 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
               filterQuality: FilterQuality.medium,
             )
           : null,
-      badge: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-          color: showBackground
-              ? Colors.white.withValues(alpha: 0.2)
-              : theme.colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          context.l10n.img2img_enabled,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: showBackground
-                ? Colors.white
-                : theme.colorScheme.onPrimaryContainer,
-          ),
-        ),
-      ),
+      badge: compactHeader
+          ? null
+          : Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: showBackground
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                context.l10n.img2img_enabled,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: showBackground
+                      ? Colors.white
+                      : theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
         child: Column(
@@ -267,19 +275,32 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
   }
 
   /// 已载入底图时的头部操作列（官网式）：
-  /// 微倾斜缩略图 + 重绘 / 编辑 / 换图 / 清除 四个图标 + 更多操作菜单。
+  /// 微倾斜缩略图 + 放入画布 / 重绘 / 编辑 / 换图 / 清除。
   List<Widget> _buildLoadedHeaderActions({
     required Img2ImgPanelViewData params,
     required ImageWorkflowState workflow,
     required bool supportsInpaint,
     required bool showBackground,
+    required bool compactHeader,
   }) {
     final sourceImage = params.sourceImage!;
     final foreground = showBackground ? Colors.white : null;
+    final isGenerating = ref.watch(
+      imageGenerationNotifierProvider.select((state) => state.isGenerating),
+    );
 
     return [
-      _buildTiltedThumbnail(sourceImage),
-      const SizedBox(width: 4),
+      if (!compactHeader) ...[
+        _buildTiltedThumbnail(sourceImage),
+        const SizedBox(width: 4),
+      ],
+      PanelHeaderIconButton(
+        key: const Key('img2img-action-place-on-canvas'),
+        iconAsset: 'assets/icons/nai-icon-send-tools.svg',
+        tooltip: context.l10n.img2img_placeOnCanvas,
+        color: foreground,
+        onPressed: isGenerating ? null : _placeSourceOnCanvas,
+      ),
       if (supportsInpaint)
         PanelHeaderIconButton(
           key: const Key('img2img-action-inpaint'),
@@ -320,19 +341,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
         color: foreground,
         onPressed: _removeSourceImage,
       ),
-      Builder(
-        builder: (buttonContext) => PanelHeaderIconButton(
-          key: const Key('img2img-overflow-menu'),
-          icon: Icons.more_vert,
-          tooltip: context.l10n.img2img_moreActions,
-          color: foreground,
-          onPressed: () => _showOverflowMenu(
-            buttonContext,
-            params: params,
-            workflow: workflow,
-          ),
-        ),
-      ),
     ];
   }
 
@@ -358,135 +366,28 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     );
   }
 
-  /// “更多”溢出菜单：低频操作（变体/导演工具/增强/放大/存库/ComfyUI 工作流）
-  /// 收进弹出菜单，保持行内只剩四个图标（官网式）。
-  void _showOverflowMenu(
-    BuildContext buttonContext, {
-    required Img2ImgPanelViewData params,
-    required ImageWorkflowState workflow,
-  }) {
-    final sourceImage = params.sourceImage!;
-    final comfyItems = _buildComfyUIMenuItems(params);
-    final overlayBox =
-        Overlay.of(buttonContext).context.findRenderObject() as RenderBox;
-    final buttonBox = buttonContext.findRenderObject() as RenderBox;
-    // 锚点矩形必须在 overlay 坐标系内（ancestor: overlayBox）；
-    // 用全局坐标而 overlay 有偏移时菜单会整体向右下方漂移。
-    final triggerRect = Rect.fromPoints(
-      buttonBox.localToGlobal(Offset.zero, ancestor: overlayBox),
-      buttonBox.localToGlobal(
-        buttonBox.size.bottomRight(Offset.zero),
-        ancestor: overlayBox,
-      ),
-    );
-
-    showMenu<String>(
-      context: buttonContext,
-      position: RelativeRect.fromRect(
-        Rect.fromLTWH(
-          triggerRect.left,
-          triggerRect.bottom + 4,
-          triggerRect.width,
-          0,
-        ),
-        Offset.zero & overlayBox.size,
-      ),
-      items: [
-        _overflowItem(
-          value: 'variations',
-          icon: Icons.auto_awesome_motion_outlined,
-          label: context.l10n.img2img_generateVariations,
-        ),
-        _overflowItem(
-          value: 'director',
-          icon: Icons.auto_fix_high_outlined,
-          label: context.l10n.img2img_directorTools,
-        ),
-        CheckedPopupMenuItem<String>(
-          value: 'enhance',
-          checked: workflow.isEnhance,
-          height: 40,
-          child: _overflowItemChild(
-            icon: workflow.isEnhance
-                ? Icons.auto_awesome
-                : Icons.auto_awesome_outlined,
-            label: context.l10n.img2img_enhance,
-          ),
-        ),
-        CheckedPopupMenuItem<String>(
-          value: 'upscale',
-          checked: workflow.isUpscale,
-          height: 40,
-          child: _overflowItemChild(
-            icon: workflow.isUpscale
-                ? Icons.zoom_out_map
-                : Icons.zoom_out_map_rounded,
-            label: context.l10n.image_upscale,
-          ),
-        ),
-        const PopupMenuDivider(),
-        _overflowItem(
-          key: const Key('img2img-save-source-to-library'),
-          value: 'saveToLibrary',
-          icon: Icons.bookmark_add_outlined,
-          label: context.l10n.preciseRefLib_saveCurrentToLibrary,
-        ),
-        if (comfyItems.isNotEmpty) ...[const PopupMenuDivider(), ...comfyItems],
-      ],
-    ).then((value) {
-      if (value == null || !mounted) return;
-      _handleOverflowSelection(
-        value,
-        sourceImage: sourceImage,
-        workflow: workflow,
-      );
-    });
-  }
-
-  PopupMenuItem<String> _overflowItem({
-    Key? key,
-    required String value,
-    required IconData icon,
-    required String label,
-  }) {
-    return PopupMenuItem<String>(
-      key: key,
-      value: value,
-      height: 40,
-      child: _overflowItemChild(icon: icon, label: label),
-    );
-  }
-
-  Widget _overflowItemChild({required IconData icon, required String label}) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
-        const SizedBox(width: 8),
-        Text(label),
-      ],
-    );
-  }
-
-  void _handleOverflowSelection(
-    String value, {
-    required Uint8List sourceImage,
-    required ImageWorkflowState workflow,
-  }) {
-    switch (value) {
-      case 'variations':
-        ImageWorkflowLauncher.generateVariations(context, ref, sourceImage);
-      case 'director':
-        ImageWorkflowLauncher.openDirectorTools(context, ref, sourceImage);
-      case 'enhance':
-        _toggleEnhance(workflow);
-      case 'upscale':
-        _toggleUpscale(workflow);
-      case 'saveToLibrary':
-        _saveSourceToPreciseRefLibrary();
-      case final String comfyId when comfyId.startsWith('comfy:'):
-        _openComfyWorkflow(comfyId.substring(6), sourceImage);
+  void _placeSourceOnCanvas() {
+    final source = ref.read(generationParamsNotifierProvider).sourceImage;
+    if (source == null) return;
+    final generation = ref.read(imageGenerationNotifierProvider);
+    if (generation.isGenerating) return;
+    final image = ref
+        .read(imageGenerationNotifierProvider.notifier)
+        .registerSourceImage(source);
+    if (image == null) {
+      AppToast.error(context, context.l10n.img2img_decodeSourceFailed);
+      return;
     }
+    ref.read(generationPreviewSelectionProvider.notifier).select(image.id);
+    final request = ref.read(canvasHistoryFocusRequestProvider.notifier);
+    request.state = (
+      group: image.generationRunId == null
+          ? 'img:${image.id}'
+          : 'run:${image.generationRunId}',
+      imageId: image.id,
+      revision: (request.state?.revision ?? 0) + 1,
+    );
+    ref.read(generationPreviewFocusNodeProvider).requestFocus();
   }
 
   /// 行内“导入图片”落点：拖入图片即设为底图（官网式）。
@@ -570,13 +471,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
         ),
       ],
     );
-  }
-
-  /// 把当前底图保存到精准参考库
-  Future<void> _saveSourceToPreciseRefLibrary() async {
-    final sourceImage = ref.read(generationParamsNotifierProvider).sourceImage;
-    if (sourceImage == null) return;
-    await saveBytesToPreciseRefLibrary(ref, context, sourceImage);
   }
 
   /// 从精准参考库选一张图作为图生图底图
@@ -1902,100 +1796,6 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
 
   void _clearImg2Img() {
     _removeSourceImage();
-  }
-
-  List<PopupMenuEntry<String>> _buildComfyUIMenuItems(
-    Img2ImgPanelViewData params,
-  ) {
-    final bool comfyEnabled;
-    try {
-      comfyEnabled = ref.watch(
-        comfyUISettingsProvider.select((s) => s.enabled),
-      );
-    } catch (_) {
-      return [];
-    }
-    if (!comfyEnabled) return [];
-
-    final List<WorkflowTemplate> workflows;
-    try {
-      workflows = ref.watch(comfyUIWorkflowsProvider);
-    } catch (_) {
-      return [];
-    }
-    final eligibleWorkflows = workflows
-        .where(
-          (t) =>
-              t.id != comfySeedvr2UpscaleTemplateId &&
-              t.id != comfySeedvr2TiledUpscaleTemplateId &&
-              t.id != comfyModelUpscaleTemplateId &&
-              t.id != comfyRtxUpscaleTemplateId &&
-              t.requiresInputImage,
-        )
-        .toList();
-
-    if (eligibleWorkflows.isEmpty) return [];
-
-    return eligibleWorkflows.map<PopupMenuEntry<String>>((template) {
-      final icon = switch (template.category) {
-        WorkflowCategory.img2img => Icons.image_outlined,
-        WorkflowCategory.inpaint => Icons.draw_outlined,
-        WorkflowCategory.enhance => Icons.auto_fix_high_outlined,
-        _ => Icons.account_tree_outlined,
-      };
-      return PopupMenuItem<String>(
-        value: 'comfy:${template.id}',
-        height: 40,
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 8),
-            Text(template.localizedName(context)),
-          ],
-        ),
-      );
-    }).toList();
-  }
-
-  void _openComfyWorkflow(String templateId, Uint8List sourceImage) {
-    final List<WorkflowTemplate> workflows;
-    try {
-      workflows = ref.read(comfyUIWorkflowsProvider);
-    } catch (_) {
-      return;
-    }
-    final template = workflows.where((t) => t.id == templateId).firstOrNull;
-    if (template == null) return;
-
-    ComfyUIWorkflowDialog.show(context, template: template, image: sourceImage);
-  }
-
-  void _toggleEnhance(ImageWorkflowState workflow) {
-    final controller = ref.read(imageWorkflowControllerProvider.notifier);
-    if (workflow.isEnhance) {
-      controller.closeTemporaryTool();
-    } else {
-      final source = ref.read(generationParamsNotifierProvider).sourceImage;
-      if (source != null) {
-        controller.openTemporaryTool(source, ImageWorkflowMode.enhance);
-      }
-    }
-  }
-
-  void _toggleUpscale(ImageWorkflowState workflow) {
-    final controller = ref.read(imageWorkflowControllerProvider.notifier);
-    if (workflow.isUpscale) {
-      controller.closeTemporaryTool();
-    } else {
-      final source = ref.read(generationParamsNotifierProvider).sourceImage;
-      if (source != null) {
-        controller.openTemporaryTool(source, ImageWorkflowMode.upscale);
-      }
-    }
   }
 
   Future<void> _openBlankCanvas() async {

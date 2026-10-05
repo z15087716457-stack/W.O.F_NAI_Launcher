@@ -1234,6 +1234,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_editImage => 'Edit Image';
 
   @override
+  String get img2img_placeOnCanvas => 'Place on canvas';
+
+  @override
   String get img2img_editApplied =>
       'The edited image is now the new source image';
 

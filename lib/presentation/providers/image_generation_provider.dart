@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import '../../data/models/image/image_operation.dart';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:image/image.dart' as img;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -1189,6 +1190,55 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       params.copyWith(vibeReferencesV4: currentVibes),
       saveImages: saveSettings.autoSave,
     );
+  }
+
+  /// Put a local source on the canvas without generating, saving or rebuilding
+  /// metadata from the current draft. Repeated imports reuse the existing tile.
+  GeneratedImage? registerSourceImage(Uint8List imageBytes) {
+    if (state.isGenerating || imageBytes.isEmpty) return null;
+    (int, int)? size;
+    try {
+      size = _resolveImageSize(imageBytes);
+    } catch (_) {
+      // Some decoders throw on truncated input instead of returning null.
+      return null;
+    }
+    if (size == null || size.$1 <= 0 || size.$2 <= 0) return null;
+
+    final existing = [...state.mergedPanelImages, ...state.displayImages]
+        .where(
+          (image) =>
+              image.canUseAsGenerationInput &&
+              listEquals(image.bytes, imageBytes),
+        )
+        .firstOrNull;
+    final image =
+        existing ??
+        GeneratedImage.create(
+          Uint8List.fromList(imageBytes),
+          width: size.$1,
+          height: size.$2,
+        );
+    state = state.copyWith(
+      status: GenerationStatus.completed,
+      currentImages: [
+        image,
+        ...state.currentImages.where((entry) => entry.id != image.id),
+      ],
+      history: state.history.any((entry) => entry.id == image.id)
+          ? state.history
+          : [image, ...state.history],
+      displayImages: [
+        image,
+        ...state.displayImages.where((entry) => entry.id != image.id),
+      ],
+      displayWidth: image.width,
+      displayHeight: image.height,
+      clearStreamPreview: true,
+    );
+    _retainSharePreparationCacheForCurrentHistory();
+    if (existing == null) _preloadMetadataInBackground([image]);
+    return image;
   }
 
   /// 将外部结果登记到历史记录，并可选地直接保存到本地图库

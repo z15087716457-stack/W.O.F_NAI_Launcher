@@ -8,6 +8,15 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/comfyui/comfyui_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
+import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
+import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_view.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
+import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_screen.dart';
+import 'package:nai_launcher/presentation/widgets/image_editor/canvas/editor_canvas.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/img2img_panel.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_picker_card/image_picker_card.dart';
 import 'package:nai_launcher/presentation/widgets/common/collapsible_image_panel.dart';
@@ -95,7 +104,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('点击导演工具会导航到独立页面而不抛异常', (tester) async {
+    testWidgets('放入画布保留原图与草稿，重复点击重新对焦且无更多菜单', (tester) async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
       await tester.binding.setSurfaceSize(const Size(1400, 1600));
@@ -121,12 +130,140 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // 导演工具移入“更多操作”溢出菜单（官网式行内布局）
-      await tester.tap(find.byKey(const Key('img2img-overflow-menu')));
+      final draft = container.read(generationParamsNotifierProvider);
+      final workflow = container.read(draftImageWorkflowProvider);
+      expect(find.byKey(const Key('img2img-overflow-menu')), findsNothing);
+      final button = find.byKey(const Key('img2img-action-place-on-canvas'));
+      expect(button, findsOneWidget);
+      expect(find.byTooltip('放入画布'), findsOneWidget);
+      await tester.tap(button);
       await tester.pumpAndSettle();
-
-      expect(find.text('导演工具'), findsWidgets);
+      final image = container
+          .read(imageGenerationNotifierProvider)
+          .history
+          .single;
+      expect(image.bytes, orderedEquals(_testImageBytes));
+      expect(container.read(generationPreviewSelectionProvider), image.id);
+      expect(
+        container.read(canvasFeedLayoutProvider).groups.single.key,
+        'img:${image.id}',
+      );
+      final request = container.read(canvasHistoryFocusRequestProvider)!;
+      expect(request.imageId, image.id);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(
+        container.read(imageGenerationNotifierProvider).history,
+        hasLength(1),
+      );
+      expect(
+        container.read(canvasHistoryFocusRequestProvider)!.revision,
+        request.revision + 1,
+      );
+      expect(container.read(generationParamsNotifierProvider), same(draft));
+      expect(container.read(draftImageWorkflowProvider), same(workflow));
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('原图直接进入实际画布，可反复对焦并打开本地编辑器', (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWith(
+            (ref) => _MemoryLocalStorageService(),
+          ),
+          estimatedCostProvider.overrideWithValue(0),
+          imageVariationCostProvider.overrideWith((ref, image) => 0),
+          generationCanvasCameraProvider.overrideWith(_TrackingCamera.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.binding.setSurfaceSize(const Size(1400, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      container
+          .read(imageWorkflowControllerProvider.notifier)
+          .replaceSourceImage(_testImageBytes);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            locale: const Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: Row(
+                children: [
+                  const SizedBox(
+                    width: 400,
+                    child: SingleChildScrollView(child: Img2ImgPanel()),
+                  ),
+                  Expanded(
+                    child: Consumer(
+                      builder: (context, ref, _) => GenerationCanvasView(
+                        generationState: ref.watch(
+                          imageGenerationNotifierProvider,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final action = find.byKey(const Key('img2img-action-place-on-canvas'));
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+      final image = container
+          .read(imageGenerationNotifierProvider)
+          .history
+          .single;
+      expect(
+        container.read(generationCanvasGroupSelectionProvider)?.group,
+        'img:${image.id}',
+      );
+      final camera =
+          container.read(generationCanvasCameraProvider.notifier)
+              as _TrackingCamera;
+      final focusCount = camera.focusCount;
+      camera.panBy(const Offset(2000, 0));
+      await tester.pump();
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+      expect(camera.focusCount, greaterThan(focusCount));
+      final toolbarEdit = find.descendant(
+        of: find.byType(GenerationCanvasView),
+        matching: find.byTooltip('编辑图像'),
+      );
+      expect(toolbarEdit, findsOneWidget);
+      await tester.tap(toolbarEdit);
+      await tester.pump();
+      for (
+        var attempt = 0;
+        attempt < 100 && find.byType(EditorCanvas).evaluate().isEmpty;
+        attempt++
+      ) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(find.byType(EditorCanvas), findsOneWidget);
+      final editor = tester.widget<ImageEditorScreen>(
+        find.byType(ImageEditorScreen),
+      );
+      expect(editor.mode, ImageEditorMode.edit);
+      expect(editor.initialImage, orderedEquals(_testImageBytes));
+      expect(
+        (tester.state(find.byType(ImageEditorScreen)) as dynamic)
+            .debugCanvasSize,
+        const Size(8, 8),
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 1));
     });
 
     testWidgets('超分模型下拉项不重复显示当前模块前缀', (tester) async {
@@ -221,6 +358,8 @@ class _FixedComfyUIUpscaleModels extends ComfyUISeedvr2Models {
 }
 
 class _MemoryLocalStorageService extends LocalStorageService {
+  @override
+  bool getCanvasReducedMotion() => true;
   final Map<String, Object?> _values = {};
 
   @override
@@ -237,5 +376,20 @@ class _MemoryLocalStorageService extends LocalStorageService {
   @override
   Future<void> deleteSetting(String key) async {
     _values.remove(key);
+  }
+}
+
+class _TrackingCamera extends GenerationCanvasCameraNotifier {
+  int focusCount = 0;
+
+  @override
+  void flyTo(
+    CanvasCamera target, {
+    double speed = 11,
+    Duration duration = const Duration(milliseconds: 500),
+    VoidCallback? onDone,
+  }) {
+    focusCount++;
+    super.flyTo(target, speed: speed, duration: duration, onDone: onDone);
   }
 }

@@ -32,6 +32,14 @@ class MockNAIImageGenerationApiService extends Mock
 class FakeNAIImageEnhancementApiService extends Mock
     implements NAIImageEnhancementApiService {}
 
+class _SourceImportGeneration extends ImageGenerationNotifier {
+  _SourceImportGeneration(this.initial);
+  final ImageGenerationState initial;
+
+  @override
+  ImageGenerationState build() => initial;
+}
+
 class _PendingVibeParams extends GenerationParamsNotifier {
   _PendingVibeParams(this.prepared);
   final Completer<List<VibeReference>> prepared;
@@ -267,6 +275,135 @@ void main() {
         expect(image.height, equals(960));
       },
     );
+
+    test(
+      'source import preserves bytes, metadata and draft without API calls',
+      () async {
+        final api = MockNAIImageGenerationApiService();
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(api),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        final draft = container.read(generationParamsNotifierProvider);
+        final source = await _buildImageWithEmbeddedMetadata(
+          imageWidth: 64,
+          imageHeight: 96,
+          metadataWidth: 64,
+          metadataHeight: 96,
+          prompt: 'original source prompt',
+          negativePrompt: 'original negative',
+          seed: 123456,
+        );
+        final notifier = container.read(
+          imageGenerationNotifierProvider.notifier,
+        );
+        final image = notifier.registerSourceImage(source)!;
+        final state = container.read(imageGenerationNotifierProvider);
+        expect(image.bytes, orderedEquals(source));
+        expect(image.bytes, isNot(same(source)));
+        expect((image.width, image.height), (64, 96));
+        expect(image.operation, isNull);
+        expect(image.canUseAsGenerationInput, isTrue);
+        final parsed = UnifiedMetadataParser.parseFromPng(image.bytes);
+        expect(parsed.metadata?.prompt, 'original source prompt');
+        expect(parsed.metadata?.seed, 123456);
+        expect(state.displayImages.single.id, image.id);
+        expect(state.history.single.id, image.id);
+        expect(container.read(generationParamsNotifierProvider), same(draft));
+        verifyZeroInteractions(api);
+        expect(
+          (container.read(subscriptionNotifierProvider.notifier)
+                  as TestSubscriptionNotifier)
+              .refreshBalanceCallCount,
+          0,
+        );
+        final again = notifier.registerSourceImage(Uint8List.fromList(source));
+        expect(again, same(image));
+        expect(container.read(canvasFeedLayoutProvider).groups, hasLength(1));
+        expect(
+          container.read(imageGenerationNotifierProvider).history,
+          hasLength(1),
+        );
+        source[0] = 0;
+        expect(
+          image.bytes.first,
+          137,
+        ); // Stored PNG is independent of caller bytes.
+      },
+    );
+
+    test(
+      'source import reuses display-only images and preserves older results',
+      () {
+        final source = _validImageBytes(width: 64, height: 96);
+        final existing = GeneratedImage.create(source, width: 64, height: 96);
+        final older = GeneratedImage.create(
+          _validImageBytes(width: 32, height: 48),
+          width: 32,
+          height: 48,
+        );
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            imageGenerationNotifierProvider.overrideWith(
+              () => _SourceImportGeneration(
+                ImageGenerationState(
+                  currentImages: [older],
+                  history: [older],
+                  displayImages: [existing, older],
+                ),
+              ),
+            ),
+          ],
+        );
+        final notifier = container.read(
+          imageGenerationNotifierProvider.notifier,
+        );
+        expect(notifier.registerSourceImage(source), same(existing));
+        final state = container.read(imageGenerationNotifierProvider);
+        expect(state.currentImages.map((image) => image.id), [
+          existing.id,
+          older.id,
+        ]);
+        expect(state.history.map((image) => image.id), [existing.id, older.id]);
+        expect(state.displayImages.map((image) => image.id), [
+          existing.id,
+          older.id,
+        ]);
+      },
+    );
+
+    test('busy or invalid source import leaves generation state unchanged', () {
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      final idle = container.read(imageGenerationNotifierProvider);
+      expect(notifier.registerSourceImage(Uint8List(0)), isNull);
+      expect(
+        notifier.registerSourceImage(Uint8List.fromList([1, 2, 3])),
+        isNull,
+      );
+      expect(container.read(imageGenerationNotifierProvider), same(idle));
+      container.dispose();
+      const busy = ImageGenerationState(status: GenerationStatus.generating);
+      container = ProviderContainer(
+        overrides: [
+          imageGenerationNotifierProvider.overrideWith(
+            () => _SourceImportGeneration(busy),
+          ),
+        ],
+      );
+      expect(
+        container
+            .read(imageGenerationNotifierProvider.notifier)
+            .registerSourceImage(_validImageBytes(width: 8, height: 8)),
+        isNull,
+      );
+      expect(container.read(imageGenerationNotifierProvider), same(busy));
+    });
 
     test('history keeps every image past the old 50-image cap', () {
       final notifier = container.read(imageGenerationNotifierProvider.notifier);

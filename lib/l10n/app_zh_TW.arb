@@ -508,6 +508,7 @@
   "img2img_removeImage": "移除圖片",
   "img2img_selectFailed": "選擇圖片失敗: {error}",
   "img2img_editImage": "編輯影像",
+  "img2img_placeOnCanvas": "放入畫布",
   "img2img_editApplied": "已將編輯結果設為新的來源圖",
   "img2img_uploadImage": "上傳圖片",
   "img2img_dropToAdd": "鬆開以設為底圖",

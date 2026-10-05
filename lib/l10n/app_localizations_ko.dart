@@ -1209,6 +1209,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_editImage => '이미지 편집';
 
   @override
+  String get img2img_placeOnCanvas => '캔버스에 배치';
+
+  @override
   String get img2img_editApplied => '편집한 이미지를 새 원본 이미지로 설정했습니다';
 
   @override

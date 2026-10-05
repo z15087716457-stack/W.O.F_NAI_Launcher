@@ -557,6 +557,7 @@
     }
   },
   "img2img_editImage": "画像を編集",
+  "img2img_placeOnCanvas": "キャンバスに配置",
   "img2img_editApplied": "編集された画像が新しいソース画像になりました",
   "img2img_uploadImage": "画像をアップロード",
   "img2img_dropToAdd": "ドロップして元画像に設定",
