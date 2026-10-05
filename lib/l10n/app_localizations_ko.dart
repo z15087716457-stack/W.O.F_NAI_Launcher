@@ -12538,4 +12538,94 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editor_closestValidSize => '가장 가까운 유효 생성 크기로 자르기';
+
+  @override
+  String get model3d_projection => '투영';
+
+  @override
+  String get model3d_perspective => '원근 투영';
+
+  @override
+  String get model3d_orthographic => '직교 투영';
+
+  @override
+  String get model3d_fov => '시야각';
+
+  @override
+  String get model3d_ambient => '주변광';
+
+  @override
+  String get model3d_direct => '직접광';
+
+  @override
+  String get model3d_direction => '광원 방향';
+
+  @override
+  String get model3d_front => '정면';
+
+  @override
+  String get model3d_frontTop => '정면 위';
+
+  @override
+  String get model3d_top => '위';
+
+  @override
+  String get model3d_left => '왼쪽';
+
+  @override
+  String get model3d_right => '오른쪽';
+
+  @override
+  String get model3d_back => '후면';
+
+  @override
+  String get model3d_shadows => '그림자';
+
+  @override
+  String get model3d_quality => '품질';
+
+  @override
+  String get model3d_veryLow => '매우 낮음';
+
+  @override
+  String get model3d_low => '낮음';
+
+  @override
+  String get model3d_medium => '중간';
+
+  @override
+  String get model3d_high => '높음';
+
+  @override
+  String get model3d_veryHigh => '매우 높음';
+
+  @override
+  String get model3d_display => '표시';
+
+  @override
+  String get model3d_showBones => '본 표시';
+
+  @override
+  String get model3d_bones => '본 목록';
+
+  @override
+  String get model3d_noBones => '본이 없습니다';
+
+  @override
+  String get model3d_morphs => '모프 타깃';
+
+  @override
+  String get model3d_noMorphs => '모프 타깃이 없습니다';
+
+  @override
+  String get model3d_settings => '3D 렌더 설정';
+
+  @override
+  String get model3d_resetModel => '모델 위치 초기화';
+
+  @override
+  String get model3d_removeModel => '모델 제거';
+
+  @override
+  String get model3d_removeConfirm => '이 모델을 제거할까요? 저장하지 않은 모델 편집 내용이 사라집니다.';
 }

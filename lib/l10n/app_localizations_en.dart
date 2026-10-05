@@ -12911,4 +12911,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editor_closestValidSize => 'Crop to closest valid generation size';
+
+  @override
+  String get model3d_projection => 'Projection';
+
+  @override
+  String get model3d_perspective => 'Perspective';
+
+  @override
+  String get model3d_orthographic => 'Orthographic';
+
+  @override
+  String get model3d_fov => 'FOV';
+
+  @override
+  String get model3d_ambient => 'Ambient';
+
+  @override
+  String get model3d_direct => 'Direct';
+
+  @override
+  String get model3d_direction => 'Light Direction';
+
+  @override
+  String get model3d_front => 'Front';
+
+  @override
+  String get model3d_frontTop => 'Front-Top';
+
+  @override
+  String get model3d_top => 'Top';
+
+  @override
+  String get model3d_left => 'Left';
+
+  @override
+  String get model3d_right => 'Right';
+
+  @override
+  String get model3d_back => 'Back';
+
+  @override
+  String get model3d_shadows => 'Shadows';
+
+  @override
+  String get model3d_quality => 'Quality';
+
+  @override
+  String get model3d_veryLow => 'Very Low';
+
+  @override
+  String get model3d_low => 'Low';
+
+  @override
+  String get model3d_medium => 'Medium';
+
+  @override
+  String get model3d_high => 'High';
+
+  @override
+  String get model3d_veryHigh => 'Very High';
+
+  @override
+  String get model3d_display => 'Display';
+
+  @override
+  String get model3d_showBones => 'Show Bones';
+
+  @override
+  String get model3d_bones => 'Bone List';
+
+  @override
+  String get model3d_noBones => 'No bones found';
+
+  @override
+  String get model3d_morphs => 'Morph Targets';
+
+  @override
+  String get model3d_noMorphs => 'No morph targets found';
+
+  @override
+  String get model3d_settings => '3D Render Settings';
+
+  @override
+  String get model3d_resetModel => 'Reset model position';
+
+  @override
+  String get model3d_removeModel => 'Remove model';
+
+  @override
+  String get model3d_removeConfirm =>
+      'Remove this model? Unsaved model edits will be lost.';
 }

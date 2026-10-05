@@ -22395,6 +22395,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Crop to closest valid generation size'**
   String get editor_closestValidSize;
+
+  /// No description provided for @model3d_projection.
+  ///
+  /// In en, this message translates to:
+  /// **'Projection'**
+  String get model3d_projection;
+
+  /// No description provided for @model3d_perspective.
+  ///
+  /// In en, this message translates to:
+  /// **'Perspective'**
+  String get model3d_perspective;
+
+  /// No description provided for @model3d_orthographic.
+  ///
+  /// In en, this message translates to:
+  /// **'Orthographic'**
+  String get model3d_orthographic;
+
+  /// No description provided for @model3d_fov.
+  ///
+  /// In en, this message translates to:
+  /// **'FOV'**
+  String get model3d_fov;
+
+  /// No description provided for @model3d_ambient.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambient'**
+  String get model3d_ambient;
+
+  /// No description provided for @model3d_direct.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct'**
+  String get model3d_direct;
+
+  /// No description provided for @model3d_direction.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Direction'**
+  String get model3d_direction;
+
+  /// No description provided for @model3d_front.
+  ///
+  /// In en, this message translates to:
+  /// **'Front'**
+  String get model3d_front;
+
+  /// No description provided for @model3d_frontTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Front-Top'**
+  String get model3d_frontTop;
+
+  /// No description provided for @model3d_top.
+  ///
+  /// In en, this message translates to:
+  /// **'Top'**
+  String get model3d_top;
+
+  /// No description provided for @model3d_left.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get model3d_left;
+
+  /// No description provided for @model3d_right.
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get model3d_right;
+
+  /// No description provided for @model3d_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get model3d_back;
+
+  /// No description provided for @model3d_shadows.
+  ///
+  /// In en, this message translates to:
+  /// **'Shadows'**
+  String get model3d_shadows;
+
+  /// No description provided for @model3d_quality.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality'**
+  String get model3d_quality;
+
+  /// No description provided for @model3d_veryLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Low'**
+  String get model3d_veryLow;
+
+  /// No description provided for @model3d_low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get model3d_low;
+
+  /// No description provided for @model3d_medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get model3d_medium;
+
+  /// No description provided for @model3d_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get model3d_high;
+
+  /// No description provided for @model3d_veryHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Very High'**
+  String get model3d_veryHigh;
+
+  /// No description provided for @model3d_display.
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get model3d_display;
+
+  /// No description provided for @model3d_showBones.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Bones'**
+  String get model3d_showBones;
+
+  /// No description provided for @model3d_bones.
+  ///
+  /// In en, this message translates to:
+  /// **'Bone List'**
+  String get model3d_bones;
+
+  /// No description provided for @model3d_noBones.
+  ///
+  /// In en, this message translates to:
+  /// **'No bones found'**
+  String get model3d_noBones;
+
+  /// No description provided for @model3d_morphs.
+  ///
+  /// In en, this message translates to:
+  /// **'Morph Targets'**
+  String get model3d_morphs;
+
+  /// No description provided for @model3d_noMorphs.
+  ///
+  /// In en, this message translates to:
+  /// **'No morph targets found'**
+  String get model3d_noMorphs;
+
+  /// No description provided for @model3d_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'3D Render Settings'**
+  String get model3d_settings;
+
+  /// No description provided for @model3d_resetModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset model position'**
+  String get model3d_resetModel;
+
+  /// No description provided for @model3d_removeModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove model'**
+  String get model3d_removeModel;
+
+  /// No description provided for @model3d_removeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this model? Unsaved model edits will be lost.'**
+  String get model3d_removeConfirm;
 }
 
 class _AppLocalizationsDelegate

@@ -1,0 +1,17 @@
+{
+  "page": "https://novelai.net/image",
+  "public_script": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+  "script_sha256": "ffa02970e0a0ce3ce1e4a7085924323df9b1af333e0b5969815be6e85b933c9e",
+  "observed": "2026-10-05",
+  "method": "Live rendered DOM SVGs and public bundle; UI and synthetic local GLB inspection. No account state or credentials stored.",
+  "icons": {
+    "editor_model_expression.svg": "ff8e3c23ef1832d66ae69adc2bdb00c88bac02f664c43c97bac96da20f57a788",
+    "editor_model_import.svg": "667e844d4b8f9715911d7b29a3468ed1b222d0178475a78121ae4dcaba4f22c5",
+    "editor_model_move.svg": "093c6493b4b3f200e505be34a9aba78ce4cf14ffb85ca25872d4f196d5e928aa",
+    "editor_model_pose.svg": "f6c35166fce75a080791a8082fd1c0bd486dcb41a8d411d8dbfe762ece69c13f",
+    "editor_model_reset.svg": "93db87d5a438020f9044016352df4c8e957c9e8f69dce2e8cee7b70af1c0d0a5",
+    "editor_model_rotate.svg": "bc9b612c22069810516f724cb680559318316469ed9058a5b3636c26d6b193a0",
+    "editor_model_scale.svg": "2c38f3411cf2175fc2162de2410f4059733c69216bc1080af17414c3c30d4ca0",
+    "editor_model_settings.svg": "4b1c08f710d9e41c752655e23d998c2697ac64a83b0f20c6faf9666910f2fe8e"
+  }
+}

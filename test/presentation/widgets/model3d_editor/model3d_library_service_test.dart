@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/widgets/model3d_editor/model3d_library_service.dart';
@@ -41,6 +43,110 @@ void main() {
     expect(ref1, ref2);
     expect(libraryDir.listSync().whereType<File>(), hasLength(1));
   });
+
+  test(
+    'packs external glTF buffer and texture into a standalone GLB',
+    () async {
+      await sourceFile('mesh.bin', [1, 2, 3, 4]);
+      await sourceFile('color.png', [137, 80, 78, 71]);
+      final source = await sourceFile(
+        'scene.gltf',
+        utf8.encode(
+          jsonEncode({
+            'asset': {'version': '2.0'},
+            'buffers': [
+              {'uri': 'mesh.bin', 'byteLength': 4},
+            ],
+            'bufferViews': [
+              {'buffer': 0, 'byteLength': 4},
+            ],
+            'images': [
+              {'uri': 'color.png'},
+            ],
+          }),
+        ),
+      );
+      final ref = await service.importModel(source);
+      final bytes = await service.resolveFile(ref)!.readAsBytes();
+      final header = ByteData.sublistView(bytes);
+      expect(header.getUint32(0, Endian.little), 0x46546c67);
+      final length = header.getUint32(12, Endian.little);
+      final document =
+          jsonDecode(utf8.decode(bytes.sublist(20, 20 + length))) as Map;
+      expect(document['images'][0], {'bufferView': 1, 'mimeType': 'image/png'});
+      expect(document['buffers'], [
+        {'byteLength': 8},
+      ]);
+      expect(bytes.sublist(28 + length), [1, 2, 3, 4, 137, 80, 78, 71]);
+      await File('${tempDir.path}/mesh.bin').delete();
+      await File('${tempDir.path}/color.png').delete();
+      expect(await service.resolveFile(ref)!.readAsBytes(), bytes);
+    },
+  );
+
+  test('rejects remote and out-of-folder glTF resources', () async {
+    for (final uri in ['https://example.com/private.bin', '../outside.bin']) {
+      final source = await sourceFile(
+        'bad.gltf',
+        utf8.encode(
+          jsonEncode({
+            'asset': {'version': '2.0'},
+            'buffers': [
+              {'uri': uri, 'byteLength': 4},
+            ],
+          }),
+        ),
+      );
+      await expectLater(
+        service.importModel(source),
+        throwsA(isA<Model3dImportException>()),
+      );
+    }
+    expect(libraryDir.existsSync(), false);
+  });
+
+  test(
+    'exports an embedded rig for browser validation after deleting its glTF resources',
+    () async {
+      final glb = await File(
+        'test/fixtures/model3d_synthetic_rig.glb',
+      ).readAsBytes();
+      final jsonLength = ByteData.sublistView(glb).getUint32(12, Endian.little);
+      final model =
+          jsonDecode(utf8.decode(glb.sublist(20, 20 + jsonLength))) as Map;
+      model['buffers'][0]['uri'] = 'rig.bin';
+      await sourceFile('rig.bin', glb.sublist(28 + jsonLength));
+      await sourceFile(
+        'white.png',
+        await File('test/fixtures/model3d_white.png').readAsBytes(),
+      );
+      model['images'] = [
+        {'uri': 'white.png'},
+      ];
+      model['textures'] = [
+        {'source': 0},
+      ];
+      model['materials'][0]['pbrMetallicRoughness']['baseColorTexture'] = {
+        'index': 0,
+      };
+      final source = await sourceFile(
+        'rig.gltf',
+        utf8.encode(jsonEncode(model)),
+      );
+      final ref = await service.importModel(source);
+      final packed = await service.resolveFile(ref)!.readAsBytes();
+      await File('${tempDir.path}/rig.bin').delete();
+      await File('${tempDir.path}/white.png').delete();
+      expect(await service.resolveFile(ref)!.readAsBytes(), packed);
+      if (Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
+        final output = File(
+          '.dart_tool/model3d-official-20261005/web/packed-rig.glb',
+        );
+        await output.parent.create(recursive: true);
+        await output.writeAsBytes(packed);
+      }
+    },
+  );
 
   test('rejects oversized file', () async {
     final small = Model3dLibraryService(

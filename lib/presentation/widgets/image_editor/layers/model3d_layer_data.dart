@@ -2,6 +2,7 @@
 ///
 /// [modelRef] 取值:
 /// - `builtin:mannequin`  内置程序化人偶
+/// - `empty`             空的 3D 场景（可再导入模型）
 /// - `lib:<sha256>`       应用内模型库文件
 /// [sceneState] 为编辑器页序列化的不透明 JSON(骨骼姿势/相机/光照),
 /// Dart 侧只存取、不解析。

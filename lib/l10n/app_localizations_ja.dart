@@ -12520,4 +12520,94 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editor_closestValidSize => '最も近い有効な生成サイズに切り抜く';
+
+  @override
+  String get model3d_projection => '投影';
+
+  @override
+  String get model3d_perspective => '透視投影';
+
+  @override
+  String get model3d_orthographic => '平行投影';
+
+  @override
+  String get model3d_fov => '視野角';
+
+  @override
+  String get model3d_ambient => '環境光';
+
+  @override
+  String get model3d_direct => '直接光';
+
+  @override
+  String get model3d_direction => '光の方向';
+
+  @override
+  String get model3d_front => '正面';
+
+  @override
+  String get model3d_frontTop => '正面上';
+
+  @override
+  String get model3d_top => '真上';
+
+  @override
+  String get model3d_left => '左';
+
+  @override
+  String get model3d_right => '右';
+
+  @override
+  String get model3d_back => '背面';
+
+  @override
+  String get model3d_shadows => '影';
+
+  @override
+  String get model3d_quality => '品質';
+
+  @override
+  String get model3d_veryLow => '非常に低い';
+
+  @override
+  String get model3d_low => '低';
+
+  @override
+  String get model3d_medium => '標準';
+
+  @override
+  String get model3d_high => '高';
+
+  @override
+  String get model3d_veryHigh => '非常に高い';
+
+  @override
+  String get model3d_display => '表示';
+
+  @override
+  String get model3d_showBones => 'ボーンを表示';
+
+  @override
+  String get model3d_bones => 'ボーンリスト';
+
+  @override
+  String get model3d_noBones => 'ボーンが見つかりません';
+
+  @override
+  String get model3d_morphs => 'モーフターゲット';
+
+  @override
+  String get model3d_noMorphs => 'モーフターゲットが見つかりません';
+
+  @override
+  String get model3d_settings => '3D レンダリング設定';
+
+  @override
+  String get model3d_resetModel => 'モデル位置をリセット';
+
+  @override
+  String get model3d_removeModel => 'モデルを削除';
+
+  @override
+  String get model3d_removeConfirm => 'このモデルを削除しますか？未保存のモデル編集は失われます。';
 }

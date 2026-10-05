@@ -123,6 +123,17 @@ class Model3dBridge {
   Future<void> resetPose() => _send('resetPose');
 
   Future<void> undoPose() => _send('undoPose');
+  Future<void> redoPose() => _send('redoPose');
+  Future<void> resetModel() => _send('resetModel');
+  Future<void> removeModel() => _send('removeModel');
+  Future<void> restoreScene(Map<String, dynamic> state) =>
+      _send('restoreScene', {'sceneState': state});
+  Future<Map<String, dynamic>> getState() => _send('getState');
+  Future<void> setSettings(Map<String, dynamic> settings) =>
+      _send('setSettings', {'settings': settings});
+  Future<void> selectBone(int id) => _send('selectBone', {'id': id});
+  Future<void> setMorph(int id, double value, {bool begin = false}) =>
+      _send('setMorph', {'id': id, 'value': value, 'begin': begin});
 
   Future<void> setLight({
     required double intensity,
@@ -147,7 +158,7 @@ class Model3dBridge {
 
   Future<Map<String, dynamic>> serialize() async {
     final data = await _send('serialize');
-    return ((data['sceneState'] as Map?) ?? const {}).cast<String, dynamic>();
+    return Map<String, dynamic>.from((data['sceneState'] as Map?) ?? const {});
   }
 
   void dispose() {

@@ -48,16 +48,16 @@ renderer.setPixelRatio(window.devicePixelRatio);
 
 const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 200);
+let camera = new THREE.PerspectiveCamera(50, 1, 0.01, 200);
 camera.position.set(0, 1.2, 3.2);
 
-const controls = new OrbitControls(camera, canvas);
+let controls = new OrbitControls(camera, canvas);
 controls.target.set(0, 0.9, 0);
 // 官网键位:左键旋转 / 中键推拉 / 右键平移(OrbitControls 默认即此映射)
 controls.update();
 
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x445566, 1.0);
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.6);
+const hemiLight = new THREE.AmbientLight(0xffffff, 0.6);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 scene.add(hemiLight, dirLight);
 
 // 辅助对象(渲染输出时整组隐藏)
@@ -65,6 +65,12 @@ const helpers = new THREE.Group();
 helpers.name = 'helpers';
 helpers.add(new THREE.GridHelper(4, 20, 0x668899, 0x334455));
 scene.add(helpers);
+helpers.add(new THREE.AxesHelper(2));
+renderer.shadowMap.enabled = false;
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(1024, 1024);
+dirLight.shadow.camera.left = dirLight.shadow.camera.bottom = -5;
+dirLight.shadow.camera.right = dirLight.shadow.camera.top = 5;
 
 // 编辑器共享上下文;后续命令在此对象上读写
 const ctx = {
@@ -77,9 +83,8 @@ const ctx = {
 };
 
 function markDirty() {
-  if (ctx.dirty) return;
+  if (!ctx.dirty) emit({ type: 'onDirty' });
   ctx.dirty = true;
-  emit({ type: 'onDirty' });
 }
 
 // ---- 命令框架 ----
@@ -108,7 +113,9 @@ window.naiEditor = {
   },
 };
 
-ctx.lightParams = { intensity: 1.6, azimuth: 37, elevation: 50 };
+ctx.lightParams = { intensity: 0.8, azimuth: 0, elevation: 22 };
+ctx.settings = { projection: 'perspective', fov: 50, ambient: 0.6,
+  direct: 0.8, direction: 'frontTop', shadows: false, quality: 'medium', showBones: true };
 
 function applyLight({ intensity, azimuth, elevation }) {
   ctx.lightParams = { intensity, azimuth, elevation };
@@ -136,6 +143,7 @@ registerCommand('setLight', (params) => {
 // ---- 相机 WASDQE 平移(官网快捷键) ----
 const keyMove = { w: [0, 0, -1], s: [0, 0, 1], a: [-1, 0, 0], d: [1, 0, 0], q: [0, -1, 0], e: [0, 1, 0] };
 window.addEventListener('keydown', (event) => {
+  if (event.ctrlKey || event.metaKey || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return;
   const move = keyMove[event.key.toLowerCase()];
   if (!move) return;
   const step = 0.05;
@@ -151,6 +159,7 @@ window.addEventListener('keydown', (event) => {
   camera.position.add(delta);
   controls.target.add(delta);
   controls.update();
+  markDirty();
 });
 
 // ---- 尺寸与渲染循环 ----
@@ -159,6 +168,11 @@ function resize() {
   if (w === 0 || h === 0) return;
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
+  if (camera.isOrthographicCamera) {
+    const half = camera.userData.halfHeight || 1;
+    camera.left = -half * w / h; camera.right = half * w / h;
+    camera.top = half; camera.bottom = -half;
+  }
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resize);
@@ -191,6 +205,7 @@ function clearCurrentModel() {
   ctx.skinnedMeshes = [];
   ctx.restPose = null;
   undoStack.length = 0; // 换模型时废弃旧快照,防止跨模型恢复污染
+  redoStack.length = 0;
 }
 
 function collectBones() {
@@ -226,7 +241,6 @@ function frameObject(root) {
 }
 
 registerCommand('loadModel', async ({ url, builtin, sceneState }) => {
-  clearCurrentModel();
   let root;
   try {
     if (builtin === 'mannequin') {
@@ -243,11 +257,16 @@ registerCommand('loadModel', async ({ url, builtin, sceneState }) => {
     throw e;
   }
 
+  // Decode completely before replacing the current model. A failed import must
+  // keep the previous visible model and its saved scene intact.
+  clearCurrentModel();
+  transformControls.detach();
   scene.add(root);
   ctx.modelRoot = root;
   ctx.skinnedMeshes = [];
   root.traverse((obj) => {
     if (obj.isSkinnedMesh) ctx.skinnedMeshes.push(obj);
+    if (obj.isMesh) { obj.castShadow = true; obj.receiveShadow = true; }
   });
   captureRestPose();
   if (sceneState) {
@@ -262,7 +281,8 @@ registerCommand('loadModel', async ({ url, builtin, sceneState }) => {
   const duplicateBoneNames = [...new Set(
     names.filter((n, i) => names.indexOf(n) !== i),
   )];
-  const result = { boneCount: names.length, duplicateBoneNames };
+  ctx.dirty = false;
+  const result = { boneCount: names.length, duplicateBoneNames, ...getEditorState() };
   emit({ type: 'onModelLoaded', ...result });
   return result;
 });
@@ -279,6 +299,7 @@ scene.add(gizmoHelper);
 transformControls.addEventListener('dragging-changed', (event) => {
   controls.enabled = !event.value;
   if (event.value) pushUndoSnapshot(); // 拖拽开始时记快照
+  else emitState();
 });
 transformControls.addEventListener('objectChange', markDirty);
 
@@ -296,6 +317,9 @@ const markerSelectedColor = new THREE.Color(0xffc24f);
 let selectedMarker = null;
 
 function rebuildBoneMarkers() {
+  const geometries = new Set(boneMarkers.children.map(m => m.geometry));
+  for (const marker of boneMarkers.children) marker.material.dispose();
+  for (const geometry of geometries) geometry.dispose();
   boneMarkers.clear();
   selectedMarker = null;
   if (!ctx.modelRoot) return;
@@ -322,10 +346,12 @@ let mode = 'transform';
 
 function applyMode() {
   if (mode === 'pose') {
-    boneMarkers.visible = true;
-    transformControls.detach(); // 等待用户点选骨骼
+    boneMarkers.visible = ctx.settings.showBones;
+    if (selectedMarker) transformControls.attach(selectedMarker.userData.bone);
+    else transformControls.detach();
   } else {
     boneMarkers.visible = false;
+    for (const marker of boneMarkers.children) marker.material.color.set(0x4f8cff);
     selectedMarker = null;
     if (ctx.modelRoot) {
       transformControls.attach(ctx.modelRoot);
@@ -346,6 +372,7 @@ function selectBone(marker) {
   selectedMarker = marker;
   marker.material.color.copy(markerSelectedColor);
   transformControls.attach(marker.userData.bone);
+  emitState();
 }
 
 const raycaster = new THREE.Raycaster();
@@ -369,6 +396,7 @@ canvas.addEventListener('pointerdown', (event) => {
 
 // ---- 会话内撤销(仅姿势/变换,不进画布 history) ----
 const undoStack = [];
+const redoStack = [];
 
 function capturePoseSnapshot() {
   const boneStates = collectBones().map((bone) => ({
@@ -380,6 +408,7 @@ function capturePoseSnapshot() {
   const root = ctx.modelRoot;
   return {
     boneStates,
+    morphs: captureMorphs(),
     rootState: root
       ? { p: root.position.clone(), q: root.quaternion.clone(), s: root.scale.clone() }
       : null,
@@ -387,6 +416,7 @@ function capturePoseSnapshot() {
 }
 
 function pushUndoSnapshot() {
+  redoStack.length = 0;
   undoStack.push(capturePoseSnapshot());
   if (undoStack.length > 50) undoStack.shift();
 }
@@ -402,15 +432,33 @@ function restoreSnapshot(snapshot) {
     ctx.modelRoot.quaternion.copy(snapshot.rootState.q);
     ctx.modelRoot.scale.copy(snapshot.rootState.s);
   }
+  restoreMorphs(snapshot.morphs);
   markDirty();
 }
 
 function undoPose() {
   const snapshot = undoStack.pop();
-  if (snapshot) restoreSnapshot(snapshot);
+  if (snapshot) { redoStack.push(capturePoseSnapshot()); restoreSnapshot(snapshot); }
+  emitState();
 }
 
 registerCommand('undoPose', () => undoPose());
+registerCommand('redoPose', () => {
+  const snapshot = redoStack.pop();
+  if (snapshot) { undoStack.push(capturePoseSnapshot()); restoreSnapshot(snapshot); }
+  emitState();
+});
+registerCommand('resetModel', () => {
+  if (!ctx.modelRoot) return;
+  pushUndoSnapshot();
+  ctx.modelRoot.position.set(0, 0, 0);
+  ctx.modelRoot.quaternion.identity(); ctx.modelRoot.scale.set(1, 1, 1);
+  markDirty(); emitState();
+});
+registerCommand('removeModel', () => {
+  transformControls.detach(); clearCurrentModel(); rebuildBoneMarkers();
+  markDirty(); emitState();
+});
 
 registerCommand('resetPose', () => {
   if (!ctx.restPose) return;
@@ -421,12 +469,13 @@ registerCommand('resetPose', () => {
     bone.scale.copy(rest.s);
   }
   markDirty();
+  emitState();
 });
 
 window.addEventListener('keydown', (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
     event.preventDefault();
-    undoPose();
+    if (event.shiftKey) commands.get('redoPose')({}); else undoPose();
   }
 });
 
@@ -462,12 +511,18 @@ function serializeScene() {
         }
       : null,
     bones,
+    boneTransforms: collectBones().map(b => ({ position: b.position.toArray(),
+      quaternion: b.quaternion.toArray(), scale: b.scale.toArray() })),
     camera: {
       position: camera.position.toArray(),
       target: controls.target.toArray(),
       fov: camera.fov,
+      zoom: camera.zoom,
+      halfHeight: camera.userData.halfHeight,
     },
     light: { ...ctx.lightParams },
+    settings: { ...ctx.settings },
+    morphs: captureMorphs(),
   };
 }
 
@@ -479,7 +534,14 @@ function applySceneState(state) {
     ctx.modelRoot.quaternion.fromArray(transform.quaternion);
     ctx.modelRoot.scale.fromArray(transform.scale);
   }
-  if (state.bones) {
+  if (Array.isArray(state.boneTransforms)) {
+    collectBones().forEach((bone, id) => {
+      const b = state.boneTransforms[id];
+      if (!b) return;
+      bone.position.fromArray(b.position); bone.quaternion.fromArray(b.quaternion);
+      bone.scale.fromArray(b.scale);
+    });
+  } else if (state.bones) {
     const byName = new Map(collectBones().map((b) => [b.name, b]));
     for (const [name, boneState] of Object.entries(state.bones)) {
       const bone = byName.get(name);
@@ -497,9 +559,106 @@ function applySceneState(state) {
     controls.update();
   }
   if (state.light) applyLight(state.light);
+  if (state.settings) applySettings(state.settings);
+  if (state.camera) {
+    camera.zoom = state.camera.zoom || 1;
+    if (state.camera.halfHeight) camera.userData.halfHeight = state.camera.halfHeight;
+    resize();
+  }
+  restoreMorphs(state.morphs);
 }
 
 registerCommand('serialize', () => ({ sceneState: serializeScene() }));
+registerCommand('restoreScene', ({ sceneState }) => {
+  applySceneState(sceneState); ctx.dirty = false; emitState();
+});
+
+// Native panels use stable indices, rather than names, so duplicate bone/morph
+// names can be selected without changing a different mesh.
+function morphEntries() {
+  const result = [];
+  if (ctx.modelRoot) ctx.modelRoot.traverse((obj) => {
+    if (!obj.morphTargetInfluences) return;
+    for (const [name, index] of Object.entries(obj.morphTargetDictionary || {})) {
+      result.push({ mesh: obj, index, name, id: result.length });
+    }
+  });
+  return result;
+}
+function captureMorphs() {
+  return morphEntries().map(e => e.mesh.morphTargetInfluences[e.index]);
+}
+function restoreMorphs(values) {
+  if (!Array.isArray(values)) return;
+  for (const e of morphEntries()) {
+    if (Number.isFinite(values[e.id])) e.mesh.morphTargetInfluences[e.index] = values[e.id];
+  }
+}
+function getEditorState() {
+  const bones = collectBones();
+  return {
+    bones: bones.map((b, id) => ({ id, name: b.name || `Bone ${id + 1}`,
+      parent: bones.indexOf(b.parent) })),
+    selectedBone: selectedMarker ? bones.indexOf(selectedMarker.userData.bone) : -1,
+    morphs: morphEntries().map(e => ({ id: e.id, name: e.name,
+      value: e.mesh.morphTargetInfluences[e.index] })),
+    canUndo: undoStack.length > 0, canRedo: redoStack.length > 0,
+    settings: { ...ctx.settings },
+  };
+}
+function emitState() { emit({ type: 'onState', ...getEditorState() }); }
+registerCommand('getState', () => getEditorState());
+registerCommand('selectBone', ({ id }) => {
+  const marker = boneMarkers.children[id];
+  if (!marker) throw new Error('bone not found');
+  mode = 'pose'; applyMode(); selectBone(marker);
+});
+registerCommand('setMorph', ({ id, value, begin }) => {
+  const entry = morphEntries()[id];
+  if (!entry || !Number.isFinite(value)) throw new Error('invalid morph target');
+  if (begin) pushUndoSnapshot();
+  entry.mesh.morphTargetInfluences[entry.index] = Math.min(1, Math.max(0, value));
+  markDirty(); emitState();
+});
+function applySettings(values) {
+  const oldProjection = ctx.settings.projection;
+  Object.assign(ctx.settings, values);
+  const s = ctx.settings;
+  s.fov = Math.min(120, Math.max(10, Number(s.fov) || 50));
+  if (oldProjection !== s.projection) {
+    const old = camera, target = controls.target.clone();
+    const half = old.position.distanceTo(target) * Math.tan(s.fov * Math.PI / 360);
+    camera = s.projection === 'orthographic'
+      ? new THREE.OrthographicCamera(-half, half, half, -half, .01, 200)
+      : new THREE.PerspectiveCamera(s.fov, 1, .01, 200);
+    camera.userData.halfHeight = half;
+    camera.position.copy(old.position); camera.quaternion.copy(old.quaternion);
+    controls.dispose(); controls = new OrbitControls(camera, canvas);
+    controls.target.copy(target); controls.addEventListener('end', markDirty);
+    transformControls.camera = camera;
+    ctx.camera = camera; ctx.controls = controls;
+  }
+  if (camera.isPerspectiveCamera) camera.fov = s.fov;
+  hemiLight.intensity = Math.max(0, Number(s.ambient));
+  const directions = { front: [0,0,500], frontTop: [0,200,500], top: [0,500,100],
+    left: [-500,100,200], right: [500,100,200], back: [0,100,-500] };
+  const d = directions[s.direction] || directions.frontTop;
+  const azimuth = Math.atan2(d[0], d[2]) * 180 / Math.PI;
+  const elevation = Math.atan2(d[1], Math.hypot(d[0], d[2])) * 180 / Math.PI;
+  applyLight({ intensity: Math.max(0, Number(s.direct)), azimuth, elevation });
+  renderer.shadowMap.enabled = !!s.shadows;
+  const resolution = { veryLow: 256, low: 512, medium: 1024, high: 2048, veryHigh: 4096 }[s.quality] || 1024;
+  if (dirLight.shadow.mapSize.x !== resolution) {
+    dirLight.shadow.mapSize.set(resolution, resolution);
+    dirLight.shadow.map?.dispose(); dirLight.shadow.map = null;
+  }
+  boneMarkers.visible = mode === 'pose' && s.showBones;
+  resize();
+}
+registerCommand('setSettings', ({ settings }) => {
+  applySettings(settings || {}); markDirty(); emitState();
+});
+controls.addEventListener('end', markDirty);
 
 // ---- 渲染输出(透明 PNG,精确像素尺寸) ----
 registerCommand('render', ({ width, height }) => {
@@ -510,6 +669,10 @@ registerCommand('render', ({ width, height }) => {
     renderer.setPixelRatio(1); // 输出精确 width×height,不乘 DPR
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
+    if (camera.isOrthographicCamera) {
+      const half = camera.userData.halfHeight || 1;
+      camera.left = -half * width / height; camera.right = half * width / height;
+    }
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
     const png = renderer.domElement.toDataURL('image/png').split(',')[1];

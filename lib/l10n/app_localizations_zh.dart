@@ -12303,6 +12303,96 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_closestValidSize => '裁至最近的有效生成尺寸';
+
+  @override
+  String get model3d_projection => '投影';
+
+  @override
+  String get model3d_perspective => '透视投影';
+
+  @override
+  String get model3d_orthographic => '平行投影';
+
+  @override
+  String get model3d_fov => '视野角';
+
+  @override
+  String get model3d_ambient => '环境光';
+
+  @override
+  String get model3d_direct => '直接光';
+
+  @override
+  String get model3d_direction => '光线方向';
+
+  @override
+  String get model3d_front => '正面';
+
+  @override
+  String get model3d_frontTop => '正面上方';
+
+  @override
+  String get model3d_top => '顶部';
+
+  @override
+  String get model3d_left => '左侧';
+
+  @override
+  String get model3d_right => '右侧';
+
+  @override
+  String get model3d_back => '背面';
+
+  @override
+  String get model3d_shadows => '阴影';
+
+  @override
+  String get model3d_quality => '质量';
+
+  @override
+  String get model3d_veryLow => '极低';
+
+  @override
+  String get model3d_low => '低';
+
+  @override
+  String get model3d_medium => '中';
+
+  @override
+  String get model3d_high => '高';
+
+  @override
+  String get model3d_veryHigh => '极高';
+
+  @override
+  String get model3d_display => '显示';
+
+  @override
+  String get model3d_showBones => '显示骨骼';
+
+  @override
+  String get model3d_bones => '骨骼列表';
+
+  @override
+  String get model3d_noBones => '未找到骨骼';
+
+  @override
+  String get model3d_morphs => '表情形变';
+
+  @override
+  String get model3d_noMorphs => '未找到表情形变';
+
+  @override
+  String get model3d_settings => '3D 渲染设置';
+
+  @override
+  String get model3d_resetModel => '重置模型位置';
+
+  @override
+  String get model3d_removeModel => '移除模型';
+
+  @override
+  String get model3d_removeConfirm => '移除此模型？尚未保存的模型编辑将丢失。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24604,4 +24694,94 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editor_closestValidSize => '裁至最近的有效生成尺寸';
+
+  @override
+  String get model3d_projection => '投影';
+
+  @override
+  String get model3d_perspective => '透視投影';
+
+  @override
+  String get model3d_orthographic => '平行投影';
+
+  @override
+  String get model3d_fov => '視野角';
+
+  @override
+  String get model3d_ambient => '環境光';
+
+  @override
+  String get model3d_direct => '直接光';
+
+  @override
+  String get model3d_direction => '光線方向';
+
+  @override
+  String get model3d_front => '正面';
+
+  @override
+  String get model3d_frontTop => '正面上方';
+
+  @override
+  String get model3d_top => '頂部';
+
+  @override
+  String get model3d_left => '左側';
+
+  @override
+  String get model3d_right => '右側';
+
+  @override
+  String get model3d_back => '背面';
+
+  @override
+  String get model3d_shadows => '陰影';
+
+  @override
+  String get model3d_quality => '品質';
+
+  @override
+  String get model3d_veryLow => '極低';
+
+  @override
+  String get model3d_low => '低';
+
+  @override
+  String get model3d_medium => '中';
+
+  @override
+  String get model3d_high => '高';
+
+  @override
+  String get model3d_veryHigh => '極高';
+
+  @override
+  String get model3d_display => '顯示';
+
+  @override
+  String get model3d_showBones => '顯示骨骼';
+
+  @override
+  String get model3d_bones => '骨骼列表';
+
+  @override
+  String get model3d_noBones => '未找到骨骼';
+
+  @override
+  String get model3d_morphs => '表情形變';
+
+  @override
+  String get model3d_noMorphs => '未找到表情形變';
+
+  @override
+  String get model3d_settings => '3D 渲染設定';
+
+  @override
+  String get model3d_resetModel => '重設模型位置';
+
+  @override
+  String get model3d_removeModel => '移除模型';
+
+  @override
+  String get model3d_removeConfirm => '移除此模型？尚未儲存的模型編輯將丟失。';
 }
