@@ -18,6 +18,7 @@ import 'package:nai_launcher/presentation/providers/generation/local_upscale_pro
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_save_settings_provider.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
 class _Storage extends LocalStorageService {
   final values = <String, Object?>{};
@@ -112,6 +113,11 @@ void main() {
             );
       controller.openTemporaryTool(source, ImageWorkflowMode.upscale);
       final task = container.read(localUpscaleTaskProvider.notifier);
+      if (scenario == 'success') {
+        container
+            .read(generationPreviewSelectionProvider.notifier)
+            .select('previous-canvas-image');
+      }
       final done = task.start();
       expect(container.read(localUpscaleTaskProvider).running, isTrue);
       if (scenario == 'new-source') {
@@ -145,7 +151,11 @@ void main() {
         var finished = false;
         unawaited(shutdown.then((_) => finished = true));
         await Future<void>.delayed(Duration.zero);
-        expect(finished, isFalse, reason: 'Shutdown must await child/task cleanup');
+        expect(
+          finished,
+          isFalse,
+          reason: 'Shutdown must await child/task cleanup',
+        );
       }
       pending.complete(LocalUpscaleResult(_png(72, 48), 72, 48));
       await done;
@@ -188,6 +198,11 @@ void main() {
           );
         } else {
           expect(state.displayImages.single.id, result.id);
+          expect(container.read(generationPreviewSelectionProvider), result.id);
+          expect(
+            container.read(canvasHistoryFocusRequestProvider)?.imageId,
+            result.id,
+          );
         }
       }
     });

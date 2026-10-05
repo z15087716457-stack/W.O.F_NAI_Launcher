@@ -10,6 +10,7 @@ import '../image_generation_provider.dart';
 import '../image_save_settings_provider.dart';
 import 'image_workflow_controller.dart';
 import 'preview_selection_provider.dart';
+import '../../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
 final localUpscaleModelManagerProvider = Provider((ref) {
   final manager = LocalUpscaleModelManager();
@@ -196,6 +197,20 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
             replaceCurrentDisplay: true,
             canApply: canApply,
             canReplaceDisplay: canReplace,
+            onRegistered: (image, displayed) {
+              if (!displayed || _disposed) return;
+              ref
+                  .read(generationPreviewSelectionProvider.notifier)
+                  .select(image.id);
+              final request = ref.read(
+                canvasHistoryFocusRequestProvider.notifier,
+              );
+              request.state = (
+                group: 'img:${image.id}',
+                imageId: image.id,
+                revision: (request.state?.revision ?? 0) + 1,
+              );
+            },
           );
       if (canApply()) {
         state = const LocalUpscaleTaskState(

@@ -1260,6 +1260,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     Uint8List? originalBytes,
     bool Function()? canApply,
     bool Function()? canReplaceDisplay,
+    void Function(GeneratedImage image, bool displayed)? onRegistered,
   }) async {
     assert(
       !addToDisplay || !replaceCurrentDisplay,
@@ -1319,6 +1320,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       displayHeight: shouldDisplay ? resolvedSize.$2 : state.displayHeight,
     );
     _retainSharePreparationCacheForCurrentHistory();
+
+    onRegistered?.call(generatedImage, shouldDisplay);
 
     if (saveToLocal) {
       await _saveImagesToGallery(
