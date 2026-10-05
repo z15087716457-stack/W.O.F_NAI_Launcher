@@ -301,7 +301,10 @@ Future<void> _capture(WidgetTester tester, GlobalKey key, String id) async {
         key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final pixels = await boundary.toImage();
     final bytes = await pixels.toByteData(format: ui.ImageByteFormat.png);
-    final file = File('.dart_tool/upscale-controls-20261005/captures/$id.png');
+    final directory =
+        Platform.environment['UPSCALE_CAPTURE_DIRECTORY'] ??
+        '.dart_tool/upscale-controls-20261005/captures';
+    final file = File('$directory/$id.png');
     await file.parent.create(recursive: true);
     await file.writeAsBytes(bytes!.buffer.asUint8List());
     pixels.dispose();

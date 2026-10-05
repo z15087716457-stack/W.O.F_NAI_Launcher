@@ -86,7 +86,7 @@ class CanvasUpscaleButton extends ConsumerWidget {
                     unawaited(_run(context, ref));
                   },
             child: Padding(
-              padding: const EdgeInsets.all(7),
+              padding: const EdgeInsets.fromLTRB(7, 7, 4, 7),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -182,11 +182,12 @@ class CanvasUpscaleButton extends ConsumerWidget {
               borderRadius: const BorderRadius.horizontal(
                 right: Radius.circular(6),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
+              child: SizedBox(
+                width: 18,
+                height: 36,
                 child: Icon(
                   Icons.keyboard_arrow_down,
-                  size: 16,
+                  size: 14,
                   color: theme.colorScheme.onSurface.withValues(
                     alpha: locked ? .35 : 1,
                   ),
