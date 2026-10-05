@@ -65,9 +65,9 @@ class _EditColorControlState extends State<EditColorControl> {
           borderRadius: BorderRadius.circular(3),
           child: Container(
             key: const Key('edit_color_swatch'),
-            width: 104,
-            height: 40,
-            padding: const EdgeInsets.all(2),
+            width: 106,
+            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
             decoration: BoxDecoration(
               color: widget.state.foregroundColor,
               border: Border.all(

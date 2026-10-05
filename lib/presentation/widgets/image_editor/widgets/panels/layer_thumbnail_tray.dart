@@ -390,64 +390,68 @@ class _InpaintLayerThumb extends StatelessWidget {
               borderRadius: BorderRadius.circular(3),
               color: active ? scheme.onSurface : scheme.outlineVariant,
             ),
-            child: Stack(
-              fit: StackFit.expand,
-              clipBehavior: Clip.hardEdge,
-              children: [
-                const CustomPaint(painter: _InpaintCheckerboardPainter()),
-                if (layer.thumbnail != null)
-                  RawImage(
-                    image: layer.thumbnail,
-                    fit: BoxFit.fill,
-                    color: layer.inpaintMask ? maskColor : null,
-                    colorBlendMode: layer.inpaintMask ? BlendMode.srcIn : null,
-                  ),
-                if (maskRects.isNotEmpty)
-                  CustomPaint(
-                    painter: _InpaintThumbnailOutpaintPainter(
-                      maskRects,
-                      canvasSize,
-                      maskColor,
+            child: ClipRect(
+              child: Stack(
+                fit: StackFit.expand,
+                clipBehavior: Clip.hardEdge,
+                children: [
+                  const CustomPaint(painter: _InpaintCheckerboardPainter()),
+                  if (layer.thumbnail != null)
+                    RawImage(
+                      image: layer.thumbnail,
+                      fit: BoxFit.fill,
+                      color: layer.inpaintMask ? maskColor : null,
+                      colorBlendMode: layer.inpaintMask
+                          ? BlendMode.srcIn
+                          : null,
                     ),
-                  ),
-                if (layer.inpaintMask || layer.hasModel3d)
-                  Positioned(
-                    left: 1,
-                    bottom: 1,
-                    child: IgnorePointer(
-                      child: Container(
-                        key: Key('inpaint_layer_type_${layer.id}'),
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: scheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        child: Center(
-                          child: layer.hasModel3d
-                              ? const InpaintGlyph('cube', size: 12)
-                              : const InpaintGlyph('mask_badge', size: 12),
+                  if (maskRects.isNotEmpty)
+                    CustomPaint(
+                      painter: _InpaintThumbnailOutpaintPainter(
+                        maskRects,
+                        canvasSize,
+                        maskColor,
+                      ),
+                    ),
+                  if (layer.inpaintMask || layer.hasModel3d)
+                    Positioned(
+                      left: 1,
+                      bottom: 1,
+                      child: IgnorePointer(
+                        child: Container(
+                          key: Key('inpaint_layer_type_${layer.id}'),
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          child: Center(
+                            child: layer.hasModel3d
+                                ? const InpaintGlyph('cube', size: 12)
+                                : const InpaintGlyph('mask_badge', size: 12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                Positioned(
-                  right: 1,
-                  top: 1,
-                  child: Material(
-                    color: scheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(3),
-                    child: InpaintButton(
-                      key: Key('inpaint_layer_delete_${layer.id}'),
-                      size: 20,
-                      glyphSize: 14,
-                      glyph: 'clear',
-                      tooltip: context.l10n.layer_delete,
-                      onPressed: onDelete,
+                  Positioned(
+                    right: 1,
+                    top: 1,
+                    child: Material(
+                      color: scheme.surfaceContainer,
+                      borderRadius: BorderRadius.circular(3),
+                      child: InpaintButton(
+                        key: Key('inpaint_layer_delete_${layer.id}'),
+                        size: 20,
+                        glyphSize: 14,
+                        glyph: 'clear',
+                        tooltip: context.l10n.layer_delete,
+                        onPressed: onDelete,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -460,6 +464,8 @@ class _InpaintCheckerboardPainter extends CustomPainter {
   const _InpaintCheckerboardPainter();
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, Paint()..color = Colors.white);
     final paint = Paint()..color = const Color(0xFFA0A0A0);
     for (var y = 0.0; y < size.height; y += 8) {
@@ -469,6 +475,7 @@ class _InpaintCheckerboardPainter extends CustomPainter {
         }
       }
     }
+    canvas.restore();
   }
 
   @override

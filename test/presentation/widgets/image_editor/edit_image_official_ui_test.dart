@@ -89,7 +89,7 @@ void main() {
                   format: ui.ImageByteFormat.png,
                 );
                 final file = File(
-                  '.dart_tool/edit-image-official-20261005/captures/${locale.toLanguageTag()}_${brightness.name}_${width.round()}_$name.png',
+                  '.dart_tool/edit-ui-proportions-20261005/captures/${locale.toLanguageTag()}_${brightness.name}_${width.round()}_$name.png',
                 );
                 await file.parent.create(recursive: true);
                 await file.writeAsBytes(data!.buffer.asUint8List());
@@ -113,10 +113,10 @@ void main() {
             final popupIcon = tester.getRect(
               find.byKey(const Key('edit_color_popup_icon')),
             );
-            expect(swatch.size, const Size(104, 40));
+            expect(swatch.size, const Size(106, 42));
             expect(popupIcon.size, const Size(34, 34));
             expect(popupIcon.center.dy, swatch.center.dy);
-            expect(swatch.right - popupIcon.right, 3);
+            expect(swatch.right - popupIcon.right, 6);
             await capture('color');
             await tester.tapAt(Offset(width - 8, 250));
             await tester.pump();

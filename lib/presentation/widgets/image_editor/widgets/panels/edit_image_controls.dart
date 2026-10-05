@@ -69,13 +69,14 @@ class EditButton extends StatelessWidget {
     this.child,
     this.onPressed,
     this.selected = false,
+    this.bordered = false,
     this.size = 44,
   });
   final String tooltip;
   final String? glyph;
   final Widget? child;
   final VoidCallback? onPressed;
-  final bool selected;
+  final bool selected, bordered;
   final double size;
   @override
   Widget build(BuildContext context) {
@@ -93,8 +94,17 @@ class EditButton extends StatelessWidget {
         selected: selected,
         enabled: onPressed != null,
         child: Material(
-          color: selected ? s.primaryContainer : Colors.transparent,
-          borderRadius: BorderRadius.circular(3),
+          color: selected
+              ? s.primaryContainer
+              : bordered
+              ? s.surfaceContainerLowest
+              : Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(3),
+            side: bordered
+                ? BorderSide(color: s.outlineVariant)
+                : BorderSide.none,
+          ),
           child: InkWell(
             onTap: onPressed,
             borderRadius: BorderRadius.circular(3),
@@ -162,49 +172,63 @@ class EditToolSettings extends StatelessWidget {
               state.requestUiUpdate();
             },
           ),
-        if (paint) ...[
-          for (final tip in EditorBrushTip.values)
-            EditButton(
-              key: Key('edit_tip_${tip.name}'),
-              tooltip: switch (tip) {
-                EditorBrushTip.round => l.editor_roundTip,
-                EditorBrushTip.softRound => l.editor_softRoundTip,
-                EditorBrushTip.square => l.editor_squareTip,
-              },
-              selected: state.brushTip == tip,
-              onPressed: () => state.setBrushTip(tip),
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  shape: tip == EditorBrushTip.square
-                      ? BoxShape.rectangle
-                      : BoxShape.circle,
-                  color: tip == EditorBrushTip.softRound
-                      ? null
-                      : Theme.of(context).colorScheme.onSurface,
-                  gradient: tip == EditorBrushTip.softRound
-                      ? RadialGradient(
-                          colors: [
-                            Theme.of(context).colorScheme.onSurface,
-                            Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0),
-                          ],
-                        )
-                      : null,
-                ),
-              ),
-            ),
-        ],
         if (paint || blur || clone)
-          EditButton(
-            key: const Key('edit_pressure'),
-            tooltip: l.editor_pressureSensitivity,
-            glyph: 'pressure',
-            selected: state.pressureSensitivity,
-            onPressed: () =>
-                state.setPressureSensitivity(!state.pressureSensitivity),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (paint) ...[
+                Row(
+                  key: const Key('edit_tips'),
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 2,
+                  children: [
+                    for (final tip in EditorBrushTip.values)
+                      EditButton(
+                        key: Key('edit_tip_${tip.name}'),
+                        tooltip: switch (tip) {
+                          EditorBrushTip.round => l.editor_roundTip,
+                          EditorBrushTip.softRound => l.editor_softRoundTip,
+                          EditorBrushTip.square => l.editor_squareTip,
+                        },
+                        selected: state.brushTip == tip,
+                        bordered: true,
+                        onPressed: () => state.setBrushTip(tip),
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            shape: tip == EditorBrushTip.square
+                                ? BoxShape.rectangle
+                                : BoxShape.circle,
+                            color: tip == EditorBrushTip.softRound
+                                ? null
+                                : Theme.of(context).colorScheme.onSurface,
+                            gradient: tip == EditorBrushTip.softRound
+                                ? RadialGradient(
+                                    colors: [
+                                      Theme.of(context).colorScheme.onSurface,
+                                      Theme.of(context).colorScheme.onSurface
+                                          .withValues(alpha: 0),
+                                    ],
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 6),
+              ],
+              EditButton(
+                key: const Key('edit_pressure'),
+                tooltip: l.editor_pressureSensitivity,
+                glyph: 'pressure',
+                selected: state.pressureSensitivity,
+                bordered: true,
+                onPressed: () =>
+                    state.setPressureSensitivity(!state.pressureSensitivity),
+              ),
+            ],
           ),
         if (clone)
           Padding(
@@ -218,45 +242,56 @@ class EditToolSettings extends StatelessWidget {
       return ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: InpaintPanel(
-          child: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 2,
-            children: [
-              SizedBox(
-                width: 64,
-                height: 64,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    EditGlyph(editToolGlyph(tool.id), size: 20),
-                    const SizedBox(height: 5),
-                    Text(
-                      editToolLabel(context, tool.id),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 11),
+          child: Padding(
+            padding: const EdgeInsets.all(1),
+            child: IntrinsicHeight(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    key: const Key('edit_tool_label'),
+                    width: 62,
+                    constraints: const BoxConstraints(minHeight: 64),
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        EditGlyph(editToolGlyph(tool.id)),
+                        const SizedBox(height: 4),
+                        Text(
+                          editToolLabel(context, tool.id),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 14, height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (settings.isNotEmpty) ...[
+                    VerticalDivider(
+                      width: 1,
+                      thickness: 1,
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                    Flexible(
+                      child: Padding(
+                        key: const Key('edit_settings_body'),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 10,
+                        ),
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: settings,
+                        ),
+                      ),
                     ),
                   ],
-                ),
+                ],
               ),
-              if (settings.isNotEmpty) ...[
-                SizedBox(
-                  height: 44,
-                  child: VerticalDivider(
-                    width: 1,
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
-                ),
-                ...settings.map(
-                  (e) => Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 6,
-                      horizontal: 2,
-                    ),
-                    child: e,
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
         ),
       );
@@ -288,68 +323,172 @@ class EditNumberSlider extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: width,
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            Flexible(
-              child: Text(
-                '$label:',
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final style = DefaultTextStyle.of(
+      context,
+    ).style.copyWith(fontSize: 14, height: 1.5, fontWeight: FontWeight.w600);
+    final number = '${value.round()}';
+    final painter = TextPainter(
+      text: TextSpan(text: number, style: style),
+      textDirection: Directionality.of(context),
+    )..layout();
+    final numberWidth = painter.width.ceilToDouble() + 4;
+    painter.dispose();
+    return SizedBox(
+      width: width,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 21,
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    '$label:',
+                    overflow: TextOverflow.ellipsis,
+                    style: style,
+                  ),
                 ),
-              ),
-            ),
-            SizedBox(
-              width: 48,
-              height: 24,
-              child: TextFormField(
-                key: ValueKey('$label:$value'),
-                initialValue: '${value.round()}',
-                textAlign: TextAlign.end,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
+                const SizedBox(width: 3),
+                SizedBox(
+                  width: numberWidth,
+                  child: TextFormField(
+                    key: ValueKey('$label:$value'),
+                    initialValue: number,
+                    textAlign: TextAlign.start,
+                    style: style,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      signed: true,
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      isCollapsed: true,
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.only(left: 2),
+                    ),
+                    onFieldSubmitted: _submit,
+                  ),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  signed: true,
-                ),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(2),
-                ),
-                onFieldSubmitted: _submit,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 18,
-          child: SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              padding: EdgeInsets.zero,
-              trackHeight: 8,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
-            ),
-            child: Slider(
-              value: value.clamp(min, max),
-              min: min,
-              max: max,
-              divisions: ((max - min) / step).round(),
-              onChanged: onChanged,
+              ],
             ),
           ),
-        ),
-      ],
-    ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 12,
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                padding: EdgeInsets.zero,
+                trackHeight: 12,
+                trackShape: const _EditSliderTrack(),
+                thumbShape: const _EditSliderThumb(),
+                overlayShape: SliderComponentShape.noOverlay,
+                tickMarkShape: SliderTickMarkShape.noTickMark,
+                showValueIndicator: ShowValueIndicator.never,
+                activeTrackColor: scheme.onSurface.withValues(alpha: .08),
+                inactiveTrackColor: scheme.onSurface.withValues(alpha: .08),
+                thumbColor: scheme.outline,
+                overlayColor: scheme.primary,
+              ),
+              child: Slider(
+                value: value.clamp(min, max),
+                min: min,
+                max: max,
+                divisions: ((max - min) / step).round(),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+          const SizedBox(height: 3.2),
+        ],
+      ),
+    );
+  }
+}
+
+/// Web range geometry: a uniform rail and a rectangular thumb, without ticks.
+class _EditSliderTrack extends SliderTrackShape {
+  const _EditSliderTrack();
+  @override
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) => Rect.fromLTWH(
+    offset.dx + 6,
+    offset.dy + (parentBox.size.height - 12) / 2,
+    math.max(0, parentBox.size.width - 12),
+    12,
   );
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
+    final rect = Rect.fromLTWH(
+      offset.dx,
+      offset.dy + (parentBox.size.height - 12) / 2,
+      parentBox.size.width,
+      12,
+    );
+    context.canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(3)),
+      Paint()..color = sliderTheme.inactiveTrackColor!,
+    );
+  }
+}
+
+class _EditSliderThumb extends SliderComponentShape {
+  const _EditSliderThumb();
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(12, 18);
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final color = Color.lerp(
+      sliderTheme.thumbColor,
+      sliderTheme.overlayColor,
+      activationAnimation.value,
+    )!;
+    context.canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: center, width: 12, height: 18),
+        const Radius.circular(3),
+      ),
+      Paint()..color = color,
+    );
+  }
 }
 
 class EditImageToolbar extends StatefulWidget {
