@@ -1,0 +1,139 @@
+{
+  "brush": {
+    "url": "https://novelai.net/_next/static/media/pen.87137c5d.svg",
+    "source_type": "official SVG asset",
+    "sha256": "924591d52a745307e66327119e5a4bf47c3b3f58b8738bb035de6be41440a165"
+  },
+  "eraser": {
+    "url": "https://novelai.net/_next/static/media/eraser.0ec62cc8.svg",
+    "source_type": "official SVG asset",
+    "sha256": "6e03e183c75c8f84845757d4d3f3f541a28df0d214714c17f7626bb0867c36a4"
+  },
+  "inpaint_focus": {
+    "url": "https://novelai.net/_next/static/media/select.429034b7.svg",
+    "source_type": "official SVG asset",
+    "sha256": "9eae0af24ff2b6b3e85184c30fb3bede64c50216fe9ede10b0e75ce4d284c613"
+  },
+  "add": {
+    "url": "https://novelai.net/_next/static/media/plus.dc778eb7.svg",
+    "source_type": "official SVG asset",
+    "sha256": "1951e5a03ff6809492a05a4781daf421dc6a1545dd33189668f48e95272ec29c"
+  },
+  "clear": {
+    "url": "https://novelai.net/_next/static/media/trash.72ef2ba9.svg",
+    "source_type": "official SVG asset",
+    "sha256": "c63f790e132338ebc66c5652078a2878e99f4521ea6272402acc95c64c6eb4a2"
+  },
+  "close": {
+    "url": "https://novelai.net/_next/static/media/cross.38d8f4dd.svg",
+    "source_type": "official SVG asset",
+    "sha256": "313e06a71a1d8e5b01516e15ed2cee2ffc9120783bc0055d8a29c842af608fb4"
+  },
+  "shift": {
+    "url": "https://novelai.net/_next/static/media/resize.9b598e1b.svg",
+    "source_type": "official SVG asset",
+    "sha256": "c83bb30cfb5fa0884ec62a0b69d3eb0a749061b4461ae6e6e0e3e7101d269432"
+  },
+  "undo": {
+    "url": "https://novelai.net/_next/static/media/undo.d181fecf.svg",
+    "source_type": "official SVG asset",
+    "sha256": "c48e33325920163e1e16ab7b7f41826ea9d836731105d97fc93e5991d1508b17"
+  },
+  "redo": {
+    "url": "https://novelai.net/_next/static/media/redo.c8b50748.svg",
+    "source_type": "official SVG asset",
+    "sha256": "ec689459b80aef10a9e2d2b116923c0a969927ba33e588d9d4cdfce5808ed039"
+  },
+  "download": {
+    "url": "https://novelai.net/_next/static/media/export.235cebdc.svg",
+    "source_type": "official SVG asset",
+    "sha256": "72bea3caf6e78ecab9544dc9c533a80edb9ff71b442f649de2d53c16d656ebc8"
+  },
+  "up": {
+    "url": "https://novelai.net/_next/static/media/directional_arrow_up.22936b44.svg",
+    "source_type": "official SVG asset",
+    "sha256": "999e0d80b1d0446eb7379a554af767db30c3ee2240647b9adc1f6ce0362591d7"
+  },
+  "down": {
+    "url": "https://novelai.net/_next/static/media/directional_arrow_down.3046336d.svg",
+    "source_type": "official SVG asset",
+    "sha256": "388f33b49cb5d151ea41dcc9b49c94ce849e7e33b2a1356c1b5116fcd873d28c"
+  },
+  "cube": {
+    "url": "https://novelai.net/_next/static/chunks/7943735f-aaf7af710193e82d.js",
+    "module": 77822,
+    "export": "klx",
+    "source_type": "official inline SVG",
+    "sha256": "4a2694caf0208e630cf9a9c31848a149c7cde54ab8d42c0ba7830989ce8b2eb9"
+  },
+  "layers": {
+    "url": "https://novelai.net/_next/static/chunks/7943735f-aaf7af710193e82d.js",
+    "module": 77822,
+    "export": "RUY",
+    "source_type": "official inline SVG",
+    "sha256": "8846a83d7109ae1938f020cb1461213a5160847042b4e92b011eb65d3cdb8c2a"
+  },
+  "mask_badge": {
+    "url": "https://novelai.net/_next/static/chunks/7943735f-aaf7af710193e82d.js",
+    "module": 77822,
+    "export": "ZdZ",
+    "source_type": "official inline SVG",
+    "sha256": "8a6fce38c6fd0178f9b57463f335a1580feb8be6e69464b76addab7053f1bddc"
+  },
+  "palette": {
+    "url": "https://novelai.net/_next/static/chunks/2007bfcb-efa28ee1fbddc7e3.js",
+    "module": 9387,
+    "export": "ZkX",
+    "source_type": "official inline SVG",
+    "sha256": "c2fe3f8706d0696370b465ea8f7e8d041a2bd446ea0ab8581186874e74f01148"
+  },
+  "fill": {
+    "url": "https://novelai.net/_next/static/chunks/ef4d5650-716157172e5e12b6.js",
+    "module": 23276,
+    "export": "R_O",
+    "source_type": "official inline SVG",
+    "sha256": "138395280b49412efe866dbeb09e56459c9886184c301561f7a3bc283898af83"
+  },
+  "pattern_solid": {
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "function": "nC",
+    "source_type": "official mask pattern SVG",
+    "sha256": "1dd942fd753ab9a30fe425e8d0380034b55f9eee7b94679c868be04e3dd42acb"
+  },
+  "pattern_lines": {
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "function": "nA",
+    "source_type": "official mask pattern SVG",
+    "sha256": "e02e4a70bc5935d88ea22ecd35896ef6c21b9620db5c5abed4f4d86fb461baa9"
+  },
+  "pattern_crosshatch": {
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "function": "nI",
+    "source_type": "official mask pattern SVG",
+    "sha256": "7912e1569eef7b390854b23d22d4a47e2002c2546e7eb9bb3f38e9d2d83f5865"
+  },
+  "pattern_dots": {
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "function": "nM",
+    "source_type": "official mask pattern SVG",
+    "sha256": "f3255d20e8724061e2c98b75461c8f903d92551ea7f8758f46831d9425084d07"
+  },
+  "pattern_grid": {
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "function": "nS",
+    "source_type": "official mask pattern SVG",
+    "sha256": "b107fd8a7d7a603ea2b44801105cad050e17255f73b3b6a2e4eaa3e7f48826a5"
+  },
+  "pattern_checker": {
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "function": "nD",
+    "source_type": "official mask pattern SVG",
+    "sha256": "212c3c9f7c0f62141140387fb7554d0c0ae37fc6d33f288ff1f195e22a7d7351"
+  },
+  "pattern_hearts": {
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "function": "nT",
+    "source_type": "official mask pattern SVG",
+    "sha256": "4734b974d06dd849a366bb845500dbabcaace7fdd95632046a581eac9b0bd3bb"
+  }
+}

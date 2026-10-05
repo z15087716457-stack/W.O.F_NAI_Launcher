@@ -27,35 +27,39 @@ class InpaintGlyph extends StatelessWidget {
   final Color? color;
   final double size;
   @override
-  Widget build(BuildContext context) => SvgPicture.asset(
-    'assets/icons/inpaint_$name.svg',
-    width: size,
-    height: size,
-    colorFilter: ColorFilter.mode(
-      color ?? Theme.of(context).colorScheme.onSurface,
-      BlendMode.srcIn,
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    // The SVG renderer derives width from height for non-square source assets.
+    // Tight bounds keep the official undo and ordering arrows inside their slots.
+    child: SvgPicture.asset(
+      'assets/icons/inpaint_$name.svg',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      colorFilter: ColorFilter.mode(
+        color ?? Theme.of(context).colorScheme.onSurface,
+        BlendMode.srcIn,
+      ),
+      excludeFromSemantics: true,
     ),
-    excludeFromSemantics: true,
   );
 }
 
 class InpaintButton extends StatelessWidget {
   const InpaintButton({
     super.key,
-    required this.icon,
+    required this.glyph,
     required this.tooltip,
     this.onPressed,
     this.selected = false,
     this.size = 44,
-    this.glyph,
-    this.glyphSize = 18,
+    this.glyphSize = 16,
   });
-  final IconData icon;
   final String tooltip;
   final VoidCallback? onPressed;
   final bool selected;
   final double size;
-  final String? glyph;
+  final String glyph;
   final double glyphSize;
   @override
   Widget build(BuildContext context) {
@@ -74,27 +78,17 @@ class InpaintButton extends StatelessWidget {
             child: SizedBox(
               width: size,
               height: size,
-              child: glyph != null
-                  ? Center(
-                      child: InpaintGlyph(
-                        glyph!,
-                        size: glyphSize,
-                        color: onPressed == null
-                            ? scheme.onSurface.withValues(alpha: .3)
-                            : selected
-                            ? scheme.onPrimaryContainer
-                            : scheme.onSurface,
-                      ),
-                    )
-                  : Icon(
-                      icon,
-                      size: 18,
-                      color: onPressed == null
-                          ? scheme.onSurface.withValues(alpha: .3)
-                          : selected
-                          ? scheme.onPrimaryContainer
-                          : scheme.onSurface,
-                    ),
+              child: Center(
+                child: InpaintGlyph(
+                  glyph,
+                  size: glyphSize,
+                  color: onPressed == null
+                      ? scheme.onSurface.withValues(alpha: .3)
+                      : selected
+                      ? scheme.onPrimaryContainer
+                      : scheme.onSurface,
+                ),
+              ),
             ),
           ),
         ),
@@ -274,7 +268,50 @@ class InpaintToolbar extends StatefulWidget {
 }
 
 class _InpaintToolbarState extends State<InpaintToolbar> {
+  final _appearanceController = OverlayPortalController();
+  final _toolbarKey = GlobalKey();
   bool _appearanceOpen = false;
+
+  void _closeAppearance() {
+    _appearanceController.hide();
+    setState(() => _appearanceOpen = false);
+  }
+
+  void _toggleAppearance() {
+    if (_appearanceOpen) {
+      _closeAppearance();
+    } else {
+      _appearanceController.show();
+      setState(() => _appearanceOpen = true);
+    }
+  }
+
+  Widget _buildAppearanceOverlay(BuildContext context) {
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final toolbar = _toolbarKey.currentContext!.findRenderObject() as RenderBox;
+    final origin = toolbar.localToGlobal(Offset.zero, ancestor: overlay);
+    final left = (origin.dx + toolbar.size.width - 290).clamp(
+      10.0,
+      (overlay.size.width - 300).clamp(10.0, double.infinity),
+    );
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        GestureDetector(
+          key: const Key('inpaint_appearance_dismiss'),
+          behavior: HitTestBehavior.opaque,
+          onTap: _closeAppearance,
+          child: const SizedBox.expand(),
+        ),
+        Positioned(
+          left: left,
+          bottom: overlay.size.height - origin.dy + 12,
+          child: InpaintMaskAppearance(state: widget.state),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: Listenable.merge([
@@ -292,82 +329,66 @@ class _InpaintToolbarState extends State<InpaintToolbar> {
           : 44.0;
       return SizedBox(
         width: widget.width,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            InpaintPanel(
-              child: Row(
-                children: [
-                  for (final tool in state.tools)
-                    InpaintButton(
-                      icon: tool.icon,
-                      glyph: tool.id,
-                      size: size,
-                      tooltip: switch (tool.id) {
-                        'brush' => l10n.editor_drawMask,
-                        'eraser' => l10n.editor_eraseMask,
-                        'fill' => l10n.editor_toolFill,
-                        _ => l10n.editor_focusedArea,
-                      },
-                      selected: state.currentTool?.id == tool.id,
-                      onPressed: () => state.setTool(tool),
-                    ),
-                  const Spacer(),
+        child: OverlayPortal(
+          controller: _appearanceController,
+          overlayChildBuilder: _buildAppearanceOverlay,
+          child: InpaintPanel(
+            key: _toolbarKey,
+            child: Row(
+              children: [
+                for (final tool in state.tools)
                   InpaintButton(
-                    icon: Icons.palette_outlined,
-                    key: const Key('inpaint_palette'),
-                    glyph: 'palette',
+                    glyph: tool.id,
                     size: size,
-                    tooltip: l10n.editor_maskAppearance,
-                    selected: _appearanceOpen,
-                    onPressed: () =>
-                        setState(() => _appearanceOpen = !_appearanceOpen),
+                    tooltip: switch (tool.id) {
+                      'brush' => l10n.editor_drawMask,
+                      'eraser' => l10n.editor_eraseMask,
+                      'fill' => l10n.editor_toolFill,
+                      _ => l10n.editor_focusedArea,
+                    },
+                    selected: state.currentTool?.id == tool.id,
+                    onPressed: () => state.setTool(tool),
                   ),
-                  InpaintButton(
-                    icon: Icons.delete_outline,
-                    key: const Key('inpaint_clear'),
-                    glyph: 'clear',
-                    size: size,
-                    tooltip: l10n.editor_resetMask,
-                    onPressed: widget.onClear,
-                  ),
-                  InpaintButton(
-                    icon: Icons.open_in_full,
-                    key: const Key('inpaint_shift'),
-                    glyph: 'shift',
-                    size: size,
-                    tooltip: l10n.editor_shiftEdges,
-                    onPressed: widget.onShiftEdges,
-                  ),
-                  InpaintButton(
-                    icon: Icons.undo,
-                    key: const Key('inpaint_undo'),
-                    glyph: 'undo',
-                    size: size,
-                    tooltip: l10n.editor_undo,
-                    onPressed: state.canUndo ? state.undo : null,
-                  ),
-                  InpaintButton(
-                    icon: Icons.redo,
-                    key: const Key('inpaint_redo'),
-                    glyph: 'redo',
-                    size: size,
-                    tooltip: l10n.editor_redo,
-                    onPressed: state.canRedo ? state.redo : null,
-                  ),
-                ],
-              ),
-            ),
-            if (_appearanceOpen)
-              Positioned(
-                right: 0,
-                bottom: size + 12,
-                child: TapRegion(
-                  onTapOutside: (_) => setState(() => _appearanceOpen = false),
-                  child: InpaintMaskAppearance(state: state),
+                const Spacer(),
+                InpaintButton(
+                  key: const Key('inpaint_palette'),
+                  glyph: 'palette',
+                  size: size,
+                  tooltip: l10n.editor_maskAppearance,
+                  selected: _appearanceOpen,
+                  onPressed: _toggleAppearance,
                 ),
-              ),
-          ],
+                InpaintButton(
+                  key: const Key('inpaint_clear'),
+                  glyph: 'clear',
+                  size: size,
+                  tooltip: l10n.editor_resetMask,
+                  onPressed: widget.onClear,
+                ),
+                InpaintButton(
+                  key: const Key('inpaint_shift'),
+                  glyph: 'shift',
+                  size: size,
+                  tooltip: l10n.editor_shiftEdges,
+                  onPressed: widget.onShiftEdges,
+                ),
+                InpaintButton(
+                  key: const Key('inpaint_undo'),
+                  glyph: 'undo',
+                  size: size,
+                  tooltip: l10n.editor_undo,
+                  onPressed: state.canUndo ? state.undo : null,
+                ),
+                InpaintButton(
+                  key: const Key('inpaint_redo'),
+                  glyph: 'redo',
+                  size: size,
+                  tooltip: l10n.editor_redo,
+                  onPressed: state.canRedo ? state.redo : null,
+                ),
+              ],
+            ),
+          ),
         ),
       );
     },
@@ -469,15 +490,8 @@ class InpaintMaskAppearance extends StatelessWidget {
                     size: 34,
                     selected: state.maskDisplayPattern == pattern,
                     onPressed: () => state.setMaskAppearance(pattern: pattern),
-                    icon: switch (pattern) {
-                      MaskDisplayPattern.solid => Icons.square,
-                      MaskDisplayPattern.lines => Icons.texture,
-                      MaskDisplayPattern.crosshatch => Icons.tag,
-                      MaskDisplayPattern.dots => Icons.more_horiz,
-                      MaskDisplayPattern.grid => Icons.grid_3x3,
-                      MaskDisplayPattern.checker => Icons.grid_view,
-                      MaskDisplayPattern.hearts => Icons.favorite,
-                    },
+                    glyph: 'pattern_${pattern.name}',
+                    glyphSize: 20,
                     tooltip: switch (pattern) {
                       MaskDisplayPattern.solid =>
                         context.l10n.editor_patternSolid,

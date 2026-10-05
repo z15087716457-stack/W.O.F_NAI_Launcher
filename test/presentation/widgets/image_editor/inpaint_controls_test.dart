@@ -226,8 +226,28 @@ void main() {
           await tester.tap(find.byKey(const Key('inpaint_palette')));
           await tester.pump();
           expect(find.byType(InpaintMaskAppearance), findsOneWidget);
-          state.setMaskAppearance(pattern: MaskDisplayPattern.hearts);
+          for (final pattern in MaskDisplayPattern.values) {
+            await tester.tap(
+              find.byWidgetPredicate(
+                (widget) =>
+                    widget is InpaintButton &&
+                    widget.glyph == 'pattern_${pattern.name}',
+              ),
+            );
+            await tester.pump();
+            expect(state.maskDisplayPattern, pattern);
+          }
+          await tester.tap(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is Container &&
+                  widget.decoration is BoxDecoration &&
+                  (widget.decoration as BoxDecoration).color ==
+                      const Color(0xFFBBC53E),
+            ),
+          );
           await tester.pump();
+          expect(state.maskDisplayColor, const Color(0xFFBBC53E));
           expect(tester.takeException(), isNull);
           if (Platform.environment['CAPTURE_INPAINT_UI'] == '1') {
             await _capture(
@@ -236,6 +256,9 @@ void main() {
               '${locale.toLanguageTag()}-${brightness.name}-${size.width.round()}-appearance',
             );
           }
+          await tester.tapAt(Offset(25, size.height / 2));
+          await tester.pump();
+          expect(find.byType(InpaintMaskAppearance), findsNothing);
           await tester.tap(find.byKey(const Key('inpaint_layers')));
           await tester.pump();
           expect(find.byKey(const Key('inpaint_add_3d')), findsOneWidget);

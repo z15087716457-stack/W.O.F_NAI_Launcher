@@ -128,7 +128,6 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
           mainAxisSize: MainAxisSize.min,
           children: [
             InpaintButton(
-              icon: Icons.download_outlined,
               glyph: 'download',
               tooltip: l10n.common_download,
               onPressed: _downloadCanvasImage,
@@ -149,7 +148,6 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
               ),
             ),
             InpaintButton(
-              icon: Icons.close,
               glyph: 'close',
               tooltip: l10n.common_close,
               onPressed: _confirmExit,

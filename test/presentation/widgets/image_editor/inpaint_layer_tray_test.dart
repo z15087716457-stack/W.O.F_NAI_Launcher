@@ -110,16 +110,38 @@ void main() {
       expect(restored.hasBaseImage, isTrue);
       expect(restored.baseImageBytes, bytes);
       expect(state.layerManager.activeLayerId, mask.id);
-      await tester.tap(find.byKey(Key('inpaint_layer_down_${mask.id}')));
-      await tester.pump();
-      expect(state.layerManager.layers.first.id, mask.id);
-      state.undo();
-      await tester.pump();
-      expect(state.layerManager.layers.last.id, mask.id);
+      expect(
+        tester
+            .widget<InpaintButton>(
+              find.byKey(Key('inpaint_layer_down_${mask.id}')),
+            )
+            .onPressed,
+        isNull,
+        reason: 'official mask layers cannot cross into the source layer group',
+      );
+      expect(
+        tester
+            .widget<InpaintButton>(
+              find.byKey(Key('inpaint_layer_up_${source.id}')),
+            )
+            .onPressed,
+        isNull,
+      );
       await tester.tap(find.byKey(const Key('inpaint_add_layer')));
       await tester.pump();
       expect(state.layerManager.layerCount, 3);
       expect(state.layerManager.layers.last.inpaintMask, isTrue);
+      final added = state.layerManager.layers.last;
+      await tester.tap(find.byKey(Key('inpaint_layer_down_${added.id}')));
+      await tester.pump();
+      expect(state.layerManager.layers.map((layer) => layer.id), [
+        source.id,
+        added.id,
+        mask.id,
+      ]);
+      state.undo();
+      await tester.pump();
+      expect(state.layerManager.layers.last.id, added.id);
       state.undo();
       await tester.pump();
       expect(state.layerManager.layerCount, 2);

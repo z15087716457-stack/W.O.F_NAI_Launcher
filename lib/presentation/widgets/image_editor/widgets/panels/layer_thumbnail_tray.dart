@@ -119,7 +119,18 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
     }
   }
 
+  bool _canMoveInpaintLayer(Layer layer, int direction) {
+    final layers = _state.layerManager.layers;
+    final index = layers.indexOf(layer);
+    final target = index + direction;
+    return index >= 0 &&
+        target >= 0 &&
+        target < layers.length &&
+        layers[target].inpaintMask == layer.inpaintMask;
+  }
+
   void _moveInpaintLayer(Layer layer, int direction) {
+    if (!_canMoveInpaintLayer(layer, direction)) return;
     final index = _state.layerManager.layers.indexOf(layer);
     _state.historyManager.execute(
       ReorderLayerAction(
@@ -268,7 +279,6 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                           key: const Key('inpaint_add_layer'),
                           size: 24,
                           glyphSize: 16,
-                          icon: Icons.add,
                           glyph: 'add',
                           tooltip: l10n.layer_add,
                           onPressed: () => _state.historyManager.execute(
@@ -285,7 +295,6 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                           key: const Key('inpaint_add_3d'),
                           size: 28,
                           glyphSize: 20,
-                          icon: Icons.view_in_ar_outlined,
                           glyph: 'cube',
                           tooltip: l10n.model3d_editorTitle,
                           onPressed: widget.onAdd3dLayer,
@@ -348,13 +357,10 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                                                 'inpaint_layer_up_${layer.id}',
                                               ),
                                               size: 20,
-                                              icon: Icons.arrow_drop_up,
+                                              glyph: 'up',
                                               tooltip: l10n.layer_moveUp,
                                               onPressed:
-                                                  manager.layers.indexOf(
-                                                        layer,
-                                                      ) <
-                                                      manager.layers.length - 1
+                                                  _canMoveInpaintLayer(layer, 1)
                                                   ? () => _moveInpaintLayer(
                                                       layer,
                                                       1,
@@ -366,13 +372,13 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                                                 'inpaint_layer_down_${layer.id}',
                                               ),
                                               size: 20,
-                                              icon: Icons.arrow_drop_down,
+                                              glyph: 'down',
                                               tooltip: l10n.layer_moveDown,
                                               onPressed:
-                                                  manager.layers.indexOf(
-                                                        layer,
-                                                      ) >
-                                                      0
+                                                  _canMoveInpaintLayer(
+                                                    layer,
+                                                    -1,
+                                                  )
                                                   ? () => _moveInpaintLayer(
                                                       layer,
                                                       -1,
@@ -409,11 +415,11 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const InpaintGlyph('layers', size: 16),
-                    const SizedBox(width: 4),
+                    const InpaintGlyph('layers', size: 18),
+                    const SizedBox(width: 6),
                     Text(
                       '${manager.layerCount}',
-                      style: const TextStyle(fontSize: 11),
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ],
                 ),
@@ -646,15 +652,7 @@ class _InpaintLayerThumb extends StatelessWidget {
                         child: Center(
                           child: layer.hasModel3d
                               ? const InpaintGlyph('cube', size: 12)
-                              : SizedBox(
-                                  width: 12,
-                                  height: 12,
-                                  child: CustomPaint(
-                                    painter: _InpaintMaskBadgePainter(
-                                      scheme.onSurface,
-                                    ),
-                                  ),
-                                ),
+                              : const InpaintGlyph('mask_badge', size: 12),
                         ),
                       ),
                     ),
@@ -669,7 +667,6 @@ class _InpaintLayerThumb extends StatelessWidget {
                       key: Key('inpaint_layer_delete_${layer.id}'),
                       size: 20,
                       glyphSize: 14,
-                      icon: Icons.delete_outline,
                       glyph: 'clear',
                       tooltip: context.l10n.layer_delete,
                       onPressed: onDelete,
@@ -702,30 +699,6 @@ class _InpaintCheckerboardPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _InpaintCheckerboardPainter old) => false;
-}
-
-class _InpaintMaskBadgePainter extends CustomPainter {
-  const _InpaintMaskBadgePainter(this.color);
-  final Color color;
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        const Rect.fromLTWH(1.5, 1.5, 9, 9),
-        const Radius.circular(2),
-      ),
-      paint,
-    );
-    canvas.drawCircle(const Offset(6, 6), 1.5, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _InpaintMaskBadgePainter old) =>
-      old.color != color;
 }
 
 class _InpaintThumbnailOutpaintPainter extends CustomPainter {

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../../../../core/utils/inpaint_outpaint_utils.dart';
 import '../../../../../core/utils/localization_extension.dart';
 import '../../../../widgets/common/themed_input.dart';
+import 'inpaint_controls.dart';
 
 class ShiftEdgesResult {
   final OutpaintEdges requestedEdges;
@@ -130,7 +131,7 @@ class _ShiftEdgesDialogState extends State<ShiftEdgesDialog> {
                         ),
                         IconButton(
                           tooltip: context.l10n.common_close,
-                          icon: const Icon(Icons.close, size: 20),
+                          icon: const InpaintGlyph('close', size: 16),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ],
