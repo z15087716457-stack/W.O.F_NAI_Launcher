@@ -9712,7 +9712,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wiki_searchHint => 'タグや別名を検索';
 
   @override
-  String get wiki_typeAll => 'すべての種類';
+  String get wiki_typeAllShort => 'すべて';
 
   @override
   String get wiki_coverageAll => 'すべての説明';
@@ -10318,6 +10318,55 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wiki_categoryLibrary => 'ローカル';
+
+  @override
+  String get wiki_addToPrompt => 'プロンプトに追加';
+
+  @override
+  String wiki_addedToPrompt(Object tag) {
+    return 'プロンプトに追加しました：$tag';
+  }
+
+  @override
+  String wiki_alreadyInPrompt(Object tag) {
+    return '$tag は既にプロンプトにあります';
+  }
+
+  @override
+  String get wiki_promptChangedCannotUndo => 'プロンプトが変更されたため元に戻せません';
+
+  @override
+  String get wiki_forward => '次へ';
+
+  @override
+  String get wiki_posts => '件の投稿';
+
+  @override
+  String get wiki_aliases => '別名';
+
+  @override
+  String get wiki_relatedTitle => 'よく一緒に使われるタグ';
+
+  @override
+  String get wiki_relatedHint => 'クリックで開く · Shift+クリックでプロンプトに追加';
+
+  @override
+  String wiki_relatedShare(Object percent) {
+    return '投稿の $percent もこのタグを含みます';
+  }
+
+  @override
+  String get wiki_inDirectory => '所属ディレクトリ';
+
+  @override
+  String get wiki_noArticle => 'Wiki なし';
+
+  @override
+  String get wiki_moreCategories => 'その他';
+
+  @override
+  String get wiki_shortcutsHint =>
+      'ショートカット: / 検索 · ↑↓ 移動 · Enter 追加 · B ブックマーク · Alt+←/→ 履歴';
 
   @override
   String get toast_titleSuccess => '完了';

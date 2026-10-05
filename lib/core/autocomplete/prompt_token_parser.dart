@@ -197,6 +197,39 @@ class PromptTokenParser {
     );
   }
 
+  /// Whether [text] already contains [canonicalTag] as a complete token.
+  /// Brackets and weight syntax around the token do not matter, while
+  /// `<...>` alias segments are skipped entirely.
+  static bool containsTag(String text, String canonicalTag) {
+    final target = TagNormalizer.normalize(canonicalTag);
+    if (target.isEmpty) return false;
+    for (final segment in _segments(text, false)) {
+      if (text.substring(segment.start, segment.end).contains('<')) {
+        continue;
+      }
+      final content = _contentRange(text, segment, false);
+      if (content.start >= content.end) continue;
+      if (TagNormalizer.normalize(text.substring(content.start, content.end)) ==
+          target) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Appends [canonicalTag] in display form at the end of [text], keeping the
+  /// separator style of existing prompts (`, ` after plain tags, a space after
+  /// a trailing comma).
+  static String appendTag(String text, String canonicalTag) {
+    final tag = TagNormalizer.toDisplay(canonicalTag);
+    final trimmed = text.trimRight();
+    if (trimmed.isEmpty) return tag;
+    if (trimmed.endsWith(',') || trimmed.endsWith('，')) {
+      return '$trimmed $tag';
+    }
+    return '$trimmed, $tag';
+  }
+
   static ({String text, int cursorPosition}) apply({
     required String text,
     required CompletionQuery query,

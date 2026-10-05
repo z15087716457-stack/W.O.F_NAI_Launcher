@@ -17286,11 +17286,11 @@ abstract class AppLocalizations {
   /// **'Search tags or aliases'**
   String get wiki_searchHint;
 
-  /// No description provided for @wiki_typeAll.
+  /// No description provided for @wiki_typeAllShort.
   ///
   /// In en, this message translates to:
-  /// **'All types'**
-  String get wiki_typeAll;
+  /// **'All'**
+  String get wiki_typeAllShort;
 
   /// No description provided for @wiki_coverageAll.
   ///
@@ -18473,6 +18473,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Library'**
   String get wiki_categoryLibrary;
+
+  /// No description provided for @wiki_addToPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to prompt'**
+  String get wiki_addToPrompt;
+
+  /// No description provided for @wiki_addedToPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to prompt: {tag}'**
+  String wiki_addedToPrompt(Object tag);
+
+  /// No description provided for @wiki_alreadyInPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'{tag} is already in the prompt'**
+  String wiki_alreadyInPrompt(Object tag);
+
+  /// No description provided for @wiki_promptChangedCannotUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt changed; can\'t undo'**
+  String get wiki_promptChangedCannotUndo;
+
+  /// No description provided for @wiki_forward.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward'**
+  String get wiki_forward;
+
+  /// No description provided for @wiki_posts.
+  ///
+  /// In en, this message translates to:
+  /// **'posts'**
+  String get wiki_posts;
+
+  /// No description provided for @wiki_aliases.
+  ///
+  /// In en, this message translates to:
+  /// **'Aliases'**
+  String get wiki_aliases;
+
+  /// No description provided for @wiki_relatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Often used with'**
+  String get wiki_relatedTitle;
+
+  /// No description provided for @wiki_relatedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to open · Shift+click to add'**
+  String get wiki_relatedHint;
+
+  /// No description provided for @wiki_relatedShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} of posts also have this tag'**
+  String wiki_relatedShare(Object percent);
+
+  /// No description provided for @wiki_inDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'In directory'**
+  String get wiki_inDirectory;
+
+  /// No description provided for @wiki_noArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'No wiki'**
+  String get wiki_noArticle;
+
+  /// No description provided for @wiki_moreCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get wiki_moreCategories;
+
+  /// No description provided for @wiki_shortcutsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts: / search · ↑↓ move · Enter add · B bookmark · Alt+←/→ history'**
+  String get wiki_shortcutsHint;
 
   /// No description provided for @toast_titleSuccess.
   ///

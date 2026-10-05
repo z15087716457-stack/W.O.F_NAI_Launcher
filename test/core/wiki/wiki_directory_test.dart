@@ -47,6 +47,34 @@ void main() {
     );
   });
 
+  test('pathsForTag returns deepest directory paths for real tags', () async {
+    final directory = await WikiDirectory.load();
+    final stopwatch = Stopwatch()..start();
+    final paths = directory.pathsForTag('short_hair');
+    stopwatch.stop();
+    // Reported to the reviewer; the first call builds the reverse index.
+    // ignore: avoid_print
+    print('pathsForTag first build: ${stopwatch.elapsedMilliseconds}ms');
+    expect(paths, isNotEmpty);
+    expect(paths.length, lessThanOrEqualTo(4));
+    for (final path in paths) {
+      expect(path.length, greaterThanOrEqualTo(2));
+      expect(directory.roots, contains(path.first));
+      expect(directory.tagsForNode(path.last), contains('short_hair'));
+      // Only the deepest containing node is reported.
+      for (final child in path.last.children) {
+        expect(directory.tagsForNode(child), isNot(contains('short_hair')));
+      }
+    }
+    expect(directory.pathsForTag('short hair'), paths);
+    expect(directory.pathsForTag(''), isEmpty);
+    expect(directory.pathsForTag('definitely_not_a_real_tag'), isEmpty);
+    final repeat = Stopwatch()..start();
+    directory.pathsForTag('long_hair');
+    repeat.stop();
+    expect(repeat.elapsedMilliseconds, lessThan(50));
+  });
+
   test('Traditional Chinese shows generated names without editing the map', () {
     expect(
       WikiDirectoryLabels.display(

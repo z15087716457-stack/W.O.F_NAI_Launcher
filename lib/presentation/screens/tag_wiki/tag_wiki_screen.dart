@@ -1,13 +1,19 @@
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart'
+    show kBackMouseButton, kForwardMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/autocomplete/autocomplete_providers.dart';
 import '../../../core/autocomplete/completion_models.dart';
+import '../../../core/autocomplete/prompt_token_parser.dart';
 import '../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
@@ -15,7 +21,9 @@ import '../../../core/wiki/tag_wiki_repository.dart';
 import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../../../core/wiki/wiki_bookmark_store.dart';
 import '../../../core/wiki/wiki_directory.dart';
+import '../../../core/wiki/wiki_directory_labels.dart';
 import '../../providers/data_source_cache_provider.dart';
+import '../../providers/generation/generation_params_notifier.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../widgets/autocomplete/tag_category_visuals.dart';
 import 'wiki_sidebar.dart';
@@ -24,11 +32,6 @@ import 'wiki_article_outline.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/common/wiki_linked_body.dart';
 import '../../widgets/common/wiki_retranslate_button.dart';
-
-class _WikiMenuValue<T> {
-  const _WikiMenuValue(this.value);
-  final T value;
-}
 
 class _WikiVisit {
   const _WikiVisit({
@@ -77,9 +80,13 @@ class TagWikiScreen extends ConsumerStatefulWidget {
 class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   static const _pageSize = 80;
   final _search = TextEditingController();
+  // The node's own key handler runs before EditableText shortcuts consume
+  // arrows, so ↑/↓ keep moving the list selection while the field has focus.
+  late final _searchFocus = FocusNode(onKeyEvent: _onSearchKey);
   final _listScroll = ScrollController();
   final _articleScroll = ScrollController();
   final _history = <_WikiVisit>[];
+  final _forward = <_WikiVisit>[];
   CompletionCandidate? _linkedCandidate;
   double? _restoreArticleOffset;
   late final AutoTagTranslationController _autoTranslation;
@@ -97,22 +104,22 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   bool _searchAll = false;
   bool _loading = false;
   bool _more = false;
-  bool _railOpen = true;
   bool _singlePane = false;
   bool _compactNavigation = false;
   bool _showCompactArticle = false;
-  bool _showRail = false;
-  bool _railAvailable = false;
-  bool _outlineOpen = true;
   String? _outlineBody;
   String? _outlineTag;
   List<WikiArticleHeading> _headings = [];
   final _articleStart = GlobalKey();
+  final _relatedAnchor = GlobalKey();
+  final _directoryAnchor = GlobalKey();
   final _articleViewport = GlobalKey();
   final _toolbarKey = GlobalKey();
   final _resultsToolbarKey = GlobalKey();
-  double _toolbarHeight = 63;
+  double _toolbarHeight = 47;
   double _resultsToolbarHeight = 94;
+  final _typeFilterScroll = ScrollController();
+  bool _typeFilterOverflows = false;
   bool _headerScheduled = false;
   GlobalKey? _activeOutline;
   GlobalKey? _clampedOutline;
@@ -127,6 +134,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   String? _loadError;
   List<CompletionCandidate> _items = const [];
   Future<TagWikiEntry?>? _article;
+  TagWikiEntry? _articleEntry;
+  Set<String>? _articleTags;
+  final _relatedRequested = <String>{};
+  final _relatedItems = <String, List<CompletionCandidate>>{};
 
   @override
   void initState() {
@@ -134,7 +145,12 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _autoTranslation = ref.read(autoTagTranslationProvider);
     _listScroll.addListener(_scheduleVisibleUpdate);
     _articleScroll.addListener(_scheduleOutlineUpdate);
+    _searchFocus.addListener(_onSearchFocusChange);
     _initialize();
+  }
+
+  void _onSearchFocusChange() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _initialize() async {
@@ -174,6 +190,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _category = null;
     _hasArticle = null;
     _history.clear();
+    _forward.clear();
     _selectTag(tag, remember: false);
     _load();
   }
@@ -183,9 +200,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     _autoTranslation.clearSurface(_listSurface);
     _autoTranslation.clearSurface(_articleSurface);
     _searchTimer?.cancel();
+    _searchFocus.dispose();
     _search.dispose();
     _listScroll.dispose();
     _articleScroll.dispose();
+    _typeFilterScroll.dispose();
     super.dispose();
   }
 
@@ -196,11 +215,33 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _searchAll = false;
       _selected = null;
       _article = null;
+      _articleEntry = null;
+      _forward.clear();
     });
     ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
     if (_listScroll.hasClients) _listScroll.jumpTo(0);
     _load();
   }
+
+  _WikiVisit _snapshot() => _WikiVisit(
+    query: _search.value,
+    scope: _scope,
+    category: _category,
+    hasArticle: _hasArticle,
+    alphabetical: _alphabetical,
+    searchAll: _searchAll,
+    selected: _selected!,
+    items: _items,
+    article: _article,
+    total: _total,
+    more: _more,
+    loading: _loading,
+    loadError: _loadError,
+    showTranslation: _showTranslation,
+    listOffset: _listScroll.hasClients ? _listScroll.offset : 0,
+    articleOffset: _articleScroll.hasClients ? _articleScroll.offset : 0,
+    linkedCandidate: _linkedCandidate,
+  );
 
   void _selectTag(
     String tag, {
@@ -215,27 +256,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       return;
     }
     if (remember && _selected != null) {
-      _history.add(
-        _WikiVisit(
-          query: _search.value,
-          scope: _scope,
-          category: _category,
-          hasArticle: _hasArticle,
-          alphabetical: _alphabetical,
-          searchAll: _searchAll,
-          selected: _selected!,
-          items: _items,
-          article: _article,
-          total: _total,
-          more: _more,
-          loading: _loading,
-          loadError: _loadError,
-          showTranslation: _showTranslation,
-          listOffset: _listScroll.hasClients ? _listScroll.offset : 0,
-          articleOffset: _articleScroll.hasClients ? _articleScroll.offset : 0,
-          linkedCandidate: _linkedCandidate,
-        ),
-      );
+      _history.add(_snapshot());
+      _forward.clear();
     }
     _linkedCandidate = linkedCandidate;
     _restoreArticleOffset = null;
@@ -246,12 +268,14 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _selected = tag;
       _showCompactArticle = reveal;
       _article = article;
+      _articleEntry = null;
     });
+    _loadRelated(tag);
     unawaited(
       article.then((entry) {
-        if (!mounted ||
-            _selected != tag ||
-            entry?.body.trim().isNotEmpty != true) {
+        if (!mounted || _selected != tag) return;
+        setState(() => _articleEntry = entry);
+        if (entry?.body.trim().isNotEmpty != true) {
           return;
         }
         ref
@@ -274,9 +298,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     );
   }
 
-  void _goBack() {
-    if (_history.isEmpty) return;
-    final visit = _history.removeLast();
+  void _applyVisit(_WikiVisit visit) {
     _searchTimer?.cancel();
     _epoch++;
     _autoTranslation.clearSurface(_listSurface);
@@ -292,6 +314,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       _selected = visit.selected;
       _items = visit.items;
       _article = visit.article;
+      _articleEntry = null;
       _total = visit.total;
       _more = visit.more;
       _loading = false;
@@ -302,8 +325,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     });
     if (visit.loading) _load();
     _saveReadingSettings();
+    _loadRelated(visit.selected);
     _article?.then((entry) {
-      if (mounted && _selected == visit.selected && entry != null) {
+      if (!mounted || _selected != visit.selected) return;
+      setState(() => _articleEntry = entry);
+      if (entry != null) {
         _autoTranslation.requestWiki(
           surface: _articleSurface,
           tag: visit.selected,
@@ -320,6 +346,20 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       }
       _scheduleVisibleUpdate();
     });
+  }
+
+  void _goBack() {
+    if (_history.isEmpty) return;
+    final visit = _history.removeLast();
+    if (_selected != null) _forward.add(_snapshot());
+    _applyVisit(visit);
+  }
+
+  void _goForward() {
+    if (_forward.isEmpty) return;
+    final visit = _forward.removeLast();
+    if (_selected != null) _history.add(_snapshot());
+    _applyVisit(visit);
   }
 
   Set<String>? _scopeTags() {
@@ -372,6 +412,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         if (!append) {
           _items = const [];
           _total = null;
+          _articleTags = null;
         }
       });
     }
@@ -435,7 +476,13 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         _total = total;
         _more = more;
         _loading = false;
+        if (_hasArticle == true) {
+          _articleTags = {for (final item in _items) item.canonicalTag};
+        } else if (_hasArticle == false) {
+          _articleTags = const {};
+        }
       });
+      if (_hasArticle == null) unawaited(_refreshArticleTags(epoch));
       if (!append && _selected == null && page.isNotEmpty) {
         _selectTag(
           page.first.canonicalTag,
@@ -452,12 +499,77 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     }
   }
 
+  Future<void> _refreshArticleTags(int epoch) async {
+    final tags = [for (final item in _items) item.canonicalTag];
+    if (tags.isEmpty) {
+      if (mounted && epoch == _epoch) setState(() => _articleTags = const {});
+      return;
+    }
+    Set<String> found;
+    try {
+      found = await ref.read(tagWikiRepositoryProvider).available(tags);
+    } catch (_) {
+      return;
+    }
+    if (!mounted || epoch != _epoch) return;
+    setState(() => _articleTags = found);
+  }
+
+  Future<void> _loadRelated(String tag) async {
+    if (!_relatedRequested.add(tag)) return;
+    try {
+      final source = ref.read(cooccurrenceCompletionSourceProvider);
+      final results = await source.search(
+        CompletionQuery(
+          fullText: '',
+          cursorPosition: 0,
+          token: '',
+          replacementRange: const TextReplacementRange(start: 0, end: 0),
+          existingTags: const {},
+          limit: 24,
+          locale: Localizations.localeOf(context).toLanguageTag(),
+          relatedTag: tag,
+        ),
+      );
+      final picked = results
+          .where((item) => item.category != TagCategory.meta)
+          .take(9)
+          .toList();
+      var merged = picked;
+      if (picked.isNotEmpty) {
+        try {
+          final details = await ref
+              .read(unifiedTagRepositoryProvider)
+              .byNames(picked.map((item) => item.canonicalTag));
+          final byTag = {for (final item in details) item.canonicalTag: item};
+          merged = [
+            for (final item in picked)
+              byTag[item.canonicalTag]?.copyWith(
+                    relatedScore: item.relatedScore,
+                    cooccurrenceCount: item.cooccurrenceCount,
+                    translation:
+                        byTag[item.canonicalTag]!.translation ??
+                        item.translation,
+                  ) ??
+                  item,
+          ];
+        } catch (_) {}
+      }
+      if (!mounted) return;
+      setState(() => _relatedItems[tag] = merged);
+    } catch (_) {
+      if (mounted) setState(() => _relatedItems[tag] = const []);
+    }
+  }
+
   void _changeFilter(VoidCallback change) {
     ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
     setState(() {
       change();
       _selected = null;
       _article = null;
+      _articleEntry = null;
+      _forward.clear();
     });
     if (_listScroll.hasClients) _listScroll.jumpTo(0);
     _load();
@@ -468,12 +580,155 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     setState(() {
       _selected = null;
       _article = null;
+      _articleEntry = null;
+      _forward.clear();
     });
     _searchTimer?.cancel();
     if (immediate) {
       _load();
     } else {
       _searchTimer = Timer(const Duration(milliseconds: 180), _load);
+    }
+  }
+
+  void _addTagToPrompt(String tag) {
+    final display = TagNormalizer.toDisplay(tag);
+    final params = ref.read(generationParamsNotifierProvider);
+    if (PromptTokenParser.containsTag(params.prompt, tag)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.wiki_alreadyInPrompt(display))),
+      );
+      return;
+    }
+    final previous = params.prompt;
+    final updated = PromptTokenParser.appendTag(previous, tag);
+    ref
+        .read(generationParamsNotifierProvider.notifier)
+        .updatePromptImmediately(updated);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.wiki_addedToPrompt(display)),
+        action: SnackBarAction(
+          label: context.l10n.common_undo,
+          onPressed: () {
+            if (!mounted) return;
+            final current = ref.read(generationParamsNotifierProvider).prompt;
+            if (current == updated) {
+              ref
+                  .read(generationParamsNotifierProvider.notifier)
+                  .updatePromptImmediately(previous);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.l10n.wiki_promptChangedCannotUndo),
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  bool get _focusInEditable {
+    final focus = FocusManager.instance.primaryFocus;
+    final element = focus?.context;
+    return element != null &&
+        element.findAncestorWidgetOfExactType<EditableText>() != null;
+  }
+
+  KeyEventResult _onSearchKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    final keyboard = HardwareKeyboard.instance;
+    if (keyboard.isAltPressed ||
+        keyboard.isControlPressed ||
+        keyboard.isMetaPressed) {
+      return KeyEventResult.ignored;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      _moveSelection(1);
+      return KeyEventResult.handled;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      _moveSelection(-1);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    final key = event.logicalKey;
+    final alt = HardwareKeyboard.instance.isAltPressed;
+    if (_focusInEditable) return KeyEventResult.ignored;
+    if (alt && key == LogicalKeyboardKey.arrowLeft) {
+      _goBack();
+      return KeyEventResult.handled;
+    }
+    if (alt && key == LogicalKeyboardKey.arrowRight) {
+      _goForward();
+      return KeyEventResult.handled;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    if (alt || keyboard.isControlPressed || keyboard.isMetaPressed) {
+      return KeyEventResult.ignored;
+    }
+    if (key == LogicalKeyboardKey.arrowDown) {
+      _moveSelection(1);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.arrowUp) {
+      _moveSelection(-1);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.slash) {
+      _searchFocus.requestFocus();
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.numpadEnter) {
+      final tag = _selected;
+      if (tag != null) _addTagToPrompt(tag);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.keyB) {
+      final tag = _selected;
+      if (tag != null) {
+        _toggleBookmark(ref.read(wikiBookmarkStoreProvider), tag);
+      }
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  void _handlePointerButtons(PointerDownEvent event) {
+    if ((event.buttons & kBackMouseButton) != 0) {
+      _goBack();
+    } else if ((event.buttons & kForwardMouseButton) != 0) {
+      _goForward();
+    }
+  }
+
+  void _moveSelection(int delta) {
+    if (_singlePane || _items.isEmpty) return;
+    var index = _selected == null
+        ? -1
+        : _items.indexWhere((item) => item.canonicalTag == _selected);
+    index = (index + delta).clamp(0, _items.length - 1);
+    _selectTag(_items[index].canonicalTag, remember: false);
+    _ensureListVisible(index);
+  }
+
+  void _ensureListVisible(int index) {
+    if (!_listScroll.hasClients) return;
+    final extent = WikiTagRow.extentOf(context);
+    final min = index * extent - _listScroll.offset;
+    final max = (index + 1) * extent - _listScroll.offset;
+    final visible = _listScroll.position.viewportDimension;
+    if (min < 0) {
+      _listScroll.jumpTo(index * extent);
+    } else if (max > visible) {
+      _listScroll.jumpTo((index + 1) * extent - visible);
     }
   }
 
@@ -550,55 +805,59 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       );
     }
     final bookmarks = ref.watch(wikiBookmarkStoreProvider);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
-        _compactNavigation = constraints.maxWidth < 1000;
-        _singlePane = constraints.maxWidth < 720 * scale.clamp(1, 1.25);
-        _railAvailable = constraints.maxWidth >= 1340 * scale.clamp(1, 1.2);
-        _showRail = _railAvailable && _railOpen;
-        _scheduleVisibleUpdate();
-        final listWidth = 300.0 * scale.clamp(1, 1.25);
-        return Row(
-          children: [
-            if (!_compactNavigation)
-              WikiSidebar(
-                allowWindowDrag: true,
-                headerHeight: _toolbarHeight - 1,
-                navigationHeight: _resultsToolbarHeight,
-                width: 216.0 * scale.clamp(1, 1.12),
-                directory: directory,
-                bookmarks: bookmarks,
-                selection: _scope!,
-                onSelect: _selectScope,
-              ),
-            Expanded(
-              child: Column(
-                children: [
-                  _toolbar(),
-                  Expanded(
-                    child: _singlePane
-                        ? (_showCompactArticle && _selected != null
-                              ? _detail(bookmarks)
-                              : _results(bookmarks))
-                        : Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              SizedBox(
-                                width: listWidth,
-                                child: _results(bookmarks),
-                              ),
-                              Expanded(child: _detail(bookmarks)),
-                              if (_showRail) _readingRail(),
-                            ],
-                          ),
+    return Focus(
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
+      child: Listener(
+        onPointerDown: _handlePointerButtons,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+            _compactNavigation = constraints.maxWidth < 1000;
+            _singlePane = constraints.maxWidth < 720 * scale.clamp(1, 1.25);
+            _scheduleVisibleUpdate();
+            final listWidth = 300.0 * scale.clamp(1, 1.25);
+            return Row(
+              children: [
+                if (!_compactNavigation)
+                  WikiSidebar(
+                    allowWindowDrag: true,
+                    headerHeight: _toolbarHeight - 1,
+                    navigationHeight: _resultsToolbarHeight,
+                    width: 216.0 * scale.clamp(1, 1.12),
+                    directory: directory,
+                    bookmarks: bookmarks,
+                    selection: _scope!,
+                    onSelect: _selectScope,
                   ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+                Expanded(
+                  child: Column(
+                    children: [
+                      _toolbar(),
+                      Expanded(
+                        child: _singlePane
+                            ? (_showCompactArticle && _selected != null
+                                  ? _detail(bookmarks)
+                                  : _results(bookmarks))
+                            : Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  SizedBox(
+                                    width: listWidth,
+                                    child: _results(bookmarks),
+                                  ),
+                                  Expanded(child: _detail(bookmarks)),
+                                ],
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -632,67 +891,101 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     final title = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (_compactNavigation)
+        _squareButton(
+          key: const ValueKey('wiki-history-back'),
+          tooltip: context.l10n.wiki_back,
+          size: 28,
+          radius: 6,
+          onPressed: _history.isEmpty ? null : _goBack,
+          child: const Icon(Icons.chevron_left, size: 19),
+        ),
+        const SizedBox(width: 4),
+        _squareButton(
+          key: const ValueKey('wiki-history-forward'),
+          tooltip: context.l10n.wiki_forward,
+          size: 28,
+          radius: 6,
+          onPressed: _forward.isEmpty ? null : _goForward,
+          child: const Icon(Icons.chevron_right, size: 19),
+        ),
+        const SizedBox(width: 8),
+        if (_compactNavigation) ...[
           IconButton(
             key: const ValueKey('wiki-directory-button'),
             tooltip: context.l10n.wiki_officialDirectory,
             onPressed: _showDirectory,
             icon: const Icon(Icons.menu, size: 19),
           ),
-        Text(
-          context.l10n.wiki_title,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        if (_total != null) ...[
-          const SizedBox(width: 7),
           Text(
-            '$_total',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+            context.l10n.wiki_title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
-        if (!_showRail)
-          IconButton(
-            key: const ValueKey('wiki-reading-button'),
-            tooltip: context.l10n.wiki_readingSettings,
-            onPressed: () {
-              if (_railAvailable && !_railOpen) {
-                setState(() => _railOpen = true);
-              } else {
-                _showReadingDialog();
-              }
-            },
-            icon: const Icon(Icons.tune, size: 18),
-          ),
       ],
     );
-    final search = TextField(
-      key: const ValueKey('wiki-search'),
-      controller: _search,
-      style: const TextStyle(fontSize: 13),
-      decoration: InputDecoration(
-        isDense: true,
-        prefixIcon: const Icon(Icons.search, size: 17),
-        hintText: context.l10n.wiki_searchHint,
-        hintStyle: const TextStyle(fontSize: 12.5),
-        suffixIcon: _search.text.isEmpty
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.close, size: 16),
-                onPressed: () {
-                  _search.clear();
-                  _queueSearch(immediate: true);
-                },
-              ),
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4)),
+    final searchBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(9),
+      borderSide: BorderSide(color: theme.dividerColor),
+    );
+    final search = SizedBox(
+      height: 36,
+      child: TextField(
+        key: const ValueKey('wiki-search'),
+        controller: _search,
+        focusNode: _searchFocus,
+        style: const TextStyle(fontSize: 13),
+        textAlignVertical: TextAlignVertical.center,
+        decoration: InputDecoration(
+          isDense: true,
+          filled: true,
+          fillColor: scheme.onSurface.withValues(alpha: .04),
+          prefixIcon: const Icon(Icons.search, size: 17),
+          hintText: context.l10n.wiki_searchHint,
+          hintStyle: const TextStyle(fontSize: 12.5),
+          suffixIcon: _search.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.close, size: 16),
+                  onPressed: () {
+                    _search.clear();
+                    _queueSearch(immediate: true);
+                  },
+                )
+              : _searchFocus.hasFocus
+              ? null
+              : IgnorePointer(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Center(
+                      widthFactor: 1,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 5,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: theme.dividerColor),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '/',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+          border: searchBorder,
+          enabledBorder: searchBorder,
+          focusedBorder: searchBorder,
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+        onChanged: (_) => _queueSearch(),
       ),
-      onChanged: (_) => _queueSearch(),
     );
     return WindowHeader(
       dragBackground: true,
@@ -703,11 +996,16 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-          child: constraints.maxWidth < 700
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          child: constraints.maxWidth < 560
               ? Column(
                   children: [
-                    Align(alignment: Alignment.centerLeft, child: title),
+                    Row(
+                      children: [
+                        Expanded(child: title),
+                        _dataMenu(),
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     search,
                   ],
@@ -716,7 +1014,17 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                   children: [
                     title,
                     const SizedBox(width: 14),
-                    Expanded(child: search),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 620),
+                          child: search,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _dataMenu(),
                   ],
                 ),
         ),
@@ -726,9 +1034,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
 
   Widget _resultsToolbar() {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Container(
       key: _resultsToolbarKey,
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      padding: const EdgeInsets.fromLTRB(12, 11, 8, 10),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
@@ -738,14 +1047,30 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  _scope?.label ?? '',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        _scope?.label ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (_total != null) ...[
+                      const SizedBox(width: 7),
+                      Text(
+                        '$_total',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               if (_search.text.isNotEmpty && _scope?.kind != WikiScopeKind.all)
@@ -756,68 +1081,249 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                       : context.l10n.wiki_scopeCurrent,
                   onTap: () => _changeFilter(() => _searchAll = !_searchAll),
                 ),
-              _dataMenu(),
+              Tooltip(
+                message: _alphabetical
+                    ? context.l10n.wiki_sortName
+                    : context.l10n.wiki_sortPopular,
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: IconButton(
+                    key: const ValueKey('wiki-sort-filter'),
+                    padding: EdgeInsets.zero,
+                    iconSize: 16,
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.swap_vert),
+                    onPressed: () =>
+                        _changeFilter(() => _alphabetical = !_alphabetical),
+                  ),
+                ),
+              ),
+              PopupMenuButton<bool?>(
+                key: const ValueKey('wiki-coverage-filter'),
+                tooltip: context.l10n.wiki_coverageAll,
+                padding: EdgeInsets.zero,
+                iconSize: 17,
+                icon: Icon(
+                  Icons.filter_list,
+                  color: _hasArticle != null ? scheme.primary : null,
+                ),
+                itemBuilder: (context) => [
+                  for (final value in const <bool?>[null, true, false])
+                    PopupMenuItem<bool?>(
+                      value: value,
+                      // Selecting 全部 pops with a null result, which the menu
+                      // reports as a cancellation rather than a selection, so
+                      // apply the filter from onTap (which runs after the pop).
+                      onTap: value == null
+                          ? () => _changeFilter(() => _hasArticle = null)
+                          : null,
+                      height: 35,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            child: _hasArticle == value
+                                ? const Icon(Icons.check, size: 15)
+                                : null,
+                          ),
+                          Text(
+                            value == null
+                                ? context.l10n.wiki_coverageAll
+                                : value
+                                ? context.l10n.wiki_withArticle
+                                : context.l10n.wiki_withoutArticle,
+                            style: const TextStyle(fontSize: 12.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+                onSelected: (value) => _changeFilter(() => _hasArticle = value),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _menu<TagCategory?>(
+          const SizedBox(height: 7),
+          NotificationListener<ScrollMetricsNotification>(
+            onNotification: (notification) {
+              final overflows = notification.metrics.maxScrollExtent > .5;
+              if (overflows != _typeFilterOverflows) {
+                setState(() => _typeFilterOverflows = overflows);
+              }
+              return false;
+            },
+            child: ShaderMask(
+              shaderCallback: (bounds) {
+                if (!_typeFilterOverflows || bounds.width <= 24) {
+                  return const LinearGradient(
+                    colors: [Colors.white, Colors.white],
+                  ).createShader(bounds);
+                }
+                return LinearGradient(
+                  colors: const [Colors.white, Colors.transparent],
+                  stops: [1 - 24 / bounds.width, 1],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: SingleChildScrollView(
+                controller: _typeFilterScroll,
+                scrollDirection: Axis.horizontal,
+                child: Row(
                   key: const ValueKey('wiki-type-filter'),
-                  tooltip: context.l10n.wiki_typeAll,
-                  label: _category == null
-                      ? context.l10n.wiki_typeAll
-                      : _categoryName(_category!),
-                  items: [
-                    null,
-                    ...TagCategory.values.where(
-                      (item) => item != TagCategory.library,
-                    ),
+                  children: [
+                    for (final category in const <TagCategory?>[
+                      null,
+                      TagCategory.general,
+                      TagCategory.artist,
+                      TagCategory.copyright,
+                      TagCategory.character,
+                      TagCategory.meta,
+                    ])
+                      _typeChip(
+                        key: ValueKey('wiki-type-${category?.name ?? 'all'}'),
+                        category: category,
+                        label: category == null
+                            ? context.l10n.wiki_typeAllShort
+                            : _categoryName(category),
+                        selected: _category == category,
+                        onTap: () => _changeFilter(() => _category = category),
+                      ),
+                    _moreCategoriesChip(),
                   ],
-                  itemLabel: (item) => item == null
-                      ? context.l10n.wiki_typeAll
-                      : _categoryName(item),
-                  onSelect: (item) => _changeFilter(() => _category = item),
                 ),
               ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: _menu<bool?>(
-                  key: const ValueKey('wiki-coverage-filter'),
-                  tooltip: context.l10n.wiki_coverageAll,
-                  label: _hasArticle == null
-                      ? context.l10n.wiki_coverageAll
-                      : _hasArticle!
-                      ? context.l10n.wiki_withArticle
-                      : context.l10n.wiki_withoutArticle,
-                  items: const [null, true, false],
-                  itemLabel: (item) => item == null
-                      ? context.l10n.wiki_coverageAll
-                      : item
-                      ? context.l10n.wiki_withArticle
-                      : context.l10n.wiki_withoutArticle,
-                  onSelect: (item) => _changeFilter(() => _hasArticle = item),
-                ),
-              ),
-              const SizedBox(width: 5),
-              Expanded(
-                child: _menu<bool>(
-                  key: const ValueKey('wiki-sort-filter'),
-                  tooltip: context.l10n.wiki_sortPopular,
-                  label: _alphabetical
-                      ? context.l10n.wiki_sortName
-                      : context.l10n.wiki_sortPopular,
-                  items: const [false, true],
-                  itemLabel: (item) => item
-                      ? context.l10n.wiki_sortName
-                      : context.l10n.wiki_sortPopular,
-                  onSelect: (item) => _changeFilter(() => _alphabetical = item),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  static const _extraCategories = [
+    TagCategory.contributor,
+    TagCategory.species,
+    TagCategory.lore,
+  ];
+
+  Widget _typeChip({
+    Key? key,
+    required TagCategory? category,
+    required String label,
+    required bool selected,
+    VoidCallback? onTap,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final chip = InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        decoration: BoxDecoration(
+          color: selected ? scheme.onSurface : null,
+          border: Border.all(
+            color: selected ? scheme.onSurface : theme.dividerColor,
+          ),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (category != null) ...[
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: TagCategoryVisuals.color(context, category),
+                ),
+              ),
+              const SizedBox(width: 5),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.5,
+                color: selected ? scheme.surface : scheme.onSurfaceVariant,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.only(right: 4),
+      child: chip,
+    );
+  }
+
+  Widget _moreCategoriesChip() {
+    final selected = _extraCategories.contains(_category);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      key: const ValueKey('wiki-type-more'),
+      padding: const EdgeInsets.only(right: 4),
+      child: PopupMenuButton<TagCategory>(
+        tooltip: context.l10n.wiki_moreCategories,
+        position: PopupMenuPosition.under,
+        offset: const Offset(0, 4),
+        itemBuilder: (context) => [
+          for (final category in _extraCategories)
+            PopupMenuItem<TagCategory>(
+              key: ValueKey('wiki-type-${category.name}'),
+              value: category,
+              height: 35,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 20,
+                    child: _category == category
+                        ? const Icon(Icons.check, size: 15)
+                        : null,
+                  ),
+                  Text(
+                    _categoryName(category),
+                    style: const TextStyle(fontSize: 12.5),
+                  ),
+                ],
+              ),
+            ),
+        ],
+        onSelected: (category) => _changeFilter(() => _category = category),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+          decoration: BoxDecoration(
+            color: selected ? scheme.onSurface : null,
+            border: Border.all(
+              color: selected ? scheme.onSurface : theme.dividerColor,
+            ),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                selected
+                    ? _categoryName(_category!)
+                    : context.l10n.wiki_moreCategories,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: selected ? scheme.surface : scheme.onSurfaceVariant,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Icon(
+                Icons.keyboard_arrow_down,
+                size: 13,
+                color: selected ? scheme.surface : scheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -870,49 +1376,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     onPressed: onTap,
     icon: Icon(value ? Icons.public : Icons.folder_outlined, size: 15),
     label: Text(label, style: const TextStyle(fontSize: 11.5)),
-  );
-
-  Widget _menu<T>({
-    Key? key,
-    required String tooltip,
-    required String label,
-    required List<T> items,
-    required String Function(T) itemLabel,
-    required ValueChanged<T> onSelect,
-  }) => PopupMenuButton<_WikiMenuValue<T>>(
-    key: key,
-    tooltip: tooltip,
-    onSelected: (item) => onSelect(item.value),
-    itemBuilder: (context) => [
-      for (final item in items)
-        PopupMenuItem<_WikiMenuValue<T>>(
-          value: _WikiMenuValue(item),
-          height: 35,
-          child: Text(itemLabel(item), style: const TextStyle(fontSize: 12.5)),
-        ),
-    ],
-    child: Container(
-      constraints: const BoxConstraints(maxWidth: 110),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 6),
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11.5),
-            ),
-          ),
-          const Icon(Icons.arrow_drop_down, size: 16),
-        ],
-      ),
-    ),
   );
 
   void _scheduleVisibleUpdate() {
@@ -1015,6 +1478,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                       final translatedName =
                           ref.read(autoTagTranslationProvider).nameFor(tag) ??
                           candidate.translation;
+                      final articleTags = _articleTags;
                       return WikiTagRow(
                         key: ValueKey('wiki-row-$tag'),
                         candidate: candidate,
@@ -1028,6 +1492,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                             : context.l10n.wiki_addBookmark,
                         onSelect: () => _selectTag(tag),
                         onBookmark: () => _toggleBookmark(bookmarks, tag),
+                        noArticleLabel:
+                            articleTags != null && !articleTags.contains(tag)
+                            ? context.l10n.wiki_noArticle
+                            : null,
                       );
                     },
                   ),
@@ -1046,6 +1514,37 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     }
   }
 
+  Widget _squareButton({
+    Key? key,
+    String? tooltip,
+    required VoidCallback? onPressed,
+    required Widget child,
+    double size = 32,
+    double radius = 7,
+  }) {
+    final button = SizedBox(
+      width: size,
+      height: size,
+      child: OutlinedButton(
+        key: key,
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          minimumSize: Size(size, size),
+          maximumSize: Size(size, size),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radius),
+          ),
+        ),
+        onPressed: onPressed,
+        child: child,
+      ),
+    );
+    if (tooltip == null) return button;
+    return Tooltip(message: tooltip, child: button);
+  }
+
   Widget _articleHeader(
     WikiBookmarkStore bookmarks,
     CompletionCandidate? candidate,
@@ -1053,117 +1552,156 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     final tag = _selected!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final title = Tooltip(
-      message: TagNormalizer.toDisplay(tag),
-      child: Text(
-        TagNormalizer.toDisplay(tag),
-        key: const ValueKey('wiki-article-title'),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 23,
-          height: 1.25,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-    final metadata = Wrap(
-      key: const ValueKey('wiki-article-metadata'),
-      spacing: 10,
-      runSpacing: 5,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        if (candidate != null) ...[
-          Row(
-            mainAxisSize: MainAxisSize.min,
+    final baseStyle = DefaultTextStyle.of(context).style;
+    final translation =
+        ref.read(autoTagTranslationProvider).nameFor(tag) ??
+        candidate?.translation;
+    final categoryColor = candidate == null
+        ? null
+        : TagCategoryVisuals.color(context, candidate.category);
+    final pill = candidate == null
+        ? null
+        : Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: categoryColor!.withValues(alpha: .1),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  key: const ValueKey('wiki-article-category-icon'),
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: categoryColor,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  _categoryName(candidate.category),
+                  key: const ValueKey('wiki-article-category-label'),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: categoryColor,
+                  ),
+                ),
+              ],
+            ),
+          );
+    final aliases = candidate?.aliases ?? const <String>[];
+    final shownAliases = aliases.take(3).toList();
+    final exactCount = candidate == null
+        ? null
+        : NumberFormat.decimalPattern(
+            Localizations.localeOf(context).toLanguageTag(),
+          ).format(candidate.postCount);
+    final metadata = candidate == null
+        ? null
+        : Wrap(
+            key: const ValueKey('wiki-article-metadata'),
+            spacing: 14,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Icon(
-                TagCategoryVisuals.icon(candidate.category),
-                key: const ValueKey('wiki-article-category-icon'),
-                size: 14,
-                color: TagCategoryVisuals.color(context, candidate.category),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                _categoryName(candidate.category),
-                key: const ValueKey('wiki-article-category-label'),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: TagCategoryVisuals.color(context, candidate.category),
+              Tooltip(
+                message: '$exactCount ${context.l10n.wiki_posts}',
+                child: Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: _postCount(candidate.postCount),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      TextSpan(text: ' ${context.l10n.wiki_posts}'),
+                    ],
+                  ),
                 ),
               ),
+              if (aliases.isNotEmpty)
+                Tooltip(
+                  message: aliases.join(', '),
+                  child: Text.rich(
+                    TextSpan(
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                      children: [
+                        TextSpan(text: '${context.l10n.wiki_aliases} '),
+                        TextSpan(text: shownAliases.join(', ')),
+                        if (aliases.length > shownAliases.length)
+                          TextSpan(
+                            text: ' +${aliases.length - shownAliases.length}',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
-          ),
-          Text(
-            _postCount(candidate.postCount),
-            style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
-          ),
-        ],
-        Text(
-          ref.read(autoTagTranslationProvider).nameFor(tag) ??
-              candidate?.translation ??
-              '',
-          style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
-        ),
-      ],
-    );
-    final buttonStyle = OutlinedButton.styleFrom(
-      foregroundColor: scheme.onSurface,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      minimumSize: const Size(0, 30),
-      visualDensity: VisualDensity.compact,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      textStyle: theme.textTheme.labelMedium?.copyWith(fontSize: 12),
-    );
+          );
     final actions = Wrap(
       spacing: 6,
       runSpacing: 6,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Tooltip(
-          message: bookmarks.contains(tag)
+        FilledButton.icon(
+          key: const ValueKey('wiki-add-to-prompt'),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, 32),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            visualDensity: VisualDensity.compact,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7),
+            ),
+            textStyle: theme.textTheme.labelLarge?.copyWith(fontSize: 12.5),
+          ),
+          icon: const Icon(Icons.add, size: 16),
+          label: Text(context.l10n.wiki_addToPrompt),
+          onPressed: () => _addTagToPrompt(tag),
+        ),
+        _squareButton(
+          key: const ValueKey('wiki-copy-tag'),
+          tooltip: context.l10n.common_copy,
+          onPressed: () => _copyTag(tag),
+          child: const Icon(Icons.content_copy_outlined, size: 17),
+        ),
+        _squareButton(
+          key: const ValueKey('wiki-article-bookmark'),
+          tooltip: bookmarks.contains(tag)
               ? context.l10n.wiki_removeBookmark
               : context.l10n.wiki_addBookmark,
-          child: OutlinedButton.icon(
-            key: const ValueKey('wiki-article-bookmark'),
-            style: buttonStyle,
-            onPressed: () => _toggleBookmark(bookmarks, tag),
-            icon: Icon(
-              bookmarks.contains(tag) ? Icons.bookmark : Icons.bookmark_border,
-              size: 17,
-            ),
-            label: Text(
-              bookmarks.contains(tag)
-                  ? context.l10n.common_unfavorite
-                  : context.l10n.common_favorite,
-            ),
+          onPressed: () => _toggleBookmark(bookmarks, tag),
+          child: Icon(
+            bookmarks.contains(tag) ? Icons.bookmark : Icons.bookmark_border,
+            size: 17,
+            color: bookmarks.contains(tag) ? scheme.primary : null,
           ),
         ),
-        OutlinedButton.icon(
-          key: const ValueKey('wiki-copy-tag'),
-          style: buttonStyle,
-          icon: const Icon(Icons.content_copy_outlined, size: 17),
-          label: Text(context.l10n.common_copy),
-          onPressed: () => _copyTag(tag),
-        ),
+        _readingMenuAnchor(),
         if (bookmarks.collections.isNotEmpty) _collectionMenu(bookmarks, tag),
       ],
     );
-    final back = (_history.isNotEmpty || _singlePane)
+    final back = _singlePane
         ? IconButton(
             key: const ValueKey('wiki-article-back'),
-            tooltip: _history.isNotEmpty
-                ? wikiBackLabel(context)
-                : context.l10n.wiki_allTags,
+            tooltip: context.l10n.wiki_allTags,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints.tightFor(width: 28, height: 28),
             visualDensity: VisualDensity.standard,
             style: IconButton.styleFrom(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            onPressed: _history.isNotEmpty
-                ? _goBack
-                : () => setState(() => _showCompactArticle = false),
+            onPressed: () => setState(() => _showCompactArticle = false),
             icon: const Icon(
               Icons.arrow_back,
               key: ValueKey('wiki-back-glyph'),
@@ -1173,41 +1711,67 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
         : null;
     return Container(
       key: const ValueKey('wiki-article-header'),
-      constraints: BoxConstraints(minHeight: _resultsToolbarHeight),
-      // Compensate for the arrow's 4.5px optical inset inside its 28px target.
-      padding: EdgeInsets.fromLTRB(back == null ? 24 : 19.5, 12, 24, 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: theme.dividerColor)),
-      ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
           final compact = constraints.maxWidth < 650 * scale;
           return Column(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (back != null) ...[back, const SizedBox(width: 8)],
-                  Expanded(child: title),
-                  if (!compact) ...[const SizedBox(width: 18), actions],
+                  if (back != null) ...[back, const SizedBox(width: 10)],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (pill != null) ...[pill, const SizedBox(height: 7)],
+                        Tooltip(
+                          message: TagNormalizer.toDisplay(tag),
+                          child: Text(
+                            TagNormalizer.toDisplay(tag),
+                            key: const ValueKey('wiki-article-title'),
+                            style: baseStyle.copyWith(
+                              fontSize: 28,
+                              height: 1.25,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ),
+                        if (translation != null) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            translation,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                        if (metadata != null) ...[
+                          const SizedBox(height: 11),
+                          metadata,
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (!compact) ...[
+                    const SizedBox(width: 18),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 30),
+                      child: actions,
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: EdgeInsets.only(left: back == null ? 0 : 36),
-                child: metadata,
-              ),
-              if (compact) ...[
-                const SizedBox(height: 14),
-                Padding(
-                  padding: EdgeInsets.only(left: back == null ? 0 : 4.5),
-                  child: actions,
-                ),
-              ],
+              if (compact) ...[const SizedBox(height: 12), actions],
+              const SizedBox(height: 18),
+              const Divider(height: 1),
             ],
           );
         },
@@ -1218,7 +1782,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   Widget _collectionMenu(WikiBookmarkStore bookmarks, String tag) =>
       PopupMenuButton<String>(
         tooltip: context.l10n.wiki_addToCollection,
-        icon: const Icon(Icons.more_vert, size: 20),
         itemBuilder: (context) => [
           for (final collection in bookmarks.collections)
             PopupMenuItem<String>(
@@ -1245,6 +1808,15 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           }
           if (_scope?.kind == WikiScopeKind.collection) _load();
         },
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(context).dividerColor),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          child: const Icon(Icons.more_vert, size: 17),
+        ),
       );
 
   String _visibleBody(TagWikiEntry? article) {
@@ -1294,6 +1866,18 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     });
   }
 
+  bool get _relatedVisible => _relatedItems[_selected]?.isNotEmpty == true;
+
+  bool get _directoryVisible =>
+      _selected != null &&
+      _directory?.pathsForTag(_selected!).isNotEmpty == true;
+
+  List<GlobalKey> _sectionAnchors() => [
+    for (final heading in _headings) heading.anchor,
+    if (_relatedVisible) _relatedAnchor,
+    if (_directoryVisible) _directoryAnchor,
+  ];
+
   void _jumpToOutline(GlobalKey anchor) {
     if (!_articleScroll.hasClients) return;
     _clampedOutline = null;
@@ -1338,12 +1922,12 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       } else {
         _clampedOutline = null;
         _clampedOutlineOffset = null;
-        for (final heading in _headings) {
-          final render = heading.anchor.currentContext?.findRenderObject();
+        for (final anchor in _sectionAnchors()) {
+          final render = anchor.currentContext?.findRenderObject();
           if (render is RenderBox &&
               render.hasSize &&
               render.localToGlobal(Offset.zero).dy <= top) {
-            active = heading.anchor;
+            active = anchor;
           }
         }
       }
@@ -1351,102 +1935,92 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     });
   }
 
-  Widget _articleOutline() => FutureBuilder<TagWikiEntry?>(
-    future: _article,
-    builder: (context, snapshot) {
-      if (_selected == null ||
-          snapshot.connectionState != ConnectionState.done ||
-          snapshot.hasError) {
-        return const SizedBox.shrink();
-      }
-      final headings = _outlineFor(_visibleBody(snapshot.data));
-      if (headings.isEmpty) return const SizedBox.shrink();
-      final label = context.l10n.wiki_onThisPage;
-      final intro = context.l10n.wiki_overview;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 24),
-          const Divider(height: 1),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: () => setState(() => _outlineOpen = !_outlineOpen),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    _outlineOpen ? Icons.expand_less : Icons.expand_more,
-                    size: 17,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (_outlineOpen) ...[
-            _outlineLink(
-              intro,
-              _articleStart,
-              selected: _activeOutline == null,
-            ),
-            for (var index = 0; index < headings.length; index++)
-              _outlineLink(
-                headings[index].label,
-                headings[index].anchor,
-                selected: _activeOutline == headings[index].anchor,
-                index: index,
-                indent: (headings[index].level - 1).clamp(0, 2) * 8.0,
-              ),
-          ],
-        ],
-      );
-    },
-  );
-
-  Widget _outlineLink(
+  Widget _tocLink(
     String label,
     GlobalKey anchor, {
     required bool selected,
-    int? index,
+    Key? key,
     double indent = 0,
   }) {
-    final scheme = Theme.of(context).colorScheme;
-    return TextButton(
-      key: index == null
-          ? const ValueKey('wiki-outline-intro')
-          : ValueKey('wiki-outline-$index'),
-      style: TextButton.styleFrom(
-        foregroundColor: selected ? scheme.primary : scheme.onSurfaceVariant,
-        padding: EdgeInsets.only(left: indent, right: 4, top: 9, bottom: 9),
-        minimumSize: const Size(0, 32),
-        visualDensity: VisualDensity.compact,
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return InkWell(
+      key: key,
+      borderRadius: BorderRadius.circular(3),
+      onTap: () => _jumpToOutline(anchor),
+      child: Container(
+        height: 26,
+        padding: EdgeInsets.only(left: indent),
+        child: Row(
+          children: [
+            Container(
+              width: 2,
+              height: 14,
+              color: selected ? scheme.primary : theme.dividerColor,
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: selected ? scheme.primary : scheme.onSurfaceVariant,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      onPressed: () => _jumpToOutline(anchor),
-      child: Row(
+    );
+  }
+
+  Widget _toc() {
+    final tag = _selected;
+    final headings = _headings;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 30, 14, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 2,
-            height: 15,
-            color: selected ? scheme.primary : Colors.transparent,
-          ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
+          Text(
+            context.l10n.wiki_onThisPage,
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
+          const SizedBox(height: 7),
+          _tocLink(
+            context.l10n.wiki_overview,
+            _articleStart,
+            selected: _activeOutline == null,
+            key: const ValueKey('wiki-outline-intro'),
+          ),
+          for (var index = 0; index < headings.length; index++)
+            _tocLink(
+              headings[index].label,
+              headings[index].anchor,
+              selected: _activeOutline == headings[index].anchor,
+              key: ValueKey('wiki-outline-$index'),
+              indent: (headings[index].level - 1).clamp(0, 2) * 8.0,
+            ),
+          if (_relatedVisible)
+            _tocLink(
+              context.l10n.wiki_relatedTitle,
+              _relatedAnchor,
+              selected: _activeOutline == _relatedAnchor,
+              key: const ValueKey('wiki-outline-related'),
+            ),
+          if (tag != null && _directoryVisible)
+            _tocLink(
+              context.l10n.wiki_inDirectory,
+              _directoryAnchor,
+              selected: _activeOutline == _directoryAnchor,
+              key: const ValueKey('wiki-outline-directory'),
+            ),
         ],
       ),
     );
@@ -1454,170 +2028,507 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
 
   Widget _detail(WikiBookmarkStore bookmarks) {
     final tag = _selected;
-    if (tag == null) return Center(child: Text(context.l10n.wiki_noSelection));
-    final scheme = Theme.of(context).colorScheme;
+    if (tag == null) {
+      return Center(child: Text(context.l10n.wiki_noSelection));
+    }
+    // Refresh the heading cache here (not inside the FutureBuilder) so the
+    // table of contents rebuilds once the article future resolves.
+    _outlineFor(_visibleBody(_articleEntry));
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final candidate =
         _linkedCandidate ??
         _items.where((item) => item.canonicalTag == tag).firstOrNull;
     return Container(
       color: scheme.surface,
-      child: Column(
-        children: [
-          _articleHeader(bookmarks, candidate),
-          Expanded(
-            child: SingleChildScrollView(
-              key: _articleViewport,
-              controller: _articleScroll,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  key: const ValueKey('wiki-reading-column'),
-                  constraints: BoxConstraints.tightFor(
-                    width: _wideArticle ? 1040 : 760,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 25, 24, 35),
-                    child: FutureBuilder<TagWikiEntry?>(
-                      future: _article,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState != ConnectionState.done) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(30),
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        }
-                        if (snapshot.hasError) return Text('${snapshot.error}');
-                        final article = snapshot.data;
-                        if (_restoreArticleOffset case final offset?) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (!mounted ||
-                                _selected != tag ||
-                                _restoreArticleOffset != offset) {
-                              return;
-                            }
-                            _restoreArticleOffset = null;
-                            if (_articleScroll.hasClients) {
-                              _articleScroll.jumpTo(
-                                offset.clamp(
-                                  0,
-                                  _articleScroll.position.maxScrollExtent,
-                                ),
-                              );
-                            }
-                          });
-                        }
-                        final translated = ref
-                            .read(autoTagTranslationProvider)
-                            .wikiFor(tag);
-                        return Column(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final readingWidth = _wideArticle ? 1040.0 : 760.0;
+          const tocWidth = 168.0;
+          final hasTocEntries =
+              _headings.isNotEmpty || _relatedVisible || _directoryVisible;
+          final showToc =
+              hasTocEntries && constraints.maxWidth >= 560 + tocWidth + 48;
+          final columnWidth = showToc
+              ? (constraints.maxWidth - tocWidth - 48)
+                    .clamp(560.0, readingWidth)
+                    .toDouble()
+              : math.min(readingWidth, math.max(0.0, constraints.maxWidth));
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  key: _articleViewport,
+                  controller: _articleScroll,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      key: const ValueKey('wiki-reading-column'),
+                      constraints: BoxConstraints.tightFor(width: columnWidth),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 25, 24, 35),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            KeyedSubtree(
-                              key: _articleStart,
-                              child: WikiLinkedBody(
-                                key: ValueKey('wiki-body-$tag'),
-                                body: _visibleBody(article),
-                                headingAnchors: _outlineFor(
-                                  _visibleBody(article),
-                                ).map((heading) => heading.anchor).toList(),
-                                style: TextStyle(
-                                  fontSize: _fontSize,
-                                  height: 1.68,
-                                  color: scheme.onSurface,
-                                ),
-                                onTagTap: (candidate) => _selectTag(
-                                  candidate.canonicalTag,
-                                  linkedCandidate: candidate,
-                                ),
-                              ),
-                            ),
-                            if (_showTranslation &&
-                                translated == null &&
-                                article?.body.trim().isNotEmpty == true)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10),
-                                child: Text(
-                                  context.l10n.wiki_untranslated,
-                                  key: const Key('wiki-untranslated'),
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: scheme.onSurfaceVariant,
-                                      ),
-                                ),
-                              ),
-                            const SizedBox(height: 26),
-                            SizedBox(
-                              width: double.infinity,
-                              child: Wrap(
-                                key: const ValueKey('wiki-article-footer'),
-                                alignment: article?.sourceUrl.isNotEmpty == true
-                                    ? WrapAlignment.spaceBetween
-                                    : WrapAlignment.end,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: 12,
-                                runSpacing: 8,
-                                children: [
-                                  if (article != null &&
-                                      article.sourceUrl.isNotEmpty)
-                                    TextButton.icon(
-                                      key: const ValueKey(
-                                        'wiki-article-source',
-                                      ),
-                                      icon: const Icon(
-                                        Icons.open_in_new,
-                                        size: 17,
-                                      ),
-                                      label: Text(context.l10n.wiki_source),
-                                      style: TextButton.styleFrom(
-                                        textStyle: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium
-                                            ?.copyWith(fontSize: 14),
-                                        minimumSize: const Size(0, 32),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 6,
+                            _articleHeader(bookmarks, candidate),
+                            const SizedBox(height: 22),
+                            FutureBuilder<TagWikiEntry?>(
+                              future: _article,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState !=
+                                    ConnectionState.done) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(30),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                if (snapshot.hasError) {
+                                  return Text('${snapshot.error}');
+                                }
+                                final article = snapshot.data;
+                                if (_restoreArticleOffset case final offset?) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    if (!mounted ||
+                                        _selected != tag ||
+                                        _restoreArticleOffset != offset) {
+                                      return;
+                                    }
+                                    _restoreArticleOffset = null;
+                                    if (_articleScroll.hasClients) {
+                                      _articleScroll.jumpTo(
+                                        offset.clamp(
+                                          0,
+                                          _articleScroll
+                                              .position
+                                              .maxScrollExtent,
                                         ),
-                                        visualDensity: VisualDensity.standard,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      onPressed: () => launchUrl(
-                                        Uri.parse(article.sourceUrl),
+                                      );
+                                    }
+                                  });
+                                }
+                                final translated = ref
+                                    .read(autoTagTranslationProvider)
+                                    .wikiFor(tag);
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    KeyedSubtree(
+                                      key: _articleStart,
+                                      child: WikiLinkedBody(
+                                        key: ValueKey('wiki-body-$tag'),
+                                        body: _visibleBody(article),
+                                        headingAnchors:
+                                            _outlineFor(_visibleBody(article))
+                                                .map(
+                                                  (heading) => heading.anchor,
+                                                )
+                                                .toList(),
+                                        linkListsAsChips: true,
+                                        onTagAdd: (candidate) =>
+                                            _addTagToPrompt(
+                                              candidate.canonicalTag,
+                                            ),
+                                        style: TextStyle(
+                                          fontSize: _fontSize,
+                                          height: 1.68,
+                                          color: scheme.onSurface,
+                                        ),
+                                        onTagTap: (candidate) => _selectTag(
+                                          candidate.canonicalTag,
+                                          linkedCandidate: candidate,
+                                        ),
                                       ),
                                     ),
-                                  if (translated != null)
-                                    WikiArticleActions(
-                                      compact: false,
-                                      tag: tag,
-                                      surface: _articleSurface,
-                                      showTranslation: _showTranslation,
-                                      onToggle: () {
-                                        setState(
-                                          () => _showTranslation =
-                                              !_showTranslation,
-                                        );
-                                        _saveReadingSettings();
-                                      },
+                                    if (_showTranslation &&
+                                        translated == null &&
+                                        article?.body.trim().isNotEmpty == true)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 10),
+                                        child: Text(
+                                          context.l10n.wiki_untranslated,
+                                          key: const Key('wiki-untranslated'),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: scheme.onSurfaceVariant,
+                                              ),
+                                        ),
+                                      ),
+                                    _relatedSection(tag, candidate),
+                                    _directorySection(tag),
+                                    const SizedBox(height: 26),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: Wrap(
+                                        key: const ValueKey(
+                                          'wiki-article-footer',
+                                        ),
+                                        alignment:
+                                            article?.sourceUrl.isNotEmpty ==
+                                                true
+                                            ? WrapAlignment.spaceBetween
+                                            : WrapAlignment.end,
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        spacing: 12,
+                                        runSpacing: 8,
+                                        children: [
+                                          if (article != null &&
+                                              article.sourceUrl.isNotEmpty)
+                                            TextButton.icon(
+                                              key: const ValueKey(
+                                                'wiki-article-source',
+                                              ),
+                                              icon: const Icon(
+                                                Icons.open_in_new,
+                                                size: 17,
+                                              ),
+                                              label: Text(
+                                                context.l10n.wiki_source,
+                                              ),
+                                              style: TextButton.styleFrom(
+                                                textStyle: theme
+                                                    .textTheme
+                                                    .labelMedium
+                                                    ?.copyWith(fontSize: 14),
+                                                minimumSize: const Size(0, 32),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 6,
+                                                    ),
+                                                visualDensity:
+                                                    VisualDensity.standard,
+                                                tapTargetSize:
+                                                    MaterialTapTargetSize
+                                                        .shrinkWrap,
+                                              ),
+                                              onPressed: () => launchUrl(
+                                                Uri.parse(article.sourceUrl),
+                                              ),
+                                            ),
+                                          if (translated != null)
+                                            WikiArticleActions(
+                                              compact: false,
+                                              tag: tag,
+                                              surface: _articleSurface,
+                                              showTranslation: _showTranslation,
+                                              onToggle: () {
+                                                setState(
+                                                  () => _showTranslation =
+                                                      !_showTranslation,
+                                                );
+                                                _saveReadingSettings();
+                                              },
+                                            ),
+                                        ],
+                                      ),
                                     ),
-                                ],
-                              ),
+                                    const SizedBox(height: 10),
+                                  ],
+                                );
+                              },
                             ),
-                            const SizedBox(height: 10),
                           ],
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
+              if (showToc)
+                SizedBox(
+                  width: tocWidth,
+                  child: SingleChildScrollView(child: _toc()),
+                ),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  Widget _relatedSection(String tag, CompletionCandidate? candidate) {
+    final items = _relatedItems[tag];
+    if (items == null || items.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final postCount = candidate?.postCount;
+    final sorted = [...items];
+    if (postCount != null && postCount > 0) {
+      sorted.sort(
+        (a, b) =>
+            (b.cooccurrenceCount ?? 0).compareTo(a.cooccurrenceCount ?? 0),
+      );
+    }
+    return KeyedSubtree(
+      key: _relatedAnchor,
+      child: Container(
+        key: const ValueKey('wiki-related-section'),
+        margin: const EdgeInsets.only(top: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  context.l10n.wiki_relatedTitle,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    context.l10n.wiki_relatedHint,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = constraints.maxWidth < 560 ? 2 : 3;
+                final width =
+                    (constraints.maxWidth - (columns - 1) * 6) / columns;
+                return Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final item in sorted)
+                      SizedBox(
+                        width: width,
+                        child: _relatedCell(item, postCount, theme, scheme),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _relatedCell(
+    CompletionCandidate item,
+    int? postCount,
+    ThemeData theme,
+    ColorScheme scheme,
+  ) {
+    final share =
+        postCount != null && postCount > 0 && item.cooccurrenceCount != null
+        ? (item.cooccurrenceCount! / postCount).clamp(0.0, 1.0)
+        : null;
+    final percent = share == null ? null : '${(share * 100).round()}%';
+    final translation =
+        item.translation ?? _autoTranslation.nameFor(item.canonicalTag);
+    final tooltip = [
+      '${_categoryName(item.category)} · '
+          '${_postCount(item.postCount)} ${context.l10n.wiki_posts}',
+      if (percent != null) context.l10n.wiki_relatedShare(percent),
+    ].join('\n');
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: theme.dividerColor),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: ValueKey('wiki-related-${item.canonicalTag}'),
+          onTap: () {
+            if (HardwareKeyboard.instance.isShiftPressed) {
+              _addTagToPrompt(item.canonicalTag);
+            } else {
+              _selectTag(item.canonicalTag, linkedCandidate: item);
+            }
+          },
+          child: SizedBox(
+            height: 34,
+            child: Stack(
+              children: [
+                if (share != null && share > 0)
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: FractionallySizedBox(
+                        widthFactor: share,
+                        child: Container(
+                          color: scheme.primary.withValues(alpha: .09),
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned.fill(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  TagNormalizer.toDisplay(item.canonicalTag),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              if (translation != null) ...[
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    translation,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (percent != null) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            percent,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: scheme.onSurfaceVariant,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _directorySection(String tag) {
+    final directory = _directory;
+    if (directory == null) return const SizedBox.shrink();
+    final paths = directory.pathsForTag(tag);
+    if (paths.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final language = context.appLanguage;
+    return KeyedSubtree(
+      key: _directoryAnchor,
+      child: Container(
+        key: const ValueKey('wiki-directory-paths'),
+        margin: const EdgeInsets.only(top: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.wiki_inDirectory,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 6),
+            for (final path in paths)
+              InkWell(
+                borderRadius: BorderRadius.circular(4),
+                onTap: () {
+                  final node = path.last;
+                  _selectScope(
+                    WikiScope(
+                      WikiScopeKind.directory,
+                      _directoryNodeId(directory, path),
+                      WikiDirectoryLabels.display(node.label, language),
+                      node: node,
+                    ),
+                  );
+                  if (_singlePane) {
+                    setState(() => _showCompactArticle = false);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Text.rich(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    TextSpan(
+                      style: TextStyle(fontSize: 13, color: scheme.onSurface),
+                      children: [
+                        for (var i = 0; i < path.length; i++) ...[
+                          if (i > 0)
+                            TextSpan(
+                              text: ' › ',
+                              style: TextStyle(color: scheme.onSurfaceVariant),
+                            ),
+                          TextSpan(
+                            text: WikiDirectoryLabels.display(
+                              path[i].label,
+                              language,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Matches the id rule in `WikiSidebar._directoryNode` so the sidebar can
+  /// highlight the node the article links to.
+  String _directoryNodeId(
+    WikiDirectory directory,
+    List<WikiDirectoryNode> path,
+  ) {
+    var id = '';
+    for (var i = 0; i < path.length; i++) {
+      final node = path[i];
+      final group = node.group;
+      if (group != null) {
+        id = group;
+        continue;
+      }
+      if (i == 0) {
+        id = 'root-${directory.roots.indexOf(node)}';
+      } else {
+        id = '$id/${path[i - 1].children.indexOf(node)}';
+      }
+    }
+    return id;
   }
 
   ButtonStyle _readingSegmentStyle() {
@@ -1666,6 +2577,58 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
 
   Widget _readingLabel(String text) =>
       Text(text, maxLines: 1, overflow: TextOverflow.ellipsis);
+
+  Widget _readingMenuAnchor() => MenuAnchor(
+    builder: (context, controller, _) => _squareButton(
+      key: const ValueKey('wiki-reading-button'),
+      tooltip: context.l10n.wiki_readingSettings,
+      onPressed: () =>
+          controller.isOpen ? controller.close() : controller.open(),
+      child: const Text(
+        'Aa',
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+      ),
+    ),
+    menuChildren: [
+      Padding(
+        padding: const EdgeInsets.all(13),
+        child: StatefulBuilder(
+          builder: (context, update) => SizedBox(
+            width: 236,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.wiki_textSize,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                const SizedBox(height: 9),
+                _textSizeChoice(refreshDialog: () => update(() {})),
+                const SizedBox(height: 18),
+                Text(
+                  context.l10n.wiki_readingWidth,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                const SizedBox(height: 8),
+                _widthChoice(refreshDialog: () => update(() {})),
+                const SizedBox(height: 18),
+                _readingLanguage(refreshDialog: () => update(() {})),
+                const SizedBox(height: 13),
+                Text(
+                  context.l10n.wiki_shortcutsHint,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
 
   Widget _textSizeChoice({
     VoidCallback? refreshDialog,
@@ -1742,59 +2705,6 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     },
   );
 
-  Widget _readingRail() {
-    final theme = Theme.of(context);
-    return Container(
-      key: const ValueKey('wiki-reading-rail'),
-      width:
-          216 * (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1, 1.3),
-      padding: const EdgeInsets.fromLTRB(15, 19, 14, 15),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(left: BorderSide(color: theme.dividerColor)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    context.l10n.wiki_readingSettings,
-                    style: theme.textTheme.titleSmall,
-                  ),
-                ),
-                IconButton(
-                  tooltip: context.l10n.wiki_hide,
-                  icon: const Icon(Icons.chevron_right, size: 18),
-                  onPressed: () => setState(() => _railOpen = false),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              context.l10n.wiki_textSize,
-              style: theme.textTheme.labelMedium,
-            ),
-            const SizedBox(height: 9),
-            _textSizeChoice(),
-            const SizedBox(height: 22),
-            Text(
-              context.l10n.wiki_readingWidth,
-              style: theme.textTheme.labelMedium,
-            ),
-            const SizedBox(height: 8),
-            _widthChoice(),
-            const SizedBox(height: 22),
-            _readingLanguage(),
-            _articleOutline(),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _readingLanguage({VoidCallback? refreshDialog}) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
@@ -1836,40 +2746,4 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       ),
     ],
   );
-
-  Future<void> _showReadingDialog() async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        scrollable: true,
-        title: Text(context.l10n.wiki_readingSettings),
-        content: SizedBox(
-          width: 300,
-          child: StatefulBuilder(
-            builder: (context, update) => Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(context.l10n.wiki_textSize),
-                const SizedBox(height: 8),
-                _textSizeChoice(refreshDialog: () => update(() {})),
-                const SizedBox(height: 18),
-                Text(context.l10n.wiki_readingWidth),
-                const SizedBox(height: 8),
-                _widthChoice(refreshDialog: () => update(() {})),
-                const SizedBox(height: 18),
-                _readingLanguage(refreshDialog: () => update(() {})),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.wiki_hide),
-          ),
-        ],
-      ),
-    );
-  }
 }

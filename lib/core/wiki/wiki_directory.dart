@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 
+import '../utils/tag_normalizer.dart';
+
 class WikiDirectoryNode {
   const WikiDirectoryNode({
     required this.label,
@@ -109,5 +111,47 @@ class WikiDirectory {
       tags.addAll(tagsForNode(child));
     }
     return tags;
+  }
+
+  /// Weakly-keyed per-instance reverse index, built lazily on the first
+  /// [pathsForTag] call so the constructor can stay const.
+  static final _tagPaths =
+      Expando<Map<String, List<List<WikiDirectoryNode>>>>();
+
+  /// Root-to-node paths where [tag] belongs, keeping only the deepest nodes:
+  /// a containing node is reported only when none of its children contain the
+  /// tag. At most four paths, in tree order. The reverse index is built lazily
+  /// on the first call.
+  List<List<WikiDirectoryNode>> pathsForTag(String tag) {
+    final normalized = TagNormalizer.normalize(tag);
+    if (normalized.isEmpty) return const [];
+    final index = _tagPaths[this] ??= _buildTagPaths();
+    return index[normalized] ?? const [];
+  }
+
+  Map<String, List<List<WikiDirectoryNode>>> _buildTagPaths() {
+    final paths = <String, List<List<WikiDirectoryNode>>>{};
+    final nodeTags = <WikiDirectoryNode, Set<String>>{};
+    Set<String> tagsOf(WikiDirectoryNode node) =>
+        nodeTags.putIfAbsent(node, () => tagsForNode(node));
+    void visit(WikiDirectoryNode node, List<WikiDirectoryNode> trail) {
+      final tags = tagsOf(node);
+      if (tags.isEmpty) return;
+      final path = [...trail, node];
+      final childTags = [for (final child in node.children) tagsOf(child)];
+      for (final tag in tags) {
+        if (childTags.any((children) => children.contains(tag))) continue;
+        final list = paths.putIfAbsent(tag, () => []);
+        if (list.length < 4) list.add(path);
+      }
+      for (final child in node.children) {
+        visit(child, path);
+      }
+    }
+
+    for (final root in roots) {
+      visit(root, const []);
+    }
+    return paths;
   }
 }

@@ -209,4 +209,99 @@ void main() {
       },
     );
   });
+
+  group('PromptTokenParser.containsTag', () {
+    test('matches a plain tag regardless of underscores or case', () {
+      expect(
+        PromptTokenParser.containsTag('solo, blue eyes, smile', 'blue_eyes'),
+        isTrue,
+      );
+      expect(
+        PromptTokenParser.containsTag('Solo, BLUE EYES', 'blue_eyes'),
+        isTrue,
+      );
+      expect(
+        PromptTokenParser.containsTag('blue_eyes_extra', 'blue_eyes'),
+        isFalse,
+      );
+      expect(PromptTokenParser.containsTag('', 'blue_eyes'), isFalse);
+      expect(PromptTokenParser.containsTag('  ', 'blue_eyes'), isFalse);
+      expect(PromptTokenParser.containsTag('solo', ''), isFalse);
+    });
+
+    test('matches tags wrapped in braces, brackets and weights', () {
+      for (final text in [
+        '{1girl}',
+        '{{1girl}}',
+        '[1girl]',
+        '(1girl)',
+        '1.2::1girl::',
+        '1.2::1girl',
+        '1girl:1.2',
+        '(1girl:1.4)',
+        '{1girl:0.8}',
+        '-1.5::1girl::',
+      ]) {
+        expect(
+          PromptTokenParser.containsTag(text, '1girl'),
+          isTrue,
+          reason: 'expected match in "$text"',
+        );
+      }
+    });
+
+    test('skips alias segments and splits on Chinese commas', () {
+      expect(PromptTokenParser.containsTag('杰作，1girl，微笑', '1girl'), isTrue);
+      expect(PromptTokenParser.containsTag('<1girl preset>', '1girl'), isFalse);
+      expect(
+        PromptTokenParser.containsTag(
+          'solo, <blue eyes alias>, 1girl',
+          '1girl',
+        ),
+        isTrue,
+      );
+    });
+
+    test('handles trailing commas and newlines', () {
+      expect(
+        PromptTokenParser.containsTag('blue eyes,\n1girl,', '1girl'),
+        isTrue,
+      );
+      expect(PromptTokenParser.containsTag('1girl,', '1girl'), isTrue);
+      expect(PromptTokenParser.containsTag('1girl，', '1girl'), isTrue);
+    });
+  });
+
+  group('PromptTokenParser.appendTag', () {
+    test('writes the display form into empty input', () {
+      expect(PromptTokenParser.appendTag('', 'blue_eyes'), 'blue eyes');
+      expect(PromptTokenParser.appendTag('   ', 'blue_eyes'), 'blue eyes');
+    });
+
+    test('separates with a comma when text does not end with one', () {
+      expect(
+        PromptTokenParser.appendTag('solo', 'blue_eyes'),
+        'solo, blue eyes',
+      );
+      expect(
+        PromptTokenParser.appendTag('{{solo}}', 'blue_eyes'),
+        '{{solo}}, blue eyes',
+      );
+    });
+
+    test('reuses a trailing comma without duplicating it', () {
+      expect(
+        PromptTokenParser.appendTag('solo,', 'blue_eyes'),
+        'solo, blue eyes',
+      );
+      expect(
+        PromptTokenParser.appendTag('solo, ', 'blue_eyes'),
+        'solo, blue eyes',
+      );
+      expect(
+        PromptTokenParser.appendTag('solo，', 'blue_eyes'),
+        'solo， blue eyes',
+      );
+    });
+  });
 }

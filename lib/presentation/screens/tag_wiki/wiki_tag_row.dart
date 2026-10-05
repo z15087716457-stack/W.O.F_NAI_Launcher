@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/autocomplete/completion_models.dart';
 import '../../../core/utils/tag_normalizer.dart';
-import '../../widgets/autocomplete/tag_candidate_title.dart';
+import '../../widgets/autocomplete/tag_category_visuals.dart';
 
 /// Two readable lines with a stable action slot, including when it is hidden.
 class WikiTagRow extends StatefulWidget {
@@ -18,12 +18,16 @@ class WikiTagRow extends StatefulWidget {
     required this.bookmarkLabel,
     required this.onSelect,
     required this.onBookmark,
+    this.noArticleLabel,
   });
 
   final CompletionCandidate candidate;
   final String subtitle, countLabel, bookmarkLabel;
   final bool selected, bookmarked;
   final VoidCallback onSelect, onBookmark;
+
+  /// Small outlined badge left of the post count; null keeps the slot empty.
+  final String? noArticleLabel;
 
   static double extentOf(BuildContext context) {
     final scaler = MediaQuery.textScalerOf(context);
@@ -40,7 +44,8 @@ class _WikiTagRowState extends State<WikiTagRow> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final tag = widget.candidate.canonicalTag;
     final showBookmark =
         widget.selected || widget.bookmarked || _hovered || _focused;
@@ -51,7 +56,7 @@ class _WikiTagRowState extends State<WikiTagRow> {
         onExit: (_) => setState(() => _hovered = false),
         child: Material(
           color: widget.selected
-              ? scheme.onSurface.withValues(alpha: .065)
+              ? scheme.primary.withValues(alpha: .08)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(4),
           child: InkWell(
@@ -64,7 +69,7 @@ class _WikiTagRowState extends State<WikiTagRow> {
               child: Row(
                 children: [
                   Container(
-                    width: 2,
+                    width: 3,
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       color: widget.selected
@@ -73,7 +78,22 @@ class _WikiTagRowState extends State<WikiTagRow> {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 9),
+                  Container(
+                    key: ValueKey(
+                      'wiki-category-${widget.candidate.category.name}-$tag',
+                    ),
+                    width: 7,
+                    height: 7,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: TagCategoryVisuals.color(
+                        context,
+                        widget.candidate.category,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Tooltip(
                       message:
@@ -82,12 +102,10 @@ class _WikiTagRowState extends State<WikiTagRow> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          TagCandidateTitle(
-                            title: TagNormalizer.toDisplay(tag),
-                            category: widget.candidate.category,
-                            iconKey: ValueKey(
-                              'wiki-category-${widget.candidate.category.name}-$tag',
-                            ),
+                          Text(
+                            TagNormalizer.toDisplay(tag),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 14,
                               height: 1.35,
@@ -111,12 +129,34 @@ class _WikiTagRowState extends State<WikiTagRow> {
                     ),
                   ),
                   const SizedBox(width: 12),
+                  if (widget.noArticleLabel != null) ...[
+                    Container(
+                      key: ValueKey('wiki-row-no-article-$tag'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 3,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: theme.dividerColor),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                      child: Text(
+                        widget.noArticleLabel!,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
                   Text(
                     widget.countLabel,
                     key: ValueKey('wiki-row-count-$tag'),
                     style: TextStyle(
                       fontSize: 12,
                       color: scheme.onSurfaceVariant,
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                   const SizedBox(width: 8),

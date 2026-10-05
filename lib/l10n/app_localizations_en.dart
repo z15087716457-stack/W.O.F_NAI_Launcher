@@ -9958,7 +9958,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wiki_searchHint => 'Search tags or aliases';
 
   @override
-  String get wiki_typeAll => 'All types';
+  String get wiki_typeAllShort => 'All';
 
   @override
   String get wiki_coverageAll => 'All descriptions';
@@ -10597,6 +10597,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wiki_categoryLibrary => 'Library';
+
+  @override
+  String get wiki_addToPrompt => 'Add to prompt';
+
+  @override
+  String wiki_addedToPrompt(Object tag) {
+    return 'Added to prompt: $tag';
+  }
+
+  @override
+  String wiki_alreadyInPrompt(Object tag) {
+    return '$tag is already in the prompt';
+  }
+
+  @override
+  String get wiki_promptChangedCannotUndo => 'Prompt changed; can\'t undo';
+
+  @override
+  String get wiki_forward => 'Forward';
+
+  @override
+  String get wiki_posts => 'posts';
+
+  @override
+  String get wiki_aliases => 'Aliases';
+
+  @override
+  String get wiki_relatedTitle => 'Often used with';
+
+  @override
+  String get wiki_relatedHint => 'Click to open · Shift+click to add';
+
+  @override
+  String wiki_relatedShare(Object percent) {
+    return '$percent of posts also have this tag';
+  }
+
+  @override
+  String get wiki_inDirectory => 'In directory';
+
+  @override
+  String get wiki_noArticle => 'No wiki';
+
+  @override
+  String get wiki_moreCategories => 'More';
+
+  @override
+  String get wiki_shortcutsHint =>
+      'Shortcuts: / search · ↑↓ move · Enter add · B bookmark · Alt+←/→ history';
 
   @override
   String get toast_titleSuccess => 'Completed';

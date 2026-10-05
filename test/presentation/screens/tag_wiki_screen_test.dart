@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/autocomplete/cooccurrence_completion_source.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
@@ -67,6 +69,18 @@ class _Wiki implements TagWikiRepository {
   );
 }
 
+class _Cooccurrence extends CooccurrenceCompletionSource {
+  _Cooccurrence()
+    : super.withLoader(
+        () async => throw StateError('unused'),
+        catalog: TagCatalogRepository(),
+      );
+
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
+      const [];
+}
+
 class _Blocks extends PromptBlockLibraryNotifier {
   @override
   Future<PromptBlockLibraryState> build() async =>
@@ -93,7 +107,7 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   testWidgets(
-    'desktop Wiki renders directory, results, article and reading rail',
+    'desktop Wiki renders directory, results, article and reading popover',
     (tester) async {
       tester.view.physicalSize = const Size(1600, 900);
       tester.view.devicePixelRatio = 1;
@@ -116,6 +130,9 @@ void main() {
               ),
             ),
             tagWikiRepositoryProvider.overrideWith((ref) => _Wiki()),
+            cooccurrenceCompletionSourceProvider.overrideWithValue(
+              _Cooccurrence(),
+            ),
             promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
           ],
           child: const MaterialApp(
@@ -144,12 +161,14 @@ void main() {
       expect(find.text('视觉特征'), findsOneWidget);
       expect(find.text('blue eyes'), findsWidgets);
       expect(find.text('Blue eyes are visible.'), findsOneWidget);
-      expect(find.text('阅读设置'), findsOneWidget);
       expect(find.byKey(const Key('wiki-untranslated')), findsOneWidget);
       auto.translations['blue_eyes'] = '蓝眼睛清晰可见。';
       auto.notifyListeners();
       await tester.pumpAndSettle();
       expect(find.text('蓝眼睛清晰可见。'), findsOneWidget);
+      // The Aa reading popover hosts the translation switch.
+      await tester.tap(find.byKey(const Key('wiki-reading-button')));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('原文'));
       await tester.pumpAndSettle();
       expect(find.text('Blue eyes are visible.'), findsOneWidget);
@@ -164,6 +183,9 @@ void main() {
       auto.notifyListeners();
       await tester.pumpAndSettle();
       expect(find.text('Blue eyes are visible.'), findsOneWidget);
+      // Close the popover before continuing.
+      await tester.tapAt(const Offset(20, 600));
+      await tester.pumpAndSettle();
 
       for (var i = 0; i < 8; i++) {
         tester
@@ -172,12 +194,23 @@ void main() {
         await tester.pumpAndSettle();
       }
       for (var i = 0; i < 8; i++) {
-        await tester.tap(find.byKey(const Key('wiki-article-back')));
+        await tester.tap(find.byKey(const Key('wiki-history-back')));
         await tester.pumpAndSettle();
       }
-      expect(find.byKey(const Key('wiki-article-back')), findsNothing);
+      expect(
+        tester
+            .widget<OutlinedButton>(find.byKey(const Key('wiki-history-back')))
+            .onPressed,
+        isNull,
+      );
       expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
       expect(find.text('Blue eyes are visible.'), findsOneWidget);
+      // Forward returns to the tag that was navigated away from.
+      await tester.tap(find.byKey(const Key('wiki-history-forward')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('wiki-body-short_hair')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('wiki-history-back')));
+      await tester.pumpAndSettle();
       expect(
         (await SharedPreferences.getInstance()).getBool(
           'wiki_show_translation',
@@ -188,7 +221,8 @@ void main() {
       tester.view.physicalSize = const Size(900, 780);
       await tester.pump();
       expect(tester.takeException(), isNull);
-      await tester.tap(find.byTooltip('阅读设置'));
+      // In the narrower window the same Aa button opens the popover.
+      await tester.tap(find.byKey(const Key('wiki-reading-button')));
       await tester.pumpAndSettle();
       expect(
         tester
@@ -207,8 +241,9 @@ void main() {
         ),
         isTrue,
       );
-      await tester.tap(find.text('隐藏').last);
+      await tester.tapAt(const Offset(20, 700));
       await tester.pumpAndSettle();
+      expect(find.byKey(const Key('wiki-reading-language')), findsNothing);
     },
   );
 }

@@ -9550,7 +9550,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_searchHint => '搜索标签或别名';
 
   @override
-  String get wiki_typeAll => '全部类型';
+  String get wiki_typeAllShort => '全部';
 
   @override
   String get wiki_coverageAll => '全部释义';
@@ -10152,6 +10152,55 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wiki_categoryLibrary => '本地';
+
+  @override
+  String get wiki_addToPrompt => '加入提示词';
+
+  @override
+  String wiki_addedToPrompt(Object tag) {
+    return '已加入提示词：$tag';
+  }
+
+  @override
+  String wiki_alreadyInPrompt(Object tag) {
+    return '提示词中已有 $tag';
+  }
+
+  @override
+  String get wiki_promptChangedCannotUndo => '提示词已变更，无法撤销';
+
+  @override
+  String get wiki_forward => '前进';
+
+  @override
+  String get wiki_posts => '帖子';
+
+  @override
+  String get wiki_aliases => '别名';
+
+  @override
+  String get wiki_relatedTitle => '常一起出现';
+
+  @override
+  String get wiki_relatedHint => '点击查看 · Shift+点击加入提示词';
+
+  @override
+  String wiki_relatedShare(Object percent) {
+    return '$percent 的帖子同时带有此标签';
+  }
+
+  @override
+  String get wiki_inDirectory => '所属目录';
+
+  @override
+  String get wiki_noArticle => '无百科';
+
+  @override
+  String get wiki_moreCategories => '更多';
+
+  @override
+  String get wiki_shortcutsHint =>
+      '/ 搜索 · ↑↓ 切换 · Enter 加入 · B 收藏 · Alt+←/→ 历史';
 
   @override
   String get toast_titleSuccess => '已完成';
@@ -22169,7 +22218,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get wiki_searchHint => '搜尋標籤或別名';
 
   @override
-  String get wiki_typeAll => '全部類型';
+  String get wiki_typeAllShort => '全部';
 
   @override
   String get wiki_coverageAll => '全部釋義';
@@ -22771,6 +22820,55 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get wiki_categoryLibrary => '本地';
+
+  @override
+  String get wiki_addToPrompt => '加入提示詞';
+
+  @override
+  String wiki_addedToPrompt(Object tag) {
+    return '已加入提示詞：$tag';
+  }
+
+  @override
+  String wiki_alreadyInPrompt(Object tag) {
+    return '提示詞中已有 $tag';
+  }
+
+  @override
+  String get wiki_promptChangedCannotUndo => '提示詞已變更，無法復原';
+
+  @override
+  String get wiki_forward => '前進';
+
+  @override
+  String get wiki_posts => '帖子';
+
+  @override
+  String get wiki_aliases => '別名';
+
+  @override
+  String get wiki_relatedTitle => '常一起出現';
+
+  @override
+  String get wiki_relatedHint => '點選檢視 · Shift+點選加入提示詞';
+
+  @override
+  String wiki_relatedShare(Object percent) {
+    return '$percent 的帖子同時帶有此標籤';
+  }
+
+  @override
+  String get wiki_inDirectory => '所屬目錄';
+
+  @override
+  String get wiki_noArticle => '無百科';
+
+  @override
+  String get wiki_moreCategories => '更多';
+
+  @override
+  String get wiki_shortcutsHint =>
+      '/ 搜尋 · ↑↓ 切換 · Enter 加入 · B 收藏 · Alt+←/→ 歷史';
 
   @override
   String get toast_titleSuccess => '已完成';

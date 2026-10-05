@@ -7,7 +7,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/autocomplete/autocomplete_providers.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/autocomplete/cooccurrence_completion_source.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
@@ -16,8 +18,10 @@ import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory.dart';
 import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_sidebar.dart';
@@ -27,7 +31,6 @@ import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
-import 'package:nai_launcher/presentation/widgets/autocomplete/tag_candidate_title.dart';
 import 'package:nai_launcher/presentation/widgets/autocomplete/tag_category_visuals.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -125,6 +128,28 @@ class _Source implements CompletionSource {
   Future<List<CompletionCandidate>> search(CompletionQuery query) async => [];
 }
 
+class _Cooccurrence extends CooccurrenceCompletionSource {
+  _Cooccurrence([this.results = const []])
+    : super.withLoader(
+        () async => throw StateError('unused'),
+        catalog: TagCatalogRepository(),
+      );
+  final List<CompletionCandidate> results;
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
+      results;
+}
+
+class _Params extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams();
+  @override
+  void updatePromptImmediately(String prompt) {
+    if (state.prompt == prompt) return;
+    state = state.copyWith(prompt: prompt);
+  }
+}
+
 class _Auto extends ChangeNotifier implements AutoTagTranslationController {
   final visible = <String, Set<String>>{};
   @override
@@ -198,7 +223,16 @@ WikiTagLinks get links => WikiTagLinks(
   },
 );
 
-Future<void> capture(WidgetTester tester, String name) async {
+Color? outlineLabelColor(WidgetTester tester, Finder link) => tester
+    .widget<Text>(find.descendant(of: link, matching: find.byType(Text)))
+    .style
+    ?.color;
+
+Future<void> capture(
+  WidgetTester tester,
+  String name, [
+  String? appearance,
+]) async {
   if (Platform.environment['CAPTURE_TAG_WIKI'] != '1') return;
   debugDisableShadows = false;
   for (final render
@@ -234,7 +268,7 @@ Future<void> capture(WidgetTester tester, String name) async {
           : '.dart_tool/tag-wiki-captures',
     )..createSync(recursive: true);
     File(
-      '${folder.path}/$name-${Platform.environment['STUDIO_APPEARANCE'] ?? 'light'}.png',
+      '${folder.path}/$name-${appearance ?? Platform.environment['STUDIO_APPEARANCE'] ?? 'light'}.png',
     ).writeAsBytesSync(bytes!.buffer.asUint8List());
     image.dispose();
   });
@@ -248,8 +282,11 @@ Future<void> _pump(
   double scale = 1,
   TagWikiRepository? wiki,
   _Tags? catalog,
+  List<CompletionCandidate>? related,
+  _Params? params,
   Locale locale = const Locale('zh'),
   bool chrome = false,
+  Brightness? brightness,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -267,6 +304,12 @@ Future<void> _pump(
                 ),
         ),
         tagWikiRepositoryProvider.overrideWithValue(wiki ?? _Wiki()),
+        cooccurrenceCompletionSourceProvider.overrideWithValue(
+          _Cooccurrence(related ?? const []),
+        ),
+        generationParamsNotifierProvider.overrideWith(
+          () => params ?? _Params(),
+        ),
         unifiedTagRepositoryProvider.overrideWith((_) => catalog ?? _Tags()),
         promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
         localTagExpansionServiceProvider.overrideWithValue(
@@ -284,9 +327,10 @@ Future<void> _pump(
         supportedLocales: AppLocalizations.supportedLocales,
         theme: AppTheme.getTheme(
           AppStyle.geist,
-          Platform.environment['STUDIO_APPEARANCE'] == 'dark'
-              ? Brightness.dark
-              : Brightness.light,
+          brightness ??
+              (Platform.environment['STUDIO_APPEARANCE'] == 'dark'
+                  ? Brightness.dark
+                  : Brightness.light),
         ),
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(
@@ -389,10 +433,15 @@ void main() {
         closeTo(tester.getRect(header).center.dx, .01),
       );
       expect(tester.getSize(column).width, 760);
+      // The reading-width choice lives in the Aa popover on the header now.
+      await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
+      await tester.pumpAndSettle();
       final width = tester.widget<SegmentedButton<bool>>(
         find.byKey(const ValueKey('wiki-reading-width')),
       );
       width.onSelectionChanged!({true});
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
       expect(tester.getSize(column).width, 1040);
       expect(
@@ -404,7 +453,15 @@ void main() {
         closeTo(tester.getRect(header).center.dx, .01),
       );
       await capture(tester, 'centered-wide-2k');
-      width.onSelectionChanged!({false});
+      await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
+      await tester.pumpAndSettle();
+      tester
+          .widget<SegmentedButton<bool>>(
+            find.byKey(const ValueKey('wiki-reading-width')),
+          )
+          .onSelectionChanged!({false});
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
       final body = find.byKey(const ValueKey('wiki-body-1girl'));
       await tester.tap(
@@ -419,17 +476,19 @@ void main() {
       final title = tester.getRect(
         find.byKey(const ValueKey('wiki-article-title')),
       );
-      final back = tester.getRect(
-        find.byKey(const ValueKey('wiki-article-back')),
-      );
       final copy = tester.getRect(find.byKey(const ValueKey('wiki-copy-tag')));
-      expect(title.center.dy, closeTo(back.center.dy, .01));
-      expect(title.center.dy, closeTo(copy.center.dy, .01));
-      final glyph = tester.getRect(
-        find.byKey(const ValueKey('wiki-back-glyph')),
+      // Actions sit on the right at title height; the category pill is above.
+      final lastAction = tester.getRect(
+        find.byKey(const ValueKey('wiki-reading-button')),
       );
-      final bounds = tester.getRect(header);
-      expect(glyph.left - bounds.left, closeTo(bounds.right - copy.right, .01));
+      expect(lastAction.right, closeTo(tester.getRect(header).right, .01));
+      expect(copy.center.dy, closeTo(lastAction.center.dy, .01));
+      expect(
+        tester
+            .getRect(find.byKey(const ValueKey('wiki-article-category-icon')))
+            .bottom,
+        lessThanOrEqualTo(title.top),
+      );
       expect(
         tester.getRect(find.byKey(const ValueKey('wiki-article-metadata'))).top,
         greaterThan(title.bottom),
@@ -453,6 +512,8 @@ void main() {
         auto,
         catalog: _Tags(entries: _uiTags()),
       );
+      await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
+      await tester.pumpAndSettle();
       for (final key in [
         'wiki-text-size',
         'wiki-reading-width',
@@ -681,15 +742,11 @@ void main() {
         expect(rect.left, greaterThanOrEqualTo(0));
         expect(rect.right, lessThanOrEqualTo(scenario.$2.width));
         if (const ['2k', 'wide', 'short', 'en'].contains(scenario.$1)) {
+          // The article header scrolls with the reading column now; the list
+          // still begins right below its own toolbar.
           final listTop = tester
               .getRect(find.byKey(const ValueKey('wiki-results-list')))
               .top;
-          expect(
-            tester
-                .getRect(find.byKey(const ValueKey('wiki-article-header')))
-                .bottom,
-            closeTo(listTop, .1),
-          );
           expect(
             tester
                 .getRect(
@@ -698,13 +755,20 @@ void main() {
                 .bottom,
             closeTo(listTop, .1),
           );
+          final header = tester.getRect(
+            find.byKey(const ValueKey('wiki-article-header')),
+          );
+          final readingColumn = tester.getRect(
+            find.byKey(const ValueKey('wiki-reading-column')),
+          );
+          expect(header.left, greaterThanOrEqualTo(readingColumn.left));
+          expect(header.right, lessThanOrEqualTo(readingColumn.right));
+          expect(header.top, lessThan(listTop));
         }
         if (scenario.$1 == '2k' || scenario.$1 == 'wide') {
-          expect(
-            find.byKey(const ValueKey('wiki-reading-rail')),
-            findsOneWidget,
-          );
+          // The article table of contents lives beside the reading column.
           expect(find.byKey(const ValueKey('wiki-outline-0')), findsOneWidget);
+          expect(find.byKey(const ValueKey('wiki-reading-rail')), findsNothing);
           final row = find.byKey(const ValueKey('wiki-row-1girl'));
           expect(tester.getSize(row).height, greaterThanOrEqualTo(60));
           expect(
@@ -717,7 +781,7 @@ void main() {
     );
   }
 
-  testWidgets('filters reset null selections and reading rail can reopen', (
+  testWidgets('filter chips update the catalog and the Aa popover closes', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1720, 940);
@@ -731,14 +795,26 @@ void main() {
       _Auto(),
       catalog: catalog,
     );
-    await tester.tap(find.byKey(const ValueKey('wiki-type-filter')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('作品').last);
+    // Type filters are chips in the results header now.
+    await tester.tap(find.byKey(const ValueKey('wiki-type-copyright')));
     await tester.pumpAndSettle();
     expect(catalog.lastCategory, TagCategory.copyright);
-    await tester.tap(find.byKey(const ValueKey('wiki-type-filter')));
+    await tester.tap(find.byKey(const ValueKey('wiki-type-all')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('全部类型').last);
+    expect(catalog.lastCategory, isNull);
+    // The extra categories live behind the trailing "more" chip, which may be
+    // scrolled out of the single-line horizontally scrollable chip row.
+    await tester.ensureVisible(find.byKey(const ValueKey('wiki-type-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('wiki-type-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('wiki-type-species')));
+    await tester.pumpAndSettle();
+    expect(catalog.lastCategory, TagCategory.species);
+    // The horizontally scrolled chip row may have moved "全部" off-screen.
+    await tester.ensureVisible(find.byKey(const ValueKey('wiki-type-all')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('wiki-type-all')));
     await tester.pumpAndSettle();
     expect(catalog.lastCategory, isNull);
     await tester.tap(find.byKey(const ValueKey('wiki-coverage-filter')));
@@ -751,16 +827,13 @@ void main() {
     await tester.tap(find.text('全部释义').last);
     await tester.pumpAndSettle();
     expect(catalog.lastCoverage, isNull);
-    await tester.tap(find.byTooltip('隐藏'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('wiki-reading-rail')), findsNothing);
+    // The reading settings popover opens and dismisses like a menu.
     await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('wiki-reading-rail')), findsOneWidget);
-    expect(
-      tester.getRect(find.byKey(const ValueKey('wiki-reading-rail'))).top,
-      tester.getRect(find.byKey(const ValueKey('wiki-results-pane'))).top,
-    );
+    expect(find.byKey(const ValueKey('wiki-reading-language')), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('wiki-reading-language')), findsNothing);
     expect(
       tester
           .getRect(find.byKey(const ValueKey('wiki-directory-header')))
@@ -838,7 +911,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final icon = tester.widget<Icon>(
+      // The category pill renders as a colored dot now.
+      final dot = tester.widget<Container>(
         find.byKey(const ValueKey('wiki-article-category-icon')),
       );
       final category = find.byKey(
@@ -848,19 +922,20 @@ void main() {
         tester.element(category),
         TagCategory.copyright,
       );
-      expect(icon.icon, Icons.copyright_rounded);
-      expect(icon.color, expectedColor);
+      expect((dot.decoration! as BoxDecoration).color, expectedColor);
       expect(tester.widget<Text>(category).style!.color, expectedColor);
-      final articleHeader = tester.getRect(
-        find.byKey(const ValueKey('wiki-article-header')),
-      );
       final resultsList = tester.getRect(
         find.byKey(const ValueKey('wiki-results-list')),
       );
       final directoryDivider = tester.getRect(
         find.byKey(const ValueKey('wiki-official-directory-divider')),
       );
-      expect(articleHeader.bottom, closeTo(resultsList.top, .1));
+      final articleHeader = tester.getRect(
+        find.byKey(const ValueKey('wiki-article-header')),
+      );
+      // The header scrolls inside the article pane and starts below the
+      // toolbar, like the results list.
+      expect(articleHeader.top, lessThan(resultsList.top));
       expect(directoryDivider.bottom, closeTo(resultsList.top, .1));
       final source = find.byKey(const ValueKey('wiki-article-source'));
       final toggle = find.byKey(const ValueKey('wiki-reading-toggle-touhou'));
@@ -929,7 +1004,7 @@ void main() {
       await tester.pumpAndSettle();
       final outline = find.byKey(const ValueKey('wiki-outline-1'));
       expect(
-        tester.widget<TextButton>(outline).style!.foregroundColor!.resolve({}),
+        outlineLabelColor(tester, outline),
         Theme.of(tester.element(outline)).colorScheme.primary,
       );
       final linked = tester.widget<WikiLinkedBody>(
@@ -953,11 +1028,7 @@ void main() {
       await tester.pumpAndSettle();
       final shortOutline = find.byKey(const ValueKey('wiki-outline-1'));
       expect(
-        tester
-            .widget<TextButton>(shortOutline)
-            .style!
-            .foregroundColor!
-            .resolve({}),
+        outlineLabelColor(tester, shortOutline),
         Theme.of(tester.element(shortOutline)).colorScheme.primary,
       );
       expect(tester.takeException(), isNull);
@@ -986,11 +1057,7 @@ void main() {
       await tester.pumpAndSettle();
       final firstOutline = find.byKey(const ValueKey('wiki-outline-0'));
       expect(
-        tester
-            .widget<TextButton>(firstOutline)
-            .style!
-            .foregroundColor!
-            .resolve({}),
+        outlineLabelColor(tester, firstOutline),
         Theme.of(tester.element(firstOutline)).colorScheme.primary,
       );
       final bodyFinder = find.byKey(const ValueKey('wiki-body-1girl'));
@@ -1007,21 +1074,27 @@ void main() {
       // Resizing and reading settings reparse Markdown without changing the tag.
       tester.view.physicalSize = const Size(1780, 840);
       await tester.pumpAndSettle();
-      final sizeChoice = tester.widget<SegmentedButton<double>>(
-        find.byKey(const ValueKey('wiki-text-size')),
+      // The article header (and its Aa button) scrolls with the column.
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('wiki-reading-button')),
       );
-      sizeChoice.onSelectionChanged!({17});
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
+      await tester.pumpAndSettle();
+      tester
+          .widget<SegmentedButton<double>>(
+            find.byKey(const ValueKey('wiki-text-size')),
+          )
+          .onSelectionChanged!({17});
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('wiki-outline-1')));
       await tester.pumpAndSettle();
       expect(scroll.controller!.offset, greaterThan(firstOffset + 400));
       final secondOutline = find.byKey(const ValueKey('wiki-outline-1'));
       expect(
-        tester
-            .widget<TextButton>(secondOutline)
-            .style!
-            .foregroundColor!
-            .resolve({}),
+        outlineLabelColor(tester, secondOutline),
         Theme.of(tester.element(secondOutline)).colorScheme.primary,
       );
       await capture(tester, 'outline-click-2k');
@@ -1029,7 +1102,7 @@ void main() {
       await tester.pumpAndSettle();
       final intro = find.byKey(const ValueKey('wiki-outline-intro'));
       expect(
-        tester.widget<TextButton>(intro).style!.foregroundColor!.resolve({}),
+        outlineLabelColor(tester, intro),
         Theme.of(tester.element(intro)).colorScheme.primary,
       );
       await tester.tap(secondOutline);
@@ -1428,6 +1501,8 @@ void main() {
         tester.widget<WikiLinkedBody>(find.byType(WikiLinkedBody)).body,
         startsWith('See '),
       );
+      await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
+      await tester.pumpAndSettle();
       expect(
         tester
             .widget<SegmentedButton<bool>>(
@@ -1436,6 +1511,8 @@ void main() {
             .selected,
         {false},
       );
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
       expect(
         (await SharedPreferences.getInstance()).getBool(
           'wiki_show_translation',
@@ -1443,6 +1520,8 @@ void main() {
         isFalse,
       );
       await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('wiki-reading-button')));
       await tester.pumpAndSettle();
       expect(
         tester
@@ -1452,15 +1531,16 @@ void main() {
             .selected,
         {true},
       );
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+      // Rows render a 7px category dot before a plain single-line title.
+      final longRow = find.byKey(const ValueKey('wiki-row-$longTag'));
       final longTitle = find.descendant(
-        of: find.byWidgetPredicate(
-          (widget) =>
-              widget is TagCandidateTitle &&
-              widget.title ==
-                  'artoria pendragon (swimsuit ruler) (first ascension) (fate)',
+        of: longRow,
+        matching: find.text(
+          'artoria pendragon (swimsuit ruler) (first ascension) (fate)',
         ),
-        matching: find.byType(Text),
       );
       final longIcon = find.byKey(
         const ValueKey('wiki-category-character-$longTag'),
@@ -1471,7 +1551,7 @@ void main() {
       expect(paragraph.didExceedMaxLines, isTrue);
       final titleRect = tester.getRect(longTitle);
       final iconRect = tester.getRect(longIcon);
-      expect(iconRect.left - titleRect.right, closeTo(3, .01));
+      expect(iconRect.right, lessThanOrEqualTo(titleRect.left));
       expect(
         iconRect.right,
         lessThan(tester.getRect(find.text('1.3k').at(1)).left),
@@ -1480,10 +1560,10 @@ void main() {
       final shortIcon = tester.getRect(
         find.byKey(const ValueKey('wiki-category-character-fate_testarossa')),
       );
-      expect(shortIcon.left - shortRect.right, closeTo(3, .01));
+      expect(shortIcon.right, lessThanOrEqualTo(shortRect.left));
       expect(
         find.byKey(const ValueKey('wiki-category-general-blue_eyes')),
-        findsNothing,
+        findsOneWidget,
       );
       expect(
         find.byKey(const ValueKey('wiki-category-artist-artist_name')),
@@ -1498,7 +1578,12 @@ void main() {
       await tester.tap(find.text('blue_eyes', findRichText: true));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
-      expect(find.byKey(const Key('wiki-article-back')), findsOneWidget);
+      expect(
+        tester
+            .widget<OutlinedButton>(find.byKey(const Key('wiki-history-back')))
+            .onPressed,
+        isNotNull,
+      );
     },
   );
 
@@ -1545,7 +1630,12 @@ void main() {
       await tester.tap(find.text('blue_eyes', findRichText: true).last);
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
-      expect(find.byKey(const Key('wiki-article-back')), findsOneWidget);
+      expect(
+        tester
+            .widget<OutlinedButton>(find.byKey(const Key('wiki-history-back')))
+            .onPressed,
+        isNotNull,
+      );
       expect(tester.takeException(), isNull);
     },
   );
@@ -1698,10 +1788,120 @@ void main() {
           .onTagTap(tags[2]);
       await tester.pumpAndSettle();
       expect(articleScroll().offset, 0);
-      await tester.tap(find.byKey(const Key('wiki-article-back')));
+      await tester.tap(find.byKey(const Key('wiki-history-back')));
       await tester.pumpAndSettle();
       expect(articleScroll().offset, 350);
       expect(tester.takeException(), isNull);
     },
   );
+
+  // CAPTURE_WIKI_REDESIGN=1 records the confirmed three-column matrix:
+  // five locales × light/dark × 1440/1100/680 (680 is single-column) plus an
+  // Aa reading-settings overlay shot per locale/theme at 1440.
+  if (Platform.environment['CAPTURE_WIKI_REDESIGN'] == '1') {
+    for (final lang in const ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
+      for (final brightness in Brightness.values) {
+        for (final width in const [1440.0, 1100.0, 680.0]) {
+          testWidgets(
+            'wiki redesign matrix $lang ${brightness.name} ${width.toInt()}',
+            (tester) async {
+              tester.view.physicalSize = Size(width, 900);
+              tester.view.devicePixelRatio = 1;
+              addTearDown(tester.view.resetPhysicalSize);
+              addTearDown(tester.view.resetDevicePixelRatio);
+              await _pump(
+                tester,
+                const TagWikiScreen(
+                  initialTag: '1girl',
+                  directory: _captureDirectory,
+                ),
+                _Auto()..bodyOverride = _uiBody,
+                catalog: _Tags(entries: _uiTags()),
+                related: _captureRelated(),
+                locale: lang == 'zh_TW'
+                    ? const Locale('zh', 'TW')
+                    : Locale(lang),
+                brightness: brightness,
+                chrome: true,
+              );
+              expect(tester.takeException(), isNull);
+              expect(
+                find.byKey(const ValueKey('wiki-related-section')),
+                findsOneWidget,
+              );
+              expect(
+                find.byKey(const ValueKey('wiki-directory-paths')),
+                findsOneWidget,
+              );
+              final name = 'matrix-${width.toInt()}-$lang';
+              await capture(tester, name, brightness.name);
+              if (width == 1440) {
+                await tester.tap(
+                  find.byKey(const ValueKey('wiki-reading-button')),
+                );
+                await tester.pumpAndSettle();
+                await capture(tester, '$name-aa', brightness.name);
+              }
+            },
+          );
+        }
+      }
+    }
+  }
 }
+
+const _captureDirectory = WikiDirectory(
+  roots: [
+    WikiDirectoryNode(
+      label: 'Visual characteristics',
+      children: [
+        WikiDirectoryNode(
+          label: 'Image composition and style',
+          children: [
+            WikiDirectoryNode(
+              label: 'Image Composition',
+              children: [
+                WikiDirectoryNode(
+                  label: 'Character Count',
+                  group: 'tag_group:character_count',
+                  children: [],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
+    WikiDirectoryNode(label: 'Attire and body accessories', children: []),
+  ],
+  groups: {
+    'tag_group:character_count': WikiDirectoryGroup(
+      title: 'tag_group:character_count',
+      members: ['1girl', '1boy', '2girls', 'solo', 'multiple_girls'],
+      children: [],
+      sourceUrl: '',
+    ),
+  },
+);
+
+List<CompletionCandidate> _captureRelated() => [
+  for (final row in const [
+    ('solo', 3800000),
+    ('long_hair', 2600000),
+    ('looking_at_viewer', 1900000),
+    ('smile', 1500000),
+    ('blush', 1400000),
+    ('blue_eyes', 1200000),
+    ('1boy', 900000),
+    ('open_mouth', 800000),
+    ('2girls', 600000),
+  ])
+    CompletionCandidate(
+      canonicalTag: row.$1,
+      category: TagCategory.general,
+      postCount: row.$2,
+      cooccurrenceCount: row.$2,
+      matchKind: CompletionMatchKind.englishExact,
+      sources: const {CompletionSourceKind.base},
+    ),
+];

@@ -5963,7 +5963,7 @@
   "wiki_deleteCollection": "Delete collection",
   "wiki_officialDirectory": "Official directory",
   "wiki_searchHint": "Search tags or aliases",
-  "wiki_typeAll": "All types",
+  "wiki_typeAllShort": "All",
   "wiki_coverageAll": "All descriptions",
   "wiki_withArticle": "Has description",
   "wiki_withoutArticle": "No description yet",
@@ -6166,6 +6166,35 @@
   "wiki_categorySpecies": "Species",
   "wiki_categoryLore": "Lore",
   "wiki_categoryLibrary": "Library",
+  "wiki_addToPrompt": "Add to prompt",
+  "wiki_addedToPrompt": "Added to prompt: {tag}",
+  "@wiki_addedToPrompt": {
+    "placeholders": {
+      "tag": {}
+    }
+  },
+  "wiki_alreadyInPrompt": "{tag} is already in the prompt",
+  "@wiki_alreadyInPrompt": {
+    "placeholders": {
+      "tag": {}
+    }
+  },
+  "wiki_promptChangedCannotUndo": "Prompt changed; can't undo",
+  "wiki_forward": "Forward",
+  "wiki_posts": "posts",
+  "wiki_aliases": "Aliases",
+  "wiki_relatedTitle": "Often used with",
+  "wiki_relatedHint": "Click to open · Shift+click to add",
+  "wiki_relatedShare": "{percent} of posts also have this tag",
+  "@wiki_relatedShare": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "wiki_inDirectory": "In directory",
+  "wiki_noArticle": "No wiki",
+  "wiki_moreCategories": "More",
+  "wiki_shortcutsHint": "Shortcuts: / search · ↑↓ move · Enter add · B bookmark · Alt+←/→ history",
   "toast_titleSuccess": "Completed",
   "toast_titleError": "Action failed",
   "toast_titleWarning": "Please note",

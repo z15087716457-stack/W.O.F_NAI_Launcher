@@ -9717,7 +9717,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get wiki_searchHint => '태그나 별칭 검색';
 
   @override
-  String get wiki_typeAll => '모든 유형';
+  String get wiki_typeAllShort => '전체';
 
   @override
   String get wiki_coverageAll => '모든 설명';
@@ -10332,6 +10332,55 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get wiki_categoryLibrary => '로컬';
+
+  @override
+  String get wiki_addToPrompt => '프롬프트에 추가';
+
+  @override
+  String wiki_addedToPrompt(Object tag) {
+    return '프롬프트에 추가됨: $tag';
+  }
+
+  @override
+  String wiki_alreadyInPrompt(Object tag) {
+    return '$tag 태그가 이미 프롬프트에 있습니다';
+  }
+
+  @override
+  String get wiki_promptChangedCannotUndo => '프롬프트가 변경되어 실행 취소할 수 없습니다';
+
+  @override
+  String get wiki_forward => '앞으로';
+
+  @override
+  String get wiki_posts => '개 게시물';
+
+  @override
+  String get wiki_aliases => '별칭';
+
+  @override
+  String get wiki_relatedTitle => '함께 자주 쓰는 태그';
+
+  @override
+  String get wiki_relatedHint => '클릭하여 열기 · Shift+클릭으로 프롬프트에 추가';
+
+  @override
+  String wiki_relatedShare(Object percent) {
+    return '게시물의 $percent도 이 태그를 포함합니다';
+  }
+
+  @override
+  String get wiki_inDirectory => '소속 디렉터리';
+
+  @override
+  String get wiki_noArticle => '위키 없음';
+
+  @override
+  String get wiki_moreCategories => '더 보기';
+
+  @override
+  String get wiki_shortcutsHint =>
+      '단축키: / 검색 · ↑↓ 이동 · Enter 추가 · B 북마크 · Alt+←/→ 기록';
 
   @override
   String get toast_titleSuccess => '완료';
