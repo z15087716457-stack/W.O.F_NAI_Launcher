@@ -1,0 +1,432 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
+// ignore: depend_on_referenced_packages
+import 'package:irondash_message_channel/irondash_message_channel.dart';
+// ignore: implementation_imports, depend_on_referenced_packages
+import 'package:super_native_extensions/src/native/context.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
+import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
+import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
+import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
+import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
+import 'package:nai_launcher/core/wiki/wiki_directory.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/data/models/online_gallery/gallery_source.dart';
+import 'package:nai_launcher/data/repositories/online_favorites_repository.dart';
+import 'package:nai_launcher/data/services/danbooru_auth_service.dart';
+import 'package:nai_launcher/data/services/gelbooru_auth_service.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
+import 'package:nai_launcher/presentation/providers/online_favorites_provider.dart';
+import 'package:nai_launcher/presentation/providers/precise_ref_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
+import 'package:nai_launcher/presentation/providers/vibe_library_category_provider.dart';
+import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/vibe_library_selection_provider.dart';
+import 'package:nai_launcher/presentation/screens/online_gallery/online_gallery_screen.dart';
+import 'package:nai_launcher/presentation/screens/precise_ref_library/precise_ref_library_screen.dart';
+import 'package:nai_launcher/presentation/screens/prompt_block_library/prompt_block_library_screen.dart';
+import 'package:nai_launcher/presentation/screens/statistics/statistics_screen.dart';
+import 'package:nai_launcher/presentation/screens/statistics/statistics_state.dart';
+import 'package:nai_launcher/presentation/screens/statistics/widgets/dashboard/animated_refresh_button.dart';
+import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
+import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_sidebar.dart';
+import 'package:nai_launcher/presentation/screens/vibe_library/vibe_library_screen.dart';
+import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
+import 'package:nai_launcher/presentation/widgets/bulk_action_bar.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
+
+import '../../helpers/studio_capture_fonts.dart';
+
+class _Gallery extends OnlineGalleryNotifier {
+  @override
+  OnlineGalleryState build() => const OnlineGalleryState();
+  @override
+  Future<void> loadPosts({bool refresh = false}) async {}
+}
+
+class _Danbooru extends DanbooruAuth {
+  @override
+  DanbooruAuthState build() => const DanbooruAuthState();
+}
+
+class _Favorites extends OnlineFavoritesNotifier {
+  _Favorites() : super(OnlineFavoritesRepository.instance);
+  @override
+  Future<void> bindSource(GallerySourceId source) async {}
+}
+
+class _Gelbooru extends GelbooruAuth {
+  @override
+  GelbooruAuthState build() => const GelbooruAuthState();
+}
+
+class _Blocks extends PromptBlockLibraryNotifier {
+  @override
+  Future<PromptBlockLibraryState> build() async => PromptBlockLibraryState(
+    blocks: [
+      PromptBlock.create(
+        id: 'example',
+        title: 'Example',
+        content: 'blue_eyes',
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+      ),
+    ],
+    folders: [],
+  );
+}
+
+class _Vibes extends VibeLibraryNotifier {
+  @override
+  VibeLibraryState build() => const VibeLibraryState();
+  @override
+  Future<void> initialize() async {}
+}
+
+class _Categories extends VibeLibraryCategoryNotifier {
+  @override
+  VibeLibraryCategoryState build() => const VibeLibraryCategoryState();
+}
+
+class _References extends PreciseRefLibraryNotifier {
+  @override
+  PreciseRefLibraryState build() => const PreciseRefLibraryState();
+  @override
+  Future<void> initialize() async {}
+}
+
+class _Statistics extends StatisticsNotifier {
+  var refreshes = 0;
+  @override
+  StatisticsData build() => const StatisticsData(isLoading: false);
+  @override
+  Future<void> refresh() async => refreshes++;
+}
+
+class _Tags extends UnifiedTagRepository {
+  _Tags()
+    : super(
+        catalog: TagCatalogRepository(),
+        runtime: () async => throw StateError('not used'),
+      );
+  @override
+  Future<List<CompletionCandidate>> browse({
+    TagCategory? category,
+    bool? hasWiki,
+    bool alphabetical = false,
+    int offset = 0,
+    int limit = 80,
+  }) async => [];
+  @override
+  Future<int> count({TagCategory? category, bool? hasWiki}) async => 0;
+}
+
+class _Wiki implements TagWikiRepository {
+  @override
+  Future<TagWikiEntry?> find(String tag) async => null;
+}
+
+class _Translation extends ChangeNotifier
+    implements AutoTagTranslationController {
+  @override
+  bool get enabled => false;
+  @override
+  int get activeRequests => 0;
+  @override
+  Object? noSuchMethod(Invocation invocation) => null;
+}
+
+const _pages = <String, Widget>{
+  'online': OnlineGalleryScreen(),
+  'blocks': PromptBlockLibraryScreen(),
+  'vibes': VibeLibraryScreen(),
+  'references': PreciseRefLibraryScreen(),
+  'wiki': Scaffold(
+    body: TagWikiScreen(
+      directory: WikiDirectory(roots: [], groups: {}),
+    ),
+  ),
+  'statistics': StatisticsScreen(),
+};
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setContextOverride(
+    MockMessageChannelContext()
+      ..registerMockMethodCallHandler('DropManager', (_) async => null)
+      ..registerMockMethodCallHandler('DragManager', (_) async => null),
+  );
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+        const MethodChannel('dev.irondash.engine_context'),
+        (_) async => 1,
+      );
+  final calls = <String>[];
+  const windows = MethodChannel('window_manager');
+  const nativeChrome = MethodChannel('com.nailauncher/titlebar');
+  setUpAll(() async {
+    await loadStudioCaptureFonts();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+  });
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    calls.clear();
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(windows, (call) async {
+      calls.add(call.method);
+      if (call.method == 'isMaximized' || call.method == 'isFullScreen') {
+        return false;
+      }
+      return null;
+    });
+    messenger.setMockMethodCallHandler(nativeChrome, (_) async => null);
+  });
+  tearDown(() {
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(windows, null);
+    messenger.setMockMethodCallHandler(nativeChrome, null);
+  });
+
+  Future<void> pumpPage(
+    WidgetTester tester,
+    String page, {
+    double width = 1600,
+    Locale locale = const Locale('zh'),
+    bool dark = false,
+  }) async {
+    tester.view.physicalSize = Size(width, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          onlineGalleryNotifierProvider.overrideWith(_Gallery.new),
+          onlineFavoritesNotifierProvider.overrideWith((_) => _Favorites()),
+          danbooruAuthProvider.overrideWith(_Danbooru.new),
+          gelbooruAuthProvider.overrideWith(_Gelbooru.new),
+          promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
+          vibeLibraryNotifierProvider.overrideWith(_Vibes.new),
+          vibeLibraryCategoryNotifierProvider.overrideWith(_Categories.new),
+          preciseRefLibraryNotifierProvider.overrideWith(_References.new),
+          statisticsNotifierProvider.overrideWith(_Statistics.new),
+          unifiedTagRepositoryProvider.overrideWith((_) => _Tags()),
+          tagWikiRepositoryProvider.overrideWith((_) => _Wiki()),
+          autoTagTranslationProvider.overrideWith((_) => _Translation()),
+        ],
+        child: MaterialApp(
+          locale: locale,
+          theme: dark ? GeistTheme.dark : GeistTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: RepaintBoundary(
+            key: const Key('capture-page'),
+            child: IntegratedTitleBarShell(
+              captionHeight: 62,
+              child: _pages[page]!,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    calls.clear();
+  }
+
+  Future<void> mouseDrag(WidgetTester tester, Offset from) async {
+    final mouse = await tester.createGesture(kind: ui.PointerDeviceKind.mouse);
+    await mouse.down(from);
+    await mouse.moveBy(const Offset(45, 0));
+    await mouse.up();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+
+  Future<void> checkHeader(WidgetTester tester) async {
+    final header = find.byType(WindowHeader).first;
+    final rect = tester.getRect(header);
+    // This is page padding, far from the pre-existing right caption strip.
+    await mouseDrag(tester, rect.topLeft + Offset(3, rect.height - 5));
+    expect(calls.where((call) => call == 'startDragging'), hasLength(1));
+    calls.clear();
+    final fields = find.descendant(
+      of: header,
+      matching: find.byType(TextField),
+    );
+    if (fields.evaluate().isNotEmpty) {
+      await mouseDrag(tester, tester.getCenter(fields.first));
+      expect(calls, isNot(contains('startDragging')));
+    }
+  }
+
+  for (final page in _pages.keys) {
+    for (final locale in const [
+      Locale('zh'),
+      Locale('zh', 'TW'),
+      Locale('en'),
+      Locale('ja'),
+      Locale('ko'),
+    ]) {
+      for (final width in [900.0, 1600.0]) {
+        testWidgets(
+          '$page empty header drags; search stays usable $locale $width',
+          (tester) async {
+            await pumpPage(
+              tester,
+              page,
+              width: width,
+              locale: locale,
+              dark: width == 900,
+            );
+            if (locale == const Locale('zh') &&
+                Platform.environment['CAPTURE_HEADER_DRAG'] == '1') {
+              final boundary = tester.renderObject<RenderRepaintBoundary>(
+                find.byKey(const Key('capture-page')),
+              );
+              await tester.runAsync(() async {
+                final image = await boundary.toImage();
+                final png = await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+                final file = File(
+                  '.dart_tool/page-header-drag-20261005/$page-${width.toInt()}.png',
+                );
+                await file.parent.create(recursive: true);
+                await file.writeAsBytes(png!.buffer.asUint8List());
+                image.dispose();
+              });
+            }
+            await checkHeader(tester);
+            await tester.tap(find.byIcon(Icons.remove));
+            expect(calls, contains('minimize'));
+            expect(tester.takeException(), isNull);
+          },
+
+          variant: TargetPlatformVariant.only(TargetPlatform.windows),
+        );
+      }
+    }
+  }
+
+  for (final page in ['blocks', 'vibes', 'wiki']) {
+    testWidgets(
+      '$page sidebar gaps drag and create button opens its dialog',
+      (tester) async {
+        await pumpPage(tester, page);
+        final sidebarSurface = find.byType(WindowHeaderDragSurface).first;
+        final rect = tester.getRect(sidebarSurface);
+        await mouseDrag(tester, rect.topLeft + Offset(rect.width * .55, 30));
+        expect(calls, contains('startDragging'));
+        calls.clear();
+        final create = find
+            .descendant(
+              of: sidebarSurface,
+              matching: page == 'vibes'
+                  ? find.byType(FilledButton)
+                  : find.byType(IconButton),
+            )
+            .first;
+        await tester.tap(create);
+        await tester.pumpAndSettle();
+        expect(find.byType(Dialog), findsOneWidget);
+        expect(calls, isNot(contains('startDragging')));
+        // A modal's blank surface must not reach the header underneath.
+        await mouseDrag(tester, rect.topLeft + const Offset(3, 30));
+        expect(calls, isNot(contains('startDragging')));
+        expect(tester.takeException(), isNull);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.windows),
+    );
+  }
+
+  testWidgets(
+    'block header stays draggable with the right detail panel open',
+    (tester) async {
+      await pumpPage(tester, 'blocks');
+      await tester.tap(find.byKey(const Key('prompt-block-detail-collapsed')));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<WindowHeader>(find.byType(WindowHeader)).enabled,
+        isFalse,
+      );
+      await checkHeader(tester);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+
+  for (final page in ['online', 'vibes']) {
+    testWidgets(
+      '$page selection header gaps still drag',
+      (tester) async {
+        await pumpPage(tester, page);
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(WindowHeader)),
+        );
+        if (page == 'vibes') {
+          container.read(vibeLibrarySelectionNotifierProvider.notifier).enter();
+        } else {
+          container
+              .read(onlineGallerySelectionNotifierProvider.notifier)
+              .enter();
+        }
+        await tester.pumpAndSettle();
+        expect(find.byType(BulkActionBar), findsOneWidget);
+        await checkHeader(tester);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.windows),
+    );
+  }
+
+  testWidgets(
+    'statistics refresh button works independently of the drag area',
+    (tester) async {
+      await pumpPage(tester, 'statistics');
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(StatisticsScreen)),
+      );
+      await tester.tap(find.byType(AnimatedRefreshButton));
+      await tester.pumpAndSettle();
+      expect(
+        (container.read(statisticsNotifierProvider.notifier) as _Statistics)
+            .refreshes,
+        1,
+      );
+      expect(calls, isNot(contains('startDragging')));
+    },
+
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+
+  testWidgets(
+    'Wiki directory sheet header does not drag the window',
+    (tester) async {
+      await pumpPage(tester, 'wiki', width: 900);
+      await tester.tap(find.byKey(const Key('wiki-directory-button')));
+      await tester.pumpAndSettle();
+      final sidebar = find.byType(WikiSidebar);
+      expect(tester.widget<WikiSidebar>(sidebar).allowWindowDrag, isFalse);
+      final header = tester.getRect(
+        find.byKey(const Key('wiki-directory-header')),
+      );
+      await mouseDrag(tester, header.topLeft + const Offset(3, 30));
+      expect(calls, isNot(contains('startDragging')));
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+}

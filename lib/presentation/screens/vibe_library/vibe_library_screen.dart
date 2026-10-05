@@ -221,47 +221,53 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
                         child: Column(
                           children: [
                             // 顶部标题栏
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              constraints: const BoxConstraints(minHeight: 62),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.folder_outlined,
-                                    size: 20,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      context.l10n.vibeLibrary_categories,
-                                      style: theme.textTheme.titleSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                            WindowHeaderDragSurface(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                constraints: const BoxConstraints(
+                                  minHeight: 62,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.folder_outlined,
+                                      size: 20,
+                                      color: theme.colorScheme.primary,
                                     ),
-                                  ),
-                                  FilledButton.tonalIcon(
-                                    onPressed: () =>
-                                        _showCreateCategoryDialog(context),
-                                    icon: const Icon(Icons.add, size: 18),
-                                    label: Text(
-                                      context.l10n.common_new,
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                    style: FilledButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: IgnorePointer(
+                                        child: Text(
+                                          context.l10n.vibeLibrary_categories,
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    FilledButton.tonalIcon(
+                                      onPressed: () =>
+                                          _showCreateCategoryDialog(context),
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: Text(
+                                        context.l10n.common_new,
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
+                                      style: FilledButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                             Divider(
@@ -392,6 +398,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
                         children: [
                           // 工具栏
                           LibraryWindowHeader(
+                            dragBackground: true,
                             minimumInlineWidth: 900,
                             child: _buildToolbar(state, selectionState, theme),
                           ),

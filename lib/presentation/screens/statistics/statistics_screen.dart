@@ -23,7 +23,10 @@ class StatisticsScreen extends ConsumerWidget {
     return Scaffold(
       body: Column(
         children: [
-          WindowHeader(child: _buildHeader(context, theme, l10n)),
+          WindowHeader(
+            dragBackground: true,
+            child: _buildHeader(context, theme, l10n),
+          ),
           Expanded(child: _buildContent(context, l10n, data, ref, screenWidth)),
         ],
       ),
@@ -41,7 +44,6 @@ class StatisticsScreen extends ConsumerWidget {
 
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
@@ -51,19 +53,28 @@ class StatisticsScreen extends ConsumerWidget {
           ),
         ),
       ),
-      child: Row(
-        children: [
-          Icon(StudioIcons.statistics, size: 24, color: colorScheme.primary),
-          const SizedBox(width: 12),
-          Text(
-            l10n.statistics_title,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+      child: WindowHeaderDragSurface(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Icon(
+                StudioIcons.statistics,
+                size: 24,
+                color: colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                l10n.statistics_title,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              const AnimatedRefreshButton(),
+            ],
           ),
-          const Spacer(),
-          const AnimatedRefreshButton(),
-        ],
+        ),
       ),
     );
   }

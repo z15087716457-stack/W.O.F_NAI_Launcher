@@ -279,6 +279,7 @@ class _OnlineGalleryScreenState extends ConsumerState<OnlineGalleryScreen>
         children: [
           // 顶部工具栏
           LibraryWindowHeader(
+            dragBackground: true,
             child: _buildToolbar(theme, state, authState, gelbooruAuthState),
           ),
           // 图片网格（右下角悬浮列宽滑杆）

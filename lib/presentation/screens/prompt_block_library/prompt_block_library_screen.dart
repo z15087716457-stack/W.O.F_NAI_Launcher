@@ -237,6 +237,7 @@ class _PromptBlockLibraryScreenState
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         LibraryWindowHeader(
+                          dragBackground: true,
                           enabled: !showDetailPanel || !_detailPanelExpanded,
                           inlineDragWidth: 17,
                           showCaptionDivider: true,
@@ -443,33 +444,37 @@ class _PromptBlockLibraryScreenState
             SizedBox(
               // 与主工具栏同高（62）垂直居中，两边分隔线/基线对齐。
               height: promptBlockLibraryWideHeaderHeight,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.folder_copy_outlined,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.l10n.promptBlockLibrary_folders,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+              child: WindowHeaderDragSurface(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.folder_copy_outlined,
+                        size: 20,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: IgnorePointer(
+                          child: Text(
+                            context.l10n.promptBlockLibrary_folders,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: context.l10n.promptBlockLibrary_newFolder,
-                      onPressed: () => _showFolderNameDialog(context),
-                      icon: const Icon(
-                        Icons.create_new_folder_outlined,
-                        size: 19,
+                      IconButton(
+                        tooltip: context.l10n.promptBlockLibrary_newFolder,
+                        onPressed: () => _showFolderNameDialog(context),
+                        icon: const Icon(
+                          Icons.create_new_folder_outlined,
+                          size: 19,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

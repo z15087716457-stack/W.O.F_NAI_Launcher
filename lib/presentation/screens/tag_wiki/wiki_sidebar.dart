@@ -9,6 +9,7 @@ import '../../widgets/common/themed_input_dialog.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import '../../widgets/common/studio_animated_icon.dart';
 import '../../widgets/common/studio_icons.dart';
+import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../providers/canvas_settings_provider.dart';
 
 enum WikiScopeKind { all, bookmarks, collection, directory }
@@ -43,6 +44,7 @@ class WikiSidebar extends StatelessWidget {
     this.width = 216,
     this.headerHeight = 62,
     this.navigationHeight,
+    this.allowWindowDrag = false,
   });
 
   final WikiDirectory directory;
@@ -51,6 +53,7 @@ class WikiSidebar extends StatelessWidget {
   final ValueChanged<WikiScope> onSelect;
   final double width;
   final double headerHeight;
+  final bool allowWindowDrag;
   // The first two rows share the results toolbar's height; collections below
   // them can still expand the directory naturally.
   final double? navigationHeight;
@@ -293,33 +296,38 @@ class WikiSidebar extends StatelessWidget {
             SizedBox(
               key: const ValueKey('wiki-directory-header'),
               height: headerHeight,
-              child: OverflowBox(
-                alignment: Alignment.topCenter,
-                minHeight: 62,
-                maxHeight: 62,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      const _WikiTitleMark(),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          context.l10n.wiki_title,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+              child: WindowHeaderDragSurface(
+                enabled: allowWindowDrag,
+                child: OverflowBox(
+                  alignment: Alignment.topCenter,
+                  minHeight: 62,
+                  maxHeight: 62,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        const _WikiTitleMark(),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: IgnorePointer(
+                            child: Text(
+                              context.l10n.wiki_title,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        tooltip: context.l10n.wiki_newCollection,
-                        icon: const Icon(
-                          Icons.create_new_folder_outlined,
-                          size: 19,
+                        IconButton(
+                          tooltip: context.l10n.wiki_newCollection,
+                          icon: const Icon(
+                            Icons.create_new_folder_outlined,
+                            size: 19,
+                          ),
+                          onPressed: () => _create(context),
                         ),
-                        onPressed: () => _create(context),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

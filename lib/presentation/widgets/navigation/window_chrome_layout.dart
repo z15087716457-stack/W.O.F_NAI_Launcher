@@ -78,6 +78,34 @@ class WindowDragArea extends StatelessWidget {
   );
 }
 
+/// Place the drag target behind the header's controls. Only uncovered space
+/// reaches it; fields, buttons and menus retain their own pointer handling.
+/// Painted containers belong outside this surface so they do not intercept
+/// its blank areas.
+class WindowHeaderDragSurface extends StatelessWidget {
+  const WindowHeaderDragSurface({
+    super.key,
+    required this.child,
+    this.enabled = true,
+  });
+
+  final Widget child;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!enabled || !WindowChromeScope.activeOf(context)) return child;
+    return Stack(
+      children: [
+        const Positioned.fill(
+          child: WindowDragArea(key: Key('window-header-background-drag')),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
 /// Reserve the top-right caption footprint within an existing page header.
 /// Narrow panes keep their controls on a second row, with no whole-window bar.
 class WindowHeader extends StatelessWidget {
@@ -90,6 +118,7 @@ class WindowHeader extends StatelessWidget {
     this.showCaptionDivider = false,
     this.outsideRightWidth = 0,
     this.dragBelowCaptions = false,
+    this.dragBackground = false,
     this.decoration,
   });
   final Widget child;
@@ -104,14 +133,22 @@ class WindowHeader extends StatelessWidget {
   /// Headers taller than the caption cluster: the reserved strip below the
   /// window controls also moves the window instead of being dead space.
   final bool dragBelowCaptions;
+
+  /// Enable dragging over uncovered header space, even when an adjacent pane
+  /// owns the caption reserve and [enabled] is false.
+  final bool dragBackground;
   final Decoration? decoration;
 
   @override
   Widget build(BuildContext context) {
     if (!enabled || !WindowChromeScope.activeOf(context)) {
+      final content = WindowHeaderDragSurface(
+        enabled: dragBackground,
+        child: child,
+      );
       return decoration == null
-          ? child
-          : Container(decoration: decoration!, child: child);
+          ? content
+          : Container(decoration: decoration!, child: content);
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -125,53 +162,58 @@ class WindowHeader extends StatelessWidget {
           decoration:
               decoration ??
               BoxDecoration(color: Theme.of(context).colorScheme.surface),
-          child: Stack(
-            children: [
-              Padding(
-                padding: narrow
-                    ? EdgeInsets.only(top: WindowChromeScope.heightOf(context))
-                    : EdgeInsets.only(right: reserved + inlineDragWidth),
-                child: child,
-              ),
-              if (dragBelowCaptions && !narrow)
-                Positioned(
-                  top: WindowChromeScope.heightOf(context),
-                  right: 0,
-                  bottom: 0,
-                  width: reserved + inlineDragWidth,
-                  child: const WindowDragArea(
-                    key: Key('window-header-drag-below-captions'),
-                  ),
+          child: WindowHeaderDragSurface(
+            enabled: dragBackground,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: narrow
+                      ? EdgeInsets.only(
+                          top: WindowChromeScope.heightOf(context),
+                        )
+                      : EdgeInsets.only(right: reserved + inlineDragWidth),
+                  child: child,
                 ),
-              Positioned(
-                top: 0,
-                left: narrow ? 0 : null,
-                right: reserved,
-                width: narrow ? null : inlineDragWidth,
-                height: WindowChromeScope.heightOf(context),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    const WindowDragArea(),
-                    if (showCaptionDivider)
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IgnorePointer(
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Container(
-                              key: const Key('window-header-caption-divider'),
-                              width: 1,
-                              height: 18,
-                              color: Theme.of(context).dividerColor,
+                if (dragBelowCaptions && !narrow)
+                  Positioned(
+                    top: WindowChromeScope.heightOf(context),
+                    right: 0,
+                    bottom: 0,
+                    width: reserved + inlineDragWidth,
+                    child: const WindowDragArea(
+                      key: Key('window-header-drag-below-captions'),
+                    ),
+                  ),
+                Positioned(
+                  top: 0,
+                  left: narrow ? 0 : null,
+                  right: reserved,
+                  width: narrow ? null : inlineDragWidth,
+                  height: WindowChromeScope.heightOf(context),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      const WindowDragArea(),
+                      if (showCaptionDivider)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IgnorePointer(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: Container(
+                                key: const Key('window-header-caption-divider'),
+                                width: 1,
+                                height: 18,
+                                color: Theme.of(context).dividerColor,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -190,6 +232,7 @@ class LibraryWindowHeader extends StatelessWidget {
     this.showCaptionDivider = false,
     this.outsideRightWidth = 0,
     this.dragBelowCaptions = false,
+    this.dragBackground = false,
   });
   final Widget child;
   final bool enabled;
@@ -198,6 +241,7 @@ class LibraryWindowHeader extends StatelessWidget {
   final bool showCaptionDivider;
   final double outsideRightWidth;
   final bool dragBelowCaptions;
+  final bool dragBackground;
   @override
   Widget build(BuildContext context) => WindowHeader(
     enabled: enabled,
@@ -206,6 +250,7 @@ class LibraryWindowHeader extends StatelessWidget {
     showCaptionDivider: showCaptionDivider,
     outsideRightWidth: outsideRightWidth,
     dragBelowCaptions: dragBelowCaptions,
+    dragBackground: dragBackground,
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surface,
       border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),

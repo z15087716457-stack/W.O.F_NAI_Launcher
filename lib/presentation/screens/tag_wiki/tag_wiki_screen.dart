@@ -563,6 +563,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           children: [
             if (!_compactNavigation)
               WikiSidebar(
+                allowWindowDrag: true,
                 headerHeight: _toolbarHeight - 1,
                 navigationHeight: _resultsToolbarHeight,
                 width: 216.0 * scale.clamp(1, 1.12),
@@ -694,6 +695,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       onChanged: (_) => _queueSearch(),
     );
     return WindowHeader(
+      dragBackground: true,
       key: _toolbarKey,
       decoration: BoxDecoration(
         color: scheme.surface,

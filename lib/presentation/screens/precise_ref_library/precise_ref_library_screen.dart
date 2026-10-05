@@ -343,7 +343,10 @@ class _PreciseRefLibraryScreenState
           children: [
             Column(
               children: [
-                LibraryWindowHeader(child: _buildToolbar(state)),
+                LibraryWindowHeader(
+                  dragBackground: true,
+                  child: _buildToolbar(state),
+                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: Align(
@@ -439,25 +442,30 @@ class _PreciseRefLibraryScreenState
               ),
             ],
           ),
-          const Spacer(),
-          SizedBox(
-            width: 220,
-            child: TextField(
-              key: const Key('precise-ref-library-search'),
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.preciseRefLib_searchHint,
-                prefixIcon: const Icon(Icons.search, size: 18),
-                isDense: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                width: 220,
+                child: TextField(
+                  key: const Key('precise-ref-library-search'),
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: l10n.preciseRefLib_searchHint,
+                    prefixIcon: const Icon(Icons.search, size: 18),
+                    isDense: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  onChanged: _onSearchChanged,
                 ),
               ),
-              onChanged: _onSearchChanged,
             ),
           ),
           const SizedBox(width: 8),
