@@ -24,6 +24,15 @@ class WikiScope {
   bool matches(WikiScope other) => kind == other.kind && id == other.id;
 }
 
+// Keep source indices for selection and expansion IDs while grouping folders.
+// The relative order within each group remains the official directory order.
+Iterable<(int, WikiDirectoryNode)> _foldersFirst(
+  List<WikiDirectoryNode> nodes,
+) sync* {
+  yield* nodes.indexed.where((entry) => entry.$2.children.isNotEmpty);
+  yield* nodes.indexed.where((entry) => entry.$2.children.isEmpty);
+}
+
 class WikiSidebar extends StatelessWidget {
   const WikiSidebar({
     super.key,
@@ -159,8 +168,7 @@ class WikiSidebar extends StatelessWidget {
     final label = WikiDirectoryLabels.display(node.label, context.appLanguage);
     final selected =
         selection.kind == WikiScopeKind.directory && selection.id == id;
-    final children = node.children;
-    if (children.isEmpty) {
+    if (node.children.isEmpty) {
       return Padding(
         padding: EdgeInsets.only(left: (depth * 13).toDouble()),
         child: _row(
@@ -200,8 +208,8 @@ class WikiSidebar extends StatelessWidget {
         ),
       ),
       children: [
-        for (var index = 0; index < children.length; index++)
-          _directoryNode(context, children[index], '$id/$index', depth + 1),
+        for (final (index, child) in _foldersFirst(node.children))
+          _directoryNode(context, child, '$id/$index', depth + 1),
       ],
     );
   }
@@ -373,13 +381,8 @@ class WikiSidebar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  for (var index = 0; index < directory.roots.length; index++)
-                    _directoryNode(
-                      context,
-                      directory.roots[index],
-                      'root-$index',
-                      0,
-                    ),
+                  for (final (index, node) in _foldersFirst(directory.roots))
+                    _directoryNode(context, node, 'root-$index', 0),
                   const SizedBox(height: 12),
                 ],
               ),
