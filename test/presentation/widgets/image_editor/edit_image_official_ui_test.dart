@@ -72,6 +72,12 @@ void main() {
                 state = canvas.state;
             expect(state.layerManager.layerCount, 1);
             expect(state.tools.map((t) => t.id), officialEditToolIds);
+            if (width >= 720) {
+              expect(
+                tester.getSize(find.byType(EditToolSettings)).height,
+                tester.getSize(find.byType(EditImageToolbar)).height,
+              );
+            }
             Future<void> capture(String name) async {
               await tester.pump();
               expect(tester.takeException(), isNull);
@@ -89,7 +95,7 @@ void main() {
                   format: ui.ImageByteFormat.png,
                 );
                 final file = File(
-                  '.dart_tool/edit-ui-proportions-20261005/captures/${locale.toLanguageTag()}_${brightness.name}_${width.round()}_$name.png',
+                  '.dart_tool/edit-ui-compact-20261005/captures/${locale.toLanguageTag()}_${brightness.name}_${width.round()}_$name.png',
                 );
                 await file.parent.create(recursive: true);
                 await file.writeAsBytes(data!.buffer.asUint8List());
@@ -100,6 +106,12 @@ void main() {
             for (final tool in state.tools) {
               state.setTool(tool);
               await tester.pump();
+              if (width >= 720) {
+                expect(
+                  tester.getSize(find.byType(EditToolSettings)).height,
+                  tester.getSize(find.byType(EditImageToolbar)).height,
+                );
+              }
               await capture(tool.id);
             }
             state.setToolById('brush');
@@ -113,10 +125,10 @@ void main() {
             final popupIcon = tester.getRect(
               find.byKey(const Key('edit_color_popup_icon')),
             );
-            expect(swatch.size, const Size(106, 42));
-            expect(popupIcon.size, const Size(34, 34));
+            expect(swatch.size, const Size(90, 34));
+            expect(popupIcon.size, const Size(28, 28));
             expect(popupIcon.center.dy, swatch.center.dy);
-            expect(swatch.right - popupIcon.right, 6);
+            expect(swatch.right - popupIcon.right, 4);
             await capture('color');
             await tester.tapAt(Offset(width - 8, 250));
             await tester.pump();

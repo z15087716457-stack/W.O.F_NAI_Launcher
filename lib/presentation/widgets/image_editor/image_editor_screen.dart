@@ -399,7 +399,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
           padding: 64,
           insets: _isInpaintMode
               ? null
-              : const EdgeInsets.fromLTRB(10, 86, 10, 70),
+              : const EdgeInsets.fromLTRB(10, 70, 10, 70),
         );
       }
     });

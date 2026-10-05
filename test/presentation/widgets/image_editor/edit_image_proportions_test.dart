@@ -20,7 +20,7 @@ Widget app(Widget child) => MaterialApp(
 void main() {
   setUpAll(loadStudioCaptureFonts);
   testWidgets(
-    'Draw groups match measured official geometry and size remains editable',
+    'Compact Draw matches bottom toolbar height and size remains editable',
     (tester) async {
       final state = EditorState()..initNewCanvas(const Size(832, 1216));
       await tester.pumpWidget(
@@ -28,10 +28,10 @@ void main() {
       );
       expect(
         tester.getSize(find.byType(EditToolSettings)),
-        const Size(537, 66),
+        const Size(459, 50),
       );
       final label = tester.getRect(find.byKey(const Key('edit_tool_label')));
-      expect(label.size, const Size(62, 64));
+      expect(label.size, const Size(52, 48));
       final icon = find.descendant(
         of: find.byKey(const Key('edit_tool_label')),
         matching: find.byType(EditGlyph),
@@ -41,12 +41,12 @@ void main() {
       final size = tester.getRect(find.byType(EditNumberSlider));
       final tips = tester.getRect(find.byKey(const Key('edit_tips')));
       final pressure = tester.getRect(find.byKey(const Key('edit_pressure')));
-      expect(swatch.left - label.right, 11);
-      expect(size.left - swatch.right, 10);
-      expect(tips.left - size.right, 10);
-      expect(tips.size, const Size(136, 44));
+      expect(swatch.left - label.right, 9);
+      expect(size.left - swatch.right, 8);
+      expect(tips.left - size.right, 8);
+      expect(tips.size, const Size(118, 38));
       expect(pressure.left - tips.right, 6);
-      expect(pressure.size, const Size(44, 44));
+      expect(pressure.size, const Size(38, 38));
       final slider = tester.getRect(find.byType(Slider));
       await tester.tapAt(Offset(slider.right - 1, slider.center.dy));
       await tester.pumpAndSettle();

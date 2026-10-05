@@ -192,10 +192,11 @@ class EditToolSettings extends StatelessWidget {
                         },
                         selected: state.brushTip == tip,
                         bordered: true,
+                        size: 38,
                         onPressed: () => state.setBrushTip(tip),
                         child: Container(
-                          width: 12,
-                          height: 12,
+                          width: 10,
+                          height: 10,
                           decoration: BoxDecoration(
                             shape: tip == EditorBrushTip.square
                                 ? BoxShape.rectangle
@@ -225,6 +226,7 @@ class EditToolSettings extends StatelessWidget {
                 glyph: 'pressure',
                 selected: state.pressureSensitivity,
                 bordered: true,
+                size: 38,
                 onPressed: () =>
                     state.setPressureSensitivity(!state.pressureSensitivity),
               ),
@@ -251,18 +253,20 @@ class EditToolSettings extends StatelessWidget {
                 children: [
                   Container(
                     key: const Key('edit_tool_label'),
-                    width: 62,
-                    constraints: const BoxConstraints(minHeight: 64),
+                    constraints: const BoxConstraints(
+                      minWidth: 52,
+                      minHeight: 48,
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         EditGlyph(editToolGlyph(tool.id)),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           editToolLabel(context, tool.id),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 14, height: 1.5),
+                          style: const TextStyle(fontSize: 12, height: 1.5),
                         ),
                       ],
                     ),
@@ -277,13 +281,13 @@ class EditToolSettings extends StatelessWidget {
                       child: Padding(
                         key: const Key('edit_settings_body'),
                         padding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 10,
+                          vertical: 5,
+                          horizontal: 8,
                         ),
                         child: Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 10,
-                          runSpacing: 10,
+                          spacing: 8,
+                          runSpacing: 8,
                           children: settings,
                         ),
                       ),
@@ -309,7 +313,7 @@ class EditNumberSlider extends StatelessWidget {
     required this.onChanged,
     this.step = 1,
     this.uncapped = false,
-    this.width = 140,
+    this.width = 120,
   });
   final String label;
   final double value, min, max, step, width;
@@ -327,7 +331,7 @@ class EditNumberSlider extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final style = DefaultTextStyle.of(
       context,
-    ).style.copyWith(fontSize: 14, height: 1.5, fontWeight: FontWeight.w600);
+    ).style.copyWith(fontSize: 12, height: 1.5, fontWeight: FontWeight.w600);
     final number = '${value.round()}';
     final painter = TextPainter(
       text: TextSpan(text: number, style: style),
@@ -342,7 +346,7 @@ class EditNumberSlider extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 21,
+            height: 18,
             child: Row(
               children: [
                 Flexible(
@@ -381,13 +385,13 @@ class EditNumberSlider extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           SizedBox(
-            height: 12,
+            height: 8,
             child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 padding: EdgeInsets.zero,
-                trackHeight: 12,
+                trackHeight: 8,
                 trackShape: const _EditSliderTrack(),
                 thumbShape: const _EditSliderThumb(),
                 overlayShape: SliderComponentShape.noOverlay,
@@ -425,10 +429,10 @@ class _EditSliderTrack extends SliderTrackShape {
     bool isEnabled = false,
     bool isDiscrete = false,
   }) => Rect.fromLTWH(
-    offset.dx + 6,
-    offset.dy + (parentBox.size.height - 12) / 2,
-    math.max(0, parentBox.size.width - 12),
-    12,
+    offset.dx + 5,
+    offset.dy + (parentBox.size.height - 8) / 2,
+    math.max(0, parentBox.size.width - 10),
+    8,
   );
 
   @override
@@ -446,9 +450,9 @@ class _EditSliderTrack extends SliderTrackShape {
   }) {
     final rect = Rect.fromLTWH(
       offset.dx,
-      offset.dy + (parentBox.size.height - 12) / 2,
+      offset.dy + (parentBox.size.height - 8) / 2,
       parentBox.size.width,
-      12,
+      8,
     );
     context.canvas.drawRRect(
       RRect.fromRectAndRadius(rect, const Radius.circular(3)),
@@ -460,7 +464,7 @@ class _EditSliderTrack extends SliderTrackShape {
 class _EditSliderThumb extends SliderComponentShape {
   const _EditSliderThumb();
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(12, 18);
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(10, 14);
   @override
   void paint(
     PaintingContext context,
@@ -483,7 +487,7 @@ class _EditSliderThumb extends SliderComponentShape {
     )!;
     context.canvas.drawRRect(
       RRect.fromRectAndRadius(
-        Rect.fromCenter(center: center, width: 12, height: 18),
+        Rect.fromCenter(center: center, width: 10, height: 14),
         const Radius.circular(3),
       ),
       Paint()..color = color,

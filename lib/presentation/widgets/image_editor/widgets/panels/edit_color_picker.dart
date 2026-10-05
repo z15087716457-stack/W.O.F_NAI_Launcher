@@ -65,9 +65,9 @@ class _EditColorControlState extends State<EditColorControl> {
           borderRadius: BorderRadius.circular(3),
           child: Container(
             key: const Key('edit_color_swatch'),
-            width: 106,
-            height: 42,
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+            width: 90,
+            height: 34,
+            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
             decoration: BoxDecoration(
               color: widget.state.foregroundColor,
               border: Border.all(
@@ -78,8 +78,8 @@ class _EditColorControlState extends State<EditColorControl> {
             alignment: Alignment.centerRight,
             child: Container(
               key: const Key('edit_color_popup_icon'),
-              width: 34,
-              height: 34,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(3),
