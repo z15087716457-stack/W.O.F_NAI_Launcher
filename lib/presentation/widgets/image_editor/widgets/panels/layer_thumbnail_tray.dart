@@ -21,6 +21,7 @@ class EditorLayerTray extends StatefulWidget {
     this.inpaint = false,
     this.onAdd3dLayer,
     this.onEdit3dLayer,
+    this.virtualMaskRects = const [],
   });
 
   final EditorState state;
@@ -33,6 +34,7 @@ class EditorLayerTray extends StatefulWidget {
   final bool inpaint;
   final VoidCallback? onAdd3dLayer;
   final ValueChanged<Layer>? onEdit3dLayer;
+  final List<Rect> virtualMaskRects;
 
   @override
   State<EditorLayerTray> createState() => _EditorLayerTrayState();
@@ -43,6 +45,7 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
 
   /// 缩略图更新防抖计时器（与 LayerPanel 相同的更新策略）
   Timer? _thumbnailUpdateTimer;
+  Size? _thumbnailCanvasSize;
 
   EditorState get _state => widget.state;
 
@@ -50,6 +53,7 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
   void initState() {
     super.initState();
     widget.state.layerManager.addListener(_onLayerContentChanged);
+    widget.state.addListener(_onEditorChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateThumbnails();
     });
@@ -58,12 +62,19 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
   @override
   void dispose() {
     widget.state.layerManager.removeListener(_onLayerContentChanged);
+    widget.state.removeListener(_onEditorChanged);
     _thumbnailUpdateTimer?.cancel();
     super.dispose();
   }
 
   void _onLayerContentChanged() {
     _scheduleThumbnailUpdate();
+  }
+
+  void _onEditorChanged() {
+    if (widget.inpaint && _thumbnailCanvasSize != _state.canvasSize) {
+      _scheduleThumbnailUpdate();
+    }
   }
 
   void _scheduleThumbnailUpdate() {
@@ -77,6 +88,12 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
 
   Future<void> _updateThumbnails() async {
     final canvasSize = _state.canvasSize;
+    if (widget.inpaint && _thumbnailCanvasSize != canvasSize) {
+      for (final layer in _state.layerManager.layers) {
+        layer.markNeedsUpdate();
+      }
+      _thumbnailCanvasSize = canvasSize;
+    }
     final layersToUpdate = _state.layerManager.layers
         .where((layer) => layer.needsThumbnailUpdate)
         .toList();
@@ -217,6 +234,197 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
     );
   }
 
+  Widget _buildInpaintTray(List<Layer> displayLayers) {
+    final l10n = context.l10n;
+    final manager = _state.layerManager;
+    final scheme = Theme.of(context).colorScheme;
+    final autoMaskLayer = manager.layers
+        .where((layer) => layer.inpaintMask)
+        .firstOrNull;
+    final canvas = _state.canvasSize;
+    final aspect = canvas.width / canvas.height;
+    final thumbSize = aspect >= 1
+        ? Size(80, 80 / aspect)
+        : Size(80 * aspect, 80);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (_expanded) ...[
+          InpaintPanel(
+            key: const Key('inpaint_layer_panel'),
+            width: 94,
+            child: Padding(
+              padding: const EdgeInsets.all(7),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 28,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InpaintButton(
+                          key: const Key('inpaint_add_layer'),
+                          size: 24,
+                          glyphSize: 16,
+                          icon: Icons.add,
+                          glyph: 'add',
+                          tooltip: l10n.layer_add,
+                          onPressed: () => _state.historyManager.execute(
+                            AddInpaintMaskLayerAction(
+                              name: l10n.editor_layerName(
+                                manager.layerCount + 1,
+                              ),
+                            ),
+                            _state,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        InpaintButton(
+                          key: const Key('inpaint_add_3d'),
+                          size: 28,
+                          glyphSize: 20,
+                          icon: Icons.view_in_ar_outlined,
+                          glyph: 'cube',
+                          tooltip: l10n.model3d_editorTitle,
+                          onPressed: widget.onAdd3dLayer,
+                        ),
+                      ],
+                    ),
+                  ),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: (MediaQuery.sizeOf(context).height - 220)
+                          .clamp(80, 400),
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final layer in displayLayers)
+                            SizedBox(
+                              width: 80,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _InpaintLayerThumb(
+                                    layer: layer,
+                                    size: thumbSize,
+                                    maskColor: _state.maskDisplayColor,
+                                    canvasSize: canvas,
+                                    maskRects: layer == autoMaskLayer
+                                        ? widget.virtualMaskRects
+                                        : const [],
+                                    onTap: layer.inpaintMask
+                                        ? () => manager.setActiveLayer(layer.id)
+                                        : null,
+                                    onDoubleTap: layer.hasModel3d
+                                        ? () =>
+                                              widget.onEdit3dLayer?.call(layer)
+                                        : null,
+                                    onDelete:
+                                        layer.id == _state.inpaintSourceLayerId
+                                        ? null
+                                        : () => _state.historyManager.execute(
+                                            DeleteInpaintLayerAction(
+                                              layerId: layer.id,
+                                            ),
+                                            _state,
+                                          ),
+                                  ),
+                                  SizedBox(
+                                    width: thumbSize.width,
+                                    height: 20,
+                                    child: Material(
+                                      color: scheme.surfaceContainerHighest,
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            InpaintButton(
+                                              key: Key(
+                                                'inpaint_layer_up_${layer.id}',
+                                              ),
+                                              size: 20,
+                                              icon: Icons.arrow_drop_up,
+                                              tooltip: l10n.layer_moveUp,
+                                              onPressed:
+                                                  manager.layers.indexOf(
+                                                        layer,
+                                                      ) <
+                                                      manager.layers.length - 1
+                                                  ? () => _moveInpaintLayer(
+                                                      layer,
+                                                      1,
+                                                    )
+                                                  : null,
+                                            ),
+                                            InpaintButton(
+                                              key: Key(
+                                                'inpaint_layer_down_${layer.id}',
+                                              ),
+                                              size: 20,
+                                              icon: Icons.arrow_drop_down,
+                                              tooltip: l10n.layer_moveDown,
+                                              onPressed:
+                                                  manager.layers.indexOf(
+                                                        layer,
+                                                      ) >
+                                                      0
+                                                  ? () => _moveInpaintLayer(
+                                                      layer,
+                                                      -1,
+                                                    )
+                                                  : null,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+        ],
+        InpaintPanel(
+          child: Tooltip(
+            key: const Key('inpaint_layers'),
+            message: l10n.editor_layers,
+            child: InkWell(
+              onTap: () => setState(() => _expanded = !_expanded),
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const InpaintGlyph('layers', size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${manager.layerCount}',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -228,6 +436,7 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
         _state.layerManager,
         _state.layerManager.uiUpdateNotifier,
         _state.layerManager.activeLayerNotifier,
+        if (widget.inpaint) _state,
       ]),
       builder: (context, _) {
         final manager = _state.layerManager;
@@ -241,162 +450,7 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
         final canDelete = layers.length > 1 && activeId != null;
 
         if (widget.inpaint) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_expanded) ...[
-                InpaintPanel(
-                  width: 92,
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            InpaintButton(
-                              size: 38,
-                              icon: Icons.add,
-                              glyph: 'add',
-                              tooltip: l10n.layer_add,
-                              onPressed: () {
-                                _state.historyManager.execute(
-                                  AddInpaintMaskLayerAction(
-                                    name: l10n.editor_layerName(
-                                      manager.layerCount + 1,
-                                    ),
-                                  ),
-                                  _state,
-                                );
-                              },
-                            ),
-                            InpaintButton(
-                              size: 38,
-                              icon: Icons.view_in_ar_outlined,
-                              glyph: 'cube',
-                              key: const Key('inpaint_add_3d'),
-                              tooltip: l10n.model3d_editorTitle,
-                              onPressed: widget.onAdd3dLayer,
-                            ),
-                          ],
-                        ),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 400),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                for (final layer in displayLayers) ...[
-                                  Stack(
-                                    children: [
-                                      GestureDetector(
-                                        onDoubleTap: layer.hasModel3d
-                                            ? () => widget.onEdit3dLayer?.call(
-                                                layer,
-                                              )
-                                            : null,
-                                        child: _LayerThumbTile(
-                                          layer: layer,
-                                          onTap: layer.inpaintMask
-                                              ? () => manager.setActiveLayer(
-                                                  layer.id,
-                                                )
-                                              : () {},
-                                        ),
-                                      ),
-                                      Positioned(
-                                        right: -3,
-                                        top: -3,
-                                        child: InpaintButton(
-                                          size: 24,
-                                          icon: Icons.delete_outline,
-                                          glyph: 'clear',
-                                          tooltip: l10n.layer_delete,
-                                          onPressed:
-                                              layer.id ==
-                                                  _state.inpaintSourceLayerId
-                                              ? null
-                                              : () => _state.historyManager
-                                                    .execute(
-                                                      DeleteLayerAction(
-                                                        layerId: layer.id,
-                                                      ),
-                                                      _state,
-                                                    ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        left: -3,
-                                        bottom: -3,
-                                        child: InpaintButton(
-                                          size: 24,
-                                          icon: layer.visible
-                                              ? Icons.visibility_outlined
-                                              : Icons.visibility_off_outlined,
-                                          tooltip: l10n.layer_visibility,
-                                          onPressed: () => manager
-                                              .toggleVisibility(layer.id),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      _TrayMiniButton(
-                                        icon: Icons.keyboard_arrow_up,
-                                        tooltip: l10n.layer_moveUp,
-                                        enabled:
-                                            layers.indexOf(layer) <
-                                            layers.length - 1,
-                                        onPressed: () =>
-                                            _moveInpaintLayer(layer, 1),
-                                      ),
-                                      _TrayMiniButton(
-                                        icon: Icons.keyboard_arrow_down,
-                                        tooltip: l10n.layer_moveDown,
-                                        enabled: layers.indexOf(layer) > 0,
-                                        onPressed: () =>
-                                            _moveInpaintLayer(layer, -1),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-              ],
-              InpaintPanel(
-                child: Tooltip(
-                  key: const Key('inpaint_layers'),
-                  message: l10n.editor_layers,
-                  child: InkWell(
-                    onTap: () => setState(() => _expanded = !_expanded),
-                    child: SizedBox(
-                      width: 44,
-                      height: 44,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const InpaintGlyph('layers', size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${layers.length}',
-                            style: const TextStyle(fontSize: 11),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
+          return _buildInpaintTray(displayLayers);
         }
 
         return Column(
@@ -517,6 +571,187 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
       },
     );
   }
+}
+
+/// Official tray proportions: 80px long edge, 3px frame, checkerboard and
+/// only a delete action plus the noninteractive mask/3D type badge.
+class _InpaintLayerThumb extends StatelessWidget {
+  const _InpaintLayerThumb({
+    required this.layer,
+    required this.size,
+    required this.canvasSize,
+    required this.maskColor,
+    required this.maskRects,
+    this.onTap,
+    this.onDoubleTap,
+    this.onDelete,
+  });
+  final Layer layer;
+  final Size size, canvasSize;
+  final Color maskColor;
+  final List<Rect> maskRects;
+  final VoidCallback? onTap, onDoubleTap, onDelete;
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+    valueListenable: layer.isActiveNotifier,
+    builder: (context, active, _) {
+      final scheme = Theme.of(context).colorScheme;
+      return Tooltip(
+        message: layer.name,
+        child: GestureDetector(
+          key: Key('inpaint_layer_thumb_${layer.id}'),
+          onTap: onTap,
+          onDoubleTap: onDoubleTap,
+          child: Container(
+            width: size.width,
+            height: size.height,
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              color: active ? scheme.onSurface : scheme.outlineVariant,
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              clipBehavior: Clip.hardEdge,
+              children: [
+                const CustomPaint(painter: _InpaintCheckerboardPainter()),
+                if (layer.thumbnail != null)
+                  RawImage(
+                    image: layer.thumbnail,
+                    fit: BoxFit.fill,
+                    color: layer.inpaintMask ? maskColor : null,
+                    colorBlendMode: layer.inpaintMask ? BlendMode.srcIn : null,
+                  ),
+                if (maskRects.isNotEmpty)
+                  CustomPaint(
+                    painter: _InpaintThumbnailOutpaintPainter(
+                      maskRects,
+                      canvasSize,
+                      maskColor,
+                    ),
+                  ),
+                if (layer.inpaintMask || layer.hasModel3d)
+                  Positioned(
+                    left: 1,
+                    bottom: 1,
+                    child: IgnorePointer(
+                      child: Container(
+                        key: Key('inpaint_layer_type_${layer.id}'),
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Center(
+                          child: layer.hasModel3d
+                              ? const InpaintGlyph('cube', size: 12)
+                              : SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CustomPaint(
+                                    painter: _InpaintMaskBadgePainter(
+                                      scheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  right: 1,
+                  top: 1,
+                  child: Material(
+                    color: scheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(3),
+                    child: InpaintButton(
+                      key: Key('inpaint_layer_delete_${layer.id}'),
+                      size: 20,
+                      glyphSize: 14,
+                      icon: Icons.delete_outline,
+                      glyph: 'clear',
+                      tooltip: context.l10n.layer_delete,
+                      onPressed: onDelete,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _InpaintCheckerboardPainter extends CustomPainter {
+  const _InpaintCheckerboardPainter();
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Offset.zero & size, Paint()..color = Colors.white);
+    final paint = Paint()..color = const Color(0xFFA0A0A0);
+    for (var y = 0.0; y < size.height; y += 8) {
+      for (var x = 0.0; x < size.width; x += 8) {
+        if (((x / 8).floor() + (y / 8).floor()).isEven) {
+          canvas.drawRect(Rect.fromLTWH(x, y, 8, 8), paint);
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _InpaintCheckerboardPainter old) => false;
+}
+
+class _InpaintMaskBadgePainter extends CustomPainter {
+  const _InpaintMaskBadgePainter(this.color);
+  final Color color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(1.5, 1.5, 9, 9),
+        const Radius.circular(2),
+      ),
+      paint,
+    );
+    canvas.drawCircle(const Offset(6, 6), 1.5, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _InpaintMaskBadgePainter old) =>
+      old.color != color;
+}
+
+class _InpaintThumbnailOutpaintPainter extends CustomPainter {
+  const _InpaintThumbnailOutpaintPainter(
+    this.rects,
+    this.canvasSize,
+    this.color,
+  );
+  final List<Rect> rects;
+  final Size canvasSize;
+  final Color color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.scale(
+      size.width / canvasSize.width,
+      size.height / canvasSize.height,
+    );
+    final paint = Paint()..color = color;
+    for (final rect in rects) {
+      canvas.drawRect(rect, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _InpaintThumbnailOutpaintPainter old) =>
+      old.rects != rects || old.canvasSize != canvasSize || old.color != color;
 }
 
 /// 托盘内单个图层缩略图

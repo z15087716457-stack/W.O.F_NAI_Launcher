@@ -44,6 +44,8 @@ void main() {
         final screen = tester.state(find.byType(ImageEditorScreen)) as dynamic;
         final EditorState state = screen.debugEditorState;
         expect(screen.debugCanvasSize, const Size(256, 256));
+        expect(state.layerManager.layers.first.id, state.inpaintSourceLayerId);
+        expect(state.layerManager.layers.last.inpaintMask, isTrue);
         state.setInpaintFocusRegion(const Rect.fromLTWH(64, 64, 128, 128));
         // Place a mask stroke inside the focus to verify resize translates existing content.
         state.layerManager.activeLayer!.addStroke(

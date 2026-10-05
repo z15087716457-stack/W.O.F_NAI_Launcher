@@ -281,6 +281,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
     return EditorLayerTray(
       state: _state,
       inpaint: _isInpaintMode,
+      virtualMaskRects: _virtualOutpaintFrame?.outpaintMaskRects ?? const [],
       onAdd3dLayer: () => _addInpaint3dLayer(),
       onEdit3dLayer: (layer) => _addInpaint3dLayer(layer: layer),
       detailsOpen: _showLayerFlyout,

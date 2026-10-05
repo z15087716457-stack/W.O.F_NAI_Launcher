@@ -504,6 +504,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       final sourceLayer = await _state.layerManager.addLayerFromImage(
         workingBytes,
         name: baseLayerName,
+        index: _isInpaintMode ? 0 : null,
       );
       _sourceLayerId = sourceLayer?.id;
       _state.inpaintSourceLayerId = _sourceLayerId;

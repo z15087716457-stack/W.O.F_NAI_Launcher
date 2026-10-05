@@ -48,6 +48,7 @@ class InpaintButton extends StatelessWidget {
     this.selected = false,
     this.size = 44,
     this.glyph,
+    this.glyphSize = 18,
   });
   final IconData icon;
   final String tooltip;
@@ -55,6 +56,7 @@ class InpaintButton extends StatelessWidget {
   final bool selected;
   final double size;
   final String? glyph;
+  final double glyphSize;
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -76,6 +78,7 @@ class InpaintButton extends StatelessWidget {
                   ? Center(
                       child: InpaintGlyph(
                         glyph!,
+                        size: glyphSize,
                         color: onPressed == null
                             ? scheme.onSurface.withValues(alpha: .3)
                             : selected
