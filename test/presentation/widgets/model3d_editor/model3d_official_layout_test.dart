@@ -88,7 +88,7 @@ void main() {
                   format: ui.ImageByteFormat.png,
                 );
                 final file = File(
-                  '.dart_tool/model3d-official-20261005/captures/${locale.toLanguageTag()}_${brightness.name}_${width.round()}_$name.png',
+                  '.dart_tool/model3d-layer-integration-20261005/captures/${locale.toLanguageTag()}_${brightness.name}_${width.round()}_$name.png',
                 );
                 await file.parent.create(recursive: true);
                 await file.writeAsBytes(data!.buffer.asUint8List());
@@ -99,7 +99,13 @@ void main() {
             final top = tester.getRect(
               find.byKey(const ValueKey('model3d-top-settings')),
             );
-            if (width >= 720) expect(top.height, 48);
+            if (width >= 720) {
+              expect(top.height, 50);
+              final controls = tester.getRect(
+                find.byKey(const ValueKey('model3d-settings-row')),
+              );
+              expect(controls.center.dy, closeTo(top.center.dy, .01));
+            }
             final canvas = tester.getRect(
               find.byKey(const ValueKey('test-viewport')),
             );

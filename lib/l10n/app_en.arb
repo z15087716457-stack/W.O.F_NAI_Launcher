@@ -7299,5 +7299,7 @@
   "model3d_settings": "3D Render Settings",
   "model3d_resetModel": "Reset model position",
   "model3d_removeModel": "Remove model",
-  "model3d_removeConfirm": "Remove this model? Unsaved model edits will be lost."
+  "model3d_removeConfirm": "Remove this model? Unsaved model edits will be lost.",
+  "model3d_toolTransform": "Model\nTransform",
+  "model3d_toolPose": "Model Pose"
 }

@@ -6,7 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <style>
   html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
-  #viewport { width: 100%; height: 100%; display: block; touch-action: none; }
+  #viewport { position:absolute; inset:0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .context-layer { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  #context-above { z-index:1; }
 </style>
 <script type="importmap">
 {
@@ -18,7 +20,9 @@
 </script>
 </head>
 <body>
+<img id="context-below" class="context-layer" alt="" hidden>
 <canvas id="viewport"></canvas>
+<img id="context-above" class="context-layer" alt="" hidden>
 <script type="module" src="./editor.js"></script>
 </body>
 </html>

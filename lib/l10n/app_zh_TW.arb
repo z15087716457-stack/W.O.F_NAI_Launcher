@@ -7281,5 +7281,7 @@
   "model3d_settings": "3D 渲染設定",
   "model3d_resetModel": "重設模型位置",
   "model3d_removeModel": "移除模型",
-  "model3d_removeConfirm": "移除此模型？尚未儲存的模型編輯將丟失。"
+  "model3d_removeConfirm": "移除此模型？尚未儲存的模型編輯將丟失。",
+  "model3d_toolTransform": "模型變換",
+  "model3d_toolPose": "模型姿勢"
 }

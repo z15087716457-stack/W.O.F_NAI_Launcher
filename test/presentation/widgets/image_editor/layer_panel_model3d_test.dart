@@ -1,12 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart'
-    show
-        InAppWebViewPlatform,
-        PlatformInAppWebViewController,
-        PlatformInAppWebViewWidget,
-        PlatformInAppWebViewWidgetCreationParams;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
@@ -14,10 +6,9 @@ import 'package:nai_launcher/presentation/widgets/image_editor/core/editor_state
 import 'package:nai_launcher/presentation/widgets/image_editor/layers/model3d_layer_data.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/widgets/panels/layer_panel.dart';
 import 'package:nai_launcher/presentation/widgets/model3d_editor/model3d_editor_screen.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 记录 push 事件的观察器(断言 3D 编辑器路由确实被推入)
+/// 记录路由,确保图层选择不再创建独立编辑页面。
 class _RecordingNavigatorObserver extends NavigatorObserver {
   final List<Route<dynamic>> pushed = [];
 
@@ -28,52 +19,12 @@ class _RecordingNavigatorObserver extends NavigatorObserver {
   }
 }
 
-class _TestPathProviderPlatform extends PathProviderPlatform {
-  _TestPathProviderPlatform(this.appSupportPath);
-
-  final String appSupportPath;
-
-  @override
-  Future<String?> getApplicationSupportPath() async => appSupportPath;
-}
-
-/// 最小 InAppWebView 平台桩:被推入的 Model3dEditorScreen 在本地
-/// 资产服务就绪后会真实构建 InAppWebView,测试里渲染为空盒即可。
-/// 未覆盖的工厂(含 WebViewEnvironment 静态查询)保持默认
-/// UnimplementedError,恰好驱动 _ensureWebView2Available 的兜底分支。
-class _StubInAppWebViewPlatform extends InAppWebViewPlatform {
-  @override
-  PlatformInAppWebViewWidget createPlatformInAppWebViewWidget(
-    PlatformInAppWebViewWidgetCreationParams params,
-  ) => _StubInAppWebViewWidget(params);
-}
-
-class _StubInAppWebViewWidget extends PlatformInAppWebViewWidget {
-  _StubInAppWebViewWidget(super.params) : super.implementation();
-
-  @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
-
-  @override
-  T controllerFromPlatform<T>(PlatformInAppWebViewController controller) =>
-      throw UnimplementedError();
-
-  @override
-  void dispose() {}
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
     // EditorState 构造时 ToolManager 会异步读取 SharedPreferences
     SharedPreferences.setMockInitialValues({});
-    // 双击 3D 层会 push Model3dEditorScreen,其 initState 里
-    // _defaultLibrary() 调 getApplicationSupportDirectory(),需 mock
-    PathProviderPlatform.instance = _TestPathProviderPlatform(
-      Directory.systemTemp.path,
-    );
-    InAppWebViewPlatform.instance = _StubInAppWebViewPlatform();
   });
 
   /// 挂载图层面板:一个普通层 + 一个 3D 层(空图层即可,避免真实图像解码)
@@ -141,26 +92,24 @@ void main() {
     expect(badgeRow, findsWidgets);
   });
 
-  testWidgets(
-    'double-tapping 3d layer name opens the editor instead of rename',
-    (tester) async {
-      final (_, observer) = await pumpPanel(tester);
+  testWidgets('double-tapping a 3D layer selects it without pushing a route', (
+    tester,
+  ) async {
+    final (state, observer) = await pumpPanel(tester);
+    state.layerManager.setActiveLayer(state.layerManager.layers.first.id);
 
-      await doubleTapText(tester, 'Pose Layer');
-      // _onEdit3dLayer 内有 await(WebView2 检查),多 pump 两帧让 push 发生
-      await tester.pump();
-      await tester.pump();
+    await doubleTapText(tester, 'Pose Layer');
+    await tester.pump();
+    await tester.pump();
 
-      // 重命名未激活
-      expect(find.byType(ThemedInput), findsNothing);
-      // 3D 编辑器路由已推入
-      expect(observer.pushed, hasLength(1));
-      expect(find.byType(Model3dEditorScreen), findsOneWidget);
+    // 重命名未激活
+    expect(find.byType(ThemedInput), findsNothing);
+    expect(state.layerManager.activeLayer!.name, 'Pose Layer');
+    expect(observer.pushed, isEmpty);
+    expect(find.byType(Model3dEditorScreen), findsNothing);
 
-      // 收尾:卸载整棵树,释放编辑器路由(其加载指示动画不会自然停止)
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-  );
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('double-tapping normal layer name still opens rename', (
     tester,

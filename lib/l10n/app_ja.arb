@@ -7281,5 +7281,7 @@
   "model3d_settings": "3D レンダリング設定",
   "model3d_resetModel": "モデル位置をリセット",
   "model3d_removeModel": "モデルを削除",
-  "model3d_removeConfirm": "このモデルを削除しますか？未保存のモデル編集は失われます。"
+  "model3d_removeConfirm": "このモデルを削除しますか？未保存のモデル編集は失われます。",
+  "model3d_toolTransform": "モデル変形",
+  "model3d_toolPose": "モデルポーズ"
 }

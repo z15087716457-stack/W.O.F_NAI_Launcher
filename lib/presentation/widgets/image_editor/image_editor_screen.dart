@@ -32,6 +32,8 @@ import 'widgets/panels/shift_edges_dialog.dart';
 import 'widgets/panels/inpaint_controls.dart';
 import 'widgets/outpaint_edge_drag_overlay.dart';
 import '../model3d_editor/model3d_editor_screen.dart';
+import '../model3d_editor/model3d_bridge.dart';
+import '../model3d_editor/model3d_library_service.dart';
 import 'layers/model3d_layer_data.dart';
 import 'canvas/layer_painter.dart';
 import 'export/image_exporter_new.dart';
@@ -72,6 +74,12 @@ class ImageEditorScreen extends StatefulWidget {
 
   @visibleForTesting
   final bool debugDisableDropRegion;
+  @visibleForTesting
+  final Model3dBridge Function()? debugModel3dBridgeFactory;
+  @visibleForTesting
+  final WidgetBuilder? debugModel3dViewport;
+  @visibleForTesting
+  final Model3dLibraryService? debugModel3dLibrary;
 
   @visibleForTesting
   const ImageEditorScreen({
@@ -87,6 +95,9 @@ class ImageEditorScreen extends StatefulWidget {
     this.initialShowLayerPanel = true,
     this.debugFailOutpaintSourceReplacement = false,
     this.debugDisableDropRegion = false,
+    this.debugModel3dBridgeFactory,
+    this.debugModel3dViewport,
+    this.debugModel3dLibrary,
   });
 
   /// 显示编辑器
@@ -146,6 +157,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   // ignore: prefer_final_fields
   bool _hasOutpaintChanges = false;
   bool _isImportingDroppedImage = false;
+  final _modelEditorKeys = <String, GlobalKey<Model3dEditorState>>{};
+  Future<bool>? _flushingModel;
 
   bool get _isInpaintMode => widget.mode == ImageEditorMode.inpaint;
   bool get _canExportAndClose => !_isOutpaintCommitPending;
@@ -602,6 +615,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   void _updateLayoutState(VoidCallback update) => setState(update);
 
   Future<void> _changeCanvasSize() async {
+    if (!await _flushActiveModelLayer() || !mounted) return;
     _state.editSelection.commit();
     final delta = await showDialog<OutpaintFrameDelta>(
       context: context,
@@ -641,7 +655,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   Future<void> _confirmExit() async {
     // 检查是否有修改：检查历史记录或图层内容
     final hasChanges =
-        _state.historyManager.canUndo || _state.editSelection.changed;
+        _state.historyManager.canUndo ||
+        _state.editSelection.changed ||
+        (_activeModelEditor?.hasChanges ?? false);
 
     if (hasChanges) {
       final shouldExit = await showDialog<bool>(
@@ -683,6 +699,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   Future<void> _exportAndClose() async {
     if (!mounted) return;
     if (!_canExportAndClose) return;
+    if (!await _flushActiveModelLayer() || !mounted) return;
     if (!_isInpaintMode) _state.editSelection.commit();
 
     bool loadingDialogShown = false;
@@ -1374,6 +1391,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       AppToast.error(context, l10n.editor_fileTooLarge(sizeMB));
       return;
     }
+
+    if (!await _flushActiveModelLayer() || !mounted) return;
 
     try {
       final layerBytes = await _coverDroppedImageToCanvas(imageBytes);

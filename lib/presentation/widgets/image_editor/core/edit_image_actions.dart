@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../../../../core/utils/inpaint_outpaint_utils.dart';
 import '../layers/layer.dart';
+import '../layers/model3d_layer_data.dart';
 import 'editor_state.dart';
 import 'history_manager.dart';
 
@@ -11,16 +12,19 @@ class LayerRasterSnapshot {
     : image = layer.baseImage?.clone(),
       bytes = layer.baseImageBytes,
       offset = layer.baseImageOffset,
+      model3d = layer.model3d,
       strokes = List.of(layer.strokes);
   final ui.Image? image;
   final ui.Offset offset;
   final List<StrokeData> strokes;
   final Uint8List? bytes;
+  final Model3dLayerData? model3d;
   void restore(Layer layer) {
     layer.clearStrokes();
     layer.clearBaseImage();
     if (image != null) layer.setBaseImageSync(image!.clone(), bytes);
     layer.setBaseImageOffset(offset);
+    layer.model3d = model3d;
     for (final s in strokes) {
       layer.addStroke(s);
     }
@@ -67,6 +71,51 @@ class ReplaceEditRasterAction extends EditorAction {
     image.dispose();
     _before?.dispose();
   }
+}
+
+/// Commit the edited scene and transparent pixels together in canvas history.
+class ReplaceModel3dLayerAction extends EditorAction {
+  ReplaceModel3dLayerAction({
+    required this.layerId,
+    required this.image,
+    required this.bytes,
+    required this.model3d,
+  });
+  final String layerId;
+  final ui.Image image;
+  final Uint8List bytes;
+  final Model3dLayerData model3d;
+  LayerRasterSnapshot? _before;
+  @override
+  void execute(EditorState state) {
+    final layer = state.layerManager.getLayerById(layerId);
+    if (layer == null) return;
+    _before ??= LayerRasterSnapshot(layer);
+    layer.clearStrokes();
+    layer.setBaseImageSync(image.clone(), bytes);
+    layer.setBaseImageOffset(Offset.zero);
+    layer.model3d = model3d;
+    state.layerManager.notifyRasterChange();
+    state.notifyCanvasPreview();
+  }
+
+  @override
+  void undo(EditorState state) {
+    final layer = state.layerManager.getLayerById(layerId);
+    if (layer == null) return;
+    _before?.restore(layer);
+    state.layerManager.notifyRasterChange();
+    state.notifyCanvasPreview();
+  }
+
+  @override
+  void dispose() {
+    image.dispose();
+    _before?.dispose();
+  }
+
+  @override
+  String get description => 'Edit 3D Layer';
 }
 
 /// Crops actual pixels and pads with transparency, while retaining full old

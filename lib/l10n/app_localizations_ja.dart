@@ -12610,4 +12610,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get model3d_removeConfirm => 'このモデルを削除しますか？未保存のモデル編集は失われます。';
+
+  @override
+  String get model3d_toolTransform => 'モデル変形';
+
+  @override
+  String get model3d_toolPose => 'モデルポーズ';
 }

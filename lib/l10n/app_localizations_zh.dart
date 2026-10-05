@@ -12393,6 +12393,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get model3d_removeConfirm => '移除此模型？尚未保存的模型编辑将丢失。';
+
+  @override
+  String get model3d_toolTransform => '模型变换';
+
+  @override
+  String get model3d_toolPose => '模型姿势';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24784,4 +24790,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get model3d_removeConfirm => '移除此模型？尚未儲存的模型編輯將丟失。';
+
+  @override
+  String get model3d_toolTransform => '模型變換';
+
+  @override
+  String get model3d_toolPose => '模型姿勢';
 }

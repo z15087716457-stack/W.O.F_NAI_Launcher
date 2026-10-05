@@ -21,6 +21,9 @@ class EditorLayerTray extends StatefulWidget {
     this.onAdd3dLayer,
     this.onEdit3dLayer,
     this.virtualMaskRects = const [],
+    this.onSelectLayer,
+    this.beforeLayerMutation,
+    this.initiallyExpanded,
   });
 
   final EditorState state;
@@ -34,6 +37,9 @@ class EditorLayerTray extends StatefulWidget {
   final VoidCallback? onAdd3dLayer;
   final ValueChanged<Layer>? onEdit3dLayer;
   final List<Rect> virtualMaskRects;
+  final Future<void> Function(Layer)? onSelectLayer;
+  final Future<bool> Function()? beforeLayerMutation;
+  final bool? initiallyExpanded;
 
   @override
   State<EditorLayerTray> createState() => _EditorLayerTrayState();
@@ -51,7 +57,7 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
   @override
   void initState() {
     super.initState();
-    _expanded = !widget.inpaint;
+    _expanded = widget.initiallyExpanded ?? !widget.inpaint;
     widget.state.layerManager.addListener(_onLayerContentChanged);
     widget.state.addListener(_onEditorChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -129,7 +135,20 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
         layers[target].inpaintMask == layer.inpaintMask;
   }
 
-  void _moveInpaintLayer(Layer layer, int direction) {
+  Future<void> _mutateLayers(VoidCallback action) async {
+    if (widget.beforeLayerMutation != null &&
+        !await widget.beforeLayerMutation!()) {
+      return;
+    }
+    if (mounted) action();
+  }
+
+  Future<void> _moveInpaintLayer(Layer layer, int direction) async {
+    if (widget.beforeLayerMutation != null &&
+        !await widget.beforeLayerMutation!()) {
+      return;
+    }
+    if (!mounted) return;
     if (!_canMoveInpaintLayer(layer, direction)) return;
     final index = _state.layerManager.layers.indexOf(layer);
     _state.historyManager.execute(
@@ -177,14 +196,16 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                           glyphSize: 16,
                           glyph: 'add',
                           tooltip: l10n.layer_add,
-                          onPressed: () => _state.historyManager.execute(
-                            AddInpaintMaskLayerAction(
-                              name: l10n.editor_layerName(
-                                manager.layerCount + 1,
+                          onPressed: () => _mutateLayers(
+                            () => _state.historyManager.execute(
+                              AddInpaintMaskLayerAction(
+                                name: l10n.editor_layerName(
+                                  manager.layerCount + 1,
+                                ),
+                                inpaintMask: widget.inpaint,
                               ),
-                              inpaintMask: widget.inpaint,
+                              _state,
                             ),
-                            _state,
                           ),
                         ),
                         const SizedBox(width: 4),
@@ -222,8 +243,19 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                                     maskRects: layer == autoMaskLayer
                                         ? widget.virtualMaskRects
                                         : const [],
-                                    onTap: !widget.inpaint || layer.inpaintMask
-                                        ? () => manager.setActiveLayer(layer.id)
+                                    onTap:
+                                        !widget.inpaint ||
+                                            layer.inpaintMask ||
+                                            layer.hasModel3d
+                                        ? () {
+                                            if (widget.onSelectLayer != null) {
+                                              unawaited(
+                                                widget.onSelectLayer!(layer),
+                                              );
+                                            } else {
+                                              manager.setActiveLayer(layer.id);
+                                            }
+                                          }
                                         : null,
                                     onDoubleTap: layer.hasModel3d
                                         ? () =>
@@ -236,11 +268,13 @@ class _EditorLayerTrayState extends State<EditorLayerTray> {
                                                         .inpaintSourceLayerId) ||
                                             manager.layerCount < 2
                                         ? null
-                                        : () => _state.historyManager.execute(
-                                            DeleteInpaintLayerAction(
-                                              layerId: layer.id,
+                                        : () => _mutateLayers(
+                                            () => _state.historyManager.execute(
+                                              DeleteInpaintLayerAction(
+                                                layerId: layer.id,
+                                              ),
+                                              _state,
                                             ),
-                                            _state,
                                           ),
                                   ),
                                   SizedBox(

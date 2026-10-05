@@ -12628,4 +12628,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get model3d_removeConfirm => '이 모델을 제거할까요? 저장하지 않은 모델 편집 내용이 사라집니다.';
+
+  @override
+  String get model3d_toolTransform => '모델 변환';
+
+  @override
+  String get model3d_toolPose => '모델 포즈';
 }

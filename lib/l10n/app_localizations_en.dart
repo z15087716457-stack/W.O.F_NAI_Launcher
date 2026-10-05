@@ -13002,4 +13002,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get model3d_removeConfirm =>
       'Remove this model? Unsaved model edits will be lost.';
+
+  @override
+  String get model3d_toolTransform => 'Model\nTransform';
+
+  @override
+  String get model3d_toolPose => 'Model Pose';
 }

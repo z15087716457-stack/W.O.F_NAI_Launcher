@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/utils/app_logger.dart';
 import 'editor_state.dart';
 import '../layers/layer.dart';
+import '../layers/model3d_layer_data.dart';
 
 /// 编辑器操作基类
 abstract class EditorAction {
@@ -514,6 +515,7 @@ class LayerData {
   final double opacity;
   final LayerBlendMode blendMode;
   final List<StrokeData> strokes;
+  final Model3dLayerData? model3d;
 
   LayerData({
     required this.id,
@@ -524,6 +526,7 @@ class LayerData {
     required this.opacity,
     this.blendMode = LayerBlendMode.normal,
     required this.strokes,
+    this.model3d,
   });
 }
 
@@ -575,7 +578,12 @@ class ClearInpaintMasksAction extends EditorAction {
 }
 
 class AddInpaintMaskLayerAction extends EditorAction {
-  AddInpaintMaskLayerAction({required this.name, this.inpaintMask = true});
+  AddInpaintMaskLayerAction({
+    required this.name,
+    this.inpaintMask = true,
+    this.model3d,
+  });
+  final Model3dLayerData? model3d;
   final bool inpaintMask;
   final String name;
   LayerData? _data;
@@ -584,6 +592,7 @@ class AddInpaintMaskLayerAction extends EditorAction {
     if (_data == null) {
       final layer = state.layerManager.addLayer(name: name);
       layer.inpaintMask = inpaintMask;
+      layer.model3d = model3d;
       _data = layer.toData();
     } else {
       state.layerManager.insertLayerFromData(

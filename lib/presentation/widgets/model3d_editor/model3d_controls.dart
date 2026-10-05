@@ -1,15 +1,20 @@
 part of 'model3d_editor_screen.dart';
 
-extension _Model3dControls on _Model3dEditorScreenState {
+extension _Model3dControls on Model3dEditorState {
   bool get _enabled => _ready && !_busy;
   bool get _hasModel => _modelRef != null;
 
   Widget _buildOfficialLayout(BuildContext context) {
     final l = context.l10n;
     return PopScope(
-      canPop: !_dirty,
+      canPop: widget.embedded || !_dirty,
       onPopInvokedWithResult: (didPop, _) async {
-        if (didPop || !await _confirmExit() || !context.mounted) return;
+        if (widget.embedded ||
+            didPop ||
+            !await _confirmExit() ||
+            !context.mounted) {
+          return;
+        }
         Navigator.pop(context);
       },
       child: Scaffold(
@@ -100,6 +105,10 @@ extension _Model3dControls on _Model3dEditorScreenState {
                           onPressed: _busy
                               ? null
                               : () async {
+                                  if (widget.onClose != null) {
+                                    await widget.onClose!();
+                                    return;
+                                  }
                                   if (await _confirmExit() && context.mounted) {
                                     Navigator.pop(context);
                                   }
@@ -116,6 +125,7 @@ extension _Model3dControls on _Model3dEditorScreenState {
                     width: (box.maxWidth - 20).clamp(100.0, 200.0),
                     height: panelHeight,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (_showBones) Expanded(child: _bonePanel()),
                         if (_showBones && _showMorphs)
@@ -126,9 +136,11 @@ extension _Model3dControls on _Model3dEditorScreenState {
                   ),
                 if (_showSettings)
                   Positioned(
-                    right: 10,
+                    right: widget.layerTray == null ? 10 : 114,
                     bottom: 70,
-                    width: (box.maxWidth - 20).clamp(150.0, 260.0),
+                    width:
+                        (box.maxWidth - (widget.layerTray == null ? 20 : 124))
+                            .clamp(150.0, 260.0),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         maxHeight: (box.maxHeight - top - 80).clamp(
@@ -139,6 +151,8 @@ extension _Model3dControls on _Model3dEditorScreenState {
                       child: _renderSettings(),
                     ),
                   ),
+                if (widget.layerTray != null)
+                  Positioned(right: 10, bottom: 70, child: widget.layerTray!),
                 Positioned(
                   left: 10,
                   right: 10,
@@ -170,11 +184,11 @@ extension _Model3dControls on _Model3dEditorScreenState {
 
   Widget _topSettings(double width) {
     final l = context.l10n;
-    final tool = _mode == 'pose' ? l.model3d_modePose : l.model3d_modeTransform;
+    final tool = _mode == 'pose' ? l.model3d_toolPose : l.model3d_toolTransform;
     return InpaintPanel(
       child: ConstrainedBox(
         key: const ValueKey('model3d-top-settings'),
-        constraints: BoxConstraints(maxWidth: width, minHeight: 48),
+        constraints: BoxConstraints(maxWidth: width, minHeight: 50),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -210,108 +224,113 @@ extension _Model3dControls on _Model3dEditorScreenState {
                     horizontal: 8,
                     vertical: 5,
                   ),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 5,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_hasModel) ...[
-                            Tooltip(
-                              message: _modelName,
-                              child: Container(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 126,
-                                ),
-                                padding: const EdgeInsets.only(left: 5),
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerHighest,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        _modelName,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: 1,
+                    child: Wrap(
+                      key: const ValueKey('model3d-settings-row'),
+                      spacing: 8,
+                      runSpacing: 5,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_hasModel) ...[
+                              Tooltip(
+                                message: _modelName,
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 126,
+                                  ),
+                                  padding: const EdgeInsets.only(left: 5),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          _modelName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    EditButton(
-                                      glyph: 'clear',
-                                      tooltip: l.model3d_removeModel,
-                                      size: 24,
-                                      onPressed: _enabled
-                                          ? () => _sendSafely(() async {
-                                              if (!await _confirmReplace(
-                                                removing: true,
-                                              )) {
-                                                return;
-                                              }
-                                              await _bridge!.removeModel();
-                                              if (mounted) {
-                                                _refresh(() {
-                                                  _modelRef = null;
-                                                  _modelName = '';
-                                                  _dirty = true;
-                                                });
-                                              }
-                                            })
-                                          : null,
-                                    ),
-                                  ],
+                                      EditButton(
+                                        glyph: 'clear',
+                                        tooltip: l.model3d_removeModel,
+                                        size: 24,
+                                        onPressed: _enabled
+                                            ? () => _sendSafely(() async {
+                                                if (!await _confirmReplace(
+                                                  removing: true,
+                                                )) {
+                                                  return;
+                                                }
+                                                await _bridge!.removeModel();
+                                                if (mounted) {
+                                                  _refresh(() {
+                                                    _modelRef = null;
+                                                    _modelName = '';
+                                                    _dirty = true;
+                                                  });
+                                                }
+                                              })
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 4),
+                            ],
+                            _choice(
+                              l.common_import,
+                              glyph: 'model_import',
+                              onTap: _enabled ? _importModel : null,
                             ),
                             const SizedBox(width: 4),
-                          ],
-                          _choice(
-                            l.common_import,
-                            glyph: 'model_import',
-                            onTap: _enabled ? _importModel : null,
-                          ),
-                          const SizedBox(width: 4),
-                          _choice(
-                            l.model3d_resetModel,
-                            glyph: 'model_reset',
-                            compactLabel: l.common_reset,
-                            onTap: _enabled && _hasModel
-                                ? () => _sendSafely(_bridge!.resetModel)
-                                : null,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (final entry in [
-                            (
-                              'translate',
-                              l.model3d_gizmoTranslate,
-                              'model_move',
-                            ),
-                            ('rotate', l.model3d_gizmoRotate, 'model_rotate'),
-                            ('scale', l.model3d_gizmoScale, 'model_scale'),
-                          ]) ...[
                             _choice(
-                              entry.$2,
-                              glyph: entry.$3,
-                              selected: _gizmo == entry.$1,
-                              onTap: _enabled
-                                  ? () => _setMode(_mode, entry.$1)
+                              l.model3d_resetModel,
+                              glyph: 'model_reset',
+                              compactLabel: l.common_reset,
+                              onTap: _enabled && _hasModel
+                                  ? () => _sendSafely(_bridge!.resetModel)
                                   : null,
                             ),
-                            const SizedBox(width: 2),
                           ],
-                        ],
-                      ),
-                    ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (final entry in [
+                              (
+                                'translate',
+                                l.model3d_gizmoTranslate,
+                                'model_move',
+                              ),
+                              ('rotate', l.model3d_gizmoRotate, 'model_rotate'),
+                              ('scale', l.model3d_gizmoScale, 'model_scale'),
+                            ]) ...[
+                              _choice(
+                                entry.$2,
+                                glyph: entry.$3,
+                                selected: _gizmo == entry.$1,
+                                onTap: _enabled
+                                    ? () => _setMode(_mode, entry.$1)
+                                    : null,
+                              ),
+                              const SizedBox(width: 2),
+                            ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -426,18 +445,36 @@ extension _Model3dControls on _Model3dEditorScreenState {
                   selected: _showMorphs,
                   onPressed: _enabled ? _toggleSidePanel : null,
                 ),
+                if (widget.onResizeCanvas != null)
+                  EditButton(
+                    glyph: 'shift',
+                    tooltip: l.editor_changeCanvasSize,
+                    onPressed: _enabled ? widget.onResizeCanvas : null,
+                  ),
                 InpaintButton(
                   glyph: 'undo',
                   tooltip: l.editor_undo,
-                  onPressed: _enabled && _editorState['canUndo'] == true
+                  onPressed: !_enabled
+                      ? null
+                      : widget.canUndoCanvas && !_dirty
+                      ? widget.onCanvasUndo
+                      : _editorState['canUndo'] == true
                       ? () => _sendSafely(_bridge!.undoPose)
+                      : widget.canUndoCanvas
+                      ? widget.onCanvasUndo
                       : null,
                 ),
                 InpaintButton(
                   glyph: 'redo',
                   tooltip: l.editor_redo,
-                  onPressed: _enabled && _editorState['canRedo'] == true
+                  onPressed: !_enabled
+                      ? null
+                      : widget.canRedoCanvas && !_dirty
+                      ? widget.onCanvasRedo
+                      : _editorState['canRedo'] == true
                       ? () => _sendSafely(_bridge!.redoPose)
+                      : widget.canRedoCanvas
+                      ? widget.onCanvasRedo
                       : null,
                 ),
               ],
@@ -454,7 +491,16 @@ extension _Model3dControls on _Model3dEditorScreenState {
     return _sidePanel(
       l.model3d_bones,
       bones.isEmpty
-          ? Text(l.model3d_noBones, style: const TextStyle(fontSize: 11))
+          ? Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  l.model3d_noBones,
+                  style: const TextStyle(fontSize: 11),
+                ),
+              ),
+            )
           : ListView(
               children: [
                 for (final bone in bones)
@@ -493,7 +539,16 @@ extension _Model3dControls on _Model3dEditorScreenState {
     return _sidePanel(
       l.model3d_morphs,
       entries.isEmpty
-          ? Text(l.model3d_noMorphs, style: const TextStyle(fontSize: 11))
+          ? Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  l.model3d_noMorphs,
+                  style: const TextStyle(fontSize: 11),
+                ),
+              ),
+            )
           : ListView(
               children: [
                 for (final e in entries)
@@ -515,10 +570,11 @@ extension _Model3dControls on _Model3dEditorScreenState {
   }
 
   Widget _sidePanel(String title, Widget body) => InpaintPanel(
+    key: ValueKey('model3d-panel-$title'),
     child: Padding(
       padding: const EdgeInsets.all(10),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(title, style: const TextStyle(fontSize: 12, height: 1.3)),
           const SizedBox(height: 8),

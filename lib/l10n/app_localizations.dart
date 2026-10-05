@@ -22575,6 +22575,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove this model? Unsaved model edits will be lost.'**
   String get model3d_removeConfirm;
+
+  /// No description provided for @model3d_toolTransform.
+  ///
+  /// In en, this message translates to:
+  /// **'Model\nTransform'**
+  String get model3d_toolTransform;
+
+  /// No description provided for @model3d_toolPose.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Pose'**
+  String get model3d_toolPose;
 }
 
 class _AppLocalizationsDelegate

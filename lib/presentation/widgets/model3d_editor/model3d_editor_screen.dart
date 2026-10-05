@@ -29,7 +29,7 @@ class Model3dEditResult {
   });
 }
 
-/// 3D 模型图层全屏编辑器
+/// 当前图像编辑器内的 3D 图层工具。
 class Model3dEditorScreen extends StatefulWidget {
   final Model3dLayerData? existing;
   final int renderWidth;
@@ -38,10 +38,23 @@ class Model3dEditorScreen extends StatefulWidget {
 
   /// 测试注入口
   final Model3dBridge? bridgeOverride;
+  final Model3dBridge Function()? bridgeFactoryForTest;
   final WidgetBuilder? viewportBuilder;
   final LocalAssetServer? serverOverride;
   final Future<File?> Function()? pickModelFile;
   final bool markReadyForTest;
+  final Widget? layerTray;
+  final Future<void> Function()? onSaveAndClose;
+  final Future<void> Function()? onDownloadCanvas;
+  final Future<void> Function()? onClose;
+  final Future<void> Function()? onResizeCanvas;
+  final Future<void> Function()? onCanvasUndo;
+  final Future<void> Function()? onCanvasRedo;
+  final bool canUndoCanvas;
+  final bool canRedoCanvas;
+  final Future<(Uint8List, Uint8List)?> Function()? contextImages;
+  final Listenable? contextChanges;
+  bool get embedded => onSaveAndClose != null;
 
   const Model3dEditorScreen({
     super.key,
@@ -50,37 +63,29 @@ class Model3dEditorScreen extends StatefulWidget {
     required this.renderHeight,
     this.libraryService,
     this.bridgeOverride,
+    this.bridgeFactoryForTest,
     this.viewportBuilder,
     this.serverOverride,
     this.pickModelFile,
     this.markReadyForTest = false,
+    this.layerTray,
+    this.onSaveAndClose,
+    this.onDownloadCanvas,
+    this.onClose,
+    this.onResizeCanvas,
+    this.onCanvasUndo,
+    this.onCanvasRedo,
+    this.canUndoCanvas = false,
+    this.canRedoCanvas = false,
+    this.contextImages,
+    this.contextChanges,
   });
 
-  static Future<Model3dEditResult?> show(
-    BuildContext context, {
-    Model3dLayerData? existing,
-    required int renderWidth,
-    required int renderHeight,
-    Model3dLibraryService? libraryService,
-  }) {
-    return Navigator.push<Model3dEditResult>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => Model3dEditorScreen(
-          existing: existing,
-          renderWidth: renderWidth,
-          renderHeight: renderHeight,
-          libraryService: libraryService,
-        ),
-      ),
-    );
-  }
-
   @override
-  State<Model3dEditorScreen> createState() => _Model3dEditorScreenState();
+  State<Model3dEditorScreen> createState() => Model3dEditorState();
 }
 
-class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
+class Model3dEditorState extends State<Model3dEditorScreen> {
   LocalAssetServer? _server;
   Model3dBridge? _bridge;
   Model3dLibraryService? _library;
@@ -106,16 +111,23 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
     'showBones': true,
   };
   late final Future<void> _servicesReady;
+  Future<void>? _restoring;
+  Future<void>? _contextRefresh;
+  int _contextRevision = 0;
+  Timer? _contextTimer;
+  bool get hasChanges => _dirty;
 
   @override
   void initState() {
     super.initState();
-    _bridge = widget.bridgeOverride; // 真桥在 WebView controller 就绪后创建
+    widget.contextChanges?.addListener(_scheduleContext);
+    _bridge = widget.bridgeOverride ?? widget.bridgeFactoryForTest?.call();
+    if (_bridge != null) _bridge!.onEvent = _onBridgeEvent;
     if (widget.markReadyForTest) {
       _ready = true;
       // 与真实 onReady 事件走同一条恢复路径,让测试覆盖 existing 恢复逻辑
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _restoreExisting();
+        if (mounted) _restoring = _prepareScene();
       });
     }
     _servicesReady = _startServices();
@@ -149,6 +161,8 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
 
   @override
   void dispose() {
+    widget.contextChanges?.removeListener(_scheduleContext);
+    _contextTimer?.cancel();
     _bridge?.dispose();
     _server?.stop();
     super.dispose();
@@ -159,7 +173,7 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
     switch (type) {
       case 'onReady':
         setState(() => _ready = true);
-        _restoreExisting();
+        _restoring = _prepareScene();
       case 'onDirty':
         setState(() => _dirty = true);
       case 'onState':
@@ -167,6 +181,73 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
       case 'onLoadError':
         _showSnack('${context.l10n.model3d_loadError}: ${data['error'] ?? ''}');
     }
+  }
+
+  Future<void> _prepareScene() async {
+    await _restoreExisting();
+    if (mounted) await _refreshContext();
+  }
+
+  void _scheduleContext() {
+    _contextTimer?.cancel();
+    _contextTimer = Timer(const Duration(milliseconds: 60), () {
+      if (mounted && _ready) unawaited(_sendSafely(_refreshContext));
+    });
+  }
+
+  Future<void> _refreshContext() {
+    _contextRevision++;
+    return _contextRefresh ??= _updateContextImages().whenComplete(
+      () => _contextRefresh = null,
+    );
+  }
+
+  Future<void> _updateContextImages() async {
+    while (mounted) {
+      final revision = _contextRevision;
+      final images = widget.contextImages;
+      if (images == null || _bridge == null) return;
+      final context = await images();
+      if (context == null) return;
+      final (below, above) = context;
+      if (!mounted) return;
+      if (revision != _contextRevision) continue;
+      await _bridge!.setContextLayers(below: below, above: above);
+      if (revision == _contextRevision) return;
+    }
+  }
+
+  /// 图层切换或整张画布导出前取得透明图层像素与可继续编辑的场景。
+  Future<Model3dEditResult?> captureLayer({
+    Future<void> Function(Model3dEditResult)? onCaptured,
+  }) async {
+    await _servicesReady;
+    await _restoring;
+    if (!mounted || !_enabled) return null;
+    Model3dEditResult? result;
+    await _runBusy(() async {
+      final sceneState = await _bridge!.serialize();
+      sceneState['fileName'] = _modelName;
+      final png = await _bridge!.render(
+        width: widget.renderWidth,
+        height: widget.renderHeight,
+      );
+      result = Model3dEditResult(
+        pngBytes: png,
+        sceneState: sceneState,
+        modelRef: _modelRef ?? Model3dLibraryService.emptySceneRef,
+      );
+      if (onCaptured != null) {
+        await onCaptured(result!);
+        await markSaved();
+      }
+    });
+    return result;
+  }
+
+  Future<void> markSaved() async {
+    await _bridge!.checkpointSaved();
+    if (mounted) setState(() => _dirty = false);
   }
 
   Future<void> _restoreExisting() async {
@@ -299,6 +380,10 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
   }
 
   Future<void> _apply() async {
+    if (widget.embedded) {
+      await widget.onSaveAndClose!();
+      return;
+    }
     await _runBusy(() async {
       final sceneState = await _bridge!.serialize();
       sceneState['fileName'] = _modelName;
@@ -368,6 +453,10 @@ class _Model3dEditorScreenState extends State<Model3dEditorScreen> {
   }
 
   Future<void> _download() async {
+    if (widget.onDownloadCanvas != null) {
+      await widget.onDownloadCanvas!();
+      return;
+    }
     await _runBusy(() async {
       final bytes = await _bridge!.render(
         width: widget.renderWidth,

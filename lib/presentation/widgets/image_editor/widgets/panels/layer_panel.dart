@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart'
-    show WebViewEnvironment;
 
 import '../../../../../core/utils/app_logger.dart';
 import '../../../../../core/utils/localization_extension.dart';
@@ -12,7 +9,7 @@ import '../../layers/layer.dart';
 import '../../layers/model3d_layer_data.dart';
 import '../../../../widgets/common/themed_divider.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
-import '../../../model3d_editor/model3d_editor_screen.dart';
+import '../../core/history_manager.dart';
 
 /// 图层面板
 class LayerPanel extends StatefulWidget {
@@ -99,73 +96,20 @@ class _LayerPanelState extends State<LayerPanel> {
     }
   }
 
-  /// Windows 下 WebView2 Runtime 缺失时提前拦截(Win10/11 一般自带)
-  Future<bool> _ensureWebView2Available() async {
-    if (!Platform.isWindows) return true;
-    String? version;
-    try {
-      version = await WebViewEnvironment.getAvailableVersion();
-    } catch (_) {
-      return true; // 查询本身失败时不拦截,交由编辑器内错误处理兜底
-    }
-    if (version != null) return true;
-    if (!mounted) return false;
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Text(context.l10n.model3d_webview2Missing),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(MaterialLocalizations.of(context).okButtonLabel),
-          ),
-        ],
+  void _onAdd3dLayer() {
+    widget.state.historyManager.execute(
+      AddInpaintMaskLayerAction(
+        name: context.l10n.model3d_editorTitle,
+        inpaintMask: false,
+        model3d: const Model3dLayerData(modelRef: 'empty', sceneState: {}),
       ),
+      widget.state,
     );
-    return false;
+    widget.state.requestUiUpdate();
   }
 
-  Future<void> _onAdd3dLayer() async {
-    if (!await _ensureWebView2Available()) return;
-    if (!mounted) return;
-    final size = widget.state.canvasSize;
-    final result = await Model3dEditorScreen.show(
-      context,
-      renderWidth: size.width.round(),
-      renderHeight: size.height.round(),
-    );
-    if (result == null || !mounted) return;
-    final layer = await widget.state.layerManager.addLayerFromImage(
-      result.pngBytes,
-      name: context.l10n.model3d_editorTitle,
-    );
-    layer?.model3d = Model3dLayerData(
-      modelRef: result.modelRef,
-      sceneState: result.sceneState,
-    );
-  }
-
-  Future<void> _onEdit3dLayer(Layer layer) async {
-    final data = layer.model3d;
-    if (data == null) return;
-    if (!await _ensureWebView2Available()) return;
-    if (!mounted) return;
-    final size = widget.state.canvasSize;
-    final result = await Model3dEditorScreen.show(
-      context,
-      existing: data,
-      renderWidth: size.width.round(),
-      renderHeight: size.height.round(),
-    );
-    if (result == null || !mounted) return;
-    await widget.state.layerManager.replaceLayerBaseImage(
-      layer.id,
-      result.pngBytes,
-    );
-    layer.model3d = Model3dLayerData(
-      modelRef: result.modelRef,
-      sceneState: result.sceneState,
-    );
+  void _onEdit3dLayer(Layer layer) {
+    widget.state.layerManager.setActiveLayer(layer.id);
   }
 
   @override

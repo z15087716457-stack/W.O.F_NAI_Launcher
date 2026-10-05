@@ -902,6 +902,7 @@ class Layer {
       opacity: opacity,
       blendMode: blendMode,
       strokes: List.from(_strokes),
+      model3d: model3d,
     );
   }
 
@@ -919,6 +920,7 @@ class Layer {
     for (final stroke in data.strokes) {
       layer.addStroke(stroke);
     }
+    layer.model3d = data.model3d;
     return layer;
   }
 

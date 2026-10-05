@@ -7281,5 +7281,7 @@
   "model3d_settings": "3D 렌더 설정",
   "model3d_resetModel": "모델 위치 초기화",
   "model3d_removeModel": "모델 제거",
-  "model3d_removeConfirm": "이 모델을 제거할까요? 저장하지 않은 모델 편집 내용이 사라집니다."
+  "model3d_removeConfirm": "이 모델을 제거할까요? 저장하지 않은 모델 편집 내용이 사라집니다.",
+  "model3d_toolTransform": "모델 변환",
+  "model3d_toolPose": "모델 포즈"
 }

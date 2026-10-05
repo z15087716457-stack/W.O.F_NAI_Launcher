@@ -30,7 +30,7 @@ class Model3dBridge {
 
   final JsEvaluator _evalJs;
   final Duration timeout;
-  final Model3dEventHandler? onEvent;
+  Model3dEventHandler? onEvent;
 
   final Map<int, Completer<Map<String, dynamic>>> _pending = {};
   int _nextRequestId = 0;
@@ -129,6 +129,14 @@ class Model3dBridge {
   Future<void> restoreScene(Map<String, dynamic> state) =>
       _send('restoreScene', {'sceneState': state});
   Future<Map<String, dynamic>> getState() => _send('getState');
+  Future<void> checkpointSaved() => _send('checkpointSaved');
+  Future<void> setContextLayers({
+    required Uint8List below,
+    required Uint8List above,
+  }) => _send('setContextLayers', {
+    'below': base64Encode(below),
+    'above': base64Encode(above),
+  });
   Future<void> setSettings(Map<String, dynamic> settings) =>
       _send('setSettings', {'settings': settings});
   Future<void> selectBone(int id) => _send('selectBone', {'id': id});

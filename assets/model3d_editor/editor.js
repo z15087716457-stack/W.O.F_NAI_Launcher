@@ -94,6 +94,26 @@ function registerCommand(type, fn) {
   commands.set(type, fn);
 }
 
+// Other editor layers are preview context only. The WebGL canvas still exports
+// just this transparent 3D layer; the parent editor owns final composition.
+registerCommand('setContextLayers', async ({ below, above }) => {
+  // Decode independent images so overlapping refreshes cannot replace each
+  // other's onload handlers or leave a bridge request waiting indefinitely.
+  const load = (png) => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image.src);
+    image.onerror = () => reject(new Error('context_image_decode_failed'));
+    image.src = 'data:image/png;base64,' + png;
+  });
+  const images = await Promise.all([load(below), load(above)]);
+  for (const [index, id] of ['context-below', 'context-above'].entries()) {
+    const image = document.getElementById(id);
+    image.src = images[index];
+    image.hidden = false;
+  }
+});
+registerCommand('checkpointSaved', () => { ctx.dirty = false; });
+
 window.naiEditor = {
   dispatch(jsonStr) {
     let msg;
