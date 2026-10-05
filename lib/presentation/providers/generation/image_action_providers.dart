@@ -79,7 +79,7 @@ final imageUpscaleCostProvider = Provider.autoDispose
           (workflow) => workflow.upscale.backend,
         ),
       );
-      if (backend == UpscaleBackend.comfyui) return 0;
+      if (backend != UpscaleBackend.novelai) return 0;
       final cost = AnlasCalculator.calculateNovelAiUpscaleCost(
         inputWidth: image.width,
         inputHeight: image.height,

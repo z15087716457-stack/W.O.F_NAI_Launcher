@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -71,7 +72,10 @@ Uint8List _png(int width, int height) =>
     Uint8List.fromList(img.encodePng(img.Image(width: width, height: height)));
 
 void main() {
-  setUpAll(() => registerFallbackValue(Uint8List(0)));
+  setUpAll(() {
+    registerFallbackValue(Uint8List(0));
+    registerFallbackValue(CancelToken());
+  });
   for (final fail in [false, true]) {
     testWidgets(
       'cloud tool ${fail ? 'failure allows retry' : 'success registers an image'} and close restores the draft',
@@ -81,7 +85,11 @@ void main() {
         final api = _Api();
         final pending = Completer<Uint8List>();
         when(
-          () => api.upscaleImage(any(), onProgress: any(named: 'onProgress')),
+          () => api.upscaleImage(
+            any(),
+            onProgress: any(named: 'onProgress'),
+            cancelToken: any(named: 'cancelToken'),
+          ),
         ).thenAnswer((_) => pending.future);
         final container = ProviderContainer(
           overrides: [
@@ -158,10 +166,17 @@ void main() {
           expect(result.currentImages.single.width, 128);
           expect(result.currentImages.single.height, 192);
           expect(result.currentImages.single.operation, ImageOperation.upscale);
-          expect(result.currentImages.single.originalBytes, same(source));
+          expect(
+            result.currentImages.single.originalBytes,
+            orderedEquals(source),
+          );
         }
         verify(
-          () => api.upscaleImage(source, onProgress: any(named: 'onProgress')),
+          () => api.upscaleImage(
+            any(that: orderedEquals(source)),
+            onProgress: any(named: 'onProgress'),
+            cancelToken: any(named: 'cancelToken'),
+          ),
         ).called(1);
         await tester.tap(close);
         await tester.pumpAndSettle();

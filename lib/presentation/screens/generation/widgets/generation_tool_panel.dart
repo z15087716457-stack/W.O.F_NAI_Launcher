@@ -5,6 +5,7 @@ import '../../../providers/generation/image_workflow_controller.dart';
 import '../../../providers/image_generation_provider.dart';
 import 'img2img_panel.dart';
 import 'generation_sidebar_style.dart';
+import 'local_upscale_panel.dart';
 
 /// Screen-space tool controls leave the image and camera free to move.
 class GenerationToolPanel extends ConsumerWidget {
@@ -56,6 +57,7 @@ class GenerationToolPanel extends ConsumerWidget {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: SingleChildScrollView(
+                  primary: false,
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Column(
@@ -153,80 +155,112 @@ class GenerationToolPanel extends ConsumerWidget {
                     _option(
                       context,
                       '${factor == factor.roundToDouble() ? factor.toInt() : factor}x',
-                      !settings.maxUpscale && settings.upscaleFactor == factor,
+                      !settings.localUpscale &&
+                          !settings.maxUpscale &&
+                          settings.upscaleFactor == factor,
                       () => controller.updateEnhanceUpscaleFactor(factor),
                     ),
                   if (controller.isEnhanceMaxUpscaleEligible)
                     _option(
                       context,
                       context.l10n.img2img_enhanceMax,
-                      settings.maxUpscale,
+                      settings.maxUpscale && !settings.localUpscale,
                       () => controller.setEnhanceMaxUpscale(true),
                     ),
+                  _option(
+                    context,
+                    context.l10n.localUpscale_local,
+                    settings.localUpscale,
+                    controller.setEnhanceLocalUpscale,
+                  ),
                 ],
               ),
             ),
           ],
         );
-        final parameters = Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (settings.showIndividualSettings) ...[
-              _slider(
-                context,
-                context.l10n.img2img_strength,
-                settings.strength.clamp(.01, .99),
-                (v) => controller.updateEnhanceIndividualSettings(strength: v),
-                min: .01,
-                max: .99,
-                divisions: 98,
-              ),
-              _slider(
-                context,
-                context.l10n.img2img_noise,
-                settings.noise.clamp(0, .99),
-                (v) => controller.updateEnhanceIndividualSettings(noise: v),
-                max: .99,
-                divisions: 99,
-              ),
-            ] else
-              _slider(
-                context,
-                context.l10n.img2img_enhanceMagnitude,
-                magnitude.toDouble(),
-                (v) => controller.updateEnhanceMagnitude((v - 1) / 4),
-                min: 1,
-                max: 5,
-                divisions: 4,
-              ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: () => controller.toggleEnhanceIndividualSettings(
-                  !settings.showIndividualSettings,
-                ),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 24),
-                  foregroundColor: Theme.of(
-                    context,
-                  ).colorScheme.onSurfaceVariant,
-                  textStyle: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(fontSize: 12),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  settings.showIndividualSettings
-                      ? context.l10n.img2img_hideAdvanced
-                      : context.l10n.img2img_showAdvanced,
-                ),
-              ),
-            ),
-          ],
-        );
-        if (constraints.maxWidth < 350) {
+        final parameters = settings.localUpscale
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    context.l10n.enhance_localAfterGeneration,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 10),
+                  LocalUpscalePanel(
+                    onCloudStart: () {},
+                    cloudRunning: false,
+                    framed: false,
+                    configurationOnly: true,
+                    localOnly: true,
+                    forGeneration: true,
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (settings.showIndividualSettings) ...[
+                    _slider(
+                      context,
+                      context.l10n.img2img_strength,
+                      settings.strength.clamp(.01, .99),
+                      (v) => controller.updateEnhanceIndividualSettings(
+                        strength: v,
+                      ),
+                      min: .01,
+                      max: .99,
+                      divisions: 98,
+                    ),
+                    _slider(
+                      context,
+                      context.l10n.img2img_noise,
+                      settings.noise.clamp(0, .99),
+                      (v) =>
+                          controller.updateEnhanceIndividualSettings(noise: v),
+                      max: .99,
+                      divisions: 99,
+                    ),
+                  ] else
+                    _slider(
+                      context,
+                      context.l10n.img2img_enhanceMagnitude,
+                      magnitude.toDouble(),
+                      (v) => controller.updateEnhanceMagnitude((v - 1) / 4),
+                      min: 1,
+                      max: 5,
+                      divisions: 4,
+                    ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () =>
+                          controller.toggleEnhanceIndividualSettings(
+                            !settings.showIndividualSettings,
+                          ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 24),
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant,
+                        textStyle: Theme.of(
+                          context,
+                        ).textTheme.labelSmall?.copyWith(fontSize: 12),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        settings.showIndividualSettings
+                            ? context.l10n.img2img_hideAdvanced
+                            : context.l10n.img2img_showAdvanced,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+        if (constraints.maxWidth < (settings.localUpscale ? 480 : 350)) {
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

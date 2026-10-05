@@ -22995,6 +22995,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Downloading component…'**
   String get localUpscale_installingComponent;
+
+  /// No description provided for @upscale_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale settings'**
+  String get upscale_settings;
+
+  /// No description provided for @upscale_cloudCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated {cost} Anlas · 2×'**
+  String upscale_cloudCost(int cost);
+
+  /// No description provided for @enhance_localAfterGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically upscale each generated image locally.'**
+  String get enhance_localAfterGeneration;
+
+  /// No description provided for @enhance_localAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate and upscale locally'**
+  String get enhance_localAction;
 }
 
 class _AppLocalizationsDelegate

@@ -89,6 +89,9 @@ void main() {
       (container.read(imageWorkflowControllerProvider.notifier) as _Workflow)
           .backend(UpscaleBackend.comfyui);
       expect(container.read(imageUpscaleCostProvider(large)), 0);
+      (container.read(imageWorkflowControllerProvider.notifier) as _Workflow)
+          .backend(UpscaleBackend.local);
+      expect(container.read(imageUpscaleCostProvider(large)), 0);
     },
   );
 

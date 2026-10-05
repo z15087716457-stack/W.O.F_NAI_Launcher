@@ -7351,5 +7351,9 @@
   "localUpscale_installComponent": "설치",
   "localUpscale_installingRuntime": "Python/CUDA 환경 설치 중…",
   "localUpscale_checkingComponent": "구성 요소와 GPU 확인 중…",
-  "localUpscale_installingComponent": "구성 요소 다운로드 중…"
+  "localUpscale_installingComponent": "구성 요소 다운로드 중…",
+  "upscale_settings": "확대 설정",
+  "upscale_cloudCost": "예상 {cost} Anlas · 2×",
+  "enhance_localAfterGeneration": "생성된 각 이미지를 로컬에서 자동으로 확대합니다.",
+  "enhance_localAction": "생성 후 로컬 확대"
 }

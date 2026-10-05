@@ -13235,4 +13235,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localUpscale_installingComponent => 'Downloading component…';
+
+  @override
+  String get upscale_settings => 'Upscale settings';
+
+  @override
+  String upscale_cloudCost(int cost) {
+    return 'Estimated $cost Anlas · 2×';
+  }
+
+  @override
+  String get enhance_localAfterGeneration =>
+      'Automatically upscale each generated image locally.';
+
+  @override
+  String get enhance_localAction => 'Generate and upscale locally';
 }

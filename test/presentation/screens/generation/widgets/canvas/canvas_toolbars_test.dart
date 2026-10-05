@@ -11,6 +11,9 @@ import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
+import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
@@ -44,6 +47,8 @@ Widget _wrap(Widget child, {Brightness? brightness, GlobalKey? captureKey}) {
   return ProviderScope(
     overrides: [
       localStorageServiceProvider.overrideWith((ref) => _FakeCanvasStorage()),
+      generationParamsNotifierProvider.overrideWith(_ToolbarParams.new),
+      localUpscaleModelsProvider.overrideWith((ref) async => []),
       estimatedCostProvider.overrideWithValue(7),
       imageUpscaleCostProvider.overrideWith((ref, image) => 7),
     ],
@@ -128,13 +133,16 @@ void main() {
   }
 
   group('CanvasEdgeToolbar', () {
-    testWidgets('cost pills show amount then Anlas icon for each priced tool', (
+    testWidgets('variation price remains and upscale uses an infinity split action', (
       tester,
     ) async {
       final image = _img(id: 'quoted');
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            localStorageServiceProvider.overrideWith((ref) => _FakeCanvasStorage()),
+            generationParamsNotifierProvider.overrideWith(_ToolbarParams.new),
+            localUpscaleModelsProvider.overrideWith((ref) async => []),
             imageVariationCostProvider(image).overrideWithValue(63),
             imageUpscaleCostProvider(image).overrideWithValue(1),
           ],
@@ -154,7 +162,7 @@ void main() {
           ),
         ),
       );
-      for (final entry in {'variations': '63', 'upscale': '1'}.entries) {
+      for (final entry in {'variations': '63'}.entries) {
         final pill = find.byKey(
           ValueKey('canvas-cost-nai-icon-${entry.key}.svg'),
         );
@@ -179,6 +187,9 @@ void main() {
         );
         expect(tester.getSize(pill).height, lessThanOrEqualTo(26));
       }
+      expect(find.byKey(const Key('canvas-upscale-infinity')), findsOneWidget);
+      expect(find.byKey(const Key('canvas-upscale-settings')), findsOneWidget);
+      expect(find.byKey(const ValueKey('canvas-cost-nai-icon-upscale.svg')), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -194,17 +205,19 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(SvgPicture), findsNWidgets(8));
-      // Unknown variation metadata stays unquoted; selected-source upscale is 7.
+      expect(find.byType(SvgPicture), findsNWidgets(7));
+      // Unknown variation metadata stays unquoted; upscale uses infinity.
       expect(
         find.byKey(const ValueKey('canvas-cost-nai-icon-variations.svg')),
         findsNothing,
       );
       expect(
         find.byKey(const ValueKey('canvas-cost-nai-icon-upscale.svg')),
-        findsOneWidget,
+        findsNothing,
       );
-      expect(find.text('7'), findsOneWidget);
+      expect(find.byKey(const Key('canvas-upscale-infinity')), findsOneWidget);
+      expect(find.byKey(const Key('canvas-upscale-settings')), findsOneWidget);
+      expect(find.text('∞'), findsOneWidget);
     });
 
     testWidgets('bottomStart renders WxH + settings + seed', (tester) async {
@@ -384,7 +397,17 @@ void main() {
   );
 }
 
+class _ToolbarParams extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams();
+}
+
 class _FakeCanvasStorage extends LocalStorageService {
+  @override
+  T? getSetting<T>(String key, {T? defaultValue}) => defaultValue;
+  @override
+  Future<void> setSetting<T>(String key, T value) async {}
+
   @override
   bool getCanvasLockCamera() => false;
 

@@ -10,19 +10,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
-import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
-import '../../../../data/datasources/remote/nai_image_enhancement_api_service.dart';
-import '../../../../data/models/image/image_params.dart';
-import '../../../../data/models/image/image_operation.dart';
 import '../../../../data/services/precise_ref_library_storage_service.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/image_generation_provider.dart';
-import '../../../providers/image_save_settings_provider.dart';
 import '../../../providers/generation/image_workflow_controller.dart';
 import '../../../providers/precise_ref_library_provider.dart';
-import '../../../providers/subscription_provider.dart';
 import '../../../utils/dropped_file_reader.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
@@ -32,6 +26,7 @@ import '../../../widgets/common/themed_divider.dart';
 import '../../../widgets/image_editor/image_editor_screen.dart';
 import '../../precise_ref_library/widgets/precise_ref_selector_dialog.dart';
 import 'local_upscale_panel.dart';
+import '../../../providers/generation/cloud_upscale_provider.dart';
 import 'img2img_preview_cache.dart';
 import 'canvas/canvas_feed_layout.dart';
 
@@ -45,9 +40,6 @@ class Img2ImgPanel extends ConsumerStatefulWidget {
 }
 
 class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
-  static const String _upscaleLogTag = 'Img2Img-Upscale';
-
-  bool _naiUpscaling = false;
   bool _isFileDraggingOver = false;
   int _headerIconTrigger = 0;
 
@@ -579,70 +571,20 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
   }
 
   Widget _buildUpscalePanel(ThemeData theme, ImageWorkflowState workflow) =>
-      LocalUpscalePanel(onCloudStart: _runUpscale, cloudRunning: _naiUpscaling);
-
-  static String _sourceLogSummary(ImageParams params, Uint8List src) =>
-      'sourceBytes=${src.length}; draftSize=${params.width}x${params.height}';
+      LocalUpscalePanel(
+        onCloudStart: _runUpscale,
+        cloudRunning: ref.watch(cloudUpscaleTaskProvider).running,
+        framed: !widget.toolOnly,
+      );
 
   Future<void> _runUpscale() async {
-    final controller = ref.read(imageWorkflowControllerProvider.notifier);
-    if (ref.read(imageWorkflowControllerProvider).isToolRunning) return;
-    final params = ref.read(generationParamsNotifierProvider);
-    final source = params.sourceImage;
-    if (source == null) return;
-    controller.setToolRunning(true);
-    try {
-      await _runNaiUpscale(params, source);
-    } finally {
-      if (!controller.isDisposed) controller.setToolRunning(false);
-    }
-  }
-
-  Future<void> _runNaiUpscale(ImageParams params, Uint8List src) async {
-    AppLogger.i(
-      'NovelAI upscale begin: ${_sourceLogSummary(params, src)}',
-      _upscaleLogTag,
-    );
-    final subscriptionNotifier = ref.read(
-      subscriptionNotifierProvider.notifier,
-    );
-    setState(() => _naiUpscaling = true);
-    try {
-      final apiService = ref.read(naiImageEnhancementApiServiceProvider);
-      AppLogger.d('NovelAI upscale API request start', _upscaleLogTag);
-      final result = await apiService.upscaleImage(src);
-      AppLogger.i(
-        'NovelAI upscale API returned: bytes=${result.length}',
-        _upscaleLogTag,
-      );
-      if (!mounted) return;
-
-      final saveSettings = ref.read(imageSaveSettingsNotifierProvider);
-      AppLogger.d(
-        'Registering NovelAI upscale result: autoSave=${saveSettings.autoSave}',
-        _upscaleLogTag,
-      );
-      await ref
-          .read(imageGenerationNotifierProvider.notifier)
-          .registerExternalImage(
-            result,
-            params: params,
-            operation: ImageOperation.upscale,
-            originalBytes: src,
-            saveToLocal: saveSettings.autoSave,
-            replaceCurrentDisplay: true,
-          );
-      AppLogger.i('NovelAI upscale result registered', _upscaleLogTag);
-      if (mounted) {
-        AppToast.success(context, context.l10n.img2img_novelAiUpscaleComplete);
-      }
-    } catch (e) {
-      AppLogger.w('NovelAI upscale failed: $e', _upscaleLogTag);
-      if (mounted) AppToast.error(context, e.toString());
-    } finally {
-      subscriptionNotifier.schedulePostBillingRefresh();
-      AppLogger.d('NovelAI upscale end', _upscaleLogTag);
-      if (mounted) setState(() => _naiUpscaling = false);
+    await ref.read(cloudUpscaleTaskProvider.notifier).start();
+    if (!mounted) return;
+    final result = ref.read(cloudUpscaleTaskProvider);
+    if (result.error != null) {
+      AppToast.error(context, result.error!);
+    } else if (result.completed) {
+      AppToast.success(context, context.l10n.img2img_novelAiUpscaleComplete);
     }
   }
 

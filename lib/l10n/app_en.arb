@@ -7369,5 +7369,16 @@
   "localUpscale_installComponent": "Install",
   "localUpscale_installingRuntime": "Installing Python/CUDA runtime…",
   "localUpscale_checkingComponent": "Checking component and GPU…",
-  "localUpscale_installingComponent": "Downloading component…"
+  "localUpscale_installingComponent": "Downloading component…",
+  "upscale_settings": "Upscale settings",
+  "upscale_cloudCost": "Estimated {cost} Anlas · 2×",
+  "enhance_localAfterGeneration": "Automatically upscale each generated image locally.",
+  "enhance_localAction": "Generate and upscale locally",
+  "@upscale_cloudCost": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  }
 }

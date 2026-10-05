@@ -11,6 +11,9 @@ import 'package:image/image.dart' as img;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/services/anlas_calculator.dart';
+import '../../core/utils/localization_extension.dart';
+import 'generation/image_workflow_controller.dart';
+import 'generation/local_upscale_provider.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/image_save_utils.dart';
 import '../../core/utils/image_share_sanitizer.dart';
@@ -21,6 +24,7 @@ import '../../core/utils/prompt_input_normalization.dart';
 import '../../core/utils/prompt_preset_resolution.dart';
 import '../../core/services/character_conversion_service.dart';
 import '../../data/services/image_metadata_service.dart';
+import '../../data/models/upscale/local_upscale_models.dart';
 import '../../data/datasources/remote/nai_image_generation_api_service.dart';
 import '../../data/models/character/character_prompt.dart' as ui_character;
 
@@ -102,12 +106,16 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   int _generationRunCounter = 0;
   int _activeGenerationRunId = 0;
   ImageOperation? _activeImageOperation;
+  UpscaleWorkflowSettings? _activeLocalEnhance;
+  List<GeneratedImage> _pendingLocalEnhanceImages = [];
   final Map<String, _RememberedStreamPreview> _streamPreviewsForSnapshots =
       <String, _RememberedStreamPreview>{};
   final Set<String> _failedStreamSnapshotKeys = <String>{};
 
   int _startGenerationRun({ImageOperation? operation}) {
     _activeImageOperation = operation;
+    _activeLocalEnhance = null;
+    _pendingLocalEnhanceImages = [];
     _isCancelled = false;
     _activeGenerationRunId = ++_generationRunCounter;
     _streamPreviewsForSnapshots.clear();
@@ -715,7 +723,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   ) async {
     // 与 _generate 共用同一在途门禁：探索生成同样不得顶替
     // 当前 run 或把冷却计数花在注定被丢弃的调用上。
-    if (state.isGenerating) {
+    if (state.isGenerating ||
+        (ref.exists(imageWorkflowControllerProvider) &&
+            ref.read(imageWorkflowControllerProvider).isToolRunning) ||
+        (ref.exists(localUpscaleTaskProvider) &&
+            ref.read(localUpscaleTaskProvider).running)) {
       return null;
     }
 
@@ -798,7 +810,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     // 必须先于冷却扣减与 _startGenerationRun——重入若走到 run 创建，
     // 会顶替当前 run 标识，使在途请求脱离取消/陈旧更新防护；
     // 取消后 isGenerating 已回落，cancel→重新生成不受影响。
-    if (state.isGenerating) {
+    if (state.isGenerating ||
+        (ref.exists(imageWorkflowControllerProvider) &&
+            ref.read(imageWorkflowControllerProvider).isToolRunning) ||
+        (ref.exists(localUpscaleTaskProvider) &&
+            ref.read(localUpscaleTaskProvider).running)) {
       return;
     }
 
@@ -812,6 +828,12 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final generationRunId = _startGenerationRun();
 
     _activeImageOperation = operation;
+    if (operation == null && ref.exists(imageWorkflowControllerProvider)) {
+      final workflow = ref.read(imageWorkflowControllerProvider);
+      if (workflow.isEnhance && workflow.enhance.localUpscale) {
+        _activeLocalEnhance = workflow.upscale;
+      }
+    }
     final effectiveParams = params;
 
     // 在参数准备/网络请求的首次 await 前发布完整占位信息。
@@ -832,6 +854,32 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       batchWidth: effectiveParams.width,
       batchHeight: effectiveParams.height,
     );
+
+    if (_activeLocalEnhance != null) {
+      try {
+        final models = await ref.read(localUpscaleModelsProvider.future);
+        if (_shouldAbortGenerationRun(generationRunId)) return;
+        if (!models.any(
+          (model) =>
+              model.installed && model.id == _activeLocalEnhance!.localModel,
+        )) {
+          state = state.copyWith(
+            status: GenerationStatus.error,
+            errorMessage: currentL10n.localUpscale_notInstalled,
+            clearStreamPreview: true,
+          );
+          return;
+        }
+      } catch (_) {
+        if (_shouldAbortGenerationRun(generationRunId)) return;
+        state = state.copyWith(
+          status: GenerationStatus.error,
+          errorMessage: currentL10n.localUpscale_modelMissing,
+          clearStreamPreview: true,
+        );
+        return;
+      }
+    }
 
     final preparedParams = await _prepareGenerationParams(
       effectiveParams,
@@ -1006,26 +1054,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           );
           return;
         }
-        final generatedList = imageBytes.indexed
-            .map(
-              (e) => GeneratedImage.create(
-                e.$2,
-                width: batchParams.width,
-                sourceParams: batchParams,
-                operation: _activeImageOperation,
-                height: batchParams.height,
-                generationRunId: generationRunId,
-                batchIndex: slotStart - 1 + e.$1,
-              ),
-            )
-            .toList();
+        final generatedList = await _completeGeneratedImages(
+          imageBytes,
+          batchParams,
+          generationRunId,
+          offset: slotStart - 1,
+        );
+        if (_shouldAbortGenerationRun(generationRunId)) return;
         if (generatedList.isNotEmpty) {
           // 将字节数据包装成带唯一ID的 GeneratedImage
           allImages.addAll(generatedList);
           // 立即更新显示和历史
           state = state.copyWith(
             currentImages: List.from(allImages),
-            history: [...generatedList, ...state.history],
+            history: _prependCompletedHistory(generatedList),
             clearStreamPreview: true,
           );
           _retainSharePreparationCacheForCurrentHistory();
@@ -1174,6 +1216,98 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     if (!_isCancelled && allImages.isNotEmpty) {
       await _autoSaveIfEnabled(allImages, preparedParams);
     }
+  }
+
+  List<GeneratedImage> _prependCompletedHistory(List<GeneratedImage> images) {
+    final ids = images.map((image) => image.id).toSet();
+    return [
+      ...images,
+      ...state.history.where((image) => !ids.contains(image.id)),
+    ];
+  }
+
+  /// Only publish the final enhanced image. Raw bytes stay temporary during
+  /// inference and are recovered only when enhancement fails or is cancelled.
+  Future<List<GeneratedImage>> _completeGeneratedImages(
+    Iterable<Uint8List> bytes,
+    ImageParams params,
+    int runId, {
+    int offset = 0,
+  }) async {
+    final settings = _activeLocalEnhance;
+    final result = <GeneratedImage>[];
+    final originals = [
+      for (final entry in bytes.indexed)
+        GeneratedImage.create(
+          entry.$2,
+          width: params.width,
+          height: params.height,
+          sourceParams: params,
+          operation: _activeImageOperation,
+          generationRunId: runId,
+          batchIndex: offset + entry.$1,
+        ),
+    ];
+    if (settings != null) _pendingLocalEnhanceImages = List.of(originals);
+    for (final raw in originals) {
+      if (_shouldAbortGenerationRun(runId)) break;
+      if (settings == null) {
+        result.add(raw);
+        continue;
+      }
+      state = state.copyWith(streamPreview: raw.bytes);
+      _clearRememberedStreamPreview(
+        generationRunId: runId,
+        imageNumber: raw.batchIndex! + 1,
+      );
+      LocalUpscaleResult? upscaled;
+      try {
+        final source = ImageSaveUtils.hasEmbeddedNovelAiMetadata(raw.bytes)
+            ? raw.bytes
+            : await ImageSaveUtils.rebuildImageBytesWithMetadata(
+                imageBytes: raw.bytes,
+                params: params,
+                actualSeed: params.seed,
+              );
+        if (_shouldAbortGenerationRun(runId)) break;
+        upscaled = await ref
+            .read(localUpscaleTaskProvider.notifier)
+            .processGenerated(
+              source,
+              modelId: settings.localModel,
+              scale: settings.localScale,
+            );
+      } catch (error, stackTrace) {
+        AppLogger.e(
+          'Local enhancement failed',
+          error,
+          stackTrace,
+          'Generation',
+        );
+      } finally {
+        if (_isCurrentGenerationRun(runId)) {
+          _pendingLocalEnhanceImages.removeWhere((image) => image.id == raw.id);
+        }
+      }
+      if (_shouldAbortGenerationRun(runId)) break;
+      final completed = upscaled == null
+          ? raw
+          : GeneratedImage.create(
+              upscaled.bytes,
+              width: upscaled.width,
+              height: upscaled.height,
+              operation: ImageOperation.upscale,
+              generationRunId: runId,
+              batchIndex: raw.batchIndex,
+            );
+      result.add(completed);
+      state = state.copyWith(
+        currentImages: [...state.currentImages, completed],
+        history: _prependCompletedHistory([completed]),
+        clearStreamPreview: true,
+      );
+    }
+    return result;
   }
 
   /// 自动保存图像（如果启用）
@@ -1992,26 +2126,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (imageBytes.isEmpty) {
           throw Exception('No images returned from generation');
         }
-        final generatedList = imageBytes.indexed
-            .map(
-              (e) => GeneratedImage.create(
-                e.$2,
-                width: params.width,
-                sourceParams: params,
-                operation: _activeImageOperation,
-                height: params.height,
-                generationRunId: generationRunId,
-                batchIndex: e.$1,
-              ),
-            )
-            .toList();
+        final generatedList = await _completeGeneratedImages(
+          imageBytes,
+          params,
+          generationRunId,
+          offset: 0,
+        );
+        if (_shouldAbortGenerationRun(generationRunId)) return;
         state = state.copyWith(
           status: GenerationStatus.completed,
           currentImages: generatedList,
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
           displayHeight: generatedList.first.height,
-          history: [...generatedList, ...state.history],
+          history: _prependCompletedHistory(generatedList),
           progress: 1.0,
           currentImage: 0,
           totalImages: 0,
@@ -2037,26 +2165,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (_shouldAbortGenerationRun(generationRunId)) return;
         final orderedImages = finalImages.entries.toList()
           ..sort((a, b) => a.key.compareTo(b.key));
-        final generatedList = orderedImages.indexed
-            .map(
-              (e) => GeneratedImage.create(
-                e.$2.value,
-                width: params.width,
-                sourceParams: params,
-                operation: _activeImageOperation,
-                height: params.height,
-                generationRunId: generationRunId,
-                batchIndex: e.$1,
-              ),
-            )
-            .toList();
+        final generatedList = await _completeGeneratedImages(
+          orderedImages.map((entry) => entry.value),
+          params,
+          generationRunId,
+          offset: 0,
+        );
+        if (_shouldAbortGenerationRun(generationRunId)) return;
         state = state.copyWith(
           status: GenerationStatus.completed,
           currentImages: generatedList,
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
           displayHeight: generatedList.first.height,
-          history: [...generatedList, ...state.history],
+          history: _prependCompletedHistory(generatedList),
           progress: 1.0,
           currentImage: 0,
           totalImages: 0,
@@ -2085,26 +2207,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (imageBytes.isEmpty) {
           throw Exception('No images returned from generation');
         }
-        final generatedList = imageBytes.indexed
-            .map(
-              (e) => GeneratedImage.create(
-                e.$2,
-                width: params.width,
-                sourceParams: params,
-                operation: _activeImageOperation,
-                height: params.height,
-                generationRunId: generationRunId,
-                batchIndex: e.$1,
-              ),
-            )
-            .toList();
+        final generatedList = await _completeGeneratedImages(
+          imageBytes,
+          params,
+          generationRunId,
+          offset: 0,
+        );
+        if (_shouldAbortGenerationRun(generationRunId)) return;
         state = state.copyWith(
           status: GenerationStatus.completed,
           currentImages: generatedList,
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
           displayHeight: generatedList.first.height,
-          history: [...generatedList, ...state.history],
+          history: _prependCompletedHistory(generatedList),
           progress: 1.0,
           currentImage: 0,
           totalImages: 0,
@@ -2171,26 +2287,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           if (imageBytes.isEmpty) {
             throw Exception('No images returned from generation');
           }
-          final generatedList = imageBytes.indexed
-              .map(
-                (e) => GeneratedImage.create(
-                  e.$2,
-                  width: params.width,
-                  sourceParams: params,
-                  operation: _activeImageOperation,
-                  height: params.height,
-                  generationRunId: generationRunId,
-                  batchIndex: e.$1,
-                ),
-              )
-              .toList();
+          final generatedList = await _completeGeneratedImages(
+            imageBytes,
+            params,
+            generationRunId,
+            offset: 0,
+          );
+          if (_shouldAbortGenerationRun(generationRunId)) return;
           state = state.copyWith(
             status: GenerationStatus.completed,
             currentImages: generatedList,
             displayImages: generatedList,
             displayWidth: generatedList.first.width,
             displayHeight: generatedList.first.height,
-            history: [...generatedList, ...state.history],
+            history: _prependCompletedHistory(generatedList),
             progress: 1.0,
             currentImage: 0,
             totalImages: 0,
@@ -2255,8 +2365,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final generationRunId = _activeGenerationRunId;
     final apiService = ref.read(naiImageGenerationApiServiceProvider);
 
+    final pendingImages = _pendingLocalEnhanceImages;
+    _pendingLocalEnhanceImages = [];
+    if (pendingImages.isNotEmpty) {
+      state = state.copyWith(
+        currentImages: [...state.currentImages, ...pendingImages],
+        history: _prependCompletedHistory(pendingImages),
+      );
+    }
+
     _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
     _invalidateGenerationRun();
+    if (_activeLocalEnhance != null && ref.exists(localUpscaleTaskProvider)) {
+      ref.read(localUpscaleTaskProvider.notifier).cancel();
+    }
     apiService.cancelGeneration();
 
     state = state.copyWith(

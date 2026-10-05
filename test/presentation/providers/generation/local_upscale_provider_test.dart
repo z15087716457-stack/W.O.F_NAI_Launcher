@@ -64,6 +64,7 @@ void main() {
   for (final scenario in [
     'success',
     'plain',
+    'direct',
     'new-source',
     'new-selection',
     'selection-back',
@@ -111,14 +112,20 @@ void main() {
               ),
               actualSeed: 123,
             );
-      controller.openTemporaryTool(source, ImageWorkflowMode.upscale);
+      if (scenario != 'direct') {
+        controller.openTemporaryTool(source, ImageWorkflowMode.upscale);
+      }
       final task = container.read(localUpscaleTaskProvider.notifier);
       if (scenario == 'success') {
         container
             .read(generationPreviewSelectionProvider.notifier)
             .select('previous-canvas-image');
       }
-      final done = task.start();
+      final done = task.start(
+        image: scenario == 'direct'
+            ? GeneratedImage.create(source, width: 48, height: 32)
+            : null,
+      );
       expect(container.read(localUpscaleTaskProvider).running, isTrue);
       if (scenario == 'new-source') {
         container
@@ -170,6 +177,16 @@ void main() {
         'unrelated draft',
       );
       expect(container.read(generationParamsNotifierProvider).seed, 999);
+      if (scenario == 'direct') {
+        expect(
+          container.read(generationParamsNotifierProvider).sourceImage,
+          isNull,
+        );
+        expect(
+          container.read(imageWorkflowControllerProvider).isUpscale,
+          isFalse,
+        );
+      }
       if (scenario == 'new-source' ||
           scenario == 'source-back' ||
           scenario == 'cancel' ||

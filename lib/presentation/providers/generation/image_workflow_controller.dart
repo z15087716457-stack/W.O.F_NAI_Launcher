@@ -302,6 +302,7 @@ class EnhanceWorkflowSettings {
     this.strength = 0.5,
     this.noise = 0.0,
     this.maxUpscale = false,
+    this.localUpscale = false,
   });
 
   final double magnitude;
@@ -314,6 +315,9 @@ class EnhanceWorkflowSettings {
   /// 由服务端端到端放大。
   final bool maxUpscale;
 
+  /// Generate with the current draft, then upscale each result locally.
+  final bool localUpscale;
+
   EnhanceWorkflowSettings copyWith({
     double? magnitude,
     bool? showIndividualSettings,
@@ -321,6 +325,7 @@ class EnhanceWorkflowSettings {
     double? strength,
     double? noise,
     bool? maxUpscale,
+    bool? localUpscale,
   }) {
     return EnhanceWorkflowSettings(
       magnitude: magnitude ?? this.magnitude,
@@ -330,6 +335,7 @@ class EnhanceWorkflowSettings {
       strength: strength ?? this.strength,
       noise: noise ?? this.noise,
       maxUpscale: maxUpscale ?? this.maxUpscale,
+      localUpscale: localUpscale ?? this.localUpscale,
     );
   }
 }
@@ -455,6 +461,9 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       : state;
 
   ImageParams paramsForGeneration(ImageParams draft) {
+    if (state.isEnhance && state.enhance.localUpscale) {
+      return draft.copyWith(enhanceWorkflow: false, upscaledEnhance: false);
+    }
     final source = state.temporaryEnhanceSource;
     if (source == null) return draft;
     final model = ImageModels.resolveBaseModel(draft.model);
@@ -804,6 +813,12 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
         const EnhanceWorkflowSettings().noise,
       ).clamp(0.0, 1.0),
       maxUpscale: rawMaxUpscale ?? const EnhanceWorkflowSettings().maxUpscale,
+      localUpscale:
+          _storage.getSetting<bool>(
+            StorageKeys.workflowEnhanceLocal,
+            defaultValue: false,
+          ) ??
+          false,
     );
   }
 
@@ -874,6 +889,12 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void _persistEnhanceSettings(EnhanceWorkflowSettings settings) {
+    unawaited(
+      _storage.setSetting(
+        StorageKeys.workflowEnhanceLocal,
+        settings.localUpscale,
+      ),
+    );
     unawaited(
       _storage.setSetting(
         StorageKeys.workflowEnhanceMagnitude,
@@ -1457,6 +1478,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     final nextSettings = state.enhance.copyWith(
       upscaleFactor: factor,
       maxUpscale: false,
+      localUpscale: false,
     );
     state = state.copyWith(enhance: nextSettings);
     _persistEnhanceSettings(nextSettings);
@@ -1467,10 +1489,21 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   ///
   /// 关闭时回落到已保存的放大倍数档。
   void setEnhanceMaxUpscale(bool enabled) {
-    final nextSettings = state.enhance.copyWith(maxUpscale: enabled);
+    final nextSettings = state.enhance.copyWith(
+      maxUpscale: enabled,
+      localUpscale: false,
+    );
     state = state.copyWith(enhance: nextSettings);
     _persistEnhanceSettings(nextSettings);
     _applyEnhanceToParams();
+  }
+
+  /// Generate at the draft dimensions, then upscale each result locally.
+  void setEnhanceLocalUpscale() {
+    final settings = state.enhance.copyWith(localUpscale: true);
+    state = state.copyWith(enhance: settings);
+    _persistEnhanceSettings(settings);
+    if (state.temporaryEnhanceSource == null) _restoreBaseParams();
   }
 
   /// 当前模型与源图是否可用 Max✨ 档。
@@ -1544,6 +1577,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void _applyEnhanceToParams() {
+    if (state.enhance.localUpscale) return;
     if (state.temporaryEnhanceSource != null) return;
     if (_params.sourceImage == null) {
       return;

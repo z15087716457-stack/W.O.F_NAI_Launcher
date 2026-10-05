@@ -12607,6 +12607,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localUpscale_installingComponent => '正在下载组件…';
+
+  @override
+  String get upscale_settings => '放大设置';
+
+  @override
+  String upscale_cloudCost(int cost) {
+    return '预计 $cost Anlas · 2×';
+  }
+
+  @override
+  String get enhance_localAfterGeneration => '每张生成完成后自动在本机放大。';
+
+  @override
+  String get enhance_localAction => '生成并本地放大';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -25212,4 +25226,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localUpscale_installingComponent => '正在下載元件…';
+
+  @override
+  String get upscale_settings => '放大設定';
+
+  @override
+  String upscale_cloudCost(int cost) {
+    return '預計 $cost Anlas · 2×';
+  }
+
+  @override
+  String get enhance_localAfterGeneration => '每張生成完成後自動在本機放大。';
+
+  @override
+  String get enhance_localAction => '生成並本地放大';
 }

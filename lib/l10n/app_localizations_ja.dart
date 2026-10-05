@@ -12832,4 +12832,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localUpscale_installingComponent => 'コンポーネントをダウンロード中…';
+
+  @override
+  String get upscale_settings => '拡大設定';
+
+  @override
+  String upscale_cloudCost(int cost) {
+    return '目安 $cost Anlas · 2×';
+  }
+
+  @override
+  String get enhance_localAfterGeneration => '生成した画像を毎回ローカルで自動拡大します。';
+
+  @override
+  String get enhance_localAction => '生成してローカルで拡大';
 }

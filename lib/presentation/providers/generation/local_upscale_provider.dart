@@ -201,24 +201,94 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
     _cancellation?.cancel();
   }
 
-  Future<void> start() {
+  Future<void> start({GeneratedImage? image}) {
     if (_pending != null) return _pending!;
-    final work = _start();
+    final work = _start(image);
     _pending = work;
     return work.whenComplete(() => _pending = null);
   }
 
-  Future<void> _start() async {
+  /// Shared native inference for automatic enhancement. The generation run
+  /// owns registration; this task owns progress, cancellation and shutdown.
+  Future<LocalUpscaleResult?> processGenerated(
+    Uint8List source, {
+    required String modelId,
+    required double scale,
+  }) async {
+    if (_pending != null || state.running) return null;
+    final work = _processGenerated(source, modelId: modelId, scale: scale);
+    _pending = work.then<void>((_) {});
+    try {
+      return await work;
+    } finally {
+      _pending = null;
+    }
+  }
+
+  Future<LocalUpscaleResult?> _processGenerated(
+    Uint8List source, {
+    required String modelId,
+    required double scale,
+  }) async {
+    final cancellation = LocalUpscaleCancellation();
+    _cancellation = cancellation;
+    state = const LocalUpscaleTaskState(running: true);
+    try {
+      final result = await ref
+          .read(localUpscaleServiceProvider)
+          .upscale(
+            Uint8List.fromList(source),
+            modelId: modelId,
+            scale: scale,
+            cancellation: cancellation,
+            onProgress: (progress) {
+              if (!_disposed && !cancellation.isCancelled) {
+                state = LocalUpscaleTaskState(
+                  running: true,
+                  progress: progress,
+                );
+              }
+            },
+          );
+      if (_disposed || cancellation.isCancelled) return null;
+      state = const LocalUpscaleTaskState(
+        completed: true,
+        progress: LocalUpscaleProgress(LocalUpscalePhase.complete, 1),
+      );
+      return result;
+    } catch (error) {
+      if (!_disposed) {
+        state = LocalUpscaleTaskState(
+          error: cancellation.isCancelled
+              ? LocalUpscaleError.cancelled
+              : error is LocalUpscaleException
+              ? error.code
+              : LocalUpscaleError.processFailed,
+        );
+      }
+      return null;
+    } finally {
+      if (!_disposed && state.running) {
+        state = LocalUpscaleTaskState(
+          error: cancellation.isCancelled ? LocalUpscaleError.cancelled : null,
+        );
+      }
+      _cancellation = null;
+    }
+  }
+
+  Future<void> _start(GeneratedImage? image) async {
     final workflow = ref.read(imageWorkflowControllerProvider);
     final generation = ref.read(imageGenerationNotifierProvider);
-    if (state.running ||
+    if ((image != null && !image.canUseAsGenerationInput) ||
+        state.running ||
         workflow.isToolRunning ||
         generation.status == GenerationStatus.generating) {
       return;
     }
     final params = ref.read(generationParamsNotifierProvider);
-    final source = params.sourceImage;
-    if (source == null || !workflow.isUpscale) return;
+    final source = image?.bytes ?? params.sourceImage;
+    if (source == null || (image == null && !workflow.isUpscale)) return;
     final frozen = Uint8List.fromList(source);
     final controller = ref.read(imageWorkflowControllerProvider.notifier);
     final revision = controller.sourceRevision;
@@ -258,14 +328,16 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
     controller.setToolRunning(true);
     bool canApply() =>
         !_disposed &&
-        !sourceChanged &&
         !cancellation.isCancelled &&
-        controller.sourceRevision == revision &&
-        identical(
-          ref.read(generationParamsNotifierProvider).sourceImage,
-          source,
-        ) &&
-        ref.read(imageWorkflowControllerProvider).isUpscale;
+        (image != null ||
+            (!sourceChanged &&
+                controller.sourceRevision == revision &&
+                identical(
+                  ref.read(generationParamsNotifierProvider).sourceImage,
+                  source,
+                ) &&
+                ref.read(imageWorkflowControllerProvider).isUpscale)) &&
+        !ref.read(imageGenerationNotifierProvider).isGenerating;
     bool canReplace() =>
         canApply() &&
         !selectionChanged &&

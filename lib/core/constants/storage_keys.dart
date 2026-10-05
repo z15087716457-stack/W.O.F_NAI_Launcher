@@ -362,6 +362,7 @@ class StorageKeys {
 
   // 工作流设置
   static const String workflowEnhanceMagnitude = 'workflow_enhance_magnitude';
+  static const String workflowEnhanceLocal = 'workflow_enhance_local';
   static const String workflowEnhanceShowIndividualSettings =
       'workflow_enhance_show_individual_settings';
   static const String workflowEnhanceUpscaleFactor =

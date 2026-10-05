@@ -7351,5 +7351,9 @@
   "localUpscale_installComponent": "安裝",
   "localUpscale_installingRuntime": "正在安裝 Python/CUDA 執行環境…",
   "localUpscale_checkingComponent": "正在檢查元件與顯示卡…",
-  "localUpscale_installingComponent": "正在下載元件…"
+  "localUpscale_installingComponent": "正在下載元件…",
+  "upscale_settings": "放大設定",
+  "upscale_cloudCost": "預計 {cost} Anlas · 2×",
+  "enhance_localAfterGeneration": "每張生成完成後自動在本機放大。",
+  "enhance_localAction": "生成並本地放大"
 }

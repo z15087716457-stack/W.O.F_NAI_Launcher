@@ -12852,4 +12852,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localUpscale_installingComponent => '구성 요소 다운로드 중…';
+
+  @override
+  String get upscale_settings => '확대 설정';
+
+  @override
+  String upscale_cloudCost(int cost) {
+    return '예상 $cost Anlas · 2×';
+  }
+
+  @override
+  String get enhance_localAfterGeneration => '생성된 각 이미지를 로컬에서 자동으로 확대합니다.';
+
+  @override
+  String get enhance_localAction => '생성 후 로컬 확대';
 }

@@ -45,6 +45,7 @@ class NAIImageEnhancementApiService {
   Future<Uint8List> upscaleImage(
     Uint8List image, {
     void Function(int, int)? onProgress,
+    CancelToken? cancelToken,
   }) async {
     try {
       final decoded = img.decodeImage(image);
@@ -68,6 +69,7 @@ class NAIImageEnhancementApiService {
           headers: {'Accept': 'application/x-zip-compressed'},
         ),
         onReceiveProgress: onProgress,
+        cancelToken: cancelToken,
       );
 
       final raw = response.data as Uint8List;

@@ -108,7 +108,9 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
               ref.watch(
                 imageWorkflowControllerProvider.select((w) => w.isEnhance),
               )
-          ? context.l10n.img2img_enhanceAction
+          ? (ref.watch(imageWorkflowControllerProvider).enhance.localUpscale
+                ? context.l10n.enhance_localAction
+                : context.l10n.img2img_enhanceAction)
           : null,
       height: widget.compact ? 40 : 48,
       isGenerating: isGenerating,

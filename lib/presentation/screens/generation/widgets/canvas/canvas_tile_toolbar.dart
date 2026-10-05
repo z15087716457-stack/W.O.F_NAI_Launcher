@@ -20,6 +20,7 @@ import '../../../../../core/utils/localization_extension.dart';
 import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import 'canvas_feed_layout.dart';
 import 'canvas_display_settings.dart';
+import 'canvas_upscale_button.dart';
 import 'generated_image_actions.dart';
 
 /// 画布工具条分区（官网 md 布局表逐字对码）
@@ -268,6 +269,9 @@ class _ToolbarStrip extends ConsumerWidget {
     }
     if (item.icon == 'nai-icon-settings.svg') {
       return const CanvasDisplaySettingsButton();
+    }
+    if (item.icon == 'nai-icon-upscale.svg') {
+      return CanvasUpscaleButton(image: image);
     }
     return _IconBtn(item: item, image: image, group: group, focus: focus);
   }

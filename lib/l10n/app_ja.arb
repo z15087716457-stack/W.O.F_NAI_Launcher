@@ -7351,5 +7351,9 @@
   "localUpscale_installComponent": "インストール",
   "localUpscale_installingRuntime": "Python/CUDA 環境をインストール中…",
   "localUpscale_checkingComponent": "コンポーネントと GPU を確認中…",
-  "localUpscale_installingComponent": "コンポーネントをダウンロード中…"
+  "localUpscale_installingComponent": "コンポーネントをダウンロード中…",
+  "upscale_settings": "拡大設定",
+  "upscale_cloudCost": "目安 {cost} Anlas · 2×",
+  "enhance_localAfterGeneration": "生成した画像を毎回ローカルで自動拡大します。",
+  "enhance_localAction": "生成してローカルで拡大"
 }
