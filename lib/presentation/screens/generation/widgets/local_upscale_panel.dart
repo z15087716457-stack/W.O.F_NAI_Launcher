@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/upscale/local_upscale_models.dart';
@@ -26,8 +27,10 @@ class LocalUpscalePanel extends ConsumerWidget {
     final workflow = ref.watch(imageWorkflowControllerProvider);
     final controller = ref.read(imageWorkflowControllerProvider.notifier);
     final task = ref.watch(localUpscaleTaskProvider);
+    final installing = ref.watch(advancedUpscaleInstallProvider).running;
     final cloud = workflow.upscale.backend == UpscaleBackend.novelai;
-    final busy = workflow.isToolRunning || task.running || cloudRunning;
+    final busy =
+        workflow.isToolRunning || task.running || cloudRunning || installing;
     final hasSource = ref.watch(
       generationParamsNotifierProvider.select((p) => p.sourceImage != null),
     );
@@ -45,6 +48,13 @@ class LocalUpscalePanel extends ConsumerWidget {
     final selected = installed
         .where((m) => m.id == workflow.upscale.localModel)
         .firstOrNull;
+    final method =
+        advancedUpscaleCatalog
+            .where((m) => m.id == workflow.upscale.localModel)
+            .firstOrNull
+            ?.method ??
+        LocalUpscaleMethod.standard;
+    final methodModels = installed.where((m) => m.method == method).toList();
     final width = workflow.sourceImageWidth ?? workflow.sourceWidth ?? 0;
     final height = workflow.sourceImageHeight ?? workflow.sourceHeight ?? 0;
     final scale = workflow.upscale.localScale;
@@ -71,7 +81,9 @@ class LocalUpscalePanel extends ConsumerWidget {
         ? l.localUpscale_cancelling
         : switch (progress?.phase) {
             LocalUpscalePhase.preparing => l.localUpscale_preparing,
+            LocalUpscalePhase.encoding => l.localUpscale_encoding,
             LocalUpscalePhase.inference => l.localUpscale_inference,
+            LocalUpscalePhase.decoding => l.localUpscale_decoding,
             LocalUpscalePhase.resizing => l.localUpscale_resizing,
             LocalUpscalePhase.complete => l.localUpscale_complete,
             null => '',
@@ -137,6 +149,41 @@ class LocalUpscalePanel extends ConsumerWidget {
                 child: LinearProgressIndicator(),
               ),
           ] else ...[
+            SegmentedButton<LocalUpscaleMethod>(
+              segments: [
+                ButtonSegment(
+                  value: LocalUpscaleMethod.standard,
+                  label: Text(l.img2img_upscaleRegularModel),
+                ),
+                const ButtonSegment(
+                  value: LocalUpscaleMethod.seedvr2,
+                  label: Text('SeedVR2'),
+                ),
+                const ButtonSegment(
+                  value: LocalUpscaleMethod.rtx,
+                  label: Text('RTX'),
+                ),
+              ],
+              selected: {method},
+              showSelectedIcon: false,
+              onSelectionChanged: busy
+                  ? null
+                  : (values) {
+                      final next = values.first;
+                      controller.updateLocalUpscaleModel(
+                        next == LocalUpscaleMethod.standard
+                            ? localUpscaleDefaultModel
+                            : advancedUpscaleCatalog
+                                  .firstWhere((m) => m.method == next)
+                                  .id,
+                      );
+                    },
+              style: const ButtonStyle(
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -148,7 +195,7 @@ class LocalUpscalePanel extends ConsumerWidget {
                 TextButton(
                   onPressed: busy
                       ? null
-                      : () => showLocalUpscaleModels(context),
+                      : () => context.go('/settings?section=local-upscale'),
                   child: Text(l.localUpscale_manage),
                 ),
               ],
@@ -159,11 +206,13 @@ class LocalUpscalePanel extends ConsumerWidget {
               isExpanded: true,
               decoration: const InputDecoration(isDense: true),
               hint: Text(
-                l.localUpscale_modelMissing,
+                method == LocalUpscaleMethod.standard
+                    ? l.localUpscale_modelMissing
+                    : l.localUpscale_notInstalled,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              items: installed
+              items: methodModels
                   .map(
                     (model) => DropdownMenuItem(
                       value: model.id,
@@ -212,7 +261,11 @@ class LocalUpscalePanel extends ConsumerWidget {
               ),
             const SizedBox(height: 8),
             Text(
-              l.localUpscale_description,
+              switch (method) {
+                LocalUpscaleMethod.standard => l.localUpscale_description,
+                LocalUpscaleMethod.seedvr2 => l.localUpscale_seedvr2Help,
+                LocalUpscaleMethod.rtx => l.localUpscale_rtxHelp,
+              },
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

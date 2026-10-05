@@ -1,0 +1,635 @@
+{
+  "schema": 1,
+  "automatic_download": false,
+  "worker": {
+    "asset": "windows/studio_upscale_worker.exe",
+    "sha256": "60fc1f337ee2a2ec9a97d1c3883fe95101dcce83c4b21e72b0f09c3ada58b66e"
+  },
+  "seedvr2": {
+    "version": "2.5.24",
+    "source": {
+      "url": "https://codeload.github.com/numz/ComfyUI-SeedVR2_VideoUpscaler/zip/4490bd1f482e026674543386bb2a4d176da245b9",
+      "sha256": "04c61842bc00fd8673e6bc9a3b1b1935955461f363791070ed14d67d2a2e77fb",
+      "bytes": 4864981,
+      "prefix": "ComfyUI-SeedVR2_VideoUpscaler-4490bd1f482e026674543386bb2a4d176da245b9/",
+      "files": [
+        {
+          "path": "configs_3b/main.yaml",
+          "bytes": 1945,
+          "sha256": "d3d100f90891ad7d60eb4c72fdb125fb7b3a774bfc48f4d4a570cf71b3126961"
+        },
+        {
+          "path": "configs_7b/main.yaml",
+          "bytes": 1829,
+          "sha256": "f9918a994e8716ba93893b74b358b163f48525125ce39701f59c8abad3f01c11"
+        },
+        {
+          "path": "inference_cli.py",
+          "bytes": 75659,
+          "sha256": "7e3234ae1079227e39ec98fcc8ed09c12ac9974997b82bf02404ba38ffff0aba"
+        },
+        {
+          "path": "LICENSE",
+          "bytes": 11334,
+          "sha256": "5967a0c153e731109b76c5d83b5e0fae2382b6aaf7b898d08ff03702eea59430"
+        },
+        {
+          "path": "neg_emb.pt",
+          "bytes": 656540,
+          "sha256": "6a43e5800ef2354f1c156d27535834da055cbec8248298b8923492bba2076581"
+        },
+        {
+          "path": "pos_emb.pt",
+          "bytes": 595100,
+          "sha256": "fa07a14844314772266b66c3b95deb0027696d8fe7065721263db5176f45d799"
+        },
+        {
+          "path": "src/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "src/common/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "src/common/cache.py",
+          "bytes": 1491,
+          "sha256": "37e8e0661cc87f37e9ac5247ea046557eb87bed7baf9709ab528aa4ec1b22b85"
+        },
+        {
+          "path": "src/common/config.py",
+          "bytes": 4269,
+          "sha256": "551c3f86095080b742756ec6c0430d05435950b64882af019264ba776327a1af"
+        },
+        {
+          "path": "src/common/decorators.py",
+          "bytes": 4064,
+          "sha256": "60d1ddcc1a4590841c2e685c107912372606ae33a67f631c41343543a60c7cc0"
+        },
+        {
+          "path": "src/common/diffusion/__init__.py",
+          "bytes": 1816,
+          "sha256": "8ded9e4584efe5b4bbfbaee15fc0d6fc81173a23cbe87ea4a432489fb24f984d"
+        },
+        {
+          "path": "src/common/diffusion/config.py",
+          "bytes": 2252,
+          "sha256": "87a27cf4c27d6c14ce81c77fae77cbce084ad0efbec3ba6c8c0c3fa6bfac55bd"
+        },
+        {
+          "path": "src/common/diffusion/samplers/base.py",
+          "bytes": 3192,
+          "sha256": "2afb7029d3e93431ba9df37e115527f6dd5fa3d76855dc1c936d529ba0a228f2"
+        },
+        {
+          "path": "src/common/diffusion/samplers/euler.py",
+          "bytes": 2985,
+          "sha256": "f92a04ba4f101d323347cd0cad7893c8ec261232f09378dd040f7c2c12874b1e"
+        },
+        {
+          "path": "src/common/diffusion/schedules/base.py",
+          "bytes": 4126,
+          "sha256": "a7fc37f35846aee5ebe1aeeca9b9f18a7bcc6023c0759be3e13c609e4f1f5bdc"
+        },
+        {
+          "path": "src/common/diffusion/schedules/lerp.py",
+          "bytes": 1705,
+          "sha256": "04b4d4fc475c5caa2510a905ce67bfa03fb7d0d9f0e5316c308327ebe868f955"
+        },
+        {
+          "path": "src/common/diffusion/timesteps/base.py",
+          "bytes": 1807,
+          "sha256": "84446d63024b341820742b5e6ee374cf60f65a922efea5e38fc79ab1449d087e"
+        },
+        {
+          "path": "src/common/diffusion/timesteps/sampling/trailing.py",
+          "bytes": 1718,
+          "sha256": "370c99d029157c4cc4b6826d9a58ebb6a7e6a61b28ba5f2e3ce633b47a2d08ee"
+        },
+        {
+          "path": "src/common/diffusion/types.py",
+          "bytes": 1857,
+          "sha256": "b937002661425ddb67082a95d524697b857b7b7693aa7c8d3740ad978870dec0"
+        },
+        {
+          "path": "src/common/diffusion/utils.py",
+          "bytes": 2553,
+          "sha256": "d4a1f565020160c203f8ee04e7d6fd307bf07ba4e55c67ae9ea769eb68111dbd"
+        },
+        {
+          "path": "src/common/distributed/__init__.py",
+          "bytes": 1008,
+          "sha256": "1670b2e67d8d136c56ca3e07946b42a66fe00852a313755903c92aea9490f294"
+        },
+        {
+          "path": "src/common/distributed/advanced.py",
+          "bytes": 7056,
+          "sha256": "616645b5ef96b1340129b8e593e51383938002d03bb709aaa5bb22dfe36c8f95"
+        },
+        {
+          "path": "src/common/distributed/basic.py",
+          "bytes": 2445,
+          "sha256": "7c9d8aa77d3ae2245ec32802143b51b636b458f57aceb78070ead584c27acc6a"
+        },
+        {
+          "path": "src/common/distributed/meta_init_utils.py",
+          "bytes": 1701,
+          "sha256": "207ae41c28b29660b95620e86ed49ddb70f560429a290f3e38abbac9f3c043ab"
+        },
+        {
+          "path": "src/common/distributed/ops.py",
+          "bytes": 17663,
+          "sha256": "6ac6f714d5021c406f03b6b0d6d1f003060d5ac135202d90043995df51f811c5"
+        },
+        {
+          "path": "src/common/half_precision_fixes.py",
+          "bytes": 6111,
+          "sha256": "24f5073e097ada1c57fd85f02d831e8cacc5fbdaab8289aeb064eb220e6f3367"
+        },
+        {
+          "path": "src/common/logger.py",
+          "bytes": 1410,
+          "sha256": "22b212900901b401a060a3ea22aab3c0da1ddbfc1f90c58b5c2f08c37129071b"
+        },
+        {
+          "path": "src/common/partition.py",
+          "bytes": 1714,
+          "sha256": "fddb52253da672c28e62026605890708956ac0538e0c6e97ef770b3103338600"
+        },
+        {
+          "path": "src/common/seed.py",
+          "bytes": 1084,
+          "sha256": "4a9366c2df2571050790607250e3ad51a08fb3d34040be89fae28f189c329db8"
+        },
+        {
+          "path": "src/core/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "src/core/alpha_upscaling.py",
+          "bytes": 15840,
+          "sha256": "1382a67c05326058c5ae7106c4263217101ee2b83c082379eb2f4d9ba92d5855"
+        },
+        {
+          "path": "src/core/generation_phases.py",
+          "bytes": 70039,
+          "sha256": "82a19980bfbef9ec9efdbc69bfd9a8b3756acdd8be6b0f31a70006d6ae85d2d8"
+        },
+        {
+          "path": "src/core/generation_utils.py",
+          "bytes": 33081,
+          "sha256": "24e0b631628e5ef97488dc6bffb32aa32aa78a8612f3080242dc7e085e86e3a6"
+        },
+        {
+          "path": "src/core/infer.py",
+          "bytes": 16783,
+          "sha256": "f72374cda904da99263ae74df68bb00b41138165f2daf291835d110b922647b8"
+        },
+        {
+          "path": "src/core/model_cache.py",
+          "bytes": 8898,
+          "sha256": "854f7dc797b404e5401d41ba88f66b4107bf1fde74642d8c07584462052663c4"
+        },
+        {
+          "path": "src/core/model_configuration.py",
+          "bytes": 64486,
+          "sha256": "d19fa1b8d406d6a27c2c2812561a0c13ecc5ae295eef8adeff81b72606fbb89b"
+        },
+        {
+          "path": "src/core/model_loader.py",
+          "bytes": 41244,
+          "sha256": "8df862322de67d6536410bed3c55ad20ffa5dc41a215d0fce4c880421fef5a00"
+        },
+        {
+          "path": "src/data/image/transforms/area_resize.py",
+          "bytes": 4667,
+          "sha256": "e94929150a032bb427e94c7fad61d88e8eec729ff07dcd9887770341cbb1d4b0"
+        },
+        {
+          "path": "src/data/image/transforms/divisible_crop.py",
+          "bytes": 2976,
+          "sha256": "77b21ea8b0b7178b3bda7d90f1cd319ec5b11cb0696ef922c4b1d9f956a2fc6d"
+        },
+        {
+          "path": "src/data/image/transforms/na_resize.py",
+          "bytes": 1887,
+          "sha256": "4f3f19de2e2bf673f5de802c3b70b3c0104b1f484e37e8f7c98d59267532332a"
+        },
+        {
+          "path": "src/data/image/transforms/side_resize.py",
+          "bytes": 2939,
+          "sha256": "dab711e44c09c98951987ba5d17d8f9c6312bd4957b63a16a5d45431a7bba4b2"
+        },
+        {
+          "path": "src/interfaces/__init__.py",
+          "bytes": 986,
+          "sha256": "c37c3fe439e202cf9809489d528219b1fa56215485b8bef3a6cebc0b1e3055fe"
+        },
+        {
+          "path": "src/interfaces/dit_model_loader.py",
+          "bytes": 8667,
+          "sha256": "c1779dd24aef30cf35771d988f78805a75c714d50b057589d05a8c763fe0cf92"
+        },
+        {
+          "path": "src/interfaces/torch_compile_settings.py",
+          "bytes": 5866,
+          "sha256": "09351b83caa3d74a04ec67bba57423863bd7b72afff313dcdd20fd4ae981d05d"
+        },
+        {
+          "path": "src/interfaces/vae_model_loader.py",
+          "bytes": 9997,
+          "sha256": "fcf3ef513e848b015546f806c65036c49426e352548b88dfbe28f883ef64a7a5"
+        },
+        {
+          "path": "src/interfaces/video_upscaler.py",
+          "bytes": 25932,
+          "sha256": "30d144924af59d6f8f57a5867f748f6003eb0a6910ebd11c3e481f6a44bfeeac"
+        },
+        {
+          "path": "src/models/dit_3b/attention.py",
+          "bytes": 6365,
+          "sha256": "6add8eb0bcf6aaa1646fcd39b820cc1b129f9e88c252c40a37c8e44f017e7c95"
+        },
+        {
+          "path": "src/models/dit_3b/embedding.py",
+          "bytes": 2098,
+          "sha256": "dacc6fc8e3fd9b277456470c197a9d16317d61903c39df1fc99f2bd021416412"
+        },
+        {
+          "path": "src/models/dit_3b/mlp.py",
+          "bytes": 2004,
+          "sha256": "af3b8bf0f1bc7e135140e5bd9f63869320f9ea3803c95f8482f21a48f1fa1d3a"
+        },
+        {
+          "path": "src/models/dit_3b/mm.py",
+          "bytes": 2525,
+          "sha256": "157033d387a8514ce175f2c58f2c91e06fa50fd4d9501aa2ccf423c35472fa01"
+        },
+        {
+          "path": "src/models/dit_3b/modulation.py",
+          "bytes": 4426,
+          "sha256": "bd100fb65cac0bffd22ec30971487ed03646bc02b1d02fc9838690b59e7197d7"
+        },
+        {
+          "path": "src/models/dit_3b/na.py",
+          "bytes": 21381,
+          "sha256": "b7a69d48927afa1b7ee4bc54ed561fdf32e815ada45d9b0dcf1b7d4e2e7abc76"
+        },
+        {
+          "path": "src/models/dit_3b/nablocks/__init__.py",
+          "bytes": 927,
+          "sha256": "11bcab5e097422148e0f8c9e9143982d07d87171ccde41b99a7269095d555664"
+        },
+        {
+          "path": "src/models/dit_3b/nablocks/attention/__init__.py",
+          "bytes": 875,
+          "sha256": "040d9a2b21f9d35f595760fac55172e14d6b282d399caa2f2a565627d2d844c2"
+        },
+        {
+          "path": "src/models/dit_3b/nablocks/attention/mmattn.py",
+          "bytes": 10258,
+          "sha256": "7e1d027205dacc5431120c7f0f5657ce1ff5b170638e0a33396584f21a860629"
+        },
+        {
+          "path": "src/models/dit_3b/nablocks/mmsr_block.py",
+          "bytes": 4527,
+          "sha256": "f31f3214b1ab99492f76a70678865d84c38ac0c0ba111cb5049469fe46289e9a"
+        },
+        {
+          "path": "src/models/dit_3b/nadit.py",
+          "bytes": 8806,
+          "sha256": "67c808bc72e716faf6d3a3a5243f661dc3176b27f17f70d4b9c5fc6666758c08"
+        },
+        {
+          "path": "src/models/dit_3b/normalization.py",
+          "bytes": 5381,
+          "sha256": "0eab8ca136e1274d56928b653de2415c73893b5028e1615af3e74343fef21680"
+        },
+        {
+          "path": "src/models/dit_3b/patch/__init__.py",
+          "bytes": 830,
+          "sha256": "c1acc9a82563dc820238de80906f32413ed699e8efae52beddf5389e108283f4"
+        },
+        {
+          "path": "src/models/dit_3b/patch/patch_v1.py",
+          "bytes": 4337,
+          "sha256": "2f01c37ed7e7374fc3803c70de8142737a028dbb180930292d40800a62efcb10"
+        },
+        {
+          "path": "src/models/dit_3b/rope.py",
+          "bytes": 7117,
+          "sha256": "389e61c876c0ad551cfd1d26df34c4f670cd2d7db27ca073fc7b266c8858ca0d"
+        },
+        {
+          "path": "src/models/dit_3b/window.py",
+          "bytes": 3371,
+          "sha256": "61b3e0235e25d3e901271186bbaa43a90dcc1552f003daa3d2844b5126ce7e84"
+        },
+        {
+          "path": "src/models/dit_7b/attention.py",
+          "bytes": 6365,
+          "sha256": "6add8eb0bcf6aaa1646fcd39b820cc1b129f9e88c252c40a37c8e44f017e7c95"
+        },
+        {
+          "path": "src/models/dit_7b/blocks/__init__.py",
+          "bytes": 934,
+          "sha256": "6e543698e3c6822b14330a9d06c14067dd2994b32fd1220ec4230413f4a5b126"
+        },
+        {
+          "path": "src/models/dit_7b/blocks/mmdit_window_block.py",
+          "bytes": 8097,
+          "sha256": "b8b201e4f666408f631e376d7449e08840f22e471f05719de06ed4d0af51ad65"
+        },
+        {
+          "path": "src/models/dit_7b/embedding.py",
+          "bytes": 2098,
+          "sha256": "dacc6fc8e3fd9b277456470c197a9d16317d61903c39df1fc99f2bd021416412"
+        },
+        {
+          "path": "src/models/dit_7b/mlp.py",
+          "bytes": 2004,
+          "sha256": "af3b8bf0f1bc7e135140e5bd9f63869320f9ea3803c95f8482f21a48f1fa1d3a"
+        },
+        {
+          "path": "src/models/dit_7b/mm.py",
+          "bytes": 2332,
+          "sha256": "3900533d7314aceb881627399de2b7d163283fe1b4b799ee8e4d4098a164ad73"
+        },
+        {
+          "path": "src/models/dit_7b/modulation.py",
+          "bytes": 4096,
+          "sha256": "1390495a6914233bb9ef2185301e159710714ac567d06bd15c511a54a983ac49"
+        },
+        {
+          "path": "src/models/dit_7b/na.py",
+          "bytes": 21381,
+          "sha256": "b7a69d48927afa1b7ee4bc54ed561fdf32e815ada45d9b0dcf1b7d4e2e7abc76"
+        },
+        {
+          "path": "src/models/dit_7b/nablocks/__init__.py",
+          "bytes": 926,
+          "sha256": "32ab54d0eac85a78f5cf2e7d81f7268b7589db500e1a1a09976875b7ba0361b7"
+        },
+        {
+          "path": "src/models/dit_7b/nablocks/mmsr_block.py",
+          "bytes": 8601,
+          "sha256": "1119368e49c01dd258ee6cfa33ea1c64cd10627b35140f2961af6452fbe4c1ee"
+        },
+        {
+          "path": "src/models/dit_7b/nadit.py",
+          "bytes": 12180,
+          "sha256": "cdaba09f63c0d4a9f955686cb021d9e7406bfcfd6d5ab68d44e29920fc910cda"
+        },
+        {
+          "path": "src/models/dit_7b/normalization.py",
+          "bytes": 4910,
+          "sha256": "12cc9c6dc3fe23f142605f5e530bdc055a6e6cfb2c181fb311c4b54cc3c85c13"
+        },
+        {
+          "path": "src/models/dit_7b/patch.py",
+          "bytes": 3389,
+          "sha256": "ca70c1910073b2a6e3bd1e15d7d105e5edc3ee425c63a55d61bbedf7000183ba"
+        },
+        {
+          "path": "src/models/dit_7b/rope.py",
+          "bytes": 4113,
+          "sha256": "5144b12a6cf1ee5d0b652b5f230ceaa02ee2958d073df8bec5570bff51256fb3"
+        },
+        {
+          "path": "src/models/dit_7b/window.py",
+          "bytes": 3371,
+          "sha256": "61b3e0235e25d3e901271186bbaa43a90dcc1552f003daa3d2844b5126ce7e84"
+        },
+        {
+          "path": "src/models/video_vae_v3/modules/attn_video_vae.py",
+          "bytes": 69412,
+          "sha256": "4519e785453ea0d7fddd76f1150d38b457401b8b08f1e3665529bcd579a6e5a5"
+        },
+        {
+          "path": "src/models/video_vae_v3/modules/causal_inflation_lib.py",
+          "bytes": 19180,
+          "sha256": "5dd3dedbbfefd7de671e1c126b106a4d6f227bd36b0cb9c391aa92ccb67128d4"
+        },
+        {
+          "path": "src/models/video_vae_v3/modules/context_parallel_lib.py",
+          "bytes": 2449,
+          "sha256": "d455a0b2f0994e10870ea766b09f7e2297de018929e5664ee78f66a96018a36b"
+        },
+        {
+          "path": "src/models/video_vae_v3/modules/global_config.py",
+          "bytes": 898,
+          "sha256": "d919db5ff73d8ae9d722b76ababb4019a58d36fadd67212cefc12f6f4f72082d"
+        },
+        {
+          "path": "src/models/video_vae_v3/modules/inflated_layers.py",
+          "bytes": 3780,
+          "sha256": "e49ae1a2853d95d999b5af196055b9e58b31cb9d454868e66e5c1d54d60ce1da"
+        },
+        {
+          "path": "src/models/video_vae_v3/modules/inflated_lib.py",
+          "bytes": 5581,
+          "sha256": "d22bc1192c4ef885d8249410b4666f5eb55c70d5ae72f3a5cb782e5612f82cac"
+        },
+        {
+          "path": "src/models/video_vae_v3/modules/types.py",
+          "bytes": 2544,
+          "sha256": "fdb693bc8c98174915b00050bc21889f1ebe6b34ca3c1cf97e65bddf7ca5605f"
+        },
+        {
+          "path": "src/models/video_vae_v3/modules/video_vae.py",
+          "bytes": 34069,
+          "sha256": "ba07224467ea6ba69caa5bca8814e6121a4359aee5c2191fdde6dbd6edbec1bd"
+        },
+        {
+          "path": "src/models/video_vae_v3/s8_c16_t4_inflation_sd3.yaml",
+          "bytes": 543,
+          "sha256": "e458b9cc9d1193fe84bb9b9bdf5e2d5826b831fd2d8592c1afd3af579d26db4a"
+        },
+        {
+          "path": "src/optimization/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "src/optimization/blockswap.py",
+          "bytes": 38643,
+          "sha256": "7536cdc9c7732d91906788c881262a3f07fab633c0d6ccea8898cbb872243e50"
+        },
+        {
+          "path": "src/optimization/compatibility.py",
+          "bytes": 38685,
+          "sha256": "e9878d37fc252aa71f26a00f3b9c3e1c4f70b02cff0be507eabbbcfbb330afa2"
+        },
+        {
+          "path": "src/optimization/gguf_dequant.py",
+          "bytes": 15677,
+          "sha256": "be07a7c6e7157cc54c0df83f34320e01833e64a06b508c793eca53243352796e"
+        },
+        {
+          "path": "src/optimization/gguf_ops.py",
+          "bytes": 12211,
+          "sha256": "14ce640f036fb0050bad7bbd58ae0d02795d6ff7f4034ba6789b67aceee2b036"
+        },
+        {
+          "path": "src/optimization/memory_manager.py",
+          "bytes": 48138,
+          "sha256": "a16d13554ef8f981d142400d22f5e485eb63f59775574e0c755c4bd3b49ebad4"
+        },
+        {
+          "path": "src/optimization/performance.py",
+          "bytes": 5884,
+          "sha256": "527b098c095f4f8998fde9b99e2942c76f422eb4286bad7eadf46142410678ff"
+        },
+        {
+          "path": "src/utils/__init__.py",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "src/utils/color_fix.py",
+          "bytes": 30537,
+          "sha256": "3f1c7faea63bb18a8b0667ec8b02cf580d4bebfd9fcc23c384ddabbd36d4b04a"
+        },
+        {
+          "path": "src/utils/constants.py",
+          "bytes": 5335,
+          "sha256": "2580e1064444ac941de98d5e057d328943f25005791712f9aef873854c2f80fd"
+        },
+        {
+          "path": "src/utils/debug.py",
+          "bytes": 37453,
+          "sha256": "0454f7fecbd413d2e1b6475b188f109271e97a386e864dc05d5f9395786e9bfc"
+        },
+        {
+          "path": "src/utils/downloads.py",
+          "bytes": 10558,
+          "sha256": "e538a0f924664409661ff1ab0c2ebec565bc3a0baa99f1cb6c038a32c1d0f3e3"
+        },
+        {
+          "path": "src/utils/model_registry.py",
+          "bytes": 4402,
+          "sha256": "a2b1f210fdaa6d10e3e4a3401db43a9e7c1e29579c8e5eb18df20fba9559500d"
+        }
+      ]
+    },
+    "python": "3.12.11",
+    "uv": {
+      "version": "0.12.17",
+      "url": "https://github.com/astral-sh/uv/releases/download/0.12.17/uv-x86_64-pc-windows-msvc.zip",
+      "sha256": "a252121d5b59398fcb137c6ea448176459a44010f33f67e0072305a637119ca7",
+      "bytes": 17906210,
+      "executable_sha256": "2019cdf564cb8f749262f5f021cedc75a99abb1c6081227ca340bbcda972611d"
+    },
+    "models": [
+      {
+        "name": "seedvr2_ema_3b_fp8_e4m3fn.safetensors",
+        "sha256": "3bf1e43ebedd570e7e7a0b1b60d6a02e105978f505c8128a241cde99a8240cff",
+        "bytes": 3391544696,
+        "url": "https://huggingface.co/numz/SeedVR2_comfyUI/resolve/09ced71023636e9bc8cdf9cdecfb2625d1e691e8/seedvr2_ema_3b_fp8_e4m3fn.safetensors?download=true"
+      },
+      {
+        "name": "ema_vae_fp16.safetensors",
+        "sha256": "20678548f420d98d26f11442d3528f8b8c94e57ee046ef93dbb7633da8612ca1",
+        "bytes": 501324814,
+        "url": "https://huggingface.co/numz/SeedVR2_comfyUI/resolve/09ced71023636e9bc8cdf9cdecfb2625d1e691e8/ema_vae_fp16.safetensors?download=true"
+      }
+    ],
+    "requirements": {
+      "asset": "seedvr2/requirements.lock",
+      "sha256": "8fedfb1530af3bdcb539a175f4d1581576250d116673bcb5ef9fa5cc89f36db4"
+    },
+    "runner": {
+      "asset": "seedvr2/worker.py",
+      "sha256": "333b800aad412349874117a31dab1c91fc236fd1e561527c3671a8f38fd258b2"
+    },
+    "package_versions": {
+      "accelerate": "1.15.0",
+      "annotated-doc": "0.0.5",
+      "antlr4-python3-runtime": "4.9.3",
+      "anyio": "4.15.1",
+      "certifi": "2026.7.22",
+      "charset-normalizer": "3.5.2",
+      "click": "8.5.0",
+      "colorama": "0.4.6",
+      "contourpy": "1.4.0",
+      "cycler": "0.12.1",
+      "diffusers": "0.35.1",
+      "einops": "0.8.1",
+      "filelock": "4.0.11",
+      "fonttools": "4.66.1",
+      "fsspec": "2026.9.0",
+      "gguf": "0.17.1",
+      "h11": "0.16.0",
+      "hf-xet": "1.6.0",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "huggingface-hub": "1.33.0",
+      "idna": "3.20",
+      "importlib-metadata": "9.0.1",
+      "jinja2": "3.1.6",
+      "kiwisolver": "1.5.1",
+      "markdown-it-py": "4.2.0",
+      "markupsafe": "3.0.4",
+      "matplotlib": "3.10.3",
+      "mdurl": "0.1.2",
+      "mpmath": "1.3.0",
+      "networkx": "3.7",
+      "numpy": "2.2.6",
+      "omegaconf": "2.3.0",
+      "opencv-python": "4.11.0.86",
+      "packaging": "26.3",
+      "peft": "0.17.1",
+      "pillow": "12.3.0",
+      "psutil": "7.0.0",
+      "pygments": "2.21.0",
+      "pyparsing": "3.3.3",
+      "python-dateutil": "2.9.0.post0",
+      "pyyaml": "6.0.3",
+      "regex": "2026.9.29",
+      "requests": "2.34.2",
+      "rich": "15.0.0",
+      "rotary-embedding-torch": "0.8.9",
+      "safetensors": "0.6.2",
+      "setuptools": "84.0.0",
+      "shellingham": "1.5.4",
+      "six": "1.17.0",
+      "sympy": "1.14.0",
+      "tokenizers": "0.22.2",
+      "torch": "2.7.1+cu128",
+      "torchvision": "0.22.1+cu128",
+      "tqdm": "4.67.1",
+      "transformers": "5.12.1",
+      "typer": "0.27.2",
+      "typing-extensions": "4.16.0",
+      "urllib3": "2.8.0",
+      "zipp": "4.1.1"
+    },
+    "license_url": "https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler/blob/4490bd1f482e026674543386bb2a4d176da245b9/LICENSE"
+  },
+  "rtx": {
+    "version": "1.1.0",
+    "archive": {
+      "url": "https://api.ngc.nvidia.com/v2/models/nvidia/multimedia/dlpp/versions/1.5/files/RTX_Video_SDK_v1.1.0.zip",
+      "sha256": "abf4f34e2b5a618e355b0d5a0365d8ecc3db4396e756e4c850a867e1ae2ed69e",
+      "bytes": 63493768
+    },
+    "files": [
+      {
+        "path": "bin/Windows/x64/rel/nvngx_vsr.dll",
+        "name": "nvngx_vsr.dll",
+        "bytes": 19140144,
+        "sha256": "c3d88eea5ff7a548edefa66414cf6e77464d0947277c904f324dd23abf58a1ed"
+      },
+      {
+        "path": "NVIDIA_RTX_Video_SDK_License.pdf",
+        "name": "LICENSE.pdf",
+        "bytes": 136535,
+        "sha256": "5addfcf7c78891a12f1dcd6b5f86c2512351ab71b3872f446ba10e1b6da54464"
+      }
+    ],
+    "license_url": "https://developer.nvidia.com/rtx-video-sdk"
+  }
+}

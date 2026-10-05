@@ -261,7 +261,9 @@ GoRouter appRouter(Ref ref) {
                     initialIntegrationTab:
                         state.uri.queryParameters['bridge'] == '1' ? 1 : null,
                     initialSectionIndex:
-                        state.uri.queryParameters['section'] == 'storage'
+                        state.uri.queryParameters['section'] == 'local-upscale'
+                        ? 10
+                        : state.uri.queryParameters['section'] == 'storage'
                         ? 3
                         : state.uri.queryParameters['section'] == 'models'
                         ? 7

@@ -22729,7 +22729,7 @@ abstract class AppLocalizations {
   /// No description provided for @localUpscale_description.
   ///
   /// In en, this message translates to:
-  /// **'Upscale on this device. No ComfyUI connection or Anlas required.'**
+  /// **'Upscale images locally without spending Anlas.'**
   String get localUpscale_description;
 
   /// No description provided for @localUpscale_bundled.
@@ -22893,6 +22893,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Model operation failed. Check your connection, file permissions and free disk space, then retry.'**
   String get localUpscale_modelOperationFailed;
+
+  /// No description provided for @settings_localUpscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Local upscaling'**
+  String get settings_localUpscale;
+
+  /// No description provided for @settings_localUpscaleDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage local upscaling models and components.'**
+  String get settings_localUpscaleDescription;
+
+  /// No description provided for @localUpscale_noCuda.
+  ///
+  /// In en, this message translates to:
+  /// **'A CUDA-capable NVIDIA GPU and a compatible driver are required.'**
+  String get localUpscale_noCuda;
+
+  /// No description provided for @localUpscale_noRtx.
+  ///
+  /// In en, this message translates to:
+  /// **'RTX Video is unavailable. Check your NVIDIA RTX GPU and driver.'**
+  String get localUpscale_noRtx;
+
+  /// No description provided for @localUpscale_encoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding image…'**
+  String get localUpscale_encoding;
+
+  /// No description provided for @localUpscale_decoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Decoding image…'**
+  String get localUpscale_decoding;
+
+  /// No description provided for @localUpscale_optionalComponents.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional components'**
+  String get localUpscale_optionalComponents;
+
+  /// No description provided for @localUpscale_noAutomaticDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Components download only when you click Install. Existing local models remain available.'**
+  String get localUpscale_noAutomaticDownload;
+
+  /// No description provided for @localUpscale_seedvr2Help.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality-focused reconstruction. Downloads about 3.9 GB of models plus a separate Python/CUDA runtime; requires an NVIDIA GPU.'**
+  String get localUpscale_seedvr2Help;
+
+  /// No description provided for @localUpscale_rtxHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast GPU upscaling with NVIDIA RTX Video. Downloads a separate component of about 64 MB; requires a compatible RTX GPU.'**
+  String get localUpscale_rtxHelp;
+
+  /// No description provided for @localUpscale_installed.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed'**
+  String get localUpscale_installed;
+
+  /// No description provided for @localUpscale_notInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Not installed — open Manage models to install'**
+  String get localUpscale_notInstalled;
+
+  /// No description provided for @localUpscale_license.
+  ///
+  /// In en, this message translates to:
+  /// **'License'**
+  String get localUpscale_license;
+
+  /// No description provided for @localUpscale_installComponent.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get localUpscale_installComponent;
+
+  /// No description provided for @localUpscale_installingRuntime.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing Python/CUDA runtime…'**
+  String get localUpscale_installingRuntime;
+
+  /// No description provided for @localUpscale_checkingComponent.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking component and GPU…'**
+  String get localUpscale_checkingComponent;
+
+  /// No description provided for @localUpscale_installingComponent.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading component…'**
+  String get localUpscale_installingComponent;
 }
 
 class _AppLocalizationsDelegate

@@ -9,6 +9,8 @@ enum LocalUpscaleError {
   invalidImage,
   sizeLimit,
   noVulkan,
+  noCuda,
+  noRtx,
   processFailed,
   modelOperationFailed,
   timeout,
@@ -23,7 +25,16 @@ class LocalUpscaleException implements Exception {
   String toString() => 'LocalUpscaleException(${code.name})';
 }
 
-enum LocalUpscalePhase { preparing, inference, resizing, complete }
+enum LocalUpscalePhase {
+  preparing,
+  encoding,
+  inference,
+  decoding,
+  resizing,
+  complete,
+}
+
+enum LocalUpscaleMethod { standard, seedvr2, rtx }
 
 class LocalUpscaleProgress {
   const LocalUpscaleProgress(this.phase, [this.fraction]);
@@ -40,6 +51,8 @@ class LocalUpscaleModel {
     this.installed = false,
     this.bundled = false,
     this.custom = false,
+    this.method = LocalUpscaleMethod.standard,
+    this.diskBytes = 0,
   });
   final String id;
   final String name;
@@ -48,19 +61,24 @@ class LocalUpscaleModel {
   final bool installed;
   final bool bundled;
   final bool custom;
+  final LocalUpscaleMethod method;
+  final int diskBytes;
   int inferenceScale(double requested) => scales.firstWhere(
     (scale) => scale >= requested,
     orElse: () => scales.last,
   );
-  LocalUpscaleModel withInstalled(bool value) => LocalUpscaleModel(
-    id: id,
-    name: name,
-    engineName: engineName,
-    scales: scales,
-    installed: value,
-    bundled: bundled,
-    custom: custom,
-  );
+  LocalUpscaleModel withInstalled(bool value, {int? diskBytes}) =>
+      LocalUpscaleModel(
+        id: id,
+        name: name,
+        engineName: engineName,
+        scales: scales,
+        installed: value,
+        bundled: bundled,
+        custom: custom,
+        method: method,
+        diskBytes: diskBytes ?? this.diskBytes,
+      );
 }
 
 const localUpscaleDefaultModel = 'anime';
@@ -83,6 +101,23 @@ const localUpscaleCatalog = [
     name: 'Real-ESRGAN x4plus',
     engineName: 'realesrgan-x4plus',
     scales: [4],
+  ),
+];
+
+const advancedUpscaleCatalog = [
+  LocalUpscaleModel(
+    id: 'seedvr2-3b',
+    name: 'SeedVR2 3B FP8',
+    engineName: 'seedvr2',
+    scales: [1, 2, 3, 4],
+    method: LocalUpscaleMethod.seedvr2,
+  ),
+  LocalUpscaleModel(
+    id: 'rtx-vsr',
+    name: 'NVIDIA RTX Video Super Resolution',
+    engineName: 'rtx-vsr',
+    scales: [1, 2, 3, 4],
+    method: LocalUpscaleMethod.rtx,
   ),
 ];
 

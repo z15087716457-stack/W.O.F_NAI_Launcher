@@ -138,6 +138,7 @@ flutter:
     - assets/local_upscale/
     - assets/local_upscale/windows/
     - assets/local_upscale/models/
+    - assets/local_upscale/seedvr2/
     - assets/images/
     - assets/icons/
     - assets/icons/providers/

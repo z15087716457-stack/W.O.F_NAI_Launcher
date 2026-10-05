@@ -66,6 +66,12 @@ List<SettingsSearchEntry> settingsSearchEntries(
       'thumbnail quality 缩略图 清晰度',
     ),
     item('storage', l.settings_extraRootsTitle, 'gallery folder 图库来源 文件夹'),
+    if (pages.containsKey('localUpscale'))
+      item(
+        'localUpscale',
+        l.localUpscale_manage,
+        'upscale super resolution Real-ESRGAN SeedVR2 RTX 本地 放大 超分 模型 下载 导入',
+      ),
     item(
       'data',
       context.l10n.settings_dictionariesCache,

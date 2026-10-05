@@ -19,6 +19,7 @@ import 'sections/shortcut_settings_section.dart';
 import 'sections/integrations_settings_section.dart';
 import 'sections/about_settings_section.dart';
 import 'sections/model_management_section.dart';
+import 'sections/local_upscale_settings_section.dart';
 
 enum SettingsDestination {
   appearance,
@@ -26,6 +27,7 @@ enum SettingsDestination {
   generation,
   storage,
   data,
+  localUpscale,
   account,
   models,
   integrations,
@@ -79,6 +81,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     6 => SettingsDestination.controls,
     7 => SettingsDestination.models,
     9 => SettingsDestination.about,
+    10 => SettingsDestination.localUpscale,
     _ => SettingsDestination.appearance,
   };
 
@@ -243,6 +246,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         context.l10n.settings_dictionariesCache,
         context.l10n.settings_manageTagDictionariesIndexesCache,
         const StorageMaintenanceSection(),
+      ),
+      _SettingsSection(
+        SettingsDestination.localUpscale,
+        StudioIcons.galleryUpscale,
+        context.l10n.settings_localUpscale,
+        context.l10n.settings_localUpscaleDescription,
+        const LocalUpscaleSettingsSection(embedded: true),
       ),
       _SettingsSection(
         SettingsDestination.account,
@@ -453,15 +463,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                               group(
                                 context.l10n.settings_creationResources,
-                                sections.skip(2).take(3),
+                                sections.skip(2).take(4),
                               ),
                               group(
                                 context.l10n.settings_servicesConnections,
-                                sections.skip(5).take(3),
+                                sections.skip(6).take(3),
                               ),
                               group(
                                 context.l10n.settings_safetyMaintenance,
-                                sections.skip(8),
+                                sections.skip(9),
                               ),
                             ],
                           ),

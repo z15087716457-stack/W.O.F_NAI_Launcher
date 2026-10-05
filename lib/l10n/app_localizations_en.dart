@@ -13081,7 +13081,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localUpscale_description =>
-      'Upscale on this device. No ComfyUI connection or Anlas required.';
+      'Upscale images locally without spending Anlas.';
 
   @override
   String get localUpscale_bundled => 'Included';
@@ -13176,4 +13176,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get localUpscale_modelOperationFailed =>
       'Model operation failed. Check your connection, file permissions and free disk space, then retry.';
+
+  @override
+  String get settings_localUpscale => 'Local upscaling';
+
+  @override
+  String get settings_localUpscaleDescription =>
+      'Manage local upscaling models and components.';
+
+  @override
+  String get localUpscale_noCuda =>
+      'A CUDA-capable NVIDIA GPU and a compatible driver are required.';
+
+  @override
+  String get localUpscale_noRtx =>
+      'RTX Video is unavailable. Check your NVIDIA RTX GPU and driver.';
+
+  @override
+  String get localUpscale_encoding => 'Encoding image…';
+
+  @override
+  String get localUpscale_decoding => 'Decoding image…';
+
+  @override
+  String get localUpscale_optionalComponents => 'Optional components';
+
+  @override
+  String get localUpscale_noAutomaticDownload =>
+      'Components download only when you click Install. Existing local models remain available.';
+
+  @override
+  String get localUpscale_seedvr2Help =>
+      'Quality-focused reconstruction. Downloads about 3.9 GB of models plus a separate Python/CUDA runtime; requires an NVIDIA GPU.';
+
+  @override
+  String get localUpscale_rtxHelp =>
+      'Fast GPU upscaling with NVIDIA RTX Video. Downloads a separate component of about 64 MB; requires a compatible RTX GPU.';
+
+  @override
+  String get localUpscale_installed => 'Installed';
+
+  @override
+  String get localUpscale_notInstalled =>
+      'Not installed — open Manage models to install';
+
+  @override
+  String get localUpscale_license => 'License';
+
+  @override
+  String get localUpscale_installComponent => 'Install';
+
+  @override
+  String get localUpscale_installingRuntime =>
+      'Installing Python/CUDA runtime…';
+
+  @override
+  String get localUpscale_checkingComponent => 'Checking component and GPU…';
+
+  @override
+  String get localUpscale_installingComponent => 'Downloading component…';
 }

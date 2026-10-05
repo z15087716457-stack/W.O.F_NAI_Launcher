@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/comfyui/builtin_workflows.dart';
 import 'package:nai_launcher/core/comfyui/comfyui_models.dart';
@@ -168,6 +169,7 @@ void main() {
       ProviderScope(
         overrides: [
           localStorageServiceProvider.overrideWithValue(storage),
+          bridgeDraftVersionProvider.overrideWith((ref) => 'fixture-draft'),
           comfyUISettingsProvider.overrideWith(_ComfySettings.new),
           comfyUIConnectionProvider.overrideWith(() => comfy),
           comfyUIWorkflowsProvider.overrideWith(() => workflows),
@@ -285,9 +287,9 @@ void main() {
             expect(find.text('本机桥接'), findsOneWidget);
             expect(find.text('网络'), findsOneWidget);
             if (tab == 0) {
-              expect(find.text('SeedVR2 超分'), findsOneWidget);
-              expect(find.text('SeedVR2 分块超分'), findsOneWidget);
-              expect(find.text('内置'), findsNWidgets(4));
+              expect(find.text('SeedVR2 超分'), findsNothing);
+              expect(find.text('SeedVR2 分块超分'), findsNothing);
+              expect(find.text('工作流管理'), findsNothing);
               if (spec.$3 == 'wide') {
                 final input = tester.getRect(
                   find.byKey(const Key('settings-comfyui-address')),
@@ -365,7 +367,7 @@ void main() {
   );
 
   testWidgets(
-    'ComfyUI address, busy test, import and custom deletion use existing actions',
+    'ComfyUI keeps connection actions and preserves hidden workflow data',
     (tester) async {
       final container = await pump(tester, tab: 0);
       await tester.enterText(
@@ -385,30 +387,15 @@ void main() {
       comfy.pending.complete(true);
       await tester.pumpAndSettle();
       expect(tester.widget<OutlinedButton>(test).onPressed, isNotNull);
-      await tester.tap(find.text('导入'));
-      await tester.pumpAndSettle();
-      expect(find.byType(WorkflowImportWizard), findsOneWidget);
-      await tester.tap(find.text('取消'));
-      await tester.pumpAndSettle();
+      container.read(comfyUIWorkflowsProvider);
       workflows.addFixture();
       await tester.pumpAndSettle();
-      final row = find.byKey(const ValueKey('settings-workflow-fixture'));
-      await tester.ensureVisible(row);
-      await tester.tap(
-        find.descendant(of: row, matching: find.byType(IconButton)),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('取消'));
-      await tester.pumpAndSettle();
+      expect(find.text('导入'), findsNothing);
+      expect(find.byType(WorkflowImportWizard), findsNothing);
+      expect(find.text('工作流管理'), findsNothing);
+      expect(find.byKey(const ValueKey('settings-workflow-fixture')), findsNothing);
       expect(workflows.deletes, 0);
-      await tester.tap(
-        find.descendant(of: row, matching: find.byType(IconButton)),
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('删除').last);
-      await tester.pumpAndSettle();
-      expect(workflows.deletes, 1);
-      expect(find.text('自定义示例'), findsNothing);
+      expect(container.read(comfyUIWorkflowsProvider).any((w) => w.id == 'fixture'), isTrue);
       await tester.ensureVisible(find.byType(SettingsToggle));
       await tester.tap(find.byType(SettingsToggle));
       await tester.pumpAndSettle();

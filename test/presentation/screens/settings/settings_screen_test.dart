@@ -27,6 +27,9 @@ import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
+import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
+import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/model_compact_dropdown.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -618,6 +621,8 @@ void main() {
           await tester.pumpWidget(
             ProviderScope(
               overrides: [
+                localUpscaleModelsProvider.overrideWith((ref) async => [localUpscaleCatalog.first.withInstalled(true), ...localUpscaleCatalog.skip(1), ...advancedUpscaleCatalog]),
+                bridgeDraftVersionProvider.overrideWith((ref) => 'fixture-draft'),
                 settingsFontScaleProvider.overrideWith(
                   () => _DesignSettingsScale(scale),
                 ),
@@ -745,6 +750,7 @@ void main() {
                   l10n.settings_generationPrompts,
                 SettingsDestination.storage => l10n.settings_galleryFiles,
                 SettingsDestination.data => l10n.settings_dictionariesCache,
+                SettingsDestination.localUpscale => l10n.settings_localUpscale,
                 SettingsDestination.account => l10n.settings_novelaiAccounts,
                 SettingsDestination.models => l10n.settings_modelsAndInterfaces,
                 SettingsDestination.integrations =>

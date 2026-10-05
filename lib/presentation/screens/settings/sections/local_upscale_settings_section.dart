@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/upscale/local_upscale_models.dart';
@@ -19,6 +20,8 @@ String localUpscaleErrorText(BuildContext context, LocalUpscaleError error) {
     LocalUpscaleError.invalidImage => l.localUpscale_invalidImage,
     LocalUpscaleError.sizeLimit => l.localUpscale_sizeLimit,
     LocalUpscaleError.noVulkan => l.localUpscale_noVulkan,
+    LocalUpscaleError.noCuda => l.localUpscale_noCuda,
+    LocalUpscaleError.noRtx => l.localUpscale_noRtx,
     LocalUpscaleError.processFailed => l.localUpscale_processFailed,
     LocalUpscaleError.modelOperationFailed =>
       l.localUpscale_modelOperationFailed,
@@ -36,41 +39,9 @@ String localUpscaleModelName(BuildContext context, LocalUpscaleModel model) =>
       _ => model.name,
     };
 
-Future<void> showLocalUpscaleModels(BuildContext context) => showDialog<void>(
-  context: context,
-  builder: (context) => Dialog(
-    child: SizedBox(
-      width: 640,
-      height: 510,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 12, 4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    context.l10n.localUpscale_manage,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  tooltip: context.l10n.common_close,
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-          ),
-          const Expanded(child: LocalUpscaleSettingsSection()),
-        ],
-      ),
-    ),
-  ),
-);
-
 class LocalUpscaleSettingsSection extends ConsumerStatefulWidget {
-  const LocalUpscaleSettingsSection({super.key});
+  const LocalUpscaleSettingsSection({super.key, this.embedded = false});
+  final bool embedded;
   @override
   ConsumerState<LocalUpscaleSettingsSection> createState() =>
       _LocalUpscaleSettingsSectionState();
@@ -159,14 +130,21 @@ class _LocalUpscaleSettingsSectionState
     final l = context.l10n;
     final theme = Theme.of(context);
     final models = ref.watch(localUpscaleModelsProvider);
-    final blocked = _busy || ref.watch(localUpscaleTaskProvider).running;
+    final install = ref.watch(advancedUpscaleInstallProvider);
+    final blocked =
+        _busy || install.running || ref.watch(localUpscaleTaskProvider).running;
     return ListView(
-      padding: const EdgeInsets.all(24),
+      shrinkWrap: widget.embedded,
+      physics: widget.embedded ? const NeverScrollableScrollPhysics() : null,
+      padding: widget.embedded ? EdgeInsets.zero : const EdgeInsets.all(24),
       children: [
         Text(l.localUpscale_description, style: theme.textTheme.bodyMedium),
         const SizedBox(height: 16),
+        Text(l.img2img_upscaleRegularModel, style: theme.textTheme.titleMedium),
+        const SizedBox(height: 8),
         ...models.when(
           data: (items) => items
+              .where((m) => m.method == LocalUpscaleMethod.standard)
               .map(
                 (model) => Card(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -310,6 +288,152 @@ class _LocalUpscaleSettingsSectionState
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
+        const SizedBox(height: 28),
+        Text(
+          l.localUpscale_optionalComponents,
+          style: theme.textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l.localUpscale_noAutomaticDownload,
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: 12),
+        ...advancedUpscaleCatalog.map((catalog) {
+          final model =
+              (models.valueOrNull ?? [])
+                  .where((m) => m.id == catalog.id)
+                  .firstOrNull ??
+              catalog;
+          final seed = model.method == LocalUpscaleMethod.seedvr2;
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        seed
+                            ? Icons.auto_awesome_outlined
+                            : Icons.speed_outlined,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          seed ? 'SeedVR2' : 'RTX',
+                          style: theme.textTheme.titleSmall,
+                        ),
+                      ),
+                      if (model.installed)
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 20,
+                          color: theme.colorScheme.primary,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    seed ? l.localUpscale_seedvr2Help : l.localUpscale_rtxHelp,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          model.installed
+                              ? '${l.localUpscale_installed} · ${(model.diskBytes / 1024 / 1024).round()} MB'
+                              : l.localUpscale_notInstalled,
+                          style: theme.textTheme.labelMedium,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => launchUrl(
+                          Uri.parse(
+                            seed
+                                ? 'https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler/blob/4490bd1f482e026674543386bb2a4d176da245b9/LICENSE'
+                                : 'https://developer.nvidia.com/rtx-video-sdk',
+                          ),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        child: Text(l.localUpscale_license),
+                      ),
+                      if (model.installed)
+                        IconButton(
+                          onPressed: blocked
+                              ? null
+                              : () => ref
+                                    .read(
+                                      advancedUpscaleInstallProvider.notifier,
+                                    )
+                                    .delete(model.id),
+                          tooltip: l.common_delete,
+                          icon: const Icon(Icons.delete_outline),
+                        )
+                      else
+                        TextButton(
+                          onPressed: blocked || !Platform.isWindows
+                              ? null
+                              : () => ref
+                                    .read(
+                                      advancedUpscaleInstallProvider.notifier,
+                                    )
+                                    .install(model.id),
+                          child: Text(l.localUpscale_installComponent),
+                        ),
+                    ],
+                  ),
+                  if (install.id == model.id) ...[
+                    const SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: install.cancelling ? null : install.fraction,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            install.cancelling
+                                ? l.localUpscale_cancelling
+                                : switch (install.phase) {
+                                    'runtime' =>
+                                      l.localUpscale_installingRuntime,
+                                    'weights' =>
+                                      l.localUpscale_downloadProgress,
+                                    'checking' =>
+                                      l.localUpscale_checkingComponent,
+                                    _ => l.localUpscale_installingComponent,
+                                  },
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: install.cancelling
+                              ? null
+                              : ref
+                                    .read(
+                                      advancedUpscaleInstallProvider.notifier,
+                                    )
+                                    .cancel,
+                          child: Text(l.common_cancel),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        }),
+        if (install.error != null)
+          Text(
+            localUpscaleErrorText(context, install.error!),
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
       ],
     );
   }

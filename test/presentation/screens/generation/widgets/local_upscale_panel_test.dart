@@ -132,7 +132,7 @@ void main() {
                     format: ui.ImageByteFormat.png,
                   );
                   final directory = Directory(
-                    '.dart_tool/local-upscale-20261005/captures',
+                    '.dart_tool/advanced-upscale-20261005/captures',
                   );
                   await directory.create(recursive: true);
                   await File(

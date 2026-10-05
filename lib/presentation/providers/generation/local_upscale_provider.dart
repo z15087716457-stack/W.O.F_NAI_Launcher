@@ -5,9 +5,11 @@ import '../../../core/services/desktop_app_shutdown_service.dart';
 import '../../../data/models/image/image_operation.dart';
 import '../../../data/models/upscale/local_upscale_models.dart';
 import '../../../data/services/local_upscale_model_manager.dart';
+import '../../../data/services/advanced_upscale_component_manager.dart';
 import '../../../data/services/local_upscale_service.dart';
 import '../image_generation_provider.dart';
 import '../image_save_settings_provider.dart';
+import '../proxy_settings_provider.dart';
 import 'image_workflow_controller.dart';
 import 'preview_selection_provider.dart';
 import '../../screens/generation/widgets/canvas/canvas_feed_layout.dart';
@@ -18,11 +20,130 @@ final localUpscaleModelManagerProvider = Provider((ref) {
   return manager;
 });
 final localUpscaleServiceProvider = Provider(
-  (ref) => LocalUpscaleService(ref.watch(localUpscaleModelManagerProvider)),
+  (ref) => LocalUpscaleService(
+    ref.watch(localUpscaleModelManagerProvider),
+    advanced: ref.watch(advancedUpscaleComponentManagerProvider),
+  ),
 );
+final advancedUpscaleComponentManagerProvider = Provider((ref) {
+  final manager = AdvancedUpscaleComponentManager(
+    proxyAddress: () => ref.read(currentProxyAddressProvider),
+  );
+  ref.onDispose(manager.dispose);
+  return manager;
+});
 final localUpscaleModelsProvider = FutureProvider(
-  (ref) => ref.watch(localUpscaleModelManagerProvider).models(),
+  (ref) async => [
+    ...await ref.watch(localUpscaleModelManagerProvider).models(),
+    ...await ref.watch(advancedUpscaleComponentManagerProvider).models(),
+  ],
 );
+
+class AdvancedUpscaleInstallState {
+  const AdvancedUpscaleInstallState({
+    this.id,
+    this.phase = '',
+    this.fraction,
+    this.error,
+    this.cancelling = false,
+  });
+  final String? id;
+  final String phase;
+  final double? fraction;
+  final LocalUpscaleError? error;
+  final bool cancelling;
+  bool get running => id != null;
+}
+
+final advancedUpscaleInstallProvider =
+    NotifierProvider<AdvancedUpscaleInstall, AdvancedUpscaleInstallState>(
+      AdvancedUpscaleInstall.new,
+    );
+
+class AdvancedUpscaleInstall extends Notifier<AdvancedUpscaleInstallState> {
+  LocalUpscaleCancellation? _cancel;
+  Future<void>? _pending;
+  bool _disposed = false;
+  @override
+  AdvancedUpscaleInstallState build() {
+    _disposed = false;
+    final remove = DesktopAppShutdownService.registerCleanup(() async {
+      _cancel?.cancel();
+      await _pending;
+    });
+    ref.onDispose(() {
+      _disposed = true;
+      _cancel?.cancel();
+      remove();
+    });
+    return const AdvancedUpscaleInstallState();
+  }
+
+  void cancel() {
+    if (!state.running) return;
+    state = AdvancedUpscaleInstallState(
+      id: state.id,
+      phase: state.phase,
+      fraction: state.fraction,
+      cancelling: true,
+    );
+    _cancel?.cancel();
+  }
+
+  Future<void> install(String id) => _operate(id, false);
+  Future<void> delete(String id) => _operate(id, true);
+  Future<void> _operate(String id, bool remove) {
+    if (_pending != null) return _pending!;
+    final work = _run(id, remove);
+    _pending = work;
+    return work.whenComplete(() => _pending = null);
+  }
+
+  Future<void> _run(String id, bool remove) async {
+    final base = ref.read(localUpscaleModelManagerProvider);
+    var locked = false;
+    final cancellation = LocalUpscaleCancellation();
+    _cancel = cancellation;
+    state = AdvancedUpscaleInstallState(id: id, phase: 'component');
+    try {
+      base.claimInference(id);
+      locked = true;
+      final manager = ref.read(advancedUpscaleComponentManagerProvider);
+      if (remove) {
+        await manager.delete(id);
+      } else {
+        await manager.install(
+          id,
+          cancellation: cancellation,
+          onProgress: (phase, fraction) {
+            if (!_disposed && !cancellation.isCancelled) {
+              state = AdvancedUpscaleInstallState(
+                id: id,
+                phase: phase,
+                fraction: fraction,
+              );
+            }
+          },
+        );
+      }
+      if (!_disposed) state = const AdvancedUpscaleInstallState();
+    } catch (error) {
+      if (!_disposed) {
+        state = AdvancedUpscaleInstallState(
+          error: cancellation.isCancelled
+              ? LocalUpscaleError.cancelled
+              : error is LocalUpscaleException
+              ? error.code
+              : LocalUpscaleError.modelOperationFailed,
+        );
+      }
+    } finally {
+      if (locked) base.releaseInference();
+      _cancel = null;
+      if (!_disposed) ref.invalidate(localUpscaleModelsProvider);
+    }
+  }
+}
 
 class LocalUpscaleTaskState {
   const LocalUpscaleTaskState({

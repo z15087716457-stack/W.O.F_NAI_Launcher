@@ -210,12 +210,10 @@ Future<ProviderContainer> pumpManagement(
 }
 
 void main() {
-  testWidgets('本地超分模型管理可从设置标签直接打开', (tester) async {
+  testWidgets('模型与接口不再重复提供本地超分标签', (tester) async {
     await pumpManagement(tester);
-    await tapVisible(tester, find.text('本地超分'));
-    expect(find.text('动漫 · 画质'), findsOneWidget);
-    expect(find.text('导入模型'), findsOneWidget);
-    expect(find.text('内置'), findsOneWidget);
+    expect(find.text('本地超分'), findsNothing);
+    expect(find.text('导入模型'), findsNothing);
     expect(tester.takeException(), isNull);
   });
   setUpAll(() async {

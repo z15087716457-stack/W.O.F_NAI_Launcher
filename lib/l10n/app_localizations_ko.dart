@@ -12706,8 +12706,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localUpscale_manage => '모델 관리';
 
   @override
-  String get localUpscale_description =>
-      '이 기기에서 이미지를 확대합니다. ComfyUI 연결이나 Anlas가 필요하지 않습니다.';
+  String get localUpscale_description => '로컬에서 이미지를 확대하며 Anlas를 사용하지 않습니다.';
 
   @override
   String get localUpscale_bundled => '내장';
@@ -12798,4 +12797,59 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get localUpscale_modelOperationFailed =>
       '모델 작업에 실패했습니다. 연결, 파일 권한 및 여유 공간을 확인한 후 다시 시도하세요.';
+
+  @override
+  String get settings_localUpscale => '로컬 확대';
+
+  @override
+  String get settings_localUpscaleDescription => '로컬 확대 모델과 실행 구성 요소를 관리합니다.';
+
+  @override
+  String get localUpscale_noCuda => 'CUDA 지원 NVIDIA GPU와 호환 드라이버가 필요합니다.';
+
+  @override
+  String get localUpscale_noRtx =>
+      'RTX Video를 사용할 수 없습니다. NVIDIA RTX GPU와 드라이버를 확인하세요.';
+
+  @override
+  String get localUpscale_encoding => '이미지 인코딩 중…';
+
+  @override
+  String get localUpscale_decoding => '이미지 디코딩 중…';
+
+  @override
+  String get localUpscale_optionalComponents => '선택 구성 요소';
+
+  @override
+  String get localUpscale_noAutomaticDownload =>
+      '설치를 누를 때만 다운로드합니다. 기존 로컬 모델은 바로 사용할 수 있습니다.';
+
+  @override
+  String get localUpscale_seedvr2Help =>
+      '세부 재구성에 중점을 둡니다. 약 3.9 GB 모델과 별도 Python/CUDA 환경을 다운로드하며 NVIDIA GPU가 필요합니다.';
+
+  @override
+  String get localUpscale_rtxHelp =>
+      'NVIDIA RTX Video로 빠르게 확대합니다. 약 64 MB의 별도 구성 요소와 호환 RTX GPU가 필요합니다.';
+
+  @override
+  String get localUpscale_installed => '설치됨';
+
+  @override
+  String get localUpscale_notInstalled => '미설치 — 모델 관리에서 설치하세요';
+
+  @override
+  String get localUpscale_license => '라이선스';
+
+  @override
+  String get localUpscale_installComponent => '설치';
+
+  @override
+  String get localUpscale_installingRuntime => 'Python/CUDA 환경 설치 중…';
+
+  @override
+  String get localUpscale_checkingComponent => '구성 요소와 GPU 확인 중…';
+
+  @override
+  String get localUpscale_installingComponent => '구성 요소 다운로드 중…';
 }

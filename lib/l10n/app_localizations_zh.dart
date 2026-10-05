@@ -12470,7 +12470,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localUpscale_manage => '管理模型';
 
   @override
-  String get localUpscale_description => '在本机放大图片，无需连接 ComfyUI，不消耗 Anlas。';
+  String get localUpscale_description => '在本机放大图片，不消耗 Anlas。';
 
   @override
   String get localUpscale_bundled => '内置';
@@ -12554,6 +12554,59 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localUpscale_modelOperationFailed => '模型操作失败，请检查网络、文件权限及可用空间后重试。';
+
+  @override
+  String get settings_localUpscale => '本地放大';
+
+  @override
+  String get settings_localUpscaleDescription => '管理本地放大模型与运行组件。';
+
+  @override
+  String get localUpscale_noCuda => '需要支持 CUDA 的 NVIDIA 显卡及兼容的驱动。';
+
+  @override
+  String get localUpscale_noRtx => 'RTX Video 不可用，请检查 NVIDIA RTX 显卡与驱动。';
+
+  @override
+  String get localUpscale_encoding => '正在编码图片…';
+
+  @override
+  String get localUpscale_decoding => '正在解码图片…';
+
+  @override
+  String get localUpscale_optionalComponents => '可选组件';
+
+  @override
+  String get localUpscale_noAutomaticDownload => '仅在点击“安装”后下载组件，已有的本地模型可直接使用。';
+
+  @override
+  String get localUpscale_seedvr2Help =>
+      '侧重细节重建。需下载约 3.9 GB 模型及独立的 Python/CUDA 运行环境，需要 NVIDIA 显卡。';
+
+  @override
+  String get localUpscale_rtxHelp =>
+      '使用 NVIDIA RTX Video 快速放大。需下载约 64 MB 独立组件，需要兼容的 RTX 显卡。';
+
+  @override
+  String get localUpscale_installed => '已安装';
+
+  @override
+  String get localUpscale_notInstalled => '尚未安装，请到管理模型安装';
+
+  @override
+  String get localUpscale_license => '许可';
+
+  @override
+  String get localUpscale_installComponent => '安装';
+
+  @override
+  String get localUpscale_installingRuntime => '正在安装 Python/CUDA 运行环境…';
+
+  @override
+  String get localUpscale_checkingComponent => '正在检查组件与显卡…';
+
+  @override
+  String get localUpscale_installingComponent => '正在下载组件…';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -25022,7 +25075,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localUpscale_manage => '管理模型';
 
   @override
-  String get localUpscale_description => '在本機放大圖片，無需連線 ComfyUI，不消耗 Anlas。';
+  String get localUpscale_description => '在本機放大圖片，不消耗 Anlas。';
 
   @override
   String get localUpscale_bundled => '內建';
@@ -25106,4 +25159,57 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localUpscale_modelOperationFailed => '模型操作失敗，請檢查網路、檔案權限及可用空間後重試。';
+
+  @override
+  String get settings_localUpscale => '本地放大';
+
+  @override
+  String get settings_localUpscaleDescription => '管理本地放大模型與執行元件。';
+
+  @override
+  String get localUpscale_noCuda => '需要支援 CUDA 的 NVIDIA 顯示卡及相容的驅動。';
+
+  @override
+  String get localUpscale_noRtx => 'RTX Video 不可用，請檢查 NVIDIA RTX 顯示卡與驅動。';
+
+  @override
+  String get localUpscale_encoding => '正在編碼圖片…';
+
+  @override
+  String get localUpscale_decoding => '正在解碼圖片…';
+
+  @override
+  String get localUpscale_optionalComponents => '可選元件';
+
+  @override
+  String get localUpscale_noAutomaticDownload => '僅在點選“安裝”後下載元件，已有的本地模型可直接使用。';
+
+  @override
+  String get localUpscale_seedvr2Help =>
+      '側重細節重建。需下載約 3.9 GB 模型及獨立的 Python/CUDA 執行環境，需要 NVIDIA 顯示卡。';
+
+  @override
+  String get localUpscale_rtxHelp =>
+      '使用 NVIDIA RTX Video 快速放大。需下載約 64 MB 獨立元件，需要相容的 RTX 顯示卡。';
+
+  @override
+  String get localUpscale_installed => '已安裝';
+
+  @override
+  String get localUpscale_notInstalled => '尚未安裝，請到管理模型安裝';
+
+  @override
+  String get localUpscale_license => '許可';
+
+  @override
+  String get localUpscale_installComponent => '安裝';
+
+  @override
+  String get localUpscale_installingRuntime => '正在安裝 Python/CUDA 執行環境…';
+
+  @override
+  String get localUpscale_checkingComponent => '正在檢查元件與顯示卡…';
+
+  @override
+  String get localUpscale_installingComponent => '正在下載元件…';
 }
