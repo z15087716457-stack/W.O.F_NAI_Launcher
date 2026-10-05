@@ -14,7 +14,6 @@ import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart'
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
-import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart';
@@ -133,14 +132,16 @@ void main() {
   }
 
   group('CanvasEdgeToolbar', () {
-    testWidgets('variation price remains and upscale uses an infinity split action', (
+    testWidgets('variation price remains and local upscale shows zero Anlas', (
       tester,
     ) async {
       final image = _img(id: 'quoted');
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            localStorageServiceProvider.overrideWith((ref) => _FakeCanvasStorage()),
+            localStorageServiceProvider.overrideWith(
+              (ref) => _FakeCanvasStorage(),
+            ),
             generationParamsNotifierProvider.overrideWith(_ToolbarParams.new),
             localUpscaleModelsProvider.overrideWith((ref) async => []),
             imageVariationCostProvider(image).overrideWithValue(63),
@@ -162,7 +163,7 @@ void main() {
           ),
         ),
       );
-      for (final entry in {'variations': '63'}.entries) {
+      for (final entry in {'variations': '63', 'upscale': '0'}.entries) {
         final pill = find.byKey(
           ValueKey('canvas-cost-nai-icon-${entry.key}.svg'),
         );
@@ -187,13 +188,19 @@ void main() {
         );
         expect(tester.getSize(pill).height, lessThanOrEqualTo(26));
       }
-      expect(find.byKey(const Key('canvas-upscale-infinity')), findsOneWidget);
+      expect(
+        find.byKey(const Key('canvas-upscale-local-cost')),
+        findsOneWidget,
+      );
       expect(find.byKey(const Key('canvas-upscale-settings')), findsOneWidget);
-      expect(find.byKey(const ValueKey('canvas-cost-nai-icon-upscale.svg')), findsNothing);
+      expect(
+        find.byKey(const ValueKey('canvas-cost-nai-icon-upscale.svg')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('top zone renders 7 icons + divider', (tester) async {
+    testWidgets('top zone renders 8 icons + divider', (tester) async {
       final img = _img(id: 'a');
       await tester.pumpWidget(
         _wrap(
@@ -205,19 +212,22 @@ void main() {
           ),
         ),
       );
-      expect(find.byType(SvgPicture), findsNWidgets(7));
-      // Unknown variation metadata stays unquoted; upscale uses infinity.
+      expect(find.byType(SvgPicture), findsNWidgets(8));
+      // Unknown variation metadata stays unquoted; local upscale costs zero.
       expect(
         find.byKey(const ValueKey('canvas-cost-nai-icon-variations.svg')),
         findsNothing,
       );
       expect(
         find.byKey(const ValueKey('canvas-cost-nai-icon-upscale.svg')),
-        findsNothing,
+        findsOneWidget,
       );
-      expect(find.byKey(const Key('canvas-upscale-infinity')), findsOneWidget);
+      expect(
+        find.byKey(const Key('canvas-upscale-local-cost')),
+        findsOneWidget,
+      );
       expect(find.byKey(const Key('canvas-upscale-settings')), findsOneWidget);
-      expect(find.text('∞'), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
     });
 
     testWidgets('bottomStart renders WxH + settings + seed', (tester) async {

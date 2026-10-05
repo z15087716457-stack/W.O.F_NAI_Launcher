@@ -176,8 +176,18 @@ void main() {
           );
           expect(find.text(l.img2img_startUpscale), findsNothing);
           expect(task.calls, 0);
-          final inset = find.byKey(const ValueKey('canvas-upscale-inset'));
+          final inset = find.byKey(
+            const ValueKey('canvas-cost-nai-icon-upscale.svg'),
+          );
           expect(inset, findsOneWidget);
+          expect(
+            find.descendant(of: inset, matching: find.text('0')),
+            findsOneWidget,
+          );
+          expect(
+            find.descendant(of: inset, matching: find.byType(SvgPicture)),
+            findsOneWidget,
+          );
           expect(tester.getSize(inset).height, lessThanOrEqualTo(26));
           final dropdown = tester.widget<DropdownButton<String>>(
             find.byType(DropdownButton<String>),
@@ -211,7 +221,7 @@ void main() {
             findsOneWidget,
           );
           expect(
-            find.byKey(const Key('canvas-upscale-infinity')),
+            find.byKey(const Key('canvas-upscale-local-cost')),
             findsNothing,
           );
           expect(cloudTask.calls, 0);
@@ -222,10 +232,13 @@ void main() {
           await tester.tap(find.text(l.localUpscale_local));
           await tester.pumpAndSettle();
           expect(
-            find.byKey(const Key('canvas-upscale-infinity')),
+            find.byKey(const Key('canvas-upscale-local-cost')),
             findsOneWidget,
           );
-          expect(cloudBadge, findsNothing);
+          expect(
+            find.descendant(of: cloudBadge, matching: find.text('0')),
+            findsOneWidget,
+          );
           await tester.tapAt(const Offset(4, 790));
           await tester.pumpAndSettle();
           expect(find.byKey(const Key('canvas-upscale-popover')), findsNothing);

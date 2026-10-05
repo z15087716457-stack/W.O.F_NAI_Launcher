@@ -39,13 +39,13 @@ class CanvasUpscaleButton extends ConsumerWidget {
             inputWidth: image.width,
             inputHeight: image.height,
           )
-        : null;
+        : 0;
     final running = local.running || cloud.running;
     final models = isCloud
         ? null
         : ref.watch(localUpscaleModelsProvider).valueOrNull;
     final supported = isCloud
-        ? cost! >= 0
+        ? cost >= 0
         : Platform.isWindows &&
               (models?.any(
                     (model) =>
@@ -102,7 +102,7 @@ class CanvasUpscaleButton extends ConsumerWidget {
                   const SizedBox(width: 4),
                   Ink(
                     key: ValueKey(
-                      isCloud && cost! >= 0
+                      cost >= 0
                           ? 'canvas-cost-nai-icon-upscale.svg'
                           : 'canvas-upscale-inset',
                     ),
@@ -119,19 +119,19 @@ class CanvasUpscaleButton extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          isCloud ? (cost! >= 0 ? '$cost' : '—') : '∞',
+                          cost >= 0 ? '$cost' : '—',
                           key: isCloud
                               ? null
-                              : const Key('canvas-upscale-infinity'),
+                              : const Key('canvas-upscale-local-cost'),
                           style: theme.textTheme.labelSmall?.copyWith(
-                            fontSize: isCloud ? 12 : 14,
+                            fontSize: 12,
                             height: 1.2,
                             fontWeight: FontWeight.w600,
                             fontFeatures: const [FontFeature.tabularFigures()],
                             color: color,
                           ),
                         ),
-                        if (isCloud && cost! >= 0) ...[
+                        if (cost >= 0) ...[
                           const SizedBox(width: 3),
                           SvgPicture.asset(
                             'assets/icons/nai-icon-anlas.svg',
