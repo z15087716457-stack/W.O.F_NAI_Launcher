@@ -39,6 +39,7 @@ Matcher _error(LocalUpscaleError code) =>
     isA<LocalUpscaleException>().having((e) => e.code, 'code', code);
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late Directory temporary;
   late LocalUpscaleModelManager manager;
   setUp(() async {
@@ -51,6 +52,14 @@ void main() {
   });
   tearDown(() async {
     await temporary.delete(recursive: true);
+  });
+
+  test('real Flutter bundle extracts the pinned offline engine and default model', () async {
+    final bundled = LocalUpscaleModelManager(rootDirectory: () async => Directory(p.join(temporary.path, 'bundle-runtime')));
+    final (engine, modelPath, model) = await bundled.resolve('anime');
+    expect(await File(engine).length(), 6161408);
+    expect(await File(p.join(modelPath, '${model.engineName}.bin')).length(), 8943500);
+    bundled.dispose();
   });
 
   test(
