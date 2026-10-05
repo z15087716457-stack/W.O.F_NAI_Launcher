@@ -1,0 +1,19 @@
+{
+  "seedvr": {
+    "asset": "assets/icons/seedvr_logo.png",
+    "project": "ByteDance-Seed/SeedVR",
+    "source_commit": "e4de8c24441a67e1b7df56abea10645059bb1185",
+    "source": "https://raw.githubusercontent.com/ByteDance-Seed/SeedVR/e4de8c24441a67e1b7df56abea10645059bb1185/assets/seedvr_logo.png",
+    "sha256": "9a08170e6ce79f87ad524d4ad5c083c8f1766f245d9dfea6b54fde5dca00f4a2",
+    "license": "Apache-2.0",
+    "license_asset": "assets/licenses/SeedVR-Logo-LICENSE.txt",
+    "usage": "The SeedVR2 component uses the official SeedVR family emblem. Flutter clips the emblem from the original artwork without changing the asset bytes."
+  },
+  "nvidia": {
+    "asset": "assets/icons/providers/nvidia.svg",
+    "source": "Existing Lobe Icons provider asset; see provider_logos.json",
+    "license": "MIT",
+    "license_asset": "assets/licenses/LobeIcons-LICENSE.txt",
+    "usage": "Decorative brand identity beside the RTX component title, painted NVIDIA green."
+  }
+}

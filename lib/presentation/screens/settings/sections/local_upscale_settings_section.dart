@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/upscale/local_upscale_models.dart';
 import '../../../providers/generation/local_upscale_provider.dart';
+import '../widgets/local_upscale_brand_logo.dart';
 
 String localUpscaleErrorText(BuildContext context, LocalUpscaleError error) {
   final l = context.l10n;
@@ -315,12 +316,7 @@ class _LocalUpscaleSettingsSectionState
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        seed
-                            ? Icons.auto_awesome_outlined
-                            : Icons.speed_outlined,
-                        size: 22,
-                      ),
+                      LocalUpscaleBrandLogo(method: model.method),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(

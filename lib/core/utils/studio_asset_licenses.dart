@@ -9,6 +9,7 @@ void registerStudioAssetLicenses() {
       'HarmonyOS Sans SC': 'HarmonyOS-Sans-LICENSE.txt',
       'Pretendard': 'Pretendard-OFL.txt',
       'Lobe Icons (provider brand assets)': 'LobeIcons-LICENSE.txt',
+      'SeedVR (ByteDance-Seed project logo)': 'SeedVR-Logo-LICENSE.txt',
     }.entries) {
       yield LicenseEntryWithLineBreaks([
         entry.key,
