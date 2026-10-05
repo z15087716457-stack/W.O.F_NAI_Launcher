@@ -1,0 +1,121 @@
+[
+  {
+    "name": "pressure",
+    "path": "assets/icons/editor_pressure.svg",
+    "url": "https://novelai.net/_next/static/media/penwriting.3c214126.svg",
+    "kind": "public SVG",
+    "sha256": "98c1882623843dcf2c5eccb94e97135dc6f5e536c04f63af6689686ae55a2e85"
+  },
+  {
+    "name": "download",
+    "path": "assets/icons/editor_download.svg",
+    "url": "https://novelai.net/_next/static/media/export.235cebdc.svg",
+    "kind": "public SVG",
+    "sha256": "72bea3caf6e78ecab9544dc9c533a80edb9ff71b442f649de2d53c16d656ebc8"
+  },
+  {
+    "name": "close",
+    "path": "assets/icons/editor_close.svg",
+    "url": "https://novelai.net/_next/static/media/cross.38d8f4dd.svg",
+    "kind": "public SVG",
+    "sha256": "313e06a71a1d8e5b01516e15ed2cee2ffc9120783bc0055d8a29c842af608fb4"
+  },
+  {
+    "name": "brush",
+    "path": "assets/icons/editor_brush.svg",
+    "url": "https://novelai.net/_next/static/media/pen.87137c5d.svg",
+    "kind": "public SVG",
+    "sha256": "924591d52a745307e66327119e5a4bf47c3b3f58b8738bb035de6be41440a165"
+  },
+  {
+    "name": "eraser",
+    "path": "assets/icons/editor_eraser.svg",
+    "url": "https://novelai.net/_next/static/media/eraser.0ec62cc8.svg",
+    "kind": "public SVG",
+    "sha256": "6e03e183c75c8f84845757d4d3f3f541a28df0d214714c17f7626bb0867c36a4"
+  },
+  {
+    "name": "fill",
+    "path": "assets/icons/editor_fill.svg",
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "kind": "rendered inline SVG",
+    "sha256": "8ad5605e779686b76228401ba99528ca79db46c515784dec91a168f9ae391b22"
+  },
+  {
+    "name": "select",
+    "path": "assets/icons/editor_select.svg",
+    "url": "https://novelai.net/_next/static/media/select.429034b7.svg",
+    "kind": "public SVG",
+    "sha256": "9eae0af24ff2b6b3e85184c30fb3bede64c50216fe9ede10b0e75ce4d284c613"
+  },
+  {
+    "name": "lasso",
+    "path": "assets/icons/editor_lasso.svg",
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "kind": "rendered inline SVG",
+    "sha256": "e2099acbec4e445da22751fa7ab125a768f32fb79e682d77c8280def03d4bc53"
+  },
+  {
+    "name": "picker",
+    "path": "assets/icons/editor_picker.svg",
+    "url": "https://novelai.net/_next/static/media/dropper.78b85b64.svg",
+    "kind": "public SVG",
+    "sha256": "5324fbe696587b5cd39e626b29ca67fa056ed7567bbb9bd20d7be19eda275f84"
+  },
+  {
+    "name": "blur",
+    "path": "assets/icons/editor_blur.svg",
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "kind": "rendered inline SVG",
+    "sha256": "3d9509fb7adccd5a3ec76f3e801ed98e94e2d20f2ccb3dba23867997296eeac7"
+  },
+  {
+    "name": "clone",
+    "path": "assets/icons/editor_clone.svg",
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "kind": "rendered inline SVG",
+    "sha256": "7be85861d494e1dc41945e829103f72691fb618677c3979bc272439d576ad3ea"
+  },
+  {
+    "name": "hsv",
+    "path": "assets/icons/editor_hsv.svg",
+    "url": "https://novelai.net/_next/static/chunks/5285-7b0d0ccd5ad58950.js",
+    "kind": "rendered inline SVG",
+    "sha256": "e16f6aa4904d6782bc3a82bc93ffddccb4bd2d1c2160db8576e1c75d6f3fe966"
+  },
+  {
+    "name": "clear",
+    "path": "assets/icons/editor_clear.svg",
+    "url": "https://novelai.net/_next/static/media/trash.72ef2ba9.svg",
+    "kind": "public SVG",
+    "sha256": "c63f790e132338ebc66c5652078a2878e99f4521ea6272402acc95c64c6eb4a2"
+  },
+  {
+    "name": "shift",
+    "path": "assets/icons/editor_shift.svg",
+    "url": "https://novelai.net/_next/static/media/resize.9b598e1b.svg",
+    "kind": "public SVG",
+    "sha256": "c83bb30cfb5fa0884ec62a0b69d3eb0a749061b4461ae6e6e0e3e7101d269432"
+  },
+  {
+    "name": "undo",
+    "path": "assets/icons/editor_undo.svg",
+    "url": "https://novelai.net/_next/static/media/undo.d181fecf.svg",
+    "kind": "public SVG",
+    "sha256": "c48e33325920163e1e16ab7b7f41826ea9d836731105d97fc93e5991d1508b17"
+  },
+  {
+    "name": "redo",
+    "path": "assets/icons/editor_redo.svg",
+    "url": "https://novelai.net/_next/static/media/redo.c8b50748.svg",
+    "kind": "public SVG",
+    "sha256": "ec689459b80aef10a9e2d2b116923c0a969927ba33e588d9d4cdfce5808ed039"
+  },
+  {
+    "name": "more",
+    "path": "assets/icons/editor_more.svg",
+    "url": "https://novelai.net/image",
+    "kind": "rendered overflow menu inline SVG",
+    "sha256": "48b75f53c878c1b5485b5eda8a21bf9a3b3c4378d1a4216da5ad8869aa41d546"
+  }
+]

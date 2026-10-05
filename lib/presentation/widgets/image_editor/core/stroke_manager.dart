@@ -8,20 +8,23 @@ class StrokeManager extends ChangeNotifier {
   List<Offset> get currentStrokePoints => _currentStrokePoints;
 
   /// 是否正在绘制
+  List<double> pressures = [];
   bool _isDrawing = false;
   bool get isDrawing => _isDrawing;
 
   /// 开始绘制
-  void startStroke(Offset point) {
+  void startStroke(Offset point, {double pressure = 1}) {
     _isDrawing = true;
     _currentStrokePoints = [point];
+    pressures = [pressure];
     notifyListeners();
   }
 
   /// 更新绘制
-  void updateStroke(Offset point) {
+  void updateStroke(Offset point, {double pressure = 1}) {
     if (_isDrawing) {
       _currentStrokePoints.add(point);
+      pressures.add(pressure);
       notifyListeners();
     }
   }
@@ -30,6 +33,7 @@ class StrokeManager extends ChangeNotifier {
   void endStroke() {
     _isDrawing = false;
     _currentStrokePoints = [];
+    pressures = [];
     notifyListeners();
   }
 
@@ -37,6 +41,7 @@ class StrokeManager extends ChangeNotifier {
   void cancelStroke() {
     _isDrawing = false;
     _currentStrokePoints = [];
+    pressures = [];
     notifyListeners();
   }
 
@@ -44,6 +49,7 @@ class StrokeManager extends ChangeNotifier {
   void reset() {
     _isDrawing = false;
     _currentStrokePoints = [];
+    pressures = [];
     notifyListeners();
   }
 

@@ -1,10 +1,13 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../core/editor_state.dart';
 import '../core/history_manager.dart';
+import '../core/edit_image_actions.dart';
+import 'pressure_stroke.dart';
 import 'tool_base.dart';
 
 /// Clone Stamp 工具 - 像素级仿制图章
@@ -27,10 +30,8 @@ class CloneStampTool extends EditorTool {
   ui.Image? _canvasSnapshot;
   ui.Image? get canvasSnapshot => _canvasSnapshot;
 
-  bool _isApplying = false;
-
   void setSize(double value) {
-    _size = value.clamp(1.0, 200.0);
+    _size = value.clamp(1.0, double.infinity);
   }
 
   void setOpacity(double value) {
@@ -51,6 +52,8 @@ class CloneStampTool extends EditorTool {
 
   @override
   bool get handlesAltKey => true;
+  @override
+  LogicalKeyboardKey get shortcutKey => LogicalKeyboardKey.keyJ;
 
   @override
   void onPointerDown(PointerDownEvent event, EditorState state) {
@@ -62,7 +65,7 @@ class CloneStampTool extends EditorTool {
     if (_sourcePoint == null || _canvasSnapshot == null) return;
 
     _sourceOffset ??= event.localPosition - _sourcePoint!;
-    state.startStroke(event.localPosition);
+    state.startStroke(event.localPosition, pressure: state.pressureFor(event));
   }
 
   void _setSourcePoint(Offset position, EditorState state) {
@@ -95,156 +98,97 @@ class CloneStampTool extends EditorTool {
     if (_sourcePoint == null || _sourceOffset == null) return;
 
     if (state.isDrawing) {
-      state.updateStroke(event.localPosition);
+      state.updateStroke(
+        event.localPosition,
+        pressure: state.pressureFor(event),
+      );
     }
   }
 
   @override
   void onPointerUp(PointerUpEvent event, EditorState state) {
     if (state.isAltPressed) return;
-    if (_isApplying) {
-      state.endStroke();
-      return;
-    }
 
     if (state.isDrawing && state.currentStrokePoints.isNotEmpty) {
       final points = List<Offset>.from(state.currentStrokePoints);
+      final pressures = List<double>.from(state.strokeManager.pressures);
       state.endStroke();
-      _applyClone(state, points);
+      _applyClone(state, points, pressures);
     } else {
       state.endStroke();
     }
   }
 
-  Future<void> _applyClone(EditorState state, List<Offset> points) async {
-    final activeLayer = state.layerManager.activeLayer;
-    if (activeLayer == null || activeLayer.locked) return;
-    if (_canvasSnapshot == null || _sourceOffset == null) return;
-    _isApplying = true;
-
-    try {
-      final canvasSize = state.canvasSize;
-      final w = canvasSize.width.toInt();
-      final h = canvasSize.height.toInt();
-
-      final layerImg = await _renderLayerToImage(activeLayer, canvasSize, w, h);
-
-      final result = _compositeCloneSync(
-        layerImg,
-        _canvasSnapshot!,
-        points,
-        _sourceOffset!,
-        w,
-        h,
-      );
-      layerImg.dispose();
-
-      final pngData = await result.toByteData(format: ui.ImageByteFormat.png);
-      if (pngData == null) {
-        result.dispose();
-        return;
-      }
-
-      state.historyManager.execute(
-        ReplaceLayerImageAction(
-          layerId: activeLayer.id,
-          newImageBytes: pngData.buffer.asUint8List(),
-          newImage: result,
-          actionDescription: 'Clone Stamp',
-        ),
-        state,
-      );
-    } finally {
-      _isApplying = false;
-    }
-  }
-
-  Future<ui.Image> _renderLayerToImage(
-    dynamic layer,
-    Size canvasSize,
-    int w,
-    int h,
-  ) async {
-    final rec = ui.PictureRecorder();
-    final c = Canvas(rec);
-    (layer as dynamic).render(c, canvasSize);
-    final pic = rec.endRecording();
-    final img = await pic.toImage(w, h);
-    pic.dispose();
-    return img;
-  }
-
-  /// 同步合成克隆结果
-  ui.Image _compositeCloneSync(
-    ui.Image layerImage,
-    ui.Image snapshot,
+  void _applyClone(
+    EditorState state,
     List<Offset> points,
-    Offset offset,
-    int w,
-    int h,
+    List<double> pressures,
   ) {
+    final layer = state.layerManager.activeLayer;
+    if (layer == null ||
+        layer.locked ||
+        _canvasSnapshot == null ||
+        _sourceOffset == null) {
+      return;
+    }
+    final size = state.canvasSize, original = renderEditLayer(layer, size);
     final rec = ui.PictureRecorder();
-    final c = Canvas(rec);
-
-    c.drawImage(layerImage, Offset.zero, Paint());
-
-    final clonePaint = Paint()..color = Color.fromRGBO(255, 255, 255, _opacity);
-
-    _drawClonePoints(c, snapshot, points, offset, clonePaint);
-
-    final pic = rec.endRecording();
-    final img = pic.toImageSync(w, h);
-    pic.dispose();
-    return img;
-  }
-
-  /// 在画布上绘制克隆点（含插值，共用于实时预览和最终应用）
-  void _drawClonePoints(
-    Canvas c,
-    ui.Image snapshot,
-    List<Offset> points,
-    Offset offset,
-    Paint paint,
-  ) {
-    void drawAt(Offset pt) {
-      c.save();
-      c.clipPath(
-        Path()
-          ..addOval(Rect.fromCenter(center: pt, width: _size, height: _size)),
-      );
-      c.drawImage(snapshot, offset, paint);
-      c.restore();
-    }
-
-    for (final pt in points) {
-      drawAt(pt);
-    }
-
-    for (int i = 0; i < points.length - 1; i++) {
-      final a = points[i];
-      final b = points[i + 1];
-      final dist = (b - a).distance;
-      if (dist < 1) continue;
-      final steps = (dist / (_size * 0.25)).ceil();
-      for (int s = 1; s < steps; s++) {
-        drawAt(Offset.lerp(a, b, s / steps)!);
-      }
-    }
-  }
-
-  /// 绘制实时克隆预览（由 LayerPainter 调用）
-  void drawRealtimePreview(Canvas canvas, List<Offset> points) {
-    if (_canvasSnapshot == null || _sourceOffset == null) return;
-
-    final clonePaint = Paint()..color = Color.fromRGBO(255, 255, 255, _opacity);
-
-    _drawClonePoints(
-      canvas,
-      _canvasSnapshot!,
-      points,
-      _sourceOffset!,
-      clonePaint,
+    final c = Canvas(rec)..drawImage(original, Offset.zero, Paint());
+    c.saveLayer(Offset.zero & size, Paint());
+    c.drawImage(_canvasSnapshot!, _sourceOffset!, Paint());
+    c.saveLayer(Offset.zero & size, Paint()..blendMode = BlendMode.dstIn);
+    drawPressureStroke(
+      c,
+      StrokeData(
+        points: points,
+        size: _size,
+        color: Colors.white,
+        opacity: 1,
+        hardness: 1,
+        isEraser: false,
+        pressures: pressures,
+      ),
     );
+    c.restore();
+    c.restore();
+    final pic = rec.endRecording(),
+        result = pic.toImageSync(size.width.round(), size.height.round());
+    pic.dispose();
+    original.dispose();
+    state.historyManager.execute(
+      ReplaceEditRasterAction(
+        layerId: layer.id,
+        image: result,
+        description: 'Clone Stamp',
+      ),
+      state,
+    );
+  }
+
+  /// Paint sampled pixels with the same pressure mask used on release.
+  void drawRealtimePreview(
+    Canvas canvas,
+    List<Offset> points, {
+    List<double> pressures = const [],
+  }) {
+    if (_canvasSnapshot == null || _sourceOffset == null) return;
+    canvas.saveLayer(null, Paint());
+    canvas.drawImage(_canvasSnapshot!, _sourceOffset!, Paint());
+    canvas.saveLayer(null, Paint()..blendMode = BlendMode.dstIn);
+    drawPressureStroke(
+      canvas,
+      StrokeData(
+        points: points,
+        size: _size,
+        color: Colors.white,
+        opacity: _opacity,
+        hardness: 1,
+        isEraser: false,
+        pressures: pressures,
+      ),
+    );
+    canvas.restore();
+    canvas.restore();
   }
 
   @override

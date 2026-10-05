@@ -38,8 +38,8 @@ void main() {
       expect(
         edit.tools.map((t) => t.id),
         containsAll([
-          'magic_wand',
-          'ellipse_selection',
+          'rect_selection',
+          'clone_stamp',
           'lasso_selection',
           'color_picker',
         ]),

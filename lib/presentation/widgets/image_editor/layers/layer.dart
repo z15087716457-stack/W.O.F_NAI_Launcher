@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import '../tools/square_stroke.dart';
+import '../tools/pressure_stroke.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/utils/app_logger.dart';
@@ -629,6 +630,10 @@ class Layer {
   /// 绘制单个笔画
   void _drawStroke(Canvas canvas, StrokeData stroke) {
     if (stroke.points.isEmpty) return;
+    if (stroke.pressures.isNotEmpty) {
+      drawPressureStroke(canvas, stroke);
+      return;
+    }
 
     final paint = Paint()
       ..color = stroke.isEraser

@@ -92,7 +92,7 @@ const List<BrushPreset> defaultBrushPresets = [
 /// 画笔工具
 class BrushTool extends EditorTool {
   /// 画笔设置
-  BrushSettings _settings = const BrushSettings();
+  BrushSettings _settings = const BrushSettings(hardness: 1);
   BrushSettings get settings => _settings;
 
   /// 当前选中的预设索引（-1 表示自定义/无选中）
@@ -132,7 +132,7 @@ class BrushTool extends EditorTool {
 
   /// 设置画笔大小
   void setSize(double size) {
-    _settings = _settings.copyWith(size: size.clamp(1.0, 500.0));
+    _settings = _settings.copyWith(size: size.clamp(1.0, double.infinity));
   }
 
   /// 设置不透明度
@@ -157,7 +157,7 @@ class BrushTool extends EditorTool {
     }
 
     // 坐标已由 EditorCanvas 统一转换为画布坐标
-    state.startStroke(event.localPosition);
+    state.startStroke(event.localPosition, pressure: state.pressureFor(event));
   }
 
   @override
@@ -167,7 +167,10 @@ class BrushTool extends EditorTool {
 
     if (state.isDrawing) {
       // 坐标已由 EditorCanvas 统一转换为画布坐标
-      state.updateStroke(event.localPosition);
+      state.updateStroke(
+        event.localPosition,
+        pressure: state.pressureFor(event),
+      );
     }
   }
 
@@ -195,9 +198,14 @@ class BrushTool extends EditorTool {
       // 创建笔画数据
       final stroke = StrokeData(
         points: List.from(state.currentStrokePoints),
+        pressures: state.inpaint
+            ? const []
+            : List.from(state.strokeManager.pressures),
         size: _settings.size,
         color: state.inpaint ? Colors.white : state.foregroundColor,
-        opacity: _settings.opacity,
+        opacity: state.inpaint
+            ? _settings.opacity
+            : _settings.opacity * state.foregroundColor.a,
         hardness: _settings.hardness,
         isEraser: false,
         square: _settings.square,

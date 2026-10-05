@@ -7,8 +7,6 @@ import '../tools/clone_stamp_tool.dart';
 import '../tools/color_picker_tool.dart';
 import '../tools/eraser_tool.dart';
 import '../tools/fill_tool.dart';
-import '../tools/magic_wand_tool.dart';
-import '../tools/selection/ellipse_selection_tool.dart';
 import '../tools/selection/lasso_selection_tool.dart';
 import '../tools/selection/rect_selection_tool.dart';
 import '../tools/tool_base.dart';
@@ -99,17 +97,8 @@ class ToolManager extends ChangeNotifier {
     if (inpaint) return;
     if (tool is BrushTool) {
       settingsManager.setSetting(tool.id, 'settings', tool.settings.toJson());
-      settingsManager.setSetting(
-        tool.id,
-        'presetIndex',
-        tool.selectedPresetIndex,
-      );
     } else if (tool is EraserTool) {
       settingsManager.setSetting(tool.id, 'size', tool.size);
-      settingsManager.setSetting(tool.id, 'hardness', tool.hardness);
-    } else if (tool is MagicWandTool) {
-      settingsManager.setSetting(tool.id, 'tolerance', tool.tolerance);
-      settingsManager.setSetting(tool.id, 'invert', tool.invert);
     }
     // 异步保存到本地存储
     settingsManager.save();
@@ -124,30 +113,12 @@ class ToolManager extends ChangeNotifier {
     if (tool is BrushTool) {
       final brushSettings = settings['settings'];
       if (brushSettings is Map<String, dynamic>) {
-        tool.updateSettings(BrushSettings.fromJson(brushSettings));
-      }
-      final presetIndex = settings['presetIndex'];
-      if (presetIndex is int) {
-        // 直接设置预设索引，不触发额外操作
-        tool.setSelectedPresetIndex(presetIndex);
+        tool.setSize(BrushSettings.fromJson(brushSettings).size);
       }
     } else if (tool is EraserTool) {
       final size = settings['size'];
       if (size is num) {
         tool.setSize(size.toDouble());
-      }
-      final hardness = settings['hardness'];
-      if (hardness is num) {
-        tool.setHardness(hardness.toDouble());
-      }
-    } else if (tool is MagicWandTool) {
-      final tolerance = settings['tolerance'];
-      if (tolerance is num) {
-        tool.setTolerance(tolerance.round());
-      }
-      final invert = settings['invert'];
-      if (invert is bool) {
-        tool.setInvert(invert);
       }
     }
   }
@@ -254,13 +225,11 @@ class ToolManager extends ChangeNotifier {
       BrushTool(),
       EraserTool(),
       FillTool(),
-      MagicWandTool(),
-      BlurTool(),
-      CloneStampTool(),
       RectSelectionTool(),
-      EllipseSelectionTool(),
       LassoSelectionTool(),
       ColorPickerTool(),
+      BlurTool(),
+      CloneStampTool(),
     ];
   }
 

@@ -74,62 +74,71 @@ void main() {
     expect(mask.getPixel(672, 320).r, 255);
   });
 
-  testWidgets('Edit mode exports the selected target in one final image', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1200, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    ImageEditorResult? result;
+  testWidgets(
+    'Edit mode preserves working dimensions and never applies hidden compression',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1200, 800));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      ImageEditorResult? result;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('zh'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async {
-              result = await Navigator.of(context).push<ImageEditorResult>(
-                MaterialPageRoute(
-                  builder: (_) => ImageEditorScreen(
-                    initialImage: _buildSolidPng(1408, 704),
-                    mode: ImageEditorMode.edit,
-                    title: 'Compressed edit export test',
-                    initialShowLayerPanel: false,
-                    debugDisableDropRegion: true,
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await Navigator.of(context).push<ImageEditorResult>(
+                  MaterialPageRoute(
+                    builder: (_) => ImageEditorScreen(
+                      initialImage: _buildSolidPng(1408, 704),
+                      mode: ImageEditorMode.edit,
+                      title: 'Compressed edit export test',
+                      initialShowLayerPanel: false,
+                      debugDisableDropRegion: true,
+                    ),
                   ),
-                ),
-              );
-            },
-            child: const Text('Open editor'),
+                );
+              },
+              child: const Text('Open editor'),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.tap(find.text('Open editor'));
-    await _pumpUntil(tester, () {
-      final editor = find.byType(ImageEditorScreen);
-      if (editor.evaluate().isEmpty) return false;
-      final state = tester.state(editor) as dynamic;
-      return state.debugCanvasSize == const Size(1408, 704) &&
-          state.debugCompressionTargetCount == 2;
-    });
+      );
+      await tester.tap(find.text('Open editor'));
+      await _pumpUntil(tester, () {
+        final editor = find.byType(ImageEditorScreen);
+        if (editor.evaluate().isEmpty) return false;
+        final state = tester.state(editor) as dynamic;
+        return state.debugCanvasSize == const Size(1408, 704);
+      });
 
-    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
-    state.debugSetCompressionTargetIndex(0);
-    await tester.pump();
-    await tester.runAsync(() async {
-      await state.debugExportAndClose();
-    });
-    await _pumpForAsyncEditorWork(tester);
+      final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
+      state.debugSetCompressionTargetIndex(0);
+      final edit = state.debugEditorState;
+      edit.currentTool.onPointerDown(
+        const PointerDownEvent(position: Offset(400, 300)),
+        edit,
+      );
+      edit.currentTool.onPointerUp(
+        const PointerUpEvent(position: Offset(400, 300)),
+        edit,
+      );
+      await tester.pump();
+      await tester.runAsync(() async {
+        await state.debugExportAndClose();
+      });
+      await _pumpForAsyncEditorWork(tester);
 
-    expect(result, isNotNull);
-    expect(result!.hasImageChanges, isTrue);
-    expect(result!.compressionApplied, isTrue);
-    expect((result!.outputWidth, result!.outputHeight), (1344, 640));
-    final decoded = img.decodeImage(result!.modifiedImage!);
-    expect((decoded!.width, decoded.height), (1344, 640));
-  });
+      expect(result, isNotNull);
+      expect(result!.hasImageChanges, isTrue);
+      expect(result!.compressionApplied, isFalse);
+      expect((result!.outputWidth, result!.outputHeight), (1408, 704));
+      final decoded = img.decodeImage(result!.modifiedImage!);
+      expect((decoded!.width, decoded.height), (1408, 704));
+    },
+  );
 }
 
 Future<void> _pumpUntil(WidgetTester tester, bool Function() condition) async {

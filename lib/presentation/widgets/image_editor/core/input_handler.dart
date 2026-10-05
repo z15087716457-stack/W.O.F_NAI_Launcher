@@ -121,7 +121,6 @@ class InputHandler {
   /// 处理键盘事件
   KeyEventResult handleKeyEvent(FocusNode node, KeyEvent event) {
     final isDown = event is KeyDownEvent;
-    final isUp = event is KeyUpEvent;
 
     // 同步修饰键状态
     keyboard.syncFromHardware();
@@ -153,12 +152,7 @@ class InputHandler {
       if (currentTool != null && currentTool.handlesAltKey) {
         return KeyEventResult.handled;
       }
-      if (isDown) {
-        state.enterTemporaryColorPicker();
-      } else if (isUp && !keyboard.isAltPressed) {
-        state.exitTemporaryColorPicker();
-      }
-      return KeyEventResult.handled;
+      return KeyEventResult.ignored;
     }
 
     // Ctrl 快捷键
@@ -175,7 +169,12 @@ class InputHandler {
           state.redo();
           return KeyEventResult.handled;
         case LogicalKeyboardKey.digit0:
-          state.canvasController.resetTo100(canvasSize: state.canvasSize);
+          state.canvasController.fitToViewport(
+            state.canvasSize,
+            insets: state.inpaint
+                ? null
+                : const EdgeInsets.fromLTRB(10, 86, 10, 70),
+          );
           return KeyEventResult.handled;
         case LogicalKeyboardKey.equal:
         case LogicalKeyboardKey.add:
@@ -187,6 +186,57 @@ class InputHandler {
       }
     }
 
+    if (!state.inpaint) {
+      if (isDown &&
+          keyboard.isAltPressed &&
+          event.logicalKey == LogicalKeyboardKey.keyL) {
+        state.editSelection.copyToLayer(cut: keyboard.isShiftPressed);
+        return KeyEventResult.handled;
+      }
+      if (isDown && !keyboard.isCtrlPressed && !keyboard.isAltPressed) {
+        if (event.logicalKey == LogicalKeyboardKey.bracketLeft) {
+          final n = state.brushSize;
+          state.setBrushSize(
+            n <= 5
+                ? 1
+                : n <= 20
+                ? n - 5
+                : n <= 50
+                ? n - 10
+                : n <= 100
+                ? n - 25
+                : n - 50,
+          );
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.bracketRight) {
+          final n = state.brushSize;
+          state.setBrushSize(
+            n < 5
+                ? 5
+                : n < 20
+                ? n + 5
+                : n < 50
+                ? n + 10
+                : n < 100
+                ? n + 25
+                : n + 50,
+          );
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.escape) {
+          state.cancelStroke();
+          state.editSelection.cancel();
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.delete ||
+            event.logicalKey == LogicalKeyboardKey.backspace) {
+          state.editSelection.delete();
+          return KeyEventResult.handled;
+        }
+      }
+      return KeyEventResult.ignored;
+    }
     // Krita 风格视图快捷键（无修饰键）
     if (isDown && !keyboard.isCtrlPressed) {
       switch (event.logicalKey) {
@@ -231,12 +281,20 @@ class InputHandler {
           return KeyEventResult.handled;
         case LogicalKeyboardKey.escape:
           state.cancelStroke();
-          if (state.inpaint) state.setInpaintFocusRegion(null);
+          if (state.inpaint) {
+            state.setInpaintFocusRegion(null);
+          } else {
+            state.editSelection.cancel();
+          }
           return KeyEventResult.handled;
         case LogicalKeyboardKey.delete:
         case LogicalKeyboardKey.backspace:
           if (state.selectionPath != null) {
-            state.clearSelection();
+            if (state.inpaint) {
+              state.clearSelection();
+            } else {
+              state.editSelection.delete();
+            }
           }
           return KeyEventResult.handled;
       }
@@ -251,10 +309,17 @@ class InputHandler {
     if (!focusNode.hasFocus) return false;
     if (HardwareKeyboard.instance.isControlPressed) return false;
 
+    if (HardwareKeyboard.instance.isAltPressed) return false;
     // 处理工具快捷键
     for (final tool in state.tools) {
       if (tool.shortcutKey == event.logicalKey) {
-        state.setTool(tool);
+        if (!state.inpaint &&
+            tool.id == 'color_picker' &&
+            state.currentTool == tool) {
+          state.switchToPreviousTool();
+        } else {
+          state.setTool(tool);
+        }
         return true;
       }
     }
@@ -310,7 +375,8 @@ class InputHandler {
     }
 
     // Shift + 左键 - 笔刷大小调整
-    if (HardwareKeyboard.instance.isShiftPressed &&
+    if (state.inpaint &&
+        HardwareKeyboard.instance.isShiftPressed &&
         event.buttons == kPrimaryButton) {
       final tool = state.currentTool;
       if (tool != null && (tool.id == 'brush' || tool.id == 'eraser')) {
@@ -322,6 +388,11 @@ class InputHandler {
       }
     }
 
+    if (!state.inpaint &&
+        keyboard.isCtrlPressed &&
+        gesture.isPrimaryButtonDown) {
+      state.setToolById('color_picker');
+    }
     // 直接调用工具的 onPointerDown（使用原始指针事件，避免 GestureDetector 延迟）
     if (gesture.isPrimaryButtonDown && !keyboard.isSpacePressed) {
       final tool = state.currentTool;
@@ -330,7 +401,16 @@ class InputHandler {
           event.localPosition,
           canvasSize: state.canvasSize,
         );
-        tool.onPointerDown(PointerDownEvent(position: canvasPosition), state);
+        tool.onPointerDown(
+          PointerDownEvent(
+            position: canvasPosition,
+            kind: event.kind,
+            pressure: event.pressure,
+            pressureMin: event.pressureMin,
+            pressureMax: event.pressureMax,
+          ),
+          state,
+        );
       }
     }
   }
@@ -408,7 +488,16 @@ class InputHandler {
           event.localPosition,
           canvasSize: state.canvasSize,
         );
-        tool.onPointerMove(PointerMoveEvent(position: canvasPosition), state);
+        tool.onPointerMove(
+          PointerMoveEvent(
+            position: canvasPosition,
+            kind: event.kind,
+            pressure: event.pressure,
+            pressureMin: event.pressureMin,
+            pressureMax: event.pressureMax,
+          ),
+          state,
+        );
       }
     }
   }
@@ -431,7 +520,7 @@ class InputHandler {
     keyboard.syncFromHardware();
 
     // Shift + 点击进入笔刷大小调整模式
-    if (HardwareKeyboard.instance.isShiftPressed) {
+    if (state.inpaint && HardwareKeyboard.instance.isShiftPressed) {
       final tool = state.currentTool;
       if (tool != null && (tool.id == 'brush' || tool.id == 'eraser')) {
         gesture.isBrushSizeMode = true;

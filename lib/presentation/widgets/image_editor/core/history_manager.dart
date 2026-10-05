@@ -141,6 +141,7 @@ class ClearLayerAction extends EditorAction {
   List<StrokeData>? _previousStrokes;
   Image? _previousBaseImage;
   Uint8List? _previousBaseImageBytes;
+  Offset _previousBaseImageOffset = Offset.zero;
 
   ClearLayerAction({required this.layerId});
 
@@ -153,6 +154,7 @@ class ClearLayerAction extends EditorAction {
 
     _previousBaseImage?.dispose();
     _previousBaseImage = layer.baseImage?.clone();
+    _previousBaseImageOffset = layer.baseImageOffset;
     _previousBaseImageBytes = layer.baseImageBytes != null
         ? Uint8List.fromList(layer.baseImageBytes!)
         : null;
@@ -175,6 +177,8 @@ class ClearLayerAction extends EditorAction {
       );
     }
 
+    layer.setBaseImageOffset(_previousBaseImageOffset);
+    state.layerManager.notifyRasterChange();
     if (_previousStrokes != null) {
       for (final stroke in _previousStrokes!) {
         state.layerManager.addStrokeToLayer(layerId, stroke);
@@ -464,6 +468,7 @@ class StrokeData {
   final double hardness;
   final bool isEraser;
   final bool square;
+  final List<double> pressures;
 
   StrokeData({
     required this.points,
@@ -473,6 +478,7 @@ class StrokeData {
     required this.hardness,
     this.isEraser = false,
     this.square = false,
+    this.pressures = const [],
   });
 
   StrokeData copyWith({
@@ -483,6 +489,7 @@ class StrokeData {
     double? hardness,
     bool? isEraser,
     bool? square,
+    List<double>? pressures,
   }) {
     return StrokeData(
       points: points ?? this.points,
@@ -492,6 +499,7 @@ class StrokeData {
       hardness: hardness ?? this.hardness,
       isEraser: isEraser ?? this.isEraser,
       square: square ?? this.square,
+      pressures: pressures ?? this.pressures,
     );
   }
 }
@@ -567,14 +575,15 @@ class ClearInpaintMasksAction extends EditorAction {
 }
 
 class AddInpaintMaskLayerAction extends EditorAction {
-  AddInpaintMaskLayerAction({required this.name});
+  AddInpaintMaskLayerAction({required this.name, this.inpaintMask = true});
+  final bool inpaintMask;
   final String name;
   LayerData? _data;
   @override
   void execute(EditorState state) {
     if (_data == null) {
       final layer = state.layerManager.addLayer(name: name);
-      layer.inpaintMask = true;
+      layer.inpaintMask = inpaintMask;
       _data = layer.toData();
     } else {
       state.layerManager.insertLayerFromData(
@@ -606,7 +615,11 @@ class DeleteInpaintLayerAction extends EditorAction {
   @override
   void execute(EditorState state) {
     final layer = state.layerManager.getLayerById(layerId);
-    if (layer == null || layerId == state.inpaintSourceLayerId) return;
+    if (layer == null ||
+        state.layerManager.layerCount < 2 ||
+        (state.inpaint && layerId == state.inpaintSourceLayerId)) {
+      return;
+    }
     _snapshot?.dispose();
     _image?.dispose();
     _snapshot = layer.clone();

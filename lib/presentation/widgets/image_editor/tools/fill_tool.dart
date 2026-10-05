@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart' show compute;
+import 'dart:async';
+import 'package:flutter/foundation.dart' show compute, listEquals;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,15 +9,16 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/hard_edge_mask_exporter.dart';
 import '../../../../core/utils/inpaint_mask_utils.dart';
 import '../core/editor_state.dart';
+import '../core/edit_image_actions.dart';
 import '../core/history_manager.dart';
 import 'tool_base.dart';
 
 class FillTool extends EditorTool {
-  int _tolerance = 32;
+  int _tolerance = 15;
   int get tolerance => _tolerance;
 
   void setTolerance(int value) {
-    _tolerance = value.clamp(0, 255);
+    _tolerance = value.clamp(0, 100);
   }
 
   @override
@@ -50,99 +52,73 @@ class FillTool extends EditorTool {
       await _fillMask(state, tapPosition);
       return;
     }
-    final canvasSize = state.canvasSize;
-    final width = canvasSize.width.toInt();
-    final height = canvasSize.height.toInt();
-    final startX = tapPosition.dx.round().clamp(0, width - 1);
-    final startY = tapPosition.dy.round().clamp(0, height - 1);
-    final fillColor = state.foregroundColor;
-
-    final activeLayer = state.layerManager.activeLayer;
-    if (activeLayer == null || activeLayer.locked) return;
-
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    state.layerManager.renderAll(canvas, canvasSize);
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(width, height);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    image.dispose();
-
-    if (byteData == null) return;
-    final pixels = byteData.buffer.asUint8List();
-
-    final targetIdx = (startY * width + startX) * 4;
-    if (targetIdx + 3 >= pixels.length) return;
-
-    final targetR = pixels[targetIdx];
-    final targetG = pixels[targetIdx + 1];
-    final targetB = pixels[targetIdx + 2];
-    final targetA = pixels[targetIdx + 3];
-
-    final fillR = (fillColor.r * 255.0).round().clamp(0, 255);
-    final fillG = (fillColor.g * 255.0).round().clamp(0, 255);
-    final fillB = (fillColor.b * 255.0).round().clamp(0, 255);
-    final fillA = (fillColor.a * 255.0).round().clamp(0, 255);
-
-    if (targetR == fillR &&
-        targetG == fillG &&
-        targetB == fillB &&
-        targetA == fillA) {
+    final canvasSize = state.canvasSize, layer = state.layerManager.activeLayer;
+    if (_fillingNormal ||
+        layer == null ||
+        layer.locked ||
+        !(Offset.zero & canvasSize).contains(tapPosition)) {
       return;
     }
-
-    final visited = Uint8List(width * height);
-    final stack = <int>[];
-    stack.add(startY * width + startX);
-    visited[startY * width + startX] = 1;
-
-    final fillPoints = <Offset>[];
-
-    while (stack.isNotEmpty) {
-      final idx = stack.removeLast();
-      final px = idx % width;
-      final py = idx ~/ width;
-      fillPoints.add(Offset(px.toDouble(), py.toDouble()));
-
-      for (final (dx, dy) in [(0, -1), (0, 1), (-1, 0), (1, 0)]) {
-        final nx = px + dx;
-        final ny = py + dy;
-        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
-        final nIdx = ny * width + nx;
-        if (visited[nIdx] == 1) continue;
-        visited[nIdx] = 1;
-
-        final pi = nIdx * 4;
-        final dr = (pixels[pi] - targetR).abs();
-        final dg = (pixels[pi + 1] - targetG).abs();
-        final db = (pixels[pi + 2] - targetB).abs();
-        final da = (pixels[pi + 3] - targetA).abs();
-
-        if (dr <= _tolerance &&
-            dg <= _tolerance &&
-            db <= _tolerance &&
-            da <= _tolerance) {
-          stack.add(nIdx);
-        }
+    _fillingNormal = true;
+    final fillColor = state.foregroundColor.toARGB32();
+    final beforeImage = layer.baseImage,
+        beforeStrokes = layer.strokes,
+        history = (
+          state.historyManager.undoStackSize,
+          state.historyManager.redoStackSize,
+        );
+    final raster = renderEditLayer(layer, canvasSize);
+    try {
+      final data = await raster.toByteData(
+        format: ui.ImageByteFormat.rawStraightRgba,
+      );
+      if (data == null || state.isDisposed) return;
+      final bytes = await compute(_fillEditPixels, {
+        'bytes': data.buffer.asUint8List(),
+        'width': raster.width,
+        'height': raster.height,
+        'x': tapPosition.dx.floor(),
+        'y': tapPosition.dy.floor(),
+        'tolerance': _tolerance,
+        'color': fillColor,
+      });
+      final completer = Completer<ui.Image>();
+      ui.decodeImageFromPixels(
+        bytes,
+        raster.width,
+        raster.height,
+        ui.PixelFormat.rgba8888,
+        completer.complete,
+      );
+      final result = await completer.future;
+      if (state.isDisposed ||
+          state.canvasSize != canvasSize ||
+          state.layerManager.activeLayerId != layer.id ||
+          layer.baseImage != beforeImage ||
+          !listEquals(layer.strokes, beforeStrokes) ||
+          history !=
+              (
+                state.historyManager.undoStackSize,
+                state.historyManager.redoStackSize,
+              )) {
+        result.dispose();
+        return;
       }
+      state.historyManager.execute(
+        ReplaceEditRasterAction(
+          layerId: layer.id,
+          image: result,
+          description: 'Fill',
+        ),
+        state,
+      );
+    } finally {
+      raster.dispose();
+      _fillingNormal = false;
     }
-
-    if (fillPoints.isEmpty) return;
-
-    final stroke = StrokeData(
-      points: fillPoints,
-      size: 1,
-      color: fillColor,
-      opacity: fillColor.a,
-      hardness: 1.0,
-      isEraser: false,
-    );
-
-    state.historyManager.execute(
-      AddStrokeAction(layerId: activeLayer.id, stroke: stroke),
-      state,
-    );
   }
+
+  bool _fillingNormal = false;
 
   bool _fillingMask = false;
   Future<void> _fillMask(EditorState state, Offset point) async {
@@ -304,4 +280,48 @@ Uint8List _floodFillMask((Uint8List, int, int, int, int) input) {
     }
   }
   return mask;
+}
+
+Uint8List _fillEditPixels(Map<String, dynamic> job) {
+  final bytes = Uint8List.fromList(job['bytes'] as Uint8List),
+      w = job['width'] as int,
+      h = job['height'] as int,
+      x = job['x'] as int,
+      y = job['y'] as int,
+      t = job['tolerance'] as int,
+      c = job['color'] as int;
+  final start = y * w + x,
+      rgba = List.generate(4, (i) => bytes[start * 4 + i]),
+      target = [(c >> 16) & 255, (c >> 8) & 255, c & 255, (c >> 24) & 255];
+  final visited = Uint8List(w * h), stack = <int>[start];
+  visited[start] = 1;
+  bool matches(int i) {
+    var d = 0;
+    for (var n = 0; n < 4; n++) {
+      final diff = bytes[i * 4 + n] - rgba[n];
+      d += diff * diff;
+    }
+    return d <= t * t;
+  }
+
+  while (stack.isNotEmpty) {
+    final p = stack.removeLast();
+    if (!matches(p)) continue;
+    for (var n = 0; n < 4; n++) {
+      bytes[p * 4 + n] = target[n];
+    }
+    final px = p % w, py = p ~/ w;
+    for (final next in [
+      if (px > 0) p - 1,
+      if (px < w - 1) p + 1,
+      if (py > 0) p - w,
+      if (py < h - 1) p + w,
+    ]) {
+      if (visited[next] == 0) {
+        visited[next] = 1;
+        stack.add(next);
+      }
+    }
+  }
+  return bytes;
 }

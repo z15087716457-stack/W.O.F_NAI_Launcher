@@ -29,6 +29,13 @@ class StrokePreviewPainter extends CustomPainter {
       return;
     }
 
+    if (!state.inpaint &&
+        (state.currentTool is BrushTool ||
+            state.currentTool is EraserTool ||
+            state.currentTool is BlurTool ||
+            state.currentTool is CloneStampTool)) {
+      return;
+    }
     final canvasSize = state.canvasSize;
     final controller = state.canvasController;
 

@@ -3,38 +3,31 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../../../core/utils/app_logger.dart';
-import '../../../core/utils/contiguous_region_selector.dart';
 import '../../../core/utils/editor_compression_utils.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../../core/utils/inpaint_focus_region.dart';
 import '../../../core/utils/inpaint_outpaint_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
-import '../../../data/services/efficient_vit_sam_service.dart';
 import '../../utils/dropped_file_reader.dart';
 import '../../utils/internal_drag_protocol.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../widgets/common/app_toast.dart';
 import 'core/editor_state.dart';
-import 'effects/editor_effects.dart';
+import 'core/edit_image_actions.dart';
+import 'widgets/panels/edit_image_controls.dart';
+import 'widgets/panels/edit_hsv_panel.dart';
+import 'widgets/panels/edit_resize_dialog.dart';
 import 'core/history_manager.dart';
 import 'layers/layer.dart';
-import 'tools/tool_base.dart';
 import 'canvas/editor_canvas.dart';
-import 'widgets/toolbar/editor_overlay_toolbar.dart';
-import 'widgets/toolbar/mobile_toolbar.dart';
-import 'widgets/panels/layer_panel.dart';
 import 'widgets/panels/layer_thumbnail_tray.dart';
-import 'widgets/panels/editor_quick_settings.dart';
-import 'widgets/panels/color_panel.dart';
-import 'widgets/panels/canvas_size_dialog.dart';
 import 'widgets/panels/shift_edges_dialog.dart';
 import 'widgets/panels/inpaint_controls.dart';
 import 'widgets/outpaint_edge_drag_overlay.dart';
@@ -42,12 +35,9 @@ import '../model3d_editor/model3d_editor_screen.dart';
 import 'layers/model3d_layer_data.dart';
 import 'canvas/layer_painter.dart';
 import 'export/image_exporter_new.dart';
-import '../../widgets/common/themed_divider.dart';
 
 part 'image_editor_screen_compression.dart';
-part 'image_editor_screen_effects.dart';
 part 'image_editor_screen_layout.dart';
-part 'image_editor_screen_magic_wand.dart';
 part 'image_editor_screen_types.dart';
 
 /// 图像编辑器主界面
@@ -84,8 +74,6 @@ class ImageEditorScreen extends StatefulWidget {
   final bool debugDisableDropRegion;
 
   @visibleForTesting
-  final EfficientVitSamSelector? debugEfficientVitSamSelector;
-
   const ImageEditorScreen({
     super.key,
     this.initialImage,
@@ -99,7 +87,6 @@ class ImageEditorScreen extends StatefulWidget {
     this.initialShowLayerPanel = true,
     this.debugFailOutpaintSourceReplacement = false,
     this.debugDisableDropRegion = false,
-    this.debugEfficientVitSamSelector,
   });
 
   /// 显示编辑器
@@ -143,7 +130,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   bool _isInitialized = false;
   bool _didStartInitialization = false;
   bool _showLayerPanel = true;
-  bool _showLayerFlyout = false;
+  bool _showHsv = false;
   bool _isOutpaintCommitPending = false;
   String? _sourceLayerId;
   Uint8List? _outpaintSourceImage;
@@ -159,38 +146,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   // ignore: prefer_final_fields
   bool _hasOutpaintChanges = false;
   bool _isImportingDroppedImage = false;
-  bool _isMagicWandProcessing = false;
-  EfficientVitSamProgress? _magicWandProgress;
-  bool _hasTransparentCutout = false;
-  late final EfficientVitSamService _efficientVitSamService;
 
   bool get _isInpaintMode => widget.mode == ImageEditorMode.inpaint;
   bool get _canExportAndClose => !_isOutpaintCommitPending;
-
-  void _setMagicWandProcessing(bool value) {
-    if (!mounted) {
-      _isMagicWandProcessing = value;
-      if (!value) {
-        _magicWandProgress = null;
-      }
-      return;
-    }
-    setState(() {
-      _isMagicWandProcessing = value;
-      if (!value) {
-        _magicWandProgress = null;
-      }
-    });
-  }
-
-  void _setMagicWandProgress(EfficientVitSamProgress progress) {
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _magicWandProgress = progress;
-    });
-  }
 
   OutpaintVirtualFrame get _effectiveOutpaintFrame {
     return _virtualOutpaintFrame ??
@@ -263,24 +221,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   @visibleForTesting
   bool get debugHasMaskContent => _hasMaskContent();
-
-  @visibleForTesting
-  bool get debugMagicWandProcessing => _isMagicWandProcessing;
-
-  @visibleForTesting
-  Future<void> debugApplyMagicWand(
-    Offset canvasPoint, {
-    MagicWandSelectionMode mode = MagicWandSelectionMode.colorArea,
-    int tolerance = 32,
-    bool invert = false,
-  }) {
-    return _applyMagicWandAt(
-      canvasPoint,
-      mode: mode,
-      tolerance: tolerance,
-      invert: invert,
-    );
-  }
 
   @visibleForTesting
   bool debugUndo() => _state.undo();
@@ -401,9 +341,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   @override
   void initState() {
     super.initState();
-    _efficientVitSamService = EfficientVitSamService();
     _state = EditorState(inpaint: _isInpaintMode);
-    if (!_isInpaintMode) _state.setMagicWandHandler(_applyMagicWandAt);
     _isOutpaintCommitPending = widget.initialOutpaintCommitPending;
     _showLayerPanel = widget.initialShowLayerPanel;
   }
@@ -456,7 +394,13 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     // 适应视口
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _state.canvasController.fitToViewport(_state.canvasSize, padding: 64);
+        _state.canvasController.fitToViewport(
+          _state.canvasSize,
+          padding: 64,
+          insets: _isInpaintMode
+              ? null
+              : const EdgeInsets.fromLTRB(10, 86, 10, 70),
+        );
       }
     });
   }
@@ -507,7 +451,15 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         index: _isInpaintMode ? 0 : null,
       );
       _sourceLayerId = sourceLayer?.id;
-      _state.inpaintSourceLayerId = _sourceLayerId;
+      _state.inpaintSourceLayerId = _isInpaintMode ? _sourceLayerId : null;
+      if (!_isInpaintMode && sourceLayer != null) {
+        for (final layer
+            in _state.layerManager.layers
+                .where((l) => l.id != sourceLayer.id)
+                .toList()) {
+          _state.layerManager.removeLayer(layer.id);
+        }
+      }
       if (_isInpaintMode && sourceLayer != null) {
         _virtualOutpaintFrame = OutpaintVirtualFrame.fromSource(
           sourceWidth: image.width,
@@ -625,8 +577,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   @override
   void dispose() {
-    _state.setMagicWandHandler(null);
-    _efficientVitSamService.dispose();
     _state.dispose();
     super.dispose();
   }
@@ -643,10 +593,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     return _buildDroppedImageLayerRegion(
       LayoutBuilder(
         builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth > 900;
-          return isDesktop || _isInpaintMode
-              ? _buildDesktopLayout(constraints.biggest)
-              : _buildMobileLayout();
+          return _buildDesktopLayout(constraints.biggest);
         },
       ),
     );
@@ -655,51 +602,16 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   void _updateLayoutState(VoidCallback update) => setState(update);
 
   Future<void> _changeCanvasSize() async {
-    final l10n = context.l10n;
-    final compressionScale = _compressionLinearScale;
-    final result = await CanvasSizeDialog.show(
-      context,
-      initialSize: _state.canvasSize,
-      title: l10n.editor_changeCanvasSize,
+    _state.editSelection.commit();
+    final delta = await showDialog<OutpaintFrameDelta>(
+      context: context,
+      builder: (context) => EditResizeDialog(size: _state.canvasSize),
     );
-
-    if (result != null && result.size != _state.canvasSize) {
-      try {
-        // 验证尺寸范围
-        final newWidth = result.size.width.toInt();
-        final newHeight = result.size.height.toInt();
-        const minSize = 64;
-        const maxSize = 4096;
-
-        if (newWidth < minSize || newHeight < minSize) {
-          _showError(l10n.editor_canvasTooSmall(minSize, minSize));
-          return;
-        }
-
-        if (newWidth > maxSize || newHeight > maxSize) {
-          _showError(l10n.editor_canvasTooLarge(maxSize, maxSize));
-          return;
-        }
-
-        // 将 ContentHandlingMode 转换为 CanvasResizeMode
-        final mode = _convertContentModeToResizeMode(result.mode);
-
-        // 使用新的 resizeCanvas 方法，支持图层内容变换
-        _state.resizeCanvas(result.size, mode);
-        _refreshCompressionPlan(desiredScale: compressionScale);
-
-        // 显示成功消息
-        if (mounted) {
-          AppToast.success(
-            context,
-            l10n.editor_canvasResized(newWidth, newHeight),
-          );
-        }
-      } catch (e) {
-        // 显示错误信息
-        _showError(l10n.editor_canvasResizeFailed(e));
-        AppLogger.e('Failed to resize canvas: $e', 'ImageEditor');
-      }
+    if (delta != null && !delta.isEmpty && mounted) {
+      _state.historyManager.execute(
+        ShiftEditCanvasAction(delta: delta, preserveViewport: false),
+        _state,
+      );
     }
   }
 
@@ -726,33 +638,10 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     );
   }
 
-  /// 显示错误消息
-  void _showError(String message) {
-    if (mounted) {
-      AppToast.error(context, message);
-    }
-  }
-
-  /// 将内容处理模式转换为画布调整模式
-  CanvasResizeMode _convertContentModeToResizeMode(ContentHandlingMode mode) {
-    switch (mode) {
-      case ContentHandlingMode.crop:
-        return CanvasResizeMode.crop;
-      case ContentHandlingMode.pad:
-        return CanvasResizeMode.pad;
-      case ContentHandlingMode.stretch:
-        return CanvasResizeMode.stretch;
-    }
-  }
-
-  /// 确认退出
   Future<void> _confirmExit() async {
     // 检查是否有修改：检查历史记录或图层内容
     final hasChanges =
-        _state.historyManager.canUndo ||
-        _state.layerManager.layers.any(
-          (l) => l.strokes.isNotEmpty || l.baseImage != null,
-        );
+        _state.historyManager.canUndo || _state.editSelection.changed;
 
     if (hasChanges) {
       final shouldExit = await showDialog<bool>(
@@ -794,6 +683,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   Future<void> _exportAndClose() async {
     if (!mounted) return;
     if (!_canExportAndClose) return;
+    if (!_isInpaintMode) _state.editSelection.commit();
 
     bool loadingDialogShown = false;
 
@@ -968,7 +858,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     }
 
     // 蒙版图层应插入到底图上方，否则会被底图完全覆盖。
-    return sourceIndex;
+    return sourceIndex + 1;
   }
 
   Future<Layer?> _addMaskLayerAboveSource(
@@ -1494,7 +1384,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       final layer = await _state.layerManager.addLayerFromImage(
         layerBytes,
         name: _droppedImageLayerName(fileName),
-        index: 0,
+        index: _isInpaintMode ? 0 : null,
       );
       if (!mounted) {
         return;
@@ -1602,17 +1492,14 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
               child: RepaintBoundary(
                 child: EditorCanvas(
                   state: _state,
-                  showTransparentCanvasBackground:
-                      _isInpaintMode || _hasTransparentCutout,
-                  shouldSuppressPointerInput: _isInpaintMode
-                      ? (position) =>
-                            OutpaintEdgeDragOverlay.isResizeInteractionPoint(
-                              localPosition: position,
-                              viewportSize: constraints.biggest,
-                              canvasSize: _state.canvasSize,
-                              controller: _state.canvasController,
-                            )
-                      : null,
+                  showTransparentCanvasBackground: true,
+                  shouldSuppressPointerInput: (position) =>
+                      OutpaintEdgeDragOverlay.isResizeInteractionPoint(
+                        localPosition: position,
+                        viewportSize: constraints.biggest,
+                        canvasSize: _state.canvasSize,
+                        controller: _state.canvasController,
+                      ),
                 ),
               ),
             ),
@@ -1629,28 +1516,33 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
                   ),
                 ),
               ),
-            if (_isInpaintMode)
-              Positioned.fill(
-                child: OutpaintEdgeDragOverlay(
-                  canvasSize: _state.canvasSize,
-                  controller: _state.canvasController,
-                  enabled: !_isOutpaintCommitPending,
-                  onCommitted: _applyOutpaintEdges,
-                  onFrameResizeCommitted:
-                      (
-                        delta, {
-                        required horizontalSnapTarget,
-                        required verticalSnapTarget,
-                      }) => _applyOutpaintFrameDelta(
+            Positioned.fill(
+              child: OutpaintEdgeDragOverlay(
+                canvasSize: _state.canvasSize,
+                controller: _state.canvasController,
+                enabled: !_isOutpaintCommitPending,
+                onCommitted: _applyOutpaintEdges,
+                onFrameResizeCommitted:
+                    (
+                      delta, {
+                      required horizontalSnapTarget,
+                      required verticalSnapTarget,
+                    }) => _isInpaintMode
+                    ? _applyOutpaintFrameDelta(
                         delta,
                         horizontalSnapTarget: horizontalSnapTarget,
                         verticalSnapTarget: verticalSnapTarget,
                         preserveViewport: true,
-                      ),
-                ),
+                      )
+                    : Future<void>.sync(() {
+                        _state.editSelection.commit();
+                        _state.historyManager.execute(
+                          ShiftEditCanvasAction(delta: delta),
+                          _state,
+                        );
+                      }),
               ),
-            if (_isMagicWandProcessing)
-              Positioned.fill(child: _buildMagicWandProgressOverlay()),
+            ),
           ],
         );
       },

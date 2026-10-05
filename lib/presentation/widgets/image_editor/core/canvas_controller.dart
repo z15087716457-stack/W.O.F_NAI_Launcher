@@ -119,13 +119,18 @@ class CanvasController extends ChangeNotifier {
   }
 
   /// 适应视口
-  void fitToViewport(Size canvasSize, {double padding = 40.0}) {
+  void fitToViewport(
+    Size canvasSize, {
+    double padding = 40.0,
+    EdgeInsets? insets,
+  }) {
     if (_viewportSize == Size.zero) return;
     // 防止除零错误
     if (canvasSize.width <= 0 || canvasSize.height <= 0) return;
 
-    final availableWidth = _viewportSize.width - padding * 2;
-    final availableHeight = _viewportSize.height - padding * 2;
+    final frame = insets ?? EdgeInsets.all(padding);
+    final availableWidth = _viewportSize.width - frame.horizontal;
+    final availableHeight = _viewportSize.height - frame.vertical;
     // 防止负数或零
     if (availableWidth <= 0 || availableHeight <= 0) return;
 
@@ -137,8 +142,8 @@ class CanvasController extends ChangeNotifier {
     final scaledWidth = canvasSize.width * _scale;
     final scaledHeight = canvasSize.height * _scale;
     _offset = Offset(
-      (_viewportSize.width - scaledWidth) / 2,
-      (_viewportSize.height - scaledHeight) / 2,
+      frame.left + (availableWidth - scaledWidth) / 2,
+      frame.top + (availableHeight - scaledHeight) / 2,
     );
 
     _notifyChanged();

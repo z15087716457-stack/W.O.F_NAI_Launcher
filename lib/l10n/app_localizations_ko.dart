@@ -12496,4 +12496,46 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editor_sourceChanged => '편집 중 원본 이미지가 변경되었습니다. 편집기를 다시 열어 주세요.';
+
+  @override
+  String get editor_draw => '그리기';
+
+  @override
+  String get editor_erase => '지우기';
+
+  @override
+  String get editor_select => '선택';
+
+  @override
+  String get editor_lasso => '올가미';
+
+  @override
+  String get editor_roundTip => '원형';
+
+  @override
+  String get editor_softRoundTip => '부드러운 원형';
+
+  @override
+  String get editor_squareTip => '사각형';
+
+  @override
+  String get editor_pressureSensitivity => '필압 감지';
+
+  @override
+  String get editor_hsvAdjustment => 'HSV 조정';
+
+  @override
+  String get editor_hue => '색조';
+
+  @override
+  String get editor_cloneSourceHint => 'Alt+클릭으로 원본 설정';
+
+  @override
+  String get editor_colorAlpha => '투명도';
+
+  @override
+  String get editor_colorHex => '색상 HEX';
+
+  @override
+  String get editor_closestValidSize => '가장 가까운 유효 생성 크기로 자르기';
 }

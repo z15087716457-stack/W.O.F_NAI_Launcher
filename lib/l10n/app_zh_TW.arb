@@ -7237,5 +7237,19 @@
   "editor_patternHearts": "愛心",
   "editor_resize": "調整尺寸",
   "editor_penSize": "畫筆大小",
-  "editor_sourceChanged": "來源圖已在編輯期間發生變化，請重新開啟編輯器。"
+  "editor_sourceChanged": "來源圖已在編輯期間發生變化，請重新開啟編輯器。",
+  "editor_draw": "繪製",
+  "editor_erase": "擦除",
+  "editor_select": "選擇",
+  "editor_lasso": "套索",
+  "editor_roundTip": "圓形",
+  "editor_softRoundTip": "柔邊圓形",
+  "editor_squareTip": "方形",
+  "editor_pressureSensitivity": "筆壓感應",
+  "editor_hsvAdjustment": "HSV 調整",
+  "editor_hue": "色相",
+  "editor_cloneSourceHint": "Alt + 點選設定來源",
+  "editor_colorAlpha": "透明度",
+  "editor_colorHex": "顏色 HEX",
+  "editor_closestValidSize": "裁至最近的有效生成尺寸"
 }

@@ -15,7 +15,7 @@ class RectSelectionTool extends ShapeSelectionTool {
   IconData get icon => Icons.crop_square;
 
   @override
-  LogicalKeyboardKey get shortcutKey => LogicalKeyboardKey.keyM;
+  LogicalKeyboardKey get shortcutKey => LogicalKeyboardKey.keyS;
 
   @override
   Path createShapePath(Rect rect) {

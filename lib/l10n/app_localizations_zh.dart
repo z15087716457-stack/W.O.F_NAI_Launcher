@@ -12261,6 +12261,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_sourceChanged => '源图已在编辑期间发生变化，请重新打开编辑器。';
+
+  @override
+  String get editor_draw => '绘制';
+
+  @override
+  String get editor_erase => '擦除';
+
+  @override
+  String get editor_select => '选择';
+
+  @override
+  String get editor_lasso => '套索';
+
+  @override
+  String get editor_roundTip => '圆形';
+
+  @override
+  String get editor_softRoundTip => '柔边圆形';
+
+  @override
+  String get editor_squareTip => '方形';
+
+  @override
+  String get editor_pressureSensitivity => '笔压感应';
+
+  @override
+  String get editor_hsvAdjustment => 'HSV 调整';
+
+  @override
+  String get editor_hue => '色相';
+
+  @override
+  String get editor_cloneSourceHint => 'Alt + 点击设置来源';
+
+  @override
+  String get editor_colorAlpha => '透明度';
+
+  @override
+  String get editor_colorHex => '颜色 HEX';
+
+  @override
+  String get editor_closestValidSize => '裁至最近的有效生成尺寸';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24520,4 +24562,46 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editor_sourceChanged => '來源圖已在編輯期間發生變化，請重新開啟編輯器。';
+
+  @override
+  String get editor_draw => '繪製';
+
+  @override
+  String get editor_erase => '擦除';
+
+  @override
+  String get editor_select => '選擇';
+
+  @override
+  String get editor_lasso => '套索';
+
+  @override
+  String get editor_roundTip => '圓形';
+
+  @override
+  String get editor_softRoundTip => '柔邊圓形';
+
+  @override
+  String get editor_squareTip => '方形';
+
+  @override
+  String get editor_pressureSensitivity => '筆壓感應';
+
+  @override
+  String get editor_hsvAdjustment => 'HSV 調整';
+
+  @override
+  String get editor_hue => '色相';
+
+  @override
+  String get editor_cloneSourceHint => 'Alt + 點選設定來源';
+
+  @override
+  String get editor_colorAlpha => '透明度';
+
+  @override
+  String get editor_colorHex => '顏色 HEX';
+
+  @override
+  String get editor_closestValidSize => '裁至最近的有效生成尺寸';
 }

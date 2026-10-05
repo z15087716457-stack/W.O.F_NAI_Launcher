@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 
 import '../../../../../core/utils/localization_extension.dart';
@@ -12,10 +10,14 @@ import '../../../../widgets/common/themed_divider.dart';
 abstract class BaseSelectionTool extends EditorTool {
   @override
   bool get isSelectionTool => true;
+  @override
+  bool get handlesAltKey => true;
 
   @override
   void onDeactivateFast(EditorState state) {
-    if (state.selectionManager.isTransforming) {
+    if (!state.inpaint) {
+      state.editSelection.commit();
+    } else if (state.selectionManager.isTransforming) {
       state.selectionManager.commitTransform();
     }
   }
@@ -78,24 +80,9 @@ abstract class ShapeSelectionTool extends BaseSelectionTool {
   @override
   void onPointerDown(PointerDownEvent event, EditorState state) {
     final pos = event.localPosition;
-
-    if (state.selectionManager.isTransforming) {
-      final bounds = state.selectionManager.transformedBounds;
-      if (bounds != null && bounds.contains(pos)) {
-        _isDraggingSelection = true;
-        _dragLastPoint = pos;
-        return;
-      }
-      state.selectionManager.commitTransform();
-      state.clearPreview();
-      startPoint = pos;
-      return;
-    }
-
-    if (state.selectionManager.hasSelection &&
-        state.selectionManager.hitTestSelection(pos)) {
-      _startTransform(state, pos);
-      return;
+    if (!state.inpaint) {
+      if (state.editSelection.pointerDown(pos)) return;
+      state.editSelection.commit();
     }
 
     state.clearSelection(saveHistory: false);
@@ -105,6 +92,10 @@ abstract class ShapeSelectionTool extends BaseSelectionTool {
 
   @override
   void onPointerMove(PointerMoveEvent event, EditorState state) {
+    if (!state.inpaint && state.editSelection.dragging) {
+      state.editSelection.pointerMove(event.localPosition);
+      return;
+    }
     if (_isDraggingSelection && _dragLastPoint != null) {
       final delta = event.localPosition - _dragLastPoint!;
       state.selectionManager.updateTransformOffset(delta);
@@ -122,6 +113,10 @@ abstract class ShapeSelectionTool extends BaseSelectionTool {
 
   @override
   void onPointerUp(PointerUpEvent event, EditorState state) {
+    if (!state.inpaint && state.editSelection.dragging) {
+      state.editSelection.pointerUp();
+      return;
+    }
     if (_isDraggingSelection) {
       _isDraggingSelection = false;
       _dragLastPoint = null;
@@ -147,19 +142,6 @@ abstract class ShapeSelectionTool extends BaseSelectionTool {
     startPoint = null;
     _isDraggingSelection = false;
     _dragLastPoint = null;
-  }
-
-  void _startTransform(EditorState state, Offset pos) {
-    state.selectionManager.enterTransform(_createPlaceholderImage());
-    _isDraggingSelection = true;
-    _dragLastPoint = pos;
-  }
-
-  static ui.Image _createPlaceholderImage() {
-    final recorder = ui.PictureRecorder();
-    Canvas(recorder).drawPaint(Paint()..color = const Color(0x00000000));
-    final picture = recorder.endRecording();
-    return picture.toImageSync(1, 1);
   }
 
   /// 子类实现：根据矩形创建形状路径

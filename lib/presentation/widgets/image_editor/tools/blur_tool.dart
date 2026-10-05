@@ -1,10 +1,14 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../core/editor_state.dart';
 import '../core/history_manager.dart';
+import '../core/edit_image_actions.dart';
+import 'pressure_stroke.dart';
+import '../layers/layer.dart';
 import 'tool_base.dart';
 
 /// Blur 工具 - 真正的像素级高斯模糊
@@ -14,17 +18,15 @@ class BlurTool extends EditorTool {
   double _intensity = 0.5;
   double get intensity => _intensity;
 
-  double _size = 30.0;
+  double _size = 20.0;
   double get size => _size;
-
-  bool _isApplying = false;
 
   void setIntensity(double value) {
     _intensity = value.clamp(0.0, 1.0);
   }
 
   void setSize(double value) {
-    _size = value.clamp(1.0, 200.0);
+    _size = value.clamp(1.0, double.infinity);
   }
 
   @override
@@ -38,165 +40,108 @@ class BlurTool extends EditorTool {
 
   @override
   bool get isPaintTool => true;
+  @override
+  LogicalKeyboardKey get shortcutKey => LogicalKeyboardKey.keyR;
 
   @override
   void onPointerDown(PointerDownEvent event, EditorState state) {
-    state.startStroke(event.localPosition);
+    state.startStroke(event.localPosition, pressure: state.pressureFor(event));
   }
 
   @override
   void onPointerMove(PointerMoveEvent event, EditorState state) {
     if (state.isDrawing) {
-      state.updateStroke(event.localPosition);
+      state.updateStroke(
+        event.localPosition,
+        pressure: state.pressureFor(event),
+      );
     }
   }
 
   @override
   void onPointerUp(PointerUpEvent event, EditorState state) {
-    if (_isApplying) {
-      state.endStroke();
-      return;
-    }
     if (state.isDrawing && state.currentStrokePoints.isNotEmpty) {
       final points = List<Offset>.from(state.currentStrokePoints);
+      final pressures = List<double>.from(state.strokeManager.pressures);
       state.endStroke();
-      _applyBlur(state, points);
+      _applyBlur(state, points, pressures);
     } else {
       state.endStroke();
     }
   }
 
-  Future<void> _applyBlur(EditorState state, List<Offset> points) async {
-    final activeLayer = state.layerManager.activeLayer;
-    if (activeLayer == null || activeLayer.locked) return;
-    _isApplying = true;
-
-    try {
-      final canvasSize = state.canvasSize;
-      final w = canvasSize.width.toInt();
-      final h = canvasSize.height.toInt();
-
-      final original = await _renderLayerToImage(activeLayer, canvasSize, w, h);
-
-      final sigma = _size * _intensity * 0.5;
-      final blurred = await _createBlurredImage(original, sigma, w, h);
-
-      final strokeMask = _buildStrokePath(points);
-
-      final result = await _compositeBlur(
-        original,
-        blurred,
-        strokeMask,
-        w,
-        h,
-        canvasSize,
-      );
-      original.dispose();
-      blurred.dispose();
-
-      final pngData = await result.toByteData(format: ui.ImageByteFormat.png);
-      if (pngData == null) {
-        result.dispose();
-        return;
-      }
-
-      state.historyManager.execute(
-        ReplaceLayerImageAction(
-          layerId: activeLayer.id,
-          newImageBytes: pngData.buffer.asUint8List(),
-          newImage: result,
-          actionDescription: 'Blur',
-        ),
-        state,
-      );
-    } finally {
-      _isApplying = false;
-    }
-  }
-
-  Future<ui.Image> _renderLayerToImage(
-    dynamic layer,
-    Size canvasSize,
-    int w,
-    int h,
-  ) async {
+  void _applyBlur(
+    EditorState state,
+    List<Offset> points,
+    List<double> pressures,
+  ) {
+    final layer = state.layerManager.activeLayer;
+    if (layer == null || layer.locked) return;
+    final size = state.canvasSize;
+    final original = renderEditLayer(layer, size);
     final rec = ui.PictureRecorder();
-    final c = Canvas(rec);
-    (layer as dynamic).render(c, canvasSize);
-    final pic = rec.endRecording();
-    final img = await pic.toImage(w, h);
+    final c = Canvas(rec)..drawImage(original, Offset.zero, Paint());
+    _drawBlur(c, original, size, points, pressures);
+    final pic = rec.endRecording(),
+        result = pic.toImageSync(size.width.round(), size.height.round());
     pic.dispose();
-    return img;
+    original.dispose();
+    state.historyManager.execute(
+      ReplaceEditRasterAction(
+        layerId: layer.id,
+        image: result,
+        description: 'Blur',
+      ),
+      state,
+    );
   }
 
-  Future<ui.Image> _createBlurredImage(
-    ui.Image source,
-    double sigma,
-    int w,
-    int h,
-  ) async {
-    final rec = ui.PictureRecorder();
-    final c = Canvas(rec);
+  void drawRealtimePreview(Canvas canvas, Layer layer, EditorState state) {
+    final original = renderEditLayer(layer, state.canvasSize);
+    _drawBlur(
+      canvas,
+      original,
+      state.canvasSize,
+      state.currentStrokePoints,
+      state.strokeManager.pressures,
+    );
+    original.dispose();
+  }
+
+  void _drawBlur(
+    Canvas c,
+    ui.Image original,
+    Size size,
+    List<Offset> points,
+    List<double> pressures,
+  ) {
+    final bounds = Offset.zero & size;
+    c.saveLayer(bounds, Paint());
     c.drawImage(
-      source,
+      original,
       Offset.zero,
       Paint()
         ..imageFilter = ui.ImageFilter.blur(
-          sigmaX: sigma,
-          sigmaY: sigma,
+          sigmaX: _size * _intensity * .5,
+          sigmaY: _size * _intensity * .5,
           tileMode: TileMode.clamp,
         ),
     );
-    final pic = rec.endRecording();
-    final img = await pic.toImage(w, h);
-    pic.dispose();
-    return img;
-  }
-
-  Path _buildStrokePath(List<Offset> points) {
-    final path = Path();
-    for (final p in points) {
-      path.addOval(Rect.fromCenter(center: p, width: _size, height: _size));
-    }
-    for (int i = 0; i < points.length - 1; i++) {
-      final a = points[i];
-      final b = points[i + 1];
-      final dx = b.dx - a.dx;
-      final dy = b.dy - a.dy;
-      final len = (Offset(dx, dy)).distance;
-      if (len < 0.1) continue;
-      final nx = -dy / len * _size / 2;
-      final ny = dx / len * _size / 2;
-      final rect = Path()
-        ..moveTo(a.dx + nx, a.dy + ny)
-        ..lineTo(b.dx + nx, b.dy + ny)
-        ..lineTo(b.dx - nx, b.dy - ny)
-        ..lineTo(a.dx - nx, a.dy - ny)
-        ..close();
-      path.addPath(rect, Offset.zero);
-    }
-    return path;
-  }
-
-  Future<ui.Image> _compositeBlur(
-    ui.Image original,
-    ui.Image blurred,
-    Path mask,
-    int w,
-    int h,
-    Size canvasSize,
-  ) async {
-    final rec = ui.PictureRecorder();
-    final c = Canvas(rec);
-    c.drawImage(original, Offset.zero, Paint());
-    c.save();
-    c.clipPath(mask);
-    c.drawImage(blurred, Offset.zero, Paint());
+    c.saveLayer(bounds, Paint()..blendMode = BlendMode.dstIn);
+    drawPressureStroke(
+      c,
+      StrokeData(
+        points: points,
+        size: _size,
+        color: Colors.white,
+        opacity: 1,
+        hardness: 1,
+        isEraser: false,
+        pressures: pressures,
+      ),
+    );
     c.restore();
-    final pic = rec.endRecording();
-    final img = await pic.toImage(w, h);
-    pic.dispose();
-    return img;
+    c.restore();
   }
 
   @override

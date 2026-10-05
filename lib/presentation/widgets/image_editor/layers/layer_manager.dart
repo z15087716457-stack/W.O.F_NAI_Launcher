@@ -587,7 +587,7 @@ class LayerManager extends ChangeNotifier {
   }
 
   /// 渲染所有可见图层到画布
-  /// 面板下方的图层渲染在上层（覆盖面板上方的图层）
+  /// 内部由底到顶，面板反序显示，后添加的图层覆盖前面的图层
   /// 使用 renderWithCache 优先利用缓存提升性能
   /// [viewportBounds] 视口边界，用于空间剔除优化（可选）
   void renderAll(
@@ -596,8 +596,8 @@ class LayerManager extends ChangeNotifier {
     Rect? viewportBounds,
     FilterQuality filterQuality = FilterQuality.none,
   }) {
-    // 反向遍历：面板上方的图层先画（底层），面板下方的图层后画（顶层）
-    for (final layer in _layers.reversed) {
+    // Render bottom to top, matching the reversed thumbnail tray.
+    for (final layer in _layers) {
       if (layer.visible) {
         layer.renderWithCache(
           canvas,
@@ -770,6 +770,9 @@ class LayerManager extends ChangeNotifier {
 
   /// 标记快照失效（在图层变化时调用）
   void invalidateSnapshot() => _snapshotManager.invalidate();
+
+  /// Notify after an atomic raster replacement, including cache and thumbnail consumers.
+  void notifyRasterChange() => _markContentChanged();
 
   /// 异步更新画布快照
   Future<bool> updateSnapshotAsync(Size canvasSize) =>

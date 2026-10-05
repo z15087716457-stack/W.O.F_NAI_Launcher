@@ -57,7 +57,7 @@ class EraserTool extends EditorTool {
     }
 
     // 坐标已由 EditorCanvas 统一转换为画布坐标
-    state.startStroke(event.localPosition);
+    state.startStroke(event.localPosition, pressure: state.pressureFor(event));
   }
 
   @override
@@ -67,7 +67,10 @@ class EraserTool extends EditorTool {
 
     if (state.isDrawing) {
       // 坐标已由 EditorCanvas 统一转换为画布坐标
-      state.updateStroke(event.localPosition);
+      state.updateStroke(
+        event.localPosition,
+        pressure: state.pressureFor(event),
+      );
     }
   }
 
@@ -95,6 +98,9 @@ class EraserTool extends EditorTool {
       // 创建橡皮擦笔画数据
       final stroke = StrokeData(
         points: List.from(state.currentStrokePoints),
+        pressures: state.inpaint
+            ? const []
+            : List.from(state.strokeManager.pressures),
         size: _size,
         color: Colors.transparent,
         opacity: 1.0,

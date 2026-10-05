@@ -80,7 +80,7 @@ void main() {
         final maskLayer = await layerManager.addLayerFromImage(
           overlayBytes,
           name: '已有蒙版',
-          index: layerManager.layers.indexOf(sourceLayer!),
+          index: layerManager.layers.indexOf(sourceLayer!) + 1,
         );
 
         expect(maskLayer, isNotNull);
@@ -129,7 +129,7 @@ void main() {
         final oldMaskLayer = await layerManager.addLayerFromImage(
           _buildSolidPng(8, 8, const Color(0x6600AAFF)),
           name: 'old mask',
-          index: layerManager.layers.indexOf(sourceLayer!),
+          index: layerManager.layers.indexOf(sourceLayer!) + 1,
         );
         expect(oldMaskLayer, isNotNull);
 
@@ -263,7 +263,7 @@ void main() {
         final existingMaskLayer = await layerManager.addLayerFromImage(
           _buildSolidPng(8, 8, const Color(0x6600AAFF)),
           name: 'existing mask',
-          index: layerManager.layers.indexOf(sourceLayer!),
+          index: layerManager.layers.indexOf(sourceLayer!) + 1,
         );
         expect(existingMaskLayer, isNotNull);
 
@@ -297,7 +297,7 @@ void main() {
         expect(notificationCount, equals(1));
         expect(
           layerManager.layers.map((layer) => layer.id),
-          equals([existingMaskLayer!.id, sourceLayer.id]),
+          equals([sourceLayer.id, existingMaskLayer!.id]),
         );
         expect(layerManager.activeLayerId, equals(sourceLayer.id));
         expect(sourceLayer.baseImageBytes, isNotNull);

@@ -53,7 +53,7 @@ void main() {
     expect(state.debugActiveLayerHasBaseImage, isTrue);
     expect(
       layerNames.indexOf('overlay.png'),
-      lessThan(layerNames.indexOf('底图')),
+      greaterThan(layerNames.indexOf('底图')),
     );
 
     await tester.pumpWidget(const SizedBox.shrink());

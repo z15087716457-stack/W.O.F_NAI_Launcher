@@ -12869,4 +12869,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get editor_sourceChanged =>
       'The source image changed while editing. Please reopen the editor.';
+
+  @override
+  String get editor_draw => 'Draw';
+
+  @override
+  String get editor_erase => 'Erase';
+
+  @override
+  String get editor_select => 'Select';
+
+  @override
+  String get editor_lasso => 'Lasso';
+
+  @override
+  String get editor_roundTip => 'Round';
+
+  @override
+  String get editor_softRoundTip => 'Soft Round';
+
+  @override
+  String get editor_squareTip => 'Square';
+
+  @override
+  String get editor_pressureSensitivity => 'Pressure Sensitivity';
+
+  @override
+  String get editor_hsvAdjustment => 'HSV Adjustment';
+
+  @override
+  String get editor_hue => 'Hue';
+
+  @override
+  String get editor_cloneSourceHint => 'Alt+Click to set source';
+
+  @override
+  String get editor_colorAlpha => 'Alpha';
+
+  @override
+  String get editor_colorHex => 'Color HEX';
+
+  @override
+  String get editor_closestValidSize => 'Crop to closest valid generation size';
 }

@@ -22311,6 +22311,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The source image changed while editing. Please reopen the editor.'**
   String get editor_sourceChanged;
+
+  /// No description provided for @editor_draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get editor_draw;
+
+  /// No description provided for @editor_erase.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase'**
+  String get editor_erase;
+
+  /// No description provided for @editor_select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get editor_select;
+
+  /// No description provided for @editor_lasso.
+  ///
+  /// In en, this message translates to:
+  /// **'Lasso'**
+  String get editor_lasso;
+
+  /// No description provided for @editor_roundTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Round'**
+  String get editor_roundTip;
+
+  /// No description provided for @editor_softRoundTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft Round'**
+  String get editor_softRoundTip;
+
+  /// No description provided for @editor_squareTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get editor_squareTip;
+
+  /// No description provided for @editor_pressureSensitivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure Sensitivity'**
+  String get editor_pressureSensitivity;
+
+  /// No description provided for @editor_hsvAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'HSV Adjustment'**
+  String get editor_hsvAdjustment;
+
+  /// No description provided for @editor_hue.
+  ///
+  /// In en, this message translates to:
+  /// **'Hue'**
+  String get editor_hue;
+
+  /// No description provided for @editor_cloneSourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt+Click to set source'**
+  String get editor_cloneSourceHint;
+
+  /// No description provided for @editor_colorAlpha.
+  ///
+  /// In en, this message translates to:
+  /// **'Alpha'**
+  String get editor_colorAlpha;
+
+  /// No description provided for @editor_colorHex.
+  ///
+  /// In en, this message translates to:
+  /// **'Color HEX'**
+  String get editor_colorHex;
+
+  /// No description provided for @editor_closestValidSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop to closest valid generation size'**
+  String get editor_closestValidSize;
 }
 
 class _AppLocalizationsDelegate

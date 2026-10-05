@@ -10,12 +10,17 @@ import '../layers/layer_manager.dart';
 import '../tools/tool_base.dart';
 import '../tools/brush_tool.dart';
 import '../tools/eraser_tool.dart';
+import '../tools/blur_tool.dart';
+import '../tools/clone_stamp_tool.dart';
 import 'canvas_controller.dart';
+import 'edit_selection.dart';
 import 'color_manager.dart';
 import 'history_manager.dart';
 import 'selection_manager.dart';
 import 'stroke_manager.dart';
 import 'tool_manager.dart';
+
+enum EditorBrushTip { round, softRound, square }
 
 enum MaskDisplayPattern {
   solid,
@@ -100,6 +105,24 @@ class EditorState extends ChangeNotifier {
 
   /// 选区管理器
   final SelectionManager selectionManager = SelectionManager();
+  late final EditSelection editSelection = EditSelection(this);
+  String? rasterPreviewLayerId;
+  ui.Image? rasterPreview;
+  void notifyCanvasPreview() {
+    if (_isDisposed) return;
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_isDisposed) {
+          _notifyRenderChange();
+          _safeNotifyListeners();
+        }
+      });
+      return;
+    }
+    _notifyRenderChange();
+    _safeNotifyListeners();
+  }
 
   /// 笔画管理器
   final StrokeManager strokeManager = StrokeManager();
@@ -249,6 +272,13 @@ class EditorState extends ChangeNotifier {
 
     // 2. 切换工具指针
     toolManager.setTool(tool);
+    if (!inpaint) {
+      final draw = toolManager.getToolById('brush') as BrushTool;
+      for (final sibling in tools) {
+        if (sibling is BlurTool) sibling.setSize(draw.settings.size);
+        if (sibling is CloneStampTool) sibling.setSize(draw.settings.size);
+      }
+    }
 
     // 3. 仅通知工具相关 UI（工具栏、设置面板）
     _setToolChangeNotifier(tool);
@@ -312,8 +342,14 @@ class EditorState extends ChangeNotifier {
 
   // ===== 代理方法：选区 =====
 
-  void setSelection(Path? path, {bool saveHistory = true}) =>
+  void setSelection(Path? path, {bool saveHistory = true}) {
+    if (!inpaint && path != null) {
+      editSelection.begin(path);
+    } else {
       selectionManager.setSelection(path, saveHistory: saveHistory);
+    }
+  }
+
   void clearSelection({bool saveHistory = true}) =>
       selectionManager.clearSelection(saveHistory: saveHistory);
   void invertSelection() => selectionManager.invertSelection(_canvasSize);
@@ -331,15 +367,15 @@ class EditorState extends ChangeNotifier {
     );
   }
 
-  void startStroke(Offset point) {
+  void startStroke(Offset point, {double pressure = 1}) {
     // 将点裁剪到画布范围内，防止画布外涂抹
-    strokeManager.startStroke(_clampToCanvas(point));
+    strokeManager.startStroke(_clampToCanvas(point), pressure: pressure);
     _notifyStrokePreviewChange();
   }
 
-  void updateStroke(Offset point) {
+  void updateStroke(Offset point, {double pressure = 1}) {
     // 将点裁剪到画布范围内，防止画布外涂抹
-    strokeManager.updateStroke(_clampToCanvas(point));
+    strokeManager.updateStroke(_clampToCanvas(point), pressure: pressure);
     _notifyStrokePreviewChangeCoalesced();
   }
 
@@ -379,6 +415,48 @@ class EditorState extends ChangeNotifier {
 
   // ===== 笔刷方法 =====
 
+  EditorBrushTip brushTip = EditorBrushTip.round;
+  bool pressureSensitivity = true;
+  void setPressureSensitivity(bool value) {
+    pressureSensitivity = value;
+    requestUiUpdate();
+  }
+
+  double pressureFor(PointerEvent event) {
+    if (inpaint ||
+        !pressureSensitivity ||
+        (event.kind != ui.PointerDeviceKind.stylus &&
+            event.kind != ui.PointerDeviceKind.invertedStylus)) {
+      return 1;
+    }
+    final range = event.pressureMax - event.pressureMin;
+    return (range > 0
+            ? (event.pressure - event.pressureMin) / range
+            : event.pressure)
+        .clamp(.05, 1);
+  }
+
+  void setBrushTip(EditorBrushTip value) {
+    if (inpaint) return;
+    brushTip = value;
+    for (final tool in tools) {
+      if (tool is BrushTool) {
+        tool.updateSettings(
+          tool.settings.copyWith(
+            opacity: 1,
+            hardness: value == EditorBrushTip.softRound ? 0 : 1,
+            square: value == EditorBrushTip.square,
+          ),
+        );
+      }
+      if (tool is EraserTool) {
+        tool.square = value == EditorBrushTip.square;
+        tool.setHardness(value == EditorBrushTip.softRound ? 0 : 1);
+      }
+    }
+    requestUiUpdate();
+  }
+
   bool get squareBrush {
     final tool = currentTool;
     return tool is BrushTool
@@ -403,6 +481,10 @@ class EditorState extends ChangeNotifier {
       return tool.settings.size;
     } else if (tool is EraserTool) {
       return tool.size;
+    } else if (tool is BlurTool) {
+      return tool.size;
+    } else if (tool is CloneStampTool) {
+      return tool.size;
     }
     final brushTool = toolManager.tools.whereType<BrushTool>().firstOrNull;
     return brushTool?.settings.size ?? 20.0;
@@ -424,6 +506,15 @@ class EditorState extends ChangeNotifier {
   }
 
   void setBrushSize(double size) {
+    if (!inpaint && currentTool is! EraserTool) {
+      for (final tool in tools) {
+        if (tool is BrushTool) tool.setSize(size);
+        if (tool is BlurTool) tool.setSize(size);
+        if (tool is CloneStampTool) tool.setSize(size);
+      }
+      requestUiUpdate();
+      return;
+    }
     final tool = toolManager.currentTool;
     if (tool is BrushTool) {
       if (inpaint) {
@@ -434,7 +525,11 @@ class EditorState extends ChangeNotifier {
         tool.setSize(size);
       }
     } else if (tool is EraserTool) {
-      tool.setSize(size, maximum: inpaint ? double.infinity : 500);
+      tool.setSize(size, maximum: double.infinity);
+    } else if (tool is BlurTool) {
+      tool.setSize(size);
+    } else if (tool is CloneStampTool) {
+      tool.setSize(size);
     }
     notifyListeners();
   }
@@ -479,6 +574,14 @@ class EditorState extends ChangeNotifier {
   // ===== 撤销/重做 =====
 
   bool undo() {
+    if (!inpaint) {
+      if (editSelection.changed) {
+        editSelection.cancel();
+        return true;
+      }
+      editSelection.cancel();
+      return historyManager.undo(this);
+    }
     // 优先撤销选区
     if (toolManager.currentTool?.isSelectionTool == true &&
         selectionManager.canUndoSelection) {
@@ -495,6 +598,10 @@ class EditorState extends ChangeNotifier {
   }
 
   bool redo() {
+    if (!inpaint) {
+      editSelection.cancel();
+      return historyManager.redo(this);
+    }
     // 优先重做选区
     if (toolManager.currentTool?.isSelectionTool == true &&
         selectionManager.canRedoSelection) {
@@ -511,6 +618,7 @@ class EditorState extends ChangeNotifier {
   }
 
   bool get canUndo {
+    if (!inpaint) return editSelection.changed || historyManager.canUndo;
     if (toolManager.currentTool?.isSelectionTool == true) {
       return selectionManager.canUndoSelection || historyManager.canUndo;
     }
@@ -518,6 +626,7 @@ class EditorState extends ChangeNotifier {
   }
 
   bool get canRedo {
+    if (!inpaint) return historyManager.canRedo;
     if (toolManager.currentTool?.isSelectionTool == true) {
       return selectionManager.canRedoSelection || historyManager.canRedo;
     }
@@ -846,6 +955,8 @@ class EditorState extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed = true;
+    currentTool?.onDeactivateFast(this);
+    editSelection.cancel();
     _pendingStrokePreviewChange = false;
     _magicWandHandler = null;
 

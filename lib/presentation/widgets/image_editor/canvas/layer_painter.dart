@@ -3,6 +3,13 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../core/editor_state.dart';
+import '../layers/layer.dart';
+import '../tools/pressure_stroke.dart';
+import '../core/history_manager.dart';
+import '../tools/brush_tool.dart';
+import '../tools/eraser_tool.dart';
+import '../tools/blur_tool.dart';
+import '../tools/clone_stamp_tool.dart';
 import 'inpaint_mask_appearance.dart';
 
 class CheckerboardCacheKey {
@@ -112,7 +119,12 @@ class LayerPainter extends CustomPainter {
   LayerPainter({
     required this.state,
     this.showTransparentCanvasBackground = false,
-  }) : super(repaint: state.renderNotifier);
+  }) : super(
+         repaint: Listenable.merge([
+           state.renderNotifier,
+           if (!state.inpaint) state.strokePreviewNotifier,
+         ]),
+       );
 
   @visibleForTesting
   static CheckerboardCacheKey? get debugCheckerboardCacheKey {
@@ -180,12 +192,64 @@ class LayerPainter extends CustomPainter {
 
     // 绘制所有图层（传入视口边界以启用空间剔除优化）
     if (!state.inpaint) {
-      state.layerManager.renderAll(
-        canvas,
-        canvasSize,
-        viewportBounds: viewportBounds,
-        filterQuality: FilterQuality.medium,
-      );
+      for (final layer in state.layerManager.layers.where((l) => l.visible)) {
+        final preview = state.editSelection.layerId == layer.id
+            ? state.editSelection.preview
+            : state.rasterPreviewLayerId == layer.id
+            ? state.rasterPreview
+            : null;
+        final tool = state.currentTool;
+        final stroke =
+            state.isDrawing &&
+            state.layerManager.activeLayerId == layer.id &&
+            (tool is BrushTool ||
+                tool is EraserTool ||
+                tool is BlurTool ||
+                tool is CloneStampTool);
+        if (stroke) canvas.saveLayer(Offset.zero & canvasSize, Paint());
+        if (preview == null) {
+          layer.renderWithCache(
+            canvas,
+            canvasSize,
+            viewportBounds: viewportBounds,
+            filterQuality: FilterQuality.medium,
+          );
+        } else {
+          canvas.drawImage(
+            preview,
+            Offset.zero,
+            Paint()
+              ..color = Colors.white.withValues(alpha: layer.opacity)
+              ..blendMode = layer.blendMode.toFlutterBlendMode(),
+          );
+        }
+        if (stroke && tool is BlurTool) {
+          tool.drawRealtimePreview(canvas, layer, state);
+          canvas.restore();
+        } else if (stroke && tool is CloneStampTool) {
+          tool.drawRealtimePreview(
+            canvas,
+            state.currentStrokePoints,
+            pressures: state.strokeManager.pressures,
+          );
+          canvas.restore();
+        } else if (stroke) {
+          drawPressureStroke(
+            canvas,
+            StrokeData(
+              points: state.currentStrokePoints,
+              size: state.brushSize,
+              color: state.foregroundColor,
+              opacity: tool is EraserTool ? 1 : state.foregroundColor.a,
+              hardness: state.brushTip == EditorBrushTip.softRound ? 0 : 1,
+              square: state.squareBrush,
+              isEraser: tool is EraserTool,
+              pressures: state.strokeManager.pressures,
+            ),
+          );
+          canvas.restore();
+        }
+      }
     } else {
       final layers = state.layerManager.layers;
       for (final layer in layers.reversed.where(
@@ -404,7 +468,9 @@ class SelectionPainter extends CustomPainter {
     }
 
     // 绘制已确认的选区（蚂蚁线）
-    if (state.selectionPath != null) {
+    if (!state.inpaint && state.editSelection.active) {
+      state.editSelection.paintHandles(canvas);
+    } else if (state.selectionPath != null) {
       if (state.selectionManager.isTransforming) {
         final bounds = state.selectionManager.transformedBounds;
         if (bounds != null) {

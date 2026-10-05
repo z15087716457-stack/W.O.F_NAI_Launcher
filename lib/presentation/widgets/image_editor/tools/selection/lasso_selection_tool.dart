@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -32,23 +30,9 @@ class LassoSelectionTool extends BaseSelectionTool {
   @override
   void onPointerDown(PointerDownEvent event, EditorState state) {
     final pos = event.localPosition;
-
-    if (state.selectionManager.isTransforming) {
-      final bounds = state.selectionManager.transformedBounds;
-      if (bounds != null && bounds.contains(pos)) {
-        _isDraggingSelection = true;
-        _dragLastPoint = pos;
-        return;
-      }
-      state.selectionManager.commitTransform();
-    }
-
-    if (state.selectionManager.hasSelection &&
-        state.selectionManager.hitTestSelection(pos)) {
-      state.selectionManager.enterTransform(_createPlaceholderImage());
-      _isDraggingSelection = true;
-      _dragLastPoint = pos;
-      return;
+    if (!state.inpaint) {
+      if (state.editSelection.pointerDown(pos)) return;
+      state.editSelection.commit();
     }
 
     state.clearSelection(saveHistory: false);
@@ -60,6 +44,10 @@ class LassoSelectionTool extends BaseSelectionTool {
 
   @override
   void onPointerMove(PointerMoveEvent event, EditorState state) {
+    if (!state.inpaint && state.editSelection.dragging) {
+      state.editSelection.pointerMove(event.localPosition);
+      return;
+    }
     if (_isDraggingSelection && _dragLastPoint != null) {
       final delta = event.localPosition - _dragLastPoint!;
       state.selectionManager.updateTransformOffset(delta);
@@ -78,6 +66,10 @@ class LassoSelectionTool extends BaseSelectionTool {
 
   @override
   void onPointerUp(PointerUpEvent event, EditorState state) {
+    if (!state.inpaint && state.editSelection.dragging) {
+      state.editSelection.pointerUp();
+      return;
+    }
     if (_isDraggingSelection) {
       _isDraggingSelection = false;
       _dragLastPoint = null;
@@ -99,13 +91,6 @@ class LassoSelectionTool extends BaseSelectionTool {
     _points.clear();
     _isDraggingSelection = false;
     _dragLastPoint = null;
-  }
-
-  static ui.Image _createPlaceholderImage() {
-    final recorder = ui.PictureRecorder();
-    Canvas(recorder).drawPaint(Paint()..color = const Color(0x00000000));
-    final picture = recorder.endRecording();
-    return picture.toImageSync(1, 1);
   }
 
   void _updatePreviewPath(EditorState state) {

@@ -7237,5 +7237,19 @@
   "editor_patternHearts": "爱心",
   "editor_resize": "调整尺寸",
   "editor_penSize": "画笔大小",
-  "editor_sourceChanged": "源图已在编辑期间发生变化，请重新打开编辑器。"
+  "editor_sourceChanged": "源图已在编辑期间发生变化，请重新打开编辑器。",
+  "editor_draw": "绘制",
+  "editor_erase": "擦除",
+  "editor_select": "选择",
+  "editor_lasso": "套索",
+  "editor_roundTip": "圆形",
+  "editor_softRoundTip": "柔边圆形",
+  "editor_squareTip": "方形",
+  "editor_pressureSensitivity": "笔压感应",
+  "editor_hsvAdjustment": "HSV 调整",
+  "editor_hue": "色相",
+  "editor_cloneSourceHint": "Alt + 点击设置来源",
+  "editor_colorAlpha": "透明度",
+  "editor_colorHex": "颜色 HEX",
+  "editor_closestValidSize": "裁至最近的有效生成尺寸"
 }

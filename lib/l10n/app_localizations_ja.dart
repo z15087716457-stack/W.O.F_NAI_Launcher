@@ -12478,4 +12478,46 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editor_sourceChanged => '編集中に元画像が変更されました。エディターを開き直してください。';
+
+  @override
+  String get editor_draw => '描画';
+
+  @override
+  String get editor_erase => '消去';
+
+  @override
+  String get editor_select => '選択';
+
+  @override
+  String get editor_lasso => '投げ縄';
+
+  @override
+  String get editor_roundTip => '円形';
+
+  @override
+  String get editor_softRoundTip => 'ソフト円形';
+
+  @override
+  String get editor_squareTip => '四角';
+
+  @override
+  String get editor_pressureSensitivity => '筆圧感知';
+
+  @override
+  String get editor_hsvAdjustment => 'HSV 調整';
+
+  @override
+  String get editor_hue => '色相';
+
+  @override
+  String get editor_cloneSourceHint => 'Alt+クリックでコピー元を設定';
+
+  @override
+  String get editor_colorAlpha => '透明度';
+
+  @override
+  String get editor_colorHex => 'カラー HEX';
+
+  @override
+  String get editor_closestValidSize => '最も近い有効な生成サイズに切り抜く';
 }

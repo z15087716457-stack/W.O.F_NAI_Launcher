@@ -8,8 +8,7 @@ import 'package:image/image.dart' as img;
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/canvas/editor_canvas.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_screen.dart';
-import 'package:nai_launcher/presentation/widgets/image_editor/widgets/panels/editor_quick_settings.dart';
-import 'package:nai_launcher/presentation/widgets/image_editor/widgets/toolbar/editor_overlay_toolbar.dart';
+import 'package:nai_launcher/presentation/widgets/image_editor/widgets/panels/edit_image_controls.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/widgets/panels/inpaint_controls.dart';
 import '../../../helpers/official_ui_capture_fonts.dart';
 
@@ -65,7 +64,7 @@ void main() {
                 .byType(
                   mode == ImageEditorMode.inpaint
                       ? InpaintToolSettings
-                      : EditorQuickSettings,
+                      : EditToolSettings,
                 )
                 .evaluate()
                 .isNotEmpty) {
@@ -78,7 +77,7 @@ void main() {
             find.byType(
               mode == ImageEditorMode.inpaint
                   ? InpaintToolSettings
-                  : EditorQuickSettings,
+                  : EditToolSettings,
             ),
             findsOneWidget,
           );
@@ -89,7 +88,7 @@ void main() {
                   find.byType(
                     mode == ImageEditorMode.inpaint
                         ? InpaintToolSettings
-                        : EditorQuickSettings,
+                        : EditToolSettings,
                   ),
                 )
                 .height,
@@ -99,7 +98,7 @@ void main() {
             find.byType(
               mode == ImageEditorMode.inpaint
                   ? InpaintToolbar
-                  : EditorFloatingToolbar,
+                  : EditImageToolbar,
             ),
             findsOneWidget,
           );

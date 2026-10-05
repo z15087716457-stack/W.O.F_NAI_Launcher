@@ -7255,5 +7255,19 @@
   "editor_patternHearts": "Hearts",
   "editor_resize": "Resize",
   "editor_penSize": "Pen Size",
-  "editor_sourceChanged": "The source image changed while editing. Please reopen the editor."
+  "editor_sourceChanged": "The source image changed while editing. Please reopen the editor.",
+  "editor_draw": "Draw",
+  "editor_erase": "Erase",
+  "editor_select": "Select",
+  "editor_lasso": "Lasso",
+  "editor_roundTip": "Round",
+  "editor_softRoundTip": "Soft Round",
+  "editor_squareTip": "Square",
+  "editor_pressureSensitivity": "Pressure Sensitivity",
+  "editor_hsvAdjustment": "HSV Adjustment",
+  "editor_hue": "Hue",
+  "editor_cloneSourceHint": "Alt+Click to set source",
+  "editor_colorAlpha": "Alpha",
+  "editor_colorHex": "Color HEX",
+  "editor_closestValidSize": "Crop to closest valid generation size"
 }

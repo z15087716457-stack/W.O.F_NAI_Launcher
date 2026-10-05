@@ -7237,5 +7237,19 @@
   "editor_patternHearts": "ハート",
   "editor_resize": "サイズ変更",
   "editor_penSize": "ペンのサイズ",
-  "editor_sourceChanged": "編集中に元画像が変更されました。エディターを開き直してください。"
+  "editor_sourceChanged": "編集中に元画像が変更されました。エディターを開き直してください。",
+  "editor_draw": "描画",
+  "editor_erase": "消去",
+  "editor_select": "選択",
+  "editor_lasso": "投げ縄",
+  "editor_roundTip": "円形",
+  "editor_softRoundTip": "ソフト円形",
+  "editor_squareTip": "四角",
+  "editor_pressureSensitivity": "筆圧感知",
+  "editor_hsvAdjustment": "HSV 調整",
+  "editor_hue": "色相",
+  "editor_cloneSourceHint": "Alt+クリックでコピー元を設定",
+  "editor_colorAlpha": "透明度",
+  "editor_colorHex": "カラー HEX",
+  "editor_closestValidSize": "最も近い有効な生成サイズに切り抜く"
 }
