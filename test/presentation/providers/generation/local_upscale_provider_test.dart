@@ -140,8 +140,13 @@ void main() {
       }
       if (scenario == 'cancel') task.cancel();
       Future<void>? shutdown;
-      if (scenario == 'shutdown')
+      if (scenario == 'shutdown') {
         shutdown = DesktopAppShutdownService.prepareBackgroundShutdown();
+        var finished = false;
+        unawaited(shutdown.then((_) => finished = true));
+        await Future<void>.delayed(Duration.zero);
+        expect(finished, isFalse, reason: 'Shutdown must await child/task cleanup');
+      }
       pending.complete(LocalUpscaleResult(_png(72, 48), 72, 48));
       await done;
       await shutdown;
