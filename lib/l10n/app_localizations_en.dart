@@ -13069,4 +13069,111 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get img2img_emotionHurt => 'Hurt';
+
+  @override
+  String get localUpscale_title => 'Local upscaling';
+
+  @override
+  String get localUpscale_local => 'Local';
+
+  @override
+  String get localUpscale_manage => 'Manage models';
+
+  @override
+  String get localUpscale_description =>
+      'Upscale on this device. No ComfyUI connection or Anlas required.';
+
+  @override
+  String get localUpscale_bundled => 'Included';
+
+  @override
+  String get localUpscale_download => 'Download';
+
+  @override
+  String get localUpscale_importHelp =>
+      'Import a matching .param and .bin pair from a 4× Real-ESRGAN NCNN model (data/output blobs). PyTorch and safetensors models are not supported.';
+
+  @override
+  String get localUpscale_preparing => 'Preparing image…';
+
+  @override
+  String get localUpscale_inference => 'Upscaling…';
+
+  @override
+  String get localUpscale_resizing => 'Finishing image…';
+
+  @override
+  String get localUpscale_complete => 'Upscale complete';
+
+  @override
+  String get localUpscale_cancelling => 'Cancelling…';
+
+  @override
+  String get localUpscale_unsupportedPlatform =>
+      'Local upscaling currently supports Windows.';
+
+  @override
+  String get localUpscale_engineMissing =>
+      'Local engine unavailable. Reinstall the complete Studio package.';
+
+  @override
+  String get localUpscale_integrity =>
+      'File verification failed. Reinstall the affected model or Studio package.';
+
+  @override
+  String get localUpscale_modelMissing =>
+      'Model unavailable. Choose an installed model or check the model folder path length.';
+
+  @override
+  String get localUpscale_invalidModel =>
+      'Incompatible model. Import a matching 4× Real-ESRGAN NCNN pair.';
+
+  @override
+  String get localUpscale_invalidImage =>
+      'Cannot read this image. Try a PNG, JPEG or WebP file.';
+
+  @override
+  String get localUpscale_sizeLimit =>
+      'Image too large: the model output must fit within 64 megapixels.';
+
+  @override
+  String get localUpscale_noVulkan =>
+      'No usable Vulkan GPU. Update your graphics driver and try again.';
+
+  @override
+  String get localUpscale_processFailed =>
+      'Upscaling failed. Check the model and graphics driver. Your source image is preserved.';
+
+  @override
+  String get localUpscale_timeout =>
+      'Upscaling timed out. Try a smaller image.';
+
+  @override
+  String get localUpscale_busy =>
+      'Another upscale or model operation is still running.';
+
+  @override
+  String get localUpscale_cancelled => 'Upscaling cancelled';
+
+  @override
+  String get localUpscale_anime => 'Anime · Quality';
+
+  @override
+  String get localUpscale_animeFast => 'Anime · Fast';
+
+  @override
+  String get localUpscale_general => 'General · Photos';
+
+  @override
+  String get localUpscale_downloadProgress => 'Downloading model…';
+
+  @override
+  String get localUpscale_importModel => 'Import model';
+
+  @override
+  String get localUpscale_modelReady => 'Model installed';
+
+  @override
+  String get localUpscale_modelOperationFailed =>
+      'Model operation failed. Check your connection, file permissions and free disk space, then retry.';
 }

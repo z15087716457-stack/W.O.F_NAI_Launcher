@@ -22707,6 +22707,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hurt'**
   String get img2img_emotionHurt;
+
+  /// No description provided for @localUpscale_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Local upscaling'**
+  String get localUpscale_title;
+
+  /// No description provided for @localUpscale_local.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get localUpscale_local;
+
+  /// No description provided for @localUpscale_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage models'**
+  String get localUpscale_manage;
+
+  /// No description provided for @localUpscale_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale on this device. No ComfyUI connection or Anlas required.'**
+  String get localUpscale_description;
+
+  /// No description provided for @localUpscale_bundled.
+  ///
+  /// In en, this message translates to:
+  /// **'Included'**
+  String get localUpscale_bundled;
+
+  /// No description provided for @localUpscale_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get localUpscale_download;
+
+  /// No description provided for @localUpscale_importHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a matching .param and .bin pair from a 4× Real-ESRGAN NCNN model (data/output blobs). PyTorch and safetensors models are not supported.'**
+  String get localUpscale_importHelp;
+
+  /// No description provided for @localUpscale_preparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing image…'**
+  String get localUpscale_preparing;
+
+  /// No description provided for @localUpscale_inference.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscaling…'**
+  String get localUpscale_inference;
+
+  /// No description provided for @localUpscale_resizing.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishing image…'**
+  String get localUpscale_resizing;
+
+  /// No description provided for @localUpscale_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale complete'**
+  String get localUpscale_complete;
+
+  /// No description provided for @localUpscale_cancelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling…'**
+  String get localUpscale_cancelling;
+
+  /// No description provided for @localUpscale_unsupportedPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Local upscaling currently supports Windows.'**
+  String get localUpscale_unsupportedPlatform;
+
+  /// No description provided for @localUpscale_engineMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Local engine unavailable. Reinstall the complete Studio package.'**
+  String get localUpscale_engineMissing;
+
+  /// No description provided for @localUpscale_integrity.
+  ///
+  /// In en, this message translates to:
+  /// **'File verification failed. Reinstall the affected model or Studio package.'**
+  String get localUpscale_integrity;
+
+  /// No description provided for @localUpscale_modelMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Model unavailable. Choose an installed model or check the model folder path length.'**
+  String get localUpscale_modelMissing;
+
+  /// No description provided for @localUpscale_invalidModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Incompatible model. Import a matching 4× Real-ESRGAN NCNN pair.'**
+  String get localUpscale_invalidModel;
+
+  /// No description provided for @localUpscale_invalidImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot read this image. Try a PNG, JPEG or WebP file.'**
+  String get localUpscale_invalidImage;
+
+  /// No description provided for @localUpscale_sizeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Image too large: the model output must fit within 64 megapixels.'**
+  String get localUpscale_sizeLimit;
+
+  /// No description provided for @localUpscale_noVulkan.
+  ///
+  /// In en, this message translates to:
+  /// **'No usable Vulkan GPU. Update your graphics driver and try again.'**
+  String get localUpscale_noVulkan;
+
+  /// No description provided for @localUpscale_processFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscaling failed. Check the model and graphics driver. Your source image is preserved.'**
+  String get localUpscale_processFailed;
+
+  /// No description provided for @localUpscale_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscaling timed out. Try a smaller image.'**
+  String get localUpscale_timeout;
+
+  /// No description provided for @localUpscale_busy.
+  ///
+  /// In en, this message translates to:
+  /// **'Another upscale or model operation is still running.'**
+  String get localUpscale_busy;
+
+  /// No description provided for @localUpscale_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscaling cancelled'**
+  String get localUpscale_cancelled;
+
+  /// No description provided for @localUpscale_anime.
+  ///
+  /// In en, this message translates to:
+  /// **'Anime · Quality'**
+  String get localUpscale_anime;
+
+  /// No description provided for @localUpscale_animeFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Anime · Fast'**
+  String get localUpscale_animeFast;
+
+  /// No description provided for @localUpscale_general.
+  ///
+  /// In en, this message translates to:
+  /// **'General · Photos'**
+  String get localUpscale_general;
+
+  /// No description provided for @localUpscale_downloadProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading model…'**
+  String get localUpscale_downloadProgress;
+
+  /// No description provided for @localUpscale_importModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Import model'**
+  String get localUpscale_importModel;
+
+  /// No description provided for @localUpscale_modelReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Model installed'**
+  String get localUpscale_modelReady;
+
+  /// No description provided for @localUpscale_modelOperationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Model operation failed. Check your connection, file permissions and free disk space, then retry.'**
+  String get localUpscale_modelOperationFailed;
 }
 
 class _AppLocalizationsDelegate

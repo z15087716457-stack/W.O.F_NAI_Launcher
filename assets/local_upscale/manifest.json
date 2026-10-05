@@ -1,0 +1,77 @@
+{
+  "engine_version": "0.2.0",
+  "engine_source": "https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan/releases/tag/v0.2.0",
+  "engine_archive_sha256": "1bbbdb12d470af80b035c773682e144c6c2f6ece9210832a289af0a48ce3fa9a",
+  "model_source": "https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0",
+  "model_archive_url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-windows.zip",
+  "model_archive_sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+  "engine_files": [
+    {
+      "path": "windows/realesrgan-ncnn-vulkan.exe",
+      "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+      "size": 6161408
+    },
+    {
+      "path": "windows/vcomp140.dll",
+      "sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+      "size": 182704
+    },
+    {
+      "path": "windows/LICENSE",
+      "sha256": "b14514ee5a83e198178f0cdb7369ca5f12eb2ba8712f23959bb3d4e1fe0a726a",
+      "size": 2274
+    }
+  ],
+  "model_files": [
+    {
+      "name": "models/realesr-animevideov3-x2.bin",
+      "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "size": 1247368
+    },
+    {
+      "name": "models/realesr-animevideov3-x2.param",
+      "sha256": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04",
+      "size": 3173
+    },
+    {
+      "name": "models/realesr-animevideov3-x3.bin",
+      "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "size": 1247368
+    },
+    {
+      "name": "models/realesr-animevideov3-x3.param",
+      "sha256": "d1a5755008791d09b57e3425fc9dd0bd26b00fdf79c606210bc0e693f8230881",
+      "size": 3173
+    },
+    {
+      "name": "models/realesr-animevideov3-x4.bin",
+      "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "size": 1247368
+    },
+    {
+      "name": "models/realesr-animevideov3-x4.param",
+      "sha256": "850a248e7c14c27e5bd8cf7265113a9441036a7db63963bb8aa5169d788a435e",
+      "size": 3077
+    },
+    {
+      "name": "models/realesrgan-x4plus-anime.bin",
+      "sha256": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc",
+      "size": 8943500
+    },
+    {
+      "name": "models/realesrgan-x4plus-anime.param",
+      "sha256": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4",
+      "size": 30290
+    },
+    {
+      "name": "models/realesrgan-x4plus.bin",
+      "sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "size": 33424520
+    },
+    {
+      "name": "models/realesrgan-x4plus.param",
+      "sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+      "size": 116029
+    }
+  ]
+}

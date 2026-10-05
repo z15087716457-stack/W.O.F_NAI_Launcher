@@ -346,6 +346,9 @@ class StorageKeys {
       'comfyui_upscale_seedvr2_model';
   static const String comfyuiUpscaleScale = 'comfyui_upscale_scale';
   static const String comfyuiUpscaleBackend = 'comfyui_upscale_backend';
+  static const String localUpscaleBackend = 'local_upscale_backend';
+  static const String localUpscaleModel = 'local_upscale_model';
+  static const String localUpscaleScale = 'local_upscale_scale';
   static const String comfyuiUpscaleModule = 'comfyui_upscale_module';
   static const String comfyuiSeedvr2VaeTileSize =
       'comfyui_seedvr2_vae_tile_size';

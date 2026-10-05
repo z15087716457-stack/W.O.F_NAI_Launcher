@@ -12459,6 +12459,101 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get img2img_emotionHurt => '受伤';
+
+  @override
+  String get localUpscale_title => '本地超分';
+
+  @override
+  String get localUpscale_local => '本地';
+
+  @override
+  String get localUpscale_manage => '管理模型';
+
+  @override
+  String get localUpscale_description => '在本机放大图片，无需连接 ComfyUI，不消耗 Anlas。';
+
+  @override
+  String get localUpscale_bundled => '内置';
+
+  @override
+  String get localUpscale_download => '下载';
+
+  @override
+  String get localUpscale_importHelp =>
+      '导入配套的 4 倍 Real-ESRGAN NCNN 模型 .param 和 .bin 文件（data/output 节点）。不支持 PyTorch 或 safetensors 模型。';
+
+  @override
+  String get localUpscale_preparing => '正在准备图片…';
+
+  @override
+  String get localUpscale_inference => '正在超分…';
+
+  @override
+  String get localUpscale_resizing => '正在完成图片处理…';
+
+  @override
+  String get localUpscale_complete => '超分完成';
+
+  @override
+  String get localUpscale_cancelling => '正在取消…';
+
+  @override
+  String get localUpscale_unsupportedPlatform => '本地超分目前支持 Windows。';
+
+  @override
+  String get localUpscale_engineMissing => '本地引擎不可用，请重新安装完整 Studio 运行包。';
+
+  @override
+  String get localUpscale_integrity => '文件校验失败，请重新安装对应模型或 Studio 运行包。';
+
+  @override
+  String get localUpscale_modelMissing => '模型不可用，请选择已安装的模型，或检查模型目录路径是否过长。';
+
+  @override
+  String get localUpscale_invalidModel =>
+      '模型不兼容，请导入配套的 4 倍 Real-ESRGAN NCNN 模型。';
+
+  @override
+  String get localUpscale_invalidImage => '无法读取图片，请尝试 PNG、JPEG 或 WebP 文件。';
+
+  @override
+  String get localUpscale_sizeLimit => '图片过大：模型原始输出不能超过 6400 万像素。';
+
+  @override
+  String get localUpscale_noVulkan => '未找到可用的 Vulkan 显卡，请更新显卡驱动后重试。';
+
+  @override
+  String get localUpscale_processFailed => '超分失败，请检查模型和显卡驱动。原图已保留。';
+
+  @override
+  String get localUpscale_timeout => '超分超时，请尝试较小的图片。';
+
+  @override
+  String get localUpscale_busy => '另一个超分或模型操作仍在运行。';
+
+  @override
+  String get localUpscale_cancelled => '已取消超分';
+
+  @override
+  String get localUpscale_anime => '动漫 · 画质';
+
+  @override
+  String get localUpscale_animeFast => '动漫 · 快速';
+
+  @override
+  String get localUpscale_general => '通用 · 摄影';
+
+  @override
+  String get localUpscale_downloadProgress => '正在下载模型…';
+
+  @override
+  String get localUpscale_importModel => '导入模型';
+
+  @override
+  String get localUpscale_modelReady => '模型已安装';
+
+  @override
+  String get localUpscale_modelOperationFailed => '模型操作失败，请检查网络、文件权限及可用空间后重试。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24916,4 +25011,99 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get img2img_emotionHurt => '受傷';
+
+  @override
+  String get localUpscale_title => '本地超分';
+
+  @override
+  String get localUpscale_local => '本地';
+
+  @override
+  String get localUpscale_manage => '管理模型';
+
+  @override
+  String get localUpscale_description => '在本機放大圖片，無需連線 ComfyUI，不消耗 Anlas。';
+
+  @override
+  String get localUpscale_bundled => '內建';
+
+  @override
+  String get localUpscale_download => '下載';
+
+  @override
+  String get localUpscale_importHelp =>
+      '匯入配套的 4 倍 Real-ESRGAN NCNN 模型 .param 和 .bin 檔案（data/output 節點）。不支援 PyTorch 或 safetensors 模型。';
+
+  @override
+  String get localUpscale_preparing => '正在準備圖片…';
+
+  @override
+  String get localUpscale_inference => '正在超分…';
+
+  @override
+  String get localUpscale_resizing => '正在完成圖片處理…';
+
+  @override
+  String get localUpscale_complete => '超分完成';
+
+  @override
+  String get localUpscale_cancelling => '正在取消…';
+
+  @override
+  String get localUpscale_unsupportedPlatform => '本地超分目前支援 Windows。';
+
+  @override
+  String get localUpscale_engineMissing => '本地引擎不可用，請重新安裝完整 Studio 執行包。';
+
+  @override
+  String get localUpscale_integrity => '檔案校驗失敗，請重新安裝對應模型或 Studio 執行包。';
+
+  @override
+  String get localUpscale_modelMissing => '模型不可用，請選擇已安裝的模型，或檢查模型目錄路徑是否過長。';
+
+  @override
+  String get localUpscale_invalidModel =>
+      '模型不相容，請匯入配套的 4 倍 Real-ESRGAN NCNN 模型。';
+
+  @override
+  String get localUpscale_invalidImage => '無法讀取圖片，請嘗試 PNG、JPEG 或 WebP 檔案。';
+
+  @override
+  String get localUpscale_sizeLimit => '圖片過大：模型原始輸出不能超過 6400 萬像素。';
+
+  @override
+  String get localUpscale_noVulkan => '未找到可用的 Vulkan 顯示卡，請更新顯示卡驅動後重試。';
+
+  @override
+  String get localUpscale_processFailed => '超分失敗，請檢查模型和顯示卡驅動。原圖已保留。';
+
+  @override
+  String get localUpscale_timeout => '超分逾時，請嘗試較小的圖片。';
+
+  @override
+  String get localUpscale_busy => '另一個超分或模型操作仍在執行。';
+
+  @override
+  String get localUpscale_cancelled => '已取消超分';
+
+  @override
+  String get localUpscale_anime => '動漫 · 畫質';
+
+  @override
+  String get localUpscale_animeFast => '動漫 · 快速';
+
+  @override
+  String get localUpscale_general => '通用 · 攝影';
+
+  @override
+  String get localUpscale_downloadProgress => '正在下載模型…';
+
+  @override
+  String get localUpscale_importModel => '匯入模型';
+
+  @override
+  String get localUpscale_modelReady => '模型已安裝';
+
+  @override
+  String get localUpscale_modelOperationFailed => '模型操作失敗，請檢查網路、檔案權限及可用空間後重試。';
 }

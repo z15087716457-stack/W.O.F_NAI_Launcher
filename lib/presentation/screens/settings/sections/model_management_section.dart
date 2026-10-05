@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'local_upscale_settings_section.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -467,6 +468,7 @@ class ModelManagementSectionState
                     context.l10n.modelSettings_tabInterfaces,
                     context.l10n.modelSettings_tabPresets,
                     context.l10n.modelSettings_tabRequests,
+                    context.l10n.localUpscale_title,
                   ],
                   selected: _tab,
                   onSelected: (value) => _switch(() => _tab = value),
@@ -789,6 +791,8 @@ class ModelManagementSectionState
                             onCreate: _createPreset,
                           ),
                         )
+                      : _tab == 4
+                      ? const LocalUpscaleSettingsSection()
                       : _requestRecords(history),
                 ),
               ],

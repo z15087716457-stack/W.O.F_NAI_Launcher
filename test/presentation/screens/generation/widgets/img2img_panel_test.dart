@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
-import 'package:nai_launcher/presentation/providers/comfyui/comfyui_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
@@ -24,6 +23,8 @@ import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.da
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../helpers/light_theme_contrast.dart';
+import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
+import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 
 void main() {
   group('Img2ImgPanel', () {
@@ -270,15 +271,14 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
     });
 
-    testWidgets('超分模型下拉项不重复显示当前模块前缀', (tester) async {
+    testWidgets('本地超分默认内置动漫模型且不依赖 ComfyUI', (tester) async {
       final container = ProviderContainer(
         overrides: [
           localStorageServiceProvider.overrideWith(
             (ref) => _MemoryLocalStorageService(),
           ),
-          comfyUISettingsProvider.overrideWith(_EnabledComfyUISettings.new),
-          comfyUISeedvr2ModelsProvider.overrideWith(
-            _FixedComfyUIUpscaleModels.new,
+          localUpscaleModelsProvider.overrideWith(
+            (ref) async => [localUpscaleCatalog.first.withInstalled(true)],
           ),
         ],
       );
@@ -306,14 +306,11 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('seedvr2_ema_7b_fp16'), findsOneWidget);
-      expect(find.textContaining('SeedVR2 ·'), findsNothing);
-
-      await tester.tap(find.text('普通模型'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('4x-UltraSharpV2'), findsOneWidget);
-      expect(find.textContaining('普通模型 ·'), findsNothing);
+      expect(find.text('动漫 · 画质'), findsOneWidget);
+      expect(find.text('本地'), findsOneWidget);
+      expect(find.text('ComfyUI'), findsNothing);
+      expect(find.text('普通模型'), findsNothing);
+      expect(find.text('管理模型'), findsOneWidget);
     });
 
     testWidgets('浅色主题下展开面板不应出现贴在面板底色上的近白色文字', (tester) async {
@@ -343,23 +340,6 @@ void main() {
 final Uint8List _testImageBytes = Uint8List.fromList(
   img.encodePng(img.Image(width: 8, height: 8)),
 );
-
-class _EnabledComfyUISettings extends ComfyUISettings {
-  @override
-  ComfyUISettingsState build() {
-    return const ComfyUISettingsState(enabled: true);
-  }
-}
-
-class _FixedComfyUIUpscaleModels extends ComfyUISeedvr2Models {
-  @override
-  List<String> build() {
-    return const ['seedvr2_ema_7b_fp16.safetensors', '4x-UltraSharpV2.pth'];
-  }
-
-  @override
-  Future<void> fetch({bool force = false}) async {}
-}
 
 class _MemoryLocalStorageService extends LocalStorageService {
   @override

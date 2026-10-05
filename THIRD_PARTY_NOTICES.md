@@ -1,5 +1,14 @@
 # Third-Party Notices
 
+## Native Local Upscaling
+
+The bundled unmodified Real-ESRGAN NCNN/Vulkan v0.2.0 engine and default
+Real-ESRGAN x4plus Anime model use the MIT license. Full engine, NCNN,
+libwebp and glslang notices, official sources and runtime dependencies
+are included under `assets/local_upscale/`. The compiled manifest pins
+the engine and model archive versions, SHA-256 hashes and file sizes.
+See `assets/local_upscale/THIRD_PARTY_NOTICES.md` and `windows/LICENSE`.
+
 ## Danbooru/e621 Tag Data
 
 The bundled `assets/databases/tag_catalog.db` is generated from the complete

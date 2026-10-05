@@ -805,7 +805,7 @@ void main() {
     test('build should default upscale settings to safe local defaults', () {
       final workflow = container.read(imageWorkflowControllerProvider);
 
-      expect(workflow.upscale.backend, equals(UpscaleBackend.comfyui));
+      expect(workflow.upscale.backend, equals(UpscaleBackend.local));
       expect(workflow.upscale.comfyModule, equals(ComfyUpscaleModule.seedvr2));
       expect(workflow.upscale.comfyScale, equals(1.5));
       expect(

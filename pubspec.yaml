@@ -135,6 +135,9 @@ flutter:
   generate: true
 
   assets:
+    - assets/local_upscale/
+    - assets/local_upscale/windows/
+    - assets/local_upscale/models/
     - assets/images/
     - assets/icons/
     - assets/icons/providers/

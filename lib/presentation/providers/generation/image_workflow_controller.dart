@@ -15,7 +15,7 @@ import 'generation_params_notifier.dart';
 
 enum ImageWorkflowMode { base, inpaint, enhance, upscale }
 
-enum UpscaleBackend { comfyui, novelai }
+enum UpscaleBackend { local, comfyui, novelai }
 
 enum ComfyUpscaleModule { regular, seedvr2, rtx }
 
@@ -184,6 +184,8 @@ const int seedvr2SwapIoComponentsThreshold = 24;
 class UpscaleWorkflowSettings {
   const UpscaleWorkflowSettings({
     this.backend = defaultBackend,
+    this.localModel = 'anime',
+    this.localScale = 1.5,
     this.comfyModule = defaultComfyModule,
     this.comfyScale = defaultComfyScale,
     this.comfyModel = defaultComfyModel,
@@ -195,7 +197,7 @@ class UpscaleWorkflowSettings {
     this.seedvr2BlocksToSwap = defaultSeedvr2BlocksToSwap,
   });
 
-  static const UpscaleBackend defaultBackend = UpscaleBackend.comfyui;
+  static const UpscaleBackend defaultBackend = UpscaleBackend.local;
   static const ComfyUpscaleModule defaultComfyModule =
       ComfyUpscaleModule.seedvr2;
   static const double defaultComfyScale = 1.5;
@@ -212,6 +214,8 @@ class UpscaleWorkflowSettings {
   static const int defaultSeedvr2BlocksToSwap = 16;
 
   final UpscaleBackend backend;
+  final String localModel;
+  final double localScale;
   final ComfyUpscaleModule comfyModule;
   final double comfyScale;
   final String comfyModel;
@@ -235,6 +239,8 @@ class UpscaleWorkflowSettings {
 
   UpscaleWorkflowSettings copyWith({
     UpscaleBackend? backend,
+    String? localModel,
+    double? localScale,
     ComfyUpscaleModule? comfyModule,
     double? comfyScale,
     String? comfyModel,
@@ -247,6 +253,8 @@ class UpscaleWorkflowSettings {
   }) {
     return UpscaleWorkflowSettings(
       backend: backend ?? this.backend,
+      localModel: localModel ?? this.localModel,
+      localScale: localScale ?? this.localScale,
       comfyModule: comfyModule ?? this.comfyModule,
       comfyScale: comfyScale ?? this.comfyScale,
       comfyModel: comfyModel ?? this.comfyModel,
@@ -615,6 +623,18 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       enhance: persistedEnhance,
       upscale: UpscaleWorkflowSettings(
         backend: persistedBackend,
+        localModel: _readPersistedStringSetting(
+          StorageKeys.localUpscaleModel,
+          defaultValue: 'anime',
+        ),
+        localScale:
+            (_storage.getSetting<num>(
+                      StorageKeys.localUpscaleScale,
+                      defaultValue: 1.5,
+                    ) ??
+                    1.5)
+                .toDouble()
+                .clamp(1.0, 4.0),
         comfyModule: persistedComfyModule,
         comfyScale: persistedScale,
         comfyModel: currentModel,
@@ -661,12 +681,16 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   UpscaleBackend _readPersistedUpscaleBackend() {
     final rawValue = _storage.getSetting<String>(
-      StorageKeys.comfyuiUpscaleBackend,
-      defaultValue: UpscaleWorkflowSettings.defaultBackend.name,
+      StorageKeys.localUpscaleBackend,
+      defaultValue: _storage.getSetting<String>(
+        StorageKeys.comfyuiUpscaleBackend,
+      ),
     );
     for (final backend in UpscaleBackend.values) {
       if (backend.name == rawValue) {
-        return backend;
+        return backend == UpscaleBackend.comfyui
+            ? UpscaleBackend.local
+            : backend;
       }
     }
     return UpscaleWorkflowSettings.defaultBackend;
@@ -1136,9 +1160,28 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   void updateUpscaleBackend(UpscaleBackend backend) {
+    if (state.isToolRunning) return;
     final nextSettings = state.upscale.copyWith(backend: backend);
     state = state.copyWith(upscale: nextSettings);
-    _persistUpscaleSettings(nextSettings);
+    unawaited(
+      _storage.setSetting(StorageKeys.localUpscaleBackend, backend.name),
+    );
+  }
+
+  int get sourceRevision => _sourceImageRequestId;
+  bool get isDisposed => _isDisposed;
+
+  void updateLocalUpscaleModel(String model) {
+    if (state.isToolRunning) return;
+    state = state.copyWith(upscale: state.upscale.copyWith(localModel: model));
+    unawaited(_storage.setSetting(StorageKeys.localUpscaleModel, model));
+  }
+
+  void updateLocalUpscaleScale(double scale) {
+    if (state.isToolRunning || !scale.isFinite) return;
+    final value = scale.clamp(1.0, 4.0);
+    state = state.copyWith(upscale: state.upscale.copyWith(localScale: value));
+    unawaited(_storage.setSetting(StorageKeys.localUpscaleScale, value));
   }
 
   void updateSeedvr2VaeTileSize(double value) {

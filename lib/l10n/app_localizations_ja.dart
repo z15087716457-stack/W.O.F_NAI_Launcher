@@ -12676,4 +12676,106 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get img2img_emotionHurt => '傷ついた';
+
+  @override
+  String get localUpscale_title => 'ローカル超解像';
+
+  @override
+  String get localUpscale_local => 'ローカル';
+
+  @override
+  String get localUpscale_manage => 'モデル管理';
+
+  @override
+  String get localUpscale_description =>
+      'この端末で画像を拡大します。ComfyUI 接続も Anlas も不要です。';
+
+  @override
+  String get localUpscale_bundled => '内蔵';
+
+  @override
+  String get localUpscale_download => 'ダウンロード';
+
+  @override
+  String get localUpscale_importHelp =>
+      '4倍 Real-ESRGAN NCNN モデルの .param と .bin の組をインポートします（data/output ノード）。PyTorch と safetensors は非対応です。';
+
+  @override
+  String get localUpscale_preparing => '画像を準備中…';
+
+  @override
+  String get localUpscale_inference => '超解像処理中…';
+
+  @override
+  String get localUpscale_resizing => '画像を仕上げ中…';
+
+  @override
+  String get localUpscale_complete => '超解像完了';
+
+  @override
+  String get localUpscale_cancelling => 'キャンセル中…';
+
+  @override
+  String get localUpscale_unsupportedPlatform => 'ローカル超解像は現在 Windows に対応しています。';
+
+  @override
+  String get localUpscale_engineMissing =>
+      'ローカルエンジンを利用できません。Studio の完全なパッケージを再インストールしてください。';
+
+  @override
+  String get localUpscale_integrity =>
+      'ファイル検証に失敗しました。モデルまたは Studio を再インストールしてください。';
+
+  @override
+  String get localUpscale_modelMissing =>
+      'モデルを利用できません。インストール済みのモデルを選ぶか、フォルダーのパス長を確認してください。';
+
+  @override
+  String get localUpscale_invalidModel =>
+      '非対応モデルです。4倍 Real-ESRGAN NCNN の組をインポートしてください。';
+
+  @override
+  String get localUpscale_invalidImage => '画像を読み込めません。PNG、JPEG、WebP をお試しください。';
+
+  @override
+  String get localUpscale_sizeLimit => '画像が大きすぎます。モデルの出力は6400万画素以下にしてください。';
+
+  @override
+  String get localUpscale_noVulkan =>
+      '利用可能な Vulkan GPU がありません。グラフィックスドライバーを更新してください。';
+
+  @override
+  String get localUpscale_processFailed =>
+      '超解像に失敗しました。モデルとドライバーを確認してください。元画像は保持されています。';
+
+  @override
+  String get localUpscale_timeout => '処理がタイムアウトしました。小さい画像をお試しください。';
+
+  @override
+  String get localUpscale_busy => '別の超解像またはモデル操作が実行中です。';
+
+  @override
+  String get localUpscale_cancelled => '超解像をキャンセルしました';
+
+  @override
+  String get localUpscale_anime => 'アニメ · 高画質';
+
+  @override
+  String get localUpscale_animeFast => 'アニメ · 高速';
+
+  @override
+  String get localUpscale_general => '汎用 · 写真';
+
+  @override
+  String get localUpscale_downloadProgress => 'モデルをダウンロード中…';
+
+  @override
+  String get localUpscale_importModel => 'モデルをインポート';
+
+  @override
+  String get localUpscale_modelReady => 'モデルをインストールしました';
+
+  @override
+  String get localUpscale_modelOperationFailed =>
+      'モデル操作に失敗しました。接続、ファイルの権限、空き容量を確認して再試行してください。';
 }

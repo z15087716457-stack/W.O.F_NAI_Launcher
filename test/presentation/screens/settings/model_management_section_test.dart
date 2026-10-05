@@ -17,6 +17,8 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_task_de
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/model_management_section.dart';
+import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
+import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/compact_service_connection.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
@@ -170,6 +172,12 @@ Future<ProviderContainer> pumpManagement(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        localUpscaleModelsProvider.overrideWith(
+          (ref) async => [
+            localUpscaleCatalog.first.withInstalled(true),
+            ...localUpscaleCatalog.skip(1),
+          ],
+        ),
         if (dio != null) promptAssistantDioProvider.overrideWithValue(dio),
         localStorageServiceProvider.overrideWithValue(storage),
         secureStorageServiceProvider.overrideWithValue(
@@ -202,6 +210,14 @@ Future<ProviderContainer> pumpManagement(
 }
 
 void main() {
+  testWidgets('本地超分模型管理可从设置标签直接打开', (tester) async {
+    await pumpManagement(tester);
+    await tapVisible(tester, find.text('本地超分'));
+    expect(find.text('动漫 · 画质'), findsOneWidget);
+    expect(find.text('导入模型'), findsOneWidget);
+    expect(find.text('内置'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
   setUpAll(() async {
     await ModelCatalogRepository.load();
     if (Platform.environment['CAPTURE_MODEL_MANAGEMENT'] != '1') return;

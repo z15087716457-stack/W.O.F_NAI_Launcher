@@ -1258,6 +1258,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     bool replaceCurrentDisplay = false,
     ImageOperation? operation,
     Uint8List? originalBytes,
+    bool Function()? canApply,
+    bool Function()? canReplaceDisplay,
   }) async {
     assert(
       !addToDisplay || !replaceCurrentDisplay,
@@ -1296,17 +1298,21 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       originalBytes: originalBytes,
     );
 
-    final shouldDisplay = addToDisplay || replaceCurrentDisplay;
+    if (canApply != null && !canApply()) return null;
+    final replaceDisplay =
+        replaceCurrentDisplay && (canReplaceDisplay?.call() ?? true);
+    final appendDisplay = addToDisplay && (canReplaceDisplay?.call() ?? true);
+    final shouldDisplay = appendDisplay || replaceDisplay;
     state = state.copyWith(
-      currentImages: replaceCurrentDisplay
+      currentImages: replaceDisplay
           ? [generatedImage]
-          : addToDisplay
+          : appendDisplay
           ? [generatedImage, ...state.currentImages]
           : state.currentImages,
       history: [generatedImage, ...state.history],
-      displayImages: replaceCurrentDisplay
+      displayImages: replaceDisplay
           ? [generatedImage]
-          : addToDisplay
+          : appendDisplay
           ? [generatedImage, ...state.displayImages]
           : state.displayImages,
       displayWidth: shouldDisplay ? resolvedSize.$1 : state.displayWidth,
