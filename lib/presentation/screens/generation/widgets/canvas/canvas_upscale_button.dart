@@ -13,6 +13,7 @@ import '../../../../providers/generation/image_workflow_controller.dart';
 import '../../../../providers/generation/local_upscale_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
 import '../../../../widgets/common/app_toast.dart';
+import '../../../../widgets/common/hinted_scroll_view.dart';
 import '../generation_sidebar_style.dart';
 import '../local_upscale_panel.dart';
 import '../../../settings/sections/local_upscale_settings_section.dart';
@@ -206,8 +207,7 @@ class CanvasUpscaleButton extends ConsumerWidget {
                     math.min(520, MediaQuery.sizeOf(context).height - 140),
                   ),
                 ),
-                child: SingleChildScrollView(
-                  primary: false,
+                child: HintedScrollView(
                   child: LocalUpscalePanel(
                     onCloudStart: () {},
                     cloudRunning: cloud.running,

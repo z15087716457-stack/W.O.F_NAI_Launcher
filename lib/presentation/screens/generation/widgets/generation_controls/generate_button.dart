@@ -17,6 +17,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
   final VoidCallback onCancel;
   final int? costOverride;
   final String? labelOverride;
+  final bool isUpscaling;
 
   /// 按钮高度（紧凑布局可压低）
   final double height;
@@ -37,6 +38,7 @@ class GenerateButtonWithCost extends ConsumerWidget {
     required this.onCancel,
     this.costOverride,
     this.labelOverride,
+    this.isUpscaling = false,
     this.height = 48,
     this.imageCount = 1,
     this.copySeed = 0,
@@ -67,7 +69,11 @@ class GenerateButtonWithCost extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (showCancel) {
-      return GenerationCancelButton(height: height, onCancel: onCancel);
+      return GenerationCancelButton(
+        height: height,
+        onCancel: onCancel,
+        isUpscaling: isUpscaling,
+      );
     }
 
     return SizedBox(
@@ -112,17 +118,19 @@ class GenerationCancelButton extends StatelessWidget {
     super.key,
     required this.onCancel,
     this.height = 48,
+    this.isUpscaling = false,
   });
 
   final VoidCallback onCancel;
   final double height;
+  final bool isUpscaling;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     const yellow = Color(0xffe2c35b);
     return SizedBox(
-      key: const ValueKey('stop-generation'),
+      key: ValueKey(isUpscaling ? 'stop-upscale' : 'stop-generation'),
       width: double.infinity,
       height: height,
       child: DecoratedBox(
@@ -156,7 +164,9 @@ class GenerationCancelButton extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          context.l10n.generation_stopGeneration,
+                          isUpscaling
+                              ? context.l10n.localUpscale_stop
+                              : context.l10n.generation_stopGeneration,
                           style: theme.textTheme.labelLarge?.copyWith(
                             color: yellow,
                             fontWeight: FontWeight.w600,

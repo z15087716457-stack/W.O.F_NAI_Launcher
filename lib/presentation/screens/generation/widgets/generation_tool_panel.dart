@@ -7,6 +7,7 @@ import 'img2img_panel.dart';
 import 'generation_sidebar_style.dart';
 import 'local_upscale_panel.dart';
 import 'upscale_control_style.dart';
+import '../../../widgets/common/hinted_scroll_view.dart';
 
 /// Screen-space tool controls leave the image and camera free to move.
 class GenerationToolPanel extends ConsumerWidget {
@@ -57,8 +58,7 @@ class GenerationToolPanel extends ConsumerWidget {
                   side: BorderSide(color: GenSidebarStyle.border(theme)),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: SingleChildScrollView(
-                  primary: false,
+                child: HintedScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Column(

@@ -6816,5 +6816,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "localUpscale_stop": "업스케일 중지",
+  "localUpscale_scrollDown": "아래로 스크롤"
 }

@@ -45,6 +45,67 @@ void main() {
     });
 
     test(
+      'canvas enhance follows draft size and preserves the selected factor',
+      () {
+        final params = container.read(
+          generationParamsNotifierProvider.notifier,
+        );
+        params.updateModel(ImageModels.animeDiffusionV5Curated);
+        params.updateSize(832, 1216, persist: false);
+        final controller = container.read(
+          imageWorkflowControllerProvider.notifier,
+        );
+        final source = Uint8List.fromList(
+          img.encodePng(img.Image(width: 1664, height: 2432)),
+        );
+        final before = container.read(generationParamsNotifierProvider);
+        controller.openTemporaryTool(
+          source,
+          ImageWorkflowMode.enhance,
+          enhanceUsesGenerationSize: true,
+        );
+        expect(controller.availableEnhanceFactors, [1.0, 1.5]);
+        expect(controller.isEnhanceMaxUpscaleEligible, isTrue);
+        controller.updateEnhanceUpscaleFactor(1.5);
+        expect(container.read(generationParamsNotifierProvider), same(before));
+        final request = container.read(generationRequestParamsProvider);
+        expect((request.width, request.height), (1248, 1824));
+        expect(request.sourceImage, same(source));
+        controller.closeTemporaryTool();
+        controller.openTemporaryTool(
+          source,
+          ImageWorkflowMode.enhance,
+          enhanceUsesGenerationSize: true,
+        );
+        expect(
+          container.read(imageWorkflowControllerProvider).enhance.upscaleFactor,
+          1.5,
+        );
+        params.updatePromptImmediately('latest user text');
+        params.updateSize(896, 1280, persist: false);
+        expect(controller.availableEnhanceFactors, contains(1.5));
+        final latest = container.read(generationRequestParamsProvider);
+        expect((latest.width, latest.height), (1344, 1920));
+        expect(latest.prompt, 'latest user text');
+        controller.setEnhanceLocalUpscale();
+        final local = container.read(generationRequestParamsProvider);
+        expect((local.width, local.height), (896, 1280));
+        expect(local.sourceImage, isNull);
+        controller.closeTemporaryTool();
+        expect(
+          container.read(generationParamsNotifierProvider).prompt,
+          'latest user text',
+        );
+        expect(
+          container
+              .read(imageWorkflowControllerProvider)
+              .enhanceUsesGenerationSize,
+          isFalse,
+        );
+      },
+    );
+
+    test(
       'local SeedVR2 options persist per variant and do not reuse ComfyUI settings',
       () async {
         await Hive.box(

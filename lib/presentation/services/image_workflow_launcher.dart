@@ -146,7 +146,11 @@ class ImageWorkflowLauncher {
 
   static void openEnhance(WidgetRef ref, Uint8List imageBytes) {
     final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
-    workflowNotifier.openTemporaryTool(imageBytes, ImageWorkflowMode.enhance);
+    workflowNotifier.openTemporaryTool(
+      imageBytes,
+      ImageWorkflowMode.enhance,
+      enhanceUsesGenerationSize: true,
+    );
   }
 
   static Future<void> openInpaint(

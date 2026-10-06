@@ -48,6 +48,13 @@ class GenerationCanvasView extends ConsumerStatefulWidget {
 class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     with TickerProviderStateMixin {
   Size _viewport = Size.zero;
+  final _viewportKey = GlobalKey();
+  final _topToolbarKey = GlobalKey();
+  final _bottomStartToolbarKey = GlobalKey();
+  final _bottomEndToolbarKey = GlobalKey();
+  Rect _focusViewport = Rect.zero;
+  bool _measureFocusPending = false;
+  bool _focusFitActive = false;
   bool _syncingPreviewSelection = false;
   bool _manualOverview = false;
 
@@ -245,6 +252,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (_viewport.isEmpty) return;
     final bounds = _groupBounds(layout, g);
     if (bounds.isEmpty) return;
+    _focusFitActive = true;
     final target = _fitCameraForRect(bounds.inflate(10));
     _camera.flyTo(_camera.adjustTargetForTeleport(target, _viewport));
   }
@@ -260,18 +268,21 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
         .map((it) => it.worldRect)
         .firstOrNull;
     if (rect == null || rect.isEmpty) return;
+    _focusFitActive = true;
     final target = _fitCameraForRect(rect.inflate(10));
     _camera.flyTo(_camera.adjustTargetForTeleport(target, _viewport));
   }
 
-  /// 官网 T() fitToRect：scale = min(fitMaxScale, 可用区/rect)，
-  /// fitMaxScale = 放大填充开 ? maxScale : 1；可用区 = 视口 - 5%外边距 - chrome。
+  /// Fit inside the measured space between the three floating toolbars.
   CanvasCamera _fitCameraForRect(Rect rect) {
-    final n = _viewport.width;
-    final o = _viewport.height;
-    const margin = 26.0; // 官网 5% + 6 + 20 近似
-    final m = math.max(1.0, n - margin * 2);
-    final f = math.max(1.0, o - margin * 2);
+    final available = _focusViewport.isEmpty
+        ? Rect.fromLTWH(
+            20,
+            56,
+            math.max(1.0, _viewport.width - 40),
+            math.max(1.0, _viewport.height - 112),
+          )
+        : _focusViewport;
     final fitMax = ref.read(canvasZoomToFillNotifierProvider)
         ? CanvasCamera.maxScale
         : 1.0;
@@ -279,20 +290,79 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       math.min(fitMax, CanvasCamera.maxScale),
       math.max(
         CanvasCamera.minScale,
-        math.min(m / rect.width, f / rect.height),
+        math.min(available.width / rect.width, available.height / rect.height),
       ),
     );
-    final tx = margin + m / 2 - rect.center.dx * y;
-    final ty = margin + f / 2 - rect.center.dy * y;
+    final tx = available.center.dx - rect.center.dx * y;
+    final ty = available.center.dy - rect.center.dy * y;
     return CanvasCamera(offset: Offset(tx, ty), scale: y);
   }
 
-  void _refitCurrentFocus() {
+  void _measureFocusViewport() {
+    if (_measureFocusPending) return;
+    _measureFocusPending = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureFocusPending = false;
+      if (!mounted) return;
+      final viewport = _viewportKey.currentContext?.findRenderObject();
+      if (viewport is! RenderBox ||
+          !viewport.hasSize ||
+          viewport.size.isEmpty) {
+        return;
+      }
+      Rect? toolbarRect(GlobalKey key) {
+        final box = key.currentContext?.findRenderObject();
+        if (box is! RenderBox || !box.hasSize) return null;
+        return viewport.globalToLocal(box.localToGlobal(Offset.zero)) &
+            box.size;
+      }
+
+      final top = toolbarRect(_topToolbarKey);
+      final bottomStart = toolbarRect(_bottomStartToolbarKey);
+      final bottomEnd = toolbarRect(_bottomEndToolbarKey);
+      if (top == null || bottomStart == null || bottomEnd == null) return;
+      final topEdge = (top.bottom + 8)
+          .clamp(0.0, viewport.size.height - 1)
+          .toDouble();
+      final bottomEdge = (math.min(bottomStart.top, bottomEnd.top) - 8)
+          .clamp(topEdge + 1, viewport.size.height)
+          .toDouble();
+      final available = Rect.fromLTRB(
+        20,
+        topEdge,
+        math.max(21.0, viewport.size.width - 20),
+        bottomEdge,
+      );
+      if (_focusViewport == available) return;
+      _focusViewport = available;
+      if (_focusFitActive && !_manualOverview) {
+        _refitCurrentFocus(immediate: true);
+      }
+    });
+  }
+
+  void _refitCurrentFocus({bool immediate = false}) {
     final focus = ref.read(generationCanvasGroupSelectionProvider);
     if (focus == null) return;
     final layout = ref.read(canvasFeedLayoutProvider);
     final group = layout.groups.where((g) => g.key == focus.group).firstOrNull;
     if (group == null) return;
+    if (immediate) {
+      final rect = focus.subimage == null
+          ? _groupBounds(layout, group)
+          : layout.items
+                .where(
+                  (item) =>
+                      item.group.key == group.key &&
+                      item.subimageIndex == focus.subimage,
+                )
+                .firstOrNull
+                ?.worldRect;
+      if (rect != null && !rect.isEmpty) {
+        _camera.jump(_fitCameraForRect(rect.inflate(10)));
+      }
+      return;
+    }
     if (focus.subimage != null) {
       _flyToSubimage(layout, group, focus.subimage!);
     } else {
@@ -342,6 +412,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    MediaQuery.textScalerOf(context);
     final layout = ref.watch(canvasFeedLayoutProvider);
     final focus = ref.watch(generationCanvasGroupSelectionProvider);
 
@@ -463,8 +534,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
               _camera.setViewport(_viewport);
               final selectedImage = _resolveSelectedImage(layout, focus);
               final showEdgeBars = focus != null && selectedImage != null;
+              if (showEdgeBars) _measureFocusViewport();
 
               return ClipRect(
+                key: _viewportKey,
                 child: Stack(
                   children: [
                     Positioned.fill(
@@ -699,6 +772,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
               outsideRightWidth: rightPaneWidth + 16,
               child: guarded(
                 CanvasEdgeToolbar(
+                  key: _topToolbarKey,
                   zone: CanvasToolbarZone.top,
                   image: img,
                   group: g,
@@ -710,6 +784,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
               alignment: Alignment.bottomLeft,
               child: guarded(
                 CanvasEdgeToolbar(
+                  key: _bottomStartToolbarKey,
                   zone: CanvasToolbarZone.bottomStart,
                   image: img,
                   group: g,
@@ -721,6 +796,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
               alignment: Alignment.bottomRight,
               child: guarded(
                 CanvasEdgeToolbar(
+                  key: _bottomEndToolbarKey,
                   zone: CanvasToolbarZone.bottomEnd,
                   image: img,
                   group: g,
@@ -743,6 +819,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
   void _startWasd() {
     if (_wasdTicker != null) return;
+    _focusFitActive = false;
     _wasdLast = Duration.zero;
     _wasdTicker = createTicker((elapsed) {
       final dt = elapsed - _wasdLast;
@@ -867,6 +944,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       return KeyEventResult.handled;
     }
     if (!_cameraLocked && ctrl && key == LogicalKeyboardKey.digit0) {
+      _focusFitActive = false;
       _manualOverview = true;
       ref.read(generationCanvasGroupSelectionProvider.notifier).clear();
       _camera.flyTo(CanvasCamera.init);
@@ -882,6 +960,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (!_cameraLocked &&
         (key == LogicalKeyboardKey.equal ||
             key == LogicalKeyboardKey.numpadAdd)) {
+      _focusFitActive = false;
       _camera.zoomBy(
         1.3,
         anchor: Offset(_viewport.width / 2, _viewport.height / 2),
@@ -891,6 +970,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (!_cameraLocked &&
         (key == LogicalKeyboardKey.minus ||
             key == LogicalKeyboardKey.numpadSubtract)) {
+      _focusFitActive = false;
       _camera.zoomBy(
         1 / 1.3,
         anchor: Offset(_viewport.width / 2, _viewport.height / 2),
@@ -900,6 +980,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (!_cameraLocked &&
         (key == LogicalKeyboardKey.digit1 ||
             key == LogicalKeyboardKey.numpad1)) {
+      _focusFitActive = false;
       // 回 100%：锚定视口中心
       final center = Offset(_viewport.width / 2, _viewport.height / 2);
       _camera.zoomBy(1 / _cameraState().scale, anchor: center);
@@ -955,6 +1036,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       if (_panAccum.distance <= 5) return;
       _panActive = true;
       _manualOverview = false;
+      _focusFitActive = false;
       _camera.panBy(_panAccum);
     } else {
       _camera.panBy(e.localDelta);
@@ -1008,6 +1090,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final ctrl = kb.isControlPressed || kb.isMetaPressed;
     final shift = kb.isShiftPressed;
     final dy = e.scrollDelta.dy;
+    _focusFitActive = false;
     _manualOverview = false;
 
     if (ctrl) {
@@ -1034,6 +1117,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   double _panZoomScale = 1;
 
   void _onPanZoomStart(PointerPanZoomStartEvent event) {
+    _focusFitActive = false;
     _panZoomScale = 1;
     _canvasFocusNode.requestFocus();
   }

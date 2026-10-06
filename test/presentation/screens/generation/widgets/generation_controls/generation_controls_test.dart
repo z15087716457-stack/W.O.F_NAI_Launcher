@@ -7,6 +7,7 @@ import 'package:image/image.dart' as img;
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/image/image_operation.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
+import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
@@ -21,6 +22,67 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/generation_
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 
 void main() {
+  for (final automatic in [false, true]) {
+    testWidgets(
+      'stop upscale routes cancellation correctly; automatic=$automatic',
+      (tester) async {
+        final task = _RunningUpscale();
+        final generation = _RunningGeneration(automatic);
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              localStorageServiceProvider.overrideWithValue(
+                _MemoryLocalStorageService({}),
+              ),
+              imageGenerationNotifierProvider.overrideWith(() => generation),
+              localUpscaleTaskProvider.overrideWith(() => task),
+              kritaBridgeNotifierProvider.overrideWith(
+                (ref) => _TestKritaBridgeNotifier(),
+              ),
+              subscriptionNotifierProvider.overrideWith(
+                _TestSubscriptionNotifier.new,
+              ),
+              estimatedCostProvider.overrideWithValue(0),
+            ],
+            child: const MaterialApp(
+              locale: Locale('zh'),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              home: Scaffold(
+                body: SizedBox(
+                  width: 400,
+                  height: 60,
+                  child: GenerationControls(
+                    compact: true,
+                    showBalanceChips: false,
+                    showAutoSaveChip: false,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.text('停止超分'), findsOneWidget);
+        expect(find.text('停止生成'), findsNothing);
+        final button = tester.getRect(
+          find.byKey(const ValueKey('stop-upscale')),
+        );
+        final contents = find
+            .ancestor(of: find.text('停止超分'), matching: find.byType(Row))
+            .first;
+        expect(
+          tester.getRect(contents).center.dx,
+          closeTo(button.center.dx, .5),
+        );
+        await tester.tap(find.text('停止超分'));
+        expect(task.stops, automatic ? 0 : 1);
+        expect(generation.stops, automatic ? 1 : 0);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+  }
   testWidgets('桥接生成使用现有停止按钮且不调用 UI 生成', (tester) async {
     final bridge = _ActiveBridgeNotifier();
     await tester.pumpWidget(
@@ -269,6 +331,26 @@ void main() {
 class _DraftParams extends GenerationParamsNotifier {
   @override
   ImageParams build() => const ImageParams(prompt: 'city lights');
+}
+
+class _RunningUpscale extends LocalUpscaleTask {
+  int stops = 0;
+  @override
+  LocalUpscaleTaskState build() => const LocalUpscaleTaskState(running: true);
+  @override
+  void cancel() => stops++;
+}
+
+class _RunningGeneration extends ImageGenerationNotifier {
+  _RunningGeneration(this.automatic);
+  final bool automatic;
+  int stops = 0;
+  @override
+  ImageGenerationState build() => ImageGenerationState(
+    status: automatic ? GenerationStatus.generating : GenerationStatus.idle,
+  );
+  @override
+  void cancel() => stops++;
 }
 
 class _CaptureGeneration extends ImageGenerationNotifier {

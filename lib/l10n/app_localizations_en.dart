@@ -12786,4 +12786,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enhance_localAction => 'Generate and upscale locally';
+
+  @override
+  String get localUpscale_stop => 'Stop upscaling';
+
+  @override
+  String get localUpscale_scrollDown => 'Scroll down';
 }

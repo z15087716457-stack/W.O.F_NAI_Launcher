@@ -6816,5 +6816,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "localUpscale_stop": "アップスケールを停止",
+  "localUpscale_scrollDown": "下へスクロール"
 }

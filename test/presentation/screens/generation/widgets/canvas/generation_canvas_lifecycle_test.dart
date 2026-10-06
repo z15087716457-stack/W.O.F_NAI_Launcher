@@ -10,6 +10,7 @@ import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart'
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_view.dart';
 
@@ -233,6 +234,16 @@ void main() {
       final oldCenter = container
           .read(generationCanvasCameraProvider)
           .screenToWorld(tester.getCenter(find.byType(GenerationCanvasView)));
+      final bars =
+          tester
+              .elementList(find.byType(CanvasEdgeToolbar))
+              .map((e) => tester.getRect(find.byWidget(e.widget)))
+              .toList()
+            ..sort((a, b) => a.top.compareTo(b.top));
+      final safeCenter = Offset(
+        tester.getCenter(find.byType(GenerationCanvasView)).dx,
+        (bars.first.bottom + bars[1].top) / 2,
+      );
 
       final loading = _loading(2, history: [old]);
       _publish(container, loading);
@@ -244,10 +255,7 @@ void main() {
       );
       expect(camera.targets.length, 2);
       final position = container.read(generationCanvasCameraProvider);
-      final viewportCenter = tester.getCenter(
-        find.byType(GenerationCanvasView),
-      );
-      final newCenter = position.screenToWorld(viewportCenter);
+      final newCenter = position.screenToWorld(safeCenter);
       expect(newCenter.dy, lessThan(oldCenter.dy));
       expect((newCenter - _rect(container, 2).center).distance, lessThan(0.01));
       // 占位卡显示一句等待小贴士，流式帧到来后保持同一句

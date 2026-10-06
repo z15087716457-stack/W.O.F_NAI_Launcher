@@ -6816,5 +6816,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "localUpscale_stop": "停止超分",
+  "localUpscale_scrollDown": "向下滚动"
 }

@@ -12395,4 +12395,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get enhance_localAction => '生成してローカルで拡大';
+
+  @override
+  String get localUpscale_stop => 'アップスケールを停止';
+
+  @override
+  String get localUpscale_scrollDown => '下へスクロール';
 }

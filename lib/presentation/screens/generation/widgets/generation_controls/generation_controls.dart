@@ -15,6 +15,7 @@ import 'package:nai_launcher/presentation/widgets/anlas/anlas_balance_chip.dart'
 import 'package:nai_launcher/presentation/widgets/anlas/opus_usage_chip.dart';
 import 'generate_button.dart';
 import '../../../../providers/generation/image_workflow_controller.dart';
+import '../../../../providers/generation/local_upscale_provider.dart';
 
 /// 生成控制按钮
 class GenerationControls extends ConsumerStatefulWidget {
@@ -70,6 +71,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         ? ref.watch(estimatedCostForBatchSizeProvider(1))
         : null;
     final isLauncherGenerating = generationState.isGenerating;
+    final localUpscaleRunning = ref.watch(localUpscaleTaskProvider).running;
     // 探索页：runner 会话期间手动生成会与逐张生成互相抢占批次 id、
     // 且 roll 快照与工作区投影分叉——runner 在跑即视为生成中，禁用按钮。
     final exploreRunnerBusy = widget.exploreMode
@@ -77,6 +79,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         : false;
     final isGenerating =
         isLauncherGenerating ||
+        localUpscaleRunning ||
         ref.watch(
           imageWorkflowControllerProvider.select((w) => w.isToolRunning),
         ) ||
@@ -85,7 +88,9 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
 
     // 生成中常驻显示取消入口（与移动端一致）
     final showCancel =
-        isLauncherGenerating || kritaBridgeState.isBridgeGenerating;
+        isLauncherGenerating ||
+        kritaBridgeState.isBridgeGenerating ||
+        localUpscaleRunning;
 
     // 探索页强制逐张请求：文案张数只反映请求次数
     final imageCount = widget.exploreMode
@@ -115,6 +120,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
       height: widget.compact ? 40 : 48,
       isGenerating: isGenerating,
       showCancel: showCancel,
+      isUpscaling: localUpscaleRunning,
       generationState: generationState,
       cooldownRemainingSeconds: cooldownState.remainingSeconds,
       costOverride: costOverride,
@@ -122,7 +128,9 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
       copySeed: _copySeed,
       onGenerate: () => unawaited(_handleGenerate(context, ref)),
       onCancel: () {
-        if (kritaBridgeState.isBridgeGenerating) {
+        if (localUpscaleRunning && !isLauncherGenerating) {
+          ref.read(localUpscaleTaskProvider.notifier).cancel();
+        } else if (kritaBridgeState.isBridgeGenerating) {
           ref.read(kritaBridgeNotifierProvider.notifier).cancelActiveRequest();
         } else {
           ref.read(imageGenerationNotifierProvider.notifier).cancel();

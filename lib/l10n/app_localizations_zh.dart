@@ -12174,6 +12174,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get enhance_localAction => '生成并本地放大';
+
+  @override
+  String get localUpscale_stop => '停止超分';
+
+  @override
+  String get localUpscale_scrollDown => '向下滚动';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24346,4 +24352,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get enhance_localAction => '生成並本地放大';
+
+  @override
+  String get localUpscale_stop => '停止超分';
+
+  @override
+  String get localUpscale_scrollDown => '向下滾動';
 }

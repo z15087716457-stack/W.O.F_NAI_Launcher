@@ -22247,6 +22247,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generate and upscale locally'**
   String get enhance_localAction;
+
+  /// No description provided for @localUpscale_stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop upscaling'**
+  String get localUpscale_stop;
+
+  /// No description provided for @localUpscale_scrollDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll down'**
+  String get localUpscale_scrollDown;
 }
 
 class _AppLocalizationsDelegate

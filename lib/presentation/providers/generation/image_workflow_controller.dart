@@ -370,6 +370,7 @@ class ImageWorkflowState {
     this.isToolRunning = false,
     this.isOutpaint = false,
     this.temporaryEnhanceSource,
+    this.enhanceUsesGenerationSize = false,
   });
 
   final ImageWorkflowMode mode;
@@ -389,6 +390,7 @@ class ImageWorkflowState {
 
   /// A canvas Enhance source belongs to the tool, never to the img2img draft.
   final Uint8List? temporaryEnhanceSource;
+  final bool enhanceUsesGenerationSize;
 
   bool get isEnhance => mode == ImageWorkflowMode.enhance;
   bool get isInpaint => mode == ImageWorkflowMode.inpaint;
@@ -410,6 +412,7 @@ class ImageWorkflowState {
     bool? isToolRunning,
     bool? isOutpaint,
     Uint8List? temporaryEnhanceSource,
+    bool? enhanceUsesGenerationSize,
     bool clearSourceSize = false,
     bool clearBaseSnapshot = false,
   }) {
@@ -417,6 +420,8 @@ class ImageWorkflowState {
       mode: mode ?? this.mode,
       temporaryEnhanceSource:
           temporaryEnhanceSource ?? this.temporaryEnhanceSource,
+      enhanceUsesGenerationSize:
+          enhanceUsesGenerationSize ?? this.enhanceUsesGenerationSize,
       sourceWidth: clearSourceSize ? null : (sourceWidth ?? this.sourceWidth),
       sourceHeight: clearSourceSize
           ? null
@@ -480,8 +485,12 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     final source = state.temporaryEnhanceSource;
     if (source == null) return draft;
     final model = ImageModels.resolveBaseModel(draft.model);
-    final width = state.sourceWidth ?? draft.width;
-    final height = state.sourceHeight ?? draft.height;
+    final width = state.enhanceUsesGenerationSize
+        ? draft.width
+        : state.sourceWidth ?? draft.width;
+    final height = state.enhanceUsesGenerationSize
+        ? draft.height
+        : state.sourceHeight ?? draft.height;
     final maxEnabled =
         state.enhance.maxUpscale &&
         MaxEnhanceMath.isEligible(model, width, height);
@@ -508,7 +517,11 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   /// A toolbar operation owns a temporary source. Reopening another tool keeps
   /// the original draft snapshot until the temporary operation is dismissed.
-  void openTemporaryTool(Uint8List image, ImageWorkflowMode mode) {
+  void openTemporaryTool(
+    Uint8List image,
+    ImageWorkflowMode mode, {
+    bool enhanceUsesGenerationSize = false,
+  }) {
     if (state.isToolRunning) return;
     if (state.temporaryEnhanceSource != null || _toolSource != null) {
       closeTemporaryTool();
@@ -519,6 +532,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       state = ImageWorkflowState(
         mode: ImageWorkflowMode.enhance,
         temporaryEnhanceSource: image,
+        enhanceUsesGenerationSize: enhanceUsesGenerationSize,
         sourceWidth: size?.$1,
         sourceHeight: size?.$2,
         sourceImageWidth: size?.$1,
@@ -1560,16 +1574,20 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     if (state.temporaryEnhanceSource == null) _restoreBaseParams();
   }
 
-  /// 当前模型与源图是否可用 Max✨ 档。
+  /// Canvas settings follow the next request, not an upscaled preview's pixels.
   bool get isEnhanceMaxUpscaleEligible => MaxEnhanceMath.isEligible(
     ImageModels.resolveBaseModel(_params.model),
-    state.sourceWidth,
-    state.sourceHeight,
+    state.enhanceUsesGenerationSize ? _params.width : state.sourceWidth,
+    state.enhanceUsesGenerationSize ? _params.height : state.sourceHeight,
   );
 
   List<double> get availableEnhanceFactors {
-    final width = state.sourceWidth ?? _params.width;
-    final height = state.sourceHeight ?? _params.height;
+    final width = state.enhanceUsesGenerationSize
+        ? _params.width
+        : state.sourceWidth ?? _params.width;
+    final height = state.enhanceUsesGenerationSize
+        ? _params.height
+        : state.sourceHeight ?? _params.height;
     if ((width == 832 && height == 1216) || (width == 1216 && height == 832)) {
       return const [1.0, 1.5];
     }

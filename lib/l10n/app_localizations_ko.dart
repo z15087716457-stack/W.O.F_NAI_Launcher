@@ -12415,4 +12415,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get enhance_localAction => '생성 후 로컬 확대';
+
+  @override
+  String get localUpscale_stop => '업스케일 중지';
+
+  @override
+  String get localUpscale_scrollDown => '아래로 스크롤';
 }
