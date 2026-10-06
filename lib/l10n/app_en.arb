@@ -573,14 +573,11 @@
   "img2img_generateVariations": "Generate Variations",
   "img2img_directorTools": "Director Tools",
   "img2img_directorPrompt": "Prompt (Optional)",
-  "img2img_directorPromptHint": "Add guidance when needed, such as target emotion or color direction",
   "img2img_directorRunning": "Processing...",
   "img2img_directorResult": "Result",
   "img2img_directorApplied": "Applied the Director Tool result as the new source image",
   "img2img_directorDefry": "Defry",
-  "img2img_directorEmotionLevel": "Emotion Level",
   "img2img_directorApplyAsSource": "Use as Source",
-  "img2img_directorSourceImage": "Source Image",
   "img2img_variationsStarted": "Generating variations...",
   "img2img_directorRemoveBackground": "Remove Background",
   "img2img_directorLineArt": "Line Art",
@@ -594,55 +591,12 @@
   "img2img_enhanceMax": "Max✨",
   "img2img_novelAiCloudUpscale": "NovelAI cloud upscale (fixed 2x)",
   "img2img_cloudUpscaleSizeLimit": "NovelAI cloud upscale supports input images up to 3MP.",
-  "img2img_comfyuiEnableHint": "Enable and connect ComfyUI in Settings > ComfyUI first.",
-  "img2img_upscaleMode": "Upscale Mode",
   "img2img_upscaleRegularModel": "Regular Model",
   "img2img_upscaleModel": "Upscale Model",
-  "img2img_noSeedvr2Models": "No SeedVR2 model found. Refresh the model list or check the SeedVR2 node/model files.",
-  "img2img_noRegularUpscaleModels": "No regular upscale model found. Refresh the model list or check models/upscale_models.",
-  "img2img_useSeedvr2TiledWorkflow": "Using the SeedVR2TilingUpscaler tiled upscale workflow.",
-  "img2img_useSeedvr2Workflow": "Using the SeedVR2VideoUpscaler workflow.",
-  "img2img_useRegularUpscaleWorkflow": "Using UpscaleModelLoader + ImageUpscaleWithModel, then correcting to the target scale with Lanczos.",
-  "img2img_useRtxUpscaleWorkflow": "Using RTX Video Super Resolution. No model selection is required.",
-  "img2img_refreshModelList": "Refresh model list",
   "img2img_startUpscale": "Start Upscale",
   "img2img_novelAiUpscaleComplete": "NovelAI upscale complete",
-  "img2img_upscaleComplete": "Upscale complete ({width}x{height})",
-  "@img2img_upscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_regularUpscaleComplete": "Regular model upscale complete ({width}x{height})",
-  "@img2img_regularUpscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_rtxUpscaleComplete": "RTX upscale complete ({width}x{height})",
-  "@img2img_rtxUpscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_noAvailableSeedvr2Model": "No available SeedVR2 model selected",
-  "img2img_noAvailableRegularUpscaleModel": "No available regular upscale model selected",
   "img2img_decodeSourceFailed": "Failed to decode source image",
-  "img2img_metricSpeed": "Speed",
-  "img2img_metricVram": "VRAM",
-  "img2img_metricQuality": "Quality",
-  "img2img_seedvr2VaeTileHint": "Also writes the SeedVR2 VAE MODEL encode/decode tile size.",
-  "img2img_seedvr2UseTiledUpscale": "Use tiled upscale",
-  "img2img_seedvr2UseTiledUpscaleHint": "When enabled, uses SeedVR2TilingUpscaler. Recommended for large images or high VRAM pressure.",
-  "img2img_seedvr2TileSize": "Tile Size",
-  "img2img_seedvr2TileSizeHint": "Also controls SeedVR2TilingUpscaler tile_width / tile_height.",
-  "img2img_seedvr2BlocksToSwap": "Blocks Offloaded To RAM",
-  "img2img_seedvr2BlocksToSwapHint": "How many DiT blocks stay in system RAM and are streamed to VRAM during inference. Higher saves VRAM but uses more RAM and runs slower; lower it (even to 0) when VRAM is plentiful. Raise it if you hit out-of-memory errors.",
   "img2img_upscalePanelOpened": "Opened the Image2Image Upscale panel",
-  "editor_done": "Done",
   "editor_tolerance": "Tolerance",
   "editor_intensity": "Intensity",
   "editor_sourcePoint": "Alt+Click to set source point",
@@ -653,8 +607,6 @@
   "editor_undo": "Undo",
   "editor_redo": "Redo",
   "editor_clearLayer": "Clear Layer",
-  "editor_resetView": "Reset View",
-  "editor_zoom": "Zoom",
   "editor_toolBrush": "Brush",
   "editor_toolEraser": "Eraser",
   "editor_toolFill": "Fill",
@@ -674,122 +626,15 @@
   "editor_toolBlur": "Blur",
   "editor_back": "Back",
   "editor_layers": "Layers",
-  "editor_loadMask": "Load Mask",
-  "editor_togglePanels": "Toggle Panels",
   "editor_fillClosedRegion": "Fill Closed Region",
   "editor_resetMask": "Reset Mask",
   "editor_zoomIn": "Zoom In",
   "editor_zoomOut": "Zoom Out",
   "editor_fitToWindow": "Fit to Window",
-  "editor_shortcutHelpTitle": "Shortcut Help",
-  "editor_shortcutPaintTools": "Paint Tools",
-  "editor_shortcutSelectionTools": "Selection Tools",
-  "editor_shortcutCanvasView": "Canvas View",
-  "editor_shortcutBrushAdjust": "Brush Adjustments",
-  "editor_shortcutColors": "Colors",
-  "editor_shortcutCanvasActions": "Canvas Actions",
-  "editor_shortcutHistoryActions": "History Actions",
-  "editor_shortcutSelectionActions": "Selection Actions",
-  "editor_shortcutTemporaryColorPicker": "Temporary Color Picker",
-  "editor_shortcutRectSelection": "Rectangle Selection",
-  "editor_shortcutEllipseSelection": "Ellipse Selection",
-  "editor_shortcutLassoSelection": "Lasso Selection",
   "editor_shortcut100Zoom": "100% Zoom",
-  "editor_shortcutFitHeight": "Fit Height",
-  "editor_shortcutFitWidth": "Fit Width",
-  "editor_shortcutRotateLeft15": "Rotate Left 15°",
-  "editor_shortcutResetRotation": "Reset Rotation",
-  "editor_shortcutRotateRight15": "Rotate Right 15°",
-  "editor_shortcutFlipHorizontal": "Flip Horizontal",
-  "editor_shortcutWheel": "Mouse Wheel",
-  "editor_shortcutBrushSmaller": "Decrease Brush Size",
-  "editor_shortcutBrushLarger": "Increase Brush Size",
-  "editor_shortcutOpacityLower": "Decrease Opacity",
-  "editor_shortcutOpacityHigher": "Increase Opacity",
-  "editor_shortcutDragBrushSize": "Adjust Brush Size",
-  "editor_shortcutSwapColors": "Swap Foreground/Background Colors",
-  "editor_shortcutPanCanvas": "Pan Canvas",
-  "editor_shortcutClearSelectionContent": "Clear Selection Content",
-  "editor_shortcutCancelCurrentAction": "Cancel Current Action",
-  "editor_selectUnlockedLayerWithContent": "Select an unlocked layer with content",
-  "editor_readCurrentLayerFailed": "Failed to read the current layer",
-  "editor_localEffects": "Local Post-processing / Effects",
-  "editor_basicAdjustments": "Basic Adjustments",
-  "editor_styleAndRepair": "Style & Repair",
-  "editor_transformCrop": "Rotate / Flip / Crop",
-  "editor_transformCropDescription": "Geometry operations are separate. They generate a preview first and write back only after confirmation.",
-  "editor_effectPreviewHint": "Preview does not modify the original image. Click Apply to write the result to the active layer and undo history.",
-  "editor_applyToCurrentLayer": "Apply to Current Layer",
-  "editor_oneShotEffectHint": "{effect} is a one-shot operation and has no intensity slider.",
-  "@editor_oneShotEffectHint": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_effectIntensity": "{effect} Intensity",
-  "@editor_effectIntensity": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_original": "Original",
-  "editor_effectPreview": "Effect Preview",
   "editor_effectBrightness": "Brightness",
-  "editor_effectContrast": "Contrast",
   "editor_effectSaturation": "Saturation",
-  "editor_effectTemperature": "Temperature",
-  "editor_effectGamma": "Gamma",
-  "editor_effectGrayscale": "Grayscale",
-  "editor_effectInvert": "Invert",
-  "editor_effectSepia": "Sepia",
-  "editor_effectDenoise": "Denoise",
-  "editor_effectBlur": "Gaussian Blur",
-  "editor_effectSharpen": "Sharpen",
-  "editor_effectCropToSelection": "Crop to Selection",
-  "editor_effectRotateLeft": "Rotate Left 90°",
-  "editor_effectRotateRight": "Rotate Right 90°",
-  "editor_effectFlipHorizontal": "Flip Horizontal",
-  "editor_effectFlipVertical": "Flip Vertical",
-  "editor_effectApplied": "Applied {effect}",
-  "@editor_effectApplied": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_applyEffectFailed": "Failed to apply effect: {error}",
-  "@editor_applyEffectFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_changeCanvasSize": "Change Canvas Size",
-  "editor_canvasTooSmall": "Canvas size is too small. Minimum size is {width} x {height} pixels",
-  "@editor_canvasTooSmall": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasTooLarge": "Canvas size is too large. Maximum size is {width} x {height} pixels",
-  "@editor_canvasTooLarge": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasResized": "Canvas resized to {width} x {height}",
-  "@editor_canvasResized": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasResizeFailed": "Failed to resize canvas: {error}",
-  "@editor_canvasResizeFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_confirmExitTitle": "Confirm Exit",
   "editor_confirmExitContent": "There are unsaved changes. Are you sure you want to exit?",
   "editor_exit": "Exit",
@@ -800,92 +645,7 @@
       "error": {}
     }
   },
-  "editor_clickInsideClosedRegion": "Click inside a closed region to fill it.",
-  "editor_drawClosedMaskOutlineFirst": "Draw a closed mask outline first.",
-  "editor_noClosedRegionAtPosition": "No fillable closed region at this position.",
-  "editor_generateMaskOverlayFailed": "Failed to generate mask overlay",
   "editor_maskLayerName": "Mask",
-  "editor_updateMaskLayerFailed": "Failed to update mask layer",
-  "editor_closedRegionFilled": "Closed region filled as mask.",
-  "editor_fillMaskFailed": "Failed to fill mask: {error}",
-  "@editor_fillMaskFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_magicWandNoSource": "No editable image layer is available for sampling.",
-  "editor_magicWandNothingChanged": "The selected region is already transparent or masked.",
-  "editor_magicWandModelPreparing": "Checking the EfficientViT-SAM model…",
-  "editor_magicWandModelDownloading": "Downloading the EfficientViT-SAM model: {percent}%",
-  "@editor_magicWandModelDownloading": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_magicWandModelLoading": "Loading the EfficientViT-SAM model…",
-  "editor_magicWandEncoding": "Analyzing image objects…",
-  "editor_magicWandSegmenting": "Segmenting the object at the clicked point…",
-  "editor_magicWandPostprocessing": "Building the selection…",
-  "editor_magicWandFailed": "Magic Wand failed: {error}",
-  "@editor_magicWandFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_compressionTitle": "Output resolution",
-  "editor_compressionTooltip": "Choose output resolution",
-  "editor_compressionUncompressed": "Original work resolution; no compression will be applied.",
-  "editor_compressionApplyOnDone": "Pica Lanczos3 compression runs once when you press Done. The work canvas stays unchanged.",
-  "editor_compressionSizeSummary": "Work {workWidth}×{workHeight} → output {targetWidth}×{targetHeight}",
-  "@editor_compressionSizeSummary": {
-    "placeholders": {
-      "workWidth": {
-        "type": "int"
-      },
-      "workHeight": {
-        "type": "int"
-      },
-      "targetWidth": {
-        "type": "int"
-      },
-      "targetHeight": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_compressionNormalSummary": "Normal (about 1 MP): {normalWidth}×{normalHeight}. Lowest: {minimumWidth}×{minimumHeight}.",
-  "@editor_compressionNormalSummary": {
-    "placeholders": {
-      "normalWidth": {
-        "type": "int"
-      },
-      "normalHeight": {
-        "type": "int"
-      },
-      "minimumWidth": {
-        "type": "int"
-      },
-      "minimumHeight": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_compressionUnavailable": "This work canvas is already below the lowest compression step.",
-  "editor_unsupportedImageFormat": "Unsupported file format: .{extension}\nPlease choose an image file (PNG, JPG, WEBP, etc.)",
-  "@editor_unsupportedImageFormat": {
-    "placeholders": {
-      "extension": {}
-    }
-  },
-  "editor_readFileFailed": "Failed to read file: {error}",
-  "@editor_readFileFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_noFileData": "Failed to get file data",
   "editor_emptyImageFile": "File is empty. Choose a valid image file",
   "editor_fileTooLarge": "File is too large ({sizeMB} MB). Choose an image under 50 MB",
   "@editor_fileTooLarge": {
@@ -893,14 +653,7 @@
       "sizeMB": {}
     }
   },
-  "editor_maskLayerAdded": "Mask layer added",
   "editor_parseImageFailed": "Failed to parse image file\nMake sure the file is not corrupted and the format is supported",
-  "editor_loadMaskFailed": "Failed to load mask: {error}",
-  "@editor_loadMaskFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_defaultTitle": "Canvas",
   "editor_baseLayerName": "Base Image",
   "editor_existingMaskLayerName": "Existing Mask",
@@ -953,13 +706,6 @@
   "editor_colorPickerTitle": "Choose Color",
   "editor_brushSettings": "Brush Settings",
   "editor_eraserSettings": "Eraser Settings",
-  "editor_colorPickerHint": "Click anywhere on the canvas to pick a color. Release to switch back to the previous tool.",
-  "editor_sample": "Sample",
-  "editor_samplePoint": "Point",
-  "editor_sampleArea": "Area",
-  "editor_source": "Source",
-  "editor_sourceCurrentLayer": "Current Layer",
-  "editor_sourceAllLayers": "All Layers",
   "editor_lassoSelectionHelp": "Hold and drag to draw a freeform selection. Release to close it automatically.",
   "layer_empty": "No layers",
   "layer_add": "Add Layer",
@@ -1433,11 +1179,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "Click for full configuration",
-  "@tagGroup_tagCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "addGroup_displayNameLabel": "Display Name (Optional)",
   "addGroup_targetCategoryLabel": "Target Category",
   "globalSettings_saveFailed": "Save failed: {error}",
@@ -1505,101 +1246,6 @@
     }
   },
   "time_never_synced": "Never synced",
-  "@randomManager_deleteTagGroupConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_tagGroupCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_presetImported": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_presetCreated": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_deletePresetConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_syncFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "@randomManager_addTagGroupSubtitle": {
-    "placeholders": {
-      "category": {}
-    }
-  },
-  "@randomManager_itemCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_tagsTab": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_editHint": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_emphasisProbabilityValue": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
-  "@randomManager_characterCountLabel": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_tagCountLabel": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_selectedItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_totalItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_enabledItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_disabledItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_batchDeleteContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_deletedItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "vibeParseFailed": "Failed to parse Vibe file",
   "localGallery_progressiveLoadError": "Failed to load image",
   "localGallery_unknownError": "Unknown error",
@@ -1884,7 +1530,6 @@
   "statistics_timeNight": "Night",
   "localGallery_group_today": "Today",
   "localGallery_group_yesterday": "Yesterday",
-  "localGallery_sendTo": "Send to…",
   "localGallery_groupImageCount": "{count, plural, =1{{formatted} image} other{{formatted} images}}",
   "@localGallery_groupImageCount": {
     "placeholders": {
@@ -2219,7 +1864,6 @@
   "statistics_thursday": "Thu",
   "statistics_friday": "Fri",
   "statistics_saturday": "Sat",
-  "fixedTags_negativeTitle": "Undesired Content Fixed Tags",
   "autocomplete_categoryCharacter": "Character",
   "autocomplete_categoryCopyright": "Copyright",
   "autocomplete_categoryArtist": "Artist",
@@ -2301,7 +1945,6 @@
   "metadataImport_clear": "Clear",
   "metadataImport_prompt": "Prompt",
   "metadataImport_mainPrompt": "Main Prompt",
-  "metadataImport_fixedTags": "Fixed Tags",
   "metadataImport_qualityTagsCount": "Quality Tags ({count})",
   "@metadataImport_qualityTagsCount": {
     "placeholders": {
@@ -3182,11 +2825,6 @@
   "settings_kritaBridgeListeningText": "Waiting for an external Agent or Krita",
   "settings_kritaBridgeConnectedText": "Krita plugin connected",
   "settings_kritaBridgeErrorText": "Startup failed, check the error message",
-  "settings_kritaBridgeDisabled": "Disabled",
-  "settings_kritaBridgeStarting": "Starting",
-  "settings_kritaBridgeListening": "Listening",
-  "settings_kritaBridgeConnected": "Connected",
-  "settings_kritaBridgeError": "Error",
   "settings_kritaBridgeRegenerateSession": "Regenerate Session",
   "settings_kritaBridgeDiscoveryFile": "Discovery File",
   "settings_kritaBridgeWaitingEndpoint": "Waiting for local WebSocket listener",
@@ -3268,13 +2906,6 @@
   },
   "settings_confirmExternalSend": "Send",
   "settings_highAnlasCostTitle": "Anlas usage reminder",
-  "settings_highAnlasCostContent": "This request is estimated to cost {cost} Anlas, which reaches or exceeds your {threshold} Anlas warning threshold. Continue generation?",
-  "@settings_highAnlasCostContent": {
-    "placeholders": {
-      "cost": {},
-      "threshold": {}
-    }
-  },
   "settings_continueGeneration": "Continue Generation",
   "dataSource_syncNow": "Sync Now",
   "settings_comfyUiEnable": "Enable ComfyUI Integration",
@@ -3290,30 +2921,6 @@
   },
   "settings_comfyUiConnected": "Connected",
   "settings_comfyUiDisconnect": "Disconnect",
-  "settings_comfyUiWorkflowManagement": "Workflow Management",
-  "settings_comfyUiBuiltinWorkflows": "Built-in Workflows",
-  "settings_comfyUiCustomWorkflows": "Custom Workflows",
-  "settings_comfyUiNoCustomWorkflows": "No custom workflows yet. Click \"Import\" to add a ComfyUI workflow.",
-  "settings_comfyUiSlotCount": "{count} slots",
-  "@settings_comfyUiSlotCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "settings_comfyUiBuiltin": "Built-in",
-  "settings_comfyUiDeleteWorkflowTitle": "Delete Workflow",
-  "settings_comfyUiDeleteWorkflowContent": "Delete workflow \"{name}\"? This cannot be undone.",
-  "@settings_comfyUiDeleteWorkflowContent": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "settings_comfyUiDeleted": "Deleted: {name}",
-  "@settings_comfyUiDeleted": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "settings_comfyUiNoResponse": "Server did not respond",
   "settings_comfyUiStatusDisconnected": "Disconnected",
   "settings_comfyUiStatusConnecting": "Connecting...",
@@ -3615,7 +3222,6 @@
   "toast_useDeleteButton": "Use the delete button in the UI",
   "toast_imageDataUnavailable": "Image data is unavailable and cannot be copied",
   "toast_vibeDataCopied": "Vibe data copied",
-  "toast_tagCopied": "Tags copied",
   "toast_characterPromptCopied": "Character prompt copied",
   "toast_copiedTitle": "{title} copied",
   "@toast_copiedTitle": {
@@ -3788,11 +3394,6 @@
   "comfyImport_syntaxPipe": "Pipe format",
   "comfyImport_syntaxUnknown": "Unknown syntax",
   "comfyImport_globalPrompt": "Global Prompt",
-  "@danbooruPreview_postCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "checkForUpdate": "Check for Updates",
   "neverChecked": "Never checked",
   "lastCheckedAt": "Last checked: {time}",
@@ -3874,27 +3475,17 @@
   "goToDownload": "Go to Download",
   "cannotOpenUrl": "Cannot open link",
   "model3d_editorTitle": "3D Model Layer",
-  "model3d_addMannequin": "Add Built-in Mannequin",
-  "model3d_importModel": "Import Model (.glb/.gltf)",
-  "model3d_emptyHint": "Scene is empty. Add a mannequin or import a model.",
-  "model3d_apply": "Apply to Layer",
   "model3d_modeTransform": "Transform",
   "model3d_modePose": "Pose",
   "model3d_gizmoTranslate": "Move",
   "model3d_gizmoRotate": "Rotate",
   "model3d_gizmoScale": "Scale",
-  "model3d_undo": "Undo",
-  "model3d_resetPose": "Reset Pose",
   "model3d_replaceConfirm": "Replace the current model? Unapplied pose will be lost.",
   "model3d_discardConfirm": "Discard unapplied changes?",
   "model3d_missingModel": "Model file is missing. You can re-import it.",
   "model3d_loadError": "Failed to load model",
   "model3d_light": "Lighting",
-  "model3d_lightIntensity": "Intensity",
-  "model3d_lightAzimuth": "Azimuth",
-  "model3d_lightElevation": "Elevation",
   "model3d_addLayerTooltip": "Add 3D Model Layer",
-  "model3d_webview2Missing": "The 3D editor requires the Microsoft Edge WebView2 Runtime. It ships with Windows 10/11; if missing, install the Evergreen runtime from Microsoft and retry.",
   "nav_preciseRefLibrary": "Precise Ref Library",
   "preciseRefLib_title": "Precise Reference Library",
   "preciseRefLib_searchHint": "Search references...",
@@ -4112,143 +3703,6 @@
       }
     }
   },
-  "@diy_branchDefaultName": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_branchCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_conditionCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_editBranch": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_ruleDefaultName": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_ruleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_actionSummary": {
-    "placeholders": {
-      "triggers": {
-        "type": "String"
-      },
-      "action": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_characterIndex": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_positionCoordinates": {
-    "placeholders": {
-      "row": {
-        "type": "String"
-      },
-      "column": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_emphasisPercent": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_peopleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_emphasisProbabilityHint": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_bracketLayers": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_presetExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_presetInvalidData": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_daysRemaining": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_timeRangeSummary": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "startMonth": {
-        "type": "int"
-      },
-      "startDay": {
-        "type": "int"
-      },
-      "endMonth": {
-        "type": "int"
-      },
-      "endDay": {
-        "type": "int"
-      }
-    }
-  },
   "common_optional": "Optional",
   "common_emptyValue": "(Empty)",
   "common_clickToRetry": "Click to retry",
@@ -4318,82 +3772,12 @@
       }
     }
   },
-  "editor_effects": "Effects",
   "editor_shiftEdges": "Shift Edges",
-  "editor_currentSize": "Current: {width} x {height}",
-  "@editor_currentSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
   "editor_edgeLeft": "Left",
   "editor_edgeRight": "Right",
   "editor_edgeTop": "Top",
   "editor_edgeBottom": "Bottom",
   "editor_enterNumber": "Enter a number",
-  "editor_nonNegativeNumber": "Must be 0 or more",
-  "editor_requestedSize": "Requested: {width} x {height}",
-  "@editor_requestedSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_requestedSizeInvalid": "Requested: invalid",
-  "editor_appliedSize": "Applied: {width} x {height}",
-  "@editor_appliedSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_appliedSizeInvalid": "Applied: invalid",
-  "editor_appliedEdges": "Applied edges: L {left}, T {top}, R {right}, B {bottom}",
-  "@editor_appliedEdges": {
-    "placeholders": {
-      "left": {
-        "type": "int"
-      },
-      "top": {
-        "type": "int"
-      },
-      "right": {
-        "type": "int"
-      },
-      "bottom": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_appliedEdgesInvalid": "Applied edges: invalid",
-  "editor_appliedDimensionLimit": "Applied dimensions must not exceed {max}.",
-  "@editor_appliedDimensionLimit": {
-    "placeholders": {
-      "max": {
-        "type": "int"
-      }
-    }
-  },
-  "@savePreset_vibeData": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "onlineGallery_videoLoadFailed": "Failed to load video",
   "vibe_releaseToAddStyleReference": "Release to add style reference",
   "router_pageNotFound": "Page not found: {error}",
@@ -5888,7 +5272,6 @@
   "titleBar_restore": "Restore",
   "titleBar_close": "Close",
   "img2img_pixelSnap": "Pixel Snap",
-  "img2img_original": "Original",
   "img2img_directorAddToQueue": "Use result as next input",
   "img2img_transform": "Transform",
   "img2img_palette": "Palettize",
@@ -5979,7 +5362,6 @@
   "wiki_standard": "Standard",
   "wiki_large": "Large",
   "wiki_wide": "Wide",
-  "wiki_hide": "Hide",
   "wiki_articleMissing": "This tag has no local Wiki description yet.",
   "wiki_source": "Source",
   "wiki_addBookmark": "Bookmark",
@@ -6188,12 +5570,6 @@
   "wiki_aliases": "Aliases",
   "wiki_relatedTitle": "Often used with",
   "wiki_relatedHint": "Click to open · Shift+click to add",
-  "wiki_relatedShare": "{percent} of posts also have this tag",
-  "@wiki_relatedShare": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
   "wiki_inDirectory": "In directory",
   "wiki_noArticle": "No wiki",
   "wiki_moreCategories": "More",
@@ -7354,7 +6730,6 @@
   "img2img_emotionEmbarrassed": "Embarrassed",
   "img2img_emotionDetermined": "Determined",
   "img2img_emotionHurt": "Hurt",
-  "localUpscale_title": "Local upscaling",
   "localUpscale_local": "Local",
   "localUpscale_manage": "Manage models",
   "localUpscale_description": "Upscale images locally without spending Anlas.",
@@ -7383,7 +6758,6 @@
   "localUpscale_general": "General · Photos",
   "localUpscale_downloadProgress": "Downloading model…",
   "localUpscale_importModel": "Import model",
-  "localUpscale_modelReady": "Model installed",
   "localUpscale_modelOperationFailed": "Model operation failed. Check your connection, file permissions and free disk space, then retry.",
   "settings_localUpscale": "Local upscaling",
   "settings_localUpscaleDescription": "Manage local upscaling models and components.",
@@ -7400,6 +6774,11 @@
   "localUpscale_license": "License",
   "localUpscale_installComponent": "Install",
   "localUpscale_installingRuntime": "Installing Python/CUDA runtime…",
+  "localUpscale_installingPython": "Preparing isolated Python…",
+  "localUpscale_installFailed": "Installation failed at: {stage}",
+  "@localUpscale_installFailed": { "placeholders": { "stage": { "type": "String" } } },
+  "wiki_translationQueued": "Waiting to translate",
+  "wiki_translationFailedRetry": "Translation failed — click to retry",
   "localUpscale_checkingComponent": "Checking component and GPU…",
   "localUpscale_installingComponent": "Downloading component…",
   "upscale_settings": "Upscale settings",

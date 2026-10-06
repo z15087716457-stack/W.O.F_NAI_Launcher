@@ -45,12 +45,14 @@ class AdvancedUpscaleInstallState {
     this.phase = '',
     this.fraction,
     this.error,
+    this.details,
     this.cancelling = false,
   });
   final String? id;
   final String phase;
   final double? fraction;
   final LocalUpscaleError? error;
+  final String? details;
   final bool cancelling;
   bool get running => id != null;
 }
@@ -130,6 +132,14 @@ class AdvancedUpscaleInstall extends Notifier<AdvancedUpscaleInstallState> {
     } catch (error) {
       if (!_disposed) {
         state = AdvancedUpscaleInstallState(
+          phase: state.phase,
+          details: cancellation.isCancelled
+              ? null
+              : AdvancedUpscaleComponentManager.safeDiagnostics(
+                  error is LocalUpscaleException
+                      ? error.details ?? ''
+                      : '$error',
+                ),
           error: cancellation.isCancelled
               ? LocalUpscaleError.cancelled
               : error is LocalUpscaleException

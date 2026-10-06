@@ -1259,9 +1259,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_directorPrompt => 'プロンプト（任意）';
 
   @override
-  String get img2img_directorPromptHint => 'ターゲットの感情や色の方向など、必要に応じてガイダンスを追加します';
-
-  @override
   String get img2img_directorRunning => '処理中...';
 
   @override
@@ -1274,13 +1271,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_directorDefry => 'デフライ';
 
   @override
-  String get img2img_directorEmotionLevel => '感情レベル';
-
-  @override
   String get img2img_directorApplyAsSource => 'ソースとして使用';
-
-  @override
-  String get img2img_directorSourceImage => 'ソース画像';
 
   @override
   String get img2img_variationsStarted => 'バリエーションを生成しています...';
@@ -1323,43 +1314,10 @@ class AppLocalizationsJa extends AppLocalizations {
       'NovelAI クラウド拡大は 3MP 以下の入力画像に対応しています。';
 
   @override
-  String get img2img_comfyuiEnableHint =>
-      'まず、[設定] > [ComfyUI] で ComfyUI を有効にして接続します。';
-
-  @override
-  String get img2img_upscaleMode => '拡大モード';
-
-  @override
   String get img2img_upscaleRegularModel => 'レギュラーモデル';
 
   @override
   String get img2img_upscaleModel => '拡大モデル';
-
-  @override
-  String get img2img_noSeedvr2Models =>
-      'SeedVR2 モデルが見つかりません。モデル リストを更新するか、SeedVR2 ノード/モデル ファイルを確認してください。';
-
-  @override
-  String get img2img_noRegularUpscaleModels =>
-      '通常の拡大モデルが見つかりません。モデルリストを更新するか、models/upscale_models を確認してください。';
-
-  @override
-  String get img2img_useSeedvr2TiledWorkflow =>
-      'SeedVR2TilingUpscaler のタイル状の拡大ワークフローを使用します。';
-
-  @override
-  String get img2img_useSeedvr2Workflow => 'SeedVR2VideoUpscaler ワークフローの使用。';
-
-  @override
-  String get img2img_useRegularUpscaleWorkflow =>
-      'UpscaleModelLoader + ImageUpscaleWithModel を使用し、Lanczos でターゲット スケールに修正します。';
-
-  @override
-  String get img2img_useRtxUpscaleWorkflow =>
-      'RTX ビデオ超解像度を使用します。モデルの選択は必要ありません。';
-
-  @override
-  String get img2img_refreshModelList => 'モデルリストを更新';
 
   @override
   String get img2img_startUpscale => '拡大を開始';
@@ -1368,69 +1326,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_novelAiUpscaleComplete => 'NovelAI 拡大が完了しました';
 
   @override
-  String img2img_upscaleComplete(Object width, Object height) {
-    return '拡大が完了しました (${width}x$height)';
-  }
-
-  @override
-  String img2img_regularUpscaleComplete(Object width, Object height) {
-    return '通常モデルの拡大が完了しました (${width}x$height)';
-  }
-
-  @override
-  String img2img_rtxUpscaleComplete(Object width, Object height) {
-    return 'RTX 拡大が完了しました (${width}x$height)';
-  }
-
-  @override
-  String get img2img_noAvailableSeedvr2Model => '利用可能な SeedVR2 モデルが選択されていません';
-
-  @override
-  String get img2img_noAvailableRegularUpscaleModel =>
-      '利用可能な通常の拡大モデルが選択されていません';
-
-  @override
   String get img2img_decodeSourceFailed => 'ソース画像のデコードに失敗しました';
 
   @override
-  String get img2img_metricSpeed => '速度';
-
-  @override
-  String get img2img_metricVram => 'VRAM';
-
-  @override
-  String get img2img_metricQuality => '品質';
-
-  @override
-  String get img2img_seedvr2VaeTileHint =>
-      'SeedVR2 VAE MODEL のエンコード/デコード タイル サイズも書き込みます。';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscale => 'タイル状の拡大を使用する';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscaleHint =>
-      '有効にすると、SeedVR2TilingUpscaler が使用されます。大きな画像や VRAM 負荷が高い場合に推奨します。';
-
-  @override
-  String get img2img_seedvr2TileSize => 'タイルのサイズ';
-
-  @override
-  String get img2img_seedvr2TileSizeHint =>
-      'SeedVR2TilingUpscaler tile_width / tile_height も制御します。';
-
-  @override
-  String get img2img_seedvr2BlocksToSwap => 'メモリへ退避するブロック数';
-
-  @override
-  String get img2img_seedvr2BlocksToSwapHint =>
-      'DiT ブロックのうち何個をシステムメモリに置き、推論時に VRAM へ順次転送するかを指定します。大きいほど VRAM を節約できますがメモリを消費し遅くなります。VRAM に余裕がある場合は 0 まで下げられます。メモリ不足エラーが出る場合は上げてください。';
-
-  @override
   String get img2img_upscalePanelOpened => 'Image2Image の拡大パネルを開きました';
-
-  @override
-  String get editor_done => '完了';
 
   @override
   String get editor_tolerance => '許容差';
@@ -1461,12 +1360,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editor_clearLayer => 'クリアレイヤー';
-
-  @override
-  String get editor_resetView => 'ビューをリセット';
-
-  @override
-  String get editor_zoom => 'ズーム';
 
   @override
   String get editor_toolBrush => 'ブラシ';
@@ -1528,12 +1421,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get editor_layers => 'レイヤー';
 
   @override
-  String get editor_loadMask => 'ロードマスク';
-
-  @override
-  String get editor_togglePanels => 'パネルの切り替え';
-
-  @override
   String get editor_fillClosedRegion => '閉じた領域を埋める';
 
   @override
@@ -1549,221 +1436,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get editor_fitToWindow => '窓に合わせる';
 
   @override
-  String get editor_shortcutHelpTitle => 'ショートカット ヘルプ';
-
-  @override
-  String get editor_shortcutPaintTools => 'ペイント ツール';
-
-  @override
-  String get editor_shortcutSelectionTools => '選択ツール';
-
-  @override
-  String get editor_shortcutCanvasView => 'キャンバス ビュー';
-
-  @override
-  String get editor_shortcutBrushAdjust => 'ブラシの調整';
-
-  @override
-  String get editor_shortcutColors => 'カラー';
-
-  @override
-  String get editor_shortcutCanvasActions => 'キャンバスアクション';
-
-  @override
-  String get editor_shortcutHistoryActions => '履歴アクション';
-
-  @override
-  String get editor_shortcutSelectionActions => '選択アクション';
-
-  @override
-  String get editor_shortcutTemporaryColorPicker => '一時的なカラーピッカー';
-
-  @override
-  String get editor_shortcutRectSelection => '長方形の選択';
-
-  @override
-  String get editor_shortcutEllipseSelection => '楕円の選択';
-
-  @override
-  String get editor_shortcutLassoSelection => 'なげなわ選択';
-
-  @override
   String get editor_shortcut100Zoom => '100% ズーム';
-
-  @override
-  String get editor_shortcutFitHeight => '高さに合わせる';
-
-  @override
-  String get editor_shortcutFitWidth => '幅に合わせる';
-
-  @override
-  String get editor_shortcutRotateLeft15 => '左に 15 度回転';
-
-  @override
-  String get editor_shortcutResetRotation => '回転をリセット';
-
-  @override
-  String get editor_shortcutRotateRight15 => '右に 15 度回転';
-
-  @override
-  String get editor_shortcutFlipHorizontal => '水平方向に反転';
-
-  @override
-  String get editor_shortcutWheel => 'マウス ホイール';
-
-  @override
-  String get editor_shortcutBrushSmaller => 'ブラシ サイズを小さくします';
-
-  @override
-  String get editor_shortcutBrushLarger => 'ブラシ サイズを大きくする';
-
-  @override
-  String get editor_shortcutOpacityLower => '不透明度を下げる';
-
-  @override
-  String get editor_shortcutOpacityHigher => '不透明度を増やす';
-
-  @override
-  String get editor_shortcutDragBrushSize => 'ブラシ サイズを調整する';
-
-  @override
-  String get editor_shortcutSwapColors => '前景色と背景色の交換';
-
-  @override
-  String get editor_shortcutPanCanvas => 'パン キャンバス';
-
-  @override
-  String get editor_shortcutClearSelectionContent => '選択内容をクリア';
-
-  @override
-  String get editor_shortcutCancelCurrentAction => '現在のアクションをキャンセルします';
-
-  @override
-  String get editor_selectUnlockedLayerWithContent =>
-      'コンテンツを含むロック解除されたレイヤーを選択してください';
-
-  @override
-  String get editor_readCurrentLayerFailed => '現在のレイヤーの読み取りに失敗しました';
-
-  @override
-  String get editor_localEffects => 'ローカル後処理 / エフェクト';
-
-  @override
-  String get editor_basicAdjustments => '基本的な調整';
-
-  @override
-  String get editor_styleAndRepair => 'スタイルと修復';
-
-  @override
-  String get editor_transformCrop => '回転/反転/切り抜き';
-
-  @override
-  String get editor_transformCropDescription =>
-      'ジオメトリ操作は別のものです。最初にプレビューを生成し、確認後にのみ書き戻します。';
-
-  @override
-  String get editor_effectPreviewHint =>
-      'プレビューは元の画像を変更しません。「適用」をクリックすると、結果をアクティブなレイヤーに書き込み、アンドゥ履歴に追加します。';
-
-  @override
-  String get editor_applyToCurrentLayer => '現在のレイヤーに適用';
-
-  @override
-  String editor_oneShotEffectHint(Object effect) {
-    return '$effect はワンショット操作であり、強度スライダーはありません。';
-  }
-
-  @override
-  String editor_effectIntensity(Object effect) {
-    return '$effect 強度';
-  }
-
-  @override
-  String get editor_original => 'オリジナル';
-
-  @override
-  String get editor_effectPreview => 'エフェクトのプレビュー';
 
   @override
   String get editor_effectBrightness => '明るさ';
 
   @override
-  String get editor_effectContrast => 'コントラスト';
-
-  @override
   String get editor_effectSaturation => '彩度';
 
   @override
-  String get editor_effectTemperature => '温度';
-
-  @override
-  String get editor_effectGamma => 'ガンマ';
-
-  @override
-  String get editor_effectGrayscale => 'グレースケール';
-
-  @override
-  String get editor_effectInvert => '反転';
-
-  @override
-  String get editor_effectSepia => 'セピア';
-
-  @override
-  String get editor_effectDenoise => 'ノイズ除去';
-
-  @override
-  String get editor_effectBlur => 'ガウスぼかし';
-
-  @override
-  String get editor_effectSharpen => 'シャープにする';
-
-  @override
-  String get editor_effectCropToSelection => '選択範囲まで切り抜き';
-
-  @override
-  String get editor_effectRotateLeft => '左に 90 度回転';
-
-  @override
-  String get editor_effectRotateRight => '右に 90 度回転';
-
-  @override
-  String get editor_effectFlipHorizontal => '水平方向に反転';
-
-  @override
-  String get editor_effectFlipVertical => '垂直方向に反転';
-
-  @override
-  String editor_effectApplied(Object effect) {
-    return '適用済み $effect';
-  }
-
-  @override
-  String editor_applyEffectFailed(Object error) {
-    return '効果の適用に失敗しました: $error';
-  }
-
-  @override
   String get editor_changeCanvasSize => 'キャンバス サイズの変更';
-
-  @override
-  String editor_canvasTooSmall(Object width, Object height) {
-    return 'キャンバスのサイズが小さすぎます。最小サイズは $width × $height ピクセルです';
-  }
-
-  @override
-  String editor_canvasTooLarge(Object width, Object height) {
-    return 'キャンバスのサイズが大きすぎます。最大サイズは $width × $height ピクセルです';
-  }
-
-  @override
-  String editor_canvasResized(Object width, Object height) {
-    return 'キャンバスのサイズを $width × $height に変更しました';
-  }
-
-  @override
-  String editor_canvasResizeFailed(Object error) {
-    return 'キャンバスのサイズ変更に失敗しました: $error';
-  }
 
   @override
   String get editor_confirmExitTitle => '終了の確認';
@@ -1783,111 +1465,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get editor_clickInsideClosedRegion => '閉じた領域内をクリックして塗りつぶします。';
-
-  @override
-  String get editor_drawClosedMaskOutlineFirst => '最初に閉じたマスクの輪郭を描画します。';
-
-  @override
-  String get editor_noClosedRegionAtPosition => 'この位置には充填可能な閉じた領域がありません。';
-
-  @override
-  String get editor_generateMaskOverlayFailed => 'マスク オーバーレイの生成に失敗しました';
-
-  @override
   String get editor_maskLayerName => 'マスク';
-
-  @override
-  String get editor_updateMaskLayerFailed => 'マスクレイヤーの更新に失敗しました';
-
-  @override
-  String get editor_closedRegionFilled => '閉じた領域がマスクとして埋められました。';
-
-  @override
-  String editor_fillMaskFailed(Object error) {
-    return 'マスクの塗りつぶしに失敗しました: $error';
-  }
-
-  @override
-  String get editor_magicWandNoSource => 'サンプリング可能な画像レイヤーがありません。';
-
-  @override
-  String get editor_magicWandNothingChanged => '選択した領域はすでに透明、またはマスク済みです。';
-
-  @override
-  String get editor_magicWandModelPreparing => 'EfficientViT-SAM モデルを確認しています…';
-
-  @override
-  String editor_magicWandModelDownloading(int percent) {
-    return 'EfficientViT-SAM モデルをダウンロード中：$percent%';
-  }
-
-  @override
-  String get editor_magicWandModelLoading => 'EfficientViT-SAM モデルを読み込んでいます…';
-
-  @override
-  String get editor_magicWandEncoding => '画像内のオブジェクトを解析しています…';
-
-  @override
-  String get editor_magicWandSegmenting => 'クリック位置のオブジェクトを分割しています…';
-
-  @override
-  String get editor_magicWandPostprocessing => '選択範囲を生成しています…';
-
-  @override
-  String editor_magicWandFailed(Object error) {
-    return 'マジックワンドに失敗しました: $error';
-  }
-
-  @override
-  String get editor_compressionTitle => '出力解像度';
-
-  @override
-  String get editor_compressionTooltip => '出力解像度を選択';
-
-  @override
-  String get editor_compressionUncompressed => '編集作業サイズを維持し、圧縮は行いません。';
-
-  @override
-  String get editor_compressionApplyOnDone =>
-      '作業キャンバスは変更されません。「完了」を押したときに Pica Lanczos3 で 1 回だけ圧縮します。';
-
-  @override
-  String editor_compressionSizeSummary(
-    int workWidth,
-    int workHeight,
-    int targetWidth,
-    int targetHeight,
-  ) {
-    return '作業サイズ $workWidth×$workHeight → 出力サイズ $targetWidth×$targetHeight';
-  }
-
-  @override
-  String editor_compressionNormalSummary(
-    int normalWidth,
-    int normalHeight,
-    int minimumWidth,
-    int minimumHeight,
-  ) {
-    return 'Normal（約 1 MP）: $normalWidth×$normalHeight。最低: $minimumWidth×$minimumHeight。';
-  }
-
-  @override
-  String get editor_compressionUnavailable =>
-      '作業キャンバスはすでに最低圧縮段階より小さいため、解像度を下げられません。';
-
-  @override
-  String editor_unsupportedImageFormat(Object extension) {
-    return 'サポートされていないファイル形式: .$extension\n画像ファイル(PNG、JPG、WEBPなど)を選択してください。';
-  }
-
-  @override
-  String editor_readFileFailed(Object error) {
-    return 'ファイルの読み取りに失敗しました: $error';
-  }
-
-  @override
-  String get editor_noFileData => 'ファイルデータの取得に失敗しました';
 
   @override
   String get editor_emptyImageFile => 'ファイルが空です。有効な画像ファイルを選択してください';
@@ -1898,16 +1476,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get editor_maskLayerAdded => 'マスクレイヤーを追加しました';
-
-  @override
   String get editor_parseImageFailed =>
       '画像ファイルの解析に失敗しました\nファイルが破損しておらず、その形式がサポートされていることを確認してください';
-
-  @override
-  String editor_loadMaskFailed(Object error) {
-    return 'マスクのロードに失敗しました: $error';
-  }
 
   @override
   String get editor_defaultTitle => 'キャンバス';
@@ -2012,28 +1582,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editor_eraserSettings => '消しゴムの設定';
-
-  @override
-  String get editor_colorPickerHint =>
-      'キャンバス上の任意の場所をクリックして色を選択します。放すと前のツールに戻ります。';
-
-  @override
-  String get editor_sample => 'サンプル';
-
-  @override
-  String get editor_samplePoint => 'ポイント';
-
-  @override
-  String get editor_sampleArea => 'エリア';
-
-  @override
-  String get editor_source => 'ソース';
-
-  @override
-  String get editor_sourceCurrentLayer => '現在のレイヤー';
-
-  @override
-  String get editor_sourceAllLayers => 'すべてのレイヤー';
 
   @override
   String get editor_lassoSelectionHelp =>
@@ -3770,9 +3318,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_group_yesterday => '昨日';
 
   @override
-  String get localGallery_sendTo => '送信先…';
-
-  @override
   String localGallery_groupImageCount(int count, String formatted) {
     return '$formatted 枚';
   }
@@ -4231,9 +3776,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get statistics_saturday => '土';
 
   @override
-  String get fixedTags_negativeTitle => '除外したい要素固定タグ';
-
-  @override
   String get autocomplete_categoryCharacter => 'キャラクター';
 
   @override
@@ -4439,9 +3981,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get metadataImport_mainPrompt => 'メイン プロンプト';
-
-  @override
-  String get metadataImport_fixedTags => '固定タグ';
 
   @override
   String metadataImport_qualityTagsCount(int count) {
@@ -5818,21 +5357,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_kritaBridgeErrorText => '起動に失敗しました。エラー メッセージを確認してください。';
 
   @override
-  String get settings_kritaBridgeDisabled => '無効';
-
-  @override
-  String get settings_kritaBridgeStarting => '開始中';
-
-  @override
-  String get settings_kritaBridgeListening => 'リスニング';
-
-  @override
-  String get settings_kritaBridgeConnected => '接続されました';
-
-  @override
-  String get settings_kritaBridgeError => 'エラー';
-
-  @override
   String get settings_kritaBridgeRegenerateSession => 'セッションを再生成';
 
   @override
@@ -6024,11 +5548,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings_highAnlasCostTitle => 'Anlas 消費の確認';
 
   @override
-  String settings_highAnlasCostContent(Object cost, Object threshold) {
-    return 'このリクエストには $cost Anlas の費用がかかると推定されており、$threshold Anlas の警告しきい値に達するか超えています。生成を継続しますか?';
-  }
-
-  @override
   String get settings_continueGeneration => '生成を続行';
 
   @override
@@ -6060,40 +5579,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_comfyUiDisconnect => '切断';
-
-  @override
-  String get settings_comfyUiWorkflowManagement => 'ワークフロー管理';
-
-  @override
-  String get settings_comfyUiBuiltinWorkflows => '組み込みワークフロー';
-
-  @override
-  String get settings_comfyUiCustomWorkflows => 'カスタム ワークフロー';
-
-  @override
-  String get settings_comfyUiNoCustomWorkflows =>
-      'カスタム ワークフローはまだありません。 「インポート」をクリックして ComfyUI ワークフローを追加します。';
-
-  @override
-  String settings_comfyUiSlotCount(Object count) {
-    return '$count スロット';
-  }
-
-  @override
-  String get settings_comfyUiBuiltin => '内蔵';
-
-  @override
-  String get settings_comfyUiDeleteWorkflowTitle => 'ワークフローの削除';
-
-  @override
-  String settings_comfyUiDeleteWorkflowContent(Object name) {
-    return 'ワークフロー「$name」を削除しますか?これを元に戻すことはできません。';
-  }
-
-  @override
-  String settings_comfyUiDeleted(Object name) {
-    return '削除されました: $name';
-  }
 
   @override
   String get settings_comfyUiNoResponse => 'サーバーが応答しませんでした';
@@ -6656,9 +6141,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get toast_vibeDataCopied => 'Vibe データをコピーしました';
 
   @override
-  String get toast_tagCopied => 'タグがコピーされました';
-
-  @override
   String get toast_characterPromptCopied => 'キャラクタープロンプトをコピーしました';
 
   @override
@@ -7089,18 +6571,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get model3d_editorTitle => '3Dモデルレイヤー';
 
   @override
-  String get model3d_addMannequin => '内蔵マネキンを追加';
-
-  @override
-  String get model3d_importModel => 'モデルをインポート (.glb/.gltf)';
-
-  @override
-  String get model3d_emptyHint => 'シーンは空です。マネキンを追加するかモデルをインポートしてください';
-
-  @override
-  String get model3d_apply => 'レイヤーに適用';
-
-  @override
   String get model3d_modeTransform => '変換';
 
   @override
@@ -7114,12 +6584,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get model3d_gizmoScale => '拡縮';
-
-  @override
-  String get model3d_undo => '元に戻す';
-
-  @override
-  String get model3d_resetPose => 'ポーズをリセット';
 
   @override
   String get model3d_replaceConfirm => '現在のモデルを置き換えますか？未適用のポーズは失われます。';
@@ -7137,20 +6601,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get model3d_light => 'ライティング';
 
   @override
-  String get model3d_lightIntensity => '強度';
-
-  @override
-  String get model3d_lightAzimuth => '方位角';
-
-  @override
-  String get model3d_lightElevation => '仰角';
-
-  @override
   String get model3d_addLayerTooltip => '3Dモデルレイヤーを追加';
-
-  @override
-  String get model3d_webview2Missing =>
-      '3DエディタにはMicrosoft Edge WebView2ランタイムが必要です。Windows 10/11には通常同梱されています。無い場合はMicrosoftからEvergreen版をインストールして再試行してください。';
 
   @override
   String get nav_preciseRefLibrary => '精密参照ライブラリ';
@@ -7484,15 +6935,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get editor_effects => 'エフェクト';
-
-  @override
   String get editor_shiftEdges => 'エッジをシフト';
-
-  @override
-  String editor_currentSize(int width, int height) {
-    return '現在: $width x $height';
-  }
 
   @override
   String get editor_edgeLeft => '左';
@@ -7508,38 +6951,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editor_enterNumber => '数値を入力してください';
-
-  @override
-  String get editor_nonNegativeNumber => '0以上の値を入力してください';
-
-  @override
-  String editor_requestedSize(int width, int height) {
-    return '指定: $width x $height';
-  }
-
-  @override
-  String get editor_requestedSizeInvalid => '指定: 無効';
-
-  @override
-  String editor_appliedSize(int width, int height) {
-    return '適用: $width x $height';
-  }
-
-  @override
-  String get editor_appliedSizeInvalid => '適用: 無効';
-
-  @override
-  String editor_appliedEdges(int left, int top, int right, int bottom) {
-    return '適用エッジ: 左 $left、上 $top、右 $right、下 $bottom';
-  }
-
-  @override
-  String get editor_appliedEdgesInvalid => '適用エッジ: 無効';
-
-  @override
-  String editor_appliedDimensionLimit(int max) {
-    return '適用後の寸法は $max 以下である必要があります。';
-  }
 
   @override
   String get onlineGallery_videoLoadFailed => '動画を読み込めませんでした';
@@ -9551,9 +8962,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_pixelSnap => 'ピクセルスナップ';
 
   @override
-  String get img2img_original => '元画像';
-
-  @override
   String get img2img_directorAddToQueue => '結果を入力キューに追加';
 
   @override
@@ -9758,9 +9166,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wiki_wide => '広い';
-
-  @override
-  String get wiki_hide => '隠す';
 
   @override
   String get wiki_articleMissing => 'このタグにはローカル Wiki の説明がありません。';
@@ -10358,11 +9763,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wiki_relatedHint => 'クリックで開く · Shift+クリックでプロンプトに追加';
-
-  @override
-  String wiki_relatedShare(Object percent) {
-    return '投稿の $percent もこのタグを含みます';
-  }
 
   @override
   String get wiki_inDirectory => '所属ディレクトリ';
@@ -12736,9 +12136,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_emotionHurt => '傷ついた';
 
   @override
-  String get localUpscale_title => 'ローカル超解像';
-
-  @override
   String get localUpscale_local => 'ローカル';
 
   @override
@@ -12830,9 +12227,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localUpscale_importModel => 'モデルをインポート';
 
   @override
-  String get localUpscale_modelReady => 'モデルをインストールしました';
-
-  @override
   String get localUpscale_modelOperationFailed =>
       'モデル操作に失敗しました。接続、ファイルの権限、空き容量を確認して再試行してください。';
 
@@ -12884,6 +12278,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localUpscale_installingRuntime => 'Python/CUDA 環境をインストール中…';
+
+  @override
+  String get localUpscale_installingPython => '独立した Python を準備中…';
+
+  @override
+  String localUpscale_installFailed(String stage) {
+    return 'インストールの失敗段階：$stage';
+  }
+
+  @override
+  String get wiki_translationQueued => '翻訳待ち';
+
+  @override
+  String get wiki_translationFailedRetry => '翻訳に失敗しました。クリックして再試行';
 
   @override
   String get localUpscale_checkingComponent => 'コンポーネントと GPU を確認中…';

@@ -74,9 +74,236 @@ Future<void> _until(bool Function() ready) async {
   fail('Timed out waiting for translation task');
 }
 
+void _respond(
+  _Assistant assistant,
+  Future<VisibleTagTranslationResult> Function(Invocation) handler,
+) {
+  when(() => assistant.translateRouteFingerprint()).thenReturn('route');
+  when(
+    () => assistant.translateVisibleTag(
+      tag: any(named: 'tag'),
+      wikiBody: any(named: 'wikiBody'),
+      includeWikiTranslation: any(named: 'includeWikiTranslation'),
+      existingNameZh: any(named: 'existingNameZh'),
+      category: any(named: 'category'),
+      aliases: any(named: 'aliases'),
+      postCount: any(named: 'postCount'),
+      relatedTo: any(named: 'relatedTo'),
+      glossary: any(named: 'glossary'),
+      sessionId: any(named: 'sessionId'),
+    ),
+  ).thenAnswer(handler);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  test(
+    'shared activity separates queued tasks, per-tag errors and deduplicated manual retries',
+    () async {
+      final assistant = _Assistant();
+      final calls = <String>[];
+      final pending = {
+        for (final tag in ['first', 'second'])
+          tag: Completer<VisibleTagTranslationResult>(),
+      };
+      _respond(assistant, (call) {
+        final tag = call.namedArguments[#tag] as String;
+        calls.add(tag);
+        return pending[tag]!.future;
+      });
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English context'),
+        cache: _Cache(),
+        maxConcurrentRequests: 1,
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.observe(surface: 'wiki', tag: 'first', visible: true);
+      await _until(() => calls.length == 1);
+      controller.observe(surface: 'expansion', tag: 'first', visible: true);
+      controller.observe(surface: 'wiki', tag: 'second', visible: true);
+      expect(
+        controller.activityFor('first')!.phase,
+        TagTranslationPhase.translating,
+      );
+      expect(
+        controller.activityFor('second')!.phase,
+        TagTranslationPhase.queued,
+      );
+      expect(calls, ['first']);
+      pending['first']!.completeError(StateError('first failed'));
+      await _until(() => calls.length == 2);
+      pending['second']!.completeError(StateError('second failed'));
+      await _until(() => controller.activeRequests == 0);
+      expect(controller.activityFor('first')!.error, contains('first failed'));
+      expect(
+        controller.activityFor('second')!.error,
+        contains('second failed'),
+      );
+      await controller.setEnabled(false);
+      expect(
+        controller.activityFor('first')!.phase,
+        TagTranslationPhase.failed,
+      );
+      pending['first'] = Completer<VisibleTagTranslationResult>();
+      controller.retranslateName(surface: 'expansion', tag: 'first');
+      controller.retranslateName(surface: 'wiki', tag: 'first');
+      await _until(() => calls.length == 3);
+      expect(
+        controller.activityFor('first')!.phase,
+        TagTranslationPhase.translating,
+      );
+      expect(
+        controller.activityFor('second')!.phase,
+        TagTranslationPhase.failed,
+      );
+      pending['first']!.complete(
+        const VisibleTagTranslationResult(nameZh: '已重试'),
+      );
+      await _until(() => controller.activeRequests == 0);
+      expect(controller.activityFor('first'), isNull);
+      expect(controller.nameFor('first'), '已重试');
+      expect(calls, ['first', 'second', 'first']);
+    },
+  );
+
+  test(
+    'article failure persists on reopening without corrupting a translated name',
+    () async {
+      final assistant = _Assistant();
+      var calls = 0;
+      var pending = Completer<VisibleTagTranslationResult>();
+      _respond(assistant, (call) {
+        calls++;
+        expect(call.namedArguments[#includeWikiTranslation], isTrue);
+        return pending.future;
+      });
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English context'),
+        cache: _Cache(),
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.observe(
+        surface: 'list',
+        tag: 'first',
+        visible: true,
+        existingNameZh: '已有名称',
+      );
+      controller.requestWiki(surface: 'article', tag: 'first');
+      await _until(() => calls == 1);
+      expect(controller.activityFor('first'), isNull);
+      expect(
+        controller.activityFor('first', wiki: true)!.phase,
+        TagTranslationPhase.translating,
+      );
+      pending.completeError(StateError('body failed'));
+      await _until(() => controller.activeRequests == 0);
+      expect(controller.activityFor('first'), isNull);
+      expect(
+        controller.activityFor('first', wiki: true)!.error,
+        contains('body failed'),
+      );
+      controller.clearSurface('article');
+      controller.requestWiki(surface: 'article', tag: 'first');
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      expect(calls, 1);
+      pending = Completer<VisibleTagTranslationResult>();
+      controller.retranslateWiki(surface: 'article', tag: 'first');
+      controller.retranslateWiki(surface: 'mini-wiki', tag: 'first');
+      await _until(() => calls == 2);
+      pending.complete(
+        const VisibleTagTranslationResult(nameZh: '新名称', wikiZh: '正文译文'),
+      );
+      await _until(() => controller.activeRequests == 0);
+      expect(controller.activityFor('first', wiki: true), isNull);
+      controller.observe(
+        surface: 'list',
+        tag: 'first',
+        visible: true,
+        existingNameZh: '已有名称',
+      );
+      expect(controller.nameFor('first'), '新名称');
+      expect(controller.wikiFor('first'), '正文译文');
+    },
+  );
+
+  test(
+    'manual name retry replaces cached name without discarding its article',
+    () async {
+      final assistant = _Assistant();
+      final cache = _Cache();
+      cache.records['first'] = const CachedVisibleTagTranslation(
+        nameZh: '旧名称',
+        wikiZh: '已缓存正文',
+        wikiOriginal: 'Cached original',
+        definition: '旧释义',
+        wikiHash: 'hash',
+      );
+      var calls = 0;
+      _respond(assistant, (call) async {
+        calls++;
+        expect(call.namedArguments[#includeWikiTranslation], isFalse);
+        expect(call.namedArguments[#existingNameZh], isNull);
+        return const VisibleTagTranslationResult(
+          nameZh: '新名称',
+          definition: '新释义',
+        );
+      });
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English context'),
+        cache: cache,
+      );
+      addTearDown(controller.dispose);
+      controller.retranslateName(surface: 'list', tag: 'first');
+      await _until(() => controller.activeRequests == 0);
+      expect(calls, 1);
+      expect(cache.records['first']!.nameZh, '新名称');
+      expect(cache.records['first']!.definition, '新释义');
+      expect(cache.records['first']!.wikiZh, '已缓存正文');
+      expect(cache.records['first']!.wikiOriginal, 'Cached original');
+    },
+  );
+
+  test(
+    'route changes ignore stale failures and translate with the new route',
+    () async {
+      final assistant = _Assistant();
+      final pending = <Completer<VisibleTagTranslationResult>>[];
+      _respond(assistant, (_) {
+        final completion = Completer<VisibleTagTranslationResult>();
+        pending.add(completion);
+        return completion.future;
+      });
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English context'),
+        cache: _Cache(),
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.observe(surface: 'list', tag: 'first', visible: true);
+      await _until(() => pending.length == 1);
+      when(() => assistant.translateRouteFingerprint()).thenReturn('new-route');
+      controller.routeChanged();
+      pending.first.completeError(StateError('stale failure'));
+      await _until(() => pending.length == 2);
+      expect(controller.lastError, isNull);
+      expect(
+        controller.activityFor('first')!.phase,
+        TagTranslationPhase.translating,
+      );
+      pending.last.complete(const VisibleTagTranslationResult(nameZh: '新接口译文'));
+      await _until(() => controller.activeRequests == 0);
+      expect(controller.activityFor('first'), isNull);
+      expect(controller.nameFor('first'), '新接口译文');
+    },
+  );
+
   test(
     'unopened visible tag sends full wiki, caches its definition and restores it without a new request',
     () async {

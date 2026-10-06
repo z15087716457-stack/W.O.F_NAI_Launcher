@@ -7,52 +7,75 @@ import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/utils/contiguous_region_selector.dart';
 import 'package:nai_launcher/data/services/efficient_vit_sam_model_manager.dart';
 import 'package:nai_launcher/data/services/efficient_vit_sam_service.dart';
+import 'package:nai_launcher/presentation/widgets/image_editor/core/tool_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final runSmokeTest = Platform.environment['EFFICIENT_VIT_SAM_SMOKE'] == '1';
+  setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  test('runs the official EfficientViT-SAM L0 ONNX models', () async {
-    final modelDirectory = Directory(
-      Platform.environment['EFFICIENT_VIT_SAM_MODEL_DIR'] ??
-          '${Directory.systemTemp.path}${Platform.pathSeparator}'
-              'nai_launcher_efficientvit_sam_poc',
+  for (final inpaint in [false, true]) {
+    test('editor inpaint=$inpaint excludes the retired SAM tool', () async {
+      final tools = ToolManager(inpaint: inpaint);
+      addTearDown(tools.dispose);
+      await tools.settingsManager.load();
+      expect(tools.tools, hasLength(inpaint ? 4 : 8));
+      expect(tools.getToolById('magic_wand'), isNull);
+      tools.setToolById('magic_wand');
+      expect(tools.currentTool!.id, 'brush');
+    });
+  }
+
+  if (runSmokeTest) {
+    test(
+      'manual legacy EfficientViT-SAM audit with cached ONNX models',
+      () async {
+        final modelDirectory = Directory(
+          Platform.environment['EFFICIENT_VIT_SAM_MODEL_DIR'] ??
+              '${Directory.systemTemp.path}${Platform.pathSeparator}'
+                  'nai_launcher_efficientvit_sam_poc',
+        );
+        final manager = EfficientVitSamModelManager(
+          directoryResolver: () async => modelDirectory,
+          download: (_, _, _) async => throw StateError(
+            'Legacy SAM audit requires cached models; downloads are disabled',
+          ),
+        );
+        final service = EfficientVitSamService(modelManager: manager);
+        final scene = _buildSyntheticScene();
+
+        // ignore: avoid_print
+        print('model_dir=${modelDirectory.path}');
+        // ignore: avoid_print
+        print('model_revision=${EfficientVitSamModelManager.modelRevision}');
+        try {
+          final circle = await _runSelection(
+            service: service,
+            scene: scene,
+            pointX: 200,
+            pointY: 192,
+            name: 'circle',
+            modelDirectory: modelDirectory,
+          );
+          final rectangle = await _runSelection(
+            service: service,
+            scene: scene,
+            pointX: 480,
+            pointY: 192,
+            name: 'rectangle',
+            modelDirectory: modelDirectory,
+          );
+
+          expect(circle.selectedPixelCount, greaterThan(0));
+          expect(rectangle.selectedPixelCount, greaterThan(0));
+          expect(circle.mask, isNot(orderedEquals(rectangle.mask)));
+        } finally {
+          service.dispose();
+        }
+      },
     );
-    final manager = EfficientVitSamModelManager(
-      directoryResolver: () async => modelDirectory,
-    );
-    final service = EfficientVitSamService(modelManager: manager);
-    final scene = _buildSyntheticScene();
-
-    // ignore: avoid_print
-    print('model_dir=${modelDirectory.path}');
-    // ignore: avoid_print
-    print('model_revision=${EfficientVitSamModelManager.modelRevision}');
-    try {
-      final circle = await _runSelection(
-        service: service,
-        scene: scene,
-        pointX: 200,
-        pointY: 192,
-        name: 'circle',
-        modelDirectory: modelDirectory,
-      );
-      final rectangle = await _runSelection(
-        service: service,
-        scene: scene,
-        pointX: 480,
-        pointY: 192,
-        name: 'rectangle',
-        modelDirectory: modelDirectory,
-      );
-
-      expect(circle.selectedPixelCount, greaterThan(0));
-      expect(rectangle.selectedPixelCount, greaterThan(0));
-      expect(circle.mask, isNot(orderedEquals(rectangle.mask)));
-    } finally {
-      service.dispose();
-    }
-  }, skip: !runSmokeTest);
+  }
 }
 
 Future<ContiguousRegionSelection> _runSelection({

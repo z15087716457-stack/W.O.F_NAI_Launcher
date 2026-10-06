@@ -70,6 +70,14 @@ void main() {
         final icon = find.byKey(const ValueKey('wiki-row-bookmark-long_hair'));
         final count = find.byKey(const ValueKey('wiki-row-count-long_hair'));
         final before = tester.getRect(count);
+        expect(
+          tester
+              .widget<Icon>(
+                find.byKey(const ValueKey('wiki-category-general-long_hair')),
+              )
+              .icon,
+          Icons.sell_rounded,
+        );
         expect(icon, findsNothing);
         expect(
           tester.getRect(find.text('长发')).top,

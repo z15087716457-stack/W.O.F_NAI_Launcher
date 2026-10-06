@@ -309,8 +309,14 @@ void main() {
       expect(find.text('动漫 · 画质'), findsOneWidget);
       expect(find.text('本地'), findsOneWidget);
       expect(find.text('ComfyUI'), findsNothing);
-      expect(find.text('普通模型'), findsNothing);
+      expect(find.text('普通模型'), findsOneWidget);
+      expect(find.text('SeedVR2'), findsOneWidget);
+      expect(find.text('RTX'), findsOneWidget);
       expect(find.text('管理模型'), findsOneWidget);
+      expect(
+        container.read(imageWorkflowControllerProvider).upscale.localModel,
+        localUpscaleCatalog.first.id,
+      );
     });
 
     testWidgets('浅色主题下展开面板不应出现贴在面板底色上的近白色文字', (tester) async {

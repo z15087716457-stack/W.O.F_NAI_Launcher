@@ -1283,10 +1283,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_directorPrompt => 'Prompt (Optional)';
 
   @override
-  String get img2img_directorPromptHint =>
-      'Add guidance when needed, such as target emotion or color direction';
-
-  @override
   String get img2img_directorRunning => 'Processing...';
 
   @override
@@ -1300,13 +1296,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_directorDefry => 'Defry';
 
   @override
-  String get img2img_directorEmotionLevel => 'Emotion Level';
-
-  @override
   String get img2img_directorApplyAsSource => 'Use as Source';
-
-  @override
-  String get img2img_directorSourceImage => 'Source Image';
 
   @override
   String get img2img_variationsStarted => 'Generating variations...';
@@ -1349,44 +1339,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'NovelAI cloud upscale supports input images up to 3MP.';
 
   @override
-  String get img2img_comfyuiEnableHint =>
-      'Enable and connect ComfyUI in Settings > ComfyUI first.';
-
-  @override
-  String get img2img_upscaleMode => 'Upscale Mode';
-
-  @override
   String get img2img_upscaleRegularModel => 'Regular Model';
 
   @override
   String get img2img_upscaleModel => 'Upscale Model';
-
-  @override
-  String get img2img_noSeedvr2Models =>
-      'No SeedVR2 model found. Refresh the model list or check the SeedVR2 node/model files.';
-
-  @override
-  String get img2img_noRegularUpscaleModels =>
-      'No regular upscale model found. Refresh the model list or check models/upscale_models.';
-
-  @override
-  String get img2img_useSeedvr2TiledWorkflow =>
-      'Using the SeedVR2TilingUpscaler tiled upscale workflow.';
-
-  @override
-  String get img2img_useSeedvr2Workflow =>
-      'Using the SeedVR2VideoUpscaler workflow.';
-
-  @override
-  String get img2img_useRegularUpscaleWorkflow =>
-      'Using UpscaleModelLoader + ImageUpscaleWithModel, then correcting to the target scale with Lanczos.';
-
-  @override
-  String get img2img_useRtxUpscaleWorkflow =>
-      'Using RTX Video Super Resolution. No model selection is required.';
-
-  @override
-  String get img2img_refreshModelList => 'Refresh model list';
 
   @override
   String get img2img_startUpscale => 'Start Upscale';
@@ -1395,71 +1351,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_novelAiUpscaleComplete => 'NovelAI upscale complete';
 
   @override
-  String img2img_upscaleComplete(Object width, Object height) {
-    return 'Upscale complete (${width}x$height)';
-  }
-
-  @override
-  String img2img_regularUpscaleComplete(Object width, Object height) {
-    return 'Regular model upscale complete (${width}x$height)';
-  }
-
-  @override
-  String img2img_rtxUpscaleComplete(Object width, Object height) {
-    return 'RTX upscale complete (${width}x$height)';
-  }
-
-  @override
-  String get img2img_noAvailableSeedvr2Model =>
-      'No available SeedVR2 model selected';
-
-  @override
-  String get img2img_noAvailableRegularUpscaleModel =>
-      'No available regular upscale model selected';
-
-  @override
   String get img2img_decodeSourceFailed => 'Failed to decode source image';
-
-  @override
-  String get img2img_metricSpeed => 'Speed';
-
-  @override
-  String get img2img_metricVram => 'VRAM';
-
-  @override
-  String get img2img_metricQuality => 'Quality';
-
-  @override
-  String get img2img_seedvr2VaeTileHint =>
-      'Also writes the SeedVR2 VAE MODEL encode/decode tile size.';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscale => 'Use tiled upscale';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscaleHint =>
-      'When enabled, uses SeedVR2TilingUpscaler. Recommended for large images or high VRAM pressure.';
-
-  @override
-  String get img2img_seedvr2TileSize => 'Tile Size';
-
-  @override
-  String get img2img_seedvr2TileSizeHint =>
-      'Also controls SeedVR2TilingUpscaler tile_width / tile_height.';
-
-  @override
-  String get img2img_seedvr2BlocksToSwap => 'Blocks Offloaded To RAM';
-
-  @override
-  String get img2img_seedvr2BlocksToSwapHint =>
-      'How many DiT blocks stay in system RAM and are streamed to VRAM during inference. Higher saves VRAM but uses more RAM and runs slower; lower it (even to 0) when VRAM is plentiful. Raise it if you hit out-of-memory errors.';
 
   @override
   String get img2img_upscalePanelOpened =>
       'Opened the Image2Image Upscale panel';
-
-  @override
-  String get editor_done => 'Done';
 
   @override
   String get editor_tolerance => 'Tolerance';
@@ -1490,12 +1386,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editor_clearLayer => 'Clear Layer';
-
-  @override
-  String get editor_resetView => 'Reset View';
-
-  @override
-  String get editor_zoom => 'Zoom';
 
   @override
   String get editor_toolBrush => 'Brush';
@@ -1557,12 +1447,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editor_layers => 'Layers';
 
   @override
-  String get editor_loadMask => 'Load Mask';
-
-  @override
-  String get editor_togglePanels => 'Toggle Panels';
-
-  @override
   String get editor_fillClosedRegion => 'Fill Closed Region';
 
   @override
@@ -1578,222 +1462,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editor_fitToWindow => 'Fit to Window';
 
   @override
-  String get editor_shortcutHelpTitle => 'Shortcut Help';
-
-  @override
-  String get editor_shortcutPaintTools => 'Paint Tools';
-
-  @override
-  String get editor_shortcutSelectionTools => 'Selection Tools';
-
-  @override
-  String get editor_shortcutCanvasView => 'Canvas View';
-
-  @override
-  String get editor_shortcutBrushAdjust => 'Brush Adjustments';
-
-  @override
-  String get editor_shortcutColors => 'Colors';
-
-  @override
-  String get editor_shortcutCanvasActions => 'Canvas Actions';
-
-  @override
-  String get editor_shortcutHistoryActions => 'History Actions';
-
-  @override
-  String get editor_shortcutSelectionActions => 'Selection Actions';
-
-  @override
-  String get editor_shortcutTemporaryColorPicker => 'Temporary Color Picker';
-
-  @override
-  String get editor_shortcutRectSelection => 'Rectangle Selection';
-
-  @override
-  String get editor_shortcutEllipseSelection => 'Ellipse Selection';
-
-  @override
-  String get editor_shortcutLassoSelection => 'Lasso Selection';
-
-  @override
   String get editor_shortcut100Zoom => '100% Zoom';
-
-  @override
-  String get editor_shortcutFitHeight => 'Fit Height';
-
-  @override
-  String get editor_shortcutFitWidth => 'Fit Width';
-
-  @override
-  String get editor_shortcutRotateLeft15 => 'Rotate Left 15°';
-
-  @override
-  String get editor_shortcutResetRotation => 'Reset Rotation';
-
-  @override
-  String get editor_shortcutRotateRight15 => 'Rotate Right 15°';
-
-  @override
-  String get editor_shortcutFlipHorizontal => 'Flip Horizontal';
-
-  @override
-  String get editor_shortcutWheel => 'Mouse Wheel';
-
-  @override
-  String get editor_shortcutBrushSmaller => 'Decrease Brush Size';
-
-  @override
-  String get editor_shortcutBrushLarger => 'Increase Brush Size';
-
-  @override
-  String get editor_shortcutOpacityLower => 'Decrease Opacity';
-
-  @override
-  String get editor_shortcutOpacityHigher => 'Increase Opacity';
-
-  @override
-  String get editor_shortcutDragBrushSize => 'Adjust Brush Size';
-
-  @override
-  String get editor_shortcutSwapColors => 'Swap Foreground/Background Colors';
-
-  @override
-  String get editor_shortcutPanCanvas => 'Pan Canvas';
-
-  @override
-  String get editor_shortcutClearSelectionContent => 'Clear Selection Content';
-
-  @override
-  String get editor_shortcutCancelCurrentAction => 'Cancel Current Action';
-
-  @override
-  String get editor_selectUnlockedLayerWithContent =>
-      'Select an unlocked layer with content';
-
-  @override
-  String get editor_readCurrentLayerFailed =>
-      'Failed to read the current layer';
-
-  @override
-  String get editor_localEffects => 'Local Post-processing / Effects';
-
-  @override
-  String get editor_basicAdjustments => 'Basic Adjustments';
-
-  @override
-  String get editor_styleAndRepair => 'Style & Repair';
-
-  @override
-  String get editor_transformCrop => 'Rotate / Flip / Crop';
-
-  @override
-  String get editor_transformCropDescription =>
-      'Geometry operations are separate. They generate a preview first and write back only after confirmation.';
-
-  @override
-  String get editor_effectPreviewHint =>
-      'Preview does not modify the original image. Click Apply to write the result to the active layer and undo history.';
-
-  @override
-  String get editor_applyToCurrentLayer => 'Apply to Current Layer';
-
-  @override
-  String editor_oneShotEffectHint(Object effect) {
-    return '$effect is a one-shot operation and has no intensity slider.';
-  }
-
-  @override
-  String editor_effectIntensity(Object effect) {
-    return '$effect Intensity';
-  }
-
-  @override
-  String get editor_original => 'Original';
-
-  @override
-  String get editor_effectPreview => 'Effect Preview';
 
   @override
   String get editor_effectBrightness => 'Brightness';
 
   @override
-  String get editor_effectContrast => 'Contrast';
-
-  @override
   String get editor_effectSaturation => 'Saturation';
 
   @override
-  String get editor_effectTemperature => 'Temperature';
-
-  @override
-  String get editor_effectGamma => 'Gamma';
-
-  @override
-  String get editor_effectGrayscale => 'Grayscale';
-
-  @override
-  String get editor_effectInvert => 'Invert';
-
-  @override
-  String get editor_effectSepia => 'Sepia';
-
-  @override
-  String get editor_effectDenoise => 'Denoise';
-
-  @override
-  String get editor_effectBlur => 'Gaussian Blur';
-
-  @override
-  String get editor_effectSharpen => 'Sharpen';
-
-  @override
-  String get editor_effectCropToSelection => 'Crop to Selection';
-
-  @override
-  String get editor_effectRotateLeft => 'Rotate Left 90°';
-
-  @override
-  String get editor_effectRotateRight => 'Rotate Right 90°';
-
-  @override
-  String get editor_effectFlipHorizontal => 'Flip Horizontal';
-
-  @override
-  String get editor_effectFlipVertical => 'Flip Vertical';
-
-  @override
-  String editor_effectApplied(Object effect) {
-    return 'Applied $effect';
-  }
-
-  @override
-  String editor_applyEffectFailed(Object error) {
-    return 'Failed to apply effect: $error';
-  }
-
-  @override
   String get editor_changeCanvasSize => 'Change Canvas Size';
-
-  @override
-  String editor_canvasTooSmall(Object width, Object height) {
-    return 'Canvas size is too small. Minimum size is $width x $height pixels';
-  }
-
-  @override
-  String editor_canvasTooLarge(Object width, Object height) {
-    return 'Canvas size is too large. Maximum size is $width x $height pixels';
-  }
-
-  @override
-  String editor_canvasResized(Object width, Object height) {
-    return 'Canvas resized to $width x $height';
-  }
-
-  @override
-  String editor_canvasResizeFailed(Object error) {
-    return 'Failed to resize canvas: $error';
-  }
 
   @override
   String get editor_confirmExitTitle => 'Confirm Exit';
@@ -1814,121 +1492,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get editor_clickInsideClosedRegion =>
-      'Click inside a closed region to fill it.';
-
-  @override
-  String get editor_drawClosedMaskOutlineFirst =>
-      'Draw a closed mask outline first.';
-
-  @override
-  String get editor_noClosedRegionAtPosition =>
-      'No fillable closed region at this position.';
-
-  @override
-  String get editor_generateMaskOverlayFailed =>
-      'Failed to generate mask overlay';
-
-  @override
   String get editor_maskLayerName => 'Mask';
-
-  @override
-  String get editor_updateMaskLayerFailed => 'Failed to update mask layer';
-
-  @override
-  String get editor_closedRegionFilled => 'Closed region filled as mask.';
-
-  @override
-  String editor_fillMaskFailed(Object error) {
-    return 'Failed to fill mask: $error';
-  }
-
-  @override
-  String get editor_magicWandNoSource =>
-      'No editable image layer is available for sampling.';
-
-  @override
-  String get editor_magicWandNothingChanged =>
-      'The selected region is already transparent or masked.';
-
-  @override
-  String get editor_magicWandModelPreparing =>
-      'Checking the EfficientViT-SAM model…';
-
-  @override
-  String editor_magicWandModelDownloading(int percent) {
-    return 'Downloading the EfficientViT-SAM model: $percent%';
-  }
-
-  @override
-  String get editor_magicWandModelLoading =>
-      'Loading the EfficientViT-SAM model…';
-
-  @override
-  String get editor_magicWandEncoding => 'Analyzing image objects…';
-
-  @override
-  String get editor_magicWandSegmenting =>
-      'Segmenting the object at the clicked point…';
-
-  @override
-  String get editor_magicWandPostprocessing => 'Building the selection…';
-
-  @override
-  String editor_magicWandFailed(Object error) {
-    return 'Magic Wand failed: $error';
-  }
-
-  @override
-  String get editor_compressionTitle => 'Output resolution';
-
-  @override
-  String get editor_compressionTooltip => 'Choose output resolution';
-
-  @override
-  String get editor_compressionUncompressed =>
-      'Original work resolution; no compression will be applied.';
-
-  @override
-  String get editor_compressionApplyOnDone =>
-      'Pica Lanczos3 compression runs once when you press Done. The work canvas stays unchanged.';
-
-  @override
-  String editor_compressionSizeSummary(
-    int workWidth,
-    int workHeight,
-    int targetWidth,
-    int targetHeight,
-  ) {
-    return 'Work $workWidth×$workHeight → output $targetWidth×$targetHeight';
-  }
-
-  @override
-  String editor_compressionNormalSummary(
-    int normalWidth,
-    int normalHeight,
-    int minimumWidth,
-    int minimumHeight,
-  ) {
-    return 'Normal (about 1 MP): $normalWidth×$normalHeight. Lowest: $minimumWidth×$minimumHeight.';
-  }
-
-  @override
-  String get editor_compressionUnavailable =>
-      'This work canvas is already below the lowest compression step.';
-
-  @override
-  String editor_unsupportedImageFormat(Object extension) {
-    return 'Unsupported file format: .$extension\nPlease choose an image file (PNG, JPG, WEBP, etc.)';
-  }
-
-  @override
-  String editor_readFileFailed(Object error) {
-    return 'Failed to read file: $error';
-  }
-
-  @override
-  String get editor_noFileData => 'Failed to get file data';
 
   @override
   String get editor_emptyImageFile =>
@@ -1940,16 +1504,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get editor_maskLayerAdded => 'Mask layer added';
-
-  @override
   String get editor_parseImageFailed =>
       'Failed to parse image file\nMake sure the file is not corrupted and the format is supported';
-
-  @override
-  String editor_loadMaskFailed(Object error) {
-    return 'Failed to load mask: $error';
-  }
 
   @override
   String get editor_defaultTitle => 'Canvas';
@@ -2056,28 +1612,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editor_eraserSettings => 'Eraser Settings';
-
-  @override
-  String get editor_colorPickerHint =>
-      'Click anywhere on the canvas to pick a color. Release to switch back to the previous tool.';
-
-  @override
-  String get editor_sample => 'Sample';
-
-  @override
-  String get editor_samplePoint => 'Point';
-
-  @override
-  String get editor_sampleArea => 'Area';
-
-  @override
-  String get editor_source => 'Source';
-
-  @override
-  String get editor_sourceCurrentLayer => 'Current Layer';
-
-  @override
-  String get editor_sourceAllLayers => 'All Layers';
 
   @override
   String get editor_lassoSelectionHelp =>
@@ -3856,9 +3390,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_group_yesterday => 'Yesterday';
 
   @override
-  String get localGallery_sendTo => 'Send to…';
-
-  @override
   String localGallery_groupImageCount(int count, String formatted) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -4340,9 +3871,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statistics_saturday => 'Sat';
 
   @override
-  String get fixedTags_negativeTitle => 'Undesired Content Fixed Tags';
-
-  @override
   String get autocomplete_categoryCharacter => 'Character';
 
   @override
@@ -4550,9 +4078,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get metadataImport_mainPrompt => 'Main Prompt';
-
-  @override
-  String get metadataImport_fixedTags => 'Fixed Tags';
 
   @override
   String metadataImport_qualityTagsCount(int count) {
@@ -5951,21 +5476,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Startup failed, check the error message';
 
   @override
-  String get settings_kritaBridgeDisabled => 'Disabled';
-
-  @override
-  String get settings_kritaBridgeStarting => 'Starting';
-
-  @override
-  String get settings_kritaBridgeListening => 'Listening';
-
-  @override
-  String get settings_kritaBridgeConnected => 'Connected';
-
-  @override
-  String get settings_kritaBridgeError => 'Error';
-
-  @override
   String get settings_kritaBridgeRegenerateSession => 'Regenerate Session';
 
   @override
@@ -6165,11 +5675,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_highAnlasCostTitle => 'Anlas usage reminder';
 
   @override
-  String settings_highAnlasCostContent(Object cost, Object threshold) {
-    return 'This request is estimated to cost $cost Anlas, which reaches or exceeds your $threshold Anlas warning threshold. Continue generation?';
-  }
-
-  @override
   String get settings_continueGeneration => 'Continue Generation';
 
   @override
@@ -6202,40 +5707,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_comfyUiDisconnect => 'Disconnect';
-
-  @override
-  String get settings_comfyUiWorkflowManagement => 'Workflow Management';
-
-  @override
-  String get settings_comfyUiBuiltinWorkflows => 'Built-in Workflows';
-
-  @override
-  String get settings_comfyUiCustomWorkflows => 'Custom Workflows';
-
-  @override
-  String get settings_comfyUiNoCustomWorkflows =>
-      'No custom workflows yet. Click \"Import\" to add a ComfyUI workflow.';
-
-  @override
-  String settings_comfyUiSlotCount(Object count) {
-    return '$count slots';
-  }
-
-  @override
-  String get settings_comfyUiBuiltin => 'Built-in';
-
-  @override
-  String get settings_comfyUiDeleteWorkflowTitle => 'Delete Workflow';
-
-  @override
-  String settings_comfyUiDeleteWorkflowContent(Object name) {
-    return 'Delete workflow \"$name\"? This cannot be undone.';
-  }
-
-  @override
-  String settings_comfyUiDeleted(Object name) {
-    return 'Deleted: $name';
-  }
 
   @override
   String get settings_comfyUiNoResponse => 'Server did not respond';
@@ -6805,9 +6276,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toast_vibeDataCopied => 'Vibe data copied';
 
   @override
-  String get toast_tagCopied => 'Tags copied';
-
-  @override
   String get toast_characterPromptCopied => 'Character prompt copied';
 
   @override
@@ -7251,19 +6719,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get model3d_editorTitle => '3D Model Layer';
 
   @override
-  String get model3d_addMannequin => 'Add Built-in Mannequin';
-
-  @override
-  String get model3d_importModel => 'Import Model (.glb/.gltf)';
-
-  @override
-  String get model3d_emptyHint =>
-      'Scene is empty. Add a mannequin or import a model.';
-
-  @override
-  String get model3d_apply => 'Apply to Layer';
-
-  @override
   String get model3d_modeTransform => 'Transform';
 
   @override
@@ -7277,12 +6732,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get model3d_gizmoScale => 'Scale';
-
-  @override
-  String get model3d_undo => 'Undo';
-
-  @override
-  String get model3d_resetPose => 'Reset Pose';
 
   @override
   String get model3d_replaceConfirm =>
@@ -7302,20 +6751,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get model3d_light => 'Lighting';
 
   @override
-  String get model3d_lightIntensity => 'Intensity';
-
-  @override
-  String get model3d_lightAzimuth => 'Azimuth';
-
-  @override
-  String get model3d_lightElevation => 'Elevation';
-
-  @override
   String get model3d_addLayerTooltip => 'Add 3D Model Layer';
-
-  @override
-  String get model3d_webview2Missing =>
-      'The 3D editor requires the Microsoft Edge WebView2 Runtime. It ships with Windows 10/11; if missing, install the Evergreen runtime from Microsoft and retry.';
 
   @override
   String get nav_preciseRefLibrary => 'Precise Ref Library';
@@ -7662,15 +7098,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get editor_effects => 'Effects';
-
-  @override
   String get editor_shiftEdges => 'Shift Edges';
-
-  @override
-  String editor_currentSize(int width, int height) {
-    return 'Current: $width x $height';
-  }
 
   @override
   String get editor_edgeLeft => 'Left';
@@ -7686,38 +7114,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editor_enterNumber => 'Enter a number';
-
-  @override
-  String get editor_nonNegativeNumber => 'Must be 0 or more';
-
-  @override
-  String editor_requestedSize(int width, int height) {
-    return 'Requested: $width x $height';
-  }
-
-  @override
-  String get editor_requestedSizeInvalid => 'Requested: invalid';
-
-  @override
-  String editor_appliedSize(int width, int height) {
-    return 'Applied: $width x $height';
-  }
-
-  @override
-  String get editor_appliedSizeInvalid => 'Applied: invalid';
-
-  @override
-  String editor_appliedEdges(int left, int top, int right, int bottom) {
-    return 'Applied edges: L $left, T $top, R $right, B $bottom';
-  }
-
-  @override
-  String get editor_appliedEdgesInvalid => 'Applied edges: invalid';
-
-  @override
-  String editor_appliedDimensionLimit(int max) {
-    return 'Applied dimensions must not exceed $max.';
-  }
 
   @override
   String get onlineGallery_videoLoadFailed => 'Failed to load video';
@@ -9792,9 +9188,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_pixelSnap => 'Pixel Snap';
 
   @override
-  String get img2img_original => 'Original';
-
-  @override
   String get img2img_directorAddToQueue => 'Use result as next input';
 
   @override
@@ -10004,9 +9397,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wiki_wide => 'Wide';
-
-  @override
-  String get wiki_hide => 'Hide';
 
   @override
   String get wiki_articleMissing =>
@@ -10638,11 +10028,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wiki_relatedHint => 'Click to open · Shift+click to add';
-
-  @override
-  String wiki_relatedShare(Object percent) {
-    return '$percent of posts also have this tag';
-  }
 
   @override
   String get wiki_inDirectory => 'In directory';
@@ -13130,9 +12515,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_emotionHurt => 'Hurt';
 
   @override
-  String get localUpscale_title => 'Local upscaling';
-
-  @override
   String get localUpscale_local => 'Local';
 
   @override
@@ -13230,9 +12612,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localUpscale_importModel => 'Import model';
 
   @override
-  String get localUpscale_modelReady => 'Model installed';
-
-  @override
   String get localUpscale_modelOperationFailed =>
       'Model operation failed. Check your connection, file permissions and free disk space, then retry.';
 
@@ -13288,6 +12667,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get localUpscale_installingRuntime =>
       'Installing Python/CUDA runtime…';
+
+  @override
+  String get localUpscale_installingPython => 'Preparing isolated Python…';
+
+  @override
+  String localUpscale_installFailed(String stage) {
+    return 'Installation failed at: $stage';
+  }
+
+  @override
+  String get wiki_translationQueued => 'Waiting to translate';
+
+  @override
+  String get wiki_translationFailedRetry =>
+      'Translation failed — click to retry';
 
   @override
   String get localUpscale_checkingComponent => 'Checking component and GPU…';

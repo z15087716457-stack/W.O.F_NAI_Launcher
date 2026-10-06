@@ -2412,12 +2412,6 @@ abstract class AppLocalizations {
   /// **'Prompt (Optional)'**
   String get img2img_directorPrompt;
 
-  /// No description provided for @img2img_directorPromptHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add guidance when needed, such as target emotion or color direction'**
-  String get img2img_directorPromptHint;
-
   /// No description provided for @img2img_directorRunning.
   ///
   /// In en, this message translates to:
@@ -2442,23 +2436,11 @@ abstract class AppLocalizations {
   /// **'Defry'**
   String get img2img_directorDefry;
 
-  /// No description provided for @img2img_directorEmotionLevel.
-  ///
-  /// In en, this message translates to:
-  /// **'Emotion Level'**
-  String get img2img_directorEmotionLevel;
-
   /// No description provided for @img2img_directorApplyAsSource.
   ///
   /// In en, this message translates to:
   /// **'Use as Source'**
   String get img2img_directorApplyAsSource;
-
-  /// No description provided for @img2img_directorSourceImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Source Image'**
-  String get img2img_directorSourceImage;
 
   /// No description provided for @img2img_variationsStarted.
   ///
@@ -2538,18 +2520,6 @@ abstract class AppLocalizations {
   /// **'NovelAI cloud upscale supports input images up to 3MP.'**
   String get img2img_cloudUpscaleSizeLimit;
 
-  /// No description provided for @img2img_comfyuiEnableHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable and connect ComfyUI in Settings > ComfyUI first.'**
-  String get img2img_comfyuiEnableHint;
-
-  /// No description provided for @img2img_upscaleMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Upscale Mode'**
-  String get img2img_upscaleMode;
-
   /// No description provided for @img2img_upscaleRegularModel.
   ///
   /// In en, this message translates to:
@@ -2561,48 +2531,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upscale Model'**
   String get img2img_upscaleModel;
-
-  /// No description provided for @img2img_noSeedvr2Models.
-  ///
-  /// In en, this message translates to:
-  /// **'No SeedVR2 model found. Refresh the model list or check the SeedVR2 node/model files.'**
-  String get img2img_noSeedvr2Models;
-
-  /// No description provided for @img2img_noRegularUpscaleModels.
-  ///
-  /// In en, this message translates to:
-  /// **'No regular upscale model found. Refresh the model list or check models/upscale_models.'**
-  String get img2img_noRegularUpscaleModels;
-
-  /// No description provided for @img2img_useSeedvr2TiledWorkflow.
-  ///
-  /// In en, this message translates to:
-  /// **'Using the SeedVR2TilingUpscaler tiled upscale workflow.'**
-  String get img2img_useSeedvr2TiledWorkflow;
-
-  /// No description provided for @img2img_useSeedvr2Workflow.
-  ///
-  /// In en, this message translates to:
-  /// **'Using the SeedVR2VideoUpscaler workflow.'**
-  String get img2img_useSeedvr2Workflow;
-
-  /// No description provided for @img2img_useRegularUpscaleWorkflow.
-  ///
-  /// In en, this message translates to:
-  /// **'Using UpscaleModelLoader + ImageUpscaleWithModel, then correcting to the target scale with Lanczos.'**
-  String get img2img_useRegularUpscaleWorkflow;
-
-  /// No description provided for @img2img_useRtxUpscaleWorkflow.
-  ///
-  /// In en, this message translates to:
-  /// **'Using RTX Video Super Resolution. No model selection is required.'**
-  String get img2img_useRtxUpscaleWorkflow;
-
-  /// No description provided for @img2img_refreshModelList.
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh model list'**
-  String get img2img_refreshModelList;
 
   /// No description provided for @img2img_startUpscale.
   ///
@@ -2616,113 +2544,17 @@ abstract class AppLocalizations {
   /// **'NovelAI upscale complete'**
   String get img2img_novelAiUpscaleComplete;
 
-  /// No description provided for @img2img_upscaleComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Upscale complete ({width}x{height})'**
-  String img2img_upscaleComplete(Object width, Object height);
-
-  /// No description provided for @img2img_regularUpscaleComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Regular model upscale complete ({width}x{height})'**
-  String img2img_regularUpscaleComplete(Object width, Object height);
-
-  /// No description provided for @img2img_rtxUpscaleComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'RTX upscale complete ({width}x{height})'**
-  String img2img_rtxUpscaleComplete(Object width, Object height);
-
-  /// No description provided for @img2img_noAvailableSeedvr2Model.
-  ///
-  /// In en, this message translates to:
-  /// **'No available SeedVR2 model selected'**
-  String get img2img_noAvailableSeedvr2Model;
-
-  /// No description provided for @img2img_noAvailableRegularUpscaleModel.
-  ///
-  /// In en, this message translates to:
-  /// **'No available regular upscale model selected'**
-  String get img2img_noAvailableRegularUpscaleModel;
-
   /// No description provided for @img2img_decodeSourceFailed.
   ///
   /// In en, this message translates to:
   /// **'Failed to decode source image'**
   String get img2img_decodeSourceFailed;
 
-  /// No description provided for @img2img_metricSpeed.
-  ///
-  /// In en, this message translates to:
-  /// **'Speed'**
-  String get img2img_metricSpeed;
-
-  /// No description provided for @img2img_metricVram.
-  ///
-  /// In en, this message translates to:
-  /// **'VRAM'**
-  String get img2img_metricVram;
-
-  /// No description provided for @img2img_metricQuality.
-  ///
-  /// In en, this message translates to:
-  /// **'Quality'**
-  String get img2img_metricQuality;
-
-  /// No description provided for @img2img_seedvr2VaeTileHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Also writes the SeedVR2 VAE MODEL encode/decode tile size.'**
-  String get img2img_seedvr2VaeTileHint;
-
-  /// No description provided for @img2img_seedvr2UseTiledUpscale.
-  ///
-  /// In en, this message translates to:
-  /// **'Use tiled upscale'**
-  String get img2img_seedvr2UseTiledUpscale;
-
-  /// No description provided for @img2img_seedvr2UseTiledUpscaleHint.
-  ///
-  /// In en, this message translates to:
-  /// **'When enabled, uses SeedVR2TilingUpscaler. Recommended for large images or high VRAM pressure.'**
-  String get img2img_seedvr2UseTiledUpscaleHint;
-
-  /// No description provided for @img2img_seedvr2TileSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Tile Size'**
-  String get img2img_seedvr2TileSize;
-
-  /// No description provided for @img2img_seedvr2TileSizeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Also controls SeedVR2TilingUpscaler tile_width / tile_height.'**
-  String get img2img_seedvr2TileSizeHint;
-
-  /// No description provided for @img2img_seedvr2BlocksToSwap.
-  ///
-  /// In en, this message translates to:
-  /// **'Blocks Offloaded To RAM'**
-  String get img2img_seedvr2BlocksToSwap;
-
-  /// No description provided for @img2img_seedvr2BlocksToSwapHint.
-  ///
-  /// In en, this message translates to:
-  /// **'How many DiT blocks stay in system RAM and are streamed to VRAM during inference. Higher saves VRAM but uses more RAM and runs slower; lower it (even to 0) when VRAM is plentiful. Raise it if you hit out-of-memory errors.'**
-  String get img2img_seedvr2BlocksToSwapHint;
-
   /// No description provided for @img2img_upscalePanelOpened.
   ///
   /// In en, this message translates to:
   /// **'Opened the Image2Image Upscale panel'**
   String get img2img_upscalePanelOpened;
-
-  /// No description provided for @editor_done.
-  ///
-  /// In en, this message translates to:
-  /// **'Done'**
-  String get editor_done;
 
   /// No description provided for @editor_tolerance.
   ///
@@ -2783,18 +2615,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear Layer'**
   String get editor_clearLayer;
-
-  /// No description provided for @editor_resetView.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset View'**
-  String get editor_resetView;
-
-  /// No description provided for @editor_zoom.
-  ///
-  /// In en, this message translates to:
-  /// **'Zoom'**
-  String get editor_zoom;
 
   /// No description provided for @editor_toolBrush.
   ///
@@ -2910,18 +2730,6 @@ abstract class AppLocalizations {
   /// **'Layers'**
   String get editor_layers;
 
-  /// No description provided for @editor_loadMask.
-  ///
-  /// In en, this message translates to:
-  /// **'Load Mask'**
-  String get editor_loadMask;
-
-  /// No description provided for @editor_togglePanels.
-  ///
-  /// In en, this message translates to:
-  /// **'Toggle Panels'**
-  String get editor_togglePanels;
-
   /// No description provided for @editor_fillClosedRegion.
   ///
   /// In en, this message translates to:
@@ -2952,263 +2760,11 @@ abstract class AppLocalizations {
   /// **'Fit to Window'**
   String get editor_fitToWindow;
 
-  /// No description provided for @editor_shortcutHelpTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Shortcut Help'**
-  String get editor_shortcutHelpTitle;
-
-  /// No description provided for @editor_shortcutPaintTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Paint Tools'**
-  String get editor_shortcutPaintTools;
-
-  /// No description provided for @editor_shortcutSelectionTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Selection Tools'**
-  String get editor_shortcutSelectionTools;
-
-  /// No description provided for @editor_shortcutCanvasView.
-  ///
-  /// In en, this message translates to:
-  /// **'Canvas View'**
-  String get editor_shortcutCanvasView;
-
-  /// No description provided for @editor_shortcutBrushAdjust.
-  ///
-  /// In en, this message translates to:
-  /// **'Brush Adjustments'**
-  String get editor_shortcutBrushAdjust;
-
-  /// No description provided for @editor_shortcutColors.
-  ///
-  /// In en, this message translates to:
-  /// **'Colors'**
-  String get editor_shortcutColors;
-
-  /// No description provided for @editor_shortcutCanvasActions.
-  ///
-  /// In en, this message translates to:
-  /// **'Canvas Actions'**
-  String get editor_shortcutCanvasActions;
-
-  /// No description provided for @editor_shortcutHistoryActions.
-  ///
-  /// In en, this message translates to:
-  /// **'History Actions'**
-  String get editor_shortcutHistoryActions;
-
-  /// No description provided for @editor_shortcutSelectionActions.
-  ///
-  /// In en, this message translates to:
-  /// **'Selection Actions'**
-  String get editor_shortcutSelectionActions;
-
-  /// No description provided for @editor_shortcutTemporaryColorPicker.
-  ///
-  /// In en, this message translates to:
-  /// **'Temporary Color Picker'**
-  String get editor_shortcutTemporaryColorPicker;
-
-  /// No description provided for @editor_shortcutRectSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Rectangle Selection'**
-  String get editor_shortcutRectSelection;
-
-  /// No description provided for @editor_shortcutEllipseSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Ellipse Selection'**
-  String get editor_shortcutEllipseSelection;
-
-  /// No description provided for @editor_shortcutLassoSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Lasso Selection'**
-  String get editor_shortcutLassoSelection;
-
   /// No description provided for @editor_shortcut100Zoom.
   ///
   /// In en, this message translates to:
   /// **'100% Zoom'**
   String get editor_shortcut100Zoom;
-
-  /// No description provided for @editor_shortcutFitHeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Fit Height'**
-  String get editor_shortcutFitHeight;
-
-  /// No description provided for @editor_shortcutFitWidth.
-  ///
-  /// In en, this message translates to:
-  /// **'Fit Width'**
-  String get editor_shortcutFitWidth;
-
-  /// No description provided for @editor_shortcutRotateLeft15.
-  ///
-  /// In en, this message translates to:
-  /// **'Rotate Left 15°'**
-  String get editor_shortcutRotateLeft15;
-
-  /// No description provided for @editor_shortcutResetRotation.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset Rotation'**
-  String get editor_shortcutResetRotation;
-
-  /// No description provided for @editor_shortcutRotateRight15.
-  ///
-  /// In en, this message translates to:
-  /// **'Rotate Right 15°'**
-  String get editor_shortcutRotateRight15;
-
-  /// No description provided for @editor_shortcutFlipHorizontal.
-  ///
-  /// In en, this message translates to:
-  /// **'Flip Horizontal'**
-  String get editor_shortcutFlipHorizontal;
-
-  /// No description provided for @editor_shortcutWheel.
-  ///
-  /// In en, this message translates to:
-  /// **'Mouse Wheel'**
-  String get editor_shortcutWheel;
-
-  /// No description provided for @editor_shortcutBrushSmaller.
-  ///
-  /// In en, this message translates to:
-  /// **'Decrease Brush Size'**
-  String get editor_shortcutBrushSmaller;
-
-  /// No description provided for @editor_shortcutBrushLarger.
-  ///
-  /// In en, this message translates to:
-  /// **'Increase Brush Size'**
-  String get editor_shortcutBrushLarger;
-
-  /// No description provided for @editor_shortcutOpacityLower.
-  ///
-  /// In en, this message translates to:
-  /// **'Decrease Opacity'**
-  String get editor_shortcutOpacityLower;
-
-  /// No description provided for @editor_shortcutOpacityHigher.
-  ///
-  /// In en, this message translates to:
-  /// **'Increase Opacity'**
-  String get editor_shortcutOpacityHigher;
-
-  /// No description provided for @editor_shortcutDragBrushSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjust Brush Size'**
-  String get editor_shortcutDragBrushSize;
-
-  /// No description provided for @editor_shortcutSwapColors.
-  ///
-  /// In en, this message translates to:
-  /// **'Swap Foreground/Background Colors'**
-  String get editor_shortcutSwapColors;
-
-  /// No description provided for @editor_shortcutPanCanvas.
-  ///
-  /// In en, this message translates to:
-  /// **'Pan Canvas'**
-  String get editor_shortcutPanCanvas;
-
-  /// No description provided for @editor_shortcutClearSelectionContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear Selection Content'**
-  String get editor_shortcutClearSelectionContent;
-
-  /// No description provided for @editor_shortcutCancelCurrentAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel Current Action'**
-  String get editor_shortcutCancelCurrentAction;
-
-  /// No description provided for @editor_selectUnlockedLayerWithContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Select an unlocked layer with content'**
-  String get editor_selectUnlockedLayerWithContent;
-
-  /// No description provided for @editor_readCurrentLayerFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to read the current layer'**
-  String get editor_readCurrentLayerFailed;
-
-  /// No description provided for @editor_localEffects.
-  ///
-  /// In en, this message translates to:
-  /// **'Local Post-processing / Effects'**
-  String get editor_localEffects;
-
-  /// No description provided for @editor_basicAdjustments.
-  ///
-  /// In en, this message translates to:
-  /// **'Basic Adjustments'**
-  String get editor_basicAdjustments;
-
-  /// No description provided for @editor_styleAndRepair.
-  ///
-  /// In en, this message translates to:
-  /// **'Style & Repair'**
-  String get editor_styleAndRepair;
-
-  /// No description provided for @editor_transformCrop.
-  ///
-  /// In en, this message translates to:
-  /// **'Rotate / Flip / Crop'**
-  String get editor_transformCrop;
-
-  /// No description provided for @editor_transformCropDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Geometry operations are separate. They generate a preview first and write back only after confirmation.'**
-  String get editor_transformCropDescription;
-
-  /// No description provided for @editor_effectPreviewHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Preview does not modify the original image. Click Apply to write the result to the active layer and undo history.'**
-  String get editor_effectPreviewHint;
-
-  /// No description provided for @editor_applyToCurrentLayer.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply to Current Layer'**
-  String get editor_applyToCurrentLayer;
-
-  /// No description provided for @editor_oneShotEffectHint.
-  ///
-  /// In en, this message translates to:
-  /// **'{effect} is a one-shot operation and has no intensity slider.'**
-  String editor_oneShotEffectHint(Object effect);
-
-  /// No description provided for @editor_effectIntensity.
-  ///
-  /// In en, this message translates to:
-  /// **'{effect} Intensity'**
-  String editor_effectIntensity(Object effect);
-
-  /// No description provided for @editor_original.
-  ///
-  /// In en, this message translates to:
-  /// **'Original'**
-  String get editor_original;
-
-  /// No description provided for @editor_effectPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Effect Preview'**
-  String get editor_effectPreview;
 
   /// No description provided for @editor_effectBrightness.
   ///
@@ -3216,137 +2772,17 @@ abstract class AppLocalizations {
   /// **'Brightness'**
   String get editor_effectBrightness;
 
-  /// No description provided for @editor_effectContrast.
-  ///
-  /// In en, this message translates to:
-  /// **'Contrast'**
-  String get editor_effectContrast;
-
   /// No description provided for @editor_effectSaturation.
   ///
   /// In en, this message translates to:
   /// **'Saturation'**
   String get editor_effectSaturation;
 
-  /// No description provided for @editor_effectTemperature.
-  ///
-  /// In en, this message translates to:
-  /// **'Temperature'**
-  String get editor_effectTemperature;
-
-  /// No description provided for @editor_effectGamma.
-  ///
-  /// In en, this message translates to:
-  /// **'Gamma'**
-  String get editor_effectGamma;
-
-  /// No description provided for @editor_effectGrayscale.
-  ///
-  /// In en, this message translates to:
-  /// **'Grayscale'**
-  String get editor_effectGrayscale;
-
-  /// No description provided for @editor_effectInvert.
-  ///
-  /// In en, this message translates to:
-  /// **'Invert'**
-  String get editor_effectInvert;
-
-  /// No description provided for @editor_effectSepia.
-  ///
-  /// In en, this message translates to:
-  /// **'Sepia'**
-  String get editor_effectSepia;
-
-  /// No description provided for @editor_effectDenoise.
-  ///
-  /// In en, this message translates to:
-  /// **'Denoise'**
-  String get editor_effectDenoise;
-
-  /// No description provided for @editor_effectBlur.
-  ///
-  /// In en, this message translates to:
-  /// **'Gaussian Blur'**
-  String get editor_effectBlur;
-
-  /// No description provided for @editor_effectSharpen.
-  ///
-  /// In en, this message translates to:
-  /// **'Sharpen'**
-  String get editor_effectSharpen;
-
-  /// No description provided for @editor_effectCropToSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Crop to Selection'**
-  String get editor_effectCropToSelection;
-
-  /// No description provided for @editor_effectRotateLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'Rotate Left 90°'**
-  String get editor_effectRotateLeft;
-
-  /// No description provided for @editor_effectRotateRight.
-  ///
-  /// In en, this message translates to:
-  /// **'Rotate Right 90°'**
-  String get editor_effectRotateRight;
-
-  /// No description provided for @editor_effectFlipHorizontal.
-  ///
-  /// In en, this message translates to:
-  /// **'Flip Horizontal'**
-  String get editor_effectFlipHorizontal;
-
-  /// No description provided for @editor_effectFlipVertical.
-  ///
-  /// In en, this message translates to:
-  /// **'Flip Vertical'**
-  String get editor_effectFlipVertical;
-
-  /// No description provided for @editor_effectApplied.
-  ///
-  /// In en, this message translates to:
-  /// **'Applied {effect}'**
-  String editor_effectApplied(Object effect);
-
-  /// No description provided for @editor_applyEffectFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to apply effect: {error}'**
-  String editor_applyEffectFailed(Object error);
-
   /// No description provided for @editor_changeCanvasSize.
   ///
   /// In en, this message translates to:
   /// **'Change Canvas Size'**
   String get editor_changeCanvasSize;
-
-  /// No description provided for @editor_canvasTooSmall.
-  ///
-  /// In en, this message translates to:
-  /// **'Canvas size is too small. Minimum size is {width} x {height} pixels'**
-  String editor_canvasTooSmall(Object width, Object height);
-
-  /// No description provided for @editor_canvasTooLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'Canvas size is too large. Maximum size is {width} x {height} pixels'**
-  String editor_canvasTooLarge(Object width, Object height);
-
-  /// No description provided for @editor_canvasResized.
-  ///
-  /// In en, this message translates to:
-  /// **'Canvas resized to {width} x {height}'**
-  String editor_canvasResized(Object width, Object height);
-
-  /// No description provided for @editor_canvasResizeFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to resize canvas: {error}'**
-  String editor_canvasResizeFailed(Object error);
 
   /// No description provided for @editor_confirmExitTitle.
   ///
@@ -3378,177 +2814,11 @@ abstract class AppLocalizations {
   /// **'Export failed: {error}'**
   String editor_exportFailed(Object error);
 
-  /// No description provided for @editor_clickInsideClosedRegion.
-  ///
-  /// In en, this message translates to:
-  /// **'Click inside a closed region to fill it.'**
-  String get editor_clickInsideClosedRegion;
-
-  /// No description provided for @editor_drawClosedMaskOutlineFirst.
-  ///
-  /// In en, this message translates to:
-  /// **'Draw a closed mask outline first.'**
-  String get editor_drawClosedMaskOutlineFirst;
-
-  /// No description provided for @editor_noClosedRegionAtPosition.
-  ///
-  /// In en, this message translates to:
-  /// **'No fillable closed region at this position.'**
-  String get editor_noClosedRegionAtPosition;
-
-  /// No description provided for @editor_generateMaskOverlayFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to generate mask overlay'**
-  String get editor_generateMaskOverlayFailed;
-
   /// No description provided for @editor_maskLayerName.
   ///
   /// In en, this message translates to:
   /// **'Mask'**
   String get editor_maskLayerName;
-
-  /// No description provided for @editor_updateMaskLayerFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to update mask layer'**
-  String get editor_updateMaskLayerFailed;
-
-  /// No description provided for @editor_closedRegionFilled.
-  ///
-  /// In en, this message translates to:
-  /// **'Closed region filled as mask.'**
-  String get editor_closedRegionFilled;
-
-  /// No description provided for @editor_fillMaskFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to fill mask: {error}'**
-  String editor_fillMaskFailed(Object error);
-
-  /// No description provided for @editor_magicWandNoSource.
-  ///
-  /// In en, this message translates to:
-  /// **'No editable image layer is available for sampling.'**
-  String get editor_magicWandNoSource;
-
-  /// No description provided for @editor_magicWandNothingChanged.
-  ///
-  /// In en, this message translates to:
-  /// **'The selected region is already transparent or masked.'**
-  String get editor_magicWandNothingChanged;
-
-  /// No description provided for @editor_magicWandModelPreparing.
-  ///
-  /// In en, this message translates to:
-  /// **'Checking the EfficientViT-SAM model…'**
-  String get editor_magicWandModelPreparing;
-
-  /// No description provided for @editor_magicWandModelDownloading.
-  ///
-  /// In en, this message translates to:
-  /// **'Downloading the EfficientViT-SAM model: {percent}%'**
-  String editor_magicWandModelDownloading(int percent);
-
-  /// No description provided for @editor_magicWandModelLoading.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading the EfficientViT-SAM model…'**
-  String get editor_magicWandModelLoading;
-
-  /// No description provided for @editor_magicWandEncoding.
-  ///
-  /// In en, this message translates to:
-  /// **'Analyzing image objects…'**
-  String get editor_magicWandEncoding;
-
-  /// No description provided for @editor_magicWandSegmenting.
-  ///
-  /// In en, this message translates to:
-  /// **'Segmenting the object at the clicked point…'**
-  String get editor_magicWandSegmenting;
-
-  /// No description provided for @editor_magicWandPostprocessing.
-  ///
-  /// In en, this message translates to:
-  /// **'Building the selection…'**
-  String get editor_magicWandPostprocessing;
-
-  /// No description provided for @editor_magicWandFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Magic Wand failed: {error}'**
-  String editor_magicWandFailed(Object error);
-
-  /// No description provided for @editor_compressionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Output resolution'**
-  String get editor_compressionTitle;
-
-  /// No description provided for @editor_compressionTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose output resolution'**
-  String get editor_compressionTooltip;
-
-  /// No description provided for @editor_compressionUncompressed.
-  ///
-  /// In en, this message translates to:
-  /// **'Original work resolution; no compression will be applied.'**
-  String get editor_compressionUncompressed;
-
-  /// No description provided for @editor_compressionApplyOnDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Pica Lanczos3 compression runs once when you press Done. The work canvas stays unchanged.'**
-  String get editor_compressionApplyOnDone;
-
-  /// No description provided for @editor_compressionSizeSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Work {workWidth}×{workHeight} → output {targetWidth}×{targetHeight}'**
-  String editor_compressionSizeSummary(
-    int workWidth,
-    int workHeight,
-    int targetWidth,
-    int targetHeight,
-  );
-
-  /// No description provided for @editor_compressionNormalSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Normal (about 1 MP): {normalWidth}×{normalHeight}. Lowest: {minimumWidth}×{minimumHeight}.'**
-  String editor_compressionNormalSummary(
-    int normalWidth,
-    int normalHeight,
-    int minimumWidth,
-    int minimumHeight,
-  );
-
-  /// No description provided for @editor_compressionUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'This work canvas is already below the lowest compression step.'**
-  String get editor_compressionUnavailable;
-
-  /// No description provided for @editor_unsupportedImageFormat.
-  ///
-  /// In en, this message translates to:
-  /// **'Unsupported file format: .{extension}\nPlease choose an image file (PNG, JPG, WEBP, etc.)'**
-  String editor_unsupportedImageFormat(Object extension);
-
-  /// No description provided for @editor_readFileFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to read file: {error}'**
-  String editor_readFileFailed(Object error);
-
-  /// No description provided for @editor_noFileData.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to get file data'**
-  String get editor_noFileData;
 
   /// No description provided for @editor_emptyImageFile.
   ///
@@ -3562,23 +2832,11 @@ abstract class AppLocalizations {
   /// **'File is too large ({sizeMB} MB). Choose an image under 50 MB'**
   String editor_fileTooLarge(Object sizeMB);
 
-  /// No description provided for @editor_maskLayerAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Mask layer added'**
-  String get editor_maskLayerAdded;
-
   /// No description provided for @editor_parseImageFailed.
   ///
   /// In en, this message translates to:
   /// **'Failed to parse image file\nMake sure the file is not corrupted and the format is supported'**
   String get editor_parseImageFailed;
-
-  /// No description provided for @editor_loadMaskFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load mask: {error}'**
-  String editor_loadMaskFailed(Object error);
 
   /// No description provided for @editor_defaultTitle.
   ///
@@ -3771,48 +3029,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Eraser Settings'**
   String get editor_eraserSettings;
-
-  /// No description provided for @editor_colorPickerHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Click anywhere on the canvas to pick a color. Release to switch back to the previous tool.'**
-  String get editor_colorPickerHint;
-
-  /// No description provided for @editor_sample.
-  ///
-  /// In en, this message translates to:
-  /// **'Sample'**
-  String get editor_sample;
-
-  /// No description provided for @editor_samplePoint.
-  ///
-  /// In en, this message translates to:
-  /// **'Point'**
-  String get editor_samplePoint;
-
-  /// No description provided for @editor_sampleArea.
-  ///
-  /// In en, this message translates to:
-  /// **'Area'**
-  String get editor_sampleArea;
-
-  /// No description provided for @editor_source.
-  ///
-  /// In en, this message translates to:
-  /// **'Source'**
-  String get editor_source;
-
-  /// No description provided for @editor_sourceCurrentLayer.
-  ///
-  /// In en, this message translates to:
-  /// **'Current Layer'**
-  String get editor_sourceCurrentLayer;
-
-  /// No description provided for @editor_sourceAllLayers.
-  ///
-  /// In en, this message translates to:
-  /// **'All Layers'**
-  String get editor_sourceAllLayers;
 
   /// No description provided for @editor_lassoSelectionHelp.
   ///
@@ -6958,12 +6174,6 @@ abstract class AppLocalizations {
   /// **'Yesterday'**
   String get localGallery_group_yesterday;
 
-  /// No description provided for @localGallery_sendTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to…'**
-  String get localGallery_sendTo;
-
   /// No description provided for @localGallery_groupImageCount.
   ///
   /// In en, this message translates to:
@@ -7744,12 +6954,6 @@ abstract class AppLocalizations {
   /// **'Sat'**
   String get statistics_saturday;
 
-  /// No description provided for @fixedTags_negativeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Undesired Content Fixed Tags'**
-  String get fixedTags_negativeTitle;
-
   /// No description provided for @autocomplete_categoryCharacter.
   ///
   /// In en, this message translates to:
@@ -8145,12 +7349,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Main Prompt'**
   String get metadataImport_mainPrompt;
-
-  /// No description provided for @metadataImport_fixedTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Fixed Tags'**
-  String get metadataImport_fixedTags;
 
   /// No description provided for @metadataImport_qualityTagsCount.
   ///
@@ -10551,36 +9749,6 @@ abstract class AppLocalizations {
   /// **'Startup failed, check the error message'**
   String get settings_kritaBridgeErrorText;
 
-  /// No description provided for @settings_kritaBridgeDisabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Disabled'**
-  String get settings_kritaBridgeDisabled;
-
-  /// No description provided for @settings_kritaBridgeStarting.
-  ///
-  /// In en, this message translates to:
-  /// **'Starting'**
-  String get settings_kritaBridgeStarting;
-
-  /// No description provided for @settings_kritaBridgeListening.
-  ///
-  /// In en, this message translates to:
-  /// **'Listening'**
-  String get settings_kritaBridgeListening;
-
-  /// No description provided for @settings_kritaBridgeConnected.
-  ///
-  /// In en, this message translates to:
-  /// **'Connected'**
-  String get settings_kritaBridgeConnected;
-
-  /// No description provided for @settings_kritaBridgeError.
-  ///
-  /// In en, this message translates to:
-  /// **'Error'**
-  String get settings_kritaBridgeError;
-
   /// No description provided for @settings_kritaBridgeRegenerateSession.
   ///
   /// In en, this message translates to:
@@ -10911,12 +10079,6 @@ abstract class AppLocalizations {
   /// **'Anlas usage reminder'**
   String get settings_highAnlasCostTitle;
 
-  /// No description provided for @settings_highAnlasCostContent.
-  ///
-  /// In en, this message translates to:
-  /// **'This request is estimated to cost {cost} Anlas, which reaches or exceeds your {threshold} Anlas warning threshold. Continue generation?'**
-  String settings_highAnlasCostContent(Object cost, Object threshold);
-
   /// No description provided for @settings_continueGeneration.
   ///
   /// In en, this message translates to:
@@ -10976,60 +10138,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Disconnect'**
   String get settings_comfyUiDisconnect;
-
-  /// No description provided for @settings_comfyUiWorkflowManagement.
-  ///
-  /// In en, this message translates to:
-  /// **'Workflow Management'**
-  String get settings_comfyUiWorkflowManagement;
-
-  /// No description provided for @settings_comfyUiBuiltinWorkflows.
-  ///
-  /// In en, this message translates to:
-  /// **'Built-in Workflows'**
-  String get settings_comfyUiBuiltinWorkflows;
-
-  /// No description provided for @settings_comfyUiCustomWorkflows.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Workflows'**
-  String get settings_comfyUiCustomWorkflows;
-
-  /// No description provided for @settings_comfyUiNoCustomWorkflows.
-  ///
-  /// In en, this message translates to:
-  /// **'No custom workflows yet. Click \"Import\" to add a ComfyUI workflow.'**
-  String get settings_comfyUiNoCustomWorkflows;
-
-  /// No description provided for @settings_comfyUiSlotCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} slots'**
-  String settings_comfyUiSlotCount(Object count);
-
-  /// No description provided for @settings_comfyUiBuiltin.
-  ///
-  /// In en, this message translates to:
-  /// **'Built-in'**
-  String get settings_comfyUiBuiltin;
-
-  /// No description provided for @settings_comfyUiDeleteWorkflowTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Workflow'**
-  String get settings_comfyUiDeleteWorkflowTitle;
-
-  /// No description provided for @settings_comfyUiDeleteWorkflowContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete workflow \"{name}\"? This cannot be undone.'**
-  String settings_comfyUiDeleteWorkflowContent(Object name);
-
-  /// No description provided for @settings_comfyUiDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Deleted: {name}'**
-  String settings_comfyUiDeleted(Object name);
 
   /// No description provided for @settings_comfyUiNoResponse.
   ///
@@ -12003,12 +11111,6 @@ abstract class AppLocalizations {
   /// **'Vibe data copied'**
   String get toast_vibeDataCopied;
 
-  /// No description provided for @toast_tagCopied.
-  ///
-  /// In en, this message translates to:
-  /// **'Tags copied'**
-  String get toast_tagCopied;
-
   /// No description provided for @toast_characterPromptCopied.
   ///
   /// In en, this message translates to:
@@ -12753,30 +11855,6 @@ abstract class AppLocalizations {
   /// **'3D Model Layer'**
   String get model3d_editorTitle;
 
-  /// No description provided for @model3d_addMannequin.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Built-in Mannequin'**
-  String get model3d_addMannequin;
-
-  /// No description provided for @model3d_importModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Import Model (.glb/.gltf)'**
-  String get model3d_importModel;
-
-  /// No description provided for @model3d_emptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Scene is empty. Add a mannequin or import a model.'**
-  String get model3d_emptyHint;
-
-  /// No description provided for @model3d_apply.
-  ///
-  /// In en, this message translates to:
-  /// **'Apply to Layer'**
-  String get model3d_apply;
-
   /// No description provided for @model3d_modeTransform.
   ///
   /// In en, this message translates to:
@@ -12806,18 +11884,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scale'**
   String get model3d_gizmoScale;
-
-  /// No description provided for @model3d_undo.
-  ///
-  /// In en, this message translates to:
-  /// **'Undo'**
-  String get model3d_undo;
-
-  /// No description provided for @model3d_resetPose.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset Pose'**
-  String get model3d_resetPose;
 
   /// No description provided for @model3d_replaceConfirm.
   ///
@@ -12849,35 +11915,11 @@ abstract class AppLocalizations {
   /// **'Lighting'**
   String get model3d_light;
 
-  /// No description provided for @model3d_lightIntensity.
-  ///
-  /// In en, this message translates to:
-  /// **'Intensity'**
-  String get model3d_lightIntensity;
-
-  /// No description provided for @model3d_lightAzimuth.
-  ///
-  /// In en, this message translates to:
-  /// **'Azimuth'**
-  String get model3d_lightAzimuth;
-
-  /// No description provided for @model3d_lightElevation.
-  ///
-  /// In en, this message translates to:
-  /// **'Elevation'**
-  String get model3d_lightElevation;
-
   /// No description provided for @model3d_addLayerTooltip.
   ///
   /// In en, this message translates to:
   /// **'Add 3D Model Layer'**
   String get model3d_addLayerTooltip;
-
-  /// No description provided for @model3d_webview2Missing.
-  ///
-  /// In en, this message translates to:
-  /// **'The 3D editor requires the Microsoft Edge WebView2 Runtime. It ships with Windows 10/11; if missing, install the Evergreen runtime from Microsoft and retry.'**
-  String get model3d_webview2Missing;
 
   /// No description provided for @nav_preciseRefLibrary.
   ///
@@ -13419,23 +12461,11 @@ abstract class AppLocalizations {
   /// **'Failed to select directory: {error}'**
   String imagePicker_directorySelectionFailed(String error);
 
-  /// No description provided for @editor_effects.
-  ///
-  /// In en, this message translates to:
-  /// **'Effects'**
-  String get editor_effects;
-
   /// No description provided for @editor_shiftEdges.
   ///
   /// In en, this message translates to:
   /// **'Shift Edges'**
   String get editor_shiftEdges;
-
-  /// No description provided for @editor_currentSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Current: {width} x {height}'**
-  String editor_currentSize(int width, int height);
 
   /// No description provided for @editor_edgeLeft.
   ///
@@ -13466,54 +12496,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a number'**
   String get editor_enterNumber;
-
-  /// No description provided for @editor_nonNegativeNumber.
-  ///
-  /// In en, this message translates to:
-  /// **'Must be 0 or more'**
-  String get editor_nonNegativeNumber;
-
-  /// No description provided for @editor_requestedSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Requested: {width} x {height}'**
-  String editor_requestedSize(int width, int height);
-
-  /// No description provided for @editor_requestedSizeInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Requested: invalid'**
-  String get editor_requestedSizeInvalid;
-
-  /// No description provided for @editor_appliedSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Applied: {width} x {height}'**
-  String editor_appliedSize(int width, int height);
-
-  /// No description provided for @editor_appliedSizeInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Applied: invalid'**
-  String get editor_appliedSizeInvalid;
-
-  /// No description provided for @editor_appliedEdges.
-  ///
-  /// In en, this message translates to:
-  /// **'Applied edges: L {left}, T {top}, R {right}, B {bottom}'**
-  String editor_appliedEdges(int left, int top, int right, int bottom);
-
-  /// No description provided for @editor_appliedEdgesInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Applied edges: invalid'**
-  String get editor_appliedEdgesInvalid;
-
-  /// No description provided for @editor_appliedDimensionLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'Applied dimensions must not exceed {max}.'**
-  String editor_appliedDimensionLimit(int max);
 
   /// No description provided for @onlineGallery_videoLoadFailed.
   ///
@@ -16974,12 +15956,6 @@ abstract class AppLocalizations {
   /// **'Pixel Snap'**
   String get img2img_pixelSnap;
 
-  /// No description provided for @img2img_original.
-  ///
-  /// In en, this message translates to:
-  /// **'Original'**
-  String get img2img_original;
-
   /// No description provided for @img2img_directorAddToQueue.
   ///
   /// In en, this message translates to:
@@ -17381,12 +16357,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wide'**
   String get wiki_wide;
-
-  /// No description provided for @wiki_hide.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide'**
-  String get wiki_hide;
 
   /// No description provided for @wiki_articleMissing.
   ///
@@ -18545,12 +17515,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Click to open · Shift+click to add'**
   String get wiki_relatedHint;
-
-  /// No description provided for @wiki_relatedShare.
-  ///
-  /// In en, this message translates to:
-  /// **'{percent} of posts also have this tag'**
-  String wiki_relatedShare(Object percent);
 
   /// No description provided for @wiki_inDirectory.
   ///
@@ -22810,12 +21774,6 @@ abstract class AppLocalizations {
   /// **'Hurt'**
   String get img2img_emotionHurt;
 
-  /// No description provided for @localUpscale_title.
-  ///
-  /// In en, this message translates to:
-  /// **'Local upscaling'**
-  String get localUpscale_title;
-
   /// No description provided for @localUpscale_local.
   ///
   /// In en, this message translates to:
@@ -22984,12 +21942,6 @@ abstract class AppLocalizations {
   /// **'Import model'**
   String get localUpscale_importModel;
 
-  /// No description provided for @localUpscale_modelReady.
-  ///
-  /// In en, this message translates to:
-  /// **'Model installed'**
-  String get localUpscale_modelReady;
-
   /// No description provided for @localUpscale_modelOperationFailed.
   ///
   /// In en, this message translates to:
@@ -23085,6 +22037,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Installing Python/CUDA runtime…'**
   String get localUpscale_installingRuntime;
+
+  /// No description provided for @localUpscale_installingPython.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing isolated Python…'**
+  String get localUpscale_installingPython;
+
+  /// No description provided for @localUpscale_installFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Installation failed at: {stage}'**
+  String localUpscale_installFailed(String stage);
+
+  /// No description provided for @wiki_translationQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to translate'**
+  String get wiki_translationQueued;
+
+  /// No description provided for @wiki_translationFailedRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation failed — click to retry'**
+  String get wiki_translationFailedRetry;
 
   /// No description provided for @localUpscale_checkingComponent.
   ///

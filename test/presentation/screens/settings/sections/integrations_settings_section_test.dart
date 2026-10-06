@@ -102,14 +102,18 @@ void main() {
 
     expect(find.text('模型与接口'), findsNothing);
     expect(find.text('ComfyUI'), findsOneWidget);
-    expect(find.text('Krita'), findsOneWidget);
+    expect(find.text('本机桥接'), findsOneWidget);
     expectOnlyPanel(_comfyUiPanelKey);
     expect(disposedPanels, isEmpty);
 
-    await tester.tap(find.text('Krita'));
+    await tester.tap(find.text('本机桥接'));
     await tester.pumpAndSettle();
     expectOnlyPanel(_kritaPanelKey);
     expect(disposedPanels, ['comfyui']);
+    await tester.tap(find.text('ComfyUI'));
+    await tester.pumpAndSettle();
+    expectOnlyPanel(_comfyUiPanelKey);
+    expect(disposedPanels, ['comfyui', 'krita']);
   });
 
   testWidgets('英文环境切换集成面板时分段导航总宽度保持不变', (tester) async {
@@ -117,34 +121,35 @@ void main() {
     await pumpSection(tester, disposedPanels, locale: const Locale('en'));
 
     final segmentedButton = find.byType(ManagementTabs);
-    final promptAssistantWidth = tester.getSize(segmentedButton).width;
+    final initialWidth = tester.getSize(segmentedButton).width;
+
+    await tester.tap(find.text('Local bridge'));
+    await tester.pumpAndSettle();
+    final bridgeWidth = tester.getSize(segmentedButton).width;
 
     await tester.tap(find.text('ComfyUI'));
     await tester.pumpAndSettle();
     final comfyUiWidth = tester.getSize(segmentedButton).width;
 
-    await tester.tap(find.text('Krita'));
-    await tester.pumpAndSettle();
-    final kritaWidth = tester.getSize(segmentedButton).width;
-
     expect(
-      [promptAssistantWidth, comfyUiWidth, kritaWidth],
-      everyElement(promptAssistantWidth),
+      [initialWidth, bridgeWidth, comfyUiWidth],
+      everyElement(initialWidth),
       reason:
-          'Prompt Assistant=$promptAssistantWidth, '
-          'ComfyUI=$comfyUiWidth, Krita=$kritaWidth',
+          'Initial=$initialWidth, Local bridge=$bridgeWidth, ComfyUI=$comfyUiWidth',
     );
   });
 
-  const expectedLabels = <String, List<String>>{
-    'en': ['ComfyUI', 'Krita'],
-    'zh': ['ComfyUI', 'Krita'],
-    'ja': ['ComfyUI', 'Krita'],
+  final expectedLabels = <Locale, List<String>>{
+    const Locale('en'): ['ComfyUI', 'Local bridge'],
+    const Locale('zh'): ['ComfyUI', '本机桥接'],
+    const Locale('zh', 'TW'): ['ComfyUI', '本機橋接'],
+    const Locale('ja'): ['ComfyUI', 'ローカル接続'],
+    const Locale('ko'): ['ComfyUI', '로컬 연결'],
   };
 
   for (final entry in expectedLabels.entries) {
     testWidgets('分段导航按 ${entry.key} 显示精确文案', (tester) async {
-      await pumpSection(tester, <String>[], locale: Locale(entry.key));
+      await pumpSection(tester, <String>[], locale: entry.key);
 
       final segmentedButton = tester.widget<ManagementTabs>(
         find.byType(ManagementTabs),

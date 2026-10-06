@@ -523,14 +523,11 @@
   "img2img_generateVariations": "生成變體",
   "img2img_directorTools": "導演工具",
   "img2img_directorPrompt": "提示詞（可選）",
-  "img2img_directorPromptHint": "需要時補充描述，例如目標情緒或上色方向",
   "img2img_directorRunning": "正在處理...",
   "img2img_directorResult": "處理結果",
   "img2img_directorApplied": "已將導演工具結果設為新的來源圖",
   "img2img_directorDefry": "Defry",
-  "img2img_directorEmotionLevel": "表情強度",
   "img2img_directorApplyAsSource": "設為來源圖",
-  "img2img_directorSourceImage": "來源圖",
   "img2img_variationsStarted": "正在生成變體...",
   "img2img_directorRemoveBackground": "背景移除",
   "img2img_directorLineArt": "線稿提取",
@@ -544,53 +541,11 @@
   "img2img_enhanceMax": "Max✨",
   "img2img_novelAiCloudUpscale": "NovelAI 雲端超分（固定 2x 放大）",
   "img2img_cloudUpscaleSizeLimit": "NovelAI 雲端放大支援不超過 3MP 的輸入圖片。",
-  "img2img_comfyuiEnableHint": "請先在「設定 > ComfyUI」中啟用並連線伺服器。",
-  "img2img_upscaleMode": "放大方式",
   "img2img_upscaleRegularModel": "普通模型",
   "img2img_upscaleModel": "超分模型",
-  "img2img_noSeedvr2Models": "未發現 SeedVR2 模型，請重新整理模型列表或檢查 SeedVR2 節點/模型檔案。",
-  "img2img_noRegularUpscaleModels": "未發現普通超分模型，請重新整理模型列表或檢查 models/upscale_models。",
-  "img2img_useSeedvr2TiledWorkflow": "將使用 SeedVR2TilingUpscaler 分塊超分流程。",
-  "img2img_useSeedvr2Workflow": "將使用 SeedVR2VideoUpscaler 流程。",
-  "img2img_useRegularUpscaleWorkflow": "將使用 UpscaleModelLoader + ImageUpscaleWithModel 流程，並用 Lanczos 修正到目標倍率。",
-  "img2img_useRtxUpscaleWorkflow": "將使用 RTX Video Super Resolution 流程，無需選擇模型。",
-  "img2img_refreshModelList": "重新整理模型列表",
   "img2img_startUpscale": "開始超分",
   "img2img_novelAiUpscaleComplete": "NovelAI 超分完成",
-  "img2img_upscaleComplete": "超分完成 ({width}x{height})",
-  "@img2img_upscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_regularUpscaleComplete": "普通模型超分完成 ({width}x{height})",
-  "@img2img_regularUpscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_rtxUpscaleComplete": "RTX 超分完成 ({width}x{height})",
-  "@img2img_rtxUpscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_noAvailableSeedvr2Model": "未選擇可用的 SeedVR2 模型",
-  "img2img_noAvailableRegularUpscaleModel": "未選擇可用的普通超分模型",
   "img2img_decodeSourceFailed": "無法解碼來源影像",
-  "img2img_metricSpeed": "速度",
-  "img2img_metricVram": "視訊記憶體",
-  "img2img_metricQuality": "效果",
-  "img2img_seedvr2VaeTileHint": "同時寫入 SeedVR2 VAE MODEL 的 encode/decode tile size。",
-  "img2img_seedvr2UseTiledUpscale": "使用分塊放大",
-  "img2img_seedvr2UseTiledUpscaleHint": "啟用後改用 SeedVR2TilingUpscaler，適合大圖或視訊記憶體壓力較高的場景。",
-  "img2img_seedvr2TileSize": "分塊圖塊大小",
-  "img2img_seedvr2TileSizeHint": "同時控制 SeedVR2TilingUpscaler 的 tile_width / tile_height。",
-  "img2img_seedvr2BlocksToSwap": "記憶體卸載層數",
-  "img2img_seedvr2BlocksToSwapHint": "把多少 DiT 層放在記憶體裡、推理時再逐層送入視訊記憶體。調高更省視訊記憶體但更吃記憶體也更慢；視訊記憶體充裕可調低甚至設為 0。視訊記憶體不足報錯時請調高。",
   "img2img_upscalePanelOpened": "已開啟圖生圖超分面板",
   "editor_tolerance": "容差",
   "editor_intensity": "強度",
@@ -602,8 +557,6 @@
   "editor_undo": "復原",
   "editor_redo": "重做",
   "editor_clearLayer": "清除圖層",
-  "editor_resetView": "重設檢視",
-  "editor_zoom": "縮放",
   "editor_toolBrush": "畫筆",
   "editor_toolEraser": "橡皮擦",
   "editor_toolFill": "填充",
@@ -621,125 +574,17 @@
   "editor_toolColorPicker": "吸管取色",
   "editor_toolCloneStamp": "仿製圖章",
   "editor_toolBlur": "模糊",
-  "editor_done": "完成",
   "editor_back": "返回",
   "editor_layers": "圖層",
-  "editor_loadMask": "載入遮罩",
-  "editor_togglePanels": "切換面板",
   "editor_fillClosedRegion": "填充封閉區域",
   "editor_resetMask": "重設遮罩",
   "editor_zoomIn": "放大",
   "editor_zoomOut": "縮小",
   "editor_fitToWindow": "適應視窗",
-  "editor_shortcutHelpTitle": "快速鍵幫助",
-  "editor_shortcutPaintTools": "繪畫工具",
-  "editor_shortcutSelectionTools": "選區工具",
-  "editor_shortcutCanvasView": "畫布檢視",
-  "editor_shortcutBrushAdjust": "筆刷調整",
-  "editor_shortcutColors": "顏色",
-  "editor_shortcutCanvasActions": "畫布操作",
-  "editor_shortcutHistoryActions": "歷史操作",
-  "editor_shortcutSelectionActions": "選區操作",
-  "editor_shortcutTemporaryColorPicker": "臨時拾色器",
-  "editor_shortcutRectSelection": "矩形選區",
-  "editor_shortcutEllipseSelection": "橢圓選區",
-  "editor_shortcutLassoSelection": "套索選區",
   "editor_shortcut100Zoom": "100% 縮放",
-  "editor_shortcutFitHeight": "適應高度",
-  "editor_shortcutFitWidth": "適應寬度",
-  "editor_shortcutRotateLeft15": "向左旋轉 15°",
-  "editor_shortcutResetRotation": "重設旋轉",
-  "editor_shortcutRotateRight15": "向右旋轉 15°",
-  "editor_shortcutFlipHorizontal": "水平鏡像",
-  "editor_shortcutWheel": "滾輪",
-  "editor_shortcutBrushSmaller": "減小筆刷",
-  "editor_shortcutBrushLarger": "增大筆刷",
-  "editor_shortcutOpacityLower": "降低透明度",
-  "editor_shortcutOpacityHigher": "提高透明度",
-  "editor_shortcutDragBrushSize": "調整筆刷大小",
-  "editor_shortcutSwapColors": "交換前景/背景色",
-  "editor_shortcutPanCanvas": "平移畫布",
-  "editor_shortcutClearSelectionContent": "清除選區內容",
-  "editor_shortcutCancelCurrentAction": "取消當前操作",
-  "editor_selectUnlockedLayerWithContent": "請選擇一個非鎖定且有內容的圖層",
-  "editor_readCurrentLayerFailed": "無法讀取當前圖層",
-  "editor_localEffects": "本地後處理 / Effects",
-  "editor_basicAdjustments": "基礎調整",
-  "editor_styleAndRepair": "風格與修復",
-  "editor_transformCrop": "旋轉 / 翻轉 / 裁切",
-  "editor_transformCropDescription": "幾何操作已經獨立出來，點選後會先生成預覽，確認應用後才寫回圖層。",
-  "editor_effectPreviewHint": "預覽不會修改原圖；點選應用後才會把結果寫入當前活動圖層和復原歷史。",
-  "editor_applyToCurrentLayer": "應用到當前圖層",
-  "editor_oneShotEffectHint": "{effect} 是一次性操作，沒有強度滑條。",
-  "@editor_oneShotEffectHint": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_effectIntensity": "{effect} 強度",
-  "@editor_effectIntensity": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_original": "原圖",
-  "editor_effectPreview": "效果預覽",
   "editor_effectBrightness": "亮度",
-  "editor_effectContrast": "對比度",
   "editor_effectSaturation": "飽和度",
-  "editor_effectTemperature": "色溫",
-  "editor_effectGamma": "伽馬",
-  "editor_effectGrayscale": "灰度",
-  "editor_effectInvert": "反相",
-  "editor_effectSepia": "復古棕褐",
-  "editor_effectDenoise": "降噪",
-  "editor_effectBlur": "高斯模糊",
-  "editor_effectSharpen": "銳化",
-  "editor_effectCropToSelection": "裁切到選區",
-  "editor_effectRotateLeft": "向左旋轉 90°",
-  "editor_effectRotateRight": "向右旋轉 90°",
-  "editor_effectFlipHorizontal": "水平翻轉",
-  "editor_effectFlipVertical": "垂直翻轉",
-  "editor_effectApplied": "已應用 {effect}",
-  "@editor_effectApplied": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_applyEffectFailed": "應用效果失敗: {error}",
-  "@editor_applyEffectFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_changeCanvasSize": "更改畫布尺寸",
-  "editor_canvasTooSmall": "畫布尺寸太小，最小尺寸為 {width} x {height} 像素",
-  "@editor_canvasTooSmall": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasTooLarge": "畫布尺寸太大，最大尺寸為 {width} x {height} 像素",
-  "@editor_canvasTooLarge": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasResized": "畫布已調整為 {width} x {height}",
-  "@editor_canvasResized": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasResizeFailed": "調整畫布尺寸失敗: {error}",
-  "@editor_canvasResizeFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_confirmExitTitle": "確認退出",
   "editor_confirmExitContent": "有未儲存的修改，確定要退出嗎？",
   "editor_exit": "退出",
@@ -750,92 +595,7 @@
       "error": {}
     }
   },
-  "editor_clickInsideClosedRegion": "請點選封閉區域內部進行填充。",
-  "editor_drawClosedMaskOutlineFirst": "請先繪製封閉的遮罩輪廓。",
-  "editor_noClosedRegionAtPosition": "該位置沒有可填充的封閉區域。",
-  "editor_generateMaskOverlayFailed": "無法生成遮罩覆蓋層",
   "editor_maskLayerName": "遮罩",
-  "editor_updateMaskLayerFailed": "無法更新遮罩圖層",
-  "editor_closedRegionFilled": "封閉區域已填充為遮罩。",
-  "editor_fillMaskFailed": "填充遮罩失敗: {error}",
-  "@editor_fillMaskFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_magicWandNoSource": "沒有可供魔棒取樣的影像圖層。",
-  "editor_magicWandNothingChanged": "選中的區域已經透明或已在遮罩中。",
-  "editor_magicWandModelPreparing": "正在檢查 EfficientViT-SAM 模型…",
-  "editor_magicWandModelDownloading": "正在下載 EfficientViT-SAM 模型：{percent}%",
-  "@editor_magicWandModelDownloading": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_magicWandModelLoading": "正在載入 EfficientViT-SAM 模型…",
-  "editor_magicWandEncoding": "正在分析影像物件…",
-  "editor_magicWandSegmenting": "正在根據點選位置分割物件…",
-  "editor_magicWandPostprocessing": "正在生成選區…",
-  "editor_magicWandFailed": "魔棒處理失敗: {error}",
-  "@editor_magicWandFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_compressionTitle": "輸出解析度",
-  "editor_compressionTooltip": "選擇輸出解析度",
-  "editor_compressionUncompressed": "保持編輯工作尺寸，不執行壓縮。",
-  "editor_compressionApplyOnDone": "工作畫布保持原樣；點選“完成”時使用 Pica Lanczos3 執行一次壓縮。",
-  "editor_compressionSizeSummary": "工作尺寸 {workWidth}×{workHeight} → 輸出尺寸 {targetWidth}×{targetHeight}",
-  "@editor_compressionSizeSummary": {
-    "placeholders": {
-      "workWidth": {
-        "type": "int"
-      },
-      "workHeight": {
-        "type": "int"
-      },
-      "targetWidth": {
-        "type": "int"
-      },
-      "targetHeight": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_compressionNormalSummary": "Normal（約 1MP）為 {normalWidth}×{normalHeight}；最低檔為 {minimumWidth}×{minimumHeight}。",
-  "@editor_compressionNormalSummary": {
-    "placeholders": {
-      "normalWidth": {
-        "type": "int"
-      },
-      "normalHeight": {
-        "type": "int"
-      },
-      "minimumWidth": {
-        "type": "int"
-      },
-      "minimumHeight": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_compressionUnavailable": "當前工作畫布已經低於最低壓縮檔，不能繼續降低解析度。",
-  "editor_unsupportedImageFormat": "不支援的檔案格式: .{extension}\n請選擇影像檔案（PNG、JPG、WEBP 等）",
-  "@editor_unsupportedImageFormat": {
-    "placeholders": {
-      "extension": {}
-    }
-  },
-  "editor_readFileFailed": "無法讀取檔案: {error}",
-  "@editor_readFileFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_noFileData": "無法取得檔案資料",
   "editor_emptyImageFile": "檔案為空，請選擇有效的影像檔案",
   "editor_fileTooLarge": "檔案過大（{sizeMB} MB），請選擇小於 50MB 的影像",
   "@editor_fileTooLarge": {
@@ -843,14 +603,7 @@
       "sizeMB": {}
     }
   },
-  "editor_maskLayerAdded": "遮罩圖層已新增",
   "editor_parseImageFailed": "無法解析影像檔案\n請確保檔案未損壞且格式受支援",
-  "editor_loadMaskFailed": "載入遮罩時發生錯誤: {error}",
-  "@editor_loadMaskFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_defaultTitle": "畫板",
   "editor_baseLayerName": "底圖",
   "editor_existingMaskLayerName": "已有遮罩",
@@ -903,13 +656,6 @@
   "editor_colorPickerTitle": "選擇顏色",
   "editor_brushSettings": "畫筆設定",
   "editor_eraserSettings": "橡皮擦設定",
-  "editor_colorPickerHint": "點選畫布任意位置取色，鬆開後自動切回上一工具",
-  "editor_sample": "取樣",
-  "editor_samplePoint": "單點",
-  "editor_sampleArea": "區域",
-  "editor_source": "來源",
-  "editor_sourceCurrentLayer": "當前圖層",
-  "editor_sourceAllLayers": "所有圖層",
   "editor_lassoSelectionHelp": "按住滑鼠拖動繪製自由形狀選區，鬆開自動閉合",
   "layer_empty": "無圖層",
   "layer_add": "新增圖層",
@@ -1411,11 +1157,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "點選檢視完整配置",
-  "@tagGroup_tagCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "addGroup_displayNameLabel": "顯示名稱（可選）",
   "addGroup_targetCategoryLabel": "目標分類",
   "globalSettings_saveFailed": "儲存失敗: {error}",
@@ -1483,101 +1224,6 @@
     }
   },
   "time_never_synced": "從未同步",
-  "@randomManager_deleteTagGroupConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_tagGroupCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_presetImported": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_presetCreated": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_deletePresetConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_syncFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "@randomManager_addTagGroupSubtitle": {
-    "placeholders": {
-      "category": {}
-    }
-  },
-  "@randomManager_itemCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_tagsTab": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_editHint": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_emphasisProbabilityValue": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
-  "@randomManager_characterCountLabel": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_tagCountLabel": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_selectedItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_totalItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_enabledItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_disabledItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_batchDeleteContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_deletedItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "vibeParseFailed": "無法解析 Vibe 檔案",
   "localGallery_progressiveLoadError": "圖片載入失敗",
   "localGallery_unknownError": "未知錯誤",
@@ -1870,7 +1516,6 @@
   "layer_moveDown": "下移",
   "localGallery_group_today": "今天",
   "localGallery_group_yesterday": "昨天",
-  "localGallery_sendTo": "傳送到…",
   "localGallery_groupImageCount": "{formatted} 張",
   "@localGallery_groupImageCount": {
     "placeholders": {
@@ -2205,7 +1850,6 @@
   "statistics_thursday": "週四",
   "statistics_friday": "週五",
   "statistics_saturday": "週六",
-  "fixedTags_negativeTitle": "負向固定詞",
   "autocomplete_categoryCharacter": "角色",
   "autocomplete_categoryCopyright": "版權",
   "autocomplete_categoryArtist": "藝術家",
@@ -2287,7 +1931,6 @@
   "metadataImport_clear": "清空",
   "metadataImport_prompt": "正向提示詞",
   "metadataImport_mainPrompt": "主提示詞",
-  "metadataImport_fixedTags": "固定詞",
   "metadataImport_qualityTagsCount": "品質詞 ({count}個)",
   "@metadataImport_qualityTagsCount": {
     "placeholders": {
@@ -2941,11 +2584,6 @@
   "settings_kritaBridgeListeningText": "等待外部 Agent 或 Krita 連線",
   "settings_kritaBridgeConnectedText": "Krita 外掛已連線",
   "settings_kritaBridgeErrorText": "啟動失敗，請檢視錯誤資訊",
-  "settings_kritaBridgeDisabled": "已關閉",
-  "settings_kritaBridgeStarting": "啟動中",
-  "settings_kritaBridgeListening": "監聽中",
-  "settings_kritaBridgeConnected": "已連線",
-  "settings_kritaBridgeError": "錯誤",
   "settings_kritaBridgeRegenerateSession": "重生成會話",
   "settings_kritaBridgeDiscoveryFile": "發現檔案",
   "settings_kritaBridgeWaitingEndpoint": "等待本地 WebSocket 監聽",
@@ -3027,13 +2665,6 @@
   },
   "settings_confirmExternalSend": "確認傳送",
   "settings_highAnlasCostTitle": "Anlas 消耗提醒",
-  "settings_highAnlasCostContent": "本次預計消耗 {cost} Anlas，已達到或超過你設定的 {threshold} Anlas 警告閾值。請確認是否繼續生成。",
-  "@settings_highAnlasCostContent": {
-    "placeholders": {
-      "cost": {},
-      "threshold": {}
-    }
-  },
   "settings_continueGeneration": "繼續生成",
   "dataSource_syncNow": "立即同步",
   "settings_comfyUiEnable": "啟用 ComfyUI 整合",
@@ -3049,30 +2680,6 @@
   },
   "settings_comfyUiConnected": "已連線",
   "settings_comfyUiDisconnect": "斷開",
-  "settings_comfyUiWorkflowManagement": "工作流管理",
-  "settings_comfyUiBuiltinWorkflows": "內建工作流",
-  "settings_comfyUiCustomWorkflows": "自訂工作流",
-  "settings_comfyUiNoCustomWorkflows": "暫無自訂工作流，點選“匯入”新增 ComfyUI 工作流",
-  "settings_comfyUiSlotCount": "{count} 個槽位",
-  "@settings_comfyUiSlotCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "settings_comfyUiBuiltin": "內建",
-  "settings_comfyUiDeleteWorkflowTitle": "刪除工作流",
-  "settings_comfyUiDeleteWorkflowContent": "確定要刪除工作流“{name}”嗎？此操作不可復原。",
-  "@settings_comfyUiDeleteWorkflowContent": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "settings_comfyUiDeleted": "已刪除: {name}",
-  "@settings_comfyUiDeleted": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "settings_comfyUiNoResponse": "伺服器無回應",
   "settings_comfyUiStatusDisconnected": "未連線",
   "settings_comfyUiStatusConnecting": "正在連線...",
@@ -3374,7 +2981,6 @@
   "toast_useDeleteButton": "請使用介面刪除按鈕",
   "toast_imageDataUnavailable": "影像資料不可用，無法複製",
   "toast_vibeDataCopied": "Vibe 資料已複製",
-  "toast_tagCopied": "標籤已複製",
   "toast_characterPromptCopied": "角色提示詞已複製",
   "toast_copiedTitle": "{title}已複製",
   "@toast_copiedTitle": {
@@ -3547,11 +3153,6 @@
   "comfyImport_syntaxPipe": "豎線格式",
   "comfyImport_syntaxUnknown": "未知語法",
   "comfyImport_globalPrompt": "全域提示詞",
-  "@danbooruPreview_postCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "checkForUpdate": "檢查更新",
   "neverChecked": "從未檢查",
   "lastCheckedAt": "上次檢查: {time}",
@@ -3633,27 +3234,17 @@
   "goToDownload": "前往下載",
   "cannotOpenUrl": "無法開啟連結",
   "model3d_editorTitle": "3D 模型圖層",
-  "model3d_addMannequin": "新增內建人偶",
-  "model3d_importModel": "匯入模型 (.glb/.gltf)",
-  "model3d_emptyHint": "場景為空，先新增人偶或匯入模型",
-  "model3d_apply": "應用到圖層",
   "model3d_modeTransform": "變換",
   "model3d_modePose": "姿勢",
   "model3d_gizmoTranslate": "移動",
   "model3d_gizmoRotate": "旋轉",
   "model3d_gizmoScale": "縮放",
-  "model3d_undo": "復原",
-  "model3d_resetPose": "重設姿勢",
   "model3d_replaceConfirm": "替換當前模型？未應用的姿勢將丟失。",
   "model3d_discardConfirm": "放棄未應用的修改？",
   "model3d_missingModel": "模型檔案已丟失，可重新匯入",
   "model3d_loadError": "模型載入失敗",
   "model3d_light": "光照",
-  "model3d_lightIntensity": "強度",
-  "model3d_lightAzimuth": "方位角",
-  "model3d_lightElevation": "仰角",
   "model3d_addLayerTooltip": "新增 3D 模型圖層",
-  "model3d_webview2Missing": "3D 編輯器需要 Microsoft Edge WebView2 執行時。Windows 10/11 通常已自帶;若缺失請從微軟官網安裝 Evergreen 版本後重試。",
   "nav_preciseRefLibrary": "精準參考庫",
   "preciseRefLib_title": "精準參考庫",
   "preciseRefLib_searchHint": "搜尋參考圖...",
@@ -3812,143 +3403,6 @@
     "placeholders": {
       "error": {
         "type": "String"
-      }
-    }
-  },
-  "@diy_branchDefaultName": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_branchCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_conditionCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_editBranch": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_ruleDefaultName": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_ruleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_actionSummary": {
-    "placeholders": {
-      "triggers": {
-        "type": "String"
-      },
-      "action": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_characterIndex": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_positionCoordinates": {
-    "placeholders": {
-      "row": {
-        "type": "String"
-      },
-      "column": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_emphasisPercent": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_peopleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_emphasisProbabilityHint": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_bracketLayers": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_presetExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_presetInvalidData": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_daysRemaining": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_timeRangeSummary": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "startMonth": {
-        "type": "int"
-      },
-      "startDay": {
-        "type": "int"
-      },
-      "endMonth": {
-        "type": "int"
-      },
-      "endDay": {
-        "type": "int"
       }
     }
   },
@@ -4318,82 +3772,12 @@
       }
     }
   },
-  "editor_effects": "效果",
   "editor_shiftEdges": "擴展邊緣",
-  "editor_currentSize": "當前: {width} x {height}",
-  "@editor_currentSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
   "editor_edgeLeft": "左",
   "editor_edgeRight": "右",
   "editor_edgeTop": "上",
   "editor_edgeBottom": "下",
   "editor_enterNumber": "請輸入數字",
-  "editor_nonNegativeNumber": "必須大於或等於 0",
-  "editor_requestedSize": "請求尺寸: {width} x {height}",
-  "@editor_requestedSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_requestedSizeInvalid": "請求尺寸: 無效",
-  "editor_appliedSize": "應用尺寸: {width} x {height}",
-  "@editor_appliedSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_appliedSizeInvalid": "應用尺寸: 無效",
-  "editor_appliedEdges": "應用邊緣: 左 {left}、上 {top}、右 {right}、下 {bottom}",
-  "@editor_appliedEdges": {
-    "placeholders": {
-      "left": {
-        "type": "int"
-      },
-      "top": {
-        "type": "int"
-      },
-      "right": {
-        "type": "int"
-      },
-      "bottom": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_appliedEdgesInvalid": "應用邊緣: 無效",
-  "editor_appliedDimensionLimit": "應用後的尺寸不能超過 {max}。",
-  "@editor_appliedDimensionLimit": {
-    "placeholders": {
-      "max": {
-        "type": "int"
-      }
-    }
-  },
-  "@savePreset_vibeData": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "onlineGallery_videoLoadFailed": "影片載入失敗",
   "vibe_releaseToAddStyleReference": "鬆開後新增風格參考",
   "router_pageNotFound": "頁面未找到: {error}",
@@ -5888,7 +5272,6 @@
   "titleBar_restore": "還原",
   "titleBar_close": "關閉",
   "img2img_pixelSnap": "像素對齊",
-  "img2img_original": "原圖",
   "img2img_directorAddToQueue": "將結果加入輸入佇列",
   "img2img_transform": "轉換",
   "img2img_palette": "調色盤",
@@ -5979,7 +5362,6 @@
   "wiki_standard": "標準",
   "wiki_large": "大",
   "wiki_wide": "寬",
-  "wiki_hide": "隱藏",
   "wiki_articleMissing": "這條標籤暫時沒有本地 Wiki 釋義。",
   "wiki_source": "來源",
   "wiki_addBookmark": "加入書籤",
@@ -6178,7 +5560,6 @@
   "wiki_aliases": "別名",
   "wiki_relatedTitle": "常一起出現",
   "wiki_relatedHint": "點選檢視 · Shift+點選加入提示詞",
-  "wiki_relatedShare": "{percent} 的帖子同時帶有此標籤",
   "wiki_inDirectory": "所屬目錄",
   "wiki_noArticle": "無百科",
   "wiki_moreCategories": "更多",
@@ -7321,7 +6702,6 @@
   "img2img_emotionEmbarrassed": "尷尬",
   "img2img_emotionDetermined": "堅定",
   "img2img_emotionHurt": "受傷",
-  "localUpscale_title": "本地超分",
   "localUpscale_local": "本地",
   "localUpscale_manage": "管理模型",
   "localUpscale_description": "在本機放大圖片，不消耗 Anlas。",
@@ -7350,7 +6730,6 @@
   "localUpscale_general": "通用 · 攝影",
   "localUpscale_downloadProgress": "正在下載模型…",
   "localUpscale_importModel": "匯入模型",
-  "localUpscale_modelReady": "模型已安裝",
   "localUpscale_modelOperationFailed": "模型操作失敗，請檢查網路、檔案權限及可用空間後重試。",
   "settings_localUpscale": "本地放大",
   "settings_localUpscaleDescription": "管理本地放大模型與執行元件。",
@@ -7367,10 +6746,56 @@
   "localUpscale_license": "許可",
   "localUpscale_installComponent": "安裝",
   "localUpscale_installingRuntime": "正在安裝 Python/CUDA 執行環境…",
+  "localUpscale_installingPython": "正在準備獨立 Python…",
+  "localUpscale_installFailed": "安裝失敗階段：{stage}",
+  "@localUpscale_installFailed": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
+  "wiki_translationQueued": "等待翻譯",
+  "wiki_translationFailedRetry": "翻譯失敗，點選重試",
   "localUpscale_checkingComponent": "正在檢查元件與顯示卡…",
   "localUpscale_installingComponent": "正在下載元件…",
   "upscale_settings": "放大設定",
   "upscale_cloudCost": "預計 {cost} Anlas · 2×",
   "enhance_localAfterGeneration": "每張生成完成後自動在本機放大。",
-  "enhance_localAction": "生成並本地放大"
+  "enhance_localAction": "生成並本地放大",
+  "@wiki_addedToPrompt": {
+    "placeholders": {
+      "tag": {}
+    }
+  },
+  "@wiki_alreadyInPrompt": {
+    "placeholders": {
+      "tag": {}
+    }
+  },
+  "@bridge_clients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@bridge_activity": {
+    "placeholders": {
+      "client": {},
+      "action": {}
+    }
+  },
+  "@bridge_guide": {
+    "placeholders": {
+      "clientPath": {}
+    }
+  },
+  "@upscale_cloudCost": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  }
 }

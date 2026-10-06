@@ -118,7 +118,9 @@ class LocalUpscaleService {
           arguments: spec.arguments,
           cancellation: cancellation,
           startProcess: advanced!.startProcess,
-          environment: const {
+          environment: {
+            if (model.method == LocalUpscaleMethod.seedvr2)
+              ...AdvancedUpscaleComponentManager.seedRuntimeEnvironment,
             'PYTHONIOENCODING': 'utf-8',
             'HF_HUB_OFFLINE': '1',
             'TRANSFORMERS_OFFLINE': '1',

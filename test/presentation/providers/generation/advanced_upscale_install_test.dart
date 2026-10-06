@@ -27,7 +27,55 @@ class _PendingInstall extends AdvancedUpscaleComponentManager {
   }
 }
 
+class _FailedInstall extends AdvancedUpscaleComponentManager {
+  @override
+  Future<void> install(
+    String id, {
+    required LocalUpscaleCancellation cancellation,
+    void Function(String, double?)? onProgress,
+  }) async {
+    onProgress?.call('runtime', null);
+    throw const LocalUpscaleException(
+      LocalUpscaleError.modelOperationFailed,
+      details:
+          'uv pip failed: https://user:private@example.test/wheel?token=private',
+    );
+  }
+}
+
 void main() {
+  test(
+    'failed installation keeps phase and sanitized details after releasing locks',
+    () async {
+      final manager = _FailedInstall();
+      final base = LocalUpscaleModelManager();
+      final container = ProviderContainer(
+        overrides: [
+          advancedUpscaleComponentManagerProvider.overrideWithValue(manager),
+          localUpscaleModelManagerProvider.overrideWithValue(base),
+        ],
+      );
+      addTearDown(() {
+        container.dispose();
+        manager.dispose();
+        base.dispose();
+      });
+      await container
+          .read(advancedUpscaleInstallProvider.notifier)
+          .install('seedvr2-3b');
+      final state = container.read(advancedUpscaleInstallProvider);
+      expect(state.running, isFalse);
+      expect(state.phase, 'runtime');
+      expect(state.error, LocalUpscaleError.modelOperationFailed);
+      expect(
+        state.details,
+        allOf(contains('uv pip failed'), isNot(contains('private'))),
+      );
+      base.claimInference('anime');
+      base.releaseInference();
+    },
+  );
+
   test(
     'tray shutdown cancels component installation and waits for owned runtime cleanup',
     () async {

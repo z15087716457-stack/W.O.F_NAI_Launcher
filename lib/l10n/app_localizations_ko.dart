@@ -1257,9 +1257,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_directorPrompt => '프롬프트 (선택 사항)';
 
   @override
-  String get img2img_directorPromptHint => '필요할 때 목표 감정이나 채색 방향 같은 안내를 추가하세요';
-
-  @override
   String get img2img_directorRunning => '처리하는 중...';
 
   @override
@@ -1272,13 +1269,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_directorDefry => 'Defry';
 
   @override
-  String get img2img_directorEmotionLevel => '감정 강도';
-
-  @override
   String get img2img_directorApplyAsSource => '원본으로 사용';
-
-  @override
-  String get img2img_directorSourceImage => '원본 이미지';
 
   @override
   String get img2img_variationsStarted => '베리에이션을 생성하는 중...';
@@ -1321,43 +1312,10 @@ class AppLocalizationsKo extends AppLocalizations {
       'NovelAI 클라우드 업스케일은 최대 3MP 입력 이미지를 지원합니다.';
 
   @override
-  String get img2img_comfyuiEnableHint =>
-      '먼저 설정 > ComfyUI에서 ComfyUI를 사용하도록 설정하고 연결하세요.';
-
-  @override
-  String get img2img_upscaleMode => '업스케일 방식';
-
-  @override
   String get img2img_upscaleRegularModel => '일반 모델';
 
   @override
   String get img2img_upscaleModel => '업스케일 모델';
-
-  @override
-  String get img2img_noSeedvr2Models =>
-      'SeedVR2 모델을 찾을 수 없습니다. 모델 목록을 새로 고치거나 SeedVR2 노드/모델 파일을 확인하세요.';
-
-  @override
-  String get img2img_noRegularUpscaleModels =>
-      '일반 업스케일 모델을 찾을 수 없습니다. 모델 목록을 새로 고치거나 models/upscale_models를 확인하세요.';
-
-  @override
-  String get img2img_useSeedvr2TiledWorkflow =>
-      'SeedVR2TilingUpscaler 타일 업스케일 워크플로를 사용합니다.';
-
-  @override
-  String get img2img_useSeedvr2Workflow => 'SeedVR2VideoUpscaler 워크플로를 사용합니다.';
-
-  @override
-  String get img2img_useRegularUpscaleWorkflow =>
-      'UpscaleModelLoader + ImageUpscaleWithModel을 사용한 뒤 Lanczos로 목표 배율에 맞춥니다.';
-
-  @override
-  String get img2img_useRtxUpscaleWorkflow =>
-      'RTX Video Super Resolution을 사용합니다. 모델을 선택할 필요가 없습니다.';
-
-  @override
-  String get img2img_refreshModelList => '모델 목록 새로 고침';
 
   @override
   String get img2img_startUpscale => '업스케일 시작';
@@ -1366,69 +1324,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_novelAiUpscaleComplete => 'NovelAI 업스케일 완료';
 
   @override
-  String img2img_upscaleComplete(Object width, Object height) {
-    return '업스케일 완료(${width}x$height)';
-  }
-
-  @override
-  String img2img_regularUpscaleComplete(Object width, Object height) {
-    return '일반 모델 업스케일 완료(${width}x$height)';
-  }
-
-  @override
-  String img2img_rtxUpscaleComplete(Object width, Object height) {
-    return 'RTX 업스케일 완료(${width}x$height)';
-  }
-
-  @override
-  String get img2img_noAvailableSeedvr2Model => '사용 가능한 SeedVR2 모델을 선택하지 않았습니다';
-
-  @override
-  String get img2img_noAvailableRegularUpscaleModel =>
-      '사용 가능한 일반 업스케일 모델을 선택하지 않았습니다';
-
-  @override
   String get img2img_decodeSourceFailed => '원본 이미지를 디코딩하지 못했습니다';
 
   @override
-  String get img2img_metricSpeed => '속도';
-
-  @override
-  String get img2img_metricVram => 'VRAM';
-
-  @override
-  String get img2img_metricQuality => '품질';
-
-  @override
-  String get img2img_seedvr2VaeTileHint =>
-      'SeedVR2 VAE MODEL의 인코딩/디코딩 타일 크기도 함께 기록합니다.';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscale => '타일 업스케일 사용';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscaleHint =>
-      '켜면 SeedVR2TilingUpscaler를 사용합니다. 큰 이미지나 VRAM 부담이 클 때 추천합니다.';
-
-  @override
-  String get img2img_seedvr2TileSize => '타일 크기';
-
-  @override
-  String get img2img_seedvr2TileSizeHint =>
-      'SeedVR2TilingUpscaler의 tile_width / tile_height도 함께 제어합니다.';
-
-  @override
-  String get img2img_seedvr2BlocksToSwap => 'RAM으로 오프로드할 블록 수';
-
-  @override
-  String get img2img_seedvr2BlocksToSwapHint =>
-      '시스템 RAM에 두고 추론 중 VRAM으로 스트리밍할 DiT 블록 수입니다. 높일수록 VRAM을 아끼지만 RAM을 더 쓰고 느려집니다. VRAM이 넉넉하면 낮추세요(0도 가능). 메모리 부족 오류가 나면 높이세요.';
-
-  @override
   String get img2img_upscalePanelOpened => 'Image2Image 업스케일 패널을 열었습니다';
-
-  @override
-  String get editor_done => '완료';
 
   @override
   String get editor_tolerance => '허용 범위';
@@ -1459,12 +1358,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editor_clearLayer => '레이어 지우기';
-
-  @override
-  String get editor_resetView => '보기 초기화';
-
-  @override
-  String get editor_zoom => '확대/축소';
 
   @override
   String get editor_toolBrush => '브러시';
@@ -1526,12 +1419,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get editor_layers => '레이어';
 
   @override
-  String get editor_loadMask => '마스크 불러오기';
-
-  @override
-  String get editor_togglePanels => '패널 전환';
-
-  @override
   String get editor_fillClosedRegion => '닫힌 영역 채우기';
 
   @override
@@ -1547,221 +1434,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get editor_fitToWindow => '창에 맞추기';
 
   @override
-  String get editor_shortcutHelpTitle => '단축키 도움말';
-
-  @override
-  String get editor_shortcutPaintTools => '그리기 도구';
-
-  @override
-  String get editor_shortcutSelectionTools => '선택 도구';
-
-  @override
-  String get editor_shortcutCanvasView => '캔버스 보기';
-
-  @override
-  String get editor_shortcutBrushAdjust => '브러시 조정';
-
-  @override
-  String get editor_shortcutColors => '색상';
-
-  @override
-  String get editor_shortcutCanvasActions => '캔버스 작업';
-
-  @override
-  String get editor_shortcutHistoryActions => '기록 작업';
-
-  @override
-  String get editor_shortcutSelectionActions => '선택 영역 작업';
-
-  @override
-  String get editor_shortcutTemporaryColorPicker => '임시 스포이트';
-
-  @override
-  String get editor_shortcutRectSelection => '사각형 선택';
-
-  @override
-  String get editor_shortcutEllipseSelection => '타원 선택';
-
-  @override
-  String get editor_shortcutLassoSelection => '올가미 선택';
-
-  @override
   String get editor_shortcut100Zoom => '100% 확대';
-
-  @override
-  String get editor_shortcutFitHeight => '높이에 맞추기';
-
-  @override
-  String get editor_shortcutFitWidth => '너비에 맞추기';
-
-  @override
-  String get editor_shortcutRotateLeft15 => '왼쪽으로 15° 회전';
-
-  @override
-  String get editor_shortcutResetRotation => '회전 초기화';
-
-  @override
-  String get editor_shortcutRotateRight15 => '오른쪽으로 15° 회전';
-
-  @override
-  String get editor_shortcutFlipHorizontal => '좌우 반전';
-
-  @override
-  String get editor_shortcutWheel => '마우스 휠';
-
-  @override
-  String get editor_shortcutBrushSmaller => '브러시 크기 줄이기';
-
-  @override
-  String get editor_shortcutBrushLarger => '브러시 크기 늘리기';
-
-  @override
-  String get editor_shortcutOpacityLower => '불투명도 낮추기';
-
-  @override
-  String get editor_shortcutOpacityHigher => '불투명도 높이기';
-
-  @override
-  String get editor_shortcutDragBrushSize => '브러시 크기 조정';
-
-  @override
-  String get editor_shortcutSwapColors => '전경색/배경색 바꾸기';
-
-  @override
-  String get editor_shortcutPanCanvas => '캔버스 이동';
-
-  @override
-  String get editor_shortcutClearSelectionContent => '선택 영역 내용 지우기';
-
-  @override
-  String get editor_shortcutCancelCurrentAction => '현재 작업 취소';
-
-  @override
-  String get editor_selectUnlockedLayerWithContent =>
-      '잠기지 않고 내용이 있는 레이어를 선택하세요';
-
-  @override
-  String get editor_readCurrentLayerFailed => '현재 레이어를 읽지 못했습니다';
-
-  @override
-  String get editor_localEffects => '로컬 후처리 / 효과';
-
-  @override
-  String get editor_basicAdjustments => '기본 조정';
-
-  @override
-  String get editor_styleAndRepair => '스타일 및 복원';
-
-  @override
-  String get editor_transformCrop => '회전 / 반전 / 자르기';
-
-  @override
-  String get editor_transformCropDescription =>
-      '기하 작업은 따로 분리되어 있습니다. 먼저 미리 보기를 만들고 확인한 뒤에만 레이어에 기록합니다.';
-
-  @override
-  String get editor_effectPreviewHint =>
-      '미리 보기는 원본 이미지를 바꾸지 않습니다. 적용을 클릭해야 결과가 현재 레이어와 실행 취소 기록에 기록됩니다.';
-
-  @override
-  String get editor_applyToCurrentLayer => '현재 레이어에 적용';
-
-  @override
-  String editor_oneShotEffectHint(Object effect) {
-    return '$effect은(는) 한 번만 실행하는 작업이라 강도 슬라이더가 없습니다.';
-  }
-
-  @override
-  String editor_effectIntensity(Object effect) {
-    return '$effect 강도';
-  }
-
-  @override
-  String get editor_original => '원본';
-
-  @override
-  String get editor_effectPreview => '효과 미리 보기';
 
   @override
   String get editor_effectBrightness => '밝기';
 
   @override
-  String get editor_effectContrast => '대비';
-
-  @override
   String get editor_effectSaturation => '채도';
 
   @override
-  String get editor_effectTemperature => '색온도';
-
-  @override
-  String get editor_effectGamma => '감마';
-
-  @override
-  String get editor_effectGrayscale => '회색조';
-
-  @override
-  String get editor_effectInvert => '반전';
-
-  @override
-  String get editor_effectSepia => '세피아';
-
-  @override
-  String get editor_effectDenoise => '노이즈 제거';
-
-  @override
-  String get editor_effectBlur => '가우시안 흐림';
-
-  @override
-  String get editor_effectSharpen => '선명하게';
-
-  @override
-  String get editor_effectCropToSelection => '선택 영역으로 자르기';
-
-  @override
-  String get editor_effectRotateLeft => '왼쪽으로 90° 회전';
-
-  @override
-  String get editor_effectRotateRight => '오른쪽으로 90° 회전';
-
-  @override
-  String get editor_effectFlipHorizontal => '좌우 반전';
-
-  @override
-  String get editor_effectFlipVertical => '상하 반전';
-
-  @override
-  String editor_effectApplied(Object effect) {
-    return '$effect 적용됨';
-  }
-
-  @override
-  String editor_applyEffectFailed(Object error) {
-    return '효과를 적용하지 못했습니다: $error';
-  }
-
-  @override
   String get editor_changeCanvasSize => '캔버스 크기 변경';
-
-  @override
-  String editor_canvasTooSmall(Object width, Object height) {
-    return '캔버스가 너무 작습니다. 최소 크기는 $width x $height픽셀입니다';
-  }
-
-  @override
-  String editor_canvasTooLarge(Object width, Object height) {
-    return '캔버스가 너무 큽니다. 최대 크기는 $width x $height픽셀입니다';
-  }
-
-  @override
-  String editor_canvasResized(Object width, Object height) {
-    return '캔버스 크기를 $width x $height(으)로 변경했습니다';
-  }
-
-  @override
-  String editor_canvasResizeFailed(Object error) {
-    return '캔버스 크기를 변경하지 못했습니다: $error';
-  }
 
   @override
   String get editor_confirmExitTitle => '종료 확인';
@@ -1781,111 +1463,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get editor_clickInsideClosedRegion => '채울 닫힌 영역 안쪽을 클릭하세요.';
-
-  @override
-  String get editor_drawClosedMaskOutlineFirst => '먼저 닫힌 마스크 윤곽을 그리세요.';
-
-  @override
-  String get editor_noClosedRegionAtPosition => '이 위치에는 채울 수 있는 닫힌 영역이 없습니다.';
-
-  @override
-  String get editor_generateMaskOverlayFailed => '마스크 오버레이를 만들지 못했습니다';
-
-  @override
   String get editor_maskLayerName => '마스크';
-
-  @override
-  String get editor_updateMaskLayerFailed => '마스크 레이어를 업데이트하지 못했습니다';
-
-  @override
-  String get editor_closedRegionFilled => '닫힌 영역을 마스크로 채웠습니다.';
-
-  @override
-  String editor_fillMaskFailed(Object error) {
-    return '마스크를 채우지 못했습니다: $error';
-  }
-
-  @override
-  String get editor_magicWandNoSource => '샘플링할 수 있는 편집 가능한 이미지 레이어가 없습니다.';
-
-  @override
-  String get editor_magicWandNothingChanged => '선택한 영역은 이미 투명하거나 마스크되어 있습니다.';
-
-  @override
-  String get editor_magicWandModelPreparing => 'EfficientViT-SAM 모델 확인 중…';
-
-  @override
-  String editor_magicWandModelDownloading(int percent) {
-    return 'EfficientViT-SAM 모델 다운로드 중: $percent%';
-  }
-
-  @override
-  String get editor_magicWandModelLoading => 'EfficientViT-SAM 모델 불러오는 중…';
-
-  @override
-  String get editor_magicWandEncoding => '이미지 개체 분석 중…';
-
-  @override
-  String get editor_magicWandSegmenting => '클릭한 지점의 개체 분할 중…';
-
-  @override
-  String get editor_magicWandPostprocessing => '선택 영역 만드는 중…';
-
-  @override
-  String editor_magicWandFailed(Object error) {
-    return '자동 선택에 실패했습니다: $error';
-  }
-
-  @override
-  String get editor_compressionTitle => '출력 해상도';
-
-  @override
-  String get editor_compressionTooltip => '출력 해상도 선택';
-
-  @override
-  String get editor_compressionUncompressed => '원래 작업 해상도이며 압축하지 않습니다.';
-
-  @override
-  String get editor_compressionApplyOnDone =>
-      '완료를 누를 때 Pica Lanczos3 압축을 한 번 실행합니다. 작업 캔버스는 그대로 유지됩니다.';
-
-  @override
-  String editor_compressionSizeSummary(
-    int workWidth,
-    int workHeight,
-    int targetWidth,
-    int targetHeight,
-  ) {
-    return '작업 $workWidth×$workHeight → 출력 $targetWidth×$targetHeight';
-  }
-
-  @override
-  String editor_compressionNormalSummary(
-    int normalWidth,
-    int normalHeight,
-    int minimumWidth,
-    int minimumHeight,
-  ) {
-    return 'Normal(약 1MP): $normalWidth×$normalHeight. 최저: $minimumWidth×$minimumHeight.';
-  }
-
-  @override
-  String get editor_compressionUnavailable =>
-      '이 작업 캔버스는 이미 가장 낮은 압축 단계보다 작습니다.';
-
-  @override
-  String editor_unsupportedImageFormat(Object extension) {
-    return '지원하지 않는 파일 형식입니다: .$extension\n이미지 파일(PNG, JPG, WEBP 등)을 선택하세요';
-  }
-
-  @override
-  String editor_readFileFailed(Object error) {
-    return '파일을 읽지 못했습니다: $error';
-  }
-
-  @override
-  String get editor_noFileData => '파일 데이터를 가져오지 못했습니다';
 
   @override
   String get editor_emptyImageFile => '파일이 비어 있습니다. 올바른 이미지 파일을 선택하세요';
@@ -1896,16 +1474,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get editor_maskLayerAdded => '마스크 레이어를 추가했습니다';
-
-  @override
   String get editor_parseImageFailed =>
       '이미지 파일을 분석하지 못했습니다\n파일이 손상되지 않았고 지원하는 형식인지 확인하세요';
-
-  @override
-  String editor_loadMaskFailed(Object error) {
-    return '마스크를 불러오지 못했습니다: $error';
-  }
 
   @override
   String get editor_defaultTitle => '캔버스';
@@ -2010,28 +1580,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editor_eraserSettings => '지우개 설정';
-
-  @override
-  String get editor_colorPickerHint =>
-      '캔버스의 아무 곳이나 클릭해 색을 추출하세요. 놓으면 이전 도구로 돌아갑니다.';
-
-  @override
-  String get editor_sample => '샘플';
-
-  @override
-  String get editor_samplePoint => '한 점';
-
-  @override
-  String get editor_sampleArea => '영역';
-
-  @override
-  String get editor_source => '소스';
-
-  @override
-  String get editor_sourceCurrentLayer => '현재 레이어';
-
-  @override
-  String get editor_sourceAllLayers => '모든 레이어';
 
   @override
   String get editor_lassoSelectionHelp =>
@@ -3768,9 +3316,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_group_yesterday => '어제';
 
   @override
-  String get localGallery_sendTo => '보내기…';
-
-  @override
   String localGallery_groupImageCount(int count, String formatted) {
     return '$formatted장';
   }
@@ -4229,9 +3774,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statistics_saturday => '토';
 
   @override
-  String get fixedTags_negativeTitle => '네거티브 고정 태그';
-
-  @override
   String get autocomplete_categoryCharacter => '캐릭터';
 
   @override
@@ -4437,9 +3979,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get metadataImport_mainPrompt => '메인 프롬프트';
-
-  @override
-  String get metadataImport_fixedTags => '고정 태그';
 
   @override
   String metadataImport_qualityTagsCount(int count) {
@@ -5811,21 +5350,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_kritaBridgeErrorText => '시작하지 못했습니다. 오류 메시지를 확인하세요';
 
   @override
-  String get settings_kritaBridgeDisabled => '꺼짐';
-
-  @override
-  String get settings_kritaBridgeStarting => '시작 중';
-
-  @override
-  String get settings_kritaBridgeListening => '수신 대기 중';
-
-  @override
-  String get settings_kritaBridgeConnected => '연결됨';
-
-  @override
-  String get settings_kritaBridgeError => '오류';
-
-  @override
   String get settings_kritaBridgeRegenerateSession => '세션 다시 만들기';
 
   @override
@@ -6016,11 +5540,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_highAnlasCostTitle => 'Anlas 사용량 확인';
 
   @override
-  String settings_highAnlasCostContent(Object cost, Object threshold) {
-    return '이번 요청의 예상 비용은 $cost Anlas로, 설정한 경고 기준값 $threshold Anlas 이상입니다. 생성을 계속하시겠습니까?';
-  }
-
-  @override
   String get settings_continueGeneration => '생성 계속';
 
   @override
@@ -6052,40 +5571,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_comfyUiDisconnect => '연결 끊기';
-
-  @override
-  String get settings_comfyUiWorkflowManagement => '워크플로 관리';
-
-  @override
-  String get settings_comfyUiBuiltinWorkflows => '기본 제공 워크플로';
-
-  @override
-  String get settings_comfyUiCustomWorkflows => '사용자 지정 워크플로';
-
-  @override
-  String get settings_comfyUiNoCustomWorkflows =>
-      '사용자 지정 워크플로가 없습니다. \"가져오기\"를 클릭해 ComfyUI 워크플로를 추가하세요.';
-
-  @override
-  String settings_comfyUiSlotCount(Object count) {
-    return '슬롯 $count개';
-  }
-
-  @override
-  String get settings_comfyUiBuiltin => '기본 제공';
-
-  @override
-  String get settings_comfyUiDeleteWorkflowTitle => '워크플로 삭제';
-
-  @override
-  String settings_comfyUiDeleteWorkflowContent(Object name) {
-    return '\"$name\" 워크플로를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
-  }
-
-  @override
-  String settings_comfyUiDeleted(Object name) {
-    return '삭제했습니다: $name';
-  }
 
   @override
   String get settings_comfyUiNoResponse => '서버가 응답하지 않습니다';
@@ -6647,9 +6132,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get toast_vibeDataCopied => 'Vibe 데이터를 복사했습니다';
 
   @override
-  String get toast_tagCopied => '태그를 복사했습니다';
-
-  @override
   String get toast_characterPromptCopied => '캐릭터 프롬프트를 복사했습니다';
 
   @override
@@ -7081,18 +6563,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get model3d_editorTitle => '3D 모델 레이어';
 
   @override
-  String get model3d_addMannequin => '기본 마네킹 추가';
-
-  @override
-  String get model3d_importModel => '모델 가져오기(.glb/.gltf)';
-
-  @override
-  String get model3d_emptyHint => '장면이 비어 있습니다. 마네킹을 추가하거나 모델을 가져오세요.';
-
-  @override
-  String get model3d_apply => '레이어에 적용';
-
-  @override
   String get model3d_modeTransform => '변형';
 
   @override
@@ -7106,12 +6576,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get model3d_gizmoScale => '크기 조절';
-
-  @override
-  String get model3d_undo => '실행 취소';
-
-  @override
-  String get model3d_resetPose => '포즈 초기화';
 
   @override
   String get model3d_replaceConfirm => '현재 모델을 교체하시겠습니까? 적용하지 않은 포즈는 사라집니다.';
@@ -7129,20 +6593,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get model3d_light => '조명';
 
   @override
-  String get model3d_lightIntensity => '강도';
-
-  @override
-  String get model3d_lightAzimuth => '방위각';
-
-  @override
-  String get model3d_lightElevation => '고도';
-
-  @override
   String get model3d_addLayerTooltip => '3D 모델 레이어 추가';
-
-  @override
-  String get model3d_webview2Missing =>
-      '3D 편집기에는 Microsoft Edge WebView2 런타임이 필요합니다. Windows 10/11에는 기본으로 포함되어 있으며, 없다면 Microsoft에서 Evergreen 런타임을 설치한 뒤 다시 시도하세요.';
 
   @override
   String get nav_preciseRefLibrary => '정밀 참조 라이브러리';
@@ -7477,15 +6928,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get editor_effects => '효과';
-
-  @override
   String get editor_shiftEdges => '가장자리 확장';
-
-  @override
-  String editor_currentSize(int width, int height) {
-    return '현재: $width x $height';
-  }
 
   @override
   String get editor_edgeLeft => '왼쪽';
@@ -7501,38 +6944,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editor_enterNumber => '숫자를 입력하세요';
-
-  @override
-  String get editor_nonNegativeNumber => '0 이상이어야 합니다';
-
-  @override
-  String editor_requestedSize(int width, int height) {
-    return '요청: $width x $height';
-  }
-
-  @override
-  String get editor_requestedSizeInvalid => '요청: 잘못됨';
-
-  @override
-  String editor_appliedSize(int width, int height) {
-    return '적용: $width x $height';
-  }
-
-  @override
-  String get editor_appliedSizeInvalid => '적용: 잘못됨';
-
-  @override
-  String editor_appliedEdges(int left, int top, int right, int bottom) {
-    return '적용된 가장자리: 왼쪽 $left, 위 $top, 오른쪽 $right, 아래 $bottom';
-  }
-
-  @override
-  String get editor_appliedEdgesInvalid => '적용된 가장자리: 잘못됨';
-
-  @override
-  String editor_appliedDimensionLimit(int max) {
-    return '적용된 크기는 $max을(를) 넘을 수 없습니다.';
-  }
 
   @override
   String get onlineGallery_videoLoadFailed => '동영상을 불러오지 못했습니다';
@@ -9555,9 +8966,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_pixelSnap => '픽셀 스냅';
 
   @override
-  String get img2img_original => '원본';
-
-  @override
   String get img2img_directorAddToQueue => '결과를 다음 입력으로 사용';
 
   @override
@@ -9763,9 +9171,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get wiki_wide => '넓게';
-
-  @override
-  String get wiki_hide => '숨기기';
 
   @override
   String get wiki_articleMissing => '이 태그에는 아직 로컬 백과 설명이 없습니다.';
@@ -10372,11 +9777,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get wiki_relatedHint => '클릭하여 열기 · Shift+클릭으로 프롬프트에 추가';
-
-  @override
-  String wiki_relatedShare(Object percent) {
-    return '게시물의 $percent도 이 태그를 포함합니다';
-  }
 
   @override
   String get wiki_inDirectory => '소속 디렉터리';
@@ -12755,9 +12155,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_emotionHurt => '상처받음';
 
   @override
-  String get localUpscale_title => '로컬 업스케일';
-
-  @override
   String get localUpscale_local => '로컬';
 
   @override
@@ -12850,9 +12247,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localUpscale_importModel => '모델 가져오기';
 
   @override
-  String get localUpscale_modelReady => '모델 설치됨';
-
-  @override
   String get localUpscale_modelOperationFailed =>
       '모델 작업에 실패했습니다. 연결, 파일 권한 및 여유 공간을 확인한 후 다시 시도하세요.';
 
@@ -12904,6 +12298,20 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localUpscale_installingRuntime => 'Python/CUDA 환경 설치 중…';
+
+  @override
+  String get localUpscale_installingPython => '독립 Python 준비 중…';
+
+  @override
+  String localUpscale_installFailed(String stage) {
+    return '설치 실패 단계: $stage';
+  }
+
+  @override
+  String get wiki_translationQueued => '번역 대기 중';
+
+  @override
+  String get wiki_translationFailedRetry => '번역 실패 — 클릭하여 다시 시도';
 
   @override
   String get localUpscale_checkingComponent => '구성 요소와 GPU 확인 중…';

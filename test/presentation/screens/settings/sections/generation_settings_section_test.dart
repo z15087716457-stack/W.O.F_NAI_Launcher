@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/providers/notification_settings_provider.dart';
-import 'package:nai_launcher/presentation/screens/settings/widgets/settings_toggle.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

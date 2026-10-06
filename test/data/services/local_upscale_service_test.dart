@@ -54,13 +54,22 @@ void main() {
     await temporary.delete(recursive: true);
   });
 
-  test('real Flutter bundle extracts the pinned offline engine and default model', () async {
-    final bundled = LocalUpscaleModelManager(rootDirectory: () async => Directory(p.join(temporary.path, 'bundle-runtime')));
-    final (engine, modelPath, model) = await bundled.resolve('anime');
-    expect(await File(engine).length(), 6161408);
-    expect(await File(p.join(modelPath, '${model.engineName}.bin')).length(), 8943500);
-    bundled.dispose();
-  });
+  test(
+    'real Flutter bundle extracts the pinned offline engine and default model',
+    () async {
+      final bundled = LocalUpscaleModelManager(
+        rootDirectory: () async =>
+            Directory(p.join(temporary.path, 'bundle-runtime')),
+      );
+      final (engine, modelPath, model) = await bundled.resolve('anime');
+      expect(await File(engine).length(), 6161408);
+      expect(
+        await File(p.join(modelPath, '${model.engineName}.bin')).length(),
+        8943500,
+      );
+      bundled.dispose();
+    },
+  );
 
   test(
     'bundled model is offline; resolve verifies engine and model hashes on every run',
@@ -148,9 +157,11 @@ void main() {
         await manager.delete(id);
       }
     },
-    skip:
-        !Platform.isWindows ||
-        Platform.environment['RUN_LOCAL_UPSCALE_AUDIT'] != '1',
+    skip: !Platform.isWindows
+        ? 'Requires Windows and Vulkan; kept as an opt-in native audit'
+        : Platform.environment['RUN_LOCAL_UPSCALE_AUDIT'] != '1'
+        ? 'Opt in with RUN_LOCAL_UPSCALE_AUDIT=1; requires Vulkan and the cached official model archive'
+        : false,
   );
 
   test(
@@ -294,9 +305,11 @@ void main() {
       );
       expect(progress.last.fraction, 1);
     },
-    skip:
-        !Platform.isWindows ||
-        Platform.environment["RUN_LOCAL_UPSCALE_AUDIT"] != "1",
+    skip: !Platform.isWindows
+        ? 'Requires Windows and Vulkan; kept as an opt-in native audit'
+        : Platform.environment['RUN_LOCAL_UPSCALE_AUDIT'] != '1'
+        ? 'Opt in with RUN_LOCAL_UPSCALE_AUDIT=1; requires a working Vulkan GPU'
+        : false,
   );
 
   test(
@@ -329,8 +342,10 @@ void main() {
         isEmpty,
       );
     },
-    skip:
-        !Platform.isWindows ||
-        Platform.environment["RUN_LOCAL_UPSCALE_AUDIT"] != "1",
+    skip: !Platform.isWindows
+        ? 'Requires Windows and Vulkan; kept as an opt-in native audit'
+        : Platform.environment['RUN_LOCAL_UPSCALE_AUDIT'] != '1'
+        ? 'Opt in with RUN_LOCAL_UPSCALE_AUDIT=1; requires a working Vulkan GPU'
+        : false,
   );
 }

@@ -913,7 +913,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   ) {
     final titleWidth = math.max(
       1.0,
-      cellWidth - 12 - 18 - (candidate.postCount > 0 ? 48 : 0),
+      cellWidth -
+          12 -
+          18 -
+          TagTranslationIndicator.extent -
+          (candidate.postCount > 0 ? 48 : 0),
     );
     final painter = TextPainter(
       text: TextSpan(
@@ -925,15 +929,15 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     )..layout(maxWidth: titleWidth);
     final lines = painter.computeLineMetrics().length;
     final lineHeight = math.max(
-      16.0,
+      TagTranslationIndicator.extent,
       (painter.height / math.max(1, lines)).ceilToDouble(),
     );
     painter.dispose();
     final detailPainter = TextPainter(
       text: TextSpan(
         text:
-            candidate.translation ??
             _autoTranslation.nameFor(candidate.canonicalTag) ??
+            candidate.translation ??
             (candidate.matchedAlias == null
                 ? TagCategoryVisuals.label(context, candidate.category)
                 : TagNormalizer.toDisplay(candidate.matchedAlias!)),
@@ -1020,14 +1024,17 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         (_wikiFailed
             ? overlayContext.l10n.common_error
             : overlayContext.l10n.tagExpansion_wikiUnavailable);
-    final titleMeasure = TextPainter(
-      text: TextSpan(
-        text: hasWiki ? _wikiTitle(overlayContext) : '',
-        style: theme.textTheme.labelMedium,
-      ),
-      textDirection: Directionality.of(overlayContext),
-      textScaler: MediaQuery.textScalerOf(overlayContext),
-    )..layout(maxWidth: math.max(1, width - 76));
+    final titleMeasure =
+        TextPainter(
+          text: TextSpan(
+            text: hasWiki ? _wikiTitle(overlayContext) : '',
+            style: theme.textTheme.labelMedium,
+          ),
+          textDirection: Directionality.of(overlayContext),
+          textScaler: MediaQuery.textScalerOf(overlayContext),
+        )..layout(
+          maxWidth: math.max(1, width - 76 - TagTranslationIndicator.extent),
+        );
     final headerHeight = math.max(28.0, titleMeasure.height) + 10;
     titleMeasure.dispose();
     final footerHeight = translatedWiki == null ? 0.0 : 36.0;
@@ -1576,8 +1583,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }) {
     final theme = Theme.of(context);
     final translation =
-        candidate.translation ??
-        ref.read(autoTagTranslationProvider).nameFor(candidate.canonicalTag);
+        ref.read(autoTagTranslationProvider).nameFor(candidate.canonicalTag) ??
+        candidate.translation;
     final alias = candidate.matchedAlias;
     final detail = translation?.isNotEmpty == true
         ? translation!
@@ -1625,6 +1632,12 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                               ),
                               category: candidate.category,
                               maxLines: null,
+                              trailing: TagTranslationIndicator(
+                                tag: candidate.canonicalTag,
+                                surface: related
+                                    ? _relatedSurface
+                                    : _searchSurface,
+                              ),
                               iconKey: ValueKey(
                                 'tag-expansion-category-${candidate.category.name}',
                               ),
@@ -1741,9 +1754,21 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
               children: [
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    _wikiTitle(context),
-                    style: theme.textTheme.labelMedium,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          _wikiTitle(context),
+                          style: theme.textTheme.labelMedium,
+                        ),
+                      ),
+                      TagTranslationIndicator(
+                        tag: candidate.canonicalTag,
+                        surface: _wikiSurface,
+                        wiki: true,
+                      ),
+                    ],
                   ),
                 ),
                 IconButton(
@@ -1862,8 +1887,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   String _wikiTitle(BuildContext context) {
     final candidate = _wikiCandidate!;
     final translatedName =
-        candidate.translation ??
-        _autoTranslation.nameFor(candidate.canonicalTag);
+        _autoTranslation.nameFor(candidate.canonicalTag) ??
+        candidate.translation;
     return '${context.l10n.tagExpansion_wikiTitle} · ${TagNormalizer.toDisplay(candidate.canonicalTag)}${translatedName == null || translatedName.isEmpty ? '' : ' · $translatedName'}';
   }
 

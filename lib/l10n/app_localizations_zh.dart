@@ -1238,9 +1238,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_directorPrompt => '提示词（可选）';
 
   @override
-  String get img2img_directorPromptHint => '需要时补充描述，例如目标情绪或上色方向';
-
-  @override
   String get img2img_directorRunning => '正在处理...';
 
   @override
@@ -1253,13 +1250,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_directorDefry => 'Defry';
 
   @override
-  String get img2img_directorEmotionLevel => '表情强度';
-
-  @override
   String get img2img_directorApplyAsSource => '设为源图';
-
-  @override
-  String get img2img_directorSourceImage => '源图';
 
   @override
   String get img2img_variationsStarted => '正在生成变体...';
@@ -1301,42 +1292,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_cloudUpscaleSizeLimit => 'NovelAI 云端放大支持不超过 3MP 的输入图片。';
 
   @override
-  String get img2img_comfyuiEnableHint => '请先在「设置 > ComfyUI」中启用并连接服务器。';
-
-  @override
-  String get img2img_upscaleMode => '放大方式';
-
-  @override
   String get img2img_upscaleRegularModel => '普通模型';
 
   @override
   String get img2img_upscaleModel => '超分模型';
-
-  @override
-  String get img2img_noSeedvr2Models =>
-      '未发现 SeedVR2 模型，请刷新模型列表或检查 SeedVR2 节点/模型文件。';
-
-  @override
-  String get img2img_noRegularUpscaleModels =>
-      '未发现普通超分模型，请刷新模型列表或检查 models/upscale_models。';
-
-  @override
-  String get img2img_useSeedvr2TiledWorkflow =>
-      '将使用 SeedVR2TilingUpscaler 分块超分流程。';
-
-  @override
-  String get img2img_useSeedvr2Workflow => '将使用 SeedVR2VideoUpscaler 流程。';
-
-  @override
-  String get img2img_useRegularUpscaleWorkflow =>
-      '将使用 UpscaleModelLoader + ImageUpscaleWithModel 流程，并用 Lanczos 修正到目标倍率。';
-
-  @override
-  String get img2img_useRtxUpscaleWorkflow =>
-      '将使用 RTX Video Super Resolution 流程，无需选择模型。';
-
-  @override
-  String get img2img_refreshModelList => '刷新模型列表';
 
   @override
   String get img2img_startUpscale => '开始超分';
@@ -1345,68 +1304,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_novelAiUpscaleComplete => 'NovelAI 超分完成';
 
   @override
-  String img2img_upscaleComplete(Object width, Object height) {
-    return '超分完成 (${width}x$height)';
-  }
-
-  @override
-  String img2img_regularUpscaleComplete(Object width, Object height) {
-    return '普通模型超分完成 (${width}x$height)';
-  }
-
-  @override
-  String img2img_rtxUpscaleComplete(Object width, Object height) {
-    return 'RTX 超分完成 (${width}x$height)';
-  }
-
-  @override
-  String get img2img_noAvailableSeedvr2Model => '未选择可用的 SeedVR2 模型';
-
-  @override
-  String get img2img_noAvailableRegularUpscaleModel => '未选择可用的普通超分模型';
-
-  @override
   String get img2img_decodeSourceFailed => '无法解码源图像';
 
   @override
-  String get img2img_metricSpeed => '速度';
-
-  @override
-  String get img2img_metricVram => '显存';
-
-  @override
-  String get img2img_metricQuality => '效果';
-
-  @override
-  String get img2img_seedvr2VaeTileHint =>
-      '同时写入 SeedVR2 VAE MODEL 的 encode/decode tile size。';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscale => '使用分块放大';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscaleHint =>
-      '启用后改用 SeedVR2TilingUpscaler，适合大图或显存压力较高的场景。';
-
-  @override
-  String get img2img_seedvr2TileSize => '分块图块大小';
-
-  @override
-  String get img2img_seedvr2TileSizeHint =>
-      '同时控制 SeedVR2TilingUpscaler 的 tile_width / tile_height。';
-
-  @override
-  String get img2img_seedvr2BlocksToSwap => '内存卸载层数';
-
-  @override
-  String get img2img_seedvr2BlocksToSwapHint =>
-      '把多少 DiT 层放在内存里、推理时再逐层送入显存。调高更省显存但更吃内存也更慢；显存充裕可调低甚至设为 0。显存不足报错时请调高。';
-
-  @override
   String get img2img_upscalePanelOpened => '已打开图生图超分面板';
-
-  @override
-  String get editor_done => '完成';
 
   @override
   String get editor_tolerance => '容差';
@@ -1437,12 +1338,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_clearLayer => '清除图层';
-
-  @override
-  String get editor_resetView => '重置视图';
-
-  @override
-  String get editor_zoom => '缩放';
 
   @override
   String get editor_toolBrush => '画笔';
@@ -1503,12 +1398,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get editor_layers => '图层';
 
   @override
-  String get editor_loadMask => '加载蒙版';
-
-  @override
-  String get editor_togglePanels => '切换面板';
-
-  @override
   String get editor_fillClosedRegion => '填充封闭区域';
 
   @override
@@ -1524,219 +1413,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get editor_fitToWindow => '适应窗口';
 
   @override
-  String get editor_shortcutHelpTitle => '快捷键帮助';
-
-  @override
-  String get editor_shortcutPaintTools => '绘画工具';
-
-  @override
-  String get editor_shortcutSelectionTools => '选区工具';
-
-  @override
-  String get editor_shortcutCanvasView => '画布视图';
-
-  @override
-  String get editor_shortcutBrushAdjust => '笔刷调整';
-
-  @override
-  String get editor_shortcutColors => '颜色';
-
-  @override
-  String get editor_shortcutCanvasActions => '画布操作';
-
-  @override
-  String get editor_shortcutHistoryActions => '历史操作';
-
-  @override
-  String get editor_shortcutSelectionActions => '选区操作';
-
-  @override
-  String get editor_shortcutTemporaryColorPicker => '临时拾色器';
-
-  @override
-  String get editor_shortcutRectSelection => '矩形选区';
-
-  @override
-  String get editor_shortcutEllipseSelection => '椭圆选区';
-
-  @override
-  String get editor_shortcutLassoSelection => '套索选区';
-
-  @override
   String get editor_shortcut100Zoom => '100% 缩放';
-
-  @override
-  String get editor_shortcutFitHeight => '适应高度';
-
-  @override
-  String get editor_shortcutFitWidth => '适应宽度';
-
-  @override
-  String get editor_shortcutRotateLeft15 => '向左旋转 15°';
-
-  @override
-  String get editor_shortcutResetRotation => '重置旋转';
-
-  @override
-  String get editor_shortcutRotateRight15 => '向右旋转 15°';
-
-  @override
-  String get editor_shortcutFlipHorizontal => '水平镜像';
-
-  @override
-  String get editor_shortcutWheel => '滚轮';
-
-  @override
-  String get editor_shortcutBrushSmaller => '减小笔刷';
-
-  @override
-  String get editor_shortcutBrushLarger => '增大笔刷';
-
-  @override
-  String get editor_shortcutOpacityLower => '降低透明度';
-
-  @override
-  String get editor_shortcutOpacityHigher => '提高透明度';
-
-  @override
-  String get editor_shortcutDragBrushSize => '调整笔刷大小';
-
-  @override
-  String get editor_shortcutSwapColors => '交换前景/背景色';
-
-  @override
-  String get editor_shortcutPanCanvas => '平移画布';
-
-  @override
-  String get editor_shortcutClearSelectionContent => '清除选区内容';
-
-  @override
-  String get editor_shortcutCancelCurrentAction => '取消当前操作';
-
-  @override
-  String get editor_selectUnlockedLayerWithContent => '请选择一个非锁定且有内容的图层';
-
-  @override
-  String get editor_readCurrentLayerFailed => '无法读取当前图层';
-
-  @override
-  String get editor_localEffects => '本地后处理 / Effects';
-
-  @override
-  String get editor_basicAdjustments => '基础调整';
-
-  @override
-  String get editor_styleAndRepair => '风格与修复';
-
-  @override
-  String get editor_transformCrop => '旋转 / 翻转 / 裁剪';
-
-  @override
-  String get editor_transformCropDescription =>
-      '几何操作已经独立出来，点击后会先生成预览，确认应用后才写回图层。';
-
-  @override
-  String get editor_effectPreviewHint => '预览不会修改原图；点击应用后才会把结果写入当前活动图层和撤销历史。';
-
-  @override
-  String get editor_applyToCurrentLayer => '应用到当前图层';
-
-  @override
-  String editor_oneShotEffectHint(Object effect) {
-    return '$effect 是一次性操作，没有强度滑条。';
-  }
-
-  @override
-  String editor_effectIntensity(Object effect) {
-    return '$effect 强度';
-  }
-
-  @override
-  String get editor_original => '原图';
-
-  @override
-  String get editor_effectPreview => '效果预览';
 
   @override
   String get editor_effectBrightness => '亮度';
 
   @override
-  String get editor_effectContrast => '对比度';
-
-  @override
   String get editor_effectSaturation => '饱和度';
 
   @override
-  String get editor_effectTemperature => '色温';
-
-  @override
-  String get editor_effectGamma => '伽马';
-
-  @override
-  String get editor_effectGrayscale => '灰度';
-
-  @override
-  String get editor_effectInvert => '反相';
-
-  @override
-  String get editor_effectSepia => '复古棕褐';
-
-  @override
-  String get editor_effectDenoise => '降噪';
-
-  @override
-  String get editor_effectBlur => '高斯模糊';
-
-  @override
-  String get editor_effectSharpen => '锐化';
-
-  @override
-  String get editor_effectCropToSelection => '裁剪到选区';
-
-  @override
-  String get editor_effectRotateLeft => '向左旋转 90°';
-
-  @override
-  String get editor_effectRotateRight => '向右旋转 90°';
-
-  @override
-  String get editor_effectFlipHorizontal => '水平翻转';
-
-  @override
-  String get editor_effectFlipVertical => '垂直翻转';
-
-  @override
-  String editor_effectApplied(Object effect) {
-    return '已应用 $effect';
-  }
-
-  @override
-  String editor_applyEffectFailed(Object error) {
-    return '应用效果失败: $error';
-  }
-
-  @override
   String get editor_changeCanvasSize => '更改画布尺寸';
-
-  @override
-  String editor_canvasTooSmall(Object width, Object height) {
-    return '画布尺寸太小，最小尺寸为 $width x $height 像素';
-  }
-
-  @override
-  String editor_canvasTooLarge(Object width, Object height) {
-    return '画布尺寸太大，最大尺寸为 $width x $height 像素';
-  }
-
-  @override
-  String editor_canvasResized(Object width, Object height) {
-    return '画布已调整为 $width x $height';
-  }
-
-  @override
-  String editor_canvasResizeFailed(Object error) {
-    return '调整画布尺寸失败: $error';
-  }
 
   @override
   String get editor_confirmExitTitle => '确认退出';
@@ -1756,110 +1442,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get editor_clickInsideClosedRegion => '请点击封闭区域内部进行填充。';
-
-  @override
-  String get editor_drawClosedMaskOutlineFirst => '请先绘制封闭的蒙版轮廓。';
-
-  @override
-  String get editor_noClosedRegionAtPosition => '该位置没有可填充的封闭区域。';
-
-  @override
-  String get editor_generateMaskOverlayFailed => '无法生成蒙版覆盖层';
-
-  @override
   String get editor_maskLayerName => '蒙版';
-
-  @override
-  String get editor_updateMaskLayerFailed => '无法更新蒙版图层';
-
-  @override
-  String get editor_closedRegionFilled => '封闭区域已填充为蒙版。';
-
-  @override
-  String editor_fillMaskFailed(Object error) {
-    return '填充蒙版失败: $error';
-  }
-
-  @override
-  String get editor_magicWandNoSource => '没有可供魔棒取样的图像图层。';
-
-  @override
-  String get editor_magicWandNothingChanged => '选中的区域已经透明或已在蒙版中。';
-
-  @override
-  String get editor_magicWandModelPreparing => '正在检查 EfficientViT-SAM 模型…';
-
-  @override
-  String editor_magicWandModelDownloading(int percent) {
-    return '正在下载 EfficientViT-SAM 模型：$percent%';
-  }
-
-  @override
-  String get editor_magicWandModelLoading => '正在加载 EfficientViT-SAM 模型…';
-
-  @override
-  String get editor_magicWandEncoding => '正在分析图像对象…';
-
-  @override
-  String get editor_magicWandSegmenting => '正在根据点击位置分割对象…';
-
-  @override
-  String get editor_magicWandPostprocessing => '正在生成选区…';
-
-  @override
-  String editor_magicWandFailed(Object error) {
-    return '魔棒处理失败: $error';
-  }
-
-  @override
-  String get editor_compressionTitle => '输出分辨率';
-
-  @override
-  String get editor_compressionTooltip => '选择输出分辨率';
-
-  @override
-  String get editor_compressionUncompressed => '保持编辑工作尺寸，不执行压缩。';
-
-  @override
-  String get editor_compressionApplyOnDone =>
-      '工作画布保持原样；点击“完成”时使用 Pica Lanczos3 执行一次压缩。';
-
-  @override
-  String editor_compressionSizeSummary(
-    int workWidth,
-    int workHeight,
-    int targetWidth,
-    int targetHeight,
-  ) {
-    return '工作尺寸 $workWidth×$workHeight → 输出尺寸 $targetWidth×$targetHeight';
-  }
-
-  @override
-  String editor_compressionNormalSummary(
-    int normalWidth,
-    int normalHeight,
-    int minimumWidth,
-    int minimumHeight,
-  ) {
-    return 'Normal（约 1MP）为 $normalWidth×$normalHeight；最低档为 $minimumWidth×$minimumHeight。';
-  }
-
-  @override
-  String get editor_compressionUnavailable => '当前工作画布已经低于最低压缩档，不能继续降低分辨率。';
-
-  @override
-  String editor_unsupportedImageFormat(Object extension) {
-    return '不支持的文件格式: .$extension\n请选择图像文件（PNG、JPG、WEBP 等）';
-  }
-
-  @override
-  String editor_readFileFailed(Object error) {
-    return '无法读取文件: $error';
-  }
-
-  @override
-  String get editor_noFileData => '无法获取文件数据';
 
   @override
   String get editor_emptyImageFile => '文件为空，请选择有效的图像文件';
@@ -1870,15 +1453,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get editor_maskLayerAdded => '蒙版图层已添加';
-
-  @override
   String get editor_parseImageFailed => '无法解析图像文件\n请确保文件未损坏且格式受支持';
-
-  @override
-  String editor_loadMaskFailed(Object error) {
-    return '加载蒙版时发生错误: $error';
-  }
 
   @override
   String get editor_defaultTitle => '画板';
@@ -1983,27 +1558,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_eraserSettings => '橡皮擦设置';
-
-  @override
-  String get editor_colorPickerHint => '点击画布任意位置取色，松开后自动切回上一工具';
-
-  @override
-  String get editor_sample => '取样';
-
-  @override
-  String get editor_samplePoint => '单点';
-
-  @override
-  String get editor_sampleArea => '区域';
-
-  @override
-  String get editor_source => '来源';
-
-  @override
-  String get editor_sourceCurrentLayer => '当前图层';
-
-  @override
-  String get editor_sourceAllLayers => '所有图层';
 
   @override
   String get editor_lassoSelectionHelp => '按住鼠标拖动绘制自由形状选区，松开自动闭合';
@@ -3708,9 +3262,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_group_yesterday => '昨天';
 
   @override
-  String get localGallery_sendTo => '发送到…';
-
-  @override
   String localGallery_groupImageCount(int count, String formatted) {
     return '$formatted 张';
   }
@@ -4168,9 +3719,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statistics_saturday => '周六';
 
   @override
-  String get fixedTags_negativeTitle => '负向固定词';
-
-  @override
   String get autocomplete_categoryCharacter => '角色';
 
   @override
@@ -4375,9 +3923,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get metadataImport_mainPrompt => '主提示词';
-
-  @override
-  String get metadataImport_fixedTags => '固定词';
 
   @override
   String metadataImport_qualityTagsCount(int count) {
@@ -5733,21 +5278,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_kritaBridgeErrorText => '启动失败，请查看错误信息';
 
   @override
-  String get settings_kritaBridgeDisabled => '已关闭';
-
-  @override
-  String get settings_kritaBridgeStarting => '启动中';
-
-  @override
-  String get settings_kritaBridgeListening => '监听中';
-
-  @override
-  String get settings_kritaBridgeConnected => '已连接';
-
-  @override
-  String get settings_kritaBridgeError => '错误';
-
-  @override
   String get settings_kritaBridgeRegenerateSession => '重生成会话';
 
   @override
@@ -5933,11 +5463,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_highAnlasCostTitle => 'Anlas 消耗提醒';
 
   @override
-  String settings_highAnlasCostContent(Object cost, Object threshold) {
-    return '本次预计消耗 $cost Anlas，已达到或超过你设置的 $threshold Anlas 警告阈值。请确认是否继续生成。';
-  }
-
-  @override
   String get settings_continueGeneration => '继续生成';
 
   @override
@@ -5968,40 +5493,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_comfyUiDisconnect => '断开';
-
-  @override
-  String get settings_comfyUiWorkflowManagement => '工作流管理';
-
-  @override
-  String get settings_comfyUiBuiltinWorkflows => '内置工作流';
-
-  @override
-  String get settings_comfyUiCustomWorkflows => '自定义工作流';
-
-  @override
-  String get settings_comfyUiNoCustomWorkflows =>
-      '暂无自定义工作流，点击“导入”添加 ComfyUI 工作流';
-
-  @override
-  String settings_comfyUiSlotCount(Object count) {
-    return '$count 个槽位';
-  }
-
-  @override
-  String get settings_comfyUiBuiltin => '内置';
-
-  @override
-  String get settings_comfyUiDeleteWorkflowTitle => '删除工作流';
-
-  @override
-  String settings_comfyUiDeleteWorkflowContent(Object name) {
-    return '确定要删除工作流“$name”吗？此操作不可撤销。';
-  }
-
-  @override
-  String settings_comfyUiDeleted(Object name) {
-    return '已删除: $name';
-  }
 
   @override
   String get settings_comfyUiNoResponse => '服务器无响应';
@@ -6553,9 +6044,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toast_vibeDataCopied => 'Vibe 数据已复制';
 
   @override
-  String get toast_tagCopied => '标签已复制';
-
-  @override
   String get toast_characterPromptCopied => '角色提示词已复制';
 
   @override
@@ -6978,18 +6466,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get model3d_editorTitle => '3D 模型图层';
 
   @override
-  String get model3d_addMannequin => '添加内置人偶';
-
-  @override
-  String get model3d_importModel => '导入模型 (.glb/.gltf)';
-
-  @override
-  String get model3d_emptyHint => '场景为空，先添加人偶或导入模型';
-
-  @override
-  String get model3d_apply => '应用到图层';
-
-  @override
   String get model3d_modeTransform => '变换';
 
   @override
@@ -7003,12 +6479,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get model3d_gizmoScale => '缩放';
-
-  @override
-  String get model3d_undo => '撤销';
-
-  @override
-  String get model3d_resetPose => '重置姿势';
 
   @override
   String get model3d_replaceConfirm => '替换当前模型？未应用的姿势将丢失。';
@@ -7026,20 +6496,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get model3d_light => '光照';
 
   @override
-  String get model3d_lightIntensity => '强度';
-
-  @override
-  String get model3d_lightAzimuth => '方位角';
-
-  @override
-  String get model3d_lightElevation => '仰角';
-
-  @override
   String get model3d_addLayerTooltip => '添加 3D 模型图层';
-
-  @override
-  String get model3d_webview2Missing =>
-      '3D 编辑器需要 Microsoft Edge WebView2 运行时。Windows 10/11 通常已自带;若缺失请从微软官网安装 Evergreen 版本后重试。';
 
   @override
   String get nav_preciseRefLibrary => '精准参考库';
@@ -7368,15 +6825,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get editor_effects => '效果';
-
-  @override
   String get editor_shiftEdges => '扩展边缘';
-
-  @override
-  String editor_currentSize(int width, int height) {
-    return '当前: $width x $height';
-  }
 
   @override
   String get editor_edgeLeft => '左';
@@ -7392,38 +6841,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_enterNumber => '请输入数字';
-
-  @override
-  String get editor_nonNegativeNumber => '必须大于或等于 0';
-
-  @override
-  String editor_requestedSize(int width, int height) {
-    return '请求尺寸: $width x $height';
-  }
-
-  @override
-  String get editor_requestedSizeInvalid => '请求尺寸: 无效';
-
-  @override
-  String editor_appliedSize(int width, int height) {
-    return '应用尺寸: $width x $height';
-  }
-
-  @override
-  String get editor_appliedSizeInvalid => '应用尺寸: 无效';
-
-  @override
-  String editor_appliedEdges(int left, int top, int right, int bottom) {
-    return '应用边缘: 左 $left、上 $top、右 $right、下 $bottom';
-  }
-
-  @override
-  String get editor_appliedEdgesInvalid => '应用边缘: 无效';
-
-  @override
-  String editor_appliedDimensionLimit(int max) {
-    return '应用后的尺寸不能超过 $max。';
-  }
 
   @override
   String get onlineGallery_videoLoadFailed => '视频加载失败';
@@ -9390,9 +8807,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_pixelSnap => '像素对齐';
 
   @override
-  String get img2img_original => '原图';
-
-  @override
   String get img2img_directorAddToQueue => '将结果加入输入队列';
 
   @override
@@ -9596,9 +9010,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wiki_wide => '宽';
-
-  @override
-  String get wiki_hide => '隐藏';
 
   @override
   String get wiki_articleMissing => '这条标签暂时没有本地 Wiki 释义。';
@@ -10192,11 +9603,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wiki_relatedHint => '点击查看 · Shift+点击加入提示词';
-
-  @override
-  String wiki_relatedShare(Object percent) {
-    return '$percent 的帖子同时带有此标签';
-  }
 
   @override
   String get wiki_inDirectory => '所属目录';
@@ -12519,9 +11925,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_emotionHurt => '受伤';
 
   @override
-  String get localUpscale_title => '本地超分';
-
-  @override
   String get localUpscale_local => '本地';
 
   @override
@@ -12608,9 +12011,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localUpscale_importModel => '导入模型';
 
   @override
-  String get localUpscale_modelReady => '模型已安装';
-
-  @override
   String get localUpscale_modelOperationFailed => '模型操作失败，请检查网络、文件权限及可用空间后重试。';
 
   @override
@@ -12659,6 +12059,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localUpscale_installingRuntime => '正在安装 Python/CUDA 运行环境…';
+
+  @override
+  String get localUpscale_installingPython => '正在准备独立 Python…';
+
+  @override
+  String localUpscale_installFailed(String stage) {
+    return '安装失败阶段：$stage';
+  }
+
+  @override
+  String get wiki_translationQueued => '等待翻译';
+
+  @override
+  String get wiki_translationFailedRetry => '翻译失败，点击重试';
 
   @override
   String get localUpscale_checkingComponent => '正在检查组件与显卡…';
@@ -13915,9 +13329,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_directorPrompt => '提示詞（可選）';
 
   @override
-  String get img2img_directorPromptHint => '需要時補充描述，例如目標情緒或上色方向';
-
-  @override
   String get img2img_directorRunning => '正在處理...';
 
   @override
@@ -13930,13 +13341,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_directorDefry => 'Defry';
 
   @override
-  String get img2img_directorEmotionLevel => '表情強度';
-
-  @override
   String get img2img_directorApplyAsSource => '設為來源圖';
-
-  @override
-  String get img2img_directorSourceImage => '來源圖';
 
   @override
   String get img2img_variationsStarted => '正在生成變體...';
@@ -13978,42 +13383,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_cloudUpscaleSizeLimit => 'NovelAI 雲端放大支援不超過 3MP 的輸入圖片。';
 
   @override
-  String get img2img_comfyuiEnableHint => '請先在「設定 > ComfyUI」中啟用並連線伺服器。';
-
-  @override
-  String get img2img_upscaleMode => '放大方式';
-
-  @override
   String get img2img_upscaleRegularModel => '普通模型';
 
   @override
   String get img2img_upscaleModel => '超分模型';
-
-  @override
-  String get img2img_noSeedvr2Models =>
-      '未發現 SeedVR2 模型，請重新整理模型列表或檢查 SeedVR2 節點/模型檔案。';
-
-  @override
-  String get img2img_noRegularUpscaleModels =>
-      '未發現普通超分模型，請重新整理模型列表或檢查 models/upscale_models。';
-
-  @override
-  String get img2img_useSeedvr2TiledWorkflow =>
-      '將使用 SeedVR2TilingUpscaler 分塊超分流程。';
-
-  @override
-  String get img2img_useSeedvr2Workflow => '將使用 SeedVR2VideoUpscaler 流程。';
-
-  @override
-  String get img2img_useRegularUpscaleWorkflow =>
-      '將使用 UpscaleModelLoader + ImageUpscaleWithModel 流程，並用 Lanczos 修正到目標倍率。';
-
-  @override
-  String get img2img_useRtxUpscaleWorkflow =>
-      '將使用 RTX Video Super Resolution 流程，無需選擇模型。';
-
-  @override
-  String get img2img_refreshModelList => '重新整理模型列表';
 
   @override
   String get img2img_startUpscale => '開始超分';
@@ -14022,68 +13395,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_novelAiUpscaleComplete => 'NovelAI 超分完成';
 
   @override
-  String img2img_upscaleComplete(Object width, Object height) {
-    return '超分完成 (${width}x$height)';
-  }
-
-  @override
-  String img2img_regularUpscaleComplete(Object width, Object height) {
-    return '普通模型超分完成 (${width}x$height)';
-  }
-
-  @override
-  String img2img_rtxUpscaleComplete(Object width, Object height) {
-    return 'RTX 超分完成 (${width}x$height)';
-  }
-
-  @override
-  String get img2img_noAvailableSeedvr2Model => '未選擇可用的 SeedVR2 模型';
-
-  @override
-  String get img2img_noAvailableRegularUpscaleModel => '未選擇可用的普通超分模型';
-
-  @override
   String get img2img_decodeSourceFailed => '無法解碼來源影像';
 
   @override
-  String get img2img_metricSpeed => '速度';
-
-  @override
-  String get img2img_metricVram => '視訊記憶體';
-
-  @override
-  String get img2img_metricQuality => '效果';
-
-  @override
-  String get img2img_seedvr2VaeTileHint =>
-      '同時寫入 SeedVR2 VAE MODEL 的 encode/decode tile size。';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscale => '使用分塊放大';
-
-  @override
-  String get img2img_seedvr2UseTiledUpscaleHint =>
-      '啟用後改用 SeedVR2TilingUpscaler，適合大圖或視訊記憶體壓力較高的場景。';
-
-  @override
-  String get img2img_seedvr2TileSize => '分塊圖塊大小';
-
-  @override
-  String get img2img_seedvr2TileSizeHint =>
-      '同時控制 SeedVR2TilingUpscaler 的 tile_width / tile_height。';
-
-  @override
-  String get img2img_seedvr2BlocksToSwap => '記憶體卸載層數';
-
-  @override
-  String get img2img_seedvr2BlocksToSwapHint =>
-      '把多少 DiT 層放在記憶體裡、推理時再逐層送入視訊記憶體。調高更省視訊記憶體但更吃記憶體也更慢；視訊記憶體充裕可調低甚至設為 0。視訊記憶體不足報錯時請調高。';
-
-  @override
   String get img2img_upscalePanelOpened => '已開啟圖生圖超分面板';
-
-  @override
-  String get editor_done => '完成';
 
   @override
   String get editor_tolerance => '容差';
@@ -14114,12 +13429,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editor_clearLayer => '清除圖層';
-
-  @override
-  String get editor_resetView => '重設檢視';
-
-  @override
-  String get editor_zoom => '縮放';
 
   @override
   String get editor_toolBrush => '畫筆';
@@ -14180,12 +13489,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get editor_layers => '圖層';
 
   @override
-  String get editor_loadMask => '載入遮罩';
-
-  @override
-  String get editor_togglePanels => '切換面板';
-
-  @override
   String get editor_fillClosedRegion => '填充封閉區域';
 
   @override
@@ -14201,219 +13504,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get editor_fitToWindow => '適應視窗';
 
   @override
-  String get editor_shortcutHelpTitle => '快速鍵幫助';
-
-  @override
-  String get editor_shortcutPaintTools => '繪畫工具';
-
-  @override
-  String get editor_shortcutSelectionTools => '選區工具';
-
-  @override
-  String get editor_shortcutCanvasView => '畫布檢視';
-
-  @override
-  String get editor_shortcutBrushAdjust => '筆刷調整';
-
-  @override
-  String get editor_shortcutColors => '顏色';
-
-  @override
-  String get editor_shortcutCanvasActions => '畫布操作';
-
-  @override
-  String get editor_shortcutHistoryActions => '歷史操作';
-
-  @override
-  String get editor_shortcutSelectionActions => '選區操作';
-
-  @override
-  String get editor_shortcutTemporaryColorPicker => '臨時拾色器';
-
-  @override
-  String get editor_shortcutRectSelection => '矩形選區';
-
-  @override
-  String get editor_shortcutEllipseSelection => '橢圓選區';
-
-  @override
-  String get editor_shortcutLassoSelection => '套索選區';
-
-  @override
   String get editor_shortcut100Zoom => '100% 縮放';
-
-  @override
-  String get editor_shortcutFitHeight => '適應高度';
-
-  @override
-  String get editor_shortcutFitWidth => '適應寬度';
-
-  @override
-  String get editor_shortcutRotateLeft15 => '向左旋轉 15°';
-
-  @override
-  String get editor_shortcutResetRotation => '重設旋轉';
-
-  @override
-  String get editor_shortcutRotateRight15 => '向右旋轉 15°';
-
-  @override
-  String get editor_shortcutFlipHorizontal => '水平鏡像';
-
-  @override
-  String get editor_shortcutWheel => '滾輪';
-
-  @override
-  String get editor_shortcutBrushSmaller => '減小筆刷';
-
-  @override
-  String get editor_shortcutBrushLarger => '增大筆刷';
-
-  @override
-  String get editor_shortcutOpacityLower => '降低透明度';
-
-  @override
-  String get editor_shortcutOpacityHigher => '提高透明度';
-
-  @override
-  String get editor_shortcutDragBrushSize => '調整筆刷大小';
-
-  @override
-  String get editor_shortcutSwapColors => '交換前景/背景色';
-
-  @override
-  String get editor_shortcutPanCanvas => '平移畫布';
-
-  @override
-  String get editor_shortcutClearSelectionContent => '清除選區內容';
-
-  @override
-  String get editor_shortcutCancelCurrentAction => '取消當前操作';
-
-  @override
-  String get editor_selectUnlockedLayerWithContent => '請選擇一個非鎖定且有內容的圖層';
-
-  @override
-  String get editor_readCurrentLayerFailed => '無法讀取當前圖層';
-
-  @override
-  String get editor_localEffects => '本地後處理 / Effects';
-
-  @override
-  String get editor_basicAdjustments => '基礎調整';
-
-  @override
-  String get editor_styleAndRepair => '風格與修復';
-
-  @override
-  String get editor_transformCrop => '旋轉 / 翻轉 / 裁切';
-
-  @override
-  String get editor_transformCropDescription =>
-      '幾何操作已經獨立出來，點選後會先生成預覽，確認應用後才寫回圖層。';
-
-  @override
-  String get editor_effectPreviewHint => '預覽不會修改原圖；點選應用後才會把結果寫入當前活動圖層和復原歷史。';
-
-  @override
-  String get editor_applyToCurrentLayer => '應用到當前圖層';
-
-  @override
-  String editor_oneShotEffectHint(Object effect) {
-    return '$effect 是一次性操作，沒有強度滑條。';
-  }
-
-  @override
-  String editor_effectIntensity(Object effect) {
-    return '$effect 強度';
-  }
-
-  @override
-  String get editor_original => '原圖';
-
-  @override
-  String get editor_effectPreview => '效果預覽';
 
   @override
   String get editor_effectBrightness => '亮度';
 
   @override
-  String get editor_effectContrast => '對比度';
-
-  @override
   String get editor_effectSaturation => '飽和度';
 
   @override
-  String get editor_effectTemperature => '色溫';
-
-  @override
-  String get editor_effectGamma => '伽馬';
-
-  @override
-  String get editor_effectGrayscale => '灰度';
-
-  @override
-  String get editor_effectInvert => '反相';
-
-  @override
-  String get editor_effectSepia => '復古棕褐';
-
-  @override
-  String get editor_effectDenoise => '降噪';
-
-  @override
-  String get editor_effectBlur => '高斯模糊';
-
-  @override
-  String get editor_effectSharpen => '銳化';
-
-  @override
-  String get editor_effectCropToSelection => '裁切到選區';
-
-  @override
-  String get editor_effectRotateLeft => '向左旋轉 90°';
-
-  @override
-  String get editor_effectRotateRight => '向右旋轉 90°';
-
-  @override
-  String get editor_effectFlipHorizontal => '水平翻轉';
-
-  @override
-  String get editor_effectFlipVertical => '垂直翻轉';
-
-  @override
-  String editor_effectApplied(Object effect) {
-    return '已應用 $effect';
-  }
-
-  @override
-  String editor_applyEffectFailed(Object error) {
-    return '應用效果失敗: $error';
-  }
-
-  @override
   String get editor_changeCanvasSize => '更改畫布尺寸';
-
-  @override
-  String editor_canvasTooSmall(Object width, Object height) {
-    return '畫布尺寸太小，最小尺寸為 $width x $height 像素';
-  }
-
-  @override
-  String editor_canvasTooLarge(Object width, Object height) {
-    return '畫布尺寸太大，最大尺寸為 $width x $height 像素';
-  }
-
-  @override
-  String editor_canvasResized(Object width, Object height) {
-    return '畫布已調整為 $width x $height';
-  }
-
-  @override
-  String editor_canvasResizeFailed(Object error) {
-    return '調整畫布尺寸失敗: $error';
-  }
 
   @override
   String get editor_confirmExitTitle => '確認退出';
@@ -14433,110 +13533,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get editor_clickInsideClosedRegion => '請點選封閉區域內部進行填充。';
-
-  @override
-  String get editor_drawClosedMaskOutlineFirst => '請先繪製封閉的遮罩輪廓。';
-
-  @override
-  String get editor_noClosedRegionAtPosition => '該位置沒有可填充的封閉區域。';
-
-  @override
-  String get editor_generateMaskOverlayFailed => '無法生成遮罩覆蓋層';
-
-  @override
   String get editor_maskLayerName => '遮罩';
-
-  @override
-  String get editor_updateMaskLayerFailed => '無法更新遮罩圖層';
-
-  @override
-  String get editor_closedRegionFilled => '封閉區域已填充為遮罩。';
-
-  @override
-  String editor_fillMaskFailed(Object error) {
-    return '填充遮罩失敗: $error';
-  }
-
-  @override
-  String get editor_magicWandNoSource => '沒有可供魔棒取樣的影像圖層。';
-
-  @override
-  String get editor_magicWandNothingChanged => '選中的區域已經透明或已在遮罩中。';
-
-  @override
-  String get editor_magicWandModelPreparing => '正在檢查 EfficientViT-SAM 模型…';
-
-  @override
-  String editor_magicWandModelDownloading(int percent) {
-    return '正在下載 EfficientViT-SAM 模型：$percent%';
-  }
-
-  @override
-  String get editor_magicWandModelLoading => '正在載入 EfficientViT-SAM 模型…';
-
-  @override
-  String get editor_magicWandEncoding => '正在分析影像物件…';
-
-  @override
-  String get editor_magicWandSegmenting => '正在根據點選位置分割物件…';
-
-  @override
-  String get editor_magicWandPostprocessing => '正在生成選區…';
-
-  @override
-  String editor_magicWandFailed(Object error) {
-    return '魔棒處理失敗: $error';
-  }
-
-  @override
-  String get editor_compressionTitle => '輸出解析度';
-
-  @override
-  String get editor_compressionTooltip => '選擇輸出解析度';
-
-  @override
-  String get editor_compressionUncompressed => '保持編輯工作尺寸，不執行壓縮。';
-
-  @override
-  String get editor_compressionApplyOnDone =>
-      '工作畫布保持原樣；點選“完成”時使用 Pica Lanczos3 執行一次壓縮。';
-
-  @override
-  String editor_compressionSizeSummary(
-    int workWidth,
-    int workHeight,
-    int targetWidth,
-    int targetHeight,
-  ) {
-    return '工作尺寸 $workWidth×$workHeight → 輸出尺寸 $targetWidth×$targetHeight';
-  }
-
-  @override
-  String editor_compressionNormalSummary(
-    int normalWidth,
-    int normalHeight,
-    int minimumWidth,
-    int minimumHeight,
-  ) {
-    return 'Normal（約 1MP）為 $normalWidth×$normalHeight；最低檔為 $minimumWidth×$minimumHeight。';
-  }
-
-  @override
-  String get editor_compressionUnavailable => '當前工作畫布已經低於最低壓縮檔，不能繼續降低解析度。';
-
-  @override
-  String editor_unsupportedImageFormat(Object extension) {
-    return '不支援的檔案格式: .$extension\n請選擇影像檔案（PNG、JPG、WEBP 等）';
-  }
-
-  @override
-  String editor_readFileFailed(Object error) {
-    return '無法讀取檔案: $error';
-  }
-
-  @override
-  String get editor_noFileData => '無法取得檔案資料';
 
   @override
   String get editor_emptyImageFile => '檔案為空，請選擇有效的影像檔案';
@@ -14547,15 +13544,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get editor_maskLayerAdded => '遮罩圖層已新增';
-
-  @override
   String get editor_parseImageFailed => '無法解析影像檔案\n請確保檔案未損壞且格式受支援';
-
-  @override
-  String editor_loadMaskFailed(Object error) {
-    return '載入遮罩時發生錯誤: $error';
-  }
 
   @override
   String get editor_defaultTitle => '畫板';
@@ -14660,27 +13649,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editor_eraserSettings => '橡皮擦設定';
-
-  @override
-  String get editor_colorPickerHint => '點選畫布任意位置取色，鬆開後自動切回上一工具';
-
-  @override
-  String get editor_sample => '取樣';
-
-  @override
-  String get editor_samplePoint => '單點';
-
-  @override
-  String get editor_sampleArea => '區域';
-
-  @override
-  String get editor_source => '來源';
-
-  @override
-  String get editor_sourceCurrentLayer => '當前圖層';
-
-  @override
-  String get editor_sourceAllLayers => '所有圖層';
 
   @override
   String get editor_lassoSelectionHelp => '按住滑鼠拖動繪製自由形狀選區，鬆開自動閉合';
@@ -16385,9 +15353,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_group_yesterday => '昨天';
 
   @override
-  String get localGallery_sendTo => '傳送到…';
-
-  @override
   String localGallery_groupImageCount(int count, String formatted) {
     return '$formatted 張';
   }
@@ -16845,9 +15810,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get statistics_saturday => '週六';
 
   @override
-  String get fixedTags_negativeTitle => '負向固定詞';
-
-  @override
   String get autocomplete_categoryCharacter => '角色';
 
   @override
@@ -17052,9 +16014,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get metadataImport_mainPrompt => '主提示詞';
-
-  @override
-  String get metadataImport_fixedTags => '固定詞';
 
   @override
   String metadataImport_qualityTagsCount(int count) {
@@ -18410,21 +17369,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_kritaBridgeErrorText => '啟動失敗，請檢視錯誤資訊';
 
   @override
-  String get settings_kritaBridgeDisabled => '已關閉';
-
-  @override
-  String get settings_kritaBridgeStarting => '啟動中';
-
-  @override
-  String get settings_kritaBridgeListening => '監聽中';
-
-  @override
-  String get settings_kritaBridgeConnected => '已連線';
-
-  @override
-  String get settings_kritaBridgeError => '錯誤';
-
-  @override
   String get settings_kritaBridgeRegenerateSession => '重生成會話';
 
   @override
@@ -18610,11 +17554,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_highAnlasCostTitle => 'Anlas 消耗提醒';
 
   @override
-  String settings_highAnlasCostContent(Object cost, Object threshold) {
-    return '本次預計消耗 $cost Anlas，已達到或超過你設定的 $threshold Anlas 警告閾值。請確認是否繼續生成。';
-  }
-
-  @override
   String get settings_continueGeneration => '繼續生成';
 
   @override
@@ -18645,40 +17584,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get settings_comfyUiDisconnect => '斷開';
-
-  @override
-  String get settings_comfyUiWorkflowManagement => '工作流管理';
-
-  @override
-  String get settings_comfyUiBuiltinWorkflows => '內建工作流';
-
-  @override
-  String get settings_comfyUiCustomWorkflows => '自訂工作流';
-
-  @override
-  String get settings_comfyUiNoCustomWorkflows =>
-      '暫無自訂工作流，點選“匯入”新增 ComfyUI 工作流';
-
-  @override
-  String settings_comfyUiSlotCount(Object count) {
-    return '$count 個槽位';
-  }
-
-  @override
-  String get settings_comfyUiBuiltin => '內建';
-
-  @override
-  String get settings_comfyUiDeleteWorkflowTitle => '刪除工作流';
-
-  @override
-  String settings_comfyUiDeleteWorkflowContent(Object name) {
-    return '確定要刪除工作流“$name”嗎？此操作不可復原。';
-  }
-
-  @override
-  String settings_comfyUiDeleted(Object name) {
-    return '已刪除: $name';
-  }
 
   @override
   String get settings_comfyUiNoResponse => '伺服器無回應';
@@ -19230,9 +18135,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get toast_vibeDataCopied => 'Vibe 資料已複製';
 
   @override
-  String get toast_tagCopied => '標籤已複製';
-
-  @override
   String get toast_characterPromptCopied => '角色提示詞已複製';
 
   @override
@@ -19655,18 +18557,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get model3d_editorTitle => '3D 模型圖層';
 
   @override
-  String get model3d_addMannequin => '新增內建人偶';
-
-  @override
-  String get model3d_importModel => '匯入模型 (.glb/.gltf)';
-
-  @override
-  String get model3d_emptyHint => '場景為空，先新增人偶或匯入模型';
-
-  @override
-  String get model3d_apply => '應用到圖層';
-
-  @override
   String get model3d_modeTransform => '變換';
 
   @override
@@ -19680,12 +18570,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get model3d_gizmoScale => '縮放';
-
-  @override
-  String get model3d_undo => '復原';
-
-  @override
-  String get model3d_resetPose => '重設姿勢';
 
   @override
   String get model3d_replaceConfirm => '替換當前模型？未應用的姿勢將丟失。';
@@ -19703,20 +18587,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get model3d_light => '光照';
 
   @override
-  String get model3d_lightIntensity => '強度';
-
-  @override
-  String get model3d_lightAzimuth => '方位角';
-
-  @override
-  String get model3d_lightElevation => '仰角';
-
-  @override
   String get model3d_addLayerTooltip => '新增 3D 模型圖層';
-
-  @override
-  String get model3d_webview2Missing =>
-      '3D 編輯器需要 Microsoft Edge WebView2 執行時。Windows 10/11 通常已自帶;若缺失請從微軟官網安裝 Evergreen 版本後重試。';
 
   @override
   String get nav_preciseRefLibrary => '精準參考庫';
@@ -20045,15 +18916,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get editor_effects => '效果';
-
-  @override
   String get editor_shiftEdges => '擴展邊緣';
-
-  @override
-  String editor_currentSize(int width, int height) {
-    return '當前: $width x $height';
-  }
 
   @override
   String get editor_edgeLeft => '左';
@@ -20069,38 +18932,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editor_enterNumber => '請輸入數字';
-
-  @override
-  String get editor_nonNegativeNumber => '必須大於或等於 0';
-
-  @override
-  String editor_requestedSize(int width, int height) {
-    return '請求尺寸: $width x $height';
-  }
-
-  @override
-  String get editor_requestedSizeInvalid => '請求尺寸: 無效';
-
-  @override
-  String editor_appliedSize(int width, int height) {
-    return '應用尺寸: $width x $height';
-  }
-
-  @override
-  String get editor_appliedSizeInvalid => '應用尺寸: 無效';
-
-  @override
-  String editor_appliedEdges(int left, int top, int right, int bottom) {
-    return '應用邊緣: 左 $left、上 $top、右 $right、下 $bottom';
-  }
-
-  @override
-  String get editor_appliedEdgesInvalid => '應用邊緣: 無效';
-
-  @override
-  String editor_appliedDimensionLimit(int max) {
-    return '應用後的尺寸不能超過 $max。';
-  }
 
   @override
   String get onlineGallery_videoLoadFailed => '影片載入失敗';
@@ -22067,9 +20898,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_pixelSnap => '像素對齊';
 
   @override
-  String get img2img_original => '原圖';
-
-  @override
   String get img2img_directorAddToQueue => '將結果加入輸入佇列';
 
   @override
@@ -22273,9 +21101,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get wiki_wide => '寬';
-
-  @override
-  String get wiki_hide => '隱藏';
 
   @override
   String get wiki_articleMissing => '這條標籤暫時沒有本地 Wiki 釋義。';
@@ -22869,11 +21694,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get wiki_relatedHint => '點選檢視 · Shift+點選加入提示詞';
-
-  @override
-  String wiki_relatedShare(Object percent) {
-    return '$percent 的帖子同時帶有此標籤';
-  }
 
   @override
   String get wiki_inDirectory => '所屬目錄';
@@ -25196,9 +24016,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_emotionHurt => '受傷';
 
   @override
-  String get localUpscale_title => '本地超分';
-
-  @override
   String get localUpscale_local => '本地';
 
   @override
@@ -25285,9 +24102,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localUpscale_importModel => '匯入模型';
 
   @override
-  String get localUpscale_modelReady => '模型已安裝';
-
-  @override
   String get localUpscale_modelOperationFailed => '模型操作失敗，請檢查網路、檔案權限及可用空間後重試。';
 
   @override
@@ -25336,6 +24150,20 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localUpscale_installingRuntime => '正在安裝 Python/CUDA 執行環境…';
+
+  @override
+  String get localUpscale_installingPython => '正在準備獨立 Python…';
+
+  @override
+  String localUpscale_installFailed(String stage) {
+    return '安裝失敗階段：$stage';
+  }
+
+  @override
+  String get wiki_translationQueued => '等待翻譯';
+
+  @override
+  String get wiki_translationFailedRetry => '翻譯失敗，點選重試';
 
   @override
   String get localUpscale_checkingComponent => '正在檢查元件與顯示卡…';

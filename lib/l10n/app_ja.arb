@@ -572,14 +572,11 @@
   "img2img_generateVariations": "バリエーションの生成",
   "img2img_directorTools": "ディレクターツール",
   "img2img_directorPrompt": "プロンプト（任意）",
-  "img2img_directorPromptHint": "ターゲットの感情や色の方向など、必要に応じてガイダンスを追加します",
   "img2img_directorRunning": "処理中...",
   "img2img_directorResult": "結果",
   "img2img_directorApplied": "ディレクターツールの結果を新しいソース イメージとして適用しました",
   "img2img_directorDefry": "デフライ",
-  "img2img_directorEmotionLevel": "感情レベル",
   "img2img_directorApplyAsSource": "ソースとして使用",
-  "img2img_directorSourceImage": "ソース画像",
   "img2img_variationsStarted": "バリエーションを生成しています...",
   "img2img_directorRemoveBackground": "背景の除去",
   "img2img_directorLineArt": "線画",
@@ -593,55 +590,12 @@
   "img2img_enhanceMax": "Max✨",
   "img2img_novelAiCloudUpscale": "NovelAI クラウド拡大（2x 固定）",
   "img2img_cloudUpscaleSizeLimit": "NovelAI クラウド拡大は 3MP 以下の入力画像に対応しています。",
-  "img2img_comfyuiEnableHint": "まず、[設定] > [ComfyUI] で ComfyUI を有効にして接続します。",
-  "img2img_upscaleMode": "拡大モード",
   "img2img_upscaleRegularModel": "レギュラーモデル",
   "img2img_upscaleModel": "拡大モデル",
-  "img2img_noSeedvr2Models": "SeedVR2 モデルが見つかりません。モデル リストを更新するか、SeedVR2 ノード/モデル ファイルを確認してください。",
-  "img2img_noRegularUpscaleModels": "通常の拡大モデルが見つかりません。モデルリストを更新するか、models/upscale_models を確認してください。",
-  "img2img_useSeedvr2TiledWorkflow": "SeedVR2TilingUpscaler のタイル状の拡大ワークフローを使用します。",
-  "img2img_useSeedvr2Workflow": "SeedVR2VideoUpscaler ワークフローの使用。",
-  "img2img_useRegularUpscaleWorkflow": "UpscaleModelLoader + ImageUpscaleWithModel を使用し、Lanczos でターゲット スケールに修正します。",
-  "img2img_useRtxUpscaleWorkflow": "RTX ビデオ超解像度を使用します。モデルの選択は必要ありません。",
-  "img2img_refreshModelList": "モデルリストを更新",
   "img2img_startUpscale": "拡大を開始",
   "img2img_novelAiUpscaleComplete": "NovelAI 拡大が完了しました",
-  "img2img_upscaleComplete": "拡大が完了しました ({width}x{height})",
-  "@img2img_upscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_regularUpscaleComplete": "通常モデルの拡大が完了しました ({width}x{height})",
-  "@img2img_regularUpscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_rtxUpscaleComplete": "RTX 拡大が完了しました ({width}x{height})",
-  "@img2img_rtxUpscaleComplete": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "img2img_noAvailableSeedvr2Model": "利用可能な SeedVR2 モデルが選択されていません",
-  "img2img_noAvailableRegularUpscaleModel": "利用可能な通常の拡大モデルが選択されていません",
   "img2img_decodeSourceFailed": "ソース画像のデコードに失敗しました",
-  "img2img_metricSpeed": "速度",
-  "img2img_metricVram": "VRAM",
-  "img2img_metricQuality": "品質",
-  "img2img_seedvr2VaeTileHint": "SeedVR2 VAE MODEL のエンコード/デコード タイル サイズも書き込みます。",
-  "img2img_seedvr2UseTiledUpscale": "タイル状の拡大を使用する",
-  "img2img_seedvr2UseTiledUpscaleHint": "有効にすると、SeedVR2TilingUpscaler が使用されます。大きな画像や VRAM 負荷が高い場合に推奨します。",
-  "img2img_seedvr2TileSize": "タイルのサイズ",
-  "img2img_seedvr2TileSizeHint": "SeedVR2TilingUpscaler tile_width / tile_height も制御します。",
-  "img2img_seedvr2BlocksToSwap": "メモリへ退避するブロック数",
-  "img2img_seedvr2BlocksToSwapHint": "DiT ブロックのうち何個をシステムメモリに置き、推論時に VRAM へ順次転送するかを指定します。大きいほど VRAM を節約できますがメモリを消費し遅くなります。VRAM に余裕がある場合は 0 まで下げられます。メモリ不足エラーが出る場合は上げてください。",
   "img2img_upscalePanelOpened": "Image2Image の拡大パネルを開きました",
-  "editor_done": "完了",
   "editor_tolerance": "許容差",
   "editor_intensity": "強度",
   "editor_sourcePoint": "Alt+クリックしてソースポイントを設定します",
@@ -652,8 +606,6 @@
   "editor_undo": "元に戻す",
   "editor_redo": "やり直し",
   "editor_clearLayer": "クリアレイヤー",
-  "editor_resetView": "ビューをリセット",
-  "editor_zoom": "ズーム",
   "editor_toolBrush": "ブラシ",
   "editor_toolEraser": "消しゴム",
   "editor_toolFill": "塗りつぶし",
@@ -673,122 +625,15 @@
   "editor_toolBlur": "ぼかし",
   "editor_back": "戻る",
   "editor_layers": "レイヤー",
-  "editor_loadMask": "ロードマスク",
-  "editor_togglePanels": "パネルの切り替え",
   "editor_fillClosedRegion": "閉じた領域を埋める",
   "editor_resetMask": "マスクをリセット",
   "editor_zoomIn": "ズームイン",
   "editor_zoomOut": "ズームアウト",
   "editor_fitToWindow": "窓に合わせる",
-  "editor_shortcutHelpTitle": "ショートカット ヘルプ",
-  "editor_shortcutPaintTools": "ペイント ツール",
-  "editor_shortcutSelectionTools": "選択ツール",
-  "editor_shortcutCanvasView": "キャンバス ビュー",
-  "editor_shortcutBrushAdjust": "ブラシの調整",
-  "editor_shortcutColors": "カラー",
-  "editor_shortcutCanvasActions": "キャンバスアクション",
-  "editor_shortcutHistoryActions": "履歴アクション",
-  "editor_shortcutSelectionActions": "選択アクション",
-  "editor_shortcutTemporaryColorPicker": "一時的なカラーピッカー",
-  "editor_shortcutRectSelection": "長方形の選択",
-  "editor_shortcutEllipseSelection": "楕円の選択",
-  "editor_shortcutLassoSelection": "なげなわ選択",
   "editor_shortcut100Zoom": "100% ズーム",
-  "editor_shortcutFitHeight": "高さに合わせる",
-  "editor_shortcutFitWidth": "幅に合わせる",
-  "editor_shortcutRotateLeft15": "左に 15 度回転",
-  "editor_shortcutResetRotation": "回転をリセット",
-  "editor_shortcutRotateRight15": "右に 15 度回転",
-  "editor_shortcutFlipHorizontal": "水平方向に反転",
-  "editor_shortcutWheel": "マウス ホイール",
-  "editor_shortcutBrushSmaller": "ブラシ サイズを小さくします",
-  "editor_shortcutBrushLarger": "ブラシ サイズを大きくする",
-  "editor_shortcutOpacityLower": "不透明度を下げる",
-  "editor_shortcutOpacityHigher": "不透明度を増やす",
-  "editor_shortcutDragBrushSize": "ブラシ サイズを調整する",
-  "editor_shortcutSwapColors": "前景色と背景色の交換",
-  "editor_shortcutPanCanvas": "パン キャンバス",
-  "editor_shortcutClearSelectionContent": "選択内容をクリア",
-  "editor_shortcutCancelCurrentAction": "現在のアクションをキャンセルします",
-  "editor_selectUnlockedLayerWithContent": "コンテンツを含むロック解除されたレイヤーを選択してください",
-  "editor_readCurrentLayerFailed": "現在のレイヤーの読み取りに失敗しました",
-  "editor_localEffects": "ローカル後処理 / エフェクト",
-  "editor_basicAdjustments": "基本的な調整",
-  "editor_styleAndRepair": "スタイルと修復",
-  "editor_transformCrop": "回転/反転/切り抜き",
-  "editor_transformCropDescription": "ジオメトリ操作は別のものです。最初にプレビューを生成し、確認後にのみ書き戻します。",
-  "editor_effectPreviewHint": "プレビューは元の画像を変更しません。「適用」をクリックすると、結果をアクティブなレイヤーに書き込み、アンドゥ履歴に追加します。",
-  "editor_applyToCurrentLayer": "現在のレイヤーに適用",
-  "editor_oneShotEffectHint": "{effect} はワンショット操作であり、強度スライダーはありません。",
-  "@editor_oneShotEffectHint": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_effectIntensity": "{effect} 強度",
-  "@editor_effectIntensity": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_original": "オリジナル",
-  "editor_effectPreview": "エフェクトのプレビュー",
   "editor_effectBrightness": "明るさ",
-  "editor_effectContrast": "コントラスト",
   "editor_effectSaturation": "彩度",
-  "editor_effectTemperature": "温度",
-  "editor_effectGamma": "ガンマ",
-  "editor_effectGrayscale": "グレースケール",
-  "editor_effectInvert": "反転",
-  "editor_effectSepia": "セピア",
-  "editor_effectDenoise": "ノイズ除去",
-  "editor_effectBlur": "ガウスぼかし",
-  "editor_effectSharpen": "シャープにする",
-  "editor_effectCropToSelection": "選択範囲まで切り抜き",
-  "editor_effectRotateLeft": "左に 90 度回転",
-  "editor_effectRotateRight": "右に 90 度回転",
-  "editor_effectFlipHorizontal": "水平方向に反転",
-  "editor_effectFlipVertical": "垂直方向に反転",
-  "editor_effectApplied": "適用済み {effect}",
-  "@editor_effectApplied": {
-    "placeholders": {
-      "effect": {}
-    }
-  },
-  "editor_applyEffectFailed": "効果の適用に失敗しました: {error}",
-  "@editor_applyEffectFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_changeCanvasSize": "キャンバス サイズの変更",
-  "editor_canvasTooSmall": "キャンバスのサイズが小さすぎます。最小サイズは {width} × {height} ピクセルです",
-  "@editor_canvasTooSmall": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasTooLarge": "キャンバスのサイズが大きすぎます。最大サイズは {width} × {height} ピクセルです",
-  "@editor_canvasTooLarge": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasResized": "キャンバスのサイズを {width} × {height} に変更しました",
-  "@editor_canvasResized": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
-  "editor_canvasResizeFailed": "キャンバスのサイズ変更に失敗しました: {error}",
-  "@editor_canvasResizeFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_confirmExitTitle": "終了の確認",
   "editor_confirmExitContent": "未保存の変更があります。終了してもよろしいですか?",
   "editor_exit": "終了",
@@ -799,92 +644,7 @@
       "error": {}
     }
   },
-  "editor_clickInsideClosedRegion": "閉じた領域内をクリックして塗りつぶします。",
-  "editor_drawClosedMaskOutlineFirst": "最初に閉じたマスクの輪郭を描画します。",
-  "editor_noClosedRegionAtPosition": "この位置には充填可能な閉じた領域がありません。",
-  "editor_generateMaskOverlayFailed": "マスク オーバーレイの生成に失敗しました",
   "editor_maskLayerName": "マスク",
-  "editor_updateMaskLayerFailed": "マスクレイヤーの更新に失敗しました",
-  "editor_closedRegionFilled": "閉じた領域がマスクとして埋められました。",
-  "editor_fillMaskFailed": "マスクの塗りつぶしに失敗しました: {error}",
-  "@editor_fillMaskFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_magicWandNoSource": "サンプリング可能な画像レイヤーがありません。",
-  "editor_magicWandNothingChanged": "選択した領域はすでに透明、またはマスク済みです。",
-  "editor_magicWandModelPreparing": "EfficientViT-SAM モデルを確認しています…",
-  "editor_magicWandModelDownloading": "EfficientViT-SAM モデルをダウンロード中：{percent}%",
-  "@editor_magicWandModelDownloading": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_magicWandModelLoading": "EfficientViT-SAM モデルを読み込んでいます…",
-  "editor_magicWandEncoding": "画像内のオブジェクトを解析しています…",
-  "editor_magicWandSegmenting": "クリック位置のオブジェクトを分割しています…",
-  "editor_magicWandPostprocessing": "選択範囲を生成しています…",
-  "editor_magicWandFailed": "マジックワンドに失敗しました: {error}",
-  "@editor_magicWandFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_compressionTitle": "出力解像度",
-  "editor_compressionTooltip": "出力解像度を選択",
-  "editor_compressionUncompressed": "編集作業サイズを維持し、圧縮は行いません。",
-  "editor_compressionApplyOnDone": "作業キャンバスは変更されません。「完了」を押したときに Pica Lanczos3 で 1 回だけ圧縮します。",
-  "editor_compressionSizeSummary": "作業サイズ {workWidth}×{workHeight} → 出力サイズ {targetWidth}×{targetHeight}",
-  "@editor_compressionSizeSummary": {
-    "placeholders": {
-      "workWidth": {
-        "type": "int"
-      },
-      "workHeight": {
-        "type": "int"
-      },
-      "targetWidth": {
-        "type": "int"
-      },
-      "targetHeight": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_compressionNormalSummary": "Normal（約 1 MP）: {normalWidth}×{normalHeight}。最低: {minimumWidth}×{minimumHeight}。",
-  "@editor_compressionNormalSummary": {
-    "placeholders": {
-      "normalWidth": {
-        "type": "int"
-      },
-      "normalHeight": {
-        "type": "int"
-      },
-      "minimumWidth": {
-        "type": "int"
-      },
-      "minimumHeight": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_compressionUnavailable": "作業キャンバスはすでに最低圧縮段階より小さいため、解像度を下げられません。",
-  "editor_unsupportedImageFormat": "サポートされていないファイル形式: .{extension}\n画像ファイル(PNG、JPG、WEBPなど)を選択してください。",
-  "@editor_unsupportedImageFormat": {
-    "placeholders": {
-      "extension": {}
-    }
-  },
-  "editor_readFileFailed": "ファイルの読み取りに失敗しました: {error}",
-  "@editor_readFileFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editor_noFileData": "ファイルデータの取得に失敗しました",
   "editor_emptyImageFile": "ファイルが空です。有効な画像ファイルを選択してください",
   "editor_fileTooLarge": "ファイルが大きすぎます ({sizeMB} MB)。 50 MB 未満の画像を選択してください",
   "@editor_fileTooLarge": {
@@ -892,14 +652,7 @@
       "sizeMB": {}
     }
   },
-  "editor_maskLayerAdded": "マスクレイヤーを追加しました",
   "editor_parseImageFailed": "画像ファイルの解析に失敗しました\nファイルが破損しておらず、その形式がサポートされていることを確認してください",
-  "editor_loadMaskFailed": "マスクのロードに失敗しました: {error}",
-  "@editor_loadMaskFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "editor_defaultTitle": "キャンバス",
   "editor_baseLayerName": "基本イメージ",
   "editor_existingMaskLayerName": "既存のマスク",
@@ -952,13 +705,6 @@
   "editor_colorPickerTitle": "色を選択してください",
   "editor_brushSettings": "ブラシ設定",
   "editor_eraserSettings": "消しゴムの設定",
-  "editor_colorPickerHint": "キャンバス上の任意の場所をクリックして色を選択します。放すと前のツールに戻ります。",
-  "editor_sample": "サンプル",
-  "editor_samplePoint": "ポイント",
-  "editor_sampleArea": "エリア",
-  "editor_source": "ソース",
-  "editor_sourceCurrentLayer": "現在のレイヤー",
-  "editor_sourceAllLayers": "すべてのレイヤー",
   "editor_lassoSelectionHelp": "押したままドラッグして、自由形式の選択範囲を描画します。放すと自動的に閉まります。",
   "layer_empty": "レイヤーがありません",
   "layer_add": "レイヤーを追加",
@@ -1433,11 +1179,6 @@
     }
   },
   "characterTooltip_viewFullConfig": "クリックすると完全な構成が表示されます",
-  "@tagGroup_tagCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "addGroup_displayNameLabel": "表示名 (オプション)",
   "addGroup_targetCategoryLabel": "対象カテゴリ",
   "globalSettings_saveFailed": "保存に失敗しました: {error}",
@@ -1505,101 +1246,6 @@
     }
   },
   "time_never_synced": "同期されていません",
-  "@randomManager_deleteTagGroupConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_tagGroupCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_presetImported": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_presetCreated": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_deletePresetConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_syncFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "@randomManager_addTagGroupSubtitle": {
-    "placeholders": {
-      "category": {}
-    }
-  },
-  "@randomManager_itemCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_tagsTab": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_editHint": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "@randomManager_emphasisProbabilityValue": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
-  "@randomManager_characterCountLabel": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_tagCountLabel": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_selectedItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_totalItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_enabledItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_disabledItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_batchDeleteContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "@randomManager_deletedItems": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "vibeParseFailed": "Vibe ファイルの解析に失敗しました",
   "localGallery_progressiveLoadError": "画像のロードに失敗しました",
   "localGallery_unknownError": "不明なエラー",
@@ -1884,7 +1530,6 @@
   "statistics_timeNight": "夜",
   "localGallery_group_today": "今日",
   "localGallery_group_yesterday": "昨日",
-  "localGallery_sendTo": "送信先…",
   "localGallery_groupImageCount": "{formatted} 枚",
   "@localGallery_groupImageCount": {
     "placeholders": {
@@ -2219,7 +1864,6 @@
   "statistics_thursday": "木",
   "statistics_friday": "金",
   "statistics_saturday": "土",
-  "fixedTags_negativeTitle": "除外したい要素固定タグ",
   "autocomplete_categoryCharacter": "キャラクター",
   "autocomplete_categoryCopyright": "著作権",
   "autocomplete_categoryArtist": "アーティスト",
@@ -2295,7 +1939,6 @@
   "metadataImport_clear": "クリア",
   "metadataImport_prompt": "プロンプト",
   "metadataImport_mainPrompt": "メイン プロンプト",
-  "metadataImport_fixedTags": "固定タグ",
   "metadataImport_qualityTagsCount": "品質タグ ({count})",
   "@metadataImport_qualityTagsCount": {
     "placeholders": {
@@ -3182,11 +2825,6 @@
   "settings_kritaBridgeListeningText": "外部 Agent または Krita の接続待ち",
   "settings_kritaBridgeConnectedText": "Krita プラグインが接続されました",
   "settings_kritaBridgeErrorText": "起動に失敗しました。エラー メッセージを確認してください。",
-  "settings_kritaBridgeDisabled": "無効",
-  "settings_kritaBridgeStarting": "開始中",
-  "settings_kritaBridgeListening": "リスニング",
-  "settings_kritaBridgeConnected": "接続されました",
-  "settings_kritaBridgeError": "エラー",
   "settings_kritaBridgeRegenerateSession": "セッションを再生成",
   "settings_kritaBridgeDiscoveryFile": "検出ファイル",
   "settings_kritaBridgeWaitingEndpoint": "ローカル WebSocket リスナーを待機しています",
@@ -3268,13 +2906,6 @@
   },
   "settings_confirmExternalSend": "送信",
   "settings_highAnlasCostTitle": "Anlas 消費の確認",
-  "settings_highAnlasCostContent": "このリクエストには {cost} Anlas の費用がかかると推定されており、{threshold} Anlas の警告しきい値に達するか超えています。生成を継続しますか?",
-  "@settings_highAnlasCostContent": {
-    "placeholders": {
-      "cost": {},
-      "threshold": {}
-    }
-  },
   "settings_continueGeneration": "生成を続行",
   "dataSource_syncNow": "今すぐ同期",
   "settings_comfyUiEnable": "ComfyUI 統合を有効にする",
@@ -3290,30 +2921,6 @@
   },
   "settings_comfyUiConnected": "接続されました",
   "settings_comfyUiDisconnect": "切断",
-  "settings_comfyUiWorkflowManagement": "ワークフロー管理",
-  "settings_comfyUiBuiltinWorkflows": "組み込みワークフロー",
-  "settings_comfyUiCustomWorkflows": "カスタム ワークフロー",
-  "settings_comfyUiNoCustomWorkflows": "カスタム ワークフローはまだありません。 「インポート」をクリックして ComfyUI ワークフローを追加します。",
-  "settings_comfyUiSlotCount": "{count} スロット",
-  "@settings_comfyUiSlotCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "settings_comfyUiBuiltin": "内蔵",
-  "settings_comfyUiDeleteWorkflowTitle": "ワークフローの削除",
-  "settings_comfyUiDeleteWorkflowContent": "ワークフロー「{name}」を削除しますか?これを元に戻すことはできません。",
-  "@settings_comfyUiDeleteWorkflowContent": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "settings_comfyUiDeleted": "削除されました: {name}",
-  "@settings_comfyUiDeleted": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "settings_comfyUiNoResponse": "サーバーが応答しませんでした",
   "settings_comfyUiStatusDisconnected": "切断されました",
   "settings_comfyUiStatusConnecting": "接続中...",
@@ -3615,7 +3222,6 @@
   "toast_useDeleteButton": "UI の削除ボタンを使用します。",
   "toast_imageDataUnavailable": "画像データが利用できないため、コピーできません",
   "toast_vibeDataCopied": "Vibe データをコピーしました",
-  "toast_tagCopied": "タグがコピーされました",
   "toast_characterPromptCopied": "キャラクタープロンプトをコピーしました",
   "toast_copiedTitle": "{title} がコピーされました",
   "@toast_copiedTitle": {
@@ -3788,11 +3394,6 @@
   "comfyImport_syntaxPipe": "パイプ形式",
   "comfyImport_syntaxUnknown": "不明な構文です",
   "comfyImport_globalPrompt": "グローバル プロンプト",
-  "@danbooruPreview_postCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "checkForUpdate": "アップデートを確認してください",
   "neverChecked": "チェックされていません",
   "lastCheckedAt": "最終チェック日: {time}",
@@ -3874,27 +3475,17 @@
   "updateInstallingHint": "インストーラーが起動しました。アプリは終了し、自動的に更新が完了します。",
   "cannotOpenUrl": "リンクを開けません",
   "model3d_editorTitle": "3Dモデルレイヤー",
-  "model3d_addMannequin": "内蔵マネキンを追加",
-  "model3d_importModel": "モデルをインポート (.glb/.gltf)",
-  "model3d_emptyHint": "シーンは空です。マネキンを追加するかモデルをインポートしてください",
-  "model3d_apply": "レイヤーに適用",
   "model3d_modeTransform": "変換",
   "model3d_modePose": "ポーズ",
   "model3d_gizmoTranslate": "移動",
   "model3d_gizmoRotate": "回転",
   "model3d_gizmoScale": "拡縮",
-  "model3d_undo": "元に戻す",
-  "model3d_resetPose": "ポーズをリセット",
   "model3d_replaceConfirm": "現在のモデルを置き換えますか？未適用のポーズは失われます。",
   "model3d_discardConfirm": "未適用の変更を破棄しますか？",
   "model3d_missingModel": "モデルファイルが見つかりません。再インポートできます",
   "model3d_loadError": "モデルの読み込みに失敗しました",
   "model3d_light": "ライティング",
-  "model3d_lightIntensity": "強度",
-  "model3d_lightAzimuth": "方位角",
-  "model3d_lightElevation": "仰角",
   "model3d_addLayerTooltip": "3Dモデルレイヤーを追加",
-  "model3d_webview2Missing": "3DエディタにはMicrosoft Edge WebView2ランタイムが必要です。Windows 10/11には通常同梱されています。無い場合はMicrosoftからEvergreen版をインストールして再試行してください。",
   "nav_preciseRefLibrary": "精密参照ライブラリ",
   "preciseRefLib_title": "精密参照ライブラリ",
   "preciseRefLib_searchHint": "参照画像を検索...",
@@ -4056,143 +3647,6 @@
       }
     }
   },
-  "@diy_branchDefaultName": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_branchCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_conditionCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_editBranch": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_ruleDefaultName": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_ruleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_actionSummary": {
-    "placeholders": {
-      "triggers": {
-        "type": "String"
-      },
-      "action": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_characterIndex": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_positionCoordinates": {
-    "placeholders": {
-      "row": {
-        "type": "String"
-      },
-      "column": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_emphasisPercent": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_peopleCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_emphasisProbabilityHint": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_bracketLayers": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_presetExportFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_presetInvalidData": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "@diy_daysRemaining": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@diy_timeRangeSummary": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "startMonth": {
-        "type": "int"
-      },
-      "startDay": {
-        "type": "int"
-      },
-      "endMonth": {
-        "type": "int"
-      },
-      "endDay": {
-        "type": "int"
-      }
-    }
-  },
   "@preciseRefLib_confirmDelete": {
     "placeholders": {
       "name": {
@@ -4318,82 +3772,12 @@
       }
     }
   },
-  "editor_effects": "エフェクト",
   "editor_shiftEdges": "エッジをシフト",
-  "editor_currentSize": "現在: {width} x {height}",
-  "@editor_currentSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
   "editor_edgeLeft": "左",
   "editor_edgeRight": "右",
   "editor_edgeTop": "上",
   "editor_edgeBottom": "下",
   "editor_enterNumber": "数値を入力してください",
-  "editor_nonNegativeNumber": "0以上の値を入力してください",
-  "editor_requestedSize": "指定: {width} x {height}",
-  "@editor_requestedSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_requestedSizeInvalid": "指定: 無効",
-  "editor_appliedSize": "適用: {width} x {height}",
-  "@editor_appliedSize": {
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_appliedSizeInvalid": "適用: 無効",
-  "editor_appliedEdges": "適用エッジ: 左 {left}、上 {top}、右 {right}、下 {bottom}",
-  "@editor_appliedEdges": {
-    "placeholders": {
-      "left": {
-        "type": "int"
-      },
-      "top": {
-        "type": "int"
-      },
-      "right": {
-        "type": "int"
-      },
-      "bottom": {
-        "type": "int"
-      }
-    }
-  },
-  "editor_appliedEdgesInvalid": "適用エッジ: 無効",
-  "editor_appliedDimensionLimit": "適用後の寸法は {max} 以下である必要があります。",
-  "@editor_appliedDimensionLimit": {
-    "placeholders": {
-      "max": {
-        "type": "int"
-      }
-    }
-  },
-  "@savePreset_vibeData": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "onlineGallery_videoLoadFailed": "動画を読み込めませんでした",
   "vibe_releaseToAddStyleReference": "離すとスタイル参照を追加",
   "router_pageNotFound": "ページが見つかりません: {error}",
@@ -5888,7 +5272,6 @@
   "titleBar_restore": "元に戻す",
   "titleBar_close": "閉じる",
   "img2img_pixelSnap": "ピクセルスナップ",
-  "img2img_original": "元画像",
   "img2img_directorAddToQueue": "結果を入力キューに追加",
   "img2img_transform": "変換",
   "img2img_palette": "パレット化",
@@ -5979,7 +5362,6 @@
   "wiki_standard": "標準",
   "wiki_large": "大",
   "wiki_wide": "広い",
-  "wiki_hide": "隠す",
   "wiki_articleMissing": "このタグにはローカル Wiki の説明がありません。",
   "wiki_source": "出典",
   "wiki_addBookmark": "ブックマークに追加",
@@ -6178,7 +5560,6 @@
   "wiki_aliases": "別名",
   "wiki_relatedTitle": "よく一緒に使われるタグ",
   "wiki_relatedHint": "クリックで開く · Shift+クリックでプロンプトに追加",
-  "wiki_relatedShare": "投稿の {percent} もこのタグを含みます",
   "wiki_inDirectory": "所属ディレクトリ",
   "wiki_noArticle": "Wiki なし",
   "wiki_moreCategories": "その他",
@@ -7321,7 +6702,6 @@
   "img2img_emotionEmbarrassed": "恥ずかしい",
   "img2img_emotionDetermined": "決意",
   "img2img_emotionHurt": "傷ついた",
-  "localUpscale_title": "ローカル超解像",
   "localUpscale_local": "ローカル",
   "localUpscale_manage": "モデル管理",
   "localUpscale_description": "ローカルで画像を拡大します。Anlas は消費しません。",
@@ -7350,7 +6730,6 @@
   "localUpscale_general": "汎用 · 写真",
   "localUpscale_downloadProgress": "モデルをダウンロード中…",
   "localUpscale_importModel": "モデルをインポート",
-  "localUpscale_modelReady": "モデルをインストールしました",
   "localUpscale_modelOperationFailed": "モデル操作に失敗しました。接続、ファイルの権限、空き容量を確認して再試行してください。",
   "settings_localUpscale": "ローカル拡大",
   "settings_localUpscaleDescription": "ローカル拡大モデルと実行コンポーネントを管理します。",
@@ -7367,10 +6746,50 @@
   "localUpscale_license": "ライセンス",
   "localUpscale_installComponent": "インストール",
   "localUpscale_installingRuntime": "Python/CUDA 環境をインストール中…",
+  "localUpscale_installingPython": "独立した Python を準備中…",
+  "localUpscale_installFailed": "インストールの失敗段階：{stage}",
+  "@localUpscale_installFailed": { "placeholders": { "stage": { "type": "String" } } },
+  "wiki_translationQueued": "翻訳待ち",
+  "wiki_translationFailedRetry": "翻訳に失敗しました。クリックして再試行",
   "localUpscale_checkingComponent": "コンポーネントと GPU を確認中…",
   "localUpscale_installingComponent": "コンポーネントをダウンロード中…",
   "upscale_settings": "拡大設定",
   "upscale_cloudCost": "目安 {cost} Anlas · 2×",
   "enhance_localAfterGeneration": "生成した画像を毎回ローカルで自動拡大します。",
-  "enhance_localAction": "生成してローカルで拡大"
+  "enhance_localAction": "生成してローカルで拡大",
+  "@wiki_addedToPrompt": {
+    "placeholders": {
+      "tag": {}
+    }
+  },
+  "@wiki_alreadyInPrompt": {
+    "placeholders": {
+      "tag": {}
+    }
+  },
+  "@bridge_clients": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@bridge_activity": {
+    "placeholders": {
+      "client": {},
+      "action": {}
+    }
+  },
+  "@bridge_guide": {
+    "placeholders": {
+      "clientPath": {}
+    }
+  },
+  "@upscale_cloudCost": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  }
 }

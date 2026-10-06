@@ -19,8 +19,9 @@ enum LocalUpscaleError {
 }
 
 class LocalUpscaleException implements Exception {
-  const LocalUpscaleException(this.code);
+  const LocalUpscaleException(this.code, {this.details});
   final LocalUpscaleError code;
+  final String? details;
   @override
   String toString() => 'LocalUpscaleException(${code.name})';
 }

@@ -539,7 +539,7 @@
     ],
     "requirements": {
       "asset": "seedvr2/requirements.lock",
-      "sha256": "8fedfb1530af3bdcb539a175f4d1581576250d116673bcb5ef9fa5cc89f36db4"
+      "sha256": "134ac1ec70a8dcc55d5642d39538c23e04fe33b29676a3b1107a88373988068f"
     },
     "runner": {
       "asset": "seedvr2/worker.py",
@@ -566,7 +566,7 @@
       "hf-xet": "1.6.0",
       "httpcore": "1.0.9",
       "httpx": "0.28.1",
-      "huggingface-hub": "1.33.0",
+      "huggingface-hub": "0.36.0",
       "idna": "3.20",
       "importlib-metadata": "9.0.1",
       "jinja2": "3.1.6",
@@ -597,11 +597,11 @@
       "shellingham": "1.5.4",
       "six": "1.17.0",
       "sympy": "1.14.0",
-      "tokenizers": "0.22.2",
+      "tokenizers": "0.21.4",
       "torch": "2.7.1+cu128",
       "torchvision": "0.22.1+cu128",
       "tqdm": "4.67.1",
-      "transformers": "5.12.1",
+      "transformers": "4.55.4",
       "typer": "0.27.2",
       "typing-extensions": "4.16.0",
       "urllib3": "2.8.0",

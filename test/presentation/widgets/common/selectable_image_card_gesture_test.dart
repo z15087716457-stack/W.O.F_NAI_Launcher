@@ -169,11 +169,14 @@ void main() {
     );
   });
 
-  testWidgets('right-click menu exposes view details', (tester) async {
+  testWidgets('right-click details closes the menu and opens the viewer once', (
+    tester,
+  ) async {
+    var opens = 0;
     await tester.pumpWidget(
       _testApp(
         _card(
-          onFullscreen: () {},
+          onFullscreen: () => opens++,
           enableSaveAction: false,
           enableCopyAction: false,
         ),
@@ -186,7 +189,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('View details'), findsOneWidget);
+    expect(find.text('Details'), findsOneWidget);
+    await tester.tap(find.text('Details'));
+    await tester.pumpAndSettle();
+    expect(opens, 1);
+    expect(find.byType(MenuAnchor), findsNothing);
   });
 }
 

@@ -138,8 +138,9 @@ void main() {
     storage.values[StorageKeys.studioThemeMode] = 'light';
     storage.failKey = StorageKeys.enableCooccurrenceRecommendation;
     storage.beforeWrite = (key) {
-      if (key == StorageKeys.enableCooccurrenceRecommendation)
+      if (key == StorageKeys.enableCooccurrenceRecommendation) {
         storage.values[StorageKeys.studioThemeMode] = 'light';
+      }
     };
     await expectLater(
       service.apply({

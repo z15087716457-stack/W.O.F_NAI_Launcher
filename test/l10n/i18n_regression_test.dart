@@ -32,6 +32,15 @@ void main() {
 
         expect(duplicates, isEmpty);
       });
+
+      test('$locale metadata belongs to existing messages', () {
+        final localized = _readArb('lib/l10n/app_$locale.arb');
+        final orphaned = _metadataKeys(localized)
+            .map((key) => key.substring(1))
+            .toSet()
+            .difference(_messageKeys(localized));
+        expect(orphaned, isEmpty);
+      });
     }
 
     for (final locale in const ['ja', 'zh', 'zh_TW', 'ko']) {
@@ -73,7 +82,8 @@ void main() {
       expect(
         unused,
         isEmpty,
-        reason: 'Remove ARB messages with no production reference: $unused',
+        reason:
+            'Remove ARB messages with no production reference:\n${unused.join('\n')}',
       );
     });
   });

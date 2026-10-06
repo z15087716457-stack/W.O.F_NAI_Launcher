@@ -14,6 +14,7 @@ class TagCandidateTitle extends StatelessWidget {
     this.showCategory = true,
     this.iconSize = 12,
     this.iconKey,
+    this.trailing,
   });
 
   final String title;
@@ -23,6 +24,7 @@ class TagCandidateTitle extends StatelessWidget {
   final bool showCategory;
   final double iconSize;
   final Key? iconKey;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -54,6 +56,7 @@ class TagCandidateTitle extends StatelessWidget {
           ),
         ),
       ],
+      if (trailing != null) trailing!,
     ],
   );
 }

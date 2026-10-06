@@ -69,6 +69,67 @@ ButtonStyle _wikiActionStyle(BuildContext context, {bool compact = true}) =>
           : Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 14),
     );
 
+class TagTranslationIndicator extends ConsumerWidget {
+  const TagTranslationIndicator({
+    super.key,
+    required this.tag,
+    required this.surface,
+    this.wiki = false,
+    this.size = 14,
+  });
+
+  static const extent = 22.0;
+  final String tag, surface;
+  final bool wiki;
+  final double size;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(autoTagTranslationProvider);
+    final activity = controller.activityFor(tag, wiki: wiki);
+    final scheme = Theme.of(context).colorScheme;
+    if (activity == null) return const SizedBox.square(dimension: extent);
+    final failed = activity.phase == TagTranslationPhase.failed;
+    final label = switch (activity.phase) {
+      TagTranslationPhase.queued => context.l10n.wiki_translationQueued,
+      TagTranslationPhase.translating => context.l10n.wiki_translating,
+      TagTranslationPhase.failed => context.l10n.wiki_translationFailedRetry,
+    };
+    final message = failed && activity.error?.isNotEmpty == true
+        ? '$label\n${activity.error}'
+        : label;
+    return SizedBox.square(
+      dimension: extent,
+      child: IconButton(
+        key: ValueKey('tag-translation-${wiki ? 'wiki' : 'name'}-$tag'),
+        tooltip: message,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(
+          width: extent,
+          height: extent,
+        ),
+        style: IconButton.styleFrom(
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        onPressed: failed
+            ? () => activity.wiki
+                  ? controller.retranslateWiki(surface: surface, tag: tag)
+                  : controller.retranslateName(surface: surface, tag: tag)
+            : null,
+        icon: TranslationIcon(
+          size: size,
+          busy: activity.phase == TagTranslationPhase.translating,
+          color: failed
+              ? scheme.error
+              : activity.phase == TagTranslationPhase.queued
+              ? scheme.onSurfaceVariant
+              : scheme.primary,
+        ),
+      ),
+    );
+  }
+}
+
 class WikiRetranslateButton extends ConsumerWidget {
   const WikiRetranslateButton({
     super.key,

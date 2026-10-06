@@ -129,9 +129,16 @@ void main() {
   }
 
   testWidgets(
-    'hover actions should expose inpaint and upscale shortcuts',
+    'hover hides inpaint and upscale shortcuts but context actions still run',
     (tester) async {
-      await tester.pumpWidget(_buildCardApp());
+      var inpaintCalls = 0;
+      var upscaleCalls = 0;
+      await tester.pumpWidget(
+        _buildCardApp(
+          onInpaint: () => inpaintCalls++,
+          onUpscale: () => upscaleCalls++,
+        ),
+      );
 
       final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
@@ -140,13 +147,58 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.byTooltip('局部重绘'), findsOneWidget);
-      expect(find.byTooltip('放大'), findsOneWidget);
+      expect(find.byTooltip('局部重绘'), findsNothing);
+      expect(find.byTooltip('放大'), findsNothing);
       // 悬浮操作条被魔改总开关 showHoverActionBar 默认关闭（0ff49fc7），
-      // 开关恢复 true 时这些悬浮用例才有意义；右键菜单用例不受影响
+      // 悬浮不显示操作按钮；对应动作仍由右键菜单执行
+      expect((inpaintCalls, upscaleCalls), (0, 0));
+      for (final action in ['局部重绘', '放大']) {
+        await _openImageContextMenu(tester);
+        await tester.tap(find.text('编辑与派生'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(action));
+        await tester.pumpAndSettle();
+        await tester.pump();
+        expect(find.byType(MenuAnchor), findsNothing);
+      }
+      expect((inpaintCalls, upscaleCalls), (1, 1));
     },
-    skip: !SelectableImageCard.showHoverActionBar,
   );
+
+  testWidgets('generation hover submenu aligns beside its parent row', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1100, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var calls = 0;
+    await tester.pumpWidget(_buildCardApp(onInpaint: () => calls++));
+    final mouse = await tester.startGesture(
+      tester.getCenter(find.byType(SelectableImageCard)),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(mouse.removePointer);
+    await mouse.up();
+    await tester.pumpAndSettle();
+    final parent = find.ancestor(
+      of: find.text('编辑与派生'),
+      matching: find.byType(SubmenuButton),
+    );
+    final rect = tester.getRect(parent);
+    await mouse.moveTo(rect.center);
+    await tester.pumpAndSettle();
+    final child = find.ancestor(
+      of: find.text('局部重绘'),
+      matching: find.byType(MenuItemButton),
+    );
+    expect(tester.getRect(child).left, greaterThanOrEqualTo(rect.right));
+    await mouse.moveTo(tester.getCenter(child));
+    await tester.pumpAndSettle();
+    await tester.tap(child);
+    await tester.pumpAndSettle();
+    expect(calls, 1);
+    expect(find.byType(MenuAnchor), findsNothing);
+  });
 
   testWidgets('context menu should expose inpaint and upscale shortcuts', (
     tester,
@@ -211,13 +263,14 @@ void main() {
   });
 
   testWidgets(
-    'hover actions should expose generation destination shortcuts',
+    'hover hides generation shortcuts but each context destination still runs',
     (tester) async {
+      final calls = {'图生图': 0, '风格迁移': 0, '精准参考': 0};
       await tester.pumpWidget(
         _buildCardApp(
-          onImageToImage: _noop,
-          onVibeTransfer: _noop,
-          onPreciseReference: _noop,
+          onImageToImage: () => calls['图生图'] = calls['图生图']! + 1,
+          onVibeTransfer: () => calls['风格迁移'] = calls['风格迁移']! + 1,
+          onPreciseReference: () => calls['精准参考'] = calls['精准参考']! + 1,
         ),
       );
 
@@ -227,11 +280,19 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
       await tester.pumpAndSettle();
 
-      expect(find.byTooltip('图生图'), findsOneWidget);
-      expect(find.byTooltip('风格迁移'), findsOneWidget);
-      expect(find.byTooltip('精准参考'), findsOneWidget);
+      for (final action in calls.keys) {
+        expect(find.byTooltip(action), findsNothing);
+      }
+      expect(calls.values, everyElement(0));
+      for (final action in calls.keys) {
+        await _openImageContextMenu(tester);
+        await tester.tap(find.text(action));
+        await tester.pumpAndSettle();
+        await tester.pump();
+        expect(find.byType(MenuAnchor), findsNothing);
+      }
+      expect(calls.values, everyElement(1));
     },
-    skip: !SelectableImageCard.showHoverActionBar,
   );
 
   testWidgets('context menu should expose generation destination shortcuts', (
@@ -262,7 +323,7 @@ void main() {
   });
 
   testWidgets(
-    'generation preview hover exposes history destination shortcuts',
+    'generation preview hover hides shortcuts without disabling its context menu',
     (tester) async {
       final container = _createContainerWithPreviewImage();
       addTearDown(container.dispose);
@@ -276,11 +337,14 @@ void main() {
       await gesture.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
       await tester.pumpAndSettle();
 
-      expect(find.byTooltip('图生图'), findsOneWidget);
-      expect(find.byTooltip('风格迁移'), findsOneWidget);
-      expect(find.byTooltip('精准参考'), findsOneWidget);
+      expect(find.byTooltip('图生图'), findsNothing);
+      expect(find.byTooltip('风格迁移'), findsNothing);
+      expect(find.byTooltip('精准参考'), findsNothing);
+      await _openImageContextMenu(tester);
+      expect(find.text('图生图'), findsOneWidget);
+      expect(find.text('风格迁移'), findsOneWidget);
+      expect(find.text('精准参考'), findsOneWidget);
     },
-    skip: !SelectableImageCard.showHoverActionBar,
   );
 
   testWidgets(

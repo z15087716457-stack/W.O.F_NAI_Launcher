@@ -19,12 +19,14 @@ class WikiTagRow extends StatefulWidget {
     required this.onSelect,
     required this.onBookmark,
     this.noArticleLabel,
+    this.translationIndicator,
   });
 
   final CompletionCandidate candidate;
   final String subtitle, countLabel, bookmarkLabel;
   final bool selected, bookmarked;
   final VoidCallback onSelect, onBookmark;
+  final Widget? translationIndicator;
 
   /// Small outlined badge left of the post count; null keeps the slot empty.
   final String? noArticleLabel;
@@ -79,18 +81,15 @@ class _WikiTagRowState extends State<WikiTagRow> {
                     ),
                   ),
                   const SizedBox(width: 9),
-                  Container(
+                  Icon(
+                    TagCategoryVisuals.icon(widget.candidate.category),
                     key: ValueKey(
                       'wiki-category-${widget.candidate.category.name}-$tag',
                     ),
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: TagCategoryVisuals.color(
-                        context,
-                        widget.candidate.category,
-                      ),
+                    size: 16,
+                    color: TagCategoryVisuals.color(
+                      context,
+                      widget.candidate.category,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -102,15 +101,23 @@ class _WikiTagRowState extends State<WikiTagRow> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            TagNormalizer.toDisplay(tag),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              height: 1.35,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  TagNormalizer.toDisplay(tag),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    height: 1.35,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              if (widget.translationIndicator != null)
+                                widget.translationIndicator!,
+                            ],
                           ),
                           const SizedBox(height: 4),
                           Text(

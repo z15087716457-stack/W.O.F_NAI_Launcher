@@ -43,6 +43,15 @@ class _Workflow extends ImageWorkflowController {
   );
 }
 
+class _FailedInstallState extends AdvancedUpscaleInstall {
+  @override
+  AdvancedUpscaleInstallState build() => const AdvancedUpscaleInstallState(
+    phase: 'runtime',
+    error: LocalUpscaleError.modelOperationFailed,
+    details: 'uv pip: exit 2\nTLS handshake failed',
+  );
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
@@ -58,6 +67,53 @@ void main() {
     Locale('ja'),
     Locale('ko'),
   ]) {
+    testWidgets(
+      'installation failure exposes phase and copyable diagnostics in $locale',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 650);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              localStorageServiceProvider.overrideWith((ref) => _Storage()),
+              generationParamsNotifierProvider.overrideWith(_Params.new),
+              localUpscaleModelsProvider.overrideWith((ref) async => []),
+              advancedUpscaleInstallProvider.overrideWith(
+                _FailedInstallState.new,
+              ),
+            ],
+            child: MaterialApp(
+              locale: locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              theme: GeistTheme.light,
+              home: const Scaffold(body: LocalUpscaleSettingsSection()),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final diagnostics = find.byKey(
+          const ValueKey('advanced-upscale-install-diagnostics'),
+        );
+        await tester.scrollUntilVisible(diagnostics, 200);
+        final l10n = AppLocalizations.of(tester.element(diagnostics))!;
+        expect(
+          find.text(
+            l10n.localUpscale_installFailed(
+              l10n.localUpscale_installingRuntime,
+            ),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          tester.widget<SelectableText>(diagnostics).data,
+          contains('TLS handshake failed'),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
     for (final dark in [false, true]) {
       for (final width in [320.0, 560.0]) {
         for (final settings in [false, true]) {

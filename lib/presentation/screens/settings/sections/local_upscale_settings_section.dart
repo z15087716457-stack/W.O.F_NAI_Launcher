@@ -396,6 +396,7 @@ class _LocalUpscaleSettingsSectionState
                             install.cancelling
                                 ? l.localUpscale_cancelling
                                 : switch (install.phase) {
+                                    'python' => l.localUpscale_installingPython,
                                     'runtime' =>
                                       l.localUpscale_installingRuntime,
                                     'weights' =>
@@ -425,11 +426,31 @@ class _LocalUpscaleSettingsSectionState
             ),
           );
         }),
-        if (install.error != null)
+        if (install.error != null) ...[
           Text(
-            localUpscaleErrorText(context, install.error!),
+            install.error == LocalUpscaleError.cancelled
+                ? localUpscaleErrorText(context, install.error!)
+                : l.localUpscale_installFailed(switch (install.phase) {
+                    'python' => l.localUpscale_installingPython,
+                    'runtime' => l.localUpscale_installingRuntime,
+                    'weights' => l.localUpscale_downloadProgress,
+                    'checking' => l.localUpscale_checkingComponent,
+                    _ => l.localUpscale_installingComponent,
+                  }),
             style: TextStyle(color: theme.colorScheme.error),
           ),
+          if (install.error != LocalUpscaleError.cancelled)
+            Text(
+              localUpscaleErrorText(context, install.error!),
+              style: theme.textTheme.bodySmall,
+            ),
+          if (install.details?.isNotEmpty == true)
+            SelectableText(
+              install.details!,
+              key: const ValueKey('advanced-upscale-install-diagnostics'),
+              style: theme.textTheme.bodySmall,
+            ),
+        ],
       ],
     );
   }

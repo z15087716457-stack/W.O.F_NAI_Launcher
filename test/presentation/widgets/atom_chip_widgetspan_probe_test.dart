@@ -9,11 +9,8 @@ import 'package:nai_launcher/presentation/widgets/prompt/nai_syntax_controller.d
 
 /// Logs the PlaceholderDimensions the engine-side paragraph build hands us.
 class _LoggingWidgetSpan extends WidgetSpan {
-  _LoggingWidgetSpan({
-    required super.child,
-    super.alignment = PlaceholderAlignment.top,
-    this.tag = '?',
-  });
+  const _LoggingWidgetSpan({required super.child, this.tag = '?'})
+    : super(alignment: PlaceholderAlignment.top);
 
   final String tag;
 
@@ -85,7 +82,7 @@ InlineSpan _buildChip(BuildContext context, String marker, int occurrence) {
 RenderEditable _renderEditableOf(WidgetTester tester) {
   RenderObject? ro = tester.renderObject(find.byKey(_chipKey));
   while (ro != null && ro is! RenderEditable) {
-    ro = ro.parent as RenderObject?;
+    ro = ro.parent;
   }
   return ro! as RenderEditable;
 }
@@ -93,7 +90,7 @@ RenderEditable _renderEditableOf(WidgetTester tester) {
 RenderEditable? _maybeRenderEditableOf(WidgetTester tester) {
   RenderObject? ro = tester.renderObject(find.byKey(_chipKey));
   while (ro != null && ro is! RenderEditable) {
-    ro = ro.parent as RenderObject?;
+    ro = ro.parent;
   }
   return ro as RenderEditable?;
 }
@@ -113,8 +110,9 @@ void _dump(String tag, WidgetTester tester) {
     final top = tester.getTopLeft(find.byWidget(e.widget));
     final size = tester.getSize(find.byWidget(e.widget));
     final t = e.widget as Text;
-    final overlap =
-        prevBottom != null && top.dy < prevBottom ? '  <<< OVERLAP' : '';
+    final overlap = prevBottom != null && top.dy < prevBottom
+        ? '  <<< OVERLAP'
+        : '';
     debugPrint(
       '[$tag]   Text "${(t.data ?? '').substring(0, (t.data ?? '').length.clamp(0, 24))}..."'
       ' top=${top.dy.toStringAsFixed(2)} h=${size.height.toStringAsFixed(2)}'
@@ -181,9 +179,7 @@ void main() {
     }
 
     // Local (painter-space) placeholder boxes vs chip size.
-    final painterBoxes = re.getLocalRectForCaret(
-      const TextPosition(offset: 0),
-    );
+    final painterBoxes = re.getLocalRectForCaret(const TextPosition(offset: 0));
     debugPrint('[span] caret rect at 0: $painterBoxes');
 
     debugPrint(
@@ -210,9 +206,7 @@ void main() {
     // Walk the RenderEditable inline-children chain.
     debugPrint('[span] --- inline children ---');
     var n = 0;
-    for (RenderBox? c = re.firstChild;
-        c != null;
-        c = re.childAfter(c)) {
+    for (RenderBox? c = re.firstChild; c != null; c = re.childAfter(c)) {
       n++;
       final pd = c.parentData;
       debugPrint(
@@ -235,7 +229,7 @@ void main() {
     debugPrint('[span] inline child count=$n');
   });
 
-  Future<void> _spanCase(
+  Future<void> spanCase(
     WidgetTester tester,
     String tag,
     Widget Function(BuildContext) child,
@@ -260,11 +254,20 @@ void main() {
       debugPrint('[$tag] marker+tail box: $b');
     }
     // Replay what performLayout does and inspect the produced dims.
-    final dims = re.layoutInlineChildren(
-      re.constraints.maxWidth,
-      ChildLayoutHelper.layoutChild,
-      ChildLayoutHelper.getBaseline,
-    );
+    final dims = <PlaceholderDimensions>[
+      for (
+        RenderBox? child = re.firstChild;
+        child != null;
+        child = re.childAfter(child)
+      )
+        PlaceholderDimensions(
+          size: ChildLayoutHelper.layoutChild(
+            child,
+            BoxConstraints(maxWidth: re.constraints.maxWidth),
+          ),
+          alignment: (child.parentData! as TextParentData).span!.alignment,
+        ),
+    ];
     debugPrint('[$tag] replayed layoutInlineChildren dims=$dims');
 
     // Dump the actual span tree RenderEditable lays out + painter config.
@@ -283,6 +286,7 @@ void main() {
         }
       }
     }
+
     dumpSpan(re.text, ' ');
     debugPrint(
       '[$tag] painter cfg: scaler=${re.textScaler} maxLines=${re.maxLines} '
@@ -321,7 +325,7 @@ void main() {
   }
 
   testWidgets('probe: SizedBox child (no LayoutBuilder)', (tester) async {
-    await _spanCase(
+    await spanCase(
       tester,
       'sizedbox',
       (context) => Container(
@@ -334,7 +338,7 @@ void main() {
   });
 
   testWidgets('probe: LayoutBuilder + fixed box', (tester) async {
-    await _spanCase(
+    await spanCase(
       tester,
       'lb-fixed',
       (context) => LayoutBuilder(
@@ -355,7 +359,7 @@ void main() {
   });
 
   testWidgets('probe: LayoutBuilder + Column of boxes', (tester) async {
-    await _spanCase(
+    await spanCase(
       tester,
       'lb-column',
       (context) => LayoutBuilder(
@@ -414,7 +418,9 @@ void main() {
     );
   });
 
-  testWidgets('probe: Text.rich WidgetSpan (RenderParagraph path)', (tester) async {
+  testWidgets('probe: Text.rich WidgetSpan (RenderParagraph path)', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -475,24 +481,25 @@ void main() {
   ) async {
     // Reproduce what RenderEditable feeds the engine: a TextSpan tree with a
     // WidgetSpan + PlaceholderDimensions(size 60x120, alignment top).
-    final tp = TextPainter(
-      text: TextSpan(
-        style: const TextStyle(fontSize: 14, height: 1.8),
-        children: [
-          const WidgetSpan(
-            alignment: PlaceholderAlignment.top,
-            child: SizedBox(width: 60, height: 120),
+    final tp =
+        TextPainter(
+          text: const TextSpan(
+            style: TextStyle(fontSize: 14, height: 1.8),
+            children: [
+              WidgetSpan(
+                alignment: PlaceholderAlignment.top,
+                child: SizedBox(width: 60, height: 120),
+              ),
+              TextSpan(text: ' tail text here\nSECOND LINE'),
+            ],
           ),
-          const TextSpan(text: ' tail text here\nSECOND LINE'),
-        ],
-      ),
-      textDirection: TextDirection.ltr,
-    )..setPlaceholderDimensions([
-      const PlaceholderDimensions(
-        size: Size(60, 120),
-        alignment: PlaceholderAlignment.top,
-      ),
-    ]);
+          textDirection: TextDirection.ltr,
+        )..setPlaceholderDimensions([
+          const PlaceholderDimensions(
+            size: Size(60, 120),
+            alignment: PlaceholderAlignment.top,
+          ),
+        ]);
     tp.layout(maxWidth: 300);
     debugPrint('[tp] size=${tp.size}');
     debugPrint('[tp] inlinePlaceholderBoxes=${tp.inlinePlaceholderBoxes}');
@@ -510,7 +517,7 @@ void main() {
     tp.dispose();
   });
 
-  Future<void> _strutCase(
+  Future<void> strutCase(
     WidgetTester tester,
     String tag,
     StrutStyle strutStyle,
@@ -572,17 +579,17 @@ void main() {
   }
 
   testWidgets('probe: StrutStyle.disabled fixes the slot', (tester) async {
-    await _strutCase(tester, 'fix-disabled', StrutStyle.disabled);
+    await strutCase(tester, 'fix-disabled', StrutStyle.disabled);
   });
 
   testWidgets('probe: forceStrutHeight=false fixes the slot', (tester) async {
-    await _strutCase(tester, 'fix-noforce', const StrutStyle());
+    await strutCase(tester, 'fix-noforce', const StrutStyle());
   });
 
   testWidgets('probe: explicit non-forced strut inherits text style', (
     tester,
   ) async {
-    await _strutCase(
+    await strutCase(
       tester,
       'fix-inherit',
       const StrutStyle(forceStrutHeight: false),

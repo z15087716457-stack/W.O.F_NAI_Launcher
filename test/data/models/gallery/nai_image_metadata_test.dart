@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/enums/precise_ref_type.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
@@ -267,19 +267,34 @@ void main() {
     });
 
     test(
-      'real official PNG metadata should apply readable generation params',
-      () async {
-        final file = File(
-          r'C:\Users\10562\Pictures\78286cee-26bf-43c0-8c0a-5970d7aeb1ab.png',
+      'self-contained NovelAI PNG metadata applies readable generation params',
+      () {
+        final image = img.Image(
+          width: 512,
+          height: 1920,
+          textData: {
+            'Software': 'NovelAI',
+            'Source': 'NovelAI Diffusion V4.5 4BDE2A90',
+            'Comment': jsonEncode({
+              'prompt': '1girl, sunset',
+              'uc': 'bad hands, blurry',
+              'seed': 3451713783,
+              'steps': 28,
+              'width': 512,
+              'height': 1920,
+              'scale': 5.0,
+              'sampler': 'k_dpmpp_2m',
+              'sm': false,
+              'sm_dyn': false,
+              'skip_cfg_above_sigma': null,
+              'noise_schedule': 'karras',
+              'cfg_rescale': 0.0,
+            }),
+          },
         );
-        if (!file.existsSync()) {
-          markTestSkipped('local official NovelAI PNG sample is not present');
-          return;
-        }
-
-        final result = UnifiedMetadataParser.parseFromPng(
-          await file.readAsBytes(),
-        );
+        final png = img.encodePng(image);
+        expect(img.decodePng(png)!.width, 512);
+        final result = UnifiedMetadataParser.parseFromPng(png);
         expect(result.success, isTrue);
         final metadata = result.metadata!;
 
@@ -312,8 +327,10 @@ void main() {
 
         expect(metadata.source, equals('NovelAI Diffusion V4.5 4BDE2A90'));
         expect(metadata.model, equals(ImageModels.animeDiffusionV45Full));
-        expect(metadata.prompt, isNotEmpty);
-        expect(metadata.negativePrompt, isNotEmpty);
+        expect(metadata.prompt, '1girl, sunset');
+        expect(metadata.negativePrompt, 'bad hands, blurry');
+        expect(applied['prompt'], '1girl, sunset');
+        expect(applied['negativePrompt'], 'bad hands, blurry');
         expect(count, equals(13));
         expect(applied['model'], equals(ImageModels.animeDiffusionV45Full));
         expect(applied['seed'], equals(3451713783));

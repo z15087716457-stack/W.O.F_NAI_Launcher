@@ -61,7 +61,8 @@ Future<OwnedUpscaleProcessResult> runOwnedUpscaleProcess({
   void line(String value) {
     diagnostics = '$diagnostics\n$value';
     if (diagnostics.length > 16384) {
-      diagnostics = diagnostics.substring(diagnostics.length - 16384);
+      diagnostics =
+          '${diagnostics.substring(0, 8192)}\n...\n${diagnostics.substring(diagnostics.length - 8187)}';
     }
     if (!cancellation.isCancelled) onLine?.call(value);
   }

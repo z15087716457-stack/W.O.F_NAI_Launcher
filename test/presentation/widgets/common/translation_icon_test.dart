@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/widgets/common/wiki_retranslate_button.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 import 'package:nai_launcher/presentation/widgets/common/translation_modified_badge.dart';
@@ -42,7 +46,120 @@ Widget sample({bool busy = false, bool reduced = false, bool ticking = true}) =>
       ),
     );
 
+class _Activity extends ChangeNotifier implements AutoTagTranslationController {
+  TagTranslationActivity? activity;
+  int retries = 0;
+  @override
+  TagTranslationActivity? activityFor(String tag, {bool wiki = false}) =>
+      activity;
+  @override
+  void retranslateName({required String surface, required String tag}) {
+    retries++;
+    activity = const TagTranslationActivity(TagTranslationPhase.queued);
+    notifyListeners();
+  }
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => null;
+}
+
 void main() {
+  for (final locale in const [
+    Locale('zh'),
+    Locale('zh', 'TW'),
+    Locale('en'),
+    Locale('ja'),
+    Locale('ko'),
+  ]) {
+    for (final brightness in Brightness.values) {
+      testWidgets(
+        'inline translation state is localized and stable in $locale $brightness',
+        (tester) async {
+          await tester.runAsync(loadStudioCaptureFonts);
+          final activity = _Activity();
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                autoTagTranslationProvider.overrideWith((_) => activity),
+              ],
+              child: MaterialApp(
+                locale: locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                theme: AppTheme.getTheme(AppStyle.geist, brightness),
+                home: const Scaffold(
+                  body: Center(
+                    child: SizedBox(
+                      width: 160,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'long original tag name',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          TagTranslationIndicator(
+                            tag: 'long_original_tag',
+                            surface: 'test',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          final slot = find.byType(TagTranslationIndicator);
+          final rect = tester.getRect(slot);
+          expect(find.byType(TranslationIcon), findsNothing);
+          activity.activity = const TagTranslationActivity(
+            TagTranslationPhase.queued,
+          );
+          activity.notifyListeners();
+          await tester.pumpAndSettle();
+          final context = tester.element(slot);
+          final l10n = AppLocalizations.of(context)!;
+          expect(find.byTooltip(l10n.wiki_translationQueued), findsOneWidget);
+          expect(painter(tester).motion.value, 0);
+          expect(tester.getRect(slot), rect);
+          activity.activity = const TagTranslationActivity(
+            TagTranslationPhase.translating,
+          );
+          activity.notifyListeners();
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 450));
+          expect(painter(tester).motion.value, greaterThan(0));
+          expect(find.byTooltip(l10n.wiki_translating), findsOneWidget);
+          activity.activity = const TagTranslationActivity(
+            TagTranslationPhase.failed,
+            error: 'request failed',
+          );
+          activity.notifyListeners();
+          await tester.pumpAndSettle();
+          expect(painter(tester).motion.value, 0);
+          expect(painter(tester).color, Theme.of(context).colorScheme.error);
+          final retry = find.byTooltip(
+            '${l10n.wiki_translationFailedRetry}\nrequest failed',
+          );
+          await tester.tap(retry);
+          await tester.pumpAndSettle();
+          expect(activity.retries, 1);
+          expect(find.byTooltip(l10n.wiki_translationQueued), findsOneWidget);
+          expect(tester.getRect(slot), rect);
+          activity.activity = null;
+          activity.notifyListeners();
+          await tester.pumpAndSettle();
+          expect(find.byType(TranslationIcon), findsNothing);
+          expect(tester.getRect(slot), rect);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   test(
     'rotating arrows leave the central letter upright and stationary',
     () async {

@@ -1254,13 +1254,12 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (category != null) ...[
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: TagCategoryVisuals.color(context, category),
-                ),
+              Icon(
+                TagCategoryVisuals.icon(category),
+                size: 14,
+                color: selected
+                    ? scheme.surface
+                    : TagCategoryVisuals.color(context, category),
               ),
               const SizedBox(width: 5),
             ],
@@ -1514,6 +1513,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                         bookmarkLabel: bookmarks.contains(tag)
                             ? context.l10n.wiki_removeBookmark
                             : context.l10n.wiki_addBookmark,
+                        translationIndicator: TagTranslationIndicator(
+                          tag: tag,
+                          surface: _listSurface,
+                        ),
                         onSelect: () => _selectTag(tag),
                         onBookmark: () => _toggleBookmark(bookmarks, tag),
                         noArticleLabel:
@@ -1594,14 +1597,11 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
+                Icon(
+                  TagCategoryVisuals.icon(candidate.category),
                   key: const ValueKey('wiki-article-category-icon'),
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: categoryColor,
-                  ),
+                  size: 14,
+                  color: categoryColor,
                 ),
                 const SizedBox(width: 5),
                 Text(
@@ -1754,15 +1754,28 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                         if (pill != null) ...[pill, const SizedBox(height: 7)],
                         Tooltip(
                           message: TagNormalizer.toDisplay(tag),
-                          child: Text(
-                            TagNormalizer.toDisplay(tag),
-                            key: const ValueKey('wiki-article-title'),
-                            style: baseStyle.copyWith(
-                              fontSize: 28,
-                              height: 1.25,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.3,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  TagNormalizer.toDisplay(tag),
+                                  key: const ValueKey('wiki-article-title'),
+                                  style: baseStyle.copyWith(
+                                    fontSize: 28,
+                                    height: 1.25,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                              ),
+                              TagTranslationIndicator(
+                                tag: tag,
+                                surface: _articleSurface,
+                                wiki: true,
+                                size: 18,
+                              ),
+                            ],
                           ),
                         ),
                         if (translation != null) ...[
@@ -1997,8 +2010,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       borderRadius: BorderRadius.circular(3),
       onTap: () => _jumpToOutline(anchor),
       child: Container(
-        height: 26,
-        padding: EdgeInsets.only(left: indent),
+        constraints: const BoxConstraints(minHeight: 26),
+        padding: EdgeInsets.only(left: indent, top: 5, bottom: 5),
         child: Row(
           children: [
             Container(
@@ -2010,8 +2023,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             Expanded(
               child: Text(
                 label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                softWrap: true,
                 style: TextStyle(
                   fontSize: 12,
                   color: selected ? scheme.primary : scheme.onSurfaceVariant,
@@ -2103,16 +2115,10 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           children: [
             Row(
               children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: TagCategoryVisuals.color(
-                      context,
-                      candidate.category,
-                    ),
-                  ),
+                Icon(
+                  TagCategoryVisuals.icon(candidate.category),
+                  size: 14,
+                  color: TagCategoryVisuals.color(context, candidate.category),
                 ),
                 const SizedBox(width: 7),
                 Expanded(

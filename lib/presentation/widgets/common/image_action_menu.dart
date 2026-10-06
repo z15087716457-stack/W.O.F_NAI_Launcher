@@ -176,9 +176,15 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
     if (action.children.isNotEmpty) {
       return SubmenuButton(
         style: style,
-        menuStyle: _menuStyle(width: 232),
+        menuStyle: _menuStyle(
+          width: 232,
+        ).copyWith(alignment: AlignmentDirectional.topEnd),
+        useRootOverlay: true,
         leadingIcon: leading,
-        menuChildren: action.children.map(_item).toList(),
+        menuChildren: [
+          for (final child in action.children)
+            SizedBox(width: 220, child: _item(child)),
+        ],
         child: label,
       );
     }

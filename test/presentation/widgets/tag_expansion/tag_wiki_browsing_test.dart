@@ -29,6 +29,7 @@ import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_tag_row.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
+import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.dart';
 import 'package:nai_launcher/presentation/widgets/autocomplete/tag_category_visuals.dart';
@@ -124,8 +125,11 @@ class _Wiki implements TagWikiRepository {
 }
 
 class _Source implements CompletionSource {
+  _Source([this.entries = const []]);
+  final List<CompletionCandidate> entries;
   @override
-  Future<List<CompletionCandidate>> search(CompletionQuery query) async => [];
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
+      entries;
 }
 
 class _Cooccurrence extends CooccurrenceCompletionSource {
@@ -151,6 +155,32 @@ class _Params extends GenerationParamsNotifier {
 }
 
 class _Auto extends ChangeNotifier implements AutoTagTranslationController {
+  final nameActivities = <String, TagTranslationActivity>{};
+  final wikiActivities = <String, TagTranslationActivity>{};
+  final retriedNames = <String>[];
+  final retriedArticles = <String>[];
+  @override
+  TagTranslationActivity? activityFor(String tag, {bool wiki = false}) =>
+      (wiki ? wikiActivities[tag] : null) ?? nameActivities[tag];
+  @override
+  void retranslateName({required String surface, required String tag}) {
+    retriedNames.add(tag);
+    nameActivities[tag] = const TagTranslationActivity(
+      TagTranslationPhase.queued,
+    );
+    notifyListeners();
+  }
+
+  @override
+  void retranslateWiki({required String surface, required String tag}) {
+    retriedArticles.add(tag);
+    wikiActivities[tag] = const TagTranslationActivity(
+      TagTranslationPhase.queued,
+      wiki: true,
+    );
+    notifyListeners();
+  }
+
   final visible = <String, Set<String>>{};
   @override
   void observe({
@@ -283,6 +313,7 @@ Future<void> _pump(
   TagWikiRepository? wiki,
   _Tags? catalog,
   List<CompletionCandidate>? related,
+  List<CompletionCandidate> expansionRelated = const [],
   _Params? params,
   Locale locale = const Locale('zh'),
   bool chrome = false,
@@ -315,7 +346,7 @@ Future<void> _pump(
         localTagExpansionServiceProvider.overrideWithValue(
           LocalTagExpansionService(
             catalog: _Tags(),
-            relatedTags: _Source(),
+            relatedTags: _Source(expansionRelated),
             substringSearch: (_, {limit = 20}) async => [],
             popularSearch: ({limit = 12}) async => tags,
           ),
@@ -447,6 +478,198 @@ void main() {
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   });
+
+  testWidgets(
+    'Wiki inline translation activity animates, disappears and retries without navigation',
+    (tester) async {
+      await tester.runAsync(loadStudioCaptureFonts);
+      tester.view.physicalSize = const Size(1600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final auto = _Auto();
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: 'blue_eyes', directory: _uiDirectory),
+        auto,
+      );
+      final row = find.byKey(const ValueKey('wiki-row-blue_eyes'));
+      final title = find.descendant(of: row, matching: find.text('blue eyes'));
+      final before = tester.getRect(title);
+      auto.nameActivities['blue_eyes'] = const TagTranslationActivity(
+        TagTranslationPhase.translating,
+      );
+      auto.notifyListeners();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
+      final listIcon = find.byKey(
+        const ValueKey('tag-translation-name-blue_eyes'),
+      );
+      final articleIcon = find.byKey(
+        const ValueKey('tag-translation-wiki-blue_eyes'),
+      );
+      expect(listIcon, findsOneWidget);
+      expect(articleIcon, findsOneWidget);
+      expect(tester.getRect(title), before);
+      expect(
+        tester.getRect(listIcon).left,
+        closeTo(tester.getRect(title).right, 1),
+      );
+      expect(
+        tester
+            .widget<TranslationIcon>(
+              find.descendant(
+                of: listIcon,
+                matching: find.byType(TranslationIcon),
+              ),
+            )
+            .busy,
+        isTrue,
+      );
+      await capture(tester, 'inline-wiki-translating');
+      auto.nameActivities.clear();
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      expect(listIcon, findsNothing);
+      expect(articleIcon, findsNothing);
+      expect(tester.getRect(title), before);
+      auto.nameActivities['blue_eyes'] = const TagTranslationActivity(
+        TagTranslationPhase.failed,
+        error: 'name request failed',
+      );
+      auto.wikiActivities['blue_eyes'] = const TagTranslationActivity(
+        TagTranslationPhase.failed,
+        wiki: true,
+        error: 'body request failed',
+      );
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      final glyph = tester.widget<TranslationIcon>(
+        find.descendant(of: listIcon, matching: find.byType(TranslationIcon)),
+      );
+      expect(glyph.busy, isFalse);
+      expect(glyph.color, Theme.of(tester.element(listIcon)).colorScheme.error);
+      await capture(tester, 'inline-wiki-failed');
+      await tester.tap(listIcon);
+      await tester.pumpAndSettle();
+      expect(auto.retriedNames, ['blue_eyes']);
+      expect(auto.retriedArticles, isEmpty);
+      expect(find.byKey(const ValueKey('wiki-body-blue_eyes')), findsOneWidget);
+      await tester.tap(articleIcon);
+      await tester.pumpAndSettle();
+      expect(auto.retriedArticles, ['blue_eyes']);
+      expect(auto.retriedNames, ['blue_eyes']);
+      await capture(tester, 'inline-wiki-queued');
+      auto.nameActivities.clear();
+      auto.wikiActivities.clear();
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'tag expansion search, related rows and mini Wiki share inline activity',
+    (tester) async {
+      await tester.runAsync(loadStudioCaptureFonts);
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final auto = _Auto();
+      await _pump(
+        tester,
+        Center(
+          child: SizedBox(
+            width: 400,
+            child: TagExpansionWrapper(
+              controller: controller,
+              child: TextField(key: const Key('host'), controller: controller),
+            ),
+          ),
+        ),
+        auto,
+        expansionRelated: [tags.first],
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(find.byKey(const Key('host')));
+      await tester.pumpAndSettle();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.enterText(
+        find.byKey(const Key('tag-expansion-search')),
+        'fate',
+      );
+      await tester.pump(const Duration(milliseconds: 170));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('fate testarossa').first);
+      await tester.pumpAndSettle();
+      final mouse = await tester.createGesture(
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      await mouse.addPointer(location: Offset.zero);
+      await mouse.moveTo(tester.getCenter(find.text('fate testarossa').first));
+      await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(
+        tester.element(find.byKey(const Key('host'))),
+      )!;
+      await tester.tap(find.byTooltip(l10n.tagExpansion_showRelated).first);
+      await tester.pumpAndSettle();
+      await mouse.removePointer();
+      auto.nameActivities['fate_testarossa'] = const TagTranslationActivity(
+        TagTranslationPhase.translating,
+      );
+      auto.notifyListeners();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
+      final nameIcons = find.byKey(
+        const ValueKey('tag-translation-name-fate_testarossa'),
+      );
+      final articleIcon = find.byKey(
+        const ValueKey('tag-translation-wiki-fate_testarossa'),
+      );
+      expect(nameIcons, findsNWidgets(2));
+      expect(articleIcon, findsOneWidget);
+      for (final icon in tester.widgetList<TranslationIcon>(
+        find.descendant(of: nameIcons, matching: find.byType(TranslationIcon)),
+      )) {
+        expect(icon.busy, isTrue);
+      }
+      await capture(tester, 'inline-expansion-translating');
+      auto.nameActivities['fate_testarossa'] = const TagTranslationActivity(
+        TagTranslationPhase.failed,
+        error: 'name failed',
+      );
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      await capture(tester, 'inline-expansion-failed');
+      await tester.tap(nameIcons.first);
+      await tester.pumpAndSettle();
+      expect(auto.retriedNames, ['fate_testarossa']);
+      expect(controller.text, isEmpty);
+      expect(find.byKey(const ValueKey('tag-expansion-popup')), findsOneWidget);
+      auto.nameActivities.clear();
+      auto.wikiActivities['fate_testarossa'] = const TagTranslationActivity(
+        TagTranslationPhase.failed,
+        wiki: true,
+        error: 'article failed',
+      );
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      expect(nameIcons, findsNothing);
+      await tester.tap(articleIcon);
+      await tester.pumpAndSettle();
+      expect(auto.retriedArticles, ['fate_testarossa']);
+      expect(controller.text, isEmpty);
+      await capture(tester, 'inline-expansion-queued');
+      auto.wikiActivities.clear();
+      auto.notifyListeners();
+      await tester.pumpAndSettle();
+      expect(articleIcon, findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'reading column remains centered, wider mode persists, and history actions align',
@@ -948,7 +1171,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       // The category pill renders as a colored dot now.
-      final dot = tester.widget<Container>(
+      final dot = tester.widget<Icon>(
         find.byKey(const ValueKey('wiki-article-category-icon')),
       );
       final category = find.byKey(
@@ -958,7 +1181,8 @@ void main() {
         tester.element(category),
         TagCategory.copyright,
       );
-      expect((dot.decoration! as BoxDecoration).color, expectedColor);
+      expect(dot.color, expectedColor);
+      expect(dot.icon, TagCategoryVisuals.icon(TagCategory.copyright));
       expect(tester.widget<Text>(category).style!.color, expectedColor);
       final resultsList = tester.getRect(
         find.byKey(const ValueKey('wiki-results-list')),
@@ -1070,6 +1294,49 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final scale in [1.0, 1.5, 2.0]) {
+    testWidgets('long outline headings wrap without clipping at scale $scale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1600, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      const title = 'Artoria Caster（泳装 Berserker）（第三阶段）';
+      await _pump(
+        tester,
+        const TagWikiScreen(initialTag: '1girl', directory: _uiDirectory),
+        _Auto()..bodyOverride = '## $title\n\n正文。\n\n## Next section\n\n内容。',
+        catalog: _Tags(entries: _uiTags()),
+        scale: scale,
+      );
+      final link = find.byKey(const ValueKey('wiki-outline-0'));
+      final next = find.byKey(const ValueKey('wiki-outline-1'));
+      final text = find.descendant(of: link, matching: find.text(title));
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.descendant(of: text, matching: find.byType(RichText)),
+      );
+      expect(paragraph.didExceedMaxLines, isFalse);
+      expect(tester.getRect(text).height, greaterThan(20));
+      expect(
+        tester.getRect(text).bottom,
+        lessThanOrEqualTo(tester.getRect(link).bottom),
+      );
+      expect(
+        tester.getRect(next).top,
+        greaterThanOrEqualTo(tester.getRect(link).bottom),
+      );
+      await tester.tap(link);
+      await tester.pumpAndSettle();
+      expect(
+        outlineLabelColor(tester, link),
+        Theme.of(tester.element(link)).colorScheme.primary,
+      );
+      expect(tester.takeException(), isNull);
+      await capture(tester, 'inline-outline-$scale');
+    });
+  }
 
   testWidgets(
     'article outline jumps to real headings and preserves linked heading navigation',

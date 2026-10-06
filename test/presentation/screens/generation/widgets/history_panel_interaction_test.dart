@@ -405,8 +405,10 @@ void main() {
     final second = find.byKey(const ValueKey('second'));
     await tester.ensureVisible(second);
     await _openContextMenu(tester, second);
-    await tester.tap(find.text('查看详情'));
+    await tester.tap(find.text('详情'));
     await _pumpRoute(tester);
+    await tester.pump();
+    expect(find.byType(MenuAnchor), findsNothing);
 
     _expectLinkedViewer(tester, initialIndex: 1);
   });
@@ -458,8 +460,10 @@ void main() {
       expect(find.byType(ImageDetailViewer), findsNothing);
 
       await _openContextMenu(tester, finder);
-      await tester.tap(find.text('查看详情'));
+      await tester.tap(find.text('详情'));
       await _pumpRoute(tester);
+      await tester.pump();
+      expect(find.byType(MenuAnchor), findsNothing);
       final viewer = tester.widget<ImageDetailViewer>(
         find.byType(ImageDetailViewer),
       );

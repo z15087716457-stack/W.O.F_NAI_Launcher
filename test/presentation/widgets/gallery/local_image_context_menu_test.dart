@@ -1,9 +1,60 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_context_menu.dart';
 
 void main() {
+  for (final position in [const Offset(20, 20), const Offset(790, 590)]) {
+    testWidgets('hover submenu follows its row and avoids edges at $position', (
+      tester,
+    ) async {
+      var calls = 0;
+      await tester.pumpWidget(
+        _MenuHarness(
+          position: position,
+          isKritaConnected: true,
+          onSelected: (_) => calls++,
+        ),
+      );
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      final parent = find.ancestor(
+        of: find.text('Create & reference'),
+        matching: find.byType(SubmenuButton),
+      );
+      final parentRect = tester.getRect(parent);
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+      await mouse.moveTo(parentRect.center);
+      await tester.pumpAndSettle();
+      final child = find.ancestor(
+        of: find.text('Send to Text to Image'),
+        matching: find.byType(MenuItemButton),
+      );
+      final childRect = tester.getRect(child);
+      if (position.dx < 400) {
+        expect(childRect.left, greaterThanOrEqualTo(parentRect.right));
+        expect(childRect.top, closeTo(parentRect.top, 1));
+      } else {
+        expect(childRect.right, lessThanOrEqualTo(parentRect.left));
+      }
+      final last = tester.getRect(find.text('Send to Krita'));
+      expect(childRect.left, greaterThanOrEqualTo(0));
+      expect(childRect.top, greaterThanOrEqualTo(0));
+      expect(last.right, lessThanOrEqualTo(800));
+      expect(last.bottom, lessThanOrEqualTo(600));
+      await mouse.moveTo(tester.getCenter(find.text('Vibe Transfer')));
+      await tester.pumpAndSettle();
+      expect(child, findsOneWidget);
+      await tester.tap(find.text('Vibe Transfer'));
+      await tester.pumpAndSettle();
+      expect(calls, 1);
+      expect(find.byType(MenuAnchor), findsNothing);
+    });
+  }
+
   testWidgets(
     'compact menu has details before img2img and quick parameter copy',
     (tester) async {

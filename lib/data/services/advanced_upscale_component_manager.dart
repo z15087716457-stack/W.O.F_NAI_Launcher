@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/utils/fatal_diagnostics.dart';
 import '../models/upscale/local_upscale_models.dart';
 import 'owned_upscale_process.dart';
 
@@ -42,7 +43,7 @@ class AdvancedUpscaleComponentManager {
            );
 
   static const manifestSha256 =
-      'c89c13dbf28b78b3a09ee8820715ac7c2850d84c4ec98742c56e46406cb7924b';
+      '7d72744fc08f883bfd754d48ab35c0349c77caa3d16af41c1add37649a4ce337';
   final String manifestDigest;
   final Future<Directory> Function() _rootDirectory;
   final Future<Uint8List> Function(String) _loadAsset;
@@ -61,6 +62,27 @@ class AdvancedUpscaleComponentManager {
 
   void releaseInference() => _busy = false;
   void dispose() => _dio.close(force: true);
+
+  static Map<String, String> get seedRuntimeEnvironment => {
+    'PYTORCH_CUDA_ALLOC_CONF':
+        Platform.environment['PYTORCH_CUDA_ALLOC_CONF'] ??
+        'backend:cudaMallocAsync',
+    'PYTHONUTF8': '1',
+    'PYTHONIOENCODING': 'utf-8',
+    'PYTHONFAULTHANDLER': '1',
+    'HF_HUB_OFFLINE': '1',
+    'TRANSFORMERS_OFFLINE': '1',
+    'HF_HUB_DISABLE_TELEMETRY': '1',
+  };
+
+  static String safeDiagnostics(String value) {
+    final safe = FatalDiagnostics.redactSensitiveText(
+      value.replaceAll(RegExp(r'https?://[^\s]+'), '[URL]'),
+    ).replaceAll(RegExp(r'\x1b\[[0-9;]*[A-Za-z]'), '').trim();
+    return safe.length > 4096
+        ? '${safe.substring(0, 2048)}\n...\n${safe.substring(safe.length - 2000)}'
+        : safe;
+  }
 
   static Future<Directory> _defaultDirectory() async => Directory(
     p.join(
@@ -110,7 +132,10 @@ class AdvancedUpscaleComponentManager {
     try {
       final value =
           jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-      if (value['manifest'] != manifestDigest ||
+      if ((value['manifest'] != manifestDigest &&
+              (id != 'rtx-vsr' ||
+                  value['manifest'] !=
+                      'c89c13dbf28b78b3a09ee8820715ac7c2850d84c4ec98742c56e46406cb7924b')) ||
           value['ready'] != true ||
           !RegExp(r'^[a-z0-9-]+$').hasMatch(value['installation'] as String)) {
         return null;
@@ -480,7 +505,6 @@ class AdvancedUpscaleComponentManager {
           'all_proxy': '',
         };
         await _contained(env['UV_CACHE_DIR']!);
-        onProgress?.call('runtime', null);
         for (final args in [
           [
             'venv',
@@ -504,6 +528,7 @@ class AdvancedUpscaleComponentManager {
             p.join(stage.path, 'requirements.lock'),
           ],
         ]) {
+          onProgress?.call(args.first == 'venv' ? 'python' : 'runtime', null);
           final result = await runOwnedUpscaleProcess(
             host: host,
             executable: uvExe,
@@ -514,8 +539,11 @@ class AdvancedUpscaleComponentManager {
             startProcess: startProcess,
           );
           if (result.exitCode != 0) {
-            throw const LocalUpscaleException(
+            throw LocalUpscaleException(
               LocalUpscaleError.modelOperationFailed,
+              details: safeDiagnostics(
+                'uv ${args.first}: exit ${result.exitCode}\n${result.diagnostics}',
+              ),
             );
           }
         }
@@ -524,6 +552,7 @@ class AdvancedUpscaleComponentManager {
           host: host,
           executable: python,
           arguments: [p.join(stage.path, 'worker.py'), source.path, '--probe'],
+          environment: seedRuntimeEnvironment,
           cancellation: cancellation,
           startProcess: startProcess,
         );
@@ -532,6 +561,9 @@ class AdvancedUpscaleComponentManager {
             probe.exitCode == 12
                 ? LocalUpscaleError.noCuda
                 : LocalUpscaleError.modelOperationFailed,
+            details: safeDiagnostics(
+              'SeedVR2 probe: exit ${probe.exitCode}\n${probe.diagnostics}',
+            ),
           );
         }
         verified.add({
