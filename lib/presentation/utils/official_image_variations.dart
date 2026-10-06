@@ -21,7 +21,12 @@ class OfficialImageVariations {
   static bool supportsSize(int width, int height) =>
       width > 0 &&
       height > 0 &&
-      width * height <= NaiResolutionAdapter.officialMaxPixels;
+      width * height <= NaiResolutionAdapter.officialMaxPixels &&
+      _gridSize(width) * _gridSize(height) <=
+          NaiResolutionAdapter.officialMaxPixels;
+
+  // The website rounds each request edge to the nearest 64; ties round up.
+  static int _gridSize(int value) => math.max(64, ((value + 32) ~/ 64) * 64);
 
   static ImageParams project({
     required ImageParams current,
@@ -102,8 +107,8 @@ class OfficialImageVariations {
       );
     }
     return params.copyWith(
-      width: width,
-      height: height,
+      width: _gridSize(width),
+      height: _gridSize(height),
       nSamples: 1,
       seed: -1,
       extraNoiseSeed: null,

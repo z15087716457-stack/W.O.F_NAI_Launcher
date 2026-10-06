@@ -114,4 +114,22 @@ void main() {
     expect(params.characters, isEmpty);
     expect(params.useCoords, isFalse);
   });
+
+  test(
+    'non-grid local upscale dimensions use the official nearest-grid request size',
+    () {
+      final bytes = Uint8List(0);
+      final params = OfficialImageVariations.project(
+        current: const ImageParams(),
+        source: bytes,
+        width: 1248,
+        height: 1824,
+      );
+      expect(params.width, 1280);
+      expect(params.height, 1856);
+      expect(params.sourceImage, same(bytes));
+      expect(OfficialImageVariations.supportsSize(1248, 1824), isTrue);
+      expect(OfficialImageVariations.supportsSize(1664, 2432), isFalse);
+    },
+  );
 }
