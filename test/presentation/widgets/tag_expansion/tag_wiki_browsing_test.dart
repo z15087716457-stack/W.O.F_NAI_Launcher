@@ -1102,6 +1102,76 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final scale in [1.0, 1.5, 2.0]) {
+    testWidgets(
+      'Wiki heading and translation icon use their actual row center at $scale scale',
+      (tester) async {
+        await tester.runAsync(loadStudioCaptureFonts);
+        tester.view.physicalSize = const Size(2560, 1440);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final auto = _Auto()
+          ..wikiActivities['blue_eyes'] = const TagTranslationActivity(
+            TagTranslationPhase.queued,
+            wiki: true,
+          );
+        await _pump(
+          tester,
+          const TagWikiScreen(initialTag: 'blue_eyes', directory: _uiDirectory),
+          auto,
+          catalog: _Tags(entries: _uiTags()),
+          scale: scale,
+          chrome: true,
+        );
+        final header = find.byKey(const ValueKey('wiki-directory-header'));
+        final center = tester.getCenter(header).dy;
+        expect(
+          tester.getCenter(find.byKey(const ValueKey('wiki-brand-mark'))).dy,
+          closeTo(center, .5),
+        );
+        final l = AppLocalizations.of(tester.element(header))!;
+        expect(
+          tester
+              .getCenter(
+                find.descendant(of: header, matching: find.text(l.wiki_title)),
+              )
+              .dy,
+          closeTo(center, .5),
+        );
+        expect(
+          tester
+              .getCenter(
+                find.descendant(
+                  of: header,
+                  matching: find.byIcon(Icons.create_new_folder_outlined),
+                ),
+              )
+              .dy,
+          closeTo(center, .5),
+        );
+        final article = find.byKey(const ValueKey('wiki-article-header'));
+        final icon = find.descendant(
+          of: article,
+          matching: find.byType(TranslationIcon),
+        );
+        expect(icon, findsOneWidget);
+        expect(
+          tester.getCenter(icon).dy,
+          closeTo(
+            tester
+                    .getCenter(find.byKey(const ValueKey('wiki-article-title')))
+                    .dy +
+                1.5 * scale,
+            .5,
+          ),
+        );
+        await capture(tester, 'translation-header-center-$scale');
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets(
     'Wiki feedback toolbar, category and footer align without hover',
     (tester) async {
@@ -1223,7 +1293,9 @@ void main() {
       // The accepted mark stays at its original center; only the row ends move.
       expect(
         tester.getCenter(find.byKey(const ValueKey('wiki-brand-mark'))).dy,
-        31,
+        tester
+            .getCenter(find.byKey(const ValueKey('wiki-directory-header')))
+            .dy,
       );
       await capture(tester, 'category-footer-header');
       await tester.tap(scope);

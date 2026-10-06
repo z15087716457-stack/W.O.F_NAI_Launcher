@@ -12645,7 +12645,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localUpscale_seedvr2Help =>
-      'Quality-focused reconstruction. Downloads about 3.9 GB of models plus a separate Python/CUDA runtime; requires an NVIDIA GPU.';
+      '3B FP8 balances quality and resources. About 3.4 GB of weights plus a 0.5 GB VAE; shares its VAE and Python/CUDA runtime with 7B. Requires an NVIDIA GPU.';
+
+  @override
+  String get localUpscale_seedvr2SevenHelp =>
+      '7B FP8 offers higher quality potential with more VRAM and processing time. About 8.2 GB of weights; shares the VAE and Python/CUDA runtime with 3B.';
+
+  @override
+  String get localUpscale_outOfMemory =>
+      'Not enough VRAM. Try 3B, a smaller scale, or Low VRAM and VAE tiling in advanced settings. The model was not switched automatically.';
+
+  @override
+  String get localUpscale_modelWeights => 'Weights';
+
+  @override
+  String get localUpscale_advancedSettings => 'Advanced settings';
+
+  @override
+  String get localUpscale_seedvr2Color => 'Color correction';
+
+  @override
+  String get localUpscale_colorNone => 'None';
+
+  @override
+  String get localUpscale_seedvr2Seed => 'Random seed';
+
+  @override
+  String get localUpscale_seedvr2Memory => 'Memory strategy';
+
+  @override
+  String get localUpscale_memoryRecommended => 'Recommended';
+
+  @override
+  String get localUpscale_memoryLow => 'Low VRAM';
+
+  @override
+  String get localUpscale_blocksToSwap => 'CPU-offloaded blocks';
+
+  @override
+  String get localUpscale_memoryHelp =>
+      'More offloaded blocks save VRAM but use more RAM and run slower. Low VRAM mode does not guarantee that every output size will fit.';
+
+  @override
+  String get localUpscale_vaeTiled => 'VAE tiling';
+
+  @override
+  String get localUpscale_vaeTileSize => 'Tile size';
+
+  @override
+  String get localUpscale_vaeOverlap => 'Tile overlap';
+
+  @override
+  String get localUpscale_vaeHelp =>
+      'Smaller tiles save VRAM; overlap reduces seams. This tiles VAE encoding and decoding, not the complete upscaling pipeline.';
+
+  @override
+  String get localUpscale_experimental => 'Experimental variation';
+
+  @override
+  String get localUpscale_inputNoise => 'Input noise';
+
+  @override
+  String get localUpscale_latentNoise => 'Latent noise';
+
+  @override
+  String get localUpscale_noiseHelp =>
+      'Keep both at 0 to preserve the current behavior. Increasing noise adds variation, not guaranteed detail or quality, and may change lines and faces.';
+
+  @override
+  String get localUpscale_restoreDefaults => 'Restore defaults';
 
   @override
   String get localUpscale_rtxHelp =>

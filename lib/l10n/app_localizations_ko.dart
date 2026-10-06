@@ -12278,7 +12278,75 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localUpscale_seedvr2Help =>
-      '세부 재구성에 중점을 둡니다. 약 3.9 GB 모델과 별도 Python/CUDA 환경을 다운로드하며 NVIDIA GPU가 필요합니다.';
+      '3B FP8은 화질과 자원 사용의 균형을 제공합니다. 가중치 약 3.4 GB와 VAE 약 0.5 GB가 필요하며, VAE 및 Python/CUDA 환경을 7B와 공유합니다. NVIDIA GPU가 필요합니다.';
+
+  @override
+  String get localUpscale_seedvr2SevenHelp =>
+      '7B FP8은 더 높은 화질을 기대할 수 있지만 VRAM과 처리 시간이 더 필요합니다. 가중치는 약 8.2 GB이며 VAE 및 Python/CUDA 환경을 3B와 공유합니다.';
+
+  @override
+  String get localUpscale_outOfMemory =>
+      'VRAM이 부족합니다. 3B, 낮은 배율 또는 고급 설정의 낮은 VRAM 모드와 VAE 타일 처리를 사용해 보세요. 모델은 자동으로 변경되지 않았습니다.';
+
+  @override
+  String get localUpscale_modelWeights => '가중치';
+
+  @override
+  String get localUpscale_advancedSettings => '고급 설정';
+
+  @override
+  String get localUpscale_seedvr2Color => '색상 보정';
+
+  @override
+  String get localUpscale_colorNone => '보정 안 함';
+
+  @override
+  String get localUpscale_seedvr2Seed => '무작위 시드';
+
+  @override
+  String get localUpscale_seedvr2Memory => 'VRAM 사용 방식';
+
+  @override
+  String get localUpscale_memoryRecommended => '권장';
+
+  @override
+  String get localUpscale_memoryLow => '낮은 VRAM';
+
+  @override
+  String get localUpscale_blocksToSwap => 'CPU로 옮길 블록 수';
+
+  @override
+  String get localUpscale_memoryHelp =>
+      '더 많은 블록을 옮기면 VRAM을 절약하지만 RAM 사용량이 늘고 느려집니다. 낮은 VRAM 모드에서도 모든 출력 크기를 처리할 수 있는 것은 아닙니다.';
+
+  @override
+  String get localUpscale_vaeTiled => 'VAE 타일 처리';
+
+  @override
+  String get localUpscale_vaeTileSize => '타일 크기';
+
+  @override
+  String get localUpscale_vaeOverlap => '타일 겹침';
+
+  @override
+  String get localUpscale_vaeHelp =>
+      '작은 타일은 VRAM을 절약하고 겹침은 경계를 완화합니다. 전체 업스케일링이 아닌 VAE 인코딩 및 디코딩만 나눕니다.';
+
+  @override
+  String get localUpscale_experimental => '실험적 변화';
+
+  @override
+  String get localUpscale_inputNoise => '입력 노이즈';
+
+  @override
+  String get localUpscale_latentNoise => '잠재 노이즈';
+
+  @override
+  String get localUpscale_noiseHelp =>
+      '두 값을 0으로 유지하면 현재 동작을 그대로 사용합니다. 노이즈를 늘려도 화질이나 세부 개선이 보장되지 않으며 선과 얼굴이 달라질 수 있습니다.';
+
+  @override
+  String get localUpscale_restoreDefaults => '기본값 복원';
 
   @override
   String get localUpscale_rtxHelp =>

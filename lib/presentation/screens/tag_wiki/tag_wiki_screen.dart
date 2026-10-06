@@ -1764,6 +1764,8 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                   style: baseStyle.copyWith(
                                     fontSize: 28,
                                     height: 1.25,
+                                    leadingDistribution:
+                                        TextLeadingDistribution.even,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: -0.3,
                                   ),

@@ -42,6 +42,7 @@ class LocalUpscaleService {
     required String modelId,
     required double scale,
     required LocalUpscaleCancellation cancellation,
+    Seedvr2Options seedvr2Options = const Seedvr2Options(),
     void Function(LocalUpscaleProgress)? onProgress,
   }) async {
     if (!_supportedPlatform) {
@@ -111,6 +112,7 @@ class LocalUpscaleService {
           targetWidth,
           targetHeight,
           cancellation,
+          seedvr2Options: seedvr2Options,
         );
         final result = await runOwnedUpscaleProcess(
           host: spec.host,
@@ -151,7 +153,16 @@ class LocalUpscaleService {
                 ? LocalUpscaleError.noCuda
                 : result.diagnostics.contains('rtx_unavailable')
                 ? LocalUpscaleError.noRtx
+                : model.method == LocalUpscaleMethod.seedvr2 &&
+                      RegExp(
+                        r'CUDA out of memory|cudaErrorMemoryAllocation|"error"\s*:\s*"OutOfMemoryError"',
+                        caseSensitive: false,
+                      ).hasMatch(result.diagnostics)
+                ? LocalUpscaleError.outOfMemory
                 : LocalUpscaleError.processFailed,
+            details: AdvancedUpscaleComponentManager.safeDiagnostics(
+              'exit ${result.exitCode}\n${result.diagnostics}',
+            ),
           );
         }
       } else {

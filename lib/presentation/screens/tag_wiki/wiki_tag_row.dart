@@ -111,6 +111,8 @@ class _WikiTagRowState extends State<WikiTagRow> {
                                   style: const TextStyle(
                                     fontSize: 14,
                                     height: 1.35,
+                                    leadingDistribution:
+                                        TextLeadingDistribution.even,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

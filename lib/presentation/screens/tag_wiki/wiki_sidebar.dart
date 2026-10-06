@@ -298,13 +298,11 @@ class WikiSidebar extends StatelessWidget {
               height: headerHeight,
               child: WindowHeaderDragSurface(
                 enabled: allowWindowDrag,
-                child: OverflowBox(
-                  alignment: Alignment.topCenter,
-                  minHeight: 62,
-                  maxHeight: 62,
+                child: Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const _WikiTitleMark(),
                         const SizedBox(width: 10),
@@ -312,14 +310,27 @@ class WikiSidebar extends StatelessWidget {
                           child: IgnorePointer(
                             child: Text(
                               context.l10n.wiki_title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w700,
+                                leadingDistribution:
+                                    TextLeadingDistribution.even,
                               ),
                             ),
                           ),
                         ),
                         IconButton(
                           tooltip: context.l10n.wiki_newCollection,
+                          visualDensity: VisualDensity.standard,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints.tightFor(
+                            width: 32,
+                            height: 32,
+                          ),
+                          style: IconButton.styleFrom(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                           icon: const Icon(
                             Icons.create_new_folder_outlined,
                             size: 19,

@@ -224,9 +224,15 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
     Uint8List source, {
     required String modelId,
     required double scale,
+    Seedvr2Options seedvr2Options = const Seedvr2Options(),
   }) async {
     if (_pending != null || state.running) return null;
-    final work = _processGenerated(source, modelId: modelId, scale: scale);
+    final work = _processGenerated(
+      source,
+      modelId: modelId,
+      scale: scale,
+      seedvr2Options: seedvr2Options,
+    );
     _pending = work.then<void>((_) {});
     try {
       return await work;
@@ -239,6 +245,7 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
     Uint8List source, {
     required String modelId,
     required double scale,
+    Seedvr2Options seedvr2Options = const Seedvr2Options(),
   }) async {
     final cancellation = LocalUpscaleCancellation();
     _cancellation = cancellation;
@@ -250,6 +257,7 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
             Uint8List.fromList(source),
             modelId: modelId,
             scale: scale,
+            seedvr2Options: seedvr2Options,
             cancellation: cancellation,
             onProgress: (progress) {
               if (!_disposed && !cancellation.isCancelled) {
@@ -370,6 +378,7 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
             frozen,
             modelId: workflow.upscale.localModel,
             scale: workflow.upscale.localScale,
+            seedvr2Options: workflow.upscale.selectedSeedvr2Options,
             cancellation: cancellation,
             onProgress: (progress) {
               if (!_disposed && !cancellation.isCancelled) {

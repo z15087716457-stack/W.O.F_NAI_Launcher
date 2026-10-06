@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
+import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/presentation/widgets/autocomplete/tag_candidate_title.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_retranslate_button.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
@@ -64,6 +66,98 @@ class _Activity extends ChangeNotifier implements AutoTagTranslationController {
 }
 
 void main() {
+  for (final scale in [1.0, 1.5, 2.0]) {
+    for (final size in [14.0, 28.0]) {
+      for (final wrapped in [false, true]) {
+        testWidgets(
+          'translation artwork is centered next to $size text at $scale scale; wrapped=$wrapped',
+          (tester) async {
+            await tester.runAsync(loadStudioCaptureFonts);
+            final boundary = GlobalKey();
+            final activity = _Activity()
+              ..activity = const TagTranslationActivity(
+                TagTranslationPhase.queued,
+              );
+            await tester.pumpWidget(
+              ProviderScope(
+                overrides: [
+                  autoTagTranslationProvider.overrideWith((_) => activity),
+                ],
+                child: MaterialApp(
+                  locale: const Locale('zh'),
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
+                  theme: AppTheme.getTheme(AppStyle.geist, Brightness.light),
+                  home: MediaQuery(
+                    data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                    child: Scaffold(
+                      body: Center(
+                        child: RepaintBoundary(
+                          key: boundary,
+                          child: TagCandidateTitle(
+                            title: 'blue eyes',
+                            maxLines: wrapped ? null : 1,
+                            category: TagCategory.general,
+                            showCategory: false,
+                            style: TextStyle(
+                              fontSize: size,
+                              height: 1.25,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            trailing: const TagTranslationIndicator(
+                              tag: 'blue_eyes',
+                              surface: 'alignment',
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+            final text = tester.getRect(find.text('blue eyes'));
+            final icon = tester.getRect(find.byType(TranslationIcon));
+            final slot = tester.getRect(find.byType(TagTranslationIndicator));
+            expect(slot.center.dy, closeTo(text.center.dy, .5));
+            expect(icon.center.dy, closeTo(slot.center.dy + 1.5 * scale, .5));
+            await tester.runAsync(() async {
+              final render =
+                  boundary.currentContext!.findRenderObject()!
+                      as RenderRepaintBoundary;
+              final image = await render.toImage(pixelRatio: 1);
+              final data = (await image.toByteData(
+                format: ui.ImageByteFormat.rawRgba,
+              ))!.buffer.asUint8List();
+              var top = image.height;
+              var bottom = -1;
+              for (var y = 0; y < image.height; y++) {
+                for (var x = 0; x < text.width.floor(); x++) {
+                  final index = (y * image.width + x) * 4;
+                  if (data[index + 3] > 80 &&
+                      data[index] < 100 &&
+                      data[index + 2] < 100) {
+                    if (y < top) top = y;
+                    if (y > bottom) bottom = y;
+                  }
+                }
+              }
+              expect(bottom, greaterThan(top));
+              final inkCenter =
+                  tester.getRect(find.byKey(boundary)).top +
+                  (top + bottom + 1) / 2;
+              expect(icon.center.dy, closeTo(inkCenter, 1.5 * scale));
+              image.dispose();
+            });
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+  }
   for (final locale in const [
     Locale('zh'),
     Locale('zh', 'TW'),

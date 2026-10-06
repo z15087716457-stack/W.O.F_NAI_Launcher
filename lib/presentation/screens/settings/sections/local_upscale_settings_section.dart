@@ -23,6 +23,7 @@ String localUpscaleErrorText(BuildContext context, LocalUpscaleError error) {
     LocalUpscaleError.noVulkan => l.localUpscale_noVulkan,
     LocalUpscaleError.noCuda => l.localUpscale_noCuda,
     LocalUpscaleError.noRtx => l.localUpscale_noRtx,
+    LocalUpscaleError.outOfMemory => l.localUpscale_outOfMemory,
     LocalUpscaleError.processFailed => l.localUpscale_processFailed,
     LocalUpscaleError.modelOperationFailed =>
       l.localUpscale_modelOperationFailed,
@@ -320,7 +321,7 @@ class _LocalUpscaleSettingsSectionState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          seed ? 'SeedVR2' : 'RTX',
+                          seed ? model.name : 'RTX',
                           style: theme.textTheme.titleSmall,
                         ),
                       ),
@@ -334,7 +335,11 @@ class _LocalUpscaleSettingsSectionState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    seed ? l.localUpscale_seedvr2Help : l.localUpscale_rtxHelp,
+                    !seed
+                        ? l.localUpscale_rtxHelp
+                        : model.id == 'seedvr2-7b'
+                        ? l.localUpscale_seedvr2SevenHelp
+                        : l.localUpscale_seedvr2Help,
                     style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),
@@ -343,7 +348,7 @@ class _LocalUpscaleSettingsSectionState
                       Expanded(
                         child: Text(
                           model.installed
-                              ? '${l.localUpscale_installed} · ${(model.diskBytes / 1024 / 1024).round()} MB'
+                              ? '${l.localUpscale_installed} · ${seed ? '${l.localUpscale_modelWeights} ' : ''}${(model.diskBytes / 1024 / 1024).round()} MB'
                               : l.localUpscale_notInstalled,
                           style: theme.textTheme.labelMedium,
                         ),

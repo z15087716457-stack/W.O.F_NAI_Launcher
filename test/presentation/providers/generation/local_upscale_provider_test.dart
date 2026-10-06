@@ -60,11 +60,13 @@ void main() {
   setUpAll(() {
     registerFallbackValue(Uint8List(0));
     registerFallbackValue(LocalUpscaleCancellation());
+    registerFallbackValue(const Seedvr2Options());
   });
   for (final scenario in [
     'success',
     'plain',
     'direct',
+    'seedvr2',
     'new-source',
     'new-selection',
     'selection-back',
@@ -76,15 +78,20 @@ void main() {
       final service = _Service();
       final pending = Completer<LocalUpscaleResult>();
       final storage = _Storage();
+      Seedvr2Options? received;
       when(
         () => service.upscale(
           any(),
           modelId: any(named: 'modelId'),
           scale: any(named: 'scale'),
+          seedvr2Options: any(named: 'seedvr2Options'),
           cancellation: any(named: 'cancellation'),
           onProgress: any(named: 'onProgress'),
         ),
-      ).thenAnswer((_) => pending.future);
+      ).thenAnswer((call) {
+        received = call.namedArguments[#seedvr2Options] as Seedvr2Options;
+        return pending.future;
+      });
       final container = ProviderContainer(
         overrides: [
           localStorageServiceProvider.overrideWith((ref) => storage),
@@ -98,6 +105,16 @@ void main() {
       final controller = container.read(
         imageWorkflowControllerProvider.notifier,
       );
+      if (scenario == 'seedvr2') {
+        controller.updateLocalUpscaleModel('seedvr2-7b');
+        controller.updateLocalSeedvr2Options(
+          const Seedvr2Options(
+            seed: 321,
+            colorCorrection: 'wavelet',
+            blocksToSwap: 36,
+          ),
+        );
+      }
       final raw = _png(48, 32);
       final source = scenario == 'plain'
           ? raw
@@ -177,6 +194,12 @@ void main() {
         'unrelated draft',
       );
       expect(container.read(generationParamsNotifierProvider).seed, 999);
+      if (scenario == 'seedvr2') {
+        expect(
+          (received!.seed, received!.colorCorrection, received!.blocksToSwap),
+          (321, 'wavelet', 36),
+        );
+      }
       if (scenario == 'direct') {
         expect(
           container.read(generationParamsNotifierProvider).sourceImage,

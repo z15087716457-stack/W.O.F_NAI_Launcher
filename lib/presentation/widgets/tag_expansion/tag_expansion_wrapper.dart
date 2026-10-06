@@ -1399,37 +1399,46 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       controller: _searchScroll,
       padding: const EdgeInsets.symmetric(horizontal: _listInset, vertical: 2),
       itemCount: _rowHeights.length,
-      itemBuilder: (context, row) => ConstrainedBox(
-        key: _rowKeys.putIfAbsent(row, GlobalKey.new),
-        constraints: const BoxConstraints(minHeight: _compactRowHeight + 2),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var column = 0; column < _gridColumns; column++) ...[
-                  if (column > 0) const SizedBox(width: _columnGap),
-                  Expanded(
-                    child: row * _gridColumns + column < _results.length
-                        ? _candidateRow(
-                            context,
-                            _results[row * _gridColumns + column],
-                            selected:
-                                row * _gridColumns + column == _selectedIndex,
-                            onTap: () {
-                              final index = row * _gridColumns + column;
-                              _selectedIndex = index;
-                              _openWiki(_results[index]);
-                            },
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ],
-              ],
+      itemBuilder: (context, row) => LayoutBuilder(
+        builder: (context, constraints) {
+          final cellWidth =
+              (constraints.maxWidth - (_gridColumns - 1) * _columnGap) /
+              _gridColumns;
+          return ConstrainedBox(
+            key: _rowKeys.putIfAbsent(row, GlobalKey.new),
+            constraints: const BoxConstraints(minHeight: _compactRowHeight + 2),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var column = 0; column < _gridColumns; column++) ...[
+                      if (column > 0) const SizedBox(width: _columnGap),
+                      Expanded(
+                        child: row * _gridColumns + column < _results.length
+                            ? _candidateRow(
+                                context,
+                                _results[row * _gridColumns + column],
+                                cellWidth: cellWidth,
+                                selected:
+                                    row * _gridColumns + column ==
+                                    _selectedIndex,
+                                onTap: () {
+                                  final index = row * _gridColumns + column;
+                                  _selectedIndex = index;
+                                  _openWiki(_results[index]);
+                                },
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -1460,6 +1469,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             child: _candidateRow(
               context,
               _relatedResults[index],
+              cellWidth: constraints.maxWidth - _listInset * 2,
               related: true,
               onTap: () => _openWiki(_relatedResults[index]),
             ),
@@ -1578,6 +1588,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     BuildContext context,
     CompletionCandidate candidate, {
     required VoidCallback onTap,
+    double? cellWidth,
     bool selected = false,
     bool related = false,
   }) {
@@ -1632,6 +1643,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                               ),
                               category: candidate.category,
                               maxLines: null,
+                              availableWidth: cellWidth == null
+                                  ? null
+                                  : cellWidth -
+                                        12 -
+                                        (candidate.postCount > 0 ? 48 : 0),
                               trailing: TagTranslationIndicator(
                                 tag: candidate.canonicalTag,
                                 surface: related
@@ -1760,7 +1776,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                       Flexible(
                         child: Text(
                           _wikiTitle(context),
-                          style: theme.textTheme.labelMedium,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            leadingDistribution: TextLeadingDistribution.even,
+                          ),
                         ),
                       ),
                       TagTranslationIndicator(

@@ -21999,8 +21999,134 @@ abstract class AppLocalizations {
   /// No description provided for @localUpscale_seedvr2Help.
   ///
   /// In en, this message translates to:
-  /// **'Quality-focused reconstruction. Downloads about 3.9 GB of models plus a separate Python/CUDA runtime; requires an NVIDIA GPU.'**
+  /// **'3B FP8 balances quality and resources. About 3.4 GB of weights plus a 0.5 GB VAE; shares its VAE and Python/CUDA runtime with 7B. Requires an NVIDIA GPU.'**
   String get localUpscale_seedvr2Help;
+
+  /// No description provided for @localUpscale_seedvr2SevenHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'7B FP8 offers higher quality potential with more VRAM and processing time. About 8.2 GB of weights; shares the VAE and Python/CUDA runtime with 3B.'**
+  String get localUpscale_seedvr2SevenHelp;
+
+  /// No description provided for @localUpscale_outOfMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough VRAM. Try 3B, a smaller scale, or Low VRAM and VAE tiling in advanced settings. The model was not switched automatically.'**
+  String get localUpscale_outOfMemory;
+
+  /// No description provided for @localUpscale_modelWeights.
+  ///
+  /// In en, this message translates to:
+  /// **'Weights'**
+  String get localUpscale_modelWeights;
+
+  /// No description provided for @localUpscale_advancedSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced settings'**
+  String get localUpscale_advancedSettings;
+
+  /// No description provided for @localUpscale_seedvr2Color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color correction'**
+  String get localUpscale_seedvr2Color;
+
+  /// No description provided for @localUpscale_colorNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get localUpscale_colorNone;
+
+  /// No description provided for @localUpscale_seedvr2Seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Random seed'**
+  String get localUpscale_seedvr2Seed;
+
+  /// No description provided for @localUpscale_seedvr2Memory.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory strategy'**
+  String get localUpscale_seedvr2Memory;
+
+  /// No description provided for @localUpscale_memoryRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get localUpscale_memoryRecommended;
+
+  /// No description provided for @localUpscale_memoryLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low VRAM'**
+  String get localUpscale_memoryLow;
+
+  /// No description provided for @localUpscale_blocksToSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'CPU-offloaded blocks'**
+  String get localUpscale_blocksToSwap;
+
+  /// No description provided for @localUpscale_memoryHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'More offloaded blocks save VRAM but use more RAM and run slower. Low VRAM mode does not guarantee that every output size will fit.'**
+  String get localUpscale_memoryHelp;
+
+  /// No description provided for @localUpscale_vaeTiled.
+  ///
+  /// In en, this message translates to:
+  /// **'VAE tiling'**
+  String get localUpscale_vaeTiled;
+
+  /// No description provided for @localUpscale_vaeTileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Tile size'**
+  String get localUpscale_vaeTileSize;
+
+  /// No description provided for @localUpscale_vaeOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tile overlap'**
+  String get localUpscale_vaeOverlap;
+
+  /// No description provided for @localUpscale_vaeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller tiles save VRAM; overlap reduces seams. This tiles VAE encoding and decoding, not the complete upscaling pipeline.'**
+  String get localUpscale_vaeHelp;
+
+  /// No description provided for @localUpscale_experimental.
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental variation'**
+  String get localUpscale_experimental;
+
+  /// No description provided for @localUpscale_inputNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Input noise'**
+  String get localUpscale_inputNoise;
+
+  /// No description provided for @localUpscale_latentNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Latent noise'**
+  String get localUpscale_latentNoise;
+
+  /// No description provided for @localUpscale_noiseHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep both at 0 to preserve the current behavior. Increasing noise adds variation, not guaranteed detail or quality, and may change lines and faces.'**
+  String get localUpscale_noiseHelp;
+
+  /// No description provided for @localUpscale_restoreDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore defaults'**
+  String get localUpscale_restoreDefaults;
 
   /// No description provided for @localUpscale_rtxHelp.
   ///

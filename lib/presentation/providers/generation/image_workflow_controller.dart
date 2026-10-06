@@ -11,6 +11,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/max_enhance_utils.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/models/image/image_params.dart';
+import '../../../data/models/upscale/local_upscale_models.dart';
 import 'generation_params_notifier.dart';
 
 enum ImageWorkflowMode { base, inpaint, enhance, upscale }
@@ -186,6 +187,8 @@ class UpscaleWorkflowSettings {
     this.backend = defaultBackend,
     this.localModel = 'anime',
     this.localScale = 1.5,
+    this.localSeedvr2Model = 'seedvr2-3b',
+    this.localSeedvr2Options = const {},
     this.comfyModule = defaultComfyModule,
     this.comfyScale = defaultComfyScale,
     this.comfyModel = defaultComfyModel,
@@ -216,6 +219,12 @@ class UpscaleWorkflowSettings {
   final UpscaleBackend backend;
   final String localModel;
   final double localScale;
+  final String localSeedvr2Model;
+  final Map<String, Seedvr2Options> localSeedvr2Options;
+  Seedvr2Options get selectedSeedvr2Options =>
+      (localSeedvr2Options[localModel] ?? const Seedvr2Options()).normalized(
+        localModel,
+      );
   final ComfyUpscaleModule comfyModule;
   final double comfyScale;
   final String comfyModel;
@@ -241,6 +250,8 @@ class UpscaleWorkflowSettings {
     UpscaleBackend? backend,
     String? localModel,
     double? localScale,
+    String? localSeedvr2Model,
+    Map<String, Seedvr2Options>? localSeedvr2Options,
     ComfyUpscaleModule? comfyModule,
     double? comfyScale,
     String? comfyModel,
@@ -255,6 +266,8 @@ class UpscaleWorkflowSettings {
       backend: backend ?? this.backend,
       localModel: localModel ?? this.localModel,
       localScale: localScale ?? this.localScale,
+      localSeedvr2Model: localSeedvr2Model ?? this.localSeedvr2Model,
+      localSeedvr2Options: localSeedvr2Options ?? this.localSeedvr2Options,
       comfyModule: comfyModule ?? this.comfyModule,
       comfyScale: comfyScale ?? this.comfyScale,
       comfyModel: comfyModel ?? this.comfyModel,
@@ -644,6 +657,11 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
                     1.5)
                 .toDouble()
                 .clamp(1.0, 4.0),
+        localSeedvr2Model:
+            _storage.getSetting(StorageKeys.localSeedvr2Model) == 'seedvr2-7b'
+            ? 'seedvr2-7b'
+            : 'seedvr2-3b',
+        localSeedvr2Options: _readLocalSeedvr2Options(),
         comfyModule: persistedComfyModule,
         comfyScale: persistedScale,
         comfyModel: currentModel,
@@ -1192,10 +1210,46 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   int get sourceRevision => _sourceImageRequestId;
   bool get isDisposed => _isDisposed;
 
+  Map<String, Seedvr2Options> _readLocalSeedvr2Options() {
+    final raw = _storage.getSetting(StorageKeys.localSeedvr2Options);
+    return Map.unmodifiable({
+      for (final id in ['seedvr2-3b', 'seedvr2-7b'])
+        if (raw is Map && raw[id] is Map)
+          id: Seedvr2Options.fromJson(raw[id], modelId: id),
+    });
+  }
+
   void updateLocalUpscaleModel(String model) {
     if (state.isToolRunning) return;
-    state = state.copyWith(upscale: state.upscale.copyWith(localModel: model));
+    final seedvr2 = model == 'seedvr2-3b' || model == 'seedvr2-7b';
+    state = state.copyWith(
+      upscale: state.upscale.copyWith(
+        localModel: model,
+        localSeedvr2Model: seedvr2 ? model : null,
+      ),
+    );
     unawaited(_storage.setSetting(StorageKeys.localUpscaleModel, model));
+    if (seedvr2) {
+      unawaited(_storage.setSetting(StorageKeys.localSeedvr2Model, model));
+    }
+  }
+
+  void updateLocalSeedvr2Options(Seedvr2Options options) {
+    if (state.isToolRunning) return;
+    final id = state.upscale.localModel;
+    if (id != 'seedvr2-3b' && id != 'seedvr2-7b') return;
+    final values = Map<String, Seedvr2Options>.unmodifiable({
+      ...state.upscale.localSeedvr2Options,
+      id: options.normalized(id),
+    });
+    state = state.copyWith(
+      upscale: state.upscale.copyWith(localSeedvr2Options: values),
+    );
+    unawaited(
+      _storage.setSetting(StorageKeys.localSeedvr2Options, {
+        for (final entry in values.entries) entry.key: entry.value.toJson(),
+      }),
+    );
   }
 
   void updateLocalUpscaleScale(double scale) {

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -69,11 +70,16 @@ class LocalUpscalePanel extends ConsumerWidget {
     final models = cloud
         ? const AsyncData<List<LocalUpscaleModel>>([])
         : ref.watch(localUpscaleModelsProvider);
-    final installed = (models.valueOrNull ?? [])
-        .where((m) => m.installed)
-        .toList();
-    final selected = installed
-        .where((m) => m.id == workflow.upscale.localModel)
+    final available =
+        models.valueOrNull ??
+        [...localUpscaleCatalog, ...advancedUpscaleCatalog];
+    final installed = available.where((m) => m.installed).toList();
+    final selected = available
+        .where(
+          (m) =>
+              m.id == workflow.upscale.localModel &&
+              (m.installed || m.method != LocalUpscaleMethod.standard),
+        )
         .firstOrNull;
     final method =
         advancedUpscaleCatalog
@@ -81,7 +87,10 @@ class LocalUpscalePanel extends ConsumerWidget {
             .firstOrNull
             ?.method ??
         LocalUpscaleMethod.standard;
-    final methodModels = installed.where((m) => m.method == method).toList();
+    final methodModels =
+        (method == LocalUpscaleMethod.standard ? installed : available)
+            .where((m) => m.method == method)
+            .toList();
     final params = forGeneration
         ? ref.watch(generationParamsNotifierProvider)
         : null;
@@ -106,6 +115,7 @@ class LocalUpscalePanel extends ConsumerWidget {
         width > 0 &&
         height > 0 &&
         selected != null &&
+        selected.installed &&
         width *
                 height *
                 selected.inferenceScale(scale) *
@@ -202,6 +212,8 @@ class LocalUpscalePanel extends ConsumerWidget {
                     controller.updateLocalUpscaleModel(
                       next == LocalUpscaleMethod.standard
                           ? localUpscaleDefaultModel
+                          : next == LocalUpscaleMethod.seedvr2
+                          ? workflow.upscale.localSeedvr2Model
                           : advancedUpscaleCatalog
                                 .firstWhere((m) => m.method == next)
                                 .id,
@@ -264,7 +276,7 @@ class LocalUpscalePanel extends ConsumerWidget {
                   (model) => DropdownMenuItem(
                     value: model.id,
                     child: Text(
-                      localUpscaleModelName(context, model),
+                      '${localUpscaleModelName(context, model)}${model.installed ? '' : ' · ${l.localUpscale_notInstalled}'}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: labelStyle,
@@ -318,9 +330,17 @@ class LocalUpscalePanel extends ConsumerWidget {
               style: captionStyle,
             ),
           const SizedBox(height: 8),
+          if (method == LocalUpscaleMethod.seedvr2)
+            _Seedvr2AdvancedSettings(
+              key: ValueKey('seedvr2-advanced-${workflow.upscale.localModel}'),
+              enabled: !busy,
+            ),
           Text(switch (method) {
             LocalUpscaleMethod.standard => l.localUpscale_description,
-            LocalUpscaleMethod.seedvr2 => l.localUpscale_seedvr2Help,
+            LocalUpscaleMethod.seedvr2 =>
+              workflow.upscale.localModel == 'seedvr2-7b'
+                  ? l.localUpscale_seedvr2SevenHelp
+                  : l.localUpscale_seedvr2Help,
             LocalUpscaleMethod.rtx => l.localUpscale_rtxHelp,
           }, style: captionStyle),
           if (!Platform.isWindows)
@@ -328,7 +348,9 @@ class LocalUpscalePanel extends ConsumerWidget {
               l.localUpscale_unsupportedPlatform,
               style: TextStyle(color: theme.colorScheme.error),
             ),
-          if (hasSource && selected != null && !localSupported)
+          if (selected?.installed != true && !models.isLoading)
+            Text(l.localUpscale_notInstalled, style: captionStyle),
+          if (hasSource && selected?.installed == true && !localSupported)
             Text(
               l.localUpscale_sizeLimit,
               style: TextStyle(color: theme.colorScheme.error),
@@ -419,6 +441,312 @@ class LocalUpscalePanel extends ConsumerWidget {
         ),
       ),
       child: styledContent,
+    );
+  }
+}
+
+class _Seedvr2AdvancedSettings extends ConsumerWidget {
+  const _Seedvr2AdvancedSettings({super.key, required this.enabled});
+  final bool enabled;
+
+  Widget _number(
+    BuildContext context,
+    String id,
+    String label,
+    double value,
+    double min,
+    double max,
+    ValueChanged<double> onChanged,
+  ) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: UpscaleControlStyle.label(Theme.of(context)),
+          ),
+        ),
+        const SizedBox(width: 8),
+        EditableDoubleField(
+          key: ValueKey(id),
+          value: value,
+          min: min,
+          max: max,
+          decimals: 0,
+          width: 100,
+          enabled: enabled,
+          onChanged: onChanged,
+        ),
+      ],
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    final theme = Theme.of(context);
+    final label = UpscaleControlStyle.label(theme);
+    final caption = UpscaleControlStyle.caption(theme);
+    final settings = ref.watch(imageWorkflowControllerProvider).upscale;
+    final options = settings.selectedSeedvr2Options;
+    final maximum = Seedvr2Options.maxBlocks(settings.localModel);
+    void update(Seedvr2Options Function(Seedvr2Options) change) {
+      final current = ref.read(imageWorkflowControllerProvider).upscale;
+      if (current.localModel != settings.localModel) return;
+      ref
+          .read(imageWorkflowControllerProvider.notifier)
+          .updateLocalSeedvr2Options(change(current.selectedSeedvr2Options));
+    }
+
+    Widget noise(
+      String id,
+      String title,
+      double value,
+      ValueChanged<double> change,
+    ) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text(title, style: label)),
+            Text(value.toStringAsFixed(2), style: caption),
+          ],
+        ),
+        Slider(
+          key: ValueKey(id),
+          value: value,
+          min: 0,
+          max: 1,
+          divisions: 100,
+          onChanged: enabled ? change : null,
+        ),
+      ],
+    );
+    return SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        trackHeight: 3,
+        tickMarkShape: SliderTickMarkShape.noTickMark,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
+      ),
+      child: ExpansionTile(
+        key: const ValueKey('seedvr2-advanced-toggle'),
+        enabled: enabled,
+        tilePadding: EdgeInsets.zero,
+        minTileHeight: 32,
+        dense: true,
+        shape: const Border(),
+        collapsedShape: const Border(),
+        title: Text(l.localUpscale_advancedSettings, style: label),
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l.localUpscale_seedvr2Color, style: label),
+              const SizedBox(height: 4),
+              DropdownButtonFormField<String>(
+                key: ValueKey('seedvr2-color-${options.colorCorrection}'),
+                initialValue: options.colorCorrection,
+                isExpanded: true,
+                style: label,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                ),
+                items: [
+                  for (final color in Seedvr2Options.colors)
+                    DropdownMenuItem(
+                      value: color,
+                      child: Text(
+                        color == 'none' ? l.localUpscale_colorNone : color,
+                        style: label,
+                      ),
+                    ),
+                ],
+                onChanged: enabled
+                    ? (value) {
+                        if (value != null) {
+                          update(
+                            (current) =>
+                                current.copyWith(colorCorrection: value),
+                          );
+                        }
+                      }
+                    : null,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(l.localUpscale_seedvr2Seed, style: label),
+                  ),
+                  EditableDoubleField(
+                    key: const ValueKey('seedvr2-seed'),
+                    value: options.seed.toDouble(),
+                    min: 0,
+                    max: 0xffffffff.toDouble(),
+                    decimals: 0,
+                    width: 112,
+                    enabled: enabled,
+                    onChanged: (value) => update(
+                      (current) => current.copyWith(seed: value.round()),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: l.generation_seedRandom,
+                    padding: const EdgeInsets.all(4),
+                    visualDensity: VisualDensity.standard,
+                    style: IconButton.styleFrom(
+                      fixedSize: const Size.square(28),
+                      minimumSize: const Size.square(28),
+                      maximumSize: const Size.square(28),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 28,
+                      minHeight: 28,
+                    ),
+                    onPressed: enabled
+                        ? () => update(
+                            (current) => current.copyWith(
+                              seed: math.Random().nextInt(0x100000000),
+                            ),
+                          )
+                        : null,
+                    icon: const Icon(Icons.shuffle, size: 16),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(l.localUpscale_seedvr2Memory, style: label),
+              const SizedBox(height: 4),
+              UpscaleChoiceBar<bool>(
+                choices: [
+                  (
+                    value: false,
+                    label: l.localUpscale_memoryRecommended,
+                    icon: null,
+                  ),
+                  (value: true, label: l.localUpscale_memoryLow, icon: null),
+                ],
+                selected: options.blocksToSwap > 0,
+                onSelected: enabled
+                    ? (low) => update(
+                        (current) =>
+                            current.copyWith(blocksToSwap: low ? maximum : 0),
+                      )
+                    : null,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(l.localUpscale_blocksToSwap, style: label),
+                  ),
+                  Text('${options.blocksToSwap} / $maximum', style: caption),
+                ],
+              ),
+              Slider(
+                key: const ValueKey('seedvr2-blocks'),
+                value: options.blocksToSwap.toDouble(),
+                min: 0,
+                max: maximum.toDouble(),
+                divisions: maximum,
+                onChanged: enabled
+                    ? (value) => update(
+                        (current) =>
+                            current.copyWith(blocksToSwap: value.round()),
+                      )
+                    : null,
+              ),
+              Text(l.localUpscale_memoryHelp, style: caption),
+              Row(
+                children: [
+                  Expanded(child: Text(l.localUpscale_vaeTiled, style: label)),
+                  Switch(
+                    value: options.vaeTiled,
+                    onChanged: enabled
+                        ? (value) => update(
+                            (current) => current.copyWith(vaeTiled: value),
+                          )
+                        : null,
+                  ),
+                ],
+              ),
+              if (options.vaeTiled) ...[
+                _number(
+                  context,
+                  'seedvr2-tile-size',
+                  l.localUpscale_vaeTileSize,
+                  options.vaeTileSize.toDouble(),
+                  128,
+                  4096,
+                  (value) => update(
+                    (current) => current.copyWith(vaeTileSize: value.round()),
+                  ),
+                ),
+                _number(
+                  context,
+                  'seedvr2-tile-overlap',
+                  l.localUpscale_vaeOverlap,
+                  options.vaeTileOverlap.toDouble(),
+                  0,
+                  (options.vaeTileSize - 64).toDouble(),
+                  (value) => update(
+                    (current) =>
+                        current.copyWith(vaeTileOverlap: value.round()),
+                  ),
+                ),
+              ],
+              Text(l.localUpscale_vaeHelp, style: caption),
+              ExpansionTile(
+                key: const ValueKey('seedvr2-experimental-toggle'),
+                enabled: enabled,
+                tilePadding: EdgeInsets.zero,
+                minTileHeight: 32,
+                dense: true,
+                shape: const Border(),
+                collapsedShape: const Border(),
+                title: Text(l.localUpscale_experimental, style: label),
+                children: [
+                  Text(l.localUpscale_noiseHelp, style: caption),
+                  const SizedBox(height: 8),
+                  noise(
+                    'seedvr2-input-noise',
+                    l.localUpscale_inputNoise,
+                    options.inputNoise,
+                    (value) => update(
+                      (current) => current.copyWith(inputNoise: value),
+                    ),
+                  ),
+                  noise(
+                    'seedvr2-latent-noise',
+                    l.localUpscale_latentNoise,
+                    options.latentNoise,
+                    (value) => update(
+                      (current) => current.copyWith(latentNoise: value),
+                    ),
+                  ),
+                ],
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  key: const ValueKey('seedvr2-reset'),
+                  onPressed: enabled
+                      ? () => update((_) => const Seedvr2Options())
+                      : null,
+                  child: Text(l.localUpscale_restoreDefaults, style: label),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

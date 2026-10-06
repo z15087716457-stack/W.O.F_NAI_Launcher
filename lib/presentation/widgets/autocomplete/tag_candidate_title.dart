@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/autocomplete/completion_models.dart';
@@ -15,6 +17,8 @@ class TagCandidateTitle extends StatelessWidget {
     this.iconSize = 12,
     this.iconKey,
     this.trailing,
+    this.trailingExtent = 22,
+    this.availableWidth,
   });
 
   final String title;
@@ -25,11 +29,64 @@ class TagCandidateTitle extends StatelessWidget {
   final double iconSize;
   final Key? iconKey;
   final Widget? trailing;
+  final double trailingExtent;
+  final double? availableWidth;
+  bool get _hasCategory => showCategory && category != TagCategory.general;
+  TextStyle get _textStyle => (style ?? const TextStyle()).copyWith(
+    leadingDistribution: TextLeadingDistribution.even,
+  );
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context) {
+    if (maxLines == 1 || trailing == null) return _row(context);
+    if (availableWidth != null) return _measured(context, availableWidth!);
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _measured(context, constraints.maxWidth),
+    );
+  }
+
+  Widget _measured(BuildContext context, double width) {
+    final reserved = trailingExtent + (_hasCategory ? iconSize + 3 : 0);
+    final painter = TextPainter(
+      text: TextSpan(
+        text: title,
+        style: DefaultTextStyle.of(context).style.merge(_textStyle),
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      locale: Localizations.maybeLocaleOf(context),
+      maxLines: maxLines,
+      ellipsis: maxLines == null ? null : '…',
+    )..layout(maxWidth: math.max(1, width - reserved));
+    final height = painter.height;
+    painter.dispose();
+    return SizedBox(
+      height: math.max(height, trailingExtent),
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: _row(context, height: height),
+      ),
+    );
+  }
+
+  Widget _aligned(Widget child, double extent, double? height) => height == null
+      ? child
+      : SizedBox(
+          width: extent,
+          height: math.max(height, extent),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Transform.translate(
+              offset: Offset(0, (height - extent) / 2),
+              child: child,
+            ),
+          ),
+        );
+
+  Widget _row(BuildContext context, {double? height}) => Row(
     mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: maxLines == 1
+    crossAxisAlignment: height == null
         ? CrossAxisAlignment.center
         : CrossAxisAlignment.start,
     children: [
@@ -41,22 +98,26 @@ class TagCandidateTitle extends StatelessWidget {
           overflow: maxLines == null
               ? TextOverflow.clip
               : TextOverflow.ellipsis,
-          style: style,
+          style: _textStyle,
         ),
       ),
-      if (showCategory && category != TagCategory.general) ...[
+      if (_hasCategory) ...[
         const SizedBox(width: 3),
-        Tooltip(
-          message: TagCategoryVisuals.label(context, category),
-          child: Icon(
-            TagCategoryVisuals.icon(category),
-            key: iconKey,
-            size: iconSize,
-            color: TagCategoryVisuals.color(context, category),
+        _aligned(
+          Tooltip(
+            message: TagCategoryVisuals.label(context, category),
+            child: Icon(
+              TagCategoryVisuals.icon(category),
+              key: iconKey,
+              size: iconSize,
+              color: TagCategoryVisuals.color(context, category),
+            ),
           ),
+          iconSize,
+          height,
         ),
       ],
-      if (trailing != null) trailing!,
+      if (trailing != null) _aligned(trailing!, trailingExtent, height),
     ],
   );
 }

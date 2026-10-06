@@ -43,7 +43,7 @@ class AdvancedUpscaleComponentManager {
            );
 
   static const manifestSha256 =
-      '7d72744fc08f883bfd754d48ab35c0349c77caa3d16af41c1add37649a4ce337';
+      '0de0f816647899c778751c9f94a33dc259554eb6e37ba2330f80f74d36d2097c';
   final String manifestDigest;
   final Future<Directory> Function() _rootDirectory;
   final Future<Uint8List> Function(String) _loadAsset;
@@ -121,18 +121,57 @@ class AdvancedUpscaleComponentManager {
   }
 
   String _key(String id) => switch (id) {
-    'seedvr2-3b' => 'seedvr2',
+    'seedvr2-3b' || 'seedvr2-7b' => 'seedvr2',
     'rtx-vsr' => 'rtx',
     _ => throw const LocalUpscaleException(LocalUpscaleError.invalidModel),
   };
   File _pointer(String id) => File(p.join(directory.path, '${_key(id)}.json'));
-  Future<Map<String, dynamic>?> _receipt(String id) async {
+  List<Map<String, dynamic>> _seedModels(
+    String id, {
+    bool requireModel = true,
+  }) => (_manifest['seedvr2']['models'] as List)
+      .cast<Map<String, dynamic>>()
+      .where((file) => file['id'] == null || requireModel && file['id'] == id)
+      .toList();
+
+  List<Map<String, dynamic>> _requiredFiles(
+    String id, {
+    bool requireModel = true,
+  }) {
+    final spec = _manifest[_key(id)] as Map<String, dynamic>;
+    return _key(id) == 'rtx'
+        ? (spec['files'] as List)
+              .cast<Map<String, dynamic>>()
+              .map((file) => {...file, 'path': file['name']})
+              .toList()
+        : [
+            ...(spec['source']['files'] as List)
+                .cast<Map<String, dynamic>>()
+                .map((file) => {...file, 'path': 'source/${file['path']}'}),
+            ..._seedModels(
+              id,
+              requireModel: requireModel,
+            ).map((file) => {...file, 'path': 'models/${file['name']}'}),
+            for (final name in ['runner', 'requirements'])
+              {
+                ...spec[name] as Map<String, dynamic>,
+                'path': p.basename(spec[name]['asset'] as String),
+              },
+          ];
+  }
+
+  Future<Map<String, dynamic>?> _receipt(
+    String id, {
+    bool requireModel = true,
+  }) async {
     final file = _pointer(id);
     if (!await file.exists()) return null;
     try {
       final value =
           jsonDecode(await file.readAsString()) as Map<String, dynamic>;
       if ((value['manifest'] != manifestDigest &&
+              value['manifest'] !=
+                  '7d72744fc08f883bfd754d48ab35c0349c77caa3d16af41c1add37649a4ce337' &&
               (id != 'rtx-vsr' ||
                   value['manifest'] !=
                       'c89c13dbf28b78b3a09ee8820715ac7c2850d84c4ec98742c56e46406cb7924b')) ||
@@ -145,26 +184,20 @@ class AdvancedUpscaleComponentManager {
       );
       if (!await root.exists()) return null;
       await _contained(root.path);
-      final spec = _manifest[_key(id)] as Map<String, dynamic>;
-      final expected = _key(id) == 'rtx'
-          ? (spec['files'] as List)
-                .cast<Map<String, dynamic>>()
-                .map((f) => {...f, 'path': f['name']})
-                .toList()
-          : [
-              ...(spec['source']['files'] as List)
-                  .cast<Map<String, dynamic>>()
-                  .map((f) => {...f, 'path': 'source/${f['path']}'}),
-              ...(spec['models'] as List).cast<Map<String, dynamic>>().map(
-                (f) => {...f, 'path': 'models/${f['name']}'},
-              ),
-              for (final name in ['runner', 'requirements'])
-                {
-                  ...spec[name] as Map<String, dynamic>,
-                  'path': p.basename(spec[name]['asset'] as String),
-                },
-            ];
+      if (_key(id) == 'seedvr2' &&
+          requireModel &&
+          !_seedModels(id).any((file) => file['id'] == id)) {
+        return null;
+      }
+      final expected = _requiredFiles(id, requireModel: requireModel);
       final stored = (value['files'] as List).cast<Map<String, dynamic>>();
+      if (_key(id) == 'seedvr2') {
+        final python = stored
+            .where((file) => file['path'] == 'venv/Scripts/python.exe')
+            .firstOrNull;
+        if (python == null) return null;
+        expected.add(python);
+      }
       for (final file in expected) {
         final match = stored
             .where((item) => item['path'] == file['path'])
@@ -175,12 +208,14 @@ class AdvancedUpscaleComponentManager {
           return null;
         }
       }
-      for (final item
-          in (value['files'] as List).cast<Map<String, dynamic>>()) {
+      for (final item in expected) {
         final path = _child(root.path, item['path'] as String);
         await _contained(path);
         final f = File(path);
-        if (!await f.exists() || await f.length() != item['bytes']) return null;
+        final bytes = stored.firstWhere(
+          (file) => file['path'] == item['path'],
+        )['bytes'];
+        if (!await f.exists() || await f.length() != bytes) return null;
       }
       return value;
     } catch (_) {
@@ -196,7 +231,14 @@ class AdvancedUpscaleComponentManager {
       result.add(
         model.withInstalled(
           receipt != null,
-          diskBytes: receipt?['disk_bytes'] as int? ?? 0,
+          diskBytes: receipt == null
+              ? 0
+              : model.method == LocalUpscaleMethod.seedvr2
+              ? _seedModels(
+                      model.id,
+                    ).firstWhere((file) => file['id'] == model.id)['bytes']
+                    as int
+              : receipt['disk_bytes'] as int,
         ),
       );
     }
@@ -422,6 +464,13 @@ class AdvancedUpscaleComponentManager {
         );
       }
       final host = await worker();
+      if (key == 'seedvr2') {
+        final shared = await _receipt(id, requireModel: false);
+        if (shared != null) {
+          await _addSeedModel(id, shared, cancellation, onProgress);
+          return;
+        }
+      }
       final name = '$key-${const Uuid().v4()}';
       stage = Directory(p.join(directory.path, 'installs', name));
       await _contained(stage.path);
@@ -571,8 +620,7 @@ class AdvancedUpscaleComponentManager {
           'bytes': await File(python).length(),
           'sha256': await _hash(File(python)),
         });
-        for (final item
-            in (spec['models'] as List).cast<Map<String, dynamic>>()) {
+        for (final item in _seedModels(id)) {
           final file = await _download(
             item,
             cancellation,
@@ -595,27 +643,7 @@ class AdvancedUpscaleComponentManager {
         );
       }
       onProgress?.call('checking', null);
-      var diskBytes = 0;
-      await for (final file in stage.list(
-        recursive: true,
-        followLinks: false,
-      )) {
-        if (file is File) diskBytes += await file.length();
-      }
-      final receipt = {
-        'ready': true,
-        'manifest': manifestDigest,
-        'installation': name,
-        'files': verified,
-        'disk_bytes': diskBytes,
-      };
-      final pointer = _pointer(id);
-      await _contained(pointer.path);
-      final temporary = File('${pointer.path}.part');
-      await _contained(temporary.path);
-      await temporary.writeAsString(jsonEncode(receipt), flush: true);
-      if (await pointer.exists()) await pointer.delete();
-      await temporary.rename(pointer.path);
+      await _publishReceipt(id, name, verified);
       stage = null; // The venv must remain at its original absolute path.
     } finally {
       try {
@@ -626,11 +654,126 @@ class AdvancedUpscaleComponentManager {
     }
   }
 
+  Future<void> _publishReceipt(
+    String id,
+    String installation,
+    List<Map<String, dynamic>> files,
+  ) async {
+    final root = Directory(p.join(directory.path, 'installs', installation));
+    var diskBytes = 0;
+    await for (final file in root.list(recursive: true, followLinks: false)) {
+      if (file is File) diskBytes += await file.length();
+    }
+    final pointer = _pointer(id);
+    await _contained(pointer.path);
+    final temporary = File('${pointer.path}.part');
+    await _contained(temporary.path);
+    await temporary.writeAsString(
+      jsonEncode({
+        'ready': true,
+        'manifest': manifestDigest,
+        'installation': installation,
+        'files': files,
+        'disk_bytes': diskBytes,
+      }),
+      flush: true,
+    );
+    await temporary.rename(pointer.path);
+  }
+
+  Future<void> _verifyReceipt(
+    String id,
+    Map<String, dynamic> receipt,
+    LocalUpscaleCancellation cancellation, {
+    bool requireModel = true,
+  }) async {
+    final root = p.join(directory.path, 'installs', receipt['installation']);
+    final stored = (receipt['files'] as List).cast<Map<String, dynamic>>();
+    final files = _requiredFiles(id, requireModel: requireModel);
+    if (_key(id) == 'seedvr2') {
+      files.add(
+        stored.firstWhere((file) => file['path'] == 'venv/Scripts/python.exe'),
+      );
+    }
+    for (final file in files) {
+      cancellation.check();
+      await _verify(File(_child(root, file['path'] as String)), file);
+    }
+  }
+
+  Future<void> _addSeedModel(
+    String id,
+    Map<String, dynamic> receipt,
+    LocalUpscaleCancellation cancellation,
+    void Function(String, double?)? progress,
+  ) async {
+    await _verifyReceipt(id, receipt, cancellation, requireModel: false);
+    final root = p.join(directory.path, 'installs', receipt['installation']);
+    final added = <File>[];
+    var committed = false;
+    try {
+      final files = (receipt['files'] as List)
+          .cast<Map<String, dynamic>>()
+          .toList();
+      for (final item in _seedModels(id).where((file) => file['id'] == id)) {
+        final relative = 'models/${item['name']}';
+        final target = File(_child(root, relative));
+        await _contained(target.path);
+        final download = await _download(
+          item,
+          cancellation,
+          progress,
+          'weights',
+        );
+        cancellation.check();
+        await target.parent.create(recursive: true);
+        await download.rename(target.path);
+        added.add(target);
+        files.removeWhere((file) => file['path'] == relative);
+        files.add({...item, 'path': relative});
+      }
+      cancellation.check();
+      await _publishReceipt(id, receipt['installation'] as String, files);
+      committed = true;
+    } finally {
+      if (!committed) {
+        for (final file in added) {
+          if (await file.exists()) await file.delete();
+        }
+      }
+    }
+  }
+
   Future<void> delete(String id) async {
     claimInference();
     try {
       await initialize();
-      final receipt = await _receipt(id);
+      final receipt = await _receipt(id, requireModel: false);
+      if (receipt != null && _key(id) == 'seedvr2') {
+        final files = (receipt['files'] as List)
+            .cast<Map<String, dynamic>>()
+            .toList();
+        final root = p.join(
+          directory.path,
+          'installs',
+          receipt['installation'],
+        );
+        for (final item in _seedModels(id).where((file) => file['id'] == id)) {
+          final relative = 'models/${item['name']}';
+          final target = File(_child(root, relative));
+          await _contained(target.path);
+          if (await target.exists()) await target.delete();
+          files.removeWhere((file) => file['path'] == relative);
+        }
+        final modelPaths = (_manifest['seedvr2']['models'] as List)
+            .where((file) => file['id'] != null)
+            .map((file) => 'models/${file['name']}')
+            .toSet();
+        if (files.any((file) => modelPaths.contains(file['path']))) {
+          await _publishReceipt(id, receipt['installation'] as String, files);
+          return;
+        }
+      }
       if (receipt != null) {
         await _remove(
           Directory(
@@ -652,19 +795,16 @@ class AdvancedUpscaleComponentManager {
     String output,
     int width,
     int height,
-    LocalUpscaleCancellation cancellation,
-  ) async {
+    LocalUpscaleCancellation cancellation, {
+    Seedvr2Options seedvr2Options = const Seedvr2Options(),
+  }) async {
     await initialize();
     final receipt = await _receipt(id);
     if (receipt == null) {
       throw const LocalUpscaleException(LocalUpscaleError.modelMissing);
     }
     final root = p.join(directory.path, 'installs', receipt['installation']);
-    for (final spec
-        in (receipt['files'] as List).cast<Map<String, dynamic>>()) {
-      cancellation.check();
-      await _verify(File(_child(root, spec['path'])), spec);
-    }
+    await _verifyReceipt(id, receipt, cancellation);
     cancellation.check();
     final host = await worker();
     if (_key(id) == 'rtx') {
@@ -691,15 +831,15 @@ class AdvancedUpscaleComponentManager {
         '--model_dir',
         p.join(root, 'models'),
         '--dit_model',
-        'seedvr2_ema_3b_fp8_e4m3fn.safetensors',
+        _seedModels(id).firstWhere((file) => file['id'] == id)['name']
+            as String,
         '--resolution',
         '${width < height ? width : height}',
         '--max_resolution',
         '${width > height ? width : height}',
         '--batch_size',
         '1',
-        '--seed',
-        '0',
+        ...seedvr2Options.arguments(id),
         '--cuda_device',
         '0',
         '--attention_mode',
@@ -710,8 +850,6 @@ class AdvancedUpscaleComponentManager {
         'cpu',
         '--tensor_offload_device',
         'cpu',
-        '--vae_encode_tiled',
-        '--vae_decode_tiled',
       ],
     );
   }

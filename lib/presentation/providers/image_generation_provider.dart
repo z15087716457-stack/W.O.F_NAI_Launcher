@@ -1276,6 +1276,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
               source,
               modelId: settings.localModel,
               scale: settings.localScale,
+              seedvr2Options: settings.selectedSeedvr2Options,
             );
       } catch (error, stackTrace) {
         AppLogger.e(

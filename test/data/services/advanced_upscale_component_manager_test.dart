@@ -139,8 +139,11 @@ void main() {
 
   AdvancedUpscaleComponentManager seedFixture({
     int runtimeExit = 0,
+    int inferenceExit = 0,
     String diagnostics = '',
     void Function(Map<String, String>)? onInferenceEnvironment,
+    void Function(String)? onDownload,
+    void Function()? onRuntime,
   }) {
     final worker = Uint8List.fromList([1, 3, 5]);
     final source = Uint8List.fromList(utf8.encode('source'));
@@ -191,7 +194,20 @@ void main() {
                 'sha256': sha256.convert(worker).toString(),
               },
             'models': [
-              {...downloadSpec(weights, 'weights'), 'name': 'model.bin'},
+              {
+                ...downloadSpec(weights, 'weights'),
+                'id': 'seedvr2-3b',
+                'name': 'seedvr2_ema_3b_fp8_e4m3fn.safetensors',
+              },
+              {
+                ...downloadSpec(Uint8List.fromList([7, 8, 9, 10]), 'weights7b'),
+                'id': 'seedvr2-7b',
+                'name': 'seedvr2_ema_7b_fp8_e4m3fn.safetensors',
+              },
+              {
+                ...downloadSpec(Uint8List.fromList([10, 11]), 'vae'),
+                'name': 'ema_vae_fp16.safetensors',
+              },
             ],
           },
         }),
@@ -199,10 +215,13 @@ void main() {
     );
     final dio = Dio()
       ..httpClientAdapter = _Adapter((request) async {
+        onDownload?.call(request.uri.path);
         final bytes = switch (request.uri.path) {
           '/source' => sourceZip,
           '/uv' => uvZip,
           '/weights' => weights,
+          '/weights7b' => Uint8List.fromList([7, 8, 9, 10]),
+          '/vae' => Uint8List.fromList([10, 11]),
           _ => throw StateError('unexpected download'),
         };
         return ResponseBody.fromBytes(bytes, 200);
@@ -236,6 +255,7 @@ void main() {
           expect(env['PYTHONIOENCODING'], 'utf-8');
         }
         if (venv) {
+          onRuntime?.call();
           expect(args, contains('--managed-python'));
           final python = File(p.join(args.last, 'Scripts', 'python.exe'));
           await python.parent.create(recursive: true);
@@ -254,12 +274,18 @@ void main() {
         );
         when(() => process.stderr).thenAnswer(
           (_) => Stream.value(
-            Uint8List.fromList(utf8.encode(sync ? diagnostics : '')),
+            Uint8List.fromList(
+              utf8.encode(sync || args.contains('--output') ? diagnostics : ''),
+            ),
           ),
         );
-        when(
-          () => process.exitCode,
-        ).thenAnswer((_) async => sync ? runtimeExit : 0);
+        when(() => process.exitCode).thenAnswer(
+          (_) async => sync
+              ? runtimeExit
+              : args.contains('--output')
+              ? inferenceExit
+              : 0,
+        );
         return process;
       },
     );
@@ -350,6 +376,396 @@ void main() {
   );
 
   test(
+    'SeedVR2 variants share runtime and VAE without deleting each other',
+    () async {
+      var runtimes = 0;
+      final downloads = <String>[];
+      final manager = seedFixture(
+        onRuntime: () => runtimes++,
+        onDownload: downloads.add,
+      );
+      addTearDown(manager.dispose);
+      await manager.install(
+        'seedvr2-3b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final first = await manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      );
+      await manager.install(
+        'seedvr2-7b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final second = await manager.command(
+        'seedvr2-7b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      );
+      expect(second.executable, first.executable);
+      expect(
+        second.arguments,
+        contains('seedvr2_ema_7b_fp8_e4m3fn.safetensors'),
+      );
+      expect(runtimes, 1);
+      expect(downloads, ['/source', '/uv', '/weights', '/vae', '/weights7b']);
+      expect(
+        (await manager.models()).take(2).every((m) => m.installed),
+        isTrue,
+      );
+      await manager.delete('seedvr2-3b');
+      expect((await manager.models()).take(2).map((m) => m.installed), [
+        false,
+        true,
+      ]);
+      await manager.command(
+        'seedvr2-7b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      );
+      await manager.install(
+        'seedvr2-3b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      expect(runtimes, 1);
+      expect(downloads.where((path) => path == '/vae').length, 1);
+      await manager.delete('seedvr2-7b');
+      expect((await manager.models()).first.installed, isTrue);
+      await manager.delete('seedvr2-3b');
+      expect(
+        await File(p.join(manager.directory.path, 'seedvr2.json')).exists(),
+        isFalse,
+      );
+    },
+  );
+
+  test('7B can be installed first and 3B adds only its own weights', () async {
+    final downloads = <String>[];
+    var runtimes = 0;
+    final manager = seedFixture(
+      onDownload: downloads.add,
+      onRuntime: () => runtimes++,
+    );
+    addTearDown(manager.dispose);
+    await manager.install(
+      'seedvr2-7b',
+      cancellation: LocalUpscaleCancellation(),
+    );
+    expect((await manager.models()).take(2).map((model) => model.installed), [
+      false,
+      true,
+    ]);
+    await manager.install(
+      'seedvr2-3b',
+      cancellation: LocalUpscaleCancellation(),
+    );
+    expect(downloads, ['/source', '/uv', '/weights7b', '/vae', '/weights']);
+    expect(runtimes, 1);
+    await manager.delete('seedvr2-7b');
+    await manager.command(
+      'seedvr2-3b',
+      'in',
+      'out',
+      64,
+      64,
+      LocalUpscaleCancellation(),
+    );
+  });
+
+  test(
+    'cancelled 7B addition leaves the existing 3B installation usable',
+    () async {
+      final cancellation = LocalUpscaleCancellation();
+      final manager = seedFixture(
+        onDownload: (path) {
+          if (path == '/weights7b') cancellation.cancel();
+        },
+      );
+      addTearDown(manager.dispose);
+      await manager.install(
+        'seedvr2-3b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      await expectLater(
+        manager.install('seedvr2-7b', cancellation: cancellation),
+        throwsA(error(LocalUpscaleError.cancelled)),
+      );
+      expect((await manager.models()).take(2).map((m) => m.installed), [
+        true,
+        false,
+      ]);
+      await manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      );
+    },
+  );
+
+  test(
+    'legacy 3B receipt survives only when current common and model hashes match',
+    () async {
+      final manager = seedFixture();
+      addTearDown(manager.dispose);
+      await manager.install(
+        'seedvr2-3b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final pointer = File(p.join(manager.directory.path, 'seedvr2.json'));
+      final receipt =
+          jsonDecode(await pointer.readAsString()) as Map<String, dynamic>;
+      receipt['manifest'] =
+          '7d72744fc08f883bfd754d48ab35c0349c77caa3d16af41c1add37649a4ce337';
+      await pointer.writeAsString(jsonEncode(receipt));
+      expect((await manager.models()).first.installed, isTrue);
+      expect((await manager.models())[1].installed, isFalse);
+      final requirements = (receipt['files'] as List).firstWhere(
+        (item) => item['path'] == 'requirements.lock',
+      );
+      requirements['sha256'] = '0' * 64;
+      await pointer.writeAsString(jsonEncode(receipt));
+      expect((await manager.models()).first.installed, isFalse);
+    },
+  );
+
+  test(
+    'corrupt sibling weights do not prevent inference with verified 3B',
+    () async {
+      final manager = seedFixture();
+      addTearDown(manager.dispose);
+      for (final id in ['seedvr2-3b', 'seedvr2-7b']) {
+        await manager.install(id, cancellation: LocalUpscaleCancellation());
+      }
+      final command = await manager.command(
+        'seedvr2-7b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      );
+      final modelDirectory =
+          command.arguments[command.arguments.indexOf('--model_dir') + 1];
+      await File(
+        p.join(modelDirectory, 'seedvr2_ema_7b_fp8_e4m3fn.safetensors'),
+      ).writeAsBytes([0, 0, 0, 0]);
+      await expectLater(
+        manager.command(
+          'seedvr2-7b',
+          'in',
+          'out',
+          64,
+          64,
+          LocalUpscaleCancellation(),
+        ),
+        throwsA(error(LocalUpscaleError.integrity)),
+      );
+      await manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      );
+    },
+  );
+
+  test(
+    'SeedVR2 options normalize malformed values without changing defaults',
+    () {
+      expect(
+        const Seedvr2Options().toJson(),
+        Seedvr2Options.fromJson(null, modelId: 'seedvr2-3b').toJson(),
+      );
+      final value = Seedvr2Options.fromJson({
+        'seed': -3,
+        'colorCorrection': '--unsafe',
+        'blocksToSwap': 99,
+        'vaeTileSize': 200,
+        'vaeTileOverlap': 999,
+        'inputNoise': double.nan,
+        'latentNoise': 2,
+        'vaeTiled': 'false',
+      }, modelId: 'seedvr2-3b');
+      expect(value.seed, 0);
+      expect(value.colorCorrection, 'lab');
+      expect(value.blocksToSwap, 32);
+      expect(value.vaeTileSize, 192);
+      expect(value.vaeTileOverlap, 128);
+      expect(value.inputNoise, 0);
+      expect(value.latentNoise, 1);
+      expect(value.vaeTiled, isTrue);
+      expect(
+        Seedvr2Options.fromJson(value.toJson(), modelId: 'seedvr2-3b').toJson(),
+        value.toJson(),
+      );
+      expect(
+        const Seedvr2Options(
+          blocksToSwap: 36,
+        ).normalized('seedvr2-7b').blocksToSwap,
+        36,
+      );
+    },
+  );
+
+  test(
+    'SeedVR2 command uses selected advanced parameters and fixed safe backend',
+    () async {
+      final manager = seedFixture();
+      addTearDown(manager.dispose);
+      await manager.install(
+        'seedvr2-7b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final command = await manager.command(
+        'seedvr2-7b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+        seedvr2Options: const Seedvr2Options(
+          seed: 123,
+          colorCorrection: 'wavelet',
+          blocksToSwap: 36,
+          vaeTiled: false,
+          inputNoise: .1,
+          latentNoise: .2,
+        ),
+      );
+      String argument(String name) =>
+          command.arguments[command.arguments.indexOf(name) + 1];
+      expect(argument('--seed'), '123');
+      expect(argument('--color_correction'), 'wavelet');
+      expect(argument('--blocks_to_swap'), '36');
+      expect(argument('--input_noise_scale'), '0.1');
+      expect(argument('--latent_noise_scale'), '0.2');
+      expect(argument('--attention_mode'), 'sdpa');
+      expect(command.arguments, contains('--swap_io_components'));
+      expect(command.arguments, isNot(contains('--vae_encode_tiled')));
+      expect(command.arguments, isNot(contains('--vae_decode_tiled')));
+      expect(
+        command.arguments,
+        contains('seedvr2_ema_7b_fp8_e4m3fn.safetensors'),
+      );
+      final defaults = const Seedvr2Options().arguments('seedvr2-3b');
+      expect(
+        defaults,
+        containsAll([
+          '--vae_encode_tiled',
+          '--vae_decode_tiled',
+          '1024',
+          '128',
+        ]),
+      );
+      expect(defaults, isNot(contains('--swap_io_components')));
+    },
+  );
+
+  test(
+    'bundled SeedVR2 variants have pinned weights and synchronized manifest hash',
+    () async {
+      final bytes = await File(
+        'assets/local_upscale/advanced_manifest.json',
+      ).readAsBytes();
+      expect(
+        sha256.convert(bytes).toString(),
+        AdvancedUpscaleComponentManager.manifestSha256,
+      );
+      final manifest = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+      final models = manifest['seedvr2']['models'] as List;
+      expect(
+        models.where((file) => file['id'] != null).map((file) => file['id']),
+        ['seedvr2-3b', 'seedvr2-7b'],
+      );
+      final seven = models.firstWhere((file) => file['id'] == 'seedvr2-7b');
+      expect(seven['bytes'], 8239729704);
+      expect(
+        seven['sha256'],
+        '1fdbf3877b7d1eb266038d3a165a977f17dbb4daa4a0f0d334d5461476963037',
+      );
+      expect(manifest['seedvr2']['package_versions']['transformers'], '4.55.4');
+      final lock = await File(
+        'assets/local_upscale/seedvr2/requirements.lock',
+      ).readAsBytes();
+      expect(
+        sha256.convert(lock).toString(),
+        manifest['seedvr2']['requirements']['sha256'],
+      );
+    },
+  );
+
+  test(
+    'SeedVR2 out-of-memory fails clearly without changing model or exposing secrets',
+    () async {
+      final manager = seedFixture(
+        inferenceExit: 1,
+        diagnostics:
+            '{"error":"OutOfMemoryError","detail":"CUDA out of memory https://private.test/?token=private"}',
+      );
+      addTearDown(manager.dispose);
+      await manager.install(
+        'seedvr2-7b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final base = _BaseModels();
+      when(
+        () => base.directory,
+      ).thenReturn(Directory(p.join(temporary.path, 'base'))..createSync());
+      when(() => base.initialize()).thenAnswer((_) async {});
+      final service = LocalUpscaleService(
+        base,
+        advanced: manager,
+        supportedPlatform: true,
+      );
+      await expectLater(
+        service.upscale(
+          Uint8List.fromList(img.encodePng(img.Image(width: 32, height: 24))),
+          modelId: 'seedvr2-7b',
+          scale: 2,
+          cancellation: LocalUpscaleCancellation(),
+        ),
+        throwsA(
+          isA<LocalUpscaleException>()
+              .having(
+                (error) => error.code,
+                'code',
+                LocalUpscaleError.outOfMemory,
+              )
+              .having(
+                (error) => error.details,
+                'details',
+                allOf(
+                  contains('CUDA out of memory'),
+                  isNot(contains('private')),
+                ),
+              ),
+        ),
+      );
+      expect((await manager.models()).take(2).map((model) => model.installed), [
+        false,
+        true,
+      ]);
+      expect(service.isRunning, isFalse);
+      verify(() => base.releaseInference()).called(1);
+    },
+  );
+
+  test(
     'bounded diagnostics preserve the first failure and the final result',
     () async {
       final process = _Process();
@@ -429,7 +845,7 @@ void main() {
       );
       addTearDown(manager.dispose);
       final models = await manager.models();
-      expect(models.map((m) => m.id), ['seedvr2-3b', 'rtx-vsr']);
+      expect(models.map((m) => m.id), ['seedvr2-3b', 'seedvr2-7b', 'rtx-vsr']);
       expect(models.every((m) => !m.installed), isTrue);
       await expectLater(
         manager.command(

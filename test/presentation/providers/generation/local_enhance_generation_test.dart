@@ -68,6 +68,7 @@ void main() {
     registerFallbackValue(const ImageParams());
     registerFallbackValue(Uint8List(0));
     registerFallbackValue(LocalUpscaleCancellation());
+    registerFallbackValue(const Seedvr2Options());
     temp = await Directory.systemTemp.createTemp('studio_local_enhance_test_');
     Hive.init(temp.path);
     await Hive.openBox(StorageKeys.settingsBox);
@@ -91,6 +92,7 @@ void main() {
     'cancel-multiple',
     'cancel-after-first',
     'frozen-settings',
+    'seedvr2-frozen',
     'missing-model',
     'closed',
     'variations',
@@ -98,6 +100,8 @@ void main() {
   ]) {
     test('automatic local enhancement: $scenario', () async {
       final cancelScenario = scenario.startsWith('cancel');
+      final seedvr2 = scenario == 'seedvr2-frozen';
+      final options = <Seedvr2Options>[];
       final api = _Api();
       final service = _Upscale();
       final raw = _png(48, 32);
@@ -128,6 +132,7 @@ void main() {
           any(),
           modelId: any(named: 'modelId'),
           scale: any(named: 'scale'),
+          seedvr2Options: any(named: 'seedvr2Options'),
           cancellation: any(named: 'cancellation'),
           onProgress: any(named: 'onProgress'),
         ),
@@ -136,11 +141,12 @@ void main() {
           call.namedArguments[#modelId] as String,
           call.namedArguments[#scale] as double,
         ));
+        options.add(call.namedArguments[#seedvr2Options] as Seedvr2Options);
         activeCancellation =
             call.namedArguments[#cancellation] as LocalUpscaleCancellation;
         if ((cancelScenario &&
                 (scenario != 'cancel-after-first' || inferred.length == 2)) ||
-            scenario == 'frozen-settings') {
+            (scenario == 'frozen-settings' || seedvr2)) {
           return pending.future;
         }
         if (scenario == 'failure') {
@@ -163,9 +169,12 @@ void main() {
           localUpscaleServiceProvider.overrideWithValue(service),
           localUpscaleModelsProvider.overrideWith(
             (ref) async => [
-              localUpscaleCatalog.first.withInstalled(
-                scenario != 'missing-model',
-              ),
+              (seedvr2
+                      ? advancedUpscaleCatalog.firstWhere(
+                          (model) => model.id == 'seedvr2-7b',
+                        )
+                      : localUpscaleCatalog.first)
+                  .withInstalled(scenario != 'missing-model'),
             ],
           ),
         ],
@@ -175,6 +184,16 @@ void main() {
       final workflow = container.read(imageWorkflowControllerProvider.notifier);
       workflow.openTemporaryTool(_png(1248, 1824), ImageWorkflowMode.enhance);
       workflow.setEnhanceLocalUpscale();
+      if (seedvr2) {
+        workflow.updateLocalUpscaleModel('seedvr2-7b');
+        workflow.updateLocalSeedvr2Options(
+          const Seedvr2Options(
+            seed: 99,
+            blocksToSwap: 36,
+            colorCorrection: 'wavelet',
+          ),
+        );
+      }
       if (scenario == 'closed') workflow.closeTemporaryTool();
       final params = container
           .read(generationRequestParamsProvider)
@@ -189,19 +208,20 @@ void main() {
           ? notifier.generateForExplore(params).then<void>((_) {})
           : notifier.generate(
               params,
-              imagesPerRequestOverride:
-                  [
-                    'multiple-samples',
-                    'cancel-multiple',
-                    'cancel-after-first',
-                  ].contains(scenario)
+              imagesPerRequestOverride: seedvr2
+                  ? 2
+                  : [
+                      'multiple-samples',
+                      'cancel-multiple',
+                      'cancel-after-first',
+                    ].contains(scenario)
                   ? 2
                   : 1,
               operation: scenario == 'variations'
                   ? ImageOperation.variations
                   : null,
             );
-      if (cancelScenario || scenario == 'frozen-settings') {
+      if (cancelScenario || (scenario == 'frozen-settings' || seedvr2)) {
         await _until(
           () =>
               container.read(localUpscaleTaskProvider).running &&
@@ -223,6 +243,11 @@ void main() {
           notifier.cancel();
           expect(activeCancellation!.isCancelled, isTrue);
         } else {
+          if (seedvr2) {
+            workflow.updateLocalSeedvr2Options(
+              const Seedvr2Options(seed: 1000),
+            );
+          }
           workflow.updateLocalUpscaleScale(3);
           workflow.updateLocalUpscaleModel('rtx');
         }
@@ -248,7 +273,8 @@ void main() {
       } else {
         expect(state.status, GenerationStatus.completed);
         final excluded = ['closed', 'variations', 'explore'].contains(scenario);
-        final count = scenario == 'batch' || scenario == 'multiple-samples'
+        final count =
+            scenario == 'batch' || scenario == 'multiple-samples' || seedvr2
             ? 2
             : 1;
         expect(inferred.length, excluded ? 0 : count);
@@ -277,7 +303,7 @@ void main() {
             state.currentImages.map((image) => image.batchIndex).toList(),
             List.generate(count, (i) => i),
           );
-          if (scenario != 'frozen-settings') {
+          if (scenario != 'frozen-settings' && !seedvr2) {
             final metadata = await ImageMetadataService().getMetadataFromBytes(
               state.currentImages.first.bytes,
             );
@@ -292,8 +318,23 @@ void main() {
             LocalUpscaleError.processFailed,
           );
         }
-        if (scenario == 'frozen-settings') {
-          expect(inferred.single, ('anime', 1.5));
+        if ((scenario == 'frozen-settings' || seedvr2)) {
+          expect(
+            inferred,
+            List.filled(seedvr2 ? 2 : 1, (
+              seedvr2 ? 'seedvr2-7b' : 'anime',
+              1.5,
+            )),
+          );
+          if (seedvr2) {
+            expect(
+              options.map(
+                (value) =>
+                    (value.seed, value.blocksToSwap, value.colorCorrection),
+              ),
+              [(99, 36, 'wavelet'), (99, 36, 'wavelet')],
+            );
+          }
         }
       }
       expect(container.read(generationParamsNotifierProvider), same(draft));

@@ -12258,7 +12258,75 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localUpscale_seedvr2Help =>
-      '細部の再構築を重視。約 3.9 GB のモデルと独立した Python/CUDA 環境のダウンロードが必要です。NVIDIA GPU が必要です。';
+      '3B FP8 は画質とリソースのバランスを重視。重みは約 3.4 GB、VAE は約 0.5 GB。VAE と Python/CUDA 環境を 7B と共有します。NVIDIA GPU が必要です。';
+
+  @override
+  String get localUpscale_seedvr2SevenHelp =>
+      '7B FP8 はより高い画質が期待できますが、VRAM と処理時間が増えます。重みは約 8.2 GB。VAE と Python/CUDA 環境を 3B と共有します。';
+
+  @override
+  String get localUpscale_outOfMemory =>
+      'VRAM が不足しています。3B、低い倍率、または詳細設定の低 VRAM モードと VAE タイル処理をお試しください。モデルは自動で切り替えていません。';
+
+  @override
+  String get localUpscale_modelWeights => '重み';
+
+  @override
+  String get localUpscale_advancedSettings => '詳細設定';
+
+  @override
+  String get localUpscale_seedvr2Color => '色補正';
+
+  @override
+  String get localUpscale_colorNone => '補正なし';
+
+  @override
+  String get localUpscale_seedvr2Seed => '乱数シード';
+
+  @override
+  String get localUpscale_seedvr2Memory => 'VRAM 使用方針';
+
+  @override
+  String get localUpscale_memoryRecommended => '推奨';
+
+  @override
+  String get localUpscale_memoryLow => '低 VRAM';
+
+  @override
+  String get localUpscale_blocksToSwap => 'CPU に退避する層数';
+
+  @override
+  String get localUpscale_memoryHelp =>
+      '退避する層を増やすと VRAM を節約できますが、RAM 使用量と処理時間が増えます。低 VRAM モードでも、すべての出力サイズで動作するとは限りません。';
+
+  @override
+  String get localUpscale_vaeTiled => 'VAE タイル処理';
+
+  @override
+  String get localUpscale_vaeTileSize => 'タイルサイズ';
+
+  @override
+  String get localUpscale_vaeOverlap => 'タイルの重なり';
+
+  @override
+  String get localUpscale_vaeHelp =>
+      '小さいタイルは VRAM を節約し、重なりは継ぎ目を抑えます。VAE のエンコード／デコードの分割であり、超解像処理全体の分割ではありません。';
+
+  @override
+  String get localUpscale_experimental => '実験的な変化';
+
+  @override
+  String get localUpscale_inputNoise => '入力ノイズ';
+
+  @override
+  String get localUpscale_latentNoise => '潜在ノイズ';
+
+  @override
+  String get localUpscale_noiseHelp =>
+      '両方を 0 にすると現在の動作を維持します。ノイズを増やしても画質や細部の向上は保証されず、線や顔が変化する場合があります。';
+
+  @override
+  String get localUpscale_restoreDefaults => '既定値に戻す';
 
   @override
   String get localUpscale_rtxHelp =>

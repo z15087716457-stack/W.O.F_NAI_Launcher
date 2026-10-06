@@ -11,6 +11,7 @@ enum LocalUpscaleError {
   noVulkan,
   noCuda,
   noRtx,
+  outOfMemory,
   processFailed,
   modelOperationFailed,
   timeout,
@@ -114,6 +115,13 @@ const advancedUpscaleCatalog = [
     method: LocalUpscaleMethod.seedvr2,
   ),
   LocalUpscaleModel(
+    id: 'seedvr2-7b',
+    name: 'SeedVR2 7B FP8',
+    engineName: 'seedvr2',
+    scales: [1, 2, 3, 4],
+    method: LocalUpscaleMethod.seedvr2,
+  ),
+  LocalUpscaleModel(
     id: 'rtx-vsr',
     name: 'NVIDIA RTX Video Super Resolution',
     engineName: 'rtx-vsr',
@@ -121,6 +129,130 @@ const advancedUpscaleCatalog = [
     method: LocalUpscaleMethod.rtx,
   ),
 ];
+
+class Seedvr2Options {
+  const Seedvr2Options({
+    this.colorCorrection = 'lab',
+    this.seed = 0,
+    this.blocksToSwap = 0,
+    this.vaeTiled = true,
+    this.vaeTileSize = 1024,
+    this.vaeTileOverlap = 128,
+    this.inputNoise = 0,
+    this.latentNoise = 0,
+  });
+
+  static const colors = [
+    'lab',
+    'wavelet',
+    'wavelet_adaptive',
+    'hsv',
+    'adain',
+    'none',
+  ];
+  static int maxBlocks(String modelId) => modelId == 'seedvr2-7b' ? 36 : 32;
+  final String colorCorrection;
+  final int seed, blocksToSwap, vaeTileSize, vaeTileOverlap;
+  final bool vaeTiled;
+  final double inputNoise, latentNoise;
+
+  Seedvr2Options copyWith({
+    String? colorCorrection,
+    int? seed,
+    int? blocksToSwap,
+    bool? vaeTiled,
+    int? vaeTileSize,
+    int? vaeTileOverlap,
+    double? inputNoise,
+    double? latentNoise,
+  }) => Seedvr2Options(
+    colorCorrection: colorCorrection ?? this.colorCorrection,
+    seed: seed ?? this.seed,
+    blocksToSwap: blocksToSwap ?? this.blocksToSwap,
+    vaeTiled: vaeTiled ?? this.vaeTiled,
+    vaeTileSize: vaeTileSize ?? this.vaeTileSize,
+    vaeTileOverlap: vaeTileOverlap ?? this.vaeTileOverlap,
+    inputNoise: inputNoise ?? this.inputNoise,
+    latentNoise: latentNoise ?? this.latentNoise,
+  );
+
+  Seedvr2Options normalized(String modelId) {
+    final tile = (vaeTileSize.clamp(128, 4096) ~/ 64) * 64;
+    return copyWith(
+      colorCorrection: colors.contains(colorCorrection)
+          ? colorCorrection
+          : 'lab',
+      seed: seed.clamp(0, 0xffffffff),
+      blocksToSwap: blocksToSwap.clamp(0, maxBlocks(modelId)),
+      vaeTileSize: tile,
+      vaeTileOverlap: (vaeTileOverlap.clamp(0, tile - 64) ~/ 8) * 8,
+      inputNoise: inputNoise.isFinite ? inputNoise.clamp(0, 1) : 0,
+      latentNoise: latentNoise.isFinite ? latentNoise.clamp(0, 1) : 0,
+    );
+  }
+
+  factory Seedvr2Options.fromJson(Object? value, {required String modelId}) {
+    final map = value is Map ? value : const {};
+    int integer(String key, int fallback) =>
+        map[key] is num && (map[key] as num).isFinite
+        ? (map[key] as num).toInt()
+        : fallback;
+    double number(String key) =>
+        map[key] is num ? (map[key] as num).toDouble() : 0;
+    return Seedvr2Options(
+      colorCorrection: map['colorCorrection'] is String
+          ? map['colorCorrection'] as String
+          : 'lab',
+      seed: integer('seed', 0),
+      blocksToSwap: integer('blocksToSwap', 0),
+      vaeTiled: map['vaeTiled'] is bool ? map['vaeTiled'] as bool : true,
+      vaeTileSize: integer('vaeTileSize', 1024),
+      vaeTileOverlap: integer('vaeTileOverlap', 128),
+      inputNoise: number('inputNoise'),
+      latentNoise: number('latentNoise'),
+    ).normalized(modelId);
+  }
+
+  Map<String, Object> toJson() => {
+    'colorCorrection': colorCorrection,
+    'seed': seed,
+    'blocksToSwap': blocksToSwap,
+    'vaeTiled': vaeTiled,
+    'vaeTileSize': vaeTileSize,
+    'vaeTileOverlap': vaeTileOverlap,
+    'inputNoise': inputNoise,
+    'latentNoise': latentNoise,
+  };
+
+  List<String> arguments(String modelId) {
+    final value = normalized(modelId);
+    return [
+      '--seed',
+      '${value.seed}',
+      '--color_correction',
+      value.colorCorrection,
+      '--input_noise_scale',
+      '${value.inputNoise}',
+      '--latent_noise_scale',
+      '${value.latentNoise}',
+      '--blocks_to_swap',
+      '${value.blocksToSwap}',
+      if (value.blocksToSwap >= 24) '--swap_io_components',
+      if (value.vaeTiled) ...[
+        '--vae_encode_tiled',
+        '--vae_decode_tiled',
+        '--vae_encode_tile_size',
+        '${value.vaeTileSize}',
+        '--vae_decode_tile_size',
+        '${value.vaeTileSize}',
+        '--vae_encode_tile_overlap',
+        '${value.vaeTileOverlap}',
+        '--vae_decode_tile_overlap',
+        '${value.vaeTileOverlap}',
+      ],
+    ];
+  }
+}
 
 class LocalUpscaleResult {
   const LocalUpscaleResult(this.bytes, this.width, this.height);

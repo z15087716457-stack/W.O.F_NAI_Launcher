@@ -8,6 +8,7 @@ import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 
@@ -42,6 +43,86 @@ void main() {
     tearDown(() {
       container.dispose();
     });
+
+    test(
+      'local SeedVR2 options persist per variant and do not reuse ComfyUI settings',
+      () async {
+        await Hive.box(
+          StorageKeys.settingsBox,
+        ).put(StorageKeys.comfyuiSeedvr2BlocksToSwap, 28);
+        final controller = container.read(
+          imageWorkflowControllerProvider.notifier,
+        );
+        controller.updateLocalUpscaleModel('seedvr2-3b');
+        expect(
+          container
+              .read(imageWorkflowControllerProvider)
+              .upscale
+              .selectedSeedvr2Options
+              .blocksToSwap,
+          0,
+        );
+        controller.updateLocalSeedvr2Options(
+          const Seedvr2Options(
+            seed: 42,
+            blocksToSwap: 36,
+            colorCorrection: 'wavelet',
+            vaeTileSize: 256,
+            vaeTileOverlap: 500,
+          ),
+        );
+        controller.updateLocalUpscaleModel('seedvr2-7b');
+        expect(
+          container
+              .read(imageWorkflowControllerProvider)
+              .upscale
+              .selectedSeedvr2Options
+              .seed,
+          0,
+        );
+        controller.updateLocalSeedvr2Options(
+          const Seedvr2Options(seed: 77, blocksToSwap: 36),
+        );
+        controller.updateLocalUpscaleModel('rtx-vsr');
+        await Future<void>.delayed(Duration.zero);
+        container.dispose();
+        container = ProviderContainer();
+        final restored = container.read(
+          imageWorkflowControllerProvider.notifier,
+        );
+        expect(
+          container
+              .read(imageWorkflowControllerProvider)
+              .upscale
+              .localSeedvr2Model,
+          'seedvr2-7b',
+        );
+        restored.updateLocalUpscaleModel('seedvr2-3b');
+        final three = container
+            .read(imageWorkflowControllerProvider)
+            .upscale
+            .selectedSeedvr2Options;
+        expect(
+          (three.seed, three.blocksToSwap, three.vaeTileOverlap),
+          (42, 32, 192),
+        );
+        expect(three.colorCorrection, 'wavelet');
+        restored.updateLocalSeedvr2Options(const Seedvr2Options());
+        restored.updateLocalUpscaleModel('seedvr2-7b');
+        final seven = container
+            .read(imageWorkflowControllerProvider)
+            .upscale
+            .selectedSeedvr2Options;
+        expect((seven.seed, seven.blocksToSwap), (77, 36));
+        expect(
+          container
+              .read(imageWorkflowControllerProvider)
+              .upscale
+              .seedvr2BlocksToSwap,
+          28,
+        );
+      },
+    );
 
     test(
       'enterEnhanceMode should project source dimensions into generation params',

@@ -12039,7 +12039,75 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localUpscale_seedvr2Help =>
-      '侧重细节重建。需下载约 3.9 GB 模型及独立的 Python/CUDA 运行环境，需要 NVIDIA 显卡。';
+      '3B FP8 兼顾效果与资源占用。权重约 3.4 GB，VAE 约 0.5 GB；与 7B 共用 VAE 和 Python/CUDA 环境，需要 NVIDIA 显卡。';
+
+  @override
+  String get localUpscale_seedvr2SevenHelp =>
+      '7B FP8 有更高的画质潜力，但需要更多显存与时间。权重约 8.2 GB；与 3B 共用 VAE 和 Python/CUDA 环境。';
+
+  @override
+  String get localUpscale_outOfMemory =>
+      '显存不足。可改用 3B、降低倍率，或在高级设置启用低显存和 VAE 分块。没有自动切换型号。';
+
+  @override
+  String get localUpscale_modelWeights => '权重';
+
+  @override
+  String get localUpscale_advancedSettings => '高级设置';
+
+  @override
+  String get localUpscale_seedvr2Color => '色彩校正';
+
+  @override
+  String get localUpscale_colorNone => '不校正';
+
+  @override
+  String get localUpscale_seedvr2Seed => '随机种子';
+
+  @override
+  String get localUpscale_seedvr2Memory => '显存策略';
+
+  @override
+  String get localUpscale_memoryRecommended => '推荐';
+
+  @override
+  String get localUpscale_memoryLow => '低显存';
+
+  @override
+  String get localUpscale_blocksToSwap => 'CPU 卸载层数';
+
+  @override
+  String get localUpscale_memoryHelp =>
+      '卸载更多层可省显存，但会占用更多内存并变慢。低显存模式不保证任意输出尺寸都能运行。';
+
+  @override
+  String get localUpscale_vaeTiled => 'VAE 分块';
+
+  @override
+  String get localUpscale_vaeTileSize => '分块大小';
+
+  @override
+  String get localUpscale_vaeOverlap => '分块重叠';
+
+  @override
+  String get localUpscale_vaeHelp =>
+      '小分块更省显存，重叠可减轻接缝。这是 VAE 编码／解码分块，不是整条超分流程分块。';
+
+  @override
+  String get localUpscale_experimental => '实验性变化';
+
+  @override
+  String get localUpscale_inputNoise => '输入噪声';
+
+  @override
+  String get localUpscale_latentNoise => '潜空间噪声';
+
+  @override
+  String get localUpscale_noiseHelp =>
+      '两项保持 0 可沿用当前行为。增加噪声是增加变化，不保证细节或画质更好，也可能改变线条和脸部。';
+
+  @override
+  String get localUpscale_restoreDefaults => '恢复默认';
 
   @override
   String get localUpscale_rtxHelp =>
@@ -24130,7 +24198,75 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localUpscale_seedvr2Help =>
-      '側重細節重建。需下載約 3.9 GB 模型及獨立的 Python/CUDA 執行環境，需要 NVIDIA 顯示卡。';
+      '3B FP8 兼顧效果與資源佔用。權重約 3.4 GB，VAE 約 0.5 GB；與 7B 共用 VAE 和 Python/CUDA 環境，需要 NVIDIA 顯示卡。';
+
+  @override
+  String get localUpscale_seedvr2SevenHelp =>
+      '7B FP8 有更高的畫質潛力，但需要更多視訊記憶體與時間。權重約 8.2 GB；與 3B 共用 VAE 和 Python/CUDA 環境。';
+
+  @override
+  String get localUpscale_outOfMemory =>
+      '視訊記憶體不足。可改用 3B、降低倍率，或在進階設定啟用低視訊記憶體和 VAE 分塊。沒有自動切換型號。';
+
+  @override
+  String get localUpscale_modelWeights => '權重';
+
+  @override
+  String get localUpscale_advancedSettings => '進階設定';
+
+  @override
+  String get localUpscale_seedvr2Color => '色彩校正';
+
+  @override
+  String get localUpscale_colorNone => '不校正';
+
+  @override
+  String get localUpscale_seedvr2Seed => '隨機種子';
+
+  @override
+  String get localUpscale_seedvr2Memory => '視訊記憶體策略';
+
+  @override
+  String get localUpscale_memoryRecommended => '推薦';
+
+  @override
+  String get localUpscale_memoryLow => '低視訊記憶體';
+
+  @override
+  String get localUpscale_blocksToSwap => 'CPU 卸載層數';
+
+  @override
+  String get localUpscale_memoryHelp =>
+      '卸載更多層可省視訊記憶體，但會佔用更多記憶體並變慢。低視訊記憶體模式不保證任意輸出尺寸都能執行。';
+
+  @override
+  String get localUpscale_vaeTiled => 'VAE 分塊';
+
+  @override
+  String get localUpscale_vaeTileSize => '分塊大小';
+
+  @override
+  String get localUpscale_vaeOverlap => '分塊重疊';
+
+  @override
+  String get localUpscale_vaeHelp =>
+      '小分塊更省視訊記憶體，重疊可減輕接縫。這是 VAE 編碼／解碼分塊，不是整條超分流程分塊。';
+
+  @override
+  String get localUpscale_experimental => '實驗性變化';
+
+  @override
+  String get localUpscale_inputNoise => '輸入噪聲';
+
+  @override
+  String get localUpscale_latentNoise => '潛空間噪聲';
+
+  @override
+  String get localUpscale_noiseHelp =>
+      '兩項保持 0 可沿用當前行為。增加噪聲是增加變化，不保證細節或畫質更好，也可能改變線條和臉部。';
+
+  @override
+  String get localUpscale_restoreDefaults => '恢復預設';
 
   @override
   String get localUpscale_rtxHelp =>

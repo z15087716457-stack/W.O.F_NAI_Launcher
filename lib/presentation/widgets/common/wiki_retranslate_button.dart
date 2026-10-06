@@ -104,11 +104,17 @@ class TagTranslationIndicator extends ConsumerWidget {
         key: ValueKey('tag-translation-${wiki ? 'wiki' : 'name'}-$tag'),
         tooltip: message,
         padding: EdgeInsets.zero,
+        alignment: Alignment.center,
+        iconSize: size,
+        visualDensity: VisualDensity.standard,
         constraints: const BoxConstraints.tightFor(
           width: extent,
           height: extent,
         ),
         style: IconButton.styleFrom(
+          alignment: Alignment.center,
+          minimumSize: const Size.square(extent),
+          maximumSize: const Size.square(extent),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         onPressed: failed
@@ -116,14 +122,17 @@ class TagTranslationIndicator extends ConsumerWidget {
                   ? controller.retranslateWiki(surface: surface, tag: tag)
                   : controller.retranslateName(surface: surface, tag: tag)
             : null,
-        icon: TranslationIcon(
-          size: size,
-          busy: activity.phase == TagTranslationPhase.translating,
-          color: failed
-              ? scheme.error
-              : activity.phase == TagTranslationPhase.queued
-              ? scheme.onSurfaceVariant
-              : scheme.primary,
+        icon: Transform.translate(
+          offset: Offset(0, MediaQuery.textScalerOf(context).scale(1.5)),
+          child: TranslationIcon(
+            size: size,
+            busy: activity.phase == TagTranslationPhase.translating,
+            color: failed
+                ? scheme.error
+                : activity.phase == TagTranslationPhase.queued
+                ? scheme.onSurfaceVariant
+                : scheme.primary,
+          ),
         ),
       ),
     );
