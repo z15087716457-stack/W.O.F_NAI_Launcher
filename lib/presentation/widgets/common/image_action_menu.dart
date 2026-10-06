@@ -167,7 +167,11 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
       visualDensity: VisualDensity.standard,
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
-    final leading = Icon(action.icon, size: 16);
+    final leading = Icon(
+      action.icon,
+      size: 16,
+      color: action.destructive && action.enabled ? colors.error : null,
+    );
     final label = Text(
       action.label,
       maxLines: 1,

@@ -22,6 +22,7 @@ import '../../../../data/services/image_metadata_service.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../providers/canvas_settings_provider.dart';
 import 'canvas/canvas_feed_layout.dart';
+import 'canvas/generated_image_actions.dart';
 import 'history_batch.dart';
 import 'image_operation_badge.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
@@ -778,14 +779,17 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           onSelectionChanged: (selected) => _setBatchSelected(batch, selected),
           onTap: () =>
               _handleImageTap(context, image, clickBehavior, batch: batch),
-          onDoubleTap: clickBehavior == HistoryClickBehavior.selectPreview
-              ? () => _showLinkedDetail(context, image)
-              : null,
+          onDoubleTap: () {
+            if (_multiSelectMode || _isMultiSelectModifierPressed) return;
+            _showDetailForBehavior(context, image, clickBehavior);
+          },
           onLongPress: clickBehavior == HistoryClickBehavior.selectPreview
               ? () => _showLinkedDetail(context, image)
               : null,
           onFullscreen: () =>
               _showDetailForBehavior(context, image, clickBehavior),
+          onDelete: () =>
+              unawaited(GeneratedImageActions(ref).deleteImage(context, image)),
           enableContextMenu: true,
           enableHoverScale: true,
           hoverEffectsEnabled: !_isHistoryScrolling,

@@ -432,7 +432,12 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
     // 新批占位出现时立即飞过去；流式帧和最终图更新使用同一组身份。
     ref.listen(canvasFeedLayoutProvider, (prev, next) {
-      if (!mounted || _viewport.isEmpty || next.groups.isEmpty) return;
+      if (!mounted || _viewport.isEmpty) return;
+      if (next.groups.isEmpty) {
+        ref.read(generationCanvasGroupSelectionProvider.notifier).clear();
+        ref.read(generationPreviewSelectionProvider.notifier).clear();
+        return;
+      }
       final head = next.groups.first;
       final selected = ref.read(generationCanvasGroupSelectionProvider);
       final selectionMissing =
@@ -445,6 +450,31 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
             .selectGroup(head.key);
         _syncPreviewToGroup(next, head.key);
         _flyToGroup(next, head);
+        return;
+      }
+      // Batch deletion changes positional indices. Keep focus on the same
+      // surviving image; if it was deleted, focus a remaining neighbour.
+      final previousImage = prev == null
+          ? null
+          : _resolveSelectedImage(prev, selected);
+      if (selected?.subimage != null && previousImage != null) {
+        final group = next.groups
+            .where((group) => group.key == selected!.group)
+            .first;
+        final retainedIndex = group.tiles.indexWhere(
+          (tile) => tile.image?.id == previousImage.id,
+        );
+        final index = retainedIndex >= 0
+            ? retainedIndex
+            : selected!.subimage!.clamp(0, group.tiles.length - 1);
+        if (index != selected!.subimage) {
+          ref
+              .read(generationCanvasGroupSelectionProvider.notifier)
+              .selectTile(group.key, index);
+        }
+        final image = group.tiles[index].image;
+        if (image != null) _syncPreviewToImage(image);
+        if (retainedIndex < 0) _flyToSubimage(next, group, index);
         return;
       }
       // 完成图接管占位后只同步共享选中，不再次飞行或抢回用户移开的焦点。

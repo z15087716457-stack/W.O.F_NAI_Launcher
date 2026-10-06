@@ -18,6 +18,72 @@ import 'package:nai_launcher/presentation/widgets/common/image_detail/image_deta
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
 
 void main() {
+  testWidgets(
+    'history menu deletes only the cover and updates remaining batch count',
+    (tester) async {
+      final images = [
+        for (var i = 0; i < 3; i++)
+          _image('delete-$i').copyWith(generationRunId: 7, batchIndex: i),
+      ];
+      final other = _image('other');
+      final container = _createContainer(
+        [...images, other],
+        currentImages: images,
+        behavior: HistoryClickBehavior.selectPreview,
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      notifier.state = notifier.state.copyWith(displayImages: images);
+      await tester.pumpWidget(_historyApp(container));
+      await tester.pumpAndSettle();
+      await _openContextMenu(tester, find.byKey(const ValueKey('delete-0')));
+      await tester.tap(find.text('删除'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, '删除'));
+      await tester.pumpAndSettle();
+      final state = container.read(imageGenerationNotifierProvider);
+      expect(state.currentImages.map((image) => image.id), [
+        'delete-1',
+        'delete-2',
+      ]);
+      expect(state.displayImages.map((image) => image.id), [
+        'delete-1',
+        'delete-2',
+      ]);
+      expect(state.history.map((image) => image.id), [
+        'delete-1',
+        'delete-2',
+        'other',
+      ]);
+      expect(find.byKey(const ValueKey('delete-0')), findsNothing);
+      expect(find.byKey(const ValueKey('delete-1')), findsOneWidget);
+      expect(find.text('×2'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'explicit history multi-selection keeps rapid clicks out of details',
+    (tester) async {
+      final container = _createContainer([
+        _image('first'),
+      ], behavior: HistoryClickBehavior.selectPreview);
+      addTearDown(container.dispose);
+      await tester.pumpWidget(_historyApp(container));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.library_add_check_outlined));
+      await tester.pumpAndSettle();
+      final card = find.byKey(const ValueKey('first'));
+      await tester.tap(card);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(card);
+      await tester.pump();
+      expect(find.byType(ImageDetailViewer), findsNothing);
+      expect(
+        container.read(imageGenerationNotifierProvider).history.single.id,
+        'first',
+      );
+    },
+  );
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(

@@ -54,6 +54,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   final VoidCallback? onLongPress;
   final ValueChanged<bool>? onSelectionChanged;
   final VoidCallback? onFullscreen;
+  final VoidCallback? onDelete;
   final bool isPreviewActive;
   final Object? imageIdentity;
   final bool allowRepeatedModifierTaps;
@@ -200,6 +201,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
     this.onLongPress,
     this.onSelectionChanged,
     this.onFullscreen,
+    this.onDelete,
     this.isPreviewActive = false,
     this.imageIdentity,
     this.allowRepeatedModifierTaps = false,
@@ -1646,6 +1648,18 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       );
     }
 
+    if (widget.onDelete != null) {
+      items.add(
+        ProMenuItem(
+          id: 'delete',
+          label: context.l10n.common_delete,
+          icon: Icons.delete_outline,
+          isDanger: true,
+          onTap: widget.onDelete,
+        ),
+      );
+    }
+
     if (widget.enableSaveAction || widget.enableCopyAction) {
       addDividerIfNeeded();
     }
@@ -1824,6 +1838,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
         value: item,
         label: item.label,
         icon: item.icon ?? Icons.more_horiz,
+        destructive: item.isDanger,
       );
     }
 
@@ -1850,6 +1865,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       actions: [
         for (final id in [
           'view_detail',
+          'delete',
           'image_to_image',
           'vibe_transfer',
           'precise_reference',

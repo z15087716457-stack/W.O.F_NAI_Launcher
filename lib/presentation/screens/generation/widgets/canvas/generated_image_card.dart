@@ -68,7 +68,9 @@ Widget buildGeneratedImageCard({
         ? context.l10n.generation_failedStreamSnapshotHint
         : null,
     onTap: onTap ?? () => actions.showFullscreenImage(context, image),
+    onDoubleTap: () => actions.showFullscreenImage(context, image),
     onFullscreen: () => actions.showFullscreenImage(context, image),
+    onDelete: () => unawaited(actions.deleteImage(context, image)),
     onImageToImage: canUseAsInput
         ? () => actions.sendToImageToImage(context, image)
         : null,

@@ -13,11 +13,13 @@ import '../../../../../core/utils/vibe_file_parser.dart';
 import '../../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../../../data/services/image_metadata_service.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
+import '../../../../providers/canvas_settings_provider.dart';
 import '../../../../providers/history_click_behavior_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
 import '../../../../providers/local_gallery_provider.dart';
 import '../../../../services/image_workflow_launcher.dart';
 import '../../../../widgets/common/app_toast.dart';
+import '../../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../../widgets/common/image_detail/file_image_detail_data.dart';
 import '../../../../widgets/common/image_detail/image_detail_data.dart';
 import '../../../../widgets/common/image_detail/image_detail_viewer.dart';
@@ -34,6 +36,39 @@ class GeneratedImageActions {
   const GeneratedImageActions(this.ref);
 
   final WidgetRef ref;
+
+  /// Remove the clicked image from the generation workspace, keeping saved
+  /// gallery files. Pin membership is removed too, so a pinned copy cannot
+  /// make the deleted image reappear on the canvas.
+  Future<void> deleteImage(BuildContext context, GeneratedImage image) async {
+    final confirmed = await ThemedConfirmDialog.show(
+      context: context,
+      title: context.l10n.common_delete,
+      content: context.l10n.generation_deleteSelectedImagesConfirm(1),
+      confirmText: context.l10n.common_delete,
+      cancelText: context.l10n.common_cancel,
+      type: ThemedConfirmDialogType.danger,
+      icon: Icons.delete_outline,
+    );
+    if (!confirmed || !context.mounted) return;
+    try {
+      await ref.read(canvasPinnedNotifierProvider.notifier).remove(image.id);
+      if (!context.mounted) return;
+      ref.read(imageGenerationNotifierProvider.notifier).removeImages({
+        image.id,
+      });
+      if (ref.read(generationPreviewSelectionProvider) == image.id) {
+        ref.read(generationPreviewSelectionProvider.notifier).clear();
+      }
+    } catch (error) {
+      if (context.mounted) {
+        AppToast.error(
+          context,
+          context.l10n.bulkProgress_errorDeleteFailed(error.toString()),
+        );
+      }
+    }
+  }
 
   /// 生成图文件名：优先已保存路径的原文件名，否则回退 id 命名。
   String previewImageFileName(GeneratedImage image) {

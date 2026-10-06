@@ -194,6 +194,18 @@ class CanvasPinnedNotifier extends _$CanvasPinnedNotifier {
   /// manifest）再更新 state，持久化失败原样抛给调用方展示。
   Future<void> toggle(GeneratedImage image) => _enqueue(() => _toggle(image));
 
+  /// Explicit removal must be idempotent; repeated delete actions must never
+  /// toggle a removed image back into the pin board.
+  Future<void> remove(String imageId) => _enqueue(() => _remove(imageId));
+
+  Future<void> _remove(String imageId) async {
+    if (_disposed || !state.contains(imageId)) return;
+    await _repo.removePin(imageId);
+    if (_disposed) return;
+    _images.remove(imageId);
+    state = {...state}..remove(imageId);
+  }
+
   Future<void> _restore() async {
     final List<GeneratedImage> restored;
     try {
@@ -213,10 +225,7 @@ class CanvasPinnedNotifier extends _$CanvasPinnedNotifier {
     if (_disposed) return;
     final id = image.id;
     if (state.contains(id)) {
-      await _repo.removePin(id);
-      if (_disposed) return;
-      _images.remove(id);
-      state = {...state}..remove(id);
+      await _remove(id);
       return;
     }
     final pinned = await _repo.addPin(image);

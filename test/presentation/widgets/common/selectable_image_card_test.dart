@@ -45,7 +45,8 @@ void main() {
     await Hive.box(StorageKeys.settingsBox).clear();
   });
 
-  if (Platform.environment['CAPTURE_FEEDBACK_UI'] == '1') {
+  if (Platform.environment['CAPTURE_FEEDBACK_UI'] == '1' ||
+      Platform.environment['CAPTURE_IMAGE_ACTIONS'] == '1') {
     testWidgets('generation menu real-font locale and theme captures', (
       tester,
     ) async {
@@ -63,8 +64,11 @@ void main() {
       });
       await tester.binding.setSurfaceSize(const Size(760, 740));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      final folder = Directory('.dart_tool/feedback-ui-captures')
-        ..createSync(recursive: true);
+      final folder = Directory(
+        Platform.environment['CAPTURE_IMAGE_ACTIONS'] == '1'
+            ? '.dart_tool/generation-image-actions-20261006/captures'
+            : '.dart_tool/feedback-ui-captures',
+      )..createSync(recursive: true);
       for (final locale in const [
         Locale('zh'),
         Locale('zh', 'TW'),
@@ -80,6 +84,7 @@ void main() {
               brightness: brightness,
               captureKey: key,
               onFullscreen: _noop,
+              onDelete: _noop,
               onImageToImage: _noop,
               onVibeTransfer: _noop,
               onPreciseReference: _noop,
@@ -117,6 +122,10 @@ void main() {
           )!;
           expect(
             tester.getTopLeft(find.text(l.imageMenu_details)).dy,
+            lessThan(tester.getTopLeft(find.text(l.common_delete)).dy),
+          );
+          expect(
+            tester.getTopLeft(find.text(l.common_delete)).dy,
             lessThan(tester.getTopLeft(find.text(l.drop_img2img)).dy),
           );
           expect(tester.takeException(), isNull);
@@ -773,6 +782,7 @@ Widget _buildCardApp({
   VoidCallback? onVibeTransfer,
   VoidCallback? onPreciseReference,
   VoidCallback? onFullscreen,
+  VoidCallback? onDelete,
   VoidCallback? onEditImage,
   VoidCallback? onGenerateVariations,
   VoidCallback? onDirectorTools,
@@ -819,6 +829,7 @@ Widget _buildCardApp({
               onVibeTransfer: onVibeTransfer,
               onPreciseReference: onPreciseReference,
               onFullscreen: onFullscreen,
+              onDelete: onDelete,
               onEditImage: onEditImage,
               onGenerateVariations: onGenerateVariations,
               onDirectorTools: onDirectorTools,

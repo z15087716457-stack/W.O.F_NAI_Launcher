@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/canvas_settings_provider.dart';
@@ -12,10 +15,12 @@ import 'package:nai_launcher/presentation/widgets/common/decoded_memory_image.da
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_view.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_detail/image_detail_viewer.dart';
 
 final _png = Uint8List.fromList(img.encodePng(img.Image(width: 1, height: 1)));
 
@@ -64,6 +69,11 @@ class _Storage extends LocalStorageService {
   Set<String> getCanvasPinnedImages() => {};
 }
 
+class _Shortcuts extends ShortcutConfigNotifier {
+  @override
+  Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
+}
+
 class _Camera extends GenerationCanvasCameraNotifier {
   final targets = <CanvasCamera>[];
 
@@ -92,6 +102,7 @@ ProviderContainer _container(ImageGenerationState initial) => ProviderContainer(
     localStorageServiceProvider.overrideWith((ref) => _Storage()),
     estimatedCostProvider.overrideWithValue(7),
     generationCanvasCameraProvider.overrideWith(_Camera.new),
+    shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
   ],
 );
 
@@ -146,6 +157,145 @@ class _Pins extends CanvasPinnedNotifier {
 }
 
 void main() {
+  testWidgets(
+    'batch deletion keeps surviving image identity and clamps removed child focus',
+    (tester) async {
+      final images = [
+        for (var index = 0; index < 4; index++) _image(1, index: index),
+      ];
+      final container = _container(ImageGenerationState(history: images));
+      addTearDown(container.dispose);
+      await _mount(tester, container);
+      await tester.pumpAndSettle();
+      container
+          .read(generationPreviewSelectionProvider.notifier)
+          .select(images.last.id);
+      await tester.pumpAndSettle();
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      notifier.removeImages({images.first.id});
+      await tester.pumpAndSettle();
+      expect(
+        container.read(generationPreviewSelectionProvider),
+        images.last.id,
+      );
+      expect(
+        container.read(generationCanvasGroupSelectionProvider)?.subimage,
+        2,
+      );
+      notifier.removeImages({images.last.id});
+      await tester.pumpAndSettle();
+      expect(container.read(generationPreviewSelectionProvider), images[2].id);
+      expect(
+        container.read(generationCanvasGroupSelectionProvider)?.subimage,
+        1,
+      );
+      await _unmount(tester);
+    },
+  );
+  testWidgets(
+    'canvas single click focuses immediately; double click opens details',
+    (tester) async {
+      final image = _image(1);
+      final container = _container(ImageGenerationState(history: [image]));
+      addTearDown(container.dispose);
+      await _mount(tester, container);
+      await tester.pumpAndSettle();
+      final tile = find.byKey(const ValueKey('canvas-tile:run:1:0'));
+      final position = tester.getCenter(tile);
+      await tester.tapAt(position);
+      await tester.pump();
+      expect(
+        container.read(generationCanvasGroupSelectionProvider)?.subimage,
+        0,
+      );
+      expect(find.byType(ImageDetailViewer), findsNothing);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tapAt(position);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      final viewer = tester.widget<ImageDetailViewer>(
+        find.byType(ImageDetailViewer),
+      );
+      expect(viewer.images[viewer.initialIndex].identifier, image.id);
+      await _unmount(tester);
+    },
+  );
+
+  testWidgets(
+    'canvas delete removes only clicked image everywhere and keeps saved file',
+    (tester) async {
+      final temp = (await tester.runAsync(
+        () => Directory.systemTemp.createTemp('canvas_delete_test_'),
+      ))!;
+      addTearDown(() => temp.deleteSync(recursive: true));
+      final file = File('${temp.path}/saved.png')..writeAsBytesSync(_png);
+      final target = _image(1).copyWithFilePath(file.path);
+      final other = _image(2);
+      final container = _container(
+        ImageGenerationState(
+          currentImages: [target, other],
+          history: [target, other],
+          displayImages: [target, other],
+        ),
+      );
+      addTearDown(container.dispose);
+      await _mount(tester, container);
+      await tester.pumpAndSettle();
+      final tile = find.byKey(const ValueKey('canvas-tile:run:1:0'));
+      container
+          .read(generationPreviewSelectionProvider.notifier)
+          .select(target.id);
+      await tester.pumpAndSettle();
+      await tester.tap(tile, buttons: kSecondaryButton);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tester.pumpAndSettle();
+      final state = container.read(imageGenerationNotifierProvider);
+      expect(state.currentImages.map((image) => image.id), [other.id]);
+      expect(state.history.map((image) => image.id), [other.id]);
+      expect(state.displayImages.map((image) => image.id), [other.id]);
+      expect(container.read(generationPreviewSelectionProvider), other.id);
+      expect(find.byKey(const ValueKey('canvas-tile:run:1:0')), findsNothing);
+      expect(file.readAsBytesSync(), _png);
+      await _unmount(tester);
+    },
+  );
+
+  testWidgets(
+    'cancelling delete keeps image; deleting last clears canvas focus',
+    (tester) async {
+      final image = _image(1);
+      final container = _container(ImageGenerationState(history: [image]));
+      addTearDown(container.dispose);
+      await _mount(tester, container);
+      await tester.pumpAndSettle();
+      final tile = find.byKey(const ValueKey('canvas-tile:run:1:0'));
+      Future<void> openDelete() async {
+        await tester.tap(tile, buttons: kSecondaryButton);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Delete'));
+        await tester.pumpAndSettle();
+      }
+
+      await openDelete();
+      await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(imageGenerationNotifierProvider).history.single.id,
+        image.id,
+      );
+      await openDelete();
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tester.pumpAndSettle();
+      expect(container.read(imageGenerationNotifierProvider).history, isEmpty);
+      expect(container.read(generationPreviewSelectionProvider), isNull);
+      expect(container.read(generationCanvasGroupSelectionProvider), isNull);
+      expect(find.byType(CanvasEdgeToolbar), findsNothing);
+      await _unmount(tester);
+    },
+  );
   testWidgets('history batch request returns from child focus to whole batch', (
     tester,
   ) async {

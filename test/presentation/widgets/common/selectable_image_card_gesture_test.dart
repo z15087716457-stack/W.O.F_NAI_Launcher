@@ -9,6 +9,43 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
 
 void main() {
+  testWidgets('delete follows details in red and closes before its callback', (
+    tester,
+  ) async {
+    var deletes = 0;
+    await tester.pumpWidget(
+      _testApp(
+        _card(
+          onFullscreen: () {},
+          onDelete: () {
+            expect(find.byType(MenuAnchor), findsNothing);
+            deletes++;
+          },
+        ),
+      ),
+    );
+    await tester.tap(
+      find.byType(SelectableImageCard),
+      buttons: kSecondaryButton,
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.text('Details')).dy,
+      lessThan(tester.getTopLeft(find.text('Delete')).dy),
+    );
+    final button = tester.widget<MenuItemButton>(
+      find.ancestor(
+        of: find.text('Delete'),
+        matching: find.byType(MenuItemButton),
+      ),
+    );
+    final colors = Theme.of(tester.element(find.text('Delete'))).colorScheme;
+    expect(button.style!.foregroundColor!.resolve({}), colors.error);
+    expect((button.leadingIcon! as Icon).color, colors.error);
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    expect(deletes, 1);
+  });
   testWidgets('linked double click is immediate tap then one double callback', (
     tester,
   ) async {
@@ -201,6 +238,7 @@ Widget _card({
   VoidCallback? onTap,
   VoidCallback? onDoubleTap,
   VoidCallback? onFullscreen,
+  VoidCallback? onDelete,
   bool isPreviewActive = false,
   bool isSelected = false,
   bool allowRepeatedModifierTaps = false,
@@ -220,6 +258,7 @@ Widget _card({
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       onFullscreen: onFullscreen,
+      onDelete: onDelete,
       enableSelection: false,
       enableSaveAction: enableSaveAction,
       enableCopyAction: enableCopyAction,
