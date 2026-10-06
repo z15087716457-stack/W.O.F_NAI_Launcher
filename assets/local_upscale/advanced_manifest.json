@@ -546,6 +546,27 @@
         "url": "https://huggingface.co/numz/SeedVR2_comfyUI/resolve/09ced71023636e9bc8cdf9cdecfb2625d1e691e8/seedvr2_ema_7b_sharp_fp8_e4m3fn.safetensors?download=true"
       },
       {
+        "id": "seedvr2-3b-int8",
+        "name": "seedvr2_3b_int8_convrot.safetensors",
+        "sha256": "c3dec8bcc5916843a8a858572970597462e1f2dc598d6dfd818f6cd40f53a157",
+        "bytes": 3458259704,
+        "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/df48879708206a403d2a61acd55578c2e80fd233/diffusion_models/seedvr2_3b_int8_convrot.safetensors?download=true"
+      },
+      {
+        "id": "seedvr2-7b-int8",
+        "name": "seedvr2_7b_int8_convrot.safetensors",
+        "sha256": "5aa0d25fc9d35e449b659d0c9a5dcb22e2a4fa04032101b95a39da42b32c1be6",
+        "bytes": 8334897976,
+        "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/df48879708206a403d2a61acd55578c2e80fd233/diffusion_models/seedvr2_7b_int8_convrot.safetensors?download=true"
+      },
+      {
+        "id": "seedvr2-7b-sharp-int8",
+        "name": "seedvr2_7b_sharp_int8_convrot.safetensors",
+        "sha256": "db48be2f1cc7e36b01a2aa529810f5d9c6a971edd29be225cf1b0eb18d51c366",
+        "bytes": 8334897976,
+        "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/df48879708206a403d2a61acd55578c2e80fd233/diffusion_models/seedvr2_7b_sharp_int8_convrot.safetensors?download=true"
+      },
+      {
         "name": "ema_vae_fp16.safetensors",
         "sha256": "20678548f420d98d26f11442d3528f8b8c94e57ee046ef93dbb7633da8612ca1",
         "bytes": 501324814,
@@ -622,7 +643,17 @@
       "urllib3": "2.8.0",
       "zipp": "4.1.1"
     },
-    "license_url": "https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler/blob/4490bd1f482e026674543386bb2a4d176da245b9/LICENSE"
+    "license_url": "https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler/blob/4490bd1f482e026674543386bb2a4d176da245b9/LICENSE",
+    "int8_files": [
+      {
+        "asset": "seedvr2/worker_int8.py",
+        "sha256": "057797b397be7f1a4079732400bf4bea20fb57f362f66a9af739bd00100c3071"
+      },
+      {
+        "asset": "seedvr2/native_int8.py",
+        "sha256": "ae7da340e46c5f6da4b15a849976be449021c88161918d16ff59e198ba1259b9"
+      }
+    ]
   },
   "rtx": {
     "version": "1.1.0",

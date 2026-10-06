@@ -22038,6 +22038,18 @@ abstract class AppLocalizations {
   /// **'7B Sharp FP8 emphasizes sharper textures and edges. Weights are about 8.2 GB; shares the VAE and Python/CUDA runtime with other SeedVR2 variants.'**
   String get localUpscale_seedvr2SharpHelp;
 
+  /// No description provided for @localUpscale_seedvr2Int8Help.
+  ///
+  /// In en, this message translates to:
+  /// **'INT8 ConvRot (experimental): requires NVIDIA Turing or newer. Shares the FP8 runtime; speed and image quality vary with the image and GPU.'**
+  String get localUpscale_seedvr2Int8Help;
+
+  /// No description provided for @localUpscale_noInt8.
+  ///
+  /// In en, this message translates to:
+  /// **'Native INT8 is unavailable on this GPU or CUDA runtime. Select FP8.'**
+  String get localUpscale_noInt8;
+
   /// No description provided for @localUpscale_seedvr2SharedHelp.
   ///
   /// In en, this message translates to:

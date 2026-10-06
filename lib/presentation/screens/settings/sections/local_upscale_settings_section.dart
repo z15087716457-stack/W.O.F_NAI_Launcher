@@ -21,6 +21,7 @@ String localUpscaleErrorText(BuildContext context, LocalUpscaleError error) {
     LocalUpscaleError.sizeLimit => l.localUpscale_sizeLimit,
     LocalUpscaleError.noVulkan => l.localUpscale_noVulkan,
     LocalUpscaleError.noCuda => l.localUpscale_noCuda,
+    LocalUpscaleError.noInt8 => l.localUpscale_noInt8,
     LocalUpscaleError.noRtx => l.localUpscale_noRtx,
     LocalUpscaleError.outOfMemory => l.localUpscale_outOfMemory,
     LocalUpscaleError.processFailed => l.localUpscale_processFailed,

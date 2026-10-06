@@ -140,6 +140,8 @@ void main() {
   AdvancedUpscaleComponentManager seedFixture({
     int runtimeExit = 0,
     int inferenceExit = 0,
+    int int8ProbeExit = 0,
+    void Function()? onInt8Probe,
     String diagnostics = '',
     void Function(Map<String, String>)? onInferenceEnvironment,
     void Function(String)? onDownload,
@@ -193,6 +195,10 @@ void main() {
                 'asset': name == 'runner' ? 'worker.py' : 'requirements.lock',
                 'sha256': sha256.convert(worker).toString(),
               },
+            'int8_files': [
+              for (final name in ['worker_int8.py', 'native_int8.py'])
+                {'asset': name, 'sha256': sha256.convert(worker).toString()},
+            ],
             'models': [
               {
                 ...downloadSpec(weights, 'weights'),
@@ -213,6 +219,24 @@ void main() {
                 'name': 'seedvr2_ema_7b_sharp_fp8_e4m3fn.safetensors',
               },
               {
+                ...downloadSpec(Uint8List.fromList([31, 32]), 'weights3bInt8'),
+                'id': 'seedvr2-3b-int8',
+                'name': 'seedvr2_3b_int8_convrot.safetensors',
+              },
+              {
+                ...downloadSpec(Uint8List.fromList([41, 42]), 'weights7bInt8'),
+                'id': 'seedvr2-7b-int8',
+                'name': 'seedvr2_7b_int8_convrot.safetensors',
+              },
+              {
+                ...downloadSpec(
+                  Uint8List.fromList([51, 52]),
+                  'weights7bSharpInt8',
+                ),
+                'id': 'seedvr2-7b-sharp-int8',
+                'name': 'seedvr2_7b_sharp_int8_convrot.safetensors',
+              },
+              {
                 ...downloadSpec(Uint8List.fromList([10, 11]), 'vae'),
                 'name': 'ema_vae_fp16.safetensors',
               },
@@ -230,6 +254,9 @@ void main() {
           '/weights' => weights,
           '/weights7b' => Uint8List.fromList([7, 8, 9, 10]),
           '/weights7bSharp' => Uint8List.fromList([17, 18, 19]),
+          '/weights3bInt8' => Uint8List.fromList([31, 32]),
+          '/weights7bInt8' => Uint8List.fromList([41, 42]),
+          '/weights7bSharpInt8' => Uint8List.fromList([51, 52]),
           '/vae' => Uint8List.fromList([10, 11]),
           _ => throw StateError('unexpected download'),
         };
@@ -253,6 +280,10 @@ void main() {
             img.encodePng(img.Image(width: width, height: height)),
           );
         }
+        final int8Probe =
+            args.last == '--probe' &&
+            args.any((value) => value.endsWith('worker_int8.py'));
+        if (int8Probe) onInt8Probe?.call();
         if (args.last == '--probe') {
           expect(
             env['PYTORCH_CUDA_ALLOC_CONF'],
@@ -293,6 +324,8 @@ void main() {
               ? runtimeExit
               : args.contains('--output')
               ? inferenceExit
+              : int8Probe
+              ? int8ProbeExit
               : 0,
         );
         return process;
@@ -537,6 +570,240 @@ void main() {
         LocalUpscaleCancellation(),
       );
       expect(downloads.length, 5);
+    },
+  );
+
+  test('INT8 adds only selected weights and reuses the FP8 runtime', () async {
+    final calls = <String>[];
+    var runtimes = 0;
+    var probes = 0;
+    final manager = seedFixture(
+      onDownload: calls.add,
+      onRuntime: () => runtimes++,
+      onInt8Probe: () => probes++,
+    );
+    addTearDown(manager.dispose);
+    await manager.install(
+      'seedvr2-3b',
+      cancellation: LocalUpscaleCancellation(),
+    );
+    final original = await manager.command(
+      'seedvr2-3b',
+      'in',
+      'out',
+      512,
+      512,
+      LocalUpscaleCancellation(),
+    );
+    calls.clear();
+    await manager.models();
+    expect(calls, isEmpty);
+    await manager.install(
+      'seedvr2-7b-sharp-int8',
+      cancellation: LocalUpscaleCancellation(),
+    );
+    expect(calls, ['/weights7bSharpInt8']);
+    expect(runtimes, 1);
+    expect(probes, 1);
+    final command = await manager.command(
+      'seedvr2-7b-sharp-int8',
+      'in',
+      'out',
+      512,
+      512,
+      LocalUpscaleCancellation(),
+      seedvr2Options: const Seedvr2Options(blocksToSwap: 36),
+    );
+    expect(command.executable, original.executable);
+    expect(command.arguments.first, endsWith('worker_int8.py'));
+    expect(
+      command.arguments,
+      contains('seedvr2_7b_sharp_int8_convrot.safetensors'),
+    );
+    expect(
+      command.arguments[command.arguments.indexOf('--blocks_to_swap') + 1],
+      '36',
+    );
+    expect(
+      (await manager.models())
+          .where((model) => model.installed)
+          .map((model) => model.id),
+      ['seedvr2-3b', 'seedvr2-7b-sharp-int8'],
+    );
+    await manager.delete('seedvr2-7b-sharp-int8');
+    expect(
+      (await manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        512,
+        512,
+        LocalUpscaleCancellation(),
+      )).executable,
+      original.executable,
+    );
+    await manager.delete('seedvr2-3b');
+    expect((await manager.models()).every((model) => !model.installed), isTrue);
+  });
+
+  test('INT8 can install first without downloading any FP8 weights', () async {
+    final calls = <String>[];
+    final manager = seedFixture(onDownload: calls.add);
+    addTearDown(manager.dispose);
+    await manager.install(
+      'seedvr2-3b-int8',
+      cancellation: LocalUpscaleCancellation(),
+    );
+    expect(calls, ['/source', '/uv', '/weights3bInt8', '/vae']);
+    expect(
+      (await manager.models()).where((model) => model.installed).single.id,
+      'seedvr2-3b-int8',
+    );
+    final command = await manager.command(
+      'seedvr2-3b-int8',
+      'in',
+      'out',
+      512,
+      512,
+      LocalUpscaleCancellation(),
+    );
+    calls.clear();
+    await manager.install(
+      'seedvr2-7b-int8',
+      cancellation: LocalUpscaleCancellation(),
+    );
+    expect(calls, ['/weights7bInt8']);
+    await manager.delete('seedvr2-3b-int8');
+    expect(
+      (await manager.command(
+        'seedvr2-7b-int8',
+        'in',
+        'out',
+        512,
+        512,
+        LocalUpscaleCancellation(),
+      )).executable,
+      command.executable,
+    );
+  });
+
+  test('INT8 probe failure precedes weights and leaves FP8 intact', () async {
+    final calls = <String>[];
+    final manager = seedFixture(onDownload: calls.add, int8ProbeExit: 13);
+    addTearDown(manager.dispose);
+    await manager.install(
+      'seedvr2-3b',
+      cancellation: LocalUpscaleCancellation(),
+    );
+    final pointer = File(p.join(manager.directory.path, 'seedvr2.json'));
+    final original = await pointer.readAsString();
+    calls.clear();
+    await expectLater(
+      manager.install(
+        'seedvr2-3b-int8',
+        cancellation: LocalUpscaleCancellation(),
+      ),
+      throwsA(error(LocalUpscaleError.noInt8)),
+    );
+    expect(calls, isEmpty);
+    expect(await pointer.readAsString(), original);
+    await manager.command(
+      'seedvr2-3b',
+      'in',
+      'out',
+      512,
+      512,
+      LocalUpscaleCancellation(),
+    );
+  });
+
+  test(
+    'cancelled INT8 download removes new adapters without changing FP8',
+    () async {
+      final cancel = LocalUpscaleCancellation();
+      final manager = seedFixture(
+        onDownload: (path) {
+          if (path == '/weights3bInt8') cancel.cancel();
+        },
+      );
+      addTearDown(manager.dispose);
+      await manager.install(
+        'seedvr2-3b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final pointer = File(p.join(manager.directory.path, 'seedvr2.json'));
+      final original = await pointer.readAsString();
+      final receipt = jsonDecode(original) as Map;
+      final root = p.join(
+        manager.directory.path,
+        'installs',
+        receipt['installation'],
+      );
+      await expectLater(
+        manager.install('seedvr2-3b-int8', cancellation: cancel),
+        throwsA(error(LocalUpscaleError.cancelled)),
+      );
+      expect(await pointer.readAsString(), original);
+      expect(await File(p.join(root, 'worker_int8.py')).exists(), isFalse);
+      expect(await File(p.join(root, 'native_int8.py')).exists(), isFalse);
+      await manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        512,
+        512,
+        LocalUpscaleCancellation(),
+      );
+    },
+  );
+
+  test(
+    'FP8 remains usable if an unrelated installed INT8 adapter is damaged',
+    () async {
+      final manager = seedFixture();
+      addTearDown(manager.dispose);
+      await manager.install(
+        'seedvr2-3b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      await manager.install(
+        'seedvr2-3b-int8',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final receipt =
+          jsonDecode(
+                await File(
+                  p.join(manager.directory.path, 'seedvr2.json'),
+                ).readAsString(),
+              )
+              as Map;
+      await File(
+        p.join(
+          manager.directory.path,
+          'installs',
+          receipt['installation'],
+          'native_int8.py',
+        ),
+      ).writeAsBytes([9, 9, 9]);
+      await manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        512,
+        512,
+        LocalUpscaleCancellation(),
+      );
+      await expectLater(
+        manager.command(
+          'seedvr2-3b-int8',
+          'in',
+          'out',
+          512,
+          512,
+          LocalUpscaleCancellation(),
+        ),
+        throwsA(error(LocalUpscaleError.integrity)),
+      );
     },
   );
 
@@ -811,7 +1078,14 @@ void main() {
       final models = manifest['seedvr2']['models'] as List;
       expect(
         models.where((file) => file['id'] != null).map((file) => file['id']),
-        ['seedvr2-3b', 'seedvr2-7b', 'seedvr2-7b-sharp'],
+        [
+          'seedvr2-3b',
+          'seedvr2-7b',
+          'seedvr2-7b-sharp',
+          'seedvr2-3b-int8',
+          'seedvr2-7b-int8',
+          'seedvr2-7b-sharp-int8',
+        ],
       );
       final seven = models.firstWhere((file) => file['id'] == 'seedvr2-7b');
       expect(seven['bytes'], 8239729704);
@@ -833,6 +1107,28 @@ void main() {
         contains('/resolve/09ced71023636e9bc8cdf9cdecfb2625d1e691e8/'),
       );
       expect(Seedvr2Options.maxBlocks('seedvr2-7b-sharp'), 36);
+      for (final model in advancedUpscaleCatalog.where(
+        (model) => model.isSeedvr2Int8,
+      )) {
+        final weight = models.firstWhere((file) => file['id'] == model.id);
+        expect(weight['bytes'], model.isSeedvr2Seven ? 8334897976 : 3458259704);
+        expect(
+          weight['url'],
+          contains(
+            '/resolve/df48879708206a403d2a61acd55578c2e80fd233/diffusion_models/',
+          ),
+        );
+        expect(
+          Seedvr2Options.maxBlocks(model.id),
+          model.isSeedvr2Seven ? 36 : 32,
+        );
+      }
+      for (final file in manifest['seedvr2']['int8_files'] as List) {
+        final bytes = await File(
+          'assets/local_upscale/${file['asset']}',
+        ).readAsBytes();
+        expect(sha256.convert(bytes).toString(), file['sha256']);
+      }
       expect(manifest['seedvr2']['package_versions']['transformers'], '4.55.4');
       final lock = await File(
         'assets/local_upscale/seedvr2/requirements.lock',
@@ -984,6 +1280,9 @@ void main() {
         'seedvr2-3b',
         'seedvr2-7b',
         'seedvr2-7b-sharp',
+        'seedvr2-3b-int8',
+        'seedvr2-7b-int8',
+        'seedvr2-7b-sharp-int8',
         'rtx-vsr',
       ]);
       expect(models.every((m) => !m.installed), isTrue);

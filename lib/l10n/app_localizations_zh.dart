@@ -12060,6 +12060,13 @@ class AppLocalizationsZh extends AppLocalizations {
       '7B Sharp FP8 偏向更锐利的纹理与边缘。权重约 8.2 GB；与其他 SeedVR2 型号共用 VAE 和 Python/CUDA 环境。';
 
   @override
+  String get localUpscale_seedvr2Int8Help =>
+      'INT8 ConvRot（实验）：需要 NVIDIA Turing 或更新显卡。与 FP8 共用运行环境，速度与画质因图片和显卡而异。';
+
+  @override
+  String get localUpscale_noInt8 => '当前显卡或 CUDA 环境不支持原生 INT8，请选择 FP8。';
+
+  @override
   String get localUpscale_seedvr2SharedHelp =>
       '型号共用 VAE（约 0.5 GB）和 Python/CUDA 环境，需要 NVIDIA 显卡。';
 
@@ -24249,6 +24256,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get localUpscale_seedvr2SharpHelp =>
       '7B Sharp FP8 偏向更銳利的紋理與邊緣。權重約 8.2 GB；與其他 SeedVR2 型號共用 VAE 和 Python/CUDA 環境。';
+
+  @override
+  String get localUpscale_seedvr2Int8Help =>
+      'INT8 ConvRot（實驗）：需要 NVIDIA Turing 或更新顯示卡。與 FP8 共用執行環境，速度與畫質因圖片和顯示卡而異。';
+
+  @override
+  String get localUpscale_noInt8 => '當前顯示卡或 CUDA 環境不支援原生 INT8，請選擇 FP8。';
 
   @override
   String get localUpscale_seedvr2SharedHelp =>

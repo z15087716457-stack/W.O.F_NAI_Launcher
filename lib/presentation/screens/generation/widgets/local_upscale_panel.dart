@@ -338,7 +338,9 @@ class LocalUpscalePanel extends ConsumerWidget {
           Text(switch (method) {
             LocalUpscaleMethod.standard => l.localUpscale_description,
             LocalUpscaleMethod.seedvr2 =>
-              workflow.upscale.localModel == 'seedvr2-7b-sharp'
+              selected?.isSeedvr2Int8 == true
+                  ? l.localUpscale_seedvr2Int8Help
+                  : selected?.isSeedvr2Sharp == true
                   ? l.localUpscale_seedvr2SharpHelp
                   : selected?.isSeedvr2Seven == true
                   ? l.localUpscale_seedvr2SevenHelp

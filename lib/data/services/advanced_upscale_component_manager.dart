@@ -43,7 +43,7 @@ class AdvancedUpscaleComponentManager {
            );
 
   static const manifestSha256 =
-      '26f53a04809b89860f909ce484b004fd60bcf10aebb16e26633f6e0ed5f30c3e';
+      '841a1965315becfe3b2c1f0d1794acfe76f88bc9df1c22e9cb05fd4f3273c0be';
   final String manifestDigest;
   final Future<Directory> Function() _rootDirectory;
   final Future<Uint8List> Function(String) _loadAsset;
@@ -121,7 +121,12 @@ class AdvancedUpscaleComponentManager {
   }
 
   String _key(String id) => switch (id) {
-    'seedvr2-3b' || 'seedvr2-7b' || 'seedvr2-7b-sharp' => 'seedvr2',
+    'seedvr2-3b' ||
+    'seedvr2-7b' ||
+    'seedvr2-7b-sharp' ||
+    'seedvr2-3b-int8' ||
+    'seedvr2-7b-int8' ||
+    'seedvr2-7b-sharp-int8' => 'seedvr2',
     'rtx-vsr' => 'rtx',
     _ => throw const LocalUpscaleException(LocalUpscaleError.invalidModel),
   };
@@ -157,8 +162,23 @@ class AdvancedUpscaleComponentManager {
                 ...spec[name] as Map<String, dynamic>,
                 'path': p.basename(spec[name]['asset'] as String),
               },
+            if (requireModel)
+              ..._seedInt8Files(id).map(
+                (file) => {
+                  ...file,
+                  'path': p.basename(file['asset'] as String),
+                },
+              ),
           ];
   }
+
+  List<Map<String, dynamic>> _seedInt8Files(String id) => id.endsWith('-int8')
+      ? (_manifest['seedvr2']['int8_files'] as List)
+            .cast<Map<String, dynamic>>()
+      : const [];
+
+  String _seedRunner(String id) =>
+      id.endsWith('-int8') ? 'worker_int8.py' : 'worker.py';
 
   Future<Map<String, dynamic>?> _receipt(
     String id, {
@@ -170,6 +190,8 @@ class AdvancedUpscaleComponentManager {
       final value =
           jsonDecode(await file.readAsString()) as Map<String, dynamic>;
       if ((value['manifest'] != manifestDigest &&
+              value['manifest'] !=
+                  '26f53a04809b89860f909ce484b004fd60bcf10aebb16e26633f6e0ed5f30c3e' &&
               value['manifest'] !=
                   '0de0f816647899c778751c9f94a33dc259554eb6e37ba2330f80f74d36d2097c' &&
               value['manifest'] !=
@@ -536,6 +558,7 @@ class AdvancedUpscaleComponentManager {
             'bytes': bytes.length,
           });
         }
+        await _installSeedInt8Files(id, stage.path, verified);
         final uvExe = p.join(stage.path, 'tools', 'uv.exe');
         final python = p.join(stage.path, 'venv', 'Scripts', 'python.exe');
         final proxy = proxyAddress?.call();
@@ -602,7 +625,11 @@ class AdvancedUpscaleComponentManager {
         probe = await runOwnedUpscaleProcess(
           host: host,
           executable: python,
-          arguments: [p.join(stage.path, 'worker.py'), source.path, '--probe'],
+          arguments: [
+            p.join(stage.path, _seedRunner(id)),
+            source.path,
+            '--probe',
+          ],
           environment: seedRuntimeEnvironment,
           cancellation: cancellation,
           startProcess: startProcess,
@@ -611,6 +638,8 @@ class AdvancedUpscaleComponentManager {
           throw LocalUpscaleException(
             probe.exitCode == 12
                 ? LocalUpscaleError.noCuda
+                : probe.exitCode == 13
+                ? LocalUpscaleError.noInt8
                 : LocalUpscaleError.modelOperationFailed,
             details: safeDiagnostics(
               'SeedVR2 probe: exit ${probe.exitCode}\n${probe.diagnostics}',
@@ -717,6 +746,36 @@ class AdvancedUpscaleComponentManager {
       final files = (receipt['files'] as List)
           .cast<Map<String, dynamic>>()
           .toList();
+      await _installSeedInt8Files(id, root, files, added: added);
+      if (id.endsWith('-int8')) {
+        progress?.call('checking', null);
+        final probe = await runOwnedUpscaleProcess(
+          host: await worker(),
+          executable: p.join(root, 'venv', 'Scripts', 'python.exe'),
+          arguments: [
+            p.join(root, _seedRunner(id)),
+            p.join(root, 'source'),
+            '--probe',
+          ],
+          environment: seedRuntimeEnvironment,
+          cancellation: cancellation,
+          startProcess: startProcess,
+        );
+        if (probe.exitCode != 0 ||
+            !probe.diagnostics.contains('"available":true') &&
+                !probe.diagnostics.contains('"available": true')) {
+          throw LocalUpscaleException(
+            probe.exitCode == 12
+                ? LocalUpscaleError.noCuda
+                : probe.exitCode == 13
+                ? LocalUpscaleError.noInt8
+                : LocalUpscaleError.modelOperationFailed,
+            details: safeDiagnostics(
+              'SeedVR2 INT8 probe: exit ${probe.exitCode}\n${probe.diagnostics}',
+            ),
+          );
+        }
+      }
       for (final item in _seedModels(id).where((file) => file['id'] == id)) {
         final relative = 'models/${item['name']}';
         final target = File(_child(root, relative));
@@ -743,6 +802,32 @@ class AdvancedUpscaleComponentManager {
           if (await file.exists()) await file.delete();
         }
       }
+    }
+  }
+
+  Future<void> _installSeedInt8Files(
+    String id,
+    String root,
+    List<Map<String, dynamic>> files, {
+    List<File>? added,
+  }) async {
+    for (final item in _seedInt8Files(id)) {
+      final relative = p.basename(item['asset'] as String);
+      final target = File(_child(root, relative));
+      await _contained(target.path);
+      final bytes = await _loadAsset(item['asset'] as String);
+      if (sha256.convert(bytes).toString() != item['sha256']) {
+        throw const LocalUpscaleException(LocalUpscaleError.integrity);
+      }
+      final file = {...item, 'path': relative, 'bytes': bytes.length};
+      if (await target.exists()) {
+        await _verify(target, file);
+      } else {
+        added?.add(target);
+        await target.writeAsBytes(bytes, flush: true);
+      }
+      files.removeWhere((entry) => entry['path'] == relative);
+      files.add(file);
     }
   }
 
@@ -823,7 +908,7 @@ class AdvancedUpscaleComponentManager {
       host,
       p.join(root, 'venv', 'Scripts', 'python.exe'),
       [
-        p.join(root, 'worker.py'),
+        p.join(root, _seedRunner(id)),
         p.join(root, 'source'),
         input,
         '--output',

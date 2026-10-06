@@ -151,6 +151,8 @@ class LocalUpscaleService {
           throw LocalUpscaleException(
             result.exitCode == 12
                 ? LocalUpscaleError.noCuda
+                : result.exitCode == 13
+                ? LocalUpscaleError.noInt8
                 : result.diagnostics.contains('rtx_unavailable')
                 ? LocalUpscaleError.noRtx
                 : model.method == LocalUpscaleMethod.seedvr2 &&

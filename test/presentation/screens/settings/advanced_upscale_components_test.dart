@@ -42,6 +42,7 @@ List<LocalUpscaleModel> _models({bool seven = false, bool sharp = false}) => [
       switch (model.id) {
         'seedvr2-7b' => seven,
         'seedvr2-7b-sharp' => sharp,
+        _ when model.isSeedvr2Int8 => false,
         _ => true,
       },
       diskBytes: model.id == 'rtx-vsr' ? 18 * 1024 * 1024 : 3234 * 1024 * 1024,
@@ -215,6 +216,28 @@ void main() {
             expect(install.installs, isEmpty);
             expect(install.deletes, isEmpty);
             await _capture(tester, boundary, '$id-7b-sharp');
+            for (final model in advancedUpscaleCatalog.where(
+              (model) => model.isSeedvr2Int8,
+            )) {
+              await tester.tap(dropdown);
+              await tester.pumpAndSettle();
+              final item = find
+                  .text(
+                    '${model.name.replaceFirst('SeedVR2 ', '')} · ${l.localUpscale_notInstalledShort}',
+                  )
+                  .last;
+              await tester.ensureVisible(item);
+              await tester.tap(item);
+              await tester.pumpAndSettle();
+              expect(find.text(l.localUpscale_seedvr2Int8Help), findsOneWidget);
+              expect(
+                find.byKey(ValueKey('upscale-management-install-${model.id}')),
+                findsOneWidget,
+              );
+              expect(install.installs, isEmpty);
+              expect(install.deletes, isEmpty);
+              await _capture(tester, boundary, '$id-${model.id}');
+            }
             expect(tester.takeException(), isNull);
           },
           variant: TargetPlatformVariant.only(TargetPlatform.windows),

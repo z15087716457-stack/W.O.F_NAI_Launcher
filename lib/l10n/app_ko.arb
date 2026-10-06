@@ -6746,6 +6746,8 @@
   "localUpscale_seedvr2SevenSummary": "더 높은 화질을 기대할 수 있지만 VRAM과 처리 시간이 더 필요합니다.",
   "localUpscale_seedvr2SharpSummary": "더 선명한 디테일을 강조하며, 질감을 강화하려는 이미지에 적합합니다.",
   "localUpscale_seedvr2SharpHelp": "7B Sharp FP8은 더 선명한 질감과 윤곽을 강조합니다. 가중치는 약 8.2 GB이며, 다른 SeedVR2 모델과 VAE 및 Python/CUDA 환경을 공유합니다.",
+  "localUpscale_seedvr2Int8Help": "INT8 ConvRot(실험적): NVIDIA Turing 이상의 GPU가 필요합니다. FP8과 실행 환경을 공유하며, 속도와 화질은 이미지와 GPU에 따라 달라집니다.",
+  "localUpscale_noInt8": "이 GPU 또는 CUDA 환경에서는 네이티브 INT8을 사용할 수 없습니다. FP8을 선택하세요.",
   "localUpscale_seedvr2SharedHelp": "모델은 VAE(약 0.5 GB)와 Python/CUDA 환경을 공유합니다. NVIDIA GPU가 필요합니다.",
   "localUpscale_seedvr2Help": "3B FP8은 화질과 자원 사용의 균형을 제공합니다. 가중치 약 3.4 GB와 VAE 약 0.5 GB가 필요하며, VAE 및 Python/CUDA 환경을 7B와 공유합니다. NVIDIA GPU가 필요합니다.",
   "localUpscale_seedvr2SevenHelp": "7B FP8은 더 높은 화질을 기대할 수 있지만 VRAM과 처리 시간이 더 필요합니다. 가중치는 약 8.2 GB이며 VAE 및 Python/CUDA 환경을 3B와 공유합니다.",

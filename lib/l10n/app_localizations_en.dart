@@ -12670,6 +12670,14 @@ class AppLocalizationsEn extends AppLocalizations {
       '7B Sharp FP8 emphasizes sharper textures and edges. Weights are about 8.2 GB; shares the VAE and Python/CUDA runtime with other SeedVR2 variants.';
 
   @override
+  String get localUpscale_seedvr2Int8Help =>
+      'INT8 ConvRot (experimental): requires NVIDIA Turing or newer. Shares the FP8 runtime; speed and image quality vary with the image and GPU.';
+
+  @override
+  String get localUpscale_noInt8 =>
+      'Native INT8 is unavailable on this GPU or CUDA runtime. Select FP8.';
+
+  @override
   String get localUpscale_seedvr2SharedHelp =>
       'Models share the VAE (about 0.5 GB) and Python/CUDA runtime. Requires an NVIDIA GPU.';
 

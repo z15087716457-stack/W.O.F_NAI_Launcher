@@ -10,6 +10,7 @@ enum LocalUpscaleError {
   sizeLimit,
   noVulkan,
   noCuda,
+  noInt8,
   noRtx,
   outOfMemory,
   processFailed,
@@ -65,7 +66,16 @@ class LocalUpscaleModel {
   final bool custom;
   final LocalUpscaleMethod method;
   final int diskBytes;
-  bool get isSeedvr2Seven => id == 'seedvr2-7b' || id == 'seedvr2-7b-sharp';
+  bool get isSeedvr2Seven => const {
+    'seedvr2-7b',
+    'seedvr2-7b-sharp',
+    'seedvr2-7b-int8',
+    'seedvr2-7b-sharp-int8',
+  }.contains(id);
+  bool get isSeedvr2Int8 =>
+      method == LocalUpscaleMethod.seedvr2 && id.endsWith('-int8');
+  bool get isSeedvr2Sharp =>
+      id == 'seedvr2-7b-sharp' || id == 'seedvr2-7b-sharp-int8';
   int inferenceScale(double requested) => scales.firstWhere(
     (scale) => scale >= requested,
     orElse: () => scales.last,
@@ -130,6 +140,27 @@ const advancedUpscaleCatalog = [
     method: LocalUpscaleMethod.seedvr2,
   ),
   LocalUpscaleModel(
+    id: 'seedvr2-3b-int8',
+    name: 'SeedVR2 3B INT8',
+    engineName: 'seedvr2',
+    scales: [1, 2, 3, 4],
+    method: LocalUpscaleMethod.seedvr2,
+  ),
+  LocalUpscaleModel(
+    id: 'seedvr2-7b-int8',
+    name: 'SeedVR2 7B INT8',
+    engineName: 'seedvr2',
+    scales: [1, 2, 3, 4],
+    method: LocalUpscaleMethod.seedvr2,
+  ),
+  LocalUpscaleModel(
+    id: 'seedvr2-7b-sharp-int8',
+    name: 'SeedVR2 7B Sharp INT8',
+    engineName: 'seedvr2',
+    scales: [1, 2, 3, 4],
+    method: LocalUpscaleMethod.seedvr2,
+  ),
+  LocalUpscaleModel(
     id: 'rtx-vsr',
     name: 'NVIDIA RTX Video Super Resolution',
     engineName: 'rtx-vsr',
@@ -159,7 +190,10 @@ class Seedvr2Options {
     'none',
   ];
   static int maxBlocks(String modelId) => switch (modelId) {
-    'seedvr2-7b' || 'seedvr2-7b-sharp' => 36,
+    'seedvr2-7b' ||
+    'seedvr2-7b-sharp' ||
+    'seedvr2-7b-int8' ||
+    'seedvr2-7b-sharp-int8' => 36,
     _ => 32,
   };
   final String colorCorrection;

@@ -12303,6 +12303,14 @@ class AppLocalizationsKo extends AppLocalizations {
       '7B Sharp FP8은 더 선명한 질감과 윤곽을 강조합니다. 가중치는 약 8.2 GB이며, 다른 SeedVR2 모델과 VAE 및 Python/CUDA 환경을 공유합니다.';
 
   @override
+  String get localUpscale_seedvr2Int8Help =>
+      'INT8 ConvRot(실험적): NVIDIA Turing 이상의 GPU가 필요합니다. FP8과 실행 환경을 공유하며, 속도와 화질은 이미지와 GPU에 따라 달라집니다.';
+
+  @override
+  String get localUpscale_noInt8 =>
+      '이 GPU 또는 CUDA 환경에서는 네이티브 INT8을 사용할 수 없습니다. FP8을 선택하세요.';
+
+  @override
   String get localUpscale_seedvr2SharedHelp =>
       '모델은 VAE(약 0.5 GB)와 Python/CUDA 환경을 공유합니다. NVIDIA GPU가 필요합니다.';
 

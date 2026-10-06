@@ -129,16 +129,25 @@ class _AdvancedUpscaleComponentsState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  selected.id == 'seedvr2-7b-sharp'
+                  selected.isSeedvr2Sharp
                       ? l.localUpscale_seedvr2SharpSummary
                       : selected.isSeedvr2Seven
                       ? l.localUpscale_seedvr2SevenSummary
                       : l.localUpscale_seedvr2ThreeSummary,
                   style: theme.textTheme.bodySmall,
                 ),
+                if (selected.isSeedvr2Int8) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    l.localUpscale_seedvr2Int8Help,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 6),
                 Text(
-                  '${l.localUpscale_modelWeights} ≈ ${selected.isSeedvr2Seven ? '8.2' : '3.4'} GB',
+                  '${l.localUpscale_modelWeights} ≈ ${selected.isSeedvr2Seven ? (selected.isSeedvr2Int8 ? '8.3' : '8.2') : (selected.isSeedvr2Int8 ? '3.5' : '3.4')} GB',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
