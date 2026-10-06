@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart' show PointerScrollEvent;
+import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -285,7 +287,9 @@ Future<void> capture(
     );
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final folder = Directory(
-      Platform.environment['CAPTURE_UI_FEEDBACK'] == '1'
+      Platform.environment['CAPTURE_GENERATION_WIKI_ACTIONS'] == '1'
+          ? '.dart_tool/generation-wiki-actions-20261006/captures/wiki'
+          : Platform.environment['CAPTURE_UI_FEEDBACK'] == '1'
           ? '.dart_tool/ui-feedback-20261006/captures/wiki'
           : alignment
           ? '.dart_tool/wiki-alignment-captures'
@@ -1041,6 +1045,52 @@ void main() {
       },
     );
   }
+
+  testWidgets(
+    'type filters translate wheel to horizontal motion and clamp both edges',
+    (tester) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await _pump(
+        tester,
+        const TagWikiScreen(directory: _uiDirectory),
+        _Auto(),
+        catalog: _Tags(),
+      );
+      final area = find.byKey(const ValueKey('wiki-type-scroll-area'));
+      final scroll = tester.widget<SingleChildScrollView>(
+        find.descendant(of: area, matching: find.byType(SingleChildScrollView)),
+      );
+      final controller = scroll.controller!;
+      expect(controller.position.maxScrollExtent, greaterThan(0));
+      expect(controller.offset, 0);
+      await capture(tester, 'wheel-start');
+      Future<void> wheel(Offset delta) async {
+        await tester.sendEventToBinding(
+          PointerScrollEvent(
+            position: tester.getCenter(area),
+            scrollDelta: delta,
+          ),
+        );
+        await tester.pump();
+      }
+
+      await wheel(const Offset(0, 70));
+      expect(controller.offset, greaterThan(0));
+      await wheel(const Offset(0, -10000));
+      expect(controller.offset, 0);
+      await wheel(const Offset(10000, 0));
+      expect(controller.offset, controller.position.maxScrollExtent);
+      await capture(tester, 'wheel-end');
+      await wheel(const Offset(0, 10000));
+      expect(controller.offset, controller.position.maxScrollExtent);
+      await wheel(const Offset(-10000, 0));
+      expect(controller.offset, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('filter chips update the catalog and the Aa popover closes', (
     tester,
@@ -2708,13 +2758,22 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byKey(const Key('wiki-preview-open')), findsOneWidget);
-      // The add button runs the usual add-to-prompt flow.
+      // The add button opens the shared block editor without changing the draft.
       await tester.tap(find.byKey(const Key('wiki-preview-add')));
       // Dismissal re-evaluates hover at the resting pointer spot, which may
       // land on another previewable target, so park the pointer first.
       await gesture.moveTo(const Offset(10, 10));
       await tester.pumpAndSettle();
-      expect(params.state.prompt, contains('solo'));
+      expect(params.state.prompt, isEmpty);
+      expect(
+        tester
+            .widget<PromptBlockEditDialog>(find.byType(PromptBlockEditDialog))
+            .initialContent,
+        'solo',
+      );
+      expect(find.byType(SnackBar), findsNothing);
+      await tester.tap(find.widgetWithText(TextButton, '取消'));
+      await tester.pumpAndSettle();
       expect(find.byKey(const Key('wiki-preview-open')), findsNothing);
       // A chip opens the same card.
       final chip = find.byKey(const Key('wiki-chip-1boy'));

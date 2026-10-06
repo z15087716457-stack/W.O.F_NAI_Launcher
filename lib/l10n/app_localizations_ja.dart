@@ -9741,7 +9741,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wiki_categoryLibrary => 'ローカル';
 
   @override
-  String get wiki_addToPrompt => 'プロンプトに追加';
+  String get wiki_addToBlock => 'ブロックに追加';
 
   @override
   String wiki_addedToPrompt(Object tag) {
@@ -9769,7 +9769,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wiki_relatedTitle => 'よく一緒に使われるタグ';
 
   @override
-  String get wiki_relatedHint => 'クリックで開く · Shift+クリックでプロンプトに追加';
+  String get wiki_relatedHint => 'クリックで開く · Shift+クリックでブロックに追加';
 
   @override
   String get wiki_inDirectory => '所属ディレクトリ';
@@ -9782,7 +9782,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wiki_shortcutsHint =>
-      'ショートカット: / 検索 · ↑↓ 移動 · Enter 追加 · B ブックマーク · Alt+←/→ 履歴';
+      'ショートカット: / 検索 · ↑↓ 移動 · Enter ブロックに追加 · B ブックマーク · Alt+←/→ 履歴';
 
   @override
   String get toast_titleSuccess => '完了';

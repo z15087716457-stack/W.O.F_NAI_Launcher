@@ -2,7 +2,12 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart'
-    show kBackMouseButton, kForwardMouseButton;
+    show
+        GestureBinding,
+        PointerScrollEvent,
+        PointerSignalEvent,
+        kBackMouseButton,
+        kForwardMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +18,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/autocomplete/autocomplete_providers.dart';
 import '../../../core/autocomplete/completion_models.dart';
-import '../../../core/autocomplete/prompt_token_parser.dart';
 import '../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
@@ -24,7 +28,9 @@ import '../../../core/wiki/wiki_bookmark_store.dart';
 import '../../../core/wiki/wiki_directory.dart';
 import '../../../core/wiki/wiki_directory_labels.dart';
 import '../../providers/data_source_cache_provider.dart';
-import '../../providers/generation/generation_params_notifier.dart';
+import '../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import '../../widgets/common/app_toast.dart';
+import '../../widgets/common/studio_icons.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../widgets/autocomplete/tag_category_visuals.dart';
 import 'wiki_sidebar.dart';
@@ -127,6 +133,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   double _resultsToolbarHeight = 94;
   final _typeFilterScroll = ScrollController();
   bool _typeFilterOverflows = false;
+  bool _savingTagToBlock = false;
   bool _headerScheduled = false;
   GlobalKey? _activeOutline;
   GlobalKey? _clampedOutline;
@@ -606,43 +613,47 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     }
   }
 
-  void _addTagToPrompt(String tag) {
+  Future<void> _addTagToBlock(String tag) async {
+    if (_savingTagToBlock) return;
+    _savingTagToBlock = true;
+    _preview?.dismiss();
     final display = TagNormalizer.toDisplay(tag);
-    final params = ref.read(generationParamsNotifierProvider);
-    if (PromptTokenParser.containsTag(params.prompt, tag)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.wiki_alreadyInPrompt(display))),
+    final candidate = _items
+        .where((item) => item.canonicalTag == tag)
+        .firstOrNull;
+    try {
+      await PromptBlockEditDialog.createWithDialog(
+        context,
+        ref,
+        initialTitle:
+            candidate?.translation ?? _autoTranslation.nameFor(tag) ?? display,
+        initialContent: display,
       );
-      return;
+    } catch (error) {
+      if (mounted) AppToast.error(context, error.toString());
+    } finally {
+      _savingTagToBlock = false;
     }
-    final previous = params.prompt;
-    final updated = PromptTokenParser.appendTag(previous, tag);
-    ref
-        .read(generationParamsNotifierProvider.notifier)
-        .updatePromptImmediately(updated);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.wiki_addedToPrompt(display)),
-        action: SnackBarAction(
-          label: context.l10n.common_undo,
-          onPressed: () {
-            if (!mounted) return;
-            final current = ref.read(generationParamsNotifierProvider).prompt;
-            if (current == updated) {
-              ref
-                  .read(generationParamsNotifierProvider.notifier)
-                  .updatePromptImmediately(previous);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(context.l10n.wiki_promptChangedCannotUndo),
-                ),
-              );
-            }
-          },
+  }
+
+  void _onTypeFilterPointerSignal(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent || !_typeFilterScroll.hasClients) return;
+    final position = _typeFilterScroll.position;
+    if (position.maxScrollExtent <= position.minScrollExtent) return;
+    final delta = event.scrollDelta.dx != 0
+        ? event.scrollDelta.dx
+        : event.scrollDelta.dy;
+    if (delta == 0) return;
+    GestureBinding.instance.pointerSignalResolver.register(event, (_) {
+      if (!mounted || !_typeFilterScroll.hasClients) return;
+      final position = _typeFilterScroll.position;
+      _typeFilterScroll.jumpTo(
+        (position.pixels + delta).clamp(
+          position.minScrollExtent,
+          position.maxScrollExtent,
         ),
-      ),
-    );
+      );
+    });
   }
 
   bool get _focusInEditable {
@@ -703,7 +714,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     if (key == LogicalKeyboardKey.enter ||
         key == LogicalKeyboardKey.numpadEnter) {
       final tag = _selected;
-      if (tag != null) _addTagToPrompt(tag);
+      if (tag != null) _addTagToBlock(tag);
       return KeyEventResult.handled;
     }
     if (key == LogicalKeyboardKey.keyB) {
@@ -1176,44 +1187,66 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
               }
               return false;
             },
-            child: ShaderMask(
-              shaderCallback: (bounds) {
-                if (!_typeFilterOverflows || bounds.width <= 24) {
-                  return const LinearGradient(
-                    colors: [Colors.white, Colors.white],
-                  ).createShader(bounds);
-                }
-                return LinearGradient(
-                  colors: const [Colors.white, Colors.transparent],
-                  stops: [1 - 24 / bounds.width, 1],
-                ).createShader(bounds);
-              },
-              blendMode: BlendMode.dstIn,
-              child: SingleChildScrollView(
-                controller: _typeFilterScroll,
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  key: const ValueKey('wiki-type-filter'),
-                  children: [
-                    for (final category in const <TagCategory?>[
-                      null,
-                      TagCategory.general,
-                      TagCategory.artist,
-                      TagCategory.copyright,
-                      TagCategory.character,
-                      TagCategory.meta,
-                    ])
-                      _typeChip(
-                        key: ValueKey('wiki-type-${category?.name ?? 'all'}'),
-                        category: category,
-                        label: category == null
-                            ? context.l10n.wiki_typeAllShort
-                            : _categoryName(category),
-                        selected: _category == category,
-                        onTap: () => _changeFilter(() => _category = category),
-                      ),
-                    _moreCategoriesChip(),
-                  ],
+            child: Listener(
+              key: const ValueKey('wiki-type-scroll-area'),
+              onPointerSignal: _onTypeFilterPointerSignal,
+              child: ListenableBuilder(
+                listenable: _typeFilterScroll,
+                builder: (context, child) => ShaderMask(
+                  shaderCallback: (bounds) {
+                    if (!_typeFilterOverflows || bounds.width <= 48) {
+                      return const LinearGradient(
+                        colors: [Colors.white, Colors.white],
+                      ).createShader(bounds);
+                    }
+                    final position = _typeFilterScroll.hasClients
+                        ? _typeFilterScroll.position
+                        : null;
+                    final fade = 24 / bounds.width;
+                    return LinearGradient(
+                      colors: [
+                        position != null && position.extentBefore > .5
+                            ? Colors.transparent
+                            : Colors.white,
+                        Colors.white,
+                        Colors.white,
+                        position == null || position.extentAfter > .5
+                            ? Colors.transparent
+                            : Colors.white,
+                      ],
+                      stops: [0, fade, 1 - fade, 1],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: child,
+                ),
+                child: SingleChildScrollView(
+                  controller: _typeFilterScroll,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    key: const ValueKey('wiki-type-filter'),
+                    children: [
+                      for (final category in const <TagCategory?>[
+                        null,
+                        TagCategory.general,
+                        TagCategory.artist,
+                        TagCategory.copyright,
+                        TagCategory.character,
+                        TagCategory.meta,
+                      ])
+                        _typeChip(
+                          key: ValueKey('wiki-type-${category?.name ?? 'all'}'),
+                          category: category,
+                          label: category == null
+                              ? context.l10n.wiki_typeAllShort
+                              : _categoryName(category),
+                          selected: _category == category,
+                          onTap: () =>
+                              _changeFilter(() => _category = category),
+                        ),
+                      _moreCategoriesChip(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1678,7 +1711,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         FilledButton.icon(
-          key: const ValueKey('wiki-add-to-prompt'),
+          key: const ValueKey('wiki-add-to-block'),
           style: FilledButton.styleFrom(
             minimumSize: const Size(0, 32),
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1689,9 +1722,9 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
             ),
             textStyle: theme.textTheme.labelLarge?.copyWith(fontSize: 12.5),
           ),
-          icon: const Icon(Icons.add, size: 16),
-          label: Text(context.l10n.wiki_addToPrompt),
-          onPressed: () => _addTagToPrompt(tag),
+          icon: const Icon(StudioIcons.promptBlockPalette, size: 16),
+          label: Text(context.l10n.wiki_addToBlock),
+          onPressed: () => _addTagToBlock(tag),
         ),
         _squareButton(
           key: const ValueKey('wiki-copy-tag'),
@@ -2204,9 +2237,9 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                   ),
                   onPressed: () {
                     _preview?.dismiss();
-                    _addTagToPrompt(tag);
+                    _addTagToBlock(tag);
                   },
-                  child: Text('＋ ${context.l10n.wiki_addToPrompt}'),
+                  child: Text('＋ ${context.l10n.wiki_addToBlock}'),
                 ),
               ],
             ),
@@ -2240,7 +2273,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       linkListsAsChips: true,
       exampleCards: true,
       initialSectionTitle: initialSection,
-      onTagAdd: (candidate) => _addTagToPrompt(candidate.canonicalTag),
+      onTagAdd: (candidate) => _addTagToBlock(candidate.canonicalTag),
       onTagHover: _previewHost.hover,
       onTagLeave: _previewHost.leave,
       style:
@@ -2701,7 +2734,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
           key: ValueKey('wiki-related-${item.canonicalTag}'),
           onTap: () {
             if (HardwareKeyboard.instance.isShiftPressed) {
-              _addTagToPrompt(item.canonicalTag);
+              _addTagToBlock(item.canonicalTag);
             } else {
               _selectTag(item.canonicalTag, linkedCandidate: item);
             }

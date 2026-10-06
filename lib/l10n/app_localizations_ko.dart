@@ -9755,7 +9755,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get wiki_categoryLibrary => '로컬';
 
   @override
-  String get wiki_addToPrompt => '프롬프트에 추가';
+  String get wiki_addToBlock => '블록에 추가';
 
   @override
   String wiki_addedToPrompt(Object tag) {
@@ -9783,7 +9783,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get wiki_relatedTitle => '함께 자주 쓰는 태그';
 
   @override
-  String get wiki_relatedHint => '클릭하여 열기 · Shift+클릭으로 프롬프트에 추가';
+  String get wiki_relatedHint => '클릭하여 열기 · Shift+클릭으로 블록에 추가';
 
   @override
   String get wiki_inDirectory => '소속 디렉터리';
@@ -9796,7 +9796,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get wiki_shortcutsHint =>
-      '단축키: / 검색 · ↑↓ 이동 · Enter 추가 · B 북마크 · Alt+←/→ 기록';
+      '단축키: / 검색 · ↑↓ 이동 · Enter 블록에 추가 · B 북마크 · Alt+←/→ 기록';
 
   @override
   String get toast_titleSuccess => '완료';

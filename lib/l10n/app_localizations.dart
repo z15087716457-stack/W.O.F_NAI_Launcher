@@ -17474,11 +17474,11 @@ abstract class AppLocalizations {
   /// **'Library'**
   String get wiki_categoryLibrary;
 
-  /// No description provided for @wiki_addToPrompt.
+  /// No description provided for @wiki_addToBlock.
   ///
   /// In en, this message translates to:
-  /// **'Add to prompt'**
-  String get wiki_addToPrompt;
+  /// **'Add to blocks'**
+  String get wiki_addToBlock;
 
   /// No description provided for @wiki_addedToPrompt.
   ///
@@ -17525,7 +17525,7 @@ abstract class AppLocalizations {
   /// No description provided for @wiki_relatedHint.
   ///
   /// In en, this message translates to:
-  /// **'Click to open · Shift+click to add'**
+  /// **'Click to open · Shift+click to add to blocks'**
   String get wiki_relatedHint;
 
   /// No description provided for @wiki_inDirectory.
@@ -17549,7 +17549,7 @@ abstract class AppLocalizations {
   /// No description provided for @wiki_shortcutsHint.
   ///
   /// In en, this message translates to:
-  /// **'Shortcuts: / search · ↑↓ move · Enter add · B bookmark · Alt+←/→ history'**
+  /// **'Shortcuts: / search · ↑↓ move · Enter add to blocks · B bookmark · Alt+←/→ history'**
   String get wiki_shortcutsHint;
 
   /// No description provided for @toast_titleSuccess.

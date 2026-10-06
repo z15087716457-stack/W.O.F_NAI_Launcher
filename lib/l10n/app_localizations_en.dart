@@ -10006,7 +10006,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wiki_categoryLibrary => 'Library';
 
   @override
-  String get wiki_addToPrompt => 'Add to prompt';
+  String get wiki_addToBlock => 'Add to blocks';
 
   @override
   String wiki_addedToPrompt(Object tag) {
@@ -10034,7 +10034,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wiki_relatedTitle => 'Often used with';
 
   @override
-  String get wiki_relatedHint => 'Click to open · Shift+click to add';
+  String get wiki_relatedHint => 'Click to open · Shift+click to add to blocks';
 
   @override
   String get wiki_inDirectory => 'In directory';
@@ -10047,7 +10047,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wiki_shortcutsHint =>
-      'Shortcuts: / search · ↑↓ move · Enter add · B bookmark · Alt+←/→ history';
+      'Shortcuts: / search · ↑↓ move · Enter add to blocks · B bookmark · Alt+←/→ history';
 
   @override
   String get toast_titleSuccess => 'Completed';

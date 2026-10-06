@@ -9580,7 +9580,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_categoryLibrary => '本地';
 
   @override
-  String get wiki_addToPrompt => '加入提示词';
+  String get wiki_addToBlock => '添加到积木';
 
   @override
   String wiki_addedToPrompt(Object tag) {
@@ -9608,7 +9608,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_relatedTitle => '常一起出现';
 
   @override
-  String get wiki_relatedHint => '点击查看 · Shift+点击加入提示词';
+  String get wiki_relatedHint => '点击查看 · Shift+点击添加到积木';
 
   @override
   String get wiki_inDirectory => '所属目录';
@@ -9621,7 +9621,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wiki_shortcutsHint =>
-      '/ 搜索 · ↑↓ 切换 · Enter 加入 · B 收藏 · Alt+←/→ 历史';
+      '/ 搜索 · ↑↓ 切换 · Enter 添加到积木 · B 收藏 · Alt+←/→ 历史';
 
   @override
   String get toast_titleSuccess => '已完成';
@@ -21778,7 +21778,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get wiki_categoryLibrary => '本地';
 
   @override
-  String get wiki_addToPrompt => '加入提示詞';
+  String get wiki_addToBlock => '新增到積木';
 
   @override
   String wiki_addedToPrompt(Object tag) {
@@ -21806,7 +21806,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get wiki_relatedTitle => '常一起出現';
 
   @override
-  String get wiki_relatedHint => '點選檢視 · Shift+點選加入提示詞';
+  String get wiki_relatedHint => '點選檢視 · Shift+點選新增到積木';
 
   @override
   String get wiki_inDirectory => '所屬目錄';
@@ -21819,7 +21819,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get wiki_shortcutsHint =>
-      '/ 搜尋 · ↑↓ 切換 · Enter 加入 · B 收藏 · Alt+←/→ 歷史';
+      '/ 搜尋 · ↑↓ 切換 · Enter 新增到積木 · B 收藏 · Alt+←/→ 歷史';
 
   @override
   String get toast_titleSuccess => '已完成';

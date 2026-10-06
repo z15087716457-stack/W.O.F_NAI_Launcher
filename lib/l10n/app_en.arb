@@ -5553,7 +5553,7 @@
   "wiki_categorySpecies": "Species",
   "wiki_categoryLore": "Lore",
   "wiki_categoryLibrary": "Library",
-  "wiki_addToPrompt": "Add to prompt",
+  "wiki_addToBlock": "Add to blocks",
   "wiki_addedToPrompt": "Added to prompt: {tag}",
   "@wiki_addedToPrompt": {
     "placeholders": {
@@ -5571,11 +5571,11 @@
   "wiki_posts": "posts",
   "wiki_aliases": "Aliases",
   "wiki_relatedTitle": "Often used with",
-  "wiki_relatedHint": "Click to open · Shift+click to add",
+  "wiki_relatedHint": "Click to open · Shift+click to add to blocks",
   "wiki_inDirectory": "In directory",
   "wiki_noArticle": "No wiki",
   "wiki_moreCategories": "More",
-  "wiki_shortcutsHint": "Shortcuts: / search · ↑↓ move · Enter add · B bookmark · Alt+←/→ history",
+  "wiki_shortcutsHint": "Shortcuts: / search · ↑↓ move · Enter add to blocks · B bookmark · Alt+←/→ history",
   "toast_titleSuccess": "Completed",
   "toast_titleError": "Action failed",
   "toast_titleWarning": "Please note",

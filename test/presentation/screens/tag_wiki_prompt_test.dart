@@ -19,6 +19,8 @@ import 'package:nai_launcher/core/wiki/wiki_directory.dart';
 import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
+import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
@@ -111,9 +113,51 @@ class _Params extends GenerationParamsNotifier {
 }
 
 class _Blocks extends PromptBlockLibraryNotifier {
+  final folders = [PromptBlockFolder.create(id: 'wiki-folder', name: '百科')];
   @override
   Future<PromptBlockLibraryState> build() async =>
-      PromptBlockLibraryState(blocks: <PromptBlock>[], folders: []);
+      PromptBlockLibraryState(blocks: [], folders: folders);
+  @override
+  Future<PromptBlock> createBlock({
+    required String title,
+    required String content,
+    String? folderId,
+    String color = '#FF607D8B',
+    String appearance = 'classic',
+    String? readingTranslationZh,
+    List<Map<String, dynamic>>? readingTranslationMarks,
+    bool readingTranslationNeedsReview = false,
+    String readingTranslationLanguageCode = 'zh',
+    bool readingTranslationEdited = false,
+    String? iconName,
+    String? thumbnail,
+    double thumbnailOffsetX = 0.0,
+    double thumbnailOffsetY = 0.0,
+    double thumbnailScale = 1.0,
+    int? sortOrder,
+    List<String>? atoms,
+    String negativeContent = '',
+    List<String>? negativeAtoms,
+    PromptBlockGenerationSettings? generationSettings,
+    List<PromptBlockTag> tags = const [],
+  }) async {
+    final block = PromptBlock.create(
+      title: title,
+      content: content,
+      folderId: folderId,
+      atoms: atoms,
+      negativeContent: negativeContent,
+      negativeAtoms: negativeAtoms,
+      generationSettings: generationSettings,
+    );
+    state = AsyncData(
+      PromptBlockLibraryState(
+        blocks: [...?state.valueOrNull?.blocks, block],
+        folders: folders,
+      ),
+    );
+    return block;
+  }
 }
 
 class _Auto extends ChangeNotifier implements AutoTagTranslationController {
@@ -205,56 +249,79 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('adds the selected tag to the prompt and undoes safely', (
+  testWidgets(
+    'article saves a tag to the chosen block folder without editing drafts',
+    (tester) async {
+      final container = await _pump(
+        tester,
+        initialTag: '1girl',
+        params: _Params('solo'),
+      );
+      await tester.tap(find.byKey(const Key('wiki-add-to-block')));
+      await tester.pumpAndSettle();
+      final dialog = tester.widget<PromptBlockEditDialog>(
+        find.byType(PromptBlockEditDialog),
+      );
+      expect(dialog.initialContent, '1girl');
+      expect(dialog.initialTitle, '1个女孩');
+      expect(container.read(generationParamsNotifierProvider).prompt, 'solo');
+      expect(find.byType(SnackBar), findsNothing);
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updatePromptImmediately('new user draft');
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(PromptBlockEditDialog),
+              matching: find.byType(DropdownButtonFormField<String>),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('百科').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, '保存'));
+      await tester.pumpAndSettle();
+      final block = container
+          .read(promptBlockLibraryNotifierProvider)
+          .value!
+          .blocks
+          .single;
+      expect(block.content, '1girl');
+      expect(block.folderId, 'wiki-folder');
+      expect(
+        container.read(generationParamsNotifierProvider).prompt,
+        'new user draft',
+      );
+      expect(find.byType(PromptBlockEditDialog), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
+      expect(find.text('已保存到块库'), findsNothing);
+    },
+  );
+
+  testWidgets('cancelled block saving preserves the library and draft', (
     tester,
   ) async {
-    final params = _Params('solo');
-    final container = await _pump(tester, initialTag: '1girl', params: params);
-    String prompt() => container.read(generationParamsNotifierProvider).prompt;
-
-    await tester.tap(find.byKey(const Key('wiki-add-to-prompt')));
-    await tester.pump();
-    expect(prompt(), 'solo, 1girl');
-    expect(find.text('已加入提示词：1girl'), findsOneWidget);
-    // Let the snack bar entrance settle so the action is hit-testable.
+    final container = await _pump(
+      tester,
+      initialTag: '1girl',
+      params: _Params('solo, 1girl'),
+    );
+    await tester.tap(find.byKey(const Key('wiki-add-to-block')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('撤销'));
+    await tester.tap(find.widgetWithText(TextButton, '取消'));
     await tester.pumpAndSettle();
-    expect(prompt(), 'solo');
-
-    // Adding the same tag again reports the duplicate without changing text.
-    await tester.tap(find.byKey(const Key('wiki-add-to-prompt')));
-    await tester.pump();
-    expect(prompt(), 'solo, 1girl');
-    ScaffoldMessenger.of(
-      tester.element(find.byType(TagWikiScreen)),
-    ).hideCurrentSnackBar();
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('wiki-add-to-prompt')));
-    await tester.pump();
-    expect(find.text('提示词中已有 1girl'), findsOneWidget);
-    expect(prompt(), 'solo, 1girl');
-    ScaffoldMessenger.of(
-      tester.element(find.byType(TagWikiScreen)),
-    ).hideCurrentSnackBar();
-    await tester.pumpAndSettle();
-
-    // Undo must not overwrite a prompt the user changed in the meantime.
-    container
-        .read(generationParamsNotifierProvider.notifier)
-        .updatePromptImmediately('solo');
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('wiki-add-to-prompt')));
-    await tester.pump();
-    expect(prompt(), 'solo, 1girl');
-    container
-        .read(generationParamsNotifierProvider.notifier)
-        .updatePromptImmediately('solo, masterpiece');
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('撤销'));
-    await tester.pumpAndSettle();
-    expect(prompt(), 'solo, masterpiece');
-    expect(find.text('提示词已变更，无法撤销'), findsOneWidget);
+    expect(
+      container.read(promptBlockLibraryNotifierProvider).value!.blocks,
+      isEmpty,
+    );
+    expect(
+      container.read(generationParamsNotifierProvider).prompt,
+      'solo, 1girl',
+    );
+    expect(find.byType(SnackBar), findsNothing);
   });
 
   testWidgets('co-occurrence section filters meta, sorts, opens and adds', (
@@ -312,13 +379,22 @@ void main() {
     expect(find.byKey(const Key('wiki-directory-paths')), findsOneWidget);
     expect(find.textContaining('Blue tags'), findsWidgets);
 
-    // Shift+click adds to the prompt instead of navigating.
+    // Shift+click opens block saving instead of navigating.
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
     await tester.tap(find.byKey(const Key('wiki-related-solo')));
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
     await tester.pump();
-    expect(container.read(generationParamsNotifierProvider).prompt, 'solo');
-    expect(find.text('已加入提示词：solo'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(container.read(generationParamsNotifierProvider).prompt, '');
+    expect(
+      tester
+          .widget<PromptBlockEditDialog>(find.byType(PromptBlockEditDialog))
+          .initialContent,
+      'solo',
+    );
+    expect(find.byType(SnackBar), findsNothing);
+    await tester.tap(find.widgetWithText(TextButton, '取消'));
+    await tester.pumpAndSettle();
     expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
   });
 
@@ -426,59 +502,76 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('keyboard shortcuts move focus, selection, bookmark and prompt', (
-    tester,
-  ) async {
-    final params = _Params();
-    final container = await _pump(tester, initialTag: '1girl', params: params);
-    String prompt() => container.read(generationParamsNotifierProvider).prompt;
+  testWidgets(
+    'keyboard shortcuts move focus, selection, bookmark and block saving',
+    (tester) async {
+      final params = _Params();
+      final container = await _pump(
+        tester,
+        initialTag: '1girl',
+        params: params,
+      );
+      String prompt() =>
+          container.read(generationParamsNotifierProvider).prompt;
 
-    // "/" focuses the search field.
-    await tester.sendKeyEvent(LogicalKeyboardKey.slash);
-    await tester.pump();
-    final field = tester.widget<TextField>(
-      find.byKey(const Key('wiki-search')),
-    );
-    expect(field.focusNode!.hasFocus, isTrue);
+      // "/" focuses the search field.
+      await tester.sendKeyEvent(LogicalKeyboardKey.slash);
+      await tester.pump();
+      final field = tester.widget<TextField>(
+        find.byKey(const Key('wiki-search')),
+      );
+      expect(field.focusNode!.hasFocus, isTrue);
 
-    // Arrows still move the list selection while the field is focused.
-    // The list is sorted by post count: safebooru, 1girl, solo, blue_eyes…
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('wiki-body-solo')), findsOneWidget);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
+      // Arrows still move the list selection while the field is focused.
+      // The list is sorted by post count: safebooru, 1girl, solo, blue_eyes…
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('wiki-body-solo')), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
 
-    // Typing in the field must not trigger the B/Enter shortcuts.
-    final bookmarks = container.read(wikiBookmarkStoreProvider);
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
-    await tester.pump();
-    expect(bookmarks.contains('blue_eyes'), isFalse);
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-    expect(prompt(), '');
+      // Typing in the field must not trigger the B/Enter shortcuts.
+      final bookmarks = container.read(wikiBookmarkStoreProvider);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+      await tester.pump();
+      expect(bookmarks.contains('blue_eyes'), isFalse);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(prompt(), '');
 
-    // Clearing the search switches to the unfiltered browse list whose first
-    // entry is 1girl.
-    await tester.enterText(find.byKey(const Key('wiki-search')), '');
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('wiki-body-1girl')), findsOneWidget);
+      // Clearing the search switches to the unfiltered browse list whose first
+      // entry is 1girl.
+      await tester.enterText(find.byKey(const Key('wiki-search')), '');
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('wiki-body-1girl')), findsOneWidget);
 
-    // Move focus to a non-editable control, then Enter adds the selected tag.
-    Focus.of(
-      tester.element(find.byKey(const Key('wiki-add-to-prompt'))),
-    ).requestFocus();
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-    expect(prompt(), '1girl');
-    await tester.pump(const Duration(seconds: 5));
-    await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
-    await tester.pump();
-    expect(bookmarks.contains('1girl'), isTrue);
-  });
+      // Enter outside editable fields opens block saving for the selected tag.
+      Focus.of(
+        tester.element(find.byKey(const Key('wiki-add-to-block'))),
+      ).requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(prompt(), '');
+      expect(
+        tester
+            .widget<PromptBlockEditDialog>(find.byType(PromptBlockEditDialog))
+            .initialContent,
+        '1girl',
+      );
+      await tester.tap(find.widgetWithText(TextButton, '取消'));
+      await tester.pumpAndSettle();
+      Focus.of(
+        tester.element(find.byKey(const Key('wiki-add-to-block'))),
+      ).requestFocus();
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+      await tester.pump();
+      expect(bookmarks.contains('1girl'), isTrue);
+    },
+  );
 
   testWidgets('article TOC shows at 1440 beside a clamped reading column', (
     tester,
