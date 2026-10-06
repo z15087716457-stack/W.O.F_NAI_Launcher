@@ -5554,19 +5554,6 @@
   "wiki_categoryLore": "Lore",
   "wiki_categoryLibrary": "Library",
   "wiki_addToBlock": "Add to blocks",
-  "wiki_addedToPrompt": "Added to prompt: {tag}",
-  "@wiki_addedToPrompt": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
-  "wiki_alreadyInPrompt": "{tag} is already in the prompt",
-  "@wiki_alreadyInPrompt": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
-  "wiki_promptChangedCannotUndo": "Prompt changed; can't undo",
   "wiki_forward": "Forward",
   "wiki_posts": "posts",
   "wiki_aliases": "Aliases",

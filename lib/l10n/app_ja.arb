@@ -5554,9 +5554,6 @@
   "wiki_categoryLore": "設定",
   "wiki_categoryLibrary": "ローカル",
   "wiki_addToBlock": "ブロックに追加",
-  "wiki_addedToPrompt": "プロンプトに追加しました：{tag}",
-  "wiki_alreadyInPrompt": "{tag} は既にプロンプトにあります",
-  "wiki_promptChangedCannotUndo": "プロンプトが変更されたため元に戻せません",
   "wiki_forward": "次へ",
   "wiki_posts": "件の投稿",
   "wiki_aliases": "別名",
@@ -6788,16 +6785,6 @@
   "upscale_cloudCost": "目安 {cost} Anlas · 2×",
   "enhance_localAfterGeneration": "生成した画像を毎回ローカルで自動拡大します。",
   "enhance_localAction": "生成してローカルで拡大",
-  "@wiki_addedToPrompt": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
-  "@wiki_alreadyInPrompt": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
   "@bridge_clients": {
     "placeholders": {
       "count": {

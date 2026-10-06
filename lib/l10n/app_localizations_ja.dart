@@ -9744,19 +9744,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wiki_addToBlock => 'ブロックに追加';
 
   @override
-  String wiki_addedToPrompt(Object tag) {
-    return 'プロンプトに追加しました：$tag';
-  }
-
-  @override
-  String wiki_alreadyInPrompt(Object tag) {
-    return '$tag は既にプロンプトにあります';
-  }
-
-  @override
-  String get wiki_promptChangedCannotUndo => 'プロンプトが変更されたため元に戻せません';
-
-  @override
   String get wiki_forward => '次へ';
 
   @override

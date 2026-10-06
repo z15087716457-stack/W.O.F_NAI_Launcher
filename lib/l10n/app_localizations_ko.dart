@@ -9758,19 +9758,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get wiki_addToBlock => '블록에 추가';
 
   @override
-  String wiki_addedToPrompt(Object tag) {
-    return '프롬프트에 추가됨: $tag';
-  }
-
-  @override
-  String wiki_alreadyInPrompt(Object tag) {
-    return '$tag 태그가 이미 프롬프트에 있습니다';
-  }
-
-  @override
-  String get wiki_promptChangedCannotUndo => '프롬프트가 변경되어 실행 취소할 수 없습니다';
-
-  @override
   String get wiki_forward => '앞으로';
 
   @override

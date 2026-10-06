@@ -5554,9 +5554,6 @@
   "wiki_categoryLore": "設定",
   "wiki_categoryLibrary": "本地",
   "wiki_addToBlock": "新增到積木",
-  "wiki_addedToPrompt": "已加入提示詞：{tag}",
-  "wiki_alreadyInPrompt": "提示詞中已有 {tag}",
-  "wiki_promptChangedCannotUndo": "提示詞已變更，無法復原",
   "wiki_forward": "前進",
   "wiki_posts": "帖子",
   "wiki_aliases": "別名",
@@ -6794,16 +6791,6 @@
   "upscale_cloudCost": "預計 {cost} Anlas · 2×",
   "enhance_localAfterGeneration": "每張生成完成後自動在本機放大。",
   "enhance_localAction": "生成並本地放大",
-  "@wiki_addedToPrompt": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
-  "@wiki_alreadyInPrompt": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
   "@bridge_clients": {
     "placeholders": {
       "count": {

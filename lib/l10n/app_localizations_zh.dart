@@ -9583,19 +9583,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_addToBlock => '添加到积木';
 
   @override
-  String wiki_addedToPrompt(Object tag) {
-    return '已加入提示词：$tag';
-  }
-
-  @override
-  String wiki_alreadyInPrompt(Object tag) {
-    return '提示词中已有 $tag';
-  }
-
-  @override
-  String get wiki_promptChangedCannotUndo => '提示词已变更，无法撤销';
-
-  @override
   String get wiki_forward => '前进';
 
   @override
@@ -21779,19 +21766,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get wiki_addToBlock => '新增到積木';
-
-  @override
-  String wiki_addedToPrompt(Object tag) {
-    return '已加入提示詞：$tag';
-  }
-
-  @override
-  String wiki_alreadyInPrompt(Object tag) {
-    return '提示詞中已有 $tag';
-  }
-
-  @override
-  String get wiki_promptChangedCannotUndo => '提示詞已變更，無法復原';
 
   @override
   String get wiki_forward => '前進';

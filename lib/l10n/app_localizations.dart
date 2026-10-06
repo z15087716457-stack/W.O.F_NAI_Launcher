@@ -17480,24 +17480,6 @@ abstract class AppLocalizations {
   /// **'Add to blocks'**
   String get wiki_addToBlock;
 
-  /// No description provided for @wiki_addedToPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Added to prompt: {tag}'**
-  String wiki_addedToPrompt(Object tag);
-
-  /// No description provided for @wiki_alreadyInPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'{tag} is already in the prompt'**
-  String wiki_alreadyInPrompt(Object tag);
-
-  /// No description provided for @wiki_promptChangedCannotUndo.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt changed; can\'t undo'**
-  String get wiki_promptChangedCannotUndo;
-
   /// No description provided for @wiki_forward.
   ///
   /// In en, this message translates to:

@@ -5554,9 +5554,6 @@
   "wiki_categoryLore": "설정",
   "wiki_categoryLibrary": "로컬",
   "wiki_addToBlock": "블록에 추가",
-  "wiki_addedToPrompt": "프롬프트에 추가됨: {tag}",
-  "wiki_alreadyInPrompt": "{tag} 태그가 이미 프롬프트에 있습니다",
-  "wiki_promptChangedCannotUndo": "프롬프트가 변경되어 실행 취소할 수 없습니다",
   "wiki_forward": "앞으로",
   "wiki_posts": "개 게시물",
   "wiki_aliases": "별칭",
@@ -6788,16 +6785,6 @@
   "upscale_cloudCost": "예상 {cost} Anlas · 2×",
   "enhance_localAfterGeneration": "생성된 각 이미지를 로컬에서 자동으로 확대합니다.",
   "enhance_localAction": "생성 후 로컬 확대",
-  "@wiki_addedToPrompt": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
-  "@wiki_alreadyInPrompt": {
-    "placeholders": {
-      "tag": {}
-    }
-  },
   "@bridge_clients": {
     "placeholders": {
       "count": {

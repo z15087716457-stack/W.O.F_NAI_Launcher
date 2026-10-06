@@ -10009,19 +10009,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wiki_addToBlock => 'Add to blocks';
 
   @override
-  String wiki_addedToPrompt(Object tag) {
-    return 'Added to prompt: $tag';
-  }
-
-  @override
-  String wiki_alreadyInPrompt(Object tag) {
-    return '$tag is already in the prompt';
-  }
-
-  @override
-  String get wiki_promptChangedCannotUndo => 'Prompt changed; can\'t undo';
-
-  @override
   String get wiki_forward => 'Forward';
 
   @override
