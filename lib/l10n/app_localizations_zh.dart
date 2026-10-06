@@ -12187,6 +12187,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localUpscale_scrollDown => '向下滚动';
+
+  @override
+  String get wiki_exampleImages => '示例图片';
+
+  @override
+  String get wiki_exampleImagesUnavailable => '示例图片暂时无法加载';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24372,4 +24378,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localUpscale_scrollDown => '向下滾動';
+
+  @override
+  String get wiki_exampleImages => '示例圖片';
+
+  @override
+  String get wiki_exampleImagesUnavailable => '示例圖片暫時無法載入';
 }

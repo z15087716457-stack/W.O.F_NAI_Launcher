@@ -12431,4 +12431,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localUpscale_scrollDown => '아래로 스크롤';
+
+  @override
+  String get wiki_exampleImages => '예시 이미지';
+
+  @override
+  String get wiki_exampleImagesUnavailable => '예시 이미지를 불러올 수 없습니다';
 }

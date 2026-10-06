@@ -27,6 +27,7 @@ import '../../../core/wiki/wiki_bilingual.dart';
 import '../../../core/wiki/wiki_bookmark_store.dart';
 import '../../../core/wiki/wiki_directory.dart';
 import '../../../core/wiki/wiki_directory_labels.dart';
+import '../../../core/wiki/wiki_example_repository.dart';
 import '../../providers/data_source_cache_provider.dart';
 import '../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 import '../../widgets/common/app_toast.dart';
@@ -2267,12 +2268,14 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       TextStyle? style,
       TextStyle? headingStyle,
       String? initialSection,
+      bool includeExampleImages = true,
     }) => WikiLinkedBody(
       key: key,
       body: markdown,
       headingAnchors: headingAnchors,
       linkListsAsChips: true,
       exampleCards: true,
+      exampleTag: includeExampleImages ? tag : null,
       initialSectionTitle: initialSection,
       onTagAdd: (candidate) => _addTagToBlock(candidate.canonicalTag),
       onTagHover: _previewHost.hover,
@@ -2342,6 +2345,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       TextStyle? style,
       TextStyle? headingStyle,
       String? initialSection,
+      bool includeExampleImages,
     })
     linked,
   ) {
@@ -2353,6 +2357,20 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
     // list blocks that arrive after the heading that opened their section.
     var translatedSection = '';
     var originalSection = '';
+    int? exampleBlock;
+    var exampleSection = '';
+    for (var index = 0; index < blocks.length; index++) {
+      final headings = wikiArticleHeadings(blocks[index].translated);
+      if (headings.isNotEmpty) exampleSection = headings.last.label;
+      if (isWikiExampleHeading(exampleSection) &&
+          RegExp(
+            r'^\s*(?:[-*+]|\d+\.)\s+',
+            multiLine: true,
+          ).hasMatch(blocks[index].translated)) {
+        exampleBlock = index;
+        break;
+      }
+    }
     final originalStyle = TextStyle(
       fontSize: _fontSize - 1,
       height: 1.6,
@@ -2399,6 +2417,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                     initialSection: translatedSeed.isEmpty
                         ? null
                         : translatedSeed,
+                    includeExampleImages: index == exampleBlock,
                   ),
                   const SizedBox(height: 4),
                   if (block.heading)
@@ -2428,6 +2447,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                         initialSection: originalSeed.isEmpty
                             ? null
                             : originalSeed,
+                        includeExampleImages: false,
                       ),
                     ),
                 ],

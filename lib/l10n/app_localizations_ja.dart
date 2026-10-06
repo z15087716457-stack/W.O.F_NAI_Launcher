@@ -12411,4 +12411,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localUpscale_scrollDown => '下へスクロール';
+
+  @override
+  String get wiki_exampleImages => '作例画像';
+
+  @override
+  String get wiki_exampleImagesUnavailable => '作例画像を読み込めませんでした';
 }

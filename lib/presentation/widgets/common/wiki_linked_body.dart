@@ -9,8 +9,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/autocomplete/completion_models.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/auto_tag_translation_controller.dart';
+import '../../../core/wiki/wiki_example_repository.dart';
 import '../../../core/wiki/wiki_tag_links.dart';
 import '../autocomplete/tag_category_visuals.dart';
+import 'wiki_example_gallery.dart';
 
 /// Shared selectable article renderer for the preview and the full Wiki.
 class WikiLinkedBody extends ConsumerWidget {
@@ -24,6 +26,7 @@ class WikiLinkedBody extends ConsumerWidget {
     this.headingAnchors,
     this.linkListsAsChips = false,
     this.exampleCards = false,
+    this.exampleTag,
     this.initialSectionTitle,
     this.onTagAdd,
     this.onTagHover,
@@ -48,6 +51,9 @@ class WikiLinkedBody extends ConsumerWidget {
   /// Top-level lists inside an example-named section ("示例"/"example"/…)
   /// render each item as a card. Checked before [linkListsAsChips].
   final bool exampleCards;
+
+  /// Only full encyclopedia articles opt in to online illustrations.
+  final String? exampleTag;
 
   /// Section title in effect before [body] starts. Bilingual blocks split the
   /// article so a list block does not see the heading that opened its
@@ -132,6 +138,7 @@ class WikiLinkedBody extends ConsumerWidget {
             ? _WikiListBuilder(
                 sectionTracker: sectionTracker,
                 exampleCards: exampleCards,
+                exampleTag: exampleTag,
                 linkListsAsChips: linkListsAsChips,
                 sheet: sheet,
                 byHref: byHref,
@@ -281,6 +288,7 @@ class _WikiSectionTracker {
   ];
 
   bool get inExampleSection {
+    if (isWikiExampleHeading(heading)) return true;
     final title = heading.replaceAll(RegExp(r'\s'), '').toLowerCase();
     // 「例」 alone counts, but substring matching would also catch 「例外」.
     if (title == '例') return true;
@@ -353,6 +361,7 @@ class _WikiListBuilder extends MarkdownElementBuilder {
   _WikiListBuilder({
     required this.sectionTracker,
     required this.exampleCards,
+    required this.exampleTag,
     required this.linkListsAsChips,
     required this.sheet,
     required this.byHref,
@@ -367,6 +376,7 @@ class _WikiListBuilder extends MarkdownElementBuilder {
 
   final _WikiSectionTracker sectionTracker;
   final bool exampleCards;
+  final String? exampleTag;
   final bool linkListsAsChips;
   final MarkdownStyleSheet sheet;
 
@@ -385,6 +395,7 @@ class _WikiListBuilder extends MarkdownElementBuilder {
   /// ul/ol nesting depth while the visitor walks the document. Cards and
   /// chip clouds only apply to top-level lists.
   int _depth = 0;
+  bool _examplesPlaced = false;
 
   @override
   bool isBlockElement() => true;
@@ -466,6 +477,22 @@ class _WikiListBuilder extends MarkdownElementBuilder {
     _depth--;
     if (!topLevel) return null;
     if (exampleCards && sectionTracker.inExampleSection && _cardable(element)) {
+      if (exampleTag != null && !_examplesPlaced) {
+        _examplesPlaced = true;
+        return WikiExampleGallery(
+          key: ValueKey('wiki-examples-$exampleTag'),
+          tag: exampleTag!,
+          fallback: _cards(context, element),
+          captionBuilder: (caption) => WikiLinkedBody(
+            body: caption,
+            onTagTap: onTap,
+            onTagAdd: onAdd,
+            onTagHover: onHover,
+            onTagLeave: onLeave,
+            style: sheet.p,
+          ),
+        );
+      }
       return _cards(context, element);
     }
     if (linkListsAsChips) {

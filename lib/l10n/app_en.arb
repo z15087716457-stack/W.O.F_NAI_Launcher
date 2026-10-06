@@ -6811,5 +6811,7 @@
     }
   },
   "localUpscale_stop": "Stop upscaling",
-  "localUpscale_scrollDown": "Scroll down"
+  "localUpscale_scrollDown": "Scroll down",
+  "wiki_exampleImages": "Example image",
+  "wiki_exampleImagesUnavailable": "Example images are temporarily unavailable"
 }

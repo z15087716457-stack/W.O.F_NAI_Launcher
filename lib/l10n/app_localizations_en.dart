@@ -12802,4 +12802,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localUpscale_scrollDown => 'Scroll down';
+
+  @override
+  String get wiki_exampleImages => 'Example image';
+
+  @override
+  String get wiki_exampleImagesUnavailable =>
+      'Example images are temporarily unavailable';
 }

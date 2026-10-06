@@ -8,6 +8,7 @@ import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
+import 'package:nai_launcher/core/wiki/wiki_example_repository.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory.dart';
 import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
@@ -118,6 +119,12 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            wikiExampleRepositoryProvider.overrideWithValue(
+              WikiExampleRepository(
+                fetchWiki: (tag, {cancelToken}) async => null,
+                fetchPosts: (ids, {cancelToken}) async => [],
+              ),
+            ),
             autoTagTranslationProvider.overrideWith((ref) => auto),
             unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
             wikiTagLinksProvider.overrideWithValue(

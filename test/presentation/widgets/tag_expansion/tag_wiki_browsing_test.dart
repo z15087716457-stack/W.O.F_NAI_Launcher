@@ -18,6 +18,8 @@ import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
+import 'package:nai_launcher/core/wiki/wiki_example_repository.dart';
+import 'package:nai_launcher/presentation/widgets/common/wiki_example_gallery.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory.dart';
 import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -37,6 +39,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.da
 import 'package:nai_launcher/presentation/widgets/autocomplete/tag_category_visuals.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 
@@ -319,6 +322,7 @@ Future<void> _pump(
   _Auto auto, {
   double scale = 1,
   TagWikiRepository? wiki,
+  WikiExampleRepository? exampleRepository,
   _Tags? catalog,
   List<CompletionCandidate>? related,
   List<CompletionCandidate> expansionRelated = const [],
@@ -330,6 +334,13 @@ Future<void> _pump(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        wikiExampleRepositoryProvider.overrideWithValue(
+          exampleRepository ??
+              WikiExampleRepository(
+                fetchWiki: (tag, {cancelToken}) async => null,
+                fetchPosts: (ids, {cancelToken}) async => [],
+              ),
+        ),
         autoTagTranslationProvider.overrideWith((_) => auto),
         wikiTagLinksProvider.overrideWithValue(
           catalog == null
@@ -478,7 +489,10 @@ Offset _inlineTextCenter(
 }
 
 void main() {
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    VisibilityDetectorController.instance.updateInterval = Duration.zero;
+  });
   setUpAll(() async {
     if (Platform.environment['CAPTURE_TAG_WIKI'] != '1') return;
     await loadStudioCaptureFonts();
@@ -2621,6 +2635,79 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final mode in WikiReadingMode.values) {
+    testWidgets('official example images appear once in ${mode.name} mode', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1440, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final previousInterval =
+          VisibilityDetectorController.instance.updateInterval;
+      VisibilityDetectorController.instance.updateInterval = Duration.zero;
+      addTearDown(() {
+        VisibilityDetectorController.instance.updateInterval = previousInterval;
+      });
+      SharedPreferences.setMockInitialValues({
+        'wiki_show_translation': mode != WikiReadingMode.original,
+        'wiki_bilingual': mode == WikiReadingMode.bilingual,
+      });
+      final auto = _Auto()
+        ..bodyOverride = '本地正文。\n\n## 示例\n\n- [solo](wof-tag:solo)'
+        ..originalOverride =
+            'Local prose.\n\n## Examples\n\n- [solo](wof-tag:solo)';
+      var requests = 0;
+      await _pump(
+        tester,
+        const TagWikiScreen(
+          initialTag: '1girl',
+          directory: WikiDirectory(roots: [], groups: {}),
+        ),
+        auto,
+        catalog: _Tags(entries: _uiTags()),
+        exampleRepository: WikiExampleRepository(
+          fetchWiki: (tag, {cancelToken}) async {
+            requests++;
+            return {
+              'body':
+                  'h4. Examples\n* !post #22: [[solo]]\n* !post #11: [[1girl]]',
+            };
+          },
+          fetchPosts: (ids, {cancelToken}) async => [],
+        ),
+      );
+      expect(find.byType(WikiExampleGallery), findsOneWidget);
+      VisibilityDetectorController.instance.notifyNow();
+      await tester.pumpAndSettle();
+      expect(requests, 1);
+      expect(
+        find.byKey(const ValueKey('wiki-example-card-22')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('wiki-example-card-11')),
+        findsOneWidget,
+      );
+      final first = tester.getTopLeft(
+        find.byKey(const ValueKey('wiki-example-card-22')),
+      );
+      final second = tester.getTopLeft(
+        find.byKey(const ValueKey('wiki-example-card-11')),
+      );
+      expect(first.dx, lessThan(second.dx));
+      expect(
+        find.text(
+          mode == WikiReadingMode.original ? 'Local prose.' : '本地正文。',
+          findRichText: true,
+        ),
+        findsOneWidget,
+      );
+      expect(auto.retriedArticles, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('bilingual example sections render cards on both sides', (
     tester,

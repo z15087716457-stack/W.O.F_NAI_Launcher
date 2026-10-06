@@ -116,6 +116,7 @@ dependencies:
   flutter_markdown_plus: ^1.0.12
   flutter_svg: ^2.3.0
 dev_dependencies:
+  file: ^7.0.1
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0

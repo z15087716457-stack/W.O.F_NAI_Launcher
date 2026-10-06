@@ -6811,5 +6811,7 @@
     }
   },
   "localUpscale_stop": "アップスケールを停止",
-  "localUpscale_scrollDown": "下へスクロール"
+  "localUpscale_scrollDown": "下へスクロール",
+  "wiki_exampleImages": "作例画像",
+  "wiki_exampleImagesUnavailable": "作例画像を読み込めませんでした"
 }

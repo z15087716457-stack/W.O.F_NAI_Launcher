@@ -6811,5 +6811,7 @@
     }
   },
   "localUpscale_stop": "업스케일 중지",
-  "localUpscale_scrollDown": "아래로 스크롤"
+  "localUpscale_scrollDown": "아래로 스크롤",
+  "wiki_exampleImages": "예시 이미지",
+  "wiki_exampleImagesUnavailable": "예시 이미지를 불러올 수 없습니다"
 }

@@ -649,12 +649,16 @@ class DanbooruApiService {
 
   // ==================== Wiki 页面 ====================
 
-  Future<Map<String, dynamic>?> getWikiPage(String title) async {
+  Future<Map<String, dynamic>?> getWikiPage(
+    String title, {
+    CancelToken? cancelToken,
+  }) async {
     final encodedTitle = Uri.encodeComponent(title);
 
     try {
       final response = await _dio.get(
         '$_baseUrl$_wikiPageDetailEndpoint/$encodedTitle.json',
+        cancelToken: cancelToken,
         options: Options(
           receiveTimeout: _timeout,
           sendTimeout: _timeout,
@@ -672,6 +676,35 @@ class DanbooruApiService {
       }
       rethrow;
     }
+  }
+
+  /// Small, read-only metadata batch for the Wiki's explicitly embedded posts.
+  Future<List<Map<String, dynamic>>> getWikiExamplePosts(
+    List<int> ids, {
+    CancelToken? cancelToken,
+  }) async {
+    if (ids.isEmpty) return const [];
+    final response = await _dio.get(
+      '$_baseUrl$_postsEndpoint',
+      cancelToken: cancelToken,
+      queryParameters: {
+        'tags': 'id:${ids.take(64).join(',')}',
+        'limit': ids.length.clamp(1, 64),
+        'only': 'id,preview_file_url,large_file_url,media_asset,is_deleted',
+      },
+      options: Options(
+        receiveTimeout: _timeout,
+        sendTimeout: _timeout,
+        headers: _getHeaders(),
+      ),
+    );
+    if (response.data is! List) {
+      throw const FormatException('Invalid post list');
+    }
+    return (response.data as List)
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
   }
 
   Future<List<Map<String, dynamic>>> searchWikiPages({

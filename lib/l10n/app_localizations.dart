@@ -22277,6 +22277,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scroll down'**
   String get localUpscale_scrollDown;
+
+  /// No description provided for @wiki_exampleImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Example image'**
+  String get wiki_exampleImages;
+
+  /// No description provided for @wiki_exampleImagesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Example images are temporarily unavailable'**
+  String get wiki_exampleImagesUnavailable;
 }
 
 class _AppLocalizationsDelegate

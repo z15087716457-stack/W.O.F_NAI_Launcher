@@ -6811,5 +6811,7 @@
     }
   },
   "localUpscale_stop": "停止超分",
-  "localUpscale_scrollDown": "向下滚动"
+  "localUpscale_scrollDown": "向下滚动",
+  "wiki_exampleImages": "示例图片",
+  "wiki_exampleImagesUnavailable": "示例图片暂时无法加载"
 }
