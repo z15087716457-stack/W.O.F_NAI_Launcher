@@ -20,6 +20,7 @@ class WikiLinkedBody extends ConsumerWidget {
     required this.onTagTap,
     this.style,
     this.headingStyle,
+    this.compact = false,
     this.headingAnchors,
     this.linkListsAsChips = false,
     this.exampleCards = false,
@@ -35,6 +36,9 @@ class WikiLinkedBody extends ConsumerWidget {
   /// Overrides the h1–h6 styles (used for the original side of a bilingual
   /// block, where headings render small and muted).
   final TextStyle? headingStyle;
+
+  /// Tighter spacing for the tag expansion's small article panel.
+  final bool compact;
   final List<GlobalKey>? headingAnchors;
 
   /// Bullet lists that are pure tag links (three items or more) render as a
@@ -100,8 +104,8 @@ class WikiLinkedBody extends ConsumerWidget {
           h4: headingStyle,
           h5: headingStyle,
           h6: headingStyle,
-          blockSpacing: headingAnchors == null ? 10 : 14,
-          listIndent: 18,
+          blockSpacing: compact ? 6 : (headingAnchors == null ? 10 : 14),
+          listIndent: compact ? 16 : 18,
         );
         final sectionTracker = _WikiSectionTracker()
           ..heading = initialSectionTitle ?? '';

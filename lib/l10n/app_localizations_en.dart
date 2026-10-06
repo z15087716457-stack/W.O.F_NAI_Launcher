@@ -12641,7 +12641,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localUpscale_noAutomaticDownload =>
-      'Components download only when you click Install. Existing local models remain available.';
+      'Download components as needed. Existing local models are ready to use.';
+
+  @override
+  String get localUpscale_notInstalledShort => 'Not installed';
+
+  @override
+  String get localUpscale_seedvr2ThreeSummary =>
+      'Balances quality and resources for everyday upscaling.';
+
+  @override
+  String get localUpscale_seedvr2SevenSummary =>
+      'Higher quality potential with more VRAM and processing time.';
+
+  @override
+  String get localUpscale_seedvr2SharedHelp =>
+      'Models share the VAE (about 0.5 GB) and Python/CUDA runtime. Requires an NVIDIA GPU.';
 
   @override
   String get localUpscale_seedvr2Help =>

@@ -506,7 +506,11 @@ Future<void> _captureSeedvr2(
         key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final image = await boundary.toImage(pixelRatio: 1);
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    final directory = Directory('.dart_tool/seedvr2-options-20261006/captures');
+    final directory = Directory(
+      Platform.environment['CAPTURE_UI_FEEDBACK'] == '1'
+          ? '.dart_tool/ui-feedback-20261006/captures/seedvr2'
+          : '.dart_tool/seedvr2-options-20261006/captures',
+    );
     await directory.create(recursive: true);
     await File(
       '${directory.path}/$name.png',

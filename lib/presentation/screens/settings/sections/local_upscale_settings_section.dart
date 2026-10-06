@@ -3,12 +3,11 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/upscale/local_upscale_models.dart';
 import '../../../providers/generation/local_upscale_provider.dart';
-import '../widgets/local_upscale_brand_logo.dart';
+import '../widgets/advanced_upscale_components.dart';
 
 String localUpscaleErrorText(BuildContext context, LocalUpscaleError error) {
   final l = context.l10n;
@@ -301,136 +300,7 @@ class _LocalUpscaleSettingsSectionState
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 12),
-        ...advancedUpscaleCatalog.map((catalog) {
-          final model =
-              (models.valueOrNull ?? [])
-                  .where((m) => m.id == catalog.id)
-                  .firstOrNull ??
-              catalog;
-          final seed = model.method == LocalUpscaleMethod.seedvr2;
-          return Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      LocalUpscaleBrandLogo(method: model.method),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          seed ? model.name : 'RTX',
-                          style: theme.textTheme.titleSmall,
-                        ),
-                      ),
-                      if (model.installed)
-                        Icon(
-                          Icons.check_circle_outline,
-                          size: 20,
-                          color: theme.colorScheme.primary,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    !seed
-                        ? l.localUpscale_rtxHelp
-                        : model.id == 'seedvr2-7b'
-                        ? l.localUpscale_seedvr2SevenHelp
-                        : l.localUpscale_seedvr2Help,
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          model.installed
-                              ? '${l.localUpscale_installed} · ${seed ? '${l.localUpscale_modelWeights} ' : ''}${(model.diskBytes / 1024 / 1024).round()} MB'
-                              : l.localUpscale_notInstalled,
-                          style: theme.textTheme.labelMedium,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => launchUrl(
-                          Uri.parse(
-                            seed
-                                ? 'https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler/blob/4490bd1f482e026674543386bb2a4d176da245b9/LICENSE'
-                                : 'https://developer.nvidia.com/rtx-video-sdk',
-                          ),
-                          mode: LaunchMode.externalApplication,
-                        ),
-                        child: Text(l.localUpscale_license),
-                      ),
-                      if (model.installed)
-                        IconButton(
-                          onPressed: blocked
-                              ? null
-                              : () => ref
-                                    .read(
-                                      advancedUpscaleInstallProvider.notifier,
-                                    )
-                                    .delete(model.id),
-                          tooltip: l.common_delete,
-                          icon: const Icon(Icons.delete_outline),
-                        )
-                      else
-                        TextButton(
-                          onPressed: blocked || !Platform.isWindows
-                              ? null
-                              : () => ref
-                                    .read(
-                                      advancedUpscaleInstallProvider.notifier,
-                                    )
-                                    .install(model.id),
-                          child: Text(l.localUpscale_installComponent),
-                        ),
-                    ],
-                  ),
-                  if (install.id == model.id) ...[
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: install.cancelling ? null : install.fraction,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            install.cancelling
-                                ? l.localUpscale_cancelling
-                                : switch (install.phase) {
-                                    'python' => l.localUpscale_installingPython,
-                                    'runtime' =>
-                                      l.localUpscale_installingRuntime,
-                                    'weights' =>
-                                      l.localUpscale_downloadProgress,
-                                    'checking' =>
-                                      l.localUpscale_checkingComponent,
-                                    _ => l.localUpscale_installingComponent,
-                                  },
-                            style: theme.textTheme.bodySmall,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: install.cancelling
-                              ? null
-                              : ref
-                                    .read(
-                                      advancedUpscaleInstallProvider.notifier,
-                                    )
-                                    .cancel,
-                          child: Text(l.common_cancel),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          );
-        }),
+        AdvancedUpscaleComponents(blocked: blocked),
         if (install.error != null) ...[
           Text(
             install.error == LocalUpscaleError.cancelled

@@ -475,6 +475,7 @@ class _Seedvr2AdvancedSettings extends ConsumerWidget {
           max: max,
           decimals: 0,
           width: 100,
+          textStyle: UpscaleControlStyle.label(Theme.of(context)),
           enabled: enabled,
           onChanged: onChanged,
         ),
@@ -591,6 +592,7 @@ class _Seedvr2AdvancedSettings extends ConsumerWidget {
                     max: 0xffffffff.toDouble(),
                     decimals: 0,
                     width: 112,
+                    textStyle: label,
                     enabled: enabled,
                     onChanged: (value) => update(
                       (current) => current.copyWith(seed: value.round()),

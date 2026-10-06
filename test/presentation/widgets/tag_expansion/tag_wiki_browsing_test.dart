@@ -285,7 +285,9 @@ Future<void> capture(
     );
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final folder = Directory(
-      alignment
+      Platform.environment['CAPTURE_UI_FEEDBACK'] == '1'
+          ? '.dart_tool/ui-feedback-20261006/captures/wiki'
+          : alignment
           ? '.dart_tool/wiki-alignment-captures'
           : feedback
           ? '.dart_tool/wiki-feedback-captures'
@@ -1151,6 +1153,19 @@ void main() {
           closeTo(center, .5),
         );
         final article = find.byKey(const ValueKey('wiki-article-header'));
+        final button = find.descendant(
+          of: article,
+          matching: find.byKey(
+            const ValueKey('tag-translation-wiki-blue_eyes'),
+          ),
+        );
+        expect(
+          tester.getRect(button).left -
+              tester
+                  .getRect(find.byKey(const ValueKey('wiki-article-title')))
+                  .right,
+          closeTo(8, .5),
+        );
         final icon = find.descendant(
           of: article,
           matching: find.byType(TranslationIcon),
@@ -1602,6 +1617,96 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final dark in [false, true]) {
+    for (final locale in const [Locale('zh'), Locale('en')]) {
+      for (final width in [420.0, 1000.0]) {
+        final id =
+            '${locale.languageCode}-${dark ? 'dark' : 'light'}-${width.toInt()}';
+        testWidgets(
+          'Small Wiki headings remain proportional and links work $id',
+          (tester) async {
+            await tester.runAsync(loadStudioCaptureFonts);
+            tester.view.physicalSize = Size(width, 780);
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.resetPhysicalSize);
+            addTearDown(tester.view.resetDevicePixelRatio);
+            final controller = TextEditingController();
+            addTearDown(controller.dispose);
+            final zh = locale.languageCode == 'zh';
+            final paragraph = zh
+                ? '包含一个女性角色的图片。'
+                : 'An image containing one female character.';
+            final heading = zh ? '示例' : 'Examples';
+            final seeAlso = zh ? '另请参阅' : 'See also';
+            final auto = _Auto()
+              ..bodyOverride =
+                  '$paragraph\n\n## $heading\n\n- [blue_eyes](wof-tag:blue_eyes)\n\n## $seeAlso\n\n- [saber_(fate)](wof-tag:saber_%28fate%29)';
+            await _pump(
+              tester,
+              Center(
+                child: SizedBox(
+                  width: 300,
+                  child: TagExpansionWrapper(
+                    controller: controller,
+                    child: TextField(
+                      key: const Key('host'),
+                      controller: controller,
+                    ),
+                  ),
+                ),
+              ),
+              auto,
+              scale: 1.3,
+              locale: locale,
+              brightness: dark ? Brightness.dark : Brightness.light,
+            );
+            await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+            await tester.tap(find.byKey(const Key('host')));
+            await tester.pumpAndSettle();
+            await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+            await tester.tap(find.text('fate testarossa'));
+            await tester.pumpAndSettle();
+            final panel = find.byKey(
+              const ValueKey('tag-expansion-wiki-panel'),
+            );
+            final text = find.descendant(
+              of: panel,
+              matching: find.text(paragraph, findRichText: true),
+            );
+            final title = find.descendant(
+              of: panel,
+              matching: find.text(heading, findRichText: true),
+            );
+            expect(
+              tester.getSize(title).height,
+              lessThan(tester.getSize(text).height * 1.5),
+            );
+            expect(
+              find.descendant(
+                of: panel,
+                matching: find.text(seeAlso, findRichText: true),
+              ),
+              findsOneWidget,
+            );
+            final rect = tester.getRect(panel);
+            expect(rect.left, greaterThanOrEqualTo(8));
+            expect(rect.right, lessThanOrEqualTo(width - 8));
+            await capture(tester, 'small-wiki-$id', dark ? 'dark' : 'light');
+            await tester.tap(
+              find.descendant(
+                of: panel,
+                matching: find.text('blue_eyes', findRichText: true),
+              ),
+            );
+            await tester.pumpAndSettle();
+            expect(find.textContaining('blue eyes'), findsWidgets);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+  }
 
   testWidgets(
     'formatted original keeps current-article links, list layout and a compact centered preview header',

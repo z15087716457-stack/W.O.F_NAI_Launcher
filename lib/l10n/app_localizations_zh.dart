@@ -12035,7 +12035,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localUpscale_optionalComponents => '可选组件';
 
   @override
-  String get localUpscale_noAutomaticDownload => '仅在点击“安装”后下载组件，已有的本地模型可直接使用。';
+  String get localUpscale_noAutomaticDownload => '按需下载组件，已有的本地模型可直接使用。';
+
+  @override
+  String get localUpscale_notInstalledShort => '未安装';
+
+  @override
+  String get localUpscale_seedvr2ThreeSummary => '兼顾效果与资源占用，适合日常放大。';
+
+  @override
+  String get localUpscale_seedvr2SevenSummary => '更高画质潜力，需要更多显存与时间。';
+
+  @override
+  String get localUpscale_seedvr2SharedHelp =>
+      '型号共用 VAE（约 0.5 GB）和 Python/CUDA 环境，需要 NVIDIA 显卡。';
 
   @override
   String get localUpscale_seedvr2Help =>
@@ -24194,7 +24207,20 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localUpscale_optionalComponents => '可選元件';
 
   @override
-  String get localUpscale_noAutomaticDownload => '僅在點選“安裝”後下載元件，已有的本地模型可直接使用。';
+  String get localUpscale_noAutomaticDownload => '按需下載元件，已有的本地模型可直接使用。';
+
+  @override
+  String get localUpscale_notInstalledShort => '未安裝';
+
+  @override
+  String get localUpscale_seedvr2ThreeSummary => '兼顧效果與資源佔用，適合日常放大。';
+
+  @override
+  String get localUpscale_seedvr2SevenSummary => '更高畫質潛力，需要更多視訊記憶體與時間。';
+
+  @override
+  String get localUpscale_seedvr2SharedHelp =>
+      '型號共用 VAE（約 0.5 GB）和 Python/CUDA 環境，需要 NVIDIA 顯示卡。';
 
   @override
   String get localUpscale_seedvr2Help =>

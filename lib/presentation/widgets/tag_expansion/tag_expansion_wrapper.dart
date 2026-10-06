@@ -1856,7 +1856,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                         final key = (
                           body,
                           constraints.maxWidth,
-                          MediaQuery.textScalerOf(context).scale(14),
+                          MediaQuery.textScalerOf(context).scale(12),
                           theme.textTheme.bodySmall,
                         );
                         return _WikiBodySizeReporter(
@@ -1873,7 +1873,16 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
                           },
                           child: WikiLinkedBody(
                             body: body,
-                            style: theme.textTheme.bodySmall,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 12,
+                              height: 1.4,
+                            ),
+                            headingStyle: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              height: 1.35,
+                            ),
+                            compact: true,
                             onTagTap: _visitTag,
                           ),
                         );

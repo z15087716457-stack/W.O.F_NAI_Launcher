@@ -21993,8 +21993,32 @@ abstract class AppLocalizations {
   /// No description provided for @localUpscale_noAutomaticDownload.
   ///
   /// In en, this message translates to:
-  /// **'Components download only when you click Install. Existing local models remain available.'**
+  /// **'Download components as needed. Existing local models are ready to use.'**
   String get localUpscale_noAutomaticDownload;
+
+  /// No description provided for @localUpscale_notInstalledShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Not installed'**
+  String get localUpscale_notInstalledShort;
+
+  /// No description provided for @localUpscale_seedvr2ThreeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Balances quality and resources for everyday upscaling.'**
+  String get localUpscale_seedvr2ThreeSummary;
+
+  /// No description provided for @localUpscale_seedvr2SevenSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher quality potential with more VRAM and processing time.'**
+  String get localUpscale_seedvr2SevenSummary;
+
+  /// No description provided for @localUpscale_seedvr2SharedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Models share the VAE (about 0.5 GB) and Python/CUDA runtime. Requires an NVIDIA GPU.'**
+  String get localUpscale_seedvr2SharedHelp;
 
   /// No description provided for @localUpscale_seedvr2Help.
   ///

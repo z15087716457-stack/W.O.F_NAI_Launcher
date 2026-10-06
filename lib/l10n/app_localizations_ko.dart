@@ -12274,7 +12274,22 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localUpscale_noAutomaticDownload =>
-      '설치를 누를 때만 다운로드합니다. 기존 로컬 모델은 바로 사용할 수 있습니다.';
+      '필요한 구성 요소를 다운로드하세요. 기존 로컬 모델은 바로 사용할 수 있습니다.';
+
+  @override
+  String get localUpscale_notInstalledShort => '미설치';
+
+  @override
+  String get localUpscale_seedvr2ThreeSummary =>
+      '화질과 리소스 사용량의 균형이 좋아 일상적인 확대에 적합합니다.';
+
+  @override
+  String get localUpscale_seedvr2SevenSummary =>
+      '더 높은 화질을 기대할 수 있지만 VRAM과 처리 시간이 더 필요합니다.';
+
+  @override
+  String get localUpscale_seedvr2SharedHelp =>
+      '모델은 VAE(약 0.5 GB)와 Python/CUDA 환경을 공유합니다. NVIDIA GPU가 필요합니다.';
 
   @override
   String get localUpscale_seedvr2Help =>

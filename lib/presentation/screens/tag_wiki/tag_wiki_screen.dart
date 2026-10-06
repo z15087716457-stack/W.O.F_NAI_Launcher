@@ -1771,6 +1771,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                   ),
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               TagTranslationIndicator(
                                 tag: tag,
                                 surface: _articleSurface,

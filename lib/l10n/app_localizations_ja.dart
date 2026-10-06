@@ -12254,7 +12254,22 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localUpscale_noAutomaticDownload =>
-      '「インストール」を押したときだけダウンロードします。既存のローカルモデルは利用できます。';
+      '必要に応じてコンポーネントをダウンロードします。既存のローカルモデルはそのまま使えます。';
+
+  @override
+  String get localUpscale_notInstalledShort => '未インストール';
+
+  @override
+  String get localUpscale_seedvr2ThreeSummary =>
+      '画質とリソース使用量のバランスが良く、日常の拡大に適しています。';
+
+  @override
+  String get localUpscale_seedvr2SevenSummary =>
+      'より高い画質が期待できますが、VRAM と処理時間が多く必要です。';
+
+  @override
+  String get localUpscale_seedvr2SharedHelp =>
+      'モデルは VAE（約 0.5 GB）と Python/CUDA 環境を共有します。NVIDIA GPU が必要です。';
 
   @override
   String get localUpscale_seedvr2Help =>
