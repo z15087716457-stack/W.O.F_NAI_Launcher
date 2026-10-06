@@ -22026,6 +22026,18 @@ abstract class AppLocalizations {
   /// **'Higher quality potential with more VRAM and processing time.'**
   String get localUpscale_seedvr2SevenSummary;
 
+  /// No description provided for @localUpscale_seedvr2SharpSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharper details for images where stronger textures are desired.'**
+  String get localUpscale_seedvr2SharpSummary;
+
+  /// No description provided for @localUpscale_seedvr2SharpHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'7B Sharp FP8 emphasizes sharper textures and edges. Weights are about 8.2 GB; shares the VAE and Python/CUDA runtime with other SeedVR2 variants.'**
+  String get localUpscale_seedvr2SharpHelp;
+
   /// No description provided for @localUpscale_seedvr2SharedHelp.
   ///
   /// In en, this message translates to:

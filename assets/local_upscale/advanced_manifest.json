@@ -539,6 +539,13 @@
         "url": "https://huggingface.co/numz/SeedVR2_comfyUI/resolve/09ced71023636e9bc8cdf9cdecfb2625d1e691e8/seedvr2_ema_7b_fp8_e4m3fn.safetensors?download=true"
       },
       {
+        "id": "seedvr2-7b-sharp",
+        "name": "seedvr2_ema_7b_sharp_fp8_e4m3fn.safetensors",
+        "sha256": "4261d18fd9c331f4c8f14b475c9148bd8c3f1512240ace55fe31a179e0a960b0",
+        "bytes": 8239729704,
+        "url": "https://huggingface.co/numz/SeedVR2_comfyUI/resolve/09ced71023636e9bc8cdf9cdecfb2625d1e691e8/seedvr2_ema_7b_sharp_fp8_e4m3fn.safetensors?download=true"
+      },
+      {
         "name": "ema_vae_fp16.safetensors",
         "sha256": "20678548f420d98d26f11442d3528f8b8c94e57ee046ef93dbb7633da8612ca1",
         "bytes": 501324814,

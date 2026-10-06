@@ -12295,6 +12295,14 @@ class AppLocalizationsKo extends AppLocalizations {
       '더 높은 화질을 기대할 수 있지만 VRAM과 처리 시간이 더 필요합니다.';
 
   @override
+  String get localUpscale_seedvr2SharpSummary =>
+      '더 선명한 디테일을 강조하며, 질감을 강화하려는 이미지에 적합합니다.';
+
+  @override
+  String get localUpscale_seedvr2SharpHelp =>
+      '7B Sharp FP8은 더 선명한 질감과 윤곽을 강조합니다. 가중치는 약 8.2 GB이며, 다른 SeedVR2 모델과 VAE 및 Python/CUDA 환경을 공유합니다.';
+
+  @override
   String get localUpscale_seedvr2SharedHelp =>
       '모델은 VAE(약 0.5 GB)와 Python/CUDA 환경을 공유합니다. NVIDIA GPU가 필요합니다.';
 

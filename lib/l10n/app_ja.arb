@@ -6744,6 +6744,8 @@
   "localUpscale_notInstalledShort": "未インストール",
   "localUpscale_seedvr2ThreeSummary": "画質とリソース使用量のバランスが良く、日常の拡大に適しています。",
   "localUpscale_seedvr2SevenSummary": "より高い画質が期待できますが、VRAM と処理時間が多く必要です。",
+  "localUpscale_seedvr2SharpSummary": "より鮮明なディテールを重視し、質感を強調したい画像に適しています。",
+  "localUpscale_seedvr2SharpHelp": "7B Sharp FP8 は質感と輪郭の鮮明さを重視します。重みは約 8.2 GB。ほかの SeedVR2 モデルと VAE および Python/CUDA 環境を共有します。",
   "localUpscale_seedvr2SharedHelp": "モデルは VAE（約 0.5 GB）と Python/CUDA 環境を共有します。NVIDIA GPU が必要です。",
   "localUpscale_seedvr2Help": "3B FP8 は画質とリソースのバランスを重視。重みは約 3.4 GB、VAE は約 0.5 GB。VAE と Python/CUDA 環境を 7B と共有します。NVIDIA GPU が必要です。",
   "localUpscale_seedvr2SevenHelp": "7B FP8 はより高い画質が期待できますが、VRAM と処理時間が増えます。重みは約 8.2 GB。VAE と Python/CUDA 環境を 3B と共有します。",

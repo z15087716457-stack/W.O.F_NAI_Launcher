@@ -36,10 +36,14 @@ class _Install extends AdvancedUpscaleInstall {
   void cancel() => state = const AdvancedUpscaleInstallState();
 }
 
-List<LocalUpscaleModel> _models({bool seven = false}) => [
+List<LocalUpscaleModel> _models({bool seven = false, bool sharp = false}) => [
   for (final model in advancedUpscaleCatalog)
     model.withInstalled(
-      model.id != 'seedvr2-7b' || seven,
+      switch (model.id) {
+        'seedvr2-7b' => seven,
+        'seedvr2-7b-sharp' => sharp,
+        _ => true,
+      },
       diskBytes: model.id == 'rtx-vsr' ? 18 * 1024 * 1024 : 3234 * 1024 * 1024,
     ),
 ];
@@ -55,7 +59,10 @@ Future<void> _capture(
         boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final image = await render.toImage();
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    final file = File('.dart_tool/ui-feedback-20261006/captures/$name.png');
+    final directory =
+        Platform.environment['UI_FEEDBACK_CAPTURE_DIR'] ??
+        '.dart_tool/ui-feedback-20261006/captures';
+    final file = File('$directory/$name.png');
     await file.parent.create(recursive: true);
     await file.writeAsBytes(bytes!.buffer.asUint8List());
     image.dispose();
@@ -187,6 +194,27 @@ void main() {
             expect(install.installs, isEmpty);
             expect(install.deletes, isEmpty);
             await _capture(tester, boundary, '$id-7b');
+            await tester.tap(dropdown);
+            await tester.pumpAndSettle();
+            await tester.tap(
+              find
+                  .text('7B Sharp FP8 · ${l.localUpscale_notInstalledShort}')
+                  .last,
+            );
+            await tester.pumpAndSettle();
+            expect(
+              find.text(l.localUpscale_seedvr2SharpSummary),
+              findsOneWidget,
+            );
+            expect(
+              find.byKey(
+                const ValueKey('upscale-management-install-seedvr2-7b-sharp'),
+              ),
+              findsOneWidget,
+            );
+            expect(install.installs, isEmpty);
+            expect(install.deletes, isEmpty);
+            await _capture(tester, boundary, '$id-7b-sharp');
             expect(tester.takeException(), isNull);
           },
           variant: TargetPlatformVariant.only(TargetPlatform.windows),

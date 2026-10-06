@@ -65,6 +65,7 @@ class LocalUpscaleModel {
   final bool custom;
   final LocalUpscaleMethod method;
   final int diskBytes;
+  bool get isSeedvr2Seven => id == 'seedvr2-7b' || id == 'seedvr2-7b-sharp';
   int inferenceScale(double requested) => scales.firstWhere(
     (scale) => scale >= requested,
     orElse: () => scales.last,
@@ -122,6 +123,13 @@ const advancedUpscaleCatalog = [
     method: LocalUpscaleMethod.seedvr2,
   ),
   LocalUpscaleModel(
+    id: 'seedvr2-7b-sharp',
+    name: 'SeedVR2 7B Sharp FP8',
+    engineName: 'seedvr2',
+    scales: [1, 2, 3, 4],
+    method: LocalUpscaleMethod.seedvr2,
+  ),
+  LocalUpscaleModel(
     id: 'rtx-vsr',
     name: 'NVIDIA RTX Video Super Resolution',
     engineName: 'rtx-vsr',
@@ -150,7 +158,10 @@ class Seedvr2Options {
     'adain',
     'none',
   ];
-  static int maxBlocks(String modelId) => modelId == 'seedvr2-7b' ? 36 : 32;
+  static int maxBlocks(String modelId) => switch (modelId) {
+    'seedvr2-7b' || 'seedvr2-7b-sharp' => 36,
+    _ => 32,
+  };
   final String colorCorrection;
   final int seed, blocksToSwap, vaeTileSize, vaeTileOverlap;
   final bool vaeTiled;

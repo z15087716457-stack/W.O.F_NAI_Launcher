@@ -205,6 +205,14 @@ void main() {
                 'name': 'seedvr2_ema_7b_fp8_e4m3fn.safetensors',
               },
               {
+                ...downloadSpec(
+                  Uint8List.fromList([17, 18, 19]),
+                  'weights7bSharp',
+                ),
+                'id': 'seedvr2-7b-sharp',
+                'name': 'seedvr2_ema_7b_sharp_fp8_e4m3fn.safetensors',
+              },
+              {
                 ...downloadSpec(Uint8List.fromList([10, 11]), 'vae'),
                 'name': 'ema_vae_fp16.safetensors',
               },
@@ -221,6 +229,7 @@ void main() {
           '/uv' => uvZip,
           '/weights' => weights,
           '/weights7b' => Uint8List.fromList([7, 8, 9, 10]),
+          '/weights7bSharp' => Uint8List.fromList([17, 18, 19]),
           '/vae' => Uint8List.fromList([10, 11]),
           _ => throw StateError('unexpected download'),
         };
@@ -448,6 +457,118 @@ void main() {
       );
     },
   );
+
+  test(
+    'Sharp reuses the verified older FP8 runtime and deletes only its own weights',
+    () async {
+      final downloads = <String>[];
+      var runtimes = 0;
+      final manager = seedFixture(
+        onRuntime: () => runtimes++,
+        onDownload: downloads.add,
+      );
+      addTearDown(manager.dispose);
+      await manager.install(
+        'seedvr2-3b',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final before = await manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      );
+      final pointer = File(p.join(manager.directory.path, 'seedvr2.json'));
+      final older =
+          jsonDecode(await pointer.readAsString()) as Map<String, dynamic>;
+      older['manifest'] =
+          '0de0f816647899c778751c9f94a33dc259554eb6e37ba2330f80f74d36d2097c';
+      await pointer.writeAsString(jsonEncode(older));
+      expect((await manager.models()).first.installed, isTrue);
+      await manager.install(
+        'seedvr2-7b-sharp',
+        cancellation: LocalUpscaleCancellation(),
+      );
+      final sharp = await manager.command(
+        'seedvr2-7b-sharp',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+        seedvr2Options: const Seedvr2Options(blocksToSwap: 36),
+      );
+      expect(sharp.executable, before.executable);
+      expect(
+        sharp.arguments,
+        contains('seedvr2_ema_7b_sharp_fp8_e4m3fn.safetensors'),
+      );
+      expect(
+        sharp.arguments[sharp.arguments.indexOf('--blocks_to_swap') + 1],
+        '36',
+      );
+      expect(runtimes, 1);
+      expect(downloads, [
+        '/source',
+        '/uv',
+        '/weights',
+        '/vae',
+        '/weights7bSharp',
+      ]);
+      expect((await manager.models()).take(3).map((m) => m.installed), [
+        true,
+        false,
+        true,
+      ]);
+      await manager.delete('seedvr2-7b-sharp');
+      expect((await manager.models()).take(3).map((m) => m.installed), [
+        true,
+        false,
+        false,
+      ]);
+      await manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      );
+      expect(downloads.length, 5);
+    },
+  );
+
+  test('the previous FP8 receipt still requires exact file identity', () async {
+    final manager = seedFixture();
+    addTearDown(manager.dispose);
+    await manager.install(
+      'seedvr2-3b',
+      cancellation: LocalUpscaleCancellation(),
+    );
+    final pointer = File(p.join(manager.directory.path, 'seedvr2.json'));
+    final receipt =
+        jsonDecode(await pointer.readAsString()) as Map<String, dynamic>;
+    receipt['manifest'] =
+        '0de0f816647899c778751c9f94a33dc259554eb6e37ba2330f80f74d36d2097c';
+    (receipt['files'] as List).firstWhere(
+      (file) => file['path'] == 'models/seedvr2_ema_3b_fp8_e4m3fn.safetensors',
+    )['sha256'] = '0' * 64;
+    await pointer.writeAsString(jsonEncode(receipt));
+    expect((await manager.models()).first.installed, isFalse);
+    await expectLater(
+      manager.command(
+        'seedvr2-3b',
+        'in',
+        'out',
+        64,
+        64,
+        LocalUpscaleCancellation(),
+      ),
+      throwsA(error(LocalUpscaleError.modelMissing)),
+    );
+  });
 
   test('7B can be installed first and 3B adds only its own weights', () async {
     final downloads = <String>[];
@@ -690,7 +811,7 @@ void main() {
       final models = manifest['seedvr2']['models'] as List;
       expect(
         models.where((file) => file['id'] != null).map((file) => file['id']),
-        ['seedvr2-3b', 'seedvr2-7b'],
+        ['seedvr2-3b', 'seedvr2-7b', 'seedvr2-7b-sharp'],
       );
       final seven = models.firstWhere((file) => file['id'] == 'seedvr2-7b');
       expect(seven['bytes'], 8239729704);
@@ -698,6 +819,20 @@ void main() {
         seven['sha256'],
         '1fdbf3877b7d1eb266038d3a165a977f17dbb4daa4a0f0d334d5461476963037',
       );
+      final sharp = models.firstWhere(
+        (file) => file['id'] == 'seedvr2-7b-sharp',
+      );
+      expect(sharp['bytes'], 8239729704);
+      expect(sharp['name'], 'seedvr2_ema_7b_sharp_fp8_e4m3fn.safetensors');
+      expect(
+        sharp['sha256'],
+        '4261d18fd9c331f4c8f14b475c9148bd8c3f1512240ace55fe31a179e0a960b0',
+      );
+      expect(
+        sharp['url'],
+        contains('/resolve/09ced71023636e9bc8cdf9cdecfb2625d1e691e8/'),
+      );
+      expect(Seedvr2Options.maxBlocks('seedvr2-7b-sharp'), 36);
       expect(manifest['seedvr2']['package_versions']['transformers'], '4.55.4');
       final lock = await File(
         'assets/local_upscale/seedvr2/requirements.lock',
@@ -845,7 +980,12 @@ void main() {
       );
       addTearDown(manager.dispose);
       final models = await manager.models();
-      expect(models.map((m) => m.id), ['seedvr2-3b', 'seedvr2-7b', 'rtx-vsr']);
+      expect(models.map((m) => m.id), [
+        'seedvr2-3b',
+        'seedvr2-7b',
+        'seedvr2-7b-sharp',
+        'rtx-vsr',
+      ]);
       expect(models.every((m) => !m.installed), isTrue);
       await expectLater(
         manager.command(

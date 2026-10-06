@@ -6744,6 +6744,8 @@
   "localUpscale_notInstalledShort": "未安装",
   "localUpscale_seedvr2ThreeSummary": "兼顾效果与资源占用，适合日常放大。",
   "localUpscale_seedvr2SevenSummary": "更高画质潜力，需要更多显存与时间。",
+  "localUpscale_seedvr2SharpSummary": "偏向更锐利的细节，适合希望强化纹理的图片。",
+  "localUpscale_seedvr2SharpHelp": "7B Sharp FP8 偏向更锐利的纹理与边缘。权重约 8.2 GB；与其他 SeedVR2 型号共用 VAE 和 Python/CUDA 环境。",
   "localUpscale_seedvr2SharedHelp": "型号共用 VAE（约 0.5 GB）和 Python/CUDA 环境，需要 NVIDIA 显卡。",
   "localUpscale_seedvr2Help": "3B FP8 兼顾效果与资源占用。权重约 3.4 GB，VAE 约 0.5 GB；与 7B 共用 VAE 和 Python/CUDA 环境，需要 NVIDIA 显卡。",
   "localUpscale_seedvr2SevenHelp": "7B FP8 有更高的画质潜力，但需要更多显存与时间。权重约 8.2 GB；与 3B 共用 VAE 和 Python/CUDA 环境。",

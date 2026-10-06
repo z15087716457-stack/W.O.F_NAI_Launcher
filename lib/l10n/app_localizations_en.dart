@@ -12662,6 +12662,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Higher quality potential with more VRAM and processing time.';
 
   @override
+  String get localUpscale_seedvr2SharpSummary =>
+      'Sharper details for images where stronger textures are desired.';
+
+  @override
+  String get localUpscale_seedvr2SharpHelp =>
+      '7B Sharp FP8 emphasizes sharper textures and edges. Weights are about 8.2 GB; shares the VAE and Python/CUDA runtime with other SeedVR2 variants.';
+
+  @override
   String get localUpscale_seedvr2SharedHelp =>
       'Models share the VAE (about 0.5 GB) and Python/CUDA runtime. Requires an NVIDIA GPU.';
 

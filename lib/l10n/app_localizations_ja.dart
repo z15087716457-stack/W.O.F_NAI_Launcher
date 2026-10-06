@@ -12275,6 +12275,14 @@ class AppLocalizationsJa extends AppLocalizations {
       'より高い画質が期待できますが、VRAM と処理時間が多く必要です。';
 
   @override
+  String get localUpscale_seedvr2SharpSummary =>
+      'より鮮明なディテールを重視し、質感を強調したい画像に適しています。';
+
+  @override
+  String get localUpscale_seedvr2SharpHelp =>
+      '7B Sharp FP8 は質感と輪郭の鮮明さを重視します。重みは約 8.2 GB。ほかの SeedVR2 モデルと VAE および Python/CUDA 環境を共有します。';
+
+  @override
   String get localUpscale_seedvr2SharedHelp =>
       'モデルは VAE（約 0.5 GB）と Python/CUDA 環境を共有します。NVIDIA GPU が必要です。';
 

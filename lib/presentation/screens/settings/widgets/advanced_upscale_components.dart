@@ -109,7 +109,7 @@ class _AdvancedUpscaleComponentsState
                               DropdownMenuItem(
                                 value: model.id,
                                 child: Text(
-                                  '${model.id == 'seedvr2-7b' ? '7B' : '3B'} FP8 · ${model.installed ? l.localUpscale_installed : l.localUpscale_notInstalledShort}',
+                                  '${model.name.replaceFirst('SeedVR2 ', '')} · ${model.installed ? l.localUpscale_installed : l.localUpscale_notInstalledShort}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -129,14 +129,16 @@ class _AdvancedUpscaleComponentsState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  selected.id == 'seedvr2-7b'
+                  selected.id == 'seedvr2-7b-sharp'
+                      ? l.localUpscale_seedvr2SharpSummary
+                      : selected.isSeedvr2Seven
                       ? l.localUpscale_seedvr2SevenSummary
                       : l.localUpscale_seedvr2ThreeSummary,
                   style: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${l.localUpscale_modelWeights} ≈ ${selected.id == 'seedvr2-7b' ? '8.2' : '3.4'} GB',
+                  '${l.localUpscale_modelWeights} ≈ ${selected.isSeedvr2Seven ? '8.2' : '3.4'} GB',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

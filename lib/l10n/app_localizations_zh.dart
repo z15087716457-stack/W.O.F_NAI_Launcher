@@ -12053,6 +12053,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localUpscale_seedvr2SevenSummary => '更高画质潜力，需要更多显存与时间。';
 
   @override
+  String get localUpscale_seedvr2SharpSummary => '偏向更锐利的细节，适合希望强化纹理的图片。';
+
+  @override
+  String get localUpscale_seedvr2SharpHelp =>
+      '7B Sharp FP8 偏向更锐利的纹理与边缘。权重约 8.2 GB；与其他 SeedVR2 型号共用 VAE 和 Python/CUDA 环境。';
+
+  @override
   String get localUpscale_seedvr2SharedHelp =>
       '型号共用 VAE（约 0.5 GB）和 Python/CUDA 环境，需要 NVIDIA 显卡。';
 
@@ -24235,6 +24242,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localUpscale_seedvr2SevenSummary => '更高畫質潛力，需要更多視訊記憶體與時間。';
+
+  @override
+  String get localUpscale_seedvr2SharpSummary => '偏向更銳利的細節，適合希望強化紋理的圖片。';
+
+  @override
+  String get localUpscale_seedvr2SharpHelp =>
+      '7B Sharp FP8 偏向更銳利的紋理與邊緣。權重約 8.2 GB；與其他 SeedVR2 型號共用 VAE 和 Python/CUDA 環境。';
 
   @override
   String get localUpscale_seedvr2SharedHelp =>

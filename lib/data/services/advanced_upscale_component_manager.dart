@@ -43,7 +43,7 @@ class AdvancedUpscaleComponentManager {
            );
 
   static const manifestSha256 =
-      '0de0f816647899c778751c9f94a33dc259554eb6e37ba2330f80f74d36d2097c';
+      '26f53a04809b89860f909ce484b004fd60bcf10aebb16e26633f6e0ed5f30c3e';
   final String manifestDigest;
   final Future<Directory> Function() _rootDirectory;
   final Future<Uint8List> Function(String) _loadAsset;
@@ -121,7 +121,7 @@ class AdvancedUpscaleComponentManager {
   }
 
   String _key(String id) => switch (id) {
-    'seedvr2-3b' || 'seedvr2-7b' => 'seedvr2',
+    'seedvr2-3b' || 'seedvr2-7b' || 'seedvr2-7b-sharp' => 'seedvr2',
     'rtx-vsr' => 'rtx',
     _ => throw const LocalUpscaleException(LocalUpscaleError.invalidModel),
   };
@@ -170,6 +170,8 @@ class AdvancedUpscaleComponentManager {
       final value =
           jsonDecode(await file.readAsString()) as Map<String, dynamic>;
       if ((value['manifest'] != manifestDigest &&
+              value['manifest'] !=
+                  '0de0f816647899c778751c9f94a33dc259554eb6e37ba2330f80f74d36d2097c' &&
               value['manifest'] !=
                   '7d72744fc08f883bfd754d48ab35c0349c77caa3d16af41c1add37649a4ce337' &&
               (id != 'rtx-vsr' ||
