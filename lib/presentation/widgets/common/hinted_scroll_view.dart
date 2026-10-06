@@ -15,6 +15,7 @@ class HintedScrollView extends StatefulWidget {
 }
 
 class _HintedScrollViewState extends State<HintedScrollView> {
+  static const _hintHeight = 22.0;
   final _scroll = ScrollController();
   bool _overflows = false;
   bool _hasMore = false;
@@ -30,8 +31,10 @@ class _HintedScrollViewState extends State<HintedScrollView> {
     if (!mounted || !_scroll.hasClients) return;
     final position = _scroll.position;
     if (!position.hasContentDimensions) return;
-    final overflows = position.maxScrollExtent > .5;
-    final hasMore = position.extentAfter > .5;
+    // The hint must not create its own overflow after content shrinks.
+    final reservedHeight = _overflows ? _hintHeight : 0.0;
+    final overflows = position.maxScrollExtent > reservedHeight + .5;
+    final hasMore = overflows && position.extentAfter > .5;
     if (_overflows == overflows && _hasMore == hasMore) return;
     setState(() {
       _overflows = overflows;
@@ -86,7 +89,7 @@ class _HintedScrollViewState extends State<HintedScrollView> {
         ),
         if (_overflows)
           Container(
-            height: 22,
+            height: _hintHeight,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -107,7 +110,7 @@ class _HintedScrollViewState extends State<HintedScrollView> {
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints.tightFor(
                         width: 36,
-                        height: 22,
+                        height: _hintHeight,
                       ),
                       iconSize: 16,
                       color: theme.colorScheme.onSurface.withValues(alpha: .6),

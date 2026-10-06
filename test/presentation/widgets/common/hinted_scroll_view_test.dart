@@ -52,10 +52,16 @@ void main() {
       scroll.jumpTo(0);
       await tester.pumpAndSettle();
       expect(arrow, findsOneWidget);
-      height.value = 90;
+      height.value = 190;
       await tester.pumpAndSettle();
       expect(arrow, findsNothing);
       expect(scroll.position.maxScrollExtent, 0);
+      height.value = 200;
+      await tester.pumpAndSettle();
+      expect(arrow, findsNothing);
+      height.value = 201;
+      await tester.pumpAndSettle();
+      expect(arrow, findsOneWidget);
       height.value = 700;
       await tester.pumpAndSettle();
       expect(arrow, findsOneWidget);
