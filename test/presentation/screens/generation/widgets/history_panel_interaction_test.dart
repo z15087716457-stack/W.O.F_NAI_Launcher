@@ -14,12 +14,14 @@ import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/history_panel.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/history_batch.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generated_image_actions.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/image_detail_viewer.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
+import 'package:nai_launcher/presentation/widgets/common/themed_confirm_dialog.dart';
 
 void main() {
   testWidgets(
-    'history menu deletes only the cover and updates remaining batch count',
+    'history menu directly deletes only the cover, clears its focus and updates remaining batch count',
     (tester) async {
       final images = [
         for (var i = 0; i < 3; i++)
@@ -34,13 +36,16 @@ void main() {
       addTearDown(container.dispose);
       final notifier = container.read(imageGenerationNotifierProvider.notifier);
       notifier.state = notifier.state.copyWith(displayImages: images);
+      container
+          .read(generationPreviewSelectionProvider.notifier)
+          .select(images.first.id);
       await tester.pumpWidget(_historyApp(container));
       await tester.pumpAndSettle();
       await _openContextMenu(tester, find.byKey(const ValueKey('delete-0')));
       await tester.tap(find.text('删除'));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, '删除'));
-      await tester.pumpAndSettle();
+      expect(find.byType(ThemedConfirmDialog), findsNothing);
+      expect(container.read(generationPreviewSelectionProvider), isNull);
       final state = container.read(imageGenerationNotifierProvider);
       expect(state.currentImages.map((image) => image.id), [
         'delete-1',
@@ -60,6 +65,44 @@ void main() {
       expect(find.text('×2'), findsOneWidget);
     },
   );
+
+  testWidgets('shared image action retains confirmation for other callers', (
+    tester,
+  ) async {
+    final images = [_image('canvas')];
+    final container = _createContainer(images);
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Consumer(
+            builder: (context, ref, _) => Scaffold(
+              body: TextButton(
+                onPressed: () => GeneratedImageActions(
+                  ref,
+                ).deleteImage(context, images.single),
+                child: const Text('canvas-delete'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('canvas-delete'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ThemedConfirmDialog), findsOneWidget);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(imageGenerationNotifierProvider).history.single.id,
+      'canvas',
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'explicit history multi-selection keeps rapid clicks out of details',

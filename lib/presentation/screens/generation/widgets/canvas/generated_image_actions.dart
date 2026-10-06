@@ -40,17 +40,24 @@ class GeneratedImageActions {
   /// Remove the clicked image from the generation workspace, keeping saved
   /// gallery files. Pin membership is removed too, so a pinned copy cannot
   /// make the deleted image reappear on the canvas.
-  Future<void> deleteImage(BuildContext context, GeneratedImage image) async {
-    final confirmed = await ThemedConfirmDialog.show(
-      context: context,
-      title: context.l10n.common_delete,
-      content: context.l10n.generation_deleteSelectedImagesConfirm(1),
-      confirmText: context.l10n.common_delete,
-      cancelText: context.l10n.common_cancel,
-      type: ThemedConfirmDialogType.danger,
-      icon: Icons.delete_outline,
-    );
-    if (!confirmed || !context.mounted) return;
+  Future<void> deleteImage(
+    BuildContext context,
+    GeneratedImage image, {
+    bool confirm = true,
+  }) async {
+    if (confirm) {
+      final confirmed = await ThemedConfirmDialog.show(
+        context: context,
+        title: context.l10n.common_delete,
+        content: context.l10n.generation_deleteSelectedImagesConfirm(1),
+        confirmText: context.l10n.common_delete,
+        cancelText: context.l10n.common_cancel,
+        type: ThemedConfirmDialogType.danger,
+        icon: Icons.delete_outline,
+      );
+      if (!confirmed || !context.mounted) return;
+    }
+    if (!context.mounted) return;
     try {
       await ref.read(canvasPinnedNotifierProvider.notifier).remove(image.id);
       if (!context.mounted) return;

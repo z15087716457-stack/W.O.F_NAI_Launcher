@@ -788,8 +788,11 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
               : null,
           onFullscreen: () =>
               _showDetailForBehavior(context, image, clickBehavior),
-          onDelete: () =>
-              unawaited(GeneratedImageActions(ref).deleteImage(context, image)),
+          onDelete: () => unawaited(
+            GeneratedImageActions(
+              ref,
+            ).deleteImage(context, image, confirm: false),
+          ),
           enableContextMenu: true,
           enableHoverScale: true,
           hoverEffectsEnabled: !_isHistoryScrolling,
