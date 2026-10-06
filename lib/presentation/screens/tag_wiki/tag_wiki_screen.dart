@@ -1323,6 +1323,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
       key: const ValueKey('wiki-type-more'),
       padding: const EdgeInsets.only(right: 4),
       child: PopupMenuButton<TagCategory>(
+        borderRadius: BorderRadius.circular(999),
         tooltip: context.l10n.wiki_moreCategories,
         position: PopupMenuPosition.under,
         offset: const Offset(0, 4),

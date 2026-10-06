@@ -287,7 +287,9 @@ Future<void> capture(
     );
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final folder = Directory(
-      Platform.environment['CAPTURE_GENERATION_WIKI_ACTIONS'] == '1'
+      Platform.environment['CAPTURE_WIKI_MORE_HOVER'] == '1'
+          ? '.dart_tool/wiki-more-hover-20261006/captures'
+          : Platform.environment['CAPTURE_GENERATION_WIKI_ACTIONS'] == '1'
           ? '.dart_tool/generation-wiki-actions-20261006/captures/wiki'
           : Platform.environment['CAPTURE_UI_FEEDBACK'] == '1'
           ? '.dart_tool/ui-feedback-20261006/captures/wiki'
@@ -1117,11 +1119,30 @@ void main() {
     // scrolled out of the single-line horizontally scrollable chip row.
     await tester.ensureVisible(find.byKey(const ValueKey('wiki-type-more')));
     await tester.pumpAndSettle();
+    final moreMouse = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+    );
+    await moreMouse.addPointer(location: const Offset(10, 10));
+    addTearDown(moreMouse.removePointer);
+    await moreMouse.moveTo(
+      tester.getCenter(find.byKey(const ValueKey('wiki-type-more'))),
+    );
+    await tester.pumpAndSettle();
+    await capture(tester, 'more-chip-hover');
     await tester.tap(find.byKey(const ValueKey('wiki-type-more')));
     await tester.pumpAndSettle();
+    await capture(tester, 'more-chip-menu');
     await tester.tap(find.byKey(const ValueKey('wiki-type-species')));
     await tester.pumpAndSettle();
     expect(catalog.lastCategory, TagCategory.species);
+    await tester.ensureVisible(find.byKey(const ValueKey('wiki-type-more')));
+    await moreMouse.moveTo(
+      tester.getCenter(find.byKey(const ValueKey('wiki-type-more'))),
+    );
+    await tester.pumpAndSettle();
+    await capture(tester, 'more-chip-selected-hover');
+    await moreMouse.moveTo(const Offset(10, 10));
+    await tester.pumpAndSettle();
     // The horizontally scrolled chip row may have moved "全部" off-screen.
     await tester.ensureVisible(find.byKey(const ValueKey('wiki-type-all')));
     await tester.pumpAndSettle();
