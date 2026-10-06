@@ -823,6 +823,7 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                   context,
                   ref,
                   imageBytes,
+                  sourceImage: image,
                 )
               : null,
           onDirectorTools: image.canUseAsGenerationInput

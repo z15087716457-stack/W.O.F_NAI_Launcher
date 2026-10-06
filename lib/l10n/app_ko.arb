@@ -569,6 +569,8 @@
   "img2img_inpaintPendingHint": "인페인트를 클릭해 캔버스를 열고 브러시, 지우개, 선택 도구로 다시 그릴 영역을 표시한 뒤, 여기로 돌아와 메인 생성 버튼을 누르세요.",
   "img2img_inpaintReadyHint": "마스크를 불러왔습니다. 다음 생성에서는 마스크 영역만 다시 그립니다.",
   "img2img_inpaintMaskReady": "인페인트 마스크가 준비되었습니다",
+  "generation_variationOriginal": "원본",
+  "generation_variationSizeUnsupported": "변형은 300만 화소 이하의 원본 이미지를 지원합니다.",
   "img2img_generateVariations": "베리에이션 생성",
   "img2img_directorTools": "디렉터 도구",
   "img2img_directorPrompt": "프롬프트 (선택 사항)",

@@ -8,6 +8,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/services/anlas_calculator.dart';
+import 'package:nai_launcher/core/utils/max_enhance_utils.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
@@ -109,6 +110,44 @@ void main() {
 
       expect(container.read(estimatedCostProvider), equals(0));
     });
+
+    test(
+      'generation-size Max prices the new draft rather than an upscaled source',
+      () {
+        container.read(subscriptionNotifierProvider.notifier).state =
+            const SubscriptionState.loaded(UserSubscription(tier: 1));
+        final notifier = container.read(
+          generationParamsNotifierProvider.notifier,
+        );
+        notifier.updateModel('nai-diffusion-5-full');
+        notifier.updateSize(832, 1216);
+        final workflow = container.read(
+          imageWorkflowControllerProvider.notifier,
+        );
+        workflow.openTemporaryTool(
+          _buildPng(width: 1664, height: 2432),
+          ImageWorkflowMode.enhance,
+          enhanceUsesGenerationSize: true,
+        );
+        workflow.setEnhanceMaxUpscale(true);
+        final params = container.read(generationRequestParamsProvider);
+        final target = MaxEnhanceMath.targetSize(832, 1216);
+        expect(
+          container.read(estimatedCostProvider),
+          AnlasCalculator.calculateRequestCost(
+            width: target.width,
+            height: target.height,
+            steps: params.steps,
+            batchCount: params.nSamples,
+            batchSize: container.read(imagesPerRequestProvider),
+            model: params.model,
+            strength: params.strength,
+            smea: false,
+            smeaDyn: false,
+          ),
+        );
+      },
+    );
 
     test(
       'should estimate novelai upscale from upscale request instead of img2img',

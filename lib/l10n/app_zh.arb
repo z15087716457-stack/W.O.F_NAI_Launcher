@@ -520,6 +520,8 @@
   "img2img_inpaintPendingHint": "点击“局部重绘”进入画布，用画笔、橡皮或选区工具标出需要重绘的区域。返回这里后，点击主生成按钮即可只重绘蒙版区域。",
   "img2img_inpaintReadyHint": "遮罩已载入。当前会按局部重绘方式提交，只有蒙版区域会被重新生成。",
   "img2img_inpaintMaskReady": "局部重绘遮罩已准备好",
+  "generation_variationOriginal": "原图",
+  "generation_variationSizeUnsupported": "生成变体支持不超过 3 百万像素的原图。",
   "img2img_generateVariations": "生成变体",
   "img2img_directorTools": "导演工具",
   "img2img_directorPrompt": "提示词（可选）",

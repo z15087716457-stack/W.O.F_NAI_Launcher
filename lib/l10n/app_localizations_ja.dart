@@ -1250,6 +1250,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_inpaintMaskReady => 'インペイントマスクの準備ができました';
 
   @override
+  String get generation_variationOriginal => '元画像';
+
+  @override
+  String get generation_variationSizeUnsupported =>
+      'バリエーションは 300 万画素以下の元画像に対応しています。';
+
+  @override
   String get img2img_generateVariations => 'バリエーションの生成';
 
   @override

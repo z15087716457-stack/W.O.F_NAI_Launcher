@@ -1274,6 +1274,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_inpaintMaskReady => 'Inpaint mask is ready';
 
   @override
+  String get generation_variationOriginal => 'ORIGINAL';
+
+  @override
+  String get generation_variationSizeUnsupported =>
+      'Variations support source images up to 3 megapixels.';
+
+  @override
   String get img2img_generateVariations => 'Generate Variations';
 
   @override

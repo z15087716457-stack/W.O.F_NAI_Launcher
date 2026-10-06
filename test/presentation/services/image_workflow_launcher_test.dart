@@ -12,7 +12,6 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/core/utils/image_save_utils.dart';
-import 'package:nai_launcher/data/models/image/image_operation.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
@@ -37,16 +36,16 @@ class _Params extends GenerationParamsNotifier {
 
 class _CaptureGeneration extends ImageGenerationNotifier {
   ImageParams? submitted;
+  GeneratedImage? original;
   @override
   ImageGenerationState build() => const ImageGenerationState();
   @override
-  Future<void> generate(
+  Future<void> generateOfficialVariations(
     ImageParams params, {
-    GenerationBatchCallback? onBatchEvent,
-    int? imagesPerRequestOverride,
-    ImageOperation? operation,
+    required GeneratedImage original,
   }) async {
-    submitted = preparePromptParams(params);
+    submitted = params;
+    this.original = original;
   }
 }
 
@@ -101,6 +100,9 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
+      final beforeParams = container.read(generationParamsNotifierProvider);
+      final beforeWorkflow = container.read(imageWorkflowControllerProvider);
+      final beforeCharacters = container.read(characterPromptNotifierProvider);
       final image = await ImageSaveUtils.buildPrebuiltMetadataBytes(
         imageBytes: Uint8List.fromList(
           img.encodePng(img.Image(width: 512, height: 768)),
@@ -179,15 +181,23 @@ void main() {
       expect(generated.submitted?.prompt, 'selected image prompt');
       expect(generated.submitted?.negativePrompt, 'selected image negative');
       expect(generated.submitted?.sourceImage, same(image));
+      expect(generated.submitted?.strength, .8);
+      expect(generated.submitted?.noise, .1);
+      expect(generated.submitted?.nSamples, 1);
+      expect(generated.original?.isVariationOriginal, isTrue);
       expect(generated.submitted?.characters.single.prompt, '1girl, blue hair');
       expect(generated.submitted?.characters.single.negativePrompt, 'red hair');
       expect(
-        container
-            .read(characterPromptNotifierProvider)
-            .characters
-            .single
-            .prompt,
-        '1girl, blue hair',
+        container.read(generationParamsNotifierProvider),
+        same(beforeParams),
+      );
+      expect(
+        container.read(imageWorkflowControllerProvider),
+        same(beforeWorkflow),
+      );
+      expect(
+        container.read(characterPromptNotifierProvider),
+        same(beforeCharacters),
       );
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpWidget(const SizedBox());

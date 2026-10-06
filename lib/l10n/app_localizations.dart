@@ -2394,6 +2394,18 @@ abstract class AppLocalizations {
   /// **'Inpaint mask is ready'**
   String get img2img_inpaintMaskReady;
 
+  /// No description provided for @generation_variationOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'ORIGINAL'**
+  String get generation_variationOriginal;
+
+  /// No description provided for @generation_variationSizeUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Variations support source images up to 3 megapixels.'**
+  String get generation_variationSizeUnsupported;
+
   /// No description provided for @img2img_generateVariations.
   ///
   /// In en, this message translates to:

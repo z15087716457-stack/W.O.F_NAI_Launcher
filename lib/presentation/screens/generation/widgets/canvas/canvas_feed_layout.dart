@@ -393,6 +393,13 @@ CanvasFeedGroup inflightGroup({
     }
   }
   final tiles = <CanvasTileSpec>[];
+  // The source is not a requested/generated slot; keep it before all slots.
+  final original = doneByNumber.remove(0);
+  if (original?.isVariationOriginal == true) {
+    tiles.add(CanvasTileSpec.image(original!));
+  } else if (original != null) {
+    doneByNumber[0] = original;
+  }
   for (final slot in sorted) {
     final done = doneByNumber.remove(slot.imageNumber);
     tiles.add(
@@ -498,7 +505,10 @@ class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
     if (state.isGenerating) {
       final bw = state.batchWidth;
       final bh = state.batchHeight;
-      final total = math.max(state.totalImages, done.length);
+      final total = math.max(
+        state.totalImages,
+        done.where((image) => !image.isVariationOriginal).length,
+      );
       if (bw != null && bh != null && bw > 0 && bh > 0 && total > 0) {
         final slotByNumber = {
           for (final slot in state.streamPreviewSlots) slot.imageNumber: slot,

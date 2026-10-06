@@ -107,6 +107,28 @@ void main() {
   });
 
   test(
+    'variation original badge survives file copies and pin restoration',
+    () async {
+      final original = GeneratedImage.create(
+        Uint8List.fromList([1, 2, 3]),
+        width: 64,
+        height: 32,
+        isVariationOriginal: true,
+      );
+      final copied = original
+          .copyWith(generationRunId: 7, batchIndex: -1)
+          .copyWithFilePath('saved.png');
+      expect(copied.isVariationOriginal, isTrue);
+      await repo().addPin(copied);
+      final restored = (await repo().loadAll()).single;
+      expect(restored.isVariationOriginal, isTrue);
+      expect(restored.bytes, original.bytes);
+      expect(restored.generationRunId, isNull);
+      expect(restored.filePath, 'saved.png');
+    },
+  );
+
+  test(
     'object-only metadata survives restart without changing image bytes',
     () async {
       final original = image(

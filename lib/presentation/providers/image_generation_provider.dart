@@ -525,7 +525,10 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     return 'NovelAI';
   }
 
-  Future<ImageParams> _prepareVibesForGeneration(ImageParams params) async {
+  Future<ImageParams> _prepareVibesForGeneration(
+    ImageParams params, {
+    bool syncCurrentState = true,
+  }) async {
     if (!AnlasCalculator.usesVibeReferences(params)) {
       return params;
     }
@@ -534,7 +537,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final encodedVibes = await notifier.ensureVibeReferencesEncoded(
       params.vibeReferencesV4,
       model: params.model,
-      syncCurrentState: true,
+      syncCurrentState: syncCurrentState,
     );
 
     if (identical(encodedVibes, params.vibeReferencesV4)) {
@@ -546,10 +549,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
   Future<ImageParams?> _prepareGenerationParams(
     ImageParams params,
-    int generationRunId,
-  ) async {
+    int generationRunId, {
+    bool preserveSnapshot = false,
+  }) async {
     try {
-      return await _prepareVibesForGeneration(_applyPromptPipeline(params));
+      return await _prepareVibesForGeneration(
+        preserveSnapshot ? params : _applyPromptPipeline(params),
+        syncCurrentState: !preserveSnapshot,
+      );
     } catch (error) {
       // 准备参数时占位已经出现；失败必须结束加载，旧请求不能改写新请求。
       if (!_shouldAbortGenerationRun(generationRunId)) {
@@ -692,6 +699,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ),
   );
 
+  /// Official source-based action. Batch preferences and draft prompt lanes
+  /// do not participate, and the original is displayed without saving it again.
+  Future<void> generateOfficialVariations(
+    ImageParams params, {
+    required GeneratedImage original,
+  }) => _withPostBillingRefresh(
+    () => _generate(
+      params.copyWith(nSamples: 1),
+      imagesPerRequestOverride: 3,
+      operation: ImageOperation.variations,
+      variationOriginal: original,
+    ),
+  );
+
   /// 探索任务专用生成入口（画风探索阶段 B）：单张、强制 nSamples=1、
   /// 随机种子实体化后把真实 seed 随结果带回；**不清空主 UI 当前图、
   /// 不触发全局 roll**（探索 runner 自控 roll 节奏）。
@@ -805,6 +826,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
     ImageOperation? operation,
+    GeneratedImage? variationOriginal,
   }) async {
     // 同步在途门禁：已有生成进行中时直接丢弃本次调用。
     // 必须先于冷却扣减与 _startGenerationRun——重入若走到 run 创建，
@@ -826,6 +848,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     }
 
     final generationRunId = _startGenerationRun();
+    final original = variationOriginal?.copyWith(
+      generationRunId: generationRunId,
+      batchIndex: -1,
+    );
+    List<GeneratedImage> withOriginal(List<GeneratedImage> images) => [
+      if (original != null) original,
+      ...images,
+    ];
 
     _activeImageOperation = operation;
     if (operation == null && ref.exists(imageWorkflowControllerProvider)) {
@@ -845,7 +875,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final totalImages = batchCount * batchSize;
     state = state.copyWith(
       generationRunId: generationRunId,
-      currentImages: [],
+      currentImages: withOriginal([]),
       status: GenerationStatus.generating,
       progress: 0.0,
       currentImage: 1,
@@ -884,6 +914,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final preparedParams = await _prepareGenerationParams(
       effectiveParams,
       generationRunId,
+      preserveSnapshot: operation == ImageOperation.variations,
     );
     if (preparedParams == null || _shouldAbortGenerationRun(generationRunId)) {
       return;
@@ -928,7 +959,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       );
       // P2.5：入队后即刻重 roll 随机块实例——本张用入队前的投影，
       // UI 随即显示下一张的内容（roll 时机 4）。
-      ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync();
+      if (operation != ImageOperation.variations) {
+        ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync();
+      }
       await singleFuture;
       stopwatch.stop();
       await _emitBatchEvent(
@@ -963,7 +996,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       errorMessage: null,
       currentImage: 1,
       totalImages: totalImages,
-      currentImages: [],
+      currentImages: withOriginal([]),
       batchWidth: preparedParams.width,
       batchHeight: preparedParams.height,
     );
@@ -1027,9 +1060,15 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       }
 
       // 每批使用不同的随机种子
+      final noiseSeed = random.nextInt(_randomSeedExclusiveUpperBound);
       final batchParams = currentParams.copyWith(
         nSamples: batchSize,
-        seed: random.nextInt(_randomSeedExclusiveUpperBound),
+        seed: operation == ImageOperation.variations
+            ? noiseSeed + 1
+            : noiseSeed,
+        extraNoiseSeed: operation == ImageOperation.variations
+            ? noiseSeed
+            : null,
       );
       final batchStopwatch = Stopwatch()..start();
 
@@ -1066,8 +1105,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           allImages.addAll(generatedList);
           // 立即更新显示和历史
           state = state.copyWith(
-            currentImages: List.from(allImages),
-            history: _prependCompletedHistory(generatedList),
+            currentImages: withOriginal(allImages),
+            history: _prependCompletedHistory(withOriginal(generatedList)),
             clearStreamPreview: true,
           );
           _retainSharePreparationCacheForCurrentHistory();
@@ -1197,8 +1236,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       status: _isCancelled
           ? GenerationStatus.cancelled
           : GenerationStatus.completed,
-      currentImages: List.from(allImages),
-      displayImages: List.from(allImages), // 确保中央区域显示所有生成的图片
+      currentImages: withOriginal(allImages),
+      displayImages: withOriginal(allImages),
       displayWidth: allImages.isEmpty
           ? preparedParams.width
           : allImages.first.width,

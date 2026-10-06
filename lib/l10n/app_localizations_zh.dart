@@ -1229,6 +1229,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_inpaintMaskReady => '局部重绘遮罩已准备好';
 
   @override
+  String get generation_variationOriginal => '原图';
+
+  @override
+  String get generation_variationSizeUnsupported => '生成变体支持不超过 3 百万像素的原图。';
+
+  @override
   String get img2img_generateVariations => '生成变体';
 
   @override
@@ -13405,6 +13411,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get img2img_inpaintMaskReady => '局部重繪遮罩已準備好';
+
+  @override
+  String get generation_variationOriginal => '原圖';
+
+  @override
+  String get generation_variationSizeUnsupported => '生成變體支援不超過 3 百萬像素的原圖。';
 
   @override
   String get img2img_generateVariations => '生成變體';

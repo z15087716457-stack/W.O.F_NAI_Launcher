@@ -25,6 +25,7 @@ class CanvasPinRecord {
     this.metadata,
     this.savedPath,
     this.operation,
+    this.isVariationOriginal = false,
   });
 
   /// 图像 ID（沿用 GeneratedImage.id，不是路径的一部分）。
@@ -39,6 +40,7 @@ class CanvasPinRecord {
   final NaiImageMetadata? metadata;
   final String? savedPath;
   final ImageOperation? operation;
+  final bool isVariationOriginal;
 
   Map<String, Object?> toJson() => {
     'id': imageId,
@@ -50,6 +52,7 @@ class CanvasPinRecord {
     if (metadata != null) 'metadata': metadata!.toJson(),
     if (savedPath != null) 'savedPath': savedPath,
     if (operation != null) 'operation': operation!.name,
+    if (isVariationOriginal) 'isVariationOriginal': true,
   };
 
   /// 宽容解析：字段缺失/类型错误返回 null，由调用方跳过该条。
@@ -98,6 +101,7 @@ class CanvasPinRecord {
       metadata: metadata,
       savedPath: raw['savedPath'] is String ? raw['savedPath'] as String : null,
       operation: ImageOperation.values.asNameMap()[raw['operation']],
+      isVariationOriginal: raw['isVariationOriginal'] == true,
     );
   }
 }
@@ -239,6 +243,7 @@ class CanvasPinRepository {
       metadata: embeddedMetadata == null ? image.metadata : null,
       savedPath: image.filePath,
       operation: image.operation,
+      isVariationOriginal: image.isVariationOriginal,
     );
     if (index < 0) {
       records.add(record);
@@ -329,6 +334,7 @@ class CanvasPinRepository {
       metadata: metadata,
       filePath: record.savedPath,
       operation: record.operation,
+      isVariationOriginal: record.isVariationOriginal,
       generationRunId: null,
     );
   }

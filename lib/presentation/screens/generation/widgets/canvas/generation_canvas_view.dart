@@ -254,7 +254,14 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (bounds.isEmpty) return;
     _focusFitActive = true;
     final target = _fitCameraForRect(bounds.inflate(10));
-    _camera.flyTo(_camera.adjustTargetForTeleport(target, _viewport));
+    _camera.flyTo(
+      _camera.adjustTargetForTeleport(
+        target,
+        _viewport,
+        fitInsideViewport: true,
+      ),
+      fitInsideViewport: true,
+    );
   }
 
   void _flyToSubimage(
@@ -270,7 +277,14 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (rect == null || rect.isEmpty) return;
     _focusFitActive = true;
     final target = _fitCameraForRect(rect.inflate(10));
-    _camera.flyTo(_camera.adjustTargetForTeleport(target, _viewport));
+    _camera.flyTo(
+      _camera.adjustTargetForTeleport(
+        target,
+        _viewport,
+        fitInsideViewport: true,
+      ),
+      fitInsideViewport: true,
+    );
   }
 
   /// Fit inside the measured space between the three floating toolbars.
@@ -289,7 +303,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final y = math.min(
       math.min(fitMax, CanvasCamera.maxScale),
       math.max(
-        CanvasCamera.minScale,
+        CanvasCamera.minFitScale,
         math.min(available.width / rect.width, available.height / rect.height),
       ),
     );
@@ -1232,6 +1246,36 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
               ),
             ),
             // 钉住角标（官网钉板标记）：实心 pin，右上反缩放恒屏大小
+            if (widget.tile.image?.isVariationOriginal == true)
+              Positioned(
+                top: 0,
+                left: 0,
+                child: Transform.scale(
+                  scale: 1 / cameraScale,
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.65),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        bottomRight: Radius.circular(4),
+                      ),
+                    ),
+                    child: Text(
+                      context.l10n.generation_variationOriginal,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             if (widget.isPinned)
               Positioned(
                 top: -30 / cameraScale.clamp(0.5, 2.5),

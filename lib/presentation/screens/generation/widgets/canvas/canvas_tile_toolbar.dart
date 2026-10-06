@@ -427,7 +427,12 @@ class _IconBtn extends ConsumerWidget {
         ImageWorkflowLauncher.openEnhance(ref, bytes);
       case 'nai-icon-variations.svg':
         unawaited(
-          ImageWorkflowLauncher.generateVariations(context, ref, bytes),
+          ImageWorkflowLauncher.generateVariations(
+            context,
+            ref,
+            bytes,
+            sourceImage: image,
+          ),
         );
       case 'nai-icon-upscale.svg':
         ImageWorkflowLauncher.openUpscale(ref, bytes);

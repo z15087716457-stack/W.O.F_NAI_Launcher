@@ -4,7 +4,7 @@ import '../../../core/services/anlas_calculator.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/services/image_metadata_service.dart';
-import '../../utils/metadata_import_applier.dart';
+import '../../utils/official_image_variations.dart';
 import '../image_generation_provider.dart';
 import '../subscription_provider.dart';
 import 'image_workflow_controller.dart';
@@ -24,34 +24,25 @@ final imageVariationCostProvider = Provider.autoDispose
           .watch(generatedImageMetadataProvider(image))
           .valueOrNull;
       if (metadata == null ||
-          metadata.width == null ||
-          metadata.height == null) {
+          !metadata.hasData ||
+          !OfficialImageVariations.supportsSize(image.width, image.height)) {
         return null;
       }
       final current = ref.watch(generationParamsNotifierProvider);
-      final params = current.copyWith(
-        model:
-            MetadataImportApplier.resolveImportableModel(metadata) ??
-            current.model,
-        width: metadata.width!,
-        height: metadata.height!,
-        steps: metadata.steps ?? current.steps,
-        smea: metadata.smea ?? current.smea,
-        smeaDyn: metadata.smeaDyn ?? current.smeaDyn,
-        strength: metadata.strength ?? 0.45,
-        action: ImageGenerationAction.img2img,
-        maskImage: null,
-        sourceImage: image.bytes,
-        preciseReferences: metadata.preciseReferences,
-        vibeReferencesV4: metadata.vibeReferences,
+      final params = OfficialImageVariations.project(
+        current: current,
+        source: image.bytes,
+        width: image.width,
+        height: image.height,
+        metadata: metadata,
       );
       final subscription = ref.watch(subscriptionNotifierProvider).subscription;
       return AnlasCalculator.calculateRequestCost(
         width: params.width,
         height: params.height,
         steps: params.steps,
-        batchCount: params.nSamples,
-        batchSize: ref.watch(imagesPerRequestProvider),
+        batchCount: 1,
+        batchSize: OfficialImageVariations.count,
         smea: params.effectiveSmea,
         smeaDyn: params.effectiveSmeaDyn,
         model: params.model,

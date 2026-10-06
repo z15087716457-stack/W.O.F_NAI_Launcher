@@ -22,6 +22,7 @@ class CanvasCamera {
   final double scale;
 
   static const minScale = 0.1;
+  static const minFitScale = 0.0001;
   static const maxScale = 8.0;
   static const init = CanvasCamera(offset: Offset.zero, scale: 1);
 
@@ -33,7 +34,9 @@ class CanvasCamera {
 
   /// 以屏幕锚点缩放（纯函数版本，官网 zoomBy 内核）
   CanvasCamera zoomAt(Offset anchor, double factor) {
-    final next = math.min(maxScale, math.max(minScale, scale * factor));
+    // Very large fitted images can start below the manual zoom floor.
+    final floor = scale < minScale ? minFitScale : minScale;
+    final next = math.min(maxScale, math.max(floor, scale * factor));
     final wa = screenToWorld(anchor);
     return CanvasCamera(offset: anchor - wa * next, scale: next);
   }
@@ -140,6 +143,7 @@ class GenerationCanvasCameraNotifier extends Notifier<CanvasCamera> {
   /// 减动效开启或 ticker 未挂载时立即落点（官网 canvasReducedMotion）。
   void flyTo(
     CanvasCamera target, {
+    bool fitInsideViewport = false,
     double speed = 11,
     Duration duration = const Duration(milliseconds: 500),
     VoidCallback? onDone,
@@ -151,7 +155,10 @@ class GenerationCanvasCameraNotifier extends Notifier<CanvasCamera> {
       offset: target.offset,
       scale: math.min(
         CanvasCamera.maxScale,
-        math.max(CanvasCamera.minScale, target.scale),
+        math.max(
+          fitInsideViewport ? CanvasCamera.minFitScale : CanvasCamera.minScale,
+          target.scale,
+        ),
       ),
     );
     final start = state;
@@ -278,7 +285,12 @@ class GenerationCanvasCameraNotifier extends Notifier<CanvasCamera> {
     final base = _pendingZoomTarget ?? state;
     final target = base.zoomAt(a, factor);
     if ((target.scale - base.scale).abs() < 1e-9) return;
-    flyTo(target, speed: 18, duration: const Duration(milliseconds: 180));
+    flyTo(
+      target,
+      speed: 18,
+      duration: const Duration(milliseconds: 180),
+      fitInsideViewport: base.scale < CanvasCamera.minScale,
+    );
     _pendingZoomTarget = target;
   }
 
@@ -323,13 +335,20 @@ class GenerationCanvasCameraNotifier extends Notifier<CanvasCamera> {
   /// 返回值始终是原始 [target]，保证 flyTo 落点精确；只有距离超过
   /// 3×视口对角线时才改写当前相机，且全程用「目标视口中心的世界点 →
   /// 当前相机屏幕位置」换算，两侧 scale 不同时坐标系仍一致。
-  CanvasCamera adjustTargetForTeleport(CanvasCamera target, Size viewport) {
+  CanvasCamera adjustTargetForTeleport(
+    CanvasCamera target,
+    Size viewport, {
+    bool fitInsideViewport = false,
+  }) {
     if (_disposed) return target;
     final cur = state;
     final center = Offset(viewport.width / 2, viewport.height / 2);
     final targetScale = math.min(
       CanvasCamera.maxScale,
-      math.max(CanvasCamera.minScale, target.scale),
+      math.max(
+        fitInsideViewport ? CanvasCamera.minFitScale : CanvasCamera.minScale,
+        target.scale,
+      ),
     );
     final targetCenterWorld = (center - target.offset) / targetScale;
     final screenPos = cur.worldToScreen(targetCenterWorld);

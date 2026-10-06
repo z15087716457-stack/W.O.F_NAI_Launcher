@@ -589,6 +589,107 @@ void main() {
     );
 
     test(
+      'official variations preserve draft and retain the original before three slots',
+      () async {
+        final api = MockNAIImageGenerationApiService();
+        final finish = Completer<void>();
+        final requests = <ImageParams>[];
+        final png = _validImageBytes(width: 512, height: 768);
+        when(() => api.generateImageStream(any())).thenAnswer((
+          invocation,
+        ) async* {
+          requests.add(invocation.positionalArguments.first as ImageParams);
+          await finish.future;
+          for (var index = 0; index < 3; index++) {
+            yield ImageStreamChunk.complete(png, sampleIndex: index);
+          }
+        });
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(api),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        await container
+            .read(imageSaveSettingsNotifierProvider.notifier)
+            .setAutoSave(false);
+        container.read(imagesPerRequestProvider.notifier).set(1);
+        final draft = container.read(generationParamsNotifierProvider);
+        final workflow = container.read(imageWorkflowControllerProvider);
+        final original = GeneratedImage.create(
+          png,
+          width: 512,
+          height: 768,
+          isVariationOriginal: true,
+        );
+        final params = draft.copyWith(
+          prompt: 'selected source',
+          negativePrompt: 'source negative',
+          width: 512,
+          height: 768,
+          sourceImage: png,
+          action: ImageGenerationAction.img2img,
+          strength: .8,
+          noise: .1,
+          qualityToggle: false,
+          ucPreset: 3,
+          nSamples: 9,
+          characters: [const CharacterPrompt(prompt: 'source character')],
+        );
+        final observedGroupSizes = <int>[];
+        final layoutSubscription = container.listen(canvasFeedLayoutProvider, (
+          _,
+          layout,
+        ) {
+          final group = layout.groups.where((g) => g.runId != null).firstOrNull;
+          if (group != null) observedGroupSizes.add(group.tiles.length);
+        });
+        addTearDown(layoutSubscription.close);
+        final running = container
+            .read(imageGenerationNotifierProvider.notifier)
+            .generateOfficialVariations(params, original: original);
+        for (var attempts = 0; requests.isEmpty && attempts < 100; attempts++) {
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+        }
+        expect(requests, hasLength(1));
+        final active = container.read(imageGenerationNotifierProvider);
+        expect(active.totalImages, 3);
+        expect(active.currentImages.single.isVariationOriginal, isTrue);
+        final request = requests.single;
+        expect(request.nSamples, 3);
+        expect(request.prompt, 'selected source');
+        expect(request.negativePrompt, 'source negative');
+        expect(request.characters.single.prompt, 'source character');
+        expect(request.qualityToggle, isFalse);
+        expect(request.ucPreset, 3);
+        expect(request.strength, .8);
+        expect(request.noise, .1);
+        expect(request.seed, request.extraNoiseSeed! + 1);
+        finish.complete();
+        await running;
+        final result = container.read(imageGenerationNotifierProvider);
+        expect(observedGroupSizes, isNotEmpty);
+        expect(observedGroupSizes.every((count) => count == 4), isTrue);
+        expect(result.status, GenerationStatus.completed);
+        expect(result.displayImages, hasLength(4));
+        expect(result.history, hasLength(4));
+        expect(
+          result.history.where((i) => i.isVariationOriginal),
+          hasLength(1),
+        );
+        expect(result.displayImages.first.bytes, same(png));
+        final group = groupCanvasImages(result.displayImages).single;
+        expect(group.images.first.isVariationOriginal, isTrue);
+        expect(group.images.skip(1).map((i) => i.batchIndex), [0, 1, 2]);
+        expect(container.read(generationParamsNotifierProvider), same(draft));
+        expect(container.read(imageWorkflowControllerProvider), same(workflow));
+      },
+    );
+
+    test(
       'generate emits awaitable per-batch events at actual request boundaries',
       () async {
         final mockApiService = MockNAIImageGenerationApiService();

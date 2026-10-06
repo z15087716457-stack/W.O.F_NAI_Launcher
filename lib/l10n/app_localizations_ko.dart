@@ -1248,6 +1248,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_inpaintMaskReady => '인페인트 마스크가 준비되었습니다';
 
   @override
+  String get generation_variationOriginal => '원본';
+
+  @override
+  String get generation_variationSizeUnsupported =>
+      '변형은 300만 화소 이하의 원본 이미지를 지원합니다.';
+
+  @override
   String get img2img_generateVariations => '베리에이션 생성';
 
   @override

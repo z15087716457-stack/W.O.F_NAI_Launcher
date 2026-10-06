@@ -520,6 +520,8 @@
   "img2img_inpaintPendingHint": "點選“局部重繪”進入畫布，用畫筆、橡皮或選區工具標出需要重繪的區域。返回這裡後，點選主生成按鈕即可只重繪遮罩區域。",
   "img2img_inpaintReadyHint": "遮罩已載入。當前會按局部重繪方式提交，只有遮罩區域會被重新生成。",
   "img2img_inpaintMaskReady": "局部重繪遮罩已準備好",
+  "generation_variationOriginal": "原圖",
+  "generation_variationSizeUnsupported": "生成變體支援不超過 3 百萬像素的原圖。",
   "img2img_generateVariations": "生成變體",
   "img2img_directorTools": "導演工具",
   "img2img_directorPrompt": "提示詞（可選）",

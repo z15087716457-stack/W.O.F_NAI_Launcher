@@ -26,17 +26,19 @@ _GenerationCostInput _resolveGenerationCostInput(
   ImageParams params,
   ImageWorkflowState workflow,
 ) {
+  final enhanceWidth = workflow.enhanceUsesGenerationSize
+      ? params.width
+      : workflow.sourceWidth;
+  final enhanceHeight = workflow.enhanceUsesGenerationSize
+      ? params.height
+      : workflow.sourceHeight;
   // 增强 Max✨：请求宽高是源图尺寸，但服务端按端到端放大目标尺寸计费。
   if (workflow.isEnhance &&
       workflow.enhance.maxUpscale &&
-      MaxEnhanceMath.isEligible(
-        params.model,
-        workflow.sourceWidth,
-        workflow.sourceHeight,
-      )) {
+      MaxEnhanceMath.isEligible(params.model, enhanceWidth, enhanceHeight)) {
     final target = MaxEnhanceMath.targetSize(
-      workflow.sourceWidth ?? params.width,
-      workflow.sourceHeight ?? params.height,
+      enhanceWidth ?? params.width,
+      enhanceHeight ?? params.height,
     );
     return _GenerationCostInput(
       width: target.width,

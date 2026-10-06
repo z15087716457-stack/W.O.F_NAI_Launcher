@@ -70,12 +70,19 @@ class _Camera extends GenerationCanvasCameraNotifier {
   @override
   void flyTo(
     CanvasCamera target, {
+    bool fitInsideViewport = false,
     double speed = 11,
     Duration duration = const Duration(milliseconds: 500),
     VoidCallback? onDone,
   }) {
     targets.add(target);
-    super.flyTo(target, speed: speed, duration: duration, onDone: onDone);
+    super.flyTo(
+      target,
+      fitInsideViewport: fitInsideViewport,
+      speed: speed,
+      duration: duration,
+      onDone: onDone,
+    );
   }
 }
 

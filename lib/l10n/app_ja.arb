@@ -569,6 +569,8 @@
   "img2img_inpaintPendingHint": "「インペイント」をクリックしてキャンバスを開き、ブラシ、消しゴム、選択ツールで再描画したい領域を指定します。その後ここに戻り、メインの生成ボタンを使用します。",
   "img2img_inpaintReadyHint": "マスクを読み込みました。次回の生成では、マスクされた領域のみを再描画します。",
   "img2img_inpaintMaskReady": "インペイントマスクの準備ができました",
+  "generation_variationOriginal": "元画像",
+  "generation_variationSizeUnsupported": "バリエーションは 300 万画素以下の元画像に対応しています。",
   "img2img_generateVariations": "バリエーションの生成",
   "img2img_directorTools": "ディレクターツール",
   "img2img_directorPrompt": "プロンプト（任意）",

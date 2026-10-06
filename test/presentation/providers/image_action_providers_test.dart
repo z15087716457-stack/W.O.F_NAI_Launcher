@@ -126,6 +126,7 @@ void main() {
     'variation quote uses selected metadata, independent of main upscale price',
     () async {
       const metadata = NaiImageMetadata(
+        prompt: 'selected source',
         model: ImageModels.animeDiffusionV45Full,
         width: 1024,
         height: 1024,
@@ -161,10 +162,10 @@ void main() {
           width: 1024,
           height: 1024,
           steps: 28,
-          batchCount: 2,
-          batchSize: 2,
+          batchCount: 1,
+          batchSize: 3,
           model: ImageModels.animeDiffusionV45Full,
-          strength: 0.6,
+          strength: 0.8,
           subscriptionTier: 0,
           smea: false,
           smeaDyn: false,

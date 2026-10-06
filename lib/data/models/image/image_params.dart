@@ -115,6 +115,9 @@ class ImageParams with _$ImageParams {
     /// 随机种子 (-1 表示随机)
     @Default(-1) int seed,
 
+    /// Official variations use a separate noise seed, one below the image seed.
+    @JsonKey(includeFromJson: false, includeToJson: false) int? extraNoiseSeed,
+
     /// 生成数量
     @Default(1) int nSamples,
 

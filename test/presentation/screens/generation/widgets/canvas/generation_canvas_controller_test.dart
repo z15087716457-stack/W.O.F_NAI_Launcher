@@ -69,6 +69,18 @@ void main() {
       expect(rect.width, 200);
       expect(rect.height, 150);
     });
+
+    test('zoom from a very large fit stays continuous around the anchor', () {
+      const fitted = CanvasCamera(offset: Offset(100, 50), scale: .02);
+      const anchor = Offset(300, 200);
+      final world = fitted.screenToWorld(anchor);
+      final out = fitted.zoomAt(anchor, .8);
+      expect(out.scale, closeTo(.016, 1e-9));
+      expect(out.worldToScreen(world), closeToOffset(anchor));
+      final inward = fitted.zoomAt(anchor, 1.2);
+      expect(inward.scale, closeTo(.024, 1e-9));
+      expect(inward.worldToScreen(world), closeToOffset(anchor));
+    });
   });
 
   group('GenerationCanvasCameraNotifier', () {
@@ -197,6 +209,23 @@ void main() {
       final cam = container.read(generationCanvasCameraProvider);
       expect(cam.scale, closeTo(1.1, 1e-9));
       expect(cam.worldToScreen(worldUnder), closeToOffset(anchor));
+    });
+
+    test('discrete and smooth zoom preserve very large fitted scales', () {
+      for (final smooth in [false, true]) {
+        final container = buildContainer();
+        final n = container.read(generationCanvasCameraProvider.notifier);
+        n.setViewport(const Size(800, 600));
+        n.flyTo(
+          const CanvasCamera(offset: Offset(100, 50), scale: .02),
+          fitInsideViewport: true,
+        );
+        n.zoomBy(.8, anchor: const Offset(300, 200), smooth: smooth);
+        expect(
+          container.read(generationCanvasCameraProvider).scale,
+          closeTo(.016, 1e-9),
+        );
+      }
     });
 
     test('zoomBy 钳制 scale 上限 8', () {

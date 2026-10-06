@@ -570,6 +570,8 @@
   "img2img_inpaintPendingHint": "Click Inpaint to open the canvas, mark the region you want to repaint with brush, eraser, or selection tools, then return here and use the main generate button.",
   "img2img_inpaintReadyHint": "Mask loaded. The next generation will repaint only the masked area.",
   "img2img_inpaintMaskReady": "Inpaint mask is ready",
+  "generation_variationOriginal": "ORIGINAL",
+  "generation_variationSizeUnsupported": "Variations support source images up to 3 megapixels.",
   "img2img_generateVariations": "Generate Variations",
   "img2img_directorTools": "Director Tools",
   "img2img_directorPrompt": "Prompt (Optional)",

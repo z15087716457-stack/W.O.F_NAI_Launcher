@@ -515,6 +515,10 @@ class NAIImageRequestBuilder {
       requestParameters['image'] = base64Encode(normalizedSource);
       requestParameters['strength'] = params.strength;
       requestParameters['noise'] = params.noise;
+      if (params.extraNoiseSeed != null) {
+        requestParameters['extra_noise_seed'] = params.extraNoiseSeed;
+        requestParameters['color_correct'] = false;
+      }
     }
 
     if (params.action == ImageGenerationAction.infill &&

@@ -69,11 +69,7 @@ class _DisplaySettingsPanelState extends ConsumerState<_DisplaySettingsPanel> {
     final transparency = ModelSpecs.of(model).transparency;
     final showPalette = transparency && _showBackground;
     return SizedBox(
-      width: showPalette
-          ? 236
-          : transparency
-          ? 96
-          : 48,
+      width: showPalette ? 236 : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

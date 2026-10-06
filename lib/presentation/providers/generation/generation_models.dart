@@ -23,6 +23,9 @@ class GeneratedImage {
   final ImageOperation? operation;
   final Uint8List? originalBytes;
 
+  /// Display-only source inserted before the three new variation images.
+  final bool isVariationOriginal;
+
   /// 已保存的文件路径（如果有）
   /// 当图像被保存到磁盘后，此字段会被填充
   final String? filePath;
@@ -43,6 +46,7 @@ class GeneratedImage {
     this.metadata,
     this.operation,
     this.originalBytes,
+    this.isVariationOriginal = false,
     this.filePath,
     this.generationRunId,
     this.batchIndex,
@@ -60,6 +64,7 @@ class GeneratedImage {
     Uint8List? originalBytes,
     int? generationRunId,
     int? batchIndex,
+    bool isVariationOriginal = false,
   }) {
     final encodedSize = NaiResolutionAdapter.readImageSize(bytes);
     return GeneratedImage(
@@ -75,6 +80,7 @@ class GeneratedImage {
               ? null
               : ImageOperation.fromParams(sourceParams)),
       originalBytes: originalBytes ?? sourceParams?.sourceImage,
+      isVariationOriginal: isVariationOriginal,
       generationRunId: generationRunId,
       batchIndex: batchIndex,
     );
@@ -93,6 +99,7 @@ class GeneratedImage {
       filePath: path,
       operation: operation,
       originalBytes: originalBytes,
+      isVariationOriginal: isVariationOriginal,
       generationRunId: generationRunId,
       batchIndex: batchIndex,
     );
@@ -111,6 +118,7 @@ class GeneratedImage {
       filePath: filePath,
       operation: operation,
       originalBytes: originalBytes,
+      isVariationOriginal: isVariationOriginal,
       generationRunId: generationRunId ?? this.generationRunId,
       batchIndex: batchIndex ?? this.batchIndex,
     );

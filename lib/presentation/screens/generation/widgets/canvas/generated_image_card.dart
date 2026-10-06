@@ -94,8 +94,12 @@ Widget buildGeneratedImageCard({
         ? () => ImageWorkflowLauncher.openInpaint(context, ref, imageBytes)
         : null,
     onGenerateVariations: canUseAsInput
-        ? () =>
-              ImageWorkflowLauncher.generateVariations(context, ref, imageBytes)
+        ? () => ImageWorkflowLauncher.generateVariations(
+            context,
+            ref,
+            imageBytes,
+            sourceImage: image,
+          )
         : null,
     onDirectorTools: canUseAsInput
         ? () =>
