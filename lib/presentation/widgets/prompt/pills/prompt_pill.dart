@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../themes/studio_typography.dart';
 import '../../common/dashed_rounded_border.dart';
 import '../../common/studio_icons.dart';
 import '../../common/translation_icon.dart';
@@ -128,6 +129,11 @@ class PromptPill extends StatelessWidget {
         : color;
     final textStyle = (theme.textTheme.bodyMedium ?? const TextStyle())
         .copyWith(
+          fontFamily: StudioTypography.cjk,
+          fontFamilyFallback: const [
+            StudioTypography.sans,
+            StudioTypography.korean,
+          ],
           fontSize: size.fontSize,
           fontWeight: translation ? FontWeight.w500 : FontWeight.w600,
           height: multiline ? 1.25 : 1,
@@ -161,8 +167,10 @@ class PromptPill extends StatelessWidget {
             : null,
         child: Padding(
           padding: multiline
-              ? size.padding.add(const EdgeInsets.symmetric(vertical: 3))
-              : size.padding,
+              ? size.padding.add(
+                  const EdgeInsets.symmetric(horizontal: 1, vertical: 4),
+                )
+              : size.padding.add(const EdgeInsets.all(1)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -204,7 +212,7 @@ class PromptPill extends StatelessWidget {
                 ),
               ),
               if (normal && isAttachedUc) ...[
-                SizedBox(width: size.gap),
+                SizedBox(width: size.gap + 2),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 3,
@@ -226,22 +234,27 @@ class PromptPill extends StatelessWidget {
                 ),
               ],
               if (normal && evolutionEnabled && allowEvolutionToggle) ...[
-                SizedBox(width: size.gap),
-                DnaIcon(size: 11, color: iconColor.withValues(alpha: .8)),
+                SizedBox(width: size.gap + 1),
+                DnaIcon(
+                  size: 11,
+                  color:
+                      (enabled ? DnaIcon.prototypeColor(theme.brightness) : ink)
+                          .withValues(alpha: .8),
+                ),
               ] else if (normal && locked) ...[
-                SizedBox(width: size.gap),
+                SizedBox(width: size.gap + 1),
                 UiuxPrototypeIcon(
                   Icons.lock_outline,
                   size: 11,
-                  color: iconColor.withValues(alpha: .8),
+                  color: ink.withValues(alpha: .8),
                   strokeWidth: 2.2,
                 ),
               ] else if (normal && showRollBadge) ...[
-                SizedBox(width: size.gap),
+                SizedBox(width: size.gap + 1),
                 UiuxPrototypeIcon(
                   rollBadgeIcon,
                   size: 11,
-                  color: iconColor.withValues(alpha: .8),
+                  color: ink.withValues(alpha: .8),
                   strokeWidth: 2.2,
                 ),
               ],

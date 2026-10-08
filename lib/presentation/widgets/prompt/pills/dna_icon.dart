@@ -5,6 +5,12 @@ import '../../common/uiux_prototype_icon.dart';
 
 /// The selected prototype's helix for inheritance actions and pill markers.
 class DnaIcon extends StatelessWidget {
+  /// The selected blocks HTML's --evo state colors.
+  static Color prototypeColor(Brightness brightness) =>
+      brightness == Brightness.dark
+      ? const Color(0xff9e8cfc)
+      : const Color(0xff6e56cf);
+
   const DnaIcon({
     super.key,
     this.size = 16,

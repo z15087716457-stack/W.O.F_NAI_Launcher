@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../themes/studio_typography.dart';
 import '../../../widgets/common/uiux_prototype_icon.dart';
 import 'generation_sidebar_style.dart';
 
@@ -47,64 +48,78 @@ class GenerationModuleCard extends StatelessWidget {
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            key: headerKey,
-            height: GenSidebarStyle.moduleHeaderHeight,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(
-                start: GenSidebarStyle.cardGutter,
-                end: GenSidebarStyle.moduleHeaderTrailingInset,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Flexible(child: titleWidget),
-                        if (count != null && count! > 0)
-                          Padding(
-                            padding: const EdgeInsetsDirectional.only(
-                              start: GenSidebarStyle.moduleActionGap,
-                            ),
-                            child: Container(
-                              height: GenSidebarStyle.moduleCountHeight,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: GenSidebarStyle.moduleCountPadding,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    theme.colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(
-                                  GenSidebarStyle.moduleCountRadius,
+      child: Padding(
+        padding: const EdgeInsets.all(GenSidebarStyle.moduleBorderWidth),
+        child: DefaultTextStyle.merge(
+          style: const TextStyle(fontFamily: StudioTypography.cjk),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                key: headerKey,
+                height: GenSidebarStyle.moduleHeaderHeight,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: GenSidebarStyle.cardGutter,
+                    end: GenSidebarStyle.moduleHeaderTrailingInset,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(child: titleWidget),
+                            if (count != null && count! > 0)
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  start: GenSidebarStyle.moduleActionGap,
+                                ),
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minWidth:
+                                        GenSidebarStyle.moduleCountMinWidth,
+                                  ),
+                                  height: GenSidebarStyle.moduleCountHeight,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal:
+                                        GenSidebarStyle.moduleCountPadding,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme
+                                        .colorScheme
+                                        .surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(
+                                      GenSidebarStyle.moduleCountRadius,
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '$count',
+                                    style: GenSidebarStyle.moduleCountBadge(
+                                      theme,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '$count',
-                                style: GenSidebarStyle.moduleCountBadge(theme),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  for (final action in actions)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        start: GenSidebarStyle.moduleActionGap,
+                          ],
+                        ),
                       ),
-                      child: action,
-                    ),
-                ],
+                      for (final action in actions)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            start: GenSidebarStyle.moduleActionGap,
+                          ),
+                          child: action,
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              ...children,
+            ],
           ),
-          ...children,
-        ],
+        ),
       ),
     );
   }
@@ -326,8 +341,10 @@ class SidebarSegmentTrack<T> extends StatelessWidget {
         onPressed: segment.enabled ? () => onSelected(segment.value) : null,
         height: height,
         borderRadius: radius,
-        padding: const EdgeInsets.symmetric(
-          horizontal: GenSidebarStyle.segmentHorizontalPadding,
+        padding: EdgeInsets.symmetric(
+          horizontal: dense
+              ? GenSidebarStyle.segmentDenseHorizontalPadding
+              : GenSidebarStyle.segmentHorizontalPadding,
         ),
         backgroundColor: isSelected
             ? theme.brightness == Brightness.dark

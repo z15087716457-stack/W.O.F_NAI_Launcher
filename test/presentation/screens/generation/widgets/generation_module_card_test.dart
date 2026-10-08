@@ -169,7 +169,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(tester.getSize(find.byType(GenerationModuleCard)).height, 38);
+      expect(tester.getSize(find.byType(GenerationModuleCard)).height, 40);
     }
   });
 
@@ -205,7 +205,8 @@ void main() {
         tester.getRect(find.byKey(const Key('row-header'))).bottom,
       );
       expect(first.bottom, last.top);
-      expect(tester.getSize(find.byType(GenerationModuleCard)).height, 130);
+      // HTML's 38px header + two 46px rows + the outer 1px border on each edge.
+      expect(tester.getSize(find.byType(GenerationModuleCard)).height, 132);
       final dividers = tester
           .widgetList<DecoratedBox>(
             find.descendant(

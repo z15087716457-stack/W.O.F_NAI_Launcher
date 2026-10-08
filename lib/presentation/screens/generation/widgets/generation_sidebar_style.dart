@@ -35,6 +35,7 @@ final class GenSidebarStyle {
   static const double moduleActionIconSize = 16;
   static const double moduleRowMinHeight = 46;
   static const double moduleCountHeight = 18;
+  static const double moduleCountMinWidth = 18;
   static const double moduleCountPadding = 5;
   static const double moduleCountRadius = 9;
 
@@ -45,8 +46,10 @@ final class GenSidebarStyle {
   static const double segmentGap = 2;
   static const double segmentTrackRadius = 6;
   static const double segmentRadius = 4;
-  static const double segmentHorizontalPadding = 10;
-  static const double segmentIconSize = 14;
+  // The HTML orientation cell is 34px with a 15px icon; dense text cells use 9px.
+  static const double segmentHorizontalPadding = 9.5;
+  static const double segmentDenseHorizontalPadding = 9;
+  static const double segmentIconSize = 15;
   static const double segmentShadowBlur = 2;
   static const double segmentShadowOffset = 1;
   static const double segmentShadowOpacity = .08;
@@ -127,6 +130,7 @@ final class GenSidebarStyle {
 
   static TextStyle moduleTitle(ThemeData theme) =>
       (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
+        fontFamily: StudioTypography.cjk,
         fontSize: 13,
         fontWeight: FontWeight.w600,
         color: theme.colorScheme.onSurface,
@@ -134,6 +138,7 @@ final class GenSidebarStyle {
 
   static TextStyle moduleCountBadge(ThemeData theme) =>
       (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
+        fontFamily: StudioTypography.cjk,
         fontSize: 11,
         fontWeight: FontWeight.w600,
         color: theme.colorScheme.onSurfaceVariant,
@@ -141,6 +146,7 @@ final class GenSidebarStyle {
 
   static TextStyle moduleFieldLabel(ThemeData theme) =>
       (theme.textTheme.labelMedium ?? const TextStyle()).copyWith(
+        fontFamily: StudioTypography.cjk,
         fontSize: 12,
         color: theme.colorScheme.onSurfaceVariant,
       );
@@ -161,9 +167,14 @@ final class GenSidebarStyle {
     required bool enabled,
     bool numeric = false,
   }) => (theme.textTheme.labelMedium ?? const TextStyle()).copyWith(
-    fontSize: 12,
+    fontSize: numeric ? 13 : 12,
+    fontWeight: selected
+        ? numeric
+              ? FontWeight.w600
+              : FontWeight.w500
+        : FontWeight.w400,
     color: segmentForeground(theme, selected: selected, enabled: enabled),
-    fontFamily: numeric ? StudioTypography.mono : null,
+    fontFamily: numeric ? StudioTypography.mono : StudioTypography.cjk,
     fontFeatures: numeric ? const [FontFeature.tabularFigures()] : null,
   );
 }

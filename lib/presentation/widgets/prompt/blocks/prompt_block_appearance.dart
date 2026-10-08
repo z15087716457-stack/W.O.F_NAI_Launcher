@@ -78,10 +78,27 @@ class PromptBlockPatternPainter extends CustomPainter {
     }
     final paint = Paint();
     if (appearance == PromptBlockAppearance.dots) {
-      paint.color = color.withValues(alpha: .34);
-      for (var x = 3.0; x < size.width; x += 6) {
-        for (var y = 3.0; y < size.height; y += 6) {
-          canvas.drawCircle(Offset(x, y), .9, paint);
+      // HTML: a 6px tile at 1px 1px in the padding box behind a 1px border.
+      // Its center is at 5px, with repeats extending beyond the border box.
+      final dot = RadialGradient(
+        colors: [
+          color.withValues(alpha: .34),
+          color.withValues(alpha: .34),
+          color.withValues(alpha: 0),
+        ],
+        stops: const [0, .9 / 1.3, 1],
+      );
+      for (var x = -1.0; x < size.width + 1.3; x += 6) {
+        for (var y = -1.0; y < size.height + 1.3; y += 6) {
+          final center = Offset(x, y);
+          canvas.drawCircle(
+            center,
+            1.3,
+            paint
+              ..shader = dot.createShader(
+                Rect.fromCircle(center: center, radius: 1.3),
+              ),
+          );
         }
       }
       return;
@@ -92,7 +109,10 @@ class PromptBlockPatternPainter extends CustomPainter {
       );
       canvas.drawRect(
         Offset.zero & size,
-        Paint()..shader = gradient.createShader(Offset.zero & size),
+        Paint()
+          ..shader = gradient.createShader(
+            Rect.fromLTRB(1, 1, size.width - 1, size.height - 1),
+          ),
       );
       return;
     }
@@ -113,7 +133,7 @@ class PromptBlockPatternPainter extends CustomPainter {
       Offset.zero & size,
       paint
         ..shader = gradient.createShader(
-          const Rect.fromLTWH(0, 0, 7 / math.sqrt2, 7 / math.sqrt2),
+          const Rect.fromLTWH(1, 1, 7 / math.sqrt2, 7 / math.sqrt2),
         ),
     );
   }
