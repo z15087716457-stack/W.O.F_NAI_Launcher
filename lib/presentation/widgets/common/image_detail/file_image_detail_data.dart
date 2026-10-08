@@ -14,6 +14,16 @@ import 'image_detail_data.dart';
 /// 从文件路径加载图像，并使用 ImageMetadataService 解析元数据
 /// 用于主页生成的已保存图像和历史队列中的图像
 class FileImageDetailData implements ImageDetailData {
+  @override
+  double? get aspectRatio {
+    final width = metadata?.width, height = metadata?.height;
+    return width != null && height != null && width > 0 && height > 0
+        ? width / height
+        : null;
+  }
+
+  @override
+  DateTime? get groupDate => null;
   final String filePath;
   final Uint8List? _cachedBytes;
   final String? _id;

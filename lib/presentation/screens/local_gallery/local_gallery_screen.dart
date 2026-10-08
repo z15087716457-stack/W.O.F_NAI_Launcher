@@ -476,6 +476,10 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
     final start = math.max(0, index - 60);
     final end = math.min(entries.length, index + 61);
     final target = entries[index].path;
+    final aspectRatios = {
+      for (var i = start; i < end; i++)
+        galleryFilePathKey(entries[i].path): entries[i].aspectRatio,
+    };
     final records = await notifier.loadRecords([
       for (var i = start; i < end; i++) entries[i].path,
     ]);
@@ -493,7 +497,11 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       context,
       images: [
         for (final record in records)
-          LocalImageDetailData(record, getFavoriteStatus: getFavoriteStatus),
+          LocalImageDetailData(
+            record,
+            getFavoriteStatus: getFavoriteStatus,
+            aspectRatio: aspectRatios[galleryFilePathKey(record.path)],
+          ),
       ],
       initialIndex: initialIndex,
       showMetadataPanel: true,

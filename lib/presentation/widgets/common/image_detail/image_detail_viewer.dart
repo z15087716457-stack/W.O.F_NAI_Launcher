@@ -17,7 +17,7 @@ import '../../shortcuts/shortcuts.dart';
 import '../app_toast.dart';
 import 'components/detail_image_page.dart';
 import 'components/detail_metadata_panel.dart';
-import 'components/detail_thumbnail_bar.dart';
+import 'components/viewer_filmstrip.dart';
 import 'components/viewer_top_bar.dart';
 import 'components/viewer_stage.dart';
 import 'package:intl/intl.dart';
@@ -178,7 +178,6 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   static const Duration _closeRequestThrottle = Duration(milliseconds: 700);
 
   late PageController _pageController;
-  late ScrollController _thumbnailController;
   late int _currentIndex;
 
   /// 可变的图像列表副本：查看器内删除图片后从列表移除并翻页
@@ -208,37 +207,10 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
     _currentIndex = widget.initialIndex;
     _images = List.of(widget.images);
     _pageController = PageController(initialPage: _currentIndex);
-    _thumbnailController = ScrollController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToThumbnail(_currentIndex, animate: false);
       _focusNode.requestFocus();
     });
-  }
-
-  void _scrollToThumbnail(int index, {bool animate = true}) {
-    if (!_thumbnailController.hasClients) return;
-
-    const thumbnailWidth = 80.0;
-    const thumbnailMargin = 8.0;
-    const totalWidth = thumbnailWidth + thumbnailMargin;
-
-    final screenWidth = MediaQuery.of(context).size.width;
-    final targetOffset =
-        (index * totalWidth) - (screenWidth / 2) + (totalWidth / 2);
-    final maxOffset = _thumbnailController.position.maxScrollExtent;
-
-    final offset = targetOffset.clamp(0.0, maxOffset);
-
-    if (animate) {
-      _thumbnailController.animateTo(
-        offset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      _thumbnailController.jumpTo(offset);
-    }
   }
 
   void _goToPage(int index) {
@@ -253,7 +225,6 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
 
   void _onPageChanged(int index) {
     setState(() => _currentIndex = index);
-    _scrollToThumbnail(index);
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
@@ -577,10 +548,16 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
                   reserveWindowButtons: _narrowWindow || !visible,
                 ),
                 filmstrip: widget.showThumbnails && _images.length > 1
-                    ? DetailThumbnailBar(
-                        images: _images,
+                    ? ViewerFilmstrip(
+                        items: [
+                          for (final image in _images)
+                            ViewerFilmstripItem(
+                              thumbnail: image.getImageProvider(),
+                              aspectRatio: image.aspectRatio,
+                              groupDate: image.groupDate,
+                            ),
+                        ],
                         currentIndex: _currentIndex,
-                        scrollController: _thumbnailController,
                         onTap: _goToPage,
                       )
                     : null,
@@ -658,7 +635,6 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
     }
     _transformationControllers.clear();
     _pageController.dispose();
-    _thumbnailController.dispose();
     _focusNode.dispose();
     super.dispose();
   }

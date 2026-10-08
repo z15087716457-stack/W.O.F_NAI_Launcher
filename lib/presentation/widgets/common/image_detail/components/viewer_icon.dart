@@ -16,6 +16,7 @@ class ViewerIcon extends StatelessWidget {
     'plus': 'M12 5v14M5 12h14',
     'full': 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5',
     'panel': 'M4 5h16v14H4zM15 5v14',
+    'img': 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01',
   };
   @override
   Widget build(BuildContext context) => SvgPicture.string(

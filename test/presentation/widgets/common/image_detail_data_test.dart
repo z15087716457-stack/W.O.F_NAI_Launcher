@@ -83,4 +83,61 @@ void main() {
     expect(resized.height, 4096);
     expect(resized.policy, ResizeImagePolicy.fit);
   });
+
+  test(
+    'local dimensions prefer metadata and fall back to timeline dimensions',
+    () {
+      final date = DateTime(2026, 8, 31);
+      LocalImageRecord record(NaiImageMetadata? metadata) => LocalImageRecord(
+        path: 'fixture',
+        size: 0,
+        modifiedAt: date,
+        metadata: metadata,
+      );
+      final metadata = LocalImageDetailData(
+        record(const NaiImageMetadata(width: 1216, height: 832)),
+        aspectRatio: .5,
+      );
+      expect(metadata.aspectRatio, 1216 / 832);
+      expect(metadata.groupDate, date);
+      expect(
+        LocalImageDetailData(record(null), aspectRatio: .5).aspectRatio,
+        .5,
+      );
+      expect(
+        LocalImageDetailData(
+          record(const NaiImageMetadata(width: 0, height: 832)),
+          aspectRatio: .5,
+        ).aspectRatio,
+        .5,
+      );
+      expect(LocalImageDetailData(record(null)).aspectRatio, isNull);
+    },
+  );
+  test('file and generated adapters expose dimensions without date groups', () {
+    const metadata = NaiImageMetadata(width: 1216, height: 832);
+    final generated = GeneratedImageDetailData(
+      imageBytes: Uint8List(0),
+      metadata: metadata,
+    );
+    final file = FileImageDetailData(
+      filePath: 'fixture',
+      initialMetadata: metadata,
+    );
+    for (final image in [generated, file]) {
+      expect(image.aspectRatio, 1216 / 832);
+      expect(image.groupDate, isNull);
+    }
+    expect(
+      GeneratedImageDetailData(imageBytes: Uint8List(0)).aspectRatio,
+      isNull,
+    );
+    expect(
+      FileImageDetailData(
+        filePath: 'fixture',
+        initialMetadata: const NaiImageMetadata(height: 0, width: 10),
+      ).aspectRatio,
+      isNull,
+    );
+  });
 }

@@ -24,6 +24,10 @@ abstract class ImageDetailData {
   /// 获取元数据
   NaiImageMetadata? get metadata;
 
+  /// Optional dimensions and grouping supplied by the source adapter.
+  double? get aspectRatio;
+  DateTime? get groupDate;
+
   /// 是否收藏
   bool get isFavorite;
 
@@ -68,7 +72,24 @@ class LocalImageDetailData implements ImageDetailData {
   /// 图像最大维度阈值（超过此值会进行缩放优化）
   static const int _maxImageDimension = 4096;
 
-  LocalImageDetailData(this.record, {this.getFavoriteStatus});
+  final double? _aspectRatio;
+
+  LocalImageDetailData(
+    this.record, {
+    this.getFavoriteStatus,
+    double? aspectRatio,
+  }) : _aspectRatio = aspectRatio;
+
+  @override
+  double? get aspectRatio {
+    final width = metadata?.width, height = metadata?.height;
+    return width != null && height != null && width > 0 && height > 0
+        ? width / height
+        : _aspectRatio;
+  }
+
+  @override
+  DateTime get groupDate => record.modifiedAt;
 
   @override
   ImageProvider getImageProvider() {
@@ -169,6 +190,16 @@ class LocalImageDetailData implements ImageDetailData {
 /// 用于未保存到磁盘的图像（内存中的图像数据）
 /// 支持从内存字节异步解析元数据
 class GeneratedImageDetailData implements ImageDetailData {
+  @override
+  double? get aspectRatio {
+    final width = metadata?.width, height = metadata?.height;
+    return width != null && height != null && width > 0 && height > 0
+        ? width / height
+        : null;
+  }
+
+  @override
+  DateTime? get groupDate => null;
   final Uint8List imageBytes;
   final NaiImageMetadata? _metadata;
   final String _id;
