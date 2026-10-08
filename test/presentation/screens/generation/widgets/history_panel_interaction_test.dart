@@ -20,6 +20,91 @@ import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.d
 import 'package:nai_launcher/presentation/widgets/common/themed_confirm_dialog.dart';
 
 void main() {
+  for (final language in ['zh', 'en', 'ja', 'ko']) {
+    testWidgets('history titles and expected total in $language', (
+      tester,
+    ) async {
+      final today = DateTime.now();
+      final older = DateTime(today.year, today.month, today.day - 2, 8, 3);
+      final single = _image(
+        'single-time',
+        createdAt: DateTime(today.year, today.month, today.day, 16, 42),
+      );
+      final pair = [
+        for (var index = 0; index < 2; index++)
+          _image(
+            'pair-$index',
+            createdAt: older,
+          ).copyWith(generationRunId: 71, batchIndex: index),
+      ];
+      final container = _createContainer([
+        single,
+        ...pair,
+      ], status: GenerationStatus.generating);
+      addTearDown(container.dispose);
+      final notifier = container.read(imageGenerationNotifierProvider.notifier);
+      notifier.state = notifier.state.copyWith(
+        generationRunId: 99,
+        totalImages: 4,
+        currentImage: 1,
+        progress: .4,
+      );
+      await tester.pumpWidget(
+        _historyApp(container, width: 210, locale: Locale(language)),
+      );
+      await tester.pumpAndSettle();
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(HistoryPanel)),
+      )!;
+      final titles = tester
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byType(HistoryPanel),
+              matching: find.byWidgetPredicate(
+                (widget) => widget is Text && widget.textSpan != null,
+              ),
+            ),
+          )
+          .map((text) => text.textSpan!.toPlainText())
+          .toList();
+      expect(titles, contains('16:42'));
+      final oldTime =
+          '${older.month.toString().padLeft(2, '0')}-${older.day.toString().padLeft(2, '0')} 08:03';
+      expect(
+        titles,
+        contains('$oldTime · ${l10n.generation_historyBatchCount(2)}'),
+      );
+      expect(
+        titles,
+        contains(
+          '${l10n.generation_generating} · ${l10n.generation_historyBatchCount(4)}',
+        ),
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('history-total-count')),
+          matching: find.text('7'),
+        ),
+        findsOneWidget,
+      );
+      final list = tester.widget<ListView>(find.byType(ListView));
+      expect(list.itemExtent, 18 + 4 + 194 + 8);
+      final loading = find.byKey(const ValueKey('history-loading:run:99'));
+      final title = find.byKey(const ValueKey('history-batch-title:run:99'));
+      expect(tester.getSize(title).height, 18);
+      expect(tester.getTopLeft(loading).dy - tester.getBottomLeft(title).dy, 4);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('empty history hides total count badge', (tester) async {
+    final container = _createContainer([]);
+    addTearDown(container.dispose);
+    await tester.pumpWidget(_historyApp(container, width: 200));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('history-total-count')), findsNothing);
+  });
+
   testWidgets(
     'history menu directly deletes only the cover, clears its focus and updates remaining batch count',
     (tester) async {
@@ -113,7 +198,7 @@ void main() {
       addTearDown(container.dispose);
       await tester.pumpWidget(_historyApp(container));
       await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.library_add_check_outlined));
+      await tester.tap(find.byKey(const ValueKey('history-multi-select')));
       await tester.pumpAndSettle();
       final card = find.byKey(const ValueKey('first'));
       await tester.tap(card);
@@ -213,7 +298,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(canvasHistoryFocusRequestProvider)?.group, 'run:7');
     expect(container.read(generationPreviewSelectionProvider), 'batch-0');
-    await tester.tap(find.byIcon(Icons.library_add_check_outlined));
+    await tester.tap(find.byKey(const ValueKey('history-multi-select')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('batch-0')));
     await tester.pumpAndSettle();
@@ -309,7 +394,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(SelectableImageCard), findsOneWidget);
       expect(find.byKey(const ValueKey('stream-0')), findsOneWidget);
-      await tester.tap(find.byIcon(Icons.library_add_check_outlined));
+      await tester.tap(find.byKey(const ValueKey('history-multi-select')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('stream-0')));
       await tester.pumpAndSettle();
@@ -389,7 +474,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.byIcon(Icons.library_add_check_outlined));
+        await tester.tap(find.byKey(const ValueKey('history-multi-select')));
         await tester.pumpAndSettle();
 
         final pack = find.widgetWithIcon(
@@ -494,6 +579,7 @@ void main() {
     await _pumpRoute(tester);
     final second = find.byKey(const ValueKey('second'));
     await tester.ensureVisible(second);
+    await tester.pumpAndSettle();
     await tester.longPress(second);
     await _pumpRoute(tester);
 
@@ -513,6 +599,7 @@ void main() {
     await _pumpRoute(tester);
     final second = find.byKey(const ValueKey('second'));
     await tester.ensureVisible(second);
+    await tester.pumpAndSettle();
     await _openContextMenu(tester, second);
     await tester.tap(find.text('详情'));
     await _pumpRoute(tester);
@@ -746,9 +833,11 @@ GeneratedImage _image(
   int width = 32,
   int height = 32,
   GeneratedImageKind kind = GeneratedImageKind.completed,
+  DateTime? createdAt,
 }) {
   return GeneratedImage(
     id: id,
+    createdAt: createdAt,
     bytes: Uint8List.fromList(
       img.encodePng(img.Image(width: 4, height: 4, numChannels: 4)),
     ),

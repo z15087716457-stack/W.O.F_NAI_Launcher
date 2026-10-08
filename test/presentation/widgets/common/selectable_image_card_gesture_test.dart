@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
 
@@ -151,7 +152,7 @@ void main() {
     expect(_activeBorder(tester).top.width, 3);
   });
 
-  testWidgets('history thumb marks state with one light-blue plate only', (
+  testWidgets('history hover draws a thin outline without a plate or glow', (
     tester,
   ) async {
     Widget thumb({bool active = false}) => SizedBox(
@@ -173,38 +174,104 @@ void main() {
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);
     addTearDown(mouse.removePointer);
-
-    // Regular cards still glow on hover, so the finder is live.
     await tester.pumpWidget(_testApp(_card()));
     await mouse.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
     await tester.pump(const Duration(milliseconds: 300));
     expect(edgeGlow, findsOneWidget);
     await mouse.moveTo(Offset.zero);
     await tester.pumpAndSettle();
-
     await tester.pumpWidget(_testApp(thumb()));
-    final blue = Theme.of(
+    final scheme = Theme.of(
       tester.element(find.byType(SelectableImageCard)),
-    ).colorScheme.primary;
-    expect(_historyPlate(tester), isNull);
-
+    ).colorScheme;
+    final outline = find.byKey(const ValueKey('history-image-outline'));
+    expect(outline, findsNothing);
     await mouse.moveTo(tester.getCenter(find.byType(SelectableImageCard)));
     await tester.pump(const Duration(milliseconds: 300));
     expect(edgeGlow, findsNothing);
-    expect(_historyPlate(tester)!.color, blue.withValues(alpha: 0.11));
-
+    final hovered =
+        tester.widget<DecoratedBox>(outline).decoration as BoxDecoration;
+    expect((hovered.border! as Border).top.width, 1);
+    expect(
+      (hovered.border! as Border).top.color,
+      scheme.onSurface.withValues(alpha: .25),
+    );
     await tester.pumpWidget(_testApp(thumb(active: true)));
     await tester.pump(const Duration(milliseconds: 300));
-    final plate = _historyPlate(tester)!;
-    expect(plate.color, blue.withValues(alpha: 0.22));
-    expect(plate.spreadRadius, 2);
-    expect(plate.blurRadius, 0);
-    // The letterbox turns clear so the plate shows through it.
-    expect(
-      _cardDecorations(tester).where((d) => d.color == Colors.transparent),
-      hasLength(1),
-    );
+    final active =
+        tester.widget<DecoratedBox>(outline).decoration as BoxDecoration;
+    expect((active.border! as Border).top.color, scheme.primary);
+    expect((active.border! as Border).top.width, 2);
+    for (final decoration in _cardDecorations(tester)) {
+      expect(decoration.color, isNull);
+      expect(decoration.boxShadow, isNull);
+    }
   });
+
+  for (final dimensions in [(80, 160), (160, 80), (120, 120)]) {
+    testWidgets(
+      'history outline follows ${dimensions.$1} x ${dimensions.$2} image bounds',
+      (tester) async {
+        for (final selected in [false, true]) {
+          await tester.pumpWidget(
+            _testApp(
+              SizedBox(
+                width: 120,
+                height: 120,
+                child: SelectableImageCard(
+                  imageBytes: img.encodePng(
+                    img.Image(
+                      width: dimensions.$1,
+                      height: dimensions.$2,
+                      numChannels: 4,
+                    ),
+                  ),
+                  imageWidth: dimensions.$1,
+                  imageHeight: dimensions.$2,
+                  historyThumb: true,
+                  isSelected: selected,
+                  isPreviewActive: !selected,
+                  batchBadgeCount: 2,
+                  sourceBadge: const SizedBox(
+                    key: Key('source'),
+                    width: 10,
+                    height: 10,
+                  ),
+                  enableSelection: false,
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final card = tester.getRect(find.byType(SelectableImageCard));
+          final picture = tester.getRect(
+            find.byKey(const Key('history-image-display-area')),
+          );
+          final expected = dimensions.$1 < dimensions.$2
+              ? Rect.fromCenter(center: card.center, width: 60, height: 120)
+              : dimensions.$1 > dimensions.$2
+              ? Rect.fromCenter(center: card.center, width: 120, height: 60)
+              : card;
+          expect(picture, expected);
+          expect(
+            tester.getRect(find.byKey(const Key('history-image-outline'))),
+            expected.inflate(4),
+          );
+          expect(
+            tester.getTopLeft(find.byKey(const Key('source'))),
+            picture.topLeft + const Offset(6, 6),
+          );
+          final badge = tester.getRect(find.text('×2'));
+          expect(badge.right, lessThanOrEqualTo(picture.right - 5));
+          expect(badge.bottom, lessThanOrEqualTo(picture.bottom - 5));
+          for (final decoration in _cardDecorations(tester)) {
+            expect(decoration.color, isNull);
+            expect(decoration.boxShadow, isNull);
+          }
+        }
+      },
+    );
+  }
 
   testWidgets('right-click details closes the menu and opens the viewer once', (
     tester,
@@ -276,13 +343,6 @@ Iterable<BoxDecoration> _cardDecorations(WidgetTester tester) {
       )
       .map((container) => container.decoration)
       .whereType<BoxDecoration>();
-}
-
-BoxShadow? _historyPlate(WidgetTester tester) {
-  final shadows = _cardDecorations(
-    tester,
-  ).singleWhere((d) => d.borderRadius == BorderRadius.circular(3)).boxShadow;
-  return shadows == null || shadows.isEmpty ? null : shadows.single;
 }
 
 Border _activeBorder(WidgetTester tester) {

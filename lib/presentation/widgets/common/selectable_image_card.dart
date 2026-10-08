@@ -11,6 +11,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import '../../../core/utils/image_save_utils.dart';
 import '../../../core/utils/image_share_sanitizer.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/models/image/image_stream_chunk.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../../l10n/app_localizations.dart';
@@ -558,17 +559,88 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     return extension?.glowColor ?? theme.colorScheme.primary;
   }
 
-  /// 历史栏缩略图的状态底板：选中/预览联动为淡蓝，悬停减半，其余无。
-  Color? _historyPlateColor(ThemeData theme) {
-    final active = widget.isSelected || widget.isPreviewActive;
-    if (!active && !_isHovering) return null;
-    final alpha = theme.brightness == Brightness.dark ? 0.42 : 0.22;
-    return theme.colorScheme.primary.withValues(
-      alpha: active ? alpha : alpha / 2,
+  Uint8List? _historySizeBytes;
+  Size? _historySourceSize;
+
+  Size? get _historyImageSize {
+    final width = widget.imageWidth;
+    final height = widget.imageHeight;
+    if (width != null && height != null && width > 0 && height > 0) {
+      return Size(width.toDouble(), height.toDouble());
+    }
+    final bytes = widget.imageBytes ?? widget.streamPreview;
+    if (!identical(bytes, _historySizeBytes)) {
+      _historySizeBytes = bytes;
+      final dimensions = bytes == null
+          ? null
+          : NaiResolutionAdapter.readImageSize(bytes);
+      _historySourceSize = dimensions == null
+          ? null
+          : Size(dimensions.$1.toDouble(), dimensions.$2.toDouble());
+    }
+    return _historySourceSize;
+  }
+
+  /// 图片和叠加元素共用 contain 的实际区域，描边置于圆角裁剪之外。
+  Widget _historyImageFrame(
+    Widget child,
+    ThemeData theme, {
+    bool showOutline = true,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bounds = Offset.zero & constraints.biggest;
+        final size = _historyImageSize ?? constraints.biggest;
+        final fitted = applyBoxFit(BoxFit.contain, size, constraints.biggest);
+        final imageRect = Alignment.center.inscribe(fitted.destination, bounds);
+        final active = widget.isSelected || widget.isPreviewActive;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const SizedBox.expand(),
+            Positioned.fromRect(
+              rect: imageRect,
+              child: ClipRRect(
+                key: const ValueKey('history-image-display-area'),
+                borderRadius: BorderRadius.circular(5),
+                child: child,
+              ),
+            ),
+            if (showOutline &&
+                !widget.hideSelectionDecoration &&
+                (active || _isHovering))
+              Positioned.fromRect(
+                // Border is painted inward: 4px = 2px gap + 2px outline.
+                rect: imageRect.inflate(4),
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    key: const ValueKey('history-image-outline'),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(9),
+                      border: Border.all(
+                        color: active
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: .25,
+                              ),
+                        width: active ? 2 : 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
-  /// 历史栏缩略图不叠悬停发光与光泽扫过，只留底板。
+  Widget _completedImageFrame(Widget child, ThemeData theme) {
+    if (widget.historyThumb) return _historyImageFrame(child, theme);
+    return ClipRRect(borderRadius: BorderRadius.circular(12), child: child);
+  }
+
+  /// 历史缩略图只绘制图片外圈描边。
   bool get _glossEnabled => widget.enableGlossEffect && !widget.historyThumb;
 
   @override
@@ -591,13 +663,47 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     final hasPreview =
         widget.streamPreview != null && widget.streamPreview!.isNotEmpty;
 
-    // 如果有流式预览，显示预览图像
-    if (hasPreview) {
-      return _buildPreviewCard(primaryColor, surfaceColor, theme);
-    }
-
-    // 否则显示加载动画
-    return _buildLoadingCard(primaryColor, surfaceColor, theme);
+    final content = hasPreview
+        ? _buildPreviewCard(primaryColor, surfaceColor, theme)
+        : _buildLoadingCard(primaryColor, surfaceColor, theme);
+    if (!widget.historyThumb) return content;
+    final child = Stack(
+      fit: StackFit.expand,
+      children: [
+        content,
+        if (widget.batchBadgeCount != null && widget.batchBadgeCount! > 1)
+          Positioned(
+            right: 6,
+            bottom: 6,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: .7),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 4,
+                  ),
+                  child: Text(
+                    '×${widget.batchBadgeCount}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      height: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+    return hasPreview
+        ? _historyImageFrame(child, theme, showOutline: false)
+        : child;
   }
 
   /// 构建带预览图像的生成中卡片
@@ -611,7 +717,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
     final totalImages = widget.totalImages ?? 0;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(widget.historyThumb ? 5 : 12),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -796,7 +902,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   /// 构建已完成状态的卡片
   Widget _buildCompletedCard(BuildContext context, ThemeData theme) {
     final glowColor = _getGlowColor(context);
-    final historyPlate = widget.historyThumb ? _historyPlateColor(theme) : null;
 
     // 确保有图像数据
     if (widget.imageBytes == null) {
@@ -845,7 +950,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
           ),
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.historyThumb ? 3 : 12),
+            borderRadius: BorderRadius.circular(widget.historyThumb ? 5 : 12),
             border: widget.hideSelectionDecoration || widget.historyThumb
                 ? null
                 : widget.isSelected
@@ -860,14 +965,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                           width: 2,
                         )
                       : null),
-            // 历史栏：选中/预览联动/悬停只用一块淡蓝底板。无模糊的阴影
-            // 会铺满整个格子，透过留边露出来，并向外多出 2px，方图填满
-            // 格子时也看得出状态。
-            boxShadow: widget.historyThumb
-                ? (historyPlate == null
-                      ? null
-                      : [BoxShadow(color: historyPlate, spreadRadius: 2)])
-                : widget.hideSelectionDecoration
+            boxShadow: widget.historyThumb || widget.hideSelectionDecoration
                 ? null
                 : [
                     BoxShadow(
@@ -891,9 +989,8 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                       ),
                   ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(widget.historyThumb ? 3 : 12),
-            child: Stack(
+          child: _completedImageFrame(
+            Stack(
               fit: StackFit.expand,
               children: [
                 // 1. 图片层
@@ -911,13 +1008,6 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     curve: Curves.easeOut,
-                    color: !widget.historyThumb
-                        ? null
-                        : historyPlate != null
-                        ? Colors.transparent
-                        : theme.colorScheme.surfaceContainerHighest.withValues(
-                            alpha: 0.5,
-                          ),
                     child: DecodedMemoryImage(
                       key: const ValueKey('selectable-image-completed-image'),
                       bytes: widget.imageBytes!,
@@ -1156,7 +1246,9 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
 
                 // 8. 选中覆盖层：primary 半透明色罩整图荧光调色、毁色准——
                 // 画布走 hideSelectionDecoration 全关（IgnorePointer 穿透）
-                if (widget.isSelected && !widget.hideSelectionDecoration)
+                if (widget.isSelected &&
+                    !widget.hideSelectionDecoration &&
+                    !widget.historyThumb)
                   Positioned.fill(
                     child: IgnorePointer(
                       child: Container(
@@ -1171,6 +1263,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
                   ),
               ],
             ),
+            theme,
           ),
         ),
       ),

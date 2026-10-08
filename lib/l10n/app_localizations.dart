@@ -22325,6 +22325,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More parameters'**
   String get generation_paramsDrawerTooltip;
+
+  /// Number of images in one generation history batch
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images'**
+  String generation_historyBatchCount(int count);
 }
 
 class _AppLocalizationsDelegate

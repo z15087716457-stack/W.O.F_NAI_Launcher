@@ -6825,5 +6825,14 @@
   "generation_repeatLabel": "重复",
   "generation_referenceUpload": "上传",
   "generation_seedPinnedLabel": "种子 · 固定",
-  "generation_paramsDrawerTooltip": "更多参数"
+  "generation_paramsDrawerTooltip": "更多参数",
+  "generation_historyBatchCount": "{count} 张",
+  "@generation_historyBatchCount": {
+    "description": "Number of images in one generation history batch",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

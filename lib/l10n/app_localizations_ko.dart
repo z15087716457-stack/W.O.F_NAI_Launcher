@@ -12455,4 +12455,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get generation_paramsDrawerTooltip => '추가 매개변수';
+
+  @override
+  String generation_historyBatchCount(int count) {
+    return '$count장';
+  }
 }

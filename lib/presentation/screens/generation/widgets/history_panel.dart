@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
+import 'package:intl/intl.dart';
 
 import '../../../../core/enums/precise_ref_type.dart';
 import '../../../../core/utils/localization_extension.dart';
@@ -24,6 +25,9 @@ import '../../../providers/canvas_settings_provider.dart';
 import 'canvas/canvas_feed_layout.dart';
 import 'canvas/generated_image_actions.dart';
 import 'history_batch.dart';
+import 'generation_sidebar_style.dart';
+import '../../../themes/studio_typography.dart';
+import '../../../widgets/common/uiux_prototype_icon.dart';
 import 'image_operation_badge.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/generation/preview_selection_provider.dart';
@@ -199,83 +203,120 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     _syncCompletionPreviewPlaceholder(state);
     _scheduleSharePreparationMaintenance(state, stripMetadata);
 
+    final historyCount = _batches.fold<int>(
+      0,
+      (sum, batch) => sum + batch.count,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 标题栏
-        Padding(
-          padding: const EdgeInsets.only(
-            left: 8,
-            right: 4,
-            top: 12,
-            bottom: 12,
-          ),
-          child: Row(
-            children: [
-              // 折叠按钮
-              _buildCollapseButton(theme),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  context.l10n.generation_historyRecord,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              // 官网顶栏 `History >` + Pins 计数（有钉住才显）
-              Consumer(
-                builder: (context, ref, _) {
-                  final count = ref.watch(canvasPinnedNotifierProvider).length;
-                  if (count == 0) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: InkWell(
-                      onTap: () => ref
-                          .read(canvasPinboardFocusRequestProvider.notifier)
-                          .state++,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.secondaryContainer,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+        // 标题栏与 HTML 的 40px 行高一致（下方分割线占 1px）。
+        SizedBox(
+          key: const ValueKey('history-panel-header'),
+          height: 39,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8, right: 6),
+            child: Row(
+              children: [
+                _buildCollapseButton(theme),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(
                         child: Text(
-                          context.l10n.generation_canvasPinnedCount(count),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSecondaryContainer,
+                          context.l10n.generation_historyRecord,
+                          style: GenSidebarStyle.moduleTitle(
+                            theme,
+                          ).copyWith(fontSize: 14, fontWeight: FontWeight.w700),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (historyCount > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 6),
+                          child: Container(
+                            key: const ValueKey('history-total-count'),
+                            constraints: const BoxConstraints(
+                              minWidth: GenSidebarStyle.moduleCountMinWidth,
+                            ),
+                            height: GenSidebarStyle.moduleCountHeight,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: GenSidebarStyle.moduleCountPadding,
+                            ),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(
+                                GenSidebarStyle.moduleCountRadius,
+                              ),
+                            ),
+                            child: Text(
+                              '$historyCount',
+                              style: GenSidebarStyle.moduleCountBadge(theme),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                // 官网顶栏 `History >` + Pins 计数（有钉住才显）
+                Consumer(
+                  builder: (context, ref, _) {
+                    final count = ref
+                        .watch(canvasPinnedNotifierProvider)
+                        .length;
+                    if (count == 0) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: InkWell(
+                        onTap: () => ref
+                            .read(canvasPinboardFocusRequestProvider.notifier)
+                            .state++,
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            context.l10n.generation_canvasPinnedCount(count),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSecondaryContainer,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-              // 多选入口（自研，官网无）：点击进显式多选态；再点退出并清空。
-              _BottomToolButton(
-                icon: _multiSelectMode || _selectedIds.isNotEmpty
-                    ? Icons.library_add_check
-                    : Icons.library_add_check_outlined,
-                tooltip: _multiSelectMode || _selectedIds.isNotEmpty
-                    ? context.l10n.generation_deselectAll
-                    : context.l10n.generation_selectMultiple,
-                color: _multiSelectMode ? theme.colorScheme.primary : null,
-                onPressed: hasContent
-                    ? () => setState(() {
-                        _multiSelectMode = !_multiSelectMode;
-                        if (!_multiSelectMode) {
-                          _selectedIds.clear();
-                          _selectedBatchKeys.clear();
-                        }
-                      })
-                    : null,
-              ),
-            ],
+                    );
+                  },
+                ),
+                // 多选入口（自研，官网无）：点击进显式多选态；再点退出并清空。
+                _BottomToolButton(
+                  key: const ValueKey('history-multi-select'),
+                  compact: true,
+                  icon: _multiSelectMode || _selectedIds.isNotEmpty
+                      ? Icons.library_add_check
+                      : Icons.library_add_check_outlined,
+                  tooltip: _multiSelectMode || _selectedIds.isNotEmpty
+                      ? context.l10n.generation_deselectAll
+                      : context.l10n.generation_selectMultiple,
+                  color: _multiSelectMode ? theme.colorScheme.primary : null,
+                  onPressed: hasContent
+                      ? () => setState(() {
+                          _multiSelectMode = !_multiSelectMode;
+                          if (!_multiSelectMode) {
+                            _selectedIds.clear();
+                            _selectedBatchKeys.clear();
+                          }
+                        })
+                      : null,
+                ),
+              ],
+            ),
           ),
         ),
         const ThemedDivider(height: 1),
@@ -407,16 +448,15 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             .setRightPanelExpanded(false),
         borderRadius: BorderRadius.circular(4),
         child: Container(
-          padding: const EdgeInsets.all(4),
+          padding: const EdgeInsets.all(5.5),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.5,
-            ),
+            color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Icon(
+          child: UiuxPrototypeIcon(
             Icons.chevron_right,
-            size: 16,
+            source: UiuxPrototypeIconSource.generation,
+            size: 13,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
@@ -638,7 +678,10 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final extent =
-            (constraints.maxWidth - 16).clamp(1.0, double.infinity) + 8;
+            18 +
+            4 +
+            (constraints.maxWidth - 16).clamp(1.0, double.infinity) +
+            8;
         if (_rowsVersion != _derivedVersion || _rowsExtent != extent) {
           _rowsVersion = _derivedVersion;
           _rowsExtent = extent;
@@ -663,18 +706,24 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                 key: _imageKeyFor(batch.key),
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: _buildHistoryBatchItem(
-                      context,
-                      batch,
-                      state,
-                      state.batchWidth ?? previewDimensions.width,
-                      state.batchHeight ?? previewDimensions.height,
-                      stripMetadata: stripMetadata,
-                      clickBehavior: clickBehavior,
-                      selectedPreviewId: selectedPreviewId,
-                    ),
+                  child: Column(
+                    children: [
+                      _buildBatchTitle(context, batch, theme),
+                      const SizedBox(height: 4),
+                      AspectRatio(
+                        aspectRatio: 1,
+                        child: _buildHistoryBatchItem(
+                          context,
+                          batch,
+                          state,
+                          state.batchWidth ?? previewDimensions.width,
+                          state.batchHeight ?? previewDimensions.height,
+                          stripMetadata: stripMetadata,
+                          clickBehavior: clickBehavior,
+                          selectedPreviewId: selectedPreviewId,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -682,6 +731,61 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildBatchTitle(
+    BuildContext context,
+    HistoryBatch batch,
+    ThemeData theme,
+  ) {
+    final image = batch.cover ?? batch.images.firstOrNull;
+    final createdAt = image?.createdAt.toLocal();
+    final today = DateTime.now();
+    final sameDay =
+        createdAt != null &&
+        createdAt.year == today.year &&
+        createdAt.month == today.month &&
+        createdAt.day == today.day;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final label = createdAt == null
+        ? context.l10n.generation_generating
+        : DateFormat(
+            sameDay ? 'HH:mm' : 'MM-dd HH:mm',
+            locale,
+          ).format(createdAt);
+    return SizedBox(
+      key: ValueKey('history-batch-title:${batch.key}'),
+      height: 18,
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 2),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text.rich(
+            TextSpan(
+              text: label,
+              children: [
+                if (batch.count > 1)
+                  TextSpan(
+                    text:
+                        ' · ${context.l10n.generation_historyBatchCount(batch.count)}',
+                    style: GenSidebarStyle.moduleFieldLabel(theme).copyWith(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: StudioTypography.data.copyWith(
+              fontSize: 11,
+              color: theme.colorScheme.onSurface.withValues(alpha: .75),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -747,6 +851,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
         childBuilder: (dragPreparationReady) => SelectableImageCard(
           key: ValueKey(image.id),
           imageBytes: imageBytes,
+          imageWidth: image.width,
+          imageHeight: image.height,
           sourceFilePath: image.filePath,
           index: _mergedIndex[image.id],
           showIndex: false,
@@ -870,53 +976,24 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
     final firstIsStreaming = state.currentImage <= 1;
     return GestureDetector(
       onTap: () => _requestBatchFocus(batch),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          SelectableImageCard(
-            key: ValueKey('history-loading:${batch.key}'),
-            isGenerating: true,
-            historyThumb: true,
-            batchBadgeCount: batch.count,
-            currentImage: 1,
-            totalImages: batch.count,
-            progress:
-                slot?.progress ?? (firstIsStreaming ? state.progress : null),
-            streamPreview:
-                slot?.previewBytes ??
-                (firstIsStreaming ? state.streamPreview : null),
-            inpaintPreviewPlacement:
-                slot?.inpaintPreviewPlacement ??
-                (firstIsStreaming ? state.inpaintPreviewPlacement : null),
-            imageWidth: imageWidth,
-            imageHeight: imageHeight,
-            enableSelection: false,
-            enableContextMenu: false,
-          ),
-          if (batch.count > 1)
-            Positioned(
-              right: 6,
-              bottom: 6,
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 3,
-                    ),
-                    child: Text(
-                      '×${batch.count}',
-                      style: const TextStyle(color: Colors.white, fontSize: 11),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+      child: SelectableImageCard(
+        key: ValueKey('history-loading:${batch.key}'),
+        isGenerating: true,
+        historyThumb: true,
+        batchBadgeCount: batch.count,
+        currentImage: 1,
+        totalImages: batch.count,
+        progress: slot?.progress ?? (firstIsStreaming ? state.progress : null),
+        streamPreview:
+            slot?.previewBytes ??
+            (firstIsStreaming ? state.streamPreview : null),
+        inpaintPreviewPlacement:
+            slot?.inpaintPreviewPlacement ??
+            (firstIsStreaming ? state.inpaintPreviewPlacement : null),
+        imageWidth: imageWidth,
+        imageHeight: imageHeight,
+        enableSelection: false,
+        enableContextMenu: false,
       ),
     );
   }
@@ -1700,23 +1777,38 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
 /// 官网底栏图标钮（38×28、紧凑密度）
 class _BottomToolButton extends StatelessWidget {
   const _BottomToolButton({
+    super.key,
     required this.icon,
     required this.tooltip,
     this.color,
     this.onPressed,
+    this.compact = false,
   });
 
   final IconData icon;
   final String tooltip;
   final Color? color;
   final VoidCallback? onPressed;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return IconButton(
       onPressed: onPressed,
-      icon: Icon(icon, size: 18),
+      icon: UiuxPrototypeIcon(
+        icon,
+        size: 16,
+        source: UiuxPrototypeIconSource.generation,
+        prototypeName: switch (icon) {
+          Icons.library_add_check ||
+          Icons.library_add_check_outlined => 'multi',
+          Icons.save_alt => 'download',
+          Icons.lock => 'lock',
+          Icons.lock_open => 'unlock',
+          _ => null,
+        },
+      ),
       tooltip: tooltip,
       style: IconButton.styleFrom(
         foregroundColor: color ?? theme.colorScheme.onSurface,
@@ -1725,7 +1817,7 @@ class _BottomToolButton extends StatelessWidget {
         ),
       ),
       visualDensity: VisualDensity.compact,
-      constraints: const BoxConstraints(minWidth: 38, minHeight: 28),
+      constraints: BoxConstraints(minWidth: compact ? 28 : 38, minHeight: 28),
       padding: const EdgeInsets.all(4),
     );
   }

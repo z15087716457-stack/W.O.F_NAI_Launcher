@@ -6825,5 +6825,14 @@
   "generation_repeatLabel": "Repeat",
   "generation_referenceUpload": "Upload",
   "generation_seedPinnedLabel": "Seed · Fixed",
-  "generation_paramsDrawerTooltip": "More parameters"
+  "generation_paramsDrawerTooltip": "More parameters",
+  "generation_historyBatchCount": "{count} images",
+  "@generation_historyBatchCount": {
+    "description": "Number of images in one generation history batch",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

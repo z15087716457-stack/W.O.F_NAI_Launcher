@@ -12435,4 +12435,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get generation_paramsDrawerTooltip => '詳細パラメータ';
+
+  @override
+  String generation_historyBatchCount(int count) {
+    return '$count枚';
+  }
 }

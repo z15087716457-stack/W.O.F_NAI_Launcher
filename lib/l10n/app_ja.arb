@@ -6825,5 +6825,14 @@
   "generation_repeatLabel": "繰り返し",
   "generation_referenceUpload": "アップロード",
   "generation_seedPinnedLabel": "シード・固定",
-  "generation_paramsDrawerTooltip": "詳細パラメータ"
+  "generation_paramsDrawerTooltip": "詳細パラメータ",
+  "generation_historyBatchCount": "{count}枚",
+  "@generation_historyBatchCount": {
+    "description": "Number of images in one generation history batch",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

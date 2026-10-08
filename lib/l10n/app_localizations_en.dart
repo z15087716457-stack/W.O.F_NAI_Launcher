@@ -12827,4 +12827,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generation_paramsDrawerTooltip => 'More parameters';
+
+  @override
+  String generation_historyBatchCount(int count) {
+    return '$count images';
+  }
 }

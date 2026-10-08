@@ -12211,6 +12211,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generation_paramsDrawerTooltip => '更多参数';
+
+  @override
+  String generation_historyBatchCount(int count) {
+    return '$count 张';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24420,4 +24425,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get generation_paramsDrawerTooltip => '更多參數';
+
+  @override
+  String generation_historyBatchCount(int count) {
+    return '$count 張';
+  }
 }

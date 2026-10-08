@@ -6825,5 +6825,14 @@
   "generation_repeatLabel": "반복",
   "generation_referenceUpload": "업로드",
   "generation_seedPinnedLabel": "시드 · 고정",
-  "generation_paramsDrawerTooltip": "추가 매개변수"
+  "generation_paramsDrawerTooltip": "추가 매개변수",
+  "generation_historyBatchCount": "{count}장",
+  "@generation_historyBatchCount": {
+    "description": "Number of images in one generation history batch",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
