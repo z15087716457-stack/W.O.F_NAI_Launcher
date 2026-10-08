@@ -12460,4 +12460,68 @@ class AppLocalizationsKo extends AppLocalizations {
   String generation_historyBatchCount(int count) {
     return '$count장';
   }
+
+  @override
+  String get library_sizeSmall => '작게';
+
+  @override
+  String get library_sizeMedium => '보통';
+
+  @override
+  String get library_sizeLarge => '크게';
+
+  @override
+  String get library_currentModel => '현재 모델';
+
+  @override
+  String get library_available => '사용 가능';
+
+  @override
+  String get library_unavailable => '사용 불가';
+
+  @override
+  String get library_inGeneration => '생성에 사용 중';
+
+  @override
+  String library_selectedCount(int count) {
+    return '$count개 선택';
+  }
+
+  @override
+  String get library_invertSelection => '선택 반전';
+
+  @override
+  String get library_more => '더 보기';
+
+  @override
+  String get library_addToGeneration => '생성에 추가';
+
+  @override
+  String get library_strength => '강도';
+
+  @override
+  String get library_information => '정보';
+
+  @override
+  String get library_fidelity => '충실도';
+
+  @override
+  String get library_encodeOnUse => '사용 시 인코딩';
+
+  @override
+  String get library_reencode => '재인코딩 필요';
+
+  @override
+  String library_unusableModel(String model) {
+    return '$model에서 사용 불가';
+  }
+
+  @override
+  String get library_exportAll => '모두 내보내기';
+
+  @override
+  String get library_rescanFolders => '폴더 다시 스캔';
+
+  @override
+  String get library_preview => '미리 보기';
 }

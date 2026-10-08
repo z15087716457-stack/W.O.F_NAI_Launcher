@@ -1,7 +1,9 @@
+import '../../widgets/library/library_widgets.dart';
+import '../../widgets/gallery/gallery_filter_widgets.dart';
+import '../../widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:io';
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -9,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../../../core/utils/app_logger.dart';
@@ -27,10 +28,7 @@ import '../../providers/selection_mode_provider.dart';
 import '../../providers/vibe_library_category_provider.dart';
 import '../../providers/vibe_library_provider.dart';
 import '../../providers/vibe_library_selection_provider.dart';
-import '../../router/app_router.dart';
-import '../../widgets/bulk_action_bar.dart';
 import '../../widgets/common/app_toast.dart';
-import '../../widgets/common/compact_icon_button.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import '../../widgets/common/themed_input_dialog.dart';
 import '../../widgets/common/pro_context_menu.dart';
@@ -50,6 +48,7 @@ import 'widgets/vibe_image_encode_dialog.dart' as encode_dialog;
 import 'widgets/vibe_import_naming_dialog.dart' as naming_dialog;
 
 part 'vibe_library_screen_layout.dart';
+part 'vibe_library_screen_workbench.dart';
 
 const List<String> _vibeImportImageExtensions = ['png', 'jpg', 'jpeg', 'webp'];
 
@@ -64,9 +63,12 @@ class VibeLibraryScreen extends ConsumerStatefulWidget {
 
 class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
   /// 是否显示分类面板
-  bool _showCategoryPanel = true;
+  bool? _navVisible;
+  LibraryCardSize _cardSize = LibraryCardSize.medium;
+  String? _selectedVibeId;
 
   /// 搜索控制器
+  final FocusNode _searchFocus = FocusNode();
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounceTimer;
 
@@ -85,6 +87,9 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
   @override
   void initState() {
     super.initState();
+    LibraryCardSize.load('vibe_library_card_size').then((size) {
+      if (mounted) _updateLayoutState(() => _cardSize = size);
+    });
     // 初始化Vibe库
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(vibeLibraryNotifierProvider.notifier).initialize();
@@ -114,6 +119,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
   void dispose() {
     _searchDebounceTimer?.cancel();
     _searchController.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -132,19 +138,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
       },
     );
     final selectionState = ref.watch(vibeLibrarySelectionNotifierProvider);
-    final screenWidth = MediaQuery.of(context).size.width;
     final theme = Theme.of(context);
-
-    // 计算内容区域宽度
-    const categoryPanelWidth = 260.0;
-    final contentWidth = _showCategoryPanel && screenWidth > 800
-        ? screenWidth - categoryPanelWidth
-        : screenWidth;
-
-    // 计算列数（200px/列，最少2列，最多8列）
-    final columns = (contentWidth / 200).floor().clamp(2, 8);
-    // 考虑 GridView padding (16 * 2 = 32) 后计算每个 item 的宽度
-    final itemWidth = (contentWidth - 32) / columns;
 
     return Scaffold(
       body: Shortcuts(
@@ -202,225 +196,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
             },
             child: Stack(
               children: [
-                Row(
-                  children: [
-                    // 左侧分类面板
-                    if (_showCategoryPanel && screenWidth > 800)
-                      Container(
-                        width: categoryPanelWidth,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerLow,
-                          border: Border(
-                            right: BorderSide(
-                              color: theme.colorScheme.outlineVariant
-                                  .withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            // 顶部标题栏
-                            WindowHeaderDragSurface(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                constraints: const BoxConstraints(
-                                  minHeight: 62,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.folder_outlined,
-                                      size: 20,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: IgnorePointer(
-                                        child: Text(
-                                          context.l10n.vibeLibrary_categories,
-                                          style: theme.textTheme.titleSmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ),
-                                    FilledButton.tonalIcon(
-                                      onPressed: () =>
-                                          _showCreateCategoryDialog(context),
-                                      icon: const Icon(Icons.add, size: 18),
-                                      label: Text(
-                                        context.l10n.common_new,
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                      style: FilledButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Divider(
-                              height: 1,
-                              color: theme.colorScheme.outlineVariant
-                                  .withValues(alpha: 0.3),
-                            ),
-                            // 分类树
-                            Expanded(
-                              child: VibeCategoryTreeView(
-                                categories: categoryState.categories,
-                                totalEntryCount: state.entries.length,
-                                favoriteCount: state.favoriteCount,
-                                selectedCategoryId:
-                                    categoryState.selectedCategoryId,
-                                onCategorySelected: (id) {
-                                  ref
-                                      .read(
-                                        vibeLibraryCategoryNotifierProvider
-                                            .notifier,
-                                      )
-                                      .selectCategory(id);
-                                  if (id == 'favorites') {
-                                    ref
-                                        .read(
-                                          vibeLibraryNotifierProvider.notifier,
-                                        )
-                                        .setFavoritesOnly(true);
-                                  } else {
-                                    // 切换到其他分类时，清除收藏过滤状态
-                                    ref
-                                        .read(
-                                          vibeLibraryNotifierProvider.notifier,
-                                        )
-                                        .setFavoritesOnly(false);
-                                    ref
-                                        .read(
-                                          vibeLibraryNotifierProvider.notifier,
-                                        )
-                                        .setCategoryFilter(id);
-                                  }
-                                },
-                                onCategoryRename: (id, newName) async {
-                                  await ref
-                                      .read(
-                                        vibeLibraryCategoryNotifierProvider
-                                            .notifier,
-                                      )
-                                      .renameCategory(id, newName);
-                                },
-                                onCategoryDelete: (id) async {
-                                  final confirmed =
-                                      await ThemedConfirmDialog.show(
-                                        context: context,
-                                        title: context
-                                            .l10n
-                                            .vibeLibrary_deleteCategoryTitle,
-                                        content: context
-                                            .l10n
-                                            .vibeLibrary_deleteCategoryContent,
-                                        confirmText: context.l10n.common_delete,
-                                        cancelText: context.l10n.common_cancel,
-                                        type: ThemedConfirmDialogType.danger,
-                                        icon: Icons.delete_outline,
-                                      );
-                                  if (confirmed) {
-                                    await ref
-                                        .read(
-                                          vibeLibraryCategoryNotifierProvider
-                                              .notifier,
-                                        )
-                                        .deleteCategory(
-                                          id,
-                                          moveEntriesToParent: true,
-                                        );
-                                  }
-                                },
-                                onAddSubCategory: (parentId) async {
-                                  final name = await ThemedInputDialog.show(
-                                    context: context,
-                                    title: parentId == null
-                                        ? context
-                                              .l10n
-                                              .vibeLibrary_createCategoryTitle
-                                        : context
-                                              .l10n
-                                              .vibeLibrary_createSubCategoryTitle,
-                                    hintText: context
-                                        .l10n
-                                        .vibeLibrary_categoryNameHint,
-                                    confirmText: context
-                                        .l10n
-                                        .vibeLibrary_createCategoryConfirm,
-                                    cancelText: context.l10n.common_cancel,
-                                  );
-                                  if (name != null && name.isNotEmpty) {
-                                    await ref
-                                        .read(
-                                          vibeLibraryCategoryNotifierProvider
-                                              .notifier,
-                                        )
-                                        .createCategory(
-                                          name,
-                                          parentId: parentId,
-                                        );
-                                  }
-                                },
-                                onCategoryMove:
-                                    (categoryId, newParentId) async {
-                                      await ref
-                                          .read(
-                                            vibeLibraryCategoryNotifierProvider
-                                                .notifier,
-                                          )
-                                          .moveCategory(
-                                            categoryId,
-                                            newParentId,
-                                          );
-                                    },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    // 右侧主内容
-                    Expanded(
-                      child: Column(
-                        children: [
-                          // 工具栏
-                          LibraryWindowHeader(
-                            dragBackground: true,
-                            minimumInlineWidth: 900,
-                            child: _buildToolbar(state, selectionState, theme),
-                          ),
-                          // 主体内容
-                          Expanded(
-                            child: _buildBody(
-                              state,
-                              columns,
-                              itemWidth,
-                              selectionState,
-                            ),
-                          ),
-                          // 底部分页条
-                          if (!state.isLoading &&
-                              state.filteredEntries.isNotEmpty &&
-                              state.totalPages > 0)
-                            _buildPaginationBar(state, contentWidth),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                _buildWorkbench(state, categoryState, selectionState, theme),
                 // 拖拽覆盖层
                 if (_isDragging) _buildDropOverlay(theme),
                 // 导入进度覆盖层
@@ -619,9 +395,7 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
     ref.read(vibeLibrarySelectionNotifierProvider.notifier).exit();
 
     // 跳转到生成页面
-    if (mounted) {
-      context.go(AppRoutes.home);
-    }
+    if (mounted) {}
   }
 
   /// 批量导出

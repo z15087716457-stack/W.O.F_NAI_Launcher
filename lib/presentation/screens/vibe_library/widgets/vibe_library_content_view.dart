@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../../core/utils/app_logger.dart';
@@ -21,11 +20,10 @@ import '../../../providers/selection_mode_provider.dart';
 import '../../../providers/vibe_library_category_provider.dart';
 import '../../../providers/vibe_library_provider.dart';
 import '../../../providers/vibe_library_selection_provider.dart';
-import '../../../router/app_router.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/pro_context_menu.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
-import 'vibe_card.dart';
+import 'vibe_library_card.dart';
 import 'vibe_detail_viewer.dart';
 import 'vibe_export_dialog.dart';
 import 'vibe_library_empty_view.dart';
@@ -36,11 +34,15 @@ import 'vibe_library_empty_view.dart';
 class VibeLibraryContentView extends ConsumerStatefulWidget {
   final int columns;
   final double itemWidth;
+  final String? selectedId;
+  final ValueChanged<String>? onSelected;
 
   const VibeLibraryContentView({
     super.key,
     required this.columns,
     required this.itemWidth,
+    this.selectedId,
+    this.onSelected,
   });
 
   @override
@@ -52,6 +54,126 @@ class _VibeLibraryContentViewState
     extends ConsumerState<VibeLibraryContentView> {
   /// GridView 的 PageStorageKey，用于保持滚动位置
   static const String _vibeLibraryGridKey = 'vibe_library_3d_grid';
+  final _gridFocus = FocusNode();
+  final _gridScroll = ScrollController();
+  String? _anchorId;
+  @override
+  void dispose() {
+    _gridFocus.dispose();
+    _gridScroll.dispose();
+    super.dispose();
+  }
+
+  void _select(VibeLibraryEntry entry, List<VibeLibraryEntry> entries) {
+    _gridFocus.requestFocus();
+    final selection = ref.read(vibeLibrarySelectionNotifierProvider);
+    final notifier = ref.read(vibeLibrarySelectionNotifierProvider.notifier);
+    final keys = HardwareKeyboard.instance;
+    if (keys.isShiftPressed) {
+      final start = entries.indexWhere(
+        (e) => e.id == (_anchorId ?? widget.selectedId),
+      );
+      final end = entries.indexWhere((e) => e.id == entry.id);
+      notifier.enter();
+      final lo = start < 0
+          ? end
+          : start < end
+          ? start
+          : end;
+      final hi = start < 0
+          ? end
+          : start > end
+          ? start
+          : end;
+      notifier.selectAll(entries.sublist(lo, hi + 1).map((e) => e.id).toList());
+    } else if (keys.isControlPressed || keys.isMetaPressed) {
+      if (!selection.isActive) {
+        notifier.enter();
+        if (widget.selectedId != null) notifier.select(widget.selectedId!);
+      }
+      notifier.toggle(entry.id);
+      _anchorId = entry.id;
+    } else if (selection.isActive) {
+      notifier.toggle(entry.id);
+      _anchorId = entry.id;
+    } else {
+      _anchorId = entry.id;
+    }
+    widget.onSelected?.call(entry.id);
+  }
+
+  KeyEventResult _handleKeys(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final entries = ref.read(vibeLibraryNotifierProvider).currentEntries;
+    if (entries.isEmpty) return KeyEventResult.ignored;
+    final key = event.logicalKey, keys = HardwareKeyboard.instance;
+    final selection = ref.read(vibeLibrarySelectionNotifierProvider);
+    final notifier = ref.read(vibeLibrarySelectionNotifierProvider.notifier);
+    if (key == LogicalKeyboardKey.keyA &&
+        (keys.isControlPressed || keys.isMetaPressed)) {
+      notifier.enter();
+      notifier.selectAll(entries.map((e) => e.id).toList());
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.escape && selection.isActive) {
+      notifier.exit();
+      return KeyEventResult.handled;
+    }
+    final index = entries.indexWhere((e) => e.id == widget.selectedId);
+    final step = key == LogicalKeyboardKey.arrowRight
+        ? 1
+        : key == LogicalKeyboardKey.arrowLeft
+        ? -1
+        : key == LogicalKeyboardKey.arrowDown
+        ? widget.columns
+        : key == LogicalKeyboardKey.arrowUp
+        ? -widget.columns
+        : 0;
+    if (step != 0) {
+      final next = (index < 0 ? 0 : index + step).clamp(0, entries.length - 1);
+      widget.onSelected?.call(entries[next].id);
+      if (_gridScroll.hasClients) {
+        final target =
+            (next ~/ widget.columns) * (widget.itemWidth * 1.25 + 60);
+        _gridScroll.jumpTo(
+          target.clamp(0, _gridScroll.position.maxScrollExtent),
+        );
+      }
+      return KeyEventResult.handled;
+    }
+    if (index < 0) return KeyEventResult.ignored;
+    if (key == LogicalKeyboardKey.enter) {
+      unawaited(
+        _sendEntryToGeneration(context, entries[index], keys.isShiftPressed),
+      );
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.delete) {
+      unawaited(() async {
+        for (final entry in entries.where(
+          (e) => selection.isActive
+              ? selection.selectedIds.contains(e.id)
+              : e.id == widget.selectedId,
+        )) {
+          if (!context.mounted) return;
+          await _deleteSingleEntry(context, entry);
+        }
+      }());
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.keyF &&
+        !keys.isControlPressed &&
+        !keys.isMetaPressed &&
+        !keys.isAltPressed) {
+      ref
+          .read(vibeLibraryNotifierProvider.notifier)
+          .toggleFavorite(entries[index].id);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,66 +221,67 @@ class _VibeLibraryContentViewState
       );
     }
 
-    return GridView.builder(
-      key: const PageStorageKey<String>(_vibeLibraryGridKey),
-      padding: const EdgeInsets.all(16),
-      scrollCacheExtent: ScrollCacheExtent.pixels(
-        computeVibeGridCacheExtent(widget.itemWidth),
-      ),
-      addAutomaticKeepAlives: false,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: widget.columns,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 1.0,
-      ),
-      itemCount: entries.length,
-      itemBuilder: (context, index) {
-        final entry = entries[index];
-        final isSelected = selectionState.selectedIds.contains(entry.id);
+    return Focus(
+      focusNode: _gridFocus,
+      onKeyEvent: _handleKeys,
+      child: GridView.builder(
+        controller: _gridScroll,
+        key: const PageStorageKey<String>(_vibeLibraryGridKey),
+        padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
+        scrollCacheExtent: ScrollCacheExtent.pixels(
+          computeVibeGridCacheExtent(widget.itemWidth),
+        ),
+        addAutomaticKeepAlives: false,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: widget.columns,
+          mainAxisSpacing: 14,
+          crossAxisSpacing: 12,
+          mainAxisExtent: widget.itemWidth * 1.25 + 46,
+        ),
+        itemCount: entries.length,
+        itemBuilder: (context, index) {
+          final entry = entries[index];
+          final selected = selectionState.isActive
+              ? selectionState.selectedIds.contains(entry.id)
+              : widget.selectedId == entry.id;
+          void send() => unawaited(
+            _sendEntryToGeneration(
+              context,
+              entry,
+              HardwareKeyboard.instance.isShiftPressed,
+            ),
+          );
+          void more() {
+            final box = context.findRenderObject()! as RenderBox;
+            _showContextMenu(context, entry, box.localToGlobal(Offset.zero));
+          }
 
-        return VibeCard(
-          entry: entry,
-          width: widget.itemWidth,
-          height: widget.itemWidth,
-          isSelected: isSelected,
-          showFavoriteIndicator: true,
-          onTap: () {
-            if (selectionState.isActive) {
-              ref
-                  .read(vibeLibrarySelectionNotifierProvider.notifier)
-                  .toggle(entry.id);
-            } else {
-              _showVibeDetail(context, entry);
-            }
-          },
-          onLongPress: () {
-            if (!selectionState.isActive) {
+          return VibeLibraryCard(
+            key: ValueKey(entry.id),
+            entry: entry,
+            isSelected: selected,
+            checkbox: selectionState.isActive ? selected : null,
+            onTap: () => _select(entry, entries),
+            onDoubleTap: send,
+            onLongPress: () {
+              _gridFocus.requestFocus();
+              _anchorId = entry.id;
+              widget.onSelected?.call(entry.id);
               ref
                   .read(vibeLibrarySelectionNotifierProvider.notifier)
                   .enterAndSelect(entry.id);
-            }
-          },
-          onSecondaryTapDown: (details) {
-            _showContextMenu(context, entry, details.globalPosition);
-          },
-          onFavoriteToggle: () {
-            ref
+            },
+            onSecondaryTapDown: (d) =>
+                _showContextMenu(context, entry, d.globalPosition),
+            onFavoriteToggle: () => ref
                 .read(vibeLibraryNotifierProvider.notifier)
-                .toggleFavorite(entry.id);
-          },
-          onSendToGeneration: () async {
-            final physicalKeys = HardwareKeyboard.instance.physicalKeysPressed;
-            final isShiftPressed =
-                physicalKeys.contains(PhysicalKeyboardKey.shiftLeft) ||
-                physicalKeys.contains(PhysicalKeyboardKey.shiftRight);
-            await _sendEntryToGeneration(context, entry, isShiftPressed);
-          },
-          onExport: () => unawaited(_exportSingleEntry(context, entry)),
-          onEdit: () => _showVibeDetail(context, entry),
-          onDelete: () => _deleteSingleEntry(context, entry),
-        );
-      },
+                .toggleFavorite(entry.id),
+            onSendToGeneration: send,
+            onPreview: () => _showVibeDetail(context, entry),
+            onMore: more,
+          );
+        },
+      ),
     );
   }
 
@@ -373,7 +496,6 @@ class _VibeLibraryContentViewState
                       actualEntry.displayName,
                     );
               AppToast.success(context, message);
-              context.go(AppRoutes.home);
             }
             return;
           } catch (e, stackTrace) {
@@ -422,7 +544,6 @@ class _VibeLibraryContentViewState
             ? context.l10n.toast_replacedVibe(actualEntry.displayName)
             : context.l10n.toast_sentVibeToGeneration(actualEntry.displayName);
         AppToast.success(context, message);
-        context.go(AppRoutes.home);
       }
     } finally {
       span.finish(
@@ -527,7 +648,6 @@ class _VibeLibraryContentViewState
                       entry.displayName,
                     );
               AppToast.success(context, message);
-              context.go(AppRoutes.home);
             }
             return;
           } catch (e, stackTrace) {
@@ -568,7 +688,6 @@ class _VibeLibraryContentViewState
             ? context.l10n.toast_replacedVibe(entry.displayName)
             : context.l10n.toast_sentVibeToGeneration(entry.displayName);
         AppToast.success(context, message);
-        context.go(AppRoutes.home);
       }
     } finally {
       span.finish(

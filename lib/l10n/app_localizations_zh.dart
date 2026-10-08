@@ -12216,6 +12216,70 @@ class AppLocalizationsZh extends AppLocalizations {
   String generation_historyBatchCount(int count) {
     return '$count 张';
   }
+
+  @override
+  String get library_sizeSmall => '小';
+
+  @override
+  String get library_sizeMedium => '中';
+
+  @override
+  String get library_sizeLarge => '大';
+
+  @override
+  String get library_currentModel => '当前模型';
+
+  @override
+  String get library_available => '可用';
+
+  @override
+  String get library_unavailable => '不能用';
+
+  @override
+  String get library_inGeneration => '在生图页';
+
+  @override
+  String library_selectedCount(int count) {
+    return '已选 $count 个';
+  }
+
+  @override
+  String get library_invertSelection => '反选';
+
+  @override
+  String get library_more => '更多';
+
+  @override
+  String get library_addToGeneration => '加入生图';
+
+  @override
+  String get library_strength => '强度';
+
+  @override
+  String get library_information => '信息';
+
+  @override
+  String get library_fidelity => '保真';
+
+  @override
+  String get library_encodeOnUse => '用时编码';
+
+  @override
+  String get library_reencode => '需重新编码';
+
+  @override
+  String library_unusableModel(String model) {
+    return '不能用于 $model';
+  }
+
+  @override
+  String get library_exportAll => '导出全部';
+
+  @override
+  String get library_rescanFolders => '重新扫描文件夹';
+
+  @override
+  String get library_preview => '预览';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24430,4 +24494,68 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String generation_historyBatchCount(int count) {
     return '$count 張';
   }
+
+  @override
+  String get library_sizeSmall => '小';
+
+  @override
+  String get library_sizeMedium => '中';
+
+  @override
+  String get library_sizeLarge => '大';
+
+  @override
+  String get library_currentModel => '當前模型';
+
+  @override
+  String get library_available => '可用';
+
+  @override
+  String get library_unavailable => '不能用';
+
+  @override
+  String get library_inGeneration => '在生圖頁';
+
+  @override
+  String library_selectedCount(int count) {
+    return '已選 $count 個';
+  }
+
+  @override
+  String get library_invertSelection => '反選';
+
+  @override
+  String get library_more => '更多';
+
+  @override
+  String get library_addToGeneration => '加入生圖';
+
+  @override
+  String get library_strength => '強度';
+
+  @override
+  String get library_information => '資訊';
+
+  @override
+  String get library_fidelity => '保真';
+
+  @override
+  String get library_encodeOnUse => '用時編碼';
+
+  @override
+  String get library_reencode => '需重新編碼';
+
+  @override
+  String library_unusableModel(String model) {
+    return '不能用於 $model';
+  }
+
+  @override
+  String get library_exportAll => '匯出全部';
+
+  @override
+  String get library_rescanFolders => '重新掃描資料夾';
+
+  @override
+  String get library_preview => '預覽';
 }

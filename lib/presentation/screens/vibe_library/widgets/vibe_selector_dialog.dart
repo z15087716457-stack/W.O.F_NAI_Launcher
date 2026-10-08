@@ -9,7 +9,7 @@ import '../../../../data/models/vibe/vibe_reference.dart';
 import '../../../../data/services/vibe_file_storage_service.dart';
 import '../../../../presentation/providers/vibe_library_provider.dart';
 import '../../../widgets/common/decoded_memory_image.dart';
-import 'vibe_card.dart';
+import 'vibe_library_card.dart';
 
 const int _topTagEntrySampleLimit = 40;
 const int _topTagDisplayLimit = 6;
@@ -945,24 +945,18 @@ class _VibeSelectorDialogState extends ConsumerState<VibeSelectorDialog> {
 
   // 紧凑全图卡片 - 复用 VibeCard
   Widget _buildCompactVibeCard(VibeLibraryEntry entry, bool isSelected) {
-    return VibeCard(
+    return VibeLibraryCard(
       entry: entry,
-      width: 140,
-      height: 175, // 0.8 aspect ratio
       isSelected: isSelected,
-      showFavoriteIndicator: false, // 选择器中不显示收藏按钮
       onTap: () => _toggleSelection(entry.id),
     );
   }
 
   // Bundle 紧凑卡片 - 复用 VibeCard
   Widget _buildBundleCardCompact(VibeLibraryEntry entry, bool isSelected) {
-    return VibeCard(
+    return VibeLibraryCard(
       entry: entry,
-      width: 140,
-      height: 175,
       isSelected: isSelected,
-      showFavoriteIndicator: false,
       onTap: () => _toggleBundleSelection(entry),
     );
   }

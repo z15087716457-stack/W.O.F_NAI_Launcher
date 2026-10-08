@@ -6834,5 +6834,39 @@
         "type": "int"
       }
     }
+  },
+  "library_sizeSmall": "小",
+  "library_sizeMedium": "中",
+  "library_sizeLarge": "大",
+  "library_currentModel": "當前模型",
+  "library_available": "可用",
+  "library_unavailable": "不能用",
+  "library_inGeneration": "在生圖頁",
+  "library_selectedCount": "已選 {count} 個",
+  "library_invertSelection": "反選",
+  "library_more": "更多",
+  "library_addToGeneration": "加入生圖",
+  "library_strength": "強度",
+  "library_information": "資訊",
+  "library_fidelity": "保真",
+  "library_encodeOnUse": "用時編碼",
+  "library_reencode": "需重新編碼",
+  "library_unusableModel": "不能用於 {model}",
+  "library_exportAll": "匯出全部",
+  "library_rescanFolders": "重新掃描資料夾",
+  "library_preview": "預覽",
+  "@library_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@library_unusableModel": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
   }
 }

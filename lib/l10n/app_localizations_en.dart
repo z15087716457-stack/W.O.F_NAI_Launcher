@@ -12832,4 +12832,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String generation_historyBatchCount(int count) {
     return '$count images';
   }
+
+  @override
+  String get library_sizeSmall => 'Small';
+
+  @override
+  String get library_sizeMedium => 'Medium';
+
+  @override
+  String get library_sizeLarge => 'Large';
+
+  @override
+  String get library_currentModel => 'Current model';
+
+  @override
+  String get library_available => 'Available';
+
+  @override
+  String get library_unavailable => 'Unavailable';
+
+  @override
+  String get library_inGeneration => 'In generation';
+
+  @override
+  String library_selectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get library_invertSelection => 'Invert selection';
+
+  @override
+  String get library_more => 'More';
+
+  @override
+  String get library_addToGeneration => 'Add to generation';
+
+  @override
+  String get library_strength => 'Strength';
+
+  @override
+  String get library_information => 'Info';
+
+  @override
+  String get library_fidelity => 'Fidelity';
+
+  @override
+  String get library_encodeOnUse => 'Encode on use';
+
+  @override
+  String get library_reencode => 'Re-encode';
+
+  @override
+  String library_unusableModel(String model) {
+    return 'Unavailable for $model';
+  }
+
+  @override
+  String get library_exportAll => 'Export all';
+
+  @override
+  String get library_rescanFolders => 'Rescan folders';
+
+  @override
+  String get library_preview => 'Preview';
 }

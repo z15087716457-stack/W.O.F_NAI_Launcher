@@ -1,3 +1,6 @@
+import '../../widgets/library/library_test_helpers.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'dart:io';
 import 'dart:typed_data';
@@ -31,6 +34,7 @@ class _FailingStorage extends PreciseRefLibraryStorageService {
 }
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   testWidgets('加载失败时显示错误与重试入口', (tester) async {
     await tester.binding.setSurfaceSize(const Size(1000, 700));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -38,6 +42,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          shortcutConfigNotifierProvider.overrideWith(TestLibraryShortcuts.new),
           preciseRefLibraryStorageServiceProvider.overrideWithValue(
             _FailingStorage(),
           ),
@@ -63,6 +68,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          shortcutConfigNotifierProvider.overrideWith(TestLibraryShortcuts.new),
           preciseRefLibraryStorageServiceProvider.overrideWithValue(
             _FailingStorage(),
           ),

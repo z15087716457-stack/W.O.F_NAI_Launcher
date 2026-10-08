@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,14 +66,14 @@ void main() {
     await pumpCard(tester);
 
     expect(find.text('银发少女'), findsOneWidget);
-    expect(find.text('S 1.0 · F 0.85'), findsOneWidget);
+    expect(find.text('强度 1.00  保真 0.85'), findsOneWidget);
     // 角色类型徽标（zh 显示“角色”）
     expect(find.text('角色'), findsOneWidget);
     // 收藏态显示实心星标
-    expect(find.byIcon(Icons.star), findsOneWidget);
+    expect(find.byKey(const Key('library-card-favorite')), findsOneWidget);
   });
 
-  testWidgets('点击卡片触发发送回调，点击星标触发收藏回调', (tester) async {
+  testWidgets('单击卡片不发送，星标与明确发送按钮可用', (tester) async {
     var sendCount = 0;
     var favoriteCount = 0;
     await pumpCard(
@@ -81,12 +82,18 @@ void main() {
       onToggleFavorite: () => favoriteCount++,
     );
 
-    await tester.tap(
-      find.byKey(const Key('precise-ref-card-favorite-entry-1')),
-    );
+    await tester.tap(find.byKey(const Key('library-card-favorite')));
     expect(favoriteCount, 1);
 
     await tester.tap(find.text('银发少女'));
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(sendCount, 0);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    await mouse.moveTo(tester.getCenter(find.byType(PreciseRefCard)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('发送到精准参考'));
     expect(sendCount, 1);
+    await mouse.removePointer();
   });
 }

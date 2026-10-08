@@ -6834,5 +6834,39 @@
         "type": "int"
       }
     }
+  },
+  "library_sizeSmall": "Small",
+  "library_sizeMedium": "Medium",
+  "library_sizeLarge": "Large",
+  "library_currentModel": "Current model",
+  "library_available": "Available",
+  "library_unavailable": "Unavailable",
+  "library_inGeneration": "In generation",
+  "library_selectedCount": "{count} selected",
+  "library_invertSelection": "Invert selection",
+  "library_more": "More",
+  "library_addToGeneration": "Add to generation",
+  "library_strength": "Strength",
+  "library_information": "Info",
+  "library_fidelity": "Fidelity",
+  "library_encodeOnUse": "Encode on use",
+  "library_reencode": "Re-encode",
+  "library_unusableModel": "Unavailable for {model}",
+  "library_exportAll": "Export all",
+  "library_rescanFolders": "Rescan folders",
+  "library_preview": "Preview",
+  "@library_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@library_unusableModel": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
   }
 }

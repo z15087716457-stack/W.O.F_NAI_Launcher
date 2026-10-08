@@ -22331,6 +22331,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} images'**
   String generation_historyBatchCount(int count);
+
+  /// No description provided for @library_sizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get library_sizeSmall;
+
+  /// No description provided for @library_sizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get library_sizeMedium;
+
+  /// No description provided for @library_sizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get library_sizeLarge;
+
+  /// No description provided for @library_currentModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current model'**
+  String get library_currentModel;
+
+  /// No description provided for @library_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get library_available;
+
+  /// No description provided for @library_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get library_unavailable;
+
+  /// No description provided for @library_inGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'In generation'**
+  String get library_inGeneration;
+
+  /// No description provided for @library_selectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String library_selectedCount(int count);
+
+  /// No description provided for @library_invertSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Invert selection'**
+  String get library_invertSelection;
+
+  /// No description provided for @library_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get library_more;
+
+  /// No description provided for @library_addToGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to generation'**
+  String get library_addToGeneration;
+
+  /// No description provided for @library_strength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get library_strength;
+
+  /// No description provided for @library_information.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get library_information;
+
+  /// No description provided for @library_fidelity.
+  ///
+  /// In en, this message translates to:
+  /// **'Fidelity'**
+  String get library_fidelity;
+
+  /// No description provided for @library_encodeOnUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Encode on use'**
+  String get library_encodeOnUse;
+
+  /// No description provided for @library_reencode.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-encode'**
+  String get library_reencode;
+
+  /// No description provided for @library_unusableModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable for {model}'**
+  String library_unusableModel(String model);
+
+  /// No description provided for @library_exportAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Export all'**
+  String get library_exportAll;
+
+  /// No description provided for @library_rescanFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescan folders'**
+  String get library_rescanFolders;
+
+  /// No description provided for @library_preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get library_preview;
 }
 
 class _AppLocalizationsDelegate

@@ -6834,5 +6834,39 @@
         "type": "int"
       }
     }
+  },
+  "library_sizeSmall": "작게",
+  "library_sizeMedium": "보통",
+  "library_sizeLarge": "크게",
+  "library_currentModel": "현재 모델",
+  "library_available": "사용 가능",
+  "library_unavailable": "사용 불가",
+  "library_inGeneration": "생성에 사용 중",
+  "library_selectedCount": "{count}개 선택",
+  "library_invertSelection": "선택 반전",
+  "library_more": "더 보기",
+  "library_addToGeneration": "생성에 추가",
+  "library_strength": "강도",
+  "library_information": "정보",
+  "library_fidelity": "충실도",
+  "library_encodeOnUse": "사용 시 인코딩",
+  "library_reencode": "재인코딩 필요",
+  "library_unusableModel": "{model}에서 사용 불가",
+  "library_exportAll": "모두 내보내기",
+  "library_rescanFolders": "폴더 다시 스캔",
+  "library_preview": "미리 보기",
+  "@library_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@library_unusableModel": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
   }
 }

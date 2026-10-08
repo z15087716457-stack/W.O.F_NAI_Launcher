@@ -6834,5 +6834,39 @@
         "type": "int"
       }
     }
+  },
+  "library_sizeSmall": "小",
+  "library_sizeMedium": "中",
+  "library_sizeLarge": "大",
+  "library_currentModel": "使用モデル",
+  "library_available": "利用可能",
+  "library_unavailable": "利用不可",
+  "library_inGeneration": "生成に使用中",
+  "library_selectedCount": "{count} 件選択",
+  "library_invertSelection": "選択を反転",
+  "library_more": "その他",
+  "library_addToGeneration": "生成に追加",
+  "library_strength": "強度",
+  "library_information": "情報",
+  "library_fidelity": "忠実度",
+  "library_encodeOnUse": "使用時にエンコード",
+  "library_reencode": "再エンコード",
+  "library_unusableModel": "{model} では利用不可",
+  "library_exportAll": "すべてエクスポート",
+  "library_rescanFolders": "フォルダーを再スキャン",
+  "library_preview": "プレビュー",
+  "@library_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@library_unusableModel": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
   }
 }

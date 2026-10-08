@@ -6834,5 +6834,39 @@
         "type": "int"
       }
     }
+  },
+  "library_sizeSmall": "小",
+  "library_sizeMedium": "中",
+  "library_sizeLarge": "大",
+  "library_currentModel": "当前模型",
+  "library_available": "可用",
+  "library_unavailable": "不能用",
+  "library_inGeneration": "在生图页",
+  "library_selectedCount": "已选 {count} 个",
+  "library_invertSelection": "反选",
+  "library_more": "更多",
+  "library_addToGeneration": "加入生图",
+  "library_strength": "强度",
+  "library_information": "信息",
+  "library_fidelity": "保真",
+  "library_encodeOnUse": "用时编码",
+  "library_reencode": "需重新编码",
+  "library_unusableModel": "不能用于 {model}",
+  "library_exportAll": "导出全部",
+  "library_rescanFolders": "重新扫描文件夹",
+  "library_preview": "预览",
+  "@library_selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@library_unusableModel": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
   }
 }

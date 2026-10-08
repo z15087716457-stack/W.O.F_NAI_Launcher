@@ -12440,4 +12440,68 @@ class AppLocalizationsJa extends AppLocalizations {
   String generation_historyBatchCount(int count) {
     return '$count枚';
   }
+
+  @override
+  String get library_sizeSmall => '小';
+
+  @override
+  String get library_sizeMedium => '中';
+
+  @override
+  String get library_sizeLarge => '大';
+
+  @override
+  String get library_currentModel => '使用モデル';
+
+  @override
+  String get library_available => '利用可能';
+
+  @override
+  String get library_unavailable => '利用不可';
+
+  @override
+  String get library_inGeneration => '生成に使用中';
+
+  @override
+  String library_selectedCount(int count) {
+    return '$count 件選択';
+  }
+
+  @override
+  String get library_invertSelection => '選択を反転';
+
+  @override
+  String get library_more => 'その他';
+
+  @override
+  String get library_addToGeneration => '生成に追加';
+
+  @override
+  String get library_strength => '強度';
+
+  @override
+  String get library_information => '情報';
+
+  @override
+  String get library_fidelity => '忠実度';
+
+  @override
+  String get library_encodeOnUse => '使用時にエンコード';
+
+  @override
+  String get library_reencode => '再エンコード';
+
+  @override
+  String library_unusableModel(String model) {
+    return '$model では利用不可';
+  }
+
+  @override
+  String get library_exportAll => 'すべてエクスポート';
+
+  @override
+  String get library_rescanFolders => 'フォルダーを再スキャン';
+
+  @override
+  String get library_preview => 'プレビュー';
 }

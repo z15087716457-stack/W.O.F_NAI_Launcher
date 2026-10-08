@@ -53,7 +53,7 @@ class ModelModeCapsule extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _ModelMenuButton(theme: theme, model: model),
+          GenerationModelMenuButton(theme: theme, model: model),
           if (showMode) ...[
             Container(
               width: 1,
@@ -110,11 +110,17 @@ class ModelModeCapsule extends ConsumerWidget {
   }
 }
 
-class _ModelMenuButton extends ConsumerWidget {
-  const _ModelMenuButton({required this.theme, required this.model});
+class GenerationModelMenuButton extends ConsumerWidget {
+  const GenerationModelMenuButton({
+    super.key,
+    required this.theme,
+    required this.model,
+    this.child,
+  });
 
   final ThemeData theme;
   final String model;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -142,64 +148,66 @@ class _ModelMenuButton extends ConsumerWidget {
       onSelected: (value) {
         ref.read(generationParamsNotifierProvider.notifier).updateModel(value);
       },
-      child: Container(
-        // 左段：Model 灰标签 + 反色内胆（图标+短名+▾）作为点击热区视觉锚点；
-        // 外框/描边上移给 ModelModeCapsule 共享壳。
-        height: 28,
-        padding: const EdgeInsets.only(left: 10, right: 3),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Model',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Container(
-              height: 22,
-              padding: const EdgeInsets.symmetric(horizontal: 7),
-              decoration: BoxDecoration(
-                // 官网式反色内胆：浅色底 + 深色内容（onSurface/surface
-                // 互反，深浅主题自动镜像）
-                color: theme.colorScheme.onSurface,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    'assets/icons/novelai-icon.png',
-                    width: 14,
-                    height: 14,
-                    // 素材是纯黑剪影，srcIn 着色随内胆底色取反
-                    color: theme.colorScheme.surface,
-                    filterQuality: FilterQuality.medium,
+      child:
+          child ??
+          Container(
+            // 左段：Model 灰标签 + 反色内胆（图标+短名+▾）作为点击热区视觉锚点；
+            // 外框/描边上移给 ModelModeCapsule 共享壳。
+            height: 28,
+            padding: const EdgeInsets.only(left: 10, right: 3),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Model',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                   ),
-                  const SizedBox(width: 5),
-                  Flexible(
-                    child: Text(
-                      shortName,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  height: 22,
+                  padding: const EdgeInsets.symmetric(horizontal: 7),
+                  decoration: BoxDecoration(
+                    // 官网式反色内胆：浅色底 + 深色内容（onSurface/surface
+                    // 互反，深浅主题自动镜像）
+                    color: theme.colorScheme.onSurface,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/icons/novelai-icon.png',
+                        width: 14,
+                        height: 14,
+                        // 素材是纯黑剪影，srcIn 着色随内胆底色取反
+                        color: theme.colorScheme.surface,
+                        filterQuality: FilterQuality.medium,
+                      ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          shortName,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.surface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 15,
                         color: theme.colorScheme.surface,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    ],
                   ),
-                  Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 15,
-                    color: theme.colorScheme.surface,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
