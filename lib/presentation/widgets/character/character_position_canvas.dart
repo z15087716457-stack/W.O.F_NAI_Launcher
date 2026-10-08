@@ -12,6 +12,7 @@ import '../../providers/generation/generation_params_selectors.dart';
 import '../../providers/generation/preview_selection_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
+import '../../screens/generation/widgets/generation_module_card.dart';
 import '../common/decoded_memory_image.dart';
 
 /// 芯片显示信息：性别符号 + 显示名
@@ -332,8 +333,13 @@ class _CharacterPositionCanvasViewState
 /// 绑定全局 globalAiChoice，常驻在角色模块头部。
 /// 「自定义」右侧的图标是位置画布的唯一入口（官网同款布局）。
 class CharacterPositionModeSegments extends ConsumerWidget {
-  const CharacterPositionModeSegments({super.key, this.expanded = false});
+  const CharacterPositionModeSegments({
+    super.key,
+    this.expanded = false,
+    this.moduleHeader = false,
+  });
   final bool expanded;
+  final bool moduleHeader;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -344,6 +350,54 @@ class CharacterPositionModeSegments extends ConsumerWidget {
     final canvasOpen = ref.watch(characterPositionCanvasProvider);
     final canvasAvailable = ref.watch(characterPositionCanvasAvailableProvider);
 
+    if (moduleHeader) {
+      final track = SidebarSegmentTrack<bool>(
+        key: const ValueKey('character-position-segments'),
+        dense: true,
+        expand: expanded,
+        selected: globalAiChoice,
+        onSelected: (value) => ref
+            .read(characterPromptNotifierProvider.notifier)
+            .setGlobalAiChoice(value),
+        segments: [
+          SidebarSegment(
+            value: true,
+            child: Text(
+              l10n.characterCanvas_aiChoice,
+              key: const ValueKey('character-position-ai'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SidebarSegment(
+            value: false,
+            child: Text(
+              l10n.characterCanvas_custom,
+              key: const ValueKey('character-position-custom'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
+      return Row(
+        mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
+        children: [
+          if (expanded) Expanded(child: track) else track,
+          const SizedBox(width: 6),
+          ModuleHeaderIconButton(
+            key: const ValueKey('character-position-toggle'),
+            icon: Icons.grid_view_outlined,
+            tooltip: l10n.characterCanvas_title,
+            onPressed: canvasAvailable
+                ? () => ref
+                      .read(characterPositionCanvasProvider.notifier)
+                      .toggle()
+                : null,
+          ),
+        ],
+      );
+    }
     Widget segment(Widget child) => expanded ? Expanded(child: child) : child;
     final colorScheme = Theme.of(context).colorScheme;
     return Container(

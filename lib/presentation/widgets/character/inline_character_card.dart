@@ -12,6 +12,8 @@ import '../../providers/character_prompt_provider.dart';
 import '../../providers/tips_provider.dart';
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
 import '../common/decoded_memory_image.dart';
+import '../common/uiux_prototype_icon.dart';
+import 'character_module_scope.dart';
 import 'add_to_library_dialog.dart';
 import 'inline_character_editor.dart';
 
@@ -156,6 +158,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isEditing = _isEditing;
+    final embedded = CharacterModuleScope.of(context);
     final enabled = widget.character.enabled;
     // 常驻模式（官网布局）编辑器恒在；经典布局始终走只读预览，
     // 选中只负责边框高亮
@@ -165,16 +168,24 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
     final card = AnimatedContainer(
       duration: _animDuration,
       curve: _animCurve,
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: embedded ? Clip.none : Clip.antiAlias,
       decoration: BoxDecoration(
-        color: GenSidebarStyle.promptSurface(theme),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isEditing
-              ? colorScheme.onSurface.withValues(alpha: 0.55)
-              : GenSidebarStyle.border(theme),
-          width: 1,
-        ),
+        color: embedded
+            ? isEditing
+                  ? colorScheme.onSurface.withValues(
+                      alpha: theme.brightness == Brightness.light ? .03 : .04,
+                    )
+                  : Colors.transparent
+            : GenSidebarStyle.promptSurface(theme),
+        borderRadius: embedded ? null : BorderRadius.circular(6),
+        border: embedded
+            ? Border(top: BorderSide(color: GenSidebarStyle.border(theme)))
+            : Border.all(
+                color: isEditing
+                    ? colorScheme.onSurface.withValues(alpha: 0.55)
+                    : GenSidebarStyle.border(theme),
+                width: 1,
+              ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -257,7 +268,11 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
           if (hasThumbnail)
             _HeaderThumbnail(path: character.thumbnailPath!)
           else
-            ColoredBox(color: colorScheme.surface),
+            ColoredBox(
+              color: CharacterModuleScope.of(context)
+                  ? Colors.transparent
+                  : colorScheme.surface,
+            ),
           Material(
             color: Colors.transparent,
             child: InkWell(
@@ -266,7 +281,15 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                 padding: const EdgeInsets.only(left: 10),
                 child: Row(
                   children: [
-                    _genderIcon(character.effectiveGender, onHeader),
+                    CharacterModuleScope.of(context)
+                        ? UiuxPrototypeIcon(
+                            Icons.place_outlined,
+                            prototypeName: 'pin',
+                            size: 14,
+                            color: onHeader,
+                            source: UiuxPrototypeIconSource.generation,
+                          )
+                        : _genderIcon(character.effectiveGender, onHeader),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Builder(
@@ -503,7 +526,26 @@ class _HeaderIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tint = enabled ? color : color.withValues(alpha: 0.3);
-    final glyph = asset != null
+    final embedded = CharacterModuleScope.of(context);
+    final prototypeName = asset?.contains('arrow-up') == true
+        ? 'chevU'
+        : asset?.contains('arrow-down') == true
+        ? 'chevD'
+        : asset?.contains('check') == true
+        ? 'check'
+        : asset?.contains('trash') == true
+        ? 'trash'
+        : null;
+    final glyph = embedded && prototypeName != null
+        ? UiuxPrototypeIcon(
+            icon ?? Icons.more_horiz,
+            prototypeName: prototypeName,
+            source: UiuxPrototypeIconSource.generation,
+            size: prototypeName == 'check' ? 16 : 15,
+            strokeWidth: prototypeName == 'check' ? 2.4 : 1.8,
+            color: tint,
+          )
+        : asset != null
         ? SvgPicture.asset(
             asset!,
             width: asset!.contains('dir-arrow') ? 11 : 13,
@@ -521,7 +563,7 @@ class _HeaderIconButton extends StatelessWidget {
           width: 28,
           height: 28,
           alignment: Alignment.center,
-          decoration: separated
+          decoration: separated && !embedded
               ? BoxDecoration(
                   border: Border(
                     left: BorderSide(
@@ -567,7 +609,9 @@ class _HeaderOverflowMenu extends StatelessWidget {
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: const RoundedRectangleBorder(),
-        side: BorderSide(color: GenSidebarStyle.border(theme)),
+        side: CharacterModuleScope.of(context)
+            ? BorderSide.none
+            : BorderSide(color: GenSidebarStyle.border(theme)),
       ),
       iconSize: 16,
       padding: EdgeInsets.zero,
@@ -618,7 +662,15 @@ class _HeaderOverflowMenu extends StatelessWidget {
           ),
         ),
       ],
-      icon: Icon(Icons.more_horiz, size: 18, color: color),
+      icon: CharacterModuleScope.of(context)
+          ? UiuxPrototypeIcon(
+              Icons.more_horiz,
+              size: 16,
+              strokeWidth: 3,
+              source: UiuxPrototypeIconSource.generation,
+              color: color,
+            )
+          : Icon(Icons.more_horiz, size: 18, color: color),
     );
   }
 }

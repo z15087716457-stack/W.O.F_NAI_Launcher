@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/uiux_prototype_icon.dart';
 import '../../../../helpers/studio_capture_fonts.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_welcome.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/right_panel.dart';
@@ -319,7 +320,14 @@ void main() {
           expect(title.style!.fontWeight, FontWeight.w600);
           expect(find.text(l10n.generation_imageSize), findsNothing);
           expect(find.text(l10n.generation_perRequestLabel), findsOneWidget);
-          expect(find.byIcon(Icons.more_horiz), findsWidgets);
+          expect(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is UiuxPrototypeIcon &&
+                  widget.icon == Icons.more_horiz,
+            ),
+            findsWidgets,
+          );
           final promptCard = find.byKey(const ValueKey('main-prompt-card'));
           expect(
             find.descendant(
