@@ -498,6 +498,7 @@ class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
       initialIndex: initialIndex,
       showMetadataPanel: true,
       showThumbnails: records.length > 1,
+      backLabel: context.l10n.viewer_backLocalGallery,
       callbacks: ImageDetailCallbacks(
         onReuseMetadata: (data) =>
             _importImageMetadata((data as LocalImageDetailData).record),

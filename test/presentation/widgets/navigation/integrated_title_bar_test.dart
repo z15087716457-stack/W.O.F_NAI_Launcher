@@ -1,5 +1,4 @@
-import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_top_bar.dart';
-import 'package:nai_launcher/presentation/widgets/common/image_detail/image_detail_data.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_detail/components/viewer_top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -100,23 +99,17 @@ void main() {
             backgroundColor: Colors.black,
             body: Align(
               alignment: Alignment.topCenter,
-              child: DetailTopBar(
-                currentIndex: 0,
-                totalImages: 1,
-                currentImage: GeneratedImageDetailData(
-                  imageBytes: Uint8List(0),
-                ),
-                onClose: () => viewerClosed++,
+              child: ViewerTopBar(
+                backLabel: 'Local gallery',
+                position: const Text('1 / 1'),
+                onBack: () => viewerClosed++,
               ),
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
-      final viewerClose = find.descendant(
-        of: find.byType(DetailTopBar),
-        matching: find.byIcon(Icons.close),
-      );
+      final viewerClose = find.byKey(const Key('viewer-back'));
       final captionRect = tester.getRect(
         find.byKey(const Key('window-caption-controls')),
       );
@@ -124,7 +117,10 @@ void main() {
       await tester.tap(viewerClose);
       expect(viewerClosed, 1);
       expect(windowCalls, isNot(contains('close')));
-      expect(find.byType(WindowDragArea), findsOneWidget);
+      expect(
+        find.byKey(const Key('window-header-background-drag')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     },
   );

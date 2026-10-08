@@ -6868,5 +6868,13 @@
         "type": "String"
       }
     }
-  }
+  },
+  "viewer_backLocalGallery": "Local gallery",
+  "viewer_backGeneration": "Generation",
+  "viewer_fit": "Fit",
+  "viewer_showInfo": "Show information panel (I)",
+  "viewer_hideInfo": "Hide information panel (I)",
+  "viewer_originalSize": "Original size (1)",
+  "viewer_fullscreen": "Fullscreen (F11)",
+  "shortcut_action_toggle_info_panel": "Toggle information panel"
 }

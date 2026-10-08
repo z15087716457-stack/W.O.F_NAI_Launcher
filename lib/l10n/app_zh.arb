@@ -6868,5 +6868,13 @@
         "type": "String"
       }
     }
-  }
+  },
+  "viewer_backLocalGallery": "本地画廊",
+  "viewer_backGeneration": "生图",
+  "viewer_fit": "适应",
+  "viewer_showInfo": "显示信息栏（I）",
+  "viewer_hideInfo": "隐藏信息栏（I）",
+  "viewer_originalSize": "原始大小（1）",
+  "viewer_fullscreen": "全屏（F11）",
+  "shortcut_action_toggle_info_panel": "显示 / 隐藏信息栏"
 }

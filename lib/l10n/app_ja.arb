@@ -6868,5 +6868,13 @@
         "type": "String"
       }
     }
-  }
+  },
+  "viewer_backLocalGallery": "ローカルギャラリー",
+  "viewer_backGeneration": "画像生成",
+  "viewer_fit": "フィット",
+  "viewer_showInfo": "情報パネルを表示 (I)",
+  "viewer_hideInfo": "情報パネルを隠す (I)",
+  "viewer_originalSize": "原寸 (1)",
+  "viewer_fullscreen": "全画面 (F11)",
+  "shortcut_action_toggle_info_panel": "情報パネルの切り替え"
 }

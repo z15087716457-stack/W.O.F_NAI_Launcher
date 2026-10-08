@@ -29,21 +29,17 @@ class DetailMetadataPanel extends StatefulWidget {
   /// 当前显示的图片数据
   final ImageDetailData? currentImage;
 
-  /// 是否默认展开
-  final bool initialExpanded;
-
   /// 面板宽度
   final double expandedWidth;
 
-  /// 折叠宽度
-  final double collapsedWidth;
+  /// Closing hides the complete pane in ViewerStage.
+  final VoidCallback? onClose;
 
   const DetailMetadataPanel({
     super.key,
     this.currentImage,
-    this.initialExpanded = true,
-    this.expandedWidth = 320,
-    this.collapsedWidth = 40,
+    this.expandedWidth = 360,
+    this.onClose,
   });
 
   @override
@@ -51,7 +47,6 @@ class DetailMetadataPanel extends StatefulWidget {
 }
 
 class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
-  late bool _isExpanded;
   Future<NaiImageMetadata?>? _metadataFuture;
   NaiImageMetadata? _loadedMetadata;
   (int, int)? _actualImageSize;
@@ -59,7 +54,6 @@ class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
   @override
   void initState() {
     super.initState();
-    _isExpanded = widget.initialExpanded;
     _startMetadataLoading();
   }
 
@@ -219,10 +213,6 @@ class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
     }
   }
 
-  void _toggleExpanded() {
-    setState(() => _isExpanded = !_isExpanded);
-  }
-
   /// 获取当前可用的元数据（同步或已加载的异步）
   NaiImageMetadata? get _currentMetadata =>
       _loadedMetadata ?? widget.currentImage?.metadata;
@@ -232,32 +222,12 @@ class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      width: _isExpanded ? widget.expandedWidth : widget.collapsedWidth,
-      clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          bottomLeft: Radius.circular(16),
-        ),
-      ),
-      child: Container(
-        // Windows Flutter 在大图预览 + 窗口焦点切换时对 BackdropFilter
-        // 合成层存在原生崩溃风险；这里保留半透明面板，避免实时背景模糊。
+    return SizedBox(
+      width: widget.expandedWidth,
+      child: ColoredBox(
+        // Preserve the existing no-BackdropFilter Windows rendering path.
         color: colorScheme.surface.withValues(alpha: 0.96),
-        // 使用 OverflowBox 允许子组件按固定宽度布局，避免动画过程中的溢出警告
-        child: OverflowBox(
-          maxWidth: widget.expandedWidth,
-          alignment: Alignment.topLeft,
-          child: SizedBox(
-            width: widget.expandedWidth,
-            child: _isExpanded
-                ? _buildExpandedPanel(theme)
-                : _buildCollapsedPanel(theme),
-          ),
-        ),
+        child: _buildExpandedPanel(theme),
       ),
     );
   }
@@ -270,7 +240,7 @@ class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
 
     return Column(
       children: [
-        _PanelHeader(isExpanded: true, onToggle: _toggleExpanded),
+        _PanelHeader(onClose: widget.onClose),
         const ThemedDivider(height: 1),
         Expanded(
           child: widget.currentImage == null
@@ -355,48 +325,13 @@ class _DetailMetadataPanelState extends State<DetailMetadataPanel> {
       ),
     );
   }
-
-  Widget _buildCollapsedPanel(ThemeData theme) {
-    final colorScheme = theme.colorScheme;
-
-    return GestureDetector(
-      onTap: _toggleExpanded,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Container(
-          alignment: Alignment.center,
-          child: RotatedBox(
-            quarterTurns: 1,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.chevron_left,
-                  size: 16,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  context.l10n.detail_metadata,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// 面板标题栏
 class _PanelHeader extends StatelessWidget {
-  final bool isExpanded;
-  final VoidCallback onToggle;
+  final VoidCallback? onClose;
 
-  const _PanelHeader({required this.isExpanded, required this.onToggle});
+  const _PanelHeader({this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -416,17 +351,13 @@ class _PanelHeader extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          IconButton(
-            icon: Icon(
-              isExpanded ? Icons.chevron_right : Icons.chevron_left,
-              size: 20,
+          if (onClose != null)
+            IconButton(
+              icon: const Icon(Icons.chevron_right, size: 20),
+              onPressed: onClose,
+              tooltip: context.l10n.viewer_hideInfo,
+              visualDensity: VisualDensity.compact,
             ),
-            onPressed: onToggle,
-            tooltip: isExpanded
-                ? context.l10n.common_collapse
-                : context.l10n.common_expand,
-            visualDensity: VisualDensity.compact,
-          ),
         ],
       ),
     );
@@ -873,13 +804,22 @@ class _ActionButtonState extends State<_ActionButton> {
                     : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 6),
-              Text(
-                widget.label,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: _isHovered
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                  fontWeight: _isHovered ? FontWeight.w600 : FontWeight.w500,
+              Flexible(
+                child: Tooltip(
+                  message: widget.label,
+                  child: Text(
+                    widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: _isHovered
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight: _isHovered
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -12504,4 +12504,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get library_preview => 'プレビュー';
+
+  @override
+  String get viewer_backLocalGallery => 'ローカルギャラリー';
+
+  @override
+  String get viewer_backGeneration => '画像生成';
+
+  @override
+  String get viewer_fit => 'フィット';
+
+  @override
+  String get viewer_showInfo => '情報パネルを表示 (I)';
+
+  @override
+  String get viewer_hideInfo => '情報パネルを隠す (I)';
+
+  @override
+  String get viewer_originalSize => '原寸 (1)';
+
+  @override
+  String get viewer_fullscreen => '全画面 (F11)';
+
+  @override
+  String get shortcut_action_toggle_info_panel => '情報パネルの切り替え';
 }

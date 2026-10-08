@@ -451,6 +451,8 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
         return l10n.shortcut_action_toggle_fullscreen;
       case 'shortcut_action_close_viewer':
         return l10n.shortcut_action_close_viewer;
+      case 'shortcut_action_toggle_info_panel':
+        return l10n.shortcut_action_toggle_info_panel;
       case 'shortcut_action_toggle_favorite':
         return l10n.shortcut_action_toggle_favorite;
       case 'shortcut_action_copy_prompt':

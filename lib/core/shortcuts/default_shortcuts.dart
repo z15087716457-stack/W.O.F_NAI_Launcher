@@ -34,6 +34,7 @@ class ShortcutIds {
   static const String resetZoom = 'reset_zoom';
   static const String toggleFullscreen = 'toggle_fullscreen';
   static const String closeViewer = 'close_viewer';
+  static const String toggleInfoPanel = 'toggle_info_panel';
   static const String toggleFavorite = 'toggle_favorite';
   static const String copyPrompt = 'copy_prompt';
   static const String reuseGalleryParams = 'reuse_gallery_params';
@@ -116,6 +117,7 @@ class DefaultShortcuts {
     ShortcutIds.resetZoom: '0',
     ShortcutIds.toggleFullscreen: 'f11',
     ShortcutIds.closeViewer: 'escape',
+    ShortcutIds.toggleInfoPanel: 'i',
     ShortcutIds.toggleFavorite: 'f',
     ShortcutIds.copyPrompt: 'ctrl+c',
     ShortcutIds.reuseGalleryParams: 'ctrl+r',
@@ -189,6 +191,7 @@ class DefaultShortcuts {
       case ShortcutIds.resetZoom:
       case ShortcutIds.toggleFullscreen:
       case ShortcutIds.closeViewer:
+      case ShortcutIds.toggleInfoPanel:
       case ShortcutIds.toggleFavorite:
       case ShortcutIds.copyPrompt:
       case ShortcutIds.reuseGalleryParams:

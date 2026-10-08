@@ -6868,5 +6868,13 @@
         "type": "String"
       }
     }
-  }
+  },
+  "viewer_backLocalGallery": "本機圖庫",
+  "viewer_backGeneration": "生圖",
+  "viewer_fit": "適應",
+  "viewer_showInfo": "顯示資訊欄（I）",
+  "viewer_hideInfo": "隱藏資訊欄（I）",
+  "viewer_originalSize": "原始大小（1）",
+  "viewer_fullscreen": "全螢幕（F11）",
+  "shortcut_action_toggle_info_panel": "顯示 / 隱藏資訊欄"
 }

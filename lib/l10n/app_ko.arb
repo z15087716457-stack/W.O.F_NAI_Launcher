@@ -6868,5 +6868,13 @@
         "type": "String"
       }
     }
-  }
+  },
+  "viewer_backLocalGallery": "로컬 갤러리",
+  "viewer_backGeneration": "이미지 생성",
+  "viewer_fit": "맞춤",
+  "viewer_showInfo": "정보 패널 표시 (I)",
+  "viewer_hideInfo": "정보 패널 숨기기 (I)",
+  "viewer_originalSize": "원본 크기 (1)",
+  "viewer_fullscreen": "전체 화면 (F11)",
+  "shortcut_action_toggle_info_panel": "정보 패널 전환"
 }

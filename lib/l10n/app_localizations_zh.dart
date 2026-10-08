@@ -12280,6 +12280,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get library_preview => '预览';
+
+  @override
+  String get viewer_backLocalGallery => '本地画廊';
+
+  @override
+  String get viewer_backGeneration => '生图';
+
+  @override
+  String get viewer_fit => '适应';
+
+  @override
+  String get viewer_showInfo => '显示信息栏（I）';
+
+  @override
+  String get viewer_hideInfo => '隐藏信息栏（I）';
+
+  @override
+  String get viewer_originalSize => '原始大小（1）';
+
+  @override
+  String get viewer_fullscreen => '全屏（F11）';
+
+  @override
+  String get shortcut_action_toggle_info_panel => '显示 / 隐藏信息栏';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24558,4 +24582,28 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get library_preview => '預覽';
+
+  @override
+  String get viewer_backLocalGallery => '本機圖庫';
+
+  @override
+  String get viewer_backGeneration => '生圖';
+
+  @override
+  String get viewer_fit => '適應';
+
+  @override
+  String get viewer_showInfo => '顯示資訊欄（I）';
+
+  @override
+  String get viewer_hideInfo => '隱藏資訊欄（I）';
+
+  @override
+  String get viewer_originalSize => '原始大小（1）';
+
+  @override
+  String get viewer_fullscreen => '全螢幕（F11）';
+
+  @override
+  String get shortcut_action_toggle_info_panel => '顯示 / 隱藏資訊欄';
 }

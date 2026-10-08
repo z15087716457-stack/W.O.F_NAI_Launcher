@@ -18,7 +18,9 @@ import '../app_toast.dart';
 import 'components/detail_image_page.dart';
 import 'components/detail_metadata_panel.dart';
 import 'components/detail_thumbnail_bar.dart';
-import 'components/detail_top_bar.dart';
+import 'components/viewer_top_bar.dart';
+import 'components/viewer_stage.dart';
+import 'package:intl/intl.dart';
 import 'image_detail_data.dart';
 
 /// 图像详情查看器回调函数
@@ -82,6 +84,8 @@ class ImageDetailViewer extends ConsumerStatefulWidget {
   /// Hero 标签前缀
   final String? heroTagPrefix;
 
+  final String? backLabel;
+
   const ImageDetailViewer({
     super.key,
     required this.images,
@@ -90,6 +94,7 @@ class ImageDetailViewer extends ConsumerStatefulWidget {
     this.showThumbnails = true,
     this.callbacks,
     this.heroTagPrefix,
+    this.backLabel,
   });
 
   /// 打开图像详情查看器
@@ -101,6 +106,7 @@ class ImageDetailViewer extends ConsumerStatefulWidget {
     bool showThumbnails = true,
     ImageDetailCallbacks? callbacks,
     String? heroTagPrefix,
+    String? backLabel,
   }) {
     final isWindows = Platform.isWindows;
     final transitionDuration = isWindows
@@ -127,6 +133,7 @@ class ImageDetailViewer extends ConsumerStatefulWidget {
             showThumbnails: showThumbnails,
             callbacks: callbacks,
             heroTagPrefix: heroTagPrefix,
+            backLabel: backLabel,
           );
           if (isWindows) {
             return viewer;
@@ -147,6 +154,7 @@ class ImageDetailViewer extends ConsumerStatefulWidget {
     bool showMetadataPanel = true,
     ImageDetailCallbacks? callbacks,
     String? heroTag,
+    String? backLabel,
   }) {
     return show(
       context,
@@ -156,6 +164,7 @@ class ImageDetailViewer extends ConsumerStatefulWidget {
       showThumbnails: false,
       callbacks: callbacks,
       heroTagPrefix: heroTag,
+      backLabel: backLabel,
     );
   }
 
@@ -175,8 +184,19 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   /// 可变的图像列表副本：查看器内删除图片后从列表移除并翻页
   late List<ImageDetailData> _images;
 
-  // 始终显示控制栏（不自动收起）
-  final bool _showControls = true;
+  // Null follows the responsive default until the user explicitly toggles it.
+  bool? _panelVisible;
+  bool _narrowWindow = false;
+
+  bool get _effectivePanelVisible =>
+      widget.showMetadataPanel && (_panelVisible ?? !_narrowWindow);
+
+  void _toggleInfoPanel() {
+    if (widget.showMetadataPanel) {
+      setState(() => _panelVisible = !_effectivePanelVisible);
+    }
+  }
+
   final _focusNode = FocusNode();
   final Map<int, TransformationController> _transformationControllers = {};
   bool _isClosing = false;
@@ -261,6 +281,10 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
   }
 
   void _handleKeyboardCloseRequest() {
+    if (_narrowWindow && _effectivePanelVisible) {
+      _toggleInfoPanel();
+      return;
+    }
     if (_shouldSuppressEscCloseOnWindows()) {
       final elapsedFocus = WindowFocusTracker.elapsedSinceFocus();
       final elapsedBlur = WindowFocusTracker.elapsedSinceBlur();
@@ -467,9 +491,6 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 800;
-
     // 定义快捷键映射
     final shortcuts = <String, VoidCallback>{
       // 上一张
@@ -486,6 +507,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
       ShortcutIds.toggleFullscreen: _toggleFullscreen,
       // 关闭查看器
       ShortcutIds.closeViewer: _handleKeyboardCloseRequest,
+      ShortcutIds.toggleInfoPanel: _toggleInfoPanel,
       // 收藏切换
       ShortcutIds.toggleFavorite: _toggleFavorite,
       // 复制 Prompt
@@ -504,196 +526,90 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
         onKeyEvent: _handleKeyEvent,
         child: Scaffold(
           backgroundColor: Colors.black,
-          body: isDesktop && widget.showMetadataPanel
-              ? Row(
-                  children: [
-                    Expanded(child: _buildMainContent()),
-                    WindowPaneInset(
-                      child: DetailMetadataPanel(
-                        currentImage: _currentImage,
-                        initialExpanded: true,
-                      ),
+          body: LayoutBuilder(
+            builder: (context, box) {
+              _narrowWindow = ViewerStage.isNarrow(box.maxWidth);
+              final visible = _effectivePanelVisible;
+              final format = NumberFormat.decimalPattern(
+                Localizations.localeOf(context).toLanguageTag(),
+              );
+              return ViewerStage(
+                itemCount: _images.length,
+                currentIndex: _currentIndex,
+                pageController: _pageController,
+                onIndexChanged: _onPageChanged,
+                handleInfoShortcut: false,
+                onEscape: _handleKeyboardCloseRequest,
+                previousLabel: context.l10n.shortcut_action_previous_image,
+                nextLabel: context.l10n.shortcut_action_next_image,
+                pageBuilder: (context, index) {
+                  final data = _images[index];
+                  final heroTag =
+                      widget.heroTagPrefix != null && index == _currentIndex
+                      ? '${widget.heroTagPrefix}_${data.identifier}'
+                      : null;
+                  return DetailImagePage(
+                    data: data,
+                    heroTag: heroTag,
+                    transformationController: _transformationControllers
+                        .putIfAbsent(index, TransformationController.new),
+                  );
+                },
+                topBar: ViewerTopBar(
+                  backLabel: widget.backLabel ?? context.l10n.common_close,
+                  onBack: () => _requestClose('top-bar-close'),
+                  position: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: format.format(_currentIndex + 1),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        TextSpan(text: ' / ${format.format(_images.length)}'),
+                      ],
                     ),
-                  ],
-                )
-              : _buildMainContent(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMainContent() {
-    final showThumbnails = widget.showThumbnails && _images.length > 1;
-
-    return Stack(
-      children: [
-        // 主图预览区域
-        // 注意：移除 onTap 切换控制栏，让顶部工具栏始终显示
-        PageView.builder(
-          controller: _pageController,
-          itemCount: _images.length,
-          onPageChanged: _onPageChanged,
-          itemBuilder: (context, index) {
-            final data = _images[index];
-            final heroTag =
-                widget.heroTagPrefix != null && index == _currentIndex
-                ? '${widget.heroTagPrefix}_${data.identifier}'
-                : null;
-            // 确保每个页面都有 TransformationController
-            if (!_transformationControllers.containsKey(index)) {
-              _transformationControllers[index] = TransformationController();
-            }
-            return DetailImagePage(
-              data: data,
-              heroTag: heroTag,
-              transformationController: _transformationControllers[index],
-            );
-          },
-        ),
-
-        // 顶部控制栏
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 200),
-          top: _showControls ? 0 : -100,
-          left: 0,
-          right: 0,
-          child: DetailTopBar(
-            currentIndex: _currentIndex,
-            totalImages: _images.length,
-            currentImage: _currentImage,
-            onClose: () => _requestClose('top-bar-close'),
-            onReuseMetadata: widget.callbacks?.onReuseMetadata != null
-                ? () => unawaited(_handleReuseMetadata(context))
-                : null,
-            onFavoriteToggle: widget.callbacks?.onFavoriteToggle != null
-                ? () => widget.callbacks!.onFavoriteToggle!(_currentImage)
-                : null,
-            onSave: widget.callbacks?.onSave != null
-                ? () => widget.callbacks!.onSave!(_currentImage)
-                : null,
-            onCopyImage: _currentImage.showCopyButton
-                ? () => _copyImageToClipboard(context)
-                : null,
-            onSendToImg2Img: widget.callbacks?.onSendToImg2Img != null
-                ? () => widget.callbacks!.onSendToImg2Img!(_currentImage)
-                : null,
-            onDelete: widget.callbacks?.onDelete != null
-                ? () => _deleteImage()
-                : null,
-          ),
-        ),
-
-        // 底部缩略图栏
-        if (showThumbnails)
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 200),
-            bottom: _showControls ? 0 : -140,
-            left: 0,
-            right: 0,
-            child: _buildBottomBar(),
-          ),
-
-        // 左右导航按钮
-        if (_showControls && _images.length > 1) ...[
-          if (_currentIndex > 0)
-            Positioned(
-              left: 16,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: _NavigationButton(
-                  icon: Icons.chevron_left,
-                  onPressed: () => _goToPage(_currentIndex - 1),
+                  ),
+                  onZoomOut: _zoomOut,
+                  onZoomIn: _zoomIn,
+                  panelVisible: visible,
+                  onTogglePanel: _toggleInfoPanel,
+                  showPanelToggle: widget.showMetadataPanel,
+                  reserveWindowButtons: _narrowWindow || !visible,
                 ),
-              ),
-            ),
-          if (_currentIndex < _images.length - 1)
-            Positioned(
-              right: 16,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: _NavigationButton(
-                  icon: Icons.chevron_right,
-                  onPressed: () => _goToPage(_currentIndex + 1),
-                ),
-              ),
-            ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildBottomBar() {
-    final metadata = _currentImage.metadata;
-
-    return Container(
-      height: 140,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent],
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 元数据信息
-          if (metadata != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: _buildMetadataInfo(metadata),
-            ),
-
-          // 缩略图条
-          DetailThumbnailBar(
-            images: _images,
-            currentIndex: _currentIndex,
-            scrollController: _thumbnailController,
-            onTap: _goToPage,
+                filmstrip: widget.showThumbnails && _images.length > 1
+                    ? DetailThumbnailBar(
+                        images: _images,
+                        currentIndex: _currentIndex,
+                        scrollController: _thumbnailController,
+                        onTap: _goToPage,
+                      )
+                    : null,
+                panel: widget.showMetadataPanel
+                    ? ColoredBox(
+                        color: Theme.of(context).colorScheme.surface,
+                        child: WindowPaneInset(
+                          enabled: !_narrowWindow,
+                          child: DetailMetadataPanel(
+                            currentImage: _currentImage,
+                            expandedWidth: _narrowWindow ? 340 : 360,
+                            onClose: _toggleInfoPanel,
+                          ),
+                        ),
+                      )
+                    : null,
+                panelVisible: visible,
+                onTogglePanel: _toggleInfoPanel,
+              );
+            },
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetadataInfo(dynamic metadata) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (metadata.seed != null) _buildInfoChip('Seed: ${metadata.seed}'),
-          if (metadata.steps != null) _buildInfoChip('${metadata.steps} steps'),
-          if (metadata.scale != null)
-            _buildInfoChip(
-              context.l10n.generation_cfgScale('${metadata.scale}'),
-            ),
-          if (metadata.sampler != null) _buildInfoChip(metadata.displaySampler),
-          if (metadata.width != null && metadata.height != null)
-            _buildInfoChip('${metadata.width}×${metadata.height}'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoChip(String text) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(color: Colors.white, fontSize: 12),
+        ),
       ),
     );
   }
 
   /// 复制图像到剪贴板
+  // Retained until the inspector actions are moved in viewer task03.
+  // ignore: unused_element
   Future<void> _copyImageToClipboard(BuildContext context) async {
     final l10n = context.l10n;
     try {
@@ -745,29 +661,5 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
     _thumbnailController.dispose();
     _focusNode.dispose();
     super.dispose();
-  }
-}
-
-/// 导航按钮
-class _NavigationButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  const _NavigationButton({required this.icon, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withValues(alpha: 0.3),
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Icon(icon, color: Colors.white, size: 32),
-        ),
-      ),
-    );
   }
 }

@@ -35,6 +35,7 @@ class ImageDetailOpener {
     BuildContext context, {
     required ImageDetailData image,
     bool showMetadataPanel = true,
+    String? backLabel,
     ImageDetailCallbacks? callbacks,
   }) async {
     return showMultiple(
@@ -42,6 +43,7 @@ class ImageDetailOpener {
       images: [image],
       initialIndex: 0,
       showMetadataPanel: showMetadataPanel,
+      backLabel: backLabel,
       showThumbnails: false,
       callbacks: callbacks,
     );
@@ -60,6 +62,7 @@ class ImageDetailOpener {
     required List<ImageDetailData> images,
     int initialIndex = 0,
     bool showMetadataPanel = true,
+    String? backLabel,
     bool showThumbnails = true,
     ImageDetailCallbacks? callbacks,
   }) async {
@@ -69,6 +72,7 @@ class ImageDetailOpener {
       images: images,
       initialIndex: initialIndex,
       showMetadataPanel: showMetadataPanel,
+      backLabel: backLabel,
       showThumbnails: showThumbnails && images.length > 1,
       callbacks: callbacks,
     );
@@ -81,6 +85,7 @@ class ImageDetailOpener {
     BuildContext context, {
     required ImageDetailData image,
     bool showMetadataPanel = true,
+    String? backLabel,
     ImageDetailCallbacks? callbacks,
     String? heroTag,
   }) {
@@ -92,6 +97,7 @@ class ImageDetailOpener {
         context,
         image: image,
         showMetadataPanel: showMetadataPanel,
+        backLabel: backLabel,
         callbacks: callbacks,
         heroTag: heroTag,
       );
@@ -106,6 +112,7 @@ class ImageDetailOpener {
     required List<ImageDetailData> images,
     int initialIndex = 0,
     bool showMetadataPanel = true,
+    String? backLabel,
     bool showThumbnails = true,
     ImageDetailCallbacks? callbacks,
   }) {
@@ -118,6 +125,7 @@ class ImageDetailOpener {
         images: images,
         initialIndex: initialIndex,
         showMetadataPanel: showMetadataPanel,
+        backLabel: backLabel,
         showThumbnails: showThumbnails && images.length > 1,
         callbacks: callbacks,
       );

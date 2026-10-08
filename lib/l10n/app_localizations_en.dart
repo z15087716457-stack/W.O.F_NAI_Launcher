@@ -12896,4 +12896,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get library_preview => 'Preview';
+
+  @override
+  String get viewer_backLocalGallery => 'Local gallery';
+
+  @override
+  String get viewer_backGeneration => 'Generation';
+
+  @override
+  String get viewer_fit => 'Fit';
+
+  @override
+  String get viewer_showInfo => 'Show information panel (I)';
+
+  @override
+  String get viewer_hideInfo => 'Hide information panel (I)';
+
+  @override
+  String get viewer_originalSize => 'Original size (1)';
+
+  @override
+  String get viewer_fullscreen => 'Fullscreen (F11)';
+
+  @override
+  String get shortcut_action_toggle_info_panel => 'Toggle information panel';
 }

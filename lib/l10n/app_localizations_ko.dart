@@ -12524,4 +12524,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get library_preview => '미리 보기';
+
+  @override
+  String get viewer_backLocalGallery => '로컬 갤러리';
+
+  @override
+  String get viewer_backGeneration => '이미지 생성';
+
+  @override
+  String get viewer_fit => '맞춤';
+
+  @override
+  String get viewer_showInfo => '정보 패널 표시 (I)';
+
+  @override
+  String get viewer_hideInfo => '정보 패널 숨기기 (I)';
+
+  @override
+  String get viewer_originalSize => '원본 크기 (1)';
+
+  @override
+  String get viewer_fullscreen => '전체 화면 (F11)';
+
+  @override
+  String get shortcut_action_toggle_info_panel => '정보 패널 전환';
 }

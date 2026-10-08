@@ -262,12 +262,30 @@ class LibraryWindowHeader extends StatelessWidget {
 /// Used only on the rightmost dock, or the exposed canvas when it is collapsed.
 /// Its own surface extends to the top; only this pane's controls move down.
 class WindowPaneInset extends StatelessWidget {
-  const WindowPaneInset({super.key, required this.child, this.enabled = true});
+  const WindowPaneInset({
+    super.key,
+    required this.child,
+    this.enabled = true,
+    this.horizontal = false,
+  });
   final Widget child;
   final bool enabled;
 
+  /// Short stage headers reserve caption width rather than adding another row.
+  final bool horizontal;
+
   @override
   Widget build(BuildContext context) {
+    if (horizontal) {
+      return WindowHeader(
+        enabled: enabled,
+        minimumInlineWidth: 0,
+        inlineDragWidth: 0,
+        dragBackground: true,
+        decoration: const BoxDecoration(color: Colors.black),
+        child: child,
+      );
+    }
     if (!enabled || !WindowChromeScope.activeOf(context)) return child;
     return Stack(
       fit: StackFit.passthrough,

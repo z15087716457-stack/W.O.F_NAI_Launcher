@@ -22451,6 +22451,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preview'**
   String get library_preview;
+
+  /// No description provided for @viewer_backLocalGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Local gallery'**
+  String get viewer_backLocalGallery;
+
+  /// No description provided for @viewer_backGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation'**
+  String get viewer_backGeneration;
+
+  /// No description provided for @viewer_fit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit'**
+  String get viewer_fit;
+
+  /// No description provided for @viewer_showInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Show information panel (I)'**
+  String get viewer_showInfo;
+
+  /// No description provided for @viewer_hideInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide information panel (I)'**
+  String get viewer_hideInfo;
+
+  /// No description provided for @viewer_originalSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Original size (1)'**
+  String get viewer_originalSize;
+
+  /// No description provided for @viewer_fullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen (F11)'**
+  String get viewer_fullscreen;
+
+  /// No description provided for @shortcut_action_toggle_info_panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle information panel'**
+  String get shortcut_action_toggle_info_panel;
 }
 
 class _AppLocalizationsDelegate
