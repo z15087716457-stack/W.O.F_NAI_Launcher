@@ -8,6 +8,9 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/image_params.dart';
 import '../../../providers/image_generation_provider.dart';
 import 'generation_param_sections.dart';
+import 'generation_sidebar_style.dart';
+import '../../../themes/studio_typography.dart';
+import '../../../widgets/common/uiux_prototype_icon.dart';
 
 /// AI 参数二级菜单宿主（官网式）
 ///
@@ -185,7 +188,7 @@ class _GenerationParamsMenuHostState
         ),
 
         // 参数摘要条（官网式）：Steps/Guidance/Seed/Sampler 四列靠左常驻，
-        // 右端右指箭头随抽屉开合旋转（收起朝右，展开朝上）
+        // 右端上箭头随抽屉开合旋转半周
         LayoutBuilder(
           builder: (context, constraints) {
             final minWidth = widget.summaryMinWidth;
@@ -194,9 +197,14 @@ class _GenerationParamsMenuHostState
               arrow: RotationTransition(
                 turns: Tween<double>(
                   begin: 0,
-                  end: -0.25,
+                  end: 0.5,
                 ).animate(_menuAnimation),
-                child: const Icon(Icons.play_arrow, size: 20),
+                child: const UiuxPrototypeIcon(
+                  Icons.keyboard_arrow_up,
+                  source: UiuxPrototypeIconSource.generation,
+                  size: 18,
+                  strokeWidth: 2.2,
+                ),
               ),
             );
             if (minWidth == null || constraints.maxWidth >= minWidth) {
@@ -268,56 +276,108 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            column(l10n.generation_stepsLabel, Text(params.steps.toString())),
-            Flexible(
-              child: column(
-                l10n.generation_guidance,
-                Text(params.scale.toStringAsFixed(1)),
-              ),
-            ),
-            tappableColumn(
-              l10n.generation_seed,
-              params.seed != -1
-                  ? Text(params.seed.toString())
-                  : SvgPicture.asset(
-                      'assets/icons/nai-icon-seed.svg',
-                      height: 14,
-                      colorFilter: ColorFilter.mode(
-                        theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                        BlendMode.srcIn,
+            Expanded(
+              child: Row(
+                children: [
+                  column(
+                    l10n.generation_stepsLabel,
+                    Text(params.steps.toString()),
+                  ),
+                  Flexible(
+                    child: column(
+                      l10n.generation_guidance,
+                      Text(params.scale.toStringAsFixed(1)),
+                    ),
+                  ),
+                  tappableColumn(
+                    params.seed == -1
+                        ? l10n.generation_seed
+                        : l10n.generation_seedPinnedLabel,
+                    params.seed != -1
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              UiuxPrototypeIcon(
+                                Icons.lock_outline,
+                                source: UiuxPrototypeIconSource.generation,
+                                size: 12,
+                                strokeWidth: 2,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(params.seed.toString()),
+                            ],
+                          )
+                        : SvgPicture.asset(
+                            'assets/icons/nai-icon-seed.svg',
+                            height: 14,
+                            colorFilter: ColorFilter.mode(
+                              theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                    () {
+                      final notifier = ref.read(
+                        generationParamsNotifierProvider.notifier,
+                      );
+                      if (params.seed != -1) {
+                        notifier.randomizeSeed();
+                      } else {
+                        notifier.pinRandomSeed();
+                      }
+                    },
+                  ),
+                  Expanded(
+                    child: Builder(
+                      builder: (buttonContext) => tappableColumn(
+                        l10n.generation_sampler,
+                        Text(
+                          Samplers.samplerDisplayNames[params.sampler] ??
+                              params.sampler,
+                        ),
+                        () => _showSamplerMenu(
+                          buttonContext,
+                          ref,
+                          theme,
+                          l10n,
+                          params,
+                        ),
                       ),
                     ),
-              () {
-                final notifier = ref.read(
-                  generationParamsNotifierProvider.notifier,
-                );
-                if (params.seed != -1) {
-                  notifier.randomizeSeed();
-                } else {
-                  notifier.pinRandomSeed();
-                }
-              },
-            ),
-            Expanded(
-              child: Builder(
-                builder: (buttonContext) => tappableColumn(
-                  l10n.generation_sampler,
-                  Text(
-                    Samplers.samplerDisplayNames[params.sampler] ??
-                        params.sampler,
                   ),
-                  () =>
-                      _showSamplerMenu(buttonContext, ref, theme, l10n, params),
-                ),
+                ],
               ),
             ),
-            // 右端箭头同样开合抽屉（与官网一致）；GestureDetector 无 hover/涟漪装饰
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
+            const SizedBox(width: 4),
+            Tooltip(
+              message: l10n.generation_paramsDrawerTooltip,
               child: GestureDetector(
+                key: const Key('params-drawer-toggle'),
                 behavior: HitTestBehavior.opaque,
                 onTap: onToggleDrawer,
-                child: Padding(padding: const EdgeInsets.all(6), child: arrow),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: IconButton(
+                    onPressed: onToggleDrawer,
+                    icon: arrow,
+                    style: IconButton.styleFrom(
+                      fixedSize: const Size(28, 28),
+                      minimumSize: const Size(28, 28),
+                      maximumSize: const Size(28, 28),
+                      padding: EdgeInsets.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      foregroundColor: theme.colorScheme.onSurface,
+                      backgroundColor: Colors.transparent,
+                      hoverColor: theme.colorScheme.surfaceContainerHigh,
+                      side: BorderSide(color: GenSidebarStyle.border(theme)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 4),
@@ -334,16 +394,23 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
       children: [
         Text(
           label,
-          style: theme.textTheme.labelSmall?.copyWith(
+          style: TextStyle(
+            fontFamily: StudioTypography.cjk,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            height: 1.4,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 2),
         DefaultTextStyle(
-          style: theme.textTheme.bodySmall!.copyWith(
-            fontWeight: FontWeight.w600,
+          style: TextStyle(
+            fontFamily: StudioTypography.cjk,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            height: 1.4,
+            color: theme.colorScheme.onSurface,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

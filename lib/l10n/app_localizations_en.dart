@@ -12821,4 +12821,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generation_referenceUpload => 'Upload';
+
+  @override
+  String get generation_seedPinnedLabel => 'Seed · Fixed';
+
+  @override
+  String get generation_paramsDrawerTooltip => 'More parameters';
 }

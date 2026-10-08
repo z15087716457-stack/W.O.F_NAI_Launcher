@@ -6823,5 +6823,7 @@
   "generation_perRequestLabel": "장 수",
   "generation_perRequestTooltip": "요청당 생성할 이미지 수 (1–4)",
   "generation_repeatLabel": "반복",
-  "generation_referenceUpload": "업로드"
+  "generation_referenceUpload": "업로드",
+  "generation_seedPinnedLabel": "시드 · 고정",
+  "generation_paramsDrawerTooltip": "추가 매개변수"
 }

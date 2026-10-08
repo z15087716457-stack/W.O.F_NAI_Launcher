@@ -6823,5 +6823,7 @@
   "generation_perRequestLabel": "张数",
   "generation_perRequestTooltip": "每次请求生成的张数（1–4）",
   "generation_repeatLabel": "重复",
-  "generation_referenceUpload": "上传"
+  "generation_referenceUpload": "上传",
+  "generation_seedPinnedLabel": "种子 · 固定",
+  "generation_paramsDrawerTooltip": "更多参数"
 }

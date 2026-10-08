@@ -12205,6 +12205,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generation_referenceUpload => '上传';
+
+  @override
+  String get generation_seedPinnedLabel => '种子 · 固定';
+
+  @override
+  String get generation_paramsDrawerTooltip => '更多参数';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24408,4 +24414,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get generation_referenceUpload => '上傳';
+
+  @override
+  String get generation_seedPinnedLabel => '種子 · 固定';
+
+  @override
+  String get generation_paramsDrawerTooltip => '更多參數';
 }

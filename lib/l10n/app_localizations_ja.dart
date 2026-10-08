@@ -12429,4 +12429,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get generation_referenceUpload => 'アップロード';
+
+  @override
+  String get generation_seedPinnedLabel => 'シード・固定';
+
+  @override
+  String get generation_paramsDrawerTooltip => '詳細パラメータ';
 }

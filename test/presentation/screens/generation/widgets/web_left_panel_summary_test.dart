@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/widgets/common/uiux_prototype_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,7 +13,7 @@ void main() {
   Widget buildSubject({
     required _MemoryLocalStorageService storage,
     required VoidCallback onToggleDrawer,
-    Widget arrow = const Icon(Icons.play_arrow),
+    Widget arrow = const Icon(Icons.keyboard_arrow_up),
   }) {
     return ProviderScope(
       overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
@@ -57,7 +58,16 @@ void main() {
       findsOneWidget,
     );
     // 默认随机种子：种子列显示循环图标而非数值
-    expect(find.byType(SvgPicture), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is SvgPicture &&
+            w.bytesLoader is SvgAssetLoader &&
+            (w.bytesLoader as SvgAssetLoader).assetName ==
+                'assets/icons/nai-icon-seed.svg',
+      ),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -76,13 +86,28 @@ void main() {
     final pinnedSeed = container.read(generationParamsNotifierProvider).seed;
     expect(pinnedSeed, isNot(-1));
     expect(find.text(pinnedSeed.toString()), findsOneWidget);
-    expect(find.byType(SvgPicture), findsNothing);
+    expect(find.text('种子 · 固定'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is UiuxPrototypeIcon && w.icon == Icons.lock_outline,
+      ),
+      findsOneWidget,
+    );
 
     // 固定态 → 回到随机（seed = -1），图标恢复
-    await tester.tap(find.text('种子'));
+    await tester.tap(find.text('种子 · 固定'));
     await tester.pump();
     expect(container.read(generationParamsNotifierProvider).seed, -1);
-    expect(find.byType(SvgPicture), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is SvgPicture &&
+            w.bytesLoader is SvgAssetLoader &&
+            (w.bytesLoader as SvgAssetLoader).assetName ==
+                'assets/icons/nai-icon-seed.svg',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('steps/guidance columns are non-interactive', (tester) async {
@@ -110,10 +135,52 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byIcon(Icons.play_arrow));
+    await tester.tap(find.byKey(const Key('params-drawer-toggle')));
     await tester.pump();
     expect(toggleCount, 1);
   });
+
+  testWidgets(
+    'host rotates the up chevron half a turn and unmounts its drawer',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localStorageServiceProvider.overrideWith(
+              (ref) => _MemoryLocalStorageService(),
+            ),
+          ],
+          child: const MaterialApp(
+            locale: Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: SizedBox(
+                width: 352,
+                height: 700,
+                child: GenerationParamsMenuHost(child: SizedBox.expand()),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      Finder rotation() => find.descendant(
+        of: find.byKey(const Key('params-drawer-toggle')),
+        matching: find.byType(RotationTransition),
+      );
+      expect(tester.widget<RotationTransition>(rotation()).turns.value, 0);
+      await tester.tap(find.byKey(const Key('params-drawer-toggle')));
+      await tester.pumpAndSettle();
+      expect(tester.widget<RotationTransition>(rotation()).turns.value, .5);
+      expect(find.descendant(of: find.byType(GenerationParamsMenuHost), matching: find.byType(SlideTransition)), findsOneWidget);
+      await tester.tap(find.byKey(const Key('params-drawer-toggle')));
+      await tester.pumpAndSettle();
+      expect(tester.widget<RotationTransition>(rotation()).turns.value, 0);
+      expect(find.descendant(of: find.byType(GenerationParamsMenuHost), matching: find.byType(SlideTransition)), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('sampler column opens grouped menu above and switches sampler', (
     tester,

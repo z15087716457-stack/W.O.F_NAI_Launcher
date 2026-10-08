@@ -6823,5 +6823,7 @@
   "generation_perRequestLabel": "枚数",
   "generation_perRequestTooltip": "1回のリクエストで生成する枚数（1〜4）",
   "generation_repeatLabel": "繰り返し",
-  "generation_referenceUpload": "アップロード"
+  "generation_referenceUpload": "アップロード",
+  "generation_seedPinnedLabel": "シード・固定",
+  "generation_paramsDrawerTooltip": "詳細パラメータ"
 }

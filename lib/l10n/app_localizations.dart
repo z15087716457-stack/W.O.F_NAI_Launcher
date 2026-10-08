@@ -22313,6 +22313,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload'**
   String get generation_referenceUpload;
+
+  /// No description provided for @generation_seedPinnedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed · Fixed'**
+  String get generation_seedPinnedLabel;
+
+  /// No description provided for @generation_paramsDrawerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'More parameters'**
+  String get generation_paramsDrawerTooltip;
 }
 
 class _AppLocalizationsDelegate

@@ -12449,4 +12449,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get generation_referenceUpload => '업로드';
+
+  @override
+  String get generation_seedPinnedLabel => '시드 · 고정';
+
+  @override
+  String get generation_paramsDrawerTooltip => '추가 매개변수';
 }
