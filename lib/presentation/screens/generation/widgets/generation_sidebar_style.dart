@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../themes/studio_typography.dart';
+
 /// 官网式生成左栏共享视觉规格。
 ///
 /// 官网实测（live DOM）：小节标签 14px/400/line21、弱色；
@@ -21,6 +23,34 @@ final class GenSidebarStyle {
 
   /// 同一小节内相邻卡片间距。
   static const double cardGap = 8;
+
+  /// 方案 A 的模块卡片和标题行；旧分节控件保持自己的规格。
+  static const double moduleRadius = 6;
+  static const double moduleBorderWidth = 1;
+  static const double moduleHeaderHeight = 38;
+  static const double moduleHeaderTrailingInset = 6;
+  static const double moduleActionGap = 6;
+  static const double moduleActionSize = 28;
+  static const double moduleActionRadius = 5;
+  static const double moduleActionIconSize = 16;
+  static const double moduleRowMinHeight = 46;
+  static const double moduleCountHeight = 18;
+  static const double moduleCountPadding = 5;
+  static const double moduleCountRadius = 9;
+
+  /// 轨道内的段高，不含轨道两侧的内边距。
+  static const double segmentHeight = 28;
+  static const double segmentDenseHeight = 22;
+  static const double segmentTrackInset = 2;
+  static const double segmentGap = 2;
+  static const double segmentTrackRadius = 6;
+  static const double segmentRadius = 4;
+  static const double segmentHorizontalPadding = 10;
+  static const double segmentIconSize = 14;
+  static const double segmentShadowBlur = 2;
+  static const double segmentShadowOffset = 1;
+  static const double segmentShadowOpacity = .08;
+  static const double disabledOpacity = .3;
 
   /// A single darker writing surface, shared by the main and character cards.
   static Color promptSurface(ThemeData theme) => Color.lerp(
@@ -94,6 +124,48 @@ final class GenSidebarStyle {
         fontWeight: FontWeight.w500,
         color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
       );
+
+  static TextStyle moduleTitle(ThemeData theme) =>
+      (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurface,
+      );
+
+  static TextStyle moduleCountBadge(ThemeData theme) =>
+      (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurfaceVariant,
+      );
+
+  static TextStyle moduleFieldLabel(ThemeData theme) =>
+      (theme.textTheme.labelMedium ?? const TextStyle()).copyWith(
+        fontSize: 12,
+        color: theme.colorScheme.onSurfaceVariant,
+      );
+
+  static Color segmentForeground(
+    ThemeData theme, {
+    required bool selected,
+    required bool enabled,
+  }) => !enabled
+      ? theme.colorScheme.onSurface.withValues(alpha: disabledOpacity)
+      : selected
+      ? theme.colorScheme.onSurface
+      : theme.colorScheme.onSurfaceVariant;
+
+  static TextStyle segmentLabel(
+    ThemeData theme, {
+    required bool selected,
+    required bool enabled,
+    bool numeric = false,
+  }) => (theme.textTheme.labelMedium ?? const TextStyle()).copyWith(
+    fontSize: 12,
+    color: segmentForeground(theme, selected: selected, enabled: enabled),
+    fontFamily: numeric ? StudioTypography.mono : null,
+    fontFeatures: numeric ? const [FontFeature.tabularFigures()] : null,
+  );
 }
 
 /// 把 `titleSmall` 提升为模块标题规格的作用域。
@@ -130,6 +202,8 @@ class SidebarSegmentButton extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.symmetric(horizontal: 10),
     this.backgroundColor,
+    this.height = 28,
+    this.borderRadius = const BorderRadius.all(Radius.circular(3)),
   });
 
   final bool selected;
@@ -138,10 +212,14 @@ class SidebarSegmentButton extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Color? backgroundColor;
 
+  /// Optional track geometry. Defaults retain the legacy segment appearance.
+  final double height;
+  final BorderRadius borderRadius;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final radius = BorderRadius.circular(3);
+    final radius = borderRadius;
     return Semantics(
       selected: selected,
       button: true,
@@ -162,7 +240,7 @@ class SidebarSegmentButton extends StatelessWidget {
           highlightColor: theme.colorScheme.onSurface.withValues(alpha: .14),
           splashFactory: NoSplash.splashFactory,
           child: SizedBox(
-            height: 28,
+            height: height,
             child: Padding(
               padding: padding,
               child: Center(child: child),
