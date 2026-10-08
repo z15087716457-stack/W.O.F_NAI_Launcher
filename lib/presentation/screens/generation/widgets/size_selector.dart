@@ -3,7 +3,12 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/resolution_preset.dart';
+import '../../../themes/studio_typography.dart';
+import '../../../widgets/common/uiux_prototype_icon.dart';
+import 'generation_module_card.dart';
 import 'generation_sidebar_style.dart';
+
+enum SizeSelectorLayout { classic, moduleRow }
 
 /// 尺寸选择器 (官网式布局：紧凑分组下拉 + 等宽宽高比分段组 + 自定义输入)
 ///
@@ -19,6 +24,7 @@ class SizeSelector extends StatefulWidget {
 
   /// 可选的分节标题（渲染在控件顶部；右侧显示当前分辨率徽标）
   final Widget? title;
+  final SizeSelectorLayout layout;
 
   const SizeSelector({
     super.key,
@@ -26,6 +32,7 @@ class SizeSelector extends StatefulWidget {
     required this.height,
     required this.onChanged,
     this.title,
+    this.layout = SizeSelectorLayout.classic,
   });
 
   @override
@@ -225,7 +232,7 @@ class _SizeSelectorState extends State<SizeSelector> {
       FocusNode focus,
       TextInputAction action,
     ) => SizedBox(
-      width: 43,
+      width: widget.layout == SizeSelectorLayout.moduleRow ? 58 : 43,
       child: TextField(
         key: Key(key),
         controller: controller,
@@ -239,7 +246,13 @@ class _SizeSelectorState extends State<SizeSelector> {
         textAlign: TextAlign.center,
         textAlignVertical: TextAlignVertical.center,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: widget.layout == SizeSelectorLayout.moduleRow ? 12.5 : 12,
+          fontFamily: widget.layout == SizeSelectorLayout.moduleRow
+              ? StudioTypography.mono
+              : null,
+          fontWeight: widget.layout == SizeSelectorLayout.moduleRow
+              ? FontWeight.w400
+              : null,
           height: 1,
           color: theme.colorScheme.onSurface,
           fontFeatures: const [FontFeature.tabularFigures()],
@@ -269,6 +282,73 @@ class _SizeSelectorState extends State<SizeSelector> {
         onTapOutside: (_) => focus.unfocus(),
       ),
     );
+    if (widget.layout == SizeSelectorLayout.moduleRow) {
+      Widget dimension(
+        String key,
+        String label,
+        TextEditingController controller,
+        FocusNode focus,
+        TextInputAction action,
+      ) => Container(
+        width: 58,
+        height: 32,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(
+            color: focus.hasFocus
+                ? theme.colorScheme.onSurface.withValues(alpha: .45)
+                : Colors.transparent,
+          ),
+        ),
+        child: Tooltip(
+          message: label,
+          child: field(key, label, controller, focus, action),
+        ),
+      );
+      return Row(
+        key: const Key('size-resolution-input'),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          dimension(
+            'size-width-input',
+            context.l10n.resolution_width,
+            _widthController,
+            _widthFocusNode,
+            TextInputAction.next,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Tooltip(
+              message: context.l10n.common_swap,
+              child: InkWell(
+                onTap: () {
+                  final width = _widthController.text;
+                  _widthController.text = _heightController.text;
+                  _heightController.text = width;
+                  _commitManualSize();
+                },
+                child: Text(
+                  '×',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: StudioTypography.cjk,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          dimension(
+            'size-height-input',
+            context.l10n.resolution_height,
+            _heightController,
+            _heightFocusNode,
+            TextInputAction.done,
+          ),
+        ],
+      );
+    }
     return Container(
       key: const Key('size-resolution-input'),
       padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -333,7 +413,12 @@ class _SizeSelectorState extends State<SizeSelector> {
 
   /// 分组下拉的紧凑宽度：随最长组名收缩（约 100px），把行宽让给宽高比组
   double _measureGroupDropdownWidth(BuildContext context) {
-    const style = TextStyle(fontSize: 13);
+    final style = TextStyle(
+      fontSize: 13,
+      fontFamily: widget.layout == SizeSelectorLayout.moduleRow
+          ? StudioTypography.cjk
+          : null,
+    );
     var maxTextWidth = 0.0;
     for (final group in ResolutionGroup.values) {
       if ((ResolutionPreset.groupedPresets[group] ?? []).isEmpty) {
@@ -459,6 +544,111 @@ class _SizeSelectorState extends State<SizeSelector> {
       widget.width,
       widget.height,
     );
+
+    if (widget.layout == SizeSelectorLayout.moduleRow) {
+      final dropdownWidth = _measureGroupDropdownWidth(context);
+      Widget dropdown() => Container(
+        width: dropdownWidth,
+        height: 32,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<ResolutionGroup>(
+            value: _selectedGroup,
+            padding: const EdgeInsets.only(left: 10, right: 8),
+            isExpanded: true,
+            icon: const UiuxPrototypeIcon(
+              Icons.expand_more,
+              size: 14,
+              source: UiuxPrototypeIconSource.generation,
+            ),
+            dropdownColor: theme.colorScheme.surfaceContainerHigh,
+            focusNode: _dropdownFocusNode,
+            items: [
+              for (final group in ResolutionGroup.values)
+                if ((ResolutionPreset.groupedPresets[group] ?? []).isNotEmpty)
+                  DropdownMenuItem(
+                    value: group,
+                    child: Text(
+                      _getGroupName(context, group),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontFamily: StudioTypography.cjk,
+                        fontWeight: FontWeight.w400,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+            ],
+            onChanged: _onGroupSelected,
+          ),
+        ),
+      );
+      Widget orientation(bool expand) => SidebarSegmentTrack<ResolutionType>(
+        key: const Key('size-aspect-group'),
+        expand: expand,
+        selected: isCustomGroup ? null : matchedPreset?.type,
+        segments: [
+          for (final (type, icon) in [
+            (ResolutionType.landscape, Icons.crop_landscape),
+            (ResolutionType.portrait, Icons.crop_portrait),
+            (ResolutionType.square, Icons.crop_square),
+          ])
+            SidebarSegment(
+              value: type,
+              enabled:
+                  !isCustomGroup && _findPreset(_selectedGroup, type) != null,
+              tooltip: _getTypeName(context, type),
+              child: UiuxPrototypeIcon(
+                icon,
+                key: Key('size-aspect-${type.name}'),
+                size: 15,
+                source: UiuxPrototypeIconSource.generation,
+              ),
+            ),
+        ],
+        onSelected: _onTypeSelected,
+      );
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // 96–112 dropdown, 110 track, 132 dimensions and two 8px gaps.
+            final singleRow =
+                constraints.maxWidth >= dropdownWidth + 110 + 132 + 16;
+            if (singleRow) {
+              return Row(
+                children: [
+                  dropdown(),
+                  const SizedBox(width: 8),
+                  orientation(false),
+                  const Spacer(),
+                  _buildResolutionInput(context),
+                ],
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  children: [
+                    dropdown(),
+                    const SizedBox(width: 8),
+                    Expanded(child: orientation(true)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                _buildResolutionInput(context),
+              ],
+            );
+          },
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

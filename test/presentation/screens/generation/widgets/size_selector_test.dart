@@ -11,6 +11,7 @@ void main() {
     int width = 832,
     int height = 1216,
     double harnessWidth = 400,
+    SizeSelectorLayout layout = SizeSelectorLayout.classic,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -20,7 +21,11 @@ void main() {
         home: Scaffold(
           body: SizedBox(
             width: harnessWidth,
-            child: _Harness(initialWidth: width, initialHeight: height),
+            child: _Harness(
+              initialWidth: width,
+              initialHeight: height,
+              layout: layout,
+            ),
           ),
         ),
       ),
@@ -67,6 +72,74 @@ void main() {
   }
 
   group('SizeSelector', () {
+    testWidgets(
+      'module row uses compact track and keeps dimensions on the same line',
+      (tester) async {
+        await pumpSelector(
+          tester,
+          harnessWidth: 395,
+          layout: SizeSelectorLayout.moduleRow,
+        );
+        final group = find.byKey(const Key('size-aspect-group'));
+        final dimensions = find.byKey(const Key('size-resolution-input'));
+        expect(tester.getSize(group), const Size(110, 32));
+        expect(
+          tester.getCenter(group).dy,
+          closeTo(tester.getCenter(dimensions).dy, .01),
+        );
+        expect(find.text('图像尺寸'), findsNothing);
+        expect(tester.getSize(find.byType(SizeSelector)).height, 40);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('module row wraps at 320 and retains custom edits and swap', (
+      tester,
+    ) async {
+      final state = await pumpSelector(
+        tester,
+        harnessWidth: 294,
+        layout: SizeSelectorLayout.moduleRow,
+      );
+      expect(
+        tester.getTopLeft(find.byKey(const Key('size-resolution-input'))).dy,
+        greaterThan(
+          tester.getBottomLeft(find.byKey(const Key('size-aspect-group'))).dy,
+        ),
+      );
+      await tester.enterText(find.byKey(const Key('size-width-input')), '1216');
+      await tester.enterText(find.byKey(const Key('size-height-input')), '832');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      expect((state.width, state.height), (1216, 832));
+      expect(find.text('自定义'), findsOneWidget);
+      await tester.tap(find.text('×'));
+      await tester.pump();
+      expect((state.width, state.height), (832, 1216));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'module row disables custom orientations and wallpaper square',
+      (tester) async {
+        await pumpSelector(tester, layout: SizeSelectorLayout.moduleRow);
+        await selectGroup(tester, '壁纸');
+        await tester.tap(find.byKey(const Key('size-aspect-square')));
+        await tester.pump();
+        expectDimensions(tester, '1088', '1920');
+        await selectGroup(tester, '自定义');
+        expect(
+          tester
+              .widget<TextField>(find.byKey(const Key('size-width-input')))
+              .focusNode!
+              .hasFocus,
+          isTrue,
+        );
+        await tester.tap(find.byKey(const Key('size-aspect-landscape')));
+        await tester.pump();
+        expectDimensions(tester, '1088', '1920');
+      },
+    );
     testWidgets('紧凑下拉 + 等宽分段组按横屏/竖屏/方形顺序排列', (tester) async {
       await pumpSelector(tester, harnessWidth: 320);
 
@@ -282,10 +355,15 @@ void main() {
 
 /// 与 SizeSection 相同的状态回路：onChanged 把宽高写回 SizeSelector
 class _Harness extends StatefulWidget {
-  const _Harness({this.initialWidth = 832, this.initialHeight = 1216});
+  const _Harness({
+    this.initialWidth = 832,
+    this.initialHeight = 1216,
+    this.layout = SizeSelectorLayout.classic,
+  });
 
   final int initialWidth;
   final int initialHeight;
+  final SizeSelectorLayout layout;
 
   @override
   State<_Harness> createState() => _HarnessState();
@@ -303,7 +381,10 @@ class _HarnessState extends State<_Harness> {
     return SizeSelector(
       width: _width,
       height: _height,
-      title: const Text('图像尺寸'),
+      title: widget.layout == SizeSelectorLayout.classic
+          ? const Text('图像尺寸')
+          : null,
+      layout: widget.layout,
       onChanged: (width, height) {
         setState(() {
           _width = width;

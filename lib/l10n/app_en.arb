@@ -446,7 +446,6 @@
   "generation_sectionCharactersSub": "Create a separate prompt for characters in your scene.",
   "character_positionLabel": "Position",
   "generation_sectionReferenceImages": "Reference Images",
-  "generation_sectionImageSettings": "Image Settings",
   "anlas_subscription": "Subscription",
   "anlas_purchased": "Purchased",
   "prompt_positive": "Prompt",
@@ -6794,7 +6793,13 @@
   "localUpscale_installingRuntime": "Installing Python/CUDA runtime…",
   "localUpscale_installingPython": "Preparing isolated Python…",
   "localUpscale_installFailed": "Installation failed at: {stage}",
-  "@localUpscale_installFailed": { "placeholders": { "stage": { "type": "String" } } },
+  "@localUpscale_installFailed": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
   "wiki_translationQueued": "Waiting to translate",
   "wiki_translationFailedRetry": "Translation failed — click to retry",
   "localUpscale_checkingComponent": "Checking component and GPU…",
@@ -6813,5 +6818,9 @@
   "localUpscale_stop": "Stop upscaling",
   "localUpscale_scrollDown": "Scroll down",
   "wiki_exampleImages": "Example image",
-  "wiki_exampleImagesUnavailable": "Example images are temporarily unavailable"
+  "wiki_exampleImagesUnavailable": "Example images are temporarily unavailable",
+  "generation_moduleImage": "Image",
+  "generation_perRequestLabel": "Images",
+  "generation_perRequestTooltip": "Images per request (1–4)",
+  "generation_repeatLabel": "Repeat"
 }

@@ -996,9 +996,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_sectionReferenceImages => '참조 이미지';
 
   @override
-  String get generation_sectionImageSettings => '이미지 설정';
-
-  @override
   String get anlas_subscription => '구독';
 
   @override
@@ -12437,4 +12434,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get wiki_exampleImagesUnavailable => '예시 이미지를 불러올 수 없습니다';
+
+  @override
+  String get generation_moduleImage => '이미지';
+
+  @override
+  String get generation_perRequestLabel => '장 수';
+
+  @override
+  String get generation_perRequestTooltip => '요청당 생성할 이미지 수 (1–4)';
+
+  @override
+  String get generation_repeatLabel => '반복';
 }

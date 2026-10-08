@@ -6,6 +6,7 @@ import '../../../providers/layout_state_provider.dart';
 import '../../../widgets/character/inline_character_section.dart';
 import 'collapsed_panel.dart';
 import 'generation_controls/generation_controls.dart';
+import 'generation_module_card.dart';
 import 'generation_param_sections.dart';
 import 'generation_params_menu_host.dart';
 import 'generation_sidebar_style.dart';
@@ -156,20 +157,15 @@ class WebLeftPanel extends ConsumerWidget {
                   const PreciseReferencePanel(),
                   const SizedBox(height: GenSidebarStyle.sectionGap),
 
-                  // 尺寸/数量：低频控件下沉至滚动列末尾
-                  // （官网 Image Settings 小节）
-                  SectionHeader(
-                    title: context.l10n.generation_sectionImageSettings,
+                  GenerationModuleCard(
+                    title: context.l10n.generation_moduleImage,
+                    children: const [
+                      SizeSection(layout: SizeSectionLayout.moduleRow),
+                      ImageCountSection(
+                        layout: ImageCountSectionLayout.moduleRow,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  // Resolution / Number of Images 是官网式模块标题档：
-                  // 用作用域把 ParamSectionTitle 放大到 15/600
-                  const SidebarTitleScope(child: SizeSection()),
-                  const SizedBox(height: 12),
-
-                  // 生成数量：请求次数步进 + 每次张数分段（官网 Image
-                  // Settings 式），与钉底生成按钮文案实时联动
-                  const SidebarTitleScope(child: ImageCountSection()),
                 ],
               ),
             ),

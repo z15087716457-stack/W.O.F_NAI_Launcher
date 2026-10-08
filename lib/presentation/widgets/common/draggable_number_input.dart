@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../themes/studio_typography.dart';
 
 /// 可拖拽调整的数值输入组件
 /// 支持：单击编辑、拖拽调整、滚轮微调
@@ -23,6 +24,9 @@ class DraggableNumberInput extends StatefulWidget {
   /// 步进值（拖拽时每移动多少像素增加1）
   final double dragSensitivity;
 
+  /// A bare number inside a shared sidebar stepper; legacy callers keep their box.
+  final bool inline;
+
   const DraggableNumberInput({
     super.key,
     required this.value,
@@ -31,6 +35,7 @@ class DraggableNumberInput extends StatefulWidget {
     this.max,
     this.prefix = '×',
     this.dragSensitivity = 20.0,
+    this.inline = false,
   });
 
   @override
@@ -150,6 +155,12 @@ class _DraggableNumberInputState extends State<DraggableNumberInput> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
+    final valueStyle = TextStyle(
+      fontSize: widget.inline ? 13 : 14,
+      fontWeight: FontWeight.w600,
+      color: theme.colorScheme.onSurface,
+      fontFamily: widget.inline ? StudioTypography.mono : null,
+    );
 
     return MouseRegion(
       cursor: _isEditing
@@ -167,24 +178,34 @@ class _DraggableNumberInputState extends State<DraggableNumberInput> {
           onHorizontalDragUpdate: _onDragUpdate,
           onHorizontalDragEnd: _onDragEnd,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            constraints: widget.inline
+                ? const BoxConstraints(minWidth: 30)
+                : null,
+            height: widget.inline ? 28 : null,
+            alignment: widget.inline ? Alignment.center : null,
+            padding: widget.inline
+                ? EdgeInsets.zero
+                : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(8),
+              color: widget.inline
+                  ? Colors.transparent
+                  : theme.colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(widget.inline ? 0 : 8),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // 前缀
-                Text(
-                  widget.prefix,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: primaryColor,
+                if (widget.prefix.isNotEmpty)
+                  Text(
+                    widget.prefix,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: primaryColor,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 2),
+                if (widget.prefix.isNotEmpty) const SizedBox(width: 2),
                 // 数值/输入框
                 _isEditing
                     ? Listener(
@@ -199,11 +220,7 @@ class _DraggableNumberInputState extends State<DraggableNumberInput> {
                             focusNode: _focusNode,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
-                            ),
+                            style: valueStyle,
                             decoration: const InputDecoration(
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(
@@ -221,14 +238,7 @@ class _DraggableNumberInputState extends State<DraggableNumberInput> {
                           ),
                         ),
                       )
-                    : Text(
-                        widget.value.toString(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
+                    : Text(widget.value.toString(), style: valueStyle),
               ],
             ),
           ),

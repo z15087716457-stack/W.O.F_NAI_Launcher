@@ -17,6 +17,7 @@ import '../../widgets/character/inline_character_section.dart';
 import '../../widgets/generation/auto_save_toggle_chip.dart';
 import '../generation/widgets/block_library_panel_slot.dart';
 import '../generation/widgets/generation_controls/generation_controls.dart';
+import '../generation/widgets/generation_module_card.dart';
 import '../generation/widgets/generation_param_sections.dart';
 import '../generation/widgets/generation_params_menu_host.dart';
 import '../generation/widgets/generation_sidebar_style.dart';
@@ -646,20 +647,15 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                         const PreciseReferencePanel(),
                         const SizedBox(height: GenSidebarStyle.sectionGap),
 
-                        // 尺寸：低频控件下沉至滚动列末尾（官网 Image Settings 小节）
-                        SectionHeader(
-                          title: context.l10n.generation_sectionImageSettings,
-                        ),
-                        const SizedBox(height: 6),
-                        const SidebarTitleScope(child: SizeSection()),
-                        const SizedBox(height: 12),
-
-                        // 生成数量：只留请求次数步进——探索模式强制逐张
-                        // 出图，1–4 每次张数分段无意义
-                        const SidebarTitleScope(
-                          child: ImageCountSection(
-                            showPerRequestSegments: false,
-                          ),
+                        GenerationModuleCard(
+                          title: context.l10n.generation_moduleImage,
+                          children: const [
+                            SizeSection(layout: SizeSectionLayout.moduleRow),
+                            ImageCountSection(
+                              showPerRequestSegments: false,
+                              layout: ImageCountSectionLayout.moduleRow,
+                            ),
+                          ],
                         ),
                       ],
                     ),

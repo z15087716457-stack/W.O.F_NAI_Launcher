@@ -7,11 +7,14 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/image_params.dart';
 import '../../../providers/image_generation_provider.dart';
+import '../../../themes/studio_typography.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/draggable_number_input.dart';
 import '../../../widgets/common/themed_dropdown.dart';
 import '../../../widgets/common/themed_input.dart';
 import '../../../widgets/common/themed_slider.dart';
+import '../../../widgets/common/uiux_prototype_icon.dart';
+import 'generation_module_card.dart';
 import 'size_selector.dart';
 import 'generation_sidebar_style.dart';
 
@@ -76,8 +79,11 @@ class ModelSection extends ConsumerWidget {
 }
 
 /// 尺寸设置分节（标题 + 尺寸选择器）
+enum SizeSectionLayout { classic, moduleRow }
+
 class SizeSection extends ConsumerWidget {
-  const SizeSection({super.key});
+  const SizeSection({super.key, this.layout = SizeSectionLayout.classic});
+  final SizeSectionLayout layout;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -90,7 +96,12 @@ class SizeSection extends ConsumerWidget {
     return SizeSelector(
       width: size.width,
       height: size.height,
-      title: ParamSectionTitle(context.l10n.generation_imageSize),
+      title: layout == SizeSectionLayout.classic
+          ? ParamSectionTitle(context.l10n.generation_imageSize)
+          : null,
+      layout: layout == SizeSectionLayout.moduleRow
+          ? SizeSelectorLayout.moduleRow
+          : SizeSelectorLayout.classic,
       onChanged: (width, height) {
         ref
             .read(generationParamsNotifierProvider.notifier)
@@ -107,10 +118,17 @@ class SizeSection extends ConsumerWidget {
 /// 总数 = 请求次数 × 每次张数，与底部生成按钮文案实时联动。
 /// [showPerRequestSegments] 关闭时不渲染 1–4 分段（如探索页强制逐张
 /// 出图的场景），合计行按每次 1 张计算。
+enum ImageCountSectionLayout { classic, moduleRow }
+
 class ImageCountSection extends ConsumerWidget {
-  const ImageCountSection({super.key, this.showPerRequestSegments = true});
+  const ImageCountSection({
+    super.key,
+    this.showPerRequestSegments = true,
+    this.layout = ImageCountSectionLayout.classic,
+  });
 
   final bool showPerRequestSegments;
+  final ImageCountSectionLayout layout;
 
   /// 请求次数上限（与步进器输入框三位数一致）
   static const int maxRequests = 999;
@@ -126,6 +144,106 @@ class ImageCountSection extends ConsumerWidget {
         ? ref.watch(imagesPerRequestProvider)
         : 1;
     final total = requests * perRequest;
+
+    if (layout == ImageCountSectionLayout.moduleRow) {
+      Widget label(String value) => Text(
+        value,
+        style: TextStyle(
+          fontSize: 12,
+          fontFamily: StudioTypography.cjk,
+          fontWeight: FontWeight.w400,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      );
+      Widget repeat() => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          label(l10n.generation_repeatLabel),
+          const SizedBox(width: 6),
+          _RequestStepper(
+            value: requests,
+            compact: true,
+            onChanged: (value) => ref
+                .read(generationParamsNotifierProvider.notifier)
+                .updateNSamples(value),
+          ),
+        ],
+      );
+      Widget segments() => Tooltip(
+        message: l10n.generation_perRequestTooltip,
+        child: SidebarSegmentTrack<int>(
+          key: const Key('image-count-segments'),
+          expand: true,
+          selected: perRequest,
+          segments: [
+            for (var i = 1; i <= 4; i++)
+              SidebarSegment(
+                value: i,
+                numeric: true,
+                child: Text('$i', key: ValueKey('image-count-$i')),
+              ),
+          ],
+          onSelected: (value) =>
+              ref.read(imagesPerRequestProvider.notifier).set(value),
+        ),
+      );
+      const labelStyle = TextStyle(
+        fontSize: 12,
+        fontFamily: StudioTypography.cjk,
+      );
+      final painter = TextPainter(
+        text: TextSpan(
+          text: l10n.generation_perRequestLabel + l10n.generation_repeatLabel,
+          style: labelStyle,
+        ),
+        textDirection: Directionality.of(context),
+      )..layout();
+      final minimumRowWidth = painter.width + 8 + 100 + 10 + 6 + 78;
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                if (!showPerRequestSegments) {
+                  return repeat();
+                }
+                final images = Row(
+                  children: [
+                    label(l10n.generation_perRequestLabel),
+                    const SizedBox(width: 8),
+                    Expanded(child: segments()),
+                  ],
+                );
+                if (constraints.maxWidth < minimumRowWidth) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [images, const SizedBox(height: 8), repeat()],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: images),
+                    const SizedBox(width: 10),
+                    repeat(),
+                  ],
+                );
+              },
+            ),
+            if (total > 1) ...[
+              const SizedBox(height: 6),
+              Text(
+                l10n.generation_imageCountTotal(requests, perRequest, total),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: .45),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,8 +304,13 @@ class ImageCountSection extends ConsumerWidget {
 class _RequestStepper extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
+  final bool compact;
 
-  const _RequestStepper({required this.value, required this.onChanged});
+  const _RequestStepper({
+    required this.value,
+    required this.onChanged,
+    this.compact = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -198,41 +321,68 @@ class _RequestStepper extends StatelessWidget {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: enabled ? onTap : null,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: Icon(
-              icon,
-              size: 18,
-              color: theme.colorScheme.onSurface.withValues(
-                alpha: enabled ? 0.7 : 0.25,
-              ),
-            ),
-          ),
+          child: compact
+              ? SizedBox(
+                  width: 22,
+                  height: 28,
+                  child: Center(
+                    child: UiuxPrototypeIcon(
+                      icon,
+                      size: 13,
+                      source: UiuxPrototypeIconSource.generation,
+                      color: enabled
+                          ? theme.colorScheme.onSurfaceVariant
+                          : theme.colorScheme.onSurface.withValues(alpha: .25),
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: theme.colorScheme.onSurface.withValues(
+                      alpha: enabled ? .7 : .25,
+                    ),
+                  ),
+                ),
         ),
       );
     }
 
+    final row = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        arrow(Icons.chevron_left, value > 1, () => onChanged(value - 1)),
+        DraggableNumberInput(
+          value: value,
+          min: 1,
+          max: ImageCountSection.maxRequests,
+          prefix: compact ? '' : '×',
+          inline: compact,
+          dragSensitivity: 30,
+          onChanged: onChanged,
+        ),
+        arrow(
+          Icons.chevron_right,
+          value < ImageCountSection.maxRequests,
+          () => onChanged(value + 1),
+        ),
+      ],
+    );
     return Tooltip(
       message: context.l10n.generation_requestCountTooltip,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          arrow(Icons.chevron_left, value > 1, () => onChanged(value - 1)),
-          DraggableNumberInput(
-            value: value,
-            min: 1,
-            max: ImageCountSection.maxRequests,
-            prefix: '×',
-            dragSensitivity: 30,
-            onChanged: onChanged,
-          ),
-          arrow(
-            Icons.chevron_right,
-            value < ImageCountSection.maxRequests,
-            () => onChanged(value + 1),
-          ),
-        ],
-      ),
+      child: compact
+          ? Container(
+              height: 32,
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: row,
+            )
+          : row,
     );
   }
 }

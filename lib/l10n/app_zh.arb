@@ -416,7 +416,6 @@
   "generation_sectionCharactersSub": "为场景中的角色创建独立提示词。",
   "character_positionLabel": "定位",
   "generation_sectionReferenceImages": "参考图",
-  "generation_sectionImageSettings": "图像设置",
   "anlas_subscription": "订阅赠送",
   "anlas_purchased": "付费购买",
   "prompt_positive": "正面",
@@ -6776,7 +6775,13 @@
   "localUpscale_installingRuntime": "正在安装 Python/CUDA 运行环境…",
   "localUpscale_installingPython": "正在准备独立 Python…",
   "localUpscale_installFailed": "安装失败阶段：{stage}",
-  "@localUpscale_installFailed": { "placeholders": { "stage": { "type": "String" } } },
+  "@localUpscale_installFailed": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
   "wiki_translationQueued": "等待翻译",
   "wiki_translationFailedRetry": "翻译失败，点击重试",
   "localUpscale_checkingComponent": "正在检查组件与显卡…",
@@ -6813,5 +6818,9 @@
   "localUpscale_stop": "停止超分",
   "localUpscale_scrollDown": "向下滚动",
   "wiki_exampleImages": "示例图片",
-  "wiki_exampleImagesUnavailable": "示例图片暂时无法加载"
+  "wiki_exampleImagesUnavailable": "示例图片暂时无法加载",
+  "generation_moduleImage": "图像",
+  "generation_perRequestLabel": "张数",
+  "generation_perRequestTooltip": "每次请求生成的张数（1–4）",
+  "generation_repeatLabel": "重复"
 }

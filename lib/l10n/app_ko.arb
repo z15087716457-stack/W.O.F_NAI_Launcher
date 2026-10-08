@@ -445,7 +445,6 @@
   "generation_sectionCharactersSub": "장면 속 캐릭터마다 별도의 프롬프트를 만듭니다.",
   "character_positionLabel": "위치",
   "generation_sectionReferenceImages": "참조 이미지",
-  "generation_sectionImageSettings": "이미지 설정",
   "anlas_subscription": "구독",
   "anlas_purchased": "구매",
   "prompt_positive": "프롬프트",
@@ -6776,7 +6775,13 @@
   "localUpscale_installingRuntime": "Python/CUDA 환경 설치 중…",
   "localUpscale_installingPython": "독립 Python 준비 중…",
   "localUpscale_installFailed": "설치 실패 단계: {stage}",
-  "@localUpscale_installFailed": { "placeholders": { "stage": { "type": "String" } } },
+  "@localUpscale_installFailed": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
   "wiki_translationQueued": "번역 대기 중",
   "wiki_translationFailedRetry": "번역 실패 — 클릭하여 다시 시도",
   "localUpscale_checkingComponent": "구성 요소와 GPU 확인 중…",
@@ -6813,5 +6818,9 @@
   "localUpscale_stop": "업스케일 중지",
   "localUpscale_scrollDown": "아래로 스크롤",
   "wiki_exampleImages": "예시 이미지",
-  "wiki_exampleImagesUnavailable": "예시 이미지를 불러올 수 없습니다"
+  "wiki_exampleImagesUnavailable": "예시 이미지를 불러올 수 없습니다",
+  "generation_moduleImage": "이미지",
+  "generation_perRequestLabel": "장 수",
+  "generation_perRequestTooltip": "요청당 생성할 이미지 수 (1–4)",
+  "generation_repeatLabel": "반복"
 }

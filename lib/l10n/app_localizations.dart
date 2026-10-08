@@ -1938,12 +1938,6 @@ abstract class AppLocalizations {
   /// **'Reference Images'**
   String get generation_sectionReferenceImages;
 
-  /// No description provided for @generation_sectionImageSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Image Settings'**
-  String get generation_sectionImageSettings;
-
   /// No description provided for @anlas_subscription.
   ///
   /// In en, this message translates to:
@@ -22289,6 +22283,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Example images are temporarily unavailable'**
   String get wiki_exampleImagesUnavailable;
+
+  /// No description provided for @generation_moduleImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get generation_moduleImage;
+
+  /// No description provided for @generation_perRequestLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get generation_perRequestLabel;
+
+  /// No description provided for @generation_perRequestTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Images per request (1–4)'**
+  String get generation_perRequestTooltip;
+
+  /// No description provided for @generation_repeatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get generation_repeatLabel;
 }
 
 class _AppLocalizationsDelegate

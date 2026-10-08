@@ -1017,9 +1017,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_sectionReferenceImages => 'Reference Images';
 
   @override
-  String get generation_sectionImageSettings => 'Image Settings';
-
-  @override
   String get anlas_subscription => 'Subscription';
 
   @override
@@ -12809,4 +12806,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get wiki_exampleImagesUnavailable =>
       'Example images are temporarily unavailable';
+
+  @override
+  String get generation_moduleImage => 'Image';
+
+  @override
+  String get generation_perRequestLabel => 'Images';
+
+  @override
+  String get generation_perRequestTooltip => 'Images per request (1–4)';
+
+  @override
+  String get generation_repeatLabel => 'Repeat';
 }

@@ -445,7 +445,6 @@
   "generation_sectionCharactersSub": "シーン内のキャラクターに個別のプロンプトを作成します。",
   "character_positionLabel": "位置",
   "generation_sectionReferenceImages": "参照画像",
-  "generation_sectionImageSettings": "画像設定",
   "anlas_subscription": "サブスク",
   "anlas_purchased": "購入済み",
   "prompt_positive": "プロンプト",
@@ -6776,7 +6775,13 @@
   "localUpscale_installingRuntime": "Python/CUDA 環境をインストール中…",
   "localUpscale_installingPython": "独立した Python を準備中…",
   "localUpscale_installFailed": "インストールの失敗段階：{stage}",
-  "@localUpscale_installFailed": { "placeholders": { "stage": { "type": "String" } } },
+  "@localUpscale_installFailed": {
+    "placeholders": {
+      "stage": {
+        "type": "String"
+      }
+    }
+  },
   "wiki_translationQueued": "翻訳待ち",
   "wiki_translationFailedRetry": "翻訳に失敗しました。クリックして再試行",
   "localUpscale_checkingComponent": "コンポーネントと GPU を確認中…",
@@ -6813,5 +6818,9 @@
   "localUpscale_stop": "アップスケールを停止",
   "localUpscale_scrollDown": "下へスクロール",
   "wiki_exampleImages": "作例画像",
-  "wiki_exampleImagesUnavailable": "作例画像を読み込めませんでした"
+  "wiki_exampleImagesUnavailable": "作例画像を読み込めませんでした",
+  "generation_moduleImage": "画像",
+  "generation_perRequestLabel": "枚数",
+  "generation_perRequestTooltip": "1回のリクエストで生成する枚数（1〜4）",
+  "generation_repeatLabel": "繰り返し"
 }

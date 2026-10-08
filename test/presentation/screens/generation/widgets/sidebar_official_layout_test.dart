@@ -312,13 +312,13 @@ void main() {
           final l10n = AppLocalizations.of(
             tester.element(find.byType(WebLeftPanel)),
           )!;
-          final label = tester.widget<Text>(
-            find.text(l10n.generation_sectionReferenceImages),
-          );
           final title = tester.widget<Text>(
-            find.text(l10n.generation_imageSize),
+            find.text(l10n.generation_moduleImage),
           );
-          expect(label.style!.fontSize, lessThan(title.style!.fontSize!));
+          expect(title.style!.fontSize, 13);
+          expect(title.style!.fontWeight, FontWeight.w600);
+          expect(find.text(l10n.generation_imageSize), findsNothing);
+          expect(find.text(l10n.generation_perRequestLabel), findsOneWidget);
           expect(find.byIcon(Icons.more_horiz), findsWidgets);
           final promptCard = find.byKey(const ValueKey('main-prompt-card'));
           expect(

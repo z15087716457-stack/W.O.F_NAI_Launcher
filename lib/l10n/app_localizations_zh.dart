@@ -981,9 +981,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_sectionReferenceImages => '参考图';
 
   @override
-  String get generation_sectionImageSettings => '图像设置';
-
-  @override
   String get anlas_subscription => '订阅赠送';
 
   @override
@@ -12193,6 +12190,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get wiki_exampleImagesUnavailable => '示例图片暂时无法加载';
+
+  @override
+  String get generation_moduleImage => '图像';
+
+  @override
+  String get generation_perRequestLabel => '张数';
+
+  @override
+  String get generation_perRequestTooltip => '每次请求生成的张数（1–4）';
+
+  @override
+  String get generation_repeatLabel => '重复';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -13170,9 +13179,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get generation_sectionReferenceImages => '參考圖';
-
-  @override
-  String get generation_sectionImageSettings => '影像設定';
 
   @override
   String get anlas_subscription => '訂閱贈送';
@@ -24384,4 +24390,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get wiki_exampleImagesUnavailable => '示例圖片暫時無法載入';
+
+  @override
+  String get generation_moduleImage => '影像';
+
+  @override
+  String get generation_perRequestLabel => '張數';
+
+  @override
+  String get generation_perRequestTooltip => '每次請求生成的張數（1–4）';
+
+  @override
+  String get generation_repeatLabel => '重複';
 }

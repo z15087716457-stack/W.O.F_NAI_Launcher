@@ -998,9 +998,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get generation_sectionReferenceImages => '参照画像';
 
   @override
-  String get generation_sectionImageSettings => '画像設定';
-
-  @override
   String get anlas_subscription => 'サブスク';
 
   @override
@@ -12417,4 +12414,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wiki_exampleImagesUnavailable => '作例画像を読み込めませんでした';
+
+  @override
+  String get generation_moduleImage => '画像';
+
+  @override
+  String get generation_perRequestLabel => '枚数';
+
+  @override
+  String get generation_perRequestTooltip => '1回のリクエストで生成する枚数（1〜4）';
+
+  @override
+  String get generation_repeatLabel => '繰り返し';
 }
