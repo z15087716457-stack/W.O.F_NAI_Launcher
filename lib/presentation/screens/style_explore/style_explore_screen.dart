@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../providers/image_generation_provider.dart';
 import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/style_explore/explore_manual_capture.dart';
@@ -586,6 +588,11 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   /// 与主生成页实时同一份；胶囊行 + Run 控制条嵌主编辑区顶部；生成按钮走
   /// 主链 generate()（探索页入口在真实批次 start 前布防手动候选登记）。
   Widget _buildCenterPanel(ThemeData theme, {required double availableWidth}) {
+    final showCharacters = ImageModels.isV4Model(
+      ref.watch(
+        generationParamsNotifierProvider.select((params) => params.model),
+      ),
+    );
     final activeRun = ref.watch(exploreActiveRunProvider);
     final activeRunId = activeRun?.id;
     final manualCaptureNotifier = ref.read(
@@ -631,8 +638,10 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                         const SizedBox(height: GenSidebarStyle.sectionGap),
 
                         // 角色区：内联在主提示词正下方（官网式，内容常显）
-                        const InlineCharacterSection(),
-                        const SizedBox(height: GenSidebarStyle.sectionGap),
+                        if (showCharacters) ...[
+                          const InlineCharacterSection(),
+                          const SizedBox(height: GenSidebarStyle.sectionGap),
+                        ],
                         GenerationModuleCard(
                           title: context.l10n.generation_sectionReferenceImages,
                           children: const [

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../providers/image_save_settings_provider.dart';
+import '../common/uiux_prototype_icon.dart';
 
 /// 自动保存图像开关芯片
 ///
@@ -248,7 +249,9 @@ String buildAutoSaveTooltip(BuildContext context, ImageSaveSettings settings) {
 /// 开启时实心橙色 save 图标，关闭时灰色描边 save 图标；
 /// 点击即切换，视觉密度与标题栏其它 IconButton 一致。
 class AutoSaveToggleIcon extends ConsumerWidget {
-  const AutoSaveToggleIcon({super.key});
+  const AutoSaveToggleIcon({super.key, this.prototypeStyle = false});
+
+  final bool prototypeStyle;
 
   static const _cuteOrange = Color(0xFFFF9F6B);
 
@@ -263,19 +266,32 @@ class AutoSaveToggleIcon extends ConsumerWidget {
         HapticFeedback.lightImpact();
         ref.read(imageSaveSettingsNotifierProvider.notifier).toggleAutoSave();
       },
-      icon: Icon(
-        isEnabled ? Icons.save_rounded : Icons.save_outlined,
-        size: 20,
-      ),
+      icon: prototypeStyle
+          ? const UiuxPrototypeIcon(
+              Icons.save_outlined,
+              prototypeName: 'autosave',
+              source: UiuxPrototypeIconSource.generation,
+              size: 16,
+            )
+          : Icon(
+              isEnabled ? Icons.save_rounded : Icons.save_outlined,
+              size: 20,
+            ),
       tooltip: buildAutoSaveTooltip(context, settings),
       style: IconButton.styleFrom(
-        foregroundColor: isEnabled
-            ? _cuteOrange
-            : theme.colorScheme.onSurface.withValues(alpha: 0.55),
+        foregroundColor: prototypeStyle
+            ? (isEnabled
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant)
+            : (isEnabled
+                  ? _cuteOrange
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.55)),
       ),
       visualDensity: VisualDensity.compact,
-      constraints: const BoxConstraints(),
-      padding: const EdgeInsets.all(8),
+      constraints: prototypeStyle
+          ? const BoxConstraints.tightFor(width: 28, height: 28)
+          : const BoxConstraints(),
+      padding: EdgeInsets.all(prototypeStyle ? 6 : 8),
     );
   }
 }

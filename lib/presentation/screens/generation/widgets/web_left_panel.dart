@@ -12,6 +12,8 @@ import 'generation_param_sections.dart';
 import 'generation_params_menu_host.dart';
 import 'generation_sidebar_style.dart';
 import 'header_capsules.dart';
+import '../../../../core/constants/api_constants.dart';
+import '../../../providers/image_generation_provider.dart';
 import 'img2img_panel.dart';
 import 'precise_reference_panel.dart';
 import 'prompt_input.dart';
@@ -69,6 +71,12 @@ class WebLeftPanel extends ConsumerWidget {
   }
 
   Widget _buildExpanded(BuildContext context, ThemeData theme, WidgetRef ref) {
+    final showCharacters = ImageModels.isV4Model(
+      ref.watch(
+        generationParamsNotifierProvider.select((params) => params.model),
+      ),
+    );
+
     return Column(
       children: [
         // 头部条：折叠按钮钉右上角不移动；chips 宽时贴折叠按钮左侧，
@@ -141,8 +149,10 @@ class WebLeftPanel extends ConsumerWidget {
                   const SizedBox(height: GenSidebarStyle.sectionGap),
 
                   // 角色区：内联在主提示词正下方（官网式，内容常显）
-                  const InlineCharacterSection(),
-                  const SizedBox(height: GenSidebarStyle.sectionGap),
+                  if (showCharacters) ...[
+                    const InlineCharacterSection(),
+                    const SizedBox(height: GenSidebarStyle.sectionGap),
+                  ],
                   GenerationModuleCard(
                     title: context.l10n.generation_sectionReferenceImages,
                     children: const [

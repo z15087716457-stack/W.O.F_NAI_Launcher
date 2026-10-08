@@ -62,7 +62,7 @@ Break prompts into reusable **blocks**: artist pools, quality tags, UC presets, 
 <p align="center">
   <img src="screenshots/generation_pill_block_library.png" alt="Generation UI: pill editor and block library" width="80%">
   <br>
-  <em>Generation UI: pill editor (block highlighting) with the block library panel (official presets and artist pools)</em>
+  <em>Earlier generation UI illustration. Current source uses refined module cards, compact parameter rows, and batch history; this revision has not been installed. See CHANGELOG.</em>
 </p>
 
 <table align="center">

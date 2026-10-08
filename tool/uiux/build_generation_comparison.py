@@ -41,15 +41,18 @@ def main():
         for dimension in ("width", "height"):
             case[dimension + "Delta"] = case["actual"]["rect"][dimension] - case["prototype"]["rect"][dimension]
     height = 90 + sum(max(c["actual"]["rect"]["height"], c["prototype"]["rect"]["height"]) + 65 for c in cases)
-    overview = Image.new("RGB", (1080, math.ceil(height)), "#fafafa")
+    column_width = math.ceil(max(max(c["actual"]["rect"]["width"], c["prototype"]["rect"]["width"]) for c in cases))
+    prototype_x = 220
+    actual_x = max(650, prototype_x + column_width + 36)
+    overview = Image.new("RGB", (max(1080, actual_x + column_width + 24), math.ceil(height)), "#fafafa")
     draw = ImageDraw.Draw(overview)
     draw.text((20, 12), config["title"], font=bold, fill="#171717")
-    draw.text((220, 50), "HTML 原型（原尺寸）", font=regular, fill="#171717")
-    draw.text((650, 50), "生产组件（原尺寸）", font=regular, fill="#171717")
+    draw.text((prototype_x, 50), "HTML 原型（原尺寸）", font=regular, fill="#171717")
+    draw.text((actual_x, 50), "生产组件（原尺寸）", font=regular, fill="#171717")
     y = 90
     for case in cases:
         draw.text((20, y), case["label"], font=regular, fill="#171717")
-        for x, field in [(220, "prototypeImage"), (650, "actualImage")]:
+        for x, field in [(prototype_x, "prototypeImage"), (actual_x, "actualImage")]:
             overview.paste(Image.open(output / case[field]), (x, y))
         row_height = math.ceil(max(case["actual"]["rect"]["height"], case["prototype"]["rect"]["height"]))
         draw.text((220, y + row_height + 9), case.get("notes", ""), font=regular, fill="#666666")

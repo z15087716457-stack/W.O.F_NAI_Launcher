@@ -62,7 +62,7 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 <p align="center">
   <img src="screenshots/generation_pill_block_library.png" alt="生成主界面：pill 药丸编辑器与块库面板" width="80%">
   <br>
-  <em>生成主界面：pill 药丸编辑器（分块高亮）+ 右侧块库面板（官方预设与画师池）</em>
+  <em>早期生图界面示意。当前源码采用 A 精修模块卡片、紧凑参数行与批次历史；本轮尚未安装，见 CHANGELOG。</em>
 </p>
 
 <table align="center">

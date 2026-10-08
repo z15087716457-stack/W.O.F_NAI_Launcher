@@ -355,7 +355,8 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
         state.history.isNotEmpty || state.currentImages.isNotEmpty;
     final allImages = _selectableImages;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
@@ -364,9 +365,10 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
       ),
       child: Row(
         children: [
-          const AutoSaveToggleIcon(),
+          const AutoSaveToggleIcon(prototypeStyle: true),
           const Spacer(),
           _BottomToolButton(
+            compact: true,
             icon: _historyScrollLocked ? Icons.lock : Icons.lock_open,
             tooltip: _historyScrollLocked
                 ? context.l10n.generation_unlockHistoryScroll
@@ -375,7 +377,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
             onPressed: () =>
                 setState(() => _historyScrollLocked = !_historyScrollLocked),
           ),
+          const SizedBox(width: 2),
           _BottomToolButton(
+            compact: true,
             icon: Icons.save_alt,
             tooltip: context.l10n.generation_downloadAllImages,
             onPressed: hasContent && allImages.isNotEmpty
@@ -388,7 +392,9 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
                   )
                 : null,
           ),
+          const SizedBox(width: 2),
           _BottomToolButton(
+            compact: true,
             icon: Icons.delete_outline,
             tooltip: _selectedIds.isNotEmpty
                 ? context.l10n.generation_deleteSelectedImages(
@@ -446,12 +452,12 @@ class _HistoryPanelState extends ConsumerState<HistoryPanel> {
         onTap: () => ref
             .read(layoutStateNotifierProvider.notifier)
             .setRightPanelExpanded(false),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(5),
         child: Container(
           padding: const EdgeInsets.all(5.5),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(5),
           ),
           child: UiuxPrototypeIcon(
             Icons.chevron_right,
