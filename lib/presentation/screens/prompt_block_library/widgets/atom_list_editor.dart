@@ -358,11 +358,6 @@ class AtomChip extends StatelessWidget {
   }
 }
 
-/// 行框描边（静拍板·实线只留首尾）：横边恒实线；左右竖边
-/// 由 [solidLeft]/[solidRight] 决定实线或虚线。四角仅当
-/// 相邻两边都是实线时画 [radius] 圆弧（虚线边不能转弧，
-/// 落直角）。普通描边 1px，折行虚线 1.5px；线心以 0.5 偏移。
-
 /// 一行文本段 + 它的行框宽。
 class _Seg {
   const _Seg(this.text, this.width);

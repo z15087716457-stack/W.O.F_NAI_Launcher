@@ -3,6 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// Keeps the atom editor's joined edges intact; pills opt into a fully dashed outline.
+///
+/// 行框描边（静拍板·实线只留首尾）：横边恒实线；左右竖边
+/// 由 [solidLeft]/[solidRight] 决定实线或虚线。四角仅当
+/// 相邻两边都是实线时画 [radius] 圆弧（虚线边不能转弧，
+/// 落直角）。普通描边 1px，折行虚线 1.5px；线心以 0.5 偏移。
 class DashedRoundedBorderPainter extends CustomPainter {
   DashedRoundedBorderPainter({
     required this.color,

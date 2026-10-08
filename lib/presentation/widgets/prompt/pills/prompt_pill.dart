@@ -271,18 +271,17 @@ class PromptPill extends StatelessWidget {
           )
         : SizedBox(height: size.height, child: content);
     return CustomPaint(
+      painter: active && normal && enabled
+          ? PromptPillShadowPainter(
+              color: color.withValues(alpha: .3),
+              radius: size.radius,
+              spreadRadius: 2,
+            )
+          : null,
       foregroundPainter: focused
           ? _PillFocusPainter(colors.primary, size.radius)
           : null,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(size.radius),
-          boxShadow: active && normal && enabled
-              ? [BoxShadow(color: color.withValues(alpha: .3), spreadRadius: 2)]
-              : null,
-        ),
-        child: frame,
-      ),
+      child: frame,
     );
   }
 }
@@ -317,20 +316,74 @@ class PromptPillDragFeedback extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Transform.rotate(
     angle: -math.pi / 90,
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(PromptPillSize.regular.radius),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: .18),
-            offset: const Offset(0, 6),
-            blurRadius: 16,
-          ),
-        ],
+    child: CustomPaint(
+      painter: PromptPillShadowPainter(
+        // HTML --shadow: rgba(0,0,0,.14) light / .45 dark.
+        color: Colors.black.withValues(
+          alpha: Theme.of(context).brightness == Brightness.dark ? .45 : .14,
+        ),
+        radius: PromptPillSize.regular.radius,
+        offset: const Offset(0, 6),
+        blurRadius: 16,
       ),
       child: child,
     ),
   );
+}
+
+/// CSS `box-shadow` semantics: painted only outside the pill outline, so the
+/// translucent block fill is not darkened by the shadow beneath it.
+class PromptPillShadowPainter extends CustomPainter {
+  const PromptPillShadowPainter({
+    required this.color,
+    required this.radius,
+    this.offset = Offset.zero,
+    this.blurRadius = 0,
+    this.spreadRadius = 0,
+  });
+
+  final Color color;
+  final double radius;
+  final Offset offset;
+  final double blurRadius;
+  final double spreadRadius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final outline = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(radius),
+    );
+    final reach = blurRadius * 2 + spreadRadius + offset.distance + 2;
+    canvas
+      ..save()
+      ..clipPath(
+        Path.combine(
+          PathOperation.difference,
+          Path()..addRect((Offset.zero & size).inflate(reach)),
+          Path()..addRRect(outline),
+        ),
+      );
+    final paint = Paint()..color = color;
+    if (blurRadius > 0) {
+      // Chromium maps a CSS blur length to a Skia radius of half that length.
+      paint.maskFilter = MaskFilter.blur(
+        BlurStyle.normal,
+        Shadow.convertRadiusToSigma(blurRadius / 2),
+      );
+    }
+    canvas
+      ..drawRRect(outline.shift(offset).inflate(spreadRadius), paint)
+      ..restore();
+  }
+
+  @override
+  bool shouldRepaint(PromptPillShadowPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.radius != radius ||
+      oldDelegate.offset != offset ||
+      oldDelegate.blurRadius != blurRadius ||
+      oldDelegate.spreadRadius != spreadRadius;
 }
 
 enum PromptPillVariant { normal, missing, unknown }

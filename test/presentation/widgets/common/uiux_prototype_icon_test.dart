@@ -6,7 +6,11 @@ import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 import 'package:nai_launcher/presentation/widgets/common/uiux_prototype_icon.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
 
-Future<void> _pump(WidgetTester tester, Widget child) async {
+Future<void> _pump(
+  WidgetTester tester,
+  Widget child, {
+  bool settle = true,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -23,7 +27,7 @@ Future<void> _pump(WidgetTester tester, Widget child) async {
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (settle) await tester.pumpAndSettle();
 }
 
 void main() {
@@ -105,20 +109,35 @@ void main() {
             busy: busy,
             style: TranslationIconStyle.pill,
           ),
+          settle: !busy,
         );
-        expect(
-          tester.getSize(find.byType(TranslationIcon)),
-          const Size(12, 12),
-        );
+        final slot = tester.getSize(find.byType(TranslationIcon));
+        expect(slot.height, 12);
         final glyph = tester
             .widgetList<RichText>(find.byType(RichText))
             .singleWhere((widget) => widget.text.toPlainText() == '译');
+        expect(slot.width, tester.getSize(find.byWidget(glyph)).width);
         final style = glyph.text.style!;
         expect(style.fontSize, 10);
         expect(style.fontWeight, FontWeight.w700);
-        expect(tester.binding.hasScheduledFrame, isFalse);
+        final fade = tester.widget<FadeTransition>(
+          find.descendant(
+            of: find.byType(TranslationIcon),
+            matching: find.byType(FadeTransition),
+          ),
+        );
+        expect(fade.opacity.value, 1);
+        if (busy) {
+          await tester.pump(const Duration(milliseconds: 350));
+          expect(fade.opacity.value, lessThan(1));
+        }
         expect(tester.takeException(), isNull);
       }
+      await _pump(
+        tester,
+        const TranslationIcon(size: 12, style: TranslationIconStyle.pill),
+      );
+      expect(tester.binding.hasScheduledFrame, isFalse);
     },
   );
 }

@@ -352,11 +352,13 @@ void main() {
         promptBlockColorPalette[8].withValues(alpha: .16),
       );
       final ring = tester
-          .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-          .map((w) => w.decoration)
-          .whereType<BoxDecoration>()
-          .singleWhere((d) => d.boxShadow != null);
-      expect(ring.boxShadow!.single.spreadRadius, 2);
+          .widgetList<CustomPaint>(find.byType(CustomPaint))
+          .map((w) => w.painter)
+          .whereType<PromptPillShadowPainter>()
+          .single;
+      expect(ring.spreadRadius, 2);
+      expect(ring.blurRadius, 0);
+      expect(ring.color, promptBlockColorPalette[8].withValues(alpha: .3));
     },
   );
 
