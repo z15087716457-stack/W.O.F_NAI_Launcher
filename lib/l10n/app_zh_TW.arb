@@ -6822,5 +6822,6 @@
   "generation_moduleImage": "影像",
   "generation_perRequestLabel": "張數",
   "generation_perRequestTooltip": "每次請求生成的張數（1–4）",
-  "generation_repeatLabel": "重複"
+  "generation_repeatLabel": "重複",
+  "generation_referenceUpload": "上傳"
 }

@@ -6822,5 +6822,6 @@
   "generation_moduleImage": "画像",
   "generation_perRequestLabel": "枚数",
   "generation_perRequestTooltip": "1回のリクエストで生成する枚数（1〜4）",
-  "generation_repeatLabel": "繰り返し"
+  "generation_repeatLabel": "繰り返し",
+  "generation_referenceUpload": "アップロード"
 }

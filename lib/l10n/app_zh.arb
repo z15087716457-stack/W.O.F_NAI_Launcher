@@ -6822,5 +6822,6 @@
   "generation_moduleImage": "图像",
   "generation_perRequestLabel": "张数",
   "generation_perRequestTooltip": "每次请求生成的张数（1–4）",
-  "generation_repeatLabel": "重复"
+  "generation_repeatLabel": "重复",
+  "generation_referenceUpload": "上传"
 }

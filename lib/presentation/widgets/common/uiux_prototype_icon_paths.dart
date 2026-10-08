@@ -74,6 +74,9 @@ const blocksPrototypeIconPaths = <String, String>{
   'warn': 'M12 4l9 16H3zM12 10v4M12 17h.01',
   'help':
       'M12 21a9 9 0 100-18 9 9 0 000 18zM9.5 9a2.5 2.5 0 015 .5c0 1.5-2.5 2-2.5 3.5M12 17h.01',
+  'box': 'M4 4h16v16H4zM8 12l3 3 5-6',
+  'heart':
+      'M12 20s-7-4.4-9.2-9A4.8 4.8 0 0112 5.6 4.8 4.8 0 0121.2 11C19 15.6 12 20 12 20z',
   'tr': 'M4 6h8M8 4v2c0 4-2 7-4 8M6 10c1 2 3 3 5 3M13 20l4-9 4 9M14.5 17h5',
 };
 
@@ -110,4 +113,6 @@ const generationPrototypeIconPaths = <String, String>{
   'tri': 'M8 5l11 7-11 7z',
   'swap':
       'M4 12a8 8 0 0114-5.3L20 9M20 4v5h-5M20 12a8 8 0 01-14 5.3L4 15M4 20v-5h5',
+  'bolt': 'M13 3L5 14h6l-1 7 8-11h-6z',
+  'save2': 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6',
 };

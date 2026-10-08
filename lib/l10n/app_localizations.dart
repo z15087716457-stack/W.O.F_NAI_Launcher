@@ -22307,6 +22307,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Repeat'**
   String get generation_repeatLabel;
+
+  /// No description provided for @generation_referenceUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get generation_referenceUpload;
 }
 
 class _AppLocalizationsDelegate

@@ -13,6 +13,8 @@ import '../../../../core/utils/vibe_export_utils.dart';
 import '../../../../data/models/vibe/vibe_reference.dart';
 import '../../../providers/generation/generation_params_notifier.dart';
 import '../../../widgets/common/app_toast.dart';
+import '../../../widgets/common/collapsible_image_panel.dart';
+import '../../../widgets/common/uiux_prototype_icon.dart';
 
 /// Vibe 导出处理器
 ///
@@ -376,12 +378,36 @@ class VibeExportHandler {
   /// 构建导出按钮
   ///
   /// 返回一个 PopupMenuButton，提供导出选项
-  Widget buildExportButton(List<VibeReference> vibes) {
+  Widget buildExportButton(
+    List<VibeReference> vibes, {
+    bool imageBackground = false,
+  }) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
+    final embedded = ReferenceModuleScope.of(context);
     return PopupMenuButton<String>(
-      icon: Icon(Icons.download, size: 18, color: theme.colorScheme.primary),
+      padding: embedded ? EdgeInsets.zero : const EdgeInsets.all(8),
+      constraints: embedded
+          ? const BoxConstraints.tightFor(width: 28, height: 28)
+          : null,
+      style: embedded
+          ? IconButton.styleFrom(
+              minimumSize: const Size(28, 28),
+              maximumSize: const Size(28, 28),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            )
+          : null,
+      icon: embedded
+          ? UiuxPrototypeIcon(
+              Icons.download_outlined,
+              size: 14,
+              source: UiuxPrototypeIconSource.generation,
+              color: imageBackground
+                  ? Colors.white
+                  : theme.colorScheme.onSurfaceVariant,
+            )
+          : Icon(Icons.download, size: 18, color: theme.colorScheme.primary),
       tooltip: l10n.vibe_export_title,
       offset: const Offset(0, 32),
       itemBuilder: (context) => [

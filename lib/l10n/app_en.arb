@@ -6822,5 +6822,6 @@
   "generation_moduleImage": "Image",
   "generation_perRequestLabel": "Images",
   "generation_perRequestTooltip": "Images per request (1–4)",
-  "generation_repeatLabel": "Repeat"
+  "generation_repeatLabel": "Repeat",
+  "generation_referenceUpload": "Upload"
 }

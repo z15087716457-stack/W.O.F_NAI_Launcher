@@ -51,7 +51,7 @@ def main():
         draw.text((20, y), case["label"], font=regular, fill="#171717")
         for x, field in [(220, "prototypeImage"), (650, "actualImage")]:
             overview.paste(Image.open(output / case[field]), (x, y))
-        row_height = max(case["actual"]["rect"]["height"], case["prototype"]["rect"]["height"])
+        row_height = math.ceil(max(case["actual"]["rect"]["height"], case["prototype"]["rect"]["height"]))
         draw.text((220, y + row_height + 9), case.get("notes", ""), font=regular, fill="#666666")
         y += row_height + 65
     overview.save(output / "原型与实现对照.png")

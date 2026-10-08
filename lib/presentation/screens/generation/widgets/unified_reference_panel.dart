@@ -362,7 +362,7 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
               VibeExportHandler(
                 ref: ref,
                 context: context,
-              ).buildExportButton(vibes),
+              ).buildExportButton(vibes, imageBackground: showBackground),
             ]
           : null,
       badge: Container(

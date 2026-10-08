@@ -20,6 +20,8 @@ import '../../../providers/precise_ref_library_provider.dart';
 import '../../../utils/dropped_file_reader.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
+import '../../../widgets/common/uiux_prototype_icon.dart';
+import '../../../themes/studio_typography.dart';
 import '../../../widgets/common/decoded_memory_image.dart';
 import '../../../widgets/common/image_picker_card/image_picker_card.dart';
 import '../../../widgets/common/themed_divider.dart';
@@ -46,8 +48,12 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) =>
-          _buildPanel(context, compactHeader: constraints.maxWidth < 360),
+      builder: (context, constraints) => _buildPanel(
+        context,
+        compactHeader:
+            constraints.maxWidth <
+            (ReferenceModuleScope.of(context) ? 420 : 360),
+      ),
     );
   }
 
@@ -58,6 +64,7 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     );
     final workflow = ref.watch(draftImageWorkflowProvider);
     if (widget.toolOnly) return _buildUpscalePanel(theme, workflow);
+    final embedded = ReferenceModuleScope.of(context);
     final hasSourceImage = params.sourceImage != null;
     final showBackground = hasSourceImage && !workflow.isPanelExpanded;
 
@@ -86,25 +93,40 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
               _buildImportDropTarget(
                 child: TextButton.icon(
                   onPressed: _pickImage,
-                  icon: SvgPicture.asset(
-                    'assets/icons/nai-icon-import.svg',
-                    width: 12,
-                    height: 12,
-                    colorFilter: ColorFilter.mode(
-                      theme.colorScheme.primary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
+                  icon: embedded
+                      ? UiuxPrototypeIcon(
+                          Icons.upload_outlined,
+                          size: 15,
+                          color: theme.colorScheme.primary,
+                          source: UiuxPrototypeIconSource.generation,
+                        )
+                      : SvgPicture.asset(
+                          'assets/icons/nai-icon-import.svg',
+                          width: 12,
+                          height: 12,
+                          colorFilter: ColorFilter.mode(
+                            theme.colorScheme.primary,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                   label: Text(
                     _isFileDraggingOver
                         ? context.l10n.img2img_dropToAdd
+                        : embedded
+                        ? context.l10n.generation_referenceUpload
                         : context.l10n.img2img_uploadImage,
-                    style: const TextStyle(fontSize: 12),
+                    style: TextStyle(
+                      fontFamily: embedded ? StudioTypography.cjk : null,
+                      fontSize: embedded ? 13 : 12,
+                      fontWeight: embedded ? FontWeight.w500 : null,
+                    ),
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: const Size(0, 30),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: embedded ? 10 : 8,
+                    ),
+                    minimumSize: Size(0, embedded ? 28 : 30),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 ),

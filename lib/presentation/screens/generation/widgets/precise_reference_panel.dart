@@ -282,36 +282,48 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
     final foreground = showBackground
         ? Colors.white
         : theme.colorScheme.onSurfaceVariant;
+    final embedded = ReferenceModuleScope.of(context);
     return [
-      TextButton.icon(
-        key: const Key('precise-ref-panel-save-to-library'),
-        onPressed: hasReferences ? _saveReferencesToLibrary : null,
-        icon: SvgPicture.asset(
-          'assets/icons/nai-icon-save.svg',
-          width: 13,
-          height: 13,
-          colorFilter: ColorFilter.mode(
-            hasReferences ? foreground : foreground.withValues(alpha: 0.38),
-            BlendMode.srcIn,
+      if (embedded)
+        PanelHeaderIconButton(
+          key: const Key('precise-ref-panel-save-to-library'),
+          icon: Icons.save_outlined,
+          prototypeName: 'save2',
+          tooltip: context.l10n.preciseRefLib_saveCurrentToLibrary,
+          color: foreground,
+          onPressed: hasReferences ? _saveReferencesToLibrary : null,
+        )
+      else
+        TextButton.icon(
+          key: const Key('precise-ref-panel-save-to-library'),
+          onPressed: hasReferences ? _saveReferencesToLibrary : null,
+          icon: SvgPicture.asset(
+            'assets/icons/nai-icon-save.svg',
+            width: 13,
+            height: 13,
+            colorFilter: ColorFilter.mode(
+              hasReferences ? foreground : foreground.withValues(alpha: 0.38),
+              BlendMode.srcIn,
+            ),
+          ),
+          label: Text(
+            context.l10n.preciseRefLib_saveCurrentToLibrary,
+            style: const TextStyle(fontSize: 12),
+          ),
+          style: TextButton.styleFrom(
+            foregroundColor: showBackground
+                ? Colors.white
+                : theme.colorScheme.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: const Size(0, 30),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ),
-        label: Text(
-          context.l10n.preciseRefLib_saveCurrentToLibrary,
-          style: const TextStyle(fontSize: 12),
-        ),
-        style: TextButton.styleFrom(
-          foregroundColor: showBackground
-              ? Colors.white
-              : theme.colorScheme.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          minimumSize: const Size(0, 30),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
-      ),
       Builder(
         builder: (buttonContext) => PanelHeaderIconButton(
           key: const Key('precise-ref-panel-add-menu'),
           iconAsset: 'assets/icons/nai-icon-rounded-plus.svg',
+          prototypeName: embedded ? 'plus' : null,
           tooltip: context.l10n.preciseRef_addReference,
           color: foreground,
           onPressed: () => _showAddMenu(buttonContext),

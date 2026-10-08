@@ -9,7 +9,9 @@ def paths(source):
     match = re.search(r"const P\s*=\s*\{(.*?)\};", html, re.S)
     if not match:
         raise ValueError(f"No prototype path table in {source}")
-    return dict(re.findall(r"([A-Za-z][A-Za-z0-9_]*):'([^']*)'", match[1]))
+    entries = dict(re.findall(r"([A-Za-z][A-Za-z0-9_]*):'([^']*)'", match[1]))
+    entries.update(re.findall(r"P\.([A-Za-z][A-Za-z0-9_]*)\s*=\s*'([^']*)'", html))
+    return entries
 
 
 def main():

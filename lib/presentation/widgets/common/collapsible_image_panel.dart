@@ -4,9 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
+import '../../screens/generation/widgets/generation_module_card.dart';
+import '../../themes/studio_typography.dart';
+import 'uiux_prototype_icon.dart';
 import 'studio_glass_surface.dart';
 import 'studio_animated_icon.dart';
 import 'studio_icons.dart';
+
+/// Desktop/explore reference rows opt in; legacy panels retain their cards.
+class ReferenceModuleScope extends InheritedWidget {
+  const ReferenceModuleScope({super.key, required super.child});
+
+  static bool of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<ReferenceModuleScope>() !=
+      null;
+
+  @override
+  bool updateShouldNotify(ReferenceModuleScope oldWidget) => false;
+}
 
 /// A common collapsible panel with optional background image support.
 ///
@@ -50,6 +65,10 @@ class CollapsibleImagePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final showBackground = hasData && !isExpanded;
+
+    if (ReferenceModuleScope.of(context)) {
+      return _buildModuleRow(context, theme);
+    }
 
     final panel = Card(
       clipBehavior: Clip.antiAlias,
@@ -213,7 +232,131 @@ class CollapsibleImagePanel extends StatelessWidget {
     return frosted ? StudioGlassSurface(child: panel) : panel;
   }
 
-  Widget _buildHeaderIcon(ThemeData theme, bool showBackground) {
+  Widget _buildModuleRow(BuildContext context, ThemeData theme) {
+    final showBackground = hasData && !isExpanded && backgroundImage != null;
+    final foreground = showBackground
+        ? Colors.white
+        : hasData
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurface;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          onTap: onToggle,
+          child: GenerationModuleRow(
+            background: showBackground
+                ? ClipRect(
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        _CollapsedBackgroundImage(
+                          child: frosted && !MediaQuery.highContrastOf(context)
+                              ? ImageFiltered(
+                                  imageFilter: ui.ImageFilter.blur(
+                                    sigmaX: 2.4,
+                                    sigmaY: 2.4,
+                                    tileMode: ui.TileMode.clamp,
+                                  ),
+                                  child: backgroundImage!,
+                                )
+                              : backgroundImage!,
+                        ),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withValues(
+                                  alpha: frosted ? .62 : .5,
+                                ),
+                                Colors.black.withValues(
+                                  alpha: frosted ? .68 : .75,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : null,
+            child: Row(
+              children: [
+                _buildHeaderIcon(theme, showBackground, size: 20),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: StudioTypography.cjk,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: foreground,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    subtitle ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: StudioTypography.cjk,
+                      fontSize: 12,
+                      color: showBackground
+                          ? Colors.white.withValues(alpha: .9)
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (headerActions != null && headerActions!.isNotEmpty) ...[
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 4,
+                    children: headerActions!,
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                if (trailing != null) ...[trailing!, const SizedBox(width: 4)],
+                if (hasData && badge != null) ...[
+                  badge!,
+                  const SizedBox(width: 6),
+                ],
+                UiuxPrototypeIcon(
+                  isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  source: UiuxPrototypeIconSource.generation,
+                  size: 18,
+                  color: showBackground
+                      ? Colors.white
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 200),
+          crossFadeState: isExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          firstChild: const SizedBox.shrink(),
+          secondChild: child,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeaderIcon(
+    ThemeData theme,
+    bool showBackground, {
+    double size = 24,
+  }) {
     final color = showBackground
         ? Colors.white
         : hasData
@@ -225,7 +368,7 @@ class CollapsibleImagePanel extends StatelessWidget {
       return StudioAnimatedIcon(
         icon: featureIcon,
         trigger: iconTrigger,
-        size: 24,
+        size: size,
         color: color,
       );
     }
@@ -233,13 +376,13 @@ class CollapsibleImagePanel extends StatelessWidget {
     if (asset != null) {
       return SvgPicture.asset(
         asset,
-        width: 24,
-        height: 24,
+        width: size,
+        height: size,
         colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
       );
     }
 
-    return Icon(icon, size: 24, color: color);
+    return Icon(icon, size: size, color: color);
   }
 }
 
@@ -255,6 +398,7 @@ class PanelHeaderIconButton extends StatelessWidget {
     this.selected = false,
     this.highlighted = false,
     this.color,
+    this.prototypeName,
   });
 
   final IconData? icon;
@@ -270,6 +414,7 @@ class PanelHeaderIconButton extends StatelessWidget {
 
   /// 前景色；未指定时按 selected 取主题槽位。
   final Color? color;
+  final String? prototypeName;
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +428,18 @@ class PanelHeaderIconButton extends StatelessWidget {
 
     Widget iconWidget;
     final asset = iconAsset;
-    if (asset != null) {
+    if (ReferenceModuleScope.of(context) &&
+        (prototypeName != null || asset == null)) {
+      iconWidget = UiuxPrototypeIcon(
+        icon ?? Icons.add,
+        prototypeName: prototypeName,
+        source: UiuxPrototypeIconSource.generation,
+        size: 14,
+        color: onPressed == null
+            ? foreground.withValues(alpha: .38)
+            : foreground,
+      );
+    } else if (asset != null) {
       iconWidget = SvgPicture.asset(
         asset,
         width: 14,

@@ -12446,4 +12446,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get generation_repeatLabel => '반복';
+
+  @override
+  String get generation_referenceUpload => '업로드';
 }

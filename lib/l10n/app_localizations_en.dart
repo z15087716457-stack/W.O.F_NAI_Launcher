@@ -12818,4 +12818,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generation_repeatLabel => 'Repeat';
+
+  @override
+  String get generation_referenceUpload => 'Upload';
 }

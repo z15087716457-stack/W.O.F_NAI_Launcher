@@ -1,3 +1,4 @@
+import '../../widgets/common/collapsible_image_panel.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -26,7 +27,6 @@ import '../generation/widgets/img2img_panel.dart';
 import '../generation/widgets/precise_reference_panel.dart';
 import '../generation/widgets/prompt_input.dart';
 import '../generation/widgets/resize_handle.dart';
-import '../generation/widgets/section_header.dart';
 import '../generation/widgets/unified_reference_panel.dart';
 import 'widgets/explore_candidate_gallery.dart';
 import 'widgets/explore_run_control_bar.dart';
@@ -633,18 +633,20 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                         // 角色区：内联在主提示词正下方（官网式，内容常显）
                         const InlineCharacterSection(),
                         const SizedBox(height: GenSidebarStyle.sectionGap),
-
-                        // 功能面板：图生图 / 风格迁移 / 精准参考
-                        // （官网 Reference Images 小节）
-                        SectionHeader(
+                        GenerationModuleCard(
                           title: context.l10n.generation_sectionReferenceImages,
+                          children: const [
+                            ReferenceModuleScope(
+                              child: Column(
+                                children: [
+                                  Img2ImgPanel(),
+                                  UnifiedReferencePanel(),
+                                  PreciseReferencePanel(),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        const Img2ImgPanel(),
-                        const SizedBox(height: GenSidebarStyle.cardGap),
-                        const UnifiedReferencePanel(),
-                        const SizedBox(height: GenSidebarStyle.cardGap),
-                        const PreciseReferencePanel(),
                         const SizedBox(height: GenSidebarStyle.sectionGap),
 
                         GenerationModuleCard(

@@ -1,3 +1,4 @@
+import '../../../widgets/common/collapsible_image_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,7 +15,6 @@ import 'header_capsules.dart';
 import 'img2img_panel.dart';
 import 'precise_reference_panel.dart';
 import 'prompt_input.dart';
-import 'section_header.dart';
 import 'unified_reference_panel.dart';
 
 /// 官网式布局左栏
@@ -143,18 +143,20 @@ class WebLeftPanel extends ConsumerWidget {
                   // 角色区：内联在主提示词正下方（官网式，内容常显）
                   const InlineCharacterSection(),
                   const SizedBox(height: GenSidebarStyle.sectionGap),
-
-                  // 功能面板：图生图 / 风格迁移 / 精准参考
-                  // （官网 Reference Images 小节）
-                  SectionHeader(
+                  GenerationModuleCard(
                     title: context.l10n.generation_sectionReferenceImages,
+                    children: const [
+                      ReferenceModuleScope(
+                        child: Column(
+                          children: [
+                            Img2ImgPanel(),
+                            UnifiedReferencePanel(),
+                            PreciseReferencePanel(),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  const Img2ImgPanel(),
-                  const SizedBox(height: GenSidebarStyle.cardGap),
-                  const UnifiedReferencePanel(),
-                  const SizedBox(height: GenSidebarStyle.cardGap),
-                  const PreciseReferencePanel(),
                   const SizedBox(height: GenSidebarStyle.sectionGap),
 
                   GenerationModuleCard(

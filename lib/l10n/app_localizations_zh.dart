@@ -12202,6 +12202,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generation_repeatLabel => '重复';
+
+  @override
+  String get generation_referenceUpload => '上传';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24402,4 +24405,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get generation_repeatLabel => '重複';
+
+  @override
+  String get generation_referenceUpload => '上傳';
 }

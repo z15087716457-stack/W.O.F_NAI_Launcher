@@ -12426,4 +12426,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get generation_repeatLabel => '繰り返し';
+
+  @override
+  String get generation_referenceUpload => 'アップロード';
 }
