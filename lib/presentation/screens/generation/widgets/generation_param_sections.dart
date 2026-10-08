@@ -197,8 +197,10 @@ class ImageCountSection extends ConsumerWidget {
           style: labelStyle,
         ),
         textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
       )..layout();
       final minimumRowWidth = painter.width + 8 + 100 + 10 + 6 + 78;
+      painter.dispose();
       return Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
         child: Column(

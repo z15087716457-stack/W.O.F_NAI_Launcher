@@ -289,12 +289,14 @@ class CharacterNameField extends ConsumerStatefulWidget {
   final CharacterPrompt character;
   final int index;
   final TextStyle? style;
+  final double hintOpacity;
 
   const CharacterNameField({
     super.key,
     required this.character,
     required this.index,
     this.style,
+    this.hintOpacity = 0.5,
   });
 
   @override
@@ -390,7 +392,7 @@ class _CharacterNameFieldState extends ConsumerState<CharacterNameField> {
           focusedBorder: InputBorder.none,
           hintText: l10n.character_number(widget.index + 1),
           hintStyle: widget.style?.copyWith(
-            color: widget.style?.color?.withValues(alpha: 0.5),
+            color: widget.style?.color?.withValues(alpha: widget.hintOpacity),
           ),
         ),
         onSubmitted: (_) => _commit(),

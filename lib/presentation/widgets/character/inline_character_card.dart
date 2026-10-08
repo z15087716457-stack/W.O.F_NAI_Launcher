@@ -11,6 +11,7 @@ import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/character_prompt_provider.dart';
 import '../../providers/tips_provider.dart';
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
+import '../../themes/studio_typography.dart';
 import '../common/decoded_memory_image.dart';
 import '../common/uiux_prototype_icon.dart';
 import 'character_module_scope.dart';
@@ -257,6 +258,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
         character.thumbnailPath!.isNotEmpty &&
         File(character.thumbnailPath!).existsSync();
     const headerHeight = 28.0;
+    final embedded = CharacterModuleScope.of(context);
     // 缩略图铺满头部时文字压图，统一转白色
     final onHeader = hasThumbnail ? Colors.white : colorScheme.onSurfaceVariant;
 
@@ -269,19 +271,17 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
             _HeaderThumbnail(path: character.thumbnailPath!)
           else
             ColoredBox(
-              color: CharacterModuleScope.of(context)
-                  ? Colors.transparent
-                  : colorScheme.surface,
+              color: embedded ? Colors.transparent : colorScheme.surface,
             ),
           Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: _toggleEditing,
               child: Padding(
-                padding: const EdgeInsets.only(left: 10),
+                padding: EdgeInsets.only(left: embedded ? 12 : 10),
                 child: Row(
                   children: [
-                    CharacterModuleScope.of(context)
+                    embedded
                         ? UiuxPrototypeIcon(
                             Icons.place_outlined,
                             prototypeName: 'pin',
@@ -296,10 +296,13 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                         builder: (context) {
                           final nameStyle = theme.textTheme.labelMedium
                               ?.copyWith(
+                                fontFamily: embedded
+                                    ? StudioTypography.cjk
+                                    : null,
                                 color: hasThumbnail
                                     ? Colors.white
                                     : colorScheme.onSurface.withValues(
-                                        alpha: 0.6,
+                                        alpha: embedded ? 1 : 0.6,
                                       ),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -319,6 +322,7 @@ class _InlineCharacterCardState extends ConsumerState<InlineCharacterCard> {
                               character: character,
                               index: widget.index,
                               style: nameStyle,
+                              hintOpacity: embedded ? 1 : 0.5,
                             );
                           }
                           return Text(

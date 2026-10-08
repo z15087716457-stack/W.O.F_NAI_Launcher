@@ -1,10 +1,12 @@
-import '../../../widgets/common/collapsible_image_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:nai_launcher/core/utils/localization_extension.dart';
+import '../../../../core/constants/api_constants.dart';
+import '../../../providers/image_generation_provider.dart';
 import '../../../providers/layout_state_provider.dart';
 import '../../../widgets/character/inline_character_section.dart';
+import '../../../widgets/common/collapsible_image_panel.dart';
 import 'collapsed_panel.dart';
 import 'generation_controls/generation_controls.dart';
 import 'generation_module_card.dart';
@@ -12,8 +14,6 @@ import 'generation_param_sections.dart';
 import 'generation_params_menu_host.dart';
 import 'generation_sidebar_style.dart';
 import 'header_capsules.dart';
-import '../../../../core/constants/api_constants.dart';
-import '../../../providers/image_generation_provider.dart';
 import 'img2img_panel.dart';
 import 'precise_reference_panel.dart';
 import 'prompt_input.dart';

@@ -1,4 +1,3 @@
-import '../../widgets/common/collapsible_image_panel.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -17,6 +16,7 @@ import '../../providers/style_explore/explore_run_provider.dart';
 import '../../providers/tips_provider.dart';
 import '../../widgets/character/character_position_canvas.dart';
 import '../../widgets/character/inline_character_section.dart';
+import '../../widgets/common/collapsible_image_panel.dart';
 import '../../widgets/generation/auto_save_toggle_chip.dart';
 import '../generation/widgets/block_library_panel_slot.dart';
 import '../generation/widgets/generation_controls/generation_controls.dart';
