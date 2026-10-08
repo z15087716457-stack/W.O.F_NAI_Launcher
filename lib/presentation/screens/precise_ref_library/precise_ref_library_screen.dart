@@ -415,8 +415,10 @@ class _PreciseRefLibraryScreenState
     leading:
         (_navVisible == false ||
             (_navVisible == null && MediaQuery.sizeOf(context).width < 800))
-        ? IconButton(
-            icon: const LibraryIcon('dbl', size: 15),
+        ? LibraryIconButton(
+            icon: 'dbl',
+            size: 15,
+            tooltip: context.l10n.common_expand,
             onPressed: () => setState(() => _navVisible = true),
           )
         : null,
@@ -448,20 +450,11 @@ class _PreciseRefLibraryScreenState
           state,
         ),
       ],
-      child: Container(
-        height: 30,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const LibraryIcon('sort', size: 14),
-            if (!compact) ...[
-              const SizedBox(width: 6),
-              Text(switch (state.sortOrder) {
+      child: LibraryDropdownFace(
+        icon: 'sort',
+        label: compact
+            ? null
+            : switch (state.sortOrder) {
                 PreciseRefLibrarySortOrder.createdAt =>
                   context.l10n.preciseRefLib_sortCreatedAt,
                 PreciseRefLibrarySortOrder.lastUsed =>
@@ -470,11 +463,8 @@ class _PreciseRefLibraryScreenState
                   context.l10n.preciseRefLib_sortUsedCount,
                 PreciseRefLibrarySortOrder.name =>
                   context.l10n.preciseRefLib_sortName,
-              }, style: const TextStyle(fontSize: 12.5)),
-            ],
-            LibraryIcon(state.sortDescending ? 'chevD' : 'chevU', size: 13),
-          ],
-        ),
+              },
+        trailingIcon: state.sortDescending ? 'chevD' : 'chevU',
       ),
     ),
     trailingBuilder: (compact) => [
@@ -482,15 +472,22 @@ class _PreciseRefLibraryScreenState
       const SizedBox(width: 8),
       LibraryActionButton(
         iconOnly: compact,
+        bordered: true,
+        selected: _multi,
+        height: 30,
         action: LibraryAction(
           label: context.l10n.common_multiSelect,
           icon: 'check',
-          onPressed: () => setState(() => _multi = !_multi),
+          onPressed: () => setState(() {
+            _multi = !_multi;
+            if (!_multi) _selectedIds.clear();
+          }),
         ),
       ),
       const SizedBox(width: 8),
       LibraryActionButton(
         iconOnly: compact,
+        height: 30,
         action: LibraryAction(
           key: const Key('precise-ref-library-import-button'),
           label: context.l10n.preciseRefLib_import,
@@ -510,10 +507,16 @@ class _PreciseRefLibraryScreenState
             child: Text(context.l10n.library_rescanFolders),
           ),
         ],
-        child: const SizedBox(
+        child: SizedBox(
           width: 28,
-          height: 32,
-          child: Center(child: LibraryIcon('more')),
+          height: 28,
+          child: Center(
+            child: LibraryIcon(
+              'more',
+              strokeWidth: 3,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
         ),
       ),
     ],

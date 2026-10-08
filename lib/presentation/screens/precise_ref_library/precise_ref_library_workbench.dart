@@ -17,8 +17,11 @@ extension _PreciseLibraryWorkbench on _PreciseRefLibraryScreenState {
               size: 18,
               color: Theme.of(context).colorScheme.primary,
             ),
-            trailing: IconButton(
-              icon: const LibraryIcon('dbl', size: 15),
+            trailing: LibraryIconButton(
+              icon: 'dbl',
+              size: 15,
+              mirrored: true,
+              tooltip: context.l10n.common_collapse,
               onPressed: () => _updateLayoutState(() => _navVisible = false),
             ),
           ),

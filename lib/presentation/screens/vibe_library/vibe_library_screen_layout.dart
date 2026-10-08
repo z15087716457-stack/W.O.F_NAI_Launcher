@@ -27,9 +27,11 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
     leading:
         (_navVisible == false ||
             (_navVisible == null && MediaQuery.sizeOf(context).width < 800))
-        ? IconButton(
+        ? LibraryIconButton(
+            icon: 'dbl',
+            size: 15,
+            tooltip: context.l10n.common_expand,
             onPressed: () => _updateLayoutState(() => _navVisible = true),
-            icon: const LibraryIcon('dbl', size: 15),
           )
         : null,
     sortBuilder: (compact) => _buildSortButton(theme, state, compact: compact),
@@ -38,23 +40,31 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
       const SizedBox(width: 8),
       LibraryActionButton(
         iconOnly: compact,
+        bordered: true,
+        selected: selection.isActive,
+        height: 30,
         action: LibraryAction(
           label: context.l10n.common_multiSelect,
           icon: 'check',
-          onPressed: () =>
-              ref.read(vibeLibrarySelectionNotifierProvider.notifier).enter(),
+          onPressed: () {
+            final notifier = ref.read(
+              vibeLibrarySelectionNotifierProvider.notifier,
+            );
+            selection.isActive ? notifier.exit() : notifier.enter();
+          },
         ),
       ),
       const SizedBox(width: 8),
       GestureDetector(
         onSecondaryTapDown: (d) => _showImportMenu(d.globalPosition),
-        child: PopupMenuButton<int>(
+        child: LibrarySplitButton<int>(
+          iconOnly: compact,
           onSelected: (i) => [
             () => _importVibes(),
             () => _importVibesFromImage(),
             () => _importVibesFromClipboard(),
           ][i](),
-          itemBuilder: (_) => [
+          menuItems: (_) => [
             PopupMenuItem(value: 0, child: Text(context.l10n.common_import)),
             PopupMenuItem(
               value: 1,
@@ -65,19 +75,17 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
               child: Text(context.l10n.vibeLibrary_importFromClipboard),
             ),
           ],
-          child: LibraryActionButton(
-            iconOnly: compact,
-            action: LibraryAction(
-              label: context.l10n.common_import,
-              icon: 'plus',
-              primary: true,
-              onPressed: _isImporting || _isPickingFile
-                  ? null
-                  : () => _importVibes(),
-            ),
+          action: LibraryAction(
+            label: context.l10n.common_import,
+            icon: 'plus',
+            primary: true,
+            onPressed: _isImporting || _isPickingFile
+                ? null
+                : () => _importVibes(),
           ),
         ),
       ),
+      const SizedBox(width: 4),
       PopupMenuButton<int>(
         tooltip: context.l10n.library_more,
         onSelected: (i) {
@@ -103,10 +111,16 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
             child: Text(context.l10n.vibeLibrary_openFolderTooltip),
           ),
         ],
-        child: const SizedBox(
+        child: SizedBox(
           width: 28,
-          height: 32,
-          child: Center(child: LibraryIcon('more')),
+          height: 28,
+          child: Center(
+            child: LibraryIcon(
+              'more',
+              strokeWidth: 3,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
         ),
       ),
     ],
@@ -135,30 +149,10 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
 
     return PopupMenuButton<VibeLibrarySortOrder>(
       tooltip: context.l10n.vibeLibrary_sortTooltip,
-      child: Container(
-        height: 30,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(
-            alpha: 0.4,
-          ),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const LibraryIcon('sort', size: 14),
-            const SizedBox(width: 4),
-            if (!compact)
-              Text(sortLabel, style: const TextStyle(fontSize: 12.5)),
-            Icon(
-              state.sortDescending
-                  ? Icons.arrow_drop_down
-                  : Icons.arrow_drop_up,
-              size: 16,
-            ),
-          ],
-        ),
+      child: LibraryDropdownFace(
+        icon: 'sort',
+        label: compact ? null : sortLabel,
+        trailingIcon: state.sortDescending ? 'chevD' : 'chevU',
       ),
       itemBuilder: (context) => [
         _buildSortMenuItem(
@@ -232,51 +226,54 @@ extension _VibeLibraryScreenLayout on _VibeLibraryScreenState {
     VibeLibraryState state,
     SelectionModeState selection,
     ThemeData theme,
-  ) => LibrarySelectionBar(
-    selectedCount: selection.selectedIds.length,
-    onExit: () =>
-        ref.read(vibeLibrarySelectionNotifierProvider.notifier).exit(),
-    onSelectAll: () => ref
-        .read(vibeLibrarySelectionNotifierProvider.notifier)
-        .selectAll(state.currentEntries.map((e) => e.id).toList()),
-    onInvertSelection: () => ref
-        .read(vibeLibrarySelectionNotifierProvider.notifier)
-        .selectAll(
-          state.currentEntries
-              .where((e) => !selection.selectedIds.contains(e.id))
-              .map((e) => e.id)
-              .toList(),
+  ) {
+    final none = selection.selectedIds.isEmpty;
+    return LibrarySelectionBar(
+      selectedCount: selection.selectedIds.length,
+      onExit: () =>
+          ref.read(vibeLibrarySelectionNotifierProvider.notifier).exit(),
+      onSelectAll: () => ref
+          .read(vibeLibrarySelectionNotifierProvider.notifier)
+          .selectAll(state.currentEntries.map((e) => e.id).toList()),
+      onInvertSelection: () => ref
+          .read(vibeLibrarySelectionNotifierProvider.notifier)
+          .selectAll(
+            state.currentEntries
+                .where((e) => !selection.selectedIds.contains(e.id))
+                .map((e) => e.id)
+                .toList(),
+          ),
+      actions: [
+        LibraryAction(
+          label: context.l10n.library_addToGeneration,
+          icon: 'plus',
+          primary: true,
+          onPressed: none ? null : _batchSendToGeneration,
         ),
-    actions: [
-      LibraryAction(
-        label: context.l10n.library_addToGeneration,
-        icon: 'plus',
-        primary: true,
-        onPressed: _batchSendToGeneration,
-      ),
-      LibraryAction(
-        label: context.l10n.common_favorite,
-        icon: 'star',
-        onPressed: _batchToggleFavorite,
-      ),
-      LibraryAction(
-        label: context.l10n.common_move,
-        icon: 'folder',
-        onPressed: () => _showMoveToCategoryDialog(context),
-      ),
-      LibraryAction(
-        label: context.l10n.common_export,
-        icon: 'upload',
-        onPressed: _batchExport,
-      ),
-      LibraryAction(
-        label: context.l10n.common_delete,
-        icon: 'trash',
-        destructive: true,
-        onPressed: _batchDelete,
-      ),
-    ],
-  );
+        LibraryAction(
+          label: context.l10n.common_favorite,
+          icon: 'star',
+          onPressed: none ? null : _batchToggleFavorite,
+        ),
+        LibraryAction(
+          label: context.l10n.common_move,
+          icon: 'folder',
+          onPressed: none ? null : () => _showMoveToCategoryDialog(context),
+        ),
+        LibraryAction(
+          label: context.l10n.common_export,
+          icon: 'upload',
+          onPressed: none ? null : _batchExport,
+        ),
+        LibraryAction(
+          label: context.l10n.common_delete,
+          icon: 'trash',
+          destructive: true,
+          onPressed: none ? null : _batchDelete,
+        ),
+      ],
+    );
+  }
 
   /// 构建主体内容
   Widget _buildBody(

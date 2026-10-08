@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'library_toolbar.dart';
 
 /// Shared desktop library dimensions from UIUX U1. The host owns persistence.
 class LibraryShell extends StatelessWidget {
@@ -101,11 +102,14 @@ class LibraryShell extends StatelessWidget {
                     Positioned.fill(child: inspector!),
                     if (onCloseInspector != null)
                       Positioned(
-                        top: 16,
-                        right: 8,
-                        child: IconButton(
+                        top: 17,
+                        right: 146,
+                        child: LibraryIconButton(
+                          icon: 'x',
+                          tooltip: MaterialLocalizations.of(
+                            context,
+                          ).closeButtonTooltip,
                           onPressed: onCloseInspector,
-                          icon: const Icon(Icons.close),
                         ),
                       ),
                   ],

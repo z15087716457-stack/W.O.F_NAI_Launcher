@@ -18,6 +18,7 @@ import '../app_toast.dart';
 import 'components/detail_image_page.dart';
 import 'components/detail_metadata_panel.dart';
 import 'components/viewer_filmstrip.dart';
+import 'components/viewer_icon.dart';
 import 'components/viewer_top_bar.dart';
 import 'components/viewer_stage.dart';
 import 'package:intl/intl.dart';
@@ -540,6 +541,7 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
                       ],
                     ),
                   ),
+                  trailing: _buildActionsMenu(context),
                   onZoomOut: _zoomOut,
                   onZoomIn: _zoomIn,
                   panelVisible: visible,
@@ -584,9 +586,53 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
     );
   }
 
+  Widget? _buildActionsMenu(BuildContext context) {
+    final l10n = context.l10n;
+    final callbacks = widget.callbacks;
+    final image = _currentImage;
+    final items = <(String, VoidCallback)>[
+      if (callbacks?.onSave != null)
+        (l10n.common_save, () => unawaited(callbacks!.onSave!(image))),
+      if (callbacks?.onReuseMetadata != null)
+        (l10n.shortcut_action_reuse_params, _reuseGalleryParams),
+      if (callbacks?.onSendToImg2Img != null)
+        (
+          l10n.detail_sendToImg2Img,
+          () => unawaited(callbacks!.onSendToImg2Img!(image)),
+        ),
+      if (image.showCopyButton)
+        (
+          l10n.shortcut_action_copy_image,
+          () => unawaited(_copyImageToClipboard(context)),
+        ),
+      if (callbacks?.onFavoriteToggle != null)
+        (
+          image.isFavorite ? l10n.common_unfavorite : l10n.common_favorite,
+          _toggleFavorite,
+        ),
+      if (callbacks?.onDelete != null)
+        (l10n.common_delete, () => unawaited(_deleteImage())),
+    ];
+    if (items.isEmpty) return null;
+    return PopupMenuButton<int>(
+      key: const Key('viewer-actions-menu'),
+      tooltip: l10n.imageMenu_more,
+      position: PopupMenuPosition.under,
+      padding: EdgeInsets.zero,
+      onSelected: (i) => items[i].$2(),
+      itemBuilder: (_) => [
+        for (var i = 0; i < items.length; i++)
+          PopupMenuItem(value: i, height: 32, child: Text(items[i].$1)),
+      ],
+      child: const SizedBox(
+        width: 30,
+        height: 30,
+        child: Center(child: ViewerIcon('more', strokeWidth: 3)),
+      ),
+    );
+  }
+
   /// 复制图像到剪贴板
-  // Retained until the inspector actions are moved in viewer task03.
-  // ignore: unused_element
   Future<void> _copyImageToClipboard(BuildContext context) async {
     final l10n = context.l10n;
     try {

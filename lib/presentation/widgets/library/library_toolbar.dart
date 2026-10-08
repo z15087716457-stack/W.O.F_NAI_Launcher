@@ -6,6 +6,7 @@ import '../../../core/shortcuts/default_shortcuts.dart';
 import '../shortcuts/shortcut_aware_widget.dart';
 import '../navigation/window_chrome_layout.dart';
 import 'library_icon.dart';
+import 'library_selection_bar.dart';
 import 'library_shell.dart';
 
 enum LibraryCardSize {
@@ -270,53 +271,70 @@ class _LibraryToolbarState extends State<LibraryToolbar> {
                 const SizedBox(width: 8),
               ],
               Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 300),
-                    child: TextField(
-                      key: widget.searchKey,
-                      controller: widget.searchController,
-                      focusNode: widget.searchFocusNode ?? _searchFocus,
-                      onChanged: widget.onSearchChanged,
-                      style: const TextStyle(fontSize: 12.5),
-                      decoration: InputDecoration(
-                        hintText: widget.searchHint,
-                        filled: true,
-                        fillColor: colors.surfaceContainerHighest,
-                        constraints: const BoxConstraints.tightFor(height: 36),
-                        isDense: true,
-                        prefixIcon: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: LibraryIcon('search', size: 15),
-                        ),
-                        prefixIconConstraints: const BoxConstraints(
-                          minWidth: 35,
-                          minHeight: 15,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(9),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(9),
-                          borderSide: BorderSide.none,
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 300),
+                        child: TextField(
+                          key: widget.searchKey,
+                          controller: widget.searchController,
+                          focusNode: widget.searchFocusNode ?? _searchFocus,
+                          onChanged: widget.onSearchChanged,
+                          style: const TextStyle(fontSize: 12.5),
+                          decoration: InputDecoration(
+                            hintText: widget.searchHint,
+                            filled: true,
+                            fillColor: colors.surfaceContainerHighest,
+                            constraints: const BoxConstraints.tightFor(
+                              height: 36,
+                            ),
+                            isDense: true,
+                            prefixIcon: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: LibraryIcon('search', size: 15),
+                            ),
+                            prefixIconConstraints: const BoxConstraints(
+                              minWidth: 35,
+                              minHeight: 15,
+                            ),
+                            suffixIcon: const Padding(
+                              padding: EdgeInsets.only(right: 7),
+                              child: LibraryKeyCap('/'),
+                            ),
+                            suffixIconConstraints: const BoxConstraints(
+                              minWidth: 25,
+                              minHeight: 18,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 10,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(9),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(9),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(9),
+                              borderSide: BorderSide(color: colors.primary),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    if (widget.sortBuilder != null) ...[
+                      widget.sortBuilder!(compact),
+                      const SizedBox(width: 10),
+                    ],
+                    _sizeSegment(context),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
-              if (widget.sortBuilder != null) ...[
-                widget.sortBuilder!(compact),
-                const SizedBox(width: 8),
-              ],
-              _sizeSegment(context),
               const SizedBox(width: 8),
               ...(widget.trailingBuilder?.call(compact) ?? const <Widget>[]),
             ],
@@ -341,6 +359,7 @@ class _LibraryToolbarState extends State<LibraryToolbar> {
       context.l10n.library_sizeMedium,
       context.l10n.library_sizeLarge,
     ];
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 30,
       padding: const EdgeInsets.all(2),
@@ -351,38 +370,256 @@ class _LibraryToolbarState extends State<LibraryToolbar> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          for (final size in LibraryCardSize.values)
-            Material(
-              color: widget.cardSize == size
-                  ? (Theme.of(context).brightness == Brightness.dark
-                        ? colors.surfaceContainerHigh
-                        : colors.surfaceContainer)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(5),
-              child: InkWell(
-                key: ValueKey('library-card-size-${size.name}'),
-                borderRadius: BorderRadius.circular(5),
-                onTap: () => widget.onCardSizeChanged(size),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Center(
-                    child: Text(
-                      labels[size.index],
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: widget.cardSize == size
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        color: widget.cardSize == size
-                            ? colors.onSurface
-                            : colors.onSurfaceVariant,
+          for (final size in LibraryCardSize.values) ...[
+            if (size.index > 0) const SizedBox(width: 2),
+            Container(
+              decoration: widget.cardSize == size
+                  ? BoxDecoration(
+                      color: dark
+                          ? colors.surfaceContainerHigh
+                          : colors.surfaceContainer,
+                      borderRadius: BorderRadius.circular(5),
+                      boxShadow: dark
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: .1),
+                                blurRadius: 2,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                    )
+                  : null,
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  key: ValueKey('library-card-size-${size.name}'),
+                  borderRadius: BorderRadius.circular(5),
+                  onTap: () => widget.onCardSizeChanged(size),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Center(
+                      child: Text(
+                        labels[size.index],
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: widget.cardSize == size
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: widget.cardSize == size
+                              ? colors.onSurface
+                              : colors.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class LibraryKeyCap extends StatelessWidget {
+  const LibraryKeyCap(this.label, {super.key});
+  final String label;
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      height: 18,
+      constraints: const BoxConstraints(minWidth: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainer,
+        borderRadius: BorderRadius.circular(4),
+        border: Border(
+          top: BorderSide(color: colors.outlineVariant),
+          left: BorderSide(color: colors.outlineVariant),
+          right: BorderSide(color: colors.outlineVariant),
+          bottom: BorderSide(color: colors.outlineVariant, width: 2),
+        ),
+      ),
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Geist Mono',
+            fontSize: 10.5,
+            fontWeight: FontWeight.w500,
+            height: 1,
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LibraryIconButton extends StatelessWidget {
+  const LibraryIconButton({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    this.onPressed,
+    this.size = 16,
+    this.strokeWidth = 1.8,
+    this.mirrored = false,
+  });
+  final String icon, tooltip;
+  final VoidCallback? onPressed;
+  final double size, strokeWidth;
+  final bool mirrored;
+  @override
+  Widget build(BuildContext context) {
+    Widget glyph = LibraryIcon(
+      icon,
+      size: size,
+      strokeWidth: strokeWidth,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
+    if (mirrored) glyph = Transform.flip(flipX: true, child: glyph);
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(6),
+        child: SizedBox(width: 28, height: 28, child: Center(child: glyph)),
+      ),
+    );
+  }
+}
+
+class LibraryDropdownFace extends StatelessWidget {
+  const LibraryDropdownFace({
+    super.key,
+    required this.icon,
+    this.label,
+    this.trailingIcon = 'chevD',
+  });
+  final String icon, trailingIcon;
+  final String? label;
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      height: 30,
+      padding: const EdgeInsets.only(left: 10, right: 8),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LibraryIcon(icon, size: 14, color: colors.onSurface),
+          const SizedBox(width: 6),
+          if (label != null) ...[
+            Text(
+              label!,
+              style: TextStyle(fontSize: 12.5, color: colors.onSurface),
+            ),
+            const SizedBox(width: 6),
+          ],
+          LibraryIcon(trailingIcon, size: 13, color: colors.onSurface),
+        ],
+      ),
+    );
+  }
+}
+
+class LibrarySplitButton<T> extends StatelessWidget {
+  const LibrarySplitButton({
+    super.key,
+    required this.action,
+    required this.menuItems,
+    required this.onSelected,
+    this.iconOnly = false,
+    this.menuTooltip,
+  });
+  final LibraryAction action;
+  final List<PopupMenuEntry<T>> Function(BuildContext) menuItems;
+  final ValueChanged<T> onSelected;
+  final bool iconOnly;
+  final String? menuTooltip;
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final enabled = action.onPressed != null;
+    final brand = libraryBrandColor(theme);
+    return Material(
+      color: enabled ? brand : brand.withValues(alpha: .45),
+      borderRadius: BorderRadius.circular(7),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        height: 30,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Tooltip(
+              message: action.label,
+              child: InkWell(
+                key: action.key,
+                onTap: action.onPressed,
+                child: Padding(
+                  padding: EdgeInsets.only(left: iconOnly ? 8 : 11, right: 7),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      LibraryIcon(
+                        action.icon,
+                        size: 14,
+                        strokeWidth: 2.4,
+                        color: Colors.white,
+                      ),
+                      if (!iconOnly) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          action.label,
+                          style: const TextStyle(
+                            fontFamily: 'HarmonyOS Sans SC',
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: 1,
+              height: 20,
+              color: Colors.white.withValues(alpha: .35),
+            ),
+            PopupMenuButton<T>(
+              tooltip: menuTooltip ?? action.label,
+              enabled: enabled,
+              padding: EdgeInsets.zero,
+              position: PopupMenuPosition.under,
+              itemBuilder: menuItems,
+              onSelected: onSelected,
+              child: const SizedBox(
+                width: 24,
+                height: 30,
+                child: Center(
+                  child: LibraryIcon(
+                    'chevD',
+                    size: 13,
+                    strokeWidth: 2.2,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

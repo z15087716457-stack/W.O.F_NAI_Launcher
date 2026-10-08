@@ -20,7 +20,7 @@ extension _VibeLibraryWorkbench on _VibeLibraryScreenState {
     },
     child: LibraryShell(
       navVisible: _navVisible,
-      hasSelection: _selectedVibeId != null,
+      hasSelection: false,
       nav: Column(
         children: [
           LibraryNavHeader(
@@ -30,16 +30,21 @@ extension _VibeLibraryWorkbench on _VibeLibraryScreenState {
               size: 18,
               color: theme.colorScheme.primary,
             ),
-            trailing: IconButton(
+            trailing: LibraryIconButton(
+              icon: 'dbl',
+              size: 15,
+              mirrored: true,
+              tooltip: context.l10n.common_collapse,
               onPressed: () => _updateLayoutState(() => _navVisible = false),
-              icon: const LibraryIcon('dbl', size: 15),
             ),
           ),
           LibraryNavSection(
             title: context.l10n.vibeLibrary_categories,
-            trailing: IconButton(
+            trailing: LibraryIconButton(
+              icon: 'plus',
+              size: 14,
+              tooltip: context.l10n.vibeLibrary_createCategoryTitle,
               onPressed: () => _showCreateCategoryDialog(context),
-              icon: const LibraryIcon('plus', size: 14),
             ),
           ),
           Expanded(

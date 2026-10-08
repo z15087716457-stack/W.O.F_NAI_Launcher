@@ -1,7 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/components/viewer_stage.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_detail/image_detail_data.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_detail/image_detail_viewer.dart';
 import '../library/library_test_helpers.dart';
 
 void main() {
@@ -60,6 +67,56 @@ void main() {
       expect(escaped, 1);
     },
   );
+  testWidgets('viewer keeps save and image actions reachable from the top bar', (
+    tester,
+  ) async {
+    var saved = 0, sent = 0;
+    final bytes = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+    );
+    tester.view.physicalSize = const Size(1600, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          shortcutConfigNotifierProvider.overrideWith(TestLibraryShortcuts.new),
+        ],
+        child: MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ImageDetailViewer(
+            images: [GeneratedImageDetailData(imageBytes: bytes)],
+            showMetadataPanel: false,
+            callbacks: ImageDetailCallbacks(
+              onSave: (_) async => saved++,
+              onSendToImg2Img: (_) async => sent++,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    Future<void> settle() async {
+      for (var i = 0; i < 6; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    final l10n = lookupAppLocalizations(const Locale('zh'));
+    await tester.tap(find.byKey(const Key('viewer-actions-menu')));
+    await settle();
+    expect(find.text(l10n.shortcut_action_copy_image), findsOneWidget);
+    await tester.tap(find.text(l10n.common_save));
+    await settle();
+    expect(saved, 1);
+    await tester.tap(find.byKey(const Key('viewer-actions-menu')));
+    await settle();
+    await tester.tap(find.text(l10n.detail_sendToImg2Img));
+    await settle();
+    expect((saved, sent), (1, 1));
+  });
   testWidgets('single page omits filmstrip and arrows', (tester) async {
     await pumpLibrary(tester, const _FakePage(count: 1));
     expect(find.byKey(const Key('viewer-filmstrip-slot')), findsNothing);
