@@ -17,6 +17,7 @@ import '../../../utils/prompt_block_bundle_insertion.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/prompt/blocks/prompt_block_colors.dart';
+import '../../../widgets/prompt/pills/prompt_pill.dart';
 import '../../../widgets/prompt/blocks/prompt_block_drag_data.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../prompt_block_library/widgets/prompt_block_detail.dart';
@@ -411,48 +412,17 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
     PromptBlock block, {
     required List<PromptBlockFolder> folders,
   }) {
-    final theme = Theme.of(context);
     final color = promptBlockColorFromString(block.color);
     final title = block.title.trim().isEmpty
         ? context.l10n.promptBlockLibrary_unnamedBlock
         : block.title.trim();
-
     final chip = ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 200),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.16),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha: 0.55), width: 0.9),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              promptBlockIconFromName(block.iconName),
-              size: 15,
-              color: color,
-            ),
-            const SizedBox(width: 5),
-            Flexible(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurface,
-                  height: 1.1,
-                ),
-              ),
-            ),
-            if (block.isFavorite) ...[
-              const SizedBox(width: 4),
-              Icon(Icons.star, size: 13, color: color),
-            ],
-          ],
-        ),
+      child: PromptPill(
+        title: title,
+        color: color,
+        appearance: block.appearance,
+        icon: promptBlockIconFromName(block.iconName),
       ),
     );
 
@@ -475,7 +445,7 @@ class _BlockLibraryPanelState extends ConsumerState<BlockLibraryPanel> {
           color: Colors.transparent,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 200),
-            child: Opacity(opacity: 0.9, child: chip),
+            child: PromptPillDragFeedback(child: chip),
           ),
         ),
         childWhenDragging: Opacity(opacity: 0.35, child: chip),

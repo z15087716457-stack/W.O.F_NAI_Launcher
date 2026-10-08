@@ -95,6 +95,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   /// L1 实例卡浮层（P2.5）：同屏只开一张，编辑器卸载时必须带走。
   OverlayEntry? _instanceCardEntry;
+  String? _instanceCardMarker;
   TranslationPillEditHandle? _translationEditor;
 
   @override
@@ -120,6 +121,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     super.didUpdateWidget(oldWidget);
     // scope 切换（角色编辑面板 State 复用、切换编辑目标）：重绑文档
     if (oldWidget.pillScope != widget.pillScope) {
+      _dismissInstanceCard(refresh: false);
       _translationEditor?.dismiss();
       _translationEditor = null;
       final workspace = ref.read(_workspace);
@@ -166,7 +168,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   @override
   void dispose() {
-    _dismissInstanceCard();
+    _dismissInstanceCard(refresh: false);
     _translationEditor?.dismiss();
     _controller
       ..removeListener(_handleControllerChanged)
@@ -185,7 +187,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   /// 点药丸开 L1 实例卡（P2.5）：点击位置浮卡，点外/再点别处关闭。
   void _showInstanceCard(String marker, Offset globalPosition) {
-    _dismissInstanceCard();
+    _dismissInstanceCard(refresh: false);
     final entry = buildPillInstanceOverlayEntry(
       scope: widget.pillScope,
       marker: marker,
@@ -195,12 +197,16 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     );
     _instanceCardEntry = entry;
     Overlay.of(context, rootOverlay: true).insert(entry);
+    setState(() => _instanceCardMarker = marker);
   }
 
-  void _dismissInstanceCard() {
+  void _dismissInstanceCard({bool refresh = true}) {
     final entry = _instanceCardEntry;
     _instanceCardEntry = null;
+    final hadMarker = _instanceCardMarker != null;
+    _instanceCardMarker = null;
     entry?.remove();
+    if (refresh && hadMarker && mounted) setState(() {});
   }
 
   /// 本编辑器绑定的药丸工作区（按 [pillScope] 取家族实例）。
@@ -307,6 +313,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       );
     });
     parts.add(library == null);
+    parts.add(_instanceCardMarker ?? '');
     return Object.hashAll(parts);
   }
 
@@ -456,6 +463,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       evolutionEnabled: instance.evolutionEnabled,
       allowEvolutionToggle: widget.allowEvolutionToggle,
       isAttachedUc: instance.useNegativeContent && instance.bundleId != null,
+      active: _instanceCardMarker == marker,
     );
 
     return WidgetSpan(
@@ -482,7 +490,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
             color: Colors.transparent,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 220),
-              child: pill,
+              child: PromptPillDragFeedback(child: pill),
             ),
           ),
           childWhenDragging: Opacity(opacity: 0.35, child: pill),
@@ -501,10 +509,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     );
   }
 
-  Widget _withPillGap(Widget child) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
-    child: child,
-  );
+  Widget _withPillGap(Widget child) =>
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 1), child: child);
 
   Future<void> _editTranslation(
     String marker,

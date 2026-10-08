@@ -1,13 +1,30 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
-import 'dna_icon.dart';
+import '../../common/dashed_rounded_border.dart';
+import '../../common/studio_icons.dart';
+import '../../common/translation_icon.dart';
 import '../blocks/prompt_block_appearance.dart';
+import 'dna_icon.dart';
 
-/// 药丸编辑器中文本流内联渲染的块药丸（P0 原型）。
-///
-/// 纯视觉组件：颜色胶囊 + 标题；禁用态降透明度，异常态（块已删/失效标记）
-/// 由 [variant] 区分。交互（点击/长按拖拽）由外层包装。
+enum PromptPillSize {
+  regular,
+  large;
+
+  double get height => this == regular ? 20 : 24;
+  double get fontSize => this == regular ? 12 : 13;
+  double get iconSize => this == regular ? 12 : 13;
+  double get radius => this == regular ? 5 : 6;
+  double get gap => this == regular ? 3 : 4;
+  EdgeInsets get padding => this == regular
+      ? const EdgeInsets.only(left: 4, right: 6)
+      : const EdgeInsets.only(left: 6, right: 8);
+}
+
+/// The same compact visual in editors, the library and the floating palette.
+/// Interaction remains with the host; multiline labels are reserved for the
+/// palette's existing translated reading, never for inline block instances.
 class PromptPill extends StatelessWidget {
   const PromptPill({
     super.key,
@@ -23,147 +40,270 @@ class PromptPill extends StatelessWidget {
     this.allowEvolutionToggle = false,
     this.isAttachedUc = false,
     this.variant = PromptPillVariant.normal,
+    this.size = PromptPillSize.regular,
+    this.active = false,
+    this.focused = false,
+    this.leading,
+    this.label,
+    this.trailing,
+    this.multiline = false,
   });
 
   final String title;
   final Color color;
   final String appearance;
   final bool enabled;
-
-  /// 随机实例的用户锁定角标；固定、未知和失效块不显示。
-  final bool locked;
-
-  /// 块自定义图标；null 时用默认模块图标（异常态图标不受此影响）。
   final IconData? icon;
-
-  /// 随机/顺序实例的右侧模式角标；遗传开启时由 DNA 角标替换。
+  final bool locked;
   final bool showRollBadge;
-
-  /// 模式角标图标：随机=骰子（默认），顺序=右箭头（逐幕步进）。
   final IconData rollBadgeIcon;
-
-  /// 画风探索深度轮使用的实例级遗传角标；只影响 UI，不进入提示词文本，
-  /// 并替换右侧骰子角标。
   final bool evolutionEnabled;
-
-  /// 当前页面是否允许操作遗传开关；仅探索页渲染 DNA 角标。
   final bool allowEvolutionToggle;
   final bool isAttachedUc;
   final PromptPillVariant variant;
+  final PromptPillSize size;
+  final bool active;
+  final bool focused;
+  final Widget? leading;
+  final Widget? label;
+  final Widget? trailing;
+  final bool multiline;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final (borderColor, fillColor, textColor, icon) = switch (variant) {
-      PromptPillVariant.normal => (
-        color.withValues(alpha: enabled ? 0.85 : 0.35),
-        enabled
-            ? PromptBlockAppearance.fill(
-                appearance,
-                color,
-                dark: theme.brightness == Brightness.dark,
-              )
-            : color.withValues(alpha: .07),
-        enabled
-            ? PromptBlockAppearance.text(
-                appearance,
-                color,
-                theme.colorScheme.onSurface,
-              )
-            : theme.colorScheme.onSurfaceVariant,
-        this.icon ?? StudioIcons.promptBlocks,
-      ),
+    final colors = theme.colorScheme;
+    final normal = variant == PromptPillVariant.normal;
+    final dark = theme.brightness == Brightness.dark;
+    final translation = appearance == PromptBlockAppearance.translation;
+    final solid = appearance == PromptBlockAppearance.solid;
+    final dashed = !normal || !enabled;
+    final (border, fill, ink, glyph) = switch (variant) {
       PromptPillVariant.missing => (
-        theme.colorScheme.error.withValues(alpha: 0.7),
-        theme.colorScheme.error.withValues(alpha: 0.12),
-        theme.colorScheme.error,
+        colors.error.withValues(alpha: .7),
+        colors.error.withValues(alpha: .12),
+        colors.error,
         Icons.error_outline,
       ),
       PromptPillVariant.unknown => (
-        theme.colorScheme.outline.withValues(alpha: 0.6),
-        theme.colorScheme.outline.withValues(alpha: 0.10),
-        theme.colorScheme.onSurfaceVariant,
+        colors.outline.withValues(alpha: .6),
+        Colors.transparent,
+        colors.onSurfaceVariant,
         Icons.help_outline,
       ),
-    };
-
-    // FEAT-47：DNA 角标为探索页专属；主生成页不渲染（开着遗传的实例
-    // 回退显示骰子角标）。
-
-    // 尺寸对齐主提示词正文（bodyMedium）：药丸曾用 labelSmall 明显小于正文字号
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: fillColor,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: borderColor, width: 0.9),
+      PromptPillVariant.normal when !enabled => (
+        colors.onSurfaceVariant.withValues(alpha: .7),
+        Colors.transparent,
+        colors.onSurfaceVariant,
+        icon ?? StudioIcons.promptBlocks,
       ),
-      child: CustomPaint(
-        painter: PromptBlockPatternPainter(
-          appearance: appearance,
-          color: color,
+      PromptPillVariant.normal => (
+        translation
+            ? colors.outlineVariant
+            : solid
+            ? color
+            : color.withValues(alpha: .45),
+        active && !solid && !translation
+            ? color.withValues(alpha: .16)
+            : PromptBlockAppearance.fill(
+                appearance,
+                color,
+                dark: dark,
+                translationSurface: colors.surfaceContainerHighest,
+              ),
+        PromptBlockAppearance.text(
+          appearance,
+          color,
+          colors.onSurface,
+          dark: dark,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 13,
-              color: appearance == PromptBlockAppearance.solid
-                  ? textColor
-                  : borderColor,
-            ),
-            if (variant == PromptPillVariant.normal && locked) ...[
-              const SizedBox(width: 2),
-              Icon(Icons.lock_outline, size: 12, color: borderColor),
-            ],
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                  height: 1.1,
+        icon ?? StudioIcons.promptBlocks,
+      ),
+    };
+    final iconColor = !normal || !enabled || solid || translation ? ink : color;
+    final textStyle = (theme.textTheme.bodyMedium ?? const TextStyle())
+        .copyWith(
+          fontSize: size.fontSize,
+          fontWeight: translation ? FontWeight.w500 : FontWeight.w600,
+          height: multiline ? 1.25 : 1,
+          color: ink,
+          decoration: normal && !enabled
+              ? TextDecoration.lineThrough
+              : TextDecoration.none,
+        );
+    final content = Material(
+      color: fill,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(size.radius),
+        side: dashed ? BorderSide.none : BorderSide(color: border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: CustomPaint(
+        painter: normal && enabled
+            ? PromptBlockPatternPainter(appearance: appearance, color: color)
+            : null,
+        foregroundPainter: dashed
+            ? DashedRoundedBorderPainter(
+                color: border,
+                dashedColor: border,
+                radius: Radius.circular(size.radius),
+                topRounded: true,
+                bottomRounded: true,
+                solidLeft: false,
+                solidRight: false,
+                dashedAll: true,
+              )
+            : null,
+        child: Padding(
+          padding: multiline
+              ? size.padding.add(const EdgeInsets.symmetric(vertical: 3))
+              : size.padding,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconTheme(
+                data: IconThemeData(color: iconColor, size: size.iconSize),
+                child: !normal
+                    ? Icon(glyph, size: size.iconSize, color: iconColor)
+                    : leading ??
+                          (translation
+                              ? TranslationIcon(
+                                  size: size.iconSize,
+                                  color: iconColor,
+                                )
+                              : Icon(
+                                  glyph,
+                                  size: size.iconSize,
+                                  color: iconColor,
+                                )),
+              ),
+              SizedBox(width: size.gap),
+              Flexible(
+                child: DefaultTextStyle(
+                  style: textStyle,
+                  child:
+                      label ??
+                      Text(
+                        title,
+                        style: textStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                 ),
               ),
-            ),
-            if (variant == PromptPillVariant.normal && isAttachedUc) ...[
-              const SizedBox(width: 5),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-                decoration: BoxDecoration(
-                  color: borderColor.withValues(alpha: .14),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-                child: Text(
-                  'UC',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                    color: borderColor,
+              if (normal && isAttachedUc) ...[
+                SizedBox(width: size.gap),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: .16),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Text(
+                    'UC',
+                    style: textStyle.copyWith(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
                 ),
-              ),
+              ],
+              if (normal && evolutionEnabled && allowEvolutionToggle) ...[
+                SizedBox(width: size.gap),
+                DnaIcon(size: 11, color: iconColor.withValues(alpha: .8)),
+              ] else if (normal && locked) ...[
+                SizedBox(width: size.gap),
+                Icon(
+                  Icons.lock_outline,
+                  size: 11,
+                  color: iconColor.withValues(alpha: .8),
+                ),
+              ] else if (normal && showRollBadge) ...[
+                SizedBox(width: size.gap),
+                Icon(
+                  rollBadgeIcon,
+                  size: 11,
+                  color: iconColor.withValues(alpha: .8),
+                ),
+              ],
+              if (trailing != null) ...[SizedBox(width: size.gap), trailing!],
             ],
-            if (variant == PromptPillVariant.normal &&
-                evolutionEnabled &&
-                allowEvolutionToggle) ...[
-              const SizedBox(width: 2),
-              DnaIcon(size: 12, color: color),
-            ] else if (variant == PromptPillVariant.normal &&
-                showRollBadge) ...[
-              const SizedBox(width: 2),
-              Icon(rollBadgeIcon, size: 11, color: borderColor),
-            ],
-          ],
+          ),
         ),
       ),
     );
+    final frame = multiline
+        ? ConstrainedBox(
+            constraints: BoxConstraints(minHeight: size.height),
+            child: content,
+          )
+        : SizedBox(height: size.height, child: content);
+    return CustomPaint(
+      foregroundPainter: focused
+          ? _PillFocusPainter(colors.primary, size.radius)
+          : null,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size.radius),
+          boxShadow: active && normal && enabled
+              ? [BoxShadow(color: color.withValues(alpha: .3), spreadRadius: 2)]
+              : null,
+        ),
+        child: frame,
+      ),
+    );
   }
+}
+
+class _PillFocusPainter extends CustomPainter {
+  const _PillFocusPainter(this.color, this.radius);
+  final Color color;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) => canvas.drawRRect(
+    RRect.fromRectAndRadius(
+      (Offset.zero & size).inflate(2),
+      Radius.circular(radius + 2),
+    ),
+    Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2,
+  );
+
+  @override
+  bool shouldRepaint(_PillFocusPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.radius != radius;
+}
+
+/// Visual feedback without changing the drag data, anchor or target geometry.
+class PromptPillDragFeedback extends StatelessWidget {
+  const PromptPillDragFeedback({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Transform.rotate(
+    angle: -math.pi / 90,
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(PromptPillSize.regular.radius),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: .18),
+            offset: const Offset(0, 6),
+            blurRadius: 16,
+          ),
+        ],
+      ),
+      child: child,
+    ),
+  );
 }
 
 enum PromptPillVariant { normal, missing, unknown }

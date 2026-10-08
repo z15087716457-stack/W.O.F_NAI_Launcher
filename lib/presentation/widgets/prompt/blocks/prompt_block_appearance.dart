@@ -31,13 +31,29 @@ abstract final class PromptBlockAppearance {
     _ => l10n.blockAppearance_classic,
   };
 
-  static Color fill(String value, Color color, {required bool dark}) {
+  static Color fill(
+    String value,
+    Color color, {
+    required bool dark,
+    Color? translationSurface,
+  }) {
     if (value == solid) return color;
-    return color.withValues(alpha: dark ? .23 : .14);
+    if (value == translation && translationSurface != null) {
+      return translationSurface;
+    }
+    if (value == stripes || value == gradient) return Colors.transparent;
+    if (value == dots) return color.withValues(alpha: .05);
+    return color.withValues(alpha: dark ? .15 : .08);
   }
 
-  static Color text(String value, Color color, Color fallback) {
-    if (value != solid) return fallback;
+  static Color text(
+    String value,
+    Color color,
+    Color fallback, {
+    bool dark = false,
+  }) {
+    if (value == translation) return fallback;
+    if (value != solid) return Color.lerp(fallback, color, dark ? .62 : .72)!;
     return ThemeData.estimateBrightnessForColor(color) == Brightness.dark
         ? Colors.white
         : Colors.black;
@@ -60,20 +76,19 @@ class PromptBlockPatternPainter extends CustomPainter {
         size.isEmpty) {
       return;
     }
-    final paint = Paint()
-      ..color = color.withValues(alpha: .14)
-      ..strokeWidth = 1;
+    final paint = Paint();
     if (appearance == PromptBlockAppearance.dots) {
-      for (var x = 5.0; x < size.width; x += 10) {
-        for (var y = 5.0; y < size.height; y += 10) {
-          canvas.drawCircle(Offset(x, y), 1, paint);
+      paint.color = color.withValues(alpha: .34);
+      for (var x = 3.0; x < size.width; x += 6) {
+        for (var y = 3.0; y < size.height; y += 6) {
+          canvas.drawCircle(Offset(x, y), .9, paint);
         }
       }
       return;
     }
     if (appearance == PromptBlockAppearance.gradient) {
       final gradient = LinearGradient(
-        colors: [color.withValues(alpha: .11), Colors.transparent],
+        colors: [color.withValues(alpha: .24), color.withValues(alpha: .02)],
       );
       canvas.drawRect(
         Offset.zero & size,
@@ -81,18 +96,26 @@ class PromptBlockPatternPainter extends CustomPainter {
       );
       return;
     }
-    const step = 9.0;
-    paint.color = color.withValues(alpha: .16);
-    for (var x = -size.height; x < size.width + size.height; x += step) {
-      canvas.drawLine(
-        Offset(math.max(0, x), math.max(0, -x)),
-        Offset(
-          math.min(size.width, x + size.height),
-          math.min(size.height, size.height + x),
+    // One shader pass avoids compounding two alpha layers at each stripe.
+    final gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      tileMode: TileMode.repeated,
+      colors: [
+        color.withValues(alpha: .17),
+        color.withValues(alpha: .17),
+        color.withValues(alpha: .05),
+        color.withValues(alpha: .05),
+      ],
+      stops: const [0, 3 / 7, 3 / 7, 1],
+    );
+    canvas.drawRect(
+      Offset.zero & size,
+      paint
+        ..shader = gradient.createShader(
+          const Rect.fromLTWH(0, 0, 7 / math.sqrt2, 7 / math.sqrt2),
         ),
-        paint,
-      );
-    }
+    );
   }
 
   @override

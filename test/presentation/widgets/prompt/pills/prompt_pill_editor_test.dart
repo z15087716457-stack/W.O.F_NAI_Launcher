@@ -108,9 +108,14 @@ void main() {
       isTrue,
     );
     expect(find.text('UC'), findsOneWidget);
+    expect(tester.widget<PromptPill>(find.byType(PromptPill)).active, isFalse);
     await tester.tap(find.byType(PromptPill));
     await tester.pumpAndSettle();
+    expect(tester.widget<PromptPill>(find.byType(PromptPill)).active, isTrue);
     expect(find.text('冷色'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(tester.widget<PromptPill>(find.byType(PromptPill)).active, isFalse);
   });
 
   testWidgets('tag divider starts near short title and moves with long title', (

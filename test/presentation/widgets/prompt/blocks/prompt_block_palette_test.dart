@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
@@ -22,6 +24,10 @@ import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.da
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_palette.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
+import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
+
+import '../../../../helpers/studio_capture_fonts.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -332,6 +338,133 @@ void main() {
   });
 
   group('PromptBlockPaletteButton overlay', () {
+    var captureFontsLoaded = false;
+    for (final locale in ['zh', 'en', 'ja', 'ko']) {
+      for (final brightness in Brightness.values) {
+        testWidgets(
+          'real palette fits compact pills $locale ${brightness.name}',
+          (tester) async {
+            final previousShadows = debugDisableShadows;
+            debugDisableShadows = false;
+            try {
+              if (Platform.environment['CAPTURE_STUDIO_UI'] == '1' &&
+                  !captureFontsLoaded) {
+                await tester.runAsync(loadStudioCaptureFonts);
+                captureFontsLoaded = true;
+              }
+              tester.view.devicePixelRatio = 1;
+              tester.view.physicalSize = const Size(860, 620);
+              addTearDown(tester.view.resetDevicePixelRatio);
+              addTearDown(tester.view.resetPhysicalSize);
+              final l10n = await AppLocalizations.delegate.load(Locale(locale));
+              final blocks = [
+                for (final appearance in [
+                  'classic',
+                  'stripes',
+                  'dots',
+                  'solid',
+                ])
+                  PromptBlock.create(
+                    id: 'capture-$appearance',
+                    title: l10n.generation_sectionReferenceImages,
+                    content: 'synthetic tag',
+                    appearance: appearance,
+                  ),
+                PromptBlock.create(
+                  id: 'capture-translation',
+                  title: l10n.generation_imageSize,
+                  content: 'synthetic tag',
+                  appearance: 'translation',
+                  readingTranslationZh: List.filled(
+                    12,
+                    l10n.generation_sectionReferenceImages,
+                  ).join(', '),
+                ),
+              ];
+              final container = ProviderContainer(
+                overrides: [
+                  promptBlockPaletteNotifierProvider.overrideWith(
+                    () => _FakePaletteNotifier(blocks),
+                  ),
+                  promptBlockLibraryNotifierProvider.overrideWith(
+                    _NoopLibraryNotifier.new,
+                  ),
+                  generationParamsNotifierProvider.overrideWith(
+                    _FakeGenerationParamsNotifier.new,
+                  ),
+                ],
+              );
+              addTearDown(container.dispose);
+              const captureKey = Key('native-palette-capture');
+              await tester.pumpWidget(
+                RepaintBoundary(
+                  key: captureKey,
+                  child: UncontrolledProviderScope(
+                    container: container,
+                    child: MaterialApp(
+                      debugShowCheckedModeBanner: false,
+                      locale: Locale(locale),
+                      localizationsDelegates:
+                          AppLocalizations.localizationsDelegates,
+                      supportedLocales: AppLocalizations.supportedLocales,
+                      theme: brightness == Brightness.light
+                          ? GeistTheme.light
+                          : GeistTheme.dark,
+                      home: const Scaffold(
+                        body: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: PromptBlockPaletteButton(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+              await tester.pumpAndSettle();
+              await tester.tap(
+                find.byKey(const Key('prompt-block-palette-toggle')),
+              );
+              await tester.pumpAndSettle();
+              final ordinary = tester
+                  .widgetList<PromptPill>(find.byType(PromptPill))
+                  .where((pill) => !pill.multiline);
+              expect(ordinary, hasLength(4));
+              for (final pill in ordinary) {
+                expect(tester.getSize(find.byWidget(pill)).height, 20);
+              }
+              expect(tester.takeException(), isNull);
+              if (Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
+                final boundary = tester.renderObject<RenderRepaintBoundary>(
+                  find.byKey(captureKey),
+                );
+                await tester.runAsync(() async {
+                  final image = await boundary.toImage(pixelRatio: 1);
+                  try {
+                    final bytes = await image.toByteData(
+                      format: ui.ImageByteFormat.png,
+                    );
+                    final file = File(
+                      '.dart_tool/uiux-blocks-task01/captures/palette-$locale-${brightness.name}.png',
+                    );
+                    await file.parent.create(recursive: true);
+                    await file.writeAsBytes(bytes!.buffer.asUint8List());
+                  } finally {
+                    image.dispose();
+                  }
+                });
+              }
+              await tester.pumpWidget(const SizedBox());
+            } finally {
+              debugDisableShadows = previousShadows;
+            }
+          },
+        );
+      }
+    }
+
     Widget buildApp(ProviderContainer container, {bool reducedMotion = false}) {
       return UncontrolledProviderScope(
         container: container,

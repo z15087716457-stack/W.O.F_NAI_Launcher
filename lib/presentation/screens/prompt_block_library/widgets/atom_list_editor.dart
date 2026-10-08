@@ -1,11 +1,10 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/atom_document.dart';
 import '../../../widgets/common/inset_shadow_container.dart';
+import '../../../widgets/common/dashed_rounded_border.dart';
 import '../../../widgets/prompt/nai_syntax_controller.dart';
 
 /// 块内原子编辑器（FEAT-79）：单文本流自由编辑。
@@ -335,7 +334,7 @@ class AtomChip extends StatelessWidget {
       // CustomPaint 必须包在 Padding 外：描边按 child 尺寸画，
       // 放内层会把 padding 画到框外、文字贴边。
       child: CustomPaint(
-        foregroundPainter: _DashedBoxPainter(
+        foregroundPainter: DashedRoundedBorderPainter(
           color: color,
           dashedColor: breakColor ?? color,
           radius: r,
@@ -363,125 +362,6 @@ class AtomChip extends StatelessWidget {
 /// 由 [solidLeft]/[solidRight] 决定实线或虚线。四角仅当
 /// 相邻两边都是实线时画 [radius] 圆弧（虚线边不能转弧，
 /// 落直角）。普通描边 1px，折行虚线 1.5px；线心以 0.5 偏移。
-class _DashedBoxPainter extends CustomPainter {
-  _DashedBoxPainter({
-    required this.color,
-    required this.dashedColor,
-    required this.radius,
-    required this.topRounded,
-    required this.bottomRounded,
-    required this.solidLeft,
-    required this.solidRight,
-  });
-
-  final Color color;
-  final Color dashedColor;
-  final Radius radius;
-  final bool topRounded;
-  final bool bottomRounded;
-  final bool solidLeft;
-  final bool solidRight;
-
-  static const double _dash = 3;
-  static const double _gap = 2;
-  static const double _c = 0.5;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    final dashedPaint = Paint()
-      ..color = dashedColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    final w = size.width;
-    final h = size.height;
-    final r = radius.x;
-    // 四角弧条件：角有资格圆（首/末外角）且相邻两边都实。
-    final tl = topRounded && solidLeft ? r : 0.0;
-    final tr = topRounded && solidRight ? r : 0.0;
-    final bl = bottomRounded && solidLeft ? r : 0.0;
-    final br = bottomRounded && solidRight ? r : 0.0;
-
-    canvas.drawLine(Offset(tl, _c), Offset(w - tr, _c), paint);
-    canvas.drawLine(Offset(bl, h - _c), Offset(w - br, h - _c), paint);
-    if (tl > 0) {
-      _arc(canvas, paint, tl, tl, math.pi, math.pi / 2);
-    }
-    if (tr > 0) {
-      _arc(canvas, paint, w - tr, tr, -math.pi / 2, math.pi / 2);
-    }
-    if (br > 0) {
-      _arc(canvas, paint, w - br, h - br, 0, math.pi / 2);
-    }
-    if (bl > 0) {
-      _arc(canvas, paint, bl, h - bl, math.pi / 2, math.pi / 2);
-    }
-    _edgeV(canvas, solidLeft ? paint : dashedPaint, _c, tl, h - bl, solidLeft);
-    _edgeV(
-      canvas,
-      solidRight ? paint : dashedPaint,
-      w - _c,
-      tr,
-      h - br,
-      solidRight,
-    );
-  }
-
-  /// 竖边：实线一条到底；虚线首段顶 y1（接上横边/弧端）、
-  /// 末段顶 y2。
-  void _edgeV(
-    Canvas canvas,
-    Paint paint,
-    double x,
-    double y1,
-    double y2,
-    bool solid,
-  ) {
-    if (solid) {
-      canvas.drawLine(Offset(x, y1), Offset(x, y2), paint);
-      return;
-    }
-    var y = y1;
-    while (y < y2) {
-      final end = (y + _dash).clamp(y, y2);
-      canvas.drawLine(Offset(x, y), Offset(x, end.toDouble()), paint);
-      y += _dash + _gap;
-    }
-  }
-
-  /// 四分之一圆弧（逆时针坐标系下的角弧），线心半径 = 角
-  /// 半径 - 0.5 保证外缘对齐框边。
-  void _arc(
-    Canvas canvas,
-    Paint paint,
-    double cx,
-    double cy,
-    double start,
-    double sweep,
-  ) {
-    final rr = radius.x - _c;
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: rr),
-      start,
-      sweep,
-      false,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBoxPainter oldDelegate) =>
-      oldDelegate.color != color ||
-      oldDelegate.dashedColor != dashedColor ||
-      oldDelegate.radius != radius ||
-      oldDelegate.topRounded != topRounded ||
-      oldDelegate.bottomRounded != bottomRounded ||
-      oldDelegate.solidLeft != solidLeft ||
-      oldDelegate.solidRight != solidRight;
-}
 
 /// 一行文本段 + 它的行框宽。
 class _Seg {

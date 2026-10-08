@@ -46,7 +46,7 @@ void main() {
     expect(tester.getSize(find.text(reading)).height, greaterThan(28));
     expect(find.byType(TranslationIcon), findsOneWidget);
     final pillMaterial = tester.widget<Material>(
-      find.ancestor(
+      find.descendant(
         of: find.byKey(const ValueKey('prompt-block-pill-body-translation-1')),
         matching: find.byWidgetPredicate(
           (widget) =>
@@ -55,7 +55,7 @@ void main() {
       ),
     );
     final pillShape = pillMaterial.shape! as RoundedRectangleBorder;
-    expect(pillShape.borderRadius.resolve(TextDirection.ltr).topLeft.x, 6);
+    expect(pillShape.borderRadius.resolve(TextDirection.ltr).topLeft.x, 5);
     expect(tester.takeException(), isNull);
   });
 

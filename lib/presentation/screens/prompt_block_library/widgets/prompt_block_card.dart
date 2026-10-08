@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,6 +9,7 @@ import '../../../widgets/prompt/blocks/prompt_block_appearance.dart';
 import '../../../widgets/prompt/blocks/prompt_block_icons.dart';
 import '../../../widgets/prompt/nai_syntax_controller.dart';
 import '../../../widgets/prompt/pills/translation_tag_span.dart';
+import '../../../widgets/prompt/pills/prompt_pill.dart';
 import '../../../widgets/common/translation_icon.dart';
 
 enum _PromptBlockCardAction { favorite, copy, addTag, edit, delete }
@@ -330,7 +329,6 @@ class PromptBlockPill extends StatelessWidget {
     this.selected = false,
     this.multiSelected = false,
     this.onSecondaryTap,
-    this.showThumbnail = true,
     this.paletteStyle = false,
     this.highlightEnabled = true,
     this.numericEmphasisEnabled = true,
@@ -347,9 +345,6 @@ class PromptBlockPill extends StatelessWidget {
 
   /// 右键菜单入口（secondary tap）。
   final void Function(TapUpDetails details)? onSecondaryTap;
-
-  /// 有缩略图时以 22px 圆角头像替换前导图标；无图块仍显示图标。
-  final bool showThumbnail;
 
   /// The floating palette shows full text at a smaller, prompt-like size.
   final bool paletteStyle;
@@ -386,19 +381,23 @@ class PromptBlockPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final blockColor = promptBlockColorFromString(block.color);
-    final thumbnail = block.thumbnail;
+    final translated =
+        paletteStyle &&
+        (block.readingTranslationZh != null ||
+            block.appearance == PromptBlockAppearance.translation);
     final titleStyle = theme.textTheme.bodyMedium?.copyWith(
-      fontSize: paletteStyle ? 12 : null,
-      height: paletteStyle ? 1.25 : null,
-      fontWeight: paletteStyle ? FontWeight.w500 : FontWeight.w600,
+      fontSize: 12,
+      height: 1.25,
+      fontWeight: FontWeight.w500,
       color: PromptBlockAppearance.text(
         block.appearance,
         blockColor,
         theme.colorScheme.onSurface,
+        dark: theme.brightness == Brightness.dark,
       ),
     );
     final marks =
-        paletteStyle &&
+        translated &&
             block.readingTranslationZh == displayTitle &&
             block.readingTranslationMarks?.isNotEmpty == true
         ? TranslationPill.fromJson({
@@ -411,105 +410,38 @@ class PromptBlockPill extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Material(
-          color: PromptBlockAppearance.fill(
-            block.appearance,
-            blockColor,
-            dark: theme.brightness == Brightness.dark,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(paletteStyle ? 6 : 18),
-            side: BorderSide(
-              color: selected
-                  ? theme.colorScheme.primary
-                  : blockColor.withValues(alpha: 0.65),
-              width: selected ? 1.4 : 1,
-            ),
-          ),
-          clipBehavior: Clip.antiAlias,
+          type: MaterialType.transparency,
           child: InkWell(
             key: ValueKey('prompt-block-pill-body-${block.id}'),
             onTap: onTap,
-            child: CustomPaint(
-              painter: PromptBlockPatternPainter(
-                appearance: block.appearance,
-                color: blockColor,
-              ),
-              child: Padding(
-                padding: paletteStyle
-                    ? const EdgeInsets.fromLTRB(8, 5, 22, 5)
-                    : const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (showThumbnail &&
-                        thumbnail != null &&
-                        !(paletteStyle && block.readingTranslationZh != null))
-                      ClipRRect(
-                        key: ValueKey('prompt-block-pill-thumb-${block.id}'),
-                        borderRadius: BorderRadius.circular(5),
-                        child: Image.file(
-                          File(thumbnail),
-                          width: 22,
-                          height: 22,
-                          fit: BoxFit.cover,
-                          alignment: Alignment(
-                            block.thumbnailOffsetX.clamp(-1.0, 1.0),
-                            block.thumbnailOffsetY.clamp(-1.0, 1.0),
-                          ),
-                          filterQuality: FilterQuality.medium,
-                          errorBuilder: (_, __, ___) =>
-                              _blockIcon(paletteStyle, blockColor),
-                        ),
-                      )
-                    else
-                      _blockIcon(paletteStyle, blockColor),
-                    SizedBox(width: paletteStyle ? 5 : 6),
-                    Flexible(
-                      child: paletteStyle
-                          ? Text.rich(
-                              _paletteTextSpan(context, titleStyle, marks),
-                              softWrap: true,
-                              overflow: TextOverflow.visible,
-                              style: titleStyle,
-                            )
-                          : Text(
-                              displayTitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: titleStyle,
-                            ),
-                    ),
-                    if (multiSelected) ...[
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.check_circle,
-                        size: 15,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+            borderRadius: BorderRadius.circular(PromptPillSize.regular.radius),
+            child: PromptPill(
+              title: displayTitle,
+              color: blockColor,
+              appearance: block.appearance,
+              icon: promptBlockIconFromName(block.iconName),
+              focused: selected,
+              multiline: translated,
+              leading: translated ? const TranslationIcon(size: 12) : null,
+              label: translated
+                  ? Text.rich(
+                      _paletteTextSpan(context, titleStyle, marks),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                      style: titleStyle,
+                    )
+                  : null,
+              trailing: multiSelected
+                  ? Icon(
+                      Icons.check_circle,
+                      size: 12,
+                      color: theme.colorScheme.primary,
+                    )
+                  : null,
             ),
           ),
         ),
       ),
     );
-  }
-
-  Widget _blockIcon(bool paletteStyle, Color blockColor) {
-    final color = PromptBlockAppearance.text(
-      block.appearance,
-      blockColor,
-      blockColor,
-    );
-    final size = paletteStyle ? 13.0 : 16.0;
-    return paletteStyle && block.readingTranslationZh != null
-        ? TranslationIcon(size: size, color: color)
-        : Icon(
-            promptBlockIconFromName(block.iconName),
-            size: size,
-            color: color,
-          );
   }
 }
