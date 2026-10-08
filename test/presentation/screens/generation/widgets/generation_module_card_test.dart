@@ -9,6 +9,8 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_module_card.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_sidebar_style.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
+import 'package:nai_launcher/presentation/widgets/common/uiux_prototype_icon.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../helpers/studio_capture_fonts.dart';
 
@@ -446,45 +448,51 @@ void main() {
       testWidgets(
         'real-font samples fit $locale ${brightness.name} at 280/352/420/560',
         (tester) async {
-          for (final width in [280.0, 352.0, 420.0, 560.0]) {
-            await _pump(
-              tester,
-              (_) => const _SampleModules(),
-              width: width,
-              locale: Locale(locale),
-              brightness: brightness,
-            );
-            expect(tester.takeException(), isNull);
-            for (final header in [
-              'character-header',
-              'reference-header',
-              'image-header',
-            ]) {
-              expect(tester.getSize(find.byKey(Key(header))).height, 38);
+          final previousShadows = debugDisableShadows;
+          debugDisableShadows = false;
+          try {
+            for (final width in [280.0, 352.0, 420.0, 560.0]) {
+              await _pump(
+                tester,
+                (_) => const _SampleModules(),
+                width: width,
+                locale: Locale(locale),
+                brightness: brightness,
+              );
+              expect(tester.takeException(), isNull);
+              for (final header in [
+                'character-header',
+                'reference-header',
+                'image-header',
+              ]) {
+                expect(tester.getSize(find.byKey(Key(header))).height, 38);
+              }
+              final card = tester.getRect(
+                find.byKey(const Key('character-module')),
+              );
+              final action = tester.getRect(
+                find.byKey(const Key('character-add')),
+              );
+              expect(card.contains(action.topLeft), isTrue);
+              expect(card.contains(action.bottomRight), isTrue);
+              expect(action.size, const Size(28, 28));
+              final title = tester.widget<Text>(
+                find
+                    .descendant(
+                      of: find.byType(GenerationModuleCard).last,
+                      matching: find.byType(Text),
+                    )
+                    .first,
+              );
+              expect(title.maxLines, 1);
+              expect(title.overflow, TextOverflow.ellipsis);
+              await _capture(
+                tester,
+                '$locale-${brightness.name}-${width.toInt()}',
+              );
             }
-            final card = tester.getRect(
-              find.byKey(const Key('character-module')),
-            );
-            final action = tester.getRect(
-              find.byKey(const Key('character-add')),
-            );
-            expect(card.contains(action.topLeft), isTrue);
-            expect(card.contains(action.bottomRight), isTrue);
-            expect(action.size, const Size(28, 28));
-            final title = tester.widget<Text>(
-              find
-                  .descendant(
-                    of: find.byType(GenerationModuleCard).last,
-                    matching: find.byType(Text),
-                  )
-                  .first,
-            );
-            expect(title.maxLines, 1);
-            expect(title.overflow, TextOverflow.ellipsis);
-            await _capture(
-              tester,
-              '$locale-${brightness.name}-${width.toInt()}',
-            );
+          } finally {
+            debugDisableShadows = previousShadows;
           }
         },
       );
@@ -556,7 +564,7 @@ class _SampleModules extends StatelessWidget {
               child: _referenceRow(
                 context,
                 l10n.img2img_title,
-                Icons.image_outlined,
+                StudioIcons.imageToImage,
               ),
             ),
             const SizedBox.shrink(),
@@ -564,14 +572,14 @@ class _SampleModules extends StatelessWidget {
               child: _referenceRow(
                 context,
                 l10n.vibe_title,
-                Icons.style_outlined,
+                StudioIcons.styleTransfer,
               ),
             ),
             GenerationModuleRow(
               child: _referenceRow(
                 context,
                 l10n.preciseRef_title,
-                Icons.person_outline,
+                StudioIcons.referenceFocus,
               ),
             ),
           ],
@@ -592,13 +600,25 @@ class _SampleModules extends StatelessWidget {
                     segments: const [
                       SidebarSegment(
                         value: 1,
-                        child: Icon(Icons.crop_landscape),
+                        child: UiuxPrototypeIcon(
+                          Icons.crop_landscape,
+                          source: UiuxPrototypeIconSource.generation,
+                        ),
                       ),
                       SidebarSegment(
                         value: 2,
-                        child: Icon(Icons.crop_portrait),
+                        child: UiuxPrototypeIcon(
+                          Icons.crop_portrait,
+                          source: UiuxPrototypeIconSource.generation,
+                        ),
                       ),
-                      SidebarSegment(value: 3, child: Icon(Icons.crop_square)),
+                      SidebarSegment(
+                        value: 3,
+                        child: UiuxPrototypeIcon(
+                          Icons.crop_square,
+                          source: UiuxPrototypeIconSource.generation,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),

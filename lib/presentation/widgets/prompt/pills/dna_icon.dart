@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../common/studio_icons.dart';
-import '../../common/studio_animated_icon.dart';
+import '../../common/uiux_prototype_icon.dart';
 
-/// The shared double-helix symbol for block inheritance actions and markers.
+/// The selected prototype's helix for inheritance actions and pill markers.
 class DnaIcon extends StatelessWidget {
   const DnaIcon({
     super.key,
@@ -13,13 +13,15 @@ class DnaIcon extends StatelessWidget {
   });
 
   final double size;
+  // Kept for caller compatibility; prototype artwork has no trigger animation.
   final int trigger;
   final Color color;
 
   @override
-  Widget build(BuildContext context) => StudioAnimatedIcon(
-    icon: StudioIcons.inherit,
-    trigger: trigger,
+  Widget build(BuildContext context) => UiuxPrototypeIcon(
+    StudioIcons.inherit,
+    prototypeName: 'evo',
+    strokeWidth: 2.2,
     size: size,
     color: color,
   );

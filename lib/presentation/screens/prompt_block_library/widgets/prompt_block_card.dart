@@ -11,6 +11,7 @@ import '../../../widgets/prompt/nai_syntax_controller.dart';
 import '../../../widgets/prompt/pills/translation_tag_span.dart';
 import '../../../widgets/prompt/pills/prompt_pill.dart';
 import '../../../widgets/common/translation_icon.dart';
+import '../../../widgets/common/uiux_prototype_icon.dart';
 
 enum _PromptBlockCardAction { favorite, copy, addTag, edit, delete }
 
@@ -422,7 +423,12 @@ class PromptBlockPill extends StatelessWidget {
               icon: promptBlockIconFromName(block.iconName),
               focused: selected,
               multiline: translated,
-              leading: translated ? const TranslationIcon(size: 12) : null,
+              leading: translated
+                  ? const TranslationIcon(
+                      size: 12,
+                      style: TranslationIconStyle.pill,
+                    )
+                  : null,
               label: translated
                   ? Text.rich(
                       _paletteTextSpan(context, titleStyle, marks),
@@ -432,7 +438,7 @@ class PromptBlockPill extends StatelessWidget {
                     )
                   : null,
               trailing: multiSelected
-                  ? Icon(
+                  ? UiuxPrototypeIcon(
                       Icons.check_circle,
                       size: 12,
                       color: theme.colorScheme.primary,

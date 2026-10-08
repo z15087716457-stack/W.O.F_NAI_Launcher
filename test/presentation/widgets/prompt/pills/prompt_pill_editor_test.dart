@@ -1,4 +1,5 @@
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
+import 'package:nai_launcher/presentation/widgets/common/uiux_prototype_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -441,7 +442,14 @@ void main() {
       await tester.pump();
 
       // FEAT-47：开着遗传的实例在主页面不渲染 DNA 角标，回退骰子角标。
-      expect(find.byIcon(Icons.casino_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is UiuxPrototypeIcon &&
+              widget.icon == Icons.casino_outlined,
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(DnaIcon), findsNothing);
 
       await tester.tap(find.byType(PromptPill));

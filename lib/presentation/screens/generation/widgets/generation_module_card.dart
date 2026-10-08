@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../widgets/common/uiux_prototype_icon.dart';
 import 'generation_sidebar_style.dart';
 
 /// Shared desktop-sidebar module. Children own their padding and dividers so
@@ -179,7 +180,12 @@ class ModuleHeaderIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return IconButton(
-      icon: Icon(icon, size: GenSidebarStyle.moduleActionIconSize),
+      icon: UiuxPrototypeIcon(
+        icon,
+        size: GenSidebarStyle.moduleActionIconSize,
+        source: UiuxPrototypeIconSource.generation,
+        strokeWidth: icon == Icons.add ? 2.1 : 1.8,
+      ),
       tooltip: tooltip,
       onPressed: onPressed,
       style: ButtonStyle(

@@ -11,6 +11,7 @@ import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/p
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/dashed_rounded_border.dart';
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
+import 'package:nai_launcher/presentation/widgets/common/uiux_prototype_icon.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_appearance.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_colors.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
@@ -19,6 +20,10 @@ import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart'
 import '../../../../helpers/studio_capture_fonts.dart';
 
 const _capture = Key('pill-specification-capture');
+
+Finder _icon(IconData icon) => find.byWidgetPredicate(
+  (widget) => widget is UiuxPrototypeIcon && widget.icon == icon,
+);
 
 Future<void> _pump(
   WidgetTester tester,
@@ -181,11 +186,11 @@ void main() {
           badge == 'dna' ? findsOneWidget : findsNothing,
         );
         expect(
-          find.byIcon(Icons.lock_outline),
+          _icon(Icons.lock_outline),
           badge == 'lock' ? findsOneWidget : findsNothing,
         );
         expect(
-          find.byIcon(Icons.casino_outlined),
+          _icon(Icons.casino_outlined),
           badge == 'mode' ? findsOneWidget : findsNothing,
         );
       }
@@ -198,7 +203,7 @@ void main() {
           rollBadgeIcon: Icons.arrow_right_alt,
         ),
       );
-      expect(find.byIcon(Icons.arrow_right_alt), findsOneWidget);
+      expect(_icon(Icons.arrow_right_alt), findsOneWidget);
     },
   );
 
@@ -249,10 +254,10 @@ void main() {
         );
         final missing = variant == PromptPillVariant.missing;
         expect(
-          find.byIcon(missing ? Icons.error_outline : Icons.help_outline),
+          _icon(missing ? Icons.error_outline : Icons.help_outline),
           findsOneWidget,
         );
-        expect(find.byIcon(Icons.lock_outline), findsNothing);
+        expect(_icon(Icons.lock_outline), findsNothing);
         expect(
           tester.widget<Text>(find.text('tag')).style!.color,
           missing
@@ -386,7 +391,10 @@ void main() {
         isTrue,
       );
       expect(find.byType(Image), findsNothing);
-      expect(tester.widget<Icon>(find.byIcon(Icons.check_circle)).size, 12);
+      expect(
+        tester.widget<UiuxPrototypeIcon>(_icon(Icons.check_circle)).size,
+        12,
+      );
       await tester.tap(find.byType(PromptBlockPill));
       final gesture = await tester.startGesture(
         tester.getCenter(find.byType(PromptBlockPill)),
@@ -398,6 +406,33 @@ void main() {
       expect(secondary, 1);
     },
   );
+
+  testWidgets('active style combinations keep the prototype CSS surfaces', (
+    tester,
+  ) async {
+    final color = promptBlockColorPalette.last;
+    for (final appearance in PromptBlockAppearance.selectable) {
+      await _pump(
+        tester,
+        (_) => PromptPill(
+          title: 'tag',
+          color: color,
+          appearance: appearance,
+          active: true,
+        ),
+      );
+      final expected = switch (appearance) {
+        PromptBlockAppearance.classic => color.withValues(alpha: .16),
+        PromptBlockAppearance.solid => color,
+        PromptBlockAppearance.translation =>
+          GeistTheme.light.colorScheme.surfaceContainerHighest,
+        PromptBlockAppearance.dots => color.withValues(alpha: .05),
+        _ => Colors.transparent,
+      };
+      expect(_surface(tester).color, expected);
+      expect(tester.getSize(find.byType(PromptPill)).height, 20);
+    }
+  });
 
   testWidgets(
     'four middle-aligned pills fit one 13px/1.55 line without raising it',

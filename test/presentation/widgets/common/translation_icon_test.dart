@@ -13,20 +13,11 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_retranslate_button.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
+import 'package:nai_launcher/presentation/widgets/common/uiux_prototype_icon.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/presentation/widgets/common/translation_modified_badge.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
-
-TranslationIconPainter painter(WidgetTester tester) =>
-    tester
-            .widget<CustomPaint>(
-              find.descendant(
-                of: find.byType(TranslationIcon),
-                matching: find.byType(CustomPaint),
-              ),
-            )
-            .painter!
-        as TranslationIconPainter;
 
 Widget sample({bool busy = false, bool reduced = false, bool ticking = true}) =>
     MaterialApp(
@@ -217,7 +208,7 @@ void main() {
           final context = tester.element(slot);
           final l10n = AppLocalizations.of(context)!;
           expect(find.byTooltip(l10n.wiki_translationQueued), findsOneWidget);
-          expect(painter(tester).motion.value, 0);
+          expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
           expect(tester.getRect(slot), rect);
           activity.activity = const TagTranslationActivity(
             TagTranslationPhase.translating,
@@ -225,7 +216,7 @@ void main() {
           activity.notifyListeners();
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 450));
-          expect(painter(tester).motion.value, greaterThan(0));
+          expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
           expect(find.byTooltip(l10n.wiki_translating), findsOneWidget);
           activity.activity = const TagTranslationActivity(
             TagTranslationPhase.failed,
@@ -233,8 +224,13 @@ void main() {
           );
           activity.notifyListeners();
           await tester.pumpAndSettle();
-          expect(painter(tester).motion.value, 0);
-          expect(painter(tester).color, Theme.of(context).colorScheme.error);
+          expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
+          expect(
+            tester
+                .widget<UiuxPrototypeIcon>(find.byType(UiuxPrototypeIcon))
+                .color,
+            Theme.of(context).colorScheme.error,
+          );
           final retry = find.byTooltip(
             '${l10n.wiki_translationFailedRetry}\nrequest failed',
           );
@@ -254,88 +250,59 @@ void main() {
     }
   }
 
-  test(
-    'rotating arrows leave the central letter upright and stationary',
-    () async {
-      Future<List<int>> render(double phase) async {
-        final recorder = ui.PictureRecorder();
-        TranslationIconPainter(
-          Colors.blue,
-          AlwaysStoppedAnimation(phase),
-        ).paint(Canvas(recorder), const Size(96, 96));
-        final picture = recorder.endRecording();
-        final image = await picture.toImage(96, 96);
-        final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-        final pixels = data!.buffer.asUint8List().toList();
-        image.dispose();
-        picture.dispose();
-        return pixels;
-      }
-
-      List<int> center(List<int> pixels) => [
-        for (var y = 32; y < 64; y++)
-          for (var x = 34; x < 64; x++)
-            ...pixels.sublist((y * 96 + x) * 4, (y * 96 + x) * 4 + 4),
-      ];
-
-      final idle = await render(0);
-      final idleCenter = center(idle);
-      expect(idleCenter.any((byte) => byte != 0), isTrue);
-      for (final phase in [.125, .25, .375]) {
-        final moving = await render(phase);
-        expect(moving, isNot(idle));
-        expect(center(moving), idleCenter);
-      }
-    },
-  );
-
-  testWidgets('busy cycles the arrow ring and completion resets', (
+  testWidgets('prototype busy artwork keeps the same slot and theme opacity', (
     tester,
   ) async {
     await tester.pumpWidget(sample());
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(TranslationIcon)), const Size(16, 16));
-    expect(painter(tester).color.a, closeTo(.5, .01));
-    expect(painter(tester).motion.value, 0);
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
+    expect(
+      tester.widget<SvgPicture>(find.byType(SvgPicture)).colorFilter,
+      ColorFilter.mode(Colors.blue.withValues(alpha: .5), BlendMode.srcIn),
+    );
     await tester.pumpWidget(sample(busy: true));
     await tester.pump(const Duration(milliseconds: 450));
-    expect(painter(tester).motion.value, closeTo(.25, .01));
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
+    expect(
+      tester.widget<SvgPicture>(find.byType(SvgPicture)).colorFilter,
+      ColorFilter.mode(Colors.blue.withValues(alpha: .5), BlendMode.srcIn),
+    );
     await tester.pump(const Duration(milliseconds: 450));
-    expect(painter(tester).motion.value, closeTo(.5, .01));
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 900));
-    expect(painter(tester).motion.value, closeTo(0, .01));
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
     await tester.pumpWidget(sample());
     await tester.pumpAndSettle();
-    expect(painter(tester).motion.value, 0);
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
     expect(tester.binding.hasScheduledFrame, isFalse);
     await _captureMotion(tester);
   });
 
-  testWidgets(
-    'reduced motion and hidden tickers stop the loop while preserving busy state',
-    (tester) async {
-      await tester.pumpWidget(sample(busy: true, reduced: true));
-      await tester.pumpAndSettle();
-      expect(painter(tester).motion.value, 0);
-      expect(tester.binding.hasScheduledFrame, isFalse);
-      await tester.pumpWidget(sample(busy: true));
-      await tester.pump(const Duration(milliseconds: 450));
-      expect(painter(tester).motion.value, greaterThan(0));
-      await tester.pumpWidget(sample(busy: true, ticking: false));
-      await tester.pumpAndSettle();
-      expect(painter(tester).motion.value, 0);
-      expect(
-        tester.widget<TranslationIcon>(find.byType(TranslationIcon)).busy,
-        isTrue,
-      );
-      await tester.pumpWidget(sample(busy: true));
-      await tester.pump(const Duration(milliseconds: 450));
-      expect(painter(tester).motion.value, greaterThan(0));
-      await tester.pumpWidget(sample(busy: true, reduced: true));
-      await tester.pumpAndSettle();
-      expect(painter(tester).motion.value, 0);
-    },
-  );
+  testWidgets('prototype stays stable with reduced motion and hidden tickers', (
+    tester,
+  ) async {
+    await tester.pumpWidget(sample(busy: true, reduced: true));
+    await tester.pumpAndSettle();
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.pumpWidget(sample(busy: true));
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
+    await tester.pumpWidget(sample(busy: true, ticking: false));
+    await tester.pumpAndSettle();
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
+    expect(
+      tester.widget<TranslationIcon>(find.byType(TranslationIcon)).busy,
+      isTrue,
+    );
+    await tester.pumpWidget(sample(busy: true));
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
+    await tester.pumpWidget(sample(busy: true, reduced: true));
+    await tester.pumpAndSettle();
+    expect(find.byType(UiuxPrototypeIcon), findsOneWidget);
+  });
 }
 
 Future<void> _captureMotion(WidgetTester tester) async {

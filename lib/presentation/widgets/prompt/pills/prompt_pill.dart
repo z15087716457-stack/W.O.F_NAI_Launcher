@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../common/dashed_rounded_border.dart';
 import '../../common/studio_icons.dart';
 import '../../common/translation_icon.dart';
+import '../../common/uiux_prototype_icon.dart';
 import '../blocks/prompt_block_appearance.dart';
 import 'dna_icon.dart';
 
@@ -103,7 +104,7 @@ class PromptPill extends StatelessWidget {
             : solid
             ? color
             : color.withValues(alpha: .45),
-        active && !solid && !translation
+        active && appearance == PromptBlockAppearance.classic
             ? color.withValues(alpha: .16)
             : PromptBlockAppearance.fill(
                 appearance,
@@ -120,7 +121,11 @@ class PromptPill extends StatelessWidget {
         icon ?? StudioIcons.promptBlocks,
       ),
     };
-    final iconColor = !normal || !enabled || solid || translation ? ink : color;
+    final iconColor = translation && normal && enabled
+        ? colors.onSurfaceVariant
+        : !normal || !enabled || solid
+        ? ink
+        : color;
     final textStyle = (theme.textTheme.bodyMedium ?? const TextStyle())
         .copyWith(
           fontSize: size.fontSize,
@@ -164,17 +169,24 @@ class PromptPill extends StatelessWidget {
               IconTheme(
                 data: IconThemeData(color: iconColor, size: size.iconSize),
                 child: !normal
-                    ? Icon(glyph, size: size.iconSize, color: iconColor)
+                    ? UiuxPrototypeIcon(
+                        glyph,
+                        size: size.iconSize,
+                        color: iconColor,
+                        strokeWidth: 2,
+                      )
                     : leading ??
                           (translation
                               ? TranslationIcon(
                                   size: size.iconSize,
                                   color: iconColor,
+                                  style: TranslationIconStyle.pill,
                                 )
-                              : Icon(
+                              : UiuxPrototypeIcon(
                                   glyph,
                                   size: size.iconSize,
                                   color: iconColor,
+                                  strokeWidth: 2,
                                 )),
               ),
               SizedBox(width: size.gap),
@@ -218,17 +230,19 @@ class PromptPill extends StatelessWidget {
                 DnaIcon(size: 11, color: iconColor.withValues(alpha: .8)),
               ] else if (normal && locked) ...[
                 SizedBox(width: size.gap),
-                Icon(
+                UiuxPrototypeIcon(
                   Icons.lock_outline,
                   size: 11,
                   color: iconColor.withValues(alpha: .8),
+                  strokeWidth: 2.2,
                 ),
               ] else if (normal && showRollBadge) ...[
                 SizedBox(width: size.gap),
-                Icon(
+                UiuxPrototypeIcon(
                   rollBadgeIcon,
                   size: 11,
                   color: iconColor.withValues(alpha: .8),
+                  strokeWidth: 2.2,
                 ),
               ],
               if (trailing != null) ...[SizedBox(width: size.gap), trailing!],
