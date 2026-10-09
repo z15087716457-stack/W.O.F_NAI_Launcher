@@ -75,7 +75,9 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           return ExploreWorkbench(
             editorWidth: layout.styleExploreEditorWidth,
             inspectorWidth: layout.styleExploreInspectorWidth,
-            inspectorVisible: layout.styleExploreInspectorVisible,
+            inspectorVisible:
+                layout.styleExploreInspectorVisible ??
+                (MediaQuery.sizeOf(context).width <= 1280 ? false : null),
             onEditorResize: (dx) => notifier.setStyleExploreEditorWidth(
               ref.read(layoutStateNotifierProvider).styleExploreEditorWidth +
                   dx,

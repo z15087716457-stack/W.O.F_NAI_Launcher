@@ -77,6 +77,7 @@ void main() {
       final button = tester.widget<GenerateButtonWithCost>(
         find.byType(GenerateButtonWithCost),
       );
+      expect(button.labelOverride, '抽 1 张候选');
       button.onGenerate();
       await tester.pump();
       expect(invoked, 2);

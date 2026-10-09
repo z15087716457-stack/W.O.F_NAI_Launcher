@@ -4,14 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/style_explore/explore_manual_capture.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_run_runner.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
-import '../../../widgets/common/themed_input_dialog.dart';
 
 /// 探索切换菜单与舞台顶栏共用的界面动作。
 abstract final class ExploreRunActions {
@@ -32,24 +30,6 @@ abstract final class ExploreRunActions {
         return Colors.teal;
       case ExploreRunStatus.cancelled:
         return scheme.error;
-    }
-  }
-
-  static String statusLabel(AppLocalizations l10n, ExploreRunStatus status) {
-    switch (status) {
-      case ExploreRunStatus.draft:
-        return l10n.styleExplore_runStatusDraft;
-      case ExploreRunStatus.generating:
-        return l10n.styleExplore_runStatusGenerating;
-      case ExploreRunStatus.paused:
-        return l10n.styleExplore_runStatusPaused;
-      case ExploreRunStatus.generated:
-      case ExploreRunStatus.reviewing:
-        return l10n.styleExplore_runStatusGenerated;
-      case ExploreRunStatus.completed:
-        return l10n.styleExplore_runStatusCompleted;
-      case ExploreRunStatus.cancelled:
-        return l10n.styleExplore_runStatusCancelled;
     }
   }
 
@@ -106,26 +86,6 @@ abstract final class ExploreRunActions {
           .read(exploreRunListNotifierProvider.notifier)
           .cancelPaused(run.id);
     }
-  }
-
-  static Future<void> rename(
-    BuildContext context,
-    WidgetRef ref,
-    ExploreRun run,
-  ) async {
-    final l10n = context.l10n;
-    final name = await ThemedInputDialog.show(
-      context: context,
-      title: l10n.styleExplore_rename,
-      labelText: l10n.styleExplore_runNameLabel,
-      initialValue: run.displayName,
-      validator: (value) =>
-          value.trim().isEmpty ? l10n.styleExplore_nameRequired : null,
-    );
-    if (name == null || name.trim().isEmpty) return;
-    await ref
-        .read(exploreRunListNotifierProvider.notifier)
-        .rename(run.id, name.trim());
   }
 
   static Future<void> delete(

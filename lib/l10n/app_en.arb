@@ -81,12 +81,10 @@
   "common_unfavorite": "Unfavorite",
   "common_ok": "OK",
   "common_exit": "Exit",
-  "common_folder": "Folder",
   "common_grid": "Grid",
   "common_pack": "Pack",
   "common_multiSelect": "Multi-select",
   "common_category": "Category",
-  "common_categories": "Categories",
   "networkError_connectionTimeout": "Connection timed out. Check your network connection.",
   "networkError_sendTimeout": "Sending timed out. Try again.",
   "networkError_receiveTimeout": "Receiving timed out. Image generation may take longer than expected.",
@@ -2174,14 +2172,7 @@
   "vibeLibrary_deleteCategoryTitle": "Confirm Delete",
   "vibeLibrary_deleteCategoryContent": "Delete this category? Vibes in it will be moved to Uncategorized.",
   "vibeLibrary_sortTooltip": "Sort by",
-  "vibeLibrary_hideCategoryPanel": "Hide category panel",
-  "vibeLibrary_showCategoryPanel": "Show category panel",
-  "vibeLibrary_enterSelectionMode": "Enter selection mode",
-  "vibeLibrary_importTooltip": "Import Vibe files or PNG/JPG/JPEG/WEBP images (right-click for more options)",
-  "vibeLibrary_exportTooltip": "Export Vibe to file",
   "vibeLibrary_openFolderTooltip": "Open Vibe library folder",
-  "vibeLibrary_refresh": "Refresh",
-  "vibeLibrary_loading": "Loading...",
   "vibeLibrary_totalCount": "{count} Vibes",
   "@vibeLibrary_totalCount": {
     "placeholders": {
@@ -3504,7 +3495,6 @@
   "preciseRefLib_sendToPreciseRef": "Send to Precise Reference",
   "preciseRefLib_sendToImg2Img": "Send to Image to Image",
   "preciseRefLib_editEntry": "Edit Parameters",
-  "preciseRefLib_deleteEntry": "Delete",
   "preciseRefLib_confirmDeleteTitle": "Delete Entry",
   "preciseRefLib_confirmDelete": "Delete \"{name}\"? The image file will also be removed.",
   "@preciseRefLib_confirmDelete": {
@@ -4152,12 +4142,8 @@
   "styleExplore_discardChangesTitle": "Discard unsaved changes?",
   "styleExplore_discardChangesMessage": "The workspace has unsaved changes. Continuing will discard them.",
   "styleExplore_discardChangesConfirm": "Continue and discard",
-  "styleExplore_previewEmpty": "(empty)",
-  "styleExplore_copiedToClipboard": "Copied",
   "styleExplore_newRun": "New exploration",
-  "styleExplore_galleryEmptyHint": "No candidates yet. Create or select an explore run to start batch generation.",
-  "styleExplore_runNameLabel": "Exploration name",
-  "styleExplore_runDeleted": "Deleted \"{name}\"",
+  "styleExplore_runDeleted": "Deleted exploration “{name}”",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
@@ -4165,14 +4151,11 @@
       }
     }
   },
-  "styleExplore_runStatusDraft": "Draft",
   "styleExplore_runStatusGenerating": "Generating",
   "styleExplore_runStatusPaused": "Paused",
-  "styleExplore_runStatusGenerated": "Generated",
-  "styleExplore_runStatusCompleted": "Completed",
   "styleExplore_runStatusCancelled": "Cancelled",
   "styleExplore_pauseRun": "Pause",
-  "styleExplore_cancelRun": "Cancel run",
+  "styleExplore_cancelRun": "Cancel exploration",
   "styleExplore_retryFailed": "Retry failed ({count})",
   "@styleExplore_retryFailed": {
     "placeholders": {
@@ -4190,7 +4173,7 @@
     }
   },
   "styleExplore_runBusy": "Generation busy, try again later",
-  "styleExplore_deleteRunTitle": "Delete explore run",
+  "styleExplore_deleteRunTitle": "Delete exploration",
   "styleExplore_deleteRunMessage": "Deletes \"{name}\" and its candidate image copies; source images in the gallery are not affected.",
   "@styleExplore_deleteRunMessage": {
     "placeholders": {
@@ -4199,13 +4182,13 @@
       }
     }
   },
-  "styleExplore_cancelRunTitle": "Cancel explore run",
-  "styleExplore_cancelRunMessage": "A cancelled run cannot be restarted; remaining pending candidates will be marked as cancelled.",
+  "styleExplore_cancelRunTitle": "Cancel exploration",
+  "styleExplore_cancelRunMessage": "A cancelled exploration cannot be restarted; remaining queued candidates are marked as cancelled.",
   "styleExplore_filterAll": "All",
   "styleExplore_filterHearted": "Favorites",
-  "styleExplore_renameFolder": "Rename folder",
-  "styleExplore_deleteFolder": "Delete folder",
-  "styleExplore_deleteFolderMessage": "Deletes the folder \"{name}\". Its candidates go back to Uncategorized; images are kept.",
+  "styleExplore_renameFolder": "Rename group",
+  "styleExplore_deleteFolder": "Delete group",
+  "styleExplore_deleteFolderMessage": "Delete group “{name}”? Its candidates become ungrouped; images are kept.",
   "@styleExplore_deleteFolderMessage": {
     "placeholders": {
       "name": {
@@ -4213,9 +4196,9 @@
       }
     }
   },
-  "styleExplore_folderNameLabel": "Folder name",
-  "styleExplore_deleteFamily": "Delete lineage",
-  "styleExplore_deleteFamilyMessage": "Deletes the lineage \"{name}\" with all its parent sets and candidate records ({count} images). Image files are kept.",
+  "styleExplore_folderNameLabel": "Group name",
+  "styleExplore_deleteFamily": "Delete evolution line",
+  "styleExplore_deleteFamilyMessage": "Delete evolution line “{name}”, all parents and offspring records ({count} images)? Image files are kept.",
   "@styleExplore_deleteFamilyMessage": {
     "placeholders": {
       "name": {
@@ -4226,9 +4209,9 @@
       }
     }
   },
-  "styleExplore_familyBusy": "This lineage still has candidates being generated. Cancel the task first",
-  "styleExplore_folderUncategorized": "Uncategorized",
-  "styleExplore_folderCreated": "Folder \"{name}\" created",
+  "styleExplore_familyBusy": "This evolution line still has candidates generating. Stop generation first.",
+  "styleExplore_folderUncategorized": "Ungrouped",
+  "styleExplore_folderCreated": "Created group “{name}”",
   "@styleExplore_folderCreated": {
     "placeholders": {
       "name": {
@@ -4238,28 +4221,8 @@
   },
   "styleExplore_candidateMissing": "Image file missing",
   "styleExplore_candidateDetailTitle": "Candidate detail",
-  "styleExplore_candidatePosition": "Image {current}/{total}",
-  "@styleExplore_candidatePosition": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_prevCandidate": "Previous",
   "styleExplore_nextCandidate": "Next",
-  "styleExplore_rollSnapshot": "Roll snapshot",
-  "styleExplore_seedLabel": "Seed {seed}",
-  "@styleExplore_seedLabel": {
-    "placeholders": {
-      "seed": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_roundNumber": "Round {number}",
   "@styleExplore_roundNumber": {
     "placeholders": {
@@ -4276,10 +4239,10 @@
       }
     }
   },
-  "styleExplore_adoptBlockEmpty": "Selected candidates have no roll text",
+  "styleExplore_adoptBlockEmpty": "The selected candidates have no artist strings or positive prompts to save",
   "styleExplore_deleteImage": "Delete image",
   "styleExplore_deleteImageTitle": "Delete candidate image",
-  "styleExplore_deleteImageMessage": "Deletes this candidate's image copy in the run directory and removes its record. The gallery source image is untouched.",
+  "styleExplore_deleteImageMessage": "Delete this candidate’s image copy and record? Library originals are kept.",
   "styleExplore_deleteImageDone": "Candidate image and record deleted",
   "styleExplore_selectCandidates": "Select",
   "styleExplore_selectedCount": "{count} selected",
@@ -4313,7 +4276,7 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "Update Existing Block Thumbnail",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "Select a block and replace its thumbnail",
-  "styleExplore_deepRoundCountHint": "Count must be at least {min} (one per parent)",
+  "styleExplore_deepRoundCountHint": "At least {min} images (one guaranteed for each parent)",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
       "min": {
@@ -4321,8 +4284,8 @@
       }
     }
   },
-  "styleExplore_deepRoundNoInstance": "No enabled random evolution block in the main prompt; deep round unavailable",
-  "styleExplore_deepRoundEmpty": "Mutation engine could not produce enough distinct children",
+  "styleExplore_deepRoundNoInstance": "No enabled genetic random block in the main prompt; offspring cannot be generated",
+  "styleExplore_deepRoundEmpty": "Not enough distinct offspring artist combinations could be created",
   "styleExplore_sortTitle": "Which is better?",
   "styleExplore_sortLeft": "Left is better",
   "styleExplore_sortRight": "Right is better",
@@ -4339,8 +4302,8 @@
       }
     }
   },
-  "styleExplore_sortDone": "Ranking finished",
-  "styleExplore_branchCreated": "Branch created ({count} parents)",
+  "styleExplore_sortDone": "Pairwise comparison complete",
+  "styleExplore_branchCreated": "Next generation bred ({count} parents)",
   "@styleExplore_branchCreated": {
     "placeholders": {
       "count": {
@@ -4348,10 +4311,10 @@
       }
     }
   },
-  "styleExplore_branchNeedLatest": "Branches can only be created from the latest generation pile",
-  "styleExplore_branchRoundsIncomplete": "The current generation still has unfinished rounds",
-  "styleExplore_branchDuplicate": "A selected child duplicates a first-generation parent string",
-  "styleExplore_branchEmpty": "Select at least one child candidate",
+  "styleExplore_branchNeedLatest": "Use offspring from the latest generation to breed the next one",
+  "styleExplore_branchRoundsIncomplete": "This generation has unfinished offspring; wait or stop generation",
+  "styleExplore_branchDuplicate": "A selected offspring candidate duplicates a first-generation parent string",
+  "styleExplore_branchEmpty": "Select at least one offspring candidate",
   "styleExplore_pileManageDeleteDone": "Deleted {count} candidates and their image copies",
   "@styleExplore_pileManageDeleteDone": {
     "placeholders": {
@@ -6743,7 +6706,6 @@
     }
   },
   "viewer_backLocalGallery": "Local gallery",
-  "viewer_backGeneration": "Generation",
   "viewer_fit": "Fit",
   "viewer_showInfo": "Show information panel (I)",
   "viewer_hideInfo": "Hide information panel (I)",
@@ -6844,7 +6806,6 @@
     }
   },
   "styleExplore_stopRun": "Stop generation",
-  "styleExplore_inspectorPlaceholder": "Select a candidate to view details",
   "styleExplore_thisWeek": "This week",
   "styleExplore_today": "Today",
   "styleExplore_smallCandidates": "Small candidates",
@@ -7193,7 +7154,7 @@
   },
   "styleExplore_parentsByPreference": "Parents · By preference",
   "styleExplore_backcross": "Backcross",
-  "styleExplore_childrenCount": "Children · {count}",
+  "styleExplore_childrenCount": "Offspring · {count}",
   "@styleExplore_childrenCount": {
     "placeholders": {
       "count": {
@@ -7223,11 +7184,11 @@
   "styleExplore_backcrossHint": "First-generation parents are included for backcrossing",
   "styleExplore_generationBusy": "This generation is still generating",
   "styleExplore_regeneratePrefix": "Generate",
-  "styleExplore_regenerateSuffix": "children",
+  "styleExplore_regenerateSuffix": "offspring",
   "styleExplore_pairCompare": "Rank by pairwise comparison",
   "styleExplore_howToUse": "How to use",
   "styleExplore_helpParents": "Parents are the artist combinations you pick; higher preference makes them more likely to contribute.",
-  "styleExplore_helpChildren": "Children come from crossing parents, mutations, or new artists injected from a pool.",
+  "styleExplore_helpChildren": "Offspring come from crossing parents, mutations, or new artists injected from a pool.",
   "styleExplore_helpCompare": "Pairwise comparison updates parent preferences and influences later combinations.",
   "styleExplore_helpBackcross": "Breeding the next generation automatically includes first-generation parents for backcrossing.",
   "styleExplore_originTitle": "How it was made",
@@ -7237,7 +7198,7 @@
   "styleExplore_newArtist": "New",
   "styleExplore_evolutionEmpty": "Pick a few favorites from the candidates to start an evolution line",
   "styleExplore_pickFromCandidates": "Pick candidates",
-  "styleExplore_generationSummary": "{parents} parents · {children} children · {selected} picked for the next generation",
+  "styleExplore_generationSummary": "{parents} parents · {children} offspring · {selected} picked for the next generation",
   "@styleExplore_generationSummary": {
     "placeholders": {
       "parents": {
@@ -7253,7 +7214,7 @@
   },
   "styleExplore_breedNext": "Breed next generation",
   "styleExplore_optionalName": "Name (optional)",
-  "styleExplore_childrenEmpty": "No children yet. Generate them above.",
+  "styleExplore_childrenEmpty": "No offspring yet. Generate a batch above.",
   "styleExplore_evolutionSubtitle": "Use your {count} picks as the first generation of parents",
   "@styleExplore_evolutionSubtitle": {
     "placeholders": {

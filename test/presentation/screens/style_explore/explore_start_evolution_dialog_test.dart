@@ -91,7 +91,9 @@ Widget evolutionDialogApp(
   ],
   child: MaterialApp(
     debugShowCheckedModeBanner: false,
-    theme: (dark ? GeistTheme.dark : GeistTheme.light).copyWith(platform: TargetPlatform.windows),
+    theme: (dark ? GeistTheme.dark : GeistTheme.light).copyWith(
+      platform: TargetPlatform.windows,
+    ),
     locale: Locale(locale),
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

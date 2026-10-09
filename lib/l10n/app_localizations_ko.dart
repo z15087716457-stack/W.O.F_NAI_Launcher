@@ -197,9 +197,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_exit => '종료';
 
   @override
-  String get common_folder => '폴더';
-
-  @override
   String get common_grid => '그리드';
 
   @override
@@ -210,9 +207,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get common_category => '분류';
-
-  @override
-  String get common_categories => '분류';
 
   @override
   String get networkError_connectionTimeout =>
@@ -4424,29 +4418,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vibeLibrary_sortTooltip => '정렬 기준';
 
   @override
-  String get vibeLibrary_hideCategoryPanel => '분류 패널 숨기기';
-
-  @override
-  String get vibeLibrary_showCategoryPanel => '분류 패널 표시';
-
-  @override
-  String get vibeLibrary_enterSelectionMode => '선택 모드 시작';
-
-  @override
-  String get vibeLibrary_importTooltip =>
-      'Vibe 파일이나 PNG/JPG/JPEG/WEBP 이미지 가져오기(마우스 오른쪽 버튼으로 옵션 더 보기)';
-
-  @override
-  String get vibeLibrary_exportTooltip => 'Vibe를 파일로 내보내기';
-
-  @override
   String get vibeLibrary_openFolderTooltip => 'Vibe 라이브러리 폴더 열기';
-
-  @override
-  String get vibeLibrary_refresh => '새로 고침';
-
-  @override
-  String get vibeLibrary_loading => '불러오는 중...';
 
   @override
   String vibeLibrary_totalCount(Object count) {
@@ -6633,9 +6605,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get preciseRefLib_editEntry => '매개변수 편집';
 
   @override
-  String get preciseRefLib_deleteEntry => '삭제';
-
-  @override
   String get preciseRefLib_confirmDeleteTitle => '항목 삭제';
 
   @override
@@ -7640,28 +7609,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => '계속하고 버리기';
 
   @override
-  String get styleExplore_previewEmpty => '(비어 있음)';
-
-  @override
-  String get styleExplore_copiedToClipboard => '복사했습니다';
-
-  @override
   String get styleExplore_newRun => '새 탐색';
 
   @override
-  String get styleExplore_galleryEmptyHint =>
-      '아직 후보가 없습니다. 탐색 작업을 만들거나 선택해 일괄 생성을 시작하세요.';
-
-  @override
-  String get styleExplore_runNameLabel => '탐색 이름';
-
-  @override
   String styleExplore_runDeleted(String name) {
-    return '\"$name\"을(를) 삭제했습니다';
+    return '탐색 “$name” 삭제됨';
   }
-
-  @override
-  String get styleExplore_runStatusDraft => '초안';
 
   @override
   String get styleExplore_runStatusGenerating => '생성 중';
@@ -7670,19 +7623,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_runStatusPaused => '일시 정지됨';
 
   @override
-  String get styleExplore_runStatusGenerated => '생성됨';
-
-  @override
-  String get styleExplore_runStatusCompleted => '완료됨';
-
-  @override
   String get styleExplore_runStatusCancelled => '취소됨';
 
   @override
   String get styleExplore_pauseRun => '일시 정지';
 
   @override
-  String get styleExplore_cancelRun => '작업 취소';
+  String get styleExplore_cancelRun => '탐색 취소';
 
   @override
   String styleExplore_retryFailed(int count) {
@@ -7698,7 +7645,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_runBusy => '생성 중입니다. 잠시 후 다시 시도하세요';
 
   @override
-  String get styleExplore_deleteRunTitle => '탐색 작업 삭제';
+  String get styleExplore_deleteRunTitle => '탐색 삭제';
 
   @override
   String styleExplore_deleteRunMessage(String name) {
@@ -7706,11 +7653,11 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_cancelRunTitle => '탐색 작업 취소';
+  String get styleExplore_cancelRunTitle => '탐색 취소';
 
   @override
   String get styleExplore_cancelRunMessage =>
-      '취소한 작업은 다시 시작할 수 없으며, 남은 대기 중 후보는 취소됨으로 표시됩니다.';
+      '취소한 탐색은 재시작할 수 없으며 대기 중인 후보도 취소됩니다.';
 
   @override
   String get styleExplore_filterAll => '전체';
@@ -7719,36 +7666,37 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_filterHearted => '즐겨찾기';
 
   @override
-  String get styleExplore_renameFolder => '폴더 이름 변경';
+  String get styleExplore_renameFolder => '그룹 이름 변경';
 
   @override
-  String get styleExplore_deleteFolder => '폴더 삭제';
+  String get styleExplore_deleteFolder => '그룹 삭제';
 
   @override
   String styleExplore_deleteFolderMessage(String name) {
-    return '\"$name\" 폴더를 삭제합니다. 안의 후보는 미분류로 돌아가며 이미지는 유지됩니다.';
+    return '“$name” 그룹을 삭제합니다. 후보는 미분류로 돌아가며 이미지는 유지됩니다.';
   }
 
   @override
-  String get styleExplore_folderNameLabel => '폴더 이름';
+  String get styleExplore_folderNameLabel => '그룹 이름';
 
   @override
-  String get styleExplore_deleteFamily => '계보 삭제';
+  String get styleExplore_deleteFamily => '진화 라인 삭제';
 
   @override
   String styleExplore_deleteFamilyMessage(String name, int count) {
-    return '\"$name\" 계보와 모든 부모 집합, 후보 기록(이미지 $count장)을 삭제합니다. 이미지 파일은 유지됩니다.';
+    return '“$name” 진화 라인과 모든 부모 및 자손 기록(이미지 $count장)을 삭제합니다. 이미지 파일은 유지됩니다.';
   }
 
   @override
-  String get styleExplore_familyBusy => '이 계보에 아직 생성 중인 후보가 있습니다. 먼저 작업을 취소하세요';
+  String get styleExplore_familyBusy =>
+      '이 진화 라인에 생성 중인 후보가 있습니다. 먼저 생성을 중지하세요.';
 
   @override
   String get styleExplore_folderUncategorized => '미분류';
 
   @override
   String styleExplore_folderCreated(String name) {
-    return '\"$name\" 폴더를 만들었습니다';
+    return '“$name” 그룹 생성됨';
   }
 
   @override
@@ -7758,23 +7706,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_candidateDetailTitle => '후보 상세';
 
   @override
-  String styleExplore_candidatePosition(int current, int total) {
-    return '$current/$total번째 이미지';
-  }
-
-  @override
   String get styleExplore_prevCandidate => '이전';
 
   @override
   String get styleExplore_nextCandidate => '다음';
-
-  @override
-  String get styleExplore_rollSnapshot => 'Roll 스냅숏';
-
-  @override
-  String styleExplore_seedLabel(String seed) {
-    return '시드 $seed';
-  }
 
   @override
   String styleExplore_roundNumber(int number) {
@@ -7787,7 +7722,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_adoptBlockEmpty => '선택한 후보에 Roll 텍스트가 없습니다';
+  String get styleExplore_adoptBlockEmpty =>
+      '선택한 후보에 저장할 작가 조합이나 긍정 프롬프트가 없습니다';
 
   @override
   String get styleExplore_deleteImage => '이미지 삭제';
@@ -7797,7 +7733,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_deleteImageMessage =>
-      '작업 폴더에 있는 이 후보의 이미지 사본과 기록을 삭제합니다. 갤러리의 원본 이미지는 그대로입니다.';
+      '후보의 이미지 사본과 기록을 삭제합니다. 라이브러리 원본은 유지됩니다.';
 
   @override
   String get styleExplore_deleteImageDone => '후보 이미지와 기록을 삭제했습니다';
@@ -7870,15 +7806,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String styleExplore_deepRoundCountHint(int min) {
-    return '개수는 최소 $min이어야 합니다(부모마다 하나)';
+    return '최소 $min장(각 부모당 1장 보장)';
   }
 
   @override
   String get styleExplore_deepRoundNoInstance =>
-      '메인 프롬프트에 사용 중인 무작위 유전 블록이 없어 심층 라운드를 진행할 수 없습니다';
+      '메인 프롬프트에 활성 유전 무작위 블록이 없어 자손을 생성할 수 없습니다';
 
   @override
-  String get styleExplore_deepRoundEmpty => '변이 엔진이 서로 다른 자식을 충분히 만들지 못했습니다';
+  String get styleExplore_deepRoundEmpty => '서로 다른 자손 작가 조합을 충분히 만들 수 없습니다';
 
   @override
   String get styleExplore_sortTitle => '어느 쪽이 더 좋나요?';
@@ -7901,18 +7837,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_sortDone => '순위 매기기 완료';
+  String get styleExplore_sortDone => '쌍별 비교 완료';
 
   @override
   String styleExplore_branchCreated(int count) {
-    return '분기를 만들었습니다(부모 $count개)';
+    return '다음 세대 육성됨(부모 $count개)';
   }
 
   @override
-  String get styleExplore_branchNeedLatest => '분기는 최신 세대 더미에서만 만들 수 있습니다';
+  String get styleExplore_branchNeedLatest => '최신 세대의 자손으로 다음 세대를 육성하세요';
 
   @override
-  String get styleExplore_branchRoundsIncomplete => '현재 세대에 끝나지 않은 라운드가 있습니다';
+  String get styleExplore_branchRoundsIncomplete =>
+      '현재 세대에 미완성 자손이 있습니다. 기다리거나 생성을 중지하세요';
 
   @override
   String get styleExplore_branchDuplicate => '선택한 자식이 1세대 부모 문자열과 같습니다';
@@ -12374,9 +12311,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get viewer_backLocalGallery => '로컬 갤러리';
 
   @override
-  String get viewer_backGeneration => '이미지 생성';
-
-  @override
   String get viewer_fit => '맞춤';
 
   @override
@@ -12469,9 +12403,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_stopRun => '생성 중지';
-
-  @override
-  String get styleExplore_inspectorPlaceholder => '후보를 선택하여 상세 정보 보기';
 
   @override
   String get styleExplore_thisWeek => '이번 주';
@@ -12721,7 +12652,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String styleExplore_childrenCount(int count) {
-    return '자손 · $count장';
+    return '자손 · $count';
   }
 
   @override
@@ -12744,7 +12675,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_regeneratePrefix => '다시 생성';
 
   @override
-  String get styleExplore_regenerateSuffix => '장 자손';
+  String get styleExplore_regenerateSuffix => '자손';
 
   @override
   String get styleExplore_pairCompare => '쌍 비교로 순위 지정';
@@ -12783,7 +12714,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_newArtist => '신규';
 
   @override
-  String get styleExplore_evolutionEmpty => '후보에서 마음에 드는 이미지를 골라 진화 계보를 시작하세요';
+  String get styleExplore_evolutionEmpty => '후보에서 마음에 드는 이미지를 골라 진화 라인을 시작하세요';
 
   @override
   String get styleExplore_pickFromCandidates => '후보 고르기';
@@ -12804,7 +12735,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_optionalName => '이름 (선택 사항)';
 
   @override
-  String get styleExplore_childrenEmpty => '아직 자손이 없습니다. 위에서 생성하세요.';
+  String get styleExplore_childrenEmpty => '아직 자손이 없습니다. 위에서 한 묶음을 생성하세요.';
 
   @override
   String styleExplore_evolutionSubtitle(int count) {

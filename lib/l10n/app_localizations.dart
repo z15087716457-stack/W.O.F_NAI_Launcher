@@ -463,12 +463,6 @@ abstract class AppLocalizations {
   /// **'Exit'**
   String get common_exit;
 
-  /// No description provided for @common_folder.
-  ///
-  /// In en, this message translates to:
-  /// **'Folder'**
-  String get common_folder;
-
   /// No description provided for @common_grid.
   ///
   /// In en, this message translates to:
@@ -492,12 +486,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Category'**
   String get common_category;
-
-  /// No description provided for @common_categories.
-  ///
-  /// In en, this message translates to:
-  /// **'Categories'**
-  String get common_categories;
 
   /// No description provided for @networkError_connectionTimeout.
   ///
@@ -8171,53 +8159,11 @@ abstract class AppLocalizations {
   /// **'Sort by'**
   String get vibeLibrary_sortTooltip;
 
-  /// No description provided for @vibeLibrary_hideCategoryPanel.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide category panel'**
-  String get vibeLibrary_hideCategoryPanel;
-
-  /// No description provided for @vibeLibrary_showCategoryPanel.
-  ///
-  /// In en, this message translates to:
-  /// **'Show category panel'**
-  String get vibeLibrary_showCategoryPanel;
-
-  /// No description provided for @vibeLibrary_enterSelectionMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter selection mode'**
-  String get vibeLibrary_enterSelectionMode;
-
-  /// No description provided for @vibeLibrary_importTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Import Vibe files or PNG/JPG/JPEG/WEBP images (right-click for more options)'**
-  String get vibeLibrary_importTooltip;
-
-  /// No description provided for @vibeLibrary_exportTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Export Vibe to file'**
-  String get vibeLibrary_exportTooltip;
-
   /// No description provided for @vibeLibrary_openFolderTooltip.
   ///
   /// In en, this message translates to:
   /// **'Open Vibe library folder'**
   String get vibeLibrary_openFolderTooltip;
-
-  /// No description provided for @vibeLibrary_refresh.
-  ///
-  /// In en, this message translates to:
-  /// **'Refresh'**
-  String get vibeLibrary_refresh;
-
-  /// No description provided for @vibeLibrary_loading.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading...'**
-  String get vibeLibrary_loading;
 
   /// No description provided for @vibeLibrary_totalCount.
   ///
@@ -11987,12 +11933,6 @@ abstract class AppLocalizations {
   /// **'Edit Parameters'**
   String get preciseRefLib_editEntry;
 
-  /// No description provided for @preciseRefLib_deleteEntry.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get preciseRefLib_deleteEntry;
-
   /// No description provided for @preciseRefLib_confirmDeleteTitle.
   ///
   /// In en, this message translates to:
@@ -13760,47 +13700,17 @@ abstract class AppLocalizations {
   /// **'Continue and discard'**
   String get styleExplore_discardChangesConfirm;
 
-  /// No description provided for @styleExplore_previewEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'(empty)'**
-  String get styleExplore_previewEmpty;
-
-  /// No description provided for @styleExplore_copiedToClipboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Copied'**
-  String get styleExplore_copiedToClipboard;
-
   /// No description provided for @styleExplore_newRun.
   ///
   /// In en, this message translates to:
   /// **'New exploration'**
   String get styleExplore_newRun;
 
-  /// No description provided for @styleExplore_galleryEmptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'No candidates yet. Create or select an explore run to start batch generation.'**
-  String get styleExplore_galleryEmptyHint;
-
-  /// No description provided for @styleExplore_runNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Exploration name'**
-  String get styleExplore_runNameLabel;
-
   /// No description provided for @styleExplore_runDeleted.
   ///
   /// In en, this message translates to:
-  /// **'Deleted \"{name}\"'**
+  /// **'Deleted exploration “{name}”'**
   String styleExplore_runDeleted(String name);
-
-  /// No description provided for @styleExplore_runStatusDraft.
-  ///
-  /// In en, this message translates to:
-  /// **'Draft'**
-  String get styleExplore_runStatusDraft;
 
   /// No description provided for @styleExplore_runStatusGenerating.
   ///
@@ -13813,18 +13723,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paused'**
   String get styleExplore_runStatusPaused;
-
-  /// No description provided for @styleExplore_runStatusGenerated.
-  ///
-  /// In en, this message translates to:
-  /// **'Generated'**
-  String get styleExplore_runStatusGenerated;
-
-  /// No description provided for @styleExplore_runStatusCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get styleExplore_runStatusCompleted;
 
   /// No description provided for @styleExplore_runStatusCancelled.
   ///
@@ -13841,7 +13739,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_cancelRun.
   ///
   /// In en, this message translates to:
-  /// **'Cancel run'**
+  /// **'Cancel exploration'**
   String get styleExplore_cancelRun;
 
   /// No description provided for @styleExplore_retryFailed.
@@ -13865,7 +13763,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_deleteRunTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete explore run'**
+  /// **'Delete exploration'**
   String get styleExplore_deleteRunTitle;
 
   /// No description provided for @styleExplore_deleteRunMessage.
@@ -13877,13 +13775,13 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_cancelRunTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cancel explore run'**
+  /// **'Cancel exploration'**
   String get styleExplore_cancelRunTitle;
 
   /// No description provided for @styleExplore_cancelRunMessage.
   ///
   /// In en, this message translates to:
-  /// **'A cancelled run cannot be restarted; remaining pending candidates will be marked as cancelled.'**
+  /// **'A cancelled exploration cannot be restarted; remaining queued candidates are marked as cancelled.'**
   String get styleExplore_cancelRunMessage;
 
   /// No description provided for @styleExplore_filterAll.
@@ -13901,55 +13799,55 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_renameFolder.
   ///
   /// In en, this message translates to:
-  /// **'Rename folder'**
+  /// **'Rename group'**
   String get styleExplore_renameFolder;
 
   /// No description provided for @styleExplore_deleteFolder.
   ///
   /// In en, this message translates to:
-  /// **'Delete folder'**
+  /// **'Delete group'**
   String get styleExplore_deleteFolder;
 
   /// No description provided for @styleExplore_deleteFolderMessage.
   ///
   /// In en, this message translates to:
-  /// **'Deletes the folder \"{name}\". Its candidates go back to Uncategorized; images are kept.'**
+  /// **'Delete group “{name}”? Its candidates become ungrouped; images are kept.'**
   String styleExplore_deleteFolderMessage(String name);
 
   /// No description provided for @styleExplore_folderNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Folder name'**
+  /// **'Group name'**
   String get styleExplore_folderNameLabel;
 
   /// No description provided for @styleExplore_deleteFamily.
   ///
   /// In en, this message translates to:
-  /// **'Delete lineage'**
+  /// **'Delete evolution line'**
   String get styleExplore_deleteFamily;
 
   /// No description provided for @styleExplore_deleteFamilyMessage.
   ///
   /// In en, this message translates to:
-  /// **'Deletes the lineage \"{name}\" with all its parent sets and candidate records ({count} images). Image files are kept.'**
+  /// **'Delete evolution line “{name}”, all parents and offspring records ({count} images)? Image files are kept.'**
   String styleExplore_deleteFamilyMessage(String name, int count);
 
   /// No description provided for @styleExplore_familyBusy.
   ///
   /// In en, this message translates to:
-  /// **'This lineage still has candidates being generated. Cancel the task first'**
+  /// **'This evolution line still has candidates generating. Stop generation first.'**
   String get styleExplore_familyBusy;
 
   /// No description provided for @styleExplore_folderUncategorized.
   ///
   /// In en, this message translates to:
-  /// **'Uncategorized'**
+  /// **'Ungrouped'**
   String get styleExplore_folderUncategorized;
 
   /// No description provided for @styleExplore_folderCreated.
   ///
   /// In en, this message translates to:
-  /// **'Folder \"{name}\" created'**
+  /// **'Created group “{name}”'**
   String styleExplore_folderCreated(String name);
 
   /// No description provided for @styleExplore_candidateMissing.
@@ -13964,12 +13862,6 @@ abstract class AppLocalizations {
   /// **'Candidate detail'**
   String get styleExplore_candidateDetailTitle;
 
-  /// No description provided for @styleExplore_candidatePosition.
-  ///
-  /// In en, this message translates to:
-  /// **'Image {current}/{total}'**
-  String styleExplore_candidatePosition(int current, int total);
-
   /// No description provided for @styleExplore_prevCandidate.
   ///
   /// In en, this message translates to:
@@ -13981,18 +13873,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next'**
   String get styleExplore_nextCandidate;
-
-  /// No description provided for @styleExplore_rollSnapshot.
-  ///
-  /// In en, this message translates to:
-  /// **'Roll snapshot'**
-  String get styleExplore_rollSnapshot;
-
-  /// No description provided for @styleExplore_seedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Seed {seed}'**
-  String styleExplore_seedLabel(String seed);
 
   /// No description provided for @styleExplore_roundNumber.
   ///
@@ -14009,7 +13889,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_adoptBlockEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Selected candidates have no roll text'**
+  /// **'The selected candidates have no artist strings or positive prompts to save'**
   String get styleExplore_adoptBlockEmpty;
 
   /// No description provided for @styleExplore_deleteImage.
@@ -14027,7 +13907,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_deleteImageMessage.
   ///
   /// In en, this message translates to:
-  /// **'Deletes this candidate\'s image copy in the run directory and removes its record. The gallery source image is untouched.'**
+  /// **'Delete this candidate’s image copy and record? Library originals are kept.'**
   String get styleExplore_deleteImageMessage;
 
   /// No description provided for @styleExplore_deleteImageDone.
@@ -14159,19 +14039,19 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_deepRoundCountHint.
   ///
   /// In en, this message translates to:
-  /// **'Count must be at least {min} (one per parent)'**
+  /// **'At least {min} images (one guaranteed for each parent)'**
   String styleExplore_deepRoundCountHint(int min);
 
   /// No description provided for @styleExplore_deepRoundNoInstance.
   ///
   /// In en, this message translates to:
-  /// **'No enabled random evolution block in the main prompt; deep round unavailable'**
+  /// **'No enabled genetic random block in the main prompt; offspring cannot be generated'**
   String get styleExplore_deepRoundNoInstance;
 
   /// No description provided for @styleExplore_deepRoundEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Mutation engine could not produce enough distinct children'**
+  /// **'Not enough distinct offspring artist combinations could be created'**
   String get styleExplore_deepRoundEmpty;
 
   /// No description provided for @styleExplore_sortTitle.
@@ -14213,37 +14093,37 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_sortDone.
   ///
   /// In en, this message translates to:
-  /// **'Ranking finished'**
+  /// **'Pairwise comparison complete'**
   String get styleExplore_sortDone;
 
   /// No description provided for @styleExplore_branchCreated.
   ///
   /// In en, this message translates to:
-  /// **'Branch created ({count} parents)'**
+  /// **'Next generation bred ({count} parents)'**
   String styleExplore_branchCreated(int count);
 
   /// No description provided for @styleExplore_branchNeedLatest.
   ///
   /// In en, this message translates to:
-  /// **'Branches can only be created from the latest generation pile'**
+  /// **'Use offspring from the latest generation to breed the next one'**
   String get styleExplore_branchNeedLatest;
 
   /// No description provided for @styleExplore_branchRoundsIncomplete.
   ///
   /// In en, this message translates to:
-  /// **'The current generation still has unfinished rounds'**
+  /// **'This generation has unfinished offspring; wait or stop generation'**
   String get styleExplore_branchRoundsIncomplete;
 
   /// No description provided for @styleExplore_branchDuplicate.
   ///
   /// In en, this message translates to:
-  /// **'A selected child duplicates a first-generation parent string'**
+  /// **'A selected offspring candidate duplicates a first-generation parent string'**
   String get styleExplore_branchDuplicate;
 
   /// No description provided for @styleExplore_branchEmpty.
   ///
   /// In en, this message translates to:
-  /// **'Select at least one child candidate'**
+  /// **'Select at least one offspring candidate'**
   String get styleExplore_branchEmpty;
 
   /// No description provided for @styleExplore_pileManageDeleteDone.
@@ -22194,12 +22074,6 @@ abstract class AppLocalizations {
   /// **'Local gallery'**
   String get viewer_backLocalGallery;
 
-  /// No description provided for @viewer_backGeneration.
-  ///
-  /// In en, this message translates to:
-  /// **'Generation'**
-  String get viewer_backGeneration;
-
   /// No description provided for @viewer_fit.
   ///
   /// In en, this message translates to:
@@ -22349,12 +22223,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop generation'**
   String get styleExplore_stopRun;
-
-  /// No description provided for @styleExplore_inspectorPlaceholder.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a candidate to view details'**
-  String get styleExplore_inspectorPlaceholder;
 
   /// No description provided for @styleExplore_thisWeek.
   ///
@@ -22790,7 +22658,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_childrenCount.
   ///
   /// In en, this message translates to:
-  /// **'Children · {count}'**
+  /// **'Offspring · {count}'**
   String styleExplore_childrenCount(int count);
 
   /// No description provided for @styleExplore_pickForGeneration.
@@ -22826,7 +22694,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_regenerateSuffix.
   ///
   /// In en, this message translates to:
-  /// **'children'**
+  /// **'offspring'**
   String get styleExplore_regenerateSuffix;
 
   /// No description provided for @styleExplore_pairCompare.
@@ -22850,7 +22718,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_helpChildren.
   ///
   /// In en, this message translates to:
-  /// **'Children come from crossing parents, mutations, or new artists injected from a pool.'**
+  /// **'Offspring come from crossing parents, mutations, or new artists injected from a pool.'**
   String get styleExplore_helpChildren;
 
   /// No description provided for @styleExplore_helpCompare.
@@ -22910,7 +22778,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_generationSummary.
   ///
   /// In en, this message translates to:
-  /// **'{parents} parents · {children} children · {selected} picked for the next generation'**
+  /// **'{parents} parents · {children} offspring · {selected} picked for the next generation'**
   String styleExplore_generationSummary(
     int parents,
     int children,
@@ -22932,7 +22800,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_childrenEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No children yet. Generate them above.'**
+  /// **'No offspring yet. Generate a batch above.'**
   String get styleExplore_childrenEmpty;
 
   /// No description provided for @styleExplore_evolutionSubtitle.

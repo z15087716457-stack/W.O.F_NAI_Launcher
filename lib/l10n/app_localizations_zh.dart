@@ -197,9 +197,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_exit => '退出';
 
   @override
-  String get common_folder => '文件夹';
-
-  @override
   String get common_grid => '网格';
 
   @override
@@ -210,9 +207,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_category => '分类';
-
-  @override
-  String get common_categories => '分类';
 
   @override
   String get networkError_connectionTimeout => '连接超时，请检查网络连接。';
@@ -4365,29 +4359,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vibeLibrary_sortTooltip => '排序方式';
 
   @override
-  String get vibeLibrary_hideCategoryPanel => '隐藏分类面板';
-
-  @override
-  String get vibeLibrary_showCategoryPanel => '显示分类面板';
-
-  @override
-  String get vibeLibrary_enterSelectionMode => '进入选择模式';
-
-  @override
-  String get vibeLibrary_importTooltip =>
-      '导入 Vibe 文件或 PNG/JPG/JPEG/WEBP 图片（右键查看更多选项）';
-
-  @override
-  String get vibeLibrary_exportTooltip => '导出 Vibe 到文件';
-
-  @override
   String get vibeLibrary_openFolderTooltip => '打开 Vibe 库文件夹';
-
-  @override
-  String get vibeLibrary_refresh => '刷新';
-
-  @override
-  String get vibeLibrary_loading => '加载中...';
 
   @override
   String vibeLibrary_totalCount(Object count) {
@@ -6534,9 +6506,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get preciseRefLib_editEntry => '编辑参数';
 
   @override
-  String get preciseRefLib_deleteEntry => '删除';
-
-  @override
   String get preciseRefLib_confirmDeleteTitle => '删除条目';
 
   @override
@@ -7528,27 +7497,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => '继续并丢弃';
 
   @override
-  String get styleExplore_previewEmpty => '（空）';
-
-  @override
-  String get styleExplore_copiedToClipboard => '已复制';
-
-  @override
   String get styleExplore_newRun => '新建探索';
 
   @override
-  String get styleExplore_galleryEmptyHint => '暂无候选。新建或选择一个探索任务，开始批量生成。';
-
-  @override
-  String get styleExplore_runNameLabel => '探索名称';
-
-  @override
   String styleExplore_runDeleted(String name) {
-    return '已删除任务「$name」';
+    return '已删除探索「$name」';
   }
-
-  @override
-  String get styleExplore_runStatusDraft => '草稿';
 
   @override
   String get styleExplore_runStatusGenerating => '生成中';
@@ -7557,19 +7511,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_runStatusPaused => '已暂停';
 
   @override
-  String get styleExplore_runStatusGenerated => '已生成';
-
-  @override
-  String get styleExplore_runStatusCompleted => '已完成';
-
-  @override
   String get styleExplore_runStatusCancelled => '已取消';
 
   @override
   String get styleExplore_pauseRun => '暂停';
 
   @override
-  String get styleExplore_cancelRun => '取消任务';
+  String get styleExplore_cancelRun => '取消探索';
 
   @override
   String styleExplore_retryFailed(int count) {
@@ -7585,7 +7533,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_runBusy => '生成进行中，稍后再试';
 
   @override
-  String get styleExplore_deleteRunTitle => '删除探索任务';
+  String get styleExplore_deleteRunTitle => '删除探索';
 
   @override
   String styleExplore_deleteRunMessage(String name) {
@@ -7593,7 +7541,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_cancelRunTitle => '取消探索任务';
+  String get styleExplore_cancelRunTitle => '取消探索';
 
   @override
   String get styleExplore_cancelRunMessage => '取消后不可再启动；剩余待生成候选将标记为已取消。';
@@ -7605,36 +7553,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_filterHearted => '收藏';
 
   @override
-  String get styleExplore_renameFolder => '重命名文件夹';
+  String get styleExplore_renameFolder => '重命名分组';
 
   @override
-  String get styleExplore_deleteFolder => '删除文件夹';
+  String get styleExplore_deleteFolder => '删除分组';
 
   @override
   String styleExplore_deleteFolderMessage(String name) {
-    return '将删除文件夹「$name」；其中的候选回到未分类，图片不会被删除。';
+    return '将删除分组「$name」；其中的候选回到未分组，图片不会被删除。';
   }
 
   @override
-  String get styleExplore_folderNameLabel => '文件夹名称';
+  String get styleExplore_folderNameLabel => '分组名称';
 
   @override
-  String get styleExplore_deleteFamily => '删除谱系';
+  String get styleExplore_deleteFamily => '删除进化线';
 
   @override
   String styleExplore_deleteFamilyMessage(String name, int count) {
-    return '将删除谱系「$name」及其全部父本集与候选记录（$count 张）；候选图片文件不会删除。';
+    return '将删除进化线「$name」及其全部父本与子代记录（$count 张）；候选图片文件不会删除。';
   }
 
   @override
-  String get styleExplore_familyBusy => '谱系内还有生成中的候选，请先取消任务';
+  String get styleExplore_familyBusy => '这条进化线还有生成中的候选，请先停止生成';
 
   @override
-  String get styleExplore_folderUncategorized => '未分类';
+  String get styleExplore_folderUncategorized => '未分组';
 
   @override
   String styleExplore_folderCreated(String name) {
-    return '已创建文件夹「$name」';
+    return '已创建分组「$name」';
   }
 
   @override
@@ -7644,23 +7592,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_candidateDetailTitle => '候选详情';
 
   @override
-  String styleExplore_candidatePosition(int current, int total) {
-    return '第 $current/$total 张';
-  }
-
-  @override
   String get styleExplore_prevCandidate => '上一张';
 
   @override
   String get styleExplore_nextCandidate => '下一张';
-
-  @override
-  String get styleExplore_rollSnapshot => 'Roll 快照';
-
-  @override
-  String styleExplore_seedLabel(String seed) {
-    return 'Seed $seed';
-  }
 
   @override
   String styleExplore_roundNumber(int number) {
@@ -7673,7 +7608,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_adoptBlockEmpty => '所选候选没有可用的 Roll 串';
+  String get styleExplore_adoptBlockEmpty => '所选候选没有可保存的画师串或正向提示词';
 
   @override
   String get styleExplore_deleteImage => '删除图片';
@@ -7683,7 +7618,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_deleteImageMessage =>
-      '将删除该候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。';
+      '将删除该候选在探索目录中的图片副本与候选记录；图库源图不受影响。';
 
   @override
   String get styleExplore_deleteImageDone => '已删除候选图与记录';
@@ -7754,14 +7689,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String styleExplore_deepRoundCountHint(int min) {
-    return '出图数至少 $min（每个父本保底一张）';
+    return '张数至少 $min（每个父本保底一张）';
   }
 
   @override
-  String get styleExplore_deepRoundNoInstance => '主提示词中没有启用的随机遗传块，无法进行深度轮';
+  String get styleExplore_deepRoundNoInstance => '主提示词中没有启用的随机遗传块，无法生成子代';
 
   @override
-  String get styleExplore_deepRoundEmpty => '变异引擎无法产出足够不同的子代串';
+  String get styleExplore_deepRoundEmpty => '无法产生足够不同的子代画师组合';
 
   @override
   String get styleExplore_sortTitle => '哪张更好？';
@@ -7784,18 +7719,18 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_sortDone => '排序完成';
+  String get styleExplore_sortDone => '两两比较完成';
 
   @override
   String styleExplore_branchCreated(int count) {
-    return '已创建分支（$count 个父本）';
+    return '已培育下一代（$count 个父本）';
   }
 
   @override
-  String get styleExplore_branchNeedLatest => '只能从最新代候选堆建分支';
+  String get styleExplore_branchNeedLatest => '只能从最新代的子代培育下一代';
 
   @override
-  String get styleExplore_branchRoundsIncomplete => '当前代还有未完成的候选轮';
+  String get styleExplore_branchRoundsIncomplete => '当前代还有未完成的子代，请等待或停止生成';
 
   @override
   String get styleExplore_branchDuplicate => '所选子代与第一代父本串完全重复';
@@ -12131,9 +12066,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get viewer_backLocalGallery => '本地画廊';
 
   @override
-  String get viewer_backGeneration => '生图';
-
-  @override
   String get viewer_fit => '适应';
 
   @override
@@ -12225,9 +12157,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_stopRun => '停止生成';
-
-  @override
-  String get styleExplore_inspectorPlaceholder => '选一张候选查看详情';
 
   @override
   String get styleExplore_thisWeek => '本周';
@@ -12476,7 +12405,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String styleExplore_childrenCount(int count) {
-    return '子代 · $count 张';
+    return '子代 · $count';
   }
 
   @override
@@ -12556,7 +12485,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_optionalName => '名称（可不填）';
 
   @override
-  String get styleExplore_childrenEmpty => '还没有子代，点击上方生成';
+  String get styleExplore_childrenEmpty => '还没有子代，在上面生成一批';
 
   @override
   String styleExplore_evolutionSubtitle(int count) {
@@ -12925,9 +12854,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get common_exit => '退出';
 
   @override
-  String get common_folder => '資料夾';
-
-  @override
   String get common_grid => '網格';
 
   @override
@@ -12938,9 +12864,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get common_category => '分類';
-
-  @override
-  String get common_categories => '分類';
 
   @override
   String get networkError_connectionTimeout => '連線逾時，請檢查網路連線。';
@@ -17093,29 +17016,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get vibeLibrary_sortTooltip => '排序方式';
 
   @override
-  String get vibeLibrary_hideCategoryPanel => '隱藏分類面板';
-
-  @override
-  String get vibeLibrary_showCategoryPanel => '顯示分類面板';
-
-  @override
-  String get vibeLibrary_enterSelectionMode => '進入選擇模式';
-
-  @override
-  String get vibeLibrary_importTooltip =>
-      '匯入 Vibe 檔案或 PNG/JPG/JPEG/WEBP 圖片（右鍵檢視更多選項）';
-
-  @override
-  String get vibeLibrary_exportTooltip => '匯出 Vibe 到檔案';
-
-  @override
   String get vibeLibrary_openFolderTooltip => '開啟 Vibe 庫資料夾';
-
-  @override
-  String get vibeLibrary_refresh => '重新整理';
-
-  @override
-  String get vibeLibrary_loading => '載入中...';
 
   @override
   String vibeLibrary_totalCount(Object count) {
@@ -19262,9 +19163,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get preciseRefLib_editEntry => '編輯參數';
 
   @override
-  String get preciseRefLib_deleteEntry => '刪除';
-
-  @override
   String get preciseRefLib_confirmDeleteTitle => '刪除條目';
 
   @override
@@ -20256,27 +20154,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_discardChangesConfirm => '繼續並丟棄';
 
   @override
-  String get styleExplore_previewEmpty => '（空）';
-
-  @override
-  String get styleExplore_copiedToClipboard => '已複製';
-
-  @override
   String get styleExplore_newRun => '新增探索';
 
   @override
-  String get styleExplore_galleryEmptyHint => '暫無候選。新增或選擇一個探索任務，開始批次生成。';
-
-  @override
-  String get styleExplore_runNameLabel => '探索名稱';
-
-  @override
   String styleExplore_runDeleted(String name) {
-    return '已刪除任務「$name」';
+    return '已刪除探索「$name」';
   }
-
-  @override
-  String get styleExplore_runStatusDraft => '草稿';
 
   @override
   String get styleExplore_runStatusGenerating => '生成中';
@@ -20285,19 +20168,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_runStatusPaused => '已暫停';
 
   @override
-  String get styleExplore_runStatusGenerated => '已生成';
-
-  @override
-  String get styleExplore_runStatusCompleted => '已完成';
-
-  @override
   String get styleExplore_runStatusCancelled => '已取消';
 
   @override
   String get styleExplore_pauseRun => '暫停';
 
   @override
-  String get styleExplore_cancelRun => '取消任務';
+  String get styleExplore_cancelRun => '取消探索';
 
   @override
   String styleExplore_retryFailed(int count) {
@@ -20313,7 +20190,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_runBusy => '生成進行中，稍後再試';
 
   @override
-  String get styleExplore_deleteRunTitle => '刪除探索任務';
+  String get styleExplore_deleteRunTitle => '刪除探索';
 
   @override
   String styleExplore_deleteRunMessage(String name) {
@@ -20321,7 +20198,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get styleExplore_cancelRunTitle => '取消探索任務';
+  String get styleExplore_cancelRunTitle => '取消探索';
 
   @override
   String get styleExplore_cancelRunMessage => '取消後不可再啟動；剩餘待生成候選將標記為已取消。';
@@ -20333,36 +20210,36 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_filterHearted => '收藏';
 
   @override
-  String get styleExplore_renameFolder => '重新命名資料夾';
+  String get styleExplore_renameFolder => '重新命名分組';
 
   @override
-  String get styleExplore_deleteFolder => '刪除資料夾';
+  String get styleExplore_deleteFolder => '刪除分組';
 
   @override
   String styleExplore_deleteFolderMessage(String name) {
-    return '將刪除資料夾「$name」；其中的候選回到未分類，圖片不會被刪除。';
+    return '將刪除分組「$name」；其中的候選回到未分組，圖片不會被刪除。';
   }
 
   @override
-  String get styleExplore_folderNameLabel => '資料夾名稱';
+  String get styleExplore_folderNameLabel => '分組名稱';
 
   @override
-  String get styleExplore_deleteFamily => '刪除譜系';
+  String get styleExplore_deleteFamily => '刪除進化線';
 
   @override
   String styleExplore_deleteFamilyMessage(String name, int count) {
-    return '將刪除譜系「$name」及其全部父本集與候選記錄（$count 張）；候選圖片檔案不會刪除。';
+    return '將刪除進化線「$name」及其全部父本與子代記錄（$count 張）；候選圖片檔案不會刪除。';
   }
 
   @override
-  String get styleExplore_familyBusy => '譜系內還有生成中的候選，請先取消任務';
+  String get styleExplore_familyBusy => '這條進化線還有生成中的候選，請先停止生成';
 
   @override
-  String get styleExplore_folderUncategorized => '未分類';
+  String get styleExplore_folderUncategorized => '未分組';
 
   @override
   String styleExplore_folderCreated(String name) {
-    return '已建立資料夾「$name」';
+    return '已建立分組「$name」';
   }
 
   @override
@@ -20372,23 +20249,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_candidateDetailTitle => '候選詳情';
 
   @override
-  String styleExplore_candidatePosition(int current, int total) {
-    return '第 $current/$total 張';
-  }
-
-  @override
   String get styleExplore_prevCandidate => '上一張';
 
   @override
   String get styleExplore_nextCandidate => '下一張';
-
-  @override
-  String get styleExplore_rollSnapshot => 'Roll 快照';
-
-  @override
-  String styleExplore_seedLabel(String seed) {
-    return 'Seed $seed';
-  }
 
   @override
   String styleExplore_roundNumber(int number) {
@@ -20401,7 +20265,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get styleExplore_adoptBlockEmpty => '所選候選沒有可用的 Roll 串';
+  String get styleExplore_adoptBlockEmpty => '所選候選沒有可儲存的畫師串或正向提示詞';
 
   @override
   String get styleExplore_deleteImage => '刪除圖片';
@@ -20411,7 +20275,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_deleteImageMessage =>
-      '將刪除該候選在 Run 目錄中的圖片副本與候選記錄；圖庫來源圖不受影響。';
+      '將刪除該候選在探索目錄中的圖片副本與候選記錄；圖庫來源圖不受影響。';
 
   @override
   String get styleExplore_deleteImageDone => '已刪除候選圖與記錄';
@@ -20482,14 +20346,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String styleExplore_deepRoundCountHint(int min) {
-    return '出圖數至少 $min（每個父本保底一張）';
+    return '張數至少 $min（每個父本保底一張）';
   }
 
   @override
-  String get styleExplore_deepRoundNoInstance => '主提示詞中沒有啟用的隨機遺傳塊，無法進行深度輪';
+  String get styleExplore_deepRoundNoInstance => '主提示詞中沒有啟用的隨機遺傳塊，無法生成子代';
 
   @override
-  String get styleExplore_deepRoundEmpty => '變異引擎無法產出足夠不同的子代串';
+  String get styleExplore_deepRoundEmpty => '無法產生足夠不同的子代畫師組合';
 
   @override
   String get styleExplore_sortTitle => '哪張更好？';
@@ -20512,18 +20376,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get styleExplore_sortDone => '排序完成';
+  String get styleExplore_sortDone => '兩兩比較完成';
 
   @override
   String styleExplore_branchCreated(int count) {
-    return '已建立分支（$count 個父本）';
+    return '已培育下一代（$count 個父本）';
   }
 
   @override
-  String get styleExplore_branchNeedLatest => '只能從最新代候選堆建分支';
+  String get styleExplore_branchNeedLatest => '只能從最新代的子代培育下一代';
 
   @override
-  String get styleExplore_branchRoundsIncomplete => '當前代還有未完成的候選輪';
+  String get styleExplore_branchRoundsIncomplete => '當前代還有未完成的子代，請等待或停止生成';
 
   @override
   String get styleExplore_branchDuplicate => '所選子代與第一代父本串完全重複';
@@ -24859,9 +24723,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get viewer_backLocalGallery => '本機圖庫';
 
   @override
-  String get viewer_backGeneration => '生圖';
-
-  @override
   String get viewer_fit => '適應';
 
   @override
@@ -24953,9 +24814,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_stopRun => '停止生成';
-
-  @override
-  String get styleExplore_inspectorPlaceholder => '選一張候選檢視詳情';
 
   @override
   String get styleExplore_thisWeek => '本週';
@@ -25204,7 +25062,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String styleExplore_childrenCount(int count) {
-    return '子代 · $count 張';
+    return '子代 · $count';
   }
 
   @override
@@ -25284,7 +25142,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_optionalName => '名稱（可不填）';
 
   @override
-  String get styleExplore_childrenEmpty => '還沒有子代，點選上方生成';
+  String get styleExplore_childrenEmpty => '還沒有子代，在上面生成一批';
 
   @override
   String styleExplore_evolutionSubtitle(int count) {

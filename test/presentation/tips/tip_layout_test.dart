@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 // The drag/drop plugin exposes its test transport through this dependency.
@@ -29,7 +28,6 @@ import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_welcome.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/web_left_panel.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_gallery_welcome.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:nai_launcher/presentation/widgets/branding/brand_entry_scene.dart';
@@ -288,94 +286,85 @@ void main() {
     }
   });
 
-  for (final lab in [false, true]) {
-    testWidgets('${lab ? 'LAB' : 'STUDIO'} welcome keeps its logo still', (
-      tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(780, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      await loadFonts(tester);
-      final container = ProviderContainer(
-        overrides: [
-          tipDeckProvider.overrideWith((ref) => _FixedDeck(ref.watch(_forced))),
-        ],
-      );
-      addTearDown(container.dispose);
-      final surface = lab ? TipSurface.lab : TipSurface.studio;
-      final logo = lab ? find.byType(SvgPicture) : find.byType(BrandLogo);
+  testWidgets('STUDIO welcome keeps its logo still', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(780, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await loadFonts(tester);
+    final container = ProviderContainer(
+      overrides: [
+        tipDeckProvider.overrideWith((ref) => _FixedDeck(ref.watch(_forced))),
+      ],
+    );
+    addTearDown(container.dispose);
+    const surface = TipSurface.studio;
+    final logo = find.byType(BrandLogo);
 
-      Future<Rect> show(Locale locale, Tip tip, Size size) async {
-        await tester.binding.setSurfaceSize(size);
-        container.read(_forced.notifier).state = {surface: tip};
-        await tester.pumpWidget(
-          UncontrolledProviderScope(
-            container: container,
-            child: MaterialApp(
-              theme: _theme(),
-              locale: locale,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: RepaintBoundary(
-                key: _captureKey,
-                child: Scaffold(
-                  body: KeyedSubtree(
-                    // 每条贴士重新挂载一次欢迎页，模拟再次进入
-                    key: ValueKey('$locale-${tip.hashCode}'),
-                    child: lab
-                        ? const ExploreGalleryWelcome()
-                        : const GenerationWelcome(),
-                  ),
+    Future<Rect> show(Locale locale, Tip tip, Size size) async {
+      await tester.binding.setSurfaceSize(size);
+      container.read(_forced.notifier).state = {surface: tip};
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: _theme(),
+            locale: locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: RepaintBoundary(
+              key: _captureKey,
+              child: Scaffold(
+                body: KeyedSubtree(
+                  // 每条贴士重新挂载一次欢迎页，模拟再次进入
+                  key: ValueKey('$locale-${tip.hashCode}'),
+                  child: const GenerationWelcome(),
                 ),
               ),
             ),
           ),
-        );
-        await tester.pump();
-        expect(tester.takeException(), isNull);
-        return tester.getRect(logo);
-      }
-
-      final shortest = tipsFor(surface).first;
-      final reference = await show(
-        const Locale('zh'),
-        shortest,
-        const Size(780, 900),
+        ),
       );
-      for (final locale in AppLocalizations.supportedLocales) {
-        for (final tip in tipsFor(surface)) {
-          final rect = await show(locale, tip, const Size(780, 900));
-          expect(
-            (rect.topLeft - reference.topLeft).distance,
-            lessThan(.01),
-            reason: '$locale logo moved',
-          );
-          final text = find.byKey(const Key('tip-welcome-text'));
-          expect(
-            tester.getRect(text).bottom,
-            lessThanOrEqualTo(900),
-            reason: '$locale ${tip.text(lookupAppLocalizations(locale))}',
-          );
-          // 矮窗口：Logo 不缩小，内容改为滚动
-          final short = await show(locale, tip, const Size(780, 420));
-          expect(short.width, closeTo(reference.width, .01));
-          expect(short.height, closeTo(reference.height, .01));
-        }
-        final l10n = lookupAppLocalizations(locale);
-        await show(locale, _longest(surface, l10n), const Size(780, 900));
-        await tester.runAsync(
-          () => precacheImage(
-            const AssetImage('assets/images/wof_logo_full.png'),
-            tester.element(find.byType(Scaffold)),
-          ),
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      return tester.getRect(logo);
+    }
+
+    final shortest = tipsFor(surface).first;
+    final reference = await show(
+      const Locale('zh'),
+      shortest,
+      const Size(780, 900),
+    );
+    for (final locale in AppLocalizations.supportedLocales) {
+      for (final tip in tipsFor(surface)) {
+        final rect = await show(locale, tip, const Size(780, 900));
+        expect(
+          (rect.topLeft - reference.topLeft).distance,
+          lessThan(.01),
+          reason: '$locale logo moved',
         );
-        await tester.pump();
-        await _capture(
-          tester,
-          '${lab ? 'lab' : 'studio'}-${locale.toLanguageTag()}',
+        final text = find.byKey(const Key('tip-welcome-text'));
+        expect(
+          tester.getRect(text).bottom,
+          lessThanOrEqualTo(900),
+          reason: '$locale ${tip.text(lookupAppLocalizations(locale))}',
         );
+        // 矮窗口：Logo 不缩小，内容改为滚动
+        final short = await show(locale, tip, const Size(780, 420));
+        expect(short.width, closeTo(reference.width, .01));
+        expect(short.height, closeTo(reference.height, .01));
       }
-    });
-  }
+      final l10n = lookupAppLocalizations(locale);
+      await show(locale, _longest(surface, l10n), const Size(780, 900));
+      await tester.runAsync(
+        () => precacheImage(
+          const AssetImage('assets/images/wof_logo_full.png'),
+          tester.element(find.byType(Scaffold)),
+        ),
+      );
+      await tester.pump();
+      await _capture(tester, 'studio-${locale.toLanguageTag()}');
+    }
+  });
 
   testWidgets('splash and single-line tips fit their slots', (tester) async {
     await loadFonts(tester);

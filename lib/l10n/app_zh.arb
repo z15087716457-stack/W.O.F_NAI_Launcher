@@ -81,12 +81,10 @@
   "common_unfavorite": "取消收藏",
   "common_ok": "确定",
   "common_exit": "退出",
-  "common_folder": "文件夹",
   "common_grid": "网格",
   "common_pack": "打包",
   "common_multiSelect": "多选",
   "common_category": "分类",
-  "common_categories": "分类",
   "networkError_connectionTimeout": "连接超时，请检查网络连接。",
   "networkError_sendTimeout": "发送超时，请重试。",
   "networkError_receiveTimeout": "接收超时，图像生成可能需要更长时间。",
@@ -2107,14 +2105,7 @@
   "vibeLibrary_deleteCategoryTitle": "确认删除",
   "vibeLibrary_deleteCategoryContent": "确定要删除此分类吗？分类下的 Vibe 将被移动到未分类。",
   "vibeLibrary_sortTooltip": "排序方式",
-  "vibeLibrary_hideCategoryPanel": "隐藏分类面板",
-  "vibeLibrary_showCategoryPanel": "显示分类面板",
-  "vibeLibrary_enterSelectionMode": "进入选择模式",
-  "vibeLibrary_importTooltip": "导入 Vibe 文件或 PNG/JPG/JPEG/WEBP 图片（右键查看更多选项）",
-  "vibeLibrary_exportTooltip": "导出 Vibe 到文件",
   "vibeLibrary_openFolderTooltip": "打开 Vibe 库文件夹",
-  "vibeLibrary_refresh": "刷新",
-  "vibeLibrary_loading": "加载中...",
   "vibeLibrary_totalCount": "共 {count} 个 Vibe",
   "@vibeLibrary_totalCount": {
     "placeholders": {
@@ -3256,7 +3247,6 @@
   "preciseRefLib_sendToPreciseRef": "发送到精准参考",
   "preciseRefLib_sendToImg2Img": "发送到图生图",
   "preciseRefLib_editEntry": "编辑参数",
-  "preciseRefLib_deleteEntry": "删除",
   "preciseRefLib_confirmDeleteTitle": "删除条目",
   "preciseRefLib_confirmDelete": "确定删除“{name}”？图片文件将一并删除。",
   "preciseRefLib_saved": "已存入精准参考库：{name}",
@@ -4152,12 +4142,8 @@
   "styleExplore_discardChangesTitle": "放弃未保存的修改？",
   "styleExplore_discardChangesMessage": "当前工作区有未保存的修改，继续将丢弃这些修改。",
   "styleExplore_discardChangesConfirm": "继续并丢弃",
-  "styleExplore_previewEmpty": "（空）",
-  "styleExplore_copiedToClipboard": "已复制",
   "styleExplore_newRun": "新建探索",
-  "styleExplore_galleryEmptyHint": "暂无候选。新建或选择一个探索任务，开始批量生成。",
-  "styleExplore_runNameLabel": "探索名称",
-  "styleExplore_runDeleted": "已删除任务「{name}」",
+  "styleExplore_runDeleted": "已删除探索「{name}」",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
@@ -4165,14 +4151,11 @@
       }
     }
   },
-  "styleExplore_runStatusDraft": "草稿",
   "styleExplore_runStatusGenerating": "生成中",
   "styleExplore_runStatusPaused": "已暂停",
-  "styleExplore_runStatusGenerated": "已生成",
-  "styleExplore_runStatusCompleted": "已完成",
   "styleExplore_runStatusCancelled": "已取消",
   "styleExplore_pauseRun": "暂停",
-  "styleExplore_cancelRun": "取消任务",
+  "styleExplore_cancelRun": "取消探索",
   "styleExplore_retryFailed": "重试失败（{count}）",
   "@styleExplore_retryFailed": {
     "placeholders": {
@@ -4190,7 +4173,7 @@
     }
   },
   "styleExplore_runBusy": "生成进行中，稍后再试",
-  "styleExplore_deleteRunTitle": "删除探索任务",
+  "styleExplore_deleteRunTitle": "删除探索",
   "styleExplore_deleteRunMessage": "将删除「{name}」及其候选图副本；图库中的源图不受影响。",
   "@styleExplore_deleteRunMessage": {
     "placeholders": {
@@ -4199,13 +4182,13 @@
       }
     }
   },
-  "styleExplore_cancelRunTitle": "取消探索任务",
+  "styleExplore_cancelRunTitle": "取消探索",
   "styleExplore_cancelRunMessage": "取消后不可再启动；剩余待生成候选将标记为已取消。",
   "styleExplore_filterAll": "全部",
   "styleExplore_filterHearted": "收藏",
-  "styleExplore_renameFolder": "重命名文件夹",
-  "styleExplore_deleteFolder": "删除文件夹",
-  "styleExplore_deleteFolderMessage": "将删除文件夹「{name}」；其中的候选回到未分类，图片不会被删除。",
+  "styleExplore_renameFolder": "重命名分组",
+  "styleExplore_deleteFolder": "删除分组",
+  "styleExplore_deleteFolderMessage": "将删除分组「{name}」；其中的候选回到未分组，图片不会被删除。",
   "@styleExplore_deleteFolderMessage": {
     "placeholders": {
       "name": {
@@ -4213,9 +4196,9 @@
       }
     }
   },
-  "styleExplore_folderNameLabel": "文件夹名称",
-  "styleExplore_deleteFamily": "删除谱系",
-  "styleExplore_deleteFamilyMessage": "将删除谱系「{name}」及其全部父本集与候选记录（{count} 张）；候选图片文件不会删除。",
+  "styleExplore_folderNameLabel": "分组名称",
+  "styleExplore_deleteFamily": "删除进化线",
+  "styleExplore_deleteFamilyMessage": "将删除进化线「{name}」及其全部父本与子代记录（{count} 张）；候选图片文件不会删除。",
   "@styleExplore_deleteFamilyMessage": {
     "placeholders": {
       "name": {
@@ -4226,9 +4209,9 @@
       }
     }
   },
-  "styleExplore_familyBusy": "谱系内还有生成中的候选，请先取消任务",
-  "styleExplore_folderUncategorized": "未分类",
-  "styleExplore_folderCreated": "已创建文件夹「{name}」",
+  "styleExplore_familyBusy": "这条进化线还有生成中的候选，请先停止生成",
+  "styleExplore_folderUncategorized": "未分组",
+  "styleExplore_folderCreated": "已创建分组「{name}」",
   "@styleExplore_folderCreated": {
     "placeholders": {
       "name": {
@@ -4238,28 +4221,8 @@
   },
   "styleExplore_candidateMissing": "图片文件缺失",
   "styleExplore_candidateDetailTitle": "候选详情",
-  "styleExplore_candidatePosition": "第 {current}/{total} 张",
-  "@styleExplore_candidatePosition": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_prevCandidate": "上一张",
   "styleExplore_nextCandidate": "下一张",
-  "styleExplore_rollSnapshot": "Roll 快照",
-  "styleExplore_seedLabel": "Seed {seed}",
-  "@styleExplore_seedLabel": {
-    "placeholders": {
-      "seed": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_roundNumber": "第 {number} 轮",
   "@styleExplore_roundNumber": {
     "placeholders": {
@@ -4276,10 +4239,10 @@
       }
     }
   },
-  "styleExplore_adoptBlockEmpty": "所选候选没有可用的 Roll 串",
+  "styleExplore_adoptBlockEmpty": "所选候选没有可保存的画师串或正向提示词",
   "styleExplore_deleteImage": "删除图片",
   "styleExplore_deleteImageTitle": "删除候选图",
-  "styleExplore_deleteImageMessage": "将删除该候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。",
+  "styleExplore_deleteImageMessage": "将删除该候选在探索目录中的图片副本与候选记录；图库源图不受影响。",
   "styleExplore_deleteImageDone": "已删除候选图与记录",
   "styleExplore_selectCandidates": "多选",
   "styleExplore_selectedCount": "已选 {count} 张",
@@ -4313,7 +4276,7 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "更新现有块预览图",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "选择块并替换其预览图",
-  "styleExplore_deepRoundCountHint": "出图数至少 {min}（每个父本保底一张）",
+  "styleExplore_deepRoundCountHint": "张数至少 {min}（每个父本保底一张）",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
       "min": {
@@ -4321,8 +4284,8 @@
       }
     }
   },
-  "styleExplore_deepRoundNoInstance": "主提示词中没有启用的随机遗传块，无法进行深度轮",
-  "styleExplore_deepRoundEmpty": "变异引擎无法产出足够不同的子代串",
+  "styleExplore_deepRoundNoInstance": "主提示词中没有启用的随机遗传块，无法生成子代",
+  "styleExplore_deepRoundEmpty": "无法产生足够不同的子代画师组合",
   "styleExplore_sortTitle": "哪张更好？",
   "styleExplore_sortLeft": "左边更好",
   "styleExplore_sortRight": "右边更好",
@@ -4339,8 +4302,8 @@
       }
     }
   },
-  "styleExplore_sortDone": "排序完成",
-  "styleExplore_branchCreated": "已创建分支（{count} 个父本）",
+  "styleExplore_sortDone": "两两比较完成",
+  "styleExplore_branchCreated": "已培育下一代（{count} 个父本）",
   "@styleExplore_branchCreated": {
     "placeholders": {
       "count": {
@@ -4348,8 +4311,8 @@
       }
     }
   },
-  "styleExplore_branchNeedLatest": "只能从最新代候选堆建分支",
-  "styleExplore_branchRoundsIncomplete": "当前代还有未完成的候选轮",
+  "styleExplore_branchNeedLatest": "只能从最新代的子代培育下一代",
+  "styleExplore_branchRoundsIncomplete": "当前代还有未完成的子代，请等待或停止生成",
   "styleExplore_branchDuplicate": "所选子代与第一代父本串完全重复",
   "styleExplore_branchEmpty": "请至少选择一张子代候选",
   "styleExplore_pileManageDeleteDone": "已删除 {count} 张候选图与记录",
@@ -6743,7 +6706,6 @@
     }
   },
   "viewer_backLocalGallery": "本地画廊",
-  "viewer_backGeneration": "生图",
   "viewer_fit": "适应",
   "viewer_showInfo": "显示信息栏（I）",
   "viewer_hideInfo": "隐藏信息栏（I）",
@@ -6844,7 +6806,6 @@
     }
   },
   "styleExplore_stopRun": "停止生成",
-  "styleExplore_inspectorPlaceholder": "选一张候选查看详情",
   "styleExplore_thisWeek": "本周",
   "styleExplore_today": "今天",
   "styleExplore_smallCandidates": "小候选图",
@@ -7193,7 +7154,7 @@
   },
   "styleExplore_parentsByPreference": "父本 · 按偏好排序",
   "styleExplore_backcross": "回交",
-  "styleExplore_childrenCount": "子代 · {count} 张",
+  "styleExplore_childrenCount": "子代 · {count}",
   "@styleExplore_childrenCount": {
     "placeholders": {
       "count": {
@@ -7253,7 +7214,7 @@
   },
   "styleExplore_breedNext": "培育下一代",
   "styleExplore_optionalName": "名称（可不填）",
-  "styleExplore_childrenEmpty": "还没有子代，点击上方生成",
+  "styleExplore_childrenEmpty": "还没有子代，在上面生成一批",
   "styleExplore_evolutionSubtitle": "用你挑中的 {count} 张作为第 1 代父本",
   "@styleExplore_evolutionSubtitle": {
     "placeholders": {

@@ -739,10 +739,32 @@ void main() {
         closeTo(stageRect(tester).width - 40, 1),
       );
       expect(mainRect(tester).width, 384);
-      expect(inspectorRect(tester).width, 312);
+      expect(find.byKey(const Key('style-explore-inspector')), findsNothing);
+      expect(
+        container.read(layoutStateNotifierProvider).styleExploreInspectorWidth,
+        312,
+      );
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('1280 inspector hides automatically and manual opening wins', (
+    tester,
+  ) async {
+    final container = await pumpScreen(tester, width: 1280);
+    expect(find.byKey(const Key('style-explore-inspector')), findsNothing);
+    expect(stageRect(tester).width, greaterThanOrEqualTo(480));
+    expect(
+      container.read(layoutStateNotifierProvider).styleExploreInspectorVisible,
+      isNull,
+    );
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setStyleExploreInspectorVisible(true);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('style-explore-inspector')), findsOneWidget);
+    expect(stageRect(tester).width, greaterThanOrEqualTo(480));
+  });
 
   for (final dark in [false, true]) {
     testWidgets(
@@ -854,6 +876,7 @@ void main() {
     await layoutNotifier.setBlockLibraryPanelWidth(220);
     await layoutNotifier.setStyleExploreEditorWidth(384);
     await layoutNotifier.setStyleExploreInspectorWidth(312);
+    await layoutNotifier.setStyleExploreInspectorVisible(true);
 
     final prompt = List.filled(
       24,
@@ -1541,7 +1564,7 @@ void main() {
       await tester.tap(chip, buttons: kSecondaryMouseButton);
       await tester.pumpAndSettle();
 
-      final renameText = find.text('重命名文件夹');
+      final renameText = find.text('重命名分组');
       expect(renameText, findsOneWidget);
       final menuItemRect = tester.getRect(renameText);
       expect((menuItemRect.center.dx - clickPosition.dx).abs(), lessThan(220));
@@ -1584,7 +1607,7 @@ void main() {
     await tester.tap(find.byKey(const Key('explore-folder-menu-delete')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('删除文件夹'), findsWidgets);
+    expect(find.text('删除分组'), findsWidgets);
     await tester.tap(find.widgetWithText(FilledButton, '删除'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 3300));

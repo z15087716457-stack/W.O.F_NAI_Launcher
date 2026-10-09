@@ -197,9 +197,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_exit => 'Exit';
 
   @override
-  String get common_folder => 'Folder';
-
-  @override
   String get common_grid => 'Grid';
 
   @override
@@ -210,9 +207,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_category => 'Category';
-
-  @override
-  String get common_categories => 'Categories';
 
   @override
   String get networkError_connectionTimeout =>
@@ -4529,29 +4523,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vibeLibrary_sortTooltip => 'Sort by';
 
   @override
-  String get vibeLibrary_hideCategoryPanel => 'Hide category panel';
-
-  @override
-  String get vibeLibrary_showCategoryPanel => 'Show category panel';
-
-  @override
-  String get vibeLibrary_enterSelectionMode => 'Enter selection mode';
-
-  @override
-  String get vibeLibrary_importTooltip =>
-      'Import Vibe files or PNG/JPG/JPEG/WEBP images (right-click for more options)';
-
-  @override
-  String get vibeLibrary_exportTooltip => 'Export Vibe to file';
-
-  @override
   String get vibeLibrary_openFolderTooltip => 'Open Vibe library folder';
-
-  @override
-  String get vibeLibrary_refresh => 'Refresh';
-
-  @override
-  String get vibeLibrary_loading => 'Loading...';
 
   @override
   String vibeLibrary_totalCount(Object count) {
@@ -6792,9 +6764,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preciseRefLib_editEntry => 'Edit Parameters';
 
   @override
-  String get preciseRefLib_deleteEntry => 'Delete';
-
-  @override
   String get preciseRefLib_confirmDeleteTitle => 'Delete Entry';
 
   @override
@@ -7822,28 +7791,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => 'Continue and discard';
 
   @override
-  String get styleExplore_previewEmpty => '(empty)';
-
-  @override
-  String get styleExplore_copiedToClipboard => 'Copied';
-
-  @override
   String get styleExplore_newRun => 'New exploration';
 
   @override
-  String get styleExplore_galleryEmptyHint =>
-      'No candidates yet. Create or select an explore run to start batch generation.';
-
-  @override
-  String get styleExplore_runNameLabel => 'Exploration name';
-
-  @override
   String styleExplore_runDeleted(String name) {
-    return 'Deleted \"$name\"';
+    return 'Deleted exploration “$name”';
   }
-
-  @override
-  String get styleExplore_runStatusDraft => 'Draft';
 
   @override
   String get styleExplore_runStatusGenerating => 'Generating';
@@ -7852,19 +7805,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_runStatusPaused => 'Paused';
 
   @override
-  String get styleExplore_runStatusGenerated => 'Generated';
-
-  @override
-  String get styleExplore_runStatusCompleted => 'Completed';
-
-  @override
   String get styleExplore_runStatusCancelled => 'Cancelled';
 
   @override
   String get styleExplore_pauseRun => 'Pause';
 
   @override
-  String get styleExplore_cancelRun => 'Cancel run';
+  String get styleExplore_cancelRun => 'Cancel exploration';
 
   @override
   String styleExplore_retryFailed(int count) {
@@ -7880,7 +7827,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_runBusy => 'Generation busy, try again later';
 
   @override
-  String get styleExplore_deleteRunTitle => 'Delete explore run';
+  String get styleExplore_deleteRunTitle => 'Delete exploration';
 
   @override
   String styleExplore_deleteRunMessage(String name) {
@@ -7888,11 +7835,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_cancelRunTitle => 'Cancel explore run';
+  String get styleExplore_cancelRunTitle => 'Cancel exploration';
 
   @override
   String get styleExplore_cancelRunMessage =>
-      'A cancelled run cannot be restarted; remaining pending candidates will be marked as cancelled.';
+      'A cancelled exploration cannot be restarted; remaining queued candidates are marked as cancelled.';
 
   @override
   String get styleExplore_filterAll => 'All';
@@ -7901,37 +7848,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_filterHearted => 'Favorites';
 
   @override
-  String get styleExplore_renameFolder => 'Rename folder';
+  String get styleExplore_renameFolder => 'Rename group';
 
   @override
-  String get styleExplore_deleteFolder => 'Delete folder';
+  String get styleExplore_deleteFolder => 'Delete group';
 
   @override
   String styleExplore_deleteFolderMessage(String name) {
-    return 'Deletes the folder \"$name\". Its candidates go back to Uncategorized; images are kept.';
+    return 'Delete group “$name”? Its candidates become ungrouped; images are kept.';
   }
 
   @override
-  String get styleExplore_folderNameLabel => 'Folder name';
+  String get styleExplore_folderNameLabel => 'Group name';
 
   @override
-  String get styleExplore_deleteFamily => 'Delete lineage';
+  String get styleExplore_deleteFamily => 'Delete evolution line';
 
   @override
   String styleExplore_deleteFamilyMessage(String name, int count) {
-    return 'Deletes the lineage \"$name\" with all its parent sets and candidate records ($count images). Image files are kept.';
+    return 'Delete evolution line “$name”, all parents and offspring records ($count images)? Image files are kept.';
   }
 
   @override
   String get styleExplore_familyBusy =>
-      'This lineage still has candidates being generated. Cancel the task first';
+      'This evolution line still has candidates generating. Stop generation first.';
 
   @override
-  String get styleExplore_folderUncategorized => 'Uncategorized';
+  String get styleExplore_folderUncategorized => 'Ungrouped';
 
   @override
   String styleExplore_folderCreated(String name) {
-    return 'Folder \"$name\" created';
+    return 'Created group “$name”';
   }
 
   @override
@@ -7941,23 +7888,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_candidateDetailTitle => 'Candidate detail';
 
   @override
-  String styleExplore_candidatePosition(int current, int total) {
-    return 'Image $current/$total';
-  }
-
-  @override
   String get styleExplore_prevCandidate => 'Previous';
 
   @override
   String get styleExplore_nextCandidate => 'Next';
-
-  @override
-  String get styleExplore_rollSnapshot => 'Roll snapshot';
-
-  @override
-  String styleExplore_seedLabel(String seed) {
-    return 'Seed $seed';
-  }
 
   @override
   String styleExplore_roundNumber(int number) {
@@ -7971,7 +7905,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_adoptBlockEmpty =>
-      'Selected candidates have no roll text';
+      'The selected candidates have no artist strings or positive prompts to save';
 
   @override
   String get styleExplore_deleteImage => 'Delete image';
@@ -7981,7 +7915,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_deleteImageMessage =>
-      'Deletes this candidate\'s image copy in the run directory and removes its record. The gallery source image is untouched.';
+      'Delete this candidate’s image copy and record? Library originals are kept.';
 
   @override
   String get styleExplore_deleteImageDone =>
@@ -8058,16 +7992,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String styleExplore_deepRoundCountHint(int min) {
-    return 'Count must be at least $min (one per parent)';
+    return 'At least $min images (one guaranteed for each parent)';
   }
 
   @override
   String get styleExplore_deepRoundNoInstance =>
-      'No enabled random evolution block in the main prompt; deep round unavailable';
+      'No enabled genetic random block in the main prompt; offspring cannot be generated';
 
   @override
   String get styleExplore_deepRoundEmpty =>
-      'Mutation engine could not produce enough distinct children';
+      'Not enough distinct offspring artist combinations could be created';
 
   @override
   String get styleExplore_sortTitle => 'Which is better?';
@@ -8090,27 +8024,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_sortDone => 'Ranking finished';
+  String get styleExplore_sortDone => 'Pairwise comparison complete';
 
   @override
   String styleExplore_branchCreated(int count) {
-    return 'Branch created ($count parents)';
+    return 'Next generation bred ($count parents)';
   }
 
   @override
   String get styleExplore_branchNeedLatest =>
-      'Branches can only be created from the latest generation pile';
+      'Use offspring from the latest generation to breed the next one';
 
   @override
   String get styleExplore_branchRoundsIncomplete =>
-      'The current generation still has unfinished rounds';
+      'This generation has unfinished offspring; wait or stop generation';
 
   @override
   String get styleExplore_branchDuplicate =>
-      'A selected child duplicates a first-generation parent string';
+      'A selected offspring candidate duplicates a first-generation parent string';
 
   @override
-  String get styleExplore_branchEmpty => 'Select at least one child candidate';
+  String get styleExplore_branchEmpty =>
+      'Select at least one offspring candidate';
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
@@ -12741,9 +12676,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewer_backLocalGallery => 'Local gallery';
 
   @override
-  String get viewer_backGeneration => 'Generation';
-
-  @override
   String get viewer_fit => 'Fit';
 
   @override
@@ -12837,10 +12769,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_stopRun => 'Stop generation';
-
-  @override
-  String get styleExplore_inspectorPlaceholder =>
-      'Select a candidate to view details';
 
   @override
   String get styleExplore_thisWeek => 'This week';
@@ -13093,7 +13021,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String styleExplore_childrenCount(int count) {
-    return 'Children · $count';
+    return 'Offspring · $count';
   }
 
   @override
@@ -13118,7 +13046,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_regeneratePrefix => 'Generate';
 
   @override
-  String get styleExplore_regenerateSuffix => 'children';
+  String get styleExplore_regenerateSuffix => 'offspring';
 
   @override
   String get styleExplore_pairCompare => 'Rank by pairwise comparison';
@@ -13132,7 +13060,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_helpChildren =>
-      'Children come from crossing parents, mutations, or new artists injected from a pool.';
+      'Offspring come from crossing parents, mutations, or new artists injected from a pool.';
 
   @override
   String get styleExplore_helpCompare =>
@@ -13173,7 +13101,7 @@ class AppLocalizationsEn extends AppLocalizations {
     int children,
     int selected,
   ) {
-    return '$parents parents · $children children · $selected picked for the next generation';
+    return '$parents parents · $children offspring · $selected picked for the next generation';
   }
 
   @override
@@ -13184,7 +13112,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_childrenEmpty =>
-      'No children yet. Generate them above.';
+      'No offspring yet. Generate a batch above.';
 
   @override
   String styleExplore_evolutionSubtitle(int count) {

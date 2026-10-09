@@ -197,9 +197,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get common_exit => '終了';
 
   @override
-  String get common_folder => 'フォルダー';
-
-  @override
   String get common_grid => 'グリッド';
 
   @override
@@ -210,9 +207,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get common_category => 'カテゴリ';
-
-  @override
-  String get common_categories => 'カテゴリ';
 
   @override
   String get networkError_connectionTimeout =>
@@ -4426,29 +4420,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vibeLibrary_sortTooltip => '並べ替え基準';
 
   @override
-  String get vibeLibrary_hideCategoryPanel => 'カテゴリ パネルを非表示にする';
-
-  @override
-  String get vibeLibrary_showCategoryPanel => 'カテゴリ パネルを表示';
-
-  @override
-  String get vibeLibrary_enterSelectionMode => '選択モードに入ります';
-
-  @override
-  String get vibeLibrary_importTooltip =>
-      'Vibe ファイルまたは PNG/JPG/JPEG/WEBP 画像をインポートします (右クリックしてその他のオプションを表示します)';
-
-  @override
-  String get vibeLibrary_exportTooltip => 'Vibe をファイルにエクスポート';
-
-  @override
   String get vibeLibrary_openFolderTooltip => 'バイブライブラリフォルダーを開く';
-
-  @override
-  String get vibeLibrary_refresh => '更新';
-
-  @override
-  String get vibeLibrary_loading => '読み込み中...';
 
   @override
   String vibeLibrary_totalCount(Object count) {
@@ -6640,9 +6612,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preciseRefLib_editEntry => 'パラメータを編集';
 
   @override
-  String get preciseRefLib_deleteEntry => '削除';
-
-  @override
   String get preciseRefLib_confirmDeleteTitle => 'エントリを削除';
 
   @override
@@ -7646,28 +7615,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => '続行して破棄';
 
   @override
-  String get styleExplore_previewEmpty => '（空）';
-
-  @override
-  String get styleExplore_copiedToClipboard => 'コピーしました';
-
-  @override
   String get styleExplore_newRun => '新しい探索';
 
   @override
-  String get styleExplore_galleryEmptyHint =>
-      '候補はまだありません。探索ランを作成または選択して一括生成を開始してください。';
-
-  @override
-  String get styleExplore_runNameLabel => '探索名';
-
-  @override
   String styleExplore_runDeleted(String name) {
-    return '「$name」を削除しました';
+    return '探索「$name」を削除しました';
   }
-
-  @override
-  String get styleExplore_runStatusDraft => '下書き';
 
   @override
   String get styleExplore_runStatusGenerating => '生成中';
@@ -7676,19 +7629,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_runStatusPaused => '一時停止';
 
   @override
-  String get styleExplore_runStatusGenerated => '生成済み';
-
-  @override
-  String get styleExplore_runStatusCompleted => '完了';
-
-  @override
   String get styleExplore_runStatusCancelled => 'キャンセル';
 
   @override
   String get styleExplore_pauseRun => '一時停止';
 
   @override
-  String get styleExplore_cancelRun => 'ランをキャンセル';
+  String get styleExplore_cancelRun => '探索をキャンセル';
 
   @override
   String styleExplore_retryFailed(int count) {
@@ -7704,7 +7651,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_runBusy => '生成中です。しばらくしてからお試しください';
 
   @override
-  String get styleExplore_deleteRunTitle => '探索ランを削除';
+  String get styleExplore_deleteRunTitle => '探索を削除';
 
   @override
   String styleExplore_deleteRunMessage(String name) {
@@ -7712,11 +7659,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_cancelRunTitle => '探索ランをキャンセル';
+  String get styleExplore_cancelRunTitle => '探索をキャンセル';
 
   @override
   String get styleExplore_cancelRunMessage =>
-      'キャンセル後は再開できません。残りの未生成候補はキャンセル済みとしてマークされます。';
+      'キャンセル後は再開できません。残りの待機候補はキャンセル済みになります。';
 
   @override
   String get styleExplore_filterAll => 'すべて';
@@ -7725,36 +7672,36 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_filterHearted => 'お気に入り';
 
   @override
-  String get styleExplore_renameFolder => 'フォルダ名を変更';
+  String get styleExplore_renameFolder => 'グループ名を変更';
 
   @override
-  String get styleExplore_deleteFolder => 'フォルダを削除';
+  String get styleExplore_deleteFolder => 'グループを削除';
 
   @override
   String styleExplore_deleteFolderMessage(String name) {
-    return 'フォルダ「$name」を削除します。中の候補は未分類に戻り、画像は削除されません。';
+    return 'グループ「$name」を削除します。候補は未分類に戻り、画像は残ります。';
   }
 
   @override
-  String get styleExplore_folderNameLabel => 'フォルダ名';
+  String get styleExplore_folderNameLabel => 'グループ名';
 
   @override
-  String get styleExplore_deleteFamily => '系統を削除';
+  String get styleExplore_deleteFamily => '進化ラインを削除';
 
   @override
   String styleExplore_deleteFamilyMessage(String name, int count) {
-    return '系統「$name」とその全父本セット・候補レコード（$count 枚）を削除します。画像ファイルは削除されません。';
+    return '進化ライン「$name」と親・子の記録（$count 枚）を削除します。画像ファイルは残ります。';
   }
 
   @override
-  String get styleExplore_familyBusy => 'この系統には生成中の候補があります。先にタスクをキャンセルしてください';
+  String get styleExplore_familyBusy => 'この進化ラインは生成中です。先に生成を停止してください。';
 
   @override
   String get styleExplore_folderUncategorized => '未分類';
 
   @override
   String styleExplore_folderCreated(String name) {
-    return 'フォルダ「$name」を作成しました';
+    return 'グループ「$name」を作成しました';
   }
 
   @override
@@ -7764,23 +7711,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_candidateDetailTitle => '候補詳細';
 
   @override
-  String styleExplore_candidatePosition(int current, int total) {
-    return '$current/$total 枚目';
-  }
-
-  @override
   String get styleExplore_prevCandidate => '前へ';
 
   @override
   String get styleExplore_nextCandidate => '次へ';
-
-  @override
-  String get styleExplore_rollSnapshot => 'Roll スナップショット';
-
-  @override
-  String styleExplore_seedLabel(String seed) {
-    return 'シード $seed';
-  }
 
   @override
   String styleExplore_roundNumber(int number) {
@@ -7793,7 +7727,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_adoptBlockEmpty => '選択した候補に Roll 文字列がありません';
+  String get styleExplore_adoptBlockEmpty => '保存できる絵師の組み合わせや正のプロンプトがありません';
 
   @override
   String get styleExplore_deleteImage => '画像を削除';
@@ -7803,7 +7737,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_deleteImageMessage =>
-      'ラン ディレクトリ内の候補画像コピーと候補レコードを削除します。ギャラリーの元画像には影響しません。';
+      '候補の画像コピーと記録を削除します。ライブラリの元画像は残ります。';
 
   @override
   String get styleExplore_deleteImageDone => '候補画像とレコードを削除しました';
@@ -7876,15 +7810,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String styleExplore_deepRoundCountHint(int min) {
-    return '枚数は最低 $min（各親につき 1 枚保証）';
+    return '最低 $min 枚（各親につき1枚）';
   }
 
   @override
   String get styleExplore_deepRoundNoInstance =>
-      'メインプロンプトに有効なランダム遺伝ブロックがないため、深層ラウンドを開始できません';
+      'メインプロンプトに有効な遺伝ランダムブロックがないため、子を生成できません';
 
   @override
-  String get styleExplore_deepRoundEmpty => '変異エンジンが十分に異なる子代を生成できませんでした';
+  String get styleExplore_deepRoundEmpty => '異なる子の絵師の組み合わせを十分に作れませんでした';
 
   @override
   String get styleExplore_sortTitle => 'どちらが良い？';
@@ -7907,18 +7841,19 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_sortDone => 'ランク付け完了';
+  String get styleExplore_sortDone => 'ペア比較が完了しました';
 
   @override
   String styleExplore_branchCreated(int count) {
-    return 'ブランチを作成しました（$count 親）';
+    return '次世代を育てました（親 $count 個）';
   }
 
   @override
-  String get styleExplore_branchNeedLatest => 'ブランチは最新世代の候補パイルからのみ作成できます';
+  String get styleExplore_branchNeedLatest => '最新世代の子から次世代を育ててください';
 
   @override
-  String get styleExplore_branchRoundsIncomplete => '現世代に未完了のラウンドがあります';
+  String get styleExplore_branchRoundsIncomplete =>
+      'この世代には未生成の子があります。完了を待つか生成を停止してください';
 
   @override
   String get styleExplore_branchDuplicate => '選択した子代が第一世代の親文字列と完全に重複しています';
@@ -12354,9 +12289,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get viewer_backLocalGallery => 'ローカルギャラリー';
 
   @override
-  String get viewer_backGeneration => '画像生成';
-
-  @override
   String get viewer_fit => 'フィット';
 
   @override
@@ -12448,9 +12380,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_stopRun => '生成を停止';
-
-  @override
-  String get styleExplore_inspectorPlaceholder => '候補を選択して詳細を表示';
 
   @override
   String get styleExplore_thisWeek => '今週';
@@ -12701,7 +12630,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String styleExplore_childrenCount(int count) {
-    return '子 · $count枚';
+    return '子 · $count';
   }
 
   @override
@@ -12761,7 +12690,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_newArtist => '新規';
 
   @override
-  String get styleExplore_evolutionEmpty => '候補から好きな画像を選んで進化ラインを開始';
+  String get styleExplore_evolutionEmpty => '候補からお気に入りを選んで進化ラインを始めましょう';
 
   @override
   String get styleExplore_pickFromCandidates => '候補を選ぶ';
@@ -12782,7 +12711,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_optionalName => '名前（任意）';
 
   @override
-  String get styleExplore_childrenEmpty => '子はまだありません。上のボタンで生成してください。';
+  String get styleExplore_childrenEmpty => '子はまだありません。上でまとめて生成してください。';
 
   @override
   String styleExplore_evolutionSubtitle(int count) {

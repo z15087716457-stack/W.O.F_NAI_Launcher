@@ -81,12 +81,10 @@
   "common_unfavorite": "取消收藏",
   "common_ok": "確定",
   "common_exit": "退出",
-  "common_folder": "資料夾",
   "common_grid": "網格",
   "common_pack": "打包",
   "common_multiSelect": "多選",
   "common_category": "分類",
-  "common_categories": "分類",
   "networkError_connectionTimeout": "連線逾時，請檢查網路連線。",
   "networkError_sendTimeout": "傳送逾時，請重試。",
   "networkError_receiveTimeout": "接收逾時，影像生成可能需要更長時間。",
@@ -2107,14 +2105,7 @@
   "vibeLibrary_deleteCategoryTitle": "確認刪除",
   "vibeLibrary_deleteCategoryContent": "確定要刪除此分類嗎？分類下的 Vibe 將被移動到未分類。",
   "vibeLibrary_sortTooltip": "排序方式",
-  "vibeLibrary_hideCategoryPanel": "隱藏分類面板",
-  "vibeLibrary_showCategoryPanel": "顯示分類面板",
-  "vibeLibrary_enterSelectionMode": "進入選擇模式",
-  "vibeLibrary_importTooltip": "匯入 Vibe 檔案或 PNG/JPG/JPEG/WEBP 圖片（右鍵檢視更多選項）",
-  "vibeLibrary_exportTooltip": "匯出 Vibe 到檔案",
   "vibeLibrary_openFolderTooltip": "開啟 Vibe 庫資料夾",
-  "vibeLibrary_refresh": "重新整理",
-  "vibeLibrary_loading": "載入中...",
   "vibeLibrary_totalCount": "共 {count} 個 Vibe",
   "@vibeLibrary_totalCount": {
     "placeholders": {
@@ -3256,7 +3247,6 @@
   "preciseRefLib_sendToPreciseRef": "傳送到精準參考",
   "preciseRefLib_sendToImg2Img": "傳送到圖生圖",
   "preciseRefLib_editEntry": "編輯參數",
-  "preciseRefLib_deleteEntry": "刪除",
   "preciseRefLib_confirmDeleteTitle": "刪除條目",
   "preciseRefLib_confirmDelete": "確定刪除“{name}”？圖片檔案將一併刪除。",
   "preciseRefLib_saved": "已存入精準參考庫：{name}",
@@ -4152,12 +4142,8 @@
   "styleExplore_discardChangesTitle": "放棄未儲存的修改？",
   "styleExplore_discardChangesMessage": "當前工作區有未儲存的修改，繼續將丟棄這些修改。",
   "styleExplore_discardChangesConfirm": "繼續並丟棄",
-  "styleExplore_previewEmpty": "（空）",
-  "styleExplore_copiedToClipboard": "已複製",
   "styleExplore_newRun": "新增探索",
-  "styleExplore_galleryEmptyHint": "暫無候選。新增或選擇一個探索任務，開始批次生成。",
-  "styleExplore_runNameLabel": "探索名稱",
-  "styleExplore_runDeleted": "已刪除任務「{name}」",
+  "styleExplore_runDeleted": "已刪除探索「{name}」",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
@@ -4165,14 +4151,11 @@
       }
     }
   },
-  "styleExplore_runStatusDraft": "草稿",
   "styleExplore_runStatusGenerating": "生成中",
   "styleExplore_runStatusPaused": "已暫停",
-  "styleExplore_runStatusGenerated": "已生成",
-  "styleExplore_runStatusCompleted": "已完成",
   "styleExplore_runStatusCancelled": "已取消",
   "styleExplore_pauseRun": "暫停",
-  "styleExplore_cancelRun": "取消任務",
+  "styleExplore_cancelRun": "取消探索",
   "styleExplore_retryFailed": "重試失敗（{count}）",
   "@styleExplore_retryFailed": {
     "placeholders": {
@@ -4190,7 +4173,7 @@
     }
   },
   "styleExplore_runBusy": "生成進行中，稍後再試",
-  "styleExplore_deleteRunTitle": "刪除探索任務",
+  "styleExplore_deleteRunTitle": "刪除探索",
   "styleExplore_deleteRunMessage": "將刪除「{name}」及其候選圖副本；圖庫中的來源圖不受影響。",
   "@styleExplore_deleteRunMessage": {
     "placeholders": {
@@ -4199,13 +4182,13 @@
       }
     }
   },
-  "styleExplore_cancelRunTitle": "取消探索任務",
+  "styleExplore_cancelRunTitle": "取消探索",
   "styleExplore_cancelRunMessage": "取消後不可再啟動；剩餘待生成候選將標記為已取消。",
   "styleExplore_filterAll": "全部",
   "styleExplore_filterHearted": "收藏",
-  "styleExplore_renameFolder": "重新命名資料夾",
-  "styleExplore_deleteFolder": "刪除資料夾",
-  "styleExplore_deleteFolderMessage": "將刪除資料夾「{name}」；其中的候選回到未分類，圖片不會被刪除。",
+  "styleExplore_renameFolder": "重新命名分組",
+  "styleExplore_deleteFolder": "刪除分組",
+  "styleExplore_deleteFolderMessage": "將刪除分組「{name}」；其中的候選回到未分組，圖片不會被刪除。",
   "@styleExplore_deleteFolderMessage": {
     "placeholders": {
       "name": {
@@ -4213,9 +4196,9 @@
       }
     }
   },
-  "styleExplore_folderNameLabel": "資料夾名稱",
-  "styleExplore_deleteFamily": "刪除譜系",
-  "styleExplore_deleteFamilyMessage": "將刪除譜系「{name}」及其全部父本集與候選記錄（{count} 張）；候選圖片檔案不會刪除。",
+  "styleExplore_folderNameLabel": "分組名稱",
+  "styleExplore_deleteFamily": "刪除進化線",
+  "styleExplore_deleteFamilyMessage": "將刪除進化線「{name}」及其全部父本與子代記錄（{count} 張）；候選圖片檔案不會刪除。",
   "@styleExplore_deleteFamilyMessage": {
     "placeholders": {
       "name": {
@@ -4226,9 +4209,9 @@
       }
     }
   },
-  "styleExplore_familyBusy": "譜系內還有生成中的候選，請先取消任務",
-  "styleExplore_folderUncategorized": "未分類",
-  "styleExplore_folderCreated": "已建立資料夾「{name}」",
+  "styleExplore_familyBusy": "這條進化線還有生成中的候選，請先停止生成",
+  "styleExplore_folderUncategorized": "未分組",
+  "styleExplore_folderCreated": "已建立分組「{name}」",
   "@styleExplore_folderCreated": {
     "placeholders": {
       "name": {
@@ -4238,28 +4221,8 @@
   },
   "styleExplore_candidateMissing": "圖片檔案缺失",
   "styleExplore_candidateDetailTitle": "候選詳情",
-  "styleExplore_candidatePosition": "第 {current}/{total} 張",
-  "@styleExplore_candidatePosition": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_prevCandidate": "上一張",
   "styleExplore_nextCandidate": "下一張",
-  "styleExplore_rollSnapshot": "Roll 快照",
-  "styleExplore_seedLabel": "Seed {seed}",
-  "@styleExplore_seedLabel": {
-    "placeholders": {
-      "seed": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_roundNumber": "第 {number} 輪",
   "@styleExplore_roundNumber": {
     "placeholders": {
@@ -4276,10 +4239,10 @@
       }
     }
   },
-  "styleExplore_adoptBlockEmpty": "所選候選沒有可用的 Roll 串",
+  "styleExplore_adoptBlockEmpty": "所選候選沒有可儲存的畫師串或正向提示詞",
   "styleExplore_deleteImage": "刪除圖片",
   "styleExplore_deleteImageTitle": "刪除候選圖",
-  "styleExplore_deleteImageMessage": "將刪除該候選在 Run 目錄中的圖片副本與候選記錄；圖庫來源圖不受影響。",
+  "styleExplore_deleteImageMessage": "將刪除該候選在探索目錄中的圖片副本與候選記錄；圖庫來源圖不受影響。",
   "styleExplore_deleteImageDone": "已刪除候選圖與記錄",
   "styleExplore_selectCandidates": "多選",
   "styleExplore_selectedCount": "已選 {count} 張",
@@ -4313,7 +4276,7 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "更新現有塊預覽圖",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "選擇塊並替換其預覽圖",
-  "styleExplore_deepRoundCountHint": "出圖數至少 {min}（每個父本保底一張）",
+  "styleExplore_deepRoundCountHint": "張數至少 {min}（每個父本保底一張）",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
       "min": {
@@ -4321,8 +4284,8 @@
       }
     }
   },
-  "styleExplore_deepRoundNoInstance": "主提示詞中沒有啟用的隨機遺傳塊，無法進行深度輪",
-  "styleExplore_deepRoundEmpty": "變異引擎無法產出足夠不同的子代串",
+  "styleExplore_deepRoundNoInstance": "主提示詞中沒有啟用的隨機遺傳塊，無法生成子代",
+  "styleExplore_deepRoundEmpty": "無法產生足夠不同的子代畫師組合",
   "styleExplore_sortTitle": "哪張更好？",
   "styleExplore_sortLeft": "左邊更好",
   "styleExplore_sortRight": "右邊更好",
@@ -4339,8 +4302,8 @@
       }
     }
   },
-  "styleExplore_sortDone": "排序完成",
-  "styleExplore_branchCreated": "已建立分支（{count} 個父本）",
+  "styleExplore_sortDone": "兩兩比較完成",
+  "styleExplore_branchCreated": "已培育下一代（{count} 個父本）",
   "@styleExplore_branchCreated": {
     "placeholders": {
       "count": {
@@ -4348,8 +4311,8 @@
       }
     }
   },
-  "styleExplore_branchNeedLatest": "只能從最新代候選堆建分支",
-  "styleExplore_branchRoundsIncomplete": "當前代還有未完成的候選輪",
+  "styleExplore_branchNeedLatest": "只能從最新代的子代培育下一代",
+  "styleExplore_branchRoundsIncomplete": "當前代還有未完成的子代，請等待或停止生成",
   "styleExplore_branchDuplicate": "所選子代與第一代父本串完全重複",
   "styleExplore_branchEmpty": "請至少選擇一張子代候選",
   "styleExplore_pileManageDeleteDone": "已刪除 {count} 張候選圖與記錄",
@@ -6743,7 +6706,6 @@
     }
   },
   "viewer_backLocalGallery": "本機圖庫",
-  "viewer_backGeneration": "生圖",
   "viewer_fit": "適應",
   "viewer_showInfo": "顯示資訊欄（I）",
   "viewer_hideInfo": "隱藏資訊欄（I）",
@@ -6844,7 +6806,6 @@
     }
   },
   "styleExplore_stopRun": "停止生成",
-  "styleExplore_inspectorPlaceholder": "選一張候選檢視詳情",
   "styleExplore_thisWeek": "本週",
   "styleExplore_today": "今天",
   "styleExplore_smallCandidates": "小候選圖",
@@ -7193,7 +7154,7 @@
   },
   "styleExplore_parentsByPreference": "父本 · 按偏好排序",
   "styleExplore_backcross": "回交",
-  "styleExplore_childrenCount": "子代 · {count} 張",
+  "styleExplore_childrenCount": "子代 · {count}",
   "@styleExplore_childrenCount": {
     "placeholders": {
       "count": {
@@ -7253,7 +7214,7 @@
   },
   "styleExplore_breedNext": "培育下一代",
   "styleExplore_optionalName": "名稱（可不填）",
-  "styleExplore_childrenEmpty": "還沒有子代，點選上方生成",
+  "styleExplore_childrenEmpty": "還沒有子代，在上面生成一批",
   "styleExplore_evolutionSubtitle": "用你挑中的 {count} 張作為第 1 代父本",
   "@styleExplore_evolutionSubtitle": {
     "placeholders": {

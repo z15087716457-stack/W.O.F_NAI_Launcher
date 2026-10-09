@@ -80,12 +80,10 @@
   "common_unfavorite": "즐겨찾기 해제",
   "common_ok": "확인",
   "common_exit": "종료",
-  "common_folder": "폴더",
   "common_grid": "그리드",
   "common_pack": "묶기",
   "common_multiSelect": "다중 선택",
   "common_category": "분류",
-  "common_categories": "분류",
   "networkError_connectionTimeout": "연결 시간이 초과되었습니다. 네트워크 연결을 확인하세요.",
   "networkError_sendTimeout": "전송 시간이 초과되었습니다. 다시 시도하세요.",
   "networkError_receiveTimeout": "수신 시간이 초과되었습니다. 이미지 생성에 예상보다 시간이 더 걸릴 수 있습니다.",
@@ -2174,14 +2172,7 @@
   "vibeLibrary_deleteCategoryTitle": "삭제 확인",
   "vibeLibrary_deleteCategoryContent": "이 분류를 삭제하시겠습니까? 안에 있는 Vibe는 분류 안 됨으로 이동합니다.",
   "vibeLibrary_sortTooltip": "정렬 기준",
-  "vibeLibrary_hideCategoryPanel": "분류 패널 숨기기",
-  "vibeLibrary_showCategoryPanel": "분류 패널 표시",
-  "vibeLibrary_enterSelectionMode": "선택 모드 시작",
-  "vibeLibrary_importTooltip": "Vibe 파일이나 PNG/JPG/JPEG/WEBP 이미지 가져오기(마우스 오른쪽 버튼으로 옵션 더 보기)",
-  "vibeLibrary_exportTooltip": "Vibe를 파일로 내보내기",
   "vibeLibrary_openFolderTooltip": "Vibe 라이브러리 폴더 열기",
-  "vibeLibrary_refresh": "새로 고침",
-  "vibeLibrary_loading": "불러오는 중...",
   "vibeLibrary_totalCount": "Vibe {count}개",
   "@vibeLibrary_totalCount": {
     "placeholders": {
@@ -3497,7 +3488,6 @@
   "preciseRefLib_sendToPreciseRef": "정밀 참조로 보내기",
   "preciseRefLib_sendToImg2Img": "Image2Image로 보내기",
   "preciseRefLib_editEntry": "매개변수 편집",
-  "preciseRefLib_deleteEntry": "삭제",
   "preciseRefLib_confirmDeleteTitle": "항목 삭제",
   "preciseRefLib_confirmDelete": "\"{name}\"을(를) 삭제하시겠습니까? 이미지 파일도 함께 삭제됩니다.",
   "preciseRefLib_saved": "\"{name}\"을(를) 정밀 참조 라이브러리에 저장했습니다",
@@ -4152,12 +4142,8 @@
   "styleExplore_discardChangesTitle": "저장하지 않은 변경 사항을 버리시겠습니까?",
   "styleExplore_discardChangesMessage": "작업 공간에 저장하지 않은 변경 사항이 있습니다. 계속하면 버려집니다.",
   "styleExplore_discardChangesConfirm": "계속하고 버리기",
-  "styleExplore_previewEmpty": "(비어 있음)",
-  "styleExplore_copiedToClipboard": "복사했습니다",
   "styleExplore_newRun": "새 탐색",
-  "styleExplore_galleryEmptyHint": "아직 후보가 없습니다. 탐색 작업을 만들거나 선택해 일괄 생성을 시작하세요.",
-  "styleExplore_runNameLabel": "탐색 이름",
-  "styleExplore_runDeleted": "\"{name}\"을(를) 삭제했습니다",
+  "styleExplore_runDeleted": "탐색 “{name}” 삭제됨",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
@@ -4165,14 +4151,11 @@
       }
     }
   },
-  "styleExplore_runStatusDraft": "초안",
   "styleExplore_runStatusGenerating": "생성 중",
   "styleExplore_runStatusPaused": "일시 정지됨",
-  "styleExplore_runStatusGenerated": "생성됨",
-  "styleExplore_runStatusCompleted": "완료됨",
   "styleExplore_runStatusCancelled": "취소됨",
   "styleExplore_pauseRun": "일시 정지",
-  "styleExplore_cancelRun": "작업 취소",
+  "styleExplore_cancelRun": "탐색 취소",
   "styleExplore_retryFailed": "실패 항목 다시 시도({count})",
   "@styleExplore_retryFailed": {
     "placeholders": {
@@ -4190,7 +4173,7 @@
     }
   },
   "styleExplore_runBusy": "생성 중입니다. 잠시 후 다시 시도하세요",
-  "styleExplore_deleteRunTitle": "탐색 작업 삭제",
+  "styleExplore_deleteRunTitle": "탐색 삭제",
   "styleExplore_deleteRunMessage": "\"{name}\"과(와) 후보 이미지 사본을 삭제합니다. 갤러리의 원본 이미지는 영향을 받지 않습니다.",
   "@styleExplore_deleteRunMessage": {
     "placeholders": {
@@ -4199,13 +4182,13 @@
       }
     }
   },
-  "styleExplore_cancelRunTitle": "탐색 작업 취소",
-  "styleExplore_cancelRunMessage": "취소한 작업은 다시 시작할 수 없으며, 남은 대기 중 후보는 취소됨으로 표시됩니다.",
+  "styleExplore_cancelRunTitle": "탐색 취소",
+  "styleExplore_cancelRunMessage": "취소한 탐색은 재시작할 수 없으며 대기 중인 후보도 취소됩니다.",
   "styleExplore_filterAll": "전체",
   "styleExplore_filterHearted": "즐겨찾기",
-  "styleExplore_renameFolder": "폴더 이름 변경",
-  "styleExplore_deleteFolder": "폴더 삭제",
-  "styleExplore_deleteFolderMessage": "\"{name}\" 폴더를 삭제합니다. 안의 후보는 미분류로 돌아가며 이미지는 유지됩니다.",
+  "styleExplore_renameFolder": "그룹 이름 변경",
+  "styleExplore_deleteFolder": "그룹 삭제",
+  "styleExplore_deleteFolderMessage": "“{name}” 그룹을 삭제합니다. 후보는 미분류로 돌아가며 이미지는 유지됩니다.",
   "@styleExplore_deleteFolderMessage": {
     "placeholders": {
       "name": {
@@ -4213,9 +4196,9 @@
       }
     }
   },
-  "styleExplore_folderNameLabel": "폴더 이름",
-  "styleExplore_deleteFamily": "계보 삭제",
-  "styleExplore_deleteFamilyMessage": "\"{name}\" 계보와 모든 부모 집합, 후보 기록(이미지 {count}장)을 삭제합니다. 이미지 파일은 유지됩니다.",
+  "styleExplore_folderNameLabel": "그룹 이름",
+  "styleExplore_deleteFamily": "진화 라인 삭제",
+  "styleExplore_deleteFamilyMessage": "“{name}” 진화 라인과 모든 부모 및 자손 기록(이미지 {count}장)을 삭제합니다. 이미지 파일은 유지됩니다.",
   "@styleExplore_deleteFamilyMessage": {
     "placeholders": {
       "name": {
@@ -4226,9 +4209,9 @@
       }
     }
   },
-  "styleExplore_familyBusy": "이 계보에 아직 생성 중인 후보가 있습니다. 먼저 작업을 취소하세요",
+  "styleExplore_familyBusy": "이 진화 라인에 생성 중인 후보가 있습니다. 먼저 생성을 중지하세요.",
   "styleExplore_folderUncategorized": "미분류",
-  "styleExplore_folderCreated": "\"{name}\" 폴더를 만들었습니다",
+  "styleExplore_folderCreated": "“{name}” 그룹 생성됨",
   "@styleExplore_folderCreated": {
     "placeholders": {
       "name": {
@@ -4238,28 +4221,8 @@
   },
   "styleExplore_candidateMissing": "이미지 파일 없음",
   "styleExplore_candidateDetailTitle": "후보 상세",
-  "styleExplore_candidatePosition": "{current}/{total}번째 이미지",
-  "@styleExplore_candidatePosition": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_prevCandidate": "이전",
   "styleExplore_nextCandidate": "다음",
-  "styleExplore_rollSnapshot": "Roll 스냅숏",
-  "styleExplore_seedLabel": "시드 {seed}",
-  "@styleExplore_seedLabel": {
-    "placeholders": {
-      "seed": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_roundNumber": "{number}라운드",
   "@styleExplore_roundNumber": {
     "placeholders": {
@@ -4276,10 +4239,10 @@
       }
     }
   },
-  "styleExplore_adoptBlockEmpty": "선택한 후보에 Roll 텍스트가 없습니다",
+  "styleExplore_adoptBlockEmpty": "선택한 후보에 저장할 작가 조합이나 긍정 프롬프트가 없습니다",
   "styleExplore_deleteImage": "이미지 삭제",
   "styleExplore_deleteImageTitle": "후보 이미지 삭제",
-  "styleExplore_deleteImageMessage": "작업 폴더에 있는 이 후보의 이미지 사본과 기록을 삭제합니다. 갤러리의 원본 이미지는 그대로입니다.",
+  "styleExplore_deleteImageMessage": "후보의 이미지 사본과 기록을 삭제합니다. 라이브러리 원본은 유지됩니다.",
   "styleExplore_deleteImageDone": "후보 이미지와 기록을 삭제했습니다",
   "styleExplore_selectCandidates": "선택",
   "styleExplore_selectedCount": "{count}개 선택됨",
@@ -4313,7 +4276,7 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "기존 블록 썸네일 업데이트",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "블록을 골라 썸네일을 교체합니다",
-  "styleExplore_deepRoundCountHint": "개수는 최소 {min}이어야 합니다(부모마다 하나)",
+  "styleExplore_deepRoundCountHint": "최소 {min}장(각 부모당 1장 보장)",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
       "min": {
@@ -4321,8 +4284,8 @@
       }
     }
   },
-  "styleExplore_deepRoundNoInstance": "메인 프롬프트에 사용 중인 무작위 유전 블록이 없어 심층 라운드를 진행할 수 없습니다",
-  "styleExplore_deepRoundEmpty": "변이 엔진이 서로 다른 자식을 충분히 만들지 못했습니다",
+  "styleExplore_deepRoundNoInstance": "메인 프롬프트에 활성 유전 무작위 블록이 없어 자손을 생성할 수 없습니다",
+  "styleExplore_deepRoundEmpty": "서로 다른 자손 작가 조합을 충분히 만들 수 없습니다",
   "styleExplore_sortTitle": "어느 쪽이 더 좋나요?",
   "styleExplore_sortLeft": "왼쪽이 더 좋음",
   "styleExplore_sortRight": "오른쪽이 더 좋음",
@@ -4339,8 +4302,8 @@
       }
     }
   },
-  "styleExplore_sortDone": "순위 매기기 완료",
-  "styleExplore_branchCreated": "분기를 만들었습니다(부모 {count}개)",
+  "styleExplore_sortDone": "쌍별 비교 완료",
+  "styleExplore_branchCreated": "다음 세대 육성됨(부모 {count}개)",
   "@styleExplore_branchCreated": {
     "placeholders": {
       "count": {
@@ -4348,8 +4311,8 @@
       }
     }
   },
-  "styleExplore_branchNeedLatest": "분기는 최신 세대 더미에서만 만들 수 있습니다",
-  "styleExplore_branchRoundsIncomplete": "현재 세대에 끝나지 않은 라운드가 있습니다",
+  "styleExplore_branchNeedLatest": "최신 세대의 자손으로 다음 세대를 육성하세요",
+  "styleExplore_branchRoundsIncomplete": "현재 세대에 미완성 자손이 있습니다. 기다리거나 생성을 중지하세요",
   "styleExplore_branchDuplicate": "선택한 자식이 1세대 부모 문자열과 같습니다",
   "styleExplore_branchEmpty": "자식 후보를 하나 이상 선택하세요",
   "styleExplore_pileManageDeleteDone": "후보 {count}개와 이미지 사본을 삭제했습니다",
@@ -6743,7 +6706,6 @@
     }
   },
   "viewer_backLocalGallery": "로컬 갤러리",
-  "viewer_backGeneration": "이미지 생성",
   "viewer_fit": "맞춤",
   "viewer_showInfo": "정보 패널 표시 (I)",
   "viewer_hideInfo": "정보 패널 숨기기 (I)",
@@ -6844,7 +6806,6 @@
     }
   },
   "styleExplore_stopRun": "생성 중지",
-  "styleExplore_inspectorPlaceholder": "후보를 선택하여 상세 정보 보기",
   "styleExplore_thisWeek": "이번 주",
   "styleExplore_today": "오늘",
   "styleExplore_smallCandidates": "작은 후보 이미지",
@@ -7193,7 +7154,7 @@
   },
   "styleExplore_parentsByPreference": "부모 · 선호도순",
   "styleExplore_backcross": "역교배",
-  "styleExplore_childrenCount": "자손 · {count}장",
+  "styleExplore_childrenCount": "자손 · {count}",
   "@styleExplore_childrenCount": {
     "placeholders": {
       "count": {
@@ -7223,7 +7184,7 @@
   "styleExplore_backcrossHint": "1세대 부모가 역교배에 자동으로 포함됩니다",
   "styleExplore_generationBusy": "이 세대는 아직 생성 중입니다",
   "styleExplore_regeneratePrefix": "다시 생성",
-  "styleExplore_regenerateSuffix": "장 자손",
+  "styleExplore_regenerateSuffix": "자손",
   "styleExplore_pairCompare": "쌍 비교로 순위 지정",
   "styleExplore_howToUse": "사용 방법",
   "styleExplore_helpParents": "부모는 선택한 작가 조합입니다. 선호도가 높을수록 조합에 참여할 가능성이 높습니다.",
@@ -7235,7 +7196,7 @@
   "styleExplore_originMutation": "부모 조합의 일부 작가를 교체했습니다",
   "styleExplore_originInjection": "풀에서 새 작가를 주입했습니다",
   "styleExplore_newArtist": "신규",
-  "styleExplore_evolutionEmpty": "후보에서 마음에 드는 이미지를 골라 진화 계보를 시작하세요",
+  "styleExplore_evolutionEmpty": "후보에서 마음에 드는 이미지를 골라 진화 라인을 시작하세요",
   "styleExplore_pickFromCandidates": "후보 고르기",
   "styleExplore_generationSummary": "부모 {parents}장 · 자손 {children}장 · 다음 세대에 {selected}장 선택",
   "@styleExplore_generationSummary": {
@@ -7253,7 +7214,7 @@
   },
   "styleExplore_breedNext": "다음 세대 육성",
   "styleExplore_optionalName": "이름 (선택 사항)",
-  "styleExplore_childrenEmpty": "아직 자손이 없습니다. 위에서 생성하세요.",
+  "styleExplore_childrenEmpty": "아직 자손이 없습니다. 위에서 한 묶음을 생성하세요.",
   "styleExplore_evolutionSubtitle": "선택한 {count}장을 1세대 부모로 사용합니다",
   "@styleExplore_evolutionSubtitle": {
     "placeholders": {

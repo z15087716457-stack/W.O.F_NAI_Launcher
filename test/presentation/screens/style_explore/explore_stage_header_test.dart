@@ -221,8 +221,8 @@ void main() {
   Future<void> confirmCancel(WidgetTester tester) async {
     await tester.tap(find.byKey(const Key('explore-run-cancel')));
     await tester.pumpAndSettle();
-    expect(find.text('取消任务'), findsWidgets);
-    await tester.tap(find.widgetWithText(FilledButton, '取消任务'));
+    expect(find.text('取消探索'), findsWidgets);
+    await tester.tap(find.widgetWithText(FilledButton, '取消探索'));
     await tester.pumpAndSettle();
   }
 
@@ -395,7 +395,7 @@ void main() {
           .overwrite(
             run.copyWith(status: ExploreRunStatus.generated, name: '另一个更新'),
           );
-      await tester.tap(find.widgetWithText(FilledButton, '取消任务'));
+      await tester.tap(find.widgetWithText(FilledButton, '取消探索'));
       await tester.pumpAndSettle();
       expect(
         (await storage.getRun(run.id))!.status,

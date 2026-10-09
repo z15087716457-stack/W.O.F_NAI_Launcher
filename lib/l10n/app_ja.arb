@@ -80,12 +80,10 @@
   "common_unfavorite": "お気に入りから削除",
   "common_ok": "OK",
   "common_exit": "終了",
-  "common_folder": "フォルダー",
   "common_grid": "グリッド",
   "common_pack": "パック",
   "common_multiSelect": "複数選択",
   "common_category": "カテゴリ",
-  "common_categories": "カテゴリ",
   "networkError_connectionTimeout": "接続がタイムアウトしました。ネットワーク接続を確認してください。",
   "networkError_sendTimeout": "送信がタイムアウトしました。もう一度お試しください。",
   "networkError_receiveTimeout": "受信がタイムアウトしました。画像生成には時間がかかる場合があります。",
@@ -2174,14 +2172,7 @@
   "vibeLibrary_deleteCategoryTitle": "削除の確認",
   "vibeLibrary_deleteCategoryContent": "このカテゴリを削除しますか？中の Vibe は未分類に移動されます。",
   "vibeLibrary_sortTooltip": "並べ替え基準",
-  "vibeLibrary_hideCategoryPanel": "カテゴリ パネルを非表示にする",
-  "vibeLibrary_showCategoryPanel": "カテゴリ パネルを表示",
-  "vibeLibrary_enterSelectionMode": "選択モードに入ります",
-  "vibeLibrary_importTooltip": "Vibe ファイルまたは PNG/JPG/JPEG/WEBP 画像をインポートします (右クリックしてその他のオプションを表示します)",
-  "vibeLibrary_exportTooltip": "Vibe をファイルにエクスポート",
   "vibeLibrary_openFolderTooltip": "バイブライブラリフォルダーを開く",
-  "vibeLibrary_refresh": "更新",
-  "vibeLibrary_loading": "読み込み中...",
   "vibeLibrary_totalCount": "{count} 件の Vibe",
   "@vibeLibrary_totalCount": {
     "placeholders": {
@@ -3497,7 +3488,6 @@
   "preciseRefLib_sendToPreciseRef": "精密参照へ送る",
   "preciseRefLib_sendToImg2Img": "画像から画像へ送る",
   "preciseRefLib_editEntry": "パラメータを編集",
-  "preciseRefLib_deleteEntry": "削除",
   "preciseRefLib_confirmDeleteTitle": "エントリを削除",
   "preciseRefLib_confirmDelete": "「{name}」を削除しますか？画像ファイルも削除されます。",
   "preciseRefLib_saved": "精密参照ライブラリに保存しました：{name}",
@@ -4152,12 +4142,8 @@
   "styleExplore_discardChangesTitle": "未保存の変更を破棄しますか？",
   "styleExplore_discardChangesMessage": "ワークスペースに未保存の変更があります。続行すると破棄されます。",
   "styleExplore_discardChangesConfirm": "続行して破棄",
-  "styleExplore_previewEmpty": "（空）",
-  "styleExplore_copiedToClipboard": "コピーしました",
   "styleExplore_newRun": "新しい探索",
-  "styleExplore_galleryEmptyHint": "候補はまだありません。探索ランを作成または選択して一括生成を開始してください。",
-  "styleExplore_runNameLabel": "探索名",
-  "styleExplore_runDeleted": "「{name}」を削除しました",
+  "styleExplore_runDeleted": "探索「{name}」を削除しました",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
@@ -4165,14 +4151,11 @@
       }
     }
   },
-  "styleExplore_runStatusDraft": "下書き",
   "styleExplore_runStatusGenerating": "生成中",
   "styleExplore_runStatusPaused": "一時停止",
-  "styleExplore_runStatusGenerated": "生成済み",
-  "styleExplore_runStatusCompleted": "完了",
   "styleExplore_runStatusCancelled": "キャンセル",
   "styleExplore_pauseRun": "一時停止",
-  "styleExplore_cancelRun": "ランをキャンセル",
+  "styleExplore_cancelRun": "探索をキャンセル",
   "styleExplore_retryFailed": "失敗を再試行（{count}）",
   "@styleExplore_retryFailed": {
     "placeholders": {
@@ -4190,7 +4173,7 @@
     }
   },
   "styleExplore_runBusy": "生成中です。しばらくしてからお試しください",
-  "styleExplore_deleteRunTitle": "探索ランを削除",
+  "styleExplore_deleteRunTitle": "探索を削除",
   "styleExplore_deleteRunMessage": "「{name}」とその候補画像コピーを削除します。ギャラリーの元画像には影響しません。",
   "@styleExplore_deleteRunMessage": {
     "placeholders": {
@@ -4199,13 +4182,13 @@
       }
     }
   },
-  "styleExplore_cancelRunTitle": "探索ランをキャンセル",
-  "styleExplore_cancelRunMessage": "キャンセル後は再開できません。残りの未生成候補はキャンセル済みとしてマークされます。",
+  "styleExplore_cancelRunTitle": "探索をキャンセル",
+  "styleExplore_cancelRunMessage": "キャンセル後は再開できません。残りの待機候補はキャンセル済みになります。",
   "styleExplore_filterAll": "すべて",
   "styleExplore_filterHearted": "お気に入り",
-  "styleExplore_renameFolder": "フォルダ名を変更",
-  "styleExplore_deleteFolder": "フォルダを削除",
-  "styleExplore_deleteFolderMessage": "フォルダ「{name}」を削除します。中の候補は未分類に戻り、画像は削除されません。",
+  "styleExplore_renameFolder": "グループ名を変更",
+  "styleExplore_deleteFolder": "グループを削除",
+  "styleExplore_deleteFolderMessage": "グループ「{name}」を削除します。候補は未分類に戻り、画像は残ります。",
   "@styleExplore_deleteFolderMessage": {
     "placeholders": {
       "name": {
@@ -4213,9 +4196,9 @@
       }
     }
   },
-  "styleExplore_folderNameLabel": "フォルダ名",
-  "styleExplore_deleteFamily": "系統を削除",
-  "styleExplore_deleteFamilyMessage": "系統「{name}」とその全父本セット・候補レコード（{count} 枚）を削除します。画像ファイルは削除されません。",
+  "styleExplore_folderNameLabel": "グループ名",
+  "styleExplore_deleteFamily": "進化ラインを削除",
+  "styleExplore_deleteFamilyMessage": "進化ライン「{name}」と親・子の記録（{count} 枚）を削除します。画像ファイルは残ります。",
   "@styleExplore_deleteFamilyMessage": {
     "placeholders": {
       "name": {
@@ -4226,9 +4209,9 @@
       }
     }
   },
-  "styleExplore_familyBusy": "この系統には生成中の候補があります。先にタスクをキャンセルしてください",
+  "styleExplore_familyBusy": "この進化ラインは生成中です。先に生成を停止してください。",
   "styleExplore_folderUncategorized": "未分類",
-  "styleExplore_folderCreated": "フォルダ「{name}」を作成しました",
+  "styleExplore_folderCreated": "グループ「{name}」を作成しました",
   "@styleExplore_folderCreated": {
     "placeholders": {
       "name": {
@@ -4238,28 +4221,8 @@
   },
   "styleExplore_candidateMissing": "画像ファイルがありません",
   "styleExplore_candidateDetailTitle": "候補詳細",
-  "styleExplore_candidatePosition": "{current}/{total} 枚目",
-  "@styleExplore_candidatePosition": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_prevCandidate": "前へ",
   "styleExplore_nextCandidate": "次へ",
-  "styleExplore_rollSnapshot": "Roll スナップショット",
-  "styleExplore_seedLabel": "シード {seed}",
-  "@styleExplore_seedLabel": {
-    "placeholders": {
-      "seed": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_roundNumber": "ラウンド {number}",
   "@styleExplore_roundNumber": {
     "placeholders": {
@@ -4276,10 +4239,10 @@
       }
     }
   },
-  "styleExplore_adoptBlockEmpty": "選択した候補に Roll 文字列がありません",
+  "styleExplore_adoptBlockEmpty": "保存できる絵師の組み合わせや正のプロンプトがありません",
   "styleExplore_deleteImage": "画像を削除",
   "styleExplore_deleteImageTitle": "候補画像を削除",
-  "styleExplore_deleteImageMessage": "ラン ディレクトリ内の候補画像コピーと候補レコードを削除します。ギャラリーの元画像には影響しません。",
+  "styleExplore_deleteImageMessage": "候補の画像コピーと記録を削除します。ライブラリの元画像は残ります。",
   "styleExplore_deleteImageDone": "候補画像とレコードを削除しました",
   "styleExplore_selectCandidates": "複数選択",
   "styleExplore_selectedCount": "{count} 枚選択中",
@@ -4313,7 +4276,7 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "既存ブロックのサムネイルを更新",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "ブロックを選択し、そのサムネイルを置き換えます",
-  "styleExplore_deepRoundCountHint": "枚数は最低 {min}（各親につき 1 枚保証）",
+  "styleExplore_deepRoundCountHint": "最低 {min} 枚（各親につき1枚）",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
       "min": {
@@ -4321,8 +4284,8 @@
       }
     }
   },
-  "styleExplore_deepRoundNoInstance": "メインプロンプトに有効なランダム遺伝ブロックがないため、深層ラウンドを開始できません",
-  "styleExplore_deepRoundEmpty": "変異エンジンが十分に異なる子代を生成できませんでした",
+  "styleExplore_deepRoundNoInstance": "メインプロンプトに有効な遺伝ランダムブロックがないため、子を生成できません",
+  "styleExplore_deepRoundEmpty": "異なる子の絵師の組み合わせを十分に作れませんでした",
   "styleExplore_sortTitle": "どちらが良い？",
   "styleExplore_sortLeft": "左が良い",
   "styleExplore_sortRight": "右が良い",
@@ -4339,8 +4302,8 @@
       }
     }
   },
-  "styleExplore_sortDone": "ランク付け完了",
-  "styleExplore_branchCreated": "ブランチを作成しました（{count} 親）",
+  "styleExplore_sortDone": "ペア比較が完了しました",
+  "styleExplore_branchCreated": "次世代を育てました（親 {count} 個）",
   "@styleExplore_branchCreated": {
     "placeholders": {
       "count": {
@@ -4348,8 +4311,8 @@
       }
     }
   },
-  "styleExplore_branchNeedLatest": "ブランチは最新世代の候補パイルからのみ作成できます",
-  "styleExplore_branchRoundsIncomplete": "現世代に未完了のラウンドがあります",
+  "styleExplore_branchNeedLatest": "最新世代の子から次世代を育ててください",
+  "styleExplore_branchRoundsIncomplete": "この世代には未生成の子があります。完了を待つか生成を停止してください",
   "styleExplore_branchDuplicate": "選択した子代が第一世代の親文字列と完全に重複しています",
   "styleExplore_branchEmpty": "子代候補を少なくとも 1 枚選択してください",
   "styleExplore_pileManageDeleteDone": "{count} 件の候補と画像コピーを削除しました",
@@ -6743,7 +6706,6 @@
     }
   },
   "viewer_backLocalGallery": "ローカルギャラリー",
-  "viewer_backGeneration": "画像生成",
   "viewer_fit": "フィット",
   "viewer_showInfo": "情報パネルを表示 (I)",
   "viewer_hideInfo": "情報パネルを隠す (I)",
@@ -6844,7 +6806,6 @@
     }
   },
   "styleExplore_stopRun": "生成を停止",
-  "styleExplore_inspectorPlaceholder": "候補を選択して詳細を表示",
   "styleExplore_thisWeek": "今週",
   "styleExplore_today": "今日",
   "styleExplore_smallCandidates": "小さい候補画像",
@@ -7193,7 +7154,7 @@
   },
   "styleExplore_parentsByPreference": "親 · 好み順",
   "styleExplore_backcross": "戻し交配",
-  "styleExplore_childrenCount": "子 · {count}枚",
+  "styleExplore_childrenCount": "子 · {count}",
   "@styleExplore_childrenCount": {
     "placeholders": {
       "count": {
@@ -7235,7 +7196,7 @@
   "styleExplore_originMutation": "親の組み合わせの一部の絵師を置き換えました",
   "styleExplore_originInjection": "プールから新しい絵師を追加しました",
   "styleExplore_newArtist": "新規",
-  "styleExplore_evolutionEmpty": "候補から好きな画像を選んで進化ラインを開始",
+  "styleExplore_evolutionEmpty": "候補からお気に入りを選んで進化ラインを始めましょう",
   "styleExplore_pickFromCandidates": "候補を選ぶ",
   "styleExplore_generationSummary": "親{parents}枚 · 子{children}枚 · 次世代に{selected}枚選択",
   "@styleExplore_generationSummary": {
@@ -7253,7 +7214,7 @@
   },
   "styleExplore_breedNext": "次世代を育成",
   "styleExplore_optionalName": "名前（任意）",
-  "styleExplore_childrenEmpty": "子はまだありません。上のボタンで生成してください。",
+  "styleExplore_childrenEmpty": "子はまだありません。上でまとめて生成してください。",
   "styleExplore_evolutionSubtitle": "選んだ {count} 枚を第1世代の親にします",
   "@styleExplore_evolutionSubtitle": {
     "placeholders": {

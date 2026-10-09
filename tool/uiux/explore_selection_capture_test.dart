@@ -105,8 +105,9 @@ void main() {
             await tester.pumpAndSettle();
             if (tester
                 .renderObjectList<RenderImage>(find.byType(RawImage))
-                .every((image) => image.image != null))
+                .every((image) => image.image != null)) {
               break;
+            }
           }
           expect(
             tester.takeException(),

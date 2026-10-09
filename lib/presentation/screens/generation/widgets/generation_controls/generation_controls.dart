@@ -141,11 +141,11 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
     // 快捷键已由父级 WebStyleGenerationLayout 统一处理
     // 这里只负责布局
     final generateButton = GenerateButtonWithCost(
-      labelOverride:
-          !widget.exploreMode &&
-              ref.watch(
-                imageWorkflowControllerProvider.select((w) => w.isEnhance),
-              )
+      labelOverride: widget.exploreMode
+          ? context.l10n.styleExplore_onboardingDraw(imageCount)
+          : ref.watch(
+              imageWorkflowControllerProvider.select((w) => w.isEnhance),
+            )
           ? (ref.watch(imageWorkflowControllerProvider).enhance.localUpscale
                 ? context.l10n.enhance_localAction
                 : context.l10n.img2img_enhanceAction)
