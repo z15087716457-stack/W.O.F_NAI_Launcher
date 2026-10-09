@@ -4315,29 +4315,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "기존 블록 썸네일 업데이트",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "블록을 골라 썸네일을 교체합니다",
-  "styleExplore_createFamily": "가계 만들기",
-  "styleExplore_familyCreated": "\"{name}\" 가계를 만들었습니다",
-  "@styleExplore_familyCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_familyNameLabel": "가계 이름",
-  "styleExplore_familyNameHint": "예: 부드러운 빛 메인 라인",
-  "styleExplore_familyParentsTitle": "부모({count})",
-  "@styleExplore_familyParentsTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_customParentLabel": "사용자 지정 부모 문자열",
-  "styleExplore_customParentHint": "부모로 쓸 프롬프트 문자열을 입력하세요",
-  "styleExplore_addCustomParent": "사용자 지정 문자열 추가",
-  "styleExplore_createFamilyEmpty": "유효한 부모 문자열을 하나 이상 남겨 두세요",
   "styleExplore_deepRoundCountHint": "개수는 최소 {min}이어야 합니다(부모마다 하나)",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
@@ -4348,13 +4325,12 @@
   },
   "styleExplore_deepRoundNoInstance": "메인 프롬프트에 사용 중인 무작위 유전 블록이 없어 심층 라운드를 진행할 수 없습니다",
   "styleExplore_deepRoundEmpty": "변이 엔진이 서로 다른 자식을 충분히 만들지 못했습니다",
-  "styleExplore_sortTitle": "부모 A/B 비교",
-  "styleExplore_sortPrompt": "어느 이미지가 원하는 스타일에 더 가깝나요?",
+  "styleExplore_sortTitle": "어느 쪽이 더 좋나요?",
   "styleExplore_sortLeft": "왼쪽이 더 좋음",
   "styleExplore_sortRight": "오른쪽이 더 좋음",
-  "styleExplore_sortNeither": "둘 다 아님",
+  "styleExplore_sortNeither": "둘 다 별로",
   "styleExplore_sortSkip": "건너뛰기",
-  "styleExplore_sortProgress": "{current}/{total}번째 쌍",
+  "styleExplore_sortProgress": "{current} / {total} 쌍",
   "@styleExplore_sortProgress": {
     "placeholders": {
       "current": {
@@ -4378,14 +4354,6 @@
   "styleExplore_branchRoundsIncomplete": "현재 세대에 끝나지 않은 라운드가 있습니다",
   "styleExplore_branchDuplicate": "선택한 자식이 1세대 부모 문자열과 같습니다",
   "styleExplore_branchEmpty": "자식 후보를 하나 이상 선택하세요",
-  "styleExplore_preferenceValue": "선호 {value}",
-  "@styleExplore_preferenceValue": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_pileManageDeleteDone": "후보 {count}개와 이미지 사본을 삭제했습니다",
   "@styleExplore_pileManageDeleteDone": {
     "placeholders": {
@@ -7287,5 +7255,93 @@
   },
   "styleExplore_breedNext": "다음 세대 육성",
   "styleExplore_optionalName": "이름 (선택 사항)",
-  "styleExplore_childrenEmpty": "아직 자손이 없습니다. 위에서 생성하세요."
+  "styleExplore_childrenEmpty": "아직 자손이 없습니다. 위에서 생성하세요.",
+  "styleExplore_evolutionSubtitle": "선택한 {count}장을 1세대 부모로 사용합니다",
+  "@styleExplore_evolutionSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionStepOne": "부모 작가를 섞어 자손 생성",
+  "styleExplore_evolutionStepTwo": "쌍별 비교로 선호도 전달",
+  "styleExplore_evolutionStepThree": "좋은 자손을 골라 다음 세대 육성",
+  "styleExplore_evolutionNewLine": "새 진화 계통",
+  "styleExplore_evolutionJoinLine": "“{name}”의 현재 세대에 추가",
+  "@styleExplore_evolutionJoinLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_evolutionName": "진화 계통 이름",
+  "styleExplore_defaultEvolutionName": "진화 계통 {n}",
+  "@styleExplore_defaultEvolutionName": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionParents": "부모 · {count}",
+  "@styleExplore_evolutionParents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionAddCustom": "사용자 지정 작가 문자열 추가",
+  "styleExplore_evolutionCustomHint": "작가 문자열 입력",
+  "styleExplore_evolutionParentEmpty": "사용 가능한 작가 문자열 없음",
+  "styleExplore_evolutionTarget": "자손이 프롬프트의 이 무작위 블록을 대체합니다",
+  "styleExplore_evolutionOnlyCreate": "생성만",
+  "styleExplore_evolutionOnlyJoin": "추가만",
+  "styleExplore_evolutionCreateGenerate": "생성 후 {count}장 생성",
+  "@styleExplore_evolutionCreateGenerate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionJoinGenerate": "추가 후 {count}장 생성",
+  "@styleExplore_evolutionJoinGenerate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionFirstBatch": "첫 자손 묶음",
+  "styleExplore_evolutionMinimum": "장 (최소 {count})",
+  "@styleExplore_evolutionMinimum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionCreated": "진화 계통 “{name}” 생성됨",
+  "@styleExplore_evolutionCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_evolutionJoined": "진화 계통 “{name}”에 추가됨",
+  "@styleExplore_evolutionJoined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_sortLiveSave": "결과는 즉시 저장되며 언제든 닫을 수 있습니다",
+  "styleExplore_sortRanking": "현재 순위 · 실시간",
+  "styleExplore_sortRankingHint": "순위는 다음 자손 묶음에서 각 부모가 선택될 확률에 영향을 줍니다",
+  "styleExplore_sortSpace": "Space"
 }

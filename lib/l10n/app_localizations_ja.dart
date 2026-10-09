@@ -7881,37 +7881,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'ブロックを選択し、そのサムネイルを置き換えます';
 
   @override
-  String get styleExplore_createFamily => 'ファミリー作成';
-
-  @override
-  String styleExplore_familyCreated(String name) {
-    return 'ファミリー「$name」を作成しました';
-  }
-
-  @override
-  String get styleExplore_familyNameLabel => 'ファミリー名';
-
-  @override
-  String get styleExplore_familyNameHint => '例：柔らかい光の本線';
-
-  @override
-  String styleExplore_familyParentsTitle(int count) {
-    return '親（$count）';
-  }
-
-  @override
-  String get styleExplore_customParentLabel => 'カスタム親文字列';
-
-  @override
-  String get styleExplore_customParentHint => 'プロンプト文字列を親として入力';
-
-  @override
-  String get styleExplore_addCustomParent => 'カスタム文字列を追加';
-
-  @override
-  String get styleExplore_createFamilyEmpty => '有効な親文字列を少なくとも 1 つ残してください';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return '枚数は最低 $min（各親につき 1 枚保証）';
   }
@@ -7924,10 +7893,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_deepRoundEmpty => '変異エンジンが十分に異なる子代を生成できませんでした';
 
   @override
-  String get styleExplore_sortTitle => '親のA/B比較';
-
-  @override
-  String get styleExplore_sortPrompt => 'どちらの画像が狙いの画風に近いですか？';
+  String get styleExplore_sortTitle => 'どちらが良い？';
 
   @override
   String get styleExplore_sortLeft => '左が良い';
@@ -7936,14 +7902,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_sortRight => '右が良い';
 
   @override
-  String get styleExplore_sortNeither => 'どちらも良くない';
+  String get styleExplore_sortNeither => 'どちらも好みではない';
 
   @override
   String get styleExplore_sortSkip => 'スキップ';
 
   @override
   String styleExplore_sortProgress(int current, int total) {
-    return '$current/$total 組目';
+    return '$current / $total ペア';
   }
 
   @override
@@ -7965,11 +7931,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_branchEmpty => '子代候補を少なくとも 1 枚選択してください';
-
-  @override
-  String styleExplore_preferenceValue(String value) {
-    return '選好 $value';
-  }
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
@@ -12828,4 +12789,97 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_childrenEmpty => '子はまだありません。上のボタンで生成してください。';
+
+  @override
+  String styleExplore_evolutionSubtitle(int count) {
+    return '選んだ $count 枚を第1世代の親にします';
+  }
+
+  @override
+  String get styleExplore_evolutionStepOne => '親の絵師を混ぜて子を生成';
+
+  @override
+  String get styleExplore_evolutionStepTwo => 'ペア比較で好みを伝える';
+
+  @override
+  String get styleExplore_evolutionStepThree => '良い子を選び次世代を育てる';
+
+  @override
+  String get styleExplore_evolutionNewLine => '新しい進化ライン';
+
+  @override
+  String styleExplore_evolutionJoinLine(String name) {
+    return '「$name」の現世代に追加';
+  }
+
+  @override
+  String get styleExplore_evolutionName => '進化ライン名';
+
+  @override
+  String styleExplore_defaultEvolutionName(int n) {
+    return '進化ライン $n';
+  }
+
+  @override
+  String styleExplore_evolutionParents(int count) {
+    return '親 · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionAddCustom => 'カスタム絵師文字列を追加';
+
+  @override
+  String get styleExplore_evolutionCustomHint => '絵師文字列を入力';
+
+  @override
+  String get styleExplore_evolutionParentEmpty => '使用できる絵師文字列がありません';
+
+  @override
+  String get styleExplore_evolutionTarget => '子はプロンプトのこのランダムブロックを置換します';
+
+  @override
+  String get styleExplore_evolutionOnlyCreate => '作成のみ';
+
+  @override
+  String get styleExplore_evolutionOnlyJoin => '追加のみ';
+
+  @override
+  String styleExplore_evolutionCreateGenerate(int count) {
+    return '作成して $count 枚生成';
+  }
+
+  @override
+  String styleExplore_evolutionJoinGenerate(int count) {
+    return '追加して $count 枚生成';
+  }
+
+  @override
+  String get styleExplore_evolutionFirstBatch => '最初の子のバッチ';
+
+  @override
+  String styleExplore_evolutionMinimum(int count) {
+    return '枚（最低 $count）';
+  }
+
+  @override
+  String styleExplore_evolutionCreated(String name) {
+    return '進化ライン「$name」を作成しました';
+  }
+
+  @override
+  String styleExplore_evolutionJoined(String name) {
+    return '進化ライン「$name」に追加しました';
+  }
+
+  @override
+  String get styleExplore_sortLiveSave => '結果は即時保存されます。いつでも閉じられます';
+
+  @override
+  String get styleExplore_sortRanking => '現在の順位 · リアルタイム';
+
+  @override
+  String get styleExplore_sortRankingHint => '順位は次のバッチで各親が選ばれる確率に影響します';
+
+  @override
+  String get styleExplore_sortSpace => 'スペース';
 }

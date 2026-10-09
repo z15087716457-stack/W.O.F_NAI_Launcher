@@ -18,6 +18,8 @@ class ExploreIcon extends StatelessWidget {
   final Color? color;
   final bool filled;
   static const _paths = {
+    'arrD': 'M12 5v14M6 13l6 6 6-6',
+    'skip': 'M5 4v16M19 4v16M9 7l6 5-6 5z',
     'enter': 'M20 4v7a4 4 0 01-4 4H5M9 11l-4 4 4 4',
     'dice':
         'M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1zM9 9h.01M15 15h.01M15 9h.01M9 15h.01M12 12h.01',

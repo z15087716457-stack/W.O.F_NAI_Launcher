@@ -4315,29 +4315,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "更新現有塊預覽圖",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "選擇塊並替換其預覽圖",
-  "styleExplore_createFamily": "建家族",
-  "styleExplore_familyCreated": "已建立家族「{name}」",
-  "@styleExplore_familyCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_familyNameLabel": "家族名稱",
-  "styleExplore_familyNameHint": "例如：柔光主線",
-  "styleExplore_familyParentsTitle": "父本（{count}）",
-  "@styleExplore_familyParentsTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_customParentLabel": "自訂父本串",
-  "styleExplore_customParentHint": "輸入一段提示詞串作為父本",
-  "styleExplore_addCustomParent": "新增自訂串",
-  "styleExplore_createFamilyEmpty": "請至少保留一個有效父本串",
   "styleExplore_deepRoundCountHint": "出圖數至少 {min}（每個父本保底一張）",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
@@ -4348,13 +4325,12 @@
   },
   "styleExplore_deepRoundNoInstance": "主提示詞中沒有啟用的隨機遺傳塊，無法進行深度輪",
   "styleExplore_deepRoundEmpty": "變異引擎無法產出足夠不同的子代串",
-  "styleExplore_sortTitle": "父本A/B組對照",
-  "styleExplore_sortPrompt": "哪張圖更接近你想要的畫風效果？",
-  "styleExplore_sortLeft": "左邊好",
-  "styleExplore_sortRight": "右邊好",
-  "styleExplore_sortNeither": "都不好",
+  "styleExplore_sortTitle": "哪張更好？",
+  "styleExplore_sortLeft": "左邊更好",
+  "styleExplore_sortRight": "右邊更好",
+  "styleExplore_sortNeither": "兩張都不行",
   "styleExplore_sortSkip": "跳過",
-  "styleExplore_sortProgress": "第 {current}/{total} 對",
+  "styleExplore_sortProgress": "第 {current} / 共 {total} 對",
   "@styleExplore_sortProgress": {
     "placeholders": {
       "current": {
@@ -4378,14 +4354,6 @@
   "styleExplore_branchRoundsIncomplete": "當前代還有未完成的候選輪",
   "styleExplore_branchDuplicate": "所選子代與第一代父本串完全重複",
   "styleExplore_branchEmpty": "請至少選擇一張子代候選",
-  "styleExplore_preferenceValue": "偏好 {value}",
-  "@styleExplore_preferenceValue": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_pileManageDeleteDone": "已刪除 {count} 張候選圖與記錄",
   "@styleExplore_pileManageDeleteDone": {
     "placeholders": {
@@ -7287,5 +7255,93 @@
   },
   "styleExplore_breedNext": "培育下一代",
   "styleExplore_optionalName": "名稱（可不填）",
-  "styleExplore_childrenEmpty": "還沒有子代，點選上方生成"
+  "styleExplore_childrenEmpty": "還沒有子代，點選上方生成",
+  "styleExplore_evolutionSubtitle": "用你挑中的 {count} 張作為第 1 代父本",
+  "@styleExplore_evolutionSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionStepOne": "混合父本的畫師生成子代",
+  "styleExplore_evolutionStepTwo": "兩兩比較告訴它你更喜歡哪些",
+  "styleExplore_evolutionStepThree": "挑最好的子代培育下一代",
+  "styleExplore_evolutionNewLine": "新增進化線",
+  "styleExplore_evolutionJoinLine": "加入「{name}」當前代",
+  "@styleExplore_evolutionJoinLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_evolutionName": "進化線名稱",
+  "styleExplore_defaultEvolutionName": "進化線 {n}",
+  "@styleExplore_defaultEvolutionName": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionParents": "父本 · {count}",
+  "@styleExplore_evolutionParents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionAddCustom": "新增自訂畫師串",
+  "styleExplore_evolutionCustomHint": "輸入畫師串",
+  "styleExplore_evolutionParentEmpty": "沒有可用的畫師串",
+  "styleExplore_evolutionTarget": "子代會替換提示詞裡的這個隨機塊",
+  "styleExplore_evolutionOnlyCreate": "只建立",
+  "styleExplore_evolutionOnlyJoin": "只加入",
+  "styleExplore_evolutionCreateGenerate": "建立並生成 {count} 張",
+  "@styleExplore_evolutionCreateGenerate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionJoinGenerate": "加入並生成 {count} 張",
+  "@styleExplore_evolutionJoinGenerate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionFirstBatch": "第一批子代",
+  "styleExplore_evolutionMinimum": "張（至少 {count}）",
+  "@styleExplore_evolutionMinimum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionCreated": "已建立進化線「{name}」",
+  "@styleExplore_evolutionCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_evolutionJoined": "已加入進化線「{name}」",
+  "@styleExplore_evolutionJoined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_sortLiveSave": "結果即時儲存，可以隨時關閉",
+  "styleExplore_sortRanking": "當前排名 · 即時",
+  "styleExplore_sortRankingHint": "排名會影響下一批子代裡各父本被選中的機率",
+  "styleExplore_sortSpace": "空格"
 }

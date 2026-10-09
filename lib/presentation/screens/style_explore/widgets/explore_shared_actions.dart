@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_view_state.dart';
-import '../../../providers/style_explore/explore_roll_capture.dart';
-import '../../../widgets/common/app_toast.dart';
 import 'explore_candidate_detail_dialog.dart';
-import 'explore_create_family_dialog.dart';
+import 'explore_start_evolution_dialog.dart';
 
 Future<void> openExploreCandidate(
   BuildContext context,
@@ -50,39 +47,9 @@ Future<bool> startExploreEvolution(
   List<ExploreCandidate> candidates,
 ) async {
   if (candidates.isEmpty) return false;
-  final result = await ExploreCreateFamilyDialog.show(
+  return ExploreStartEvolutionDialog.show(
     context,
+    run: run,
     candidates: candidates,
   );
-  if (result == null || !context.mounted) return false;
-  try {
-    final family = await ref
-        .read(exploreRunListNotifierProvider.notifier)
-        .createFamily(
-          run.id,
-          name: result.name,
-          parents: [
-            for (final candidate in candidates)
-              (
-                sourceCandidateId: candidate.id,
-                artistString: exploreParentStringFor(candidate),
-              ),
-            for (final text in result.customStrings)
-              (sourceCandidateId: null, artistString: text),
-          ],
-        );
-    ref.read(exploreActiveFamilyIdProvider.notifier).state = family.id;
-    if (context.mounted) {
-      AppToast.success(
-        context,
-        context.l10n.styleExplore_familyCreated(family.name),
-      );
-    }
-    return true;
-  } on StateError {
-    if (context.mounted) {
-      AppToast.warning(context, context.l10n.styleExplore_createFamilyEmpty);
-    }
-    return false;
-  }
 }

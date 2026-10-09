@@ -447,11 +447,12 @@ void main() {
           .createFamily(
             created.id,
             name: '  ',
+            defaultName: 'Evolution line 1',
             parents: const [
               (sourceCandidateId: null, artistString: 'artist:a'),
             ],
           );
-      expect(family.name, '家族 1');
+      expect(family.name, 'Evolution line 1');
     });
   });
 

@@ -8063,39 +8063,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select a block and replace its thumbnail';
 
   @override
-  String get styleExplore_createFamily => 'Create family';
-
-  @override
-  String styleExplore_familyCreated(String name) {
-    return 'Family \"$name\" created';
-  }
-
-  @override
-  String get styleExplore_familyNameLabel => 'Family name';
-
-  @override
-  String get styleExplore_familyNameHint => 'e.g. Soft light main line';
-
-  @override
-  String styleExplore_familyParentsTitle(int count) {
-    return 'Parents ($count)';
-  }
-
-  @override
-  String get styleExplore_customParentLabel => 'Custom parent string';
-
-  @override
-  String get styleExplore_customParentHint =>
-      'Enter a prompt string as a parent';
-
-  @override
-  String get styleExplore_addCustomParent => 'Add custom string';
-
-  @override
-  String get styleExplore_createFamilyEmpty =>
-      'Keep at least one valid parent string';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return 'Count must be at least $min (one per parent)';
   }
@@ -8109,11 +8076,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Mutation engine could not produce enough distinct children';
 
   @override
-  String get styleExplore_sortTitle => 'Parent A/B comparison';
-
-  @override
-  String get styleExplore_sortPrompt =>
-      'Which image is closer to the style you want?';
+  String get styleExplore_sortTitle => 'Which is better?';
 
   @override
   String get styleExplore_sortLeft => 'Left is better';
@@ -8122,14 +8085,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_sortRight => 'Right is better';
 
   @override
-  String get styleExplore_sortNeither => 'Neither';
+  String get styleExplore_sortNeither => 'Neither is good';
 
   @override
   String get styleExplore_sortSkip => 'Skip';
 
   @override
   String styleExplore_sortProgress(int current, int total) {
-    return 'Pair $current/$total';
+    return 'Pair $current / $total';
   }
 
   @override
@@ -8154,11 +8117,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_branchEmpty => 'Select at least one child candidate';
-
-  @override
-  String styleExplore_preferenceValue(String value) {
-    return 'Pref $value';
-  }
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
@@ -13233,4 +13191,103 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get styleExplore_childrenEmpty =>
       'No children yet. Generate them above.';
+
+  @override
+  String styleExplore_evolutionSubtitle(int count) {
+    return 'Use your $count picks as the first generation of parents';
+  }
+
+  @override
+  String get styleExplore_evolutionStepOne =>
+      'Mix parent artists to generate offspring';
+
+  @override
+  String get styleExplore_evolutionStepTwo =>
+      'Compare pairs to show your preferences';
+
+  @override
+  String get styleExplore_evolutionStepThree =>
+      'Pick the best offspring for the next generation';
+
+  @override
+  String get styleExplore_evolutionNewLine => 'New evolution line';
+
+  @override
+  String styleExplore_evolutionJoinLine(String name) {
+    return 'Join the current generation of “$name”';
+  }
+
+  @override
+  String get styleExplore_evolutionName => 'Evolution line name';
+
+  @override
+  String styleExplore_defaultEvolutionName(int n) {
+    return 'Evolution line $n';
+  }
+
+  @override
+  String styleExplore_evolutionParents(int count) {
+    return 'Parents · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionAddCustom => 'Add a custom artist string';
+
+  @override
+  String get styleExplore_evolutionCustomHint => 'Enter an artist string';
+
+  @override
+  String get styleExplore_evolutionParentEmpty => 'No usable artist string';
+
+  @override
+  String get styleExplore_evolutionTarget =>
+      'Offspring replace this random block in the prompt';
+
+  @override
+  String get styleExplore_evolutionOnlyCreate => 'Create only';
+
+  @override
+  String get styleExplore_evolutionOnlyJoin => 'Add only';
+
+  @override
+  String styleExplore_evolutionCreateGenerate(int count) {
+    return 'Create and generate $count';
+  }
+
+  @override
+  String styleExplore_evolutionJoinGenerate(int count) {
+    return 'Add and generate $count';
+  }
+
+  @override
+  String get styleExplore_evolutionFirstBatch => 'First offspring batch';
+
+  @override
+  String styleExplore_evolutionMinimum(int count) {
+    return 'images (at least $count)';
+  }
+
+  @override
+  String styleExplore_evolutionCreated(String name) {
+    return 'Created evolution line “$name”';
+  }
+
+  @override
+  String styleExplore_evolutionJoined(String name) {
+    return 'Added to evolution line “$name”';
+  }
+
+  @override
+  String get styleExplore_sortLiveSave =>
+      'Results save live; close at any time';
+
+  @override
+  String get styleExplore_sortRanking => 'Current ranking · Live';
+
+  @override
+  String get styleExplore_sortRankingHint =>
+      'Ranking affects each parent’s chance of selection in the next offspring batch';
+
+  @override
+  String get styleExplore_sortSpace => 'Space';
 }

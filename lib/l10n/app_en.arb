@@ -4315,29 +4315,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "Update Existing Block Thumbnail",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "Select a block and replace its thumbnail",
-  "styleExplore_createFamily": "Create family",
-  "styleExplore_familyCreated": "Family \"{name}\" created",
-  "@styleExplore_familyCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_familyNameLabel": "Family name",
-  "styleExplore_familyNameHint": "e.g. Soft light main line",
-  "styleExplore_familyParentsTitle": "Parents ({count})",
-  "@styleExplore_familyParentsTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_customParentLabel": "Custom parent string",
-  "styleExplore_customParentHint": "Enter a prompt string as a parent",
-  "styleExplore_addCustomParent": "Add custom string",
-  "styleExplore_createFamilyEmpty": "Keep at least one valid parent string",
   "styleExplore_deepRoundCountHint": "Count must be at least {min} (one per parent)",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
@@ -4348,13 +4325,12 @@
   },
   "styleExplore_deepRoundNoInstance": "No enabled random evolution block in the main prompt; deep round unavailable",
   "styleExplore_deepRoundEmpty": "Mutation engine could not produce enough distinct children",
-  "styleExplore_sortTitle": "Parent A/B comparison",
-  "styleExplore_sortPrompt": "Which image is closer to the style you want?",
+  "styleExplore_sortTitle": "Which is better?",
   "styleExplore_sortLeft": "Left is better",
   "styleExplore_sortRight": "Right is better",
-  "styleExplore_sortNeither": "Neither",
+  "styleExplore_sortNeither": "Neither is good",
   "styleExplore_sortSkip": "Skip",
-  "styleExplore_sortProgress": "Pair {current}/{total}",
+  "styleExplore_sortProgress": "Pair {current} / {total}",
   "@styleExplore_sortProgress": {
     "placeholders": {
       "current": {
@@ -4378,14 +4354,6 @@
   "styleExplore_branchRoundsIncomplete": "The current generation still has unfinished rounds",
   "styleExplore_branchDuplicate": "A selected child duplicates a first-generation parent string",
   "styleExplore_branchEmpty": "Select at least one child candidate",
-  "styleExplore_preferenceValue": "Pref {value}",
-  "@styleExplore_preferenceValue": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_pileManageDeleteDone": "Deleted {count} candidates and their image copies",
   "@styleExplore_pileManageDeleteDone": {
     "placeholders": {
@@ -7287,5 +7255,93 @@
   },
   "styleExplore_breedNext": "Breed next generation",
   "styleExplore_optionalName": "Name (optional)",
-  "styleExplore_childrenEmpty": "No children yet. Generate them above."
+  "styleExplore_childrenEmpty": "No children yet. Generate them above.",
+  "styleExplore_evolutionSubtitle": "Use your {count} picks as the first generation of parents",
+  "@styleExplore_evolutionSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionStepOne": "Mix parent artists to generate offspring",
+  "styleExplore_evolutionStepTwo": "Compare pairs to show your preferences",
+  "styleExplore_evolutionStepThree": "Pick the best offspring for the next generation",
+  "styleExplore_evolutionNewLine": "New evolution line",
+  "styleExplore_evolutionJoinLine": "Join the current generation of “{name}”",
+  "@styleExplore_evolutionJoinLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_evolutionName": "Evolution line name",
+  "styleExplore_defaultEvolutionName": "Evolution line {n}",
+  "@styleExplore_defaultEvolutionName": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionParents": "Parents · {count}",
+  "@styleExplore_evolutionParents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionAddCustom": "Add a custom artist string",
+  "styleExplore_evolutionCustomHint": "Enter an artist string",
+  "styleExplore_evolutionParentEmpty": "No usable artist string",
+  "styleExplore_evolutionTarget": "Offspring replace this random block in the prompt",
+  "styleExplore_evolutionOnlyCreate": "Create only",
+  "styleExplore_evolutionOnlyJoin": "Add only",
+  "styleExplore_evolutionCreateGenerate": "Create and generate {count}",
+  "@styleExplore_evolutionCreateGenerate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionJoinGenerate": "Add and generate {count}",
+  "@styleExplore_evolutionJoinGenerate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionFirstBatch": "First offspring batch",
+  "styleExplore_evolutionMinimum": "images (at least {count})",
+  "@styleExplore_evolutionMinimum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionCreated": "Created evolution line “{name}”",
+  "@styleExplore_evolutionCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_evolutionJoined": "Added to evolution line “{name}”",
+  "@styleExplore_evolutionJoined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_sortLiveSave": "Results save live; close at any time",
+  "styleExplore_sortRanking": "Current ranking · Live",
+  "styleExplore_sortRankingHint": "Ranking affects each parent’s chance of selection in the next offspring batch",
+  "styleExplore_sortSpace": "Space"
 }

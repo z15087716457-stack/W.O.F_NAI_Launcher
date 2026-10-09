@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -213,46 +214,109 @@ void main() {
 
   Finder button(String key) => find.byKey(Key(key));
 
-  testWidgets('大窗 + 左图右占位：完整容纳双原图', (tester) async {
+  testWidgets('narrow comparison keeps contain images and puts ranking below', (
+    tester,
+  ) async {
     await openDialog(tester, sortRun());
-
     final dialog = find.byKey(const Key('explore-preference-sort-dialog'));
-    // 大窗照详情弹窗先例：85% × 88%（Material 面 = 窗面）。
     final surface = tester.getSize(
       find.descendant(of: dialog, matching: find.byType(Material)).first,
     );
-    expect(surface.width, closeTo(1200 * 0.85, 1));
-    expect(surface.height, closeTo(900 * 0.88, 1));
-    expect(find.text(l10n.styleExplore_sortProgress(1, 3)), findsOneWidget);
+    expect(surface.width, 1152);
+    expect(surface.height, 852);
     expect(find.text(l10n.styleExplore_sortTitle), findsOneWidget);
-
-    // 有来源图的左侧渲染 Image，无图侧落「图片文件缺失」占位。
-    expect(find.byType(Image), findsOneWidget);
+    expect(find.text(l10n.styleExplore_sortProgress(1, 3)), findsOneWidget);
     expect(find.text(l10n.styleExplore_candidateMissing), findsOneWidget);
-
-    // 左右对照卡并排等高，图区吃掉窗面绝大部分高度。
-    final leftCard = tester.getRect(
-      find
-          .ancestor(
-            of: find.text('artist:with-image'),
-            matching: find.byType(Container),
-          )
-          .first,
+    final left = tester.getRect(
+      find.byKey(const Key('explore-sort-side-left')),
     );
-    final rightCard = tester.getRect(
-      find
-          .ancestor(
-            of: find.text('artist:no-image'),
-            matching: find.byType(Container),
-          )
-          .first,
+    final right = tester.getRect(
+      find.byKey(const Key('explore-sort-side-right')),
     );
-    expect(leftCard.top, rightCard.top);
-    expect(leftCard.right, lessThan(rightCard.left));
-    expect(leftCard.width, greaterThan(surface.width / 2 - 40));
-    expect(leftCard.height, greaterThan(surface.height * 0.7));
-    expect(tester.getSize(find.byType(Image)).height, greaterThan(400));
+    final ranking = tester.getRect(
+      find.byKey(const Key('explore-sort-ranking')),
+    );
+    expect(left.top, right.top);
+    expect(left.right, lessThan(right.left));
+    expect(ranking.top, greaterThan(left.bottom));
+    expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'wide comparison uses 1180 dialog, 240 ranking and 610 image limit',
+    (tester) async {
+      await openDialog(tester, sortRun());
+      tester.view.physicalSize = const Size(1600, 1000);
+      await tester.pumpAndSettle();
+      final dialog = find.byKey(const Key('explore-preference-sort-dialog'));
+      expect(
+        tester
+            .getSize(
+              find
+                  .descendant(of: dialog, matching: find.byType(Material))
+                  .first,
+            )
+            .width,
+        1180,
+      );
+      expect(
+        tester.getSize(find.byKey(const Key('explore-sort-ranking'))).width,
+        240,
+      );
+      final ranking = tester.getRect(
+            find.byKey(const Key('explore-sort-ranking')),
+          ),
+          right = tester.getRect(
+            find.byKey(const Key('explore-sort-side-right')),
+          );
+      expect(ranking.left, greaterThan(right.right));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'arrow and space shortcuts persist answers; escape closes early',
+    (tester) async {
+      await openDialog(tester, sortRun());
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pumpAndSettle();
+      expect(
+        (await storage.getRun(
+          'run-1',
+        ))!.parentSets.single.comparisons.map((c) => c.result),
+        [
+          ExploreComparisonResult.left,
+          ExploreComparisonResult.neither,
+          ExploreComparisonResult.skip,
+        ],
+      );
+      expect(
+        find.byKey(const Key('explore-preference-sort-dialog')),
+        findsNothing,
+      );
+      await tester.pump(const Duration(seconds: 4));
+      await tester.tap(find.byKey(const Key('open-sort-dialog')));
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(
+        (await storage.getRun(
+          'run-1',
+        ))!.parentSets.single.comparisons.last.result,
+        ExploreComparisonResult.right,
+      );
+      expect(
+        find.byKey(const Key('explore-preference-sort-dialog')),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('左边好：落盘 +1.0，后续对子显示最新偏好值', (tester) async {
     await openDialog(tester, sortRun());
@@ -267,14 +331,9 @@ void main() {
 
     // 第 2 对 = (p-1, p-3)：左侧显示对照中刚落盘的 2.00，不是开窗快照 1.00。
     expect(find.text(l10n.styleExplore_sortProgress(2, 3)), findsOneWidget);
-    expect(
-      find.text(l10n.styleExplore_preferenceValue('2.00')),
-      findsOneWidget,
-    );
-    expect(
-      find.text(l10n.styleExplore_preferenceValue('1.00')),
-      findsOneWidget,
-    );
+    expect(find.text('2.00'), findsOneWidget);
+    expect(find.text('1.00'), findsWidgets);
+    expect(find.text('artist:custom'), findsWidgets);
   });
 
   testWidgets('都不好 / 跳过 / 右边好：偏好落盘与关窗提示', (tester) async {

@@ -14168,60 +14168,6 @@ abstract class AppLocalizations {
   /// **'Select a block and replace its thumbnail'**
   String get promptBlockLibrary_updateExistingThumbnailSubtitle;
 
-  /// No description provided for @styleExplore_createFamily.
-  ///
-  /// In en, this message translates to:
-  /// **'Create family'**
-  String get styleExplore_createFamily;
-
-  /// No description provided for @styleExplore_familyCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'Family \"{name}\" created'**
-  String styleExplore_familyCreated(String name);
-
-  /// No description provided for @styleExplore_familyNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Family name'**
-  String get styleExplore_familyNameLabel;
-
-  /// No description provided for @styleExplore_familyNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Soft light main line'**
-  String get styleExplore_familyNameHint;
-
-  /// No description provided for @styleExplore_familyParentsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Parents ({count})'**
-  String styleExplore_familyParentsTitle(int count);
-
-  /// No description provided for @styleExplore_customParentLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom parent string'**
-  String get styleExplore_customParentLabel;
-
-  /// No description provided for @styleExplore_customParentHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a prompt string as a parent'**
-  String get styleExplore_customParentHint;
-
-  /// No description provided for @styleExplore_addCustomParent.
-  ///
-  /// In en, this message translates to:
-  /// **'Add custom string'**
-  String get styleExplore_addCustomParent;
-
-  /// No description provided for @styleExplore_createFamilyEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep at least one valid parent string'**
-  String get styleExplore_createFamilyEmpty;
-
   /// No description provided for @styleExplore_deepRoundCountHint.
   ///
   /// In en, this message translates to:
@@ -14243,14 +14189,8 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_sortTitle.
   ///
   /// In en, this message translates to:
-  /// **'Parent A/B comparison'**
+  /// **'Which is better?'**
   String get styleExplore_sortTitle;
-
-  /// No description provided for @styleExplore_sortPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Which image is closer to the style you want?'**
-  String get styleExplore_sortPrompt;
 
   /// No description provided for @styleExplore_sortLeft.
   ///
@@ -14267,7 +14207,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_sortNeither.
   ///
   /// In en, this message translates to:
-  /// **'Neither'**
+  /// **'Neither is good'**
   String get styleExplore_sortNeither;
 
   /// No description provided for @styleExplore_sortSkip.
@@ -14279,7 +14219,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_sortProgress.
   ///
   /// In en, this message translates to:
-  /// **'Pair {current}/{total}'**
+  /// **'Pair {current} / {total}'**
   String styleExplore_sortProgress(int current, int total);
 
   /// No description provided for @styleExplore_sortDone.
@@ -14317,12 +14257,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select at least one child candidate'**
   String get styleExplore_branchEmpty;
-
-  /// No description provided for @styleExplore_preferenceValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Pref {value}'**
-  String styleExplore_preferenceValue(String value);
 
   /// No description provided for @styleExplore_pileManageDeleteDone.
   ///
@@ -23012,6 +22946,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No children yet. Generate them above.'**
   String get styleExplore_childrenEmpty;
+
+  /// No description provided for @styleExplore_evolutionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your {count} picks as the first generation of parents'**
+  String styleExplore_evolutionSubtitle(int count);
+
+  /// No description provided for @styleExplore_evolutionStepOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Mix parent artists to generate offspring'**
+  String get styleExplore_evolutionStepOne;
+
+  /// No description provided for @styleExplore_evolutionStepTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare pairs to show your preferences'**
+  String get styleExplore_evolutionStepTwo;
+
+  /// No description provided for @styleExplore_evolutionStepThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the best offspring for the next generation'**
+  String get styleExplore_evolutionStepThree;
+
+  /// No description provided for @styleExplore_evolutionNewLine.
+  ///
+  /// In en, this message translates to:
+  /// **'New evolution line'**
+  String get styleExplore_evolutionNewLine;
+
+  /// No description provided for @styleExplore_evolutionJoinLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the current generation of “{name}”'**
+  String styleExplore_evolutionJoinLine(String name);
+
+  /// No description provided for @styleExplore_evolutionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution line name'**
+  String get styleExplore_evolutionName;
+
+  /// No description provided for @styleExplore_defaultEvolutionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution line {n}'**
+  String styleExplore_defaultEvolutionName(int n);
+
+  /// No description provided for @styleExplore_evolutionParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents · {count}'**
+  String styleExplore_evolutionParents(int count);
+
+  /// No description provided for @styleExplore_evolutionAddCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a custom artist string'**
+  String get styleExplore_evolutionAddCustom;
+
+  /// No description provided for @styleExplore_evolutionCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an artist string'**
+  String get styleExplore_evolutionCustomHint;
+
+  /// No description provided for @styleExplore_evolutionParentEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No usable artist string'**
+  String get styleExplore_evolutionParentEmpty;
+
+  /// No description provided for @styleExplore_evolutionTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Offspring replace this random block in the prompt'**
+  String get styleExplore_evolutionTarget;
+
+  /// No description provided for @styleExplore_evolutionOnlyCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create only'**
+  String get styleExplore_evolutionOnlyCreate;
+
+  /// No description provided for @styleExplore_evolutionOnlyJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Add only'**
+  String get styleExplore_evolutionOnlyJoin;
+
+  /// No description provided for @styleExplore_evolutionCreateGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and generate {count}'**
+  String styleExplore_evolutionCreateGenerate(int count);
+
+  /// No description provided for @styleExplore_evolutionJoinGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add and generate {count}'**
+  String styleExplore_evolutionJoinGenerate(int count);
+
+  /// No description provided for @styleExplore_evolutionFirstBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'First offspring batch'**
+  String get styleExplore_evolutionFirstBatch;
+
+  /// No description provided for @styleExplore_evolutionMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'images (at least {count})'**
+  String styleExplore_evolutionMinimum(int count);
+
+  /// No description provided for @styleExplore_evolutionCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created evolution line “{name}”'**
+  String styleExplore_evolutionCreated(String name);
+
+  /// No description provided for @styleExplore_evolutionJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to evolution line “{name}”'**
+  String styleExplore_evolutionJoined(String name);
+
+  /// No description provided for @styleExplore_sortLiveSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Results save live; close at any time'**
+  String get styleExplore_sortLiveSave;
+
+  /// No description provided for @styleExplore_sortRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Current ranking · Live'**
+  String get styleExplore_sortRanking;
+
+  /// No description provided for @styleExplore_sortRankingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking affects each parent’s chance of selection in the next offspring batch'**
+  String get styleExplore_sortRankingHint;
+
+  /// No description provided for @styleExplore_sortSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Space'**
+  String get styleExplore_sortSpace;
 }
 
 class _AppLocalizationsDelegate

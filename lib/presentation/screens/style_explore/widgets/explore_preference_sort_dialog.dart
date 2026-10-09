@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:math' as math;
+import 'package:flutter/services.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,7 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../themes/studio_typography.dart';
+import 'explore_candidate_card.dart';
+import 'explore_artist_text.dart';
+import 'explore_dialog_frame.dart';
+import 'explore_icon.dart';
+import 'explore_style.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 
@@ -115,13 +122,35 @@ class _ExplorePreferenceSortDialogState
     }
   }
 
+  KeyEventResult _key(KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (FocusManager.instance.primaryFocus?.context
+            ?.findAncestorStateOfType<EditableTextState>() !=
+        null) {
+      return KeyEventResult.ignored;
+    }
+    final result = switch (event.logicalKey) {
+      LogicalKeyboardKey.arrowLeft => ExploreComparisonResult.left,
+      LogicalKeyboardKey.arrowRight => ExploreComparisonResult.right,
+      LogicalKeyboardKey.arrowDown => ExploreComparisonResult.neither,
+      LogicalKeyboardKey.space => ExploreComparisonResult.skip,
+      _ => null,
+    };
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      Navigator.pop(context);
+      return KeyEventResult.handled;
+    }
+    if (result == null) return KeyEventResult.ignored;
+    _answer(result);
+    return KeyEventResult.handled;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
+    final theme = Theme.of(context),
+        colors = theme.colorScheme,
+        l10n = context.l10n;
     if (_pairs.isEmpty || _index >= _pairs.length) {
-      // 防御：父本 <2（show 已拦截）或索引越界时渲染可关闭空壳，
-      // 绝不触 _pairs[_index]。
       return const Dialog(child: SizedBox(width: 240, height: 120));
     }
     final (left, right) = _pairs[_index];
@@ -129,194 +158,400 @@ class _ExplorePreferenceSortDialogState
         .watch(exploreRunListNotifierProvider)
         .valueOrNull
         ?.runById(widget.runId);
-
+    final narrow = MediaQuery.sizeOf(context).width < 1280;
+    final purple = ExploreStyle.evolution(theme);
     return Dialog(
       key: const Key('explore-preference-sort-dialog'),
-      child: ConstrainedBox(
-        // 双原图并排：大窗照候选详情弹窗先例（85%×88%）。
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * 0.85,
-          maxHeight: MediaQuery.sizeOf(context).height * 0.88,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.styleExplore_sortTitle,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ),
-                  Text(
-                    l10n.styleExplore_sortProgress(_index + 1, _pairs.length),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Divider(height: 1, color: theme.dividerColor),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+      insetPadding: const EdgeInsets.all(24),
+      backgroundColor: colors.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: colors.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Focus(
+        autofocus: true,
+        onKeyEvent: (_, event) => _key(event),
+        child: SizedBox(
+          width: 1180,
+          height: math.min(888, MediaQuery.sizeOf(context).height - 48),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 14, 12, 6),
+                child: Row(
                   children: [
-                    Text(
-                      l10n.styleExplore_sortPrompt,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                    ExploreIcon('sort', size: 20, color: purple),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        l10n.styleExplore_sortTitle,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(child: _buildParentCard(run, left)),
-                          const SizedBox(width: 12),
-                          Expanded(child: _buildParentCard(run, right)),
-                        ],
+                    IconButton(
+                      tooltip: l10n.common_close,
+                      onPressed: () => Navigator.pop(context),
+                      icon: ExploreIcon(
+                        'x',
+                        size: 18,
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            Divider(height: 1, color: theme.dividerColor),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                spacing: 8,
-                runSpacing: 4,
-                children: [
-                  TextButton(
-                    key: const Key('explore-sort-neither'),
-                    onPressed: () => _answer(ExploreComparisonResult.neither),
-                    child: Text(l10n.styleExplore_sortNeither),
-                  ),
-                  TextButton(
-                    key: const Key('explore-sort-skip'),
-                    onPressed: () => _answer(ExploreComparisonResult.skip),
-                    child: Text(l10n.styleExplore_sortSkip),
-                  ),
-                  FilledButton.tonal(
-                    key: const Key('explore-sort-left'),
-                    onPressed: () => _answer(ExploreComparisonResult.left),
-                    child: Text(l10n.styleExplore_sortLeft),
-                  ),
-                  FilledButton.tonal(
-                    key: const Key('explore-sort-right'),
-                    onPressed: () => _answer(ExploreComparisonResult.right),
-                    child: Text(l10n.styleExplore_sortRight),
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 22),
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      l10n.styleExplore_sortProgress(_index + 1, _pairs.length),
+                      style: StudioTypography.data.copyWith(
+                        fontSize: 12,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 160,
+                      child: LinearProgressIndicator(
+                        value: (_index + 1) / _pairs.length,
+                        minHeight: 4,
+                        borderRadius: BorderRadius.circular(2),
+                        color: purple,
+                        backgroundColor: colors.surfaceContainerHighest,
+                      ),
+                    ),
+                    Text(
+                      l10n.styleExplore_sortLiveSave,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 14),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 0, 22, 18),
+                  child: narrow
+                      ? Column(
+                          children: [
+                            Expanded(child: _comparison(run, left, right)),
+                            const SizedBox(height: 14),
+                            SizedBox(
+                              height: 168,
+                              child: _ranking(run, below: true),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(child: _comparison(run, left, right)),
+                            const SizedBox(width: 18),
+                            SizedBox(width: 240, child: _ranking(run)),
+                          ],
+                        ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildParentCard(ExploreRun? run, ExploreParent parent) {
-    return _ParentCard(
-      parent: parent,
-      filePath: _filePathOf(run, parent),
-      preference: _preferenceOf(run, parent),
+  Widget _comparison(
+    ExploreRun? run,
+    ExploreParent left,
+    ExploreParent right,
+  ) => Row(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Expanded(child: _side(run, left, true)),
+      const SizedBox(width: 10),
+      SizedBox(
+        width: 100,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _button(
+                'explore-sort-neither',
+                context.l10n.styleExplore_sortNeither,
+                '↓',
+                ExploreComparisonResult.neither,
+              ),
+              const SizedBox(height: 10),
+              _button(
+                'explore-sort-skip',
+                context.l10n.styleExplore_sortSkip,
+                context.l10n.styleExplore_sortSpace,
+                ExploreComparisonResult.skip,
+              ),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(width: 10),
+      Expanded(child: _side(run, right, false)),
+    ],
+  );
+
+  Widget _side(ExploreRun? run, ExploreParent parent, bool left) {
+    final colors = Theme.of(context).colorScheme,
+        path = _filePathOf(run, parent);
+    return Column(
+      key: Key(left ? 'explore-sort-side-left' : 'explore-sort-side-right'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.center,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 610),
+              child: SizedBox.expand(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: ColoredBox(
+                    color: colors.surfaceContainerLowest,
+                    child: parent.sourceCandidateId == null
+                        ? Padding(
+                            padding: const EdgeInsets.all(22),
+                            child: Center(
+                              child: Text(
+                                parent.artistString,
+                                textAlign: TextAlign.center,
+                                style: StudioTypography.data.copyWith(
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          )
+                        : path == null
+                        ? _missing()
+                        : Image.file(
+                            File(path),
+                            fit: BoxFit.contain,
+                            cacheWidth: 1000,
+                            errorBuilder: (_, error, stack) => _missing(),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        ExploreArtistLine(
+          text: parent.artistString,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 10),
+        _button(
+          left ? 'explore-sort-left' : 'explore-sort-right',
+          left
+              ? context.l10n.styleExplore_sortLeft
+              : context.l10n.styleExplore_sortRight,
+          left ? '←' : '→',
+          left ? ExploreComparisonResult.left : ExploreComparisonResult.right,
+        ),
+      ],
     );
   }
-}
 
-/// 一侧对照卡：原图（contain 完整不裁剪）+ 串 + 偏好值小字。
-class _ParentCard extends StatelessWidget {
-  const _ParentCard({
-    required this.parent,
-    required this.filePath,
-    required this.preference,
-  });
-
-  final ExploreParent parent;
-  final String? filePath;
-  final double preference;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+  Widget _missing() => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ExploreIcon(
+          'img',
+          size: 32,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
+        const SizedBox(height: 8),
+        Text(
+          context.l10n.styleExplore_candidateMissing,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _button(
+    String key,
+    String label,
+    String shortcut,
+    ExploreComparisonResult result,
+  ) => OutlinedButton(
+    key: Key(key),
+    onPressed: _submitting ? null : () => _answer(result),
+    style: ExploreDialogFrame.buttonStyle(context).copyWith(
+      padding: const WidgetStatePropertyAll(
+        EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      ),
+    ),
+    child: Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [Text(label), _keycap(shortcut)],
+    ),
+  );
+
+  Widget _keycap(String value) {
+    final colors = Theme.of(context).colorScheme;
+    return IntrinsicWidth(
+      child: Container(
+        constraints: const BoxConstraints(minWidth: 18),
+        height: 18,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          border: Border.all(color: colors.outlineVariant),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          value,
+          style: StudioTypography.data.copyWith(
+            fontSize: 10.5,
+            fontWeight: FontWeight.w500,
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _ranking(ExploreRun? run, {bool below = false}) {
+    final colors = Theme.of(context).colorScheme, l10n = context.l10n;
+    final parents = [...widget.parentSet.parents]
+      ..sort((a, b) => _preferenceOf(run, b).compareTo(_preferenceOf(run, a)));
+    final max = parents.map((p) => _preferenceOf(run, p)).reduce(math.max);
+    return Container(
+      key: const Key('explore-sort-ranking'),
+      padding: EdgeInsets.only(left: below ? 0 : 18, top: below ? 10 : 0),
+      decoration: BoxDecoration(
+        border: below
+            ? Border(top: BorderSide(color: colors.outlineVariant))
+            : Border(left: BorderSide(color: colors.outlineVariant)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(child: _buildImage(theme, l10n)),
-          const SizedBox(height: 8),
-          SelectableText(
-            parent.artistString,
-            maxLines: 3,
-            style: theme.textTheme.bodySmall,
-          ),
-          const SizedBox(height: 4),
           Text(
-            l10n.styleExplore_preferenceValue(preference.toStringAsFixed(2)),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            l10n.styleExplore_sortRanking,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: ListView(
+              children: [
+                for (final p in parents)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 30,
+                          height: 44,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child:
+                                run?.candidateById(p.sourceCandidateId ?? '') !=
+                                    null
+                                ? ExploreCandidateImage(
+                                    candidate: run!.candidateById(
+                                      p.sourceCandidateId!,
+                                    )!,
+                                    sequenceNumber: 1,
+                                  )
+                                : ColoredBox(
+                                    color: ExploreStyle.evolutionBg(
+                                      Theme.of(context),
+                                    ),
+                                    child: Center(
+                                      child: ExploreIcon(
+                                        'dice',
+                                        size: 15,
+                                        color: ExploreStyle.evolution(
+                                          Theme.of(context),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ExploreArtistLine(
+                                text: p.artistString,
+                                fontSize: 12,
+                              ),
+                              const SizedBox(height: 6),
+                              LinearProgressIndicator(
+                                value: max <= 0
+                                    ? 0
+                                    : _preferenceOf(run, p) / max,
+                                minHeight: 4,
+                                borderRadius: BorderRadius.circular(2),
+                                color: ExploreStyle.evolution(
+                                  Theme.of(context),
+                                ),
+                                backgroundColor: colors.surfaceContainerHighest,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _preferenceOf(run, p).toStringAsFixed(2),
+                          style: StudioTypography.data.copyWith(
+                            fontSize: 11,
+                            color: colors.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.styleExplore_sortRankingHint,
+            style: TextStyle(
+              fontSize: 11,
+              height: 1.6,
+              color: colors.onSurfaceVariant,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  /// 原图：无来源/无图/文件缺失都落到同一占位，不阻断对照。
-  Widget _buildImage(ThemeData theme, AppLocalizations l10n) {
-    final placeholder = _placeholder(theme, l10n);
-    final path = filePath;
-    if (path == null) return placeholder;
-    return Image.file(
-      File(path),
-      fit: BoxFit.contain,
-      // 完整显示不裁剪；解码按图区宽度（避免裸全尺寸的内存尖峰）。
-      cacheWidth: 720,
-      errorBuilder: (context, error, stackTrace) => placeholder,
-    );
-  }
-
-  Widget _placeholder(ThemeData theme, AppLocalizations l10n) {
-    return ColoredBox(
-      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.broken_image_outlined,
-              size: 32,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.styleExplore_candidateMissing,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

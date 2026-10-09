@@ -4315,29 +4315,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "既存ブロックのサムネイルを更新",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "ブロックを選択し、そのサムネイルを置き換えます",
-  "styleExplore_createFamily": "ファミリー作成",
-  "styleExplore_familyCreated": "ファミリー「{name}」を作成しました",
-  "@styleExplore_familyCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_familyNameLabel": "ファミリー名",
-  "styleExplore_familyNameHint": "例：柔らかい光の本線",
-  "styleExplore_familyParentsTitle": "親（{count}）",
-  "@styleExplore_familyParentsTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_customParentLabel": "カスタム親文字列",
-  "styleExplore_customParentHint": "プロンプト文字列を親として入力",
-  "styleExplore_addCustomParent": "カスタム文字列を追加",
-  "styleExplore_createFamilyEmpty": "有効な親文字列を少なくとも 1 つ残してください",
   "styleExplore_deepRoundCountHint": "枚数は最低 {min}（各親につき 1 枚保証）",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
@@ -4348,13 +4325,12 @@
   },
   "styleExplore_deepRoundNoInstance": "メインプロンプトに有効なランダム遺伝ブロックがないため、深層ラウンドを開始できません",
   "styleExplore_deepRoundEmpty": "変異エンジンが十分に異なる子代を生成できませんでした",
-  "styleExplore_sortTitle": "親のA/B比較",
-  "styleExplore_sortPrompt": "どちらの画像が狙いの画風に近いですか？",
+  "styleExplore_sortTitle": "どちらが良い？",
   "styleExplore_sortLeft": "左が良い",
   "styleExplore_sortRight": "右が良い",
-  "styleExplore_sortNeither": "どちらも良くない",
+  "styleExplore_sortNeither": "どちらも好みではない",
   "styleExplore_sortSkip": "スキップ",
-  "styleExplore_sortProgress": "{current}/{total} 組目",
+  "styleExplore_sortProgress": "{current} / {total} ペア",
   "@styleExplore_sortProgress": {
     "placeholders": {
       "current": {
@@ -4378,14 +4354,6 @@
   "styleExplore_branchRoundsIncomplete": "現世代に未完了のラウンドがあります",
   "styleExplore_branchDuplicate": "選択した子代が第一世代の親文字列と完全に重複しています",
   "styleExplore_branchEmpty": "子代候補を少なくとも 1 枚選択してください",
-  "styleExplore_preferenceValue": "選好 {value}",
-  "@styleExplore_preferenceValue": {
-    "placeholders": {
-      "value": {
-        "type": "String"
-      }
-    }
-  },
   "styleExplore_pileManageDeleteDone": "{count} 件の候補と画像コピーを削除しました",
   "@styleExplore_pileManageDeleteDone": {
     "placeholders": {
@@ -7287,5 +7255,93 @@
   },
   "styleExplore_breedNext": "次世代を育成",
   "styleExplore_optionalName": "名前（任意）",
-  "styleExplore_childrenEmpty": "子はまだありません。上のボタンで生成してください。"
+  "styleExplore_childrenEmpty": "子はまだありません。上のボタンで生成してください。",
+  "styleExplore_evolutionSubtitle": "選んだ {count} 枚を第1世代の親にします",
+  "@styleExplore_evolutionSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionStepOne": "親の絵師を混ぜて子を生成",
+  "styleExplore_evolutionStepTwo": "ペア比較で好みを伝える",
+  "styleExplore_evolutionStepThree": "良い子を選び次世代を育てる",
+  "styleExplore_evolutionNewLine": "新しい進化ライン",
+  "styleExplore_evolutionJoinLine": "「{name}」の現世代に追加",
+  "@styleExplore_evolutionJoinLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_evolutionName": "進化ライン名",
+  "styleExplore_defaultEvolutionName": "進化ライン {n}",
+  "@styleExplore_defaultEvolutionName": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionParents": "親 · {count}",
+  "@styleExplore_evolutionParents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionAddCustom": "カスタム絵師文字列を追加",
+  "styleExplore_evolutionCustomHint": "絵師文字列を入力",
+  "styleExplore_evolutionParentEmpty": "使用できる絵師文字列がありません",
+  "styleExplore_evolutionTarget": "子はプロンプトのこのランダムブロックを置換します",
+  "styleExplore_evolutionOnlyCreate": "作成のみ",
+  "styleExplore_evolutionOnlyJoin": "追加のみ",
+  "styleExplore_evolutionCreateGenerate": "作成して {count} 枚生成",
+  "@styleExplore_evolutionCreateGenerate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionJoinGenerate": "追加して {count} 枚生成",
+  "@styleExplore_evolutionJoinGenerate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionFirstBatch": "最初の子のバッチ",
+  "styleExplore_evolutionMinimum": "枚（最低 {count}）",
+  "@styleExplore_evolutionMinimum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionCreated": "進化ライン「{name}」を作成しました",
+  "@styleExplore_evolutionCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_evolutionJoined": "進化ライン「{name}」に追加しました",
+  "@styleExplore_evolutionJoined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_sortLiveSave": "結果は即時保存されます。いつでも閉じられます",
+  "styleExplore_sortRanking": "現在の順位 · リアルタイム",
+  "styleExplore_sortRankingHint": "順位は次のバッチで各親が選ばれる確率に影響します",
+  "styleExplore_sortSpace": "スペース"
 }

@@ -7759,37 +7759,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_updateExistingThumbnailSubtitle => '选择块并替换其预览图';
 
   @override
-  String get styleExplore_createFamily => '建家族';
-
-  @override
-  String styleExplore_familyCreated(String name) {
-    return '已创建家族「$name」';
-  }
-
-  @override
-  String get styleExplore_familyNameLabel => '家族名称';
-
-  @override
-  String get styleExplore_familyNameHint => '例如：柔光主线';
-
-  @override
-  String styleExplore_familyParentsTitle(int count) {
-    return '父本（$count）';
-  }
-
-  @override
-  String get styleExplore_customParentLabel => '自定义父本串';
-
-  @override
-  String get styleExplore_customParentHint => '输入一段提示词串作为父本';
-
-  @override
-  String get styleExplore_addCustomParent => '添加自定义串';
-
-  @override
-  String get styleExplore_createFamilyEmpty => '请至少保留一个有效父本串';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return '出图数至少 $min（每个父本保底一张）';
   }
@@ -7801,26 +7770,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_deepRoundEmpty => '变异引擎无法产出足够不同的子代串';
 
   @override
-  String get styleExplore_sortTitle => '父本A/B组对照';
+  String get styleExplore_sortTitle => '哪张更好？';
 
   @override
-  String get styleExplore_sortPrompt => '哪张图更接近你想要的画风效果？';
+  String get styleExplore_sortLeft => '左边更好';
 
   @override
-  String get styleExplore_sortLeft => '左边好';
+  String get styleExplore_sortRight => '右边更好';
 
   @override
-  String get styleExplore_sortRight => '右边好';
-
-  @override
-  String get styleExplore_sortNeither => '都不好';
+  String get styleExplore_sortNeither => '两张都不行';
 
   @override
   String get styleExplore_sortSkip => '跳过';
 
   @override
   String styleExplore_sortProgress(int current, int total) {
-    return '第 $current/$total 对';
+    return '第 $current / 共 $total 对';
   }
 
   @override
@@ -7842,11 +7808,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_branchEmpty => '请至少选择一张子代候选';
-
-  @override
-  String styleExplore_preferenceValue(String value) {
-    return '偏好 $value';
-  }
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
@@ -12602,6 +12563,99 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_childrenEmpty => '还没有子代，点击上方生成';
+
+  @override
+  String styleExplore_evolutionSubtitle(int count) {
+    return '用你挑中的 $count 张作为第 1 代父本';
+  }
+
+  @override
+  String get styleExplore_evolutionStepOne => '混合父本的画师生成子代';
+
+  @override
+  String get styleExplore_evolutionStepTwo => '两两比较告诉它你更喜欢哪些';
+
+  @override
+  String get styleExplore_evolutionStepThree => '挑最好的子代培育下一代';
+
+  @override
+  String get styleExplore_evolutionNewLine => '新建进化线';
+
+  @override
+  String styleExplore_evolutionJoinLine(String name) {
+    return '加入「$name」当前代';
+  }
+
+  @override
+  String get styleExplore_evolutionName => '进化线名称';
+
+  @override
+  String styleExplore_defaultEvolutionName(int n) {
+    return '进化线 $n';
+  }
+
+  @override
+  String styleExplore_evolutionParents(int count) {
+    return '父本 · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionAddCustom => '添加自定义画师串';
+
+  @override
+  String get styleExplore_evolutionCustomHint => '输入画师串';
+
+  @override
+  String get styleExplore_evolutionParentEmpty => '没有可用的画师串';
+
+  @override
+  String get styleExplore_evolutionTarget => '子代会替换提示词里的这个随机块';
+
+  @override
+  String get styleExplore_evolutionOnlyCreate => '只创建';
+
+  @override
+  String get styleExplore_evolutionOnlyJoin => '只加入';
+
+  @override
+  String styleExplore_evolutionCreateGenerate(int count) {
+    return '创建并生成 $count 张';
+  }
+
+  @override
+  String styleExplore_evolutionJoinGenerate(int count) {
+    return '加入并生成 $count 张';
+  }
+
+  @override
+  String get styleExplore_evolutionFirstBatch => '第一批子代';
+
+  @override
+  String styleExplore_evolutionMinimum(int count) {
+    return '张（至少 $count）';
+  }
+
+  @override
+  String styleExplore_evolutionCreated(String name) {
+    return '已创建进化线「$name」';
+  }
+
+  @override
+  String styleExplore_evolutionJoined(String name) {
+    return '已加入进化线「$name」';
+  }
+
+  @override
+  String get styleExplore_sortLiveSave => '结果实时保存，可以随时关闭';
+
+  @override
+  String get styleExplore_sortRanking => '当前排名 · 实时';
+
+  @override
+  String get styleExplore_sortRankingHint => '排名会影响下一批子代里各父本被选中的概率';
+
+  @override
+  String get styleExplore_sortSpace => '空格';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -20359,37 +20413,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockLibrary_updateExistingThumbnailSubtitle => '選擇塊並替換其預覽圖';
 
   @override
-  String get styleExplore_createFamily => '建家族';
-
-  @override
-  String styleExplore_familyCreated(String name) {
-    return '已建立家族「$name」';
-  }
-
-  @override
-  String get styleExplore_familyNameLabel => '家族名稱';
-
-  @override
-  String get styleExplore_familyNameHint => '例如：柔光主線';
-
-  @override
-  String styleExplore_familyParentsTitle(int count) {
-    return '父本（$count）';
-  }
-
-  @override
-  String get styleExplore_customParentLabel => '自訂父本串';
-
-  @override
-  String get styleExplore_customParentHint => '輸入一段提示詞串作為父本';
-
-  @override
-  String get styleExplore_addCustomParent => '新增自訂串';
-
-  @override
-  String get styleExplore_createFamilyEmpty => '請至少保留一個有效父本串';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return '出圖數至少 $min（每個父本保底一張）';
   }
@@ -20401,26 +20424,23 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_deepRoundEmpty => '變異引擎無法產出足夠不同的子代串';
 
   @override
-  String get styleExplore_sortTitle => '父本A/B組對照';
+  String get styleExplore_sortTitle => '哪張更好？';
 
   @override
-  String get styleExplore_sortPrompt => '哪張圖更接近你想要的畫風效果？';
+  String get styleExplore_sortLeft => '左邊更好';
 
   @override
-  String get styleExplore_sortLeft => '左邊好';
+  String get styleExplore_sortRight => '右邊更好';
 
   @override
-  String get styleExplore_sortRight => '右邊好';
-
-  @override
-  String get styleExplore_sortNeither => '都不好';
+  String get styleExplore_sortNeither => '兩張都不行';
 
   @override
   String get styleExplore_sortSkip => '跳過';
 
   @override
   String styleExplore_sortProgress(int current, int total) {
-    return '第 $current/$total 對';
+    return '第 $current / 共 $total 對';
   }
 
   @override
@@ -20442,11 +20462,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_branchEmpty => '請至少選擇一張子代候選';
-
-  @override
-  String styleExplore_preferenceValue(String value) {
-    return '偏好 $value';
-  }
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
@@ -25202,4 +25217,97 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_childrenEmpty => '還沒有子代，點選上方生成';
+
+  @override
+  String styleExplore_evolutionSubtitle(int count) {
+    return '用你挑中的 $count 張作為第 1 代父本';
+  }
+
+  @override
+  String get styleExplore_evolutionStepOne => '混合父本的畫師生成子代';
+
+  @override
+  String get styleExplore_evolutionStepTwo => '兩兩比較告訴它你更喜歡哪些';
+
+  @override
+  String get styleExplore_evolutionStepThree => '挑最好的子代培育下一代';
+
+  @override
+  String get styleExplore_evolutionNewLine => '新增進化線';
+
+  @override
+  String styleExplore_evolutionJoinLine(String name) {
+    return '加入「$name」當前代';
+  }
+
+  @override
+  String get styleExplore_evolutionName => '進化線名稱';
+
+  @override
+  String styleExplore_defaultEvolutionName(int n) {
+    return '進化線 $n';
+  }
+
+  @override
+  String styleExplore_evolutionParents(int count) {
+    return '父本 · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionAddCustom => '新增自訂畫師串';
+
+  @override
+  String get styleExplore_evolutionCustomHint => '輸入畫師串';
+
+  @override
+  String get styleExplore_evolutionParentEmpty => '沒有可用的畫師串';
+
+  @override
+  String get styleExplore_evolutionTarget => '子代會替換提示詞裡的這個隨機塊';
+
+  @override
+  String get styleExplore_evolutionOnlyCreate => '只建立';
+
+  @override
+  String get styleExplore_evolutionOnlyJoin => '只加入';
+
+  @override
+  String styleExplore_evolutionCreateGenerate(int count) {
+    return '建立並生成 $count 張';
+  }
+
+  @override
+  String styleExplore_evolutionJoinGenerate(int count) {
+    return '加入並生成 $count 張';
+  }
+
+  @override
+  String get styleExplore_evolutionFirstBatch => '第一批子代';
+
+  @override
+  String styleExplore_evolutionMinimum(int count) {
+    return '張（至少 $count）';
+  }
+
+  @override
+  String styleExplore_evolutionCreated(String name) {
+    return '已建立進化線「$name」';
+  }
+
+  @override
+  String styleExplore_evolutionJoined(String name) {
+    return '已加入進化線「$name」';
+  }
+
+  @override
+  String get styleExplore_sortLiveSave => '結果即時儲存，可以隨時關閉';
+
+  @override
+  String get styleExplore_sortRanking => '當前排名 · 即時';
+
+  @override
+  String get styleExplore_sortRankingHint => '排名會影響下一批子代裡各父本被選中的機率';
+
+  @override
+  String get styleExplore_sortSpace => '空格';
 }

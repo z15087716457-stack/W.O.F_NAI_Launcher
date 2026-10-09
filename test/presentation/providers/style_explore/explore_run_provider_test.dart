@@ -91,6 +91,143 @@ void main() {
         );
   }
 
+  test(
+    'append parents deduplicates, keeps preference and serializes concurrent writes',
+    () async {
+      final c = container(),
+          notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      final line = await notifier.createFamily(
+        run.id,
+        name: 'Evolution line',
+        parents: const [(sourceCandidateId: 'a', artistString: 'artist:a')],
+      );
+      final futures = [
+        notifier.addParentsToActiveSet(
+          run.id,
+          familyId: line.id,
+          parents: const [
+            (sourceCandidateId: 'duplicate', artistString: ' artist:a '),
+            (sourceCandidateId: 'b', artistString: 'artist:b'),
+            (sourceCandidateId: 'b2', artistString: ' artist:b '),
+            (sourceCandidateId: null, artistString: ' '),
+          ],
+        ),
+        notifier.addParentsToActiveSet(
+          run.id,
+          familyId: line.id,
+          parents: const [(sourceCandidateId: null, artistString: 'artist:c')],
+        ),
+      ];
+      await Future.wait(futures);
+      final updated = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+      expect(updated.parentSets.single.parents.map((p) => p.artistString), [
+        'artist:a',
+        'artist:b',
+        'artist:c',
+      ]);
+      expect(
+        updated.parentSets.single.parents.map((p) => p.sourceCandidateId),
+        ['a', 'b', null],
+      );
+      expect(updated.parentSets.single.parents.first.preference, 1);
+      expect(updated.families.single.activeParentSetId, line.activeParentSetId);
+    },
+  );
+
+  test(
+    'append parents only touches the active set and rejects in-flight rounds or pending candidates',
+    () async {
+      final c = container(),
+          notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      final family = await notifier.createFamily(
+        run.id,
+        name: 'Line',
+        parents: const [(sourceCandidateId: null, artistString: 'artist:root')],
+      );
+      final original = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+      final active = original.parentSets.single.copyWith(
+        id: 'next',
+        generation: 2,
+      );
+      final current = original.copyWith(
+        parentSets: [
+          original.parentSets.single.copyWith(
+            status: ExploreParentSetStatus.used,
+          ),
+          active,
+        ],
+        families: [family.copyWith(activeParentSetId: active.id)],
+      );
+      await notifier.overwrite(current);
+      await notifier.addParentsToActiveSet(
+        run.id,
+        familyId: family.id,
+        parents: const [(sourceCandidateId: null, artistString: 'artist:next')],
+      );
+      final updated = (await c.read(
+        exploreRunListNotifierProvider.future,
+      )).runById(run.id)!;
+      expect(updated.parentSets.first.parents, hasLength(1));
+      expect(updated.parentSets.last.parents, hasLength(2));
+      for (final status in [
+        ExploreRoundStatus.pending,
+        ExploreRoundStatus.generating,
+        ExploreRoundStatus.generated,
+      ]) {
+        await notifier.overwrite(
+          updated.copyWith(
+            rounds: [
+              ExploreRound(
+                id: 'deep',
+                number: 1,
+                phase: ExploreRoundPhase.deep,
+                status: status,
+                createdAt: _epoch,
+                targetCount: 1,
+                parentSetId: active.id,
+                candidateIds: ['pending'],
+              ),
+            ],
+            candidates: const [
+              ExploreCandidate(
+                id: 'pending',
+                roundId: 'deep',
+                lineage: ExploreLineage(
+                  operation: ExploreLineageOperation.mutation,
+                ),
+                generation: ExploreCandidateGeneration(
+                  status: ExploreCandidateGenerationStatus.pending,
+                ),
+              ),
+            ],
+          ),
+        );
+        await expectLater(
+          notifier.addParentsToActiveSet(
+            run.id,
+            familyId: family.id,
+            parents: const [
+              (sourceCandidateId: null, artistString: 'artist:no'),
+            ],
+          ),
+          throwsStateError,
+        );
+        expect(
+          (await c.read(
+            exploreRunListNotifierProvider.future,
+          )).runById(run.id)!.parentSets.last.parents,
+          hasLength(2),
+        );
+      }
+    },
+  );
+
   test('create/rename/archive/delete keep list consistent', () async {
     final c = container();
     final notifier = c.read(exploreRunListNotifierProvider.notifier);

@@ -470,10 +470,11 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
   /// 建家族（阶段 D）：父本串列表 → 家族 + 第一代父本集（active）。
   ///
   /// 父本串去首尾空白、去空、按串去重（保序）；至少需要一个有效串，
-  /// 否则抛 [StateError]。名称为空时回退「家族 N」。
+  /// 否则抛 [StateError]。名称为空时用调用方传入的本地化默认名。
   Future<ExploreFamily> createFamily(
     String runId, {
     required String name,
+    String defaultName = '',
     required List<({String? sourceCandidateId, String artistString})> parents,
   }) {
     return _mutateRun(runId, (run) {
@@ -507,12 +508,13 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
             ),
         ],
       );
-      final trimmedName = name.trim();
+      final trimmedName = name.trim().isEmpty
+          ? defaultName.trim()
+          : name.trim();
+      if (trimmedName.isEmpty) throw StateError('进化线名称不能为空');
       final family = ExploreFamily(
         id: familyId,
-        name: trimmedName.isEmpty
-            ? '家族 ${run.families.length + 1}'
-            : trimmedName,
+        name: trimmedName,
         createdAt: DateTime.now(),
         rootParentSetId: parentSet.id,
         activeParentSetId: parentSet.id,
@@ -522,6 +524,49 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
         families: [...run.families, family],
       );
     }).then((run) => run.families.last);
+  }
+
+  /// Append only to the active generation, on the same serialized mutation
+  /// chain as generation and review updates. Existing preference stays intact.
+  Future<ExploreParentSet> addParentsToActiveSet(
+    String runId, {
+    required String familyId,
+    required List<({String? sourceCandidateId, String artistString})> parents,
+  }) {
+    String? activeId;
+    return _mutateRun(runId, (run) {
+      final family = run.familyById(familyId);
+      if (family == null) throw StateError('进化线不存在');
+      final active = run.parentSetById(family.activeParentSetId);
+      if (active == null) throw StateError('活跃父本集不存在');
+      if (!exploreParentSetRoundsComplete(run, active)) {
+        throw StateError('这一代还在生成');
+      }
+      activeId = active.id;
+      final seen = active.parents.map((p) => p.artistString.trim()).toSet();
+      final added = <ExploreParent>[];
+      for (final parent in parents) {
+        final text = parent.artistString.trim();
+        if (text.isEmpty || !seen.add(text)) continue;
+        added.add(
+          ExploreParent(
+            id: const Uuid().v4(),
+            sourceCandidateId: parent.sourceCandidateId,
+            artistString: text,
+          ),
+        );
+      }
+      if (seen.isEmpty) throw StateError('至少需要一个有效父本串');
+      return run.copyWith(
+        parentSets: [
+          for (final set in run.parentSets)
+            if (set.id == active.id)
+              set.copyWith(parents: [...set.parents, ...added])
+            else
+              set,
+        ],
+      );
+    }).then((run) => run.parentSetById(activeId!)!);
   }
 
   /// 建分支（阶段 D）：多选最新代优秀子代 + 第一代父本回交 →

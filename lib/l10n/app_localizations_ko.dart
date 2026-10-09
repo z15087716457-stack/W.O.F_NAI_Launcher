@@ -7875,37 +7875,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '블록을 골라 썸네일을 교체합니다';
 
   @override
-  String get styleExplore_createFamily => '가계 만들기';
-
-  @override
-  String styleExplore_familyCreated(String name) {
-    return '\"$name\" 가계를 만들었습니다';
-  }
-
-  @override
-  String get styleExplore_familyNameLabel => '가계 이름';
-
-  @override
-  String get styleExplore_familyNameHint => '예: 부드러운 빛 메인 라인';
-
-  @override
-  String styleExplore_familyParentsTitle(int count) {
-    return '부모($count)';
-  }
-
-  @override
-  String get styleExplore_customParentLabel => '사용자 지정 부모 문자열';
-
-  @override
-  String get styleExplore_customParentHint => '부모로 쓸 프롬프트 문자열을 입력하세요';
-
-  @override
-  String get styleExplore_addCustomParent => '사용자 지정 문자열 추가';
-
-  @override
-  String get styleExplore_createFamilyEmpty => '유효한 부모 문자열을 하나 이상 남겨 두세요';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return '개수는 최소 $min이어야 합니다(부모마다 하나)';
   }
@@ -7918,10 +7887,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_deepRoundEmpty => '변이 엔진이 서로 다른 자식을 충분히 만들지 못했습니다';
 
   @override
-  String get styleExplore_sortTitle => '부모 A/B 비교';
-
-  @override
-  String get styleExplore_sortPrompt => '어느 이미지가 원하는 스타일에 더 가깝나요?';
+  String get styleExplore_sortTitle => '어느 쪽이 더 좋나요?';
 
   @override
   String get styleExplore_sortLeft => '왼쪽이 더 좋음';
@@ -7930,14 +7896,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_sortRight => '오른쪽이 더 좋음';
 
   @override
-  String get styleExplore_sortNeither => '둘 다 아님';
+  String get styleExplore_sortNeither => '둘 다 별로';
 
   @override
   String get styleExplore_sortSkip => '건너뛰기';
 
   @override
   String styleExplore_sortProgress(int current, int total) {
-    return '$current/$total번째 쌍';
+    return '$current / $total 쌍';
   }
 
   @override
@@ -7959,11 +7925,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_branchEmpty => '자식 후보를 하나 이상 선택하세요';
-
-  @override
-  String styleExplore_preferenceValue(String value) {
-    return '선호 $value';
-  }
 
   @override
   String styleExplore_pileManageDeleteDone(int count) {
@@ -12850,4 +12811,98 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_childrenEmpty => '아직 자손이 없습니다. 위에서 생성하세요.';
+
+  @override
+  String styleExplore_evolutionSubtitle(int count) {
+    return '선택한 $count장을 1세대 부모로 사용합니다';
+  }
+
+  @override
+  String get styleExplore_evolutionStepOne => '부모 작가를 섞어 자손 생성';
+
+  @override
+  String get styleExplore_evolutionStepTwo => '쌍별 비교로 선호도 전달';
+
+  @override
+  String get styleExplore_evolutionStepThree => '좋은 자손을 골라 다음 세대 육성';
+
+  @override
+  String get styleExplore_evolutionNewLine => '새 진화 계통';
+
+  @override
+  String styleExplore_evolutionJoinLine(String name) {
+    return '“$name”의 현재 세대에 추가';
+  }
+
+  @override
+  String get styleExplore_evolutionName => '진화 계통 이름';
+
+  @override
+  String styleExplore_defaultEvolutionName(int n) {
+    return '진화 계통 $n';
+  }
+
+  @override
+  String styleExplore_evolutionParents(int count) {
+    return '부모 · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionAddCustom => '사용자 지정 작가 문자열 추가';
+
+  @override
+  String get styleExplore_evolutionCustomHint => '작가 문자열 입력';
+
+  @override
+  String get styleExplore_evolutionParentEmpty => '사용 가능한 작가 문자열 없음';
+
+  @override
+  String get styleExplore_evolutionTarget => '자손이 프롬프트의 이 무작위 블록을 대체합니다';
+
+  @override
+  String get styleExplore_evolutionOnlyCreate => '생성만';
+
+  @override
+  String get styleExplore_evolutionOnlyJoin => '추가만';
+
+  @override
+  String styleExplore_evolutionCreateGenerate(int count) {
+    return '생성 후 $count장 생성';
+  }
+
+  @override
+  String styleExplore_evolutionJoinGenerate(int count) {
+    return '추가 후 $count장 생성';
+  }
+
+  @override
+  String get styleExplore_evolutionFirstBatch => '첫 자손 묶음';
+
+  @override
+  String styleExplore_evolutionMinimum(int count) {
+    return '장 (최소 $count)';
+  }
+
+  @override
+  String styleExplore_evolutionCreated(String name) {
+    return '진화 계통 “$name” 생성됨';
+  }
+
+  @override
+  String styleExplore_evolutionJoined(String name) {
+    return '진화 계통 “$name”에 추가됨';
+  }
+
+  @override
+  String get styleExplore_sortLiveSave => '결과는 즉시 저장되며 언제든 닫을 수 있습니다';
+
+  @override
+  String get styleExplore_sortRanking => '현재 순위 · 실시간';
+
+  @override
+  String get styleExplore_sortRankingHint =>
+      '순위는 다음 자손 묶음에서 각 부모가 선택될 확률에 영향을 줍니다';
+
+  @override
+  String get styleExplore_sortSpace => 'Space';
 }
