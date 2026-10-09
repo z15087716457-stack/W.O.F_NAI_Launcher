@@ -217,12 +217,20 @@ class _ExploreCandidateCardState extends ConsumerState<ExploreCandidateCard> {
                                     },
                               background: adopted
                                   ? const Color(0x99000000)
-                                  : const Color(0xff6e56cf),
+                                  : switch (candidate.lineage.operation) {
+                                      ExploreLineageOperation.mutation =>
+                                        const Color(0xffc2410c),
+                                      ExploreLineageOperation.injection =>
+                                        const Color(0xff0e7490),
+                                      _ => const Color(0xff6e56cf),
+                                    },
                               foreground: Colors.white,
-                              icon: const DnaIcon(
-                                size: 11,
-                                color: Colors.white,
-                              ),
+                              icon: adopted
+                                  ? const DnaIcon(size: 11, color: Colors.white)
+                                  : null,
+                              height: 19,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         if (done && folder != null && !hovered)
@@ -358,9 +366,12 @@ class _ExploreCandidateCardState extends ConsumerState<ExploreCandidateCard> {
     String text, {
     required Color background,
     required Color foreground,
-    required Widget icon,
+    required Widget? icon,
+    double height = 20,
+    double fontSize = 11,
+    FontWeight fontWeight = FontWeight.w500,
   }) => Container(
-    height: 20,
+    height: height,
     constraints: const BoxConstraints(maxWidth: 140),
     padding: const EdgeInsets.symmetric(horizontal: 6),
     decoration: BoxDecoration(
@@ -370,16 +381,15 @@ class _ExploreCandidateCardState extends ConsumerState<ExploreCandidateCard> {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        icon,
-        const SizedBox(width: 3),
+        if (icon != null) ...[icon, const SizedBox(width: 3)],
         Flexible(
           child: Text(
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
               color: foreground,
             ),
           ),
@@ -647,30 +657,42 @@ class ExploreCandidateImage extends StatelessWidget {
     String text,
     Color color, {
     String? hint,
-  }) => Center(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ExploreIcon(icon, size: 22, color: color, strokeWidth: 1.5),
-        const SizedBox(height: 8),
-        Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: color),
-        ),
-        if (hint != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            hint,
-            style: TextStyle(
-              fontSize: 11,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurfaceVariant.withValues(alpha: .7),
-            ),
+  }) => LayoutBuilder(
+    builder: (context, space) {
+      if (space.maxHeight < 100 || space.maxWidth < 80) {
+        return Center(
+          child: Tooltip(
+            message: text,
+            child: ExploreIcon(icon, size: 18, color: color, strokeWidth: 1.5),
           ),
-        ],
-      ],
-    ),
+        );
+      }
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ExploreIcon(icon, size: 22, color: color, strokeWidth: 1.5),
+            const SizedBox(height: 8),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: color),
+            ),
+            if (hint != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                hint,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: .7),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    },
   );
 }

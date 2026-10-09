@@ -25,6 +25,8 @@ class ExploreIcon extends StatelessWidget {
     'max': 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
     'pause': 'M9 5v14M15 5v14',
     'stop': 'M6 6h12v12H6z',
+    'minus': 'M5 12h14',
+    'chevU': 'M6 15l6-6 6 6',
     'play': 'M8 5l11 7-11 7z',
     'panel': 'M4 5h16v14H4zM15 5v14',
     'swap':

@@ -18,11 +18,14 @@ class ExploreSelectionBar extends StatelessWidget {
     required this.onEvolve,
     required this.onDelete,
     required this.onExit,
+    this.evolutionLabel,
   });
   final Key? groupKey;
   final int count;
+  final String? evolutionLabel;
   final bool allHearted;
-  final VoidCallback onHeart, onGroup, onAdopt, onEvolve, onDelete, onExit;
+  final VoidCallback onHeart, onGroup, onAdopt, onDelete, onExit;
+  final VoidCallback? onEvolve;
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n, theme = Theme.of(context);
@@ -69,7 +72,7 @@ class ExploreSelectionBar extends StatelessWidget {
         ),
         LibraryAction(
           key: const Key('explore-gallery-create-family'),
-          label: l10n.styleExplore_startEvolution,
+          label: evolutionLabel ?? l10n.styleExplore_startEvolution,
           icon: 'evo',
           iconWidget: DnaIcon(size: 14, color: foreground),
           backgroundColor: ExploreStyle.evolution(theme, highContrast: hc),

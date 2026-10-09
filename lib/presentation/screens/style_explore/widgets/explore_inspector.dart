@@ -24,6 +24,7 @@ import 'explore_icon.dart';
 import 'explore_shared_actions.dart';
 import 'explore_style.dart';
 import 'explore_highlighted_prompt.dart';
+import 'explore_lineage_info.dart';
 
 class ExploreInspector extends ConsumerStatefulWidget {
   const ExploreInspector({
@@ -378,6 +379,10 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
           ),
         ),
         const SizedBox(height: 14),
+        if (exploreHasLineage(candidate)) ...[
+          ExploreLineageInfo(run: run, candidate: candidate),
+          const SizedBox(height: 14),
+        ],
         _draws(candidate),
         if (done) ...[
           const SizedBox(height: 14),
@@ -568,6 +573,10 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
                   if (candidate.generation.status ==
                       ExploreCandidateGenerationStatus.done) ...[
                     _actions(run, candidate),
+                    const SizedBox(height: 14),
+                  ],
+                  if (exploreHasLineage(candidate)) ...[
+                    ExploreLineageInfo(run: run, candidate: candidate),
                     const SizedBox(height: 14),
                   ],
                   _draws(candidate),

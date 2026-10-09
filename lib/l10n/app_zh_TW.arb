@@ -4181,7 +4181,6 @@
       }
     }
   },
-  "styleExplore_targetCountLabel": "出圖數",
   "styleExplore_manualRunName": "手動候選 {time}",
   "@styleExplore_manualRunName": {
     "placeholders": {
@@ -4204,7 +4203,6 @@
   "styleExplore_cancelRunMessage": "取消後不可再啟動；剩餘待生成候選將標記為已取消。",
   "styleExplore_filterAll": "全部",
   "styleExplore_filterHearted": "收藏",
-  "styleExplore_newFolder": "新增資料夾",
   "styleExplore_renameFolder": "重新命名資料夾",
   "styleExplore_deleteFolder": "刪除資料夾",
   "styleExplore_deleteFolderMessage": "將刪除資料夾「{name}」；其中的候選回到未分類，圖片不會被刪除。",
@@ -4238,7 +4236,6 @@
       }
     }
   },
-  "styleExplore_assignToFolder": "歸類到",
   "styleExplore_candidateMissing": "圖片檔案缺失",
   "styleExplore_candidateDetailTitle": "候選詳情",
   "styleExplore_candidatePosition": "第 {current}/{total} 張",
@@ -4295,7 +4292,6 @@
       }
     }
   },
-  "styleExplore_mergeAdopt": "合併收編",
   "promptBlockEditor_library": "塊庫",
   "promptBlockPicker_title": "選擇塊",
   "promptBlockLibrary_thumbnail": "預覽圖",
@@ -4319,7 +4315,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "更新現有塊預覽圖",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "選擇塊並替換其預覽圖",
-  "styleExplore_lineageTitle": "譜系",
   "styleExplore_createFamily": "建家族",
   "styleExplore_familyCreated": "已建立家族「{name}」",
   "@styleExplore_familyCreated": {
@@ -4343,36 +4338,6 @@
   "styleExplore_customParentHint": "輸入一段提示詞串作為父本",
   "styleExplore_addCustomParent": "新增自訂串",
   "styleExplore_createFamilyEmpty": "請至少保留一個有效父本串",
-  "styleExplore_parentSetTitle": "第 {generation} 代父本集",
-  "@styleExplore_parentSetTitle": {
-    "placeholders": {
-      "generation": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_candidatePileTitle": "第 {generation} 代候選堆 · {count} 張",
-  "@styleExplore_candidatePileTitle": {
-    "placeholders": {
-      "generation": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_parentSetActive": "活躍",
-  "styleExplore_parentSetUsed": "已回交",
-  "styleExplore_branchLabel": "分支：{name}",
-  "@styleExplore_branchLabel": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_createDeepRound": "生成候選圖",
   "styleExplore_deepRoundCountHint": "出圖數至少 {min}（每個父本保底一張）",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
@@ -4383,7 +4348,6 @@
   },
   "styleExplore_deepRoundNoInstance": "主提示詞中沒有啟用的隨機遺傳塊，無法進行深度輪",
   "styleExplore_deepRoundEmpty": "變異引擎無法產出足夠不同的子代串",
-  "styleExplore_sortParents": "A/B 組對照",
   "styleExplore_sortTitle": "父本A/B組對照",
   "styleExplore_sortPrompt": "哪張圖更接近你想要的畫風效果？",
   "styleExplore_sortLeft": "左邊好",
@@ -4402,9 +4366,6 @@
     }
   },
   "styleExplore_sortDone": "排序完成",
-  "styleExplore_branchSelect": "多選建分支",
-  "styleExplore_createBranch": "建分支",
-  "styleExplore_branchNameLabel": "分支名稱（可選）",
   "styleExplore_branchCreated": "已建立分支（{count} 個父本）",
   "@styleExplore_branchCreated": {
     "placeholders": {
@@ -4422,25 +4383,6 @@
     "placeholders": {
       "value": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_roundsSummary": "{count} 輪",
-  "@styleExplore_roundsSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_pileEmpty": "尚無候選圖，點上方「生成候選圖」開始",
-  "styleExplore_managePile": "管理",
-  "styleExplore_pileManageDeleteTitle": "刪除所選候選圖",
-  "styleExplore_pileManageDeleteMessage": "將刪除 {count} 張候選在 Run 目錄中的圖片副本與候選記錄；圖庫來源圖不受影響。",
-  "@styleExplore_pileManageDeleteMessage": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
@@ -7251,5 +7193,99 @@
   "styleExplore_appliedToEditor": "已套用到編輯區",
   "@styleExplore_appliedToEditor": {
     "description": "Candidate prompt applied to editor."
-  }
+  },
+  "styleExplore_generationNumber": "第 {index} 代",
+  "@styleExplore_generationNumber": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_currentGeneration": "當前",
+  "styleExplore_generationStart": "由 {count} 張候選開始",
+  "@styleExplore_generationStart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generationSource": "由第 {index} 代挑 {count} 張 + 第 1 代回交 {roots} 張",
+  "@styleExplore_generationSource": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "roots": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_parentsByPreference": "父本 · 按偏好排序",
+  "styleExplore_backcross": "回交",
+  "styleExplore_childrenCount": "子代 · {count} 張",
+  "@styleExplore_childrenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pickForGeneration": "勾選好的，培育第 {index} 代",
+  "@styleExplore_pickForGeneration": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_breedSelected": "用選中的 {count} 張培育第 {index} 代",
+  "@styleExplore_breedSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_backcrossHint": "會自動帶上第 1 代父本做回交",
+  "styleExplore_generationBusy": "這一代還在生成",
+  "styleExplore_regeneratePrefix": "再生成",
+  "styleExplore_regenerateSuffix": "張子代",
+  "styleExplore_pairCompare": "兩兩比較排序",
+  "styleExplore_howToUse": "怎麼用",
+  "styleExplore_helpParents": "父本是你選中的畫師組合，偏好越高，越容易參與組合。",
+  "styleExplore_helpChildren": "子代由父本交叉、變異或從畫師池注入新畫師產生。",
+  "styleExplore_helpCompare": "兩兩比較會更新父本偏好，影響後續子代組合。",
+  "styleExplore_helpBackcross": "培育下一代時，會自動帶上第 1 代父本做回交。",
+  "styleExplore_originTitle": "怎麼來的",
+  "styleExplore_originCross": "由這幾張父本的畫師交叉組合",
+  "styleExplore_originMutation": "在父本基礎上替換了部分畫師",
+  "styleExplore_originInjection": "從池裡注入了新畫師",
+  "styleExplore_newArtist": "新",
+  "styleExplore_evolutionEmpty": "從候選裡挑幾張喜歡的，開始一條進化線",
+  "styleExplore_pickFromCandidates": "去候選裡挑",
+  "styleExplore_generationSummary": "{parents} 父本 · {children} 子代 · 選了 {selected} 張進入下一代",
+  "@styleExplore_generationSummary": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "children": {
+        "type": "int"
+      },
+      "selected": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_breedNext": "培育下一代",
+  "styleExplore_optionalName": "名稱（可不填）",
+  "styleExplore_childrenEmpty": "還沒有子代，點選上方生成"
 }

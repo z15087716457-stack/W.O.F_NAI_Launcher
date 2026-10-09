@@ -77,8 +77,6 @@ class StorageKeys {
       'style_explore_inspector_width';
   static const String styleExploreInspectorVisible =
       'style_explore_inspector_visible';
-  static const String styleExplorePileColumnWidth =
-      'style_explore_pile_column_width';
 
   // Panel Expansion State Keys (面板展开状态)
   static const String advancedOptionsExpanded = 'advanced_options_expanded';

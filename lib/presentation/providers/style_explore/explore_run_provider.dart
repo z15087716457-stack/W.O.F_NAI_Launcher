@@ -861,13 +861,6 @@ String mergeExploreRollPositives(Iterable<String> positives) {
 /// 谱系区当前选中的家族 id（UI 态；切换 run 时由谱系面板校正）。
 final exploreActiveFamilyIdProvider = StateProvider<String?>((ref) => null);
 
-/// 谱系区代际卡片列的内容高度（session 态，拖拽手柄调整，重启不保留）。
-final exploreLineagePanelHeightProvider = StateProvider<double>((ref) => 320);
-
-/// 谱系区内容高度的可调范围。
-const exploreLineagePanelMinHeight = 160.0;
-const exploreLineagePanelMaxHeight = 600.0;
-
 /// 父本集的所有深度轮是否全部完成（建分支前置条件）：
 /// 无未完成状态的轮次，且轮内无 pending 候选。
 bool exploreParentSetRoundsComplete(

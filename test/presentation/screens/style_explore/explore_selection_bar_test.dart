@@ -10,6 +10,8 @@ import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_
 import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_selection_bar.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_filter_widgets.dart';
 import 'explore_candidate_wall_test.dart';
+import 'explore_inspector_test.dart' show InspectorBlocks;
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 
 void main() {
   testWidgets('pending candidate is preserved when Delete is pressed', (
@@ -67,7 +69,14 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      wallFixtureApp(run ?? wallFixture(count: 4), width: 1100, child: child),
+      wallFixtureApp(
+        run ?? wallFixture(count: 4),
+        width: 1100,
+        child: child,
+        extraOverrides: [
+          promptBlockLibraryNotifierProvider.overrideWith(InspectorBlocks.new),
+        ],
+      ),
     );
     await tester.pumpAndSettle();
     return ProviderScope.containerOf(

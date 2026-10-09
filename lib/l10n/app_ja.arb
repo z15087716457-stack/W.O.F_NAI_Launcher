@@ -4181,7 +4181,6 @@
       }
     }
   },
-  "styleExplore_targetCountLabel": "生成枚数",
   "styleExplore_manualRunName": "手動キャプチャ {time}",
   "@styleExplore_manualRunName": {
     "placeholders": {
@@ -4204,7 +4203,6 @@
   "styleExplore_cancelRunMessage": "キャンセル後は再開できません。残りの未生成候補はキャンセル済みとしてマークされます。",
   "styleExplore_filterAll": "すべて",
   "styleExplore_filterHearted": "お気に入り",
-  "styleExplore_newFolder": "新しいフォルダ",
   "styleExplore_renameFolder": "フォルダ名を変更",
   "styleExplore_deleteFolder": "フォルダを削除",
   "styleExplore_deleteFolderMessage": "フォルダ「{name}」を削除します。中の候補は未分類に戻り、画像は削除されません。",
@@ -4238,7 +4236,6 @@
       }
     }
   },
-  "styleExplore_assignToFolder": "分類先",
   "styleExplore_candidateMissing": "画像ファイルがありません",
   "styleExplore_candidateDetailTitle": "候補詳細",
   "styleExplore_candidatePosition": "{current}/{total} 枚目",
@@ -4295,7 +4292,6 @@
       }
     }
   },
-  "styleExplore_mergeAdopt": "まとめて収録",
   "promptBlockEditor_library": "ブロックライブラリ",
   "promptBlockPicker_title": "ブロックを選択",
   "promptBlockLibrary_thumbnail": "サムネイル",
@@ -4319,7 +4315,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "既存ブロックのサムネイルを更新",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "ブロックを選択し、そのサムネイルを置き換えます",
-  "styleExplore_lineageTitle": "系譜",
   "styleExplore_createFamily": "ファミリー作成",
   "styleExplore_familyCreated": "ファミリー「{name}」を作成しました",
   "@styleExplore_familyCreated": {
@@ -4343,36 +4338,6 @@
   "styleExplore_customParentHint": "プロンプト文字列を親として入力",
   "styleExplore_addCustomParent": "カスタム文字列を追加",
   "styleExplore_createFamilyEmpty": "有効な親文字列を少なくとも 1 つ残してください",
-  "styleExplore_parentSetTitle": "第 {generation} 世代の親セット",
-  "@styleExplore_parentSetTitle": {
-    "placeholders": {
-      "generation": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_candidatePileTitle": "第 {generation} 世代の候補パイル · {count} 枚",
-  "@styleExplore_candidatePileTitle": {
-    "placeholders": {
-      "generation": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_parentSetActive": "アクティブ",
-  "styleExplore_parentSetUsed": "バッククロス済み",
-  "styleExplore_branchLabel": "ブランチ：{name}",
-  "@styleExplore_branchLabel": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_createDeepRound": "候補を生成",
   "styleExplore_deepRoundCountHint": "枚数は最低 {min}（各親につき 1 枚保証）",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
@@ -4383,7 +4348,6 @@
   },
   "styleExplore_deepRoundNoInstance": "メインプロンプトに有効なランダム遺伝ブロックがないため、深層ラウンドを開始できません",
   "styleExplore_deepRoundEmpty": "変異エンジンが十分に異なる子代を生成できませんでした",
-  "styleExplore_sortParents": "A/B比較",
   "styleExplore_sortTitle": "親のA/B比較",
   "styleExplore_sortPrompt": "どちらの画像が狙いの画風に近いですか？",
   "styleExplore_sortLeft": "左が良い",
@@ -4402,9 +4366,6 @@
     }
   },
   "styleExplore_sortDone": "ランク付け完了",
-  "styleExplore_branchSelect": "複数選択でブランチ",
-  "styleExplore_createBranch": "ブランチ作成",
-  "styleExplore_branchNameLabel": "ブランチ名（任意）",
   "styleExplore_branchCreated": "ブランチを作成しました（{count} 親）",
   "@styleExplore_branchCreated": {
     "placeholders": {
@@ -4422,25 +4383,6 @@
     "placeholders": {
       "value": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_roundsSummary": "{count} ラウンド",
-  "@styleExplore_roundsSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_pileEmpty": "候補はまだありません。上の「候補を生成」から始めてください",
-  "styleExplore_managePile": "管理",
-  "styleExplore_pileManageDeleteTitle": "選択した候補画像を削除",
-  "styleExplore_pileManageDeleteMessage": "{count} 件の候補の Run ディレクトリ内コピーとレコードを削除します。ギャラリーの元画像には影響しません。",
-  "@styleExplore_pileManageDeleteMessage": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
@@ -7251,5 +7193,99 @@
   "styleExplore_appliedToEditor": "編集欄に適用しました",
   "@styleExplore_appliedToEditor": {
     "description": "Candidate prompt applied to editor."
-  }
+  },
+  "styleExplore_generationNumber": "第{index}世代",
+  "@styleExplore_generationNumber": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_currentGeneration": "現在",
+  "styleExplore_generationStart": "候補{count}枚から開始",
+  "@styleExplore_generationStart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generationSource": "第{index}世代から{count}枚選択 + 初代{roots}枚を戻し交配",
+  "@styleExplore_generationSource": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "roots": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_parentsByPreference": "親 · 好み順",
+  "styleExplore_backcross": "戻し交配",
+  "styleExplore_childrenCount": "子 · {count}枚",
+  "@styleExplore_childrenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pickForGeneration": "良い候補を選んで第{index}世代へ",
+  "@styleExplore_pickForGeneration": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_breedSelected": "選択した{count}枚で第{index}世代を育成",
+  "@styleExplore_breedSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_backcrossHint": "初代の親を自動で加えて戻し交配します",
+  "styleExplore_generationBusy": "この世代はまだ生成中です",
+  "styleExplore_regeneratePrefix": "再生成",
+  "styleExplore_regenerateSuffix": "枚の子",
+  "styleExplore_pairCompare": "ペア比較で並べ替え",
+  "styleExplore_howToUse": "使い方",
+  "styleExplore_helpParents": "親は選んだ絵師の組み合わせです。好みの値が高いほど組み合わせに参加しやすくなります。",
+  "styleExplore_helpChildren": "子は親の交叉、変異、絵師プールからの新しい絵師の追加で生まれます。",
+  "styleExplore_helpCompare": "ペア比較で親の好みの値を更新し、その後の組み合わせに反映します。",
+  "styleExplore_helpBackcross": "次世代の育成では、初代の親を自動で加えて戻し交配します。",
+  "styleExplore_originTitle": "生成の由来",
+  "styleExplore_originCross": "これらの親の絵師を交叉して組み合わせました",
+  "styleExplore_originMutation": "親の組み合わせの一部の絵師を置き換えました",
+  "styleExplore_originInjection": "プールから新しい絵師を追加しました",
+  "styleExplore_newArtist": "新規",
+  "styleExplore_evolutionEmpty": "候補から好きな画像を選んで進化ラインを開始",
+  "styleExplore_pickFromCandidates": "候補を選ぶ",
+  "styleExplore_generationSummary": "親{parents}枚 · 子{children}枚 · 次世代に{selected}枚選択",
+  "@styleExplore_generationSummary": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "children": {
+        "type": "int"
+      },
+      "selected": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_breedNext": "次世代を育成",
+  "styleExplore_optionalName": "名前（任意）",
+  "styleExplore_childrenEmpty": "子はまだありません。上のボタンで生成してください。"
 }

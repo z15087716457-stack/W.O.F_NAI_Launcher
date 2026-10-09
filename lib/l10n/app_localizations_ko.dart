@@ -7690,9 +7690,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_targetCountLabel => '이미지 수';
-
-  @override
   String styleExplore_manualRunName(String time) {
     return '수동 수집 $time';
   }
@@ -7720,9 +7717,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_filterHearted => '즐겨찾기';
-
-  @override
-  String get styleExplore_newFolder => '새 폴더';
 
   @override
   String get styleExplore_renameFolder => '폴더 이름 변경';
@@ -7756,9 +7750,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String styleExplore_folderCreated(String name) {
     return '\"$name\" 폴더를 만들었습니다';
   }
-
-  @override
-  String get styleExplore_assignToFolder => '이동';
 
   @override
   String get styleExplore_candidateMissing => '이미지 파일 없음';
@@ -7826,9 +7817,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_mergeAdopt => '병합해 저장';
-
-  @override
   String get promptBlockEditor_library => '블록 라이브러리';
 
   @override
@@ -7887,9 +7875,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '블록을 골라 썸네일을 교체합니다';
 
   @override
-  String get styleExplore_lineageTitle => '계보';
-
-  @override
   String get styleExplore_createFamily => '가계 만들기';
 
   @override
@@ -7921,30 +7906,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_createFamilyEmpty => '유효한 부모 문자열을 하나 이상 남겨 두세요';
 
   @override
-  String styleExplore_parentSetTitle(int generation) {
-    return '$generation세대 부모 집합';
-  }
-
-  @override
-  String styleExplore_candidatePileTitle(int generation, int count) {
-    return '$generation세대 후보 더미 · $count';
-  }
-
-  @override
-  String get styleExplore_parentSetActive => '활성';
-
-  @override
-  String get styleExplore_parentSetUsed => '역교배됨';
-
-  @override
-  String styleExplore_branchLabel(String name) {
-    return '분기: $name';
-  }
-
-  @override
-  String get styleExplore_createDeepRound => '후보 생성';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return '개수는 최소 $min이어야 합니다(부모마다 하나)';
   }
@@ -7955,9 +7916,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_deepRoundEmpty => '변이 엔진이 서로 다른 자식을 충분히 만들지 못했습니다';
-
-  @override
-  String get styleExplore_sortParents => 'A/B 비교';
 
   @override
   String get styleExplore_sortTitle => '부모 A/B 비교';
@@ -7986,15 +7944,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_sortDone => '순위 매기기 완료';
 
   @override
-  String get styleExplore_branchSelect => '분기용으로 선택';
-
-  @override
-  String get styleExplore_createBranch => '분기 만들기';
-
-  @override
-  String get styleExplore_branchNameLabel => '분기 이름(선택)';
-
-  @override
   String styleExplore_branchCreated(int count) {
     return '분기를 만들었습니다(부모 $count개)';
   }
@@ -8014,25 +7963,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String styleExplore_preferenceValue(String value) {
     return '선호 $value';
-  }
-
-  @override
-  String styleExplore_roundsSummary(int count) {
-    return '$count라운드';
-  }
-
-  @override
-  String get styleExplore_pileEmpty => '아직 후보가 없습니다 — 위의 \"후보 생성\"으로 시작하세요';
-
-  @override
-  String get styleExplore_managePile => '관리';
-
-  @override
-  String get styleExplore_pileManageDeleteTitle => '선택한 후보 이미지 삭제';
-
-  @override
-  String styleExplore_pileManageDeleteMessage(int count) {
-    return '후보 $count개의 작업 폴더 이미지 사본과 기록을 삭제합니다. 갤러리의 원본 이미지는 영향을 받지 않습니다.';
   }
 
   @override
@@ -12809,4 +12739,115 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_appliedToEditor => '편집기에 적용됨';
+
+  @override
+  String styleExplore_generationNumber(int index) {
+    return '$index세대';
+  }
+
+  @override
+  String get styleExplore_currentGeneration => '현재';
+
+  @override
+  String styleExplore_generationStart(int count) {
+    return '후보 $count장으로 시작';
+  }
+
+  @override
+  String styleExplore_generationSource(int index, int count, int roots) {
+    return '$index세대에서 $count장 선택 + 1세대 $roots장 역교배';
+  }
+
+  @override
+  String get styleExplore_parentsByPreference => '부모 · 선호도순';
+
+  @override
+  String get styleExplore_backcross => '역교배';
+
+  @override
+  String styleExplore_childrenCount(int count) {
+    return '자손 · $count장';
+  }
+
+  @override
+  String styleExplore_pickForGeneration(int index) {
+    return '좋은 후보를 골라 $index세대 육성';
+  }
+
+  @override
+  String styleExplore_breedSelected(int count, int index) {
+    return '선택한 $count장으로 $index세대 육성';
+  }
+
+  @override
+  String get styleExplore_backcrossHint => '1세대 부모가 역교배에 자동으로 포함됩니다';
+
+  @override
+  String get styleExplore_generationBusy => '이 세대는 아직 생성 중입니다';
+
+  @override
+  String get styleExplore_regeneratePrefix => '다시 생성';
+
+  @override
+  String get styleExplore_regenerateSuffix => '장 자손';
+
+  @override
+  String get styleExplore_pairCompare => '쌍 비교로 순위 지정';
+
+  @override
+  String get styleExplore_howToUse => '사용 방법';
+
+  @override
+  String get styleExplore_helpParents =>
+      '부모는 선택한 작가 조합입니다. 선호도가 높을수록 조합에 참여할 가능성이 높습니다.';
+
+  @override
+  String get styleExplore_helpChildren =>
+      '자손은 부모 교차, 변이 또는 작가 풀에서 새 작가를 주입하여 만들어집니다.';
+
+  @override
+  String get styleExplore_helpCompare => '쌍 비교는 부모 선호도를 갱신하여 이후 조합에 반영합니다.';
+
+  @override
+  String get styleExplore_helpBackcross =>
+      '다음 세대를 육성할 때 1세대 부모가 역교배에 자동으로 포함됩니다.';
+
+  @override
+  String get styleExplore_originTitle => '생성 과정';
+
+  @override
+  String get styleExplore_originCross => '이 부모들의 작가를 교차 조합했습니다';
+
+  @override
+  String get styleExplore_originMutation => '부모 조합의 일부 작가를 교체했습니다';
+
+  @override
+  String get styleExplore_originInjection => '풀에서 새 작가를 주입했습니다';
+
+  @override
+  String get styleExplore_newArtist => '신규';
+
+  @override
+  String get styleExplore_evolutionEmpty => '후보에서 마음에 드는 이미지를 골라 진화 계보를 시작하세요';
+
+  @override
+  String get styleExplore_pickFromCandidates => '후보 고르기';
+
+  @override
+  String styleExplore_generationSummary(
+    int parents,
+    int children,
+    int selected,
+  ) {
+    return '부모 $parents장 · 자손 $children장 · 다음 세대에 $selected장 선택';
+  }
+
+  @override
+  String get styleExplore_breedNext => '다음 세대 육성';
+
+  @override
+  String get styleExplore_optionalName => '이름 (선택 사항)';
+
+  @override
+  String get styleExplore_childrenEmpty => '아직 자손이 없습니다. 위에서 생성하세요.';
 }

@@ -17,7 +17,8 @@ import 'explore_candidate_hover_preview.dart';
 import 'explore_shared_actions.dart';
 import 'explore_folder_assign_bar.dart';
 import 'explore_gallery_welcome.dart';
-import 'explore_lineage_panel.dart';
+import 'explore_evolution_view.dart';
+import 'explore_evolution_actions.dart';
 import 'horizontal_edge_fade.dart';
 import '../../../providers/layout_state_provider.dart';
 import '../../../providers/style_explore/explore_manual_capture.dart';
@@ -90,6 +91,7 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
     ref.watch(exploreSelectionProvider);
     ref.watch(exploreSelectionModeProvider);
     final tab = ref.watch(exploreStageTabProvider);
+    ref.watch(exploreRunRunnerProvider);
     return Focus(
       focusNode: _stageFocus,
       onKeyEvent: (node, event) => _key(run, event),
@@ -104,13 +106,17 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
                 _buildTabs(theme, l10n, run, filter, tab),
                 Expanded(
                   child: tab == ExploreStageTab.evolution
-                      ? SingleChildScrollView(
-                          child: ExploreLineagePanel(
-                            run: run,
-                            onOpenCandidate: (candidate) =>
-                                _openCandidateDetail(run, candidate),
-                            hoverSession: _hoverSession,
+                      ? ExploreEvolutionView(
+                          run: run,
+                          cardBuilder: (c, selectable) => _buildCandidateCard(
+                            run,
+                            c,
+                            selectable: selectable,
                           ),
+                          onGridLayout: (n, extent) {
+                            _columns = n;
+                            _cardExtent = extent;
+                          },
                         )
                       : candidates.isEmpty
                       ? const ExploreGalleryWelcome()
@@ -118,9 +124,7 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
                 ),
               ],
             ),
-            if (_selectionMode &&
-                _selectedIds.isNotEmpty &&
-                tab == ExploreStageTab.candidates)
+            if (_selectionMode && _selectedIds.isNotEmpty)
               Positioned(
                 left: 14,
                 right: 14,
@@ -136,7 +140,18 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
                     onHeart: () => _toggleHearts(run, _selectedIds),
                     onGroup: () => _assignMenu(run),
                     onAdopt: () => _adoptSelected(run),
-                    onEvolve: () => _createFamilyFromSelection(run),
+                    evolutionLabel: tab == ExploreStageTab.evolution
+                        ? l10n.styleExplore_breedNext
+                        : null,
+                    onEvolve: tab == ExploreStageTab.evolution
+                        ? _canBreed(run)
+                              ? () => breedExploreNextGeneration(
+                                  context,
+                                  ref,
+                                  run,
+                                )
+                              : null
+                        : () => _createFamilyFromSelection(run),
                     onDelete: () => _deleteSelected(run),
                     onExit: _exitSelection,
                   ),
@@ -186,7 +201,7 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
         Expanded(
           child: tab == ExploreStageTab.candidates
               ? _buildToolbar(theme, l10n, run, filter)
-              : const SizedBox.shrink(),
+              : ExploreEvolutionFilters(run: run),
         ),
       ],
     ),
@@ -781,7 +796,11 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
         .deleteFolder(run.id, folderId);
   }
 
-  Widget _buildCandidateCard(ExploreRun run, ExploreCandidate candidate) {
+  Widget _buildCandidateCard(
+    ExploreRun run,
+    ExploreCandidate candidate, {
+    bool selectable = true,
+  }) {
     final current = ref.watch(exploreGeneratingCandidateIdProvider);
     return KeyedSubtree(
       key: ValueKey('explore-candidate-${candidate.id}'),
@@ -791,19 +810,48 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
         candidate: candidate,
         sequenceNumber:
             run.candidates.indexWhere((c) => c.id == candidate.id) + 1,
-        selectionMode: _selectionMode,
-        selected: _selectedIds.contains(candidate.id),
+        selectionMode: selectable && _selectionMode,
+        selected: selectable && _selectedIds.contains(candidate.id),
         focused: ref.watch(exploreFocusedCandidateIdProvider) == candidate.id,
         generating: candidate.id == current,
-        onFocus: () => _clickCandidate(candidate.id),
-        onToggleSelect: () => _clickCandidate(candidate.id),
-        onEnterSelection: () => _enterSelection(candidate.id),
-        onOpenDetail: () => _openCandidateDetail(run, candidate),
+        onFocus: () => selectable
+            ? _clickCandidate(candidate.id)
+            : ref.read(exploreFocusedCandidateIdProvider.notifier).state =
+                  candidate.id,
+        onToggleSelect: selectable ? () => _clickCandidate(candidate.id) : null,
+        onEnterSelection: selectable
+            ? () => _enterSelection(candidate.id)
+            : null,
+        onOpenDetail: () => openExploreCandidate(
+          context,
+          ref,
+          run,
+          candidate,
+          browsingIds:
+              ref.read(exploreStageTabProvider) == ExploreStageTab.evolution
+              ? [
+                  for (final c in run.candidates)
+                    if (c.roundId == candidate.roundId) c.id,
+                ]
+              : null,
+        ),
       ),
     );
   }
 
   // ==================== 多选与出口 ====================
+
+  bool _canBreed(ExploreRun run) {
+    final family = exploreSelectedFamily(
+      run,
+      ref.read(exploreActiveFamilyIdProvider),
+    );
+    final set = run.parentSetById(family?.activeParentSetId ?? '');
+    final runner = ref.read(exploreRunRunnerProvider);
+    return set != null &&
+        exploreParentSetRoundsComplete(run, set) &&
+        !(runner.isRunning && runner.runId == run.id);
+  }
 
   void _clickCandidate(String id) {
     _stageFocus.requestFocus();
@@ -953,7 +1001,15 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
       if (targets.isNotEmpty) unawaited(_toggleHearts(run, targets));
     } else if (key == LogicalKeyboardKey.keyE) {
       if (targets.isNotEmpty) {
-        unawaited(_createFamilyFromSelection(run, ids: targets));
+        if (ref.read(exploreStageTabProvider) == ExploreStageTab.evolution) {
+          if (_canBreed(run)) {
+            unawaited(
+              breedExploreNextGeneration(context, ref, run, ids: targets),
+            );
+          }
+        } else {
+          unawaited(_createFamilyFromSelection(run, ids: targets));
+        }
       }
     } else if (key == LogicalKeyboardKey.delete) {
       if (targets.isNotEmpty) {

@@ -7577,9 +7577,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_targetCountLabel => '出图数';
-
-  @override
   String styleExplore_manualRunName(String time) {
     return '手动候选 $time';
   }
@@ -7606,9 +7603,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_filterHearted => '收藏';
-
-  @override
-  String get styleExplore_newFolder => '新建文件夹';
 
   @override
   String get styleExplore_renameFolder => '重命名文件夹';
@@ -7642,9 +7636,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String styleExplore_folderCreated(String name) {
     return '已创建文件夹「$name」';
   }
-
-  @override
-  String get styleExplore_assignToFolder => '归类到';
 
   @override
   String get styleExplore_candidateMissing => '图片文件缺失';
@@ -7712,9 +7703,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_mergeAdopt => '合并收编';
-
-  @override
   String get promptBlockEditor_library => '块库';
 
   @override
@@ -7771,9 +7759,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_updateExistingThumbnailSubtitle => '选择块并替换其预览图';
 
   @override
-  String get styleExplore_lineageTitle => '谱系';
-
-  @override
   String get styleExplore_createFamily => '建家族';
 
   @override
@@ -7805,30 +7790,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_createFamilyEmpty => '请至少保留一个有效父本串';
 
   @override
-  String styleExplore_parentSetTitle(int generation) {
-    return '第 $generation 代父本集';
-  }
-
-  @override
-  String styleExplore_candidatePileTitle(int generation, int count) {
-    return '第 $generation 代候选堆 · $count 张';
-  }
-
-  @override
-  String get styleExplore_parentSetActive => '活跃';
-
-  @override
-  String get styleExplore_parentSetUsed => '已回交';
-
-  @override
-  String styleExplore_branchLabel(String name) {
-    return '分支：$name';
-  }
-
-  @override
-  String get styleExplore_createDeepRound => '生成候选图';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return '出图数至少 $min（每个父本保底一张）';
   }
@@ -7838,9 +7799,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_deepRoundEmpty => '变异引擎无法产出足够不同的子代串';
-
-  @override
-  String get styleExplore_sortParents => 'A/B 组对照';
 
   @override
   String get styleExplore_sortTitle => '父本A/B组对照';
@@ -7869,15 +7827,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_sortDone => '排序完成';
 
   @override
-  String get styleExplore_branchSelect => '多选建分支';
-
-  @override
-  String get styleExplore_createBranch => '建分支';
-
-  @override
-  String get styleExplore_branchNameLabel => '分支名称（可选）';
-
-  @override
   String styleExplore_branchCreated(int count) {
     return '已创建分支（$count 个父本）';
   }
@@ -7897,25 +7846,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String styleExplore_preferenceValue(String value) {
     return '偏好 $value';
-  }
-
-  @override
-  String styleExplore_roundsSummary(int count) {
-    return '$count 轮';
-  }
-
-  @override
-  String get styleExplore_pileEmpty => '尚无候选图，点上方「生成候选图」开始';
-
-  @override
-  String get styleExplore_managePile => '管理';
-
-  @override
-  String get styleExplore_pileManageDeleteTitle => '删除所选候选图';
-
-  @override
-  String styleExplore_pileManageDeleteMessage(int count) {
-    return '将删除 $count 张候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。';
   }
 
   @override
@@ -12564,6 +12494,114 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_appliedToEditor => '已套用到编辑区';
+
+  @override
+  String styleExplore_generationNumber(int index) {
+    return '第 $index 代';
+  }
+
+  @override
+  String get styleExplore_currentGeneration => '当前';
+
+  @override
+  String styleExplore_generationStart(int count) {
+    return '由 $count 张候选开始';
+  }
+
+  @override
+  String styleExplore_generationSource(int index, int count, int roots) {
+    return '由第 $index 代挑 $count 张 + 第 1 代回交 $roots 张';
+  }
+
+  @override
+  String get styleExplore_parentsByPreference => '父本 · 按偏好排序';
+
+  @override
+  String get styleExplore_backcross => '回交';
+
+  @override
+  String styleExplore_childrenCount(int count) {
+    return '子代 · $count 张';
+  }
+
+  @override
+  String styleExplore_pickForGeneration(int index) {
+    return '勾选好的，培育第 $index 代';
+  }
+
+  @override
+  String styleExplore_breedSelected(int count, int index) {
+    return '用选中的 $count 张培育第 $index 代';
+  }
+
+  @override
+  String get styleExplore_backcrossHint => '会自动带上第 1 代父本做回交';
+
+  @override
+  String get styleExplore_generationBusy => '这一代还在生成';
+
+  @override
+  String get styleExplore_regeneratePrefix => '再生成';
+
+  @override
+  String get styleExplore_regenerateSuffix => '张子代';
+
+  @override
+  String get styleExplore_pairCompare => '两两比较排序';
+
+  @override
+  String get styleExplore_howToUse => '怎么用';
+
+  @override
+  String get styleExplore_helpParents => '父本是你选中的画师组合，偏好越高，越容易参与组合。';
+
+  @override
+  String get styleExplore_helpChildren => '子代由父本交叉、变异或从画师池注入新画师产生。';
+
+  @override
+  String get styleExplore_helpCompare => '两两比较会更新父本偏好，影响后续子代组合。';
+
+  @override
+  String get styleExplore_helpBackcross => '培育下一代时，会自动带上第 1 代父本做回交。';
+
+  @override
+  String get styleExplore_originTitle => '怎么来的';
+
+  @override
+  String get styleExplore_originCross => '由这几张父本的画师交叉组合';
+
+  @override
+  String get styleExplore_originMutation => '在父本基础上替换了部分画师';
+
+  @override
+  String get styleExplore_originInjection => '从池里注入了新画师';
+
+  @override
+  String get styleExplore_newArtist => '新';
+
+  @override
+  String get styleExplore_evolutionEmpty => '从候选里挑几张喜欢的，开始一条进化线';
+
+  @override
+  String get styleExplore_pickFromCandidates => '去候选里挑';
+
+  @override
+  String styleExplore_generationSummary(
+    int parents,
+    int children,
+    int selected,
+  ) {
+    return '$parents 父本 · $children 子代 · 选了 $selected 张进入下一代';
+  }
+
+  @override
+  String get styleExplore_breedNext => '培育下一代';
+
+  @override
+  String get styleExplore_optionalName => '名称（可不填）';
+
+  @override
+  String get styleExplore_childrenEmpty => '还没有子代，点击上方生成';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -20139,9 +20177,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get styleExplore_targetCountLabel => '出圖數';
-
-  @override
   String styleExplore_manualRunName(String time) {
     return '手動候選 $time';
   }
@@ -20168,9 +20203,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_filterHearted => '收藏';
-
-  @override
-  String get styleExplore_newFolder => '新增資料夾';
 
   @override
   String get styleExplore_renameFolder => '重新命名資料夾';
@@ -20204,9 +20236,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String styleExplore_folderCreated(String name) {
     return '已建立資料夾「$name」';
   }
-
-  @override
-  String get styleExplore_assignToFolder => '歸類到';
 
   @override
   String get styleExplore_candidateMissing => '圖片檔案缺失';
@@ -20274,9 +20303,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get styleExplore_mergeAdopt => '合併收編';
-
-  @override
   String get promptBlockEditor_library => '塊庫';
 
   @override
@@ -20333,9 +20359,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockLibrary_updateExistingThumbnailSubtitle => '選擇塊並替換其預覽圖';
 
   @override
-  String get styleExplore_lineageTitle => '譜系';
-
-  @override
   String get styleExplore_createFamily => '建家族';
 
   @override
@@ -20367,30 +20390,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_createFamilyEmpty => '請至少保留一個有效父本串';
 
   @override
-  String styleExplore_parentSetTitle(int generation) {
-    return '第 $generation 代父本集';
-  }
-
-  @override
-  String styleExplore_candidatePileTitle(int generation, int count) {
-    return '第 $generation 代候選堆 · $count 張';
-  }
-
-  @override
-  String get styleExplore_parentSetActive => '活躍';
-
-  @override
-  String get styleExplore_parentSetUsed => '已回交';
-
-  @override
-  String styleExplore_branchLabel(String name) {
-    return '分支：$name';
-  }
-
-  @override
-  String get styleExplore_createDeepRound => '生成候選圖';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return '出圖數至少 $min（每個父本保底一張）';
   }
@@ -20400,9 +20399,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_deepRoundEmpty => '變異引擎無法產出足夠不同的子代串';
-
-  @override
-  String get styleExplore_sortParents => 'A/B 組對照';
 
   @override
   String get styleExplore_sortTitle => '父本A/B組對照';
@@ -20431,15 +20427,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_sortDone => '排序完成';
 
   @override
-  String get styleExplore_branchSelect => '多選建分支';
-
-  @override
-  String get styleExplore_createBranch => '建分支';
-
-  @override
-  String get styleExplore_branchNameLabel => '分支名稱（可選）';
-
-  @override
   String styleExplore_branchCreated(int count) {
     return '已建立分支（$count 個父本）';
   }
@@ -20459,25 +20446,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String styleExplore_preferenceValue(String value) {
     return '偏好 $value';
-  }
-
-  @override
-  String styleExplore_roundsSummary(int count) {
-    return '$count 輪';
-  }
-
-  @override
-  String get styleExplore_pileEmpty => '尚無候選圖，點上方「生成候選圖」開始';
-
-  @override
-  String get styleExplore_managePile => '管理';
-
-  @override
-  String get styleExplore_pileManageDeleteTitle => '刪除所選候選圖';
-
-  @override
-  String styleExplore_pileManageDeleteMessage(int count) {
-    return '將刪除 $count 張候選在 Run 目錄中的圖片副本與候選記錄；圖庫來源圖不受影響。';
   }
 
   @override
@@ -25126,4 +25094,112 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_appliedToEditor => '已套用到編輯區';
+
+  @override
+  String styleExplore_generationNumber(int index) {
+    return '第 $index 代';
+  }
+
+  @override
+  String get styleExplore_currentGeneration => '當前';
+
+  @override
+  String styleExplore_generationStart(int count) {
+    return '由 $count 張候選開始';
+  }
+
+  @override
+  String styleExplore_generationSource(int index, int count, int roots) {
+    return '由第 $index 代挑 $count 張 + 第 1 代回交 $roots 張';
+  }
+
+  @override
+  String get styleExplore_parentsByPreference => '父本 · 按偏好排序';
+
+  @override
+  String get styleExplore_backcross => '回交';
+
+  @override
+  String styleExplore_childrenCount(int count) {
+    return '子代 · $count 張';
+  }
+
+  @override
+  String styleExplore_pickForGeneration(int index) {
+    return '勾選好的，培育第 $index 代';
+  }
+
+  @override
+  String styleExplore_breedSelected(int count, int index) {
+    return '用選中的 $count 張培育第 $index 代';
+  }
+
+  @override
+  String get styleExplore_backcrossHint => '會自動帶上第 1 代父本做回交';
+
+  @override
+  String get styleExplore_generationBusy => '這一代還在生成';
+
+  @override
+  String get styleExplore_regeneratePrefix => '再生成';
+
+  @override
+  String get styleExplore_regenerateSuffix => '張子代';
+
+  @override
+  String get styleExplore_pairCompare => '兩兩比較排序';
+
+  @override
+  String get styleExplore_howToUse => '怎麼用';
+
+  @override
+  String get styleExplore_helpParents => '父本是你選中的畫師組合，偏好越高，越容易參與組合。';
+
+  @override
+  String get styleExplore_helpChildren => '子代由父本交叉、變異或從畫師池注入新畫師產生。';
+
+  @override
+  String get styleExplore_helpCompare => '兩兩比較會更新父本偏好，影響後續子代組合。';
+
+  @override
+  String get styleExplore_helpBackcross => '培育下一代時，會自動帶上第 1 代父本做回交。';
+
+  @override
+  String get styleExplore_originTitle => '怎麼來的';
+
+  @override
+  String get styleExplore_originCross => '由這幾張父本的畫師交叉組合';
+
+  @override
+  String get styleExplore_originMutation => '在父本基礎上替換了部分畫師';
+
+  @override
+  String get styleExplore_originInjection => '從池裡注入了新畫師';
+
+  @override
+  String get styleExplore_newArtist => '新';
+
+  @override
+  String get styleExplore_evolutionEmpty => '從候選裡挑幾張喜歡的，開始一條進化線';
+
+  @override
+  String get styleExplore_pickFromCandidates => '去候選裡挑';
+
+  @override
+  String styleExplore_generationSummary(
+    int parents,
+    int children,
+    int selected,
+  ) {
+    return '$parents 父本 · $children 子代 · 選了 $selected 張進入下一代';
+  }
+
+  @override
+  String get styleExplore_breedNext => '培育下一代';
+
+  @override
+  String get styleExplore_optionalName => '名稱（可不填）';
+
+  @override
+  String get styleExplore_childrenEmpty => '還沒有子代，點選上方生成';
 }

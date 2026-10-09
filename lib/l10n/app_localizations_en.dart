@@ -7872,9 +7872,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_targetCountLabel => 'Images';
-
-  @override
   String styleExplore_manualRunName(String time) {
     return 'Manual capture $time';
   }
@@ -7902,9 +7899,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_filterHearted => 'Favorites';
-
-  @override
-  String get styleExplore_newFolder => 'New folder';
 
   @override
   String get styleExplore_renameFolder => 'Rename folder';
@@ -7939,9 +7933,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String styleExplore_folderCreated(String name) {
     return 'Folder \"$name\" created';
   }
-
-  @override
-  String get styleExplore_assignToFolder => 'Move to';
 
   @override
   String get styleExplore_candidateMissing => 'Image file missing';
@@ -8011,9 +8002,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_mergeAdopt => 'Merge & adopt';
-
-  @override
   String get promptBlockEditor_library => 'Block library';
 
   @override
@@ -8075,9 +8063,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select a block and replace its thumbnail';
 
   @override
-  String get styleExplore_lineageTitle => 'Lineage';
-
-  @override
   String get styleExplore_createFamily => 'Create family';
 
   @override
@@ -8111,30 +8096,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keep at least one valid parent string';
 
   @override
-  String styleExplore_parentSetTitle(int generation) {
-    return 'Gen $generation parent set';
-  }
-
-  @override
-  String styleExplore_candidatePileTitle(int generation, int count) {
-    return 'Gen $generation pile · $count';
-  }
-
-  @override
-  String get styleExplore_parentSetActive => 'Active';
-
-  @override
-  String get styleExplore_parentSetUsed => 'Backcrossed';
-
-  @override
-  String styleExplore_branchLabel(String name) {
-    return 'Branch: $name';
-  }
-
-  @override
-  String get styleExplore_createDeepRound => 'Generate candidates';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return 'Count must be at least $min (one per parent)';
   }
@@ -8146,9 +8107,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get styleExplore_deepRoundEmpty =>
       'Mutation engine could not produce enough distinct children';
-
-  @override
-  String get styleExplore_sortParents => 'A/B comparison';
 
   @override
   String get styleExplore_sortTitle => 'Parent A/B comparison';
@@ -8178,15 +8136,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_sortDone => 'Ranking finished';
 
   @override
-  String get styleExplore_branchSelect => 'Select for branch';
-
-  @override
-  String get styleExplore_createBranch => 'Create branch';
-
-  @override
-  String get styleExplore_branchNameLabel => 'Branch name (optional)';
-
-  @override
   String styleExplore_branchCreated(int count) {
     return 'Branch created ($count parents)';
   }
@@ -8209,27 +8158,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String styleExplore_preferenceValue(String value) {
     return 'Pref $value';
-  }
-
-  @override
-  String styleExplore_roundsSummary(int count) {
-    return '$count rounds';
-  }
-
-  @override
-  String get styleExplore_pileEmpty =>
-      'No candidates yet — start with \"Generate candidates\" above';
-
-  @override
-  String get styleExplore_managePile => 'Manage';
-
-  @override
-  String get styleExplore_pileManageDeleteTitle =>
-      'Delete selected candidate images';
-
-  @override
-  String styleExplore_pileManageDeleteMessage(int count) {
-    return 'Deletes the run-directory image copies and records of $count candidates; gallery source images are not affected.';
   }
 
   @override
@@ -13186,4 +13114,123 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_appliedToEditor => 'Applied to editor';
+
+  @override
+  String styleExplore_generationNumber(int index) {
+    return 'Generation $index';
+  }
+
+  @override
+  String get styleExplore_currentGeneration => 'Current';
+
+  @override
+  String styleExplore_generationStart(int count) {
+    return 'Started with $count candidates';
+  }
+
+  @override
+  String styleExplore_generationSource(int index, int count, int roots) {
+    return '$count picked from generation $index + $roots founders';
+  }
+
+  @override
+  String get styleExplore_parentsByPreference => 'Parents · By preference';
+
+  @override
+  String get styleExplore_backcross => 'Backcross';
+
+  @override
+  String styleExplore_childrenCount(int count) {
+    return 'Children · $count';
+  }
+
+  @override
+  String styleExplore_pickForGeneration(int index) {
+    return 'Pick the best for generation $index';
+  }
+
+  @override
+  String styleExplore_breedSelected(int count, int index) {
+    return 'Breed generation $index with $count selected';
+  }
+
+  @override
+  String get styleExplore_backcrossHint =>
+      'First-generation parents are included for backcrossing';
+
+  @override
+  String get styleExplore_generationBusy =>
+      'This generation is still generating';
+
+  @override
+  String get styleExplore_regeneratePrefix => 'Generate';
+
+  @override
+  String get styleExplore_regenerateSuffix => 'children';
+
+  @override
+  String get styleExplore_pairCompare => 'Rank by pairwise comparison';
+
+  @override
+  String get styleExplore_howToUse => 'How to use';
+
+  @override
+  String get styleExplore_helpParents =>
+      'Parents are the artist combinations you pick; higher preference makes them more likely to contribute.';
+
+  @override
+  String get styleExplore_helpChildren =>
+      'Children come from crossing parents, mutations, or new artists injected from a pool.';
+
+  @override
+  String get styleExplore_helpCompare =>
+      'Pairwise comparison updates parent preferences and influences later combinations.';
+
+  @override
+  String get styleExplore_helpBackcross =>
+      'Breeding the next generation automatically includes first-generation parents for backcrossing.';
+
+  @override
+  String get styleExplore_originTitle => 'How it was made';
+
+  @override
+  String get styleExplore_originCross =>
+      'Artist combinations crossed from these parents';
+
+  @override
+  String get styleExplore_originMutation =>
+      'Some artists were replaced in the parent combination';
+
+  @override
+  String get styleExplore_originInjection =>
+      'New artists were injected from the pool';
+
+  @override
+  String get styleExplore_newArtist => 'New';
+
+  @override
+  String get styleExplore_evolutionEmpty =>
+      'Pick a few favorites from the candidates to start an evolution line';
+
+  @override
+  String get styleExplore_pickFromCandidates => 'Pick candidates';
+
+  @override
+  String styleExplore_generationSummary(
+    int parents,
+    int children,
+    int selected,
+  ) {
+    return '$parents parents · $children children · $selected picked for the next generation';
+  }
+
+  @override
+  String get styleExplore_breedNext => 'Breed next generation';
+
+  @override
+  String get styleExplore_optionalName => 'Name (optional)';
+
+  @override
+  String get styleExplore_childrenEmpty =>
+      'No children yet. Generate them above.';
 }

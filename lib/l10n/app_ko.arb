@@ -4181,7 +4181,6 @@
       }
     }
   },
-  "styleExplore_targetCountLabel": "이미지 수",
   "styleExplore_manualRunName": "수동 수집 {time}",
   "@styleExplore_manualRunName": {
     "placeholders": {
@@ -4204,7 +4203,6 @@
   "styleExplore_cancelRunMessage": "취소한 작업은 다시 시작할 수 없으며, 남은 대기 중 후보는 취소됨으로 표시됩니다.",
   "styleExplore_filterAll": "전체",
   "styleExplore_filterHearted": "즐겨찾기",
-  "styleExplore_newFolder": "새 폴더",
   "styleExplore_renameFolder": "폴더 이름 변경",
   "styleExplore_deleteFolder": "폴더 삭제",
   "styleExplore_deleteFolderMessage": "\"{name}\" 폴더를 삭제합니다. 안의 후보는 미분류로 돌아가며 이미지는 유지됩니다.",
@@ -4238,7 +4236,6 @@
       }
     }
   },
-  "styleExplore_assignToFolder": "이동",
   "styleExplore_candidateMissing": "이미지 파일 없음",
   "styleExplore_candidateDetailTitle": "후보 상세",
   "styleExplore_candidatePosition": "{current}/{total}번째 이미지",
@@ -4295,7 +4292,6 @@
       }
     }
   },
-  "styleExplore_mergeAdopt": "병합해 저장",
   "promptBlockEditor_library": "블록 라이브러리",
   "promptBlockPicker_title": "블록 선택",
   "promptBlockLibrary_thumbnail": "썸네일",
@@ -4319,7 +4315,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "기존 블록 썸네일 업데이트",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "블록을 골라 썸네일을 교체합니다",
-  "styleExplore_lineageTitle": "계보",
   "styleExplore_createFamily": "가계 만들기",
   "styleExplore_familyCreated": "\"{name}\" 가계를 만들었습니다",
   "@styleExplore_familyCreated": {
@@ -4343,36 +4338,6 @@
   "styleExplore_customParentHint": "부모로 쓸 프롬프트 문자열을 입력하세요",
   "styleExplore_addCustomParent": "사용자 지정 문자열 추가",
   "styleExplore_createFamilyEmpty": "유효한 부모 문자열을 하나 이상 남겨 두세요",
-  "styleExplore_parentSetTitle": "{generation}세대 부모 집합",
-  "@styleExplore_parentSetTitle": {
-    "placeholders": {
-      "generation": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_candidatePileTitle": "{generation}세대 후보 더미 · {count}",
-  "@styleExplore_candidatePileTitle": {
-    "placeholders": {
-      "generation": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_parentSetActive": "활성",
-  "styleExplore_parentSetUsed": "역교배됨",
-  "styleExplore_branchLabel": "분기: {name}",
-  "@styleExplore_branchLabel": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_createDeepRound": "후보 생성",
   "styleExplore_deepRoundCountHint": "개수는 최소 {min}이어야 합니다(부모마다 하나)",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
@@ -4383,7 +4348,6 @@
   },
   "styleExplore_deepRoundNoInstance": "메인 프롬프트에 사용 중인 무작위 유전 블록이 없어 심층 라운드를 진행할 수 없습니다",
   "styleExplore_deepRoundEmpty": "변이 엔진이 서로 다른 자식을 충분히 만들지 못했습니다",
-  "styleExplore_sortParents": "A/B 비교",
   "styleExplore_sortTitle": "부모 A/B 비교",
   "styleExplore_sortPrompt": "어느 이미지가 원하는 스타일에 더 가깝나요?",
   "styleExplore_sortLeft": "왼쪽이 더 좋음",
@@ -4402,9 +4366,6 @@
     }
   },
   "styleExplore_sortDone": "순위 매기기 완료",
-  "styleExplore_branchSelect": "분기용으로 선택",
-  "styleExplore_createBranch": "분기 만들기",
-  "styleExplore_branchNameLabel": "분기 이름(선택)",
   "styleExplore_branchCreated": "분기를 만들었습니다(부모 {count}개)",
   "@styleExplore_branchCreated": {
     "placeholders": {
@@ -4422,25 +4383,6 @@
     "placeholders": {
       "value": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_roundsSummary": "{count}라운드",
-  "@styleExplore_roundsSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_pileEmpty": "아직 후보가 없습니다 — 위의 \"후보 생성\"으로 시작하세요",
-  "styleExplore_managePile": "관리",
-  "styleExplore_pileManageDeleteTitle": "선택한 후보 이미지 삭제",
-  "styleExplore_pileManageDeleteMessage": "후보 {count}개의 작업 폴더 이미지 사본과 기록을 삭제합니다. 갤러리의 원본 이미지는 영향을 받지 않습니다.",
-  "@styleExplore_pileManageDeleteMessage": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
@@ -7251,5 +7193,99 @@
   "styleExplore_appliedToEditor": "편집기에 적용됨",
   "@styleExplore_appliedToEditor": {
     "description": "Candidate prompt applied to editor."
-  }
+  },
+  "styleExplore_generationNumber": "{index}세대",
+  "@styleExplore_generationNumber": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_currentGeneration": "현재",
+  "styleExplore_generationStart": "후보 {count}장으로 시작",
+  "@styleExplore_generationStart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generationSource": "{index}세대에서 {count}장 선택 + 1세대 {roots}장 역교배",
+  "@styleExplore_generationSource": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "roots": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_parentsByPreference": "부모 · 선호도순",
+  "styleExplore_backcross": "역교배",
+  "styleExplore_childrenCount": "자손 · {count}장",
+  "@styleExplore_childrenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pickForGeneration": "좋은 후보를 골라 {index}세대 육성",
+  "@styleExplore_pickForGeneration": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_breedSelected": "선택한 {count}장으로 {index}세대 육성",
+  "@styleExplore_breedSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_backcrossHint": "1세대 부모가 역교배에 자동으로 포함됩니다",
+  "styleExplore_generationBusy": "이 세대는 아직 생성 중입니다",
+  "styleExplore_regeneratePrefix": "다시 생성",
+  "styleExplore_regenerateSuffix": "장 자손",
+  "styleExplore_pairCompare": "쌍 비교로 순위 지정",
+  "styleExplore_howToUse": "사용 방법",
+  "styleExplore_helpParents": "부모는 선택한 작가 조합입니다. 선호도가 높을수록 조합에 참여할 가능성이 높습니다.",
+  "styleExplore_helpChildren": "자손은 부모 교차, 변이 또는 작가 풀에서 새 작가를 주입하여 만들어집니다.",
+  "styleExplore_helpCompare": "쌍 비교는 부모 선호도를 갱신하여 이후 조합에 반영합니다.",
+  "styleExplore_helpBackcross": "다음 세대를 육성할 때 1세대 부모가 역교배에 자동으로 포함됩니다.",
+  "styleExplore_originTitle": "생성 과정",
+  "styleExplore_originCross": "이 부모들의 작가를 교차 조합했습니다",
+  "styleExplore_originMutation": "부모 조합의 일부 작가를 교체했습니다",
+  "styleExplore_originInjection": "풀에서 새 작가를 주입했습니다",
+  "styleExplore_newArtist": "신규",
+  "styleExplore_evolutionEmpty": "후보에서 마음에 드는 이미지를 골라 진화 계보를 시작하세요",
+  "styleExplore_pickFromCandidates": "후보 고르기",
+  "styleExplore_generationSummary": "부모 {parents}장 · 자손 {children}장 · 다음 세대에 {selected}장 선택",
+  "@styleExplore_generationSummary": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "children": {
+        "type": "int"
+      },
+      "selected": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_breedNext": "다음 세대 육성",
+  "styleExplore_optionalName": "이름 (선택 사항)",
+  "styleExplore_childrenEmpty": "아직 자손이 없습니다. 위에서 생성하세요."
 }

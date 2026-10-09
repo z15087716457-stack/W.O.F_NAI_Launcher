@@ -13850,12 +13850,6 @@ abstract class AppLocalizations {
   /// **'Retry failed ({count})'**
   String styleExplore_retryFailed(int count);
 
-  /// No description provided for @styleExplore_targetCountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Images'**
-  String get styleExplore_targetCountLabel;
-
   /// No description provided for @styleExplore_manualRunName.
   ///
   /// In en, this message translates to:
@@ -13903,12 +13897,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favorites'**
   String get styleExplore_filterHearted;
-
-  /// No description provided for @styleExplore_newFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'New folder'**
-  String get styleExplore_newFolder;
 
   /// No description provided for @styleExplore_renameFolder.
   ///
@@ -13963,12 +13951,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Folder \"{name}\" created'**
   String styleExplore_folderCreated(String name);
-
-  /// No description provided for @styleExplore_assignToFolder.
-  ///
-  /// In en, this message translates to:
-  /// **'Move to'**
-  String get styleExplore_assignToFolder;
 
   /// No description provided for @styleExplore_candidateMissing.
   ///
@@ -14078,12 +14060,6 @@ abstract class AppLocalizations {
   /// **'{count} selected'**
   String styleExplore_selectedCount(int count);
 
-  /// No description provided for @styleExplore_mergeAdopt.
-  ///
-  /// In en, this message translates to:
-  /// **'Merge & adopt'**
-  String get styleExplore_mergeAdopt;
-
   /// No description provided for @promptBlockEditor_library.
   ///
   /// In en, this message translates to:
@@ -14192,12 +14168,6 @@ abstract class AppLocalizations {
   /// **'Select a block and replace its thumbnail'**
   String get promptBlockLibrary_updateExistingThumbnailSubtitle;
 
-  /// No description provided for @styleExplore_lineageTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Lineage'**
-  String get styleExplore_lineageTitle;
-
   /// No description provided for @styleExplore_createFamily.
   ///
   /// In en, this message translates to:
@@ -14252,42 +14222,6 @@ abstract class AppLocalizations {
   /// **'Keep at least one valid parent string'**
   String get styleExplore_createFamilyEmpty;
 
-  /// No description provided for @styleExplore_parentSetTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Gen {generation} parent set'**
-  String styleExplore_parentSetTitle(int generation);
-
-  /// No description provided for @styleExplore_candidatePileTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Gen {generation} pile · {count}'**
-  String styleExplore_candidatePileTitle(int generation, int count);
-
-  /// No description provided for @styleExplore_parentSetActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Active'**
-  String get styleExplore_parentSetActive;
-
-  /// No description provided for @styleExplore_parentSetUsed.
-  ///
-  /// In en, this message translates to:
-  /// **'Backcrossed'**
-  String get styleExplore_parentSetUsed;
-
-  /// No description provided for @styleExplore_branchLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Branch: {name}'**
-  String styleExplore_branchLabel(String name);
-
-  /// No description provided for @styleExplore_createDeepRound.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate candidates'**
-  String get styleExplore_createDeepRound;
-
   /// No description provided for @styleExplore_deepRoundCountHint.
   ///
   /// In en, this message translates to:
@@ -14305,12 +14239,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mutation engine could not produce enough distinct children'**
   String get styleExplore_deepRoundEmpty;
-
-  /// No description provided for @styleExplore_sortParents.
-  ///
-  /// In en, this message translates to:
-  /// **'A/B comparison'**
-  String get styleExplore_sortParents;
 
   /// No description provided for @styleExplore_sortTitle.
   ///
@@ -14360,24 +14288,6 @@ abstract class AppLocalizations {
   /// **'Ranking finished'**
   String get styleExplore_sortDone;
 
-  /// No description provided for @styleExplore_branchSelect.
-  ///
-  /// In en, this message translates to:
-  /// **'Select for branch'**
-  String get styleExplore_branchSelect;
-
-  /// No description provided for @styleExplore_createBranch.
-  ///
-  /// In en, this message translates to:
-  /// **'Create branch'**
-  String get styleExplore_createBranch;
-
-  /// No description provided for @styleExplore_branchNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Branch name (optional)'**
-  String get styleExplore_branchNameLabel;
-
   /// No description provided for @styleExplore_branchCreated.
   ///
   /// In en, this message translates to:
@@ -14413,36 +14323,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pref {value}'**
   String styleExplore_preferenceValue(String value);
-
-  /// No description provided for @styleExplore_roundsSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} rounds'**
-  String styleExplore_roundsSummary(int count);
-
-  /// No description provided for @styleExplore_pileEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'No candidates yet — start with \"Generate candidates\" above'**
-  String get styleExplore_pileEmpty;
-
-  /// No description provided for @styleExplore_managePile.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage'**
-  String get styleExplore_managePile;
-
-  /// No description provided for @styleExplore_pileManageDeleteTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete selected candidate images'**
-  String get styleExplore_pileManageDeleteTitle;
-
-  /// No description provided for @styleExplore_pileManageDeleteMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Deletes the run-directory image copies and records of {count} candidates; gallery source images are not affected.'**
-  String styleExplore_pileManageDeleteMessage(int count);
 
   /// No description provided for @styleExplore_pileManageDeleteDone.
   ///
@@ -22948,6 +22828,190 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Applied to editor'**
   String get styleExplore_appliedToEditor;
+
+  /// No description provided for @styleExplore_generationNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation {index}'**
+  String styleExplore_generationNumber(int index);
+
+  /// No description provided for @styleExplore_currentGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get styleExplore_currentGeneration;
+
+  /// No description provided for @styleExplore_generationStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Started with {count} candidates'**
+  String styleExplore_generationStart(int count);
+
+  /// No description provided for @styleExplore_generationSource.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} picked from generation {index} + {roots} founders'**
+  String styleExplore_generationSource(int index, int count, int roots);
+
+  /// No description provided for @styleExplore_parentsByPreference.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents · By preference'**
+  String get styleExplore_parentsByPreference;
+
+  /// No description provided for @styleExplore_backcross.
+  ///
+  /// In en, this message translates to:
+  /// **'Backcross'**
+  String get styleExplore_backcross;
+
+  /// No description provided for @styleExplore_childrenCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Children · {count}'**
+  String styleExplore_childrenCount(int count);
+
+  /// No description provided for @styleExplore_pickForGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the best for generation {index}'**
+  String styleExplore_pickForGeneration(int index);
+
+  /// No description provided for @styleExplore_breedSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Breed generation {index} with {count} selected'**
+  String styleExplore_breedSelected(int count, int index);
+
+  /// No description provided for @styleExplore_backcrossHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First-generation parents are included for backcrossing'**
+  String get styleExplore_backcrossHint;
+
+  /// No description provided for @styleExplore_generationBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'This generation is still generating'**
+  String get styleExplore_generationBusy;
+
+  /// No description provided for @styleExplore_regeneratePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get styleExplore_regeneratePrefix;
+
+  /// No description provided for @styleExplore_regenerateSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'children'**
+  String get styleExplore_regenerateSuffix;
+
+  /// No description provided for @styleExplore_pairCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank by pairwise comparison'**
+  String get styleExplore_pairCompare;
+
+  /// No description provided for @styleExplore_howToUse.
+  ///
+  /// In en, this message translates to:
+  /// **'How to use'**
+  String get styleExplore_howToUse;
+
+  /// No description provided for @styleExplore_helpParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents are the artist combinations you pick; higher preference makes them more likely to contribute.'**
+  String get styleExplore_helpParents;
+
+  /// No description provided for @styleExplore_helpChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Children come from crossing parents, mutations, or new artists injected from a pool.'**
+  String get styleExplore_helpChildren;
+
+  /// No description provided for @styleExplore_helpCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairwise comparison updates parent preferences and influences later combinations.'**
+  String get styleExplore_helpCompare;
+
+  /// No description provided for @styleExplore_helpBackcross.
+  ///
+  /// In en, this message translates to:
+  /// **'Breeding the next generation automatically includes first-generation parents for backcrossing.'**
+  String get styleExplore_helpBackcross;
+
+  /// No description provided for @styleExplore_originTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How it was made'**
+  String get styleExplore_originTitle;
+
+  /// No description provided for @styleExplore_originCross.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist combinations crossed from these parents'**
+  String get styleExplore_originCross;
+
+  /// No description provided for @styleExplore_originMutation.
+  ///
+  /// In en, this message translates to:
+  /// **'Some artists were replaced in the parent combination'**
+  String get styleExplore_originMutation;
+
+  /// No description provided for @styleExplore_originInjection.
+  ///
+  /// In en, this message translates to:
+  /// **'New artists were injected from the pool'**
+  String get styleExplore_originInjection;
+
+  /// No description provided for @styleExplore_newArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get styleExplore_newArtist;
+
+  /// No description provided for @styleExplore_evolutionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a few favorites from the candidates to start an evolution line'**
+  String get styleExplore_evolutionEmpty;
+
+  /// No description provided for @styleExplore_pickFromCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick candidates'**
+  String get styleExplore_pickFromCandidates;
+
+  /// No description provided for @styleExplore_generationSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{parents} parents · {children} children · {selected} picked for the next generation'**
+  String styleExplore_generationSummary(
+    int parents,
+    int children,
+    int selected,
+  );
+
+  /// No description provided for @styleExplore_breedNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Breed next generation'**
+  String get styleExplore_breedNext;
+
+  /// No description provided for @styleExplore_optionalName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get styleExplore_optionalName;
+
+  /// No description provided for @styleExplore_childrenEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No children yet. Generate them above.'**
+  String get styleExplore_childrenEmpty;
 }
 
 class _AppLocalizationsDelegate

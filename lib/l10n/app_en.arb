@@ -4181,7 +4181,6 @@
       }
     }
   },
-  "styleExplore_targetCountLabel": "Images",
   "styleExplore_manualRunName": "Manual capture {time}",
   "@styleExplore_manualRunName": {
     "placeholders": {
@@ -4204,7 +4203,6 @@
   "styleExplore_cancelRunMessage": "A cancelled run cannot be restarted; remaining pending candidates will be marked as cancelled.",
   "styleExplore_filterAll": "All",
   "styleExplore_filterHearted": "Favorites",
-  "styleExplore_newFolder": "New folder",
   "styleExplore_renameFolder": "Rename folder",
   "styleExplore_deleteFolder": "Delete folder",
   "styleExplore_deleteFolderMessage": "Deletes the folder \"{name}\". Its candidates go back to Uncategorized; images are kept.",
@@ -4238,7 +4236,6 @@
       }
     }
   },
-  "styleExplore_assignToFolder": "Move to",
   "styleExplore_candidateMissing": "Image file missing",
   "styleExplore_candidateDetailTitle": "Candidate detail",
   "styleExplore_candidatePosition": "Image {current}/{total}",
@@ -4295,7 +4292,6 @@
       }
     }
   },
-  "styleExplore_mergeAdopt": "Merge & adopt",
   "promptBlockEditor_library": "Block library",
   "promptBlockPicker_title": "Select Block",
   "promptBlockLibrary_thumbnail": "Thumbnail",
@@ -4319,7 +4315,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "Update Existing Block Thumbnail",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "Select a block and replace its thumbnail",
-  "styleExplore_lineageTitle": "Lineage",
   "styleExplore_createFamily": "Create family",
   "styleExplore_familyCreated": "Family \"{name}\" created",
   "@styleExplore_familyCreated": {
@@ -4343,36 +4338,6 @@
   "styleExplore_customParentHint": "Enter a prompt string as a parent",
   "styleExplore_addCustomParent": "Add custom string",
   "styleExplore_createFamilyEmpty": "Keep at least one valid parent string",
-  "styleExplore_parentSetTitle": "Gen {generation} parent set",
-  "@styleExplore_parentSetTitle": {
-    "placeholders": {
-      "generation": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_candidatePileTitle": "Gen {generation} pile · {count}",
-  "@styleExplore_candidatePileTitle": {
-    "placeholders": {
-      "generation": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_parentSetActive": "Active",
-  "styleExplore_parentSetUsed": "Backcrossed",
-  "styleExplore_branchLabel": "Branch: {name}",
-  "@styleExplore_branchLabel": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_createDeepRound": "Generate candidates",
   "styleExplore_deepRoundCountHint": "Count must be at least {min} (one per parent)",
   "@styleExplore_deepRoundCountHint": {
     "placeholders": {
@@ -4383,7 +4348,6 @@
   },
   "styleExplore_deepRoundNoInstance": "No enabled random evolution block in the main prompt; deep round unavailable",
   "styleExplore_deepRoundEmpty": "Mutation engine could not produce enough distinct children",
-  "styleExplore_sortParents": "A/B comparison",
   "styleExplore_sortTitle": "Parent A/B comparison",
   "styleExplore_sortPrompt": "Which image is closer to the style you want?",
   "styleExplore_sortLeft": "Left is better",
@@ -4402,9 +4366,6 @@
     }
   },
   "styleExplore_sortDone": "Ranking finished",
-  "styleExplore_branchSelect": "Select for branch",
-  "styleExplore_createBranch": "Create branch",
-  "styleExplore_branchNameLabel": "Branch name (optional)",
   "styleExplore_branchCreated": "Branch created ({count} parents)",
   "@styleExplore_branchCreated": {
     "placeholders": {
@@ -4422,25 +4383,6 @@
     "placeholders": {
       "value": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_roundsSummary": "{count} rounds",
-  "@styleExplore_roundsSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_pileEmpty": "No candidates yet — start with \"Generate candidates\" above",
-  "styleExplore_managePile": "Manage",
-  "styleExplore_pileManageDeleteTitle": "Delete selected candidate images",
-  "styleExplore_pileManageDeleteMessage": "Deletes the run-directory image copies and records of {count} candidates; gallery source images are not affected.",
-  "@styleExplore_pileManageDeleteMessage": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
@@ -7251,5 +7193,99 @@
   "styleExplore_appliedToEditor": "Applied to editor",
   "@styleExplore_appliedToEditor": {
     "description": "Candidate prompt applied to editor."
-  }
+  },
+  "styleExplore_generationNumber": "Generation {index}",
+  "@styleExplore_generationNumber": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_currentGeneration": "Current",
+  "styleExplore_generationStart": "Started with {count} candidates",
+  "@styleExplore_generationStart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generationSource": "{count} picked from generation {index} + {roots} founders",
+  "@styleExplore_generationSource": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "roots": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_parentsByPreference": "Parents · By preference",
+  "styleExplore_backcross": "Backcross",
+  "styleExplore_childrenCount": "Children · {count}",
+  "@styleExplore_childrenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pickForGeneration": "Pick the best for generation {index}",
+  "@styleExplore_pickForGeneration": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_breedSelected": "Breed generation {index} with {count} selected",
+  "@styleExplore_breedSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_backcrossHint": "First-generation parents are included for backcrossing",
+  "styleExplore_generationBusy": "This generation is still generating",
+  "styleExplore_regeneratePrefix": "Generate",
+  "styleExplore_regenerateSuffix": "children",
+  "styleExplore_pairCompare": "Rank by pairwise comparison",
+  "styleExplore_howToUse": "How to use",
+  "styleExplore_helpParents": "Parents are the artist combinations you pick; higher preference makes them more likely to contribute.",
+  "styleExplore_helpChildren": "Children come from crossing parents, mutations, or new artists injected from a pool.",
+  "styleExplore_helpCompare": "Pairwise comparison updates parent preferences and influences later combinations.",
+  "styleExplore_helpBackcross": "Breeding the next generation automatically includes first-generation parents for backcrossing.",
+  "styleExplore_originTitle": "How it was made",
+  "styleExplore_originCross": "Artist combinations crossed from these parents",
+  "styleExplore_originMutation": "Some artists were replaced in the parent combination",
+  "styleExplore_originInjection": "New artists were injected from the pool",
+  "styleExplore_newArtist": "New",
+  "styleExplore_evolutionEmpty": "Pick a few favorites from the candidates to start an evolution line",
+  "styleExplore_pickFromCandidates": "Pick candidates",
+  "styleExplore_generationSummary": "{parents} parents · {children} children · {selected} picked for the next generation",
+  "@styleExplore_generationSummary": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "children": {
+        "type": "int"
+      },
+      "selected": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_breedNext": "Breed next generation",
+  "styleExplore_optionalName": "Name (optional)",
+  "styleExplore_childrenEmpty": "No children yet. Generate them above."
 }

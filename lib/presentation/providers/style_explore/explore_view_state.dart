@@ -52,6 +52,17 @@ final exploreVisibleCandidatesProvider = Provider<List<ExploreCandidate>>((
 ) {
   final run = ref.watch(exploreActiveRunProvider);
   if (run == null) return [];
+  if (ref.watch(exploreStageTabProvider) == ExploreStageTab.evolution) {
+    final family =
+        run.familyById(ref.watch(exploreActiveFamilyIdProvider) ?? '') ??
+        run.families.lastOrNull;
+    if (family == null) return [];
+    return exploreFamilyGenerations(run, family)
+            .where((g) => g.parentSet.id == family.activeParentSetId)
+            .firstOrNull
+            ?.pile ??
+        [];
+  }
   return exploreWallCandidates(
     run,
     effectiveExploreGalleryFilter(run, ref.watch(exploreGalleryFilterProvider)),

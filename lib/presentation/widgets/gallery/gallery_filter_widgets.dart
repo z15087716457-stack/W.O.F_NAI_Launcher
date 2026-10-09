@@ -12,6 +12,10 @@ class GalleryFilterChip extends StatelessWidget {
     this.icon,
     this.onClear,
     this.count,
+    this.iconWidget,
+    this.trailing,
+    this.activeColor,
+    this.activeForeground,
   });
 
   final String label;
@@ -21,18 +25,22 @@ class GalleryFilterChip extends StatelessWidget {
   final IconData? icon;
   final VoidCallback? onClear;
   final int? count;
+  final Widget? iconWidget, trailing;
+  final Color? activeColor, activeForeground;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final foreground = active ? colors.primary : colors.onSurface;
+    final foreground = active
+        ? activeForeground ?? colors.primary
+        : colors.onSurface;
     return Tooltip(
       message: tooltip,
       waitDuration: const Duration(milliseconds: 600),
       child: Material(
         color: active
-            ? colors.primary.withValues(alpha: 0.12)
+            ? activeColor ?? colors.primary.withValues(alpha: 0.12)
             : Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(6),
@@ -49,8 +57,11 @@ class GalleryFilterChip extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (icon != null) ...[
-                  Icon(icon, size: 14, color: foreground),
+                if (icon != null || iconWidget != null) ...[
+                  IconTheme(
+                    data: IconThemeData(color: foreground, size: 14),
+                    child: iconWidget ?? Icon(icon),
+                  ),
                   const SizedBox(width: 6),
                 ],
                 Text(
@@ -71,6 +82,7 @@ class GalleryFilterChip extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (trailing != null) ...[const SizedBox(width: 5), trailing!],
                 if (onClear != null)
                   InkWell(
                     onTap: onClear,

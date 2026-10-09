@@ -7696,9 +7696,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_targetCountLabel => '生成枚数';
-
-  @override
   String styleExplore_manualRunName(String time) {
     return '手動キャプチャ $time';
   }
@@ -7726,9 +7723,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_filterHearted => 'お気に入り';
-
-  @override
-  String get styleExplore_newFolder => '新しいフォルダ';
 
   @override
   String get styleExplore_renameFolder => 'フォルダ名を変更';
@@ -7762,9 +7756,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String styleExplore_folderCreated(String name) {
     return 'フォルダ「$name」を作成しました';
   }
-
-  @override
-  String get styleExplore_assignToFolder => '分類先';
 
   @override
   String get styleExplore_candidateMissing => '画像ファイルがありません';
@@ -7832,9 +7823,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_mergeAdopt => 'まとめて収録';
-
-  @override
   String get promptBlockEditor_library => 'ブロックライブラリ';
 
   @override
@@ -7893,9 +7881,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'ブロックを選択し、そのサムネイルを置き換えます';
 
   @override
-  String get styleExplore_lineageTitle => '系譜';
-
-  @override
   String get styleExplore_createFamily => 'ファミリー作成';
 
   @override
@@ -7927,30 +7912,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_createFamilyEmpty => '有効な親文字列を少なくとも 1 つ残してください';
 
   @override
-  String styleExplore_parentSetTitle(int generation) {
-    return '第 $generation 世代の親セット';
-  }
-
-  @override
-  String styleExplore_candidatePileTitle(int generation, int count) {
-    return '第 $generation 世代の候補パイル · $count 枚';
-  }
-
-  @override
-  String get styleExplore_parentSetActive => 'アクティブ';
-
-  @override
-  String get styleExplore_parentSetUsed => 'バッククロス済み';
-
-  @override
-  String styleExplore_branchLabel(String name) {
-    return 'ブランチ：$name';
-  }
-
-  @override
-  String get styleExplore_createDeepRound => '候補を生成';
-
-  @override
   String styleExplore_deepRoundCountHint(int min) {
     return '枚数は最低 $min（各親につき 1 枚保証）';
   }
@@ -7961,9 +7922,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_deepRoundEmpty => '変異エンジンが十分に異なる子代を生成できませんでした';
-
-  @override
-  String get styleExplore_sortParents => 'A/B比較';
 
   @override
   String get styleExplore_sortTitle => '親のA/B比較';
@@ -7992,15 +7950,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_sortDone => 'ランク付け完了';
 
   @override
-  String get styleExplore_branchSelect => '複数選択でブランチ';
-
-  @override
-  String get styleExplore_createBranch => 'ブランチ作成';
-
-  @override
-  String get styleExplore_branchNameLabel => 'ブランチ名（任意）';
-
-  @override
   String styleExplore_branchCreated(int count) {
     return 'ブランチを作成しました（$count 親）';
   }
@@ -8020,25 +7969,6 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String styleExplore_preferenceValue(String value) {
     return '選好 $value';
-  }
-
-  @override
-  String styleExplore_roundsSummary(int count) {
-    return '$count ラウンド';
-  }
-
-  @override
-  String get styleExplore_pileEmpty => '候補はまだありません。上の「候補を生成」から始めてください';
-
-  @override
-  String get styleExplore_managePile => '管理';
-
-  @override
-  String get styleExplore_pileManageDeleteTitle => '選択した候補画像を削除';
-
-  @override
-  String styleExplore_pileManageDeleteMessage(int count) {
-    return '$count 件の候補の Run ディレクトリ内コピーとレコードを削除します。ギャラリーの元画像には影響しません。';
   }
 
   @override
@@ -12789,4 +12719,113 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_appliedToEditor => '編集欄に適用しました';
+
+  @override
+  String styleExplore_generationNumber(int index) {
+    return '第$index世代';
+  }
+
+  @override
+  String get styleExplore_currentGeneration => '現在';
+
+  @override
+  String styleExplore_generationStart(int count) {
+    return '候補$count枚から開始';
+  }
+
+  @override
+  String styleExplore_generationSource(int index, int count, int roots) {
+    return '第$index世代から$count枚選択 + 初代$roots枚を戻し交配';
+  }
+
+  @override
+  String get styleExplore_parentsByPreference => '親 · 好み順';
+
+  @override
+  String get styleExplore_backcross => '戻し交配';
+
+  @override
+  String styleExplore_childrenCount(int count) {
+    return '子 · $count枚';
+  }
+
+  @override
+  String styleExplore_pickForGeneration(int index) {
+    return '良い候補を選んで第$index世代へ';
+  }
+
+  @override
+  String styleExplore_breedSelected(int count, int index) {
+    return '選択した$count枚で第$index世代を育成';
+  }
+
+  @override
+  String get styleExplore_backcrossHint => '初代の親を自動で加えて戻し交配します';
+
+  @override
+  String get styleExplore_generationBusy => 'この世代はまだ生成中です';
+
+  @override
+  String get styleExplore_regeneratePrefix => '再生成';
+
+  @override
+  String get styleExplore_regenerateSuffix => '枚の子';
+
+  @override
+  String get styleExplore_pairCompare => 'ペア比較で並べ替え';
+
+  @override
+  String get styleExplore_howToUse => '使い方';
+
+  @override
+  String get styleExplore_helpParents =>
+      '親は選んだ絵師の組み合わせです。好みの値が高いほど組み合わせに参加しやすくなります。';
+
+  @override
+  String get styleExplore_helpChildren => '子は親の交叉、変異、絵師プールからの新しい絵師の追加で生まれます。';
+
+  @override
+  String get styleExplore_helpCompare => 'ペア比較で親の好みの値を更新し、その後の組み合わせに反映します。';
+
+  @override
+  String get styleExplore_helpBackcross => '次世代の育成では、初代の親を自動で加えて戻し交配します。';
+
+  @override
+  String get styleExplore_originTitle => '生成の由来';
+
+  @override
+  String get styleExplore_originCross => 'これらの親の絵師を交叉して組み合わせました';
+
+  @override
+  String get styleExplore_originMutation => '親の組み合わせの一部の絵師を置き換えました';
+
+  @override
+  String get styleExplore_originInjection => 'プールから新しい絵師を追加しました';
+
+  @override
+  String get styleExplore_newArtist => '新規';
+
+  @override
+  String get styleExplore_evolutionEmpty => '候補から好きな画像を選んで進化ラインを開始';
+
+  @override
+  String get styleExplore_pickFromCandidates => '候補を選ぶ';
+
+  @override
+  String styleExplore_generationSummary(
+    int parents,
+    int children,
+    int selected,
+  ) {
+    return '親$parents枚 · 子$children枚 · 次世代に$selected枚選択';
+  }
+
+  @override
+  String get styleExplore_breedNext => '次世代を育成';
+
+  @override
+  String get styleExplore_optionalName => '名前（任意）';
+
+  @override
+  String get styleExplore_childrenEmpty => '子はまだありません。上のボタンで生成してください。';
 }
