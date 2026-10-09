@@ -12687,4 +12687,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_emptyRound => 'このラウンドに候補はありません';
+
+  @override
+  String get styleExplore_unfavorite => 'お気に入り解除';
+
+  @override
+  String get styleExplore_groupLabel => 'グループ';
+
+  @override
+  String get styleExplore_newGroup => '新しいグループ…';
+
+  @override
+  String get styleExplore_saveBlock => 'ブロックとして保存';
+
+  @override
+  String get styleExplore_startEvolution => '進化を開始';
+
+  @override
+  String get styleExplore_newestFirst => '新しいラウンドを先に';
+
+  @override
+  String get styleExplore_oldestFirst => '古いラウンドを先に';
+
+  @override
+  String get styleExplore_pickEvolution => '進化する候補を選ぶ';
+
+  @override
+  String get styleExplore_deleteCandidatesTitle => '候補を削除';
+
+  @override
+  String styleExplore_deleteCandidatesMessage(int count) {
+    return '候補$count枚と画像コピーを削除しますか？ライブラリの原画像は保持されます。';
+  }
 }

@@ -5,6 +5,97 @@ import 'explore_run_provider.dart';
 
 enum ExploreStageTab { candidates, evolution }
 
+final exploreSelectionModeProvider = StateProvider<bool>((ref) {
+  ref.watch(exploreActiveRunIdProvider);
+  ref.watch(exploreStageTabProvider);
+  return false;
+});
+
+final exploreSelectionProvider =
+    NotifierProvider<ExploreSelection, Set<String>>(ExploreSelection.new);
+
+class ExploreSelection extends Notifier<Set<String>> {
+  @override
+  Set<String> build() {
+    ref.watch(exploreActiveRunIdProvider);
+    ref.watch(exploreStageTabProvider);
+    ref.listen(exploreActiveRunProvider, (_, next) {
+      final existing = next?.candidates.map((c) => c.id).toSet() ?? <String>{};
+      final kept = state.intersection(existing);
+      if (kept.length != state.length) state = kept;
+    });
+    return {};
+  }
+
+  void toggle(String id) =>
+      state = state.contains(id) ? ({...state}..remove(id)) : {...state, id};
+  void selectRange(String? anchor, String to, List<String> orderedIds) {
+    final a = orderedIds.indexOf(anchor ?? to), b = orderedIds.indexOf(to);
+    if (a < 0 || b < 0) {
+      toggle(to);
+      return;
+    }
+    state = {
+      ...state,
+      ...orderedIds.sublist(a < b ? a : b, (a > b ? a : b) + 1),
+    };
+  }
+
+  void selectAll(Iterable<String> ids) => state = ids.toSet();
+  void clear() => state = {};
+}
+
+final exploreVisibleCandidatesProvider = Provider<List<ExploreCandidate>>((
+  ref,
+) {
+  final run = ref.watch(exploreActiveRunProvider);
+  if (run == null) return [];
+  return exploreWallCandidates(
+    run,
+    effectiveExploreGalleryFilter(run, ref.watch(exploreGalleryFilterProvider)),
+    newestFirst: ref.watch(exploreRoundOrderNewestFirstProvider),
+  );
+});
+
+/// Moves vertically within a round; crossing a round preserves the closest column.
+String? exploreMovedFocus(
+  List<ExploreCandidate> visible,
+  String? focused,
+  int horizontal,
+  int vertical,
+  int columns,
+) {
+  if (visible.isEmpty) return null;
+  final index = visible.indexWhere((c) => c.id == focused);
+  if (index < 0) return visible.first.id;
+  if (horizontal != 0) {
+    return visible[(index + horizontal).clamp(0, visible.length - 1)].id;
+  }
+  final groups = <List<ExploreCandidate>>[];
+  for (final candidate in visible) {
+    if (groups.isEmpty || groups.last.first.roundId != candidate.roundId) {
+      groups.add([]);
+    }
+    groups.last.add(candidate);
+  }
+  final group = groups.indexWhere((g) => g.any((c) => c.id == focused));
+  final local = groups[group].indexWhere((c) => c.id == focused),
+      column = local % columns;
+  final target = local + vertical * columns;
+  if (target >= 0 && target < groups[group].length) {
+    return groups[group][target].id;
+  }
+  if (target >= groups[group].length &&
+      local ~/ columns < (groups[group].length - 1) ~/ columns) {
+    return groups[group].last.id;
+  }
+  final adjacent = group + vertical;
+  if (adjacent < 0 || adjacent >= groups.length) return focused;
+  final next = groups[adjacent];
+  final rowStart = vertical > 0 ? 0 : ((next.length - 1) ~/ columns) * columns;
+  return next[(rowStart + column).clamp(0, next.length - 1)].id;
+}
+
 final exploreStageTabProvider = StateProvider<ExploreStageTab>((ref) {
   ref.watch(exploreActiveRunIdProvider);
   return ExploreStageTab.candidates;

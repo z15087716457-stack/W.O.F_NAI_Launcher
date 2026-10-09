@@ -13082,4 +13082,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_emptyRound => 'This round has no candidates';
+
+  @override
+  String get styleExplore_unfavorite => 'Unfavorite';
+
+  @override
+  String get styleExplore_groupLabel => 'Group';
+
+  @override
+  String get styleExplore_newGroup => 'New group…';
+
+  @override
+  String get styleExplore_saveBlock => 'Save as block';
+
+  @override
+  String get styleExplore_startEvolution => 'Start evolution';
+
+  @override
+  String get styleExplore_newestFirst => 'Newest rounds first';
+
+  @override
+  String get styleExplore_oldestFirst => 'Oldest rounds first';
+
+  @override
+  String get styleExplore_pickEvolution => 'Pick candidates to evolve';
+
+  @override
+  String get styleExplore_deleteCandidatesTitle => 'Delete candidates';
+
+  @override
+  String styleExplore_deleteCandidatesMessage(int count) {
+    return 'Delete $count candidates and their image copies? Library originals are kept.';
+  }
 }

@@ -142,6 +142,43 @@ class WallRunList extends ExploreRunListNotifier {
       ),
     );
   }
+
+  @override
+  Future<ExploreRun> assignCandidatesFolder(
+    String runId,
+    List<String> candidateIds,
+    String? folderId,
+  ) {
+    final run = runs.firstWhere((r) => r.id == runId);
+    return overwrite(
+      run.copyWith(
+        candidates: [
+          for (final c in run.candidates)
+            candidateIds.contains(c.id) ? c.copyWith(folderId: folderId) : c,
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<ExploreRun> removeCandidates(String runId, List<String> candidateIds) {
+    final run = runs.firstWhere((r) => r.id == runId);
+    return overwrite(
+      run.copyWith(
+        candidates: run.candidates
+            .where((c) => !candidateIds.contains(c.id))
+            .toList(),
+        rounds: [
+          for (final r in run.rounds)
+            r.copyWith(
+              candidateIds: r.candidateIds
+                  .where((id) => !candidateIds.contains(id))
+                  .toList(),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class WallRunner extends ExploreRunRunner {
@@ -200,6 +237,7 @@ Widget wallFixtureApp(
     ),
   ],
   child: MaterialApp(
+    debugShowCheckedModeBanner: false,
     theme: dark ? GeistTheme.dark : GeistTheme.light,
     locale: Locale(locale),
     supportedLocales: AppLocalizations.supportedLocales,

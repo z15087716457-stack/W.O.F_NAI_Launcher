@@ -12707,4 +12707,36 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_emptyRound => '이 라운드에는 후보가 없습니다';
+
+  @override
+  String get styleExplore_unfavorite => '즐겨찾기 해제';
+
+  @override
+  String get styleExplore_groupLabel => '그룹';
+
+  @override
+  String get styleExplore_newGroup => '새 그룹…';
+
+  @override
+  String get styleExplore_saveBlock => '블록으로 저장';
+
+  @override
+  String get styleExplore_startEvolution => '진화 시작';
+
+  @override
+  String get styleExplore_newestFirst => '최신 라운드 먼저';
+
+  @override
+  String get styleExplore_oldestFirst => '오래된 라운드 먼저';
+
+  @override
+  String get styleExplore_pickEvolution => '진화할 후보 선택';
+
+  @override
+  String get styleExplore_deleteCandidatesTitle => '후보 삭제';
+
+  @override
+  String styleExplore_deleteCandidatesMessage(int count) {
+    return '후보 $count개와 이미지 복사본을 삭제할까요? 라이브러리 원본은 유지됩니다.';
+  }
 }

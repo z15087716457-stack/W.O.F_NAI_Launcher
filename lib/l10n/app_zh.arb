@@ -7098,5 +7098,50 @@
   "styleExplore_emptyRound": "本轮还没有候选",
   "@styleExplore_emptyRound": {
     "description": "Style explore task03: emptyRound"
+  },
+  "styleExplore_unfavorite": "取消收藏",
+  "@styleExplore_unfavorite": {
+    "description": "Explore workbench selection: unfavorite"
+  },
+  "styleExplore_groupLabel": "分组",
+  "@styleExplore_groupLabel": {
+    "description": "Explore workbench selection: groupLabel"
+  },
+  "styleExplore_newGroup": "新建分组…",
+  "@styleExplore_newGroup": {
+    "description": "Explore workbench selection: newGroup"
+  },
+  "styleExplore_saveBlock": "存为块",
+  "@styleExplore_saveBlock": {
+    "description": "Explore workbench selection: saveBlock"
+  },
+  "styleExplore_startEvolution": "开始进化",
+  "@styleExplore_startEvolution": {
+    "description": "Explore workbench selection: startEvolution"
+  },
+  "styleExplore_newestFirst": "最新轮在前",
+  "@styleExplore_newestFirst": {
+    "description": "Explore workbench selection: newestFirst"
+  },
+  "styleExplore_oldestFirst": "最早轮在前",
+  "@styleExplore_oldestFirst": {
+    "description": "Explore workbench selection: oldestFirst"
+  },
+  "styleExplore_pickEvolution": "挑几张去进化",
+  "@styleExplore_pickEvolution": {
+    "description": "Explore workbench selection: pickEvolution"
+  },
+  "styleExplore_deleteCandidatesTitle": "删除候选",
+  "@styleExplore_deleteCandidatesTitle": {
+    "description": "Delete candidates with or without local copies"
+  },
+  "styleExplore_deleteCandidatesMessage": "将删除 {count} 张候选及其图片副本，图库源图保留。",
+  "@styleExplore_deleteCandidatesMessage": {
+    "description": "Delete candidates with or without local copies",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

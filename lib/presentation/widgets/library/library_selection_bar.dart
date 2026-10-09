@@ -10,11 +10,17 @@ class LibraryAction {
     this.primary = false,
     this.destructive = false,
     this.key,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.iconWidget,
+    this.trailing,
   });
   final String label, icon;
   final VoidCallback? onPressed;
   final bool primary, destructive;
   final Key? key;
+  final Color? backgroundColor, foregroundColor;
+  final Widget? iconWidget, trailing;
 }
 
 Color libraryBrandColor(ThemeData theme) =>
@@ -39,7 +45,8 @@ class LibraryActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context), colors = theme.colorScheme;
-    final filled = action.primary || selected;
+    final filled = action.primary || selected || action.backgroundColor != null;
+    final fillColor = action.backgroundColor ?? libraryBrandColor(theme);
     final compact = height <= 28;
     final radius = compact ? 6.0 : 7.0;
     return Tooltip(
@@ -62,21 +69,23 @@ class LibraryActionButton extends StatelessWidget {
           minimumSize: Size(iconOnly ? 28 : 0, height),
           maximumSize: Size(double.infinity, height),
           backgroundColor: filled
-              ? libraryBrandColor(theme)
+              ? fillColor
               : bordered
               ? colors.surfaceContainer
               : Colors.transparent,
           disabledBackgroundColor: filled
-              ? libraryBrandColor(theme).withValues(alpha: .45)
+              ? fillColor.withValues(alpha: .45)
               : null,
-          foregroundColor: filled
-              ? Colors.white
-              : foreground ??
-                    (action.destructive
-                        ? colors.error
-                        : dark
-                        ? Colors.white
-                        : colors.onSurface),
+          foregroundColor:
+              action.foregroundColor ??
+              (filled
+                  ? Colors.white
+                  : foreground ??
+                        (action.destructive
+                            ? colors.error
+                            : dark
+                            ? Colors.white
+                            : colors.onSurface)),
           disabledForegroundColor: filled
               ? Colors.white.withValues(alpha: .7)
               : (foreground ?? (dark ? Colors.white : colors.onSurface))
@@ -96,17 +105,18 @@ class LibraryActionButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            LibraryIcon(
-              action.icon,
-              size: 14,
-              strokeWidth: action.icon == 'more'
-                  ? 3
-                  : action.icon == 'plus'
-                  ? 2.4
-                  : action.icon == 'check'
-                  ? 2.2
-                  : 1.8,
-            ),
+            action.iconWidget ??
+                LibraryIcon(
+                  action.icon,
+                  size: 14,
+                  strokeWidth: action.icon == 'more'
+                      ? 3
+                      : action.icon == 'plus'
+                      ? 2.4
+                      : action.icon == 'check'
+                      ? 2.2
+                      : 1.8,
+                ),
             if (!iconOnly) ...[
               SizedBox(width: compact ? 5 : 6),
               Flexible(
@@ -116,6 +126,10 @@ class LibraryActionButton extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+            ],
+            if (action.trailing != null && !iconOnly) ...[
+              const SizedBox(width: 4),
+              action.trailing!,
             ],
           ],
         ),
@@ -132,20 +146,31 @@ class LibrarySelectionBar extends StatelessWidget {
     required this.onExit,
     this.onSelectAll,
     this.onInvertSelection,
+    this.selectionLabel,
   });
   final int selectedCount;
   final List<LibraryAction> actions;
   final VoidCallback onExit;
   final VoidCallback? onSelectAll, onInvertSelection;
+  final String? selectionLabel;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context), colors = theme.colorScheme;
-    final label = context.l10n.library_selectedCount(selectedCount);
-    double measure(String text, double size) {
+    final label =
+        selectionLabel ?? context.l10n.library_selectedCount(selectedCount);
+    double measure(
+      String text,
+      double size, [
+      FontWeight weight = FontWeight.w500,
+    ]) {
       final p = TextPainter(
         text: TextSpan(
           text: text,
-          style: TextStyle(fontFamily: 'HarmonyOS Sans SC', fontSize: size),
+          style: TextStyle(
+            fontFamily: 'HarmonyOS Sans SC',
+            fontSize: size,
+            fontWeight: weight,
+          ),
         ),
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(context),
@@ -155,8 +180,10 @@ class LibrarySelectionBar extends StatelessWidget {
       return width;
     }
 
-    final countWidth = measure(label, 12.5);
-    final widths = actions.map((a) => measure(a.label, 12.5) + 40).toList();
+    final countWidth = measure(label, 12.5, FontWeight.w600);
+    final widths = actions
+        .map((a) => measure(a.label, 12.5) + 40 + (a.trailing == null ? 0 : 18))
+        .toList();
     return LayoutBuilder(
       builder: (context, c) {
         final fixed =

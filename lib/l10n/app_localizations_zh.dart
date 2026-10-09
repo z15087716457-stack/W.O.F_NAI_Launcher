@@ -12462,6 +12462,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_emptyRound => '本轮还没有候选';
+
+  @override
+  String get styleExplore_unfavorite => '取消收藏';
+
+  @override
+  String get styleExplore_groupLabel => '分组';
+
+  @override
+  String get styleExplore_newGroup => '新建分组…';
+
+  @override
+  String get styleExplore_saveBlock => '存为块';
+
+  @override
+  String get styleExplore_startEvolution => '开始进化';
+
+  @override
+  String get styleExplore_newestFirst => '最新轮在前';
+
+  @override
+  String get styleExplore_oldestFirst => '最早轮在前';
+
+  @override
+  String get styleExplore_pickEvolution => '挑几张去进化';
+
+  @override
+  String get styleExplore_deleteCandidatesTitle => '删除候选';
+
+  @override
+  String styleExplore_deleteCandidatesMessage(int count) {
+    return '将删除 $count 张候选及其图片副本，图库源图保留。';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24922,4 +24954,36 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_emptyRound => '本輪還沒有候選';
+
+  @override
+  String get styleExplore_unfavorite => '取消收藏';
+
+  @override
+  String get styleExplore_groupLabel => '分組';
+
+  @override
+  String get styleExplore_newGroup => '新增分組…';
+
+  @override
+  String get styleExplore_saveBlock => '存為塊';
+
+  @override
+  String get styleExplore_startEvolution => '開始進化';
+
+  @override
+  String get styleExplore_newestFirst => '最新輪在前';
+
+  @override
+  String get styleExplore_oldestFirst => '最早輪在前';
+
+  @override
+  String get styleExplore_pickEvolution => '挑幾張去進化';
+
+  @override
+  String get styleExplore_deleteCandidatesTitle => '刪除候選';
+
+  @override
+  String styleExplore_deleteCandidatesMessage(int count) {
+    return '將刪除 $count 張候選及其圖片副本，圖庫來源圖保留。';
+  }
 }

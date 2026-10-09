@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
@@ -28,6 +30,10 @@ import 'explore_candidate_card.dart';
 import 'explore_candidate_detail_dialog.dart';
 import 'explore_icon.dart';
 import 'explore_run_actions.dart';
+import 'explore_selection_bar.dart';
+import 'explore_style.dart';
+import '../../../widgets/gallery/gallery_filter_widgets.dart';
+import '../../../widgets/common/dashed_rounded_border.dart';
 
 /// 右栏候选画廊：筛选 chips + 新建文件夹 + 牌堆分组 + 大图详情弹窗。
 ///
@@ -43,12 +49,14 @@ class ExploreCandidateWall extends ConsumerStatefulWidget {
 }
 
 class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
-  bool _selectionMode = false;
-  final Set<String> _selectedIds = {};
-
-  /// 最近一次渲染的 run id：切 run 时多选态随之清空（选择集只对
-  /// 旧 run 的候选有意义）。
-  String? _lastRunId;
+  final _stageFocus = FocusNode(debugLabel: 'exploration-stage');
+  final _scroll = ScrollController();
+  final _groupButton = GlobalKey();
+  final Map<String, GlobalKey> _cardKeys = {};
+  int _columns = 2;
+  double _cardExtent = 300;
+  bool get _selectionMode => ref.read(exploreSelectionModeProvider);
+  Set<String> get _selectedIds => ref.read(exploreSelectionProvider);
 
   /// 候选堆缩略图悬停预览会话（FEAT-41）：谱系区全部堆卡共享。
   final ExploreCandidateHoverSession _hoverSession =
@@ -57,6 +65,8 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
   @override
   void dispose() {
     _hoverSession.dispose();
+    _stageFocus.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -79,36 +89,64 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
     }
 
     final candidates = run.candidates;
-    if (run.id != _lastRunId) {
-      _lastRunId = run.id;
-      _selectionMode = false;
-      _selectedIds.clear();
-    }
-    // 候选集合变化后清掉失效的选择项（删 run/重选 run 等）。
-    final existingIds = candidates.map((c) => c.id).toSet();
-    _selectedIds.removeWhere((id) => !existingIds.contains(id));
-
+    ref.watch(exploreSelectionProvider);
+    ref.watch(exploreSelectionModeProvider);
     final tab = ref.watch(exploreStageTabProvider);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildTabs(theme, l10n, run, filter, tab),
-        if (_selectionMode) _buildSelectionBar(l10n, run),
-        Expanded(
-          child: tab == ExploreStageTab.evolution
-              ? SingleChildScrollView(
-                  child: ExploreLineagePanel(
-                    run: run,
-                    onOpenCandidate: (candidate) =>
-                        _openCandidateDetail(run, candidate),
-                    hoverSession: _hoverSession,
+    return Focus(
+      focusNode: _stageFocus,
+      onKeyEvent: (node, event) => _key(run, event),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: _stageFocus.requestFocus,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildTabs(theme, l10n, run, filter, tab),
+                Expanded(
+                  child: tab == ExploreStageTab.evolution
+                      ? SingleChildScrollView(
+                          child: ExploreLineagePanel(
+                            run: run,
+                            onOpenCandidate: (candidate) =>
+                                _openCandidateDetail(run, candidate),
+                            hoverSession: _hoverSession,
+                          ),
+                        )
+                      : candidates.isEmpty
+                      ? const ExploreGalleryWelcome()
+                      : _buildDeck(theme, l10n, run),
+                ),
+              ],
+            ),
+            if (_selectionMode &&
+                _selectedIds.isNotEmpty &&
+                tab == ExploreStageTab.candidates)
+              Positioned(
+                left: 14,
+                right: 14,
+                bottom: 18,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: ExploreSelectionBar(
+                    count: _selectedIds.length,
+                    allHearted: run.candidates
+                        .where((c) => _selectedIds.contains(c.id))
+                        .every((c) => c.review.heart),
+                    groupKey: _groupButton,
+                    onHeart: () => _toggleHearts(run, _selectedIds),
+                    onGroup: () => _assignMenu(run),
+                    onAdopt: () => _adoptSelected(run),
+                    onEvolve: () => _createFamilyFromSelection(run),
+                    onDelete: () => _deleteSelected(run),
+                    onExit: _exitSelection,
                   ),
-                )
-              : candidates.isEmpty
-              ? const ExploreGalleryWelcome()
-              : _buildDeck(theme, l10n, run),
+                ),
+              ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -226,94 +264,177 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
     ExploreRun run,
     ExploreGalleryFilter filter,
   ) {
-    // 锁定 chip 数：全部/收藏 两枚钉死在筛选排最前，文件夹 chips 才可拖。
-    const lockedChipCount = 2;
-    return Padding(
-      padding: EdgeInsets.zero,
-      child: Row(
-        children: [
-          Expanded(
-            child: SizedBox(
-              height: 40,
-              child: HorizontalEdgeFade(
-                child: ReorderableListView(
-                  scrollDirection: Axis.horizontal,
-                  buildDefaultDragHandles: false,
-                  onReorderItem: (oldIndex, newIndex) =>
-                      _reorderFolderChips(run, oldIndex, newIndex),
-                  children: [
-                    _filterChip(
-                      key: const Key('explore-filter-all'),
-                      label: l10n.styleExplore_filterAll,
-                      selected: filter is ExploreGalleryFilterAll,
-                      onTap: () => _setFilter(const ExploreGalleryFilterAll()),
+    final mode = ref.watch(exploreSelectionModeProvider);
+    final newest = ref.watch(exploreRoundOrderNewestFirstProvider);
+    Widget chip(
+      Key key,
+      String label,
+      ExploreGalleryFilter value, {
+      IconData? icon,
+      int? index,
+    }) {
+      final count = run.candidates
+          .where((c) => exploreCandidateMatchesFilter(c, value))
+          .length;
+      Widget result = Padding(
+        padding: const EdgeInsets.only(right: 6),
+        child: GalleryFilterChip(
+          label: label,
+          tooltip: label,
+          active: filter == value,
+          icon: icon,
+          count: count,
+          onTap: () => _setFilter(value),
+        ),
+      );
+      if (value is ExploreGalleryFilterFolder && value.folderId != null) {
+        result = GestureDetector(
+          onSecondaryTapUp: (details) => _showFolderMenu(
+            run,
+            run.folderById(value.folderId!)!,
+            details.globalPosition,
+          ),
+          child: result,
+        );
+      }
+      return index == null
+          ? KeyedSubtree(key: key, child: result)
+          : ReorderableDragStartListener(key: key, index: index, child: result);
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: SizedBox(
+            height: 28,
+            child: HorizontalEdgeFade(
+              child: ReorderableListView(
+                scrollDirection: Axis.horizontal,
+                buildDefaultDragHandles: false,
+                onReorderItem: (a, b) => _reorderFolderChips(run, a, b),
+                children: [
+                  chip(
+                    const Key('explore-filter-all'),
+                    l10n.styleExplore_filterAll,
+                    const ExploreGalleryFilterAll(),
+                  ),
+                  chip(
+                    const Key('explore-filter-hearted'),
+                    l10n.styleExplore_filterHearted,
+                    const ExploreGalleryFilterHearted(),
+                    icon: StudioIcons.galleryHeartFilled,
+                  ),
+                  chip(
+                    const Key('explore-filter-uncategorized'),
+                    l10n.styleExplore_folderUncategorized,
+                    const ExploreGalleryFilterFolder(null),
+                    icon: StudioIcons.galleryCollection,
+                  ),
+                  for (final entry in run.folders.indexed)
+                    chip(
+                      ValueKey('explore-filter-folder-${entry.$2.id}'),
+                      entry.$2.name,
+                      ExploreGalleryFilterFolder(entry.$2.id),
+                      icon: StudioIcons.galleryFolder,
+                      index: 3 + entry.$1,
                     ),
-                    _filterChip(
-                      key: const Key('explore-filter-hearted'),
-                      label: l10n.styleExplore_filterHearted,
-                      selected: filter is ExploreGalleryFilterHearted,
+                  Padding(
+                    key: const Key('explore-gallery-new-folder'),
+                    padding: const EdgeInsets.only(right: 6),
+                    child: GestureDetector(
                       onTap: () =>
-                          _setFilter(const ExploreGalleryFilterHearted()),
-                    ),
-                    for (final entry in run.folders.indexed)
-                      ReorderableDragStartListener(
-                        key: ValueKey('explore-filter-folder-${entry.$2.id}'),
-                        index: lockedChipCount + entry.$1,
-                        child: GestureDetector(
-                          // 右键小菜单：重命名/删除。空文件夹不渲染牌堆
-                          // 组头，chip 是其唯一管理入口（FEAT 补充）。
-                          onSecondaryTapUp: (details) => _showFolderMenu(
-                            run,
-                            entry.$2,
-                            details.globalPosition,
-                          ),
-                          child: _filterChip(
-                            label: entry.$2.name,
-                            icon: Icons.folder_outlined,
-                            selected:
-                                filter is ExploreGalleryFilterFolder &&
-                                filter.folderId == entry.$2.id,
-                            onTap: () => _setFilter(
-                              ExploreGalleryFilterFolder(entry.$2.id),
-                            ),
+                          promptCreateExploreFolder(context, ref, run.id),
+                      child: CustomPaint(
+                        painter: DashedRoundedBorderPainter(
+                          color: theme.colorScheme.outline,
+                          dashedColor: theme.colorScheme.outline,
+                          radius: const Radius.circular(14),
+                          topRounded: true,
+                          bottomRounded: true,
+                          solidLeft: false,
+                          solidRight: false,
+                          dashedAll: true,
+                        ),
+                        child: Container(
+                          height: 28,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ExploreIcon(
+                                'plus',
+                                size: 13,
+                                color: theme.colorScheme.outline,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                l10n.styleExplore_groupLabel,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: theme.colorScheme.outline,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    _filterChip(
-                      key: const Key('explore-filter-uncategorized'),
-                      label: l10n.styleExplore_folderUncategorized,
-                      icon: Icons.inbox_outlined,
-                      selected:
-                          filter is ExploreGalleryFilterFolder &&
-                          filter.folderId == null,
-                      onTap: () =>
-                          _setFilter(const ExploreGalleryFilterFolder(null)),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-          // 钉右两钮：chips 溢出横滚时常显不挤没。
-          IconButton(
-            key: const Key('explore-gallery-new-folder'),
-            iconSize: 18,
-            visualDensity: VisualDensity.compact,
-            tooltip: l10n.styleExplore_newFolder,
-            onPressed: () => promptCreateExploreFolder(context, ref, run.id),
-            icon: const Icon(Icons.create_new_folder_outlined),
+        ),
+        const SizedBox(width: 6),
+        if (!mode)
+          Tooltip(
+            message: newest
+                ? l10n.styleExplore_newestFirst
+                : l10n.styleExplore_oldestFirst,
+            child: IconButton(
+              key: const Key('explore-round-sort'),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints.tightFor(width: 28, height: 30),
+              icon: Icon(
+                newest
+                    ? StudioIcons.gallerySortDesc
+                    : StudioIcons.gallerySortAsc,
+                size: 15,
+              ),
+              onPressed: () =>
+                  ref
+                          .read(exploreRoundOrderNewestFirstProvider.notifier)
+                          .state =
+                      !newest,
+            ),
           ),
-          // 多选模式。
-          IconButton(
-            key: const Key('explore-gallery-select-toggle'),
-            iconSize: 18,
-            visualDensity: VisualDensity.compact,
-            tooltip: l10n.styleExplore_selectCandidates,
-            onPressed: () => setState(() => _selectionMode = true),
-            icon: const Icon(Icons.checklist),
+        const SizedBox(width: 6),
+        OutlinedButton.icon(
+          key: const Key('explore-gallery-select-toggle'),
+          onPressed: mode
+              ? _selectAll
+              : () => ref.read(exploreSelectionModeProvider.notifier).state =
+                    true,
+          icon: const Icon(StudioIcons.gallerySelect, size: 14),
+          label: Text(
+            mode ? l10n.common_selectAll : l10n.styleExplore_selectCandidates,
           ),
-        ],
-      ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 30),
+            maximumSize: const Size(double.infinity, 30),
+            padding: const EdgeInsets.symmetric(horizontal: 11),
+            textStyle: StudioTypography.body.copyWith(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+            ),
+            side: BorderSide(color: theme.colorScheme.outlineVariant),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7),
+            ),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+      ],
     );
   }
 
@@ -387,7 +508,7 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
   /// 拖入落点夹回文件夹区间，写回 run.folders 顺序（牌堆分组同源）。
   /// onReorderItem 的 newIndex 已按移除项调整（= 最终插入位）。
   void _reorderFolderChips(ExploreRun run, int oldIndex, int newIndex) {
-    const locked = 2;
+    const locked = 3;
     final folderCount = run.folders.length;
     if (oldIndex < locked || oldIndex >= locked + folderCount) return;
     final target = newIndex.clamp(locked, locked + folderCount - 1);
@@ -396,99 +517,6 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
     ref
         .read(exploreRunListNotifierProvider.notifier)
         .reorderFolders(run.id, ordered);
-  }
-
-  Widget _filterChip({
-    Key? key,
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-    IconData? icon,
-  }) {
-    return Padding(
-      key: key,
-      padding: const EdgeInsets.only(right: 6),
-      child: FilterChip(
-        label: icon == null
-            ? Text(label)
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 14),
-                  const SizedBox(width: 4),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 120),
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-        selected: selected,
-        visualDensity: VisualDensity.compact,
-        onSelected: (_) => onTap(),
-      ),
-    );
-  }
-
-  Widget _buildSelectionBar(AppLocalizations l10n, ExploreRun run) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
-      // 窄栏（320px）下按钮可换行，防多语言长文案溢出。
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          IconButton(
-            key: const Key('explore-gallery-select-exit'),
-            iconSize: 18,
-            visualDensity: VisualDensity.compact,
-            tooltip: l10n.common_close,
-            onPressed: _exitSelection,
-            icon: const Icon(Icons.close),
-          ),
-          Text(
-            l10n.styleExplore_selectedCount(_selectedIds.length),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          FilledButton.tonalIcon(
-            key: const Key('explore-gallery-create-family'),
-            onPressed: _selectedIds.isEmpty
-                ? null
-                : () => _createFamilyFromSelection(run),
-            icon: const Icon(StudioIcons.styleExplore, size: 16),
-            label: Text(l10n.styleExplore_createFamily),
-          ),
-          FilledButton.tonalIcon(
-            key: const Key('explore-gallery-merge-adopt'),
-            onPressed: _selectedIds.isEmpty ? null : () => _adoptSelected(run),
-            icon: const Icon(Icons.inventory_2_outlined, size: 16),
-            label: Text(l10n.styleExplore_mergeAdopt),
-          ),
-          // FEAT-56：无底色删除钮——批量删图（FEAT-42 同链路），
-          // 仅当选择集里有已落副本的候选时启用。
-          TextButton.icon(
-            key: const Key('explore-gallery-delete'),
-            onPressed:
-                run.candidates.any(
-                  (candidate) =>
-                      _selectedIds.contains(candidate.id) &&
-                      candidate.generation.filePath != null,
-                )
-                ? () => _deleteSelected(run)
-                : null,
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            icon: const Icon(Icons.delete_outline, size: 16),
-            label: Text(l10n.styleExplore_deleteImage),
-          ),
-        ],
-      ),
-    );
   }
 
   // ==================== 牌堆（分组） ====================
@@ -523,8 +551,11 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
             .clamp(2, 100);
         final cardWidth = (available - 12 * (columns - 1)) / columns;
         final ratio = run.paramsSnapshot.width / run.paramsSnapshot.height;
+        _columns = columns;
+        _cardExtent = cardWidth / ratio + 6 + 11.5 * 1.45 * 2 + 14;
         return CustomScrollView(
           key: ValueKey('explore-wall-${run.id}'),
+          controller: _scroll,
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
@@ -686,6 +717,24 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
               ),
             ),
           ],
+          if (failures == 0 && !running) ...[
+            const SizedBox(width: 10),
+            TextButton.icon(
+              key: Key('explore-round-select-${round.id}'),
+              onPressed: () => _enterSelection(null),
+              icon: DnaIcon(size: 13, color: ExploreStyle.evolution(theme)),
+              label: Text(
+                l10n.styleExplore_pickEvolution,
+                style: const TextStyle(fontSize: 12.5),
+              ),
+              style: TextButton.styleFrom(
+                foregroundColor: colors.onSurfaceVariant,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 26),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -762,47 +811,249 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
           )
           .firstOrNull;
     }
-    return ExploreCandidateCard(
+    return KeyedSubtree(
       key: ValueKey('explore-candidate-${candidate.id}'),
-      run: run,
-      candidate: candidate,
-      sequenceNumber:
-          run.candidates.indexWhere((c) => c.id == candidate.id) + 1,
-      selectionMode: _selectionMode,
-      selected: _selectedIds.contains(candidate.id),
-      focused: ref.watch(exploreFocusedCandidateIdProvider) == candidate.id,
-      generating: candidate.id == current,
-      onFocus: () =>
-          ref.read(exploreFocusedCandidateIdProvider.notifier).state =
-              candidate.id,
-      onToggleSelect: () => _toggleSelect(candidate.id),
-      onEnterSelection: () => _enterSelection(candidate.id),
-      onOpenDetail: () => _openCandidateDetail(run, candidate),
+      child: ExploreCandidateCard(
+        key: _cardKeys.putIfAbsent(candidate.id, GlobalKey.new),
+        run: run,
+        candidate: candidate,
+        sequenceNumber:
+            run.candidates.indexWhere((c) => c.id == candidate.id) + 1,
+        selectionMode: _selectionMode,
+        selected: _selectedIds.contains(candidate.id),
+        focused: ref.watch(exploreFocusedCandidateIdProvider) == candidate.id,
+        generating: candidate.id == current,
+        onFocus: () => _clickCandidate(candidate.id),
+        onToggleSelect: () => _clickCandidate(candidate.id),
+        onEnterSelection: () => _enterSelection(candidate.id),
+        onOpenDetail: () => _openCandidateDetail(run, candidate),
+      ),
     );
   }
 
   // ==================== 多选与出口 ====================
 
-  void _toggleSelect(String candidateId) {
-    setState(() {
-      if (!_selectedIds.remove(candidateId)) {
-        _selectedIds.add(candidateId);
-      }
-    });
+  void _clickCandidate(String id) {
+    _stageFocus.requestFocus();
+    final focused = ref.read(exploreFocusedCandidateIdProvider);
+    final selection = ref.read(exploreSelectionProvider.notifier);
+    if (HardwareKeyboard.instance.isShiftPressed) {
+      ref.read(exploreSelectionModeProvider.notifier).state = true;
+      selection.selectRange(
+        focused,
+        id,
+        ref.read(exploreVisibleCandidatesProvider).map((c) => c.id).toList(),
+      );
+    } else if (_selectionMode || HardwareKeyboard.instance.isControlPressed) {
+      ref.read(exploreSelectionModeProvider.notifier).state = true;
+      selection.toggle(id);
+    }
+    ref.read(exploreFocusedCandidateIdProvider.notifier).state = id;
   }
 
-  void _enterSelection(String candidateId) {
-    setState(() {
-      _selectionMode = true;
-      _selectedIds.add(candidateId);
-    });
+  void _enterSelection(String? id) {
+    _stageFocus.requestFocus();
+    ref.read(exploreSelectionModeProvider.notifier).state = true;
+    if (id != null) {
+      ref.read(exploreFocusedCandidateIdProvider.notifier).state = id;
+      if (!_selectedIds.contains(id)) {
+        ref.read(exploreSelectionProvider.notifier).toggle(id);
+      }
+    } else {
+      ref.read(exploreSelectionProvider.notifier).clear();
+    }
+  }
+
+  void _selectAll() {
+    ref.read(exploreSelectionModeProvider.notifier).state = true;
+    ref
+        .read(exploreSelectionProvider.notifier)
+        .selectAll(ref.read(exploreVisibleCandidatesProvider).map((c) => c.id));
   }
 
   void _exitSelection() {
-    setState(() {
-      _selectionMode = false;
-      _selectedIds.clear();
-    });
+    ref.read(exploreSelectionProvider.notifier).clear();
+    ref.read(exploreSelectionModeProvider.notifier).state = false;
+  }
+
+  Future<void> _toggleHearts(ExploreRun run, Set<String> ids) async {
+    final targets = run.candidates.where((c) => ids.contains(c.id)).toList();
+    final heart = !targets.every((c) => c.review.heart);
+    for (final target in targets) {
+      await ref
+          .read(exploreRunListNotifierProvider.notifier)
+          .updateReview(run.id, target.id, heart: heart);
+    }
+  }
+
+  Future<void> _assignMenu(ExploreRun run) async {
+    final anchor =
+        _groupButton.currentContext?.findRenderObject() as RenderBox?;
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final rect = anchor == null
+        ? Rect.fromLTWH(overlay.size.width / 2, overlay.size.height - 62, 0, 0)
+        : Rect.fromPoints(
+            overlay.globalToLocal(anchor.localToGlobal(Offset.zero)),
+            overlay.globalToLocal(
+              anchor.localToGlobal(
+                Offset(anchor.size.width, anchor.size.height),
+              ),
+            ),
+          );
+    final value = await showMenu<String>(
+      context: context,
+      position: RelativeRect.fromRect(rect, Offset.zero & overlay.size),
+      items: [
+        for (final folder in run.folders)
+          PopupMenuItem(value: folder.id, child: Text(folder.name)),
+        PopupMenuItem(
+          value: '__none',
+          child: Text(context.l10n.styleExplore_folderUncategorized),
+        ),
+        PopupMenuItem(
+          value: '__new',
+          child: Text(context.l10n.styleExplore_newGroup),
+        ),
+      ],
+    );
+    if (value == null || !mounted) return;
+    String? folderId = value == '__none' ? null : value;
+    if (value == '__new') {
+      final folder = await promptCreateExploreFolder(context, ref, run.id);
+      if (folder == null) return;
+      folderId = folder.id;
+    }
+    if (_selectedIds.isNotEmpty) {
+      await ref
+          .read(exploreRunListNotifierProvider.notifier)
+          .assignCandidatesFolder(run.id, _selectedIds.toList(), folderId);
+    }
+  }
+
+  KeyEventResult _key(ExploreRun run, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    if (FocusManager.instance.primaryFocus?.context
+            ?.findAncestorStateOfType<EditableTextState>() !=
+        null) {
+      return KeyEventResult.ignored;
+    }
+    final key = event.logicalKey;
+    final visible = ref.read(exploreVisibleCandidatesProvider);
+    final focused = ref.read(exploreFocusedCandidateIdProvider);
+    final targets = _selectionMode && _selectedIds.isNotEmpty
+        ? _selectedIds
+        : {if (focused != null) focused};
+    if (HardwareKeyboard.instance.isControlPressed) {
+      if (key == LogicalKeyboardKey.keyA) {
+        _selectAll();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    }
+    final horizontal = key == LogicalKeyboardKey.arrowLeft
+        ? -1
+        : key == LogicalKeyboardKey.arrowRight
+        ? 1
+        : 0;
+    final vertical = key == LogicalKeyboardKey.arrowUp
+        ? -1
+        : key == LogicalKeyboardKey.arrowDown
+        ? 1
+        : 0;
+    if (horizontal != 0 || vertical != 0) {
+      final id = exploreMovedFocus(
+        visible,
+        focused,
+        horizontal,
+        vertical,
+        _columns,
+      );
+      ref.read(exploreFocusedCandidateIdProvider.notifier).state = id;
+      if (id != null) unawaited(_reveal(id, visible));
+    } else if (key == LogicalKeyboardKey.enter ||
+        key == LogicalKeyboardKey.space) {
+      final candidate = run.candidateById(focused ?? '');
+      if (candidate != null) _openCandidateDetail(run, candidate);
+    } else if (key == LogicalKeyboardKey.keyF) {
+      if (targets.isNotEmpty) unawaited(_toggleHearts(run, targets));
+    } else if (key == LogicalKeyboardKey.keyE) {
+      if (targets.isNotEmpty) {
+        unawaited(_createFamilyFromSelection(run, ids: targets));
+      }
+    } else if (key == LogicalKeyboardKey.delete) {
+      if (targets.isNotEmpty) {
+        unawaited(_deleteSelected(run, ids: targets));
+      }
+    } else if (key == LogicalKeyboardKey.escape) {
+      if (_selectionMode) {
+        _exitSelection();
+      } else {
+        ref.read(exploreFocusedCandidateIdProvider.notifier).state = null;
+      }
+    } else {
+      final number =
+          int.tryParse(key.keyLabel) ??
+          [
+            LogicalKeyboardKey.numpad0,
+            LogicalKeyboardKey.numpad1,
+            LogicalKeyboardKey.numpad2,
+            LogicalKeyboardKey.numpad3,
+            LogicalKeyboardKey.numpad4,
+            LogicalKeyboardKey.numpad5,
+            LogicalKeyboardKey.numpad6,
+            LogicalKeyboardKey.numpad7,
+            LogicalKeyboardKey.numpad8,
+            LogicalKeyboardKey.numpad9,
+          ].indexOf(key);
+      if (number < 0 || number > 9) return KeyEventResult.ignored;
+      if (number > run.folders.length) return KeyEventResult.handled;
+      String? folderId = number == 0 ? null : run.folders[number - 1].id;
+      if (folderId != null &&
+          run.candidates
+              .where((c) => targets.contains(c.id))
+              .every((c) => c.folderId == folderId)) {
+        folderId = null;
+      }
+      if (targets.isNotEmpty) {
+        unawaited(
+          ref
+              .read(exploreRunListNotifierProvider.notifier)
+              .assignCandidatesFolder(run.id, targets.toList(), folderId),
+        );
+      }
+    }
+    return KeyEventResult.handled;
+  }
+
+  Future<void> _reveal(String id, List<ExploreCandidate> visible) async {
+    var target = _cardKeys[id]?.currentContext;
+    if (target == null && _scroll.hasClients) {
+      double offset = 0;
+      for (final group in visible.map((c) => c.roundId).toSet()) {
+        final candidates = visible.where((c) => c.roundId == group).toList();
+        final index = candidates.indexWhere((c) => c.id == id);
+        if (index >= 0) {
+          offset += 48 + (index ~/ _columns) * _cardExtent;
+          break;
+        }
+        offset += 48 + (candidates.length / _columns).ceil() * _cardExtent;
+      }
+      await _scroll.animateTo(
+        offset.clamp(0, _scroll.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+      target = _cardKeys[id]?.currentContext;
+    }
+    if (target != null && target.mounted) {
+      await Scrollable.ensureVisible(
+        target,
+        duration: const Duration(milliseconds: 200),
+      );
+    }
   }
 
   /// 多选合并收编：成功后退出多选，取消则保留选择。
@@ -823,21 +1074,22 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
 
   /// 多选批量删图（FEAT-56，FEAT-55 拍板 = 连记录删）：一次确认 → 逐张
   /// 删副本文件 + 移除候选记录，与 FEAT-42 管理弹窗 `_deleteSelected`
-  /// 同链路；无副本项不参与（确认框计数只含有副本张数），成功后退出多选。
-  Future<void> _deleteSelected(ExploreRun run) async {
+  /// 同链路；无副本记录也可删除。生成中的候选保持原状态。
+  Future<void> _deleteSelected(ExploreRun run, {Set<String>? ids}) async {
     final targets = [
       for (final candidate in run.candidates)
-        if (_selectedIds.contains(candidate.id) &&
-            candidate.generation.filePath != null)
+        if ((ids ?? _selectedIds).contains(candidate.id) &&
+            candidate.generation.status !=
+                ExploreCandidateGenerationStatus.pending)
           candidate,
     ];
     if (targets.isEmpty) return;
     final l10n = context.l10n;
     final confirmed = await ThemedConfirmDialog.show(
       context: context,
-      title: l10n.styleExplore_pileManageDeleteTitle,
-      content: l10n.styleExplore_pileManageDeleteMessage(targets.length),
-      confirmText: l10n.styleExplore_deleteImage,
+      title: l10n.styleExplore_deleteCandidatesTitle,
+      content: l10n.styleExplore_deleteCandidatesMessage(targets.length),
+      confirmText: l10n.common_delete,
       type: ThemedConfirmDialogType.danger,
       icon: Icons.delete_outline,
     );
@@ -848,9 +1100,21 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
       final notifier = ref.read(exploreRunListNotifierProvider.notifier);
       // FEAT-55 拍板 = 连记录删：副本删成功的候选整条记录移除。
       final deletedIds = <String>[];
-      for (final candidate in targets) {
-        final filePath = candidate.generation.filePath!;
-        if (!await store.deleteCandidateImage(filePath)) continue;
+      for (final target in targets) {
+        final candidate = ref
+            .read(exploreRunListNotifierProvider)
+            .valueOrNull
+            ?.runById(run.id)
+            ?.candidateById(target.id);
+        if (candidate == null ||
+            candidate.generation.status ==
+                ExploreCandidateGenerationStatus.pending) {
+          continue;
+        }
+        final filePath = candidate.generation.filePath;
+        if (filePath != null && !await store.deleteCandidateImage(filePath)) {
+          continue;
+        }
         deletedIds.add(candidate.id);
         deleted++;
       }
@@ -908,10 +1172,13 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
 
   /// 多选建家族（阶段 D）：对话框确认命名/自定义串后创建家族 +
   /// 第一代父本集，谱系区选中新家族并退出多选。
-  Future<void> _createFamilyFromSelection(ExploreRun run) async {
+  Future<void> _createFamilyFromSelection(
+    ExploreRun run, {
+    Set<String>? ids,
+  }) async {
     final selected = [
       for (final candidate in run.candidates)
-        if (_selectedIds.contains(candidate.id)) candidate,
+        if ((ids ?? _selectedIds).contains(candidate.id)) candidate,
     ];
     if (selected.isEmpty) return;
     final l10n = context.l10n;

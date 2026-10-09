@@ -7098,5 +7098,50 @@
   "styleExplore_emptyRound": "このラウンドに候補はありません",
   "@styleExplore_emptyRound": {
     "description": "Style explore task03: emptyRound"
+  },
+  "styleExplore_unfavorite": "お気に入り解除",
+  "@styleExplore_unfavorite": {
+    "description": "Explore workbench selection: unfavorite"
+  },
+  "styleExplore_groupLabel": "グループ",
+  "@styleExplore_groupLabel": {
+    "description": "Explore workbench selection: groupLabel"
+  },
+  "styleExplore_newGroup": "新しいグループ…",
+  "@styleExplore_newGroup": {
+    "description": "Explore workbench selection: newGroup"
+  },
+  "styleExplore_saveBlock": "ブロックとして保存",
+  "@styleExplore_saveBlock": {
+    "description": "Explore workbench selection: saveBlock"
+  },
+  "styleExplore_startEvolution": "進化を開始",
+  "@styleExplore_startEvolution": {
+    "description": "Explore workbench selection: startEvolution"
+  },
+  "styleExplore_newestFirst": "新しいラウンドを先に",
+  "@styleExplore_newestFirst": {
+    "description": "Explore workbench selection: newestFirst"
+  },
+  "styleExplore_oldestFirst": "古いラウンドを先に",
+  "@styleExplore_oldestFirst": {
+    "description": "Explore workbench selection: oldestFirst"
+  },
+  "styleExplore_pickEvolution": "進化する候補を選ぶ",
+  "@styleExplore_pickEvolution": {
+    "description": "Explore workbench selection: pickEvolution"
+  },
+  "styleExplore_deleteCandidatesTitle": "候補を削除",
+  "@styleExplore_deleteCandidatesTitle": {
+    "description": "Delete candidates with or without local copies"
+  },
+  "styleExplore_deleteCandidatesMessage": "候補{count}枚と画像コピーを削除しますか？ライブラリの原画像は保持されます。",
+  "@styleExplore_deleteCandidatesMessage": {
+    "description": "Delete candidates with or without local copies",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

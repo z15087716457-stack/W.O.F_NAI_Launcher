@@ -7098,5 +7098,50 @@
   "styleExplore_emptyRound": "이 라운드에는 후보가 없습니다",
   "@styleExplore_emptyRound": {
     "description": "Style explore task03: emptyRound"
+  },
+  "styleExplore_unfavorite": "즐겨찾기 해제",
+  "@styleExplore_unfavorite": {
+    "description": "Explore workbench selection: unfavorite"
+  },
+  "styleExplore_groupLabel": "그룹",
+  "@styleExplore_groupLabel": {
+    "description": "Explore workbench selection: groupLabel"
+  },
+  "styleExplore_newGroup": "새 그룹…",
+  "@styleExplore_newGroup": {
+    "description": "Explore workbench selection: newGroup"
+  },
+  "styleExplore_saveBlock": "블록으로 저장",
+  "@styleExplore_saveBlock": {
+    "description": "Explore workbench selection: saveBlock"
+  },
+  "styleExplore_startEvolution": "진화 시작",
+  "@styleExplore_startEvolution": {
+    "description": "Explore workbench selection: startEvolution"
+  },
+  "styleExplore_newestFirst": "최신 라운드 먼저",
+  "@styleExplore_newestFirst": {
+    "description": "Explore workbench selection: newestFirst"
+  },
+  "styleExplore_oldestFirst": "오래된 라운드 먼저",
+  "@styleExplore_oldestFirst": {
+    "description": "Explore workbench selection: oldestFirst"
+  },
+  "styleExplore_pickEvolution": "진화할 후보 선택",
+  "@styleExplore_pickEvolution": {
+    "description": "Explore workbench selection: pickEvolution"
+  },
+  "styleExplore_deleteCandidatesTitle": "후보 삭제",
+  "@styleExplore_deleteCandidatesTitle": {
+    "description": "Delete candidates with or without local copies"
+  },
+  "styleExplore_deleteCandidatesMessage": "후보 {count}개와 이미지 복사본을 삭제할까요? 라이브러리 원본은 유지됩니다.",
+  "@styleExplore_deleteCandidatesMessage": {
+    "description": "Delete candidates with or without local copies",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -1618,6 +1618,7 @@ void main() {
     );
     final container = await pumpScreen(
       tester,
+      width: 1920,
       extraOverrides: [
         promptBlockLibraryNotifierProvider.overrideWith(() => recording),
       ],
@@ -1630,9 +1631,9 @@ void main() {
     await tester.tap(find.byKey(const Key('explore-gallery-select-toggle')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(find.text('已选 2 张'), findsOneWidget);
     // 多选模式同走牌堆分组（无视图切换）。
     expect(find.byKey(const Key('explore-round-r-1')), findsOneWidget);
@@ -1803,6 +1804,7 @@ void main() {
     );
     final container = await pumpScreen(
       tester,
+      width: 1920,
       extraOverrides: [
         exploreRunImageStoreProvider.overrideWithValue(imageStore),
       ],
@@ -1817,19 +1819,17 @@ void main() {
 
     await tester.tap(find.byKey(const Key('explore-gallery-select-toggle')));
     await tester.pump();
-    // 无底色形制 = TextButton（key 挂在钮本体）+ error 前景。
-    expect(find.byKey(deleteKey), findsOneWidget);
-    expect(tester.widget(find.byKey(deleteKey)), isA<TextButton>());
-
-    // 空选择 → 钮禁用；选无副本项 → 仍禁用；选有副本项 → 启用。
-    expect(tester.widget<TextButton>(find.byKey(deleteKey)).onPressed, isNull);
+    expect(find.byKey(deleteKey), findsNothing, reason: '空选择隐藏浮条');
     await tester.tap(find.byKey(const Key('explore-candidate-cand-no-copy')));
-    await tester.pump();
-    expect(tester.widget<TextButton>(find.byKey(deleteKey)).onPressed, isNull);
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(
+      tester.widget<TextButton>(find.byKey(deleteKey)).onPressed,
+      isNotNull,
+    );
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
     expect(
       tester.widget<TextButton>(find.byKey(deleteKey)).onPressed,
       isNotNull,
@@ -1839,8 +1839,8 @@ void main() {
     await tester.tap(find.byKey(deleteKey));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('删除所选候选图'), findsOneWidget);
-    expect(find.text('将删除 2 张候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。'), findsOneWidget);
+    expect(find.text('删除候选'), findsOneWidget);
+    expect(find.text('将删除 3 张候选及其图片副本，图库源图保留。'), findsOneWidget);
     await tester.tap(find.widgetWithText(TextButton, '取消'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1851,7 +1851,7 @@ void main() {
     await tester.tap(find.byKey(deleteKey));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.widgetWithText(FilledButton, '删除图片'));
+    await tester.tap(find.widgetWithText(FilledButton, '删除'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 3300));
@@ -1861,7 +1861,7 @@ void main() {
     // FEAT-55：连记录删——候选整条移除，画廊卡消失。
     expect(stored.candidateById('cand-1'), isNull);
     expect(stored.candidateById('cand-2'), isNull);
-    expect(stored.candidateById('cand-no-copy'), isNotNull);
+    expect(stored.candidateById('cand-no-copy'), isNull);
     expect(find.byKey(const Key('explore-candidate-cand-1')), findsNothing);
     expect(
       find.byKey(const Key('explore-gallery-select-toggle')),

@@ -125,9 +125,7 @@ class _ExploreCandidateCardState extends ConsumerState<ExploreCandidateCard> {
                     onTap: widget.selectionMode
                         ? widget.onToggleSelect
                         : widget.onFocus,
-                    onDoubleTap: widget.selectionMode
-                        ? null
-                        : widget.onOpenDetail,
+                    onDoubleTap: widget.onOpenDetail,
                     onLongPress: widget.onEnterSelection,
                     onSecondaryTapUp: (details) =>
                         _more(details.globalPosition),
@@ -154,6 +152,9 @@ class _ExploreCandidateCardState extends ConsumerState<ExploreCandidateCard> {
                             left: 6,
                             top: 6,
                             child: GestureDetector(
+                              key: Key(
+                                'explore-candidate-select-${candidate.id}',
+                              ),
                               onTap: widget.selectionMode
                                   ? widget.onToggleSelect
                                   : widget.onEnterSelection,

@@ -22763,6 +22763,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This round has no candidates'**
   String get styleExplore_emptyRound;
+
+  /// Explore workbench selection: unfavorite
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite'**
+  String get styleExplore_unfavorite;
+
+  /// Explore workbench selection: groupLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get styleExplore_groupLabel;
+
+  /// Explore workbench selection: newGroup
+  ///
+  /// In en, this message translates to:
+  /// **'New group…'**
+  String get styleExplore_newGroup;
+
+  /// Explore workbench selection: saveBlock
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block'**
+  String get styleExplore_saveBlock;
+
+  /// Explore workbench selection: startEvolution
+  ///
+  /// In en, this message translates to:
+  /// **'Start evolution'**
+  String get styleExplore_startEvolution;
+
+  /// Explore workbench selection: newestFirst
+  ///
+  /// In en, this message translates to:
+  /// **'Newest rounds first'**
+  String get styleExplore_newestFirst;
+
+  /// Explore workbench selection: oldestFirst
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest rounds first'**
+  String get styleExplore_oldestFirst;
+
+  /// Explore workbench selection: pickEvolution
+  ///
+  /// In en, this message translates to:
+  /// **'Pick candidates to evolve'**
+  String get styleExplore_pickEvolution;
+
+  /// Delete candidates with or without local copies
+  ///
+  /// In en, this message translates to:
+  /// **'Delete candidates'**
+  String get styleExplore_deleteCandidatesTitle;
+
+  /// Delete candidates with or without local copies
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} candidates and their image copies? Library originals are kept.'**
+  String styleExplore_deleteCandidatesMessage(int count);
 }
 
 class _AppLocalizationsDelegate

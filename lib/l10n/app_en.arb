@@ -7098,5 +7098,50 @@
   "styleExplore_emptyRound": "This round has no candidates",
   "@styleExplore_emptyRound": {
     "description": "Style explore task03: emptyRound"
+  },
+  "styleExplore_unfavorite": "Unfavorite",
+  "@styleExplore_unfavorite": {
+    "description": "Explore workbench selection: unfavorite"
+  },
+  "styleExplore_groupLabel": "Group",
+  "@styleExplore_groupLabel": {
+    "description": "Explore workbench selection: groupLabel"
+  },
+  "styleExplore_newGroup": "New group…",
+  "@styleExplore_newGroup": {
+    "description": "Explore workbench selection: newGroup"
+  },
+  "styleExplore_saveBlock": "Save as block",
+  "@styleExplore_saveBlock": {
+    "description": "Explore workbench selection: saveBlock"
+  },
+  "styleExplore_startEvolution": "Start evolution",
+  "@styleExplore_startEvolution": {
+    "description": "Explore workbench selection: startEvolution"
+  },
+  "styleExplore_newestFirst": "Newest rounds first",
+  "@styleExplore_newestFirst": {
+    "description": "Explore workbench selection: newestFirst"
+  },
+  "styleExplore_oldestFirst": "Oldest rounds first",
+  "@styleExplore_oldestFirst": {
+    "description": "Explore workbench selection: oldestFirst"
+  },
+  "styleExplore_pickEvolution": "Pick candidates to evolve",
+  "@styleExplore_pickEvolution": {
+    "description": "Explore workbench selection: pickEvolution"
+  },
+  "styleExplore_deleteCandidatesTitle": "Delete candidates",
+  "@styleExplore_deleteCandidatesTitle": {
+    "description": "Delete candidates with or without local copies"
+  },
+  "styleExplore_deleteCandidatesMessage": "Delete {count} candidates and their image copies? Library originals are kept.",
+  "@styleExplore_deleteCandidatesMessage": {
+    "description": "Delete candidates with or without local copies",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }
