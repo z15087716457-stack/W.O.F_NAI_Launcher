@@ -6949,5 +6949,50 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_variablesTitle": "무작위 변수",
+  "@styleExplore_variablesTitle": {
+    "description": "Style exploration workbench: styleExplore_variablesTitle"
+  },
+  "styleExplore_variablesHint": "이미지마다 다시 추출",
+  "@styleExplore_variablesHint": {
+    "description": "Style exploration workbench: styleExplore_variablesHint"
+  },
+  "styleExplore_variablesExplanation": "활성화된 무작위·순차 진화 블록의 추출 내용을 후보마다 기록합니다.",
+  "@styleExplore_variablesExplanation": {
+    "description": "Style exploration workbench: styleExplore_variablesExplanation"
+  },
+  "styleExplore_variablePoolSize": "풀 {count}개",
+  "@styleExplore_variablePoolSize": {
+    "description": "Style exploration workbench: styleExplore_variablePoolSize",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_variableEvolutionTarget": "진화 대상",
+  "@styleExplore_variableEvolutionTarget": {
+    "description": "Style exploration workbench: styleExplore_variableEvolutionTarget"
+  },
+  "styleExplore_variableNegative": "부정",
+  "@styleExplore_variableNegative": {
+    "description": "Style exploration workbench: styleExplore_variableNegative"
+  },
+  "styleExplore_variablesEmpty": "프롬프트에 무작위 블록이 없어 후보가 비슷하게 나옵니다.",
+  "@styleExplore_variablesEmpty": {
+    "description": "Style exploration workbench: styleExplore_variablesEmpty"
+  },
+  "styleExplore_openBlockLibrary": "블록 라이브러리 열기",
+  "@styleExplore_openBlockLibrary": {
+    "description": "Style exploration workbench: styleExplore_openBlockLibrary"
+  },
+  "styleExplore_drawCountLabel": "이번 추출",
+  "@styleExplore_drawCountLabel": {
+    "description": "Style exploration workbench: styleExplore_drawCountLabel"
+  },
+  "styleExplore_drawCountSuffix": "장 · 한 장씩 생성",
+  "@styleExplore_drawCountSuffix": {
+    "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   }
 }

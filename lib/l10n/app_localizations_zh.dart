@@ -12363,6 +12363,38 @@ class AppLocalizationsZh extends AppLocalizations {
   String styleExplore_imageCount(int count) {
     return '$count 张';
   }
+
+  @override
+  String get styleExplore_variablesTitle => '随机变量';
+
+  @override
+  String get styleExplore_variablesHint => '每张重新抽取';
+
+  @override
+  String get styleExplore_variablesExplanation => '每张候选会记录启用的随机或顺序遗传块抽到了哪些内容。';
+
+  @override
+  String styleExplore_variablePoolSize(int count) {
+    return '池 $count 项';
+  }
+
+  @override
+  String get styleExplore_variableEvolutionTarget => '进化目标';
+
+  @override
+  String get styleExplore_variableNegative => '负面';
+
+  @override
+  String get styleExplore_variablesEmpty => '提示词里还没有随机块，抽出来的图会很像';
+
+  @override
+  String get styleExplore_openBlockLibrary => '打开块库';
+
+  @override
+  String get styleExplore_drawCountLabel => '本次抽取';
+
+  @override
+  String get styleExplore_drawCountSuffix => '张 · 逐张生成';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24724,4 +24756,36 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String styleExplore_imageCount(int count) {
     return '$count 張';
   }
+
+  @override
+  String get styleExplore_variablesTitle => '隨機變數';
+
+  @override
+  String get styleExplore_variablesHint => '每張重新抽取';
+
+  @override
+  String get styleExplore_variablesExplanation => '每張候選會記錄啟用的隨機或順序遺傳塊抽到了哪些內容。';
+
+  @override
+  String styleExplore_variablePoolSize(int count) {
+    return '池 $count 項';
+  }
+
+  @override
+  String get styleExplore_variableEvolutionTarget => '進化目標';
+
+  @override
+  String get styleExplore_variableNegative => '負面';
+
+  @override
+  String get styleExplore_variablesEmpty => '提示詞裡還沒有隨機塊，抽出來的圖會很像';
+
+  @override
+  String get styleExplore_openBlockLibrary => '開啟塊庫';
+
+  @override
+  String get styleExplore_drawCountLabel => '本次抽取';
+
+  @override
+  String get styleExplore_drawCountSuffix => '張 · 逐張生成';
 }

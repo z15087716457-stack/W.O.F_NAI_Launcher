@@ -6949,5 +6949,50 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_variablesTitle": "Random variables",
+  "@styleExplore_variablesTitle": {
+    "description": "Style exploration workbench: styleExplore_variablesTitle"
+  },
+  "styleExplore_variablesHint": "Redraw each image",
+  "@styleExplore_variablesHint": {
+    "description": "Style exploration workbench: styleExplore_variablesHint"
+  },
+  "styleExplore_variablesExplanation": "Enabled random and sequential evolution blocks are recorded for each candidate.",
+  "@styleExplore_variablesExplanation": {
+    "description": "Style exploration workbench: styleExplore_variablesExplanation"
+  },
+  "styleExplore_variablePoolSize": "Pool: {count} items",
+  "@styleExplore_variablePoolSize": {
+    "description": "Style exploration workbench: styleExplore_variablePoolSize",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_variableEvolutionTarget": "Evolution target",
+  "@styleExplore_variableEvolutionTarget": {
+    "description": "Style exploration workbench: styleExplore_variableEvolutionTarget"
+  },
+  "styleExplore_variableNegative": "Negative",
+  "@styleExplore_variableNegative": {
+    "description": "Style exploration workbench: styleExplore_variableNegative"
+  },
+  "styleExplore_variablesEmpty": "No random blocks in the prompt yet; candidates will look alike.",
+  "@styleExplore_variablesEmpty": {
+    "description": "Style exploration workbench: styleExplore_variablesEmpty"
+  },
+  "styleExplore_openBlockLibrary": "Open block library",
+  "@styleExplore_openBlockLibrary": {
+    "description": "Style exploration workbench: styleExplore_openBlockLibrary"
+  },
+  "styleExplore_drawCountLabel": "Draw",
+  "@styleExplore_drawCountLabel": {
+    "description": "Style exploration workbench: styleExplore_drawCountLabel"
+  },
+  "styleExplore_drawCountSuffix": "images · one at a time",
+  "@styleExplore_drawCountSuffix": {
+    "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   }
 }

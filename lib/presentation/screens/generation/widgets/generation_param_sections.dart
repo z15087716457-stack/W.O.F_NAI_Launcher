@@ -124,10 +124,12 @@ class ImageCountSection extends ConsumerWidget {
   const ImageCountSection({
     super.key,
     this.showPerRequestSegments = true,
+    this.exploreLabel = false,
     this.layout = ImageCountSectionLayout.classic,
   });
 
   final bool showPerRequestSegments;
+  final bool exploreLabel;
   final ImageCountSectionLayout layout;
 
   /// 请求次数上限（与步进器输入框三位数一致）
@@ -158,7 +160,11 @@ class ImageCountSection extends ConsumerWidget {
       Widget repeat() => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          label(l10n.generation_repeatLabel),
+          label(
+            exploreLabel
+                ? l10n.styleExplore_drawCountLabel
+                : l10n.generation_repeatLabel,
+          ),
           const SizedBox(width: 6),
           _RequestStepper(
             value: requests,
@@ -167,6 +173,22 @@ class ImageCountSection extends ConsumerWidget {
                 .read(generationParamsNotifierProvider.notifier)
                 .updateNSamples(value),
           ),
+          if (exploreLabel) ...[
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                l10n.styleExplore_drawCountSuffix,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: .7,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       );
       Widget segments() => Tooltip(
@@ -233,7 +255,7 @@ class ImageCountSection extends ConsumerWidget {
                 );
               },
             ),
-            if (total > 1) ...[
+            if (total > 1 && !exploreLabel) ...[
               const SizedBox(height: 6),
               Text(
                 l10n.generation_imageCountTotal(requests, perRequest, total),

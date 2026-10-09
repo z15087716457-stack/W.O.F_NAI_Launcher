@@ -6949,5 +6949,50 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_variablesTitle": "随机变量",
+  "@styleExplore_variablesTitle": {
+    "description": "Style exploration workbench: styleExplore_variablesTitle"
+  },
+  "styleExplore_variablesHint": "每张重新抽取",
+  "@styleExplore_variablesHint": {
+    "description": "Style exploration workbench: styleExplore_variablesHint"
+  },
+  "styleExplore_variablesExplanation": "每张候选会记录启用的随机或顺序遗传块抽到了哪些内容。",
+  "@styleExplore_variablesExplanation": {
+    "description": "Style exploration workbench: styleExplore_variablesExplanation"
+  },
+  "styleExplore_variablePoolSize": "池 {count} 项",
+  "@styleExplore_variablePoolSize": {
+    "description": "Style exploration workbench: styleExplore_variablePoolSize",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_variableEvolutionTarget": "进化目标",
+  "@styleExplore_variableEvolutionTarget": {
+    "description": "Style exploration workbench: styleExplore_variableEvolutionTarget"
+  },
+  "styleExplore_variableNegative": "负面",
+  "@styleExplore_variableNegative": {
+    "description": "Style exploration workbench: styleExplore_variableNegative"
+  },
+  "styleExplore_variablesEmpty": "提示词里还没有随机块，抽出来的图会很像",
+  "@styleExplore_variablesEmpty": {
+    "description": "Style exploration workbench: styleExplore_variablesEmpty"
+  },
+  "styleExplore_openBlockLibrary": "打开块库",
+  "@styleExplore_openBlockLibrary": {
+    "description": "Style exploration workbench: styleExplore_openBlockLibrary"
+  },
+  "styleExplore_drawCountLabel": "本次抽取",
+  "@styleExplore_drawCountLabel": {
+    "description": "Style exploration workbench: styleExplore_drawCountLabel"
+  },
+  "styleExplore_drawCountSuffix": "张 · 逐张生成",
+  "@styleExplore_drawCountSuffix": {
+    "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   }
 }

@@ -33,6 +33,7 @@ import '../../providers/pill_workspace_provider.dart';
 import '../../providers/prompt_block_library_provider.dart';
 import 'widgets/explore_auto_run_name.dart';
 import 'widgets/explore_icon.dart';
+import 'widgets/explore_random_variables_module.dart';
 import 'widgets/explore_run_actions.dart';
 import 'widgets/explore_stage_header.dart';
 import 'widgets/explore_workbench.dart';
@@ -97,9 +98,12 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                   right: BorderSide(color: theme.colorScheme.outlineVariant),
                 ),
               ),
-              child: LayoutBuilder(
-                builder: (context, box) =>
-                    _buildCenterPanel(theme, availableWidth: box.maxWidth),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 1),
+                child: LayoutBuilder(
+                  builder: (context, box) =>
+                      _buildCenterPanel(theme, availableWidth: box.maxWidth),
+                ),
               ),
             ),
             stageBuilder: (context, inspectorVisible) => Column(
@@ -290,6 +294,9 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                         ),
                         const SizedBox(height: GenSidebarStyle.sectionGap),
 
+                        const ExploreRandomVariablesModule(),
+                        const SizedBox(height: GenSidebarStyle.sectionGap),
+
                         // 角色区：内联在主提示词正下方（官网式，内容常显）
                         if (showCharacters) ...[
                           const InlineCharacterSection(),
@@ -317,6 +324,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                             SizeSection(layout: SizeSectionLayout.moduleRow),
                             ImageCountSection(
                               showPerRequestSegments: false,
+                              exploreLabel: true,
                               layout: ImageCountSectionLayout.moduleRow,
                             ),
                           ],

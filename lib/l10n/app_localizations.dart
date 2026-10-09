@@ -22589,6 +22589,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} images'**
   String styleExplore_imageCount(int count);
+
+  /// Style exploration workbench: styleExplore_variablesTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Random variables'**
+  String get styleExplore_variablesTitle;
+
+  /// Style exploration workbench: styleExplore_variablesHint
+  ///
+  /// In en, this message translates to:
+  /// **'Redraw each image'**
+  String get styleExplore_variablesHint;
+
+  /// Style exploration workbench: styleExplore_variablesExplanation
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled random and sequential evolution blocks are recorded for each candidate.'**
+  String get styleExplore_variablesExplanation;
+
+  /// Style exploration workbench: styleExplore_variablePoolSize
+  ///
+  /// In en, this message translates to:
+  /// **'Pool: {count} items'**
+  String styleExplore_variablePoolSize(int count);
+
+  /// Style exploration workbench: styleExplore_variableEvolutionTarget
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution target'**
+  String get styleExplore_variableEvolutionTarget;
+
+  /// Style exploration workbench: styleExplore_variableNegative
+  ///
+  /// In en, this message translates to:
+  /// **'Negative'**
+  String get styleExplore_variableNegative;
+
+  /// Style exploration workbench: styleExplore_variablesEmpty
+  ///
+  /// In en, this message translates to:
+  /// **'No random blocks in the prompt yet; candidates will look alike.'**
+  String get styleExplore_variablesEmpty;
+
+  /// Style exploration workbench: styleExplore_openBlockLibrary
+  ///
+  /// In en, this message translates to:
+  /// **'Open block library'**
+  String get styleExplore_openBlockLibrary;
+
+  /// Style exploration workbench: styleExplore_drawCountLabel
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get styleExplore_drawCountLabel;
+
+  /// Style exploration workbench: styleExplore_drawCountSuffix
+  ///
+  /// In en, this message translates to:
+  /// **'images · one at a time'**
+  String get styleExplore_drawCountSuffix;
 }
 
 class _AppLocalizationsDelegate

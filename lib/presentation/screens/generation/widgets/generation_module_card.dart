@@ -12,6 +12,8 @@ class GenerationModuleCard extends StatelessWidget {
     required this.title,
     this.titleTooltip,
     this.count,
+    this.headerLeading,
+    this.showZeroCount = false,
     this.actions = const [],
     this.headerKey,
     this.children = const [],
@@ -20,6 +22,8 @@ class GenerationModuleCard extends StatelessWidget {
   final String title;
   final String? titleTooltip;
   final int? count;
+  final Widget? headerLeading;
+  final bool showZeroCount;
   final List<Widget> actions;
   final Key? headerKey;
   final List<Widget> children;
@@ -66,11 +70,15 @@ class GenerationModuleCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
+                      if (headerLeading != null) ...[
+                        headerLeading!,
+                        const SizedBox(width: GenSidebarStyle.moduleActionGap),
+                      ],
                       Expanded(
                         child: Row(
                           children: [
                             Flexible(child: titleWidget),
-                            if (count != null && count! > 0)
+                            if (count != null && (count! > 0 || showZeroCount))
                               Padding(
                                 padding: const EdgeInsetsDirectional.only(
                                   start: GenSidebarStyle.moduleActionGap,

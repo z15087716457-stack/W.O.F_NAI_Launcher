@@ -12607,4 +12607,37 @@ class AppLocalizationsKo extends AppLocalizations {
   String styleExplore_imageCount(int count) {
     return '$count장';
   }
+
+  @override
+  String get styleExplore_variablesTitle => '무작위 변수';
+
+  @override
+  String get styleExplore_variablesHint => '이미지마다 다시 추출';
+
+  @override
+  String get styleExplore_variablesExplanation =>
+      '활성화된 무작위·순차 진화 블록의 추출 내용을 후보마다 기록합니다.';
+
+  @override
+  String styleExplore_variablePoolSize(int count) {
+    return '풀 $count개';
+  }
+
+  @override
+  String get styleExplore_variableEvolutionTarget => '진화 대상';
+
+  @override
+  String get styleExplore_variableNegative => '부정';
+
+  @override
+  String get styleExplore_variablesEmpty => '프롬프트에 무작위 블록이 없어 후보가 비슷하게 나옵니다.';
+
+  @override
+  String get styleExplore_openBlockLibrary => '블록 라이브러리 열기';
+
+  @override
+  String get styleExplore_drawCountLabel => '이번 추출';
+
+  @override
+  String get styleExplore_drawCountSuffix => '장 · 한 장씩 생성';
 }

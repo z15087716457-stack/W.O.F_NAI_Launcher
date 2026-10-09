@@ -13,6 +13,7 @@ void main() {
     WidgetTester tester, {
     bool module = false,
     bool showPerRequest = true,
+    bool exploreLabel = false,
     double width = 395,
   }) async {
     final storage = _MemoryLocalStorageService();
@@ -28,6 +29,7 @@ void main() {
               width: width,
               child: ImageCountSection(
                 showPerRequestSegments: showPerRequest,
+                exploreLabel: exploreLabel,
                 layout: module
                     ? ImageCountSectionLayout.moduleRow
                     : ImageCountSectionLayout.classic,
@@ -63,6 +65,24 @@ void main() {
       await tester.pump();
       expect(container.read(generationParamsNotifierProvider).nSamples, 999);
       expect(find.text('999 次 × 4 张 = 共 3996 张'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'explore label keeps the same numeric control and one-by-one suffix',
+    (tester) async {
+      await pumpSection(
+        tester,
+        module: true,
+        showPerRequest: false,
+        exploreLabel: true,
+        width: 328,
+      );
+      expect(find.text('本次抽取'), findsOneWidget);
+      expect(find.text('张 · 逐张生成'), findsOneWidget);
+      expect(find.text('重复'), findsNothing);
+      expect(find.byType(DraggableNumberInput), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

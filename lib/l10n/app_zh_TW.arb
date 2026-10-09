@@ -6949,5 +6949,50 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_variablesTitle": "隨機變數",
+  "@styleExplore_variablesTitle": {
+    "description": "Style exploration workbench: styleExplore_variablesTitle"
+  },
+  "styleExplore_variablesHint": "每張重新抽取",
+  "@styleExplore_variablesHint": {
+    "description": "Style exploration workbench: styleExplore_variablesHint"
+  },
+  "styleExplore_variablesExplanation": "每張候選會記錄啟用的隨機或順序遺傳塊抽到了哪些內容。",
+  "@styleExplore_variablesExplanation": {
+    "description": "Style exploration workbench: styleExplore_variablesExplanation"
+  },
+  "styleExplore_variablePoolSize": "池 {count} 項",
+  "@styleExplore_variablePoolSize": {
+    "description": "Style exploration workbench: styleExplore_variablePoolSize",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_variableEvolutionTarget": "進化目標",
+  "@styleExplore_variableEvolutionTarget": {
+    "description": "Style exploration workbench: styleExplore_variableEvolutionTarget"
+  },
+  "styleExplore_variableNegative": "負面",
+  "@styleExplore_variableNegative": {
+    "description": "Style exploration workbench: styleExplore_variableNegative"
+  },
+  "styleExplore_variablesEmpty": "提示詞裡還沒有隨機塊，抽出來的圖會很像",
+  "@styleExplore_variablesEmpty": {
+    "description": "Style exploration workbench: styleExplore_variablesEmpty"
+  },
+  "styleExplore_openBlockLibrary": "開啟塊庫",
+  "@styleExplore_openBlockLibrary": {
+    "description": "Style exploration workbench: styleExplore_openBlockLibrary"
+  },
+  "styleExplore_drawCountLabel": "本次抽取",
+  "@styleExplore_drawCountLabel": {
+    "description": "Style exploration workbench: styleExplore_drawCountLabel"
+  },
+  "styleExplore_drawCountSuffix": "張 · 逐張生成",
+  "@styleExplore_drawCountSuffix": {
+    "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   }
 }

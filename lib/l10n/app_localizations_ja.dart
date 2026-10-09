@@ -12586,4 +12586,38 @@ class AppLocalizationsJa extends AppLocalizations {
   String styleExplore_imageCount(int count) {
     return '$count 枚';
   }
+
+  @override
+  String get styleExplore_variablesTitle => 'ランダム変数';
+
+  @override
+  String get styleExplore_variablesHint => '画像ごとに再抽選';
+
+  @override
+  String get styleExplore_variablesExplanation =>
+      '有効なランダム・順次抽選の進化ブロックについて、各候補の抽選内容を記録します。';
+
+  @override
+  String styleExplore_variablePoolSize(int count) {
+    return 'プール $count 件';
+  }
+
+  @override
+  String get styleExplore_variableEvolutionTarget => '進化対象';
+
+  @override
+  String get styleExplore_variableNegative => 'ネガティブ';
+
+  @override
+  String get styleExplore_variablesEmpty =>
+      'プロンプトにランダムブロックがありません。候補が似た画像になります。';
+
+  @override
+  String get styleExplore_openBlockLibrary => 'ブロックライブラリを開く';
+
+  @override
+  String get styleExplore_drawCountLabel => '今回の抽選';
+
+  @override
+  String get styleExplore_drawCountSuffix => '枚 · 1枚ずつ生成';
 }

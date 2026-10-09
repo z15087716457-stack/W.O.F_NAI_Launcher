@@ -12981,4 +12981,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String styleExplore_imageCount(int count) {
     return '$count images';
   }
+
+  @override
+  String get styleExplore_variablesTitle => 'Random variables';
+
+  @override
+  String get styleExplore_variablesHint => 'Redraw each image';
+
+  @override
+  String get styleExplore_variablesExplanation =>
+      'Enabled random and sequential evolution blocks are recorded for each candidate.';
+
+  @override
+  String styleExplore_variablePoolSize(int count) {
+    return 'Pool: $count items';
+  }
+
+  @override
+  String get styleExplore_variableEvolutionTarget => 'Evolution target';
+
+  @override
+  String get styleExplore_variableNegative => 'Negative';
+
+  @override
+  String get styleExplore_variablesEmpty =>
+      'No random blocks in the prompt yet; candidates will look alike.';
+
+  @override
+  String get styleExplore_openBlockLibrary => 'Open block library';
+
+  @override
+  String get styleExplore_drawCountLabel => 'Draw';
+
+  @override
+  String get styleExplore_drawCountSuffix => 'images · one at a time';
 }

@@ -6949,5 +6949,50 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_variablesTitle": "ランダム変数",
+  "@styleExplore_variablesTitle": {
+    "description": "Style exploration workbench: styleExplore_variablesTitle"
+  },
+  "styleExplore_variablesHint": "画像ごとに再抽選",
+  "@styleExplore_variablesHint": {
+    "description": "Style exploration workbench: styleExplore_variablesHint"
+  },
+  "styleExplore_variablesExplanation": "有効なランダム・順次抽選の進化ブロックについて、各候補の抽選内容を記録します。",
+  "@styleExplore_variablesExplanation": {
+    "description": "Style exploration workbench: styleExplore_variablesExplanation"
+  },
+  "styleExplore_variablePoolSize": "プール {count} 件",
+  "@styleExplore_variablePoolSize": {
+    "description": "Style exploration workbench: styleExplore_variablePoolSize",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_variableEvolutionTarget": "進化対象",
+  "@styleExplore_variableEvolutionTarget": {
+    "description": "Style exploration workbench: styleExplore_variableEvolutionTarget"
+  },
+  "styleExplore_variableNegative": "ネガティブ",
+  "@styleExplore_variableNegative": {
+    "description": "Style exploration workbench: styleExplore_variableNegative"
+  },
+  "styleExplore_variablesEmpty": "プロンプトにランダムブロックがありません。候補が似た画像になります。",
+  "@styleExplore_variablesEmpty": {
+    "description": "Style exploration workbench: styleExplore_variablesEmpty"
+  },
+  "styleExplore_openBlockLibrary": "ブロックライブラリを開く",
+  "@styleExplore_openBlockLibrary": {
+    "description": "Style exploration workbench: styleExplore_openBlockLibrary"
+  },
+  "styleExplore_drawCountLabel": "今回の抽選",
+  "@styleExplore_drawCountLabel": {
+    "description": "Style exploration workbench: styleExplore_drawCountLabel"
+  },
+  "styleExplore_drawCountSuffix": "枚 · 1枚ずつ生成",
+  "@styleExplore_drawCountSuffix": {
+    "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   }
 }
