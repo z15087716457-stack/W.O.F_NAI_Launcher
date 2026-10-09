@@ -29,16 +29,13 @@ Widget buildThemedTextSelectionToolbar(
 
 Widget _themedToolbarButton(BuildContext context, ContextMenuButtonItem item) {
   final label = AdaptiveTextSelectionToolbar.getButtonLabel(context, item);
-  // 只覆盖 fontFamily：颜色、字号、字重仍由按钮自己决定，
-  // 这样观感不变，只把字体拉回主题。
+  // Desktop toolbar defaults bypass the application's typography.
   return DesktopTextSelectionToolbarButton(
     onPressed: item.onPressed,
     child: Text(
       label,
       overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontFamily: Theme.of(context).textTheme.labelLarge?.fontFamily,
-      ),
+      style: Theme.of(context).textTheme.bodyMedium,
     ),
   );
 }

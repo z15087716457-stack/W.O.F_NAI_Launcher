@@ -8,9 +8,9 @@ final settingsFontScaleProvider =
       SettingsFontScaleNotifier.new,
     );
 
-/// Settings use a comfortable baseline without changing the workspace scale.
+/// Prototype typography starts at 100%; explicit settings scaling stays local.
 class SettingsFontScaleNotifier extends Notifier<double> {
-  static const baselineScale = 1.1;
+  static const baselineScale = 1.0;
   static double effectiveScale(double relative) => baselineScale * relative;
 
   @override

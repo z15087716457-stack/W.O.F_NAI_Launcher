@@ -91,13 +91,13 @@ void main() {
           MediaQuery.textScalerOf(tester.element(find.byKey(key))).scale(10) /
           10;
       expect(scale(const Key('workspace')), 1);
-      expect(scale(const Key('settings')), 1.1);
+      expect(scale(const Key('settings')), 1);
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
-      expect(scale(const Key('first-dialog')), 1.1);
+      expect(scale(const Key('first-dialog')), 1);
       await tester.tap(find.text('Nested dialog'));
       await tester.pumpAndSettle();
-      expect(scale(const Key('nested-dialog')), 1.1);
+      expect(scale(const Key('nested-dialog')), 1);
       Navigator.of(
         tester.element(find.byKey(const Key('nested-dialog'))),
       ).pop();
@@ -110,7 +110,7 @@ void main() {
         MediaQuery.textScalerOf(
           tester.element(find.text('Option B').last),
         ).scale(10),
-        closeTo(11, .001),
+        closeTo(10, .001),
       );
       Navigator.of(tester.element(find.text('Option B').last)).pop();
       await tester.pumpAndSettle();
@@ -121,7 +121,7 @@ void main() {
           .read(settingsFontScaleProvider.notifier)
           .setFontScale(1.3);
       await tester.pumpAndSettle();
-      expect(scale(const Key('settings')), closeTo(1.43, .001));
+      expect(scale(const Key('settings')), closeTo(1.3, .001));
       expect(scale(const Key('workspace')), 1);
       expect(storage.values[StorageKeys.fontScale], 1.1);
       expect(tester.takeException(), isNull);
@@ -168,7 +168,7 @@ void main() {
           MediaQuery.textScalerOf(
             tester.element(find.byKey(const Key('settings-text'))),
           ).scale(14),
-          closeTo(15.4, .001),
+          closeTo(14, .001),
         );
         expect(storage.values, {StorageKeys.fontScale: legacy});
         await tester.pumpWidget(const SizedBox.shrink());

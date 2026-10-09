@@ -298,6 +298,8 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
             key: const Key('gallery-toolbar-count'),
             maxLines: 1,
             style: theme.textTheme.bodySmall?.copyWith(
+              fontFamily: 'Geist Mono',
+              height: 0,
               color: colors.onSurfaceVariant,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
@@ -843,6 +845,8 @@ class _KeyHint extends StatelessWidget {
       child: Text(
         label,
         style: theme.textTheme.labelSmall?.copyWith(
+          fontFamily: 'Geist Mono',
+          height: 0,
           color: colors.onSurfaceVariant,
           fontSize: 11,
           fontWeight: FontWeight.w400,

@@ -1,5 +1,14 @@
 # Third-Party Notices
 
+## Geist Typography
+
+The bundled Geist and Geist Mono fonts are licensed under SIL OFL 1.1.
+The full notice is in `assets/licenses/Geist-OFL.txt` and on the app's license page.
+`GeistMono-Prototype600.ttf` and `GeistMono-Prototype700.ttf` are derived from
+the bundled Medium font by `tool/fonts/build_prototype_weights.py`. Only SFNT
+weight metadata and checksums change; all glyphs, metrics, kerning, hinting and
+name tables remain unchanged. These two files retain the same OFL license.
+
 ## Native Local Upscaling
 
 The bundled unmodified Real-ESRGAN NCNN/Vulkan v0.2.0 engine and default

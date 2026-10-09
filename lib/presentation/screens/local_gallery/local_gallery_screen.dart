@@ -54,6 +54,7 @@ import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/image_detail/image_detail_data.dart';
 import '../../widgets/common/image_detail/image_detail_viewer.dart';
 import '../../widgets/common/precise_reference_type_dialog.dart';
+import '../../widgets/common/prototype_typography_scope.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
 import '../../widgets/common/themed_input_dialog.dart';
 import '../../widgets/drop/image_destination_dialog.dart';
@@ -74,14 +75,25 @@ import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../widgets/shortcuts/shortcut_aware_widget.dart';
 
 /// 本地画廊屏幕：侧栏 / 连续时间线 / 右侧详情三栏。
-class LocalGalleryScreen extends ConsumerStatefulWidget {
+class LocalGalleryScreen extends StatelessWidget {
   const LocalGalleryScreen({super.key});
 
   @override
-  ConsumerState<LocalGalleryScreen> createState() => _LocalGalleryScreenState();
+  Widget build(BuildContext context) => const PrototypeTypographyScope(
+    family: 'Geist',
+    child: _LocalGalleryContents(),
+  );
 }
 
-class _LocalGalleryScreenState extends ConsumerState<LocalGalleryScreen> {
+class _LocalGalleryContents extends ConsumerStatefulWidget {
+  const _LocalGalleryContents();
+
+  @override
+  ConsumerState<_LocalGalleryContents> createState() =>
+      _LocalGalleryScreenState();
+}
+
+class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   static const double _sidebarWidth = 240;
   static const double _minContentWidth = 560;
 

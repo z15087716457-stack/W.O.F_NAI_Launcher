@@ -98,8 +98,11 @@ class _StatItem extends StatelessWidget {
           Text(
             value,
             style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.3,
+              fontFamily: 'Geist Mono',
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              height: 0,
+              letterSpacing: -0.4,
             ),
           ),
         ],

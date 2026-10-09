@@ -170,6 +170,7 @@ class LibraryNavItem extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Geist Mono',
                       fontSize: 11.5,
+                      height: 0,
                       color: colors.onSurfaceVariant.withValues(alpha: .7),
                     ),
                   ),
@@ -451,7 +452,7 @@ class LibraryKeyCap extends StatelessWidget {
             fontFamily: 'Geist Mono',
             fontSize: 10.5,
             fontWeight: FontWeight.w500,
-            height: 1,
+            height: 0,
             color: colors.onSurfaceVariant,
           ),
         ),
@@ -656,6 +657,7 @@ class LibraryFilterRow extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'Geist Mono',
                 fontSize: 12,
+                height: 0,
                 color: Theme.of(
                   context,
                 ).colorScheme.onSurfaceVariant.withValues(alpha: .7),

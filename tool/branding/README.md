@@ -12,10 +12,12 @@
 
 | 用途 | 字体 |
 |---|---|
-| 正文与控件 | Geist Sans + HarmonyOS Sans SC + Pretendard fallback，400 / 500 / 600 / 700 |
-| 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC + Pretendard fallback，400 / 500 |
+| 正文与控件 | HarmonyOS Sans SC + Pretendard缺字回退；13px / 1.45、400 / 500 / 600–700 |
+| 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC + Pretendard回退；400为Regular、500–700共用Medium字形 |
+| 本地画廊 | Geist → HarmonyOS Sans SC；查看器恢复HOS |
+| 标签百科 | Segoe UI → Microsoft YaHei UI → Microsoft YaHei；文章标题Cascadia Code → Consolas |
 
-`StudioTypography` 负责正文、控件与等宽数据字体，应用统一使用 Geist 深浅两套主题，共用离线 Geist / HarmonyOS 字体；HarmonyOS Sans SC 不含韩文字母，韩文由随包的 Pretendard 1.3.9（OFL-1.1，未修改的静态 OTF 四档字重）回退显示。显式系统 / Google 字体选择仍有效，旧默认键 `system`、空键使用应用默认组合。独立标题栏已移除，品牌展示位于登录 / 载入页和生图空画布。字体许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
+`StudioTypography` 负责正文、控件与等宽数据字体，字距与词距默认为0；原生Geist Mono600 / 700登记文件由 `tool/fonts/build_prototype_weights.py` 生成，仅改字重元数据、不改字形与度量。主工作区固定100%，设置页及其弹层以1.0为基准应用用户相对倍率，详见 [原型字体核对](../../docs/uiux-typography-2026-10-09.md)。应用使用Geist深浅两套主题，共用离线Geist / HarmonyOS字体；HarmonyOS Sans SC 不含韩文字母，韩文由随包的 Pretendard 1.3.9（OFL-1.1，未修改的静态 OTF 四档字重）回退显示。显式系统 / Google 字体选择仍有效，旧默认键 `system`、空键使用应用默认组合。独立标题栏已移除，品牌展示位于登录 / 载入页和生图空画布。字体许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
 
 功能图标统一使用 `lib/presentation/widgets/common/studio_icons.dart` 的 `StudioIcons`：画风探索为遗传分支，块内遗传动作为双螺旋，在线画廊为图片＋地球，提示词块为模块网格，积木悬浮窗为双凸点轻量砖块，精准参考为人物叠卡，Vibe 为方形叠卡与弯箭头；生图为画布与画笔，本地画廊为图片文件夹，统计为三级圆角柱，设置为六齿圆角齿轮。侧栏、标题、块默认图标和菜单复用对应造型；参考卡片使用下述独立功能图标。网格布局、通用文件夹、保存动作与用户自选块图标保持各自语义。
 

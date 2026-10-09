@@ -397,11 +397,11 @@ class _StyledButtonState extends State<_StyledButton> {
   TextStyle _getTextStyle(_ButtonColors colors, ThemeData theme) {
     final isPhysical = widget.type == _ButtonType.physical;
 
-    return TextStyle(
+    return theme.textTheme.labelLarge!.copyWith(
       color: colors.foreground,
       fontWeight: FontWeight.bold,
       fontFamily: isPhysical ? null : theme.textTheme.bodyMedium?.fontFamily,
-      letterSpacing: isPhysical ? null : 1.5,
+      letterSpacing: 0,
     );
   }
 }

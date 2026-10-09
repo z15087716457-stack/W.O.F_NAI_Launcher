@@ -405,8 +405,7 @@ class GenerationParamsSummaryBar extends ConsumerWidget {
           overflow: TextOverflow.ellipsis,
         ),
         DefaultTextStyle(
-          style: TextStyle(
-            fontFamily: StudioTypography.cjk,
+          style: StudioTypography.body.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w500,
             height: 1.4,

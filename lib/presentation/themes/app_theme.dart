@@ -270,7 +270,13 @@ class AppTheme {
 
     final (textTheme, primaryTextTheme, tooltipFontFamily) = result;
 
-    return baseTheme.copyWith(
+    return StudioTypography.applyFamily(baseTheme, tooltipFontFamily!).copyWith(
+      extensions: [
+        ...baseTheme.extensions.values.where((e) => e is! StudioFontProfile),
+        StudioFontProfile(
+          usePrototypeFamilies: fontConfig == FontConfig.defaultFont,
+        ),
+      ],
       textTheme: textTheme,
       primaryTextTheme: primaryTextTheme,
       tooltipTheme: _buildTooltipTheme(baseTheme, tooltipFontFamily),
@@ -355,10 +361,11 @@ class AppTheme {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: baseTheme.dividerColor, width: 1),
       ),
-      textStyle: TextStyle(
+      textStyle: StudioTypography.body.copyWith(
         color: baseTheme.colorScheme.onSurface.withValues(alpha: 0.8),
-        fontSize: 12,
-        fontFamily: fontFamily ?? StudioTypography.sans,
+        fontSize: 12.5,
+        fontWeight: FontWeight.w500,
+        fontFamily: fontFamily ?? StudioTypography.cjk,
         fontFamilyFallback: StudioTypography.fallback,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

@@ -133,9 +133,12 @@ class _MetricCardState extends State<MetricCard> {
         Text(
           widget.value,
           style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+            fontFamily: 'Geist Mono',
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
+            height: 1.15,
             color: colorScheme.onSurface,
-            letterSpacing: -0.3,
+            letterSpacing: -0.8,
           ),
         ),
         if (widget.trend != null) ...[
@@ -192,9 +195,12 @@ class _MetricCardState extends State<MetricCard> {
               child: Text(
                 widget.value,
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Geist Mono',
+                  fontSize: 28,
+                  fontWeight: FontWeight.w600,
+                  height: 1.15,
                   color: colorScheme.onSurface,
-                  letterSpacing: -0.5,
+                  letterSpacing: -0.8,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

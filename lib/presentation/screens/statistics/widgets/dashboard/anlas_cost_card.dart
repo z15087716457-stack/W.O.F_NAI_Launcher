@@ -281,9 +281,12 @@ class _StatBox extends StatelessWidget {
           Text(
             value,
             style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontFamily: 'Geist Mono',
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              height: 0,
               color: Colors.amber.shade700,
-              letterSpacing: -0.3,
+              letterSpacing: -0.4,
             ),
           ),
         ],

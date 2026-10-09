@@ -1272,7 +1272,9 @@ class _CategoryItemState extends State<_CategoryItem> {
               Text(
                 NumberFormat.decimalPattern(locale).format(count),
                 style: theme.textTheme.bodySmall?.copyWith(
+                  fontFamily: 'Geist Mono',
                   fontSize: 12,
+                  height: 0,
                   color: colors.onSurfaceVariant,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
@@ -1451,8 +1453,9 @@ class _SidebarSectionHeaderState extends State<_SidebarSectionHeader> {
     final label = Text(
       widget.label,
       style: theme.textTheme.labelSmall?.copyWith(
+        fontSize: 12,
         color: colors.onSurfaceVariant,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
       ),
     );
     return MouseRegion(

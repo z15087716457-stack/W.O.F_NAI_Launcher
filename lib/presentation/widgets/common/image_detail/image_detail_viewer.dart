@@ -15,6 +15,7 @@ import '../../../providers/share_image_settings_provider.dart';
 import '../../../utils/clipboard_image.dart';
 import '../../shortcuts/shortcuts.dart';
 import '../app_toast.dart';
+import '../prototype_typography_scope.dart';
 import 'components/detail_image_page.dart';
 import 'components/detail_metadata_panel.dart';
 import 'components/viewer_filmstrip.dart';
@@ -490,96 +491,99 @@ class _ImageDetailViewerState extends ConsumerState<ImageDetailViewer> {
       ShortcutIds.deleteImage: _deleteImage,
     };
 
-    return PageShortcuts(
-      contextType: ShortcutContext.viewer,
-      shortcuts: shortcuts,
-      child: Focus(
-        focusNode: _focusNode,
-        onKeyEvent: _handleKeyEvent,
-        child: Scaffold(
-          backgroundColor: Colors.black,
-          body: LayoutBuilder(
-            builder: (context, box) {
-              _narrowWindow = ViewerStage.isNarrow(box.maxWidth);
-              final visible = _effectivePanelVisible;
-              final format = NumberFormat.decimalPattern(
-                Localizations.localeOf(context).toLanguageTag(),
-              );
-              return ViewerStage(
-                itemCount: _images.length,
-                currentIndex: _currentIndex,
-                pageController: _pageController,
-                onIndexChanged: _onPageChanged,
-                handleInfoShortcut: false,
-                onEscape: _handleKeyboardCloseRequest,
-                previousLabel: context.l10n.shortcut_action_previous_image,
-                nextLabel: context.l10n.shortcut_action_next_image,
-                pageBuilder: (context, index) {
-                  final data = _images[index];
-                  final heroTag =
-                      widget.heroTagPrefix != null && index == _currentIndex
-                      ? '${widget.heroTagPrefix}_${data.identifier}'
-                      : null;
-                  return DetailImagePage(
-                    data: data,
-                    heroTag: heroTag,
-                    transformationController: _transformationControllers
-                        .putIfAbsent(index, TransformationController.new),
-                  );
-                },
-                topBar: ViewerTopBar(
-                  backLabel: widget.backLabel ?? context.l10n.common_close,
-                  onBack: () => _requestClose('top-bar-close'),
-                  position: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: format.format(_currentIndex + 1),
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        TextSpan(text: ' / ${format.format(_images.length)}'),
-                      ],
+    return PrototypeTypographyScope(
+      family: 'HarmonyOS Sans SC',
+      child: PageShortcuts(
+        contextType: ShortcutContext.viewer,
+        shortcuts: shortcuts,
+        child: Focus(
+          focusNode: _focusNode,
+          onKeyEvent: _handleKeyEvent,
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            body: LayoutBuilder(
+              builder: (context, box) {
+                _narrowWindow = ViewerStage.isNarrow(box.maxWidth);
+                final visible = _effectivePanelVisible;
+                final format = NumberFormat.decimalPattern(
+                  Localizations.localeOf(context).toLanguageTag(),
+                );
+                return ViewerStage(
+                  itemCount: _images.length,
+                  currentIndex: _currentIndex,
+                  pageController: _pageController,
+                  onIndexChanged: _onPageChanged,
+                  handleInfoShortcut: false,
+                  onEscape: _handleKeyboardCloseRequest,
+                  previousLabel: context.l10n.shortcut_action_previous_image,
+                  nextLabel: context.l10n.shortcut_action_next_image,
+                  pageBuilder: (context, index) {
+                    final data = _images[index];
+                    final heroTag =
+                        widget.heroTagPrefix != null && index == _currentIndex
+                        ? '${widget.heroTagPrefix}_${data.identifier}'
+                        : null;
+                    return DetailImagePage(
+                      data: data,
+                      heroTag: heroTag,
+                      transformationController: _transformationControllers
+                          .putIfAbsent(index, TransformationController.new),
+                    );
+                  },
+                  topBar: ViewerTopBar(
+                    backLabel: widget.backLabel ?? context.l10n.common_close,
+                    onBack: () => _requestClose('top-bar-close'),
+                    position: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: format.format(_currentIndex + 1),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          TextSpan(text: ' / ${format.format(_images.length)}'),
+                        ],
+                      ),
                     ),
+                    trailing: _buildActionsMenu(context),
+                    onZoomOut: _zoomOut,
+                    onZoomIn: _zoomIn,
+                    panelVisible: visible,
+                    onTogglePanel: _toggleInfoPanel,
+                    showPanelToggle: widget.showMetadataPanel,
+                    reserveWindowButtons: _narrowWindow || !visible,
                   ),
-                  trailing: _buildActionsMenu(context),
-                  onZoomOut: _zoomOut,
-                  onZoomIn: _zoomIn,
+                  filmstrip: widget.showThumbnails && _images.length > 1
+                      ? ViewerFilmstrip(
+                          items: [
+                            for (final image in _images)
+                              ViewerFilmstripItem(
+                                thumbnail: image.getImageProvider(),
+                                aspectRatio: image.aspectRatio,
+                                groupDate: image.groupDate,
+                              ),
+                          ],
+                          currentIndex: _currentIndex,
+                          onTap: _goToPage,
+                        )
+                      : null,
+                  panel: widget.showMetadataPanel
+                      ? ColoredBox(
+                          color: Theme.of(context).colorScheme.surface,
+                          child: WindowPaneInset(
+                            enabled: !_narrowWindow,
+                            child: DetailMetadataPanel(
+                              currentImage: _currentImage,
+                              expandedWidth: _narrowWindow ? 340 : 360,
+                              onClose: _toggleInfoPanel,
+                            ),
+                          ),
+                        )
+                      : null,
                   panelVisible: visible,
                   onTogglePanel: _toggleInfoPanel,
-                  showPanelToggle: widget.showMetadataPanel,
-                  reserveWindowButtons: _narrowWindow || !visible,
-                ),
-                filmstrip: widget.showThumbnails && _images.length > 1
-                    ? ViewerFilmstrip(
-                        items: [
-                          for (final image in _images)
-                            ViewerFilmstripItem(
-                              thumbnail: image.getImageProvider(),
-                              aspectRatio: image.aspectRatio,
-                              groupDate: image.groupDate,
-                            ),
-                        ],
-                        currentIndex: _currentIndex,
-                        onTap: _goToPage,
-                      )
-                    : null,
-                panel: widget.showMetadataPanel
-                    ? ColoredBox(
-                        color: Theme.of(context).colorScheme.surface,
-                        child: WindowPaneInset(
-                          enabled: !_narrowWindow,
-                          child: DetailMetadataPanel(
-                            currentImage: _currentImage,
-                            expandedWidth: _narrowWindow ? 340 : 360,
-                            onClose: _toggleInfoPanel,
-                          ),
-                        ),
-                      )
-                    : null,
-                panelVisible: visible,
-                onTogglePanel: _toggleInfoPanel,
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

@@ -11,7 +11,12 @@ Future<void> loadStudioCaptureFonts() async {
       'Geist-SemiBold.ttf',
       'Geist-Bold.ttf',
     ],
-    'Geist Mono': ['GeistMono-Regular.ttf', 'GeistMono-Medium.ttf'],
+    'Geist Mono': [
+      'GeistMono-Regular.ttf',
+      'GeistMono-Medium.ttf',
+      'GeistMono-Prototype600.ttf',
+      'GeistMono-Prototype700.ttf',
+    ],
     'Geist Pixel Line': ['GeistPixel-Line.ttf'],
     'Geist Pixel Square': ['GeistPixel-Square.ttf'],
     'Geist Pixel Circle': ['GeistPixel-Circle.ttf'],
@@ -35,6 +40,25 @@ Future<void> loadStudioCaptureFonts() async {
   }
   // The legacy titlebar uses the Windows UI fallback instead of a bundled font.
   if (Platform.isWindows && Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
+    // Wiki's selected prototype uses Windows faces rather than HOS/Geist.
+    for (final entry in const {
+      'Segoe UI': ['segoeui.ttf', 'seguisb.ttf', 'segoeuib.ttf'],
+      'Microsoft YaHei UI': ['msyh.ttc', 'msyhbd.ttc'],
+      'Microsoft YaHei': ['msyh.ttc', 'msyhbd.ttc'],
+      'Consolas': ['consola.ttf', 'consolab.ttf'],
+      'Cascadia Code': ['CascadiaCode.ttf'],
+    }.entries) {
+      final loader = FontLoader(entry.key);
+      var found = false;
+      for (final name in entry.value) {
+        final systemFile = File('C:/Windows/Fonts/$name');
+        if (await systemFile.exists()) {
+          loader.addFont(systemFile.readAsBytes().then(ByteData.sublistView));
+          found = true;
+        }
+      }
+      if (found) await loader.load();
+    }
     final file = File('C:/Windows/Fonts/segoeui.ttf');
     if (await file.exists()) {
       await (FontLoader(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../themes/studio_typography.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import '../../../navigation/window_chrome_layout.dart';
 import 'viewer_icon.dart';
@@ -41,11 +42,10 @@ class ViewerTopBar extends StatelessWidget {
       reserveWindowButtons;
   final String? zoomLabel;
   static final ink = Colors.white.withValues(alpha: .92);
-  static final mono = TextStyle(
-    fontFamily: 'Geist Mono',
-    fontFamilyFallback: const ['HarmonyOS Sans SC', 'Pretendard'],
+  static final mono = StudioTypography.data.copyWith(
     fontSize: 12.5,
     fontWeight: FontWeight.w500,
+    height: 0,
     color: Colors.white.withValues(alpha: 0.72),
   );
 
@@ -111,6 +111,7 @@ class ViewerTopBar extends StatelessWidget {
                                     fontFamily: 'Geist Mono',
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w500,
+                                    height: 0,
                                     color: Colors.white.withValues(alpha: 0.45),
                                   ),
                                 ),

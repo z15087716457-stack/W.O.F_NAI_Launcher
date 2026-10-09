@@ -104,7 +104,7 @@ final class GenSidebarStyle {
   static TextStyle sectionTitle(ThemeData theme) =>
       (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
         fontSize: 15,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.45,
         color: theme.colorScheme.onSurface,
       );
@@ -114,7 +114,7 @@ final class GenSidebarStyle {
   static TextStyle tabLabel(ThemeData theme, {required bool selected}) =>
       (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
         fontSize: 13,
-        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
         color: selected
             ? theme.colorScheme.onSurface
             : theme.colorScheme.onSurface.withValues(alpha: 0.55),
@@ -132,7 +132,7 @@ final class GenSidebarStyle {
       (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
         fontFamily: StudioTypography.cjk,
         fontSize: 13,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: theme.colorScheme.onSurface,
       );
 
@@ -148,6 +148,7 @@ final class GenSidebarStyle {
       (theme.textTheme.labelMedium ?? const TextStyle()).copyWith(
         fontFamily: StudioTypography.cjk,
         fontSize: 12,
+        fontWeight: FontWeight.w400,
         color: theme.colorScheme.onSurfaceVariant,
       );
 

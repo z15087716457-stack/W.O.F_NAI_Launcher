@@ -150,7 +150,7 @@ class _AutoSaveToggleChipState extends ConsumerState<AutoSaveToggleChip>
                           : theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                       fontSize: widget.compact ? 11.5 : 12.5,
-                      letterSpacing: widget.compact ? 0.1 : 0.3,
+                      letterSpacing: 0,
                     ),
                   ),
                 ],

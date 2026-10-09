@@ -317,7 +317,7 @@ void main() {
             find.text(l10n.generation_moduleImage),
           );
           expect(title.style!.fontSize, 13);
-          expect(title.style!.fontWeight, FontWeight.w600);
+          expect(title.style!.fontWeight, FontWeight.w700);
           expect(find.text(l10n.generation_imageSize), findsNothing);
           expect(find.text(l10n.generation_perRequestLabel), findsOneWidget);
           expect(

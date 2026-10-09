@@ -52,6 +52,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/light_theme_contrast.dart';
 import '../../helpers/studio_capture_fonts.dart';
+import 'package:nai_launcher/presentation/widgets/library/library_toolbar.dart';
 
 class _Shortcuts extends ShortcutConfigNotifier {
   @override
@@ -298,7 +299,24 @@ void main() {
               ? const Color(0xFF111111)
               : Colors.white,
         );
-        if (isLibrary && name != 'vibe') {
+        if (const ['vibe-wide', 'precise'].contains(name)) {
+          final toolbar = find.byType(LibraryToolbar);
+          expect(tester.getSize(toolbar).height, 62);
+          final search = find
+              .descendant(of: toolbar, matching: find.byType(TextField))
+              .first;
+          final captions = find.byKey(const Key('window-caption-controls'));
+          // Toolbar content excludes its 1px bottom rule; caption controls use
+          // the full 62px reserve, so their centers differ by half a pixel.
+          expect(
+            tester.getCenter(search).dy,
+            closeTo(tester.getCenter(captions).dy, .51),
+          );
+          expect(
+            tester.getRect(search).overlaps(tester.getRect(captions)),
+            isFalse,
+          );
+        } else if (isLibrary && name != 'vibe') {
           final header = tester.getRect(find.byType(WindowHeader));
           final captions = find.byKey(const Key('window-caption-controls'));
           final minimize = find.descendant(

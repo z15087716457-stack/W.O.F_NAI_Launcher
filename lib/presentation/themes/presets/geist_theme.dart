@@ -91,27 +91,7 @@ abstract final class GeistTheme {
           fontWeight: weight,
           letterSpacing: 0,
         );
-    final textTheme =
-        (dark
-                ? Typography.material2021().white
-                : Typography.material2021().black)
-            .apply(
-              fontFamily: StudioTypography.sans,
-              fontFamilyFallback: StudioTypography.fallback,
-              bodyColor: ink,
-              displayColor: ink,
-            )
-            .copyWith(
-              titleLarge: text(20, FontWeight.w600),
-              titleMedium: text(16, FontWeight.w600),
-              titleSmall: text(14, FontWeight.w600),
-              bodyLarge: text(16),
-              bodyMedium: text(14),
-              bodySmall: text(12),
-              labelLarge: text(14, FontWeight.w500),
-              labelMedium: text(13, FontWeight.w500),
-              labelSmall: text(12, FontWeight.w500),
-            );
+    final textTheme = StudioTypography.textTheme(ink);
     final primaryButton = FilledButton.styleFrom(
       backgroundColor: blue,
       foregroundColor: Colors.white,
@@ -149,13 +129,13 @@ abstract final class GeistTheme {
       focusColor: accent.withValues(alpha: .12),
       disabledColor: muted.withValues(alpha: .6),
       splashFactory: NoSplash.splashFactory,
-      fontFamily: StudioTypography.sans,
+      fontFamily: StudioTypography.cjk,
       fontFamilyFallback: StudioTypography.fallback,
       textTheme: textTheme,
       primaryTextTheme: textTheme,
       iconTheme: IconThemeData(color: muted, size: 20),
       primaryIconTheme: IconThemeData(color: accent, size: 20),
-      extensions: [extension(brightness)],
+      extensions: [extension(brightness), const StudioFontProfile()],
       appBarTheme: AppBarThemeData(
         backgroundColor: background,
         foregroundColor: ink,
@@ -258,7 +238,7 @@ abstract final class GeistTheme {
         color: raised,
         surfaceTintColor: Colors.transparent,
         elevation: 8,
-        textStyle: text(14),
+        textStyle: text(13),
         shape: RoundedRectangleBorder(
           borderRadius: popoverRadius,
           side: BorderSide(color: border),
@@ -276,14 +256,14 @@ abstract final class GeistTheme {
           ),
         ),
       ),
-      dropdownMenuTheme: DropdownMenuThemeData(textStyle: text(14)),
+      dropdownMenuTheme: DropdownMenuThemeData(textStyle: text(13)),
       tabBarTheme: TabBarThemeData(
         labelColor: ink,
         unselectedLabelColor: muted,
         indicatorColor: accent,
         dividerColor: border,
-        labelStyle: text(14, FontWeight.w500),
-        unselectedLabelStyle: text(14),
+        labelStyle: text(13, FontWeight.w700),
+        unselectedLabelStyle: text(13, FontWeight.w500),
       ),
       listTileTheme: ListTileThemeData(
         iconColor: muted,

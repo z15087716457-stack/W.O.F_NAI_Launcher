@@ -31,6 +31,7 @@ import '../../../core/wiki/wiki_example_repository.dart';
 import '../../providers/data_source_cache_provider.dart';
 import '../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
 import '../../widgets/common/app_toast.dart';
+import '../../widgets/common/prototype_typography_scope.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../../widgets/autocomplete/tag_category_visuals.dart';
@@ -81,17 +82,36 @@ class _WikiVisit {
   final CompletionCandidate? linkedCandidate;
 }
 
-class TagWikiScreen extends ConsumerStatefulWidget {
+class TagWikiScreen extends StatelessWidget {
   const TagWikiScreen({super.key, this.initialTag, this.directory});
 
   final String? initialTag;
   final WikiDirectory? directory;
 
   @override
-  ConsumerState<TagWikiScreen> createState() => _TagWikiScreenState();
+  Widget build(BuildContext context) => PrototypeTypographyScope(
+    family: 'Segoe UI',
+    height: 0, // CSS normal: use the system face's intrinsic line metrics.
+    fallback: const [
+      'Microsoft YaHei UI',
+      'Microsoft YaHei',
+      'HarmonyOS Sans SC',
+      'Pretendard',
+    ],
+    child: _TagWikiContents(initialTag: initialTag, directory: directory),
+  );
 }
 
-class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
+class _TagWikiContents extends ConsumerStatefulWidget {
+  const _TagWikiContents({this.initialTag, this.directory});
+  final String? initialTag;
+  final WikiDirectory? directory;
+
+  @override
+  ConsumerState<_TagWikiContents> createState() => _TagWikiScreenState();
+}
+
+class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
   static const _pageSize = 80;
   final _search = TextEditingController();
   // The node's own key handler runs before EditableText shortcuts consume
@@ -197,7 +217,7 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
   }
 
   @override
-  void didUpdateWidget(covariant TagWikiScreen oldWidget) {
+  void didUpdateWidget(covariant _TagWikiContents oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialTag == oldWidget.initialTag ||
         _directory == null ||
@@ -1797,8 +1817,15 @@ class _TagWikiScreenState extends ConsumerState<TagWikiScreen> {
                                   TagNormalizer.toDisplay(tag),
                                   key: const ValueKey('wiki-article-title'),
                                   style: baseStyle.copyWith(
-                                    fontSize: 28,
-                                    height: 1.25,
+                                    fontSize: 30,
+                                    fontFamily: 'Cascadia Code',
+                                    fontFamilyFallback: const [
+                                      'Consolas',
+                                      'Segoe UI',
+                                      'Microsoft YaHei UI',
+                                      'Microsoft YaHei',
+                                    ],
+                                    height: 0,
                                     leadingDistribution:
                                         TextLeadingDistribution.even,
                                     fontWeight: FontWeight.w700,

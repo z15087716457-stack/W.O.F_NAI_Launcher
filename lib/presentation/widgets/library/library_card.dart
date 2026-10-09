@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/localization_extension.dart';
 import 'library_icon.dart';
 import 'library_status_colors.dart';
+import '../../themes/studio_typography.dart';
 
 BoxDecoration librarySelectionDecoration(ThemeData theme) => BoxDecoration(
   borderRadius: BorderRadius.circular(10),
@@ -32,9 +33,8 @@ class LibraryHoverActionBar extends StatelessWidget {
         child: IconTheme(
           data: const IconThemeData(color: Colors.white, size: 13),
           child: DefaultTextStyle(
-            style: const TextStyle(
-              fontFamily: 'HarmonyOS Sans SC',
-              fontSize: 12,
+            style: StudioTypography.body.copyWith(
+              fontSize: 12.5,
               fontWeight: FontWeight.w500,
               color: Colors.white,
             ),
