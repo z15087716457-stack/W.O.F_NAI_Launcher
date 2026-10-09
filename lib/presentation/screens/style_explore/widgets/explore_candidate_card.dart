@@ -420,90 +420,11 @@ class _ExploreCandidateCardState extends ConsumerState<ExploreCandidateCard> {
     ),
   );
 
-  Widget _image() {
-    final colors = Theme.of(context).colorScheme;
-    final l10n = context.l10n;
-    final gen = widget.candidate.generation;
-    if (gen.status == ExploreCandidateGenerationStatus.failed) {
-      final error = switch (gen.error) {
-        'cancelled' => l10n.styleExplore_runStatusCancelled,
-        'interrupted' => l10n.styleExplore_interrupted,
-        _ => gen.error ?? l10n.styleExplore_operationFailed,
-      };
-      return Tooltip(
-        message: error,
-        child: ColoredBox(
-          color: Color.alphaBlend(
-            colors.error.withValues(alpha: .08),
-            colors.surfaceContainerHighest,
-          ),
-          child: _placeholder(
-            'warn',
-            l10n.styleExplore_generationFailed,
-            colors.error,
-            hint: l10n.styleExplore_failureHint,
-          ),
-        ),
-      );
-    }
-    if (gen.status == ExploreCandidateGenerationStatus.pending) {
-      if (widget.generating) {
-        return _GeneratingCandidate(number: widget.sequenceNumber);
-      }
-      return ColoredBox(
-        color: colors.surfaceContainerHighest,
-        child: _placeholder(
-          'dice',
-          l10n.styleExplore_queued(widget.sequenceNumber),
-          colors.onSurfaceVariant.withValues(alpha: .6),
-        ),
-      );
-    }
-    Widget missing() => ColoredBox(
-      color: colors.surfaceContainerHighest,
-      child: _placeholder(
-        'img',
-        l10n.styleExplore_imageDeleted,
-        colors.onSurfaceVariant.withValues(alpha: .6),
-      ),
-    );
-    if (gen.filePath == null) return missing();
-    return Image.file(
-      File(gen.filePath!),
-      fit: BoxFit.cover,
-      gaplessPlayback: true,
-      cacheWidth: 360,
-      errorBuilder: (_, error, stack) => missing(),
-    );
-  }
-
-  Widget _placeholder(String icon, String text, Color color, {String? hint}) =>
-      Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ExploreIcon(icon, size: 22, color: color, strokeWidth: 1.5),
-            const SizedBox(height: 8),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: color),
-            ),
-            if (hint != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                hint,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurfaceVariant.withValues(alpha: .7),
-                ),
-              ),
-            ],
-          ],
-        ),
-      );
+  Widget _image() => ExploreCandidateImage(
+    candidate: widget.candidate,
+    sequenceNumber: widget.sequenceNumber,
+    generating: widget.generating,
+  );
 
   Future<void> _more(Offset position) async {
     final l10n = context.l10n;
@@ -641,4 +562,115 @@ class _GeneratingCandidateState extends State<_GeneratingCandidate>
       ),
     );
   }
+}
+
+/// Candidate imagery shared by the wall, inspector and evolution views.
+class ExploreCandidateImage extends StatelessWidget {
+  const ExploreCandidateImage({
+    super.key,
+    required this.candidate,
+    required this.sequenceNumber,
+    this.generating = false,
+    this.fit = BoxFit.cover,
+  });
+  final ExploreCandidate candidate;
+  final int sequenceNumber;
+  final bool generating;
+  final BoxFit fit;
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
+    final gen = candidate.generation;
+    if (gen.status == ExploreCandidateGenerationStatus.failed) {
+      final error = switch (gen.error) {
+        'cancelled' => l10n.styleExplore_runStatusCancelled,
+        'interrupted' => l10n.styleExplore_interrupted,
+        _ => gen.error ?? l10n.styleExplore_operationFailed,
+      };
+      return Tooltip(
+        message: error,
+        child: ColoredBox(
+          color: Color.alphaBlend(
+            colors.error.withValues(alpha: .08),
+            colors.surfaceContainerHighest,
+          ),
+          child: _placeholder(
+            context,
+            'warn',
+            l10n.styleExplore_generationFailed,
+            colors.error,
+            hint: l10n.styleExplore_failureHint,
+          ),
+        ),
+      );
+    }
+    if (gen.status == ExploreCandidateGenerationStatus.pending) {
+      if (generating) {
+        return _GeneratingCandidate(number: sequenceNumber);
+      }
+      return ColoredBox(
+        color: colors.surfaceContainerHighest,
+        child: _placeholder(
+          context,
+          'dice',
+          l10n.styleExplore_queued(sequenceNumber),
+          colors.onSurfaceVariant.withValues(alpha: .6),
+        ),
+      );
+    }
+    Widget missing() => ColoredBox(
+      color: colors.surfaceContainerHighest,
+      child: _placeholder(
+        context,
+        'img',
+        l10n.styleExplore_imageDeleted,
+        colors.onSurfaceVariant.withValues(alpha: .6),
+      ),
+    );
+    if (gen.filePath == null) return missing();
+    return ColoredBox(
+      color: colors.surfaceContainerHighest,
+      child: Image.file(
+        File(gen.filePath!),
+        fit: fit,
+        gaplessPlayback: true,
+        cacheWidth: 360,
+        errorBuilder: (_, error, stack) => missing(),
+      ),
+    );
+  }
+
+  Widget _placeholder(
+    BuildContext context,
+    String icon,
+    String text,
+    Color color, {
+    String? hint,
+  }) => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ExploreIcon(icon, size: 22, color: color, strokeWidth: 1.5),
+        const SizedBox(height: 8),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: color),
+        ),
+        if (hint != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            hint,
+            style: TextStyle(
+              fontSize: 11,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: .7),
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
 }

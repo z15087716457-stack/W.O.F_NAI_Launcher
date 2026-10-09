@@ -7143,5 +7143,87 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_inspectorEmpty": "후보를 선택하여 자세히 보기",
+  "@styleExplore_inspectorEmpty": {
+    "description": "styleExplore_inspectorEmpty."
+  },
+  "styleExplore_drawsTitle": "이 이미지의 추출 결과",
+  "@styleExplore_drawsTitle": {
+    "description": "styleExplore_drawsTitle."
+  },
+  "styleExplore_drawsAfterGeneration": "생성이 완료되면 표시",
+  "@styleExplore_drawsAfterGeneration": {
+    "description": "styleExplore_drawsAfterGeneration."
+  },
+  "styleExplore_emptyDraw": "이번에는 빈 항목이 선택되었습니다",
+  "@styleExplore_emptyDraw": {
+    "description": "styleExplore_emptyDraw."
+  },
+  "styleExplore_hearted": "즐겨찾기됨",
+  "@styleExplore_hearted": {
+    "description": "styleExplore_hearted."
+  },
+  "styleExplore_joinEvolution": "진화에 추가",
+  "@styleExplore_joinEvolution": {
+    "description": "styleExplore_joinEvolution."
+  },
+  "styleExplore_applyToEditor": "편집기에 적용",
+  "@styleExplore_applyToEditor": {
+    "description": "styleExplore_applyToEditor."
+  },
+  "styleExplore_seedName": "시드",
+  "@styleExplore_seedName": {
+    "description": "styleExplore_seedName."
+  },
+  "styleExplore_elapsedName": "소요 시간",
+  "@styleExplore_elapsedName": {
+    "description": "styleExplore_elapsedName."
+  },
+  "styleExplore_parameters": "매개변수",
+  "@styleExplore_parameters": {
+    "description": "styleExplore_parameters."
+  },
+  "styleExplore_modelName": "모델",
+  "@styleExplore_modelName": {
+    "description": "styleExplore_modelName."
+  },
+  "styleExplore_fullPrompt": "전체 프롬프트",
+  "@styleExplore_fullPrompt": {
+    "description": "styleExplore_fullPrompt."
+  },
+  "styleExplore_mergedArtists": "합쳐진 작가 (중복 제거)",
+  "@styleExplore_mergedArtists": {
+    "description": "styleExplore_mergedArtists."
+  },
+  "styleExplore_selectionExplanation": "블록 저장은 하나로 합치고, 진화는 각 이미지의 작가 문자열을 부모로 사용합니다.",
+  "@styleExplore_selectionExplanation": {
+    "description": "styleExplore_selectionExplanation."
+  },
+  "styleExplore_quickGroupHint": "1–9로 빠르게 분류",
+  "@styleExplore_quickGroupHint": {
+    "description": "styleExplore_quickGroupHint."
+  },
+  "styleExplore_newGroupChip": "새 그룹",
+  "@styleExplore_newGroupChip": {
+    "description": "Inspector compact new group chip."
+  },
+  "styleExplore_parameterSummary": "{width}×{height} · {steps} 단계 · {scale}",
+  "@styleExplore_parameterSummary": {
+    "description": "Inspector generation parameter summary.",
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "steps": {
+        "type": "int"
+      },
+      "scale": {
+        "type": "String"
+      }
+    }
   }
 }

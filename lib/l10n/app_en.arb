@@ -7143,5 +7143,87 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_inspectorEmpty": "Select a candidate to view details",
+  "@styleExplore_inspectorEmpty": {
+    "description": "styleExplore_inspectorEmpty."
+  },
+  "styleExplore_drawsTitle": "Drawn for this image",
+  "@styleExplore_drawsTitle": {
+    "description": "styleExplore_drawsTitle."
+  },
+  "styleExplore_drawsAfterGeneration": "Shown after generation",
+  "@styleExplore_drawsAfterGeneration": {
+    "description": "styleExplore_drawsAfterGeneration."
+  },
+  "styleExplore_emptyDraw": "Nothing drawn (the pool contains empty entries)",
+  "@styleExplore_emptyDraw": {
+    "description": "styleExplore_emptyDraw."
+  },
+  "styleExplore_hearted": "Favorited",
+  "@styleExplore_hearted": {
+    "description": "styleExplore_hearted."
+  },
+  "styleExplore_joinEvolution": "Add to evolution",
+  "@styleExplore_joinEvolution": {
+    "description": "styleExplore_joinEvolution."
+  },
+  "styleExplore_applyToEditor": "Apply to editor",
+  "@styleExplore_applyToEditor": {
+    "description": "styleExplore_applyToEditor."
+  },
+  "styleExplore_seedName": "Seed",
+  "@styleExplore_seedName": {
+    "description": "styleExplore_seedName."
+  },
+  "styleExplore_elapsedName": "Elapsed",
+  "@styleExplore_elapsedName": {
+    "description": "styleExplore_elapsedName."
+  },
+  "styleExplore_parameters": "Parameters",
+  "@styleExplore_parameters": {
+    "description": "styleExplore_parameters."
+  },
+  "styleExplore_modelName": "Model",
+  "@styleExplore_modelName": {
+    "description": "styleExplore_modelName."
+  },
+  "styleExplore_fullPrompt": "Full prompt",
+  "@styleExplore_fullPrompt": {
+    "description": "styleExplore_fullPrompt."
+  },
+  "styleExplore_mergedArtists": "Combined artists (deduplicated)",
+  "@styleExplore_mergedArtists": {
+    "description": "styleExplore_mergedArtists."
+  },
+  "styleExplore_selectionExplanation": "Save as block combines these into one block; evolution uses each image’s artist string as a parent.",
+  "@styleExplore_selectionExplanation": {
+    "description": "styleExplore_selectionExplanation."
+  },
+  "styleExplore_quickGroupHint": "Group with 1–9",
+  "@styleExplore_quickGroupHint": {
+    "description": "styleExplore_quickGroupHint."
+  },
+  "styleExplore_newGroupChip": "New group",
+  "@styleExplore_newGroupChip": {
+    "description": "Inspector compact new group chip."
+  },
+  "styleExplore_parameterSummary": "{width}×{height} · {steps} steps · {scale}",
+  "@styleExplore_parameterSummary": {
+    "description": "Inspector generation parameter summary.",
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "steps": {
+        "type": "int"
+      },
+      "scale": {
+        "type": "String"
+      }
+    }
   }
 }

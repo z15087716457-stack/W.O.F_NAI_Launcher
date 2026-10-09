@@ -12494,6 +12494,65 @@ class AppLocalizationsZh extends AppLocalizations {
   String styleExplore_deleteCandidatesMessage(int count) {
     return '将删除 $count 张候选及其图片副本，图库源图保留。';
   }
+
+  @override
+  String get styleExplore_inspectorEmpty => '选一张候选查看详情';
+
+  @override
+  String get styleExplore_drawsTitle => '本张抽到';
+
+  @override
+  String get styleExplore_drawsAfterGeneration => '生成完成后显示';
+
+  @override
+  String get styleExplore_emptyDraw => '这次没有抽中（池里有空项）';
+
+  @override
+  String get styleExplore_hearted => '已收藏';
+
+  @override
+  String get styleExplore_joinEvolution => '加入进化';
+
+  @override
+  String get styleExplore_applyToEditor => '套用到编辑区';
+
+  @override
+  String get styleExplore_seedName => '种子';
+
+  @override
+  String get styleExplore_elapsedName => '耗时';
+
+  @override
+  String get styleExplore_parameters => '参数';
+
+  @override
+  String get styleExplore_modelName => '模型';
+
+  @override
+  String get styleExplore_fullPrompt => '完整提示词';
+
+  @override
+  String get styleExplore_mergedArtists => '合在一起的画师（去重）';
+
+  @override
+  String get styleExplore_selectionExplanation =>
+      '存为块会把这些合成一个块；开始进化会把每张图的画师串作为一个父本。';
+
+  @override
+  String get styleExplore_quickGroupHint => '按 1–9 快速归组';
+
+  @override
+  String get styleExplore_newGroupChip => '新分组';
+
+  @override
+  String styleExplore_parameterSummary(
+    int width,
+    int height,
+    int steps,
+    String scale,
+  ) {
+    return '$width×$height · $steps 步 · $scale';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24985,5 +25044,64 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String styleExplore_deleteCandidatesMessage(int count) {
     return '將刪除 $count 張候選及其圖片副本，圖庫來源圖保留。';
+  }
+
+  @override
+  String get styleExplore_inspectorEmpty => '選一張候選檢視詳情';
+
+  @override
+  String get styleExplore_drawsTitle => '本張抽到';
+
+  @override
+  String get styleExplore_drawsAfterGeneration => '生成完成後顯示';
+
+  @override
+  String get styleExplore_emptyDraw => '這次沒有抽中（池裡有空項）';
+
+  @override
+  String get styleExplore_hearted => '已收藏';
+
+  @override
+  String get styleExplore_joinEvolution => '加入進化';
+
+  @override
+  String get styleExplore_applyToEditor => '套用到編輯區';
+
+  @override
+  String get styleExplore_seedName => '種子';
+
+  @override
+  String get styleExplore_elapsedName => '耗時';
+
+  @override
+  String get styleExplore_parameters => '參數';
+
+  @override
+  String get styleExplore_modelName => '模型';
+
+  @override
+  String get styleExplore_fullPrompt => '完整提示詞';
+
+  @override
+  String get styleExplore_mergedArtists => '合在一起的畫師（去重）';
+
+  @override
+  String get styleExplore_selectionExplanation =>
+      '存為塊會把這些合成一個塊；開始進化會把每張圖的畫師串作為一個父本。';
+
+  @override
+  String get styleExplore_quickGroupHint => '按 1–9 快速歸組';
+
+  @override
+  String get styleExplore_newGroupChip => '新分組';
+
+  @override
+  String styleExplore_parameterSummary(
+    int width,
+    int height,
+    int steps,
+    String scale,
+  ) {
+    return '$width×$height · $steps 步 · $scale';
   }
 }

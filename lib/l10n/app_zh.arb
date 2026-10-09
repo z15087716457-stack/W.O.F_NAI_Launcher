@@ -7143,5 +7143,87 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_inspectorEmpty": "选一张候选查看详情",
+  "@styleExplore_inspectorEmpty": {
+    "description": "styleExplore_inspectorEmpty."
+  },
+  "styleExplore_drawsTitle": "本张抽到",
+  "@styleExplore_drawsTitle": {
+    "description": "styleExplore_drawsTitle."
+  },
+  "styleExplore_drawsAfterGeneration": "生成完成后显示",
+  "@styleExplore_drawsAfterGeneration": {
+    "description": "styleExplore_drawsAfterGeneration."
+  },
+  "styleExplore_emptyDraw": "这次没有抽中（池里有空项）",
+  "@styleExplore_emptyDraw": {
+    "description": "styleExplore_emptyDraw."
+  },
+  "styleExplore_hearted": "已收藏",
+  "@styleExplore_hearted": {
+    "description": "styleExplore_hearted."
+  },
+  "styleExplore_joinEvolution": "加入进化",
+  "@styleExplore_joinEvolution": {
+    "description": "styleExplore_joinEvolution."
+  },
+  "styleExplore_applyToEditor": "套用到编辑区",
+  "@styleExplore_applyToEditor": {
+    "description": "styleExplore_applyToEditor."
+  },
+  "styleExplore_seedName": "种子",
+  "@styleExplore_seedName": {
+    "description": "styleExplore_seedName."
+  },
+  "styleExplore_elapsedName": "耗时",
+  "@styleExplore_elapsedName": {
+    "description": "styleExplore_elapsedName."
+  },
+  "styleExplore_parameters": "参数",
+  "@styleExplore_parameters": {
+    "description": "styleExplore_parameters."
+  },
+  "styleExplore_modelName": "模型",
+  "@styleExplore_modelName": {
+    "description": "styleExplore_modelName."
+  },
+  "styleExplore_fullPrompt": "完整提示词",
+  "@styleExplore_fullPrompt": {
+    "description": "styleExplore_fullPrompt."
+  },
+  "styleExplore_mergedArtists": "合在一起的画师（去重）",
+  "@styleExplore_mergedArtists": {
+    "description": "styleExplore_mergedArtists."
+  },
+  "styleExplore_selectionExplanation": "存为块会把这些合成一个块；开始进化会把每张图的画师串作为一个父本。",
+  "@styleExplore_selectionExplanation": {
+    "description": "styleExplore_selectionExplanation."
+  },
+  "styleExplore_quickGroupHint": "按 1–9 快速归组",
+  "@styleExplore_quickGroupHint": {
+    "description": "styleExplore_quickGroupHint."
+  },
+  "styleExplore_newGroupChip": "新分组",
+  "@styleExplore_newGroupChip": {
+    "description": "Inspector compact new group chip."
+  },
+  "styleExplore_parameterSummary": "{width}×{height} · {steps} 步 · {scale}",
+  "@styleExplore_parameterSummary": {
+    "description": "Inspector generation parameter summary.",
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "steps": {
+        "type": "int"
+      },
+      "scale": {
+        "type": "String"
+      }
+    }
   }
 }

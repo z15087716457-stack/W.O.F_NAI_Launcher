@@ -13114,4 +13114,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String styleExplore_deleteCandidatesMessage(int count) {
     return 'Delete $count candidates and their image copies? Library originals are kept.';
   }
+
+  @override
+  String get styleExplore_inspectorEmpty =>
+      'Select a candidate to view details';
+
+  @override
+  String get styleExplore_drawsTitle => 'Drawn for this image';
+
+  @override
+  String get styleExplore_drawsAfterGeneration => 'Shown after generation';
+
+  @override
+  String get styleExplore_emptyDraw =>
+      'Nothing drawn (the pool contains empty entries)';
+
+  @override
+  String get styleExplore_hearted => 'Favorited';
+
+  @override
+  String get styleExplore_joinEvolution => 'Add to evolution';
+
+  @override
+  String get styleExplore_applyToEditor => 'Apply to editor';
+
+  @override
+  String get styleExplore_seedName => 'Seed';
+
+  @override
+  String get styleExplore_elapsedName => 'Elapsed';
+
+  @override
+  String get styleExplore_parameters => 'Parameters';
+
+  @override
+  String get styleExplore_modelName => 'Model';
+
+  @override
+  String get styleExplore_fullPrompt => 'Full prompt';
+
+  @override
+  String get styleExplore_mergedArtists => 'Combined artists (deduplicated)';
+
+  @override
+  String get styleExplore_selectionExplanation =>
+      'Save as block combines these into one block; evolution uses each image’s artist string as a parent.';
+
+  @override
+  String get styleExplore_quickGroupHint => 'Group with 1–9';
+
+  @override
+  String get styleExplore_newGroupChip => 'New group';
+
+  @override
+  String styleExplore_parameterSummary(
+    int width,
+    int height,
+    int steps,
+    String scale,
+  ) {
+    return '$width×$height · $steps steps · $scale';
+  }
 }

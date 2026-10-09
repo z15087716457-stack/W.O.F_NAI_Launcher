@@ -144,6 +144,13 @@ class WallRunList extends ExploreRunListNotifier {
   }
 
   @override
+  Future<ExploreRun> assignCandidateFolder(
+    String runId,
+    String candidateId,
+    String? folderId,
+  ) => assignCandidatesFolder(runId, [candidateId], folderId);
+
+  @override
   Future<ExploreRun> assignCandidatesFolder(
     String runId,
     List<String> candidateIds,
@@ -216,6 +223,7 @@ Widget wallFixtureApp(
   Key? captureKey,
   bool large = true,
   Widget? child,
+  List<Override> extraOverrides = const [],
 }) => ProviderScope(
   overrides: [
     exploreRunListNotifierProvider.overrideWith(() => WallRunList([run])),
@@ -235,6 +243,7 @@ Widget wallFixtureApp(
         ),
       ),
     ),
+    ...extraOverrides,
   ],
   child: MaterialApp(
     debugShowCheckedModeBanner: false,

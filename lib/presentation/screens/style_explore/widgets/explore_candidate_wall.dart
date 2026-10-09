@@ -8,14 +8,13 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../providers/style_explore/explore_roll_capture.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
 import 'explore_candidate_actions.dart';
 import 'explore_candidate_hover_preview.dart';
-import 'explore_create_family_dialog.dart';
+import 'explore_shared_actions.dart';
 import 'explore_folder_assign_bar.dart';
 import 'explore_gallery_welcome.dart';
 import 'explore_lineage_panel.dart';
@@ -27,7 +26,6 @@ import '../../../providers/style_explore/explore_view_state.dart';
 import '../../../themes/studio_typography.dart';
 import '../../../widgets/prompt/pills/dna_icon.dart';
 import 'explore_candidate_card.dart';
-import 'explore_candidate_detail_dialog.dart';
 import 'explore_icon.dart';
 import 'explore_run_actions.dart';
 import 'explore_selection_bar.dart';
@@ -784,33 +782,7 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
   }
 
   Widget _buildCandidateCard(ExploreRun run, ExploreCandidate candidate) {
-    final runner = ref.watch(exploreRunRunnerProvider);
-    final manual = ref.watch(exploreManualCaptureProvider);
-    String? current;
-    if (runner.isRunning && runner.runId == run.id) {
-      for (final round in run.rounds.where(
-        (r) => r.status == ExploreRoundStatus.generating,
-      )) {
-        current =
-            exploreRoundCandidates(run, round, const ExploreGalleryFilterAll())
-                .where(
-                  (c) =>
-                      c.generation.status ==
-                      ExploreCandidateGenerationStatus.pending,
-                )
-                .firstOrNull
-                ?.id;
-        if (current != null) break;
-      }
-    } else if (manual.armed && manual.runId == run.id) {
-      current = manual.candidateIds
-          .where(
-            (id) =>
-                run.candidateById(id)?.generation.status ==
-                ExploreCandidateGenerationStatus.pending,
-          )
-          .firstOrNull;
-    }
+    final current = ref.watch(exploreGeneratingCandidateIdProvider);
     return KeyedSubtree(
       key: ValueKey('explore-candidate-${candidate.id}'),
       child: ExploreCandidateCard(
@@ -1140,38 +1112,9 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
   ///
   /// 翻页序 = 打开瞬间的筛选快照；点开的候选不在快照内（谱系区旁路）
   /// 时退化为单张序列。
-  void _openCandidateDetail(ExploreRun run, ExploreCandidate candidate) {
-    final filter = effectiveExploreGalleryFilter(
-      run,
-      ref.read(exploreGalleryFilterProvider),
-    );
-    final candidateIds = [
-      for (final item in exploreWallCandidates(
-        run,
-        filter,
-        newestFirst: ref.read(exploreRoundOrderNewestFirstProvider),
-      ))
-        item.id,
-    ];
-    var index = candidateIds.indexOf(candidate.id);
-    if (index < 0) {
-      candidateIds
-        ..clear()
-        ..add(candidate.id);
-      index = 0;
-    }
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => ExploreCandidateDetailDialog(
-        runId: run.id,
-        candidateIds: candidateIds,
-        initialIndex: index,
-      ),
-    );
-  }
+  void _openCandidateDetail(ExploreRun run, ExploreCandidate candidate) =>
+      openExploreCandidate(context, ref, run, candidate);
 
-  /// 多选建家族（阶段 D）：对话框确认命名/自定义串后创建家族 +
-  /// 第一代父本集，谱系区选中新家族并退出多选。
   Future<void> _createFamilyFromSelection(
     ExploreRun run, {
     Set<String>? ids,
@@ -1181,35 +1124,8 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
         if ((ids ?? _selectedIds).contains(candidate.id)) candidate,
     ];
     if (selected.isEmpty) return;
-    final l10n = context.l10n;
-    final result = await ExploreCreateFamilyDialog.show(
-      context,
-      candidates: selected,
-    );
-    if (result == null || !mounted) return;
-
-    final parents = <({String? sourceCandidateId, String artistString})>[
-      for (final candidate in selected)
-        (
-          sourceCandidateId: candidate.id,
-          artistString: exploreParentStringFor(candidate),
-        ),
-      for (final text in result.customStrings)
-        (sourceCandidateId: null, artistString: text),
-    ];
-    try {
-      final family = await ref
-          .read(exploreRunListNotifierProvider.notifier)
-          .createFamily(run.id, name: result.name, parents: parents);
-      ref.read(exploreActiveFamilyIdProvider.notifier).state = family.id;
-      if (mounted) {
-        AppToast.success(context, l10n.styleExplore_familyCreated(family.name));
-        _exitSelection();
-      }
-    } on StateError {
-      if (mounted) {
-        AppToast.warning(context, l10n.styleExplore_createFamilyEmpty);
-      }
+    if (await startExploreEvolution(context, ref, run, selected) && mounted) {
+      _exitSelection();
     }
   }
 }

@@ -33,6 +33,7 @@ import 'widgets/explore_auto_run_name.dart';
 import 'widgets/explore_random_variables_module.dart';
 import 'widgets/explore_stage_header.dart';
 import 'widgets/explore_workbench.dart';
+import 'widgets/explore_inspector.dart';
 
 /// Exploration workbench; editor and generation data remain shared.
 class StyleExploreScreen extends ConsumerStatefulWidget {
@@ -103,7 +104,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                 const Expanded(child: ExploreCandidateWall()),
               ],
             ),
-            inspector: _buildInspectorPlaceholder(theme),
+            inspector: const ExploreInspector(),
             blockLibrary: layout.blockLibraryPanelExpanded
                 ? const BlockLibraryPanelSlot(overlay: true)
                 : null,
@@ -112,56 +113,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
       ),
     );
   }
-
-  Widget _buildInspectorPlaceholder(ThemeData theme) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: theme.colorScheme.surfaceContainerLow,
-      border: Border(left: BorderSide(color: theme.colorScheme.outlineVariant)),
-    ),
-    child: Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: theme.colorScheme.outlineVariant),
-            ),
-          ),
-          child: WindowPanelHeader(
-            headerHeight: 52,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 14),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  context.l10n.styleExplore_inspectorTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Text(
-                context.l10n.styleExplore_inspectorPlaceholder,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 
   /// 头部胶囊行（官网式）：Model/Mode 合一胶囊居左，Opus/Anlas 额度胶囊居右；
   /// 宽度不足时余额胶囊整块落第二行靠左（与主生成页头部同款 Wrap 语义）。

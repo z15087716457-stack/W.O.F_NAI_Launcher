@@ -12739,4 +12739,63 @@ class AppLocalizationsKo extends AppLocalizations {
   String styleExplore_deleteCandidatesMessage(int count) {
     return '후보 $count개와 이미지 복사본을 삭제할까요? 라이브러리 원본은 유지됩니다.';
   }
+
+  @override
+  String get styleExplore_inspectorEmpty => '후보를 선택하여 자세히 보기';
+
+  @override
+  String get styleExplore_drawsTitle => '이 이미지의 추출 결과';
+
+  @override
+  String get styleExplore_drawsAfterGeneration => '생성이 완료되면 표시';
+
+  @override
+  String get styleExplore_emptyDraw => '이번에는 빈 항목이 선택되었습니다';
+
+  @override
+  String get styleExplore_hearted => '즐겨찾기됨';
+
+  @override
+  String get styleExplore_joinEvolution => '진화에 추가';
+
+  @override
+  String get styleExplore_applyToEditor => '편집기에 적용';
+
+  @override
+  String get styleExplore_seedName => '시드';
+
+  @override
+  String get styleExplore_elapsedName => '소요 시간';
+
+  @override
+  String get styleExplore_parameters => '매개변수';
+
+  @override
+  String get styleExplore_modelName => '모델';
+
+  @override
+  String get styleExplore_fullPrompt => '전체 프롬프트';
+
+  @override
+  String get styleExplore_mergedArtists => '합쳐진 작가 (중복 제거)';
+
+  @override
+  String get styleExplore_selectionExplanation =>
+      '블록 저장은 하나로 합치고, 진화는 각 이미지의 작가 문자열을 부모로 사용합니다.';
+
+  @override
+  String get styleExplore_quickGroupHint => '1–9로 빠르게 분류';
+
+  @override
+  String get styleExplore_newGroupChip => '새 그룹';
+
+  @override
+  String styleExplore_parameterSummary(
+    int width,
+    int height,
+    int steps,
+    String scale,
+  ) {
+    return '$width×$height · $steps 단계 · $scale';
+  }
 }

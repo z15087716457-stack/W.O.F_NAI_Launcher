@@ -7,6 +7,7 @@ import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
+import 'explore_icon.dart';
 
 /// 弹出命名框新建候选文件夹；取消或失败返回 null。
 Future<ExploreCandidateFolder?> promptCreateExploreFolder(
@@ -17,8 +18,8 @@ Future<ExploreCandidateFolder?> promptCreateExploreFolder(
   final l10n = context.l10n;
   final name = await ThemedInputDialog.show(
     context: context,
-    title: l10n.styleExplore_newFolder,
-    labelText: l10n.styleExplore_folderNameLabel,
+    title: l10n.styleExplore_newGroupChip,
+    labelText: l10n.styleExplore_groupLabel,
     validator: (value) {
       final trimmed = value.trim();
       if (trimmed.isEmpty) return l10n.styleExplore_nameRequired;
@@ -95,35 +96,52 @@ class ExploreFolderAssignBar extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.styleExplore_assignToFolder,
-          style: theme.textTheme.titleSmall,
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.styleExplore_groupLabel,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: .23,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Text(
+              l10n.styleExplore_quickGroupHint,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: .7),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 7),
         Wrap(
-          spacing: 6,
-          runSpacing: 4,
+          spacing: 5,
+          runSpacing: 5,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             for (final folder in run.folders)
-              FilterChip(
+              ExploreGroupChip(
                 key: Key('explore-assign-folder-${folder.id}'),
-                label: Text(folder.name),
-                avatar: const Icon(Icons.folder_outlined, size: 16),
+                label: folder.name,
                 selected: candidate.folderId == folder.id,
-                visualDensity: VisualDensity.compact,
-                onSelected: (_) => _assign(
+                onTap: () => _assign(
                   context,
                   ref,
                   candidate.folderId == folder.id ? null : folder.id,
                 ),
               ),
-            IconButton(
+            ExploreGroupChip(
               key: const Key('explore-assign-new-folder'),
-              iconSize: 18,
-              visualDensity: VisualDensity.compact,
-              tooltip: l10n.styleExplore_newFolder,
-              onPressed: () async {
+              label: l10n.styleExplore_newGroupChip,
+              leading: const ExploreIcon('plus', size: 12),
+              onTap: () async {
                 final folder = await promptCreateExploreFolder(
                   context,
                   ref,
@@ -132,11 +150,78 @@ class ExploreFolderAssignBar extends ConsumerWidget {
                 if (folder == null || !context.mounted) return;
                 await _assign(context, ref, folder.id);
               },
-              icon: const Icon(Icons.create_new_folder_outlined),
             ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class ExploreGroupChip extends StatelessWidget {
+  const ExploreGroupChip({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.selected = false,
+    this.leading,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Widget? leading;
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: selected
+          ? Color.alphaBlend(
+              colors.primary.withValues(alpha: .07),
+              colors.surfaceContainer,
+            )
+          : colors.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(13),
+        side: BorderSide(
+          color: selected ? colors.primary : colors.outlineVariant,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          height: 26,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (selected || leading != null) ...[
+                selected
+                    ? ExploreIcon(
+                        'check',
+                        size: 12,
+                        color: colors.primary,
+                        strokeWidth: 2.6,
+                      )
+                    : leading!,
+                const SizedBox(width: 4),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    color: selected ? colors.primary : colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

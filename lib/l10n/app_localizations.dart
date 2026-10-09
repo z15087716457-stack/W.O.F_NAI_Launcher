@@ -22823,6 +22823,113 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete {count} candidates and their image copies? Library originals are kept.'**
   String styleExplore_deleteCandidatesMessage(int count);
+
+  /// styleExplore_inspectorEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a candidate to view details'**
+  String get styleExplore_inspectorEmpty;
+
+  /// styleExplore_drawsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn for this image'**
+  String get styleExplore_drawsTitle;
+
+  /// styleExplore_drawsAfterGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown after generation'**
+  String get styleExplore_drawsAfterGeneration;
+
+  /// styleExplore_emptyDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing drawn (the pool contains empty entries)'**
+  String get styleExplore_emptyDraw;
+
+  /// styleExplore_hearted.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorited'**
+  String get styleExplore_hearted;
+
+  /// styleExplore_joinEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to evolution'**
+  String get styleExplore_joinEvolution;
+
+  /// styleExplore_applyToEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to editor'**
+  String get styleExplore_applyToEditor;
+
+  /// styleExplore_seedName.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get styleExplore_seedName;
+
+  /// styleExplore_elapsedName.
+  ///
+  /// In en, this message translates to:
+  /// **'Elapsed'**
+  String get styleExplore_elapsedName;
+
+  /// styleExplore_parameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters'**
+  String get styleExplore_parameters;
+
+  /// styleExplore_modelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get styleExplore_modelName;
+
+  /// styleExplore_fullPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Full prompt'**
+  String get styleExplore_fullPrompt;
+
+  /// styleExplore_mergedArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined artists (deduplicated)'**
+  String get styleExplore_mergedArtists;
+
+  /// styleExplore_selectionExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block combines these into one block; evolution uses each image’s artist string as a parent.'**
+  String get styleExplore_selectionExplanation;
+
+  /// styleExplore_quickGroupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Group with 1–9'**
+  String get styleExplore_quickGroupHint;
+
+  /// Inspector compact new group chip.
+  ///
+  /// In en, this message translates to:
+  /// **'New group'**
+  String get styleExplore_newGroupChip;
+
+  /// Inspector generation parameter summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{width}×{height} · {steps} steps · {scale}'**
+  String styleExplore_parameterSummary(
+    int width,
+    int height,
+    int steps,
+    String scale,
+  );
 }
 
 class _AppLocalizationsDelegate

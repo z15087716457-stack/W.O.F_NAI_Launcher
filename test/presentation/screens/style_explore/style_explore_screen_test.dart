@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_folder_assign_bar.dart';
 // ignore: depend_on_referenced_packages
 import 'package:irondash_message_channel/irondash_message_channel.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
@@ -1290,7 +1291,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     final assignChip = find.byKey(const Key('explore-assign-folder-folder-a'));
     expect(assignChip, findsOneWidget);
-    expect(tester.widget<FilterChip>(assignChip).selected, isFalse);
+    expect(tester.widget<ExploreGroupChip>(assignChip).selected, isFalse);
     expect(find.text('第 1/3 张'), findsOneWidget);
     expect(
       find.descendant(
@@ -1345,7 +1346,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(tester.widget<FilterChip>(assignChip).selected, isTrue);
+    expect(tester.widget<ExploreGroupChip>(assignChip).selected, isTrue);
 
     // 再点当前文件夹 = 移回未分类（不删图、不跳页）。
     await tester.tap(assignChip);
@@ -1634,7 +1635,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 350));
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
     await tester.pump(const Duration(milliseconds: 350));
-    expect(find.text('已选 2 张'), findsOneWidget);
+    expect(find.text('已选 2 张'), findsNWidgets(2));
     // 多选模式同走牌堆分组（无视图切换）。
     expect(find.byKey(const Key('explore-round-r-1')), findsOneWidget);
 
@@ -1845,7 +1846,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(imageStore.deletedPaths, isEmpty);
-    expect(find.text('已选 3 张'), findsOneWidget, reason: '取消保留多选');
+    expect(find.text('已选 3 张'), findsNWidgets(2), reason: '取消保留多选');
 
     // 确认流：逐张删副本 + 清 filePath + 成功退多选。
     await tester.tap(find.byKey(deleteKey));

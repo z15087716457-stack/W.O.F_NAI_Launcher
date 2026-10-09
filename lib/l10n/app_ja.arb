@@ -7143,5 +7143,87 @@
         "type": "int"
       }
     }
+  },
+  "styleExplore_inspectorEmpty": "候補を選ぶと詳細が表示されます",
+  "@styleExplore_inspectorEmpty": {
+    "description": "styleExplore_inspectorEmpty."
+  },
+  "styleExplore_drawsTitle": "この画像の抽選結果",
+  "@styleExplore_drawsTitle": {
+    "description": "styleExplore_drawsTitle."
+  },
+  "styleExplore_drawsAfterGeneration": "生成完了後に表示",
+  "@styleExplore_drawsAfterGeneration": {
+    "description": "styleExplore_drawsAfterGeneration."
+  },
+  "styleExplore_emptyDraw": "今回は空の項目が選ばれました",
+  "@styleExplore_emptyDraw": {
+    "description": "styleExplore_emptyDraw."
+  },
+  "styleExplore_hearted": "お気に入り済み",
+  "@styleExplore_hearted": {
+    "description": "styleExplore_hearted."
+  },
+  "styleExplore_joinEvolution": "進化に追加",
+  "@styleExplore_joinEvolution": {
+    "description": "styleExplore_joinEvolution."
+  },
+  "styleExplore_applyToEditor": "編集欄に適用",
+  "@styleExplore_applyToEditor": {
+    "description": "styleExplore_applyToEditor."
+  },
+  "styleExplore_seedName": "シード",
+  "@styleExplore_seedName": {
+    "description": "styleExplore_seedName."
+  },
+  "styleExplore_elapsedName": "所要時間",
+  "@styleExplore_elapsedName": {
+    "description": "styleExplore_elapsedName."
+  },
+  "styleExplore_parameters": "パラメーター",
+  "@styleExplore_parameters": {
+    "description": "styleExplore_parameters."
+  },
+  "styleExplore_modelName": "モデル",
+  "@styleExplore_modelName": {
+    "description": "styleExplore_modelName."
+  },
+  "styleExplore_fullPrompt": "完全なプロンプト",
+  "@styleExplore_fullPrompt": {
+    "description": "styleExplore_fullPrompt."
+  },
+  "styleExplore_mergedArtists": "画師をまとめる（重複除去）",
+  "@styleExplore_mergedArtists": {
+    "description": "styleExplore_mergedArtists."
+  },
+  "styleExplore_selectionExplanation": "ブロック保存はこれらを1つにまとめ、進化では各画像の画師文字列を親として使います。",
+  "@styleExplore_selectionExplanation": {
+    "description": "styleExplore_selectionExplanation."
+  },
+  "styleExplore_quickGroupHint": "1–9 で分類",
+  "@styleExplore_quickGroupHint": {
+    "description": "styleExplore_quickGroupHint."
+  },
+  "styleExplore_newGroupChip": "新規グループ",
+  "@styleExplore_newGroupChip": {
+    "description": "Inspector compact new group chip."
+  },
+  "styleExplore_parameterSummary": "{width}×{height} · {steps} ステップ · {scale}",
+  "@styleExplore_parameterSummary": {
+    "description": "Inspector generation parameter summary.",
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      },
+      "steps": {
+        "type": "int"
+      },
+      "scale": {
+        "type": "String"
+      }
+    }
   }
 }

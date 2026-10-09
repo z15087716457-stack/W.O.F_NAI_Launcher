@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/style_explore/explore_run.dart';
 import 'explore_run_provider.dart';
+import 'explore_run_runner.dart';
+import 'explore_manual_capture.dart';
 
 enum ExploreStageTab { candidates, evolution }
 
@@ -161,3 +163,34 @@ List<ExploreCandidate> exploreWallCandidates(
   for (final round in exploreOrderedRounds(run, newestFirst))
     ...exploreRoundCandidates(run, round, filter),
 ];
+
+final exploreGeneratingCandidateIdProvider = Provider<String?>((ref) {
+  final run = ref.watch(exploreActiveRunProvider);
+  if (run == null) return null;
+  final runner = ref.watch(exploreRunRunnerProvider),
+      manual = ref.watch(exploreManualCaptureProvider);
+  if (runner.isRunning && runner.runId == run.id) {
+    for (final round in run.rounds.where(
+      (r) => r.status == ExploreRoundStatus.generating,
+    )) {
+      final current =
+          exploreRoundCandidates(run, round, const ExploreGalleryFilterAll())
+              .where(
+                (c) =>
+                    c.generation.status ==
+                    ExploreCandidateGenerationStatus.pending,
+              )
+              .firstOrNull;
+      if (current != null) return current.id;
+    }
+  } else if (manual.armed && manual.runId == run.id) {
+    return manual.candidateIds
+        .where(
+          (id) =>
+              run.candidateById(id)?.generation.status ==
+              ExploreCandidateGenerationStatus.pending,
+        )
+        .firstOrNull;
+  }
+  return null;
+});

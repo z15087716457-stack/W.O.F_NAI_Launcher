@@ -12719,4 +12719,63 @@ class AppLocalizationsJa extends AppLocalizations {
   String styleExplore_deleteCandidatesMessage(int count) {
     return '候補$count枚と画像コピーを削除しますか？ライブラリの原画像は保持されます。';
   }
+
+  @override
+  String get styleExplore_inspectorEmpty => '候補を選ぶと詳細が表示されます';
+
+  @override
+  String get styleExplore_drawsTitle => 'この画像の抽選結果';
+
+  @override
+  String get styleExplore_drawsAfterGeneration => '生成完了後に表示';
+
+  @override
+  String get styleExplore_emptyDraw => '今回は空の項目が選ばれました';
+
+  @override
+  String get styleExplore_hearted => 'お気に入り済み';
+
+  @override
+  String get styleExplore_joinEvolution => '進化に追加';
+
+  @override
+  String get styleExplore_applyToEditor => '編集欄に適用';
+
+  @override
+  String get styleExplore_seedName => 'シード';
+
+  @override
+  String get styleExplore_elapsedName => '所要時間';
+
+  @override
+  String get styleExplore_parameters => 'パラメーター';
+
+  @override
+  String get styleExplore_modelName => 'モデル';
+
+  @override
+  String get styleExplore_fullPrompt => '完全なプロンプト';
+
+  @override
+  String get styleExplore_mergedArtists => '画師をまとめる（重複除去）';
+
+  @override
+  String get styleExplore_selectionExplanation =>
+      'ブロック保存はこれらを1つにまとめ、進化では各画像の画師文字列を親として使います。';
+
+  @override
+  String get styleExplore_quickGroupHint => '1–9 で分類';
+
+  @override
+  String get styleExplore_newGroupChip => '新規グループ';
+
+  @override
+  String styleExplore_parameterSummary(
+    int width,
+    int height,
+    int steps,
+    String scale,
+  ) {
+    return '$width×$height · $steps ステップ · $scale';
+  }
 }
