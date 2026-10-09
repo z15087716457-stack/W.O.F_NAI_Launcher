@@ -327,15 +327,40 @@ void main() {
     ExploreRunStatus status = ExploreRunStatus.draft,
     List<ExploreCandidate> candidates = const [],
   }) async {
-    final run = ExploreRun.create(
-      name: name,
-      recipeSnapshot: ExploreRecipeSnapshot(
-        positive: doc('pos'),
-        negative: doc('neg'),
-      ),
-      paramsSnapshot: testSnapshot(),
-      targetCount: targetCount,
-    ).copyWith(status: status, candidates: candidates);
+    final run =
+        ExploreRun.create(
+          name: name,
+          recipeSnapshot: ExploreRecipeSnapshot(
+            positive: doc('pos'),
+            negative: doc('neg'),
+          ),
+          paramsSnapshot: testSnapshot(),
+          targetCount: targetCount,
+        ).copyWith(
+          status: status,
+          candidates: candidates,
+          rounds: [
+            for (final id in candidates.map((c) => c.roundId).toSet())
+              ExploreRound(
+                id: id,
+                number:
+                    candidates
+                        .map((c) => c.roundId)
+                        .toSet()
+                        .toList()
+                        .indexOf(id) +
+                    1,
+                phase: ExploreRoundPhase.manual,
+                status: ExploreRoundStatus.generated,
+                createdAt: DateTime(2026, 9, 14),
+                targetCount: candidates.where((c) => c.roundId == id).length,
+                candidateIds: candidates
+                    .where((c) => c.roundId == id)
+                    .map((c) => c.id)
+                    .toList(),
+              ),
+          ],
+        );
     await runStorage.putRun(run);
     return run;
   }
@@ -900,8 +925,8 @@ void main() {
     // 两张候选卡 + 序号文本。
     expect(find.byKey(const Key('explore-candidate-cand-a')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-b')), findsOneWidget);
-    expect(find.textContaining('#1'), findsOneWidget);
-    expect(find.textContaining('#2'), findsOneWidget);
+    expect(find.text('图片已删除'), findsOneWidget);
+    expect(find.text('生成失败'), findsOneWidget);
     // 卡片内嵌标记钮（T/S/R）整行已拆除。
     expect(
       find.byKey(const Key('explore-candidate-treasure-cand-a')),
@@ -917,7 +942,15 @@ void main() {
     );
 
     // 右上角收藏钮写 heart 字段（不改状态、不动文件）。
+    final pointer = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await pointer.addPointer(
+      location: tester.getCenter(
+        find.byKey(const Key('explore-candidate-cand-a')),
+      ),
+    );
+    await tester.pump();
     await tester.tap(find.byKey(const Key('explore-candidate-heart-cand-a')));
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -928,6 +961,7 @@ void main() {
 
     // 再点一次取消收藏。
     await tester.tap(find.byKey(const Key('explore-candidate-heart-cand-a')));
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(
@@ -1018,10 +1052,7 @@ void main() {
     expect(find.byKey(const Key('explore-candidate-cand-f')), findsOneWidget);
     expect(find.byKey(const Key('explore-candidate-cand-d')), findsNothing);
     // 筛选叠加在牌堆分组之上（牌堆常驻，无视图切换）。
-    expect(
-      find.byKey(const Key('explore-deck-header-uncategorized')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('explore-round-r-1')), findsOneWidget);
 
     // 回到全部（先滚回筛选排最左，「全部」chip 已被懒回收）。
     await scrollChipRowToEnd(tester, toEnd: false);
@@ -1065,6 +1096,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-d')));
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byKey(const Key('explore-candidate-cand-d')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1148,37 +1181,68 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 打开 cand-2：翻页序 = 打开瞬间的筛选快照，按展示序（最新在前，
-    // 与画廊 .reversed 对齐）→ 序列 [cand-3, cand-2, cand-1]，
-    // cand-2 在 index 1 = 第 2/3 张；← 到 cand-3、→ 到 cand-1。
+    // 打开 cand-2：翻页序 = 打开瞬间的筛选快照，按轮内生成顺序→ 序列 [cand-1, cand-2, cand-3]，
+    // cand-2 在 index 1 = 第 2/3 张；← 到 cand-1、→ 到 cand-3。
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const Key('explore-candidate-detail')), findsOneWidget);
     expect(find.text('第 2/3 张'), findsOneWidget);
-    expect(find.text('pos-2'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-2'),
+      ),
+      findsOneWidget,
+    );
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
     expect(find.text('第 1/3 张'), findsOneWidget);
-    expect(find.text('pos-3'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-1'),
+      ),
+      findsOneWidget,
+    );
     // 已到首张：左箭头按钮消失且再按 ← 原地不动（不循环）。
     expect(find.byKey(const Key('explore-candidate-prev')), findsNothing);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
     expect(find.text('第 1/3 张'), findsOneWidget);
-    expect(find.text('pos-3'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-1'),
+      ),
+      findsOneWidget,
+    );
 
     // 小键盘 → 与普通 → 等价。
     await tester.sendKeyEvent(LogicalKeyboardKey.numpad6);
     await tester.pump();
     expect(find.text('第 2/3 张'), findsOneWidget);
-    expect(find.text('pos-2'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-2'),
+      ),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const Key('explore-candidate-next')));
     await tester.pump();
     expect(find.text('第 3/3 张'), findsOneWidget);
-    expect(find.text('pos-1'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-3'),
+      ),
+      findsOneWidget,
+    );
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(find.text('第 3/3 张'), findsOneWidget);
@@ -1192,8 +1256,8 @@ void main() {
       name: '暖光',
       createdAt: DateTime.utc(2026, 9, 14),
     );
-    // 各配独立 roll 串作探针：翻页序 = 展示序（最新在前）→
-    // 序列 [cand-3, cand-2, cand-1]，「下一张未分类」沿序列向更旧方向推进。
+    // 各配独立 roll 串作探针：翻页序 = 轮内生成顺序→
+    // 序列 [cand-1, cand-2, cand-3]，「下一张未分类」沿序列向更旧方向推进。
     final run = await seedRun(
       '归类任务',
       status: ExploreRunStatus.generated,
@@ -1218,28 +1282,42 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 从最新的 cand-3（序列 index 0）开始连续归类。
-    await tester.tap(find.byKey(const Key('explore-candidate-cand-3')));
+    // 从最新的 cand-1（序列 index 0）开始连续归类。
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     final assignChip = find.byKey(const Key('explore-assign-folder-folder-a'));
     expect(assignChip, findsOneWidget);
     expect(tester.widget<FilterChip>(assignChip).selected, isFalse);
     expect(find.text('第 1/3 张'), findsOneWidget);
-    expect(find.text('pos-3'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-1'),
+      ),
+      findsOneWidget,
+    );
 
     // 点文件夹即归类落盘 + 自动跳序列下一张未分类（更旧方向）。
     await tester.tap(assignChip);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(
-      runStorage._store[run.id]!.candidateById('cand-3')!.folderId,
+      runStorage._store[run.id]!.candidateById('cand-1')!.folderId,
       'folder-a',
     );
     expect(find.text('第 2/3 张'), findsOneWidget);
-    expect(find.text('pos-2'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-2'),
+      ),
+      findsOneWidget,
+    );
 
-    // 再归类第二张 → 跳到第三张（最旧的 cand-1）。
+    // 再归类第二张 → 跳到第三张（最旧的 cand-3）。
     await tester.tap(assignChip);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1248,13 +1326,25 @@ void main() {
       'folder-a',
     );
     expect(find.text('第 3/3 张'), findsOneWidget);
-    expect(find.text('pos-1'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-3'),
+      ),
+      findsOneWidget,
+    );
 
     // 回看第二张：归属态在弹窗内高亮。
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
     expect(find.text('第 2/3 张'), findsOneWidget);
-    expect(find.text('pos-2'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('pos-2'),
+      ),
+      findsOneWidget,
+    );
     expect(tester.widget<FilterChip>(assignChip).selected, isTrue);
 
     // 再点当前文件夹 = 移回未分类（不删图、不跳页）。
@@ -1268,9 +1358,7 @@ void main() {
     expect(find.text('第 2/3 张'), findsOneWidget);
   });
 
-  testWidgets('newest candidate renders first with storage-bound numbering', (
-    tester,
-  ) async {
+  testWidgets('round candidates retain generation order', (tester) async {
     final run = await seedRun(
       '排序任务',
       status: ExploreRunStatus.generated,
@@ -1285,34 +1373,20 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // 展示层反转：最后追加的候选排最前（组内同序）。
+    // 轮内保持生成顺序：首张候选排最前。
     final newest = tester.getTopLeft(
-      find.byKey(const Key('explore-candidate-cand-3')),
+      find.byKey(const Key('explore-candidate-cand-1')),
     );
     final oldest = tester.getTopLeft(
-      find.byKey(const Key('explore-candidate-cand-1')),
+      find.byKey(const Key('explore-candidate-cand-3')),
     );
     expect(
       newest.dy < oldest.dy ||
           (newest.dy == oldest.dy && newest.dx < oldest.dx),
       isTrue,
-      reason: '首张卡 = 最后追加的候选',
+      reason: '轮内生成顺序保持不变',
     );
-    // #N 绑存储序：最新那张拿最大序号，最早那张仍是 #1。
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('explore-candidate-cand-3')),
-        matching: find.text('#3'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('explore-candidate-cand-1')),
-        matching: find.text('#1'),
-      ),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('explore-round-r-1')), findsOneWidget);
   });
 
   testWidgets('toolbar creates a folder that groups the deck', (tester) async {
@@ -1351,19 +1425,15 @@ void main() {
     // 视图切换已删：牌堆常驻，无切换钮。
     expect(find.byKey(const Key('explore-gallery-view-toggle')), findsNothing);
 
-    expect(find.text('暖光 · 1'), findsOneWidget);
-    expect(find.text('未分类 · 1'), findsOneWidget);
-    expect(
-      find.byKey(const Key('explore-deck-header-uncategorized')),
-      findsOneWidget,
-    );
+    expect(find.text('暖光'), findsWidgets);
+    expect(find.byKey(const Key('explore-round-r-1')), findsOneWidget);
     expect(
       find.byKey(const Key('explore-folder-rename-folder-a')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const Key('explore-folder-delete-folder-a')),
-      findsOneWidget,
+      findsNothing,
     );
     for (final id in const ['cand-1', 'cand-2']) {
       expect(find.byKey(Key('explore-candidate-$id')), findsOneWidget);
@@ -1385,10 +1455,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 3300));
     expect(find.text('冷光 · 0'), findsNothing, reason: '空组不渲染');
-    expect(
-      find.byKey(const Key('explore-deck-header-uncategorized')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('explore-round-r-1')), findsOneWidget);
     expect(runStorage._store[run.id]!.folders.map((f) => f.name), ['暖光', '冷光']);
   });
 
@@ -1454,7 +1521,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('explore-folder-delete-folder-a')));
+    await tester.tap(
+      find.byKey(const Key('explore-filter-folder-folder-a')),
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('explore-folder-menu-delete')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('删除文件夹'), findsWidgets);
@@ -1467,10 +1539,7 @@ void main() {
     expect(stored.candidateById('cand-1')!.folderId, isNull);
     expect(stored.candidateById('cand-1')!.generation.filePath, isNull);
     expect(find.byKey(const Key('explore-candidate-cand-1')), findsOneWidget);
-    expect(
-      find.byKey(const Key('explore-deck-header-uncategorized')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('explore-round-r-1')), findsOneWidget);
   });
 
   testWidgets('detail dialog adopt-as-block passes roll positive to '
@@ -1500,8 +1569,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
-    await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('explore-candidate-adopt-block')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1565,10 +1635,7 @@ void main() {
     await tester.pump();
     expect(find.text('已选 2 张'), findsOneWidget);
     // 多选模式同走牌堆分组（无视图切换）。
-    expect(
-      find.byKey(const Key('explore-deck-header-uncategorized')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('explore-round-r-1')), findsOneWidget);
 
     // 合并收编 → 默认名 ×2 → 确认。
     await tester.tap(find.byKey(const Key('explore-gallery-merge-adopt')));
@@ -1625,8 +1692,9 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
-    await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('explore-candidate-fixate')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -1671,8 +1739,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     await tester.tap(find.byKey(const Key('explore-candidate-cand-no-copy')));
-    await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-no-copy')));
+    await tester.pumpAndSettle();
     expect(
       find.byKey(const Key('explore-candidate-delete-image')),
       findsNothing,
@@ -1688,8 +1757,9 @@ void main() {
 
     // 有副本候选：删除图片 → 确认 → 副本删除 + 记录连删（FEAT-55）。
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
-    await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('explore-candidate-delete-image')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));

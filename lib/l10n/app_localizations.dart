@@ -22649,6 +22649,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'images · one at a time'**
   String get styleExplore_drawCountSuffix;
+
+  /// Style explore task03: candidatesTab
+  ///
+  /// In en, this message translates to:
+  /// **'Candidates'**
+  String get styleExplore_candidatesTab;
+
+  /// Style explore task03: evolutionTab
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution'**
+  String get styleExplore_evolutionTab;
+
+  /// Style explore task03: deepRoundTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution · {name} · Generation {generation}'**
+  String styleExplore_deepRoundTitle(String name, int generation);
+
+  /// Style explore task03: wallRoundCount
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images'**
+  String styleExplore_wallRoundCount(int count);
+
+  /// Style explore task03: wallGenerating
+  ///
+  /// In en, this message translates to:
+  /// **'Generating'**
+  String get styleExplore_wallGenerating;
+
+  /// Style explore task03: roundFailures
+  ///
+  /// In en, this message translates to:
+  /// **'Failed {count}'**
+  String styleExplore_roundFailures(int count);
+
+  /// Style explore task03: queued
+  ///
+  /// In en, this message translates to:
+  /// **'Queued #{number}'**
+  String styleExplore_queued(int number);
+
+  /// Style explore task03: generatingCandidate
+  ///
+  /// In en, this message translates to:
+  /// **'Generating #{number}'**
+  String styleExplore_generatingCandidate(int number);
+
+  /// Style explore task03: generationFailed
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed'**
+  String get styleExplore_generationFailed;
+
+  /// Style explore task03: failureHint
+  ///
+  /// In en, this message translates to:
+  /// **'Hover to see the reason'**
+  String get styleExplore_failureHint;
+
+  /// Style explore task03: imageDeleted
+  ///
+  /// In en, this message translates to:
+  /// **'Image deleted'**
+  String get styleExplore_imageDeleted;
+
+  /// Style explore task03: parentBadge
+  ///
+  /// In en, this message translates to:
+  /// **'Parent'**
+  String get styleExplore_parentBadge;
+
+  /// Style explore task03: opMutation
+  ///
+  /// In en, this message translates to:
+  /// **'Mutation'**
+  String get styleExplore_opMutation;
+
+  /// Style explore task03: opCrossover
+  ///
+  /// In en, this message translates to:
+  /// **'Crossover'**
+  String get styleExplore_opCrossover;
+
+  /// Style explore task03: opInjection
+  ///
+  /// In en, this message translates to:
+  /// **'Injection'**
+  String get styleExplore_opInjection;
+
+  /// Style explore task03: copyArtists
+  ///
+  /// In en, this message translates to:
+  /// **'Copy artists'**
+  String get styleExplore_copyArtists;
+
+  /// Style explore task03: interrupted
+  ///
+  /// In en, this message translates to:
+  /// **'Interrupted'**
+  String get styleExplore_interrupted;
+
+  /// Style explore task03: emptyFilter
+  ///
+  /// In en, this message translates to:
+  /// **'No matching candidates'**
+  String get styleExplore_emptyFilter;
+
+  /// Style explore task03: emptyRound
+  ///
+  /// In en, this message translates to:
+  /// **'This round has no candidates'**
+  String get styleExplore_emptyRound;
 }
 
 class _AppLocalizationsDelegate

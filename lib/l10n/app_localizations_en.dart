@@ -13015,4 +13015,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_drawCountSuffix => 'images · one at a time';
+
+  @override
+  String get styleExplore_candidatesTab => 'Candidates';
+
+  @override
+  String get styleExplore_evolutionTab => 'Evolution';
+
+  @override
+  String styleExplore_deepRoundTitle(String name, int generation) {
+    return 'Evolution · $name · Generation $generation';
+  }
+
+  @override
+  String styleExplore_wallRoundCount(int count) {
+    return '$count images';
+  }
+
+  @override
+  String get styleExplore_wallGenerating => 'Generating';
+
+  @override
+  String styleExplore_roundFailures(int count) {
+    return 'Failed $count';
+  }
+
+  @override
+  String styleExplore_queued(int number) {
+    return 'Queued #$number';
+  }
+
+  @override
+  String styleExplore_generatingCandidate(int number) {
+    return 'Generating #$number';
+  }
+
+  @override
+  String get styleExplore_generationFailed => 'Generation failed';
+
+  @override
+  String get styleExplore_failureHint => 'Hover to see the reason';
+
+  @override
+  String get styleExplore_imageDeleted => 'Image deleted';
+
+  @override
+  String get styleExplore_parentBadge => 'Parent';
+
+  @override
+  String get styleExplore_opMutation => 'Mutation';
+
+  @override
+  String get styleExplore_opCrossover => 'Crossover';
+
+  @override
+  String get styleExplore_opInjection => 'Injection';
+
+  @override
+  String get styleExplore_copyArtists => 'Copy artists';
+
+  @override
+  String get styleExplore_interrupted => 'Interrupted';
+
+  @override
+  String get styleExplore_emptyFilter => 'No matching candidates';
+
+  @override
+  String get styleExplore_emptyRound => 'This round has no candidates';
 }

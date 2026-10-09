@@ -12640,4 +12640,71 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_drawCountSuffix => '장 · 한 장씩 생성';
+
+  @override
+  String get styleExplore_candidatesTab => '후보';
+
+  @override
+  String get styleExplore_evolutionTab => '진화';
+
+  @override
+  String styleExplore_deepRoundTitle(String name, int generation) {
+    return '진화 · $name $generation세대';
+  }
+
+  @override
+  String styleExplore_wallRoundCount(int count) {
+    return '$count장';
+  }
+
+  @override
+  String get styleExplore_wallGenerating => '생성 중';
+
+  @override
+  String styleExplore_roundFailures(int count) {
+    return '실패 $count';
+  }
+
+  @override
+  String styleExplore_queued(int number) {
+    return '대기 #$number';
+  }
+
+  @override
+  String styleExplore_generatingCandidate(int number) {
+    return '생성 중 #$number';
+  }
+
+  @override
+  String get styleExplore_generationFailed => '생성 실패';
+
+  @override
+  String get styleExplore_failureHint => '마우스를 올려 원인 확인';
+
+  @override
+  String get styleExplore_imageDeleted => '이미지 삭제됨';
+
+  @override
+  String get styleExplore_parentBadge => '부모';
+
+  @override
+  String get styleExplore_opMutation => '변이';
+
+  @override
+  String get styleExplore_opCrossover => '교차';
+
+  @override
+  String get styleExplore_opInjection => '주입';
+
+  @override
+  String get styleExplore_copyArtists => '작가 문자열 복사';
+
+  @override
+  String get styleExplore_interrupted => '중단됨';
+
+  @override
+  String get styleExplore_emptyFilter => '필터와 일치하는 후보가 없습니다';
+
+  @override
+  String get styleExplore_emptyRound => '이 라운드에는 후보가 없습니다';
 }

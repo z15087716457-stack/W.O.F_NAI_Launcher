@@ -16,7 +16,7 @@ import '../../../widgets/common/column_width_menu_panel.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
 import 'explore_candidate_actions.dart';
-import 'explore_candidate_gallery.dart';
+import 'explore_candidate_detail_dialog.dart';
 import 'explore_folder_assign_bar.dart';
 
 /// 候选堆「管理」大弹窗（FEAT-42）：网格/瀑布流两档 + 列宽 + 多选全选

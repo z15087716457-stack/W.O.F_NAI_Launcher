@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/storage/local_storage_service.dart';
+import '../../core/constants/storage_keys.dart';
 
 part 'layout_state_provider.g.dart';
 
@@ -18,6 +19,7 @@ class LayoutState {
   final bool blockPaletteToolPinned;
   final bool translationToolPinned;
   final bool blockLibraryPanelToolPinned;
+  final bool styleExploreGridLarge;
   final double styleExploreEditorWidth;
   final double styleExploreInspectorWidth;
 
@@ -35,6 +37,7 @@ class LayoutState {
     this.blockPaletteToolPinned = true,
     this.translationToolPinned = true,
     this.blockLibraryPanelToolPinned = false,
+    this.styleExploreGridLarge = true,
     this.styleExploreEditorWidth = 384.0,
     this.styleExploreInspectorWidth = 312.0,
     this.styleExploreInspectorVisible,
@@ -52,6 +55,7 @@ class LayoutState {
     bool? blockPaletteToolPinned,
     bool? translationToolPinned,
     bool? blockLibraryPanelToolPinned,
+    bool? styleExploreGridLarge,
     double? styleExploreEditorWidth,
     double? styleExploreInspectorWidth,
     Object? styleExploreInspectorVisible = _unchangedInspectorVisibility,
@@ -72,6 +76,8 @@ class LayoutState {
           translationToolPinned ?? this.translationToolPinned,
       blockLibraryPanelToolPinned:
           blockLibraryPanelToolPinned ?? this.blockLibraryPanelToolPinned,
+      styleExploreGridLarge:
+          styleExploreGridLarge ?? this.styleExploreGridLarge,
       styleExploreEditorWidth:
           styleExploreEditorWidth ?? this.styleExploreEditorWidth,
       styleExploreInspectorWidth:
@@ -103,6 +109,12 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       blockPaletteToolPinned: storage.getBlockPaletteToolPinned(),
       translationToolPinned: storage.getTranslationToolPinned(),
       blockLibraryPanelToolPinned: storage.getBlockLibraryPanelToolPinned(),
+      styleExploreGridLarge:
+          storage.getSetting<bool>(
+            StorageKeys.styleExploreGridLarge,
+            defaultValue: true,
+          ) ??
+          true,
       styleExploreEditorWidth: storage.getStyleExploreEditorWidth(),
       styleExploreInspectorWidth: storage.getStyleExploreInspectorWidth(),
       styleExploreInspectorVisible: storage.getStyleExploreInspectorVisible(),
@@ -216,6 +228,13 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
   /// 切换块库面板图标钉住状态
   Future<void> toggleBlockLibraryPanelToolPinned() async {
     await setBlockLibraryPanelToolPinned(!state.blockLibraryPanelToolPinned);
+  }
+
+  Future<void> setStyleExploreGridLarge(bool large) async {
+    state = state.copyWith(styleExploreGridLarge: large);
+    await ref
+        .read(localStorageServiceProvider)
+        .setSetting<bool>(StorageKeys.styleExploreGridLarge, large);
   }
 
   Future<void> setStyleExploreEditorWidth(double width) async {

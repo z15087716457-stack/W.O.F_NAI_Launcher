@@ -96,6 +96,31 @@ void main() {
   });
 
   group('exploration workbench persistence', () {
+    test('candidate size survives recreating the layout provider', () async {
+      final storage = _FakeLayoutStorage();
+      ProviderContainer create() => ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+      );
+      final first = create();
+      expect(
+        first.read(layoutStateNotifierProvider).styleExploreGridLarge,
+        isTrue,
+      );
+      await first
+          .read(layoutStateNotifierProvider.notifier)
+          .setStyleExploreGridLarge(false);
+      first.dispose();
+      final restored = create();
+      addTearDown(restored.dispose);
+      expect(
+        restored.read(layoutStateNotifierProvider).styleExploreGridLarge,
+        isFalse,
+      );
+      expect(
+        restored.read(layoutStateNotifierProvider).styleExploreEditorWidth,
+        384,
+      );
+    });
     test('new defaults and nullable copyWith preserve unrelated layout', () {
       const state = LayoutState();
       expect(state.styleExploreEditorWidth, 384);
@@ -176,6 +201,15 @@ void main() {
 }
 
 class _FakeLayoutStorage extends LocalStorageService {
+  final settings = <String, Object?>{};
+  @override
+  T? getSetting<T>(String key, {T? defaultValue}) =>
+      settings[key] as T? ?? defaultValue;
+  @override
+  Future<void> setSetting<T>(String key, T value) async {
+    settings[key] = value;
+  }
+
   bool rightExpanded = true;
   double rightWidth = 280;
   bool mainNavExpanded = false;

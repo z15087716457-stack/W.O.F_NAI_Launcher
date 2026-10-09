@@ -12620,4 +12620,71 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_drawCountSuffix => '枚 · 1枚ずつ生成';
+
+  @override
+  String get styleExplore_candidatesTab => '候補';
+
+  @override
+  String get styleExplore_evolutionTab => '進化';
+
+  @override
+  String styleExplore_deepRoundTitle(String name, int generation) {
+    return '進化 · $name 第$generation世代';
+  }
+
+  @override
+  String styleExplore_wallRoundCount(int count) {
+    return '$count枚';
+  }
+
+  @override
+  String get styleExplore_wallGenerating => '生成中';
+
+  @override
+  String styleExplore_roundFailures(int count) {
+    return '失敗 $count';
+  }
+
+  @override
+  String styleExplore_queued(int number) {
+    return '待機 #$number';
+  }
+
+  @override
+  String styleExplore_generatingCandidate(int number) {
+    return '生成中 #$number';
+  }
+
+  @override
+  String get styleExplore_generationFailed => '生成失敗';
+
+  @override
+  String get styleExplore_failureHint => 'ホバーで原因を表示';
+
+  @override
+  String get styleExplore_imageDeleted => '画像は削除済み';
+
+  @override
+  String get styleExplore_parentBadge => '親';
+
+  @override
+  String get styleExplore_opMutation => '変異';
+
+  @override
+  String get styleExplore_opCrossover => '交叉';
+
+  @override
+  String get styleExplore_opInjection => '注入';
+
+  @override
+  String get styleExplore_copyArtists => '画家タグをコピー';
+
+  @override
+  String get styleExplore_interrupted => '中断';
+
+  @override
+  String get styleExplore_emptyFilter => '条件に合う候補はありません';
+
+  @override
+  String get styleExplore_emptyRound => 'このラウンドに候補はありません';
 }

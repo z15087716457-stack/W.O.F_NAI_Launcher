@@ -116,7 +116,7 @@ void main() {
   });
 
   test(
-    'addManualCandidates reuses one manual round and links lineage',
+    'addManualCandidates creates a numbered round per call and links lineage',
     () async {
       final c = container();
       final notifier = c.read(exploreRunListNotifierProvider.notifier);
@@ -153,14 +153,19 @@ void main() {
       expect(run.rounds.single.candidateIds, hasLength(2));
       expect(run.candidates, hasLength(2));
 
-      // 再次追加：复用同一手动轮，不新建轮次。
+      // 再次点击建立独立轮，已有候选不挪动。
       final second = await notifier.addManualCandidates(created.id, count: 1);
       run = (await c.read(
         exploreRunListNotifierProvider.future,
       )).runById(created.id)!;
-      expect(run.rounds, hasLength(1));
-      expect(run.rounds.single.candidateIds, hasLength(3));
-      expect(second.single.roundId, run.rounds.single.id);
+      expect(run.rounds, hasLength(2));
+      expect(run.rounds.map((round) => round.number), [1, 2]);
+      expect(
+        run.rounds.first.candidateIds,
+        first.map((candidate) => candidate.id),
+      );
+      expect(run.rounds.last.candidateIds, [second.single.id]);
+      expect(second.single.roundId, run.rounds.last.id);
     },
   );
 

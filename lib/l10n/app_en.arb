@@ -6994,5 +6994,109 @@
   "styleExplore_drawCountSuffix": "images · one at a time",
   "@styleExplore_drawCountSuffix": {
     "description": "Style exploration workbench: styleExplore_drawCountSuffix"
+  },
+  "styleExplore_candidatesTab": "Candidates",
+  "@styleExplore_candidatesTab": {
+    "description": "Style explore task03: candidatesTab"
+  },
+  "styleExplore_evolutionTab": "Evolution",
+  "@styleExplore_evolutionTab": {
+    "description": "Style explore task03: evolutionTab"
+  },
+  "styleExplore_deepRoundTitle": "Evolution · {name} · Generation {generation}",
+  "@styleExplore_deepRoundTitle": {
+    "description": "Style explore task03: deepRoundTitle",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "generation": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_wallRoundCount": "{count} images",
+  "@styleExplore_wallRoundCount": {
+    "description": "Style explore task03: wallRoundCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_wallGenerating": "Generating",
+  "@styleExplore_wallGenerating": {
+    "description": "Style explore task03: wallGenerating"
+  },
+  "styleExplore_roundFailures": "Failed {count}",
+  "@styleExplore_roundFailures": {
+    "description": "Style explore task03: roundFailures",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_queued": "Queued #{number}",
+  "@styleExplore_queued": {
+    "description": "Style explore task03: queued",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generatingCandidate": "Generating #{number}",
+  "@styleExplore_generatingCandidate": {
+    "description": "Style explore task03: generatingCandidate",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generationFailed": "Generation failed",
+  "@styleExplore_generationFailed": {
+    "description": "Style explore task03: generationFailed"
+  },
+  "styleExplore_failureHint": "Hover to see the reason",
+  "@styleExplore_failureHint": {
+    "description": "Style explore task03: failureHint"
+  },
+  "styleExplore_imageDeleted": "Image deleted",
+  "@styleExplore_imageDeleted": {
+    "description": "Style explore task03: imageDeleted"
+  },
+  "styleExplore_parentBadge": "Parent",
+  "@styleExplore_parentBadge": {
+    "description": "Style explore task03: parentBadge"
+  },
+  "styleExplore_opMutation": "Mutation",
+  "@styleExplore_opMutation": {
+    "description": "Style explore task03: opMutation"
+  },
+  "styleExplore_opCrossover": "Crossover",
+  "@styleExplore_opCrossover": {
+    "description": "Style explore task03: opCrossover"
+  },
+  "styleExplore_opInjection": "Injection",
+  "@styleExplore_opInjection": {
+    "description": "Style explore task03: opInjection"
+  },
+  "styleExplore_copyArtists": "Copy artists",
+  "@styleExplore_copyArtists": {
+    "description": "Style explore task03: copyArtists"
+  },
+  "styleExplore_interrupted": "Interrupted",
+  "@styleExplore_interrupted": {
+    "description": "Style explore task03: interrupted"
+  },
+  "styleExplore_emptyFilter": "No matching candidates",
+  "@styleExplore_emptyFilter": {
+    "description": "Style explore task03: emptyFilter"
+  },
+  "styleExplore_emptyRound": "This round has no candidates",
+  "@styleExplore_emptyRound": {
+    "description": "Style explore task03: emptyRound"
   }
 }

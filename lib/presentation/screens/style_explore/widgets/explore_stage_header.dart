@@ -17,8 +17,6 @@ import 'explore_icon.dart';
 import 'explore_run_actions.dart';
 import 'explore_run_switcher.dart';
 
-final styleExploreGridLargeProvider = StateProvider<bool>((ref) => true);
-
 /// Size toggle, auto-save and inspector toggle with their 10px gaps.
 const double _trailingWidth = 10 + 70 + 10 + 28 + 10 + 28;
 
@@ -70,7 +68,11 @@ class ExploreStageHeader extends ConsumerWidget {
           l10n.styleExplore_lineCount(run.families.length),
       ],
     ];
-    final large = ref.watch(styleExploreGridLargeProvider);
+    final large = ref.watch(
+      layoutStateNotifierProvider.select(
+        (layout) => layout.styleExploreGridLarge,
+      ),
+    );
     final runStyle = theme.textTheme.bodyMedium?.copyWith(
       fontSize: 14,
       height: 1.45,
@@ -353,14 +355,9 @@ class ExploreStageHeader extends ConsumerWidget {
                                   : StudioIcons.gallerySizeSmall,
                               size: 15,
                             ),
-                            onPressed: () =>
-                                ref
-                                        .read(
-                                          styleExploreGridLargeProvider
-                                              .notifier,
-                                        )
-                                        .state =
-                                    big,
+                            onPressed: () => ref
+                                .read(layoutStateNotifierProvider.notifier)
+                                .setStyleExploreGridLarge(big),
                           ),
                         ),
                       ),

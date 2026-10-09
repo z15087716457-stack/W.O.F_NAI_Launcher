@@ -6994,5 +6994,109 @@
   "styleExplore_drawCountSuffix": "장 · 한 장씩 생성",
   "@styleExplore_drawCountSuffix": {
     "description": "Style exploration workbench: styleExplore_drawCountSuffix"
+  },
+  "styleExplore_candidatesTab": "후보",
+  "@styleExplore_candidatesTab": {
+    "description": "Style explore task03: candidatesTab"
+  },
+  "styleExplore_evolutionTab": "진화",
+  "@styleExplore_evolutionTab": {
+    "description": "Style explore task03: evolutionTab"
+  },
+  "styleExplore_deepRoundTitle": "진화 · {name} {generation}세대",
+  "@styleExplore_deepRoundTitle": {
+    "description": "Style explore task03: deepRoundTitle",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "generation": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_wallRoundCount": "{count}장",
+  "@styleExplore_wallRoundCount": {
+    "description": "Style explore task03: wallRoundCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_wallGenerating": "생성 중",
+  "@styleExplore_wallGenerating": {
+    "description": "Style explore task03: wallGenerating"
+  },
+  "styleExplore_roundFailures": "실패 {count}",
+  "@styleExplore_roundFailures": {
+    "description": "Style explore task03: roundFailures",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_queued": "대기 #{number}",
+  "@styleExplore_queued": {
+    "description": "Style explore task03: queued",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generatingCandidate": "생성 중 #{number}",
+  "@styleExplore_generatingCandidate": {
+    "description": "Style explore task03: generatingCandidate",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generationFailed": "생성 실패",
+  "@styleExplore_generationFailed": {
+    "description": "Style explore task03: generationFailed"
+  },
+  "styleExplore_failureHint": "마우스를 올려 원인 확인",
+  "@styleExplore_failureHint": {
+    "description": "Style explore task03: failureHint"
+  },
+  "styleExplore_imageDeleted": "이미지 삭제됨",
+  "@styleExplore_imageDeleted": {
+    "description": "Style explore task03: imageDeleted"
+  },
+  "styleExplore_parentBadge": "부모",
+  "@styleExplore_parentBadge": {
+    "description": "Style explore task03: parentBadge"
+  },
+  "styleExplore_opMutation": "변이",
+  "@styleExplore_opMutation": {
+    "description": "Style explore task03: opMutation"
+  },
+  "styleExplore_opCrossover": "교차",
+  "@styleExplore_opCrossover": {
+    "description": "Style explore task03: opCrossover"
+  },
+  "styleExplore_opInjection": "주입",
+  "@styleExplore_opInjection": {
+    "description": "Style explore task03: opInjection"
+  },
+  "styleExplore_copyArtists": "작가 문자열 복사",
+  "@styleExplore_copyArtists": {
+    "description": "Style explore task03: copyArtists"
+  },
+  "styleExplore_interrupted": "중단됨",
+  "@styleExplore_interrupted": {
+    "description": "Style explore task03: interrupted"
+  },
+  "styleExplore_emptyFilter": "필터와 일치하는 후보가 없습니다",
+  "@styleExplore_emptyFilter": {
+    "description": "Style explore task03: emptyFilter"
+  },
+  "styleExplore_emptyRound": "이 라운드에는 후보가 없습니다",
+  "@styleExplore_emptyRound": {
+    "description": "Style explore task03: emptyRound"
   }
 }

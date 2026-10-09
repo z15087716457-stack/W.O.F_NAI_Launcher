@@ -6994,5 +6994,109 @@
   "styleExplore_drawCountSuffix": "张 · 逐张生成",
   "@styleExplore_drawCountSuffix": {
     "description": "Style exploration workbench: styleExplore_drawCountSuffix"
+  },
+  "styleExplore_candidatesTab": "候选",
+  "@styleExplore_candidatesTab": {
+    "description": "Style explore task03: candidatesTab"
+  },
+  "styleExplore_evolutionTab": "进化",
+  "@styleExplore_evolutionTab": {
+    "description": "Style explore task03: evolutionTab"
+  },
+  "styleExplore_deepRoundTitle": "进化 · {name} 第 {generation} 代",
+  "@styleExplore_deepRoundTitle": {
+    "description": "Style explore task03: deepRoundTitle",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "generation": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_wallRoundCount": "{count} 张",
+  "@styleExplore_wallRoundCount": {
+    "description": "Style explore task03: wallRoundCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_wallGenerating": "正在生成",
+  "@styleExplore_wallGenerating": {
+    "description": "Style explore task03: wallGenerating"
+  },
+  "styleExplore_roundFailures": "失败 {count}",
+  "@styleExplore_roundFailures": {
+    "description": "Style explore task03: roundFailures",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_queued": "排队 #{number}",
+  "@styleExplore_queued": {
+    "description": "Style explore task03: queued",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generatingCandidate": "生成中 #{number}",
+  "@styleExplore_generatingCandidate": {
+    "description": "Style explore task03: generatingCandidate",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generationFailed": "生成失败",
+  "@styleExplore_generationFailed": {
+    "description": "Style explore task03: generationFailed"
+  },
+  "styleExplore_failureHint": "悬停查看原因",
+  "@styleExplore_failureHint": {
+    "description": "Style explore task03: failureHint"
+  },
+  "styleExplore_imageDeleted": "图片已删除",
+  "@styleExplore_imageDeleted": {
+    "description": "Style explore task03: imageDeleted"
+  },
+  "styleExplore_parentBadge": "父本",
+  "@styleExplore_parentBadge": {
+    "description": "Style explore task03: parentBadge"
+  },
+  "styleExplore_opMutation": "变异",
+  "@styleExplore_opMutation": {
+    "description": "Style explore task03: opMutation"
+  },
+  "styleExplore_opCrossover": "交叉",
+  "@styleExplore_opCrossover": {
+    "description": "Style explore task03: opCrossover"
+  },
+  "styleExplore_opInjection": "注入",
+  "@styleExplore_opInjection": {
+    "description": "Style explore task03: opInjection"
+  },
+  "styleExplore_copyArtists": "复制画师串",
+  "@styleExplore_copyArtists": {
+    "description": "Style explore task03: copyArtists"
+  },
+  "styleExplore_interrupted": "已中断",
+  "@styleExplore_interrupted": {
+    "description": "Style explore task03: interrupted"
+  },
+  "styleExplore_emptyFilter": "没有符合筛选的候选",
+  "@styleExplore_emptyFilter": {
+    "description": "Style explore task03: emptyFilter"
+  },
+  "styleExplore_emptyRound": "本轮还没有候选",
+  "@styleExplore_emptyRound": {
+    "description": "Style explore task03: emptyRound"
   }
 }

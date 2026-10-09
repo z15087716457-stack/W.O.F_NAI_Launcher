@@ -20,6 +20,8 @@ class ExploreIcon extends StatelessWidget {
   static const _paths = {
     'dice':
         'M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1zM9 9h.01M15 15h.01M15 9h.01M9 15h.01M12 12h.01',
+    'box': 'M4 5h16v4H4zM5 9v10h14V9M10 13h4',
+    'max': 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
     'pause': 'M9 5v14M15 5v14',
     'stop': 'M6 6h12v12H6z',
     'play': 'M8 5l11 7-11 7z',

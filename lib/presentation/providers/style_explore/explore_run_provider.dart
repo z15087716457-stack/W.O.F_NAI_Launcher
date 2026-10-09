@@ -84,7 +84,7 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     await ref.read(exploreRunImageStoreProvider).deleteRunDir(id);
   }
 
-  /// 追加手动候选（探索页生成按钮登记）：复用最近的手动轮（无则新建，
+  /// 追加手动候选（探索页生成按钮登记）：每次调用新建一个手动轮（
   /// 状态直接 generated 不经 runner），一次落盘追加 [count] 个 pending
   /// 候选（lineage.operation=manual）。[rollSnapshots] 按追加候选顺序写入。
   Future<List<ExploreCandidate>> addManualCandidates(
@@ -99,25 +99,15 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
           throw StateError('Style explore run does not exist: $runId');
         }
 
-        ExploreRound? manualRound;
-        for (final round in run.rounds.reversed) {
-          if (round.phase == ExploreRoundPhase.manual) {
-            manualRound = round;
-            break;
-          }
-        }
-        final rounds = [...run.rounds];
-        if (manualRound == null) {
-          manualRound = ExploreRound(
-            id: const Uuid().v4(),
-            number: rounds.length + 1,
-            phase: ExploreRoundPhase.manual,
-            status: ExploreRoundStatus.generated,
-            createdAt: DateTime.now(),
-            targetCount: 0,
-          );
-          rounds.add(manualRound);
-        }
+        final manualRound = ExploreRound(
+          id: const Uuid().v4(),
+          number: run.rounds.length + 1,
+          phase: ExploreRoundPhase.manual,
+          status: ExploreRoundStatus.generated,
+          createdAt: DateTime.now(),
+          targetCount: count,
+        );
+        final rounds = [...run.rounds, manualRound];
         final roundId = manualRound.id;
         final snapshots = rollSnapshots;
 

@@ -71,6 +71,7 @@ class StorageKeys {
       'block_library_panel_tool_pinned';
   static const String blockLibraryPanelBlocksSplit =
       'block_library_panel_blocks_split';
+  static const String styleExploreGridLarge = 'style_explore_grid_large';
   static const String styleExploreEditorWidth = 'style_explore_editor_width';
   static const String styleExploreInspectorWidth =
       'style_explore_inspector_width';

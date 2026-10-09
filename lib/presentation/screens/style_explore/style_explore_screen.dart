@@ -6,13 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/constants/api_constants.dart';
-import '../../../data/models/style_explore/explore_run.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/character_position_canvas_provider.dart';
 import '../../providers/layout_state_provider.dart';
 import '../../providers/style_explore/explore_manual_capture.dart';
 import '../../providers/style_explore/explore_run_provider.dart';
-import '../../providers/style_explore/explore_run_runner.dart';
 import '../../providers/tips_provider.dart';
 import '../../widgets/character/character_position_canvas.dart';
 import '../../widgets/character/inline_character_section.dart';
@@ -28,13 +26,11 @@ import '../generation/widgets/img2img_panel.dart';
 import '../generation/widgets/precise_reference_panel.dart';
 import '../generation/widgets/prompt_input.dart';
 import '../generation/widgets/unified_reference_panel.dart';
-import 'widgets/explore_candidate_gallery.dart';
+import 'widgets/explore_candidate_wall.dart';
 import '../../providers/pill_workspace_provider.dart';
 import '../../providers/prompt_block_library_provider.dart';
 import 'widgets/explore_auto_run_name.dart';
-import 'widgets/explore_icon.dart';
 import 'widgets/explore_random_variables_module.dart';
-import 'widgets/explore_run_actions.dart';
 import 'widgets/explore_stage_header.dart';
 import 'widgets/explore_workbench.dart';
 
@@ -50,17 +46,6 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final run = ref.watch(exploreActiveRunProvider);
-    final busy =
-        ref.watch(exploreRunRunnerProvider).isRunning ||
-        ref.watch(imageGenerationNotifierProvider).isGenerating;
-    final retryCount =
-        !busy &&
-            run != null &&
-            (run.status == ExploreRunStatus.generated ||
-                run.status == ExploreRunStatus.reviewing)
-        ? run.failedCount
-        : 0;
 
     // 探索页没有画布宿主（主页画布占图像预览区）：✥ 入口改走轻量弹窗。
     // 弹窗打开后 provider 再关（画布自带关闭按钮/再次点 ✥）由弹窗内
@@ -115,38 +100,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                   dragBackground: true,
                   child: ExploreStageHeader(inspectorVisible: inspectorVisible),
                 ),
-                if (retryCount case final int count when count > 0)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
-                      child: TextButton.icon(
-                        key: const Key('explore-run-retry'),
-                        onPressed: () {
-                          final current = ref.read(exploreActiveRunProvider);
-                          if (current != null) {
-                            ExploreRunActions.retryFailed(
-                              context,
-                              ref,
-                              current,
-                            );
-                          }
-                        },
-                        icon: ExploreIcon(
-                          'swap',
-                          size: 13,
-                          color: theme.colorScheme.error,
-                        ),
-                        label: Text(
-                          context.l10n.styleExplore_retryFailed(count),
-                        ),
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.colorScheme.error,
-                        ),
-                      ),
-                    ),
-                  ),
-                const Expanded(child: ExploreCandidateGallery()),
+                const Expanded(child: ExploreCandidateWall()),
               ],
             ),
             inspector: _buildInspectorPlaceholder(theme),

@@ -12395,6 +12395,73 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_drawCountSuffix => '张 · 逐张生成';
+
+  @override
+  String get styleExplore_candidatesTab => '候选';
+
+  @override
+  String get styleExplore_evolutionTab => '进化';
+
+  @override
+  String styleExplore_deepRoundTitle(String name, int generation) {
+    return '进化 · $name 第 $generation 代';
+  }
+
+  @override
+  String styleExplore_wallRoundCount(int count) {
+    return '$count 张';
+  }
+
+  @override
+  String get styleExplore_wallGenerating => '正在生成';
+
+  @override
+  String styleExplore_roundFailures(int count) {
+    return '失败 $count';
+  }
+
+  @override
+  String styleExplore_queued(int number) {
+    return '排队 #$number';
+  }
+
+  @override
+  String styleExplore_generatingCandidate(int number) {
+    return '生成中 #$number';
+  }
+
+  @override
+  String get styleExplore_generationFailed => '生成失败';
+
+  @override
+  String get styleExplore_failureHint => '悬停查看原因';
+
+  @override
+  String get styleExplore_imageDeleted => '图片已删除';
+
+  @override
+  String get styleExplore_parentBadge => '父本';
+
+  @override
+  String get styleExplore_opMutation => '变异';
+
+  @override
+  String get styleExplore_opCrossover => '交叉';
+
+  @override
+  String get styleExplore_opInjection => '注入';
+
+  @override
+  String get styleExplore_copyArtists => '复制画师串';
+
+  @override
+  String get styleExplore_interrupted => '已中断';
+
+  @override
+  String get styleExplore_emptyFilter => '没有符合筛选的候选';
+
+  @override
+  String get styleExplore_emptyRound => '本轮还没有候选';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24788,4 +24855,71 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_drawCountSuffix => '張 · 逐張生成';
+
+  @override
+  String get styleExplore_candidatesTab => '候選';
+
+  @override
+  String get styleExplore_evolutionTab => '進化';
+
+  @override
+  String styleExplore_deepRoundTitle(String name, int generation) {
+    return '進化 · $name 第 $generation 代';
+  }
+
+  @override
+  String styleExplore_wallRoundCount(int count) {
+    return '$count 張';
+  }
+
+  @override
+  String get styleExplore_wallGenerating => '正在生成';
+
+  @override
+  String styleExplore_roundFailures(int count) {
+    return '失敗 $count';
+  }
+
+  @override
+  String styleExplore_queued(int number) {
+    return '排隊 #$number';
+  }
+
+  @override
+  String styleExplore_generatingCandidate(int number) {
+    return '生成中 #$number';
+  }
+
+  @override
+  String get styleExplore_generationFailed => '生成失敗';
+
+  @override
+  String get styleExplore_failureHint => '懸停檢視原因';
+
+  @override
+  String get styleExplore_imageDeleted => '圖片已刪除';
+
+  @override
+  String get styleExplore_parentBadge => '父本';
+
+  @override
+  String get styleExplore_opMutation => '變異';
+
+  @override
+  String get styleExplore_opCrossover => '交叉';
+
+  @override
+  String get styleExplore_opInjection => '注入';
+
+  @override
+  String get styleExplore_copyArtists => '複製畫師串';
+
+  @override
+  String get styleExplore_interrupted => '已中斷';
+
+  @override
+  String get styleExplore_emptyFilter => '沒有符合篩選的候選';
+
+  @override
+  String get styleExplore_emptyRound => '本輪還沒有候選';
 }
