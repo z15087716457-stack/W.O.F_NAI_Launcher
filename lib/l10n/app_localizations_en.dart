@@ -7989,12 +7989,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Selected candidates have no roll text';
 
   @override
-  String get styleExplore_fixateAsTemplate => 'Import metadata';
-
-  @override
-  String get styleExplore_fixateDone => 'Metadata imported to editor';
-
-  @override
   String get styleExplore_deleteImage => 'Delete image';
 
   @override
@@ -13175,4 +13169,21 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$width×$height · $steps steps · $scale';
   }
+
+  @override
+  String get styleExplore_viewerBack => 'Style exploration';
+
+  @override
+  String styleExplore_viewerPosition(int index, int total) {
+    return 'Image $index / $total';
+  }
+
+  @override
+  String get styleExplore_viewerGroupsShortcut => '1–9: group; 0: ungroup';
+
+  @override
+  String get styleExplore_seedClickCopy => 'Seed (click to copy)';
+
+  @override
+  String get styleExplore_appliedToEditor => 'Applied to editor';
 }

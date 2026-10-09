@@ -7805,12 +7805,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_adoptBlockEmpty => '선택한 후보에 Roll 텍스트가 없습니다';
 
   @override
-  String get styleExplore_fixateAsTemplate => '메타데이터 가져오기';
-
-  @override
-  String get styleExplore_fixateDone => '메타데이터를 편집기로 가져왔습니다';
-
-  @override
   String get styleExplore_deleteImage => '이미지 삭제';
 
   @override
@@ -12798,4 +12792,21 @@ class AppLocalizationsKo extends AppLocalizations {
   ) {
     return '$width×$height · $steps 단계 · $scale';
   }
+
+  @override
+  String get styleExplore_viewerBack => '화풍 탐색';
+
+  @override
+  String styleExplore_viewerPosition(int index, int total) {
+    return '$index장 / 총 $total장';
+  }
+
+  @override
+  String get styleExplore_viewerGroupsShortcut => '1–9: 분류, 0: 분류 해제';
+
+  @override
+  String get styleExplore_seedClickCopy => '시드 (클릭하여 복사)';
+
+  @override
+  String get styleExplore_appliedToEditor => '편집기에 적용됨';
 }

@@ -4282,8 +4282,6 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "選択した候補に Roll 文字列がありません",
-  "styleExplore_fixateAsTemplate": "メタデータを導入",
-  "styleExplore_fixateDone": "メタデータをエディタに導入しました",
   "styleExplore_deleteImage": "画像を削除",
   "styleExplore_deleteImageTitle": "候補画像を削除",
   "styleExplore_deleteImageMessage": "ラン ディレクトリ内の候補画像コピーと候補レコードを削除します。ギャラリーの元画像には影響しません。",
@@ -7225,5 +7223,33 @@
         "type": "String"
       }
     }
+  },
+  "styleExplore_viewerBack": "画風探索",
+  "@styleExplore_viewerBack": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_viewerPosition": "{index} 枚目 / {total} 枚",
+  "@styleExplore_viewerPosition": {
+    "description": "Exploration viewer.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_viewerGroupsShortcut": "1–9：分類、0：分類解除",
+  "@styleExplore_viewerGroupsShortcut": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_seedClickCopy": "シード（クリックでコピー）",
+  "@styleExplore_seedClickCopy": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_appliedToEditor": "編集欄に適用しました",
+  "@styleExplore_appliedToEditor": {
+    "description": "Candidate prompt applied to editor."
   }
 }

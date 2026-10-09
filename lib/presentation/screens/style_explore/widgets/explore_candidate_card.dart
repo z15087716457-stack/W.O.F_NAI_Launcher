@@ -439,7 +439,7 @@ class _ExploreCandidateCardState extends ConsumerState<ExploreCandidateCard> {
       items: [
         PopupMenuItem(
           value: 'apply',
-          child: Text(l10n.styleExplore_fixateAsTemplate),
+          child: Text(l10n.styleExplore_applyToEditor),
         ),
         PopupMenuItem(
           value: 'copy',

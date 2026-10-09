@@ -14042,18 +14042,6 @@ abstract class AppLocalizations {
   /// **'Selected candidates have no roll text'**
   String get styleExplore_adoptBlockEmpty;
 
-  /// No description provided for @styleExplore_fixateAsTemplate.
-  ///
-  /// In en, this message translates to:
-  /// **'Import metadata'**
-  String get styleExplore_fixateAsTemplate;
-
-  /// No description provided for @styleExplore_fixateDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Metadata imported to editor'**
-  String get styleExplore_fixateDone;
-
   /// No description provided for @styleExplore_deleteImage.
   ///
   /// In en, this message translates to:
@@ -22930,6 +22918,36 @@ abstract class AppLocalizations {
     int steps,
     String scale,
   );
+
+  /// Exploration viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Style exploration'**
+  String get styleExplore_viewerBack;
+
+  /// Exploration viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Image {index} / {total}'**
+  String styleExplore_viewerPosition(int index, int total);
+
+  /// Exploration viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'1–9: group; 0: ungroup'**
+  String get styleExplore_viewerGroupsShortcut;
+
+  /// Exploration viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed (click to copy)'**
+  String get styleExplore_seedClickCopy;
+
+  /// Candidate prompt applied to editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied to editor'**
+  String get styleExplore_appliedToEditor;
 }
 
 class _AppLocalizationsDelegate

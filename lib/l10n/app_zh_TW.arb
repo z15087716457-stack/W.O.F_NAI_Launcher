@@ -4282,8 +4282,6 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "所選候選沒有可用的 Roll 串",
-  "styleExplore_fixateAsTemplate": "匯入後設資料",
-  "styleExplore_fixateDone": "已匯入後設資料到編輯區",
   "styleExplore_deleteImage": "刪除圖片",
   "styleExplore_deleteImageTitle": "刪除候選圖",
   "styleExplore_deleteImageMessage": "將刪除該候選在 Run 目錄中的圖片副本與候選記錄；圖庫來源圖不受影響。",
@@ -7225,5 +7223,33 @@
         "type": "String"
       }
     }
+  },
+  "styleExplore_viewerBack": "畫風探索",
+  "@styleExplore_viewerBack": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_viewerPosition": "第 {index} 張 / 共 {total} 張",
+  "@styleExplore_viewerPosition": {
+    "description": "Exploration viewer.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_viewerGroupsShortcut": "按 1–9 歸組，0 移回未分組",
+  "@styleExplore_viewerGroupsShortcut": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_seedClickCopy": "種子（點選複製）",
+  "@styleExplore_seedClickCopy": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_appliedToEditor": "已套用到編輯區",
+  "@styleExplore_appliedToEditor": {
+    "description": "Candidate prompt applied to editor."
   }
 }

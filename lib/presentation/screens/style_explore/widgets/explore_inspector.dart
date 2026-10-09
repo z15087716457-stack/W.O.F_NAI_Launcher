@@ -23,9 +23,21 @@ import 'explore_folder_assign_bar.dart';
 import 'explore_icon.dart';
 import 'explore_shared_actions.dart';
 import 'explore_style.dart';
+import 'explore_highlighted_prompt.dart';
 
 class ExploreInspector extends ConsumerStatefulWidget {
-  const ExploreInspector({super.key});
+  const ExploreInspector({
+    super.key,
+    this.runId,
+    this.candidateId,
+    this.viewer = false,
+    this.onEvolution,
+    this.onAssigned,
+  });
+  final String? runId, candidateId;
+  final bool viewer;
+  final VoidCallback? onEvolution;
+  final void Function(String?)? onAssigned;
   @override
   ConsumerState<ExploreInspector> createState() => _ExploreInspectorState();
 }
@@ -33,6 +45,17 @@ class ExploreInspector extends ConsumerStatefulWidget {
 class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
   final _scroll = ScrollController();
   bool _expanded = false;
+  bool _negativeExpanded = false;
+  @override
+  void didUpdateWidget(covariant ExploreInspector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.candidateId != widget.candidateId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scroll.hasClients) _scroll.jumpTo(0);
+      });
+    }
+  }
+
   @override
   void dispose() {
     _scroll.dispose();
@@ -44,8 +67,14 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
     final theme = Theme.of(context),
         colors = theme.colorScheme,
         l10n = context.l10n;
-    final run = ref.watch(exploreActiveRunProvider);
-    final focus = ref.watch(exploreFocusedCandidateIdProvider);
+    final run = widget.runId == null
+        ? ref.watch(exploreActiveRunProvider)
+        : ref
+              .watch(exploreRunListNotifierProvider)
+              .valueOrNull
+              ?.runById(widget.runId!);
+    final focus =
+        widget.candidateId ?? ref.watch(exploreFocusedCandidateIdProvider);
     final candidate = run?.candidateById(focus ?? '');
     final ids = ref.watch(exploreSelectionProvider);
     final selected = ref.watch(exploreSelectionModeProvider) && ids.isNotEmpty
@@ -59,6 +88,9 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
         if (mounted && _scroll.hasClients) _scroll.jumpTo(0);
       });
     });
+    if (widget.viewer && run != null && candidate != null) {
+      return _viewer(run, candidate);
+    }
     return LayoutBuilder(
       builder: (context, box) => Container(
         decoration: BoxDecoration(
@@ -280,7 +312,7 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
     ],
   );
   Widget _single(ExploreRun run, ExploreCandidate candidate, double width) {
-    final colors = Theme.of(context).colorScheme, l10n = context.l10n;
+    final l10n = context.l10n;
     final done =
         candidate.generation.status == ExploreCandidateGenerationStatus.done;
     final visible = ref.watch(exploreVisibleCandidatesProvider),
@@ -346,6 +378,26 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
           ),
         ),
         const SizedBox(height: 14),
+        _draws(candidate),
+        if (done) ...[
+          const SizedBox(height: 14),
+          _actions(run, candidate),
+          const SizedBox(height: 14),
+          ExploreFolderAssignBar(run: run, candidate: candidate),
+          const SizedBox(height: 14),
+          _params(run, candidate),
+        ],
+      ],
+    );
+  }
+
+  Widget _draws(ExploreCandidate candidate) {
+    final colors = Theme.of(context).colorScheme, l10n = context.l10n;
+    final done =
+        candidate.generation.status == ExploreCandidateGenerationStatus.done;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         _heading(
           l10n.styleExplore_drawsTitle,
           trailing: GestureDetector(
@@ -390,75 +442,204 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
             ),
         ] else
           _atoms(exploreRawArtistAtoms(candidate)),
-        if (done) ...[
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: _action(
-                  'heart',
-                  candidate.review.heart
-                      ? l10n.styleExplore_hearted
-                      : l10n.styleExplore_filterHearted,
-                  () => ref
-                      .read(exploreRunListNotifierProvider.notifier)
-                      .updateReview(
-                        run.id,
-                        candidate.id,
-                        heart: !candidate.review.heart,
-                      ),
-                  key: const Key('explore-inspector-heart'),
-                  hotkey: 'F',
-                  hearted: candidate.review.heart,
+      ],
+    );
+  }
+
+  Widget _actions(ExploreRun run, ExploreCandidate candidate) {
+    final l10n = context.l10n;
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _action(
+                'heart',
+                candidate.review.heart
+                    ? l10n.styleExplore_hearted
+                    : l10n.styleExplore_filterHearted,
+                () => ref
+                    .read(exploreRunListNotifierProvider.notifier)
+                    .updateReview(
+                      run.id,
+                      candidate.id,
+                      heart: !candidate.review.heart,
+                    ),
+                key: Key(
+                  widget.viewer
+                      ? 'explore-candidate-heart'
+                      : 'explore-inspector-heart',
+                ),
+                hotkey: 'F',
+                hearted: candidate.review.heart,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _action(
+                'evo',
+                l10n.styleExplore_joinEvolution,
+                widget.onEvolution ??
+                    () => startExploreEvolution(context, ref, run, [candidate]),
+                hotkey: 'E',
+                evolution: true,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Expanded(
+              child: _action(
+                'box',
+                l10n.styleExplore_saveBlock,
+                () => ExploreCandidateActions.adoptSingle(
+                  context,
+                  ref,
+                  run: run,
+                  candidate: candidate,
+                ),
+                key: Key(
+                  widget.viewer
+                      ? 'explore-candidate-adopt-block'
+                      : 'explore-inspector-save',
                 ),
               ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: _action(
-                  'evo',
-                  l10n.styleExplore_joinEvolution,
-                  () => startExploreEvolution(context, ref, run, [candidate]),
-                  hotkey: 'E',
-                  evolution: true,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: _action(
+                'enter',
+                l10n.styleExplore_applyToEditor,
+                () => ExploreCandidateActions.fixateAsTemplate(
+                  context,
+                  ref,
+                  candidate: candidate,
+                ),
+                key: Key(
+                  widget.viewer
+                      ? 'explore-candidate-fixate'
+                      : 'explore-inspector-apply',
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _viewer(ExploreRun run, ExploreCandidate candidate) {
+    final colors = Theme.of(context).colorScheme, l10n = context.l10n;
+    return Container(
+      color: colors.surfaceContainerLow,
+      child: Column(
+        children: [
+          Container(
+            height: 52,
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: colors.outlineVariant)),
+            ),
+            child: WindowPanelHeader(
+              headerHeight: 51,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '#${run.candidates.indexOf(candidate) + 1}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: _action(
-                  'box',
-                  l10n.styleExplore_saveBlock,
-                  () => ExploreCandidateActions.adoptSingle(
-                    context,
-                    ref,
+          Expanded(
+            child: SingleChildScrollView(
+              controller: _scroll,
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (candidate.generation.status ==
+                      ExploreCandidateGenerationStatus.done) ...[
+                    _actions(run, candidate),
+                    const SizedBox(height: 14),
+                  ],
+                  _draws(candidate),
+                  const SizedBox(height: 14),
+                  _heading(
+                    l10n.styleExplore_fullPrompt,
+                    trailing: GestureDetector(
+                      key: const Key('explore-candidate-copy-snapshot'),
+                      onTap: () => _copySnapshot(candidate.rollSnapshot),
+                      child: ExploreIcon(
+                        'copy',
+                        size: 12,
+                        color: colors.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  if (candidate.rollSnapshot != null)
+                    ExploreHighlightedPrompt(snapshot: candidate.rollSnapshot!),
+                  const SizedBox(height: 14),
+                  GestureDetector(
+                    key: const Key('explore-viewer-negative'),
+                    onTap: () =>
+                        setState(() => _negativeExpanded = !_negativeExpanded),
+                    child: _heading(
+                      l10n.prompt_negativePrompt,
+                      trailing: ExploreIcon(
+                        _negativeExpanded ? 'chevU' : 'chevD',
+                        size: 12,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  if (_negativeExpanded) ...[
+                    const SizedBox(height: 7),
+                    SelectableText(
+                      candidate.rollSnapshot?.negative ?? '',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                  _params(run, candidate),
+                  const SizedBox(height: 14),
+                  ExploreFolderAssignBar(
                     run: run,
                     candidate: candidate,
+                    onAssigned: widget.onAssigned,
                   ),
-                ),
+                  if (candidate.generation.filePath != null) ...[
+                    const SizedBox(height: 14),
+                    TextButton.icon(
+                      key: const Key('explore-candidate-delete-image'),
+                      onPressed: () => _delete(run, candidate),
+                      icon: ExploreIcon('trash', size: 14, color: colors.error),
+                      label: Text(l10n.common_delete),
+                      style: TextButton.styleFrom(
+                        alignment: Alignment.centerLeft,
+                        padding: EdgeInsets.zero,
+                        foregroundColor: colors.error,
+                        textStyle: StudioTypography.body.copyWith(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: _action(
-                  'enter',
-                  l10n.styleExplore_applyToEditor,
-                  () => ExploreCandidateActions.fixateAsTemplate(
-                    context,
-                    ref,
-                    candidate: candidate,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 14),
-          ExploreFolderAssignBar(run: run, candidate: candidate),
-          const SizedBox(height: 14),
-          _params(run, candidate),
         ],
-      ],
+      ),
     );
   }
 
@@ -656,7 +837,9 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
     final entries =
         <({String label, String value, bool mono, VoidCallback? onTap})>[
           (
-            label: l10n.styleExplore_seedName,
+            label: widget.viewer
+                ? l10n.styleExplore_seedClickCopy
+                : l10n.styleExplore_seedName,
             value: g.seed?.toString() ?? '—',
             mono: true,
             onTap: g.seed == null ? null : () => _copy(g.seed.toString()),
@@ -785,6 +968,20 @@ class _ExploreInspectorState extends ConsumerState<ExploreInspector> {
         ),
       ],
     );
+  }
+
+  Future<void> _copySnapshot(ExploreRollSnapshot? snapshot) async {
+    if (snapshot == null) return;
+    final buffer = StringBuffer()
+      ..writeln(snapshot.positive)
+      ..write('---${String.fromCharCode(10)}')
+      ..writeln(snapshot.negative);
+    for (final instance in snapshot.instanceRolls) {
+      buffer.writeln(
+        '[${instance.lane}] ${instance.blockTitle}: ${instance.rolledText}',
+      );
+    }
+    await _copy(buffer.toString());
   }
 
   Future<void> _copy(String text) async {

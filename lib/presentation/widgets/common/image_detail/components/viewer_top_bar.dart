@@ -16,6 +16,7 @@ class ViewerTopBar extends StatelessWidget {
     this.onZoomOut,
     this.onZoomIn,
     this.onOriginalSize,
+    this.onFit,
     this.onFullscreen,
     this.onTogglePanel,
     this.panelVisible = true,
@@ -32,6 +33,7 @@ class ViewerTopBar extends StatelessWidget {
   final VoidCallback? onZoomOut,
       onZoomIn,
       onOriginalSize,
+      onFit,
       onFullscreen,
       onTogglePanel;
   final bool panelVisible,
@@ -156,30 +158,34 @@ class ViewerTopBar extends StatelessWidget {
                           size: 14,
                           key: const Key('viewer-zoom-out'),
                         ),
-                        Container(
-                          height: 28,
-                          constraints: const BoxConstraints(minWidth: 74),
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          decoration: BoxDecoration(
-                            border: Border.symmetric(
-                              vertical: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.1),
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                zoomLabel ?? context.l10n.viewer_fit,
-                                style: mono.copyWith(
-                                  fontSize: 12,
-                                  color: Colors.white,
+                        GestureDetector(
+                          key: const Key('viewer-fit'),
+                          onTap: onFit,
+                          child: Container(
+                            height: 28,
+                            constraints: const BoxConstraints(minWidth: 74),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              border: Border.symmetric(
+                                vertical: BorderSide(
+                                  color: Colors.white.withValues(alpha: 0.1),
                                 ),
                               ),
-                              const SizedBox(width: 4),
-                              const ViewerIcon('chevD', size: 12),
-                            ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  zoomLabel ?? context.l10n.viewer_fit,
+                                  style: mono.copyWith(
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const ViewerIcon('chevD', size: 12),
+                              ],
+                            ),
                           ),
                         ),
                         _button(

@@ -136,7 +136,7 @@ abstract final class ExploreCandidateActions {
         .read(pillWorkspaceProvider(PillScopes.main).notifier)
         .replaceWithPlainText(positive);
     if (context.mounted) {
-      AppToast.success(context, context.l10n.styleExplore_fixateDone);
+      AppToast.success(context, context.l10n.styleExplore_appliedToEditor);
     }
   }
 

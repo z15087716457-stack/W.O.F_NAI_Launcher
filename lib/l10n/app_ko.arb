@@ -4282,8 +4282,6 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "선택한 후보에 Roll 텍스트가 없습니다",
-  "styleExplore_fixateAsTemplate": "메타데이터 가져오기",
-  "styleExplore_fixateDone": "메타데이터를 편집기로 가져왔습니다",
   "styleExplore_deleteImage": "이미지 삭제",
   "styleExplore_deleteImageTitle": "후보 이미지 삭제",
   "styleExplore_deleteImageMessage": "작업 폴더에 있는 이 후보의 이미지 사본과 기록을 삭제합니다. 갤러리의 원본 이미지는 그대로입니다.",
@@ -7225,5 +7223,33 @@
         "type": "String"
       }
     }
+  },
+  "styleExplore_viewerBack": "화풍 탐색",
+  "@styleExplore_viewerBack": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_viewerPosition": "{index}장 / 총 {total}장",
+  "@styleExplore_viewerPosition": {
+    "description": "Exploration viewer.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_viewerGroupsShortcut": "1–9: 분류, 0: 분류 해제",
+  "@styleExplore_viewerGroupsShortcut": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_seedClickCopy": "시드 (클릭하여 복사)",
+  "@styleExplore_seedClickCopy": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_appliedToEditor": "편집기에 적용됨",
+  "@styleExplore_appliedToEditor": {
+    "description": "Candidate prompt applied to editor."
   }
 }

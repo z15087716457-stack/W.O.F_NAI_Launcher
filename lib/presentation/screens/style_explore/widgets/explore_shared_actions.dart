@@ -13,12 +13,12 @@ Future<void> openExploreCandidate(
   BuildContext context,
   WidgetRef ref,
   ExploreRun run,
-  ExploreCandidate candidate,
-) {
-  final ids = ref
-      .read(exploreVisibleCandidatesProvider)
-      .map((c) => c.id)
-      .toList();
+  ExploreCandidate candidate, {
+  List<String>? browsingIds,
+}) async {
+  final ids =
+      browsingIds ??
+      ref.read(exploreVisibleCandidatesProvider).map((c) => c.id).toList();
   var index = ids.indexOf(candidate.id);
   if (index < 0) {
     ids
@@ -26,14 +26,21 @@ Future<void> openExploreCandidate(
       ..add(candidate.id);
     index = 0;
   }
-  return showDialog<void>(
-    context: context,
-    builder: (_) => ExploreCandidateDetailDialog(
-      runId: run.id,
-      candidateIds: ids,
-      initialIndex: index,
-    ),
+  final evolution = await ExploreCandidateDetailDialog.show(
+    context,
+    runId: run.id,
+    candidateIds: ids,
+    initialIndex: index,
   );
+  if (evolution == null || !context.mounted) return;
+  final latest = ref
+          .read(exploreRunListNotifierProvider)
+          .valueOrNull
+          ?.runById(run.id),
+      source = latest?.candidateById(evolution);
+  if (latest != null && source != null) {
+    await startExploreEvolution(context, ref, latest, [source]);
+  }
 }
 
 Future<bool> startExploreEvolution(

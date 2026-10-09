@@ -7691,12 +7691,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_adoptBlockEmpty => '所选候选没有可用的 Roll 串';
 
   @override
-  String get styleExplore_fixateAsTemplate => '导入元数据';
-
-  @override
-  String get styleExplore_fixateDone => '已导入元数据到编辑区';
-
-  @override
   String get styleExplore_deleteImage => '删除图片';
 
   @override
@@ -12553,6 +12547,23 @@ class AppLocalizationsZh extends AppLocalizations {
   ) {
     return '$width×$height · $steps 步 · $scale';
   }
+
+  @override
+  String get styleExplore_viewerBack => '画风探索';
+
+  @override
+  String styleExplore_viewerPosition(int index, int total) {
+    return '第 $index 张 / 共 $total 张';
+  }
+
+  @override
+  String get styleExplore_viewerGroupsShortcut => '按 1–9 归组，0 移回未分组';
+
+  @override
+  String get styleExplore_seedClickCopy => '种子（点击复制）';
+
+  @override
+  String get styleExplore_appliedToEditor => '已套用到编辑区';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -20242,12 +20253,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_adoptBlockEmpty => '所選候選沒有可用的 Roll 串';
 
   @override
-  String get styleExplore_fixateAsTemplate => '匯入後設資料';
-
-  @override
-  String get styleExplore_fixateDone => '已匯入後設資料到編輯區';
-
-  @override
   String get styleExplore_deleteImage => '刪除圖片';
 
   @override
@@ -25104,4 +25109,21 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   ) {
     return '$width×$height · $steps 步 · $scale';
   }
+
+  @override
+  String get styleExplore_viewerBack => '畫風探索';
+
+  @override
+  String styleExplore_viewerPosition(int index, int total) {
+    return '第 $index 張 / 共 $total 張';
+  }
+
+  @override
+  String get styleExplore_viewerGroupsShortcut => '按 1–9 歸組，0 移回未分組';
+
+  @override
+  String get styleExplore_seedClickCopy => '種子（點選複製）';
+
+  @override
+  String get styleExplore_appliedToEditor => '已套用到編輯區';
 }

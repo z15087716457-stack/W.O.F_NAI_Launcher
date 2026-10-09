@@ -4282,8 +4282,6 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "Selected candidates have no roll text",
-  "styleExplore_fixateAsTemplate": "Import metadata",
-  "styleExplore_fixateDone": "Metadata imported to editor",
   "styleExplore_deleteImage": "Delete image",
   "styleExplore_deleteImageTitle": "Delete candidate image",
   "styleExplore_deleteImageMessage": "Deletes this candidate's image copy in the run directory and removes its record. The gallery source image is untouched.",
@@ -7225,5 +7223,33 @@
         "type": "String"
       }
     }
+  },
+  "styleExplore_viewerBack": "Style exploration",
+  "@styleExplore_viewerBack": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_viewerPosition": "Image {index} / {total}",
+  "@styleExplore_viewerPosition": {
+    "description": "Exploration viewer.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_viewerGroupsShortcut": "1–9: group; 0: ungroup",
+  "@styleExplore_viewerGroupsShortcut": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_seedClickCopy": "Seed (click to copy)",
+  "@styleExplore_seedClickCopy": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_appliedToEditor": "Applied to editor",
+  "@styleExplore_appliedToEditor": {
+    "description": "Candidate prompt applied to editor."
   }
 }

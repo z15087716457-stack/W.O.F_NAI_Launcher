@@ -1094,21 +1094,39 @@ void main() {
     );
     final container = await pumpScreen(tester);
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
 
     await tester.tap(find.byKey(const Key('explore-candidate-cand-d')));
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byKey(const Key('explore-candidate-cand-d')));
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.byKey(const Key('explore-candidate-detail')), findsOneWidget);
-    expect(find.text('候选详情'), findsOneWidget);
-    expect(find.text('Seed 987654'), findsOneWidget);
-    expect(find.text('4321 ms'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('画风探索'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('987654'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('4.3 s'), findsOneWidget);
     expect(find.text('soft light, watercolor'), findsOneWidget);
-    expect(find.text('[pos] 画风池: watercolor'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-candidate-detail')),
+        matching: find.text('画风池'),
+      ),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const Key('explore-candidate-copy-snapshot')),
       findsOneWidget,
@@ -1123,7 +1141,7 @@ void main() {
     );
     final container = await pumpScreen(tester);
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
 
     // 基础轮出图数、draft 开始和 generated 再来一轮均由主生成控制条承载。
@@ -1179,7 +1197,7 @@ void main() {
     );
     final container = await pumpScreen(tester);
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
 
     // 打开 cand-2：翻页序 = 打开瞬间的筛选快照，按轮内生成顺序→ 序列 [cand-1, cand-2, cand-3]，
@@ -1187,67 +1205,87 @@ void main() {
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byKey(const Key('explore-candidate-detail')), findsOneWidget);
-    expect(find.text('第 2/3 张'), findsOneWidget);
+    expect(find.textContaining('第 2 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-2'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-2',
+        ),
       ),
       findsOneWidget,
     );
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    expect(find.text('第 1/3 张'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('第 1 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-1'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-1',
+        ),
       ),
       findsOneWidget,
     );
     // 已到首张：左箭头按钮消失且再按 ← 原地不动（不循环）。
-    expect(find.byKey(const Key('explore-candidate-prev')), findsNothing);
+    expect(find.byKey(const Key('viewer-previous')), findsNothing);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    expect(find.text('第 1/3 张'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('第 1 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-1'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-1',
+        ),
       ),
       findsOneWidget,
     );
 
     // 小键盘 → 与普通 → 等价。
     await tester.sendKeyEvent(LogicalKeyboardKey.numpad6);
-    await tester.pump();
-    expect(find.text('第 2/3 张'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('第 2 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-2'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-2',
+        ),
       ),
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const Key('explore-candidate-next')));
-    await tester.pump();
-    expect(find.text('第 3/3 张'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('viewer-next')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('第 3 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-3'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-3',
+        ),
       ),
       findsOneWidget,
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
-    expect(find.text('第 3/3 张'), findsOneWidget);
-    expect(find.byKey(const Key('explore-candidate-next')), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('第 3 张 / 共 3 张'), findsOneWidget);
+    expect(find.byKey(const Key('viewer-next')), findsNothing);
   });
 
   testWidgets('detail dialog assigns folder, persists and jumps to next '
@@ -1280,69 +1318,85 @@ void main() {
     await runStorage.putRun(run.copyWith(folders: [folder]));
     final container = await pumpScreen(tester);
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
 
     // 从最新的 cand-1（序列 index 0）开始连续归类。
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
     await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
     final assignChip = find.byKey(const Key('explore-assign-folder-folder-a'));
     expect(assignChip, findsOneWidget);
     expect(tester.widget<ExploreGroupChip>(assignChip).selected, isFalse);
-    expect(find.text('第 1/3 张'), findsOneWidget);
+    expect(find.textContaining('第 1 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-1'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-1',
+        ),
       ),
       findsOneWidget,
     );
 
     // 点文件夹即归类落盘 + 自动跳序列下一张未分类（更旧方向）。
     await tester.tap(assignChip);
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
     expect(
       runStorage._store[run.id]!.candidateById('cand-1')!.folderId,
       'folder-a',
     );
-    expect(find.text('第 2/3 张'), findsOneWidget);
+    expect(find.textContaining('第 2 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-2'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-2',
+        ),
       ),
       findsOneWidget,
     );
 
     // 再归类第二张 → 跳到第三张（最旧的 cand-3）。
     await tester.tap(assignChip);
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
     expect(
       runStorage._store[run.id]!.candidateById('cand-2')!.folderId,
       'folder-a',
     );
-    expect(find.text('第 3/3 张'), findsOneWidget);
+    expect(find.textContaining('第 3 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-3'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-3',
+        ),
       ),
       findsOneWidget,
     );
 
     // 回看第二张：归属态在弹窗内高亮。
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.pump();
-    expect(find.text('第 2/3 张'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('第 2 张 / 共 3 张'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.text('pos-2'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is SelectableText &&
+              (w.data ?? w.textSpan?.toPlainText()) == 'pos-2',
+        ),
       ),
       findsOneWidget,
     );
@@ -1350,13 +1404,13 @@ void main() {
 
     // 再点当前文件夹 = 移回未分类（不删图、不跳页）。
     await tester.tap(assignChip);
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 100));
     expect(
       runStorage._store[run.id]!.candidateById('cand-2')!.folderId,
       isNull,
     );
-    expect(find.text('第 2/3 张'), findsOneWidget);
+    expect(find.textContaining('第 2 张 / 共 3 张'), findsOneWidget);
   });
 
   testWidgets('round candidates retain generation order', (tester) async {
@@ -1751,7 +1805,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byKey(const Key('explore-candidate-detail')),
-        matching: find.byIcon(Icons.close),
+        matching: find.byKey(const Key('viewer-back')),
       ),
     );
     await tester.pump();

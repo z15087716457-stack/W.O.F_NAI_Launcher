@@ -7811,12 +7811,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_adoptBlockEmpty => '選択した候補に Roll 文字列がありません';
 
   @override
-  String get styleExplore_fixateAsTemplate => 'メタデータを導入';
-
-  @override
-  String get styleExplore_fixateDone => 'メタデータをエディタに導入しました';
-
-  @override
   String get styleExplore_deleteImage => '画像を削除';
 
   @override
@@ -12778,4 +12772,21 @@ class AppLocalizationsJa extends AppLocalizations {
   ) {
     return '$width×$height · $steps ステップ · $scale';
   }
+
+  @override
+  String get styleExplore_viewerBack => '画風探索';
+
+  @override
+  String styleExplore_viewerPosition(int index, int total) {
+    return '$index 枚目 / $total 枚';
+  }
+
+  @override
+  String get styleExplore_viewerGroupsShortcut => '1–9：分類、0：分類解除';
+
+  @override
+  String get styleExplore_seedClickCopy => 'シード（クリックでコピー）';
+
+  @override
+  String get styleExplore_appliedToEditor => '編集欄に適用しました';
 }

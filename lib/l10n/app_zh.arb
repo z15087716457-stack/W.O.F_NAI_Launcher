@@ -4282,8 +4282,6 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "所选候选没有可用的 Roll 串",
-  "styleExplore_fixateAsTemplate": "导入元数据",
-  "styleExplore_fixateDone": "已导入元数据到编辑区",
   "styleExplore_deleteImage": "删除图片",
   "styleExplore_deleteImageTitle": "删除候选图",
   "styleExplore_deleteImageMessage": "将删除该候选在 Run 目录中的图片副本与候选记录；图库源图不受影响。",
@@ -7225,5 +7223,33 @@
         "type": "String"
       }
     }
+  },
+  "styleExplore_viewerBack": "画风探索",
+  "@styleExplore_viewerBack": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_viewerPosition": "第 {index} 张 / 共 {total} 张",
+  "@styleExplore_viewerPosition": {
+    "description": "Exploration viewer.",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_viewerGroupsShortcut": "按 1–9 归组，0 移回未分组",
+  "@styleExplore_viewerGroupsShortcut": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_seedClickCopy": "种子（点击复制）",
+  "@styleExplore_seedClickCopy": {
+    "description": "Exploration viewer."
+  },
+  "styleExplore_appliedToEditor": "已套用到编辑区",
+  "@styleExplore_appliedToEditor": {
+    "description": "Candidate prompt applied to editor."
   }
 }
