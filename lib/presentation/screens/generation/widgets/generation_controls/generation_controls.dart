@@ -17,6 +17,17 @@ import 'generate_button.dart';
 import '../../../../providers/generation/image_workflow_controller.dart';
 import '../../../../providers/generation/local_upscale_provider.dart';
 
+/// An additional UI entry calls the exact same guarded generation handler.
+class GenerationControlsController {
+  Object? _owner;
+  Future<void> Function()? _action;
+  Future<void> generate() => _action?.call() ?? Future<void>.value();
+  void dispose() {
+    _owner = null;
+    _action = null;
+  }
+}
+
 /// 生成控制按钮
 class GenerationControls extends ConsumerStatefulWidget {
   /// 紧凑模式：用于官网式布局的钉底控制条——压低生成按钮高度。
@@ -39,6 +50,7 @@ class GenerationControls extends ConsumerStatefulWidget {
   /// 是否显示自动保存开关芯片。
   /// 生成页左栏把它挪到了历史面板标题栏，传 false 关闭底栏渲染。
   final bool showAutoSaveChip;
+  final GenerationControlsController? controller;
 
   const GenerationControls({
     super.key,
@@ -48,6 +60,7 @@ class GenerationControls extends ConsumerStatefulWidget {
     this.exploreMode = false,
     this.showBalanceChips = true,
     this.showAutoSaveChip = true,
+    this.controller,
   });
 
   @override
@@ -59,6 +72,21 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
   int _copySeed = 0;
   int _lastImageCount = -1;
   bool _wasGenerating = false;
+
+  @override
+  void didUpdateWidget(GenerationControls oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller &&
+        oldWidget.controller?._owner == this) {
+      oldWidget.controller?.dispose();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller?._owner == this) widget.controller?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +113,11 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
         ) ||
         kritaBridgeState.isBridgeGenerating ||
         exploreRunnerBusy;
+    widget.controller?._owner = this;
+    widget.controller?._action = () =>
+        !mounted || isGenerating || cooldownState.remainingSeconds > 0
+        ? Future<void>.value()
+        : _handleGenerate(context, ref);
 
     // 生成中常驻显示取消入口（与移动端一致）
     final showCancel =

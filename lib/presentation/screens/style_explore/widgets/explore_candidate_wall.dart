@@ -16,7 +16,7 @@ import 'explore_candidate_actions.dart';
 import 'explore_candidate_hover_preview.dart';
 import 'explore_shared_actions.dart';
 import 'explore_folder_assign_bar.dart';
-import 'explore_gallery_welcome.dart';
+import 'explore_onboarding.dart';
 import 'explore_evolution_view.dart';
 import 'explore_evolution_actions.dart';
 import 'horizontal_edge_fade.dart';
@@ -40,7 +40,9 @@ import '../../../widgets/common/dashed_rounded_border.dart';
 /// 收藏（heart 字段）是纯数据注释，任何时刻不移动/改名图库文件，
 /// run 目录副本随 run 删除。
 class ExploreCandidateWall extends ConsumerStatefulWidget {
-  const ExploreCandidateWall({super.key});
+  const ExploreCandidateWall({super.key, this.onGenerate, this.onOpenPrevious});
+  final Future<void> Function()? onGenerate;
+  final VoidCallback? onOpenPrevious;
 
   @override
   ConsumerState<ExploreCandidateWall> createState() =>
@@ -84,7 +86,10 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
           );
 
     if (run == null) {
-      return const ExploreGalleryWelcome();
+      return ExploreOnboarding(
+        onGenerate: widget.onGenerate,
+        onOpenPrevious: widget.onOpenPrevious,
+      );
     }
 
     final candidates = run.candidates;
@@ -119,7 +124,10 @@ class _ExploreCandidateWallState extends ConsumerState<ExploreCandidateWall> {
                           },
                         )
                       : candidates.isEmpty
-                      ? const ExploreGalleryWelcome()
+                      ? ExploreOnboarding(
+                          onGenerate: widget.onGenerate,
+                          onOpenPrevious: widget.onOpenPrevious,
+                        )
                       : _buildDeck(theme, l10n, run),
                 ),
               ],

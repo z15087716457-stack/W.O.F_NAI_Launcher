@@ -917,7 +917,7 @@ void main() {
     final container = await pumpScreen(tester);
 
     // 无 activeRun 时是空态。
-    expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
+    expect(find.byKey(const Key('explore-onboarding-step-1')), findsOneWidget);
 
     container.read(exploreActiveRunIdProvider.notifier).state = run.id;
     await tester.pump();
@@ -1649,7 +1649,7 @@ void main() {
     final created = recording.created.single;
     expect(created.title, '收编任务 #1');
     expect(created.content, 'soft light, watercolor');
-    expect(created.color, '#FF607D8B');
+    expect(created.color, '#FF6E56CF');
     expect(created.iconName, isNull);
   });
 

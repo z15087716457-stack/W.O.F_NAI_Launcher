@@ -7668,14 +7668,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_adoptAsBlock => '收编为块';
-
-  @override
-  String get styleExplore_adoptBlockNameLabel => '块名称';
-
-  @override
   String styleExplore_adoptBlockSaved(String name) {
-    return '已收编为块「$name」';
+    return '已存为块「$name」';
   }
 
   @override
@@ -12656,6 +12650,86 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_sortSpace => '空格';
+
+  @override
+  String styleExplore_saveSingleSubtitle(int n) {
+    return '#$n 的画师存成一个块';
+  }
+
+  @override
+  String styleExplore_saveManySubtitle(int count) {
+    return '$count 张候选的画师合成一个块，存进块库';
+  }
+
+  @override
+  String get styleExplore_saveArtistsOnly => '只要抽到的画师';
+
+  @override
+  String get styleExplore_saveFullPositive => '完整正向提示词';
+
+  @override
+  String get styleExplore_saveNoDraws => '这些候选没有正向遗传实例记录，请保存完整正向提示词';
+
+  @override
+  String get styleExplore_saveContent => '内容';
+
+  @override
+  String get styleExplore_saveRemoveAtoms => '点 × 去掉不要的画师';
+
+  @override
+  String styleExplore_saveRemoved(int count) {
+    return '已去掉 $count 个';
+  }
+
+  @override
+  String get styleExplore_saveRestore => '恢复';
+
+  @override
+  String get styleExplore_saveName => '块名称';
+
+  @override
+  String get styleExplore_saveColor => '颜色';
+
+  @override
+  String get styleExplore_saveIcon => '图标';
+
+  @override
+  String get styleExplore_saveFolder => '放到块库';
+
+  @override
+  String get styleExplore_saveRoot => '根目录';
+
+  @override
+  String get styleExplore_saveHint => '存好后可以在块库里拖进提示词';
+
+  @override
+  String get styleExplore_onboardingTitle => '用随机块批量试画风';
+
+  @override
+  String get styleExplore_onboardingRandomTitle => '放入随机块';
+
+  @override
+  String get styleExplore_onboardingRandomHint => '在提示词里放入画师池，开启随机抽取和进化';
+
+  @override
+  String get styleExplore_onboardingDrawTitle => '抽一批候选';
+
+  @override
+  String get styleExplore_onboardingDrawHint => '每张图会从随机块里重新抽画师';
+
+  @override
+  String styleExplore_onboardingDraw(int count) {
+    return '抽 $count 张候选';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewTitle => '收藏、比较、进化';
+
+  @override
+  String get styleExplore_onboardingReviewHint => '收藏喜欢的画风，两两比较，再挑最好的培育下一代';
+
+  @override
+  String get styleExplore_onboardingOpenPrevious => '打开以前的探索';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -20322,14 +20396,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get styleExplore_adoptAsBlock => '收編為塊';
-
-  @override
-  String get styleExplore_adoptBlockNameLabel => '塊名稱';
-
-  @override
   String styleExplore_adoptBlockSaved(String name) {
-    return '已收編為塊「$name」';
+    return '已存為塊「$name」';
   }
 
   @override
@@ -25310,4 +25378,84 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_sortSpace => '空格';
+
+  @override
+  String styleExplore_saveSingleSubtitle(int n) {
+    return '#$n 的畫師存成一個塊';
+  }
+
+  @override
+  String styleExplore_saveManySubtitle(int count) {
+    return '$count 張候選的畫師合成一個塊，存進塊庫';
+  }
+
+  @override
+  String get styleExplore_saveArtistsOnly => '只要抽到的畫師';
+
+  @override
+  String get styleExplore_saveFullPositive => '完整正向提示詞';
+
+  @override
+  String get styleExplore_saveNoDraws => '這些候選沒有正向遺傳實例記錄，請儲存完整正向提示詞';
+
+  @override
+  String get styleExplore_saveContent => '內容';
+
+  @override
+  String get styleExplore_saveRemoveAtoms => '點 × 去掉不要的畫師';
+
+  @override
+  String styleExplore_saveRemoved(int count) {
+    return '已去掉 $count 個';
+  }
+
+  @override
+  String get styleExplore_saveRestore => '恢復';
+
+  @override
+  String get styleExplore_saveName => '塊名稱';
+
+  @override
+  String get styleExplore_saveColor => '顏色';
+
+  @override
+  String get styleExplore_saveIcon => '圖示';
+
+  @override
+  String get styleExplore_saveFolder => '放到塊庫';
+
+  @override
+  String get styleExplore_saveRoot => '根目錄';
+
+  @override
+  String get styleExplore_saveHint => '存好後可以在塊庫裡拖進提示詞';
+
+  @override
+  String get styleExplore_onboardingTitle => '用隨機塊批次試畫風';
+
+  @override
+  String get styleExplore_onboardingRandomTitle => '放入隨機塊';
+
+  @override
+  String get styleExplore_onboardingRandomHint => '在提示詞裡放入畫師池，開啟隨機抽取和進化';
+
+  @override
+  String get styleExplore_onboardingDrawTitle => '抽一批候選';
+
+  @override
+  String get styleExplore_onboardingDrawHint => '每張圖會從隨機塊裡重新抽畫師';
+
+  @override
+  String styleExplore_onboardingDraw(int count) {
+    return '抽 $count 張候選';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewTitle => '收藏、比較、進化';
+
+  @override
+  String get styleExplore_onboardingReviewHint => '收藏喜歡的畫風，兩兩比較，再挑最好的培育下一代';
+
+  @override
+  String get styleExplore_onboardingOpenPrevious => '開啟以前的探索';
 }

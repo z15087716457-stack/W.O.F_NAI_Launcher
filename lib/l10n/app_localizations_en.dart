@@ -7965,14 +7965,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_adoptAsBlock => 'Adopt as block';
-
-  @override
-  String get styleExplore_adoptBlockNameLabel => 'Block name';
-
-  @override
   String styleExplore_adoptBlockSaved(String name) {
-    return 'Adopted as block \"$name\"';
+    return 'Saved as block “$name”';
   }
 
   @override
@@ -13290,4 +13284,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_sortSpace => 'Space';
+
+  @override
+  String styleExplore_saveSingleSubtitle(int n) {
+    return 'Save the artists from #$n as one block';
+  }
+
+  @override
+  String styleExplore_saveManySubtitle(int count) {
+    return 'Combine artists from $count candidates into one library block';
+  }
+
+  @override
+  String get styleExplore_saveArtistsOnly => 'Drawn artists only';
+
+  @override
+  String get styleExplore_saveFullPositive => 'Full positive prompt';
+
+  @override
+  String get styleExplore_saveNoDraws =>
+      'These candidates have no positive genetic draw records; save the full positive prompt';
+
+  @override
+  String get styleExplore_saveContent => 'Content';
+
+  @override
+  String get styleExplore_saveRemoveAtoms =>
+      'Click × to remove unwanted artists';
+
+  @override
+  String styleExplore_saveRemoved(int count) {
+    return 'Removed $count';
+  }
+
+  @override
+  String get styleExplore_saveRestore => 'Restore';
+
+  @override
+  String get styleExplore_saveName => 'Block name';
+
+  @override
+  String get styleExplore_saveColor => 'Color';
+
+  @override
+  String get styleExplore_saveIcon => 'Icon';
+
+  @override
+  String get styleExplore_saveFolder => 'Library folder';
+
+  @override
+  String get styleExplore_saveRoot => 'Root';
+
+  @override
+  String get styleExplore_saveHint =>
+      'Drag the saved block from the library into a prompt';
+
+  @override
+  String get styleExplore_onboardingTitle =>
+      'Explore styles with random blocks';
+
+  @override
+  String get styleExplore_onboardingRandomTitle => 'Add random blocks';
+
+  @override
+  String get styleExplore_onboardingRandomHint =>
+      'Add an artist pool to the prompt and enable random draws and evolution';
+
+  @override
+  String get styleExplore_onboardingDrawTitle => 'Draw a candidate batch';
+
+  @override
+  String get styleExplore_onboardingDrawHint =>
+      'Each image draws artists afresh from the random blocks';
+
+  @override
+  String styleExplore_onboardingDraw(int count) {
+    return 'Draw $count candidates';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewTitle => 'Favorite, compare, evolve';
+
+  @override
+  String get styleExplore_onboardingReviewHint =>
+      'Favorite the styles you like, compare pairs, then breed the best into the next generation';
+
+  @override
+  String get styleExplore_onboardingOpenPrevious =>
+      'Open previous explorations';
 }

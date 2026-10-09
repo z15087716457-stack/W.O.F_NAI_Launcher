@@ -44,6 +44,14 @@ class StyleExploreScreen extends ConsumerStatefulWidget {
 }
 
 class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
+  final _generationControls = GenerationControlsController();
+  final _runMenu = MenuController();
+  @override
+  void dispose() {
+    _generationControls.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -99,9 +107,17 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
                   minimumInlineWidth: 520,
                   inlineDragWidth: 0,
                   dragBackground: true,
-                  child: ExploreStageHeader(inspectorVisible: inspectorVisible),
+                  child: ExploreStageHeader(
+                    inspectorVisible: inspectorVisible,
+                    runMenuController: _runMenu,
+                  ),
                 ),
-                const Expanded(child: ExploreCandidateWall()),
+                Expanded(
+                  child: ExploreCandidateWall(
+                    onGenerate: _generationControls.generate,
+                    onOpenPrevious: _runMenu.open,
+                  ),
+                ),
               ],
             ),
             inspector: const ExploreInspector(),
@@ -253,6 +269,7 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
           child: SizedBox(
             width: availableWidth,
             child: GenerationControls(
+              controller: _generationControls,
               // 主编辑区宽度有限，用紧凑钉底条（与主生成页左面板同款 2×2
               // 点数块布局），正常布局在此宽度会把点数 chips 压到重叠
               compact: true,

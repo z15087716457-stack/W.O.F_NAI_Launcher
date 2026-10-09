@@ -7782,14 +7782,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_adoptAsBlock => '블록으로 저장';
-
-  @override
-  String get styleExplore_adoptBlockNameLabel => '블록 이름';
-
-  @override
   String styleExplore_adoptBlockSaved(String name) {
-    return '\"$name\" 블록으로 저장했습니다';
+    return '“$name” 블록으로 저장됨';
   }
 
   @override
@@ -12905,4 +12899,86 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_sortSpace => 'Space';
+
+  @override
+  String styleExplore_saveSingleSubtitle(int n) {
+    return '#$n의 작가를 하나의 블록으로 저장';
+  }
+
+  @override
+  String styleExplore_saveManySubtitle(int count) {
+    return '후보 $count장의 작가를 하나의 라이브러리 블록으로 합칩니다';
+  }
+
+  @override
+  String get styleExplore_saveArtistsOnly => '추출된 작가만';
+
+  @override
+  String get styleExplore_saveFullPositive => '전체 긍정 프롬프트';
+
+  @override
+  String get styleExplore_saveNoDraws => '긍정 유전 추출 기록이 없어 전체 긍정 프롬프트를 저장합니다';
+
+  @override
+  String get styleExplore_saveContent => '내용';
+
+  @override
+  String get styleExplore_saveRemoveAtoms => '×를 눌러 원하지 않는 작가 제거';
+
+  @override
+  String styleExplore_saveRemoved(int count) {
+    return '$count개 제거됨';
+  }
+
+  @override
+  String get styleExplore_saveRestore => '복원';
+
+  @override
+  String get styleExplore_saveName => '블록 이름';
+
+  @override
+  String get styleExplore_saveColor => '색상';
+
+  @override
+  String get styleExplore_saveIcon => '아이콘';
+
+  @override
+  String get styleExplore_saveFolder => '라이브러리 폴더';
+
+  @override
+  String get styleExplore_saveRoot => '루트';
+
+  @override
+  String get styleExplore_saveHint => '저장한 블록을 라이브러리에서 프롬프트로 끌어올 수 있습니다';
+
+  @override
+  String get styleExplore_onboardingTitle => '무작위 블록으로 화풍 탐색';
+
+  @override
+  String get styleExplore_onboardingRandomTitle => '무작위 블록 추가';
+
+  @override
+  String get styleExplore_onboardingRandomHint =>
+      '작가 풀을 프롬프트에 넣고 무작위 추출과 진화를 켭니다';
+
+  @override
+  String get styleExplore_onboardingDrawTitle => '후보 묶음 추출';
+
+  @override
+  String get styleExplore_onboardingDrawHint => '각 이미지마다 무작위 블록에서 작가를 다시 추출합니다';
+
+  @override
+  String styleExplore_onboardingDraw(int count) {
+    return '후보 $count장 추출';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewTitle => '즐겨찾기, 비교, 진화';
+
+  @override
+  String get styleExplore_onboardingReviewHint =>
+      '좋은 화풍을 즐겨찾기하고 쌍별 비교로 다음 세대를 육성합니다';
+
+  @override
+  String get styleExplore_onboardingOpenPrevious => '이전 탐색 열기';
 }

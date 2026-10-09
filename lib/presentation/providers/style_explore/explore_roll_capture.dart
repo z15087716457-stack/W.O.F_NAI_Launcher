@@ -6,6 +6,13 @@ import '../../../data/models/style_explore/explore_run.dart';
 import '../pill_workspace_provider.dart';
 import '../prompt_block_library_provider.dart';
 
+Iterable<MapEntry<String, PillInstance>> exploreGeneticInstances(
+  PillDocument document,
+) => document.instances.entries.where(
+  (e) =>
+      e.value.enabled && e.value.settings.hasRoll && e.value.evolutionEnabled,
+);
+
 /// 解析深度轮 override 的目标遗传实例 marker（纯函数）：
 /// 优先文档中与 [blockId] 相同的启用遗传实例（父本来源实例；随机/顺序
 /// 模式均可），找不到回退第一个启用遗传实例；都没有 → null（不允许深度轮）。
@@ -14,13 +21,8 @@ String? resolveExploreOverrideMarkerInDocument(
   String? blockId,
 }) {
   String? first;
-  for (final entry in document.instances.entries) {
+  for (final entry in exploreGeneticInstances(document)) {
     final instance = entry.value;
-    if (!instance.enabled ||
-        !instance.settings.hasRoll ||
-        !instance.evolutionEnabled) {
-      continue;
-    }
     first ??= entry.key;
     if (blockId != null && instance.blockId == blockId) return entry.key;
   }

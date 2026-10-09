@@ -13,74 +13,62 @@ import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import 'explore_adopt_block_dialog.dart';
 
-/// 探索候选的出口动作（收编为块 / 导入元数据 / 删除候选图），
-/// 候选详情弹窗与画廊多选条共用。
+/// 探索候选的出口动作（存为块 / 套用到编辑区 / 删除候选图），
+/// 检查器、大图和多选条共用。
 abstract final class ExploreCandidateActions {
-  /// 单候选收编为块：内容 = `rollSnapshot.positive` 原文，
-  /// 默认名 = run 名 + 候选序号。返回是否实际建块。
   static Future<bool> adoptSingle(
     BuildContext context,
     WidgetRef ref, {
     required ExploreRun run,
     required ExploreCandidate candidate,
-  }) async {
-    final positive = candidate.rollSnapshot?.positive;
-    if (positive == null || positive.trim().isEmpty) {
-      AppToast.warning(context, context.l10n.styleExplore_adoptBlockEmpty);
-      return false;
-    }
-    final sequence = run.candidates.indexWhere((c) => c.id == candidate.id) + 1;
-    return _adopt(
-      context,
-      ref,
-      defaultTitle: '${run.displayName} #$sequence',
-      content: positive,
-    );
-  }
+  }) => _adopt(
+    context,
+    ref,
+    defaultTitle:
+        '${run.displayName} #${run.candidates.indexWhere((c) => c.id == candidate.id) + 1}',
+    candidates: [candidate],
+    sequenceNumber: run.candidates.indexWhere((c) => c.id == candidate.id) + 1,
+  );
 
-  /// 多选合并收编：多候选 roll 正向串合并去重成一块。返回是否实际建块。
   static Future<bool> adoptMerged(
     BuildContext context,
     WidgetRef ref, {
     required ExploreRun run,
     required List<ExploreCandidate> candidates,
-  }) async {
-    final content = mergeExploreRollPositives([
-      for (final candidate in candidates)
-        if (candidate.rollSnapshot?.positive case final positive?) positive,
-    ]);
-    if (content.isEmpty) {
-      if (context.mounted) {
-        AppToast.warning(context, context.l10n.styleExplore_adoptBlockEmpty);
-      }
-      return false;
-    }
-    return _adopt(
-      context,
-      ref,
-      defaultTitle: '${run.displayName} ×${candidates.length}',
-      content: content,
-    );
-  }
+  }) => _adopt(
+    context,
+    ref,
+    defaultTitle: '${run.displayName} ×${candidates.length}',
+    candidates: candidates,
+  );
 
   static Future<bool> _adopt(
     BuildContext context,
     WidgetRef ref, {
     required String defaultTitle,
-    required String content,
+    required List<ExploreCandidate> candidates,
+    int sequenceNumber = 1,
   }) async {
+    if (exploreAdoptArtists(candidates).isEmpty &&
+        exploreAdoptPositive(candidates).isEmpty) {
+      AppToast.warning(context, context.l10n.styleExplore_adoptBlockEmpty);
+      return false;
+    }
     final result = await ExploreAdoptBlockDialog.show(
       context,
       initialTitle: defaultTitle,
-      contentPreview: content,
+      candidates: candidates,
+      sequenceNumber: sequenceNumber,
     );
-    if (result == null) return false;
+    if (result == null || !context.mounted) return false;
     try {
       await ref
           .read(promptBlockLibraryNotifierProvider.notifier)
           .createBlock(
             title: result.title,
-            content: content,
+            content: result.content,
+            atoms: result.atoms,
+            folderId: result.folderId,
             color: result.color,
             iconName: result.iconName,
           );
@@ -92,12 +80,7 @@ abstract final class ExploreCandidateActions {
       }
       return true;
     } catch (error) {
-      AppLogger.e(
-        'Adopt explore candidate as block failed',
-        error,
-        null,
-        'StyleExplore',
-      );
+      AppLogger.e('Save explore block failed', error, null, 'StyleExplore');
       if (context.mounted) {
         AppToast.error(context, context.l10n.styleExplore_operationFailed);
       }
@@ -171,9 +154,10 @@ abstract final class ExploreCandidateActions {
       }
       // FEAT-55 拍板 = 连记录删：副本删成功后整条候选记录移除
       // （清 rounds.candidateIds / lineage.parentCandidateIds 引用）。
-      await ref
-          .read(exploreRunListNotifierProvider.notifier)
-          .removeCandidates(runId, [candidate.id]);
+      await ref.read(exploreRunListNotifierProvider.notifier).removeCandidates(
+        runId,
+        [candidate.id],
+      );
       if (context.mounted) {
         AppToast.success(context, context.l10n.styleExplore_deleteImageDone);
       }

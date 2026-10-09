@@ -262,7 +262,7 @@ class _ExploreCandidateCardState extends ConsumerState<ExploreCandidateCard> {
                                 ),
                                 _action(
                                   'box',
-                                  l10n.styleExplore_adoptAsBlock,
+                                  l10n.styleExplore_saveBlock,
                                   () => ExploreCandidateActions.adoptSingle(
                                     context,
                                     ref,

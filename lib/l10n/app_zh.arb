@@ -4268,9 +4268,7 @@
       }
     }
   },
-  "styleExplore_adoptAsBlock": "收编为块",
-  "styleExplore_adoptBlockNameLabel": "块名称",
-  "styleExplore_adoptBlockSaved": "已收编为块「{name}」",
+  "styleExplore_adoptBlockSaved": "已存为块「{name}」",
   "@styleExplore_adoptBlockSaved": {
     "placeholders": {
       "name": {
@@ -7343,5 +7341,57 @@
   "styleExplore_sortLiveSave": "结果实时保存，可以随时关闭",
   "styleExplore_sortRanking": "当前排名 · 实时",
   "styleExplore_sortRankingHint": "排名会影响下一批子代里各父本被选中的概率",
-  "styleExplore_sortSpace": "空格"
+  "styleExplore_sortSpace": "空格",
+  "styleExplore_saveSingleSubtitle": "#{n} 的画师存成一个块",
+  "@styleExplore_saveSingleSubtitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveManySubtitle": "{count} 张候选的画师合成一个块，存进块库",
+  "@styleExplore_saveManySubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveArtistsOnly": "只要抽到的画师",
+  "styleExplore_saveFullPositive": "完整正向提示词",
+  "styleExplore_saveNoDraws": "这些候选没有正向遗传实例记录，请保存完整正向提示词",
+  "styleExplore_saveContent": "内容",
+  "styleExplore_saveRemoveAtoms": "点 × 去掉不要的画师",
+  "styleExplore_saveRemoved": "已去掉 {count} 个",
+  "@styleExplore_saveRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveRestore": "恢复",
+  "styleExplore_saveName": "块名称",
+  "styleExplore_saveColor": "颜色",
+  "styleExplore_saveIcon": "图标",
+  "styleExplore_saveFolder": "放到块库",
+  "styleExplore_saveRoot": "根目录",
+  "styleExplore_saveHint": "存好后可以在块库里拖进提示词",
+  "styleExplore_onboardingTitle": "用随机块批量试画风",
+  "styleExplore_onboardingRandomTitle": "放入随机块",
+  "styleExplore_onboardingRandomHint": "在提示词里放入画师池，开启随机抽取和进化",
+  "styleExplore_onboardingDrawTitle": "抽一批候选",
+  "styleExplore_onboardingDrawHint": "每张图会从随机块里重新抽画师",
+  "styleExplore_onboardingDraw": "抽 {count} 张候选",
+  "@styleExplore_onboardingDraw": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_onboardingReviewTitle": "收藏、比较、进化",
+  "styleExplore_onboardingReviewHint": "收藏喜欢的画风，两两比较，再挑最好的培育下一代",
+  "styleExplore_onboardingOpenPrevious": "打开以前的探索"
 }

@@ -7,14 +7,56 @@ class PromptBlockColorPicker extends StatelessWidget {
     super.key,
     required this.selectedColor,
     required this.onChanged,
+    this.inline = false,
+    this.palette = promptBlockColorPalette,
   });
 
   final Color selectedColor;
   final ValueChanged<Color> onChanged;
+  final bool inline;
+  final List<Color> palette;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (inline) {
+      return Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          for (final color in palette)
+            Semantics(
+              label: promptBlockColorToHex(color),
+              selected: color.toARGB32() == selectedColor.toARGB32(),
+              button: true,
+              child: InkWell(
+                key: ValueKey(
+                  'prompt-block-color-option-${promptBlockColorToHex(color)}',
+                ),
+                onTap: () => onChanged(color),
+                customBorder: const CircleBorder(),
+                child: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color,
+                    boxShadow: color.toARGB32() == selectedColor.toARGB32()
+                        ? [
+                            BoxShadow(color: color, spreadRadius: 4),
+                            BoxShadow(
+                              color: theme.colorScheme.surface,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : null,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
     MenuController? menuController;
     return MenuAnchor(
       key: const Key('prompt-block-color-picker'),
@@ -48,7 +90,7 @@ class PromptBlockColorPicker extends StatelessWidget {
             spacing: 4,
             runSpacing: 4,
             children: [
-              for (final color in promptBlockColorPalette)
+              for (final color in palette)
                 _buildColorOption(
                   theme,
                   color,

@@ -4,6 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_manual_capture.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
@@ -202,6 +206,28 @@ class WallManual extends ExploreManualCaptureNotifier {
   ExploreManualCaptureState build() => initial;
 }
 
+class WallBlocks extends PromptBlockLibraryNotifier {
+  @override
+  Future<PromptBlockLibraryState> build() async =>
+      PromptBlockLibraryState(blocks: [], folders: []);
+}
+
+class WallWorkspace extends PillWorkspaceNotifier {
+  @override
+  PillWorkspaceState build(String scope) =>
+      PillWorkspaceState(document: PillDocument.empty(), projection: '');
+}
+
+class WallGeneration extends ImageGenerationNotifier {
+  @override
+  ImageGenerationState build() => const ImageGenerationState();
+}
+
+class WallParams extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams(nSamples: 10);
+}
+
 class WallStorage extends LocalStorageService {
   WallStorage([this.large = true]);
   bool large;
@@ -226,6 +252,10 @@ Widget wallFixtureApp(
   List<Override> extraOverrides = const [],
 }) => ProviderScope(
   overrides: [
+    promptBlockLibraryNotifierProvider.overrideWith(WallBlocks.new),
+    pillWorkspaceProvider.overrideWith(WallWorkspace.new),
+    imageGenerationNotifierProvider.overrideWith(WallGeneration.new),
+    generationParamsNotifierProvider.overrideWith(WallParams.new),
     exploreRunListNotifierProvider.overrideWith(() => WallRunList([run])),
     exploreActiveRunIdProvider.overrideWith((ref) => run.id),
     localStorageServiceProvider.overrideWith((ref) => WallStorage(large)),

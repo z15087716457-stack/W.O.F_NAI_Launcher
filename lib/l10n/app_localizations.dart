@@ -14000,22 +14000,10 @@ abstract class AppLocalizations {
   /// **'Round {number}'**
   String styleExplore_roundNumber(int number);
 
-  /// No description provided for @styleExplore_adoptAsBlock.
-  ///
-  /// In en, this message translates to:
-  /// **'Adopt as block'**
-  String get styleExplore_adoptAsBlock;
-
-  /// No description provided for @styleExplore_adoptBlockNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Block name'**
-  String get styleExplore_adoptBlockNameLabel;
-
   /// No description provided for @styleExplore_adoptBlockSaved.
   ///
   /// In en, this message translates to:
-  /// **'Adopted as block \"{name}\"'**
+  /// **'Saved as block “{name}”'**
   String styleExplore_adoptBlockSaved(String name);
 
   /// No description provided for @styleExplore_adoptBlockEmpty.
@@ -23096,6 +23084,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Space'**
   String get styleExplore_sortSpace;
+
+  /// No description provided for @styleExplore_saveSingleSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the artists from #{n} as one block'**
+  String styleExplore_saveSingleSubtitle(int n);
+
+  /// No description provided for @styleExplore_saveManySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine artists from {count} candidates into one library block'**
+  String styleExplore_saveManySubtitle(int count);
+
+  /// No description provided for @styleExplore_saveArtistsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn artists only'**
+  String get styleExplore_saveArtistsOnly;
+
+  /// No description provided for @styleExplore_saveFullPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Full positive prompt'**
+  String get styleExplore_saveFullPositive;
+
+  /// No description provided for @styleExplore_saveNoDraws.
+  ///
+  /// In en, this message translates to:
+  /// **'These candidates have no positive genetic draw records; save the full positive prompt'**
+  String get styleExplore_saveNoDraws;
+
+  /// No description provided for @styleExplore_saveContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get styleExplore_saveContent;
+
+  /// No description provided for @styleExplore_saveRemoveAtoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Click × to remove unwanted artists'**
+  String get styleExplore_saveRemoveAtoms;
+
+  /// No description provided for @styleExplore_saveRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {count}'**
+  String styleExplore_saveRemoved(int count);
+
+  /// No description provided for @styleExplore_saveRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get styleExplore_saveRestore;
+
+  /// No description provided for @styleExplore_saveName.
+  ///
+  /// In en, this message translates to:
+  /// **'Block name'**
+  String get styleExplore_saveName;
+
+  /// No description provided for @styleExplore_saveColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get styleExplore_saveColor;
+
+  /// No description provided for @styleExplore_saveIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get styleExplore_saveIcon;
+
+  /// No description provided for @styleExplore_saveFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Library folder'**
+  String get styleExplore_saveFolder;
+
+  /// No description provided for @styleExplore_saveRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Root'**
+  String get styleExplore_saveRoot;
+
+  /// No description provided for @styleExplore_saveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the saved block from the library into a prompt'**
+  String get styleExplore_saveHint;
+
+  /// No description provided for @styleExplore_onboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore styles with random blocks'**
+  String get styleExplore_onboardingTitle;
+
+  /// No description provided for @styleExplore_onboardingRandomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add random blocks'**
+  String get styleExplore_onboardingRandomTitle;
+
+  /// No description provided for @styleExplore_onboardingRandomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an artist pool to the prompt and enable random draws and evolution'**
+  String get styleExplore_onboardingRandomHint;
+
+  /// No description provided for @styleExplore_onboardingDrawTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw a candidate batch'**
+  String get styleExplore_onboardingDrawTitle;
+
+  /// No description provided for @styleExplore_onboardingDrawHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each image draws artists afresh from the random blocks'**
+  String get styleExplore_onboardingDrawHint;
+
+  /// No description provided for @styleExplore_onboardingDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw {count} candidates'**
+  String styleExplore_onboardingDraw(int count);
+
+  /// No description provided for @styleExplore_onboardingReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite, compare, evolve'**
+  String get styleExplore_onboardingReviewTitle;
+
+  /// No description provided for @styleExplore_onboardingReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite the styles you like, compare pairs, then breed the best into the next generation'**
+  String get styleExplore_onboardingReviewHint;
+
+  /// No description provided for @styleExplore_onboardingOpenPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Open previous explorations'**
+  String get styleExplore_onboardingOpenPrevious;
 }
 
 class _AppLocalizationsDelegate

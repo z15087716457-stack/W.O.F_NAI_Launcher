@@ -22,6 +22,75 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/generation_
 import 'package:nai_launcher/presentation/widgets/generation/auto_save_toggle_chip.dart';
 
 void main() {
+  testWidgets(
+    'onboarding controller invokes the same guarded editor generation path',
+    (tester) async {
+      final controller = GenerationControlsController(),
+          generation = _CaptureGeneration();
+      var invoked = 0;
+      Future<void> callback(GenerationBatchEvent event) async {}
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(
+              _MemoryLocalStorageService({}),
+            ),
+            generationParamsNotifierProvider.overrideWith(_DraftParams.new),
+            imageGenerationNotifierProvider.overrideWith(() => generation),
+            kritaBridgeNotifierProvider.overrideWith(
+              (ref) => _TestKritaBridgeNotifier(),
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              _TestSubscriptionNotifier.new,
+            ),
+            exploreRunRunnerProvider.overrideWith(_TestExploreRunner.new),
+            estimatedCostForBatchSizeProvider(1).overrideWithValue(0),
+            isFreeGenerationProvider.overrideWithValue(true),
+          ],
+          child: MaterialApp(
+            locale: const Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: GenerationControls(
+                controller: controller,
+                compact: true,
+                exploreMode: true,
+                showBalanceChips: false,
+                showAutoSaveChip: false,
+                onGenerateInvoked: () {
+                  invoked++;
+                },
+                onBatchEvent: callback,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await controller.generate();
+      await tester.pump();
+      expect(generation.submitted!.prompt, 'city lights');
+      expect(generation.batchSizeOverride, 1);
+      expect(generation.callback, same(callback));
+      expect(invoked, 1);
+      final button = tester.widget<GenerateButtonWithCost>(
+        find.byType(GenerateButtonWithCost),
+      );
+      button.onGenerate();
+      await tester.pump();
+      expect(invoked, 2);
+      expect(generation.callback, same(callback));
+      generation.setBusy();
+      await tester.pump();
+      await controller.generate();
+      await tester.pump();
+      expect(invoked, 2);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await controller.generate();
+      expect(invoked, 2);
+    },
+  );
   for (final automatic in [false, true]) {
     testWidgets(
       'stop upscale routes cancellation correctly; automatic=$automatic',
@@ -355,6 +424,10 @@ class _RunningGeneration extends ImageGenerationNotifier {
 
 class _CaptureGeneration extends ImageGenerationNotifier {
   ImageParams? submitted;
+  int? batchSizeOverride;
+  GenerationBatchCallback? callback;
+  void setBusy() =>
+      state = const ImageGenerationState(status: GenerationStatus.generating);
   @override
   ImageGenerationState build() => const ImageGenerationState();
   @override
@@ -365,6 +438,8 @@ class _CaptureGeneration extends ImageGenerationNotifier {
     ImageOperation? operation,
   }) async {
     submitted = params;
+    batchSizeOverride = imagesPerRequestOverride;
+    callback = onBatchEvent;
   }
 }
 

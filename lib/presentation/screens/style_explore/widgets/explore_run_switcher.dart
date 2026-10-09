@@ -40,13 +40,15 @@ int exploreRunDateGroup(DateTime updatedAt, DateTime now) {
 }
 
 class ExploreRunSwitcher extends ConsumerStatefulWidget {
-  const ExploreRunSwitcher({super.key});
+  const ExploreRunSwitcher({super.key, this.controller});
+  final MenuController? controller;
   @override
   ConsumerState<ExploreRunSwitcher> createState() => _ExploreRunSwitcherState();
 }
 
 class _ExploreRunSwitcherState extends ConsumerState<ExploreRunSwitcher> {
-  final _controller = MenuController();
+  final _localController = MenuController();
+  MenuController get _controller => widget.controller ?? _localController;
   bool _open = false;
   @override
   Widget build(BuildContext context) {

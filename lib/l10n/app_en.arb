@@ -4268,9 +4268,7 @@
       }
     }
   },
-  "styleExplore_adoptAsBlock": "Adopt as block",
-  "styleExplore_adoptBlockNameLabel": "Block name",
-  "styleExplore_adoptBlockSaved": "Adopted as block \"{name}\"",
+  "styleExplore_adoptBlockSaved": "Saved as block “{name}”",
   "@styleExplore_adoptBlockSaved": {
     "placeholders": {
       "name": {
@@ -7343,5 +7341,57 @@
   "styleExplore_sortLiveSave": "Results save live; close at any time",
   "styleExplore_sortRanking": "Current ranking · Live",
   "styleExplore_sortRankingHint": "Ranking affects each parent’s chance of selection in the next offspring batch",
-  "styleExplore_sortSpace": "Space"
+  "styleExplore_sortSpace": "Space",
+  "styleExplore_saveSingleSubtitle": "Save the artists from #{n} as one block",
+  "@styleExplore_saveSingleSubtitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveManySubtitle": "Combine artists from {count} candidates into one library block",
+  "@styleExplore_saveManySubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveArtistsOnly": "Drawn artists only",
+  "styleExplore_saveFullPositive": "Full positive prompt",
+  "styleExplore_saveNoDraws": "These candidates have no positive genetic draw records; save the full positive prompt",
+  "styleExplore_saveContent": "Content",
+  "styleExplore_saveRemoveAtoms": "Click × to remove unwanted artists",
+  "styleExplore_saveRemoved": "Removed {count}",
+  "@styleExplore_saveRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveRestore": "Restore",
+  "styleExplore_saveName": "Block name",
+  "styleExplore_saveColor": "Color",
+  "styleExplore_saveIcon": "Icon",
+  "styleExplore_saveFolder": "Library folder",
+  "styleExplore_saveRoot": "Root",
+  "styleExplore_saveHint": "Drag the saved block from the library into a prompt",
+  "styleExplore_onboardingTitle": "Explore styles with random blocks",
+  "styleExplore_onboardingRandomTitle": "Add random blocks",
+  "styleExplore_onboardingRandomHint": "Add an artist pool to the prompt and enable random draws and evolution",
+  "styleExplore_onboardingDrawTitle": "Draw a candidate batch",
+  "styleExplore_onboardingDrawHint": "Each image draws artists afresh from the random blocks",
+  "styleExplore_onboardingDraw": "Draw {count} candidates",
+  "@styleExplore_onboardingDraw": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_onboardingReviewTitle": "Favorite, compare, evolve",
+  "styleExplore_onboardingReviewHint": "Favorite the styles you like, compare pairs, then breed the best into the next generation",
+  "styleExplore_onboardingOpenPrevious": "Open previous explorations"
 }

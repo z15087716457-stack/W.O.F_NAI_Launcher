@@ -4268,9 +4268,7 @@
       }
     }
   },
-  "styleExplore_adoptAsBlock": "블록으로 저장",
-  "styleExplore_adoptBlockNameLabel": "블록 이름",
-  "styleExplore_adoptBlockSaved": "\"{name}\" 블록으로 저장했습니다",
+  "styleExplore_adoptBlockSaved": "“{name}” 블록으로 저장됨",
   "@styleExplore_adoptBlockSaved": {
     "placeholders": {
       "name": {
@@ -7343,5 +7341,57 @@
   "styleExplore_sortLiveSave": "결과는 즉시 저장되며 언제든 닫을 수 있습니다",
   "styleExplore_sortRanking": "현재 순위 · 실시간",
   "styleExplore_sortRankingHint": "순위는 다음 자손 묶음에서 각 부모가 선택될 확률에 영향을 줍니다",
-  "styleExplore_sortSpace": "Space"
+  "styleExplore_sortSpace": "Space",
+  "styleExplore_saveSingleSubtitle": "#{n}의 작가를 하나의 블록으로 저장",
+  "@styleExplore_saveSingleSubtitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveManySubtitle": "후보 {count}장의 작가를 하나의 라이브러리 블록으로 합칩니다",
+  "@styleExplore_saveManySubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveArtistsOnly": "추출된 작가만",
+  "styleExplore_saveFullPositive": "전체 긍정 프롬프트",
+  "styleExplore_saveNoDraws": "긍정 유전 추출 기록이 없어 전체 긍정 프롬프트를 저장합니다",
+  "styleExplore_saveContent": "내용",
+  "styleExplore_saveRemoveAtoms": "×를 눌러 원하지 않는 작가 제거",
+  "styleExplore_saveRemoved": "{count}개 제거됨",
+  "@styleExplore_saveRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveRestore": "복원",
+  "styleExplore_saveName": "블록 이름",
+  "styleExplore_saveColor": "색상",
+  "styleExplore_saveIcon": "아이콘",
+  "styleExplore_saveFolder": "라이브러리 폴더",
+  "styleExplore_saveRoot": "루트",
+  "styleExplore_saveHint": "저장한 블록을 라이브러리에서 프롬프트로 끌어올 수 있습니다",
+  "styleExplore_onboardingTitle": "무작위 블록으로 화풍 탐색",
+  "styleExplore_onboardingRandomTitle": "무작위 블록 추가",
+  "styleExplore_onboardingRandomHint": "작가 풀을 프롬프트에 넣고 무작위 추출과 진화를 켭니다",
+  "styleExplore_onboardingDrawTitle": "후보 묶음 추출",
+  "styleExplore_onboardingDrawHint": "각 이미지마다 무작위 블록에서 작가를 다시 추출합니다",
+  "styleExplore_onboardingDraw": "후보 {count}장 추출",
+  "@styleExplore_onboardingDraw": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_onboardingReviewTitle": "즐겨찾기, 비교, 진화",
+  "styleExplore_onboardingReviewHint": "좋은 화풍을 즐겨찾기하고 쌍별 비교로 다음 세대를 육성합니다",
+  "styleExplore_onboardingOpenPrevious": "이전 탐색 열기"
 }

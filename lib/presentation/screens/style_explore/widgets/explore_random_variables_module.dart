@@ -52,11 +52,8 @@ class ExploreRandomVariablesView extends StatelessWidget {
     final target = resolveExploreOverrideMarkerInDocument(positive);
     final variables = [
       for (final lane in [(positive, false), (negative, true)])
-        for (final entry in lane.$1.instances.entries)
-          if (entry.value.enabled &&
-              entry.value.settings.hasRoll &&
-              entry.value.evolutionEnabled)
-            (marker: entry.key, instance: entry.value, negative: lane.$2),
+        for (final entry in exploreGeneticInstances(lane.$1))
+          (marker: entry.key, instance: entry.value, negative: lane.$2),
     ];
     return GenerationModuleCard(
       key: const Key('explore-random-variables'),

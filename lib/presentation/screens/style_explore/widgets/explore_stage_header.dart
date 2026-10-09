@@ -24,8 +24,13 @@ const double _trailingWidth = 10 + 70 + 10 + 28 + 10 + 28;
 const double _switcherChrome = 59;
 
 class ExploreStageHeader extends ConsumerWidget {
-  const ExploreStageHeader({super.key, required this.inspectorVisible});
+  const ExploreStageHeader({
+    super.key,
+    required this.inspectorVisible,
+    this.runMenuController,
+  });
   final bool inspectorVisible;
+  final MenuController? runMenuController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -162,7 +167,10 @@ class ExploreStageHeader extends ConsumerWidget {
           }
           return Row(
             children: [
-              SizedBox(width: runWidth, child: const ExploreRunSwitcher()),
+              SizedBox(
+                width: runWidth,
+                child: ExploreRunSwitcher(controller: runMenuController),
+              ),
               if (shownStats.isNotEmpty) ...[
                 const SizedBox(width: 10),
                 Tooltip(

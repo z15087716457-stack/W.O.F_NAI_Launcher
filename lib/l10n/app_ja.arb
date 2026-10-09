@@ -4268,9 +4268,7 @@
       }
     }
   },
-  "styleExplore_adoptAsBlock": "ブロックに収録",
-  "styleExplore_adoptBlockNameLabel": "ブロック名",
-  "styleExplore_adoptBlockSaved": "ブロック「{name}」に収録しました",
+  "styleExplore_adoptBlockSaved": "ブロック「{name}」として保存しました",
   "@styleExplore_adoptBlockSaved": {
     "placeholders": {
       "name": {
@@ -7343,5 +7341,57 @@
   "styleExplore_sortLiveSave": "結果は即時保存されます。いつでも閉じられます",
   "styleExplore_sortRanking": "現在の順位 · リアルタイム",
   "styleExplore_sortRankingHint": "順位は次のバッチで各親が選ばれる確率に影響します",
-  "styleExplore_sortSpace": "スペース"
+  "styleExplore_sortSpace": "スペース",
+  "styleExplore_saveSingleSubtitle": "#{n} の絵師を1つのブロックに保存",
+  "@styleExplore_saveSingleSubtitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveManySubtitle": "候補 {count} 枚の絵師を1つのライブラリブロックにまとめます",
+  "@styleExplore_saveManySubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveArtistsOnly": "抽選された絵師のみ",
+  "styleExplore_saveFullPositive": "正のプロンプト全体",
+  "styleExplore_saveNoDraws": "正の遺伝抽選記録がないため、正のプロンプト全体を保存してください",
+  "styleExplore_saveContent": "内容",
+  "styleExplore_saveRemoveAtoms": "不要な絵師は × で除去",
+  "styleExplore_saveRemoved": "{count} 個除去済み",
+  "@styleExplore_saveRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveRestore": "復元",
+  "styleExplore_saveName": "ブロック名",
+  "styleExplore_saveColor": "色",
+  "styleExplore_saveIcon": "アイコン",
+  "styleExplore_saveFolder": "保存先フォルダー",
+  "styleExplore_saveRoot": "ルート",
+  "styleExplore_saveHint": "保存後、ライブラリからプロンプトにドラッグできます",
+  "styleExplore_onboardingTitle": "ランダムブロックで画風を試す",
+  "styleExplore_onboardingRandomTitle": "ランダムブロックを追加",
+  "styleExplore_onboardingRandomHint": "絵師プールを追加し、ランダム抽選と進化を有効にします",
+  "styleExplore_onboardingDrawTitle": "候補をまとめて生成",
+  "styleExplore_onboardingDrawHint": "画像ごとにランダムブロックから絵師を再抽選します",
+  "styleExplore_onboardingDraw": "候補を {count} 枚生成",
+  "@styleExplore_onboardingDraw": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_onboardingReviewTitle": "お気に入り・比較・進化",
+  "styleExplore_onboardingReviewHint": "好みの画風を保存し、ペア比較で良いものを選んで次世代を育てます",
+  "styleExplore_onboardingOpenPrevious": "以前の探索を開く"
 }

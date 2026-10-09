@@ -7788,14 +7788,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get styleExplore_adoptAsBlock => 'ブロックに収録';
-
-  @override
-  String get styleExplore_adoptBlockNameLabel => 'ブロック名';
-
-  @override
   String styleExplore_adoptBlockSaved(String name) {
-    return 'ブロック「$name」に収録しました';
+    return 'ブロック「$name」として保存しました';
   }
 
   @override
@@ -12882,4 +12876,85 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_sortSpace => 'スペース';
+
+  @override
+  String styleExplore_saveSingleSubtitle(int n) {
+    return '#$n の絵師を1つのブロックに保存';
+  }
+
+  @override
+  String styleExplore_saveManySubtitle(int count) {
+    return '候補 $count 枚の絵師を1つのライブラリブロックにまとめます';
+  }
+
+  @override
+  String get styleExplore_saveArtistsOnly => '抽選された絵師のみ';
+
+  @override
+  String get styleExplore_saveFullPositive => '正のプロンプト全体';
+
+  @override
+  String get styleExplore_saveNoDraws => '正の遺伝抽選記録がないため、正のプロンプト全体を保存してください';
+
+  @override
+  String get styleExplore_saveContent => '内容';
+
+  @override
+  String get styleExplore_saveRemoveAtoms => '不要な絵師は × で除去';
+
+  @override
+  String styleExplore_saveRemoved(int count) {
+    return '$count 個除去済み';
+  }
+
+  @override
+  String get styleExplore_saveRestore => '復元';
+
+  @override
+  String get styleExplore_saveName => 'ブロック名';
+
+  @override
+  String get styleExplore_saveColor => '色';
+
+  @override
+  String get styleExplore_saveIcon => 'アイコン';
+
+  @override
+  String get styleExplore_saveFolder => '保存先フォルダー';
+
+  @override
+  String get styleExplore_saveRoot => 'ルート';
+
+  @override
+  String get styleExplore_saveHint => '保存後、ライブラリからプロンプトにドラッグできます';
+
+  @override
+  String get styleExplore_onboardingTitle => 'ランダムブロックで画風を試す';
+
+  @override
+  String get styleExplore_onboardingRandomTitle => 'ランダムブロックを追加';
+
+  @override
+  String get styleExplore_onboardingRandomHint => '絵師プールを追加し、ランダム抽選と進化を有効にします';
+
+  @override
+  String get styleExplore_onboardingDrawTitle => '候補をまとめて生成';
+
+  @override
+  String get styleExplore_onboardingDrawHint => '画像ごとにランダムブロックから絵師を再抽選します';
+
+  @override
+  String styleExplore_onboardingDraw(int count) {
+    return '候補を $count 枚生成';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewTitle => 'お気に入り・比較・進化';
+
+  @override
+  String get styleExplore_onboardingReviewHint =>
+      '好みの画風を保存し、ペア比較で良いものを選んで次世代を育てます';
+
+  @override
+  String get styleExplore_onboardingOpenPrevious => '以前の探索を開く';
 }
