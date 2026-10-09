@@ -4154,45 +4154,14 @@
   "styleExplore_discardChangesConfirm": "Continue and discard",
   "styleExplore_previewEmpty": "(empty)",
   "styleExplore_copiedToClipboard": "Copied",
-  "styleExplore_runSectionTitle": "Explore runs",
-  "styleExplore_runEmptyHint": "An explore run captures prompt and parameter snapshots, generates candidates in batch, then reviews them.",
-  "styleExplore_newRun": "New run",
-  "styleExplore_galleryTitle": "Candidate gallery",
+  "styleExplore_newRun": "New exploration",
   "styleExplore_galleryEmptyHint": "No candidates yet. Create or select an explore run to start batch generation.",
-  "styleExplore_runNameLabel": "Run name",
-  "styleExplore_runNameHint": "e.g. Soft light ×30",
-  "styleExplore_runCreated": "Created \"{name}\"",
-  "@styleExplore_runCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "styleExplore_runNameLabel": "Exploration name",
   "styleExplore_runDeleted": "Deleted \"{name}\"",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_runTotalCount": "Total {total} images",
-  "@styleExplore_runTotalCount": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_runGeneratingProgress": "Image {current}/{total}",
-  "@styleExplore_runGeneratingProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
       }
     }
   },
@@ -4329,7 +4298,6 @@
     }
   },
   "styleExplore_mergeAdopt": "Merge & adopt",
-  "styleExplore_noRunsYet": "No explore runs yet",
   "promptBlockEditor_library": "Block library",
   "promptBlockPicker_title": "Select Block",
   "promptBlockLibrary_thumbnail": "Thumbnail",
@@ -5333,7 +5301,6 @@
   "settings_geistDark": "Geist Dark",
   "settings_geistLight": "Geist Light",
   "settings_geistDescription": "One appearance across your studio. Black or white surfaces, with blue accents.",
-  "styleExplore_collapseGallery": "Collapse candidate gallery",
   "updateCapsuleLabel": "Update",
   "updateWaitForTask": "Wait for the current task to finish before restarting",
   "updateLater": "Later",
@@ -6876,5 +6843,111 @@
   "viewer_hideInfo": "Hide information panel (I)",
   "viewer_originalSize": "Original size (1)",
   "viewer_fullscreen": "Fullscreen (F11)",
-  "shortcut_action_toggle_info_panel": "Toggle information panel"
+  "shortcut_action_toggle_info_panel": "Toggle information panel",
+  "styleExplore_runNamingHint": "Named from rolling blocks and the date. Double-click a name to rename it.",
+  "styleExplore_roundGenerating": "Round {round} · Generating",
+  "@styleExplore_roundGenerating": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_inspectorTitle": "Details",
+  "styleExplore_failedBadge": "{count} failed",
+  "@styleExplore_failedBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_showInspector": "Show inspector",
+  "styleExplore_roundProgress": "Round {round} · {current} / {total}",
+  "@styleExplore_roundProgress": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_earlier": "Earlier",
+  "styleExplore_noMatchingRuns": "No matching explorations",
+  "styleExplore_lineCount": "{count} evolution lines",
+  "@styleExplore_lineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_newRunDescription": "Start with the current prompts and parameters; rename it later",
+  "styleExplore_autoRunName": "{blocks} · {time}",
+  "@styleExplore_autoRunName": {
+    "placeholders": {
+      "blocks": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_largeCandidates": "Large candidates",
+  "styleExplore_hideInspector": "Hide inspector",
+  "styleExplore_searchRuns": "Search exploration names or artists",
+  "styleExplore_favoriteCount": "{count} favorites",
+  "@styleExplore_favoriteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generatingBadge": "Generating {current}/{total}",
+  "@styleExplore_generatingBadge": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_roundCount": "{count} rounds",
+  "@styleExplore_roundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pausedRemaining": "Paused · {count} remaining",
+  "@styleExplore_pausedRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stopRun": "Stop generation",
+  "styleExplore_inspectorPlaceholder": "Select a candidate to view details",
+  "styleExplore_thisWeek": "This week",
+  "styleExplore_today": "Today",
+  "styleExplore_smallCandidates": "Small candidates",
+  "styleExplore_imageCount": "{count} images",
+  "@styleExplore_imageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

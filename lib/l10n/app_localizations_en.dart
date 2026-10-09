@@ -7828,46 +7828,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_copiedToClipboard => 'Copied';
 
   @override
-  String get styleExplore_runSectionTitle => 'Explore runs';
-
-  @override
-  String get styleExplore_runEmptyHint =>
-      'An explore run captures prompt and parameter snapshots, generates candidates in batch, then reviews them.';
-
-  @override
-  String get styleExplore_newRun => 'New run';
-
-  @override
-  String get styleExplore_galleryTitle => 'Candidate gallery';
+  String get styleExplore_newRun => 'New exploration';
 
   @override
   String get styleExplore_galleryEmptyHint =>
       'No candidates yet. Create or select an explore run to start batch generation.';
 
   @override
-  String get styleExplore_runNameLabel => 'Run name';
-
-  @override
-  String get styleExplore_runNameHint => 'e.g. Soft light ×30';
-
-  @override
-  String styleExplore_runCreated(String name) {
-    return 'Created \"$name\"';
-  }
+  String get styleExplore_runNameLabel => 'Exploration name';
 
   @override
   String styleExplore_runDeleted(String name) {
     return 'Deleted \"$name\"';
-  }
-
-  @override
-  String styleExplore_runTotalCount(int total) {
-    return 'Total $total images';
-  }
-
-  @override
-  String styleExplore_runGeneratingProgress(int current, int total) {
-    return 'Image $current/$total';
   }
 
   @override
@@ -8046,9 +8018,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get styleExplore_mergeAdopt => 'Merge & adopt';
-
-  @override
-  String get styleExplore_noRunsYet => 'No explore runs yet';
 
   @override
   String get promptBlockEditor_library => 'Block library';
@@ -9310,9 +9279,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_geistDescription =>
       'One appearance across your studio. Black or white surfaces, with blue accents.';
-
-  @override
-  String get styleExplore_collapseGallery => 'Collapse candidate gallery';
 
   @override
   String get updateCapsuleLabel => 'Update';
@@ -12920,4 +12886,99 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcut_action_toggle_info_panel => 'Toggle information panel';
+
+  @override
+  String get styleExplore_runNamingHint =>
+      'Named from rolling blocks and the date. Double-click a name to rename it.';
+
+  @override
+  String styleExplore_roundGenerating(int round) {
+    return 'Round $round · Generating';
+  }
+
+  @override
+  String get styleExplore_inspectorTitle => 'Details';
+
+  @override
+  String styleExplore_failedBadge(int count) {
+    return '$count failed';
+  }
+
+  @override
+  String get styleExplore_showInspector => 'Show inspector';
+
+  @override
+  String styleExplore_roundProgress(int round, int current, int total) {
+    return 'Round $round · $current / $total';
+  }
+
+  @override
+  String get styleExplore_earlier => 'Earlier';
+
+  @override
+  String get styleExplore_noMatchingRuns => 'No matching explorations';
+
+  @override
+  String styleExplore_lineCount(int count) {
+    return '$count evolution lines';
+  }
+
+  @override
+  String get styleExplore_newRunDescription =>
+      'Start with the current prompts and parameters; rename it later';
+
+  @override
+  String styleExplore_autoRunName(String blocks, String time) {
+    return '$blocks · $time';
+  }
+
+  @override
+  String get styleExplore_largeCandidates => 'Large candidates';
+
+  @override
+  String get styleExplore_hideInspector => 'Hide inspector';
+
+  @override
+  String get styleExplore_searchRuns => 'Search exploration names or artists';
+
+  @override
+  String styleExplore_favoriteCount(int count) {
+    return '$count favorites';
+  }
+
+  @override
+  String styleExplore_generatingBadge(int current, int total) {
+    return 'Generating $current/$total';
+  }
+
+  @override
+  String styleExplore_roundCount(int count) {
+    return '$count rounds';
+  }
+
+  @override
+  String styleExplore_pausedRemaining(int count) {
+    return 'Paused · $count remaining';
+  }
+
+  @override
+  String get styleExplore_stopRun => 'Stop generation';
+
+  @override
+  String get styleExplore_inspectorPlaceholder =>
+      'Select a candidate to view details';
+
+  @override
+  String get styleExplore_thisWeek => 'This week';
+
+  @override
+  String get styleExplore_today => 'Today';
+
+  @override
+  String get styleExplore_smallCandidates => 'Small candidates';
+
+  @override
+  String styleExplore_imageCount(int count) {
+    return '$count images';
+  }
 }

@@ -7646,46 +7646,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_copiedToClipboard => '복사했습니다';
 
   @override
-  String get styleExplore_runSectionTitle => '탐색 작업';
-
-  @override
-  String get styleExplore_runEmptyHint =>
-      '탐색 작업은 프롬프트와 매개변수의 스냅숏을 남기고 후보를 일괄 생성한 뒤 검토합니다.';
-
-  @override
-  String get styleExplore_newRun => '새 작업';
-
-  @override
-  String get styleExplore_galleryTitle => '후보 갤러리';
+  String get styleExplore_newRun => '새 탐색';
 
   @override
   String get styleExplore_galleryEmptyHint =>
       '아직 후보가 없습니다. 탐색 작업을 만들거나 선택해 일괄 생성을 시작하세요.';
 
   @override
-  String get styleExplore_runNameLabel => '작업 이름';
-
-  @override
-  String get styleExplore_runNameHint => '예: 부드러운 빛 ×30';
-
-  @override
-  String styleExplore_runCreated(String name) {
-    return '\"$name\"을(를) 만들었습니다';
-  }
+  String get styleExplore_runNameLabel => '탐색 이름';
 
   @override
   String styleExplore_runDeleted(String name) {
     return '\"$name\"을(를) 삭제했습니다';
-  }
-
-  @override
-  String styleExplore_runTotalCount(int total) {
-    return '총 $total장';
-  }
-
-  @override
-  String styleExplore_runGeneratingProgress(int current, int total) {
-    return '$current/$total번째 이미지';
   }
 
   @override
@@ -7861,9 +7833,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_mergeAdopt => '병합해 저장';
-
-  @override
-  String get styleExplore_noRunsYet => '아직 탐색 작업이 없습니다';
 
   @override
   String get promptBlockEditor_library => '블록 라이브러리';
@@ -9085,9 +9054,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get settings_geistDescription =>
       '스튜디오 전체에 하나의 외관. 검정 또는 흰색 바탕에 파란색 강조.';
-
-  @override
-  String get styleExplore_collapseGallery => '후보 갤러리 접기';
 
   @override
   String get updateCapsuleLabel => '업데이트';
@@ -12548,4 +12514,97 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get shortcut_action_toggle_info_panel => '정보 패널 전환';
+
+  @override
+  String get styleExplore_runNamingHint =>
+      '자동 이름: 랜덤 블록 이름 + 날짜. 이름을 두 번 클릭하여 변경';
+
+  @override
+  String styleExplore_roundGenerating(int round) {
+    return '$round 라운드 · 생성 중';
+  }
+
+  @override
+  String get styleExplore_inspectorTitle => '상세';
+
+  @override
+  String styleExplore_failedBadge(int count) {
+    return '실패 $count';
+  }
+
+  @override
+  String get styleExplore_showInspector => '상세 패널 펼치기';
+
+  @override
+  String styleExplore_roundProgress(int round, int current, int total) {
+    return '$round 라운드 · $current / $total';
+  }
+
+  @override
+  String get styleExplore_earlier => '이전';
+
+  @override
+  String get styleExplore_noMatchingRuns => '일치하는 탐색이 없습니다';
+
+  @override
+  String styleExplore_lineCount(int count) {
+    return '$count 진화 계통';
+  }
+
+  @override
+  String get styleExplore_newRunDescription => '현재 프롬프트와 설정으로 시작하고 이름은 나중에 변경';
+
+  @override
+  String styleExplore_autoRunName(String blocks, String time) {
+    return '$blocks · $time';
+  }
+
+  @override
+  String get styleExplore_largeCandidates => '큰 후보 이미지';
+
+  @override
+  String get styleExplore_hideInspector => '상세 패널 접기';
+
+  @override
+  String get styleExplore_searchRuns => '탐색 이름 또는 작가 검색';
+
+  @override
+  String styleExplore_favoriteCount(int count) {
+    return '즐겨찾기 $count';
+  }
+
+  @override
+  String styleExplore_generatingBadge(int current, int total) {
+    return '생성 중 $current/$total';
+  }
+
+  @override
+  String styleExplore_roundCount(int count) {
+    return '$count 라운드';
+  }
+
+  @override
+  String styleExplore_pausedRemaining(int count) {
+    return '일시 정지 · $count장 남음';
+  }
+
+  @override
+  String get styleExplore_stopRun => '생성 중지';
+
+  @override
+  String get styleExplore_inspectorPlaceholder => '후보를 선택하여 상세 정보 보기';
+
+  @override
+  String get styleExplore_thisWeek => '이번 주';
+
+  @override
+  String get styleExplore_today => '오늘';
+
+  @override
+  String get styleExplore_smallCandidates => '작은 후보 이미지';
+
+  @override
+  String styleExplore_imageCount(int count) {
+    return '$count장';
+  }
 }

@@ -7652,46 +7652,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get styleExplore_copiedToClipboard => 'コピーしました';
 
   @override
-  String get styleExplore_runSectionTitle => '探索ラン';
-
-  @override
-  String get styleExplore_runEmptyHint =>
-      '探索ランはプロンプトとパラメータのスナップショットを固定し、候補を一括生成して選別します。';
-
-  @override
-  String get styleExplore_newRun => '新規ラン';
-
-  @override
-  String get styleExplore_galleryTitle => '候補ギャラリー';
+  String get styleExplore_newRun => '新しい探索';
 
   @override
   String get styleExplore_galleryEmptyHint =>
       '候補はまだありません。探索ランを作成または選択して一括生成を開始してください。';
 
   @override
-  String get styleExplore_runNameLabel => 'ラン名';
-
-  @override
-  String get styleExplore_runNameHint => '例：柔らかい光 ×30';
-
-  @override
-  String styleExplore_runCreated(String name) {
-    return '「$name」を作成しました';
-  }
+  String get styleExplore_runNameLabel => '探索名';
 
   @override
   String styleExplore_runDeleted(String name) {
     return '「$name」を削除しました';
-  }
-
-  @override
-  String styleExplore_runTotalCount(int total) {
-    return '全 $total 枚';
-  }
-
-  @override
-  String styleExplore_runGeneratingProgress(int current, int total) {
-    return '$current/$total 枚目';
   }
 
   @override
@@ -7867,9 +7839,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_mergeAdopt => 'まとめて収録';
-
-  @override
-  String get styleExplore_noRunsYet => '探索ランはまだありません';
 
   @override
   String get promptBlockEditor_library => 'ブロックライブラリ';
@@ -9080,9 +9049,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_geistDescription => 'スタジオ全体で共通の外観。白黒の背景にブルーのアクセント。';
-
-  @override
-  String get styleExplore_collapseGallery => '候補ギャラリーを折りたたむ';
 
   @override
   String get updateCapsuleLabel => '更新';
@@ -12528,4 +12494,96 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shortcut_action_toggle_info_panel => '情報パネルの切り替え';
+
+  @override
+  String get styleExplore_runNamingHint => '自動命名：ランダムブロック名＋日時。名前をダブルクリックして変更';
+
+  @override
+  String styleExplore_roundGenerating(int round) {
+    return '第 $round ラウンド · 生成中';
+  }
+
+  @override
+  String get styleExplore_inspectorTitle => '詳細';
+
+  @override
+  String styleExplore_failedBadge(int count) {
+    return '失敗 $count';
+  }
+
+  @override
+  String get styleExplore_showInspector => '詳細を表示';
+
+  @override
+  String styleExplore_roundProgress(int round, int current, int total) {
+    return '第 $round ラウンド · $current / $total';
+  }
+
+  @override
+  String get styleExplore_earlier => 'それ以前';
+
+  @override
+  String get styleExplore_noMatchingRuns => '一致する探索がありません';
+
+  @override
+  String styleExplore_lineCount(int count) {
+    return '$count 進化系統';
+  }
+
+  @override
+  String get styleExplore_newRunDescription => '現在のプロンプトと設定で作成。名前は後から変更できます';
+
+  @override
+  String styleExplore_autoRunName(String blocks, String time) {
+    return '$blocks · $time';
+  }
+
+  @override
+  String get styleExplore_largeCandidates => '大きい候補画像';
+
+  @override
+  String get styleExplore_hideInspector => '詳細を隠す';
+
+  @override
+  String get styleExplore_searchRuns => '探索名または絵師を検索';
+
+  @override
+  String styleExplore_favoriteCount(int count) {
+    return 'お気に入り $count';
+  }
+
+  @override
+  String styleExplore_generatingBadge(int current, int total) {
+    return '生成中 $current/$total';
+  }
+
+  @override
+  String styleExplore_roundCount(int count) {
+    return '$count ラウンド';
+  }
+
+  @override
+  String styleExplore_pausedRemaining(int count) {
+    return '一時停止 · 残り $count 枚';
+  }
+
+  @override
+  String get styleExplore_stopRun => '生成を停止';
+
+  @override
+  String get styleExplore_inspectorPlaceholder => '候補を選択して詳細を表示';
+
+  @override
+  String get styleExplore_thisWeek => '今週';
+
+  @override
+  String get styleExplore_today => '今日';
+
+  @override
+  String get styleExplore_smallCandidates => '小さい候補画像';
+
+  @override
+  String styleExplore_imageCount(int count) {
+    return '$count 枚';
+  }
 }

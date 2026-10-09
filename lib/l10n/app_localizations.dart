@@ -13772,29 +13772,11 @@ abstract class AppLocalizations {
   /// **'Copied'**
   String get styleExplore_copiedToClipboard;
 
-  /// No description provided for @styleExplore_runSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Explore runs'**
-  String get styleExplore_runSectionTitle;
-
-  /// No description provided for @styleExplore_runEmptyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'An explore run captures prompt and parameter snapshots, generates candidates in batch, then reviews them.'**
-  String get styleExplore_runEmptyHint;
-
   /// No description provided for @styleExplore_newRun.
   ///
   /// In en, this message translates to:
-  /// **'New run'**
+  /// **'New exploration'**
   String get styleExplore_newRun;
-
-  /// No description provided for @styleExplore_galleryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Candidate gallery'**
-  String get styleExplore_galleryTitle;
 
   /// No description provided for @styleExplore_galleryEmptyHint.
   ///
@@ -13805,38 +13787,14 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_runNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Run name'**
+  /// **'Exploration name'**
   String get styleExplore_runNameLabel;
-
-  /// No description provided for @styleExplore_runNameHint.
-  ///
-  /// In en, this message translates to:
-  /// **'e.g. Soft light ×30'**
-  String get styleExplore_runNameHint;
-
-  /// No description provided for @styleExplore_runCreated.
-  ///
-  /// In en, this message translates to:
-  /// **'Created \"{name}\"'**
-  String styleExplore_runCreated(String name);
 
   /// No description provided for @styleExplore_runDeleted.
   ///
   /// In en, this message translates to:
   /// **'Deleted \"{name}\"'**
   String styleExplore_runDeleted(String name);
-
-  /// No description provided for @styleExplore_runTotalCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Total {total} images'**
-  String styleExplore_runTotalCount(int total);
-
-  /// No description provided for @styleExplore_runGeneratingProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Image {current}/{total}'**
-  String styleExplore_runGeneratingProgress(int current, int total);
 
   /// No description provided for @styleExplore_runStatusDraft.
   ///
@@ -14137,12 +14095,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Merge & adopt'**
   String get styleExplore_mergeAdopt;
-
-  /// No description provided for @styleExplore_noRunsYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No explore runs yet'**
-  String get styleExplore_noRunsYet;
 
   /// No description provided for @promptBlockEditor_library.
   ///
@@ -16183,12 +16135,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One appearance across your studio. Black or white surfaces, with blue accents.'**
   String get settings_geistDescription;
-
-  /// No description provided for @styleExplore_collapseGallery.
-  ///
-  /// In en, this message translates to:
-  /// **'Collapse candidate gallery'**
-  String get styleExplore_collapseGallery;
 
   /// No description provided for @updateCapsuleLabel.
   ///
@@ -22499,6 +22445,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle information panel'**
   String get shortcut_action_toggle_info_panel;
+
+  /// No description provided for @styleExplore_runNamingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Named from rolling blocks and the date. Double-click a name to rename it.'**
+  String get styleExplore_runNamingHint;
+
+  /// No description provided for @styleExplore_roundGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} · Generating'**
+  String styleExplore_roundGenerating(int round);
+
+  /// No description provided for @styleExplore_inspectorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get styleExplore_inspectorTitle;
+
+  /// No description provided for @styleExplore_failedBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} failed'**
+  String styleExplore_failedBadge(int count);
+
+  /// No description provided for @styleExplore_showInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Show inspector'**
+  String get styleExplore_showInspector;
+
+  /// No description provided for @styleExplore_roundProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} · {current} / {total}'**
+  String styleExplore_roundProgress(int round, int current, int total);
+
+  /// No description provided for @styleExplore_earlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get styleExplore_earlier;
+
+  /// No description provided for @styleExplore_noMatchingRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching explorations'**
+  String get styleExplore_noMatchingRuns;
+
+  /// No description provided for @styleExplore_lineCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} evolution lines'**
+  String styleExplore_lineCount(int count);
+
+  /// No description provided for @styleExplore_newRunDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with the current prompts and parameters; rename it later'**
+  String get styleExplore_newRunDescription;
+
+  /// No description provided for @styleExplore_autoRunName.
+  ///
+  /// In en, this message translates to:
+  /// **'{blocks} · {time}'**
+  String styleExplore_autoRunName(String blocks, String time);
+
+  /// No description provided for @styleExplore_largeCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Large candidates'**
+  String get styleExplore_largeCandidates;
+
+  /// No description provided for @styleExplore_hideInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide inspector'**
+  String get styleExplore_hideInspector;
+
+  /// No description provided for @styleExplore_searchRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Search exploration names or artists'**
+  String get styleExplore_searchRuns;
+
+  /// No description provided for @styleExplore_favoriteCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} favorites'**
+  String styleExplore_favoriteCount(int count);
+
+  /// No description provided for @styleExplore_generatingBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating {current}/{total}'**
+  String styleExplore_generatingBadge(int current, int total);
+
+  /// No description provided for @styleExplore_roundCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rounds'**
+  String styleExplore_roundCount(int count);
+
+  /// No description provided for @styleExplore_pausedRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused · {count} remaining'**
+  String styleExplore_pausedRemaining(int count);
+
+  /// No description provided for @styleExplore_stopRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop generation'**
+  String get styleExplore_stopRun;
+
+  /// No description provided for @styleExplore_inspectorPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a candidate to view details'**
+  String get styleExplore_inspectorPlaceholder;
+
+  /// No description provided for @styleExplore_thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get styleExplore_thisWeek;
+
+  /// No description provided for @styleExplore_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get styleExplore_today;
+
+  /// No description provided for @styleExplore_smallCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Small candidates'**
+  String get styleExplore_smallCandidates;
+
+  /// No description provided for @styleExplore_imageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images'**
+  String styleExplore_imageCount(int count);
 }
 
 class _AppLocalizationsDelegate

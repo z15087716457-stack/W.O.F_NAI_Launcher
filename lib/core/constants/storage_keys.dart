@@ -71,11 +71,11 @@ class StorageKeys {
       'block_library_panel_tool_pinned';
   static const String blockLibraryPanelBlocksSplit =
       'block_library_panel_blocks_split';
-  static const String styleExploreRunSidebarWidth =
-      'style_explore_run_sidebar_width';
-  static const String styleExploreRunSidebarVisible =
-      'style_explore_run_sidebar_visible';
-  static const String styleExploreGalleryWidth = 'style_explore_gallery_width';
+  static const String styleExploreEditorWidth = 'style_explore_editor_width';
+  static const String styleExploreInspectorWidth =
+      'style_explore_inspector_width';
+  static const String styleExploreInspectorVisible =
+      'style_explore_inspector_visible';
   static const String styleExplorePileColumnWidth =
       'style_explore_pile_column_width';
 

@@ -5,6 +5,7 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/style_explore/explore_run.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../providers/image_generation_provider.dart';
 import '../../../providers/style_explore/explore_manual_capture.dart';
 import '../../../providers/style_explore/explore_run_provider.dart';
 import '../../../providers/style_explore/explore_run_runner.dart';
@@ -12,7 +13,7 @@ import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../widgets/common/themed_input_dialog.dart';
 
-/// 探索 Run 的共享界面动作（左栏卡片菜单与中栏控制条菜单共用）。
+/// 探索切换菜单与舞台顶栏共用的界面动作。
 abstract final class ExploreRunActions {
   /// 状态点颜色（draft 灰/generating 蓝/paused 橙/generated 绿/
   /// completed 青/cancelled 红）；存量 `reviewing` 按 generated 处理。
@@ -49,6 +50,61 @@ abstract final class ExploreRunActions {
         return l10n.styleExplore_runStatusCompleted;
       case ExploreRunStatus.cancelled:
         return l10n.styleExplore_runStatusCancelled;
+    }
+  }
+
+  static Future<void> start(
+    BuildContext context,
+    WidgetRef ref,
+    ExploreRun run,
+  ) async {
+    final started = await ref
+        .read(exploreRunRunnerProvider.notifier)
+        .start(run.id);
+    if (!started && context.mounted) {
+      AppToast.info(context, context.l10n.styleExplore_runBusy);
+    }
+  }
+
+  static Future<void> retryFailed(
+    BuildContext context,
+    WidgetRef ref,
+    ExploreRun run,
+  ) async {
+    final started = await ref
+        .read(exploreRunRunnerProvider.notifier)
+        .retryFailed(run.id);
+    if (!started && context.mounted) {
+      AppToast.info(context, context.l10n.styleExplore_runBusy);
+    }
+  }
+
+  static Future<void> cancel(
+    BuildContext context,
+    WidgetRef ref,
+    ExploreRun run,
+  ) async {
+    final l10n = context.l10n;
+    final confirmed = await ThemedConfirmDialog.show(
+      context: context,
+      title: l10n.styleExplore_cancelRunTitle,
+      content: l10n.styleExplore_cancelRunMessage,
+      confirmText: l10n.styleExplore_cancelRun,
+      cancelText: l10n.common_cancel,
+    );
+    if (!confirmed || !context.mounted) return;
+    final runner = ref.read(exploreRunRunnerProvider);
+    final capture = ref.read(exploreManualCaptureProvider);
+    if (runner.isRunning && runner.runId == run.id) {
+      ref.read(exploreRunRunnerProvider.notifier).cancel();
+    } else if (capture.armed &&
+        capture.runId == run.id &&
+        ref.read(imageGenerationNotifierProvider).isGenerating) {
+      ref.read(imageGenerationNotifierProvider.notifier).cancel();
+    } else {
+      await ref
+          .read(exploreRunListNotifierProvider.notifier)
+          .cancelPaused(run.id);
     }
   }
 

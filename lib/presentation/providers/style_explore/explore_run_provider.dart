@@ -152,6 +152,32 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     );
   }
 
+  /// Cancel only a still-paused run, reading its latest state in the queue.
+  Future<ExploreRun> cancelPaused(String id) => _mutateRun(id, (current) {
+    if (current.status != ExploreRunStatus.paused) return current;
+    return current.copyWith(
+      status: ExploreRunStatus.cancelled,
+      candidates: [
+        for (final candidate in current.candidates)
+          candidate.generation.status == ExploreCandidateGenerationStatus.pending
+              ? candidate.copyWith(
+                  generation: candidate.generation.copyWith(
+                    status: ExploreCandidateGenerationStatus.failed,
+                    error: 'cancelled',
+                  ),
+                )
+              : candidate,
+      ],
+      rounds: [
+        for (final round in current.rounds)
+          round.status == ExploreRoundStatus.generating ||
+                  round.status == ExploreRoundStatus.pending
+              ? round.copyWith(status: ExploreRoundStatus.cancelled)
+              : round,
+      ],
+    );
+  });
+
   /// 候选通用更新：读-改-写单个候选后落盘。
   Future<ExploreRun> updateCandidate(
     String runId,

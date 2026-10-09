@@ -4154,45 +4154,14 @@
   "styleExplore_discardChangesConfirm": "繼續並丟棄",
   "styleExplore_previewEmpty": "（空）",
   "styleExplore_copiedToClipboard": "已複製",
-  "styleExplore_runSectionTitle": "探索任務",
-  "styleExplore_runEmptyHint": "探索任務（Run）固化提示詞與參數快照，批次生成候選並篩選。",
-  "styleExplore_newRun": "新增任務",
-  "styleExplore_galleryTitle": "候選畫廊",
+  "styleExplore_newRun": "新增探索",
   "styleExplore_galleryEmptyHint": "暫無候選。新增或選擇一個探索任務，開始批次生成。",
-  "styleExplore_runNameLabel": "任務名稱",
-  "styleExplore_runNameHint": "例如：柔光畫風 ×30",
-  "styleExplore_runCreated": "已建立任務「{name}」",
-  "@styleExplore_runCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "styleExplore_runNameLabel": "探索名稱",
   "styleExplore_runDeleted": "已刪除任務「{name}」",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_runTotalCount": "共 {total} 張",
-  "@styleExplore_runTotalCount": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_runGeneratingProgress": "第 {current}/{total} 張",
-  "@styleExplore_runGeneratingProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
       }
     }
   },
@@ -4329,7 +4298,6 @@
     }
   },
   "styleExplore_mergeAdopt": "合併收編",
-  "styleExplore_noRunsYet": "還沒有探索任務",
   "promptBlockEditor_library": "塊庫",
   "promptBlockPicker_title": "選擇塊",
   "promptBlockLibrary_thumbnail": "預覽圖",
@@ -5333,7 +5301,6 @@
   "settings_geistDark": "Geist 深色",
   "settings_geistLight": "Geist 淺色",
   "settings_geistDescription": "全工作室統一外觀：黑白灰底色，藍色作為操作強調。",
-  "styleExplore_collapseGallery": "收起候選畫廊",
   "updateCapsuleLabel": "更新",
   "updateWaitForTask": "任務進行中，結束後即可重啟更新",
   "updateLater": "稍後",
@@ -6876,5 +6843,111 @@
   "viewer_hideInfo": "隱藏資訊欄（I）",
   "viewer_originalSize": "原始大小（1）",
   "viewer_fullscreen": "全螢幕（F11）",
-  "shortcut_action_toggle_info_panel": "顯示 / 隱藏資訊欄"
+  "shortcut_action_toggle_info_panel": "顯示 / 隱藏資訊欄",
+  "styleExplore_runNamingHint": "自動命名：隨機塊名 + 日期，雙擊名稱即可改名",
+  "styleExplore_roundGenerating": "第 {round} 輪 · 生成中",
+  "@styleExplore_roundGenerating": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_inspectorTitle": "詳情",
+  "styleExplore_failedBadge": "失敗 {count}",
+  "@styleExplore_failedBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_showInspector": "展開檢查器",
+  "styleExplore_roundProgress": "第 {round} 輪 · {current} / {total}",
+  "@styleExplore_roundProgress": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_earlier": "更早",
+  "styleExplore_noMatchingRuns": "沒有匹配的探索",
+  "styleExplore_lineCount": "{count} 條進化線",
+  "@styleExplore_lineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_newRunDescription": "用當前提示詞和參數開一個新的，名字可以之後改",
+  "styleExplore_autoRunName": "{blocks} · {time}",
+  "@styleExplore_autoRunName": {
+    "placeholders": {
+      "blocks": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_largeCandidates": "大候選圖",
+  "styleExplore_hideInspector": "收起檢查器",
+  "styleExplore_searchRuns": "搜尋探索名稱或畫師",
+  "styleExplore_favoriteCount": "收藏 {count}",
+  "@styleExplore_favoriteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generatingBadge": "生成中 {current}/{total}",
+  "@styleExplore_generatingBadge": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_roundCount": "{count} 輪",
+  "@styleExplore_roundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pausedRemaining": "已暫停 · 剩 {count} 張",
+  "@styleExplore_pausedRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stopRun": "停止生成",
+  "styleExplore_inspectorPlaceholder": "選一張候選檢視詳情",
+  "styleExplore_thisWeek": "本週",
+  "styleExplore_today": "今天",
+  "styleExplore_smallCandidates": "小候選圖",
+  "styleExplore_imageCount": "{count} 張",
+  "@styleExplore_imageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

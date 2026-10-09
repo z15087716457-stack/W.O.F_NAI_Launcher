@@ -309,11 +309,22 @@ class WindowPaneInset extends StatelessWidget {
 /// A short panel title beside the window controls. Empty space is draggable;
 /// only panes too narrow to hold both rows place their title below the captions.
 class WindowPanelHeader extends StatelessWidget {
-  const WindowPanelHeader({super.key, required this.child});
+  const WindowPanelHeader({super.key, required this.child, this.headerHeight});
   final Widget child;
+
+  /// Fixed-height panel titles reserve captions horizontally, without a second row.
+  final double? headerHeight;
 
   @override
   Widget build(BuildContext context) {
+    if (headerHeight != null) {
+      return WindowHeader(
+        minimumInlineWidth: 0,
+        inlineDragWidth: 0,
+        dragBackground: true,
+        child: SizedBox(height: headerHeight, child: child),
+      );
+    }
     final height = WindowChromeScope.heightOf(context);
     if (!WindowChromeScope.activeOf(context)) {
       return SizedBox(height: height, child: child);

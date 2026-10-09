@@ -816,40 +816,39 @@ class LocalStorageService {
     );
   }
 
-  /// 获取画风探索页 Run 侧栏宽度 (默认240)
-  double getStyleExploreRunSidebarWidth() {
-    final value = getSetting(StorageKeys.styleExploreRunSidebarWidth);
-    if (value is int) return value.toDouble();
-    if (value is double) return value;
-    return 240.0;
+  double getStyleExploreEditorWidth() {
+    final value = getSetting<num>(StorageKeys.styleExploreEditorWidth);
+    return value != null && value.isFinite
+        ? value.clamp(352.0, 560.0).toDouble()
+        : 384.0;
   }
 
-  /// 保存画风探索页 Run 侧栏宽度
-  Future<void> setStyleExploreRunSidebarWidth(double width) async {
-    await setSetting(StorageKeys.styleExploreRunSidebarWidth, width);
+  Future<void> setStyleExploreEditorWidth(double width) async {
+    await setSetting(
+      StorageKeys.styleExploreEditorWidth,
+      width.clamp(352.0, 560.0),
+    );
   }
 
-  /// 获取画风探索页 Run 侧栏展开状态（未设置过 = null，调用方按首次访问处理）
-  bool? getStyleExploreRunSidebarVisible() {
-    return getSetting<bool?>(StorageKeys.styleExploreRunSidebarVisible);
+  double getStyleExploreInspectorWidth() {
+    final value = getSetting<num>(StorageKeys.styleExploreInspectorWidth);
+    return value != null && value.isFinite
+        ? value.clamp(280.0, 420.0).toDouble()
+        : 312.0;
   }
 
-  /// 保存画风探索页 Run 侧栏展开状态
-  Future<void> setStyleExploreRunSidebarVisible(bool visible) async {
-    await setSetting(StorageKeys.styleExploreRunSidebarVisible, visible);
+  Future<void> setStyleExploreInspectorWidth(double width) async {
+    await setSetting(
+      StorageKeys.styleExploreInspectorWidth,
+      width.clamp(280.0, 420.0),
+    );
   }
 
-  /// 获取画风探索页候选画廊宽度 (默认360)
-  double getStyleExploreGalleryWidth() {
-    final value = getSetting(StorageKeys.styleExploreGalleryWidth);
-    if (value is int) return value.toDouble();
-    if (value is double) return value;
-    return 360.0;
-  }
+  bool? getStyleExploreInspectorVisible() =>
+      getSetting<bool>(StorageKeys.styleExploreInspectorVisible);
 
-  /// 保存画风探索页候选画廊宽度
-  Future<void> setStyleExploreGalleryWidth(double width) async {
-    await setSetting(StorageKeys.styleExploreGalleryWidth, width);
+  Future<void> setStyleExploreInspectorVisible(bool? visible) async {
+    await setSetting<bool?>(StorageKeys.styleExploreInspectorVisible, visible);
   }
 
   // ==================== Lifecycle ====================

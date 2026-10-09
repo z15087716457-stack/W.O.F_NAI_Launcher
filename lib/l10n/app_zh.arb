@@ -4154,45 +4154,14 @@
   "styleExplore_discardChangesConfirm": "继续并丢弃",
   "styleExplore_previewEmpty": "（空）",
   "styleExplore_copiedToClipboard": "已复制",
-  "styleExplore_runSectionTitle": "探索任务",
-  "styleExplore_runEmptyHint": "探索任务（Run）固化提示词与参数快照，批量生成候选并筛选。",
-  "styleExplore_newRun": "新建任务",
-  "styleExplore_galleryTitle": "候选画廊",
+  "styleExplore_newRun": "新建探索",
   "styleExplore_galleryEmptyHint": "暂无候选。新建或选择一个探索任务，开始批量生成。",
-  "styleExplore_runNameLabel": "任务名称",
-  "styleExplore_runNameHint": "例如：柔光画风 ×30",
-  "styleExplore_runCreated": "已创建任务「{name}」",
-  "@styleExplore_runCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "styleExplore_runNameLabel": "探索名称",
   "styleExplore_runDeleted": "已删除任务「{name}」",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_runTotalCount": "共 {total} 张",
-  "@styleExplore_runTotalCount": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_runGeneratingProgress": "第 {current}/{total} 张",
-  "@styleExplore_runGeneratingProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
       }
     }
   },
@@ -4329,7 +4298,6 @@
     }
   },
   "styleExplore_mergeAdopt": "合并收编",
-  "styleExplore_noRunsYet": "还没有探索任务",
   "promptBlockEditor_library": "块库",
   "promptBlockPicker_title": "选择块",
   "promptBlockLibrary_thumbnail": "预览图",
@@ -5333,7 +5301,6 @@
   "settings_geistDark": "Geist 深色",
   "settings_geistLight": "Geist 浅色",
   "settings_geistDescription": "全工作室统一外观：黑白灰底色，蓝色作为操作强调。",
-  "styleExplore_collapseGallery": "收起候选画廊",
   "updateCapsuleLabel": "更新",
   "updateWaitForTask": "任务进行中，结束后即可重启更新",
   "updateLater": "稍后",
@@ -6876,5 +6843,111 @@
   "viewer_hideInfo": "隐藏信息栏（I）",
   "viewer_originalSize": "原始大小（1）",
   "viewer_fullscreen": "全屏（F11）",
-  "shortcut_action_toggle_info_panel": "显示 / 隐藏信息栏"
+  "shortcut_action_toggle_info_panel": "显示 / 隐藏信息栏",
+  "styleExplore_runNamingHint": "自动命名：随机块名 + 日期，双击名称即可改名",
+  "styleExplore_roundGenerating": "第 {round} 轮 · 生成中",
+  "@styleExplore_roundGenerating": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_inspectorTitle": "详情",
+  "styleExplore_failedBadge": "失败 {count}",
+  "@styleExplore_failedBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_showInspector": "展开检查器",
+  "styleExplore_roundProgress": "第 {round} 轮 · {current} / {total}",
+  "@styleExplore_roundProgress": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_earlier": "更早",
+  "styleExplore_noMatchingRuns": "没有匹配的探索",
+  "styleExplore_lineCount": "{count} 条进化线",
+  "@styleExplore_lineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_newRunDescription": "用当前提示词和参数开一个新的，名字可以之后改",
+  "styleExplore_autoRunName": "{blocks} · {time}",
+  "@styleExplore_autoRunName": {
+    "placeholders": {
+      "blocks": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_largeCandidates": "大候选图",
+  "styleExplore_hideInspector": "收起检查器",
+  "styleExplore_searchRuns": "搜索探索名称或画师",
+  "styleExplore_favoriteCount": "收藏 {count}",
+  "@styleExplore_favoriteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generatingBadge": "生成中 {current}/{total}",
+  "@styleExplore_generatingBadge": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_roundCount": "{count} 轮",
+  "@styleExplore_roundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pausedRemaining": "已暂停 · 剩 {count} 张",
+  "@styleExplore_pausedRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stopRun": "停止生成",
+  "styleExplore_inspectorPlaceholder": "选一张候选查看详情",
+  "styleExplore_thisWeek": "本周",
+  "styleExplore_today": "今天",
+  "styleExplore_smallCandidates": "小候选图",
+  "styleExplore_imageCount": "{count} 张",
+  "@styleExplore_imageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

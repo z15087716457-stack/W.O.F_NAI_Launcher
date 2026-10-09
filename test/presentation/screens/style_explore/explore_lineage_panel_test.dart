@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -23,7 +24,8 @@ class _MemoryRunStorage extends StyleExploreRunStorage {
   Future<ExploreRun?> getRun(String id) async => _store[id];
 
   @override
-  Future<void> putRun(ExploreRun run) async {
+  Future<void> putRun(ExploreRun run, {void Function()? beforeWrite}) async {
+    beforeWrite?.call();
     _store[run.id] = run;
   }
 
@@ -48,6 +50,7 @@ class _RecordingRunner extends ExploreRunRunner {
     required String familyId,
     required String parentSetId,
     required int count,
+    void Function(ImageParams)? beforeGenerate,
   }) async {
     calls.add((familyId: familyId, parentSetId: parentSetId, count: count));
     return true;

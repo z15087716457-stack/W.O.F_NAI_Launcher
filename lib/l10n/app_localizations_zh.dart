@@ -7534,44 +7534,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_copiedToClipboard => '已复制';
 
   @override
-  String get styleExplore_runSectionTitle => '探索任务';
-
-  @override
-  String get styleExplore_runEmptyHint => '探索任务（Run）固化提示词与参数快照，批量生成候选并筛选。';
-
-  @override
-  String get styleExplore_newRun => '新建任务';
-
-  @override
-  String get styleExplore_galleryTitle => '候选画廊';
+  String get styleExplore_newRun => '新建探索';
 
   @override
   String get styleExplore_galleryEmptyHint => '暂无候选。新建或选择一个探索任务，开始批量生成。';
 
   @override
-  String get styleExplore_runNameLabel => '任务名称';
-
-  @override
-  String get styleExplore_runNameHint => '例如：柔光画风 ×30';
-
-  @override
-  String styleExplore_runCreated(String name) {
-    return '已创建任务「$name」';
-  }
+  String get styleExplore_runNameLabel => '探索名称';
 
   @override
   String styleExplore_runDeleted(String name) {
     return '已删除任务「$name」';
-  }
-
-  @override
-  String styleExplore_runTotalCount(int total) {
-    return '共 $total 张';
-  }
-
-  @override
-  String styleExplore_runGeneratingProgress(int current, int total) {
-    return '第 $current/$total 张';
   }
 
   @override
@@ -7746,9 +7719,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_mergeAdopt => '合并收编';
-
-  @override
-  String get styleExplore_noRunsYet => '还没有探索任务';
 
   @override
   String get promptBlockEditor_library => '块库';
@@ -8923,9 +8893,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_geistDescription => '全工作室统一外观：黑白灰底色，蓝色作为操作强调。';
-
-  @override
-  String get styleExplore_collapseGallery => '收起候选画廊';
 
   @override
   String get updateCapsuleLabel => '更新';
@@ -12304,6 +12271,98 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortcut_action_toggle_info_panel => '显示 / 隐藏信息栏';
+
+  @override
+  String get styleExplore_runNamingHint => '自动命名：随机块名 + 日期，双击名称即可改名';
+
+  @override
+  String styleExplore_roundGenerating(int round) {
+    return '第 $round 轮 · 生成中';
+  }
+
+  @override
+  String get styleExplore_inspectorTitle => '详情';
+
+  @override
+  String styleExplore_failedBadge(int count) {
+    return '失败 $count';
+  }
+
+  @override
+  String get styleExplore_showInspector => '展开检查器';
+
+  @override
+  String styleExplore_roundProgress(int round, int current, int total) {
+    return '第 $round 轮 · $current / $total';
+  }
+
+  @override
+  String get styleExplore_earlier => '更早';
+
+  @override
+  String get styleExplore_noMatchingRuns => '没有匹配的探索';
+
+  @override
+  String styleExplore_lineCount(int count) {
+    return '$count 条进化线';
+  }
+
+  @override
+  String get styleExplore_newRunDescription => '用当前提示词和参数开一个新的，名字可以之后改';
+
+  @override
+  String styleExplore_autoRunName(String blocks, String time) {
+    return '$blocks · $time';
+  }
+
+  @override
+  String get styleExplore_largeCandidates => '大候选图';
+
+  @override
+  String get styleExplore_hideInspector => '收起检查器';
+
+  @override
+  String get styleExplore_searchRuns => '搜索探索名称或画师';
+
+  @override
+  String styleExplore_favoriteCount(int count) {
+    return '收藏 $count';
+  }
+
+  @override
+  String styleExplore_generatingBadge(int current, int total) {
+    return '生成中 $current/$total';
+  }
+
+  @override
+  String styleExplore_roundCount(int count) {
+    return '$count 轮';
+  }
+
+  @override
+  String styleExplore_pausedRemaining(int count) {
+    return '已暂停 · 剩 $count 张';
+  }
+
+  @override
+  String get styleExplore_stopRun => '停止生成';
+
+  @override
+  String get styleExplore_inspectorPlaceholder => '选一张候选查看详情';
+
+  @override
+  String get styleExplore_thisWeek => '本周';
+
+  @override
+  String get styleExplore_today => '今天';
+
+  @override
+  String get styleExplore_smallCandidates => '小候选图';
+
+  @override
+  String styleExplore_imageCount(int count) {
+    return '$count 张';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -19836,44 +19895,17 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_copiedToClipboard => '已複製';
 
   @override
-  String get styleExplore_runSectionTitle => '探索任務';
-
-  @override
-  String get styleExplore_runEmptyHint => '探索任務（Run）固化提示詞與參數快照，批次生成候選並篩選。';
-
-  @override
-  String get styleExplore_newRun => '新增任務';
-
-  @override
-  String get styleExplore_galleryTitle => '候選畫廊';
+  String get styleExplore_newRun => '新增探索';
 
   @override
   String get styleExplore_galleryEmptyHint => '暫無候選。新增或選擇一個探索任務，開始批次生成。';
 
   @override
-  String get styleExplore_runNameLabel => '任務名稱';
-
-  @override
-  String get styleExplore_runNameHint => '例如：柔光畫風 ×30';
-
-  @override
-  String styleExplore_runCreated(String name) {
-    return '已建立任務「$name」';
-  }
+  String get styleExplore_runNameLabel => '探索名稱';
 
   @override
   String styleExplore_runDeleted(String name) {
     return '已刪除任務「$name」';
-  }
-
-  @override
-  String styleExplore_runTotalCount(int total) {
-    return '共 $total 張';
-  }
-
-  @override
-  String styleExplore_runGeneratingProgress(int current, int total) {
-    return '第 $current/$total 張';
   }
 
   @override
@@ -20048,9 +20080,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_mergeAdopt => '合併收編';
-
-  @override
-  String get styleExplore_noRunsYet => '還沒有探索任務';
 
   @override
   String get promptBlockEditor_library => '塊庫';
@@ -21225,9 +21254,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get settings_geistDescription => '全工作室統一外觀：黑白灰底色，藍色作為操作強調。';
-
-  @override
-  String get styleExplore_collapseGallery => '收起候選畫廊';
 
   @override
   String get updateCapsuleLabel => '更新';
@@ -24606,4 +24632,96 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get shortcut_action_toggle_info_panel => '顯示 / 隱藏資訊欄';
+
+  @override
+  String get styleExplore_runNamingHint => '自動命名：隨機塊名 + 日期，雙擊名稱即可改名';
+
+  @override
+  String styleExplore_roundGenerating(int round) {
+    return '第 $round 輪 · 生成中';
+  }
+
+  @override
+  String get styleExplore_inspectorTitle => '詳情';
+
+  @override
+  String styleExplore_failedBadge(int count) {
+    return '失敗 $count';
+  }
+
+  @override
+  String get styleExplore_showInspector => '展開檢查器';
+
+  @override
+  String styleExplore_roundProgress(int round, int current, int total) {
+    return '第 $round 輪 · $current / $total';
+  }
+
+  @override
+  String get styleExplore_earlier => '更早';
+
+  @override
+  String get styleExplore_noMatchingRuns => '沒有匹配的探索';
+
+  @override
+  String styleExplore_lineCount(int count) {
+    return '$count 條進化線';
+  }
+
+  @override
+  String get styleExplore_newRunDescription => '用當前提示詞和參數開一個新的，名字可以之後改';
+
+  @override
+  String styleExplore_autoRunName(String blocks, String time) {
+    return '$blocks · $time';
+  }
+
+  @override
+  String get styleExplore_largeCandidates => '大候選圖';
+
+  @override
+  String get styleExplore_hideInspector => '收起檢查器';
+
+  @override
+  String get styleExplore_searchRuns => '搜尋探索名稱或畫師';
+
+  @override
+  String styleExplore_favoriteCount(int count) {
+    return '收藏 $count';
+  }
+
+  @override
+  String styleExplore_generatingBadge(int current, int total) {
+    return '生成中 $current/$total';
+  }
+
+  @override
+  String styleExplore_roundCount(int count) {
+    return '$count 輪';
+  }
+
+  @override
+  String styleExplore_pausedRemaining(int count) {
+    return '已暫停 · 剩 $count 張';
+  }
+
+  @override
+  String get styleExplore_stopRun => '停止生成';
+
+  @override
+  String get styleExplore_inspectorPlaceholder => '選一張候選檢視詳情';
+
+  @override
+  String get styleExplore_thisWeek => '本週';
+
+  @override
+  String get styleExplore_today => '今天';
+
+  @override
+  String get styleExplore_smallCandidates => '小候選圖';
+
+  @override
+  String styleExplore_imageCount(int count) {
+    return '$count 張';
+  }
 }

@@ -4154,45 +4154,14 @@
   "styleExplore_discardChangesConfirm": "続行して破棄",
   "styleExplore_previewEmpty": "（空）",
   "styleExplore_copiedToClipboard": "コピーしました",
-  "styleExplore_runSectionTitle": "探索ラン",
-  "styleExplore_runEmptyHint": "探索ランはプロンプトとパラメータのスナップショットを固定し、候補を一括生成して選別します。",
-  "styleExplore_newRun": "新規ラン",
-  "styleExplore_galleryTitle": "候補ギャラリー",
+  "styleExplore_newRun": "新しい探索",
   "styleExplore_galleryEmptyHint": "候補はまだありません。探索ランを作成または選択して一括生成を開始してください。",
-  "styleExplore_runNameLabel": "ラン名",
-  "styleExplore_runNameHint": "例：柔らかい光 ×30",
-  "styleExplore_runCreated": "「{name}」を作成しました",
-  "@styleExplore_runCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "styleExplore_runNameLabel": "探索名",
   "styleExplore_runDeleted": "「{name}」を削除しました",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_runTotalCount": "全 {total} 枚",
-  "@styleExplore_runTotalCount": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_runGeneratingProgress": "{current}/{total} 枚目",
-  "@styleExplore_runGeneratingProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
       }
     }
   },
@@ -4329,7 +4298,6 @@
     }
   },
   "styleExplore_mergeAdopt": "まとめて収録",
-  "styleExplore_noRunsYet": "探索ランはまだありません",
   "promptBlockEditor_library": "ブロックライブラリ",
   "promptBlockPicker_title": "ブロックを選択",
   "promptBlockLibrary_thumbnail": "サムネイル",
@@ -5333,7 +5301,6 @@
   "settings_geistDark": "Geist ダーク",
   "settings_geistLight": "Geist ライト",
   "settings_geistDescription": "スタジオ全体で共通の外観。白黒の背景にブルーのアクセント。",
-  "styleExplore_collapseGallery": "候補ギャラリーを折りたたむ",
   "updateCapsuleLabel": "更新",
   "updateWaitForTask": "タスク完了後に再起動して更新できます",
   "updateLater": "後で",
@@ -6876,5 +6843,111 @@
   "viewer_hideInfo": "情報パネルを隠す (I)",
   "viewer_originalSize": "原寸 (1)",
   "viewer_fullscreen": "全画面 (F11)",
-  "shortcut_action_toggle_info_panel": "情報パネルの切り替え"
+  "shortcut_action_toggle_info_panel": "情報パネルの切り替え",
+  "styleExplore_runNamingHint": "自動命名：ランダムブロック名＋日時。名前をダブルクリックして変更",
+  "styleExplore_roundGenerating": "第 {round} ラウンド · 生成中",
+  "@styleExplore_roundGenerating": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_inspectorTitle": "詳細",
+  "styleExplore_failedBadge": "失敗 {count}",
+  "@styleExplore_failedBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_showInspector": "詳細を表示",
+  "styleExplore_roundProgress": "第 {round} ラウンド · {current} / {total}",
+  "@styleExplore_roundProgress": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_earlier": "それ以前",
+  "styleExplore_noMatchingRuns": "一致する探索がありません",
+  "styleExplore_lineCount": "{count} 進化系統",
+  "@styleExplore_lineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_newRunDescription": "現在のプロンプトと設定で作成。名前は後から変更できます",
+  "styleExplore_autoRunName": "{blocks} · {time}",
+  "@styleExplore_autoRunName": {
+    "placeholders": {
+      "blocks": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_largeCandidates": "大きい候補画像",
+  "styleExplore_hideInspector": "詳細を隠す",
+  "styleExplore_searchRuns": "探索名または絵師を検索",
+  "styleExplore_favoriteCount": "お気に入り {count}",
+  "@styleExplore_favoriteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generatingBadge": "生成中 {current}/{total}",
+  "@styleExplore_generatingBadge": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_roundCount": "{count} ラウンド",
+  "@styleExplore_roundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pausedRemaining": "一時停止 · 残り {count} 枚",
+  "@styleExplore_pausedRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stopRun": "生成を停止",
+  "styleExplore_inspectorPlaceholder": "候補を選択して詳細を表示",
+  "styleExplore_thisWeek": "今週",
+  "styleExplore_today": "今日",
+  "styleExplore_smallCandidates": "小さい候補画像",
+  "styleExplore_imageCount": "{count} 枚",
+  "@styleExplore_imageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

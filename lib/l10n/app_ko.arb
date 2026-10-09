@@ -4154,45 +4154,14 @@
   "styleExplore_discardChangesConfirm": "계속하고 버리기",
   "styleExplore_previewEmpty": "(비어 있음)",
   "styleExplore_copiedToClipboard": "복사했습니다",
-  "styleExplore_runSectionTitle": "탐색 작업",
-  "styleExplore_runEmptyHint": "탐색 작업은 프롬프트와 매개변수의 스냅숏을 남기고 후보를 일괄 생성한 뒤 검토합니다.",
-  "styleExplore_newRun": "새 작업",
-  "styleExplore_galleryTitle": "후보 갤러리",
+  "styleExplore_newRun": "새 탐색",
   "styleExplore_galleryEmptyHint": "아직 후보가 없습니다. 탐색 작업을 만들거나 선택해 일괄 생성을 시작하세요.",
-  "styleExplore_runNameLabel": "작업 이름",
-  "styleExplore_runNameHint": "예: 부드러운 빛 ×30",
-  "styleExplore_runCreated": "\"{name}\"을(를) 만들었습니다",
-  "@styleExplore_runCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "styleExplore_runNameLabel": "탐색 이름",
   "styleExplore_runDeleted": "\"{name}\"을(를) 삭제했습니다",
   "@styleExplore_runDeleted": {
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "styleExplore_runTotalCount": "총 {total}장",
-  "@styleExplore_runTotalCount": {
-    "placeholders": {
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_runGeneratingProgress": "{current}/{total}번째 이미지",
-  "@styleExplore_runGeneratingProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
       }
     }
   },
@@ -4329,7 +4298,6 @@
     }
   },
   "styleExplore_mergeAdopt": "병합해 저장",
-  "styleExplore_noRunsYet": "아직 탐색 작업이 없습니다",
   "promptBlockEditor_library": "블록 라이브러리",
   "promptBlockPicker_title": "블록 선택",
   "promptBlockLibrary_thumbnail": "썸네일",
@@ -5333,7 +5301,6 @@
   "settings_geistDark": "Geist 다크",
   "settings_geistLight": "Geist 라이트",
   "settings_geistDescription": "스튜디오 전체에 하나의 외관. 검정 또는 흰색 바탕에 파란색 강조.",
-  "styleExplore_collapseGallery": "후보 갤러리 접기",
   "updateCapsuleLabel": "업데이트",
   "updateWaitForTask": "현재 작업이 끝난 뒤 다시 시작하세요",
   "updateLater": "나중에",
@@ -6876,5 +6843,111 @@
   "viewer_hideInfo": "정보 패널 숨기기 (I)",
   "viewer_originalSize": "원본 크기 (1)",
   "viewer_fullscreen": "전체 화면 (F11)",
-  "shortcut_action_toggle_info_panel": "정보 패널 전환"
+  "shortcut_action_toggle_info_panel": "정보 패널 전환",
+  "styleExplore_runNamingHint": "자동 이름: 랜덤 블록 이름 + 날짜. 이름을 두 번 클릭하여 변경",
+  "styleExplore_roundGenerating": "{round} 라운드 · 생성 중",
+  "@styleExplore_roundGenerating": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_inspectorTitle": "상세",
+  "styleExplore_failedBadge": "실패 {count}",
+  "@styleExplore_failedBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_showInspector": "상세 패널 펼치기",
+  "styleExplore_roundProgress": "{round} 라운드 · {current} / {total}",
+  "@styleExplore_roundProgress": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_earlier": "이전",
+  "styleExplore_noMatchingRuns": "일치하는 탐색이 없습니다",
+  "styleExplore_lineCount": "{count} 진화 계통",
+  "@styleExplore_lineCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_newRunDescription": "현재 프롬프트와 설정으로 시작하고 이름은 나중에 변경",
+  "styleExplore_autoRunName": "{blocks} · {time}",
+  "@styleExplore_autoRunName": {
+    "placeholders": {
+      "blocks": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "styleExplore_largeCandidates": "큰 후보 이미지",
+  "styleExplore_hideInspector": "상세 패널 접기",
+  "styleExplore_searchRuns": "탐색 이름 또는 작가 검색",
+  "styleExplore_favoriteCount": "즐겨찾기 {count}",
+  "@styleExplore_favoriteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_generatingBadge": "생성 중 {current}/{total}",
+  "@styleExplore_generatingBadge": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_roundCount": "{count} 라운드",
+  "@styleExplore_roundCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_pausedRemaining": "일시 정지 · {count}장 남음",
+  "@styleExplore_pausedRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stopRun": "생성 중지",
+  "styleExplore_inspectorPlaceholder": "후보를 선택하여 상세 정보 보기",
+  "styleExplore_thisWeek": "이번 주",
+  "styleExplore_today": "오늘",
+  "styleExplore_smallCandidates": "작은 후보 이미지",
+  "styleExplore_imageCount": "{count}장",
+  "@styleExplore_imageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -23,7 +23,8 @@ class _MemoryRunStorage extends StyleExploreRunStorage {
   Future<ExploreRun?> getRun(String id) async => _store[id];
 
   @override
-  Future<void> putRun(ExploreRun run) async {
+  Future<void> putRun(ExploreRun run, {void Function()? beforeWrite}) async {
+    beforeWrite?.call();
     _store[run.id] = run;
   }
 

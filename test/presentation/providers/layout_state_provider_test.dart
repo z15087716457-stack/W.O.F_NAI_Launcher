@@ -95,237 +95,102 @@ void main() {
     });
   });
 
-  group('LayoutState style explore widths', () {
-    test('defaults and copyWith preserve the Run sidebar width', () {
+  group('exploration workbench persistence', () {
+    test('new defaults and nullable copyWith preserve unrelated layout', () {
       const state = LayoutState();
-
-      expect(state.styleExploreRunSidebarWidth, 240.0);
-      expect(state.styleExploreGalleryWidth, 360.0);
-
-      final updated = state.copyWith(styleExploreRunSidebarWidth: 300.0);
-      expect(updated.styleExploreRunSidebarWidth, 300.0);
-      expect(updated.styleExploreGalleryWidth, 360.0);
-    });
-
-    test('setters preserve widths outside the former bounds', () async {
-      final storage = _FakeLayoutStorage()
-        ..blockLibraryPanelWidth = 280.0
-        ..styleExploreRunSidebarWidth = 280.0
-        ..styleExploreGalleryWidth = 360.0;
-      final container = ProviderContainer(
-        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
-      );
-      addTearDown(container.dispose);
-
-      final notifier = container.read(layoutStateNotifierProvider.notifier);
-      final state = container.read(layoutStateNotifierProvider);
-      expect(state.blockLibraryPanelWidth, 280.0);
-      expect(state.styleExploreRunSidebarWidth, 280.0);
-      expect(state.styleExploreGalleryWidth, 360.0);
-
-      await notifier.setStyleExploreRunSidebarWidth(100.0);
-      expect(storage.styleExploreRunSidebarWidth, 100.0);
+      expect(state.styleExploreEditorWidth, 384);
+      expect(state.styleExploreInspectorWidth, 312);
+      expect(state.styleExploreInspectorVisible, isNull);
+      final manual = state.copyWith(styleExploreInspectorVisible: false);
       expect(
-        container.read(layoutStateNotifierProvider).styleExploreRunSidebarWidth,
-        100.0,
+        manual.copyWith(rightPanelWidth: 350).styleExploreInspectorVisible,
+        false,
       );
-      await notifier.setStyleExploreRunSidebarWidth(999.0);
-      expect(storage.styleExploreRunSidebarWidth, 999.0);
       expect(
-        container.read(layoutStateNotifierProvider).styleExploreRunSidebarWidth,
-        999.0,
-      );
-
-      await notifier.setStyleExploreGalleryWidth(100.0);
-      expect(storage.styleExploreGalleryWidth, 100.0);
-      expect(
-        container.read(layoutStateNotifierProvider).styleExploreGalleryWidth,
-        100.0,
-      );
-      await notifier.setStyleExploreGalleryWidth(999.0);
-      expect(storage.styleExploreGalleryWidth, 999.0);
-      expect(
-        container.read(layoutStateNotifierProvider).styleExploreGalleryWidth,
-        999.0,
-      );
-
-      await notifier.setBlockLibraryPanelWidth(100.0);
-      expect(storage.blockLibraryPanelWidth, 100.0);
-      expect(
-        container.read(layoutStateNotifierProvider).blockLibraryPanelWidth,
-        100.0,
-      );
-      await notifier.setBlockLibraryPanelWidth(999.0);
-      expect(storage.blockLibraryPanelWidth, 999.0);
-      expect(
-        container.read(layoutStateNotifierProvider).blockLibraryPanelWidth,
-        999.0,
-      );
-
-      await notifier.setStyleExploreRunSidebarWidth(-1.0);
-      expect(storage.styleExploreRunSidebarWidth, 0.0);
-      expect(
-        container.read(layoutStateNotifierProvider).styleExploreRunSidebarWidth,
-        0.0,
-      );
-    });
-  });
-
-  group('LayoutStateNotifier paired style explore pane widths', () {
-    test(
-      'paired setter updates both panes in one state and storage write',
-      () async {
-        final storage = _FakeLayoutStorage()
-          ..blockLibraryPanelWidth = 280.0
-          ..styleExploreRunSidebarWidth = 240.0
-          ..styleExploreGalleryWidth = 360.0;
-        final container = ProviderContainer(
-          overrides: [
-            localStorageServiceProvider.overrideWith((ref) => storage),
-          ],
-        );
-        addTearDown(container.dispose);
-
-        await container
-            .read(layoutStateNotifierProvider.notifier)
-            .setStyleExplorePaneWidths(sidebar: 180.0, gallery: 420.0);
-
-        final state = container.read(layoutStateNotifierProvider);
-        expect(state.styleExploreRunSidebarWidth, 180.0);
-        expect(state.styleExploreGalleryWidth, 420.0);
-        // 未传入的键必须原样保留。
-        expect(state.blockLibraryPanelWidth, 280.0);
-        expect(storage.styleExploreRunSidebarWidth, 180.0);
-        expect(storage.styleExploreGalleryWidth, 420.0);
-        expect(storage.blockLibraryPanelWidth, 280.0);
-      },
-    );
-
-    test(
-      'paired setter accepts block library without touching panes',
-      () async {
-        final storage = _FakeLayoutStorage();
-        final container = ProviderContainer(
-          overrides: [
-            localStorageServiceProvider.overrideWith((ref) => storage),
-          ],
-        );
-        addTearDown(container.dispose);
-
-        await container
-            .read(layoutStateNotifierProvider.notifier)
-            .setStyleExplorePaneWidths(blockLibrary: 260.0, sidebar: 300.0);
-
-        final state = container.read(layoutStateNotifierProvider);
-        expect(state.blockLibraryPanelWidth, 260.0);
-        expect(state.styleExploreRunSidebarWidth, 300.0);
-        expect(state.styleExploreGalleryWidth, 360.0);
-        expect(storage.blockLibraryPanelWidth, 260.0);
-        expect(storage.styleExploreGalleryWidth, 360.0);
-      },
-    );
-
-    test('paired setter clamps negative widths to zero', () async {
-      final storage = _FakeLayoutStorage();
-      final container = ProviderContainer(
-        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
-      );
-      addTearDown(container.dispose);
-
-      await container
-          .read(layoutStateNotifierProvider.notifier)
-          .setStyleExplorePaneWidths(sidebar: -40.0, gallery: -10.0);
-
-      final state = container.read(layoutStateNotifierProvider);
-      expect(state.styleExploreRunSidebarWidth, 0.0);
-      expect(state.styleExploreGalleryWidth, 0.0);
-      expect(storage.styleExploreRunSidebarWidth, 0.0);
-      expect(storage.styleExploreGalleryWidth, 0.0);
-    });
-  });
-
-  group('LayoutState style explore run sidebar visibility', () {
-    test(
-      'defaults to null so the screen can treat the first visit as open',
-      () {
-        const state = LayoutState();
-
-        expect(state.styleExploreRunSidebarVisible, isNull);
-
-        final updated = state.copyWith(styleExploreRunSidebarVisible: false);
-        expect(updated.styleExploreRunSidebarVisible, isFalse);
-        // 不影响同页其他布局字段。
-        expect(updated.styleExploreRunSidebarWidth, 240.0);
-        expect(updated.styleExploreGalleryWidth, 360.0);
-      },
-    );
-
-    test('build reads the stored flag and the setter writes it back', () async {
-      final storage = _FakeLayoutStorage()
-        ..styleExploreRunSidebarVisible = false;
-      final container = ProviderContainer(
-        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
-      );
-      addTearDown(container.dispose);
-
-      expect(
-        container
-            .read(layoutStateNotifierProvider)
-            .styleExploreRunSidebarVisible,
-        isFalse,
-      );
-
-      await container
-          .read(layoutStateNotifierProvider.notifier)
-          .setStyleExploreRunSidebarVisible(true);
-
-      expect(storage.styleExploreRunSidebarVisible, isTrue);
-      expect(
-        container
-            .read(layoutStateNotifierProvider)
-            .styleExploreRunSidebarVisible,
-        isTrue,
-      );
-    });
-
-    test('a never touched key stays null (no write on first visit)', () {
-      final storage = _FakeLayoutStorage();
-      final container = ProviderContainer(
-        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
-      );
-      addTearDown(container.dispose);
-
-      expect(
-        container
-            .read(layoutStateNotifierProvider)
-            .styleExploreRunSidebarVisible,
+        manual
+            .copyWith(styleExploreInspectorVisible: null)
+            .styleExploreInspectorVisible,
         isNull,
       );
-      expect(storage.styleExploreRunSidebarVisible, isNull);
+      expect(manual.styleExploreEditorWidth, 384);
+    });
+
+    test('editor and inspector clamp independently and persist', () async {
+      final storage = _FakeLayoutStorage()
+        ..styleExploreEditorWidth = 450
+        ..styleExploreInspectorWidth = 350;
+      final container = ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      expect(
+        container.read(layoutStateNotifierProvider).styleExploreEditorWidth,
+        450,
+      );
+      expect(
+        container.read(layoutStateNotifierProvider).styleExploreInspectorWidth,
+        350,
+      );
+      await notifier.setStyleExploreEditorWidth(9999);
+      await notifier.setStyleExploreInspectorWidth(1);
+      expect(storage.styleExploreEditorWidth, 560);
+      expect(storage.styleExploreInspectorWidth, 280);
+      await notifier.setStyleExploreEditorWidth(1);
+      await notifier.setStyleExploreInspectorWidth(9999);
+      expect(storage.styleExploreEditorWidth, 352);
+      expect(storage.styleExploreInspectorWidth, 420);
+      await notifier.setStyleExploreEditorWidth(double.nan);
+      await notifier.setStyleExploreInspectorWidth(double.infinity);
+      expect(storage.styleExploreEditorWidth, 384);
+      expect(storage.styleExploreInspectorWidth, 312);
+      expect(storage.blockLibraryPanelWidth, 320);
+    });
+
+    test('visibility stores manual intent and can return to auto', () async {
+      final storage = _FakeLayoutStorage()
+        ..styleExploreInspectorVisible = false;
+      final container = ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWith((ref) => storage)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(layoutStateNotifierProvider.notifier);
+      expect(
+        container
+            .read(layoutStateNotifierProvider)
+            .styleExploreInspectorVisible,
+        false,
+      );
+      await notifier.setStyleExploreInspectorVisible(true);
+      expect(storage.styleExploreInspectorVisible, true);
+      await notifier.setStyleExploreInspectorVisible(null);
+      expect(storage.styleExploreInspectorVisible, isNull);
+      expect(
+        container
+            .read(layoutStateNotifierProvider)
+            .styleExploreInspectorVisible,
+        isNull,
+      );
     });
   });
 }
 
 class _FakeLayoutStorage extends LocalStorageService {
   bool rightExpanded = true;
-  double rightWidth = 280.0;
+  double rightWidth = 280;
   bool mainNavExpanded = false;
-  double webWidth = 400.0;
+  double webWidth = 400;
   bool webExpanded = true;
-  double blockLibraryPanelWidth = 320.0;
-  double styleExploreRunSidebarWidth = 240.0;
-  double styleExploreGalleryWidth = 360.0;
-  bool? styleExploreRunSidebarVisible;
-
+  double blockLibraryPanelWidth = 320;
+  double styleExploreEditorWidth = 384;
+  double styleExploreInspectorWidth = 312;
+  bool? styleExploreInspectorVisible;
   @override
   bool getRightPanelExpanded() => rightExpanded;
-
   @override
   double getRightPanelWidth() => rightWidth;
-
   @override
   bool getMainNavRailExpanded() => mainNavExpanded;
-
   @override
   Future<void> setMainNavRailExpanded(bool value) async {
     mainNavExpanded = value;
@@ -333,7 +198,6 @@ class _FakeLayoutStorage extends LocalStorageService {
 
   @override
   double getWebLeftPanelWidth() => webWidth;
-
   @override
   Future<void> setWebLeftPanelWidth(double value) async {
     webWidth = value;
@@ -341,7 +205,6 @@ class _FakeLayoutStorage extends LocalStorageService {
 
   @override
   bool getWebLeftPanelExpanded() => webExpanded;
-
   @override
   Future<void> setWebLeftPanelExpanded(bool value) async {
     webExpanded = value;
@@ -349,33 +212,29 @@ class _FakeLayoutStorage extends LocalStorageService {
 
   @override
   double getBlockLibraryPanelWidth() => blockLibraryPanelWidth;
-
   @override
   Future<void> setBlockLibraryPanelWidth(double value) async {
     blockLibraryPanelWidth = value;
   }
 
   @override
-  double getStyleExploreRunSidebarWidth() => styleExploreRunSidebarWidth;
-
+  double getStyleExploreEditorWidth() => styleExploreEditorWidth;
   @override
-  Future<void> setStyleExploreRunSidebarWidth(double value) async {
-    styleExploreRunSidebarWidth = value;
+  Future<void> setStyleExploreEditorWidth(double value) async {
+    styleExploreEditorWidth = value;
   }
 
   @override
-  bool? getStyleExploreRunSidebarVisible() => styleExploreRunSidebarVisible;
-
+  double getStyleExploreInspectorWidth() => styleExploreInspectorWidth;
   @override
-  Future<void> setStyleExploreRunSidebarVisible(bool value) async {
-    styleExploreRunSidebarVisible = value;
+  Future<void> setStyleExploreInspectorWidth(double value) async {
+    styleExploreInspectorWidth = value;
   }
 
   @override
-  double getStyleExploreGalleryWidth() => styleExploreGalleryWidth;
-
+  bool? getStyleExploreInspectorVisible() => styleExploreInspectorVisible;
   @override
-  Future<void> setStyleExploreGalleryWidth(double value) async {
-    styleExploreGalleryWidth = value;
+  Future<void> setStyleExploreInspectorVisible(bool? value) async {
+    styleExploreInspectorVisible = value;
   }
 }

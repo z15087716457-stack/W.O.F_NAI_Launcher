@@ -4,6 +4,8 @@ import '../../core/storage/local_storage_service.dart';
 
 part 'layout_state_provider.g.dart';
 
+const _unchangedInspectorVisibility = Object();
+
 /// UI布局状态数据类
 class LayoutState {
   final bool rightPanelExpanded;
@@ -16,11 +18,11 @@ class LayoutState {
   final bool blockPaletteToolPinned;
   final bool translationToolPinned;
   final bool blockLibraryPanelToolPinned;
-  final double styleExploreRunSidebarWidth;
-  final double styleExploreGalleryWidth;
+  final double styleExploreEditorWidth;
+  final double styleExploreInspectorWidth;
 
-  /// 探索页 Run 侧栏展开态；null = 从未设置过（首次访问由页面按默认展开处理）。
-  final bool? styleExploreRunSidebarVisible;
+  /// null follows available width; a user override persists across windows.
+  final bool? styleExploreInspectorVisible;
 
   const LayoutState({
     this.rightPanelExpanded = true,
@@ -33,9 +35,9 @@ class LayoutState {
     this.blockPaletteToolPinned = true,
     this.translationToolPinned = true,
     this.blockLibraryPanelToolPinned = false,
-    this.styleExploreRunSidebarWidth = 240.0,
-    this.styleExploreGalleryWidth = 360.0,
-    this.styleExploreRunSidebarVisible,
+    this.styleExploreEditorWidth = 384.0,
+    this.styleExploreInspectorWidth = 312.0,
+    this.styleExploreInspectorVisible,
   });
 
   /// 复制并更新部分字段
@@ -50,9 +52,9 @@ class LayoutState {
     bool? blockPaletteToolPinned,
     bool? translationToolPinned,
     bool? blockLibraryPanelToolPinned,
-    double? styleExploreRunSidebarWidth,
-    double? styleExploreGalleryWidth,
-    bool? styleExploreRunSidebarVisible,
+    double? styleExploreEditorWidth,
+    double? styleExploreInspectorWidth,
+    Object? styleExploreInspectorVisible = _unchangedInspectorVisibility,
   }) {
     return LayoutState(
       rightPanelExpanded: rightPanelExpanded ?? this.rightPanelExpanded,
@@ -70,12 +72,14 @@ class LayoutState {
           translationToolPinned ?? this.translationToolPinned,
       blockLibraryPanelToolPinned:
           blockLibraryPanelToolPinned ?? this.blockLibraryPanelToolPinned,
-      styleExploreRunSidebarWidth:
-          styleExploreRunSidebarWidth ?? this.styleExploreRunSidebarWidth,
-      styleExploreGalleryWidth:
-          styleExploreGalleryWidth ?? this.styleExploreGalleryWidth,
-      styleExploreRunSidebarVisible:
-          styleExploreRunSidebarVisible ?? this.styleExploreRunSidebarVisible,
+      styleExploreEditorWidth:
+          styleExploreEditorWidth ?? this.styleExploreEditorWidth,
+      styleExploreInspectorWidth:
+          styleExploreInspectorWidth ?? this.styleExploreInspectorWidth,
+      styleExploreInspectorVisible:
+          identical(styleExploreInspectorVisible, _unchangedInspectorVisibility)
+          ? this.styleExploreInspectorVisible
+          : styleExploreInspectorVisible as bool?,
     );
   }
 }
@@ -99,9 +103,9 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       blockPaletteToolPinned: storage.getBlockPaletteToolPinned(),
       translationToolPinned: storage.getTranslationToolPinned(),
       blockLibraryPanelToolPinned: storage.getBlockLibraryPanelToolPinned(),
-      styleExploreRunSidebarWidth: storage.getStyleExploreRunSidebarWidth(),
-      styleExploreGalleryWidth: storage.getStyleExploreGalleryWidth(),
-      styleExploreRunSidebarVisible: storage.getStyleExploreRunSidebarVisible(),
+      styleExploreEditorWidth: storage.getStyleExploreEditorWidth(),
+      styleExploreInspectorWidth: storage.getStyleExploreInspectorWidth(),
+      styleExploreInspectorVisible: storage.getStyleExploreInspectorVisible(),
     );
   }
 
@@ -214,65 +218,26 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
     await setBlockLibraryPanelToolPinned(!state.blockLibraryPanelToolPinned);
   }
 
-  /// 设置画风探索页 Run 侧栏宽度
-  Future<void> setStyleExploreRunSidebarWidth(double width) async {
-    final normalized = width.clamp(0.0, double.infinity).toDouble();
-    state = state.copyWith(styleExploreRunSidebarWidth: normalized);
-
-    final storage = ref.read(localStorageServiceProvider);
-    await storage.setStyleExploreRunSidebarWidth(normalized);
+  Future<void> setStyleExploreEditorWidth(double width) async {
+    final value = width.isFinite ? width.clamp(352.0, 560.0).toDouble() : 384.0;
+    state = state.copyWith(styleExploreEditorWidth: value);
+    await ref
+        .read(localStorageServiceProvider)
+        .setStyleExploreEditorWidth(value);
   }
 
-  /// 设置画风探索页候选画廊宽度
-  Future<void> setStyleExploreGalleryWidth(double width) async {
-    final normalized = width.clamp(0.0, double.infinity).toDouble();
-    state = state.copyWith(styleExploreGalleryWidth: normalized);
-
-    final storage = ref.read(localStorageServiceProvider);
-    await storage.setStyleExploreGalleryWidth(normalized);
+  Future<void> setStyleExploreInspectorWidth(double width) async {
+    final value = width.isFinite ? width.clamp(280.0, 420.0).toDouble() : 312.0;
+    state = state.copyWith(styleExploreInspectorWidth: value);
+    await ref
+        .read(localStorageServiceProvider)
+        .setStyleExploreInspectorWidth(value);
   }
 
-  /// 设置画风探索页 Run 侧栏展开状态
-  ///
-  /// 首次访问由探索页按默认展开处理；用户手动开关过一次即落盘，
-  /// 此后按存值恢复（与块库/画廊 toggle 同款持久化语义）。
-  Future<void> setStyleExploreRunSidebarVisible(bool visible) async {
-    state = state.copyWith(styleExploreRunSidebarVisible: visible);
-
-    final storage = ref.read(localStorageServiceProvider);
-    await storage.setStyleExploreRunSidebarVisible(visible);
-  }
-
-  /// 成对调整画风探索页分区宽度（手柄拖拽补偿专用）
-  ///
-  /// 拖拽分界时右邻 ∓Δ、左邻 ±Δ 同帧写回，被拖分界以外的分界位置不动；
-  /// 一次 copyWith、只持久化传入的键，避免每帧两次 state 更新。
-  /// 单键 setter 保留给其他调用方。
-  Future<void> setStyleExplorePaneWidths({
-    double? blockLibrary,
-    double? sidebar,
-    double? gallery,
-  }) async {
-    final blockLibraryWidth = blockLibrary
-        ?.clamp(0.0, double.infinity)
-        .toDouble();
-    final sidebarWidth = sidebar?.clamp(0.0, double.infinity).toDouble();
-    final galleryWidth = gallery?.clamp(0.0, double.infinity).toDouble();
-    state = state.copyWith(
-      blockLibraryPanelWidth: blockLibraryWidth,
-      styleExploreRunSidebarWidth: sidebarWidth,
-      styleExploreGalleryWidth: galleryWidth,
-    );
-
-    final storage = ref.read(localStorageServiceProvider);
-    if (blockLibraryWidth != null) {
-      await storage.setBlockLibraryPanelWidth(blockLibraryWidth);
-    }
-    if (sidebarWidth != null) {
-      await storage.setStyleExploreRunSidebarWidth(sidebarWidth);
-    }
-    if (galleryWidth != null) {
-      await storage.setStyleExploreGalleryWidth(galleryWidth);
-    }
+  Future<void> setStyleExploreInspectorVisible(bool? visible) async {
+    state = state.copyWith(styleExploreInspectorVisible: visible);
+    await ref
+        .read(localStorageServiceProvider)
+        .setStyleExploreInspectorVisible(visible);
   }
 }
