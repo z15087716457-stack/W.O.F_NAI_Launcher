@@ -89,15 +89,17 @@ class _StyleExploreScreenState extends ConsumerState<StyleExploreScreen> {
               ref.read(layoutStateNotifierProvider).styleExploreInspectorWidth +
                   dx,
             ),
+            onCloseInspector: () =>
+                notifier.setStyleExploreInspectorVisible(false),
             editor: DecoratedBox(
               decoration: BoxDecoration(
                 border: Border(
                   right: BorderSide(color: theme.colorScheme.outlineVariant),
                 ),
               ),
-              child: _buildCenterPanel(
-                theme,
-                availableWidth: layout.styleExploreEditorWidth,
+              child: LayoutBuilder(
+                builder: (context, box) =>
+                    _buildCenterPanel(theme, availableWidth: box.maxWidth),
               ),
             ),
             stageBuilder: (context, inspectorVisible) => Column(

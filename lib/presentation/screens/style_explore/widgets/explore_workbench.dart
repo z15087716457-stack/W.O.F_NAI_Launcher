@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../widgets/library/library_toolbar.dart';
 import '../../generation/widgets/resize_handle.dart';
 
 /// Three panes retain their positions when the block library overlays the stage.
@@ -15,11 +16,13 @@ class ExploreWorkbench extends StatelessWidget {
     required this.inspectorWidth,
     required this.onEditorResize,
     required this.onInspectorResize,
+    required this.onCloseInspector,
     this.inspectorVisible,
     this.blockLibrary,
   });
 
   final Widget editor, inspector;
+  final VoidCallback onCloseInspector;
   final Widget Function(BuildContext context, bool inspectorVisible)
   stageBuilder;
   final double editorWidth, inspectorWidth;
@@ -33,10 +36,21 @@ class ExploreWorkbench extends StatelessWidget {
       final showInspector =
           inspectorVisible ??
           constraints.maxWidth >= editorWidth + 480 + inspectorWidth;
-      final rightWidth = showInspector ? inspectorWidth : 0.0;
+      // A manual open that cannot dock without crushing the editor below its
+      // 352 floor floats over the stage edge, as the U1 library inspector does.
+      final docked =
+          showInspector &&
+          constraints.maxWidth >=
+              math.min(352.0, editorWidth) + 480 + inspectorWidth;
+      final rightWidth = docked ? inspectorWidth : 0.0;
       final visibleEditorWidth = math.min(
         editorWidth,
         math.max(0.0, constraints.maxWidth - 480 - rightWidth),
+      );
+      // Reflow down to the 352 floor first; only narrower windows clip.
+      final editorLayoutWidth = math.max(
+        math.min(352.0, editorWidth),
+        visibleEditorWidth,
       );
       final contentWidth = math.max(
         constraints.maxWidth,
@@ -60,9 +74,12 @@ class ExploreWorkbench extends StatelessWidget {
                       child: ClipRect(
                         child: OverflowBox(
                           alignment: Alignment.topLeft,
-                          minWidth: editorWidth,
-                          maxWidth: editorWidth,
-                          child: SizedBox(width: editorWidth, child: editor),
+                          minWidth: editorLayoutWidth,
+                          maxWidth: editorLayoutWidth,
+                          child: SizedBox(
+                            width: editorLayoutWidth,
+                            child: editor,
+                          ),
                         ),
                       ),
                     ),
@@ -73,7 +90,7 @@ class ExploreWorkbench extends StatelessWidget {
                         children: [stageBuilder(context, showInspector)],
                       ),
                     ),
-                    if (showInspector)
+                    if (docked)
                       SizedBox(
                         key: const Key('style-explore-inspector'),
                         width: inspectorWidth,
@@ -81,7 +98,7 @@ class ExploreWorkbench extends StatelessWidget {
                       ),
                   ],
                 ),
-                if (showInspector)
+                if (docked)
                   Positioned(
                     right: inspectorWidth - 4,
                     top: 0,
@@ -113,6 +130,38 @@ class ExploreWorkbench extends StatelessWidget {
                     onDrag: onEditorResize,
                   ),
                 ),
+                if (showInspector && !docked)
+                  Positioned(
+                    key: const Key('style-explore-inspector'),
+                    top: 0,
+                    bottom: 0,
+                    right: 0,
+                    width: math.min(
+                      inspectorWidth,
+                      contentWidth - visibleEditorWidth,
+                    ),
+                    child: Material(
+                      elevation: 12,
+                      color: Theme.of(context).colorScheme.surfaceContainerLow,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(child: inspector),
+                          Positioned(
+                            top: 12,
+                            right: 146,
+                            child: LibraryIconButton(
+                              key: const Key('style-explore-inspector-close'),
+                              icon: 'x',
+                              tooltip: MaterialLocalizations.of(
+                                context,
+                              ).closeButtonTooltip,
+                              onPressed: onCloseInspector,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

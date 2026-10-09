@@ -501,9 +501,11 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('style-explore-inspector-toggle')));
     await tester.pumpAndSettle();
+    // Docking would crush the editor below 352, so the inspector floats.
     expect(find.byKey(const Key('style-explore-inspector')), findsOneWidget);
-    expect(stageRect(tester).width, 480);
-    expect(mainRect(tester).width, 208);
+    expect(stageRect(tester).width, 616);
+    expect(mainRect(tester).width, 384);
+    expect(inspectorRect(tester), const Rect.fromLTWH(688, 0, 312, 900));
     expect(
       container.read(layoutStateNotifierProvider).styleExploreEditorWidth,
       384,
@@ -511,10 +513,18 @@ void main() {
     tester.view.physicalSize = const Size(900, 900);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('style-explore-inspector')), findsOneWidget);
-    expect(stageRect(tester).width, 480);
+    expect(stageRect(tester).width, 516);
+    expect(mainRect(tester).width, 384);
     expect(
       container.read(layoutStateNotifierProvider).styleExploreInspectorVisible,
       true,
+    );
+    await tester.tap(find.byKey(const Key('style-explore-inspector-close')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('style-explore-inspector')), findsNothing);
+    expect(
+      container.read(layoutStateNotifierProvider).styleExploreInspectorVisible,
+      false,
     );
     expect(tester.takeException(), isNull);
   });

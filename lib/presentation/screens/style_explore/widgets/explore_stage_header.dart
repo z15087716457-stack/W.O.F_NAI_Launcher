@@ -19,6 +19,12 @@ import 'explore_run_switcher.dart';
 
 final styleExploreGridLargeProvider = StateProvider<bool>((ref) => true);
 
+/// Size toggle, auto-save and inspector toggle with their 10px gaps.
+const double _trailingWidth = 10 + 70 + 10 + 28 + 10 + 28;
+
+/// Switcher padding, status dot, gaps, chevron and border around the name.
+const double _switcherChrome = 59;
+
 class ExploreStageHeader extends ConsumerWidget {
   const ExploreStageHeader({super.key, required this.inspectorVisible});
   final bool inspectorVisible;
@@ -65,6 +71,23 @@ class ExploreStageHeader extends ConsumerWidget {
       ],
     ];
     final large = ref.watch(styleExploreGridLargeProvider);
+    final runStyle = theme.textTheme.bodyMedium?.copyWith(
+      fontSize: 14,
+      height: 1.45,
+      fontWeight: FontWeight.w700,
+    );
+    final statStyle = theme.textTheme.bodySmall?.copyWith(
+      fontSize: 12,
+      color: scheme.onSurfaceVariant,
+    );
+    final progressStyle = theme.textTheme.bodySmall?.copyWith(
+      fontSize: 12.5,
+      fontWeight: FontWeight.w600,
+      color: scheme.primary,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    final hasFraction = busy && total > 0;
+    final compactProgress = '$current / $total';
     return Container(
       key: const Key('explore-stage-header'),
       height: 52,
@@ -75,107 +98,92 @@ class ExploreStageHeader extends ConsumerWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          double widthOf(String text, double size, FontWeight weight) {
+          double widthOf(String text, TextStyle? style) {
             final painter = TextPainter(
-              text: TextSpan(
-                text: text,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: size,
-                  fontWeight: weight,
-                ),
-              ),
+              text: TextSpan(text: text, style: style),
               textDirection: Directionality.of(context),
               textScaler: MediaQuery.textScalerOf(context),
             )..layout();
-            return painter.width;
+            final width = painter.width.ceilToDouble();
+            painter.dispose();
+            return width;
           }
 
+          // Degrade order on narrow stages: statistics drop whole items, the
+          // progress bar goes, the round prefix collapses to "9 / 12", and
+          // only then the exploration name is shortened.
+          final showProgress = busy || paused;
+          final available =
+              constraints.maxWidth - _trailingWidth - (showProgress ? 10 : 0);
           final desiredRun = math.min(
             300.0,
-            widthOf(
-                  run?.displayName ?? l10n.styleExplore_newRun,
-                  14,
-                  FontWeight.w700,
-                ) +
-                59,
+            widthOf(run?.displayName ?? l10n.styleExplore_newRun, runStyle) +
+                _switcherChrome,
           );
-          final desiredStats =
-              stats.fold<double>(
-                0,
-                (n, s) => n + widthOf(s, 12, FontWeight.w400),
-              ) +
-              math.max(0, stats.length - 1) * 19;
-          final showProgress = busy || paused;
-          final statWidth = math.min(
-            desiredStats,
-            constraints.maxWidth * (showProgress ? .12 : .3),
+          final chrome =
+              16.0 + (busy ? 24 : 0) + 6 + ((running || paused) ? 56 : 28);
+          final progressOptions = !showProgress
+              ? const <double>[0]
+              : [
+                  if (hasFraction)
+                    widthOf(progress, progressStyle) + chrome + 100,
+                  widthOf(progress, progressStyle) + chrome,
+                  if (hasFraction)
+                    widthOf(compactProgress, progressStyle) + chrome,
+                ];
+          final progressLevel = progressOptions.indexWhere(
+            (width) => width + desiredRun <= available,
           );
-          final desiredProgress =
-              widthOf(progress, 12.5, FontWeight.w600) + (paused ? 86 : 224);
-          final progressWidth = showProgress
-              ? math.min(
-                  desiredProgress,
-                  math.max(
-                    148.0,
-                    constraints.maxWidth - 146 - statWidth - 96 - 30,
-                  ),
-                )
-              : 0.0;
+          final progressIndex = progressLevel < 0
+              ? progressOptions.length - 1
+              : progressLevel;
+          final progressWidth = progressLevel >= 0 || !showProgress
+              ? progressOptions[progressIndex]
+              : math.min(
+                  progressOptions[progressIndex],
+                  math.max(chrome + 24, available - math.min(desiredRun, 96)),
+                );
+          final showBar = hasFraction && progressIndex == 0;
+          final compact = hasFraction && progressIndex == 2;
           final runWidth = math.max(
-            59.0,
-            math.min(
-              desiredRun,
-              constraints.maxWidth -
-                  146 -
-                  statWidth -
-                  progressWidth -
-                  (showProgress ? 30 : 20),
-            ),
+            _switcherChrome,
+            math.min(desiredRun, available - progressWidth),
           );
+          var statsRoom = available - runWidth - progressWidth - 10;
+          final shownStats = <String>[];
+          for (final stat in stats) {
+            final width =
+                widthOf(stat, statStyle) + (shownStats.isEmpty ? 0 : 19);
+            if (width > statsRoom) break;
+            statsRoom -= width;
+            shownStats.add(stat);
+          }
           return Row(
             children: [
               SizedBox(width: runWidth, child: const ExploreRunSwitcher()),
-              if (stats.isNotEmpty) ...[
+              if (shownStats.isNotEmpty) ...[
                 const SizedBox(width: 10),
-                SizedBox(
-                  width: statWidth,
-                  child: Tooltip(
-                    message: stats.join(' · '),
-                    child: ClipRect(
-                      child: UnconstrainedBox(
-                        constrainedAxis: Axis.vertical,
-                        alignment: Alignment.centerLeft,
-                        clipBehavior: Clip.hardEdge,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            for (var i = 0; i < stats.length; i++) ...[
-                              if (i > 0)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                  ),
-                                  child: Container(
-                                    width: 3,
-                                    height: 3,
-                                    decoration: BoxDecoration(
-                                      color: scheme.outline,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                              Text(
-                                stats[i],
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  fontSize: 12,
-                                  color: scheme.onSurfaceVariant,
-                                ),
+                Tooltip(
+                  message: stats.join(' · '),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < shownStats.length; i++) ...[
+                        if (i > 0)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Container(
+                              width: 3,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                color: scheme.outline,
+                                shape: BoxShape.circle,
                               ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
+                            ),
+                          ),
+                        Text(shownStats[i], maxLines: 1, style: statStyle),
+                      ],
+                    ],
                   ),
                 ),
               ],
@@ -221,22 +229,13 @@ class ExploreStageHeader extends ConsumerWidget {
                           ],
                           Expanded(
                             child: Text(
-                              progress,
+                              compact ? compactProgress : progress,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                                color: scheme.primary,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
+                              style: progressStyle,
                             ),
                           ),
-                          if (busy &&
-                              progressWidth >= desiredProgress - 1 &&
-                              total > 0) ...[
+                          if (showBar) ...[
                             const SizedBox(width: 10),
                             SizedBox(
                               width: 90,

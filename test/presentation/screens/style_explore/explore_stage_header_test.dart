@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -235,9 +236,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(windowCalls, contains('startDragging'));
       windowCalls.clear();
-    await tester.tap(find.byKey(const Key('explore-run-switcher-button')));
+      await tester.tap(find.byKey(const Key('explore-run-switcher-button')));
       await tester.pumpAndSettle();
-    expect(find.byKey(const Key('explore-run-switcher-menu')), findsOneWidget);
+      expect(
+        find.byKey(const Key('explore-run-switcher-menu')),
+        findsOneWidget,
+      );
       expect(windowCalls, isEmpty);
       expect(tester.takeException(), isNull);
     },
@@ -482,14 +486,17 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('重命名'));
       await tester.pumpAndSettle();
-      expect(find.byType(AlertDialog), findsOneWidget);
-      final field = find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.byType(TextField),
+      expect(find.byType(AlertDialog), findsNothing);
+      final field = find.byKey(const Key('explore-run-inline-name'));
+      expect(
+        find.descendant(
+          of: find.byKey(ValueKey('explore-run-${other.id}')),
+          matching: field,
+        ),
+        findsOneWidget,
       );
       await tester.enterText(field, '改过的探索');
-      await tester.pump();
-      await tester.tap(find.widgetWithText(FilledButton, '确定'));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
       expect(
         container
@@ -587,4 +594,55 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets(
+    'default 1280 stage keeps the full name and fraction before the round prefix',
+    (tester) async {
+      final run = _run(
+        '柔光画风',
+        candidates: [
+          for (var i = 0; i < 3; i++)
+            ExploreCandidate.shell(roundId: 'r', id: 'c$i'),
+        ],
+      );
+      // 1280 window − 48 rail − 384 editor − 312 inspector.
+      await pump(tester, run, width: 536);
+      expect(
+        tester
+            .renderObject<RenderParagraph>(
+              find.descendant(
+                of: find.byKey(const Key('explore-run-switcher-button')),
+                matching: find.text('柔光画风'),
+              ),
+            )
+            .didExceedMaxLines,
+        isFalse,
+      );
+      expect(find.text('3 张'), findsOneWidget);
+      runner.set(
+        ExploreRunRunnerState(
+          runId: run.id,
+          isRunning: true,
+          processedCount: 8,
+          totalCount: 12,
+        ),
+      );
+      await tester.pump();
+      expect(find.text('9 / 12'), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(
+        tester
+            .renderObject<RenderParagraph>(
+              find.descendant(
+                of: find.byKey(const Key('explore-run-switcher-button')),
+                matching: find.text('柔光画风'),
+              ),
+            )
+            .didExceedMaxLines,
+        isFalse,
+      );
+      expect(find.byKey(const Key('explore-run-pause')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

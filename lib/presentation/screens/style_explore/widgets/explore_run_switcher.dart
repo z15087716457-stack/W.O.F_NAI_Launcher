@@ -287,7 +287,7 @@ class _ExploreRunMenuState extends ConsumerState<_ExploreRunMenu> {
     );
     if (!mounted) return;
     if (action == 'rename') {
-      await ExploreRunActions.rename(context, ref, run);
+      _edit(run);
     } else if (action == 'delete') {
       await ExploreRunActions.delete(context, ref, run);
     }

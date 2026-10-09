@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
-import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_auto_run_name.dart';
