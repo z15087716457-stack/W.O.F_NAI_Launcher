@@ -11,7 +11,7 @@ import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_preference_sort_dialog.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_preference_sort_dialog.dart';
 
 /// 内存版 Run 存储（testWidgets 的 fakeAsync 区里 Hive 异步写盘不落定）。
 class _MemoryRunStorage extends StyleExploreRunStorage {
@@ -224,7 +224,7 @@ void main() {
     );
     expect(surface.width, 1152);
     expect(surface.height, 852);
-    expect(find.text(l10n.styleExplore_sortTitle), findsOneWidget);
+    expect(find.text(l10n.styleExplore_compareQuestion), findsOneWidget);
     expect(find.text(l10n.styleExplore_sortProgress(1, 3)), findsOneWidget);
     expect(find.text(l10n.styleExplore_candidateMissing), findsOneWidget);
     final left = tester.getRect(
@@ -243,7 +243,7 @@ void main() {
   });
 
   testWidgets(
-    'wide comparison uses 1180 dialog, 240 ranking and 610 image limit',
+    'wide comparison uses prototype 1380 dialog, 280 ranking and 610 image limit',
     (tester) async {
       await openDialog(tester, sortRun());
       tester.view.physicalSize = const Size(1600, 1000);
@@ -257,11 +257,11 @@ void main() {
                   .first,
             )
             .width,
-        1180,
+        1380,
       );
       expect(
         tester.getSize(find.byKey(const Key('explore-sort-ranking'))).width,
-        240,
+        280,
       );
       final ranking = tester.getRect(
             find.byKey(const Key('explore-sort-ranking')),
@@ -329,10 +329,10 @@ void main() {
     expect(stored.parentSetById('ps-1')!.parents.first.preference, 2.0);
     expect(stored.parentSetById('ps-1')!.comparisons, hasLength(1));
 
-    // 第 2 对 = (p-1, p-3)：左侧显示对照中刚落盘的 2.00，不是开窗快照 1.00。
+    // 第 2 对 = (p-1, p-3)：左侧显示对照中刚落盘的 2.0，不是开窗快照 1.0。
     expect(find.text(l10n.styleExplore_sortProgress(2, 3)), findsOneWidget);
-    expect(find.text('2.00'), findsOneWidget);
-    expect(find.text('1.00'), findsWidgets);
+    expect(find.text('2.0'), findsOneWidget);
+    expect(find.text('1.0'), findsWidgets);
     expect(find.text('artist:custom'), findsWidgets);
   });
 

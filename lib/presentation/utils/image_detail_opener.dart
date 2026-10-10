@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../widgets/common/image_detail/image_detail_data.dart';
 import '../widgets/common/image_detail/image_detail_viewer.dart';

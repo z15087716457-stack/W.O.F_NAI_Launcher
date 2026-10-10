@@ -1,0 +1,922 @@
+[
+  {
+    "id": 1,
+    "image": "assets/c08.jpg",
+    "atoms": [
+      "0.5::artist:modare::",
+      "artist:mignon"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "modare",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "mignon",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 2,
+    "image": "assets/c19.jpg",
+    "atoms": [
+      "0.9::artist:torino aqua::",
+      "0.6::artist:toosaka asagi::",
+      "0.7::artist:ke-ta::"
+    ],
+    "arts": [
+      {
+        "w": "0.9",
+        "a": "torino aqua",
+        "k": "pk"
+      },
+      {
+        "w": "0.6",
+        "a": "toosaka asagi",
+        "k": "pk"
+      },
+      {
+        "w": "0.7",
+        "a": "ke-ta",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 3,
+    "image": "assets/c04.jpg",
+    "atoms": [
+      "0.9::artist:mignon::",
+      "1.2::artist:rurudo::"
+    ],
+    "arts": [
+      {
+        "w": "0.9",
+        "a": "mignon",
+        "k": "pk"
+      },
+      {
+        "w": "1.2",
+        "a": "rurudo",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 4,
+    "image": "assets/c12.jpg",
+    "atoms": [
+      "0.5::artist:houk1se1::",
+      "artist:ogipote"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "houk1se1",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "ogipote",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 5,
+    "image": "assets/u1.jpg",
+    "atoms": [
+      "0.7::artist:namie::",
+      "0.7::artist:void_0::",
+      "0.9::artist:ningen mame::"
+    ],
+    "arts": [
+      {
+        "w": "0.7",
+        "a": "namie",
+        "k": "pk"
+      },
+      {
+        "w": "0.7",
+        "a": "void_0",
+        "k": "pk"
+      },
+      {
+        "w": "0.9",
+        "a": "ningen mame",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 6,
+    "image": "assets/c05.jpg",
+    "atoms": [
+      "0.9::artist:mika pikazo::",
+      "0.9::artist:tiv::",
+      "artist:ask (askzy)"
+    ],
+    "arts": [
+      {
+        "w": "0.9",
+        "a": "mika pikazo",
+        "k": "pk"
+      },
+      {
+        "w": "0.9",
+        "a": "tiv",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "ask (askzy)",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 7,
+    "image": "assets/c14.jpg",
+    "atoms": [
+      "0.6::artist:wanke::",
+      "1.2::artist:modare::",
+      "0.8::artist:nardack::"
+    ],
+    "arts": [
+      {
+        "w": "0.6",
+        "a": "wanke",
+        "k": "pk"
+      },
+      {
+        "w": "1.2",
+        "a": "modare",
+        "k": "pk"
+      },
+      {
+        "w": "0.8",
+        "a": "nardack",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 8,
+    "image": "assets/c01.jpg",
+    "atoms": [
+      "0.5::artist:sincos::",
+      "artist:ningen mame"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "sincos",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "ningen mame",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 9,
+    "image": "assets/c06.jpg",
+    "atoms": [
+      "0.5::artist:ogipote::",
+      "1.0::artist:nardack::",
+      "artist:yoneyama mai"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "ogipote",
+        "k": "pk"
+      },
+      {
+        "w": "1.0",
+        "a": "nardack",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "yoneyama mai",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 10,
+    "image": "assets/c15.jpg",
+    "atoms": [
+      "0.9::artist:ogipote::",
+      "1.0::artist:void_0::"
+    ],
+    "arts": [
+      {
+        "w": "0.9",
+        "a": "ogipote",
+        "k": "pk"
+      },
+      {
+        "w": "1.0",
+        "a": "void_0",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 11,
+    "image": "assets/c02.jpg",
+    "atoms": [
+      "0.5::artist:namie::",
+      "0.8::artist:ogipote::"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "namie",
+        "k": "pk"
+      },
+      {
+        "w": "0.8",
+        "a": "ogipote",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 12,
+    "image": "assets/c07.jpg",
+    "atoms": [
+      "0.5::artist:nardack::",
+      "0.7::artist:atdan::",
+      "0.9::artist:ningen mame::"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "nardack",
+        "k": "pk"
+      },
+      {
+        "w": "0.7",
+        "a": "atdan",
+        "k": "pk"
+      },
+      {
+        "w": "0.9",
+        "a": "ningen mame",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 13,
+    "image": "assets/c16.jpg",
+    "atoms": [
+      "0.6::artist:wanke::",
+      "artist:ke-ta"
+    ],
+    "arts": [
+      {
+        "w": "0.6",
+        "a": "wanke",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "ke-ta",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 14,
+    "image": "assets/c03.jpg",
+    "atoms": [
+      "0.9::artist:mika pikazo::",
+      "artist:momoko (momopoco)"
+    ],
+    "arts": [
+      {
+        "w": "0.9",
+        "a": "mika pikazo",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "momoko (momopoco)",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 15,
+    "image": "assets/c08.jpg",
+    "atoms": [
+      "0.7::artist:mika pikazo::",
+      "artist:kawacy"
+    ],
+    "arts": [
+      {
+        "w": "0.7",
+        "a": "mika pikazo",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "kawacy",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 16,
+    "image": "assets/c19.jpg",
+    "atoms": [
+      "0.5::artist:wanke::",
+      "0.5::artist:void_0::"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "wanke",
+        "k": "pk"
+      },
+      {
+        "w": "0.5",
+        "a": "void_0",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 17,
+    "image": "assets/c04.jpg",
+    "atoms": [
+      "1.0::artist:ciloranko::",
+      "1.0::artist:sincos::",
+      "artist:namie"
+    ],
+    "arts": [
+      {
+        "w": "1.0",
+        "a": "ciloranko",
+        "k": "pk"
+      },
+      {
+        "w": "1.0",
+        "a": "sincos",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "namie",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 18,
+    "image": "assets/c12.jpg",
+    "atoms": [
+      "0.6::artist:quasarcake::",
+      "1.0::artist:wanke::"
+    ],
+    "arts": [
+      {
+        "w": "0.6",
+        "a": "quasarcake",
+        "k": "pk"
+      },
+      {
+        "w": "1.0",
+        "a": "wanke",
+        "k": "bl"
+      }
+    ],
+    "heart": true,
+    "folder": null
+  },
+  {
+    "id": 19,
+    "image": "assets/u1.jpg",
+    "atoms": [
+      "0.9::artist:void_0::",
+      "artist:quasarcake"
+    ],
+    "arts": [
+      {
+        "w": "0.9",
+        "a": "void_0",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "quasarcake",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 20,
+    "image": "assets/c05.jpg",
+    "atoms": [
+      "0.5::artist:namie::",
+      "1.2::artist:void_0::"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "namie",
+        "k": "pk"
+      },
+      {
+        "w": "1.2",
+        "a": "void_0",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 21,
+    "image": "assets/c14.jpg",
+    "atoms": [
+      "0.5::artist:toosaka asagi::",
+      "1.0::artist:kantoku::"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "toosaka asagi",
+        "k": "pk"
+      },
+      {
+        "w": "1.0",
+        "a": "kantoku",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 22,
+    "image": "assets/c01.jpg",
+    "atoms": [
+      "0.8::artist:sincos::",
+      "0.7::artist:mignon::"
+    ],
+    "arts": [
+      {
+        "w": "0.8",
+        "a": "sincos",
+        "k": "pk"
+      },
+      {
+        "w": "0.7",
+        "a": "mignon",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 23,
+    "image": "assets/c06.jpg",
+    "atoms": [
+      "1.2::artist:rella::",
+      "1.2::artist:rurudo::"
+    ],
+    "arts": [
+      {
+        "w": "1.2",
+        "a": "rella",
+        "k": "pk"
+      },
+      {
+        "w": "1.2",
+        "a": "rurudo",
+        "k": "bl"
+      }
+    ],
+    "heart": true,
+    "folder": "厚涂"
+  },
+  {
+    "id": 24,
+    "image": "assets/c15.jpg",
+    "atoms": [
+      "1.2::artist:wanke::",
+      "0.5::artist:momoko (momopoco)::",
+      "0.6::artist:nardack::"
+    ],
+    "arts": [
+      {
+        "w": "1.2",
+        "a": "wanke",
+        "k": "pk"
+      },
+      {
+        "w": "0.5",
+        "a": "momoko (momopoco)",
+        "k": "pk"
+      },
+      {
+        "w": "0.6",
+        "a": "nardack",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 25,
+    "image": "assets/c02.jpg",
+    "atoms": [
+      "0.6::artist:wanke::",
+      "artist:atdan"
+    ],
+    "arts": [
+      {
+        "w": "0.6",
+        "a": "wanke",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "atdan",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 26,
+    "image": "assets/c07.jpg",
+    "atoms": [
+      "0.5::artist:toosaka asagi::",
+      "artist:namie"
+    ],
+    "arts": [
+      {
+        "w": "0.5",
+        "a": "toosaka asagi",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "namie",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 27,
+    "image": "assets/u1.jpg",
+    "atoms": [
+      "0.6::artist:ciloranko::"
+    ],
+    "arts": [
+      {
+        "w": "0.6",
+        "a": "ciloranko",
+        "k": "bl"
+      }
+    ],
+    "heart": true,
+    "folder": "冷色调"
+  },
+  {
+    "id": 28,
+    "image": "assets/c03.jpg",
+    "atoms": [
+      "0.7::artist:wanke::",
+      "0.5::artist:kantoku::",
+      "1.2::artist:quasarcake::"
+    ],
+    "arts": [
+      {
+        "w": "0.7",
+        "a": "wanke",
+        "k": "pk"
+      },
+      {
+        "w": "0.5",
+        "a": "kantoku",
+        "k": "pk"
+      },
+      {
+        "w": "1.2",
+        "a": "quasarcake",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 29,
+    "image": "assets/c08.jpg",
+    "atoms": [
+      "0.6::artist:ask (askzy)::",
+      "0.8::artist:fuzichoco::",
+      "artist:rurudo"
+    ],
+    "arts": [
+      {
+        "w": "0.6",
+        "a": "ask (askzy)",
+        "k": "pk"
+      },
+      {
+        "w": "0.8",
+        "a": "fuzichoco",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "rurudo",
+        "k": "bl"
+      }
+    ],
+    "heart": true,
+    "folder": null
+  },
+  {
+    "id": 30,
+    "image": "assets/c19.jpg",
+    "atoms": [
+      "0.8::artist:ogipote::",
+      "0.6::artist:yoneyama mai::",
+      "1.2::artist:modare::"
+    ],
+    "arts": [
+      {
+        "w": "0.8",
+        "a": "ogipote",
+        "k": "pk"
+      },
+      {
+        "w": "0.6",
+        "a": "yoneyama mai",
+        "k": "pk"
+      },
+      {
+        "w": "1.2",
+        "a": "modare",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 31,
+    "image": "assets/c04.jpg",
+    "atoms": [
+      "1.0::artist:mignon::",
+      "0.9::artist:atdan::",
+      "0.8::artist:sincos::"
+    ],
+    "arts": [
+      {
+        "w": "1.0",
+        "a": "mignon",
+        "k": "pk"
+      },
+      {
+        "w": "0.9",
+        "a": "atdan",
+        "k": "pk"
+      },
+      {
+        "w": "0.8",
+        "a": "sincos",
+        "k": "bl"
+      }
+    ],
+    "heart": true,
+    "folder": "冷色调"
+  },
+  {
+    "id": 32,
+    "image": "assets/c12.jpg",
+    "atoms": [
+      "0.6::artist:void_0::",
+      "0.5::artist:rurudo::",
+      "1.2::artist:torino aqua::"
+    ],
+    "arts": [
+      {
+        "w": "0.6",
+        "a": "void_0",
+        "k": "pk"
+      },
+      {
+        "w": "0.5",
+        "a": "rurudo",
+        "k": "pk"
+      },
+      {
+        "w": "1.2",
+        "a": "torino aqua",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 33,
+    "image": "assets/u1.jpg",
+    "atoms": [
+      "0.6::artist:void_0::",
+      "1.2::artist:mika pikazo::",
+      "artist:rella"
+    ],
+    "arts": [
+      {
+        "w": "0.6",
+        "a": "void_0",
+        "k": "pk"
+      },
+      {
+        "w": "1.2",
+        "a": "mika pikazo",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "rella",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 34,
+    "image": "assets/c05.jpg",
+    "atoms": [
+      "1.2::artist:kawacy::",
+      "1.0::artist:mika pikazo::"
+    ],
+    "arts": [
+      {
+        "w": "1.2",
+        "a": "kawacy",
+        "k": "pk"
+      },
+      {
+        "w": "1.0",
+        "a": "mika pikazo",
+        "k": "bl"
+      }
+    ],
+    "heart": true,
+    "folder": "厚涂"
+  },
+  {
+    "id": 35,
+    "image": "assets/c14.jpg",
+    "atoms": [
+      "0.7::artist:atdan::",
+      "artist:momoko (momopoco)"
+    ],
+    "arts": [
+      {
+        "w": "0.7",
+        "a": "atdan",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "momoko (momopoco)",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 36,
+    "image": "assets/c01.jpg",
+    "atoms": [
+      "0.7::artist:houk1se1::",
+      "artist:nardack"
+    ],
+    "arts": [
+      {
+        "w": "0.7",
+        "a": "houk1se1",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "nardack",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 37,
+    "image": "assets/c06.jpg",
+    "atoms": [
+      "1.0::artist:houk1se1::",
+      "1.0::artist:ask (askzy)::"
+    ],
+    "arts": [
+      {
+        "w": "1.0",
+        "a": "houk1se1",
+        "k": "pk"
+      },
+      {
+        "w": "1.0",
+        "a": "ask (askzy)",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": null
+  },
+  {
+    "id": 38,
+    "image": "assets/c15.jpg",
+    "atoms": [
+      "1.2::artist:kantoku::",
+      "0.7::artist:fuzichoco::",
+      "artist:modare"
+    ],
+    "arts": [
+      {
+        "w": "1.2",
+        "a": "kantoku",
+        "k": "pk"
+      },
+      {
+        "w": "0.7",
+        "a": "fuzichoco",
+        "k": "pk"
+      },
+      {
+        "w": "",
+        "a": "modare",
+        "k": "bl"
+      }
+    ],
+    "heart": false,
+    "folder": "冷色调"
+  }
+]

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/theme_extension.dart';
 
 /// 内阴影容器 - 创造凹陷立体感效果

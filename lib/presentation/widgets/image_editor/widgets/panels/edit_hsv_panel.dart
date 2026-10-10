@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../../../../core/utils/localization_extension.dart';
 import '../../core/edit_image_actions.dart';
 import '../../core/editor_state.dart';

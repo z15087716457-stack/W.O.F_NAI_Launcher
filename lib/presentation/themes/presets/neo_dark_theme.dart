@@ -4,7 +4,7 @@
 /// Inspired by: Linear.app
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/neo_dark_palette.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';

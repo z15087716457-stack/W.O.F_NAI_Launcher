@@ -2,7 +2,7 @@ import 'settings_ui_theme.dart';
 import 'settings_tile.dart';
 import 'settings_hover_line.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/shortcuts/default_shortcuts.dart';
 import '../../../../core/shortcuts/shortcut_config.dart';

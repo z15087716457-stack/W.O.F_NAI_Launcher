@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';

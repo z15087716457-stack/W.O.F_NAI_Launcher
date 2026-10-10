@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_text_coverage.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -87,7 +88,7 @@ class ModelModeCapsule extends ConsumerWidget {
                         const SizedBox(width: 5),
                         // 官网 Mode 胶囊恒为英文（静拍板：纯英文）
                         Flexible(
-                          child: Text(
+                          child: StudioText(
                             furryMode ? 'Furry' : 'Anime',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
@@ -158,7 +159,7 @@ class GenerationModelMenuButton extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                StudioText(
                   'Model',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
@@ -187,7 +188,7 @@ class GenerationModelMenuButton extends ConsumerWidget {
                       ),
                       const SizedBox(width: 5),
                       Flexible(
-                        child: Text(
+                        child: StudioText(
                           shortName,
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
@@ -216,7 +217,7 @@ class GenerationModelMenuButton extends ConsumerWidget {
       enabled: false,
       height: 26,
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Text(
+      child: StudioText(
         label,
         style: theme.textTheme.labelSmall?.copyWith(
           fontSize: 10,
@@ -258,7 +259,7 @@ class GenerationModelMenuButton extends ConsumerWidget {
                 Row(
                   children: [
                     Flexible(
-                      child: Text(
+                      child: StudioText(
                         fullName,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
@@ -271,7 +272,7 @@ class GenerationModelMenuButton extends ConsumerWidget {
                 ),
                 if (description != null) ...[
                   const SizedBox(height: 2),
-                  Text(
+                  StudioText(
                     description,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// 根据布局尺寸限制内存图解码尺寸，避免列表里反复全尺寸解码大图。
 class DecodedMemoryImage extends StatelessWidget {

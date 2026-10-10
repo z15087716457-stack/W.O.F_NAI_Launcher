@@ -1,7 +1,7 @@
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'dart:ui' show PathMetric;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 

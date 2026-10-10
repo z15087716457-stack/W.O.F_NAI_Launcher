@@ -7817,9 +7817,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_deepRoundEmpty => '서로 다른 자손 작가 조합을 충분히 만들 수 없습니다';
 
   @override
-  String get styleExplore_sortTitle => '어느 쪽이 더 좋나요?';
-
-  @override
   String get styleExplore_sortLeft => '왼쪽이 더 좋음';
 
   @override
@@ -12656,17 +12653,9 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String styleExplore_pickForGeneration(int index) {
-    return '좋은 후보를 골라 $index세대 육성';
-  }
-
-  @override
   String styleExplore_breedSelected(int count, int index) {
     return '선택한 $count장으로 $index세대 육성';
   }
-
-  @override
-  String get styleExplore_backcrossHint => '1세대 부모가 역교배에 자동으로 포함됩니다';
 
   @override
   String get styleExplore_generationBusy => '이 세대는 아직 생성 중입니다';
@@ -12738,11 +12727,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_childrenEmpty => '아직 자손이 없습니다. 위에서 한 묶음을 생성하세요.';
 
   @override
-  String styleExplore_evolutionSubtitle(int count) {
-    return '선택한 $count장을 1세대 부모로 사용합니다';
-  }
-
-  @override
   String get styleExplore_evolutionStepOne => '부모 작가를 섞어 자손 생성';
 
   @override
@@ -12768,11 +12752,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String styleExplore_evolutionParents(int count) {
-    return '부모 · $count';
-  }
-
-  @override
   String get styleExplore_evolutionAddCustom => '사용자 지정 작가 문자열 추가';
 
   @override
@@ -12782,7 +12761,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_evolutionParentEmpty => '사용 가능한 작가 문자열 없음';
 
   @override
-  String get styleExplore_evolutionTarget => '자손이 프롬프트의 이 무작위 블록을 대체합니다';
+  String get styleExplore_evolutionTarget => '자손은 프롬프트의';
 
   @override
   String get styleExplore_evolutionOnlyCreate => '생성만';
@@ -12865,7 +12844,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_saveRestore => '복원';
 
   @override
-  String get styleExplore_saveName => '블록 이름';
+  String get styleExplore_saveName => '이름';
 
   @override
   String get styleExplore_saveColor => '색상';
@@ -12889,14 +12868,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_onboardingRandomTitle => '무작위 블록 추가';
 
   @override
-  String get styleExplore_onboardingRandomHint =>
-      '작가 풀을 프롬프트에 넣고 무작위 추출과 진화를 켭니다';
-
-  @override
   String get styleExplore_onboardingDrawTitle => '후보 묶음 추출';
-
-  @override
-  String get styleExplore_onboardingDrawHint => '각 이미지마다 무작위 블록에서 작가를 다시 추출합니다';
 
   @override
   String styleExplore_onboardingDraw(int count) {
@@ -12907,9 +12879,71 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_onboardingReviewTitle => '즐겨찾기, 비교, 진화';
 
   @override
-  String get styleExplore_onboardingReviewHint =>
-      '좋은 화풍을 즐겨찾기하고 쌍별 비교로 다음 세대를 육성합니다';
+  String get styleExplore_onboardingOpenPrevious => '이전 탐색 열기';
 
   @override
-  String get styleExplore_onboardingOpenPrevious => '이전 탐색 열기';
+  String get styleExplore_onboardingSubtitle =>
+      '이미지마다 랜덤 블록에서 작가를 다시 추첨합니다. 마음에 드는 이미지를 고르세요';
+
+  @override
+  String get styleExplore_onboardingRandomDescription =>
+      '프롬프트에 작가 풀을 넣으세요. 감지된 랜덤 변수는 왼쪽에 표시됩니다.';
+
+  @override
+  String styleExplore_onboardingDrawDescription(int count) {
+    return '왼쪽 아래의 “후보 $count장 생성”을 누르세요. 각 이미지 아래에 추첨된 작가가 표시됩니다.';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewDescription =>
+      'F로 즐겨찾기하고 몇 장을 선택해 진화하세요. 좋은 작가 조합을 다음 세대로 이어갑니다.';
+
+  @override
+  String styleExplore_onboardingDetected(int count) {
+    return '$count개 감지됨';
+  }
+
+  @override
+  String get styleExplore_compareTitle => '일대일 비교 · 부모 순위';
+
+  @override
+  String get styleExplore_compareQuestion => '어느 이미지가 원하는 화풍에 더 가까운가요?';
+
+  @override
+  String styleExplore_childLabel(int index) {
+    return '자식 #$index';
+  }
+
+  @override
+  String styleExplore_generationCounts(int parents, int children) {
+    return '부모 $parents개 → 자식 $children개';
+  }
+
+  @override
+  String get styleExplore_viewLarge => '크게 보기';
+
+  @override
+  String get styleExplore_saveDialogTitle => '프롬프트 블록으로 저장';
+
+  @override
+  String styleExplore_startDialogTitle(int count) {
+    return '후보 $count개로 진화 시작';
+  }
+
+  @override
+  String get styleExplore_stepGenerate => '자손 생성';
+
+  @override
+  String get styleExplore_stepPick => '좋은 후보 선택';
+
+  @override
+  String get styleExplore_stepBreed => '다음 세대 육성';
+
+  @override
+  String styleExplore_firstGenerationParents(int count) {
+    return '1세대 부모 · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionTargetAfter => '위치를 교체하고 나머지 내용은 유지합니다';
 }

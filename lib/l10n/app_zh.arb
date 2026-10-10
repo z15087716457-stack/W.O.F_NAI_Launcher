@@ -4286,7 +4286,6 @@
   },
   "styleExplore_deepRoundNoInstance": "主提示词中没有启用的随机遗传块，无法生成子代",
   "styleExplore_deepRoundEmpty": "无法产生足够不同的子代画师组合",
-  "styleExplore_sortTitle": "哪张更好？",
   "styleExplore_sortLeft": "左边更好",
   "styleExplore_sortRight": "右边更好",
   "styleExplore_sortNeither": "两张都不行",
@@ -7130,7 +7129,7 @@
     }
   },
   "styleExplore_currentGeneration": "当前",
-  "styleExplore_generationStart": "由 {count} 张候选开始",
+  "styleExplore_generationStart": "从候选里选了 {count} 张作为起点",
   "@styleExplore_generationStart": {
     "placeholders": {
       "count": {
@@ -7162,14 +7161,6 @@
       }
     }
   },
-  "styleExplore_pickForGeneration": "勾选好的，培育第 {index} 代",
-  "@styleExplore_pickForGeneration": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_breedSelected": "用选中的 {count} 张培育第 {index} 代",
   "@styleExplore_breedSelected": {
     "placeholders": {
@@ -7181,7 +7172,6 @@
       }
     }
   },
-  "styleExplore_backcrossHint": "会自动带上第 1 代父本做回交",
   "styleExplore_generationBusy": "这一代还在生成",
   "styleExplore_regeneratePrefix": "再生成",
   "styleExplore_regenerateSuffix": "张子代",
@@ -7198,7 +7188,7 @@
   "styleExplore_newArtist": "新",
   "styleExplore_evolutionEmpty": "从候选里挑几张喜欢的，开始一条进化线",
   "styleExplore_pickFromCandidates": "去候选里挑",
-  "styleExplore_generationSummary": "{parents} 父本 · {children} 子代 · 选了 {selected} 张进入下一代",
+  "styleExplore_generationSummary": "{parents} 个父本 → {children} 张子代 · 选了 {selected} 张",
   "@styleExplore_generationSummary": {
     "placeholders": {
       "parents": {
@@ -7215,17 +7205,9 @@
   "styleExplore_breedNext": "培育下一代",
   "styleExplore_optionalName": "名称（可不填）",
   "styleExplore_childrenEmpty": "还没有子代，在上面生成一批",
-  "styleExplore_evolutionSubtitle": "用你挑中的 {count} 张作为第 1 代父本",
-  "@styleExplore_evolutionSubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionStepOne": "混合父本的画师生成子代",
-  "styleExplore_evolutionStepTwo": "两两比较告诉它你更喜欢哪些",
-  "styleExplore_evolutionStepThree": "挑最好的子代培育下一代",
+  "styleExplore_evolutionStepOne": "父本的画师串互相变异、交叉",
+  "styleExplore_evolutionStepTwo": "可以两两比较帮你排序",
+  "styleExplore_evolutionStepThree": "选中的子代成为新父本",
   "styleExplore_evolutionNewLine": "新建进化线",
   "styleExplore_evolutionJoinLine": "加入「{name}」当前代",
   "@styleExplore_evolutionJoinLine": {
@@ -7244,18 +7226,10 @@
       }
     }
   },
-  "styleExplore_evolutionParents": "父本 · {count}",
-  "@styleExplore_evolutionParents": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionAddCustom": "添加自定义画师串",
+  "styleExplore_evolutionAddCustom": "再加一段自定义画师串",
   "styleExplore_evolutionCustomHint": "输入画师串",
   "styleExplore_evolutionParentEmpty": "没有可用的画师串",
-  "styleExplore_evolutionTarget": "子代会替换提示词里的这个随机块",
+  "styleExplore_evolutionTarget": "子代会替换提示词里",
   "styleExplore_evolutionOnlyCreate": "只创建",
   "styleExplore_evolutionOnlyJoin": "只加入",
   "styleExplore_evolutionCreateGenerate": "创建并生成 {count} 张",
@@ -7311,7 +7285,7 @@
       }
     }
   },
-  "styleExplore_saveManySubtitle": "{count} 张候选的画师合成一个块，存进块库",
+  "styleExplore_saveManySubtitle": "来自 {count} 张候选，已合并去重",
   "@styleExplore_saveManySubtitle": {
     "placeholders": {
       "count": {
@@ -7333,7 +7307,7 @@
     }
   },
   "styleExplore_saveRestore": "恢复",
-  "styleExplore_saveName": "块名称",
+  "styleExplore_saveName": "名称",
   "styleExplore_saveColor": "颜色",
   "styleExplore_saveIcon": "图标",
   "styleExplore_saveFolder": "放到块库",
@@ -7341,9 +7315,7 @@
   "styleExplore_saveHint": "存好后可以在块库里拖进提示词",
   "styleExplore_onboardingTitle": "用随机块批量试画风",
   "styleExplore_onboardingRandomTitle": "放入随机块",
-  "styleExplore_onboardingRandomHint": "在提示词里放入画师池，开启随机抽取和进化",
   "styleExplore_onboardingDrawTitle": "抽一批候选",
-  "styleExplore_onboardingDrawHint": "每张图会从随机块里重新抽画师",
   "styleExplore_onboardingDraw": "抽 {count} 张候选",
   "@styleExplore_onboardingDraw": {
     "placeholders": {
@@ -7353,6 +7325,67 @@
     }
   },
   "styleExplore_onboardingReviewTitle": "收藏、比较、进化",
-  "styleExplore_onboardingReviewHint": "收藏喜欢的画风，两两比较，再挑最好的培育下一代",
-  "styleExplore_onboardingOpenPrevious": "打开以前的探索"
+  "styleExplore_onboardingOpenPrevious": "打开以前的探索",
+  "styleExplore_onboardingSubtitle": "每张图都会从随机块里重新抽画师，你只管挑喜欢的",
+  "styleExplore_onboardingRandomDescription": "在提示词里插入画师池，例如 400 精选画师池。左边会列出检测到的随机变量。",
+  "styleExplore_onboardingDrawDescription": "点左下角“抽 {count} 张候选”。每张图下方会写出它抽到了哪些画师。",
+  "@styleExplore_onboardingDrawDescription": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_onboardingReviewDescription": "喜欢的按 F 收藏；挑几张开始进化，让好的画师组合继续杂交出新组合。",
+  "styleExplore_onboardingDetected": "已检测到 {count} 个",
+  "@styleExplore_onboardingDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_compareTitle": "两两比较 · 给父本排个序",
+  "styleExplore_compareQuestion": "哪张更接近你想要的画风？",
+  "styleExplore_childLabel": "子代 #{index}",
+  "styleExplore_generationCounts": "{parents} 个父本 → {children} 张子代",
+  "styleExplore_viewLarge": "看大图",
+  "@styleExplore_childLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@styleExplore_generationCounts": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "children": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveDialogTitle": "存为提示词块",
+  "styleExplore_startDialogTitle": "用 {count} 张候选开始进化",
+  "@styleExplore_startDialogTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stepGenerate": "生成子代",
+  "styleExplore_stepPick": "挑出好的",
+  "styleExplore_stepBreed": "培育下一代",
+  "styleExplore_firstGenerationParents": "第 1 代父本 · {count}",
+  "@styleExplore_firstGenerationParents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionTargetAfter": "的位置，其他内容不变"
 }

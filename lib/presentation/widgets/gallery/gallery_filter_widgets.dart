@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../common/studio_icons.dart';
 import 'gallery_nai_versions.dart';
 

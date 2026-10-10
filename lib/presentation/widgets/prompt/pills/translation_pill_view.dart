@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../../core/utils/prompt_input_normalization.dart';

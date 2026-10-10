@@ -8,7 +8,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_random_variables_module.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_random_variables_module.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 
 PromptBlockLibraryState variableFixtureLibrary({bool dark = false}) =>
@@ -178,7 +178,7 @@ void main() {
   );
 
   testWidgets(
-    'disabled, fixed and non-evolution blocks are excluded; negative is labeled',
+    'disabled and fixed blocks are excluded; non-evolution random blocks remain visible',
     (tester) async {
       final doc = variableFixtureDocument(1);
       await tester.pumpWidget(
@@ -197,7 +197,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('400精选画师池'), findsNWidgets(2));
+      expect(find.text('400精选画师池'), findsNWidgets(3));
       expect(find.text('· 进化目标'), findsOneWidget);
       expect(find.text('· 负面'), findsOneWidget);
     },

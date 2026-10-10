@@ -1,5 +1,5 @@
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../../data/models/prompt_block/prompt_block.dart';
 import 'prompt_block_colors.dart';

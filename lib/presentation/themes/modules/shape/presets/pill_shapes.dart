@@ -1,7 +1,7 @@
 /// Pill Shapes - Material You rounded-full style
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/shape_module.dart';
 
 class PillShapes extends BaseShapeModule {

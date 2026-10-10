@@ -13,7 +13,7 @@ import 'package:nai_launcher/presentation/providers/image_generation_provider.da
 import 'package:nai_launcher/presentation/providers/style_explore/explore_manual_capture.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_stage_header.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_stage_header.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 
 class _MemoryRuns extends StyleExploreRunStorage {
@@ -612,7 +612,9 @@ void main() {
             .renderObject<RenderParagraph>(
               find.descendant(
                 of: find.byKey(const Key('explore-run-switcher-button')),
-                matching: find.text('柔光画风'),
+                matching: find.byWidgetPredicate(
+                  (w) => w is RichText && w.text.toPlainText() == '柔光画风',
+                ),
               ),
             )
             .didExceedMaxLines,
@@ -635,7 +637,9 @@ void main() {
             .renderObject<RenderParagraph>(
               find.descendant(
                 of: find.byKey(const Key('explore-run-switcher-button')),
-                matching: find.text('柔光画风'),
+                matching: find.byWidgetPredicate(
+                  (w) => w is RichText && w.text.toPlainText() == '柔光画风',
+                ),
               ),
             )
             .didExceedMaxLines,

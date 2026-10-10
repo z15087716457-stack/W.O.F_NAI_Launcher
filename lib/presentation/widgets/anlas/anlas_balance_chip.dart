@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_text_coverage.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -60,7 +61,7 @@ class AnlasBalanceChip extends ConsumerWidget {
         children: [
           _buildIcon(theme, null),
           const SizedBox(width: 4),
-          Text(
+          StudioText(
             '--',
             style: TextStyle(
               color: theme.colorScheme.onSurfaceVariant,
@@ -134,7 +135,7 @@ class AnlasBalanceChip extends ConsumerWidget {
           children: [
             _buildIcon(theme, isInsufficient),
             const SizedBox(width: 4),
-            Text(
+            StudioText(
               formatter.format(balance),
               style: TextStyle(
                 color: textColor,
@@ -188,7 +189,7 @@ class AnlasBalanceChip extends ConsumerWidget {
                 color: theme.colorScheme.error,
               ),
               const SizedBox(width: 4),
-              Text(
+              StudioText(
                 '--',
                 style: TextStyle(
                   color: theme.colorScheme.error,

@@ -5,7 +5,7 @@
 /// - Curve: cubic-bezier(0.2, 0.8, 0.2, 1) - gentle ease-out
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/motion/motion_module.dart';
 
 /// Custom curve matching design spec: cubic-bezier(0.2, 0.8, 0.2, 1)

@@ -1,5 +1,5 @@
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../core/editor_state.dart';
 
 /// Display styling is applied after mask coverage, never to stored mask pixels.

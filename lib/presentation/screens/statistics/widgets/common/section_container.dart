@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../../../widgets/common/themed_divider.dart';
 
 /// Container for statistics sections with consistent styling

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../providers/tips_provider.dart';
 import '../../../widgets/branding/brand_entry_scene.dart';

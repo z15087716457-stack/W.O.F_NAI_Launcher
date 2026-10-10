@@ -14054,12 +14054,6 @@ abstract class AppLocalizations {
   /// **'Not enough distinct offspring artist combinations could be created'**
   String get styleExplore_deepRoundEmpty;
 
-  /// No description provided for @styleExplore_sortTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Which is better?'**
-  String get styleExplore_sortTitle;
-
   /// No description provided for @styleExplore_sortLeft.
   ///
   /// In en, this message translates to:
@@ -22661,23 +22655,11 @@ abstract class AppLocalizations {
   /// **'Offspring · {count}'**
   String styleExplore_childrenCount(int count);
 
-  /// No description provided for @styleExplore_pickForGeneration.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick the best for generation {index}'**
-  String styleExplore_pickForGeneration(int index);
-
   /// No description provided for @styleExplore_breedSelected.
   ///
   /// In en, this message translates to:
   /// **'Breed generation {index} with {count} selected'**
   String styleExplore_breedSelected(int count, int index);
-
-  /// No description provided for @styleExplore_backcrossHint.
-  ///
-  /// In en, this message translates to:
-  /// **'First-generation parents are included for backcrossing'**
-  String get styleExplore_backcrossHint;
 
   /// No description provided for @styleExplore_generationBusy.
   ///
@@ -22803,12 +22785,6 @@ abstract class AppLocalizations {
   /// **'No offspring yet. Generate a batch above.'**
   String get styleExplore_childrenEmpty;
 
-  /// No description provided for @styleExplore_evolutionSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Use your {count} picks as the first generation of parents'**
-  String styleExplore_evolutionSubtitle(int count);
-
   /// No description provided for @styleExplore_evolutionStepOne.
   ///
   /// In en, this message translates to:
@@ -22851,12 +22827,6 @@ abstract class AppLocalizations {
   /// **'Evolution line {n}'**
   String styleExplore_defaultEvolutionName(int n);
 
-  /// No description provided for @styleExplore_evolutionParents.
-  ///
-  /// In en, this message translates to:
-  /// **'Parents · {count}'**
-  String styleExplore_evolutionParents(int count);
-
   /// No description provided for @styleExplore_evolutionAddCustom.
   ///
   /// In en, this message translates to:
@@ -22878,7 +22848,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_evolutionTarget.
   ///
   /// In en, this message translates to:
-  /// **'Offspring replace this random block in the prompt'**
+  /// **'Offspring replace'**
   String get styleExplore_evolutionTarget;
 
   /// No description provided for @styleExplore_evolutionOnlyCreate.
@@ -23010,7 +22980,7 @@ abstract class AppLocalizations {
   /// No description provided for @styleExplore_saveName.
   ///
   /// In en, this message translates to:
-  /// **'Block name'**
+  /// **'Name'**
   String get styleExplore_saveName;
 
   /// No description provided for @styleExplore_saveColor.
@@ -23055,23 +23025,11 @@ abstract class AppLocalizations {
   /// **'Add random blocks'**
   String get styleExplore_onboardingRandomTitle;
 
-  /// No description provided for @styleExplore_onboardingRandomHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add an artist pool to the prompt and enable random draws and evolution'**
-  String get styleExplore_onboardingRandomHint;
-
   /// No description provided for @styleExplore_onboardingDrawTitle.
   ///
   /// In en, this message translates to:
   /// **'Draw a candidate batch'**
   String get styleExplore_onboardingDrawTitle;
-
-  /// No description provided for @styleExplore_onboardingDrawHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Each image draws artists afresh from the random blocks'**
-  String get styleExplore_onboardingDrawHint;
 
   /// No description provided for @styleExplore_onboardingDraw.
   ///
@@ -23085,17 +23043,113 @@ abstract class AppLocalizations {
   /// **'Favorite, compare, evolve'**
   String get styleExplore_onboardingReviewTitle;
 
-  /// No description provided for @styleExplore_onboardingReviewHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Favorite the styles you like, compare pairs, then breed the best into the next generation'**
-  String get styleExplore_onboardingReviewHint;
-
   /// No description provided for @styleExplore_onboardingOpenPrevious.
   ///
   /// In en, this message translates to:
   /// **'Open previous explorations'**
   String get styleExplore_onboardingOpenPrevious;
+
+  /// No description provided for @styleExplore_onboardingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Each image draws artists again from random blocks. Just choose your favorites.'**
+  String get styleExplore_onboardingSubtitle;
+
+  /// No description provided for @styleExplore_onboardingRandomDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert an artist-pool block in the prompt, such as the 400-artist pool. Detected random variables appear on the left.'**
+  String get styleExplore_onboardingRandomDescription;
+
+  /// No description provided for @styleExplore_onboardingDrawDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Click “Draw {count} candidates” at the bottom left. Each image lists the artists it drew.'**
+  String styleExplore_onboardingDrawDescription(int count);
+
+  /// No description provided for @styleExplore_onboardingReviewDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Press F to favorite images; select a few to evolve and combine promising artists into the next generation.'**
+  String get styleExplore_onboardingReviewDescription;
+
+  /// No description provided for @styleExplore_onboardingDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected {count}'**
+  String styleExplore_onboardingDetected(int count);
+
+  /// No description provided for @styleExplore_compareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pair comparison · Rank parents'**
+  String get styleExplore_compareTitle;
+
+  /// No description provided for @styleExplore_compareQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which image is closer to the style you want?'**
+  String get styleExplore_compareQuestion;
+
+  /// No description provided for @styleExplore_childLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Child #{index}'**
+  String styleExplore_childLabel(int index);
+
+  /// No description provided for @styleExplore_generationCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{parents} parents → {children} children'**
+  String styleExplore_generationCounts(int parents, int children);
+
+  /// No description provided for @styleExplore_viewLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'View large'**
+  String get styleExplore_viewLarge;
+
+  /// No description provided for @styleExplore_saveDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as a prompt block'**
+  String get styleExplore_saveDialogTitle;
+
+  /// No description provided for @styleExplore_startDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start evolution with {count} candidates'**
+  String styleExplore_startDialogTitle(int count);
+
+  /// No description provided for @styleExplore_stepGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate offspring'**
+  String get styleExplore_stepGenerate;
+
+  /// No description provided for @styleExplore_stepPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the best'**
+  String get styleExplore_stepPick;
+
+  /// No description provided for @styleExplore_stepBreed.
+  ///
+  /// In en, this message translates to:
+  /// **'Breed the next generation'**
+  String get styleExplore_stepBreed;
+
+  /// No description provided for @styleExplore_firstGenerationParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation 1 parents · {count}'**
+  String styleExplore_firstGenerationParents(int count);
+
+  /// No description provided for @styleExplore_evolutionTargetAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'while keeping the rest unchanged'**
+  String get styleExplore_evolutionTargetAfter;
 }
 
 class _AppLocalizationsDelegate

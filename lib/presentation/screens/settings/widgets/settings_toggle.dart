@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// Compact, contained switch. Hover and focus stay inside the track.
 class SettingsToggle extends StatelessWidget {

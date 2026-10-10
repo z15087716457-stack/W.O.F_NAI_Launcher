@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// Keeps native copy behavior closer to selectable text than page shortcuts.
 class SelectionCopyShortcuts extends StatelessWidget {

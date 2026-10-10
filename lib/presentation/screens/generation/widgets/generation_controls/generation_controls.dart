@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -28,6 +28,25 @@ class GenerationControlsController {
   }
 }
 
+/// A page may replace the visual controls while retaining the guarded handler.
+class GenerationControlsViewState {
+  const GenerationControlsViewState({
+    required this.busy,
+    required this.canCancel,
+    required this.cooldown,
+    required this.count,
+    required this.generation,
+    required this.onGenerate,
+    required this.onCancel,
+    this.cost,
+  });
+  final bool busy, canCancel;
+  final int cooldown, count;
+  final int? cost;
+  final ImageGenerationState generation;
+  final VoidCallback onGenerate, onCancel;
+}
+
 /// 生成控制按钮
 class GenerationControls extends ConsumerStatefulWidget {
   /// 紧凑模式：用于官网式布局的钉底控制条——压低生成按钮高度。
@@ -51,6 +70,8 @@ class GenerationControls extends ConsumerStatefulWidget {
   /// 生成页左栏把它挪到了历史面板标题栏，传 false 关闭底栏渲染。
   final bool showAutoSaveChip;
   final GenerationControlsController? controller;
+  final Widget Function(BuildContext, GenerationControlsViewState)?
+  presentationBuilder;
 
   const GenerationControls({
     super.key,
@@ -61,6 +82,7 @@ class GenerationControls extends ConsumerStatefulWidget {
     this.showBalanceChips = true,
     this.showAutoSaveChip = true,
     this.controller,
+    this.presentationBuilder,
   });
 
   @override
@@ -137,6 +159,37 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
       _copySeed++;
     }
     _wasGenerating = isGenerating;
+
+    void cancel() {
+      if (localUpscaleRunning && !isLauncherGenerating) {
+        ref.read(localUpscaleTaskProvider.notifier).cancel();
+      } else if (kritaBridgeState.isBridgeGenerating) {
+        ref.read(kritaBridgeNotifierProvider.notifier).cancelActiveRequest();
+      } else {
+        ref.read(imageGenerationNotifierProvider.notifier).cancel();
+      }
+    }
+
+    if (widget.presentationBuilder case final builder?) {
+      return builder(
+        context,
+        GenerationControlsViewState(
+          busy: isGenerating,
+          canCancel: showCancel,
+          cooldown: cooldownState.remainingSeconds,
+          count: imageCount,
+          cost: costOverride,
+          generation: generationState,
+          onGenerate: () => unawaited(
+            widget.controller?.generate() ??
+                (isGenerating || cooldownState.remainingSeconds > 0
+                    ? Future<void>.value()
+                    : _handleGenerate(context, ref)),
+          ),
+          onCancel: cancel,
+        ),
+      );
+    }
 
     // 快捷键已由父级 WebStyleGenerationLayout 统一处理
     // 这里只负责布局

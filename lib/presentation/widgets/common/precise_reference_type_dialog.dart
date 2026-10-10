@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../core/enums/precise_ref_type.dart';
 import '../../../core/extensions/precise_ref_type_extensions.dart';

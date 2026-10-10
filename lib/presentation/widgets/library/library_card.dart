@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' show ImageFilter;
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../../core/utils/localization_extension.dart';
 import 'library_icon.dart';
 import 'library_status_colors.dart';
@@ -19,7 +19,8 @@ BoxDecoration librarySelectionDecoration(ThemeData theme) => BoxDecoration(
 );
 
 class LibraryHoverActionBar extends StatelessWidget {
-  const LibraryHoverActionBar({super.key, required this.children});
+  const LibraryHoverActionBar({super.key, required this.children, this.backgroundColor});
+  final Color? backgroundColor;
   final List<Widget> children;
   @override
   Widget build(BuildContext context) => ClipRRect(
@@ -29,7 +30,7 @@ class LibraryHoverActionBar extends StatelessWidget {
       child: Container(
         height: 34,
         padding: const EdgeInsets.symmetric(horizontal: 3),
-        color: Colors.black.withValues(alpha: .78),
+          color: backgroundColor ?? Colors.black.withValues(alpha: .78),
         child: IconTheme(
           data: const IconThemeData(color: Colors.white, size: 13),
           child: DefaultTextStyle(

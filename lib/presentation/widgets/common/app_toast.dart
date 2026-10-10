@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../../core/utils/localization_extension.dart';
 
 enum ToastType { success, error, warning, info, progress }

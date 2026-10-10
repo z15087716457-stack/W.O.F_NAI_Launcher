@@ -1,5 +1,5 @@
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';

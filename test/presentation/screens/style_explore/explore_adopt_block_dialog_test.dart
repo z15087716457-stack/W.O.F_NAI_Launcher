@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,7 +6,7 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_adopt_block_dialog.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_adopt_block_dialog.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'explore_candidate_wall_test.dart';
 
@@ -168,7 +169,7 @@ void main() {
     }
     expect(
       tester
-          .widget<FilledButton>(
+          .widget<ExploreButton>(
             find.byKey(const Key('explore-adopt-block-confirm')),
           )
           .onPressed,
@@ -183,7 +184,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester
-          .widget<FilledButton>(
+          .widget<ExploreButton>(
             find.byKey(const Key('explore-adopt-block-confirm')),
           )
           .onPressed,
@@ -203,7 +204,7 @@ void main() {
       ]);
       expect(
         tester
-            .widget<OutlinedButton>(
+            .widget<ExploreButton>(
               find.byKey(const Key('explore-adopt-artists')),
             )
             .onPressed,

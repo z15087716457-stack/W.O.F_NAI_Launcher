@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../core/utils/comfyui_prompt_parser.dart';
 import '../../../data/models/character/character_prompt.dart';

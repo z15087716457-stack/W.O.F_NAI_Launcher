@@ -1,4 +1,53 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/utils/localization_extension.dart';
+import '../../../../core/utils/comfyui_prompt_parser/pipe_parser.dart';
+import '../../../../core/utils/nai_prompt_formatter.dart';
+import '../../../../core/utils/sd_to_nai_converter.dart';
+import '../../../../data/models/character/character_prompt.dart';
+import '../../../../data/models/prompt/prompt_preset_mode.dart';
+import '../../../../data/services/alias_resolver_service.dart';
+import '../../../providers/character_prompt_provider.dart';
+import '../../../providers/image_generation_provider.dart';
+import '../../../providers/layout_state_provider.dart';
+import '../../../providers/prompt_maximize_provider.dart';
+import '../../../providers/pill_workspace_provider.dart';
+import '../../../providers/prompt_translation_provider.dart';
+import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
+import '../../../router/app_router.dart';
+import '../../../providers/prompt_token_counter_provider.dart';
+import '../../../providers/quality_preset_provider.dart';
+import '../../../providers/tips_provider.dart';
+import '../../../providers/uc_preset_provider.dart';
+import '../../../widgets/common/app_toast.dart';
+import '../../../widgets/common/prompt_translation_guide.dart';
+import '../../../widgets/prompt/pills/prompt_pill_editor.dart';
+import '../../../widgets/prompt/unified/unified_prompt_config.dart';
+import '../../../widgets/prompt/nai_syntax_controller.dart';
+import '../../../widgets/prompt/prompt_token_count_bar.dart';
+import '../../../widgets/prompt/quality_tags_selector.dart';
+import '../../../widgets/prompt/transparent_background_chip.dart';
+import '../../../widgets/prompt/uc_preset_selector.dart';
+import '../../../widgets/prompt/blocks/prompt_block_palette.dart';
+import '../../../widgets/prompt/block_library_panel_toggle.dart';
+import '../../../widgets/character/character_prompt_button.dart';
+import '../../../providers/pending_prompt_provider.dart';
+import 'generation_sidebar_style.dart';
+import '../../../widgets/common/translation_icon.dart';
+import '../../../widgets/bridge/agent_bridge_indicator.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
+import '../../../themes/studio_typography.dart';
+import '../../../providers/character_position_canvas_provider.dart';
+import '../../style_explore/ui/explore_controls.dart';
+import '../../style_explore/ui/explore_icon.dart';
+import '../../style_explore/ui/explore_style.dart';
+import '../../style_explore/ui/explore_text.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
@@ -52,6 +101,7 @@ bool usesRichPromptTypeTooltip(TargetPlatform platform) =>
 
 /// Prompt 输入组件
 class PromptInputWidget extends ConsumerStatefulWidget {
+  final bool prototypeExplore;
   final bool compact;
   final VoidCallback? onToggleMaximize;
   final bool isMaximized;
@@ -70,6 +120,7 @@ class PromptInputWidget extends ConsumerStatefulWidget {
 
   const PromptInputWidget({
     super.key,
+    this.prototypeExplore = false,
     this.compact = false,
     this.onToggleMaximize,
     this.isMaximized = false,
@@ -415,11 +466,139 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     _promptController.numericEmphasisEnabled = numericEmphasisEnabled;
     _negativeController.numericEmphasisEnabled = numericEmphasisEnabled;
 
+    if (widget.prototypeExplore) {
+      return _buildExploreLayout(theme, numericEmphasisEnabled);
+    }
     if (widget.compact) {
       return _buildCompactLayout(theme, numericEmphasisEnabled);
     }
 
     return _buildFullLayout(theme, numericEmphasisEnabled);
+  }
+
+  Widget _buildExploreLayout(ThemeData theme, bool numericEmphasisEnabled) {
+    final c = theme.colorScheme;
+    Widget tab(String label, bool negative) => Material(
+      color: _isNegativeMode == negative
+          ? c.surfaceContainerHighest
+          : Colors.transparent,
+      borderRadius: BorderRadius.circular(3),
+      child: InkWell(
+        onTap: () => _setNegativeMode(negative),
+        child: SizedBox(
+          height: 28,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Center(
+              widthFactor: 1,
+              child: ExploreText(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: _isNegativeMode == negative
+                      ? FontWeight.w700
+                      : FontWeight.w500,
+                  color: _isNegativeMode == negative
+                      ? c.onSurface
+                      : c.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    return Container(
+      key: const ValueKey('main-prompt-card'),
+      decoration: BoxDecoration(
+        color: ExploreStyle.prompt(theme),
+        border: Border.all(color: c.outlineVariant),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 2),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Flexible(child: tab(context.l10n.prompt_baseTab, false)),
+                      const SizedBox(width: 2),
+                      Flexible(
+                        child: tab(context.l10n.prompt_negativeTab, true),
+                      ),
+                      ExploreIconButton(
+                        'link',
+                        width: 24,
+                        size: 15,
+                        tooltip: context.l10n.character_positionLabel,
+                        onPressed: () => ref
+                            .read(characterPositionCanvasProvider.notifier)
+                            .toggle(),
+                      ),
+                    ],
+                  ),
+                ),
+                ExploreIconButton(
+                  'box',
+                  tooltip: context.l10n.styleExplore_openBlockLibrary,
+                  onPressed: () => ref
+                      .read(layoutStateNotifierProvider.notifier)
+                      .toggleBlockLibraryPanel(),
+                ),
+                _buildChunksMenuButton(theme),
+                ExploreIconButton(
+                  'max',
+                  size: 15,
+                  tooltip: context.l10n.toolbar_fullscreenEdit,
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (dialogContext) => Dialog(
+                      child: SizedBox(
+                        width: 900,
+                        height: MediaQuery.sizeOf(dialogContext).height * .85,
+                        child: Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                onPressed: () => Navigator.pop(dialogContext),
+                                icon: const ExploreIcon('x'),
+                              ),
+                            ),
+                            const Expanded(
+                              child: PromptInputWidget(
+                                allowEvolutionToggle: true,
+                                isMaximized: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _isNegativeMode
+              ? _buildTextNegativeInput(theme, numericEmphasisEnabled, 1)
+              : _buildTextPromptInput(theme, numericEmphasisEnabled, 1),
+          _PromptTokenCountFooter(
+            target: _isNegativeMode
+                ? PromptTokenCountTarget.negative
+                : PromptTokenCountTarget.positive,
+            topPadding: 4,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFullLayout(ThemeData theme, bool numericEmphasisEnabled) {
@@ -797,17 +976,23 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
           },
         ),
       ],
-      icon: SvgPicture.asset(
-        'assets/icons/nai-icon-prompt-chunk.svg',
-        width: 16,
-        height: 16,
-        colorFilter: ColorFilter.mode(
-          highlighted
-              ? theme.colorScheme.onSurface
-              : theme.colorScheme.onSurfaceVariant,
-          BlendMode.srcIn,
-        ),
-      ),
+      icon: widget.prototypeExplore
+          ? ExploreIcon(
+              'grid',
+              size: 15,
+              color: theme.colorScheme.onSurfaceVariant,
+            )
+          : SvgPicture.asset(
+              'assets/icons/nai-icon-prompt-chunk.svg',
+              width: 16,
+              height: 16,
+              colorFilter: ColorFilter.mode(
+                highlighted
+                    ? theme.colorScheme.onSurface
+                    : theme.colorScheme.onSurfaceVariant,
+                BlendMode.srcIn,
+              ),
+            ),
     );
   }
 
@@ -981,6 +1166,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
       sdSyntaxAutoConvertSettingsProvider,
     );
     return PromptPillEditor(
+      textStyle: widget.prototypeExplore
+          ? StudioTypography.body.copyWith(fontSize: 13, height: 1.5)
+          : null,
       key: const ValueKey('generation_prompt_positive_input'),
       compact: false,
       autoGrow: widget.autoGrow,
@@ -995,10 +1183,12 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         enableComfyuiImport: true,
         hintText: watchTipHint(ref, context.l10n, widget.tipSurface),
         // 官网式：框内右上小 ✕ 清空本文本（不再连带清角色卡）
-        showClearButton: true,
+        showClearButton: !widget.prototypeExplore,
       ),
-      decoration: const InputDecoration(
-        contentPadding: EdgeInsets.fromLTRB(10, 6, 26, 6),
+      decoration: InputDecoration(
+        contentPadding: widget.prototypeExplore
+            ? const EdgeInsets.fromLTRB(12, 6, 14, 6)
+            : const EdgeInsets.fromLTRB(10, 6, 26, 6),
       ),
       onComfyuiImport: (globalPrompt, characters) {
         // 清空现有角色并替换；块工作区由编辑器先切回纯文本。
@@ -1036,6 +1226,9 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
     // P3：负向框同换单框药丸编辑器（旧段式编辑器连 38px 侧图标条一并退场）
     return PromptPillEditor(
       key: const ValueKey('generation_prompt_negative_input'),
+      textStyle: widget.prototypeExplore
+          ? StudioTypography.body.copyWith(fontSize: 13, height: 1.5)
+          : null,
       pillScope: PillScopes.negative,
       initialPlainText: _negativeController.text,
       compact: false,
@@ -1050,10 +1243,12 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
         enableSdSyntaxAutoConvert: enableSdSyntaxAutoConvert,
         enableComfyuiImport: false,
         hintText: context.l10n.prompt_unwantedContent,
-        showClearButton: true,
+        showClearButton: !widget.prototypeExplore,
       ),
-      decoration: const InputDecoration(
-        contentPadding: EdgeInsets.fromLTRB(10, 6, 26, 6),
+      decoration: InputDecoration(
+        contentPadding: widget.prototypeExplore
+            ? const EdgeInsets.fromLTRB(12, 6, 14, 6)
+            : const EdgeInsets.fromLTRB(10, 6, 26, 6),
       ),
       onChanged: (value) {
         _setProxyText(_negativeController, value);

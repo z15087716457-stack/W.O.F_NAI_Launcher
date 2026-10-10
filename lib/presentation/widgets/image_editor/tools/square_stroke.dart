@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// Axis-aligned square stamps, shared by preview, layer rasterization and export.
 void drawSquareStroke(

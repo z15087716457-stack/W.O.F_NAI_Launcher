@@ -6,9 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_view_state.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_candidate_wall.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_selection_bar.dart';
-import 'package:nai_launcher/presentation/widgets/gallery/gallery_filter_widgets.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candidate_wall.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_selection_bar.dart';
 import 'explore_candidate_wall_test.dart';
 import 'explore_inspector_test.dart' show InspectorBlocks;
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
@@ -39,7 +38,7 @@ void main() {
     );
   });
   testWidgets(
-    'narrow stage exposes remaining actions in the shared overflow menu',
+    'narrow stage keeps every selection action available as a compact button',
     (tester) async {
       tester.view.physicalSize = const Size(480, 800);
       tester.view.devicePixelRatio = 1;
@@ -54,9 +53,18 @@ void main() {
       container.read(exploreSelectionModeProvider.notifier).state = true;
       container.read(exploreSelectionProvider.notifier).selectAll(['c1', 'c2']);
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('library-selection-overflow')));
-      await tester.pumpAndSettle();
-      expect(find.widgetWithText(PopupMenuItem<int>, '开始进化'), findsOneWidget);
+      for (final key in [
+        'explore-selection-heart',
+        'explore-gallery-group',
+        'explore-gallery-merge-adopt',
+        'explore-gallery-create-family',
+        'explore-gallery-delete',
+        'explore-selection-exit',
+      ]) {
+        final button = find.byKey(Key(key));
+        expect(button, findsOneWidget);
+        expect(tester.getRect(button).right, lessThanOrEqualTo(480));
+      }
       expect(tester.takeException(), isNull);
     },
   );
@@ -102,10 +110,13 @@ void main() {
     tester,
   ) async {
     final container = await pump(tester);
-    final favorite = tester.widget<GalleryFilterChip>(
-      find.byWidgetPredicate((w) => w is GalleryFilterChip && w.label == '收藏'),
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('explore-filter-hearted')),
+        matching: find.text('2'),
+      ),
+      findsOneWidget,
     );
-    expect(favorite.count, 2);
     await tester.tap(find.byKey(const Key('explore-filter-hearted')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('explore-gallery-select-toggle')));
@@ -302,7 +313,7 @@ void main() {
           .every((c) => c.review.heart),
       isTrue,
     );
-    await tester.tap(find.widgetWithText(TextButton, '分组'));
+    await tester.tap(find.byKey(const Key('explore-gallery-group')));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(PopupMenuItem<String>, '冷光'));
     await tester.pumpAndSettle();

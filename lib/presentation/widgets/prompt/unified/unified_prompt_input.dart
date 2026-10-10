@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -34,6 +34,8 @@ import 'package:nai_launcher/presentation/widgets/common/themed_text_selection_t
 /// )
 /// ```
 class UnifiedPromptInput extends ConsumerStatefulWidget {
+  final TextStyle? textStyle;
+
   /// 配置
   final UnifiedPromptConfig config;
 
@@ -79,6 +81,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
 
   const UnifiedPromptInput({
     super.key,
+    this.textStyle,
     this.config = const UnifiedPromptConfig(),
     this.controller,
     this.focusNode,
@@ -200,6 +203,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     // 官网的竖线装饰独立于强调开关，因此始终使用语法控制器。
     final initialText = widget.controller?.text ?? '';
     _syntaxController = NaiSyntaxController(
+      lineHeight: widget.textStyle?.height,
       text: initialText,
       highlightEnabled: widget.config.enableSyntaxHighlight,
       numericEmphasisEnabled: widget.config.numericEmphasisEnabled,
@@ -1074,11 +1078,13 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     // 导致 _onFocusChanged 监听不到失焦事件
     final baseInput = ThemedInput(
       embedded: widget.config.embedded,
-      style: widget.config.embedded
-          ? Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontSize: 14, height: 1.55)
-          : null,
+      style:
+          widget.textStyle ??
+          (widget.config.embedded
+              ? Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontSize: 14, height: 1.55)
+              : null),
       // A translated pill may span several lines. The default forced strut
       // only reserves a text line and lets the pill paint over its neighbors.
       strutStyle: widget.config.pillBuilder == null

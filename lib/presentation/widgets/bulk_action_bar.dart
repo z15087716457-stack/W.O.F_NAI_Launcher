@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 /// 通用批量操作工具栏

@@ -1,7 +1,7 @@
 /// Material Motion - MD3 standard curves
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/motion/motion_module.dart';
 
 class MaterialMotion extends BaseMotionModule {

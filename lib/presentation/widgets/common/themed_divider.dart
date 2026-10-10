@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../themes/theme_extension.dart';
 
 /// 主题感知分割线 - 根据当前主题自动应用合适的分割线样式

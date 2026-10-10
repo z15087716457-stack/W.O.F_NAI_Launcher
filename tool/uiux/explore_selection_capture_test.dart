@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_view_state.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_candidate_wall.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candidate_wall.dart';
 import '../../test/helpers/studio_capture_fonts.dart';
 import '../../test/presentation/screens/style_explore/explore_candidate_wall_test.dart';
 

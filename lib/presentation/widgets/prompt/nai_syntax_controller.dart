@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
+import '../common/studio_text_coverage.dart';
 
 import '../../../core/utils/alias_parser.dart';
 import '../../../core/utils/pill_document_editor.dart';
@@ -18,6 +19,8 @@ typedef PillSpanBuilder =
 /// NAI 语法高亮控制器
 /// 继承 TextEditingController，重写 buildTextSpan 实现语法着色
 class NaiSyntaxController extends TextEditingController {
+  /// Optional explicit editor metrics; the default keeps existing 1.35 rendering.
+  final double? lineHeight;
   bool _highlightEnabled;
   bool _numericEmphasisEnabled;
 
@@ -69,6 +72,7 @@ class NaiSyntaxController extends TextEditingController {
   bool get hasSyntaxErrors => _syntaxErrors.isNotEmpty;
 
   NaiSyntaxController({
+    this.lineHeight,
     super.text,
     bool highlightEnabled = true,
     bool numericEmphasisEnabled = true,
@@ -110,7 +114,9 @@ class NaiSyntaxController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    final baseStyle = style ?? const TextStyle();
+    final baseStyle = StudioTextCoverage.withoutCoverage(
+      style ?? const TextStyle(),
+    );
 
     final theme = Theme.of(context);
     final colors = NaiSyntaxColors.fromTheme(theme);
@@ -118,8 +124,12 @@ class NaiSyntaxController extends TextEditingController {
     // 检查缓存是否有效（文本未变化且主题未变化）
     if (_cachedText == text &&
         _cachedColorSignature == colors.cacheSignature &&
+        _cachedBaseStyle == baseStyle &&
         _cachedFinalSpans != null) {
-      return TextSpan(style: baseStyle, children: _cachedFinalSpans);
+      return _withGlyphCoverage(
+        context,
+        TextSpan(style: baseStyle, children: _cachedFinalSpans),
+      );
     }
 
     // 官网的竖线提示独立于“高亮强调”开关，搜索高亮也需要继续叠加。
@@ -142,13 +152,23 @@ class NaiSyntaxController extends TextEditingController {
     // 更新缓存
     _cachedText = text;
     _cachedColorSignature = colors.cacheSignature;
+    _cachedBaseStyle = baseStyle;
     _cachedFinalSpans = finalSpans;
 
-    return TextSpan(style: baseStyle, children: finalSpans);
+    return _withGlyphCoverage(
+      context,
+      TextSpan(style: baseStyle, children: finalSpans),
+    );
   }
+
+  TextSpan _withGlyphCoverage(BuildContext context, TextSpan span) =>
+      StudioTextCoverageScope.activeOf(context)
+      ? StudioTextCoverage.glyphSpan(context, span) as TextSpan
+      : span;
 
   /// 药丸拼接后的 span 缓存（与 [_cachedSpans] 同生命周期）。
   List<InlineSpan>? _cachedFinalSpans;
+  TextStyle? _cachedBaseStyle;
 
   bool _containsPillMarker(String value) {
     for (var i = 0; i < value.length; i++) {
@@ -483,7 +503,11 @@ class NaiSyntaxController extends TextEditingController {
       spans.add(
         TextSpan(
           text: text.substring(start, index),
-          style: colors._applyDecoration(baseStyle, decoration),
+          style: colors._applyDecoration(
+            baseStyle,
+            decoration,
+            lineHeight: lineHeight,
+          ),
         ),
       );
       start = index;
@@ -562,8 +586,12 @@ class NaiSyntaxColors {
     pipeColor,
   );
 
-  TextStyle _applyDecoration(TextStyle baseStyle, _SpanDecoration decoration) {
-    var style = baseStyle.copyWith(height: 1.35);
+  TextStyle _applyDecoration(
+    TextStyle baseStyle,
+    _SpanDecoration decoration, {
+    double? lineHeight,
+  }) {
+    var style = baseStyle.copyWith(height: lineHeight ?? 1.35);
     final mark = decoration.background;
     if (mark != null) {
       style = style.copyWith(backgroundColor: _getBackgroundColor(mark));

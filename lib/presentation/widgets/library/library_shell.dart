@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'library_toolbar.dart';
 
 /// Shared desktop library dimensions from UIUX U1. The host owns persistence.

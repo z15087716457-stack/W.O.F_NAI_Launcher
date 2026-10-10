@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'model_compact_dropdown.dart';
 import '../../../prompt_assistant/models/prompt_assistant_models.dart';
 import 'provider_logo.dart';

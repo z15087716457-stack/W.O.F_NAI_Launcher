@@ -7,7 +7,7 @@
 /// - 透明度梯度控制，层次分明但不刺眼
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/shadow/shadow_module.dart';
 
 /// 深度层叠风格的多层阴影系统

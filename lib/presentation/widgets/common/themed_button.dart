@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import '../../themes/theme_extension.dart';
 import '../shortcuts/shortcut_tooltip.dart';

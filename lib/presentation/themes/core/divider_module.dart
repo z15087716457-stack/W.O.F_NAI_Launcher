@@ -9,7 +9,7 @@
 /// - RetroWave: Neon glow borders
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// Defines the divider and border styles for a theme.
 ///

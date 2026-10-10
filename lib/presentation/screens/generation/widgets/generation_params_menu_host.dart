@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -25,11 +25,13 @@ class GenerationParamsMenuHost extends ConsumerStatefulWidget {
   /// 摘要条排版宽度下限：面板被挤窄时摘要条按此宽度排版并裁剪超出
   /// 部分，避免内部四列直接溢出报错；null = 不设下限。
   final double? summaryMinWidth;
+  final Widget Function(BuildContext, VoidCallback, Widget)? summaryBuilder;
 
   const GenerationParamsMenuHost({
     super.key,
     required this.child,
     this.summaryMinWidth,
+    this.summaryBuilder,
   });
 
   @override
@@ -192,21 +194,36 @@ class _GenerationParamsMenuHostState
         LayoutBuilder(
           builder: (context, constraints) {
             final minWidth = widget.summaryMinWidth;
-            final summaryBar = GenerationParamsSummaryBar(
-              onToggleDrawer: _toggleParamsMenu,
-              arrow: RotationTransition(
-                turns: Tween<double>(
-                  begin: 0,
-                  end: 0.5,
-                ).animate(_menuAnimation),
-                child: const UiuxPrototypeIcon(
-                  Icons.keyboard_arrow_up,
-                  source: UiuxPrototypeIconSource.generation,
-                  size: 18,
-                  strokeWidth: 2.2,
-                ),
+            final arrow = RotationTransition(
+              turns: Tween<double>(begin: 0, end: .5).animate(_menuAnimation),
+              child: const UiuxPrototypeIcon(
+                Icons.keyboard_arrow_up,
+                source: UiuxPrototypeIconSource.generation,
+                size: 15,
+                strokeWidth: 2.2,
               ),
             );
+            final summaryBar =
+                widget.summaryBuilder?.call(
+                  context,
+                  _toggleParamsMenu,
+                  arrow,
+                ) ??
+                GenerationParamsSummaryBar(
+                  onToggleDrawer: _toggleParamsMenu,
+                  arrow: RotationTransition(
+                    turns: Tween<double>(
+                      begin: 0,
+                      end: 0.5,
+                    ).animate(_menuAnimation),
+                    child: const UiuxPrototypeIcon(
+                      Icons.keyboard_arrow_up,
+                      source: UiuxPrototypeIconSource.generation,
+                      size: 18,
+                      strokeWidth: 2.2,
+                    ),
+                  ),
+                );
             if (minWidth == null || constraints.maxWidth >= minWidth) {
               return summaryBar;
             }

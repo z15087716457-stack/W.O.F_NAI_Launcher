@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../providers/font_provider.dart';

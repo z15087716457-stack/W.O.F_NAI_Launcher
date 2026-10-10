@@ -8004,9 +8004,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not enough distinct offspring artist combinations could be created';
 
   @override
-  String get styleExplore_sortTitle => 'Which is better?';
-
-  @override
   String get styleExplore_sortLeft => 'Left is better';
 
   @override
@@ -13025,18 +13022,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String styleExplore_pickForGeneration(int index) {
-    return 'Pick the best for generation $index';
-  }
-
-  @override
   String styleExplore_breedSelected(int count, int index) {
     return 'Breed generation $index with $count selected';
   }
-
-  @override
-  String get styleExplore_backcrossHint =>
-      'First-generation parents are included for backcrossing';
 
   @override
   String get styleExplore_generationBusy =>
@@ -13115,11 +13103,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No offspring yet. Generate a batch above.';
 
   @override
-  String styleExplore_evolutionSubtitle(int count) {
-    return 'Use your $count picks as the first generation of parents';
-  }
-
-  @override
   String get styleExplore_evolutionStepOne =>
       'Mix parent artists to generate offspring';
 
@@ -13148,11 +13131,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String styleExplore_evolutionParents(int count) {
-    return 'Parents · $count';
-  }
-
-  @override
   String get styleExplore_evolutionAddCustom => 'Add a custom artist string';
 
   @override
@@ -13162,8 +13140,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_evolutionParentEmpty => 'No usable artist string';
 
   @override
-  String get styleExplore_evolutionTarget =>
-      'Offspring replace this random block in the prompt';
+  String get styleExplore_evolutionTarget => 'Offspring replace';
 
   @override
   String get styleExplore_evolutionOnlyCreate => 'Create only';
@@ -13249,7 +13226,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_saveRestore => 'Restore';
 
   @override
-  String get styleExplore_saveName => 'Block name';
+  String get styleExplore_saveName => 'Name';
 
   @override
   String get styleExplore_saveColor => 'Color';
@@ -13275,15 +13252,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_onboardingRandomTitle => 'Add random blocks';
 
   @override
-  String get styleExplore_onboardingRandomHint =>
-      'Add an artist pool to the prompt and enable random draws and evolution';
-
-  @override
   String get styleExplore_onboardingDrawTitle => 'Draw a candidate batch';
-
-  @override
-  String get styleExplore_onboardingDrawHint =>
-      'Each image draws artists afresh from the random blocks';
 
   @override
   String styleExplore_onboardingDraw(int count) {
@@ -13294,10 +13263,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_onboardingReviewTitle => 'Favorite, compare, evolve';
 
   @override
-  String get styleExplore_onboardingReviewHint =>
-      'Favorite the styles you like, compare pairs, then breed the best into the next generation';
-
-  @override
   String get styleExplore_onboardingOpenPrevious =>
       'Open previous explorations';
+
+  @override
+  String get styleExplore_onboardingSubtitle =>
+      'Each image draws artists again from random blocks. Just choose your favorites.';
+
+  @override
+  String get styleExplore_onboardingRandomDescription =>
+      'Insert an artist-pool block in the prompt, such as the 400-artist pool. Detected random variables appear on the left.';
+
+  @override
+  String styleExplore_onboardingDrawDescription(int count) {
+    return 'Click “Draw $count candidates” at the bottom left. Each image lists the artists it drew.';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewDescription =>
+      'Press F to favorite images; select a few to evolve and combine promising artists into the next generation.';
+
+  @override
+  String styleExplore_onboardingDetected(int count) {
+    return 'Detected $count';
+  }
+
+  @override
+  String get styleExplore_compareTitle => 'Pair comparison · Rank parents';
+
+  @override
+  String get styleExplore_compareQuestion =>
+      'Which image is closer to the style you want?';
+
+  @override
+  String styleExplore_childLabel(int index) {
+    return 'Child #$index';
+  }
+
+  @override
+  String styleExplore_generationCounts(int parents, int children) {
+    return '$parents parents → $children children';
+  }
+
+  @override
+  String get styleExplore_viewLarge => 'View large';
+
+  @override
+  String get styleExplore_saveDialogTitle => 'Save as a prompt block';
+
+  @override
+  String styleExplore_startDialogTitle(int count) {
+    return 'Start evolution with $count candidates';
+  }
+
+  @override
+  String get styleExplore_stepGenerate => 'Generate offspring';
+
+  @override
+  String get styleExplore_stepPick => 'Pick the best';
+
+  @override
+  String get styleExplore_stepBreed => 'Breed the next generation';
+
+  @override
+  String styleExplore_firstGenerationParents(int count) {
+    return 'Generation 1 parents · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionTargetAfter =>
+      'while keeping the rest unchanged';
 }

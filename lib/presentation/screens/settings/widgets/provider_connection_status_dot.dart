@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../prompt_assistant/providers/provider_connection_health_provider.dart';
 import '../../../../core/utils/localization_extension.dart';

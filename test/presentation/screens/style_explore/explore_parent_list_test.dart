@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_parent_list.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_parent_list.dart';
 
 void main() {
   Future<void> pump(
@@ -71,7 +71,8 @@ void main() {
       ExploreParent(id: 'b', artistString: 'artist:second', preference: 0),
     ];
     await pump(tester, list, backcross: {'artist:first'});
-    expect(find.text('回交'), findsOneWidget);
+    expect(find.text('回交'), findsNothing);
+    expect(find.byTooltip('回交'), findsOneWidget);
     expect(
       tester
           .widget<LinearProgressIndicator>(

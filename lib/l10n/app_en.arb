@@ -4286,7 +4286,6 @@
   },
   "styleExplore_deepRoundNoInstance": "No enabled genetic random block in the main prompt; offspring cannot be generated",
   "styleExplore_deepRoundEmpty": "Not enough distinct offspring artist combinations could be created",
-  "styleExplore_sortTitle": "Which is better?",
   "styleExplore_sortLeft": "Left is better",
   "styleExplore_sortRight": "Right is better",
   "styleExplore_sortNeither": "Neither is good",
@@ -7162,14 +7161,6 @@
       }
     }
   },
-  "styleExplore_pickForGeneration": "Pick the best for generation {index}",
-  "@styleExplore_pickForGeneration": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_breedSelected": "Breed generation {index} with {count} selected",
   "@styleExplore_breedSelected": {
     "placeholders": {
@@ -7181,7 +7172,6 @@
       }
     }
   },
-  "styleExplore_backcrossHint": "First-generation parents are included for backcrossing",
   "styleExplore_generationBusy": "This generation is still generating",
   "styleExplore_regeneratePrefix": "Generate",
   "styleExplore_regenerateSuffix": "offspring",
@@ -7215,14 +7205,6 @@
   "styleExplore_breedNext": "Breed next generation",
   "styleExplore_optionalName": "Name (optional)",
   "styleExplore_childrenEmpty": "No offspring yet. Generate a batch above.",
-  "styleExplore_evolutionSubtitle": "Use your {count} picks as the first generation of parents",
-  "@styleExplore_evolutionSubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_evolutionStepOne": "Mix parent artists to generate offspring",
   "styleExplore_evolutionStepTwo": "Compare pairs to show your preferences",
   "styleExplore_evolutionStepThree": "Pick the best offspring for the next generation",
@@ -7244,18 +7226,10 @@
       }
     }
   },
-  "styleExplore_evolutionParents": "Parents · {count}",
-  "@styleExplore_evolutionParents": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_evolutionAddCustom": "Add a custom artist string",
   "styleExplore_evolutionCustomHint": "Enter an artist string",
   "styleExplore_evolutionParentEmpty": "No usable artist string",
-  "styleExplore_evolutionTarget": "Offspring replace this random block in the prompt",
+  "styleExplore_evolutionTarget": "Offspring replace",
   "styleExplore_evolutionOnlyCreate": "Create only",
   "styleExplore_evolutionOnlyJoin": "Add only",
   "styleExplore_evolutionCreateGenerate": "Create and generate {count}",
@@ -7333,7 +7307,7 @@
     }
   },
   "styleExplore_saveRestore": "Restore",
-  "styleExplore_saveName": "Block name",
+  "styleExplore_saveName": "Name",
   "styleExplore_saveColor": "Color",
   "styleExplore_saveIcon": "Icon",
   "styleExplore_saveFolder": "Library folder",
@@ -7341,9 +7315,7 @@
   "styleExplore_saveHint": "Drag the saved block from the library into a prompt",
   "styleExplore_onboardingTitle": "Explore styles with random blocks",
   "styleExplore_onboardingRandomTitle": "Add random blocks",
-  "styleExplore_onboardingRandomHint": "Add an artist pool to the prompt and enable random draws and evolution",
   "styleExplore_onboardingDrawTitle": "Draw a candidate batch",
-  "styleExplore_onboardingDrawHint": "Each image draws artists afresh from the random blocks",
   "styleExplore_onboardingDraw": "Draw {count} candidates",
   "@styleExplore_onboardingDraw": {
     "placeholders": {
@@ -7353,6 +7325,67 @@
     }
   },
   "styleExplore_onboardingReviewTitle": "Favorite, compare, evolve",
-  "styleExplore_onboardingReviewHint": "Favorite the styles you like, compare pairs, then breed the best into the next generation",
-  "styleExplore_onboardingOpenPrevious": "Open previous explorations"
+  "styleExplore_onboardingOpenPrevious": "Open previous explorations",
+  "styleExplore_onboardingSubtitle": "Each image draws artists again from random blocks. Just choose your favorites.",
+  "styleExplore_onboardingRandomDescription": "Insert an artist-pool block in the prompt, such as the 400-artist pool. Detected random variables appear on the left.",
+  "styleExplore_onboardingDrawDescription": "Click “Draw {count} candidates” at the bottom left. Each image lists the artists it drew.",
+  "@styleExplore_onboardingDrawDescription": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_onboardingReviewDescription": "Press F to favorite images; select a few to evolve and combine promising artists into the next generation.",
+  "styleExplore_onboardingDetected": "Detected {count}",
+  "@styleExplore_onboardingDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_compareTitle": "Pair comparison · Rank parents",
+  "styleExplore_compareQuestion": "Which image is closer to the style you want?",
+  "styleExplore_childLabel": "Child #{index}",
+  "styleExplore_generationCounts": "{parents} parents → {children} children",
+  "styleExplore_viewLarge": "View large",
+  "@styleExplore_childLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@styleExplore_generationCounts": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "children": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveDialogTitle": "Save as a prompt block",
+  "styleExplore_startDialogTitle": "Start evolution with {count} candidates",
+  "@styleExplore_startDialogTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stepGenerate": "Generate offspring",
+  "styleExplore_stepPick": "Pick the best",
+  "styleExplore_stepBreed": "Breed the next generation",
+  "styleExplore_firstGenerationParents": "Generation 1 parents · {count}",
+  "@styleExplore_firstGenerationParents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionTargetAfter": "while keeping the rest unchanged"
 }

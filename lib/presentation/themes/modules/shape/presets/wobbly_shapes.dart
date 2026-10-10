@@ -4,7 +4,7 @@
 /// in Task 8 (painters/wobbly_shape_border.dart).
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/shape_module.dart';
 
 class WobblyShapes extends BaseShapeModule {

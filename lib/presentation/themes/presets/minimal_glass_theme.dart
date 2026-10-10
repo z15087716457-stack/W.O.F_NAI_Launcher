@@ -4,7 +4,7 @@
 /// Inspired by: herdi.ng
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/minimal_glass_palette.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';

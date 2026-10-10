@@ -5,7 +5,7 @@
 /// Background: #FFFBFE (MD3 白)
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/color_module.dart';
 
 /// Material You color palette - Google's Material Design 3.

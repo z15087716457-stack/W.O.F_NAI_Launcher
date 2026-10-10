@@ -16,7 +16,7 @@
 /// - Shadow: 0 4px 24px -1px rgba(0,0,0,0.2)
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/zen_palette.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';

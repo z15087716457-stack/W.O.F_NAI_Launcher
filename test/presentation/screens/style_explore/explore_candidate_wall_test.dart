@@ -14,8 +14,8 @@ import 'package:nai_launcher/presentation/providers/style_explore/explore_run_pr
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_view_state.dart';
 import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_candidate_card.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_candidate_wall.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candidate_card.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candidate_wall.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 
 ExploreRun wallFixture({

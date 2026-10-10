@@ -2,7 +2,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// 画布控制器
 /// 管理画布的缩放、平移、旋转、镜像等变换

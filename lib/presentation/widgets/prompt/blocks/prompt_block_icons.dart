@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -63,10 +63,14 @@ class PromptBlockIconPicker extends StatelessWidget {
     super.key,
     required this.selected,
     required this.onChanged,
+    this.compactIcon,
+    this.compactLabel,
   });
 
   final String? selected;
   final ValueChanged<String?> onChanged;
+  final Widget? compactIcon;
+  final String? compactLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +84,21 @@ class PromptBlockIconPicker extends StatelessWidget {
       ),
       builder: (context, controller, child) {
         menuController = controller;
+        if (compactIcon != null) {
+          return Tooltip(
+            message: compactLabel ?? context.l10n.common_default,
+            child: InkWell(
+              key: const Key('prompt-block-icon-trigger'),
+              onTap: () =>
+                  controller.isOpen ? controller.close() : controller.open(),
+              child: SizedBox(
+                width: 20,
+                height: 28,
+                child: Center(child: compactIcon),
+              ),
+            ),
+          );
+        }
         return OutlinedButton.icon(
           key: const Key('prompt-block-icon-trigger'),
           onPressed: () {

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../shortcuts/shortcut_tooltip.dart';
 
 /// Compact icon button with optional label for toolbars

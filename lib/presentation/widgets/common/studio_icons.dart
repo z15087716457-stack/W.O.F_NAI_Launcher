@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// Semantic feature icons shared by navigation, menus, titles and inline blocks.
 /// SVG masters and font builder: tool/branding/studio_icons/.

@@ -7,10 +7,10 @@ import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_view_state.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_artist_text.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_candidate_card.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_folder_assign_bar.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_inspector.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_artist_text.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candidate_card.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_folder_assign_bar.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_inspector.dart';
 import 'explore_candidate_wall_test.dart';
 
 class InspectorBlocks extends PromptBlockLibraryNotifier {

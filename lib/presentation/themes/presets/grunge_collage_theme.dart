@@ -4,7 +4,7 @@
 /// Reference: docs/UI设计提示词合集/第二套UI.txt
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_composer.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/palettes/grunge_palette.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';

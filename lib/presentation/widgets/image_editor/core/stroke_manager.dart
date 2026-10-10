@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// 笔画状态管理器
 /// 负责当前绘制笔画的状态管理

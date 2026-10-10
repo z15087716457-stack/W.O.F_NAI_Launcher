@@ -8,7 +8,7 @@
 /// 所以这里改为自己构造按钮，把字体显式补回去。
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// 用主题字体构建文本选择工具栏。
 ///

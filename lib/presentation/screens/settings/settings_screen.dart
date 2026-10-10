@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import '../../widgets/auth/add_account_dialog.dart';
 import '../../providers/settings_navigation_provider.dart';

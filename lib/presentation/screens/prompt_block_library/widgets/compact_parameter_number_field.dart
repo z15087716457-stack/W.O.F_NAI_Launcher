@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// 紧凑数值控制：箭头微调、横向拖动快调、点击数值精确输入。
 /// 空值表示块不覆盖当前参数。

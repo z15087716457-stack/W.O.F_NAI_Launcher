@@ -6,7 +6,7 @@
 /// - 圆角范围 4-8px，适合工具类软件
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/shape/shape_module.dart';
 
 /// 深度层叠风格的小圆角系统

@@ -7,7 +7,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_onboarding.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_onboarding.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
 import 'explore_candidate_wall_test.dart';
 import 'explore_start_evolution_dialog_test.dart';

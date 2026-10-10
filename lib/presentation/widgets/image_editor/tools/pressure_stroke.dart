@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../core/history_manager.dart';
 
 /// Same stamp geometry for the live stroke and committed pixels. Mouse input

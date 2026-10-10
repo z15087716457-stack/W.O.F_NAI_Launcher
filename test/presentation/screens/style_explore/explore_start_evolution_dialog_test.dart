@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,7 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_view_state.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_start_evolution_dialog.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_start_evolution_dialog.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'explore_candidate_wall_test.dart' show wallFixture;
 import 'explore_random_variables_module_test.dart'
@@ -312,7 +313,7 @@ void main() {
     );
     expect(
       tester
-          .widget<OutlinedButton>(
+          .widget<ExploreButton>(
             find.byKey(const Key('explore-evolution-only-create')),
           )
           .onPressed,
@@ -320,7 +321,7 @@ void main() {
     );
     expect(
       tester
-          .widget<FilledButton>(
+          .widget<ExploreButton>(
             find.byKey(const Key('explore-evolution-create-generate')),
           )
           .onPressed,

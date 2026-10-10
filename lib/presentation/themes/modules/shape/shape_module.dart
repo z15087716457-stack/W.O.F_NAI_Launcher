@@ -1,7 +1,7 @@
 /// Shape Module - Base Implementation
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/core/theme_modules.dart';
 
 export 'presets/standard_shapes.dart';

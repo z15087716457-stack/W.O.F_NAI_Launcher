@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,8 +34,10 @@ import 'translation_pill_view.dart';
 /// 块库入口不在本编辑器内（旧侧签/模态抽屉已拆除），由生成页页面级的
 /// 块库面板承担；本编辑器只负责拖放落点与文内拖动排序。
 class PromptPillEditor extends ConsumerStatefulWidget {
+  final TextStyle? textStyle;
   const PromptPillEditor({
     super.key,
+    this.textStyle,
     required this.config,
     this.pillScope = PillScopes.main,
     this.initialPlainText,
@@ -261,6 +263,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           child: KeyedSubtree(
             key: _fieldAreaKey,
             child: UnifiedPromptInput(
+              textStyle: widget.textStyle,
               controller: _controller,
               focusNode: _focusNode,
               // A source field inside a WidgetSpan owns its own caret.

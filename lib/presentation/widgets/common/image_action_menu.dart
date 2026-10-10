@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// A compact image menu shared by generated images and the local gallery.
 /// Flutter owns submenu positioning, keyboard traversal and edge avoidance.

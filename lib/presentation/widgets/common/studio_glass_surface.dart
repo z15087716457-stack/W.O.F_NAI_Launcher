@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// Glass finish for compact in-app surfaces. The optional backdrop pass samples
 /// only pixels behind this clipped surface; child text and controls stay sharp.

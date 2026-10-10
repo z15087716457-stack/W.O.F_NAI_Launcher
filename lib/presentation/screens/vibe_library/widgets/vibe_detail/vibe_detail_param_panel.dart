@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../../../data/models/vibe/vibe_library_entry.dart';
 import '../../../../../data/models/vibe/vibe_reference.dart';

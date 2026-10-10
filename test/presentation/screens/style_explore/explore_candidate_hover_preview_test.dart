@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_candidate_hover_preview.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candidate_hover_preview.dart';
 
 /// 1×1 透明 PNG（注入 Image.memory 规避 fakeAsync 区真文件 I/O）。
 final _transparentPngBytes = Uint8List.fromList(const [

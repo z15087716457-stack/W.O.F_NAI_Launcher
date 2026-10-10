@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import 'comfyui_settings_section.dart';
 import 'krita_bridge_settings_section.dart';

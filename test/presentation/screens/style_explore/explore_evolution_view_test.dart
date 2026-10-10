@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'explore_inspector_test.dart' show InspectorBlocks;
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_controls.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,9 +13,9 @@ import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_candidate_wall.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candidate_wall.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_view_state.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_lineage_info.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_lineage_info.dart';
 
 /// 内存版 Run 存储（testWidgets 的 fakeAsync 区里 Hive 异步写盘不落定）。
 class _MemoryRunStorage extends StyleExploreRunStorage {
@@ -319,14 +320,14 @@ void main() {
     expect(container(tester).read(exploreSelectionProvider), contains(id));
   }
 
-  testWidgets('最新代展开、旧代64高，旧代展开只读', (tester) async {
+  testWidgets('最新代展开、第一代按原型56高，旧代展开只读', (tester) async {
     await pumpPanel(tester, twoGenerationRun(), []);
     expect(find.byKey(const Key('explore-generation-ps-2')), findsOneWidget);
     expect(
       tester
           .getSize(find.byKey(const Key('explore-generation-collapsed-ps-1')))
           .height,
-      64,
+      56,
     );
     await tester.tap(find.byKey(const Key('explore-generation-expand-ps-1')));
     await tester.pumpAndSettle();
@@ -432,7 +433,7 @@ void main() {
     await pumpPanel(tester, run, []);
     expect(
       tester
-          .widget<FilledButton>(find.byKey(const Key('explore-breed-ps-2')))
+          .widget<ExploreButton>(find.byKey(const Key('explore-breed-ps-2')))
           .onPressed,
       isNull,
     );
@@ -452,7 +453,7 @@ void main() {
     await tester.pump();
     expect(
       tester
-          .widget<FilledButton>(find.byKey(const Key('explore-breed-ps-2')))
+          .widget<ExploreButton>(find.byKey(const Key('explore-breed-ps-2')))
           .onPressed,
       isNull,
     );
@@ -535,7 +536,7 @@ void main() {
     await pumpPanel(tester, twoGenerationRun(), []);
     expect(
       tester
-          .widget<OutlinedButton>(
+          .widget<ExploreButton>(
             find.byKey(const Key('explore-sort-parents-ps-2')),
           )
           .onPressed,
@@ -591,6 +592,20 @@ void main() {
       ExploreStageTab.candidates,
     );
     expect(container(tester).read(exploreSelectionModeProvider), true);
+  });
+  testWidgets('圆圈提示入口打开教程，关闭后保留进化界面', (tester) async {
+    await pumpPanel(tester, twoGenerationRun(), []);
+    await tester.tap(find.byKey(const Key('explore-evolution-help')));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.styleExplore_helpParents), findsOneWidget);
+    expect(find.text(l10n.styleExplore_helpChildren), findsOneWidget);
+    expect(find.text(l10n.styleExplore_helpCompare), findsOneWidget);
+    expect(find.text(l10n.styleExplore_helpBackcross), findsOneWidget);
+    await tester.tap(find.text(l10n.common_close));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.styleExplore_helpParents), findsNothing);
+    expect(find.byKey(const Key('explore-evolution-help')), findsOneWidget);
+    expect((await storage.getRun('run-1'))!.parentSets, hasLength(2));
   });
   test('来源的新原子只标父本中没有的原文', () {
     final run = twoGenerationRun();

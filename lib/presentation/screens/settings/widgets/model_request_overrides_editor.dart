@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../../prompt_assistant/models/model_request_overrides.dart';
 import '../../../themes/studio_typography.dart';
 import '../../../../core/utils/localization_extension.dart';

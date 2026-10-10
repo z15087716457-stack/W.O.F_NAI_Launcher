@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// Enables the selected prototype only for cards inside the desktop module.
 class CharacterModuleScope extends InheritedWidget {

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 
 import '../../../../../data/models/gallery/daily_trend_statistics.dart';

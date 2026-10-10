@@ -7699,9 +7699,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_deepRoundEmpty => '无法产生足够不同的子代画师组合';
 
   @override
-  String get styleExplore_sortTitle => '哪张更好？';
-
-  @override
   String get styleExplore_sortLeft => '左边更好';
 
   @override
@@ -12389,7 +12386,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String styleExplore_generationStart(int count) {
-    return '由 $count 张候选开始';
+    return '从候选里选了 $count 张作为起点';
   }
 
   @override
@@ -12409,17 +12406,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String styleExplore_pickForGeneration(int index) {
-    return '勾选好的，培育第 $index 代';
-  }
-
-  @override
   String styleExplore_breedSelected(int count, int index) {
     return '用选中的 $count 张培育第 $index 代';
   }
-
-  @override
-  String get styleExplore_backcrossHint => '会自动带上第 1 代父本做回交';
 
   @override
   String get styleExplore_generationBusy => '这一代还在生成';
@@ -12475,7 +12464,7 @@ class AppLocalizationsZh extends AppLocalizations {
     int children,
     int selected,
   ) {
-    return '$parents 父本 · $children 子代 · 选了 $selected 张进入下一代';
+    return '$parents 个父本 → $children 张子代 · 选了 $selected 张';
   }
 
   @override
@@ -12488,18 +12477,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_childrenEmpty => '还没有子代，在上面生成一批';
 
   @override
-  String styleExplore_evolutionSubtitle(int count) {
-    return '用你挑中的 $count 张作为第 1 代父本';
-  }
+  String get styleExplore_evolutionStepOne => '父本的画师串互相变异、交叉';
 
   @override
-  String get styleExplore_evolutionStepOne => '混合父本的画师生成子代';
+  String get styleExplore_evolutionStepTwo => '可以两两比较帮你排序';
 
   @override
-  String get styleExplore_evolutionStepTwo => '两两比较告诉它你更喜欢哪些';
-
-  @override
-  String get styleExplore_evolutionStepThree => '挑最好的子代培育下一代';
+  String get styleExplore_evolutionStepThree => '选中的子代成为新父本';
 
   @override
   String get styleExplore_evolutionNewLine => '新建进化线';
@@ -12518,12 +12502,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String styleExplore_evolutionParents(int count) {
-    return '父本 · $count';
-  }
-
-  @override
-  String get styleExplore_evolutionAddCustom => '添加自定义画师串';
+  String get styleExplore_evolutionAddCustom => '再加一段自定义画师串';
 
   @override
   String get styleExplore_evolutionCustomHint => '输入画师串';
@@ -12532,7 +12511,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_evolutionParentEmpty => '没有可用的画师串';
 
   @override
-  String get styleExplore_evolutionTarget => '子代会替换提示词里的这个随机块';
+  String get styleExplore_evolutionTarget => '子代会替换提示词里';
 
   @override
   String get styleExplore_evolutionOnlyCreate => '只创建';
@@ -12587,7 +12566,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String styleExplore_saveManySubtitle(int count) {
-    return '$count 张候选的画师合成一个块，存进块库';
+    return '来自 $count 张候选，已合并去重';
   }
 
   @override
@@ -12614,7 +12593,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_saveRestore => '恢复';
 
   @override
-  String get styleExplore_saveName => '块名称';
+  String get styleExplore_saveName => '名称';
 
   @override
   String get styleExplore_saveColor => '颜色';
@@ -12638,13 +12617,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_onboardingRandomTitle => '放入随机块';
 
   @override
-  String get styleExplore_onboardingRandomHint => '在提示词里放入画师池，开启随机抽取和进化';
-
-  @override
   String get styleExplore_onboardingDrawTitle => '抽一批候选';
-
-  @override
-  String get styleExplore_onboardingDrawHint => '每张图会从随机块里重新抽画师';
 
   @override
   String styleExplore_onboardingDraw(int count) {
@@ -12655,10 +12628,72 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_onboardingReviewTitle => '收藏、比较、进化';
 
   @override
-  String get styleExplore_onboardingReviewHint => '收藏喜欢的画风，两两比较，再挑最好的培育下一代';
+  String get styleExplore_onboardingOpenPrevious => '打开以前的探索';
 
   @override
-  String get styleExplore_onboardingOpenPrevious => '打开以前的探索';
+  String get styleExplore_onboardingSubtitle => '每张图都会从随机块里重新抽画师，你只管挑喜欢的';
+
+  @override
+  String get styleExplore_onboardingRandomDescription =>
+      '在提示词里插入画师池，例如 400 精选画师池。左边会列出检测到的随机变量。';
+
+  @override
+  String styleExplore_onboardingDrawDescription(int count) {
+    return '点左下角“抽 $count 张候选”。每张图下方会写出它抽到了哪些画师。';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewDescription =>
+      '喜欢的按 F 收藏；挑几张开始进化，让好的画师组合继续杂交出新组合。';
+
+  @override
+  String styleExplore_onboardingDetected(int count) {
+    return '已检测到 $count 个';
+  }
+
+  @override
+  String get styleExplore_compareTitle => '两两比较 · 给父本排个序';
+
+  @override
+  String get styleExplore_compareQuestion => '哪张更接近你想要的画风？';
+
+  @override
+  String styleExplore_childLabel(int index) {
+    return '子代 #$index';
+  }
+
+  @override
+  String styleExplore_generationCounts(int parents, int children) {
+    return '$parents 个父本 → $children 张子代';
+  }
+
+  @override
+  String get styleExplore_viewLarge => '看大图';
+
+  @override
+  String get styleExplore_saveDialogTitle => '存为提示词块';
+
+  @override
+  String styleExplore_startDialogTitle(int count) {
+    return '用 $count 张候选开始进化';
+  }
+
+  @override
+  String get styleExplore_stepGenerate => '生成子代';
+
+  @override
+  String get styleExplore_stepPick => '挑出好的';
+
+  @override
+  String get styleExplore_stepBreed => '培育下一代';
+
+  @override
+  String styleExplore_firstGenerationParents(int count) {
+    return '第 1 代父本 · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionTargetAfter => '的位置，其他内容不变';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -20356,9 +20391,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_deepRoundEmpty => '無法產生足夠不同的子代畫師組合';
 
   @override
-  String get styleExplore_sortTitle => '哪張更好？';
-
-  @override
   String get styleExplore_sortLeft => '左邊更好';
 
   @override
@@ -25046,7 +25078,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String styleExplore_generationStart(int count) {
-    return '由 $count 張候選開始';
+    return '從候選裡選了 $count 張作為起點';
   }
 
   @override
@@ -25066,17 +25098,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String styleExplore_pickForGeneration(int index) {
-    return '勾選好的，培育第 $index 代';
-  }
-
-  @override
   String styleExplore_breedSelected(int count, int index) {
     return '用選中的 $count 張培育第 $index 代';
   }
-
-  @override
-  String get styleExplore_backcrossHint => '會自動帶上第 1 代父本做回交';
 
   @override
   String get styleExplore_generationBusy => '這一代還在生成';
@@ -25132,7 +25156,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
     int children,
     int selected,
   ) {
-    return '$parents 父本 · $children 子代 · 選了 $selected 張進入下一代';
+    return '$parents 個父本 → $children 張子代 · 選了 $selected 張';
   }
 
   @override
@@ -25145,18 +25169,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_childrenEmpty => '還沒有子代，在上面生成一批';
 
   @override
-  String styleExplore_evolutionSubtitle(int count) {
-    return '用你挑中的 $count 張作為第 1 代父本';
-  }
+  String get styleExplore_evolutionStepOne => '父本的畫師串互相變異、交叉';
 
   @override
-  String get styleExplore_evolutionStepOne => '混合父本的畫師生成子代';
+  String get styleExplore_evolutionStepTwo => '可以兩兩比較幫你排序';
 
   @override
-  String get styleExplore_evolutionStepTwo => '兩兩比較告訴它你更喜歡哪些';
-
-  @override
-  String get styleExplore_evolutionStepThree => '挑最好的子代培育下一代';
+  String get styleExplore_evolutionStepThree => '選中的子代成為新父本';
 
   @override
   String get styleExplore_evolutionNewLine => '新增進化線';
@@ -25175,12 +25194,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String styleExplore_evolutionParents(int count) {
-    return '父本 · $count';
-  }
-
-  @override
-  String get styleExplore_evolutionAddCustom => '新增自訂畫師串';
+  String get styleExplore_evolutionAddCustom => '再加一段自訂畫師串';
 
   @override
   String get styleExplore_evolutionCustomHint => '輸入畫師串';
@@ -25189,7 +25203,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_evolutionParentEmpty => '沒有可用的畫師串';
 
   @override
-  String get styleExplore_evolutionTarget => '子代會替換提示詞裡的這個隨機塊';
+  String get styleExplore_evolutionTarget => '子代會替換提示詞裡';
 
   @override
   String get styleExplore_evolutionOnlyCreate => '只建立';
@@ -25244,7 +25258,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String styleExplore_saveManySubtitle(int count) {
-    return '$count 張候選的畫師合成一個塊，存進塊庫';
+    return '來自 $count 張候選，已合併去重';
   }
 
   @override
@@ -25271,7 +25285,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_saveRestore => '恢復';
 
   @override
-  String get styleExplore_saveName => '塊名稱';
+  String get styleExplore_saveName => '名稱';
 
   @override
   String get styleExplore_saveColor => '顏色';
@@ -25295,13 +25309,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_onboardingRandomTitle => '放入隨機塊';
 
   @override
-  String get styleExplore_onboardingRandomHint => '在提示詞裡放入畫師池，開啟隨機抽取和進化';
-
-  @override
   String get styleExplore_onboardingDrawTitle => '抽一批候選';
-
-  @override
-  String get styleExplore_onboardingDrawHint => '每張圖會從隨機塊裡重新抽畫師';
 
   @override
   String styleExplore_onboardingDraw(int count) {
@@ -25312,8 +25320,70 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_onboardingReviewTitle => '收藏、比較、進化';
 
   @override
-  String get styleExplore_onboardingReviewHint => '收藏喜歡的畫風，兩兩比較，再挑最好的培育下一代';
+  String get styleExplore_onboardingOpenPrevious => '開啟以前的探索';
 
   @override
-  String get styleExplore_onboardingOpenPrevious => '開啟以前的探索';
+  String get styleExplore_onboardingSubtitle => '每張圖都會從隨機塊裡重新抽畫師，你只管挑喜歡的';
+
+  @override
+  String get styleExplore_onboardingRandomDescription =>
+      '在提示詞裡插入畫師池，例如 400 精選畫師池。左邊會列出檢測到的隨機變數。';
+
+  @override
+  String styleExplore_onboardingDrawDescription(int count) {
+    return '點左下角“抽 $count 張候選”。每張圖下方會寫出它抽到了哪些畫師。';
+  }
+
+  @override
+  String get styleExplore_onboardingReviewDescription =>
+      '喜歡的按 F 收藏；挑幾張開始進化，讓好的畫師組合繼續雜交出新組合。';
+
+  @override
+  String styleExplore_onboardingDetected(int count) {
+    return '已檢測到 $count 個';
+  }
+
+  @override
+  String get styleExplore_compareTitle => '兩兩比較 · 給父本排個序';
+
+  @override
+  String get styleExplore_compareQuestion => '哪張更接近你想要的畫風？';
+
+  @override
+  String styleExplore_childLabel(int index) {
+    return '子代 #$index';
+  }
+
+  @override
+  String styleExplore_generationCounts(int parents, int children) {
+    return '$parents 個父本 → $children 張子代';
+  }
+
+  @override
+  String get styleExplore_viewLarge => '看大圖';
+
+  @override
+  String get styleExplore_saveDialogTitle => '存為提示詞塊';
+
+  @override
+  String styleExplore_startDialogTitle(int count) {
+    return '用 $count 張候選開始進化';
+  }
+
+  @override
+  String get styleExplore_stepGenerate => '生成子代';
+
+  @override
+  String get styleExplore_stepPick => '挑出好的';
+
+  @override
+  String get styleExplore_stepBreed => '培育下一代';
+
+  @override
+  String styleExplore_firstGenerationParents(int count) {
+    return '第 1 代父本 · $count';
+  }
+
+  @override
+  String get styleExplore_evolutionTargetAfter => '的位置，其他內容不變';
 }

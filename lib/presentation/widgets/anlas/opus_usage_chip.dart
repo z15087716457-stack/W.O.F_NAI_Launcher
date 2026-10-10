@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_text_coverage.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -103,7 +104,7 @@ class OpusUsageChip extends ConsumerWidget {
                       refilling: refilling,
                     ),
                     const SizedBox(width: 5),
-                    Text(
+                    StudioText(
                       usage.isNegative
                           ? '0%'
                           : '${_fmtPercent(usage.percent)}%',
@@ -155,7 +156,7 @@ class OpusUsageChip extends ConsumerWidget {
             color: warning ? scheme.error : scheme.primary,
           ),
           const SizedBox(width: 4),
-          Text(
+          StudioText(
             text,
             style: TextStyle(
               color: warning ? scheme.error : scheme.onSurfaceVariant,

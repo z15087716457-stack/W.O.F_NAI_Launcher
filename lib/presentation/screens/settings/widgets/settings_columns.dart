@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// Flat paired settings groups, stacked when reading space becomes too narrow.
 class SettingsColumns extends StatelessWidget {

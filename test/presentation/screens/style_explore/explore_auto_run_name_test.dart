@@ -4,8 +4,8 @@ import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_auto_run_name.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_run_switcher.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/actions/explore_auto_run_name.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_run_switcher.dart';
 
 void main() {
   final l10n = lookupAppLocalizations(const Locale('zh'));

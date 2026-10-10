@@ -3,21 +3,15 @@
 
 import 'dart:async';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_view_state.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_candidate_detail_dialog.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_preference_sort_dialog.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_start_evolution_dialog.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_adopt_block_dialog.dart';
-import '../../test/presentation/screens/style_explore/explore_candidate_wall_test.dart'
-    show wallFixture;
-import '../../test/presentation/screens/style_explore/explore_random_variables_module_test.dart'
-    show variableFixtureDocument, variableFixtureLibrary;
-import 'explore_evolution_capture_test.dart' show evolutionCaptureFixture;
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candidate_detail_dialog.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_preference_sort_dialog.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_start_evolution_dialog.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_adopt_block_dialog.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_manual_capture.dart';
 import '../../test/helpers/studio_capture_fonts.dart';
@@ -27,6 +21,7 @@ import 'package:irondash_message_channel/irondash_message_channel.dart';
 import 'package:super_native_extensions/src/native/context.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
+import 'package:nai_launcher/presentation/widgets/common/workspace_typography_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,12 +29,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
-import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
-import 'package:nai_launcher/data/models/character/character_prompt.dart';
-import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
-import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
-import 'package:nai_launcher/data/models/user/user_subscription.dart';
-import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
@@ -56,369 +45,7 @@ import 'package:nai_launcher/presentation/screens/style_explore/style_explore_sc
 
 /// 内存版 Run 存储（testWidgets 的 fakeAsync 区里 Hive 的异步写盘永不完成，
 /// 因此 widget 测试不落盘，只验证 UI 与 provider 协作）。
-class _MemoryRunStorage extends StyleExploreRunStorage {
-  final Map<String, ExploreRun> _store = {};
-
-  @override
-  Future<List<ExploreRun>> getRuns() async {
-    final runs = _store.values.toList()
-      ..sort((a, b) {
-        final comparison = b.updatedAt.compareTo(a.updatedAt);
-        if (comparison != 0) return comparison;
-        return a.id.compareTo(b.id);
-      });
-    return runs;
-  }
-
-  @override
-  Future<ExploreRun?> getRun(String id) async => _store[id];
-
-  @override
-  Future<void> putRun(ExploreRun run, {void Function()? beforeWrite}) async {
-    beforeWrite?.call();
-    _store[run.id] = run;
-  }
-
-  @override
-  ExploreRun? currentRun(String id) => _store[id];
-
-  @override
-  Future<ExploreRun> transformRun(
-    String id,
-    ExploreRun Function(ExploreRun) update,
-  ) async {
-    final next = update(_store[id]!);
-    _store[id] = next;
-    return next;
-  }
-
-  @override
-  Future<void> deleteRun(String id) async {
-    _store.remove(id);
-  }
-
-  @override
-  Future<void> clear() async {
-    _store.clear();
-  }
-}
-
-class _TestLocalStorageService extends LocalStorageService {
-  _TestLocalStorageService({Map<String, Object?>? initial}) {
-    if (initial != null) settings.addAll(initial);
-  }
-
-  /// 已写入的设置值（含布局 provider 落盘的 toggle 状态）。
-  final Map<String, Object?> settings = {};
-
-  @override
-  T? getSetting<T>(String key, {T? defaultValue}) {
-    final value = settings[key];
-    if (value is T) return value;
-    return defaultValue;
-  }
-
-  @override
-  Future<void> setSetting<T>(String key, T value) async {
-    settings[key] = value;
-  }
-
-  @override
-  bool getEnablePromptWeightScroll() => false;
-
-  @override
-  bool getEnableAutocomplete() => false;
-
-  @override
-  bool getAutoFormatPrompt() => false;
-
-  @override
-  bool getHighlightEmphasis() => false;
-
-  @override
-  bool getSdSyntaxAutoConvert() => false;
-
-  @override
-  String getLastPrompt() => '';
-
-  @override
-  String getLastNegativePrompt() => '';
-
-  @override
-  String getDefaultModel() => 'nai-diffusion-4-5-full';
-
-  @override
-  String getDefaultSampler() => 'k_euler_ancestral';
-
-  @override
-  int getDefaultSteps() => 28;
-
-  @override
-  double getDefaultScale() => 5.0;
-
-  @override
-  int getDefaultWidth() => 832;
-
-  @override
-  int getDefaultHeight() => 1216;
-
-  @override
-  bool getLastSmea() => false;
-
-  @override
-  bool getLastSmeaDyn() => false;
-
-  @override
-  double getLastCfgRescale() => 0.0;
-
-  @override
-  String getLastNoiseSchedule() => 'native';
-
-  @override
-  bool getLastVarietyPlus() => false;
-}
-
-class _TestVibeLibraryNotifier extends VibeLibraryNotifier {
-  @override
-  VibeLibraryState build() => const VibeLibraryState();
-}
-
-class _TestVibeStorageService extends VibeLibraryStorageService {
-  @override
-  Future<List<VibeLibraryEntry>> getRecentDisplayEntries({
-    int limit = 20,
-  }) async => const [];
-}
-
-class _FakeCooldownNotifier extends GenerationCooldownNotifier {
-  @override
-  GenerationCooldownState build() => const GenerationCooldownState();
-}
-
-class _TestCharacterPromptNotifier extends CharacterPromptNotifier {
-  @override
-  CharacterPromptConfig build() => const CharacterPromptConfig();
-}
-
-class _TestKritaBridgeNotifier extends KritaBridgeNotifier {
-  @override
-  Future<void> close() async {}
-}
-
-class _TestSubscriptionNotifier extends SubscriptionNotifier {
-  @override
-  SubscriptionState build() => const SubscriptionState.initial();
-}
-
-class _Runner extends ExploreRunRunner {
-  int cancelCalls = 0, pauseCalls = 0;
-  String? started;
-  @override
-  ExploreRunRunnerState build() => const ExploreRunRunnerState();
-  void set(ExploreRunRunnerState value) {
-    state = value;
-  }
-
-  @override
-  void pause() {
-    pauseCalls++;
-  }
-
-  @override
-  void cancel() {
-    cancelCalls++;
-  }
-
-  @override
-  Future<bool> start(
-    String runId, {
-    void Function(ImageParams)? beforeGenerate,
-  }) async {
-    started = runId;
-    return true;
-  }
-}
-
-class _Capture extends ExploreManualCaptureNotifier {
-  @override
-  ExploreManualCaptureState build() => const ExploreManualCaptureState();
-  void set(ExploreManualCaptureState value) {
-    state = value;
-  }
-}
-
-class _Generation extends ImageGenerationNotifier {
-  int cancelCalls = 0;
-  @override
-  ImageGenerationState build() => const ImageGenerationState();
-  void set(ImageGenerationState value) {
-    state = value;
-  }
-
-  @override
-  void cancel() {
-    cancelCalls++;
-  }
-}
-
-class _FinalLibrary extends PromptBlockLibraryNotifier {
-  _FinalLibrary(this.dark);
-  final bool dark;
-  @override
-  Future<PromptBlockLibraryState> build() async =>
-      variableFixtureLibrary(dark: dark);
-}
-
-class _FinalWorkspace extends PillWorkspaceNotifier {
-  @override
-  PillWorkspaceState build(String scope) {
-    final doc = scope == PillScopes.main
-        ? variableFixtureDocument(2).copyWith(
-            text:
-                'scenery, panorama, from behind, green theme, blue theme, plant, detailed background, (extremely vibrant colors), magical atmosphere, dynamic composition, sitting, wide shot, white dress, blue flower, frilled dress, giant, 0.8::artist:sincos::, ${variableFixtureDocument(2).text}, artist:asteroid_ill, candid, year 2025, very aesthetic, masterpiece, sketch, lineart, solo, no text',
-          )
-        : PillDocument.empty();
-    return PillWorkspaceState(document: doc, projection: doc.text);
-  }
-}
-
-class _FinalParams extends GenerationParamsNotifier {
-  _FinalParams(this.model);
-  final String model;
-  @override
-  ImageParams build() => ImageParams(
-    model: model,
-    width: 832,
-    height: 1216,
-    steps: 28,
-    scale: 5,
-    nSamples: 10,
-    prompt: 'scenery',
-    seed: -1,
-  );
-  @override
-  Future<void> restoreGenerationState() async {}
-  @override
-  Future<void> saveGenerationState() async {}
-}
-
-ExploreRun finalCaptureRun(String scene, String model) {
-  final cards =
-      jsonDecode(
-            File(
-              '.dart_tool/uiux-explore-task03/prototype-cards.json',
-            ).readAsStringSync(),
-          )
-          as List;
-  final evolution = evolutionCaptureFixture();
-  final base = scene == 'evolution' || scene == 'compare'
-      ? evolution
-      : wallFixture(count: scene == 'onboarding' ? 0 : 38);
-  final candidates = [
-    for (var i = 0; i < base.candidates.length; i++)
-      base.candidates[i].copyWith(
-        roundId: scene == 'evolution' || scene == 'compare'
-            ? base.candidates[i].roundId
-            : i < 16
-            ? 'r1'
-            : i < 26
-            ? 'r2'
-            : 'r3',
-        generation: base.candidates[i].generation.copyWith(
-          status: scene == 'running' && i >= 35
-              ? ExploreCandidateGenerationStatus.pending
-              : scene == 'failed' && i == 27
-              ? ExploreCandidateGenerationStatus.failed
-              : ExploreCandidateGenerationStatus.done,
-          filePath:
-              (scene == 'running' && i >= 35) || (scene == 'failed' && i == 27)
-              ? null
-              : 'E:/A.I/NovelAI/.devin/mockups/style-explore/${cards[(i < 26 ? i : i - 26) % cards.length]['image']}',
-          seed: 3274348526 + i,
-          error: scene == 'failed' && i == 27
-              ? 'Synthetic failure, no API request'
-              : null,
-        ),
-        rollSnapshot: ExploreRollSnapshot(
-          positive:
-              'scenery, ${(cards[(i < 26 ? i : i - 26) % cards.length]['atoms'] as List).join(', ')}, year 2025',
-          negative: 'lowres, bad anatomy',
-          instanceRolls: [
-            const ExploreInstanceRoll(
-              lane: 'pos',
-              marker: '\uE000',
-              blockId: 'pool',
-              blockTitle: '400精选画师池',
-              rolledText: '',
-            ),
-            ExploreInstanceRoll(
-              lane: 'pos',
-              marker: '\uE001',
-              blockId: 'favorite',
-              blockTitle: '收藏艺术家池',
-              rolledText:
-                  (cards[(i < 26 ? i : i - 26) % cards.length]['atoms'] as List)
-                      .join(', '),
-            ),
-          ],
-        ),
-        review: ExploreCandidateReview(
-          heart: [1, 15, 21, 26, 28, 30].contains(i),
-        ),
-        folderId: i == 26 || i == 30
-            ? 'cold'
-            : i == 33
-            ? 'thick'
-            : null,
-      ),
-  ];
-  return base.copyWith(
-    paramsSnapshot: base.paramsSnapshot.copyWith(model: model),
-    status: scene == 'running'
-        ? ExploreRunStatus.generating
-        : ExploreRunStatus.generated,
-    candidates: candidates,
-    families: evolution.families,
-    parentSets: evolution.parentSets,
-    folders: [
-      ExploreCandidateFolder(
-        id: 'cold',
-        name: '冷色调',
-        createdAt: base.createdAt,
-      ),
-      ExploreCandidateFolder(
-        id: 'thick',
-        name: '厚涂',
-        createdAt: base.createdAt,
-      ),
-    ],
-    rounds: scene == 'evolution' || scene == 'compare'
-        ? base.rounds
-        : [
-            for (var i = 1; i <= 3; i++)
-              ExploreRound(
-                id: 'r$i',
-                number: i,
-                phase: ExploreRoundPhase.manual,
-                status: scene == 'running' && i == 3
-                    ? ExploreRoundStatus.generating
-                    : ExploreRoundStatus.generated,
-                createdAt: base.createdAt.subtract(
-                  Duration(minutes: (3 - i) * 94),
-                ),
-                targetCount: i == 1
-                    ? 16
-                    : i == 2
-                    ? 10
-                    : 12,
-                candidateIds: [
-                  for (final c in candidates)
-                    if (c.roundId == 'r$i') c.id,
-                ],
-              ),
-          ],
-  );
-}
+import 'explore_prototype_fixture.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -433,7 +60,10 @@ void main() {
         const MethodChannel('dev.irondash.engine_context'),
         (_) async => 1,
       );
-  final output = Directory('.dart_tool/uiux-explore-final/captures');
+  final outputRoot =
+      Platform.environment['EXPLORE_CAPTURE_ROOT'] ??
+      '.dart_tool/uiux-explore-final';
+  final output = Directory('$outputRoot/captures');
   setUpAll(() async {
     await loadStudioCaptureFonts();
     output.createSync(recursive: true);
@@ -441,6 +71,13 @@ void main() {
   testWidgets('final full-page production widget matrix, no generation API', (
     tester,
   ) async {
+    final previousErrorHandler = FlutterError.onError;
+    FlutterError.onError = (details) {
+      // Retain the originating layout widget when the matrix assertion fails.
+      print(details.toString());
+      previousErrorHandler?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = previousErrorHandler);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final profiles =
@@ -516,11 +153,11 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       tester.view.physicalSize = Size(profile.width.toDouble(), 1000);
       final run = finalCaptureRun(profile.scene, profile.model),
-          storage = _MemoryRunStorage(),
-          local = _TestLocalStorageService(),
-          runner = _Runner(),
-          capture = _Capture(),
-          gen = _Generation(),
+          storage = ExploreCaptureRunStorage(),
+          local = ExploreCaptureSettings(),
+          runner = ExploreCaptureRunner(),
+          capture = ExploreCaptureManual(),
+          gen = ExploreCaptureGeneration(),
           boundary = GlobalKey();
       await storage.putRun(run);
       if (profile.scene == 'dropdown') {
@@ -545,25 +182,23 @@ void main() {
             localStorageServiceProvider.overrideWith((_) => local),
             styleExploreRunStorageProvider.overrideWithValue(storage),
             promptBlockLibraryNotifierProvider.overrideWith(
-              () => _FinalLibrary(profile.dark),
+              () => ExploreCaptureLibrary(profile.dark),
             ),
-            pillWorkspaceProvider.overrideWith(_FinalWorkspace.new),
+            pillWorkspaceProvider.overrideWith(ExploreCaptureWorkspace.new),
             generationParamsNotifierProvider.overrideWith(
-              () => _FinalParams(profile.model),
+              () => ExploreCaptureParams(profile.model),
             ),
-            vibeLibraryNotifierProvider.overrideWith(
-              _TestVibeLibraryNotifier.new,
-            ),
+            vibeLibraryNotifierProvider.overrideWith(ExploreCaptureVibes.new),
             vibeLibraryStorageServiceProvider.overrideWithValue(
-              _TestVibeStorageService(),
+              ExploreCaptureVibeStorage(),
             ),
-            generationCooldownProvider.overrideWith(_FakeCooldownNotifier.new),
+            generationCooldownProvider.overrideWith(ExploreCaptureCooldown.new),
             exploreGenerateFnProvider.overrideWithValue((params) async => null),
             exploreRunRunnerProvider.overrideWith(() => runner),
             exploreManualCaptureProvider.overrideWith(() => capture),
             imageGenerationNotifierProvider.overrideWith(() => gen),
             characterPromptNotifierProvider.overrideWith(
-              _TestCharacterPromptNotifier.new,
+              ExploreCaptureCharacters.new,
             ),
             promptTokenUsageProvider(
               PromptTokenCountTarget.positive,
@@ -576,10 +211,10 @@ void main() {
               (ref) async => const PromptTokenUsage(usedTokens: 0, limit: 512),
             ),
             kritaBridgeNotifierProvider.overrideWith(
-              (ref) => _TestKritaBridgeNotifier(),
+              (ref) => ExploreCaptureKrita(),
             ),
             subscriptionNotifierProvider.overrideWith(
-              _TestSubscriptionNotifier.new,
+              ExploreCaptureSubscription.new,
             ),
             estimatedCostProvider.overrideWith((_) => 0),
             estimatedCostForBatchSizeProvider(1).overrideWith((_) => 0),
@@ -597,22 +232,15 @@ void main() {
               key: boundary,
               child: MediaQuery(
                 data: MediaQuery.of(context).copyWith(disableAnimations: true),
-                child: child!,
+                child: WorkspaceTypographyScope(child: child!),
               ),
             ),
-            home: IntegratedTitleBarShell(
+            home: const IntegratedTitleBarShell(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  SizedBox(
-                    width: 48,
-                    child: Builder(
-                      builder: (context) => ColoredBox(
-                        color: Theme.of(context).colorScheme.surface,
-                      ),
-                    ),
-                  ),
-                  const Expanded(child: StyleExploreScreen()),
+                  SizedBox(width: 48, child: ExploreCaptureRail()),
+                  Expanded(child: StyleExploreScreen()),
                 ],
               ),
             ),
@@ -633,7 +261,7 @@ void main() {
           ExploreRunRunnerState(
             runId: run.id,
             isRunning: true,
-            processedCount: 9,
+            processedCount: 8,
             totalCount: 12,
           ),
         );
@@ -642,12 +270,22 @@ void main() {
         container
             .read(exploreFocusedCandidateIdProvider.notifier)
             .state = run.candidates.length > 26
-            ? run.candidates[26].id
+            ? run
+                  .candidates[['evolution', 'compare'].contains(profile.scene)
+                      ? 23
+                      : 26]
+                  .id
             : run.candidates.first.id;
       }
       if (['evolution', 'compare'].contains(profile.scene)) {
         container.read(exploreStageTabProvider.notifier).state =
             ExploreStageTab.evolution;
+        container.read(exploreActiveFamilyIdProvider.notifier).state = 'line';
+        container.read(exploreSelectionProvider.notifier).selectAll([
+          'c24',
+          'c27',
+          'c30',
+        ]);
       }
       if (profile.scene == 'selection') {
         container.read(exploreSelectionModeProvider.notifier).state = true;
@@ -657,6 +295,16 @@ void main() {
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
+      if (['evolution', 'compare'].contains(profile.scene)) {
+        await tester.enterText(
+          find.byKey(const Key('explore-deep-round-count-set3')),
+          '8',
+        );
+        FocusManager.instance.primaryFocus?.unfocus();
+        container.read(exploreFocusedCandidateIdProvider.notifier).state =
+            run.candidates[23].id;
+        await tester.pump();
+      }
       final host = tester.element(find.byType(StyleExploreScreen));
       if (profile.scene == 'viewer') {
         unawaited(
@@ -673,7 +321,7 @@ void main() {
           ExplorePreferenceSortDialog.show(
             host,
             runId: run.id,
-            parentSet: run.parentSets.last,
+            parentSet: run.parentSetById('set3')!,
           ),
         );
       }
@@ -682,7 +330,9 @@ void main() {
           ExploreStartEvolutionDialog.show(
             host,
             run: run,
-            candidates: run.candidates.skip(26).take(3).toList(),
+            candidates: [
+              for (final i in [26, 28, 29, 32]) run.candidates[i],
+            ],
           ),
         );
       }
@@ -690,17 +340,47 @@ void main() {
         unawaited(
           ExploreAdoptBlockDialog.show(
             host,
-            initialTitle: '${run.name} ×3',
-            candidates: run.candidates.skip(26).take(3).toList(),
+            initialTitle: '柔光画风 · 精选 3',
+            candidates: [
+              for (final i in [26, 28, 29]) run.candidates[i],
+            ],
             sequenceNumber: 27,
           ),
         );
+      }
+      if (profile.scene == 'start-evolution' || profile.scene == 'save') {
+        await tester.pumpAndSettle();
+        if (profile.scene == 'start-evolution') {
+          await tester.enterText(
+            find.byKey(const Key('explore-family-name')),
+            '柔光主线',
+          );
+          await tester.enterText(
+            find.byKey(const Key('explore-evolution-count')),
+            '8',
+          );
+        } else {
+          tester
+              .widget<DropdownButtonFormField<String>>(
+                find.byKey(const Key('explore-adopt-folder')),
+              )
+              .onChanged
+              ?.call('style');
+        }
+        await tester.pump();
       }
       if (profile.scene == 'dropdown') {
         await tester.tap(find.byKey(const Key('explore-run-switcher-button')));
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
+      if (profile.scene == 'compare') {
+        for (var answer = 0; answer < 2; answer++) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.space);
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+        }
+      }
       for (var i = 0; i < 20; i++) {
         await tester.runAsync(
           () => Future<void>.delayed(const Duration(milliseconds: 50)),
@@ -743,9 +423,7 @@ void main() {
       });
       print('CAPTURE $name');
     }
-    File(
-      '.dart_tool/uiux-explore-final/geometry.json',
-    ).writeAsStringSync(jsonEncode(geometry));
+    File('$outputRoot/geometry.json').writeAsStringSync(jsonEncode(geometry));
     await tester.pumpWidget(const SizedBox.shrink());
   }, timeout: const Timeout(Duration(minutes: 8)));
 }

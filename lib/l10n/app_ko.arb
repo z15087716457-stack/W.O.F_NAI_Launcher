@@ -4286,7 +4286,6 @@
   },
   "styleExplore_deepRoundNoInstance": "메인 프롬프트에 활성 유전 무작위 블록이 없어 자손을 생성할 수 없습니다",
   "styleExplore_deepRoundEmpty": "서로 다른 자손 작가 조합을 충분히 만들 수 없습니다",
-  "styleExplore_sortTitle": "어느 쪽이 더 좋나요?",
   "styleExplore_sortLeft": "왼쪽이 더 좋음",
   "styleExplore_sortRight": "오른쪽이 더 좋음",
   "styleExplore_sortNeither": "둘 다 별로",
@@ -7162,14 +7161,6 @@
       }
     }
   },
-  "styleExplore_pickForGeneration": "좋은 후보를 골라 {index}세대 육성",
-  "@styleExplore_pickForGeneration": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_breedSelected": "선택한 {count}장으로 {index}세대 육성",
   "@styleExplore_breedSelected": {
     "placeholders": {
@@ -7181,7 +7172,6 @@
       }
     }
   },
-  "styleExplore_backcrossHint": "1세대 부모가 역교배에 자동으로 포함됩니다",
   "styleExplore_generationBusy": "이 세대는 아직 생성 중입니다",
   "styleExplore_regeneratePrefix": "다시 생성",
   "styleExplore_regenerateSuffix": "자손",
@@ -7215,14 +7205,6 @@
   "styleExplore_breedNext": "다음 세대 육성",
   "styleExplore_optionalName": "이름 (선택 사항)",
   "styleExplore_childrenEmpty": "아직 자손이 없습니다. 위에서 한 묶음을 생성하세요.",
-  "styleExplore_evolutionSubtitle": "선택한 {count}장을 1세대 부모로 사용합니다",
-  "@styleExplore_evolutionSubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_evolutionStepOne": "부모 작가를 섞어 자손 생성",
   "styleExplore_evolutionStepTwo": "쌍별 비교로 선호도 전달",
   "styleExplore_evolutionStepThree": "좋은 자손을 골라 다음 세대 육성",
@@ -7244,18 +7226,10 @@
       }
     }
   },
-  "styleExplore_evolutionParents": "부모 · {count}",
-  "@styleExplore_evolutionParents": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_evolutionAddCustom": "사용자 지정 작가 문자열 추가",
   "styleExplore_evolutionCustomHint": "작가 문자열 입력",
   "styleExplore_evolutionParentEmpty": "사용 가능한 작가 문자열 없음",
-  "styleExplore_evolutionTarget": "자손이 프롬프트의 이 무작위 블록을 대체합니다",
+  "styleExplore_evolutionTarget": "자손은 프롬프트의",
   "styleExplore_evolutionOnlyCreate": "생성만",
   "styleExplore_evolutionOnlyJoin": "추가만",
   "styleExplore_evolutionCreateGenerate": "생성 후 {count}장 생성",
@@ -7333,7 +7307,7 @@
     }
   },
   "styleExplore_saveRestore": "복원",
-  "styleExplore_saveName": "블록 이름",
+  "styleExplore_saveName": "이름",
   "styleExplore_saveColor": "색상",
   "styleExplore_saveIcon": "아이콘",
   "styleExplore_saveFolder": "라이브러리 폴더",
@@ -7341,9 +7315,7 @@
   "styleExplore_saveHint": "저장한 블록을 라이브러리에서 프롬프트로 끌어올 수 있습니다",
   "styleExplore_onboardingTitle": "무작위 블록으로 화풍 탐색",
   "styleExplore_onboardingRandomTitle": "무작위 블록 추가",
-  "styleExplore_onboardingRandomHint": "작가 풀을 프롬프트에 넣고 무작위 추출과 진화를 켭니다",
   "styleExplore_onboardingDrawTitle": "후보 묶음 추출",
-  "styleExplore_onboardingDrawHint": "각 이미지마다 무작위 블록에서 작가를 다시 추출합니다",
   "styleExplore_onboardingDraw": "후보 {count}장 추출",
   "@styleExplore_onboardingDraw": {
     "placeholders": {
@@ -7353,6 +7325,67 @@
     }
   },
   "styleExplore_onboardingReviewTitle": "즐겨찾기, 비교, 진화",
-  "styleExplore_onboardingReviewHint": "좋은 화풍을 즐겨찾기하고 쌍별 비교로 다음 세대를 육성합니다",
-  "styleExplore_onboardingOpenPrevious": "이전 탐색 열기"
+  "styleExplore_onboardingOpenPrevious": "이전 탐색 열기",
+  "styleExplore_onboardingSubtitle": "이미지마다 랜덤 블록에서 작가를 다시 추첨합니다. 마음에 드는 이미지를 고르세요",
+  "styleExplore_onboardingRandomDescription": "프롬프트에 작가 풀을 넣으세요. 감지된 랜덤 변수는 왼쪽에 표시됩니다.",
+  "styleExplore_onboardingDrawDescription": "왼쪽 아래의 “후보 {count}장 생성”을 누르세요. 각 이미지 아래에 추첨된 작가가 표시됩니다.",
+  "@styleExplore_onboardingDrawDescription": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_onboardingReviewDescription": "F로 즐겨찾기하고 몇 장을 선택해 진화하세요. 좋은 작가 조합을 다음 세대로 이어갑니다.",
+  "styleExplore_onboardingDetected": "{count}개 감지됨",
+  "@styleExplore_onboardingDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_compareTitle": "일대일 비교 · 부모 순위",
+  "styleExplore_compareQuestion": "어느 이미지가 원하는 화풍에 더 가까운가요?",
+  "styleExplore_childLabel": "자식 #{index}",
+  "styleExplore_generationCounts": "부모 {parents}개 → 자식 {children}개",
+  "styleExplore_viewLarge": "크게 보기",
+  "@styleExplore_childLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@styleExplore_generationCounts": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "children": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveDialogTitle": "프롬프트 블록으로 저장",
+  "styleExplore_startDialogTitle": "후보 {count}개로 진화 시작",
+  "@styleExplore_startDialogTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stepGenerate": "자손 생성",
+  "styleExplore_stepPick": "좋은 후보 선택",
+  "styleExplore_stepBreed": "다음 세대 육성",
+  "styleExplore_firstGenerationParents": "1세대 부모 · {count}",
+  "@styleExplore_firstGenerationParents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionTargetAfter": "위치를 교체하고 나머지 내용은 유지합니다"
 }

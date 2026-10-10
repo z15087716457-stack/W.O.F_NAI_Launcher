@@ -5,7 +5,7 @@
 /// Secondary: #57F287 (Green)
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/color_module.dart';
 
 /// Social color palette - familiar social app theme.

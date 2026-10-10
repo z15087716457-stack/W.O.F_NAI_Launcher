@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 

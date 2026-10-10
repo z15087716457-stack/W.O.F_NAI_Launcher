@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -7,8 +7,11 @@ import '../../../themes/studio_typography.dart';
 import '../../../widgets/common/uiux_prototype_icon.dart';
 import 'generation_module_card.dart';
 import 'generation_sidebar_style.dart';
+import '../../style_explore/ui/explore_icon.dart';
+import '../../style_explore/ui/explore_text.dart';
+import '../../style_explore/ui/explore_style.dart';
 
-enum SizeSelectorLayout { classic, moduleRow }
+enum SizeSelectorLayout { classic, moduleRow, explorePrototype }
 
 /// 尺寸选择器 (官网式布局：紧凑分组下拉 + 等宽宽高比分段组 + 自定义输入)
 ///
@@ -544,6 +547,205 @@ class _SizeSelectorState extends State<SizeSelector> {
       widget.width,
       widget.height,
     );
+
+    if (widget.layout == SizeSelectorLayout.explorePrototype) {
+      final c = theme.colorScheme;
+      Widget dimension(
+        String name,
+        TextEditingController controller,
+        FocusNode focus,
+        TextInputAction action,
+      ) => Container(
+        width: 54,
+        height: 32,
+        decoration: BoxDecoration(
+          color: c.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Center(
+          child: TextField(
+            key: Key('size-$name-input'),
+            controller: controller,
+            focusNode: focus,
+            textAlign: TextAlign.center,
+            textAlignVertical: TextAlignVertical.center,
+            keyboardType: TextInputType.number,
+            textInputAction: action,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(5),
+            ],
+            style: StudioTypography.data.copyWith(
+              fontSize: 12.5,
+              height: 1.45,
+              color: c.onSurface,
+            ),
+            decoration: const InputDecoration(
+              isDense: true,
+              isCollapsed: true,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              filled: false,
+              contentPadding: EdgeInsets.zero,
+            ),
+            onTap: () => controller.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: controller.text.length,
+            ),
+            onSubmitted: (_) {
+              _commitManualSize();
+              if (action == TextInputAction.next) {
+                _heightFocusNode.requestFocus();
+              } else {
+                focus.unfocus();
+              }
+            },
+            onTapOutside: (_) => focus.unfocus(),
+          ),
+        ),
+      );
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        child: LayoutBuilder(
+          builder: (context, space) => Row(
+            children: [
+              Container(
+                width: (space.maxWidth - 250).clamp(61.0, 86.0),
+                height: 32,
+                decoration: BoxDecoration(
+                  color: c.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<ResolutionGroup>(
+                    focusNode: _dropdownFocusNode,
+                    value: _selectedGroup,
+                    padding: const EdgeInsets.only(left: 10, right: 8),
+                    isExpanded: true,
+                    icon: ExploreIcon(
+                      'chevD',
+                      size: 14,
+                      color: c.onSurfaceVariant,
+                    ),
+                    onChanged: _onGroupSelected,
+                    items: [
+                      for (final group in ResolutionGroup.values)
+                        if (group == ResolutionGroup.custom ||
+                            (ResolutionPreset.groupedPresets[group] ?? [])
+                                .isNotEmpty)
+                          DropdownMenuItem(
+                            value: group,
+                            child: ExploreText(
+                              _getGroupName(context, group),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                key: const Key('size-aspect-group'),
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: c.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final (type, name) in [
+                      (ResolutionType.landscape, 'land'),
+                      (ResolutionType.portrait, 'port'),
+                      (ResolutionType.square, 'sq'),
+                    ])
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: type == ResolutionType.landscape ? 0 : 2,
+                        ),
+                        child: Material(
+                          color: !isCustomGroup && matchedPreset?.type == type
+                              ? ExploreStyle.raised(theme)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(4),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(4),
+                            onTap:
+                                !isCustomGroup &&
+                                    _findPreset(_selectedGroup, type) != null
+                                ? () => _onTypeSelected(type)
+                                : null,
+                            child: Tooltip(
+                              message: _getTypeName(context, type),
+                              child: SizedBox(
+                                key: Key('size-aspect-${type.name}'),
+                                width: 32,
+                                height: 28,
+                                child: Center(
+                                  child: ExploreIcon(
+                                    name,
+                                    size: 15,
+                                    color:
+                                        !isCustomGroup &&
+                                            matchedPreset?.type == type
+                                        ? c.onSurface
+                                        : c.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              dimension(
+                'width',
+                _widthController,
+                _widthFocusNode,
+                TextInputAction.next,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    final width = _widthController.text;
+                    _widthController.text = _heightController.text;
+                    _heightController.text = width;
+                    _commitManualSize();
+                  },
+                  child: SizedBox(
+                    width: 8,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: ExploreText(
+                        '×',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: c.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              dimension(
+                'height',
+                _heightController,
+                _heightFocusNode,
+                TextInputAction.done,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     if (widget.layout == SizeSelectorLayout.moduleRow) {
       final dropdownWidth = _measureGroupDropdownWidth(context);

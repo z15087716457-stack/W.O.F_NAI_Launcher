@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../image_detail_data.dart';
 import 'viewer_filmstrip.dart';
 

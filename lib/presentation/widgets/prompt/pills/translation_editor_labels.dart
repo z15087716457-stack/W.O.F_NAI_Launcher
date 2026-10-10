@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/prompt_translation_language.dart';

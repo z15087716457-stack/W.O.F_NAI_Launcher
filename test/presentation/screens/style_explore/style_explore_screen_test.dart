@@ -1,4 +1,4 @@
-import 'package:nai_launcher/presentation/screens/style_explore/widgets/explore_folder_assign_bar.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_folder_assign_bar.dart';
 // ignore: depend_on_referenced_packages
 import 'package:irondash_message_channel/irondash_message_channel.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
@@ -8,6 +8,7 @@ import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_controls.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,7 +40,7 @@ import 'package:nai_launcher/presentation/providers/style_explore/explore_run_ru
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/block_library_panel_slot.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generate_button.dart';
+import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_editor.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/style_explore_screen.dart';
 
 /// 内存版 Run 存储（testWidgets 的 fakeAsync 区里 Hive 的异步写盘永不完成，
@@ -449,6 +450,7 @@ void main() {
     double width = 1600,
     List<Override> extraOverrides = const [],
     Offset appOffset = Offset.zero,
+    bool populated = false,
   }) async {
     // 宽窗：左栏 + 右栏画廊都展开（画廊默认断点 1100）。
     tester.view.physicalSize = Size(width, 900);
@@ -460,7 +462,29 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    return ProviderScope.containerOf(tester.element(find.byType(MaterialApp)));
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    );
+    if (populated) {
+      final run = await seedRun(
+        'Pane layout',
+        status: ExploreRunStatus.generated,
+        candidates: [
+          ExploreCandidate.shell(
+            roundId: 'pane-round',
+            id: 'pane-candidate',
+          ).copyWith(
+            generation: const ExploreCandidateGeneration(
+              status: ExploreCandidateGenerationStatus.done,
+            ),
+          ),
+        ],
+      );
+      await container.read(exploreRunListNotifierProvider.notifier).refresh();
+      container.read(exploreActiveRunIdProvider.notifier).state = run.id;
+      await tester.pumpAndSettle();
+    }
+    return container;
   }
 
   Rect mainRect(WidgetTester tester) =>
@@ -496,7 +520,7 @@ void main() {
   testWidgets('three panes and top bar replace the old sidebar', (
     tester,
   ) async {
-    await pumpScreen(tester);
+    await pumpScreen(tester, populated: true);
     expect(mainRect(tester).width, 384);
     expect(stageRect(tester).width, 904);
     expect(inspectorRect(tester).width, 312);
@@ -511,7 +535,18 @@ void main() {
     expect(find.text('选一张候选查看详情'), findsOneWidget);
     expect(find.byKey(const Key('style-explore-run-sidebar')), findsNothing);
     expect(find.byKey(const Key('explore-run-start')), findsNothing);
-    expect(find.byType(GenerateButtonWithCost), findsOneWidget);
+    expect(find.byType(ExploreGenerateButton), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('first use keeps the stage open and omits the empty inspector', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    expect(mainRect(tester).width, 384);
+    expect(stageRect(tester).width, 1216);
+    expect(find.byKey(const Key('style-explore-inspector')), findsNothing);
+    expect(find.byKey(const Key('explore-onboarding-step-2')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -525,7 +560,14 @@ void main() {
       container.read(layoutStateNotifierProvider).styleExploreInspectorVisible,
       isNull,
     );
-    await tester.tap(find.byKey(const Key('style-explore-inspector-toggle')));
+    await tester.ensureVisible(
+      find.byKey(const Key('explore-onboarding-previous')),
+    );
+    await tester.tap(find.byKey(const Key('explore-onboarding-previous')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('style-explore-inspector-menu-toggle')),
+    );
     await tester.pumpAndSettle();
     // Docking would crush the editor below 352, so the inspector floats.
     expect(find.byKey(const Key('style-explore-inspector')), findsOneWidget);
@@ -559,16 +601,20 @@ void main() {
     'manual inspector preference persists across a new provider scope',
     (tester) async {
       await pumpScreen(tester);
-      await tester.tap(find.byKey(const Key('style-explore-inspector-toggle')));
+      await tester.tap(find.byKey(const Key('explore-onboarding-previous')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('style-explore-inspector-menu-toggle')),
+      );
       await tester.pumpAndSettle();
       expect(
         localStorage.settings[StorageKeys.styleExploreInspectorVisible],
-        false,
+        true,
       );
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpWidget(buildScreen());
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('style-explore-inspector')), findsNothing);
+      expect(find.byKey(const Key('style-explore-inspector')), findsOneWidget);
     },
   );
 
@@ -578,7 +624,7 @@ void main() {
       'style_explore_gallery_width': 888.0,
       'style_explore_run_sidebar_visible': false,
     });
-    await pumpScreen(tester);
+    await pumpScreen(tester, populated: true);
     expect(mainRect(tester).width, 384);
     expect(inspectorRect(tester).width, 312);
   });
@@ -586,7 +632,7 @@ void main() {
   testWidgets('pane resizing clamps without redistributing the other pane', (
     tester,
   ) async {
-    final container = await pumpScreen(tester);
+    final container = await pumpScreen(tester, populated: true);
     await tester.drag(
       find.byKey(const Key('style-explore-editor-resize-handle')),
       const Offset(400, 0),
@@ -614,7 +660,7 @@ void main() {
   testWidgets(
     'block library overlays the stage and its resize leaves panes fixed',
     (tester) async {
-      final container = await pumpScreen(tester);
+      final container = await pumpScreen(tester, populated: true);
       final before = [
         mainRect(tester),
         stageRect(tester),
@@ -670,6 +716,7 @@ void main() {
     );
     final container = await pumpScreen(
       tester,
+      populated: true,
       extraOverrides: [
         promptBlockLibraryNotifierProvider.overrideWith(
           () => _OneBlockLibraryNotifier(block),
@@ -774,6 +821,12 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         await tester.pumpWidget(buildScreen(dark: dark, update: true));
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(MaterialApp)),
+        );
+        await container
+            .read(layoutStateNotifierProvider.notifier)
+            .setStyleExploreInspectorVisible(true);
         await tester.pumpAndSettle();
         final captions = tester.getRect(
           find.byKey(const Key('window-caption-controls')),
@@ -808,7 +861,7 @@ void main() {
           .read(pillWorkspaceProvider(PillScopes.negative).notifier)
           .replaceWithPlainText('fresh negative');
       await tester.pump();
-      await tester.tap(find.byKey(const Key('explore-run-switcher-button')));
+      await tester.tap(find.byKey(const Key('explore-onboarding-previous')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('style-explore-new-run')));
       await tester.pumpAndSettle();
@@ -1238,6 +1291,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-2',
         ),
       ),
@@ -1253,6 +1307,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-1',
         ),
       ),
@@ -1269,6 +1324,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-1',
         ),
       ),
@@ -1285,6 +1341,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-2',
         ),
       ),
@@ -1300,6 +1357,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-3',
         ),
       ),
@@ -1360,6 +1418,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-1',
         ),
       ),
@@ -1381,6 +1440,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-2',
         ),
       ),
@@ -1402,6 +1462,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-3',
         ),
       ),
@@ -1418,6 +1479,7 @@ void main() {
         matching: find.byWidgetPredicate(
           (w) =>
               w is SelectableText &&
+              w.runtimeType == SelectableText &&
               (w.data ?? w.textSpan?.toPlainText()) == 'pos-2',
         ),
       ),
@@ -1901,7 +1963,7 @@ void main() {
     await tester.tap(find.byKey(const Key('explore-candidate-cand-no-copy')));
     await tester.pump(const Duration(milliseconds: 350));
     expect(
-      tester.widget<TextButton>(find.byKey(deleteKey)).onPressed,
+      tester.widget<ExploreIconButton>(find.byKey(deleteKey)).onPressed,
       isNotNull,
     );
     await tester.tap(find.byKey(const Key('explore-candidate-cand-1')));
@@ -1909,7 +1971,7 @@ void main() {
     await tester.tap(find.byKey(const Key('explore-candidate-cand-2')));
     await tester.pump(const Duration(milliseconds: 350));
     expect(
-      tester.widget<TextButton>(find.byKey(deleteKey)).onPressed,
+      tester.widget<ExploreIconButton>(find.byKey(deleteKey)).onPressed,
       isNotNull,
     );
 

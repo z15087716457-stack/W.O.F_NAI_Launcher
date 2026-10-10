@@ -5,7 +5,7 @@
 /// Secondary: #1095C1 (青蓝色)
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/color_module.dart';
 
 /// Minimal Glass color palette - elegant dark theme with gold and cyan.

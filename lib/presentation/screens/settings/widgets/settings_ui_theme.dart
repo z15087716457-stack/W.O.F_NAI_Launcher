@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// One visual system for settings, including routes opened above the page.
 ThemeData settingsUiTheme(ThemeData base) {

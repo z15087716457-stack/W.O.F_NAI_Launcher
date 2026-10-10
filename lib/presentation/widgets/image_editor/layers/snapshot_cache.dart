@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// 区域快照缓存（用于拾色器实时采样）
 /// 仅缓存光标周围的小区域，支持快速移动时的同步查询

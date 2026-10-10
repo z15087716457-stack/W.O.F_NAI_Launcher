@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// The selected branch motif, shared by all associated-tag actions.
 class RelatedTagsIcon extends StatelessWidget {

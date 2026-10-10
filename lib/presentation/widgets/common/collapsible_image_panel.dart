@@ -1,6 +1,7 @@
+import 'package:nai_launcher/presentation/widgets/common/studio_text_coverage.dart';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../screens/generation/widgets/generation_sidebar_style.dart';
@@ -10,17 +11,30 @@ import 'uiux_prototype_icon.dart';
 import 'studio_glass_surface.dart';
 import 'studio_animated_icon.dart';
 import 'studio_icons.dart';
+import '../../screens/style_explore/ui/explore_text.dart';
+import '../../screens/style_explore/ui/explore_icon.dart';
 
 /// Desktop/explore reference rows opt in; legacy panels retain their cards.
 class ReferenceModuleScope extends InheritedWidget {
-  const ReferenceModuleScope({super.key, required super.child});
+  const ReferenceModuleScope({
+    super.key,
+    required super.child,
+    this.prototypeExplore = false,
+  });
+  final bool prototypeExplore;
+  static bool prototypeOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<ReferenceModuleScope>()
+          ?.prototypeExplore ==
+      true;
 
   static bool of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<ReferenceModuleScope>() !=
       null;
 
   @override
-  bool updateShouldNotify(ReferenceModuleScope oldWidget) => false;
+  bool updateShouldNotify(ReferenceModuleScope oldWidget) =>
+      prototypeExplore != oldWidget.prototypeExplore;
 }
 
 /// A common collapsible panel with optional background image support.
@@ -65,6 +79,69 @@ class CollapsibleImagePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final showBackground = hasData && !isExpanded;
+
+    if (ReferenceModuleScope.prototypeOf(context)) {
+      final c = theme.colorScheme;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onToggle,
+              child: Container(
+                height: 44,
+                padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: c.outlineVariant)),
+                ),
+                child: Row(
+                  children: [
+                    _buildHeaderIcon(theme, false, size: 18),
+                    const SizedBox(width: 10),
+                    ExploreText(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ExploreText(
+                        subtitle ?? '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: c.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    if (headerActions != null) ...headerActions!,
+                    if (trailing != null) trailing!,
+                    if (hasData && badge != null) badge!,
+                    if (hasData || icon != StudioIcons.imageToImage)
+                      SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: Center(
+                          child: ExploreIcon(
+                            isExpanded ? 'chevU' : 'chevD',
+                            size: 15,
+                            color: c.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (isExpanded) child,
+        ],
+      );
+    }
 
     if (ReferenceModuleScope.of(context)) {
       return _buildModuleRow(context, theme);
@@ -149,7 +226,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            StudioText(
                               title,
                               style: GenSidebarStyle.sectionTitle(theme)
                                   .copyWith(
@@ -164,7 +241,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                             ),
                             if (subtitle != null) ...[
                               const SizedBox(height: 2),
-                              Text(
+                              StudioText(
                                 subtitle!,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 11,
@@ -287,7 +364,7 @@ class CollapsibleImagePanel extends StatelessWidget {
               children: [
                 _buildHeaderIcon(theme, showBackground, size: 20),
                 const SizedBox(width: 10),
-                Text(
+                StudioText(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -300,7 +377,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
+                  child: StudioText(
                     subtitle ?? '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

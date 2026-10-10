@@ -4286,7 +4286,6 @@
   },
   "styleExplore_deepRoundNoInstance": "メインプロンプトに有効な遺伝ランダムブロックがないため、子を生成できません",
   "styleExplore_deepRoundEmpty": "異なる子の絵師の組み合わせを十分に作れませんでした",
-  "styleExplore_sortTitle": "どちらが良い？",
   "styleExplore_sortLeft": "左が良い",
   "styleExplore_sortRight": "右が良い",
   "styleExplore_sortNeither": "どちらも好みではない",
@@ -7162,14 +7161,6 @@
       }
     }
   },
-  "styleExplore_pickForGeneration": "良い候補を選んで第{index}世代へ",
-  "@styleExplore_pickForGeneration": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_breedSelected": "選択した{count}枚で第{index}世代を育成",
   "@styleExplore_breedSelected": {
     "placeholders": {
@@ -7181,7 +7172,6 @@
       }
     }
   },
-  "styleExplore_backcrossHint": "初代の親を自動で加えて戻し交配します",
   "styleExplore_generationBusy": "この世代はまだ生成中です",
   "styleExplore_regeneratePrefix": "再生成",
   "styleExplore_regenerateSuffix": "枚の子",
@@ -7215,14 +7205,6 @@
   "styleExplore_breedNext": "次世代を育成",
   "styleExplore_optionalName": "名前（任意）",
   "styleExplore_childrenEmpty": "子はまだありません。上でまとめて生成してください。",
-  "styleExplore_evolutionSubtitle": "選んだ {count} 枚を第1世代の親にします",
-  "@styleExplore_evolutionSubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_evolutionStepOne": "親の絵師を混ぜて子を生成",
   "styleExplore_evolutionStepTwo": "ペア比較で好みを伝える",
   "styleExplore_evolutionStepThree": "良い子を選び次世代を育てる",
@@ -7244,18 +7226,10 @@
       }
     }
   },
-  "styleExplore_evolutionParents": "親 · {count}",
-  "@styleExplore_evolutionParents": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_evolutionAddCustom": "カスタム絵師文字列を追加",
   "styleExplore_evolutionCustomHint": "絵師文字列を入力",
   "styleExplore_evolutionParentEmpty": "使用できる絵師文字列がありません",
-  "styleExplore_evolutionTarget": "子はプロンプトのこのランダムブロックを置換します",
+  "styleExplore_evolutionTarget": "子孫はプロンプト内の",
   "styleExplore_evolutionOnlyCreate": "作成のみ",
   "styleExplore_evolutionOnlyJoin": "追加のみ",
   "styleExplore_evolutionCreateGenerate": "作成して {count} 枚生成",
@@ -7333,7 +7307,7 @@
     }
   },
   "styleExplore_saveRestore": "復元",
-  "styleExplore_saveName": "ブロック名",
+  "styleExplore_saveName": "名前",
   "styleExplore_saveColor": "色",
   "styleExplore_saveIcon": "アイコン",
   "styleExplore_saveFolder": "保存先フォルダー",
@@ -7341,9 +7315,7 @@
   "styleExplore_saveHint": "保存後、ライブラリからプロンプトにドラッグできます",
   "styleExplore_onboardingTitle": "ランダムブロックで画風を試す",
   "styleExplore_onboardingRandomTitle": "ランダムブロックを追加",
-  "styleExplore_onboardingRandomHint": "絵師プールを追加し、ランダム抽選と進化を有効にします",
   "styleExplore_onboardingDrawTitle": "候補をまとめて生成",
-  "styleExplore_onboardingDrawHint": "画像ごとにランダムブロックから絵師を再抽選します",
   "styleExplore_onboardingDraw": "候補を {count} 枚生成",
   "@styleExplore_onboardingDraw": {
     "placeholders": {
@@ -7353,6 +7325,67 @@
     }
   },
   "styleExplore_onboardingReviewTitle": "お気に入り・比較・進化",
-  "styleExplore_onboardingReviewHint": "好みの画風を保存し、ペア比較で良いものを選んで次世代を育てます",
-  "styleExplore_onboardingOpenPrevious": "以前の探索を開く"
+  "styleExplore_onboardingOpenPrevious": "以前の探索を開く",
+  "styleExplore_onboardingSubtitle": "画像ごとにランダムブロックから画家を抽選。好きな画像を選ぶだけです",
+  "styleExplore_onboardingRandomDescription": "プロンプトに画家プールを挿入します。検出したランダム変数は左側に表示されます。",
+  "styleExplore_onboardingDrawDescription": "左下の「候補を {count} 枚生成」を押します。各画像の下に抽選された画家が表示されます。",
+  "@styleExplore_onboardingDrawDescription": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_onboardingReviewDescription": "F でお気に入りに登録。数枚を選んで進化し、良い画家の組み合わせを次の世代へ。",
+  "styleExplore_onboardingDetected": "{count} 個を検出",
+  "@styleExplore_onboardingDetected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_compareTitle": "ペア比較 · 親候補を順位付け",
+  "styleExplore_compareQuestion": "求める画風に近いのはどちらですか？",
+  "styleExplore_childLabel": "子候補 #{index}",
+  "styleExplore_generationCounts": "親 {parents} 件 → 子 {children} 件",
+  "styleExplore_viewLarge": "大きく表示",
+  "@styleExplore_childLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "@styleExplore_generationCounts": {
+    "placeholders": {
+      "parents": {
+        "type": "int"
+      },
+      "children": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_saveDialogTitle": "プロンプトブロックとして保存",
+  "styleExplore_startDialogTitle": "候補 {count} 枚から進化を開始",
+  "@styleExplore_startDialogTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_stepGenerate": "子孫を生成",
+  "styleExplore_stepPick": "良いものを選ぶ",
+  "styleExplore_stepBreed": "次の世代を育てる",
+  "styleExplore_firstGenerationParents": "第1世代の親 · {count}",
+  "@styleExplore_firstGenerationParents": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "styleExplore_evolutionTargetAfter": "の位置を置き換え、他の内容は保持します"
 }

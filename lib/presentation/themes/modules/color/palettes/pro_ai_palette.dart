@@ -5,7 +5,7 @@
 /// Secondary: #6366F1 (Indigo)
 library;
 
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:nai_launcher/presentation/themes/modules/color/color_module.dart';
 
 /// Pro AI color palette - professional AI tool theme.

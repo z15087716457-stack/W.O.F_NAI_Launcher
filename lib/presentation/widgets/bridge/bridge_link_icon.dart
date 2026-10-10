@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 /// The approved horizontal double-link glyph, drawn at its native 16px size.
 class BridgeLinkIcon extends StatefulWidget {
