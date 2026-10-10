@@ -34,7 +34,6 @@ import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_candi
 import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_preference_sort_dialog.dart';
 import 'package:nai_launcher/presentation/screens/style_explore/ui/explore_start_evolution_dialog.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_text_coverage.dart';
 import 'package:nai_launcher/presentation/widgets/common/workspace_typography_scope.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'explore_prototype_fixture.dart';
@@ -61,7 +60,6 @@ Future<void> main(List<String> args) async {
   await windowManager.setTitle('Explore UI capture — independent fixture');
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
   await windowManager.setSize(Size(width, 1000));
-  await StudioTextCoverage.preload();
   final run = finalCaptureRun(scene == 'help' ? 'evolution' : scene, model),
       storage = ExploreCaptureRunStorage();
   await storage.putRun(run);
@@ -308,8 +306,7 @@ Future<void> main(List<String> args) async {
   final render =
       _boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
   final view = ui.PlatformDispatcher.instance.views.first;
-  final stem =
-      '$scene-$locale-${dark ? 'dark' : 'light'}-${width.toInt()}-${StudioTextCoverage.exponent}';
+  final stem = '$scene-$locale-${dark ? 'dark' : 'light'}-${width.toInt()}-1.0';
   final dir = Directory(_output);
   await dir.create(recursive: true);
   for (final scale in [1.0, view.devicePixelRatio]) {
@@ -331,7 +328,8 @@ Future<void> main(List<String> args) async {
       'physicalSize': [view.physicalSize.width, view.physicalSize.height],
       'devicePixelRatio': view.devicePixelRatio,
       'shaderFilterSupported': ui.ImageFilter.isShaderFilterSupported,
-      'coverageExponent': dark ? 1 : StudioTextCoverage.exponent,
+      'coverageExponent': 1.0,
+      'textPostProcessing': 'none',
       'errors': errors,
       'storage': 'memory only',
       'generationCalls': 0,

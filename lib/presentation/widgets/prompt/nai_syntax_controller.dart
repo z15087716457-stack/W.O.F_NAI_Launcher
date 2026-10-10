@@ -1,5 +1,4 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
-import '../common/studio_text_coverage.dart';
 
 import '../../../core/utils/alias_parser.dart';
 import '../../../core/utils/pill_document_editor.dart';
@@ -114,9 +113,7 @@ class NaiSyntaxController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    final baseStyle = StudioTextCoverage.withoutCoverage(
-      style ?? const TextStyle(),
-    );
+    final baseStyle = style ?? const TextStyle();
 
     final theme = Theme.of(context);
     final colors = NaiSyntaxColors.fromTheme(theme);
@@ -126,10 +123,7 @@ class NaiSyntaxController extends TextEditingController {
         _cachedColorSignature == colors.cacheSignature &&
         _cachedBaseStyle == baseStyle &&
         _cachedFinalSpans != null) {
-      return _withGlyphCoverage(
-        context,
-        TextSpan(style: baseStyle, children: _cachedFinalSpans),
-      );
+      return TextSpan(style: baseStyle, children: _cachedFinalSpans);
     }
 
     // 官网的竖线提示独立于“高亮强调”开关，搜索高亮也需要继续叠加。
@@ -155,16 +149,8 @@ class NaiSyntaxController extends TextEditingController {
     _cachedBaseStyle = baseStyle;
     _cachedFinalSpans = finalSpans;
 
-    return _withGlyphCoverage(
-      context,
-      TextSpan(style: baseStyle, children: finalSpans),
-    );
+    return TextSpan(style: baseStyle, children: finalSpans);
   }
-
-  TextSpan _withGlyphCoverage(BuildContext context, TextSpan span) =>
-      StudioTextCoverageScope.activeOf(context)
-      ? StudioTextCoverage.glyphSpan(context, span) as TextSpan
-      : span;
 
   /// 药丸拼接后的 span 缓存（与 [_cachedSpans] 同生命周期）。
   List<InlineSpan>? _cachedFinalSpans;

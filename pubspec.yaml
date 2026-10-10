@@ -154,9 +154,6 @@ flutter:
     - assets/model3d_editor/vendor/addons/loaders/
     - assets/model3d_editor/vendor/addons/utils/
 
-  shaders:
-    - assets/shaders/explore_text_coverage.frag
-
   fonts:
     - family: StudioIcons
       fonts:

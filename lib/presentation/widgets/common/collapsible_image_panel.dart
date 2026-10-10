@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/common/studio_text_coverage.dart';
 import 'dart:ui' as ui;
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
@@ -226,7 +225,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            StudioText(
+                            Text(
                               title,
                               style: GenSidebarStyle.sectionTitle(theme)
                                   .copyWith(
@@ -241,7 +240,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                             ),
                             if (subtitle != null) ...[
                               const SizedBox(height: 2),
-                              StudioText(
+                              Text(
                                 subtitle!,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   fontSize: 11,
@@ -364,7 +363,7 @@ class CollapsibleImagePanel extends StatelessWidget {
               children: [
                 _buildHeaderIcon(theme, showBackground, size: 20),
                 const SizedBox(width: 10),
-                StudioText(
+                Text(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -377,7 +376,7 @@ class CollapsibleImagePanel extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: StudioText(
+                  child: Text(
                     subtitle ?? '',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

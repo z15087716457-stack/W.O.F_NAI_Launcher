@@ -6,7 +6,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart'
 import 'package:nai_launcher/presentation/widgets/common/workspace_typography_scope.dart';
 
 void main() {
-  testWidgets('coverage theme changes preserve input focus and composing', (
+  testWidgets('workspace theme changes preserve input focus and composing', (
     tester,
   ) async {
     final controller = fw.TextEditingController(text: '画风');

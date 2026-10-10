@@ -1,8 +1,7 @@
-import '../../../widgets/common/studio_text_coverage.dart';
+import '../../../widgets/common/studio_material.dart';
 
-/// The accepted 0.70 coverage curve applies to isolated light-theme text only.
-/// Ink, font metrics, backgrounds and dark-theme rendering remain unchanged.
-class ExploreText extends StudioText {
+/// Prototype text metrics rendered directly by Flutter without post-processing.
+class ExploreText extends Text {
   const ExploreText(
     super.data, {
     super.key,
