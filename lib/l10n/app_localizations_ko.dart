@@ -12946,4 +12946,416 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get styleExplore_evolutionTargetAfter => '위치를 교체하고 나머지 내용은 유지합니다';
+
+  @override
+  String get stats_title => '통계';
+
+  @override
+  String get stats_subtitle => '로컬 갤러리 · 파일 시간 기준';
+
+  @override
+  String stats_rangeDays(Object count) {
+    return '$count일';
+  }
+
+  @override
+  String get stats_rangeThisYear => '올해';
+
+  @override
+  String get stats_rangeAll => '전체';
+
+  @override
+  String get stats_naiOnly => 'NAI 이미지만';
+
+  @override
+  String stats_updatedAt(Object time) {
+    return '$time 업데이트';
+  }
+
+  @override
+  String get stats_updating => '업데이트 중';
+
+  @override
+  String stats_counting(Object count) {
+    return '$count장 집계 중…';
+  }
+
+  @override
+  String get stats_updateFailed => '업데이트 실패';
+
+  @override
+  String get stats_refresh => '새로 고침';
+
+  @override
+  String stats_lastDays(Object count) {
+    return '최근 $count일';
+  }
+
+  @override
+  String stats_lastDaysShort(Object count) {
+    return '$count일';
+  }
+
+  @override
+  String get stats_unitDays => '일';
+
+  @override
+  String stats_imagesCount(Object count) {
+    return '$count장';
+  }
+
+  @override
+  String get stats_less => '적음';
+
+  @override
+  String get stats_more => '많음';
+
+  @override
+  String get stats_kpiImages => '이미지';
+
+  @override
+  String get stats_kpiNewImages => '새 이미지';
+
+  @override
+  String stats_kpiActiveDays(Object days, Object avg) {
+    return '활동 $days일 · 일평균 $avg';
+  }
+
+  @override
+  String stats_kpiVsPrevious(Object count) {
+    return '이전 $count일 대비';
+  }
+
+  @override
+  String get stats_kpiVsLastYear => '작년 같은 기간 대비';
+
+  @override
+  String stats_kpiPreviousValue(Object value) {
+    return ' ($value)';
+  }
+
+  @override
+  String get stats_kpiFavorites => '즐겨찾기';
+
+  @override
+  String stats_kpiFavoriteRate(Object rate) {
+    return '즐겨찾기 비율 $rate';
+  }
+
+  @override
+  String get stats_kpiAnlas90 => 'Anlas · 최근 90일';
+
+  @override
+  String get stats_kpiAnlasSpent => 'Anlas 사용';
+
+  @override
+  String stats_kpiAnlasRecent(Object week, Object today) {
+    return '7일 $week · 오늘 $today';
+  }
+
+  @override
+  String stats_kpiAnlasDaily(Object avg, Object today) {
+    return '일평균 $avg · 오늘 $today';
+  }
+
+  @override
+  String get stats_kpiStreak => '연속 창작';
+
+  @override
+  String stats_kpiLongest(Object days, Object unit) {
+    return '최장 $days$unit';
+  }
+
+  @override
+  String stats_kpiLongestRange(Object days, Object unit, Object range) {
+    return '최장 $days$unit ($range)';
+  }
+
+  @override
+  String get stats_kpiStorage => '용량';
+
+  @override
+  String stats_kpiStorageDetail(Object avg, Object pct) {
+    return '평균 $avg · 메타데이터 $pct';
+  }
+
+  @override
+  String get stats_calendarTitle => '창작 캘린더';
+
+  @override
+  String get stats_calendarHint => '한 칸이 하루, 진할수록 많음';
+
+  @override
+  String get stats_calendarPastYear => '최근 1년';
+
+  @override
+  String stats_calendarYear(Object year) {
+    return '$year년';
+  }
+
+  @override
+  String get stats_calendarImagesPastYear => '최근 1년 이미지';
+
+  @override
+  String stats_calendarImagesInYear(Object year) {
+    return '$year년 이미지';
+  }
+
+  @override
+  String get stats_calendarActiveDays => '창작한 날';
+
+  @override
+  String get stats_calendarBestDay => '가장 많은 날';
+
+  @override
+  String get stats_calendarLongestStreak => '최장 연속';
+
+  @override
+  String get stats_calendarTipOpen => '클릭하면 로컬 갤러리에서 이 날을 엽니다';
+
+  @override
+  String get stats_productionTitle => '생성량과 모델';
+
+  @override
+  String stats_productionHintAll(Object unit) {
+    return '$unit별, 색은 모델';
+  }
+
+  @override
+  String stats_productionHintRange(Object range, Object unit) {
+    return '$range, $unit별, 색은 모델';
+  }
+
+  @override
+  String get stats_unitDay => '일';
+
+  @override
+  String get stats_unitWeek => '주';
+
+  @override
+  String get stats_unitMonth => '월';
+
+  @override
+  String get stats_granularityDay => '일';
+
+  @override
+  String get stats_granularityWeek => '주';
+
+  @override
+  String get stats_granularityMonth => '월';
+
+  @override
+  String stats_monthWithYear(Object year, Object month) {
+    return '$year.$month';
+  }
+
+  @override
+  String get stats_productionModelsHint => '모델 · 클릭하면 해당 모델만 보기';
+
+  @override
+  String stats_productionOtherModels(Object count) {
+    return '기타 모델 $count개';
+  }
+
+  @override
+  String stats_productionNoMetadata(Object count) {
+    return '메타데이터 없는 이미지 $count장 (연회색)';
+  }
+
+  @override
+  String get stats_familyOther => '기타 모델';
+
+  @override
+  String get stats_familyNoMetadata => '메타데이터 없음';
+
+  @override
+  String stats_productionTipTotal(Object period, Object count) {
+    return '$period · $count장';
+  }
+
+  @override
+  String get stats_productionTipOpenDay => '클릭하면 로컬 갤러리에서 이 날을 엽니다';
+
+  @override
+  String get stats_productionTipOpenWeek => '클릭하면 로컬 갤러리에서 이 주를 엽니다';
+
+  @override
+  String get stats_productionTipOpenMonth => '클릭하면 로컬 갤러리에서 이 달을 엽니다';
+
+  @override
+  String get stats_punchTitle => '언제 그리나';
+
+  @override
+  String get stats_punchHint => '요일 × 시간';
+
+  @override
+  String get stats_punchPeak => '가장 많음';
+
+  @override
+  String stats_punchPeakValue(Object weekday, Object from, Object to) {
+    return '$weekday $from–$to시';
+  }
+
+  @override
+  String get stats_punchBusiest => '가장 바쁨';
+
+  @override
+  String get stats_punchLateNight => '심야';
+
+  @override
+  String get stats_punchNote => '원이 클수록 많음';
+
+  @override
+  String get stats_anlasTitle => 'Anlas 사용';
+
+  @override
+  String get stats_anlasToday => '오늘';
+
+  @override
+  String get stats_anlasDailyAvg => '일평균';
+
+  @override
+  String stats_anlasActiveDays(Object count) {
+    return '사용한 날 $count일';
+  }
+
+  @override
+  String get stats_anlasPeak => '최다';
+
+  @override
+  String get stats_anlasNote => '잔액이 줄 때 기록하며 업스케일·Vibe 인코딩 포함, 최근 90일만 보관';
+
+  @override
+  String get stats_aspectTitle => '캔버스 크기';
+
+  @override
+  String get stats_aspectHint => '실제 크기';
+
+  @override
+  String get stats_aspectOrientation => '방향';
+
+  @override
+  String get stats_orientationPortrait => '세로';
+
+  @override
+  String get stats_orientationLandscape => '가로';
+
+  @override
+  String get stats_orientationSquare => '정사각';
+
+  @override
+  String stats_aspectShapeCount(Object orientation, Object count) {
+    return '$orientation · $count';
+  }
+
+  @override
+  String stats_aspectOthers(Object count, Object pct) {
+    return '기타 $count종 · $pct';
+  }
+
+  @override
+  String get stats_aspectClickHint => '크기나 방향을 클릭하면 해당 이미지만 보기';
+
+  @override
+  String get stats_paramsTitle => '파라미터 습관';
+
+  @override
+  String get stats_paramsHint => '메타데이터 있는 이미지';
+
+  @override
+  String get stats_paramsCombo => '가장 많이 쓰는 설정';
+
+  @override
+  String get stats_paramsSampler => '샘플러';
+
+  @override
+  String get stats_paramsSteps => '스텝';
+
+  @override
+  String stats_paramsStepsValue(Object count) {
+    return '$count스텝';
+  }
+
+  @override
+  String get stats_paramsNoise => '노이즈 스케줄';
+
+  @override
+  String get stats_artistsTitle => '자주 쓰는 작가';
+
+  @override
+  String stats_artistsHint(Object count, Object pct) {
+    return '작가 태그 사용 $count장 ($pct)';
+  }
+
+  @override
+  String get stats_artistsComputing => '작가 집계 중…';
+
+  @override
+  String get stats_artistsNone => '프롬프트에 artist: 태그가 없습니다';
+
+  @override
+  String get stats_artistsNote => '등장한 이미지 수 기준, 한 이미지에서 여러 번 써도 1회';
+
+  @override
+  String stats_artistsTipSearch(Object query) {
+    return '로컬 갤러리에서 $query 검색';
+  }
+
+  @override
+  String get stats_artistsTipCopy => '우클릭: 작가 이름 복사';
+
+  @override
+  String stats_artistsCopied(Object name) {
+    return '$name 복사됨';
+  }
+
+  @override
+  String get stats_storageTitle => '저장 공간';
+
+  @override
+  String stats_storageFiles(Object count) {
+    return '파일 $count개';
+  }
+
+  @override
+  String get stats_storageMonthly => '최근 12개월 월별 추가';
+
+  @override
+  String stats_storageNoMetadata(Object count) {
+    return '메타데이터 없음 $count장';
+  }
+
+  @override
+  String get stats_storageViewInGallery => '로컬 갤러리에서 보기';
+
+  @override
+  String stats_storageLarge(Object count, Object size) {
+    return '10MB 초과 $count장 · $size';
+  }
+
+  @override
+  String get stats_storageView => '보기';
+
+  @override
+  String get stats_footer =>
+      '통계를 열 때마다 갤러리 변경을 확인해 백그라운드에서 다시 집계 · 숫자를 클릭하면 해당 필터로 로컬 갤러리를 엽니다';
+
+  @override
+  String get stats_emptyTitle => '로컬 갤러리에 아직 이미지가 없습니다';
+
+  @override
+  String get stats_emptyBody =>
+      '생성한 이미지는 로컬 갤러리에 자동으로 저장되며, 기존 이미지 폴더를 추가할 수도 있습니다. 이후 이곳에 창작 리듬, 모델, 파라미터 습관이 표시됩니다.';
+
+  @override
+  String get stats_emptyGenerate => '생성하러 가기';
+
+  @override
+  String get stats_emptyAddFolder => '갤러리 폴더 추가';
+
+  @override
+  String get stats_errorTitle => '통계를 계산하지 못했습니다';
+
+  @override
+  String get stats_errorRetry => '다시 시도';
 }

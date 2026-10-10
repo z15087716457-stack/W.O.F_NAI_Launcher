@@ -12921,4 +12921,417 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get styleExplore_evolutionTargetAfter => 'の位置を置き換え、他の内容は保持します';
+
+  @override
+  String get stats_title => '統計';
+
+  @override
+  String get stats_subtitle => 'ローカルギャラリー · ファイル日時順';
+
+  @override
+  String stats_rangeDays(Object count) {
+    return '$count 日';
+  }
+
+  @override
+  String get stats_rangeThisYear => '今年';
+
+  @override
+  String get stats_rangeAll => 'すべて';
+
+  @override
+  String get stats_naiOnly => 'NAI 画像のみ';
+
+  @override
+  String stats_updatedAt(Object time) {
+    return '$time に更新';
+  }
+
+  @override
+  String get stats_updating => '更新中';
+
+  @override
+  String stats_counting(Object count) {
+    return '$count 枚を集計中…';
+  }
+
+  @override
+  String get stats_updateFailed => '更新に失敗しました';
+
+  @override
+  String get stats_refresh => '更新';
+
+  @override
+  String stats_lastDays(Object count) {
+    return '直近 $count 日';
+  }
+
+  @override
+  String stats_lastDaysShort(Object count) {
+    return '$count 日';
+  }
+
+  @override
+  String get stats_unitDays => '日';
+
+  @override
+  String stats_imagesCount(Object count) {
+    return '$count 枚';
+  }
+
+  @override
+  String get stats_less => '少';
+
+  @override
+  String get stats_more => '多';
+
+  @override
+  String get stats_kpiImages => '画像';
+
+  @override
+  String get stats_kpiNewImages => '新しい画像';
+
+  @override
+  String stats_kpiActiveDays(Object days, Object avg) {
+    return '活動 $days 日 · 1 日平均 $avg';
+  }
+
+  @override
+  String stats_kpiVsPrevious(Object count) {
+    return '前の $count 日比';
+  }
+
+  @override
+  String get stats_kpiVsLastYear => '前年同期比';
+
+  @override
+  String stats_kpiPreviousValue(Object value) {
+    return '（$value）';
+  }
+
+  @override
+  String get stats_kpiFavorites => 'お気に入り';
+
+  @override
+  String stats_kpiFavoriteRate(Object rate) {
+    return 'お気に入り率 $rate';
+  }
+
+  @override
+  String get stats_kpiAnlas90 => 'Anlas · 直近 90 日';
+
+  @override
+  String get stats_kpiAnlasSpent => 'Anlas 消費';
+
+  @override
+  String stats_kpiAnlasRecent(Object week, Object today) {
+    return '7 日 $week · 今日 $today';
+  }
+
+  @override
+  String stats_kpiAnlasDaily(Object avg, Object today) {
+    return '1 日平均 $avg · 今日 $today';
+  }
+
+  @override
+  String get stats_kpiStreak => '連続制作';
+
+  @override
+  String stats_kpiLongest(Object days, Object unit) {
+    return '最長 $days $unit';
+  }
+
+  @override
+  String stats_kpiLongestRange(Object days, Object unit, Object range) {
+    return '最長 $days $unit（$range）';
+  }
+
+  @override
+  String get stats_kpiStorage => '容量';
+
+  @override
+  String stats_kpiStorageDetail(Object avg, Object pct) {
+    return '平均 $avg · メタデータあり $pct';
+  }
+
+  @override
+  String get stats_calendarTitle => '制作カレンダー';
+
+  @override
+  String get stats_calendarHint => '1 マス 1 日、濃いほど多い';
+
+  @override
+  String get stats_calendarPastYear => '直近 1 年';
+
+  @override
+  String stats_calendarYear(Object year) {
+    return '$year 年';
+  }
+
+  @override
+  String get stats_calendarImagesPastYear => '直近 1 年の画像';
+
+  @override
+  String stats_calendarImagesInYear(Object year) {
+    return '$year 年の画像';
+  }
+
+  @override
+  String get stats_calendarActiveDays => '制作した日数';
+
+  @override
+  String get stats_calendarBestDay => '最も多い日';
+
+  @override
+  String get stats_calendarLongestStreak => '最長連続';
+
+  @override
+  String get stats_calendarTipOpen => 'クリックでこの日をローカルギャラリーで開く';
+
+  @override
+  String get stats_productionTitle => '生成量とモデル';
+
+  @override
+  String stats_productionHintAll(Object unit) {
+    return '$unitごと、色はモデル';
+  }
+
+  @override
+  String stats_productionHintRange(Object range, Object unit) {
+    return '$range、$unitごと、色はモデル';
+  }
+
+  @override
+  String get stats_unitDay => '日';
+
+  @override
+  String get stats_unitWeek => '週';
+
+  @override
+  String get stats_unitMonth => '月';
+
+  @override
+  String get stats_granularityDay => '日';
+
+  @override
+  String get stats_granularityWeek => '週';
+
+  @override
+  String get stats_granularityMonth => '月';
+
+  @override
+  String stats_monthWithYear(Object year, Object month) {
+    return '$year.$month';
+  }
+
+  @override
+  String get stats_productionModelsHint => 'モデル · クリックでそのモデルだけ表示';
+
+  @override
+  String stats_productionOtherModels(Object count) {
+    return 'その他 $count モデル';
+  }
+
+  @override
+  String stats_productionNoMetadata(Object count) {
+    return 'ほかにメタデータなし $count 枚（薄いグレー）';
+  }
+
+  @override
+  String get stats_familyOther => 'その他のモデル';
+
+  @override
+  String get stats_familyNoMetadata => 'メタデータなし';
+
+  @override
+  String stats_productionTipTotal(Object period, Object count) {
+    return '$period · $count 枚';
+  }
+
+  @override
+  String get stats_productionTipOpenDay => 'クリックでこの日をローカルギャラリーで開く';
+
+  @override
+  String get stats_productionTipOpenWeek => 'クリックでこの週をローカルギャラリーで開く';
+
+  @override
+  String get stats_productionTipOpenMonth => 'クリックでこの月をローカルギャラリーで開く';
+
+  @override
+  String get stats_punchTitle => 'いつ描くか';
+
+  @override
+  String get stats_punchHint => '曜日 × 時間';
+
+  @override
+  String get stats_punchPeak => '最も多い';
+
+  @override
+  String stats_punchPeakValue(Object weekday, Object from, Object to) {
+    return '$weekday $from–$to 時';
+  }
+
+  @override
+  String get stats_punchBusiest => '最も忙しい';
+
+  @override
+  String get stats_punchLateNight => '深夜';
+
+  @override
+  String get stats_punchNote => '円が大きいほど多い';
+
+  @override
+  String get stats_anlasTitle => 'Anlas 消費';
+
+  @override
+  String get stats_anlasToday => '今日';
+
+  @override
+  String get stats_anlasDailyAvg => '1 日平均';
+
+  @override
+  String stats_anlasActiveDays(Object count) {
+    return '消費あり $count 日';
+  }
+
+  @override
+  String get stats_anlasPeak => '最多';
+
+  @override
+  String get stats_anlasNote =>
+      '残高が減ったときに記録（アップスケールや Vibe エンコードを含む）。直近 90 日のみ保持';
+
+  @override
+  String get stats_aspectTitle => '画面サイズ';
+
+  @override
+  String get stats_aspectHint => '実際のサイズ';
+
+  @override
+  String get stats_aspectOrientation => '向き';
+
+  @override
+  String get stats_orientationPortrait => '縦';
+
+  @override
+  String get stats_orientationLandscape => '横';
+
+  @override
+  String get stats_orientationSquare => '正方形';
+
+  @override
+  String stats_aspectShapeCount(Object orientation, Object count) {
+    return '$orientation · $count';
+  }
+
+  @override
+  String stats_aspectOthers(Object count, Object pct) {
+    return 'その他 $count 種 · $pct';
+  }
+
+  @override
+  String get stats_aspectClickHint => 'サイズや向きをクリックするとその画像だけ表示';
+
+  @override
+  String get stats_paramsTitle => 'パラメーターの傾向';
+
+  @override
+  String get stats_paramsHint => 'メタデータのある画像';
+
+  @override
+  String get stats_paramsCombo => 'よく使う設定';
+
+  @override
+  String get stats_paramsSampler => 'サンプラー';
+
+  @override
+  String get stats_paramsSteps => 'ステップ';
+
+  @override
+  String stats_paramsStepsValue(Object count) {
+    return '$count ステップ';
+  }
+
+  @override
+  String get stats_paramsNoise => 'ノイズスケジュール';
+
+  @override
+  String get stats_artistsTitle => 'よく使う絵師';
+
+  @override
+  String stats_artistsHint(Object count, Object pct) {
+    return '絵師タグ入り $count 枚（$pct）';
+  }
+
+  @override
+  String get stats_artistsComputing => '絵師を集計中…';
+
+  @override
+  String get stats_artistsNone => 'プロンプトに artist: がまだありません';
+
+  @override
+  String get stats_artistsNote => '登場した画像の枚数順。1 枚で何度書いても 1 回';
+
+  @override
+  String stats_artistsTipSearch(Object query) {
+    return 'ローカルギャラリーで $query を検索';
+  }
+
+  @override
+  String get stats_artistsTipCopy => '右クリック：絵師名をコピー';
+
+  @override
+  String stats_artistsCopied(Object name) {
+    return '$name をコピーしました';
+  }
+
+  @override
+  String get stats_storageTitle => 'ストレージ';
+
+  @override
+  String stats_storageFiles(Object count) {
+    return '$count ファイル';
+  }
+
+  @override
+  String get stats_storageMonthly => '直近 12 か月の月別追加';
+
+  @override
+  String stats_storageNoMetadata(Object count) {
+    return 'メタデータなし $count 枚';
+  }
+
+  @override
+  String get stats_storageViewInGallery => 'ローカルギャラリーで表示';
+
+  @override
+  String stats_storageLarge(Object count, Object size) {
+    return '10 MB 超 $count 枚 · $size';
+  }
+
+  @override
+  String get stats_storageView => '表示';
+
+  @override
+  String get stats_footer =>
+      '統計を開くたびにギャラリーの変化を確認し、変わっていればバックグラウンドで再集計 · 数字をクリックするとそのフィルターでローカルギャラリーを開く';
+
+  @override
+  String get stats_emptyTitle => 'ローカルギャラリーにまだ画像がありません';
+
+  @override
+  String get stats_emptyBody =>
+      '生成した画像は自動でローカルギャラリーに保存されます。既存の画像フォルダーを追加することもできます。その後、ここに制作のペース、モデル、パラメーターの傾向が表示されます。';
+
+  @override
+  String get stats_emptyGenerate => '生成へ';
+
+  @override
+  String get stats_emptyAddFolder => 'ギャラリーフォルダーを追加';
+
+  @override
+  String get stats_errorTitle => '統計を計算できませんでした';
+
+  @override
+  String get stats_errorRetry => '再試行';
 }

@@ -13333,4 +13333,425 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get styleExplore_evolutionTargetAfter =>
       'while keeping the rest unchanged';
+
+  @override
+  String get stats_title => 'Statistics';
+
+  @override
+  String get stats_subtitle => 'Local gallery · by file time';
+
+  @override
+  String stats_rangeDays(Object count) {
+    return '${count}D';
+  }
+
+  @override
+  String get stats_rangeThisYear => 'YTD';
+
+  @override
+  String get stats_rangeAll => 'All';
+
+  @override
+  String get stats_naiOnly => 'NAI images only';
+
+  @override
+  String stats_updatedAt(Object time) {
+    return 'Updated $time';
+  }
+
+  @override
+  String get stats_updating => 'Updating';
+
+  @override
+  String stats_counting(Object count) {
+    return 'Counting $count images…';
+  }
+
+  @override
+  String get stats_updateFailed => 'Update failed';
+
+  @override
+  String get stats_refresh => 'Refresh';
+
+  @override
+  String stats_lastDays(Object count) {
+    return 'Last $count days';
+  }
+
+  @override
+  String stats_lastDaysShort(Object count) {
+    return '$count days';
+  }
+
+  @override
+  String get stats_unitDays => 'days';
+
+  @override
+  String stats_imagesCount(Object count) {
+    return '$count images';
+  }
+
+  @override
+  String get stats_less => 'Less';
+
+  @override
+  String get stats_more => 'More';
+
+  @override
+  String get stats_kpiImages => 'Images';
+
+  @override
+  String get stats_kpiNewImages => 'New images';
+
+  @override
+  String stats_kpiActiveDays(Object days, Object avg) {
+    return '$days active days · $avg/day';
+  }
+
+  @override
+  String stats_kpiVsPrevious(Object count) {
+    return 'vs previous $count days';
+  }
+
+  @override
+  String get stats_kpiVsLastYear => 'vs same period last year';
+
+  @override
+  String stats_kpiPreviousValue(Object value) {
+    return ' ($value)';
+  }
+
+  @override
+  String get stats_kpiFavorites => 'Favorites';
+
+  @override
+  String stats_kpiFavoriteRate(Object rate) {
+    return '$rate favorited';
+  }
+
+  @override
+  String get stats_kpiAnlas90 => 'Anlas · last 90 days';
+
+  @override
+  String get stats_kpiAnlasSpent => 'Anlas spent';
+
+  @override
+  String stats_kpiAnlasRecent(Object week, Object today) {
+    return '7 days $week · today $today';
+  }
+
+  @override
+  String stats_kpiAnlasDaily(Object avg, Object today) {
+    return '$avg/day · today $today';
+  }
+
+  @override
+  String get stats_kpiStreak => 'Streak';
+
+  @override
+  String stats_kpiLongest(Object days, Object unit) {
+    return 'Longest $days $unit';
+  }
+
+  @override
+  String stats_kpiLongestRange(Object days, Object unit, Object range) {
+    return 'Longest $days $unit ($range)';
+  }
+
+  @override
+  String get stats_kpiStorage => 'Storage';
+
+  @override
+  String stats_kpiStorageDetail(Object avg, Object pct) {
+    return 'avg $avg · $pct with metadata';
+  }
+
+  @override
+  String get stats_calendarTitle => 'Creation calendar';
+
+  @override
+  String get stats_calendarHint =>
+      'One square per day; darker means more images';
+
+  @override
+  String get stats_calendarPastYear => 'Past year';
+
+  @override
+  String stats_calendarYear(Object year) {
+    return '$year';
+  }
+
+  @override
+  String get stats_calendarImagesPastYear => 'Images in the past year';
+
+  @override
+  String stats_calendarImagesInYear(Object year) {
+    return 'Images in $year';
+  }
+
+  @override
+  String get stats_calendarActiveDays => 'Days with images';
+
+  @override
+  String get stats_calendarBestDay => 'Busiest day';
+
+  @override
+  String get stats_calendarLongestStreak => 'Longest streak';
+
+  @override
+  String get stats_calendarTipOpen =>
+      'Click to open this day in the local gallery';
+
+  @override
+  String get stats_productionTitle => 'Output & models';
+
+  @override
+  String stats_productionHintAll(Object unit) {
+    return 'By $unit, colored by model';
+  }
+
+  @override
+  String stats_productionHintRange(Object range, Object unit) {
+    return '$range, by $unit, colored by model';
+  }
+
+  @override
+  String get stats_unitDay => 'day';
+
+  @override
+  String get stats_unitWeek => 'week';
+
+  @override
+  String get stats_unitMonth => 'month';
+
+  @override
+  String get stats_granularityDay => 'Day';
+
+  @override
+  String get stats_granularityWeek => 'Week';
+
+  @override
+  String get stats_granularityMonth => 'Month';
+
+  @override
+  String stats_monthWithYear(Object year, Object month) {
+    return '$month $year';
+  }
+
+  @override
+  String get stats_productionModelsHint =>
+      'Models · click to see only that model';
+
+  @override
+  String stats_productionOtherModels(Object count) {
+    return '$count other models';
+  }
+
+  @override
+  String stats_productionNoMetadata(Object count) {
+    return '$count more images have no metadata (light gray)';
+  }
+
+  @override
+  String get stats_familyOther => 'Other models';
+
+  @override
+  String get stats_familyNoMetadata => 'No metadata';
+
+  @override
+  String stats_productionTipTotal(Object period, Object count) {
+    return '$period · $count images';
+  }
+
+  @override
+  String get stats_productionTipOpenDay =>
+      'Click to open this day in the local gallery';
+
+  @override
+  String get stats_productionTipOpenWeek =>
+      'Click to open this week in the local gallery';
+
+  @override
+  String get stats_productionTipOpenMonth =>
+      'Click to open this month in the local gallery';
+
+  @override
+  String get stats_punchTitle => 'When you create';
+
+  @override
+  String get stats_punchHint => 'Weekday × hour';
+
+  @override
+  String get stats_punchPeak => 'Most often';
+
+  @override
+  String stats_punchPeakValue(Object weekday, Object from, Object to) {
+    return '$weekday $from:00–$to:00';
+  }
+
+  @override
+  String get stats_punchBusiest => 'Busiest';
+
+  @override
+  String get stats_punchLateNight => 'Late night';
+
+  @override
+  String get stats_punchNote => 'Bigger dots mean more images';
+
+  @override
+  String get stats_anlasTitle => 'Anlas spent';
+
+  @override
+  String get stats_anlasToday => 'Today';
+
+  @override
+  String get stats_anlasDailyAvg => 'Daily avg';
+
+  @override
+  String stats_anlasActiveDays(Object count) {
+    return '$count days with spend';
+  }
+
+  @override
+  String get stats_anlasPeak => 'Peak';
+
+  @override
+  String get stats_anlasNote =>
+      'Recorded when your balance drops, including upscales and Vibe encoding; only the last 90 days are kept';
+
+  @override
+  String get stats_aspectTitle => 'Canvas size';
+
+  @override
+  String get stats_aspectHint => 'Actual pixel sizes';
+
+  @override
+  String get stats_aspectOrientation => 'Orientation';
+
+  @override
+  String get stats_orientationPortrait => 'Portrait';
+
+  @override
+  String get stats_orientationLandscape => 'Landscape';
+
+  @override
+  String get stats_orientationSquare => 'Square';
+
+  @override
+  String stats_aspectShapeCount(Object orientation, Object count) {
+    return '$orientation · $count';
+  }
+
+  @override
+  String stats_aspectOthers(Object count, Object pct) {
+    return '$count others · $pct';
+  }
+
+  @override
+  String get stats_aspectClickHint =>
+      'Click a size or orientation to see only those images';
+
+  @override
+  String get stats_paramsTitle => 'Parameter habits';
+
+  @override
+  String get stats_paramsHint => 'Images with metadata';
+
+  @override
+  String get stats_paramsCombo => 'Most used settings';
+
+  @override
+  String get stats_paramsSampler => 'Sampler';
+
+  @override
+  String get stats_paramsSteps => 'Steps';
+
+  @override
+  String stats_paramsStepsValue(Object count) {
+    return '$count steps';
+  }
+
+  @override
+  String get stats_paramsNoise => 'Noise schedule';
+
+  @override
+  String get stats_artistsTitle => 'Favorite artists';
+
+  @override
+  String stats_artistsHint(Object count, Object pct) {
+    return '$count images use artist tags ($pct)';
+  }
+
+  @override
+  String get stats_artistsComputing => 'Counting artists…';
+
+  @override
+  String get stats_artistsNone => 'No artist: tags in prompts yet';
+
+  @override
+  String get stats_artistsNote =>
+      'Ranked by how many images mention them; repeats in one image count once';
+
+  @override
+  String stats_artistsTipSearch(Object query) {
+    return 'Search $query in the local gallery';
+  }
+
+  @override
+  String get stats_artistsTipCopy => 'Right-click: copy artist name';
+
+  @override
+  String stats_artistsCopied(Object name) {
+    return 'Copied $name';
+  }
+
+  @override
+  String get stats_storageTitle => 'Storage';
+
+  @override
+  String stats_storageFiles(Object count) {
+    return '$count files';
+  }
+
+  @override
+  String get stats_storageMonthly => 'Added per month, last 12 months';
+
+  @override
+  String stats_storageNoMetadata(Object count) {
+    return '$count images without metadata';
+  }
+
+  @override
+  String get stats_storageViewInGallery => 'View in local gallery';
+
+  @override
+  String stats_storageLarge(Object count, Object size) {
+    return '$count images over 10 MB · $size';
+  }
+
+  @override
+  String get stats_storageView => 'View';
+
+  @override
+  String get stats_footer =>
+      'Statistics recalculate in the background when the gallery changes · Click any number to open the local gallery with that filter';
+
+  @override
+  String get stats_emptyTitle => 'Your local gallery has no images yet';
+
+  @override
+  String get stats_emptyBody =>
+      'Generated images are saved to the local gallery automatically, or you can add an existing image folder. Then this page shows your creative rhythm, models and parameter habits.';
+
+  @override
+  String get stats_emptyGenerate => 'Go to Generate';
+
+  @override
+  String get stats_emptyAddFolder => 'Add gallery folder';
+
+  @override
+  String get stats_errorTitle => 'Couldn\'t calculate statistics';
+
+  @override
+  String get stats_errorRetry => 'Retry';
 }

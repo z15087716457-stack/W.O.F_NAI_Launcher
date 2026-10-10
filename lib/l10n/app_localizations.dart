@@ -23150,6 +23150,690 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'while keeping the rest unchanged'**
   String get styleExplore_evolutionTargetAfter;
+
+  /// No description provided for @stats_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get stats_title;
+
+  /// No description provided for @stats_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local gallery · by file time'**
+  String get stats_subtitle;
+
+  /// No description provided for @stats_rangeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}D'**
+  String stats_rangeDays(Object count);
+
+  /// No description provided for @stats_rangeThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'YTD'**
+  String get stats_rangeThisYear;
+
+  /// No description provided for @stats_rangeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get stats_rangeAll;
+
+  /// No description provided for @stats_naiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI images only'**
+  String get stats_naiOnly;
+
+  /// No description provided for @stats_updatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {time}'**
+  String stats_updatedAt(Object time);
+
+  /// No description provided for @stats_updating.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating'**
+  String get stats_updating;
+
+  /// No description provided for @stats_counting.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting {count} images…'**
+  String stats_counting(Object count);
+
+  /// No description provided for @stats_updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed'**
+  String get stats_updateFailed;
+
+  /// No description provided for @stats_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get stats_refresh;
+
+  /// No description provided for @stats_lastDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Last {count} days'**
+  String stats_lastDays(Object count);
+
+  /// No description provided for @stats_lastDaysShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String stats_lastDaysShort(Object count);
+
+  /// No description provided for @stats_unitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get stats_unitDays;
+
+  /// No description provided for @stats_imagesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images'**
+  String stats_imagesCount(Object count);
+
+  /// No description provided for @stats_less.
+  ///
+  /// In en, this message translates to:
+  /// **'Less'**
+  String get stats_less;
+
+  /// No description provided for @stats_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get stats_more;
+
+  /// No description provided for @stats_kpiImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get stats_kpiImages;
+
+  /// No description provided for @stats_kpiNewImages.
+  ///
+  /// In en, this message translates to:
+  /// **'New images'**
+  String get stats_kpiNewImages;
+
+  /// No description provided for @stats_kpiActiveDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} active days · {avg}/day'**
+  String stats_kpiActiveDays(Object days, Object avg);
+
+  /// No description provided for @stats_kpiVsPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'vs previous {count} days'**
+  String stats_kpiVsPrevious(Object count);
+
+  /// No description provided for @stats_kpiVsLastYear.
+  ///
+  /// In en, this message translates to:
+  /// **'vs same period last year'**
+  String get stats_kpiVsLastYear;
+
+  /// No description provided for @stats_kpiPreviousValue.
+  ///
+  /// In en, this message translates to:
+  /// **' ({value})'**
+  String stats_kpiPreviousValue(Object value);
+
+  /// No description provided for @stats_kpiFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get stats_kpiFavorites;
+
+  /// No description provided for @stats_kpiFavoriteRate.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate} favorited'**
+  String stats_kpiFavoriteRate(Object rate);
+
+  /// No description provided for @stats_kpiAnlas90.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas · last 90 days'**
+  String get stats_kpiAnlas90;
+
+  /// No description provided for @stats_kpiAnlasSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas spent'**
+  String get stats_kpiAnlasSpent;
+
+  /// No description provided for @stats_kpiAnlasRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days {week} · today {today}'**
+  String stats_kpiAnlasRecent(Object week, Object today);
+
+  /// No description provided for @stats_kpiAnlasDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'{avg}/day · today {today}'**
+  String stats_kpiAnlasDaily(Object avg, Object today);
+
+  /// No description provided for @stats_kpiStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get stats_kpiStreak;
+
+  /// No description provided for @stats_kpiLongest.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest {days} {unit}'**
+  String stats_kpiLongest(Object days, Object unit);
+
+  /// No description provided for @stats_kpiLongestRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest {days} {unit} ({range})'**
+  String stats_kpiLongestRange(Object days, Object unit, Object range);
+
+  /// No description provided for @stats_kpiStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get stats_kpiStorage;
+
+  /// No description provided for @stats_kpiStorageDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'avg {avg} · {pct} with metadata'**
+  String stats_kpiStorageDetail(Object avg, Object pct);
+
+  /// No description provided for @stats_calendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Creation calendar'**
+  String get stats_calendarTitle;
+
+  /// No description provided for @stats_calendarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One square per day; darker means more images'**
+  String get stats_calendarHint;
+
+  /// No description provided for @stats_calendarPastYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Past year'**
+  String get stats_calendarPastYear;
+
+  /// No description provided for @stats_calendarYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{year}'**
+  String stats_calendarYear(Object year);
+
+  /// No description provided for @stats_calendarImagesPastYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Images in the past year'**
+  String get stats_calendarImagesPastYear;
+
+  /// No description provided for @stats_calendarImagesInYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Images in {year}'**
+  String stats_calendarImagesInYear(Object year);
+
+  /// No description provided for @stats_calendarActiveDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days with images'**
+  String get stats_calendarActiveDays;
+
+  /// No description provided for @stats_calendarBestDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Busiest day'**
+  String get stats_calendarBestDay;
+
+  /// No description provided for @stats_calendarLongestStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest streak'**
+  String get stats_calendarLongestStreak;
+
+  /// No description provided for @stats_calendarTipOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to open this day in the local gallery'**
+  String get stats_calendarTipOpen;
+
+  /// No description provided for @stats_productionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Output & models'**
+  String get stats_productionTitle;
+
+  /// No description provided for @stats_productionHintAll.
+  ///
+  /// In en, this message translates to:
+  /// **'By {unit}, colored by model'**
+  String stats_productionHintAll(Object unit);
+
+  /// No description provided for @stats_productionHintRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{range}, by {unit}, colored by model'**
+  String stats_productionHintRange(Object range, Object unit);
+
+  /// No description provided for @stats_unitDay.
+  ///
+  /// In en, this message translates to:
+  /// **'day'**
+  String get stats_unitDay;
+
+  /// No description provided for @stats_unitWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'week'**
+  String get stats_unitWeek;
+
+  /// No description provided for @stats_unitMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'month'**
+  String get stats_unitMonth;
+
+  /// No description provided for @stats_granularityDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get stats_granularityDay;
+
+  /// No description provided for @stats_granularityWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get stats_granularityWeek;
+
+  /// No description provided for @stats_granularityMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get stats_granularityMonth;
+
+  /// No description provided for @stats_monthWithYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} {year}'**
+  String stats_monthWithYear(Object year, Object month);
+
+  /// No description provided for @stats_productionModelsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Models · click to see only that model'**
+  String get stats_productionModelsHint;
+
+  /// No description provided for @stats_productionOtherModels.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} other models'**
+  String stats_productionOtherModels(Object count);
+
+  /// No description provided for @stats_productionNoMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more images have no metadata (light gray)'**
+  String stats_productionNoMetadata(Object count);
+
+  /// No description provided for @stats_familyOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other models'**
+  String get stats_familyOther;
+
+  /// No description provided for @stats_familyNoMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'No metadata'**
+  String get stats_familyNoMetadata;
+
+  /// No description provided for @stats_productionTipTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{period} · {count} images'**
+  String stats_productionTipTotal(Object period, Object count);
+
+  /// No description provided for @stats_productionTipOpenDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to open this day in the local gallery'**
+  String get stats_productionTipOpenDay;
+
+  /// No description provided for @stats_productionTipOpenWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to open this week in the local gallery'**
+  String get stats_productionTipOpenWeek;
+
+  /// No description provided for @stats_productionTipOpenMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to open this month in the local gallery'**
+  String get stats_productionTipOpenMonth;
+
+  /// No description provided for @stats_punchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When you create'**
+  String get stats_punchTitle;
+
+  /// No description provided for @stats_punchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekday × hour'**
+  String get stats_punchHint;
+
+  /// No description provided for @stats_punchPeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Most often'**
+  String get stats_punchPeak;
+
+  /// No description provided for @stats_punchPeakValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday} {from}:00–{to}:00'**
+  String stats_punchPeakValue(Object weekday, Object from, Object to);
+
+  /// No description provided for @stats_punchBusiest.
+  ///
+  /// In en, this message translates to:
+  /// **'Busiest'**
+  String get stats_punchBusiest;
+
+  /// No description provided for @stats_punchLateNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Late night'**
+  String get stats_punchLateNight;
+
+  /// No description provided for @stats_punchNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Bigger dots mean more images'**
+  String get stats_punchNote;
+
+  /// No description provided for @stats_anlasTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas spent'**
+  String get stats_anlasTitle;
+
+  /// No description provided for @stats_anlasToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get stats_anlasToday;
+
+  /// No description provided for @stats_anlasDailyAvg.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily avg'**
+  String get stats_anlasDailyAvg;
+
+  /// No description provided for @stats_anlasActiveDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days with spend'**
+  String stats_anlasActiveDays(Object count);
+
+  /// No description provided for @stats_anlasPeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak'**
+  String get stats_anlasPeak;
+
+  /// No description provided for @stats_anlasNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded when your balance drops, including upscales and Vibe encoding; only the last 90 days are kept'**
+  String get stats_anlasNote;
+
+  /// No description provided for @stats_aspectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas size'**
+  String get stats_aspectTitle;
+
+  /// No description provided for @stats_aspectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual pixel sizes'**
+  String get stats_aspectHint;
+
+  /// No description provided for @stats_aspectOrientation.
+  ///
+  /// In en, this message translates to:
+  /// **'Orientation'**
+  String get stats_aspectOrientation;
+
+  /// No description provided for @stats_orientationPortrait.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait'**
+  String get stats_orientationPortrait;
+
+  /// No description provided for @stats_orientationLandscape.
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape'**
+  String get stats_orientationLandscape;
+
+  /// No description provided for @stats_orientationSquare.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get stats_orientationSquare;
+
+  /// No description provided for @stats_aspectShapeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{orientation} · {count}'**
+  String stats_aspectShapeCount(Object orientation, Object count);
+
+  /// No description provided for @stats_aspectOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} others · {pct}'**
+  String stats_aspectOthers(Object count, Object pct);
+
+  /// No description provided for @stats_aspectClickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a size or orientation to see only those images'**
+  String get stats_aspectClickHint;
+
+  /// No description provided for @stats_paramsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameter habits'**
+  String get stats_paramsTitle;
+
+  /// No description provided for @stats_paramsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Images with metadata'**
+  String get stats_paramsHint;
+
+  /// No description provided for @stats_paramsCombo.
+  ///
+  /// In en, this message translates to:
+  /// **'Most used settings'**
+  String get stats_paramsCombo;
+
+  /// No description provided for @stats_paramsSampler.
+  ///
+  /// In en, this message translates to:
+  /// **'Sampler'**
+  String get stats_paramsSampler;
+
+  /// No description provided for @stats_paramsSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get stats_paramsSteps;
+
+  /// No description provided for @stats_paramsStepsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps'**
+  String stats_paramsStepsValue(Object count);
+
+  /// No description provided for @stats_paramsNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise schedule'**
+  String get stats_paramsNoise;
+
+  /// No description provided for @stats_artistsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite artists'**
+  String get stats_artistsTitle;
+
+  /// No description provided for @stats_artistsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images use artist tags ({pct})'**
+  String stats_artistsHint(Object count, Object pct);
+
+  /// No description provided for @stats_artistsComputing.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting artists…'**
+  String get stats_artistsComputing;
+
+  /// No description provided for @stats_artistsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No artist: tags in prompts yet'**
+  String get stats_artistsNone;
+
+  /// No description provided for @stats_artistsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked by how many images mention them; repeats in one image count once'**
+  String get stats_artistsNote;
+
+  /// No description provided for @stats_artistsTipSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search {query} in the local gallery'**
+  String stats_artistsTipSearch(Object query);
+
+  /// No description provided for @stats_artistsTipCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click: copy artist name'**
+  String get stats_artistsTipCopy;
+
+  /// No description provided for @stats_artistsCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied {name}'**
+  String stats_artistsCopied(Object name);
+
+  /// No description provided for @stats_storageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get stats_storageTitle;
+
+  /// No description provided for @stats_storageFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files'**
+  String stats_storageFiles(Object count);
+
+  /// No description provided for @stats_storageMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Added per month, last 12 months'**
+  String get stats_storageMonthly;
+
+  /// No description provided for @stats_storageNoMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images without metadata'**
+  String stats_storageNoMetadata(Object count);
+
+  /// No description provided for @stats_storageViewInGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'View in local gallery'**
+  String get stats_storageViewInGallery;
+
+  /// No description provided for @stats_storageLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images over 10 MB · {size}'**
+  String stats_storageLarge(Object count, Object size);
+
+  /// No description provided for @stats_storageView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get stats_storageView;
+
+  /// No description provided for @stats_footer.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics recalculate in the background when the gallery changes · Click any number to open the local gallery with that filter'**
+  String get stats_footer;
+
+  /// No description provided for @stats_emptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your local gallery has no images yet'**
+  String get stats_emptyTitle;
+
+  /// No description provided for @stats_emptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated images are saved to the local gallery automatically, or you can add an existing image folder. Then this page shows your creative rhythm, models and parameter habits.'**
+  String get stats_emptyBody;
+
+  /// No description provided for @stats_emptyGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Generate'**
+  String get stats_emptyGenerate;
+
+  /// No description provided for @stats_emptyAddFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add gallery folder'**
+  String get stats_emptyAddFolder;
+
+  /// No description provided for @stats_errorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t calculate statistics'**
+  String get stats_errorTitle;
+
+  /// No description provided for @stats_errorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get stats_errorRetry;
 }
 
 class _AppLocalizationsDelegate

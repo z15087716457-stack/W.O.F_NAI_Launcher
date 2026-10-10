@@ -12694,6 +12694,418 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get styleExplore_evolutionTargetAfter => '的位置，其他内容不变';
+
+  @override
+  String get stats_title => '统计';
+
+  @override
+  String get stats_subtitle => '本地图库 · 按文件时间';
+
+  @override
+  String stats_rangeDays(Object count) {
+    return '$count 天';
+  }
+
+  @override
+  String get stats_rangeThisYear => '今年';
+
+  @override
+  String get stats_rangeAll => '全部';
+
+  @override
+  String get stats_naiOnly => '仅 NAI 图片';
+
+  @override
+  String stats_updatedAt(Object time) {
+    return '更新于 $time';
+  }
+
+  @override
+  String get stats_updating => '更新中';
+
+  @override
+  String stats_counting(Object count) {
+    return '正在统计 $count 张…';
+  }
+
+  @override
+  String get stats_updateFailed => '更新失败';
+
+  @override
+  String get stats_refresh => '刷新';
+
+  @override
+  String stats_lastDays(Object count) {
+    return '近 $count 天';
+  }
+
+  @override
+  String stats_lastDaysShort(Object count) {
+    return '近 $count 天';
+  }
+
+  @override
+  String get stats_unitDays => '天';
+
+  @override
+  String stats_imagesCount(Object count) {
+    return '$count 张';
+  }
+
+  @override
+  String get stats_less => '少';
+
+  @override
+  String get stats_more => '多';
+
+  @override
+  String get stats_kpiImages => '图片';
+
+  @override
+  String get stats_kpiNewImages => '新增图片';
+
+  @override
+  String stats_kpiActiveDays(Object days, Object avg) {
+    return '活跃 $days 天 · 日均 $avg';
+  }
+
+  @override
+  String stats_kpiVsPrevious(Object count) {
+    return '比前 $count 天';
+  }
+
+  @override
+  String get stats_kpiVsLastYear => '比去年同期';
+
+  @override
+  String stats_kpiPreviousValue(Object value) {
+    return '（$value）';
+  }
+
+  @override
+  String get stats_kpiFavorites => '收藏';
+
+  @override
+  String stats_kpiFavoriteRate(Object rate) {
+    return '收藏率 $rate';
+  }
+
+  @override
+  String get stats_kpiAnlas90 => 'Anlas · 近 90 天';
+
+  @override
+  String get stats_kpiAnlasSpent => 'Anlas 消耗';
+
+  @override
+  String stats_kpiAnlasRecent(Object week, Object today) {
+    return '近 7 天 $week · 今日 $today';
+  }
+
+  @override
+  String stats_kpiAnlasDaily(Object avg, Object today) {
+    return '日均 $avg · 今日 $today';
+  }
+
+  @override
+  String get stats_kpiStreak => '连续创作';
+
+  @override
+  String stats_kpiLongest(Object days, Object unit) {
+    return '最长 $days $unit';
+  }
+
+  @override
+  String stats_kpiLongestRange(Object days, Object unit, Object range) {
+    return '最长 $days $unit（$range）';
+  }
+
+  @override
+  String get stats_kpiStorage => '占用';
+
+  @override
+  String stats_kpiStorageDetail(Object avg, Object pct) {
+    return '平均 $avg · $pct 有元数据';
+  }
+
+  @override
+  String get stats_calendarTitle => '创作日历';
+
+  @override
+  String get stats_calendarHint => '每格一天，颜色越深图越多';
+
+  @override
+  String get stats_calendarPastYear => '近一年';
+
+  @override
+  String stats_calendarYear(Object year) {
+    return '$year 年';
+  }
+
+  @override
+  String get stats_calendarImagesPastYear => '近一年图片';
+
+  @override
+  String stats_calendarImagesInYear(Object year) {
+    return '$year 年图片';
+  }
+
+  @override
+  String get stats_calendarActiveDays => '有创作的天数';
+
+  @override
+  String get stats_calendarBestDay => '最多的一天';
+
+  @override
+  String get stats_calendarLongestStreak => '最长连续';
+
+  @override
+  String get stats_calendarTipOpen => '点一下在本地画廊打开这一天';
+
+  @override
+  String get stats_productionTitle => '产量与模型';
+
+  @override
+  String stats_productionHintAll(Object unit) {
+    return '按$unit，颜色是模型';
+  }
+
+  @override
+  String stats_productionHintRange(Object range, Object unit) {
+    return '$range，按$unit，颜色是模型';
+  }
+
+  @override
+  String get stats_unitDay => '天';
+
+  @override
+  String get stats_unitWeek => '周';
+
+  @override
+  String get stats_unitMonth => '月';
+
+  @override
+  String get stats_granularityDay => '日';
+
+  @override
+  String get stats_granularityWeek => '周';
+
+  @override
+  String get stats_granularityMonth => '月';
+
+  @override
+  String stats_monthWithYear(Object year, Object month) {
+    return '$year.$month';
+  }
+
+  @override
+  String get stats_productionModelsHint => '模型 · 点一下只看这个模型的图';
+
+  @override
+  String stats_productionOtherModels(Object count) {
+    return '其他 $count 个模型';
+  }
+
+  @override
+  String stats_productionNoMetadata(Object count) {
+    return '另有 $count 张没有元数据，图上是浅灰色';
+  }
+
+  @override
+  String get stats_familyOther => '其他模型';
+
+  @override
+  String get stats_familyNoMetadata => '无元数据';
+
+  @override
+  String stats_productionTipTotal(Object period, Object count) {
+    return '$period · $count 张';
+  }
+
+  @override
+  String get stats_productionTipOpenDay => '点一下在本地画廊打开这一天';
+
+  @override
+  String get stats_productionTipOpenWeek => '点一下在本地画廊打开这一周';
+
+  @override
+  String get stats_productionTipOpenMonth => '点一下在本地画廊打开这个月';
+
+  @override
+  String get stats_punchTitle => '什么时候画';
+
+  @override
+  String get stats_punchHint => '星期 × 小时';
+
+  @override
+  String get stats_punchPeak => '最常在';
+
+  @override
+  String stats_punchPeakValue(Object weekday, Object from, Object to) {
+    return '$weekday $from–$to 点';
+  }
+
+  @override
+  String get stats_punchBusiest => '最忙';
+
+  @override
+  String get stats_punchLateNight => '深夜占';
+
+  @override
+  String get stats_punchNote => '圆越大图越多';
+
+  @override
+  String get stats_anlasTitle => 'Anlas 消耗';
+
+  @override
+  String get stats_anlasToday => '今天';
+
+  @override
+  String get stats_anlasDailyAvg => '日均';
+
+  @override
+  String stats_anlasActiveDays(Object count) {
+    return '有消耗 $count 天';
+  }
+
+  @override
+  String get stats_anlasPeak => '最多';
+
+  @override
+  String get stats_anlasNote => '按余额下降记录，含放大、Vibe 编码等；只保留最近 90 天';
+
+  @override
+  String get stats_aspectTitle => '画幅';
+
+  @override
+  String get stats_aspectHint => '按真实尺寸';
+
+  @override
+  String get stats_aspectOrientation => '方向';
+
+  @override
+  String get stats_orientationPortrait => '竖';
+
+  @override
+  String get stats_orientationLandscape => '横';
+
+  @override
+  String get stats_orientationSquare => '方';
+
+  @override
+  String stats_aspectShapeCount(Object orientation, Object count) {
+    return '$orientation · $count';
+  }
+
+  @override
+  String stats_aspectOthers(Object count, Object pct) {
+    return '其他 $count 种 · $pct';
+  }
+
+  @override
+  String get stats_aspectClickHint => '点一个尺寸或方向，在本地画廊只看这一类';
+
+  @override
+  String get stats_paramsTitle => '参数习惯';
+
+  @override
+  String get stats_paramsHint => '有元数据的图';
+
+  @override
+  String get stats_paramsCombo => '最常用的设置';
+
+  @override
+  String get stats_paramsSampler => '采样器';
+
+  @override
+  String get stats_paramsSteps => '步数';
+
+  @override
+  String stats_paramsStepsValue(Object count) {
+    return '$count 步';
+  }
+
+  @override
+  String get stats_paramsNoise => '噪声调度';
+
+  @override
+  String get stats_artistsTitle => '常用画师';
+
+  @override
+  String stats_artistsHint(Object count, Object pct) {
+    return '$count 张图写了画师串（$pct）';
+  }
+
+  @override
+  String get stats_artistsComputing => '正在统计画师…';
+
+  @override
+  String get stats_artistsNone => '提示词里还没有写过 artist:';
+
+  @override
+  String get stats_artistsNote => '按“出现在几张图里”排，一张图里写多次只算一次';
+
+  @override
+  String stats_artistsTipSearch(Object query) {
+    return '在本地画廊搜 $query';
+  }
+
+  @override
+  String get stats_artistsTipCopy => '右键：复制画师名';
+
+  @override
+  String stats_artistsCopied(Object name) {
+    return '已复制 $name';
+  }
+
+  @override
+  String get stats_storageTitle => '存储';
+
+  @override
+  String stats_storageFiles(Object count) {
+    return '$count 个文件';
+  }
+
+  @override
+  String get stats_storageMonthly => '近 12 个月每月新增';
+
+  @override
+  String stats_storageNoMetadata(Object count) {
+    return '$count 张没有元数据';
+  }
+
+  @override
+  String get stats_storageViewInGallery => '在本地画廊查看';
+
+  @override
+  String stats_storageLarge(Object count, Object size) {
+    return '$count 张大于 10 MB · $size';
+  }
+
+  @override
+  String get stats_storageView => '查看';
+
+  @override
+  String get stats_footer =>
+      '每次进入统计页都检查图库有没有变化，变了就在后台重算 · 数字都可以点，点了跳到本地画廊并带上筛选';
+
+  @override
+  String get stats_emptyTitle => '本地图库里还没有图片';
+
+  @override
+  String get stats_emptyBody =>
+      '生成的图会自动存进本地图库，或者把已有的图片文件夹加进来。之后这里会显示你的创作节奏、模型和参数习惯。';
+
+  @override
+  String get stats_emptyGenerate => '去生图';
+
+  @override
+  String get stats_emptyAddFolder => '添加图库文件夹';
+
+  @override
+  String get stats_errorTitle => '统计没有算出来';
+
+  @override
+  String get stats_errorRetry => '重试';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -25386,4 +25798,416 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get styleExplore_evolutionTargetAfter => '的位置，其他內容不變';
+
+  @override
+  String get stats_title => '統計';
+
+  @override
+  String get stats_subtitle => '本地圖庫 · 按檔案時間';
+
+  @override
+  String stats_rangeDays(Object count) {
+    return '$count 天';
+  }
+
+  @override
+  String get stats_rangeThisYear => '今年';
+
+  @override
+  String get stats_rangeAll => '全部';
+
+  @override
+  String get stats_naiOnly => '僅 NAI 圖片';
+
+  @override
+  String stats_updatedAt(Object time) {
+    return '更新於 $time';
+  }
+
+  @override
+  String get stats_updating => '更新中';
+
+  @override
+  String stats_counting(Object count) {
+    return '正在統計 $count 張…';
+  }
+
+  @override
+  String get stats_updateFailed => '更新失敗';
+
+  @override
+  String get stats_refresh => '重新整理';
+
+  @override
+  String stats_lastDays(Object count) {
+    return '近 $count 天';
+  }
+
+  @override
+  String stats_lastDaysShort(Object count) {
+    return '近 $count 天';
+  }
+
+  @override
+  String get stats_unitDays => '天';
+
+  @override
+  String stats_imagesCount(Object count) {
+    return '$count 張';
+  }
+
+  @override
+  String get stats_less => '少';
+
+  @override
+  String get stats_more => '多';
+
+  @override
+  String get stats_kpiImages => '圖片';
+
+  @override
+  String get stats_kpiNewImages => '新增圖片';
+
+  @override
+  String stats_kpiActiveDays(Object days, Object avg) {
+    return '活躍 $days 天 · 日均 $avg';
+  }
+
+  @override
+  String stats_kpiVsPrevious(Object count) {
+    return '比前 $count 天';
+  }
+
+  @override
+  String get stats_kpiVsLastYear => '比去年同期';
+
+  @override
+  String stats_kpiPreviousValue(Object value) {
+    return '（$value）';
+  }
+
+  @override
+  String get stats_kpiFavorites => '收藏';
+
+  @override
+  String stats_kpiFavoriteRate(Object rate) {
+    return '收藏率 $rate';
+  }
+
+  @override
+  String get stats_kpiAnlas90 => 'Anlas · 近 90 天';
+
+  @override
+  String get stats_kpiAnlasSpent => 'Anlas 消耗';
+
+  @override
+  String stats_kpiAnlasRecent(Object week, Object today) {
+    return '近 7 天 $week · 今日 $today';
+  }
+
+  @override
+  String stats_kpiAnlasDaily(Object avg, Object today) {
+    return '日均 $avg · 今日 $today';
+  }
+
+  @override
+  String get stats_kpiStreak => '連續創作';
+
+  @override
+  String stats_kpiLongest(Object days, Object unit) {
+    return '最長 $days $unit';
+  }
+
+  @override
+  String stats_kpiLongestRange(Object days, Object unit, Object range) {
+    return '最長 $days $unit（$range）';
+  }
+
+  @override
+  String get stats_kpiStorage => '佔用';
+
+  @override
+  String stats_kpiStorageDetail(Object avg, Object pct) {
+    return '平均 $avg · $pct 有後設資料';
+  }
+
+  @override
+  String get stats_calendarTitle => '創作日曆';
+
+  @override
+  String get stats_calendarHint => '每格一天，顏色越深圖越多';
+
+  @override
+  String get stats_calendarPastYear => '近一年';
+
+  @override
+  String stats_calendarYear(Object year) {
+    return '$year 年';
+  }
+
+  @override
+  String get stats_calendarImagesPastYear => '近一年圖片';
+
+  @override
+  String stats_calendarImagesInYear(Object year) {
+    return '$year 年圖片';
+  }
+
+  @override
+  String get stats_calendarActiveDays => '有創作的天數';
+
+  @override
+  String get stats_calendarBestDay => '最多的一天';
+
+  @override
+  String get stats_calendarLongestStreak => '最長連續';
+
+  @override
+  String get stats_calendarTipOpen => '點一下在本地畫廊開啟這一天';
+
+  @override
+  String get stats_productionTitle => '產量與模型';
+
+  @override
+  String stats_productionHintAll(Object unit) {
+    return '按$unit，顏色是模型';
+  }
+
+  @override
+  String stats_productionHintRange(Object range, Object unit) {
+    return '$range，按$unit，顏色是模型';
+  }
+
+  @override
+  String get stats_unitDay => '天';
+
+  @override
+  String get stats_unitWeek => '周';
+
+  @override
+  String get stats_unitMonth => '月';
+
+  @override
+  String get stats_granularityDay => '日';
+
+  @override
+  String get stats_granularityWeek => '周';
+
+  @override
+  String get stats_granularityMonth => '月';
+
+  @override
+  String stats_monthWithYear(Object year, Object month) {
+    return '$year.$month';
+  }
+
+  @override
+  String get stats_productionModelsHint => '模型 · 點一下只看這個模型的圖';
+
+  @override
+  String stats_productionOtherModels(Object count) {
+    return '其他 $count 個模型';
+  }
+
+  @override
+  String stats_productionNoMetadata(Object count) {
+    return '另有 $count 張沒有後設資料，圖上是淺灰色';
+  }
+
+  @override
+  String get stats_familyOther => '其他模型';
+
+  @override
+  String get stats_familyNoMetadata => '無後設資料';
+
+  @override
+  String stats_productionTipTotal(Object period, Object count) {
+    return '$period · $count 張';
+  }
+
+  @override
+  String get stats_productionTipOpenDay => '點一下在本地畫廊開啟這一天';
+
+  @override
+  String get stats_productionTipOpenWeek => '點一下在本地畫廊開啟這一週';
+
+  @override
+  String get stats_productionTipOpenMonth => '點一下在本地畫廊開啟這個月';
+
+  @override
+  String get stats_punchTitle => '什麼時候畫';
+
+  @override
+  String get stats_punchHint => '星期 × 小時';
+
+  @override
+  String get stats_punchPeak => '最常在';
+
+  @override
+  String stats_punchPeakValue(Object weekday, Object from, Object to) {
+    return '$weekday $from–$to 點';
+  }
+
+  @override
+  String get stats_punchBusiest => '最忙';
+
+  @override
+  String get stats_punchLateNight => '深夜佔';
+
+  @override
+  String get stats_punchNote => '圓越大圖越多';
+
+  @override
+  String get stats_anlasTitle => 'Anlas 消耗';
+
+  @override
+  String get stats_anlasToday => '今天';
+
+  @override
+  String get stats_anlasDailyAvg => '日均';
+
+  @override
+  String stats_anlasActiveDays(Object count) {
+    return '有消耗 $count 天';
+  }
+
+  @override
+  String get stats_anlasPeak => '最多';
+
+  @override
+  String get stats_anlasNote => '按餘額下降記錄，含放大、Vibe 編碼等；只保留最近 90 天';
+
+  @override
+  String get stats_aspectTitle => '畫幅';
+
+  @override
+  String get stats_aspectHint => '按真實尺寸';
+
+  @override
+  String get stats_aspectOrientation => '方向';
+
+  @override
+  String get stats_orientationPortrait => '豎';
+
+  @override
+  String get stats_orientationLandscape => '橫';
+
+  @override
+  String get stats_orientationSquare => '方';
+
+  @override
+  String stats_aspectShapeCount(Object orientation, Object count) {
+    return '$orientation · $count';
+  }
+
+  @override
+  String stats_aspectOthers(Object count, Object pct) {
+    return '其他 $count 種 · $pct';
+  }
+
+  @override
+  String get stats_aspectClickHint => '點一個尺寸或方向，在本地畫廊只看這一類';
+
+  @override
+  String get stats_paramsTitle => '參數習慣';
+
+  @override
+  String get stats_paramsHint => '有後設資料的圖';
+
+  @override
+  String get stats_paramsCombo => '最常用的設定';
+
+  @override
+  String get stats_paramsSampler => '取樣器';
+
+  @override
+  String get stats_paramsSteps => '步數';
+
+  @override
+  String stats_paramsStepsValue(Object count) {
+    return '$count 步';
+  }
+
+  @override
+  String get stats_paramsNoise => '噪聲排程';
+
+  @override
+  String get stats_artistsTitle => '常用畫師';
+
+  @override
+  String stats_artistsHint(Object count, Object pct) {
+    return '$count 張圖寫了畫師串（$pct）';
+  }
+
+  @override
+  String get stats_artistsComputing => '正在統計畫師…';
+
+  @override
+  String get stats_artistsNone => '提示詞裡還沒有寫過 artist:';
+
+  @override
+  String get stats_artistsNote => '按“出現在幾張圖裡”排，一張圖裡寫多次只算一次';
+
+  @override
+  String stats_artistsTipSearch(Object query) {
+    return '在本地畫廊搜 $query';
+  }
+
+  @override
+  String get stats_artistsTipCopy => '右鍵：複製畫師名';
+
+  @override
+  String stats_artistsCopied(Object name) {
+    return '已複製 $name';
+  }
+
+  @override
+  String get stats_storageTitle => '儲存';
+
+  @override
+  String stats_storageFiles(Object count) {
+    return '$count 個檔案';
+  }
+
+  @override
+  String get stats_storageMonthly => '近 12 個月每月新增';
+
+  @override
+  String stats_storageNoMetadata(Object count) {
+    return '$count 張沒有後設資料';
+  }
+
+  @override
+  String get stats_storageViewInGallery => '在本地畫廊檢視';
+
+  @override
+  String stats_storageLarge(Object count, Object size) {
+    return '$count 張大於 10 MB · $size';
+  }
+
+  @override
+  String get stats_storageView => '檢視';
+
+  @override
+  String get stats_footer =>
+      '每次進入統計頁都檢查圖庫有沒有變化，變了就在後臺重算 · 數字都可以點，點了跳到本地畫廊並帶上篩選';
+
+  @override
+  String get stats_emptyTitle => '本地圖庫裡還沒有圖片';
+
+  @override
+  String get stats_emptyBody =>
+      '生成的圖會自動存進本地圖庫，或者把已有的圖片資料夾加進來。之後這裡會顯示你的創作節奏、模型和參數習慣。';
+
+  @override
+  String get stats_emptyGenerate => '去生圖';
+
+  @override
+  String get stats_emptyAddFolder => '新增圖庫資料夾';
+
+  @override
+  String get stats_errorTitle => '統計沒有算出來';
+
+  @override
+  String get stats_errorRetry => '重試';
 }
