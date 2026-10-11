@@ -30,6 +30,9 @@ enum UiBtnTone {
 
   /// 强调色描边和文字（“完成多选”这类正在进行的状态）。
   accent,
+
+  /// 进化紫实心（画风探索的“开始进化 / 培育下一代”）。
+  evo,
 }
 
 /// 按钮：图标 + 文字，间距 6，500 字重。
@@ -82,6 +85,11 @@ class UiBtn extends StatelessWidget {
             hover ? c.ink : c.muted,
           ),
           UiBtnTone.accent => (hover ? c.hover : c.raised, c.accent, c.accent),
+          UiBtnTone.evo => (
+            hover ? Color.lerp(c.evo, Colors.black, .08)! : c.evo,
+            c.evo,
+            c.onEvo,
+          ),
           UiBtnTone.normal => (hover ? c.hover : c.raised, c.line, c.ink),
         };
         final ink = color ?? fg;

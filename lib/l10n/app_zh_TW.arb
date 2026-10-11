@@ -9369,5 +9369,527 @@
       "count": {}
     }
   },
-  "imageViewer_yesterday": "昨天"
+  "imageViewer_yesterday": "昨天",
+  "explore_back": "畫風探索",
+  "explore_close": "關閉",
+  "explore_cancel": "取消",
+  "explore_done": "完成",
+  "explore_more": "更多",
+  "explore_rename": "改名",
+  "explore_remove": "去掉",
+  "explore_copy": "複製",
+  "explore_undo": "復原",
+  "explore_expand": "展開",
+  "explore_expandAll": "展開全部",
+  "explore_collapse": "收起",
+  "explore_previous": "上一張",
+  "explore_next": "下一張",
+  "explore_today": "今天 {time}",
+  "@explore_today": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "explore_yesterday": "昨天 {time}",
+  "@explore_yesterday": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "explore_monthDay": "{month}月{day}日 {time}",
+  "@explore_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {},
+      "time": {}
+    }
+  },
+  "explore_fullDate": "{year}年{month}月{day}日",
+  "@explore_fullDate": {
+    "placeholders": {
+      "year": {},
+      "month": {},
+      "day": {}
+    }
+  },
+  "explore_sectionToday": "今天",
+  "explore_thisWeek": "本週",
+  "explore_earlier": "更早",
+  "explore_variables": "隨機變數",
+  "explore_variablesHint": "每張重新抽取",
+  "explore_variablesInfo": "提示詞裡的隨機塊。每張候選都會從池裡重新抽，抽到的畫師寫在候選下面；標“進化目標”的塊是進化時子代替換的位置。",
+  "explore_variablesEmpty": "提示詞裡還沒有隨機塊。插入塊庫裡的隨機塊（比如畫師池），每張圖都會重新抽。",
+  "explore_openBlockLibrary": "開啟塊庫",
+  "explore_variableMissing": "塊已刪除",
+  "explore_poolSize": "池 {count} 項",
+  "@explore_poolSize": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_evolutionTarget": "進化目標",
+  "explore_draw": "抽 {count} 張候選",
+  "@explore_draw": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_stopGenerating": "停止生成",
+  "explore_busy": "生成中",
+  "explore_cooldown": "冷卻 {seconds} 秒",
+  "@explore_cooldown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "explore_insufficient": "Anlas 不夠",
+  "explore_count": "{count} 張",
+  "@explore_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_favoritesCount": "收藏 {count}",
+  "@explore_favoritesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_roundsCount": "{count} 輪",
+  "@explore_roundsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_linesCount": "{count} 條進化線",
+  "@explore_linesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_progressRound": "第 {round} 輪 · {done} / {total}",
+  "@explore_progressRound": {
+    "placeholders": {
+      "round": {},
+      "done": {},
+      "total": {}
+    }
+  },
+  "explore_progressChildren": "{line} 第 {gen} 代 · {done} / {total}",
+  "@explore_progressChildren": {
+    "placeholders": {
+      "line": {},
+      "gen": {},
+      "done": {},
+      "total": {}
+    }
+  },
+  "explore_paused": "已暫停 · {where}",
+  "@explore_paused": {
+    "placeholders": {
+      "where": {}
+    }
+  },
+  "explore_pause": "暫停",
+  "explore_resume": "繼續",
+  "explore_stop": "停止",
+  "explore_sizeSmall": "小卡片",
+  "explore_sizeLarge": "大卡片",
+  "explore_inspector": "檢查器",
+  "explore_hideInspector": "收起",
+  "explore_tabCandidates": "候選",
+  "explore_tabEvolution": "進化",
+  "explore_filterAll": "全部",
+  "explore_filterFavorites": "收藏",
+  "explore_filterUngrouped": "未分組",
+  "explore_addGroup": "分組",
+  "explore_groupName": "分組名稱",
+  "explore_deleteGroup": "刪除分組（成員回到未分組）",
+  "explore_newLine": "新進化線",
+  "explore_deleteLine": "刪除進化線",
+  "explore_compareShort": "兩兩比較",
+  "explore_evoHelp": "怎麼用",
+  "explore_evoHelpBody": "1. 在候選裡挑幾張喜歡的，開始進化，它們的畫師串就是第 1 代父本。\n2. 子代由父本交叉、變異、注入新畫師得到。\n3. 勾選喜歡的子代培育下一代；兩兩比較能調整父本的偏好。",
+  "explore_select": "多選",
+  "explore_selectAll": "全選",
+  "explore_selectDone": "完成",
+  "explore_selectExit": "退出多選  Esc",
+  "explore_selectHint": "點卡片勾選",
+  "explore_selectedN": "已選 {count} 張",
+  "@explore_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_sortNewest": "新的輪在上（點一下改為舊的在上）",
+  "explore_sortOldest": "舊的輪在上（點一下改為新的在上）",
+  "explore_round": "第 {number} 輪",
+  "@explore_round": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "explore_generatingShort": "生成中 {done} / {total}",
+  "@explore_generatingShort": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "explore_failedRetry": "{count} 張失敗 · 重試",
+  "@explore_failedRetry": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_pick": "挑幾張去進化",
+  "explore_pickTip": "進入多選，本輪收藏的已經勾上",
+  "explore_filterEmpty": "這個篩選下還沒有候選",
+  "explore_showAll": "顯示全部",
+  "explore_queued": "排隊 #{number}",
+  "@explore_queued": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "explore_generatingN": "生成中 #{number}",
+  "@explore_generatingN": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "explore_failed": "生成失敗",
+  "explore_failedHover": "懸停檢視原因",
+  "explore_noArtists": "沒有抽到畫師",
+  "explore_parentTip": "已經是進化線的父本",
+  "explore_favorite": "收藏",
+  "explore_favorited": "已收藏",
+  "explore_unfavorite": "取消收藏",
+  "explore_addToEvolution": "加入進化",
+  "explore_startEvolution": "開始進化",
+  "explore_saveBlock": "存為塊",
+  "explore_applyToEditor": "套用到編輯區",
+  "explore_copyArtists": "複製畫師串",
+  "explore_openLarge": "看大圖",
+  "explore_group": "分組",
+  "explore_groups": "分組",
+  "explore_groupsHint": "按 1–9 快速歸組",
+  "explore_newGroup": "新分組",
+  "explore_ungroup": "移出分組",
+  "explore_delete": "刪除",
+  "explore_deleteN": "刪除 {count} 張",
+  "@explore_deleteN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_deleteThis": "刪除這張",
+  "explore_deleted": "已刪除 {count} 張",
+  "@explore_deleted": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_inspectorEmpty": "點一張候選，這裡會寫出它抽到了哪些畫師",
+  "explore_childN": "子代 #{number}",
+  "@explore_childN": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "explore_genOp": "第 {gen} 代 · {op}",
+  "@explore_genOp": {
+    "placeholders": {
+      "gen": {},
+      "op": {}
+    }
+  },
+  "explore_drawn": "本張抽到",
+  "explore_drawEmpty": "這次沒有抽中（池裡有空項）",
+  "explore_origin": "怎麼來的",
+  "explore_seed": "種子",
+  "explore_elapsed": "耗時",
+  "explore_params": "參數",
+  "explore_sampler": "取樣器",
+  "explore_model": "模型",
+  "explore_steps": "{count} 步",
+  "@explore_steps": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_fullPrompt": "完整提示詞",
+  "explore_negative": "負面",
+  "explore_failReason": "失敗原因",
+  "explore_retryFailed": "重試失敗的候選",
+  "explore_waitHint": "生成好以後這裡會顯示它抽到的畫師",
+  "explore_mergedArtists": "合在一起的畫師 · {count}",
+  "@explore_mergedArtists": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_multiHint": "存為塊會把這些畫師合成一個塊；開始進化時每張都是一個父本。",
+  "explore_evoEmptyTitle": "還沒有進化線",
+  "explore_evoEmptyBody": "在候選裡挑幾張喜歡的，點“開始進化”，讓好的畫師組合繼續雜交出新組合。",
+  "explore_evoGoPick": "去候選裡挑",
+  "explore_gen": "第 {number} 代",
+  "@explore_gen": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "explore_current": "當前",
+  "explore_genFirst": "從候選裡選了 {picked} 張作為起點 · {children} 張子代",
+  "@explore_genFirst": {
+    "placeholders": {
+      "picked": {},
+      "children": {}
+    }
+  },
+  "explore_genFrom": "{parents} 個父本 → {children} 張子代 · 由第 {from} 代挑 {picked} 張",
+  "@explore_genFrom": {
+    "placeholders": {
+      "parents": {},
+      "children": {},
+      "from": {},
+      "picked": {}
+    }
+  },
+  "explore_backcross": "第 1 代回交",
+  "explore_compare": "兩兩比較排序",
+  "explore_compareTip": "一次看兩張父本，選更好的那張，偏好越高越常被選中",
+  "explore_generateChildren": "再生成 {count} 張子代",
+  "@explore_generateChildren": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_children": "子代 · {count}",
+  "@explore_children": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_pickedN": "已選 {count}",
+  "@explore_pickedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_breedHint": "勾選喜歡的子代，培育下一代",
+  "explore_breed": "用選中的 {count} 張培育第 {next} 代",
+  "@explore_breed": {
+    "placeholders": {
+      "count": {},
+      "next": {}
+    }
+  },
+  "explore_noChildren": "還沒有子代 · 點“再生成”出第一批",
+  "explore_parentsByPref": "父本 · 按偏好排序 · {count}",
+  "@explore_parentsByPref": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_opMutation": "變異",
+  "explore_opCrossover": "交叉",
+  "explore_opInjection": "注入",
+  "explore_searchRuns": "搜尋探索",
+  "explore_newRun": "新增探索",
+  "explore_newRunHint": "用當前提示詞和參數開一個新的，名字可以之後改",
+  "explore_runRunning": "生成中 {done}/{total}",
+  "@explore_runRunning": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "explore_runPaused": "已暫停 {done}/{total}",
+  "@explore_runPaused": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "explore_runFailed": "{count} 張失敗",
+  "@explore_runFailed": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_noRunMatch": "沒有匹配的探索",
+  "explore_runMenuHint": "自動命名：隨機塊名 + 日期 · 懸停一行點“⋯”改名或刪除",
+  "explore_deleteRun": "刪除探索",
+  "explore_deleteRunTitle": "刪除“{name}”？",
+  "@explore_deleteRunTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "explore_deleteRunBody": "{count} 張候選和所有進化線會一起刪掉，不能復原。圖庫裡的圖不受影響。",
+  "@explore_deleteRunBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_deleteLineTitle": "刪除進化線“{name}”？",
+  "@explore_deleteLineTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "explore_deleteLineBody": "它生成的 {count} 張子代會一起刪掉，不能復原。候選不受影響。",
+  "@explore_deleteLineBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_onboardingTitle": "用隨機塊批次試畫風",
+  "explore_onboardingBody": "每張圖從畫師池裡重新抽，挑出喜歡的組合，再讓它們進化。",
+  "explore_step1": "放一個隨機塊",
+  "explore_step1Body": "在提示詞裡插入塊庫裡的隨機塊，比如畫師池。",
+  "explore_step2": "抽一批候選",
+  "explore_step2Body": "點左下角“抽 {count} 張候選”，每張都會重新抽畫師。",
+  "@explore_step2Body": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_step3": "收藏、進化、存為塊",
+  "explore_step3Body": "喜歡的收藏起來，拿去進化，滿意的組合存成塊。",
+  "explore_detected": "已檢測到 {count} 個",
+  "@explore_detected": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_noVariables": "還沒有隨機塊",
+  "explore_openPrevious": "開啟以前的探索",
+  "explore_evoTitle": "用 {count} 張候選開始進化",
+  "@explore_evoTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_evoJoinTitle": "把 {count} 張加入“{line}”第 {gen} 代",
+  "@explore_evoJoinTitle": {
+    "placeholders": {
+      "count": {},
+      "line": {},
+      "gen": {}
+    }
+  },
+  "explore_evoStep1": "父本",
+  "explore_evoStep1Body": "每張候選的畫師串是一個父本",
+  "explore_evoStep2": "子代",
+  "explore_evoStep2Body": "交叉、變異、注入新畫師",
+  "explore_evoStep3": "挑選",
+  "explore_evoStep3Body": "勾選喜歡的，培育下一代",
+  "explore_evoNewLine": "新增進化線",
+  "explore_evoJoin": "加入“{line}”第 {gen} 代",
+  "@explore_evoJoin": {
+    "placeholders": {
+      "line": {},
+      "gen": {}
+    }
+  },
+  "explore_lineName": "進化線名稱",
+  "explore_lineDefault": "進化線 {number}",
+  "@explore_lineDefault": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "explore_lineGen": "{line} · 第 {gen} 代",
+  "@explore_lineGen": {
+    "placeholders": {
+      "line": {},
+      "gen": {}
+    }
+  },
+  "explore_evoParents": "第 1 代父本 · {count}",
+  "@explore_evoParents": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_evoAddParents": "加入的父本 · {count}",
+  "@explore_evoAddParents": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_addCustom": "再加一段自訂畫師串",
+  "explore_customHint": "比如 0.8::artist:ciloranko::, artist:rella（回車新增）",
+  "explore_targetBefore": "子代會替換提示詞裡",
+  "explore_targetAfter": "的位置，其他內容不變",
+  "explore_noTarget": "提示詞裡沒有隨機塊，子代沒地方替換——先在提示詞裡插入一個隨機塊。",
+  "explore_firstBatch": "第一批子代",
+  "explore_atLeast4": "張（至少 4）",
+  "explore_createOnly": "只建立",
+  "explore_joinOnly": "只加入",
+  "explore_createGenerate": "建立並生成 {count} 張",
+  "@explore_createGenerate": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_saveBlockTitle": "存為提示詞塊",
+  "explore_untitled": "未命名",
+  "explore_blockFromOne": "來自候選 #{number}",
+  "@explore_blockFromOne": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "explore_blockFromMany": "來自 {count} 張候選，已合併去重",
+  "@explore_blockFromMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "explore_blockNameMany": "{run} · 精選 {count}",
+  "@explore_blockNameMany": {
+    "placeholders": {
+      "run": {},
+      "count": {}
+    }
+  },
+  "explore_blockContent": "內容",
+  "explore_blockArtists": "只要抽到的畫師",
+  "explore_blockFull": "完整正向提示詞",
+  "explore_blockFullSingle": "只有一張候選時可以存完整提示詞",
+  "explore_blockRemoveHint": "點 × 去掉不要的畫師",
+  "explore_blockKept": "保留 {kept} / {total}",
+  "@explore_blockKept": {
+    "placeholders": {
+      "kept": {},
+      "total": {}
+    }
+  },
+  "explore_blockName": "名稱",
+  "explore_blockColor": "顏色",
+  "explore_blockFolder": "放到塊庫",
+  "explore_blockRoot": "塊庫（根目錄）",
+  "explore_blockFooter": "存好後可以在塊庫裡拖進提示詞",
+  "explore_compareTitle": "兩兩比較 · 給父本排個序",
+  "explore_compareNote": "結果隨時儲存，可以中途關掉",
+  "explore_compareQuestion": "哪張更接近你想要的畫風？",
+  "explore_comparePairs": "{index} / {total} 對",
+  "@explore_comparePairs": {
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
+  "explore_leftBetter": "左邊更好",
+  "explore_rightBetter": "右邊更好",
+  "explore_neither": "兩張都不行",
+  "explore_skip": "跳過",
+  "explore_keySpace": "空格",
+  "explore_ranking": "當前排名 · 即時",
+  "explore_rankingNote": "偏好越高，培育下一代時越常被選為父本。",
+  "explore_compareDone": "排好了",
+  "explore_compareDoneBody": "新的偏好已經儲存，下次生成子代就會用上。"
 }

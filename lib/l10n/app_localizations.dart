@@ -29233,6 +29233,1318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'yesterday'**
   String get imageViewer_yesterday;
+
+  /// No description provided for @explore_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Style explore'**
+  String get explore_back;
+
+  /// No description provided for @explore_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get explore_close;
+
+  /// No description provided for @explore_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get explore_cancel;
+
+  /// No description provided for @explore_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get explore_done;
+
+  /// No description provided for @explore_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get explore_more;
+
+  /// No description provided for @explore_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get explore_rename;
+
+  /// No description provided for @explore_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get explore_remove;
+
+  /// No description provided for @explore_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get explore_copy;
+
+  /// No description provided for @explore_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get explore_undo;
+
+  /// No description provided for @explore_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get explore_expand;
+
+  /// No description provided for @explore_expandAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get explore_expandAll;
+
+  /// No description provided for @explore_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get explore_collapse;
+
+  /// No description provided for @explore_previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get explore_previous;
+
+  /// No description provided for @explore_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get explore_next;
+
+  /// No description provided for @explore_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today {time}'**
+  String explore_today(Object time);
+
+  /// No description provided for @explore_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday {time}'**
+  String explore_yesterday(Object time);
+
+  /// No description provided for @explore_monthDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}/{day} {time}'**
+  String explore_monthDay(Object month, Object day, Object time);
+
+  /// No description provided for @explore_fullDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{year}/{month}/{day}'**
+  String explore_fullDate(Object year, Object month, Object day);
+
+  /// No description provided for @explore_sectionToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get explore_sectionToday;
+
+  /// No description provided for @explore_thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get explore_thisWeek;
+
+  /// No description provided for @explore_earlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get explore_earlier;
+
+  /// No description provided for @explore_variables.
+  ///
+  /// In en, this message translates to:
+  /// **'Random variables'**
+  String get explore_variables;
+
+  /// No description provided for @explore_variablesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-drawn for every image'**
+  String get explore_variablesHint;
+
+  /// No description provided for @explore_variablesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Random blocks in your prompt. Each candidate draws again from the pool and shows what it got; the block marked as evolution target is where offspring swap in.'**
+  String get explore_variablesInfo;
+
+  /// No description provided for @explore_variablesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No random blocks in the prompt yet. Insert one from the block library (e.g. an artist pool) and every image draws again.'**
+  String get explore_variablesEmpty;
+
+  /// No description provided for @explore_openBlockLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Open block library'**
+  String get explore_openBlockLibrary;
+
+  /// No description provided for @explore_variableMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Block deleted'**
+  String get explore_variableMissing;
+
+  /// No description provided for @explore_poolSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in pool'**
+  String explore_poolSize(Object count);
+
+  /// No description provided for @explore_evolutionTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution target'**
+  String get explore_evolutionTarget;
+
+  /// No description provided for @explore_draw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw {count} candidates'**
+  String explore_draw(Object count);
+
+  /// No description provided for @explore_stopGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get explore_stopGenerating;
+
+  /// No description provided for @explore_busy.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating'**
+  String get explore_busy;
+
+  /// No description provided for @explore_cooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooldown {seconds} s'**
+  String explore_cooldown(Object seconds);
+
+  /// No description provided for @explore_insufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough Anlas'**
+  String get explore_insufficient;
+
+  /// No description provided for @explore_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images'**
+  String explore_count(Object count);
+
+  /// No description provided for @explore_favoritesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} favorites'**
+  String explore_favoritesCount(Object count);
+
+  /// No description provided for @explore_roundsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} rounds'**
+  String explore_roundsCount(Object count);
+
+  /// No description provided for @explore_linesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} lines'**
+  String explore_linesCount(Object count);
+
+  /// No description provided for @explore_progressRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} · {done} / {total}'**
+  String explore_progressRound(Object round, Object done, Object total);
+
+  /// No description provided for @explore_progressChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'{line} G{gen} · {done} / {total}'**
+  String explore_progressChildren(
+    Object line,
+    Object gen,
+    Object done,
+    Object total,
+  );
+
+  /// No description provided for @explore_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused · {where}'**
+  String explore_paused(Object where);
+
+  /// No description provided for @explore_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get explore_pause;
+
+  /// No description provided for @explore_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get explore_resume;
+
+  /// No description provided for @explore_stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get explore_stop;
+
+  /// No description provided for @explore_sizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small cards'**
+  String get explore_sizeSmall;
+
+  /// No description provided for @explore_sizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large cards'**
+  String get explore_sizeLarge;
+
+  /// No description provided for @explore_inspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspector'**
+  String get explore_inspector;
+
+  /// No description provided for @explore_hideInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get explore_hideInspector;
+
+  /// No description provided for @explore_tabCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'Candidates'**
+  String get explore_tabCandidates;
+
+  /// No description provided for @explore_tabEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Evolution'**
+  String get explore_tabEvolution;
+
+  /// No description provided for @explore_filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get explore_filterAll;
+
+  /// No description provided for @explore_filterFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get explore_filterFavorites;
+
+  /// No description provided for @explore_filterUngrouped.
+  ///
+  /// In en, this message translates to:
+  /// **'Ungrouped'**
+  String get explore_filterUngrouped;
+
+  /// No description provided for @explore_addGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get explore_addGroup;
+
+  /// No description provided for @explore_groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name'**
+  String get explore_groupName;
+
+  /// No description provided for @explore_deleteGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete group (members become ungrouped)'**
+  String get explore_deleteGroup;
+
+  /// No description provided for @explore_newLine.
+  ///
+  /// In en, this message translates to:
+  /// **'New line'**
+  String get explore_newLine;
+
+  /// No description provided for @explore_deleteLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete line'**
+  String get explore_deleteLine;
+
+  /// No description provided for @explore_compareShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get explore_compareShort;
+
+  /// No description provided for @explore_evoHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get explore_evoHelp;
+
+  /// No description provided for @explore_evoHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Pick candidates you like and start evolution — their artist strings become generation 1.\n2. Offspring come from crossover, mutation and injecting new artists.\n3. Tick the offspring you like to breed the next generation; pairwise comparison tunes parent preference.'**
+  String get explore_evoHelpBody;
+
+  /// No description provided for @explore_select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get explore_select;
+
+  /// No description provided for @explore_selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get explore_selectAll;
+
+  /// No description provided for @explore_selectDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get explore_selectDone;
+
+  /// No description provided for @explore_selectExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit selection  Esc'**
+  String get explore_selectExit;
+
+  /// No description provided for @explore_selectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click cards to select'**
+  String get explore_selectHint;
+
+  /// No description provided for @explore_selectedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String explore_selectedN(Object count);
+
+  /// No description provided for @explore_sortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest round first (click for oldest first)'**
+  String get explore_sortNewest;
+
+  /// No description provided for @explore_sortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest round first (click for newest first)'**
+  String get explore_sortOldest;
+
+  /// No description provided for @explore_round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {number}'**
+  String explore_round(Object number);
+
+  /// No description provided for @explore_generatingShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating {done} / {total}'**
+  String explore_generatingShort(Object done, Object total);
+
+  /// No description provided for @explore_failedRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} failed · Retry'**
+  String explore_failedRetry(Object count);
+
+  /// No description provided for @explore_pick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick for evolution'**
+  String get explore_pick;
+
+  /// No description provided for @explore_pickTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter selection with this round\'s favorites ticked'**
+  String get explore_pickTip;
+
+  /// No description provided for @explore_filterEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No candidates match this filter'**
+  String get explore_filterEmpty;
+
+  /// No description provided for @explore_showAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get explore_showAll;
+
+  /// No description provided for @explore_queued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued #{number}'**
+  String explore_queued(Object number);
+
+  /// No description provided for @explore_generatingN.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating #{number}'**
+  String explore_generatingN(Object number);
+
+  /// No description provided for @explore_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get explore_failed;
+
+  /// No description provided for @explore_failedHover.
+  ///
+  /// In en, this message translates to:
+  /// **'Hover for the reason'**
+  String get explore_failedHover;
+
+  /// No description provided for @explore_noArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'No artists drawn'**
+  String get explore_noArtists;
+
+  /// No description provided for @explore_parentTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Already a parent in an evolution line'**
+  String get explore_parentTip;
+
+  /// No description provided for @explore_favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get explore_favorite;
+
+  /// No description provided for @explore_favorited.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorited'**
+  String get explore_favorited;
+
+  /// No description provided for @explore_unfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite'**
+  String get explore_unfavorite;
+
+  /// No description provided for @explore_addToEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to evolution'**
+  String get explore_addToEvolution;
+
+  /// No description provided for @explore_startEvolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Start evolution'**
+  String get explore_startEvolution;
+
+  /// No description provided for @explore_saveBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block'**
+  String get explore_saveBlock;
+
+  /// No description provided for @explore_applyToEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to editor'**
+  String get explore_applyToEditor;
+
+  /// No description provided for @explore_copyArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy artists'**
+  String get explore_copyArtists;
+
+  /// No description provided for @explore_openLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Open large'**
+  String get explore_openLarge;
+
+  /// No description provided for @explore_group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get explore_group;
+
+  /// No description provided for @explore_groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get explore_groups;
+
+  /// No description provided for @explore_groupsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press 1–9 to group'**
+  String get explore_groupsHint;
+
+  /// No description provided for @explore_newGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'New group'**
+  String get explore_newGroup;
+
+  /// No description provided for @explore_ungroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Ungroup'**
+  String get explore_ungroup;
+
+  /// No description provided for @explore_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get explore_delete;
+
+  /// No description provided for @explore_deleteN.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count}'**
+  String explore_deleteN(Object count);
+
+  /// No description provided for @explore_deleteThis.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this image'**
+  String get explore_deleteThis;
+
+  /// No description provided for @explore_deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {count}'**
+  String explore_deleted(Object count);
+
+  /// No description provided for @explore_inspectorEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a candidate to see which artists it drew'**
+  String get explore_inspectorEmpty;
+
+  /// No description provided for @explore_childN.
+  ///
+  /// In en, this message translates to:
+  /// **'Offspring #{number}'**
+  String explore_childN(Object number);
+
+  /// No description provided for @explore_genOp.
+  ///
+  /// In en, this message translates to:
+  /// **'G{gen} · {op}'**
+  String explore_genOp(Object gen, Object op);
+
+  /// No description provided for @explore_drawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn for this image'**
+  String get explore_drawn;
+
+  /// No description provided for @explore_drawEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing drawn this time (the pool has empty entries)'**
+  String get explore_drawEmpty;
+
+  /// No description provided for @explore_origin.
+  ///
+  /// In en, this message translates to:
+  /// **'How it was made'**
+  String get explore_origin;
+
+  /// No description provided for @explore_seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get explore_seed;
+
+  /// No description provided for @explore_elapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get explore_elapsed;
+
+  /// No description provided for @explore_params.
+  ///
+  /// In en, this message translates to:
+  /// **'Params'**
+  String get explore_params;
+
+  /// No description provided for @explore_sampler.
+  ///
+  /// In en, this message translates to:
+  /// **'Sampler'**
+  String get explore_sampler;
+
+  /// No description provided for @explore_model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get explore_model;
+
+  /// No description provided for @explore_steps.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps'**
+  String explore_steps(Object count);
+
+  /// No description provided for @explore_fullPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Full prompt'**
+  String get explore_fullPrompt;
+
+  /// No description provided for @explore_negative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative'**
+  String get explore_negative;
+
+  /// No description provided for @explore_failReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get explore_failReason;
+
+  /// No description provided for @explore_retryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry failed candidates'**
+  String get explore_retryFailed;
+
+  /// No description provided for @explore_waitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Artists show up here once it is generated'**
+  String get explore_waitHint;
+
+  /// No description provided for @explore_mergedArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined artists · {count}'**
+  String explore_mergedArtists(Object count);
+
+  /// No description provided for @explore_multiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block merges these artists into one block; in evolution each image becomes a parent.'**
+  String get explore_multiHint;
+
+  /// No description provided for @explore_evoEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No evolution lines yet'**
+  String get explore_evoEmptyTitle;
+
+  /// No description provided for @explore_evoEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a few candidates you like and press \"Start evolution\" to breed new artist mixes from the good ones.'**
+  String get explore_evoEmptyBody;
+
+  /// No description provided for @explore_evoGoPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from candidates'**
+  String get explore_evoGoPick;
+
+  /// No description provided for @explore_gen.
+  ///
+  /// In en, this message translates to:
+  /// **'G{number}'**
+  String explore_gen(Object number);
+
+  /// No description provided for @explore_current.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get explore_current;
+
+  /// No description provided for @explore_genFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Started from {picked} candidates · {children} offspring'**
+  String explore_genFirst(Object picked, Object children);
+
+  /// No description provided for @explore_genFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'{parents} parents → {children} offspring · {picked} picked from G{from}'**
+  String explore_genFrom(
+    Object parents,
+    Object children,
+    Object from,
+    Object picked,
+  );
+
+  /// No description provided for @explore_backcross.
+  ///
+  /// In en, this message translates to:
+  /// **'G1 backcross'**
+  String get explore_backcross;
+
+  /// No description provided for @explore_compare.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank by comparing'**
+  String get explore_compare;
+
+  /// No description provided for @explore_compareTip.
+  ///
+  /// In en, this message translates to:
+  /// **'See two parents at a time and pick the better one; higher preference means picked more often'**
+  String get explore_compareTip;
+
+  /// No description provided for @explore_generateChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate {count} offspring'**
+  String explore_generateChildren(Object count);
+
+  /// No description provided for @explore_children.
+  ///
+  /// In en, this message translates to:
+  /// **'Offspring · {count}'**
+  String explore_children(Object count);
+
+  /// No description provided for @explore_pickedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} picked'**
+  String explore_pickedN(Object count);
+
+  /// No description provided for @explore_breedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick offspring you like to breed the next generation'**
+  String get explore_breedHint;
+
+  /// No description provided for @explore_breed.
+  ///
+  /// In en, this message translates to:
+  /// **'Breed G{next} from {count}'**
+  String explore_breed(Object count, Object next);
+
+  /// No description provided for @explore_noChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'No offspring yet · press Generate for the first batch'**
+  String get explore_noChildren;
+
+  /// No description provided for @explore_parentsByPref.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents by preference · {count}'**
+  String explore_parentsByPref(Object count);
+
+  /// No description provided for @explore_opMutation.
+  ///
+  /// In en, this message translates to:
+  /// **'Mutation'**
+  String get explore_opMutation;
+
+  /// No description provided for @explore_opCrossover.
+  ///
+  /// In en, this message translates to:
+  /// **'Crossover'**
+  String get explore_opCrossover;
+
+  /// No description provided for @explore_opInjection.
+  ///
+  /// In en, this message translates to:
+  /// **'Injection'**
+  String get explore_opInjection;
+
+  /// No description provided for @explore_searchRuns.
+  ///
+  /// In en, this message translates to:
+  /// **'Search explorations'**
+  String get explore_searchRuns;
+
+  /// No description provided for @explore_newRun.
+  ///
+  /// In en, this message translates to:
+  /// **'New exploration'**
+  String get explore_newRun;
+
+  /// No description provided for @explore_newRunHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts with the current prompt and settings; rename any time'**
+  String get explore_newRunHint;
+
+  /// No description provided for @explore_runRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating {done}/{total}'**
+  String explore_runRunning(Object done, Object total);
+
+  /// No description provided for @explore_runPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused {done}/{total}'**
+  String explore_runPaused(Object done, Object total);
+
+  /// No description provided for @explore_runFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} failed'**
+  String explore_runFailed(Object count);
+
+  /// No description provided for @explore_noRunMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching explorations'**
+  String get explore_noRunMatch;
+
+  /// No description provided for @explore_runMenuHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-named from random blocks + date · hover a row and use ⋯ to rename or delete'**
+  String get explore_runMenuHint;
+
+  /// No description provided for @explore_deleteRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete exploration'**
+  String get explore_deleteRun;
+
+  /// No description provided for @explore_deleteRunTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"?'**
+  String explore_deleteRunTitle(Object name);
+
+  /// No description provided for @explore_deleteRunBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its {count} candidates and all evolution lines will be deleted. This cannot be undone. Gallery images are not affected.'**
+  String explore_deleteRunBody(Object count);
+
+  /// No description provided for @explore_deleteLineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete line \"{name}\"?'**
+  String explore_deleteLineTitle(Object name);
+
+  /// No description provided for @explore_deleteLineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Its {count} offspring will be deleted. This cannot be undone. Candidates are not affected.'**
+  String explore_deleteLineBody(Object count);
+
+  /// No description provided for @explore_onboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try styles in bulk with random blocks'**
+  String get explore_onboardingTitle;
+
+  /// No description provided for @explore_onboardingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every image draws again from your artist pool — keep the mixes you like and let them evolve.'**
+  String get explore_onboardingBody;
+
+  /// No description provided for @explore_step1.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a random block'**
+  String get explore_step1;
+
+  /// No description provided for @explore_step1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert a random block from the library into the prompt, e.g. an artist pool.'**
+  String get explore_step1Body;
+
+  /// No description provided for @explore_step2.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw a batch'**
+  String get explore_step2;
+
+  /// No description provided for @explore_step2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Press \"Draw {count} candidates\" at the bottom left; each image draws new artists.'**
+  String explore_step2Body(Object count);
+
+  /// No description provided for @explore_step3.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep, evolve, save'**
+  String get explore_step3;
+
+  /// No description provided for @explore_step3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite what you like, evolve it, and save the mixes you love as blocks.'**
+  String get explore_step3Body;
+
+  /// No description provided for @explore_detected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} detected'**
+  String explore_detected(Object count);
+
+  /// No description provided for @explore_noVariables.
+  ///
+  /// In en, this message translates to:
+  /// **'No random blocks yet'**
+  String get explore_noVariables;
+
+  /// No description provided for @explore_openPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a previous exploration'**
+  String get explore_openPrevious;
+
+  /// No description provided for @explore_evoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start evolution with {count} candidates'**
+  String explore_evoTitle(Object count);
+
+  /// No description provided for @explore_evoJoinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count} to \"{line}\" G{gen}'**
+  String explore_evoJoinTitle(Object count, Object line, Object gen);
+
+  /// No description provided for @explore_evoStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents'**
+  String get explore_evoStep1;
+
+  /// No description provided for @explore_evoStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Each candidate\'s artist string is a parent'**
+  String get explore_evoStep1Body;
+
+  /// No description provided for @explore_evoStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Offspring'**
+  String get explore_evoStep2;
+
+  /// No description provided for @explore_evoStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Crossover, mutation, new artists'**
+  String get explore_evoStep2Body;
+
+  /// No description provided for @explore_evoStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick'**
+  String get explore_evoStep3;
+
+  /// No description provided for @explore_evoStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick favorites to breed the next one'**
+  String get explore_evoStep3Body;
+
+  /// No description provided for @explore_evoNewLine.
+  ///
+  /// In en, this message translates to:
+  /// **'New line'**
+  String get explore_evoNewLine;
+
+  /// No description provided for @explore_evoJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join \"{line}\" G{gen}'**
+  String explore_evoJoin(Object line, Object gen);
+
+  /// No description provided for @explore_lineName.
+  ///
+  /// In en, this message translates to:
+  /// **'Line name'**
+  String get explore_lineName;
+
+  /// No description provided for @explore_lineDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {number}'**
+  String explore_lineDefault(Object number);
+
+  /// No description provided for @explore_lineGen.
+  ///
+  /// In en, this message translates to:
+  /// **'{line} · G{gen}'**
+  String explore_lineGen(Object line, Object gen);
+
+  /// No description provided for @explore_evoParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation 1 parents · {count}'**
+  String explore_evoParents(Object count);
+
+  /// No description provided for @explore_evoAddParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents to add · {count}'**
+  String explore_evoAddParents(Object count);
+
+  /// No description provided for @explore_addCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a custom artist string'**
+  String get explore_addCustom;
+
+  /// No description provided for @explore_customHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 0.8::artist:ciloranko::, artist:rella (Enter to add)'**
+  String get explore_customHint;
+
+  /// No description provided for @explore_targetBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Offspring replace'**
+  String get explore_targetBefore;
+
+  /// No description provided for @explore_targetAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'in the prompt; everything else stays'**
+  String get explore_targetAfter;
+
+  /// No description provided for @explore_noTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no random block in the prompt for offspring to replace — insert one first.'**
+  String get explore_noTarget;
+
+  /// No description provided for @explore_firstBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'First batch'**
+  String get explore_firstBatch;
+
+  /// No description provided for @explore_atLeast4.
+  ///
+  /// In en, this message translates to:
+  /// **'images (at least 4)'**
+  String get explore_atLeast4;
+
+  /// No description provided for @explore_createOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Create only'**
+  String get explore_createOnly;
+
+  /// No description provided for @explore_joinOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Add only'**
+  String get explore_joinOnly;
+
+  /// No description provided for @explore_createGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create & generate {count}'**
+  String explore_createGenerate(Object count);
+
+  /// No description provided for @explore_saveBlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as prompt block'**
+  String get explore_saveBlockTitle;
+
+  /// No description provided for @explore_untitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get explore_untitled;
+
+  /// No description provided for @explore_blockFromOne.
+  ///
+  /// In en, this message translates to:
+  /// **'From candidate #{number}'**
+  String explore_blockFromOne(Object number);
+
+  /// No description provided for @explore_blockFromMany.
+  ///
+  /// In en, this message translates to:
+  /// **'From {count} candidates, merged and deduplicated'**
+  String explore_blockFromMany(Object count);
+
+  /// No description provided for @explore_blockNameMany.
+  ///
+  /// In en, this message translates to:
+  /// **'{run} · Picks {count}'**
+  String explore_blockNameMany(Object run, Object count);
+
+  /// No description provided for @explore_blockContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get explore_blockContent;
+
+  /// No description provided for @explore_blockArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn artists only'**
+  String get explore_blockArtists;
+
+  /// No description provided for @explore_blockFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full positive prompt'**
+  String get explore_blockFull;
+
+  /// No description provided for @explore_blockFullSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Full prompt is available for a single candidate'**
+  String get explore_blockFullSingle;
+
+  /// No description provided for @explore_blockRemoveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click × to drop artists'**
+  String get explore_blockRemoveHint;
+
+  /// No description provided for @explore_blockKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping {kept} / {total}'**
+  String explore_blockKept(Object kept, Object total);
+
+  /// No description provided for @explore_blockName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get explore_blockName;
+
+  /// No description provided for @explore_blockColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get explore_blockColor;
+
+  /// No description provided for @explore_blockFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder'**
+  String get explore_blockFolder;
+
+  /// No description provided for @explore_blockRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Block library (root)'**
+  String get explore_blockRoot;
+
+  /// No description provided for @explore_blockFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag it into the prompt from the block library afterwards'**
+  String get explore_blockFooter;
+
+  /// No description provided for @explore_compareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairwise · rank the parents'**
+  String get explore_compareTitle;
+
+  /// No description provided for @explore_compareNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved as you go — close any time'**
+  String get explore_compareNote;
+
+  /// No description provided for @explore_compareQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which is closer to the style you want?'**
+  String get explore_compareQuestion;
+
+  /// No description provided for @explore_comparePairs.
+  ///
+  /// In en, this message translates to:
+  /// **'Pair {index} / {total}'**
+  String explore_comparePairs(Object index, Object total);
+
+  /// No description provided for @explore_leftBetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Left is better'**
+  String get explore_leftBetter;
+
+  /// No description provided for @explore_rightBetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Right is better'**
+  String get explore_rightBetter;
+
+  /// No description provided for @explore_neither.
+  ///
+  /// In en, this message translates to:
+  /// **'Neither'**
+  String get explore_neither;
+
+  /// No description provided for @explore_skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get explore_skip;
+
+  /// No description provided for @explore_keySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Space'**
+  String get explore_keySpace;
+
+  /// No description provided for @explore_ranking.
+  ///
+  /// In en, this message translates to:
+  /// **'Live ranking'**
+  String get explore_ranking;
+
+  /// No description provided for @explore_rankingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher preference means picked more often as a parent when breeding.'**
+  String get explore_rankingNote;
+
+  /// No description provided for @explore_compareDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All ranked'**
+  String get explore_compareDone;
+
+  /// No description provided for @explore_compareDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'New preferences are saved and used for the next offspring.'**
+  String get explore_compareDoneBody;
 }
 
 class _AppLocalizationsDelegate

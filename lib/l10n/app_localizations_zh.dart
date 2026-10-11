@@ -16113,6 +16113,782 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get imageViewer_yesterday => '昨天';
+
+  @override
+  String get explore_back => '画风探索';
+
+  @override
+  String get explore_close => '关闭';
+
+  @override
+  String get explore_cancel => '取消';
+
+  @override
+  String get explore_done => '完成';
+
+  @override
+  String get explore_more => '更多';
+
+  @override
+  String get explore_rename => '改名';
+
+  @override
+  String get explore_remove => '去掉';
+
+  @override
+  String get explore_copy => '复制';
+
+  @override
+  String get explore_undo => '撤销';
+
+  @override
+  String get explore_expand => '展开';
+
+  @override
+  String get explore_expandAll => '展开全部';
+
+  @override
+  String get explore_collapse => '收起';
+
+  @override
+  String get explore_previous => '上一张';
+
+  @override
+  String get explore_next => '下一张';
+
+  @override
+  String explore_today(Object time) {
+    return '今天 $time';
+  }
+
+  @override
+  String explore_yesterday(Object time) {
+    return '昨天 $time';
+  }
+
+  @override
+  String explore_monthDay(Object month, Object day, Object time) {
+    return '$month月$day日 $time';
+  }
+
+  @override
+  String explore_fullDate(Object year, Object month, Object day) {
+    return '$year年$month月$day日';
+  }
+
+  @override
+  String get explore_sectionToday => '今天';
+
+  @override
+  String get explore_thisWeek => '本周';
+
+  @override
+  String get explore_earlier => '更早';
+
+  @override
+  String get explore_variables => '随机变量';
+
+  @override
+  String get explore_variablesHint => '每张重新抽取';
+
+  @override
+  String get explore_variablesInfo =>
+      '提示词里的随机块。每张候选都会从池里重新抽，抽到的画师写在候选下面；标“进化目标”的块是进化时子代替换的位置。';
+
+  @override
+  String get explore_variablesEmpty => '提示词里还没有随机块。插入块库里的随机块（比如画师池），每张图都会重新抽。';
+
+  @override
+  String get explore_openBlockLibrary => '打开块库';
+
+  @override
+  String get explore_variableMissing => '块已删除';
+
+  @override
+  String explore_poolSize(Object count) {
+    return '池 $count 项';
+  }
+
+  @override
+  String get explore_evolutionTarget => '进化目标';
+
+  @override
+  String explore_draw(Object count) {
+    return '抽 $count 张候选';
+  }
+
+  @override
+  String get explore_stopGenerating => '停止生成';
+
+  @override
+  String get explore_busy => '生成中';
+
+  @override
+  String explore_cooldown(Object seconds) {
+    return '冷却 $seconds 秒';
+  }
+
+  @override
+  String get explore_insufficient => 'Anlas 不够';
+
+  @override
+  String explore_count(Object count) {
+    return '$count 张';
+  }
+
+  @override
+  String explore_favoritesCount(Object count) {
+    return '收藏 $count';
+  }
+
+  @override
+  String explore_roundsCount(Object count) {
+    return '$count 轮';
+  }
+
+  @override
+  String explore_linesCount(Object count) {
+    return '$count 条进化线';
+  }
+
+  @override
+  String explore_progressRound(Object round, Object done, Object total) {
+    return '第 $round 轮 · $done / $total';
+  }
+
+  @override
+  String explore_progressChildren(
+    Object line,
+    Object gen,
+    Object done,
+    Object total,
+  ) {
+    return '$line 第 $gen 代 · $done / $total';
+  }
+
+  @override
+  String explore_paused(Object where) {
+    return '已暂停 · $where';
+  }
+
+  @override
+  String get explore_pause => '暂停';
+
+  @override
+  String get explore_resume => '继续';
+
+  @override
+  String get explore_stop => '停止';
+
+  @override
+  String get explore_sizeSmall => '小卡片';
+
+  @override
+  String get explore_sizeLarge => '大卡片';
+
+  @override
+  String get explore_inspector => '检查器';
+
+  @override
+  String get explore_hideInspector => '收起';
+
+  @override
+  String get explore_tabCandidates => '候选';
+
+  @override
+  String get explore_tabEvolution => '进化';
+
+  @override
+  String get explore_filterAll => '全部';
+
+  @override
+  String get explore_filterFavorites => '收藏';
+
+  @override
+  String get explore_filterUngrouped => '未分组';
+
+  @override
+  String get explore_addGroup => '分组';
+
+  @override
+  String get explore_groupName => '分组名称';
+
+  @override
+  String get explore_deleteGroup => '删除分组（成员回到未分组）';
+
+  @override
+  String get explore_newLine => '新进化线';
+
+  @override
+  String get explore_deleteLine => '删除进化线';
+
+  @override
+  String get explore_compareShort => '两两比较';
+
+  @override
+  String get explore_evoHelp => '怎么用';
+
+  @override
+  String get explore_evoHelpBody =>
+      '1. 在候选里挑几张喜欢的，开始进化，它们的画师串就是第 1 代父本。\n2. 子代由父本交叉、变异、注入新画师得到。\n3. 勾选喜欢的子代培育下一代；两两比较能调整父本的偏好。';
+
+  @override
+  String get explore_select => '多选';
+
+  @override
+  String get explore_selectAll => '全选';
+
+  @override
+  String get explore_selectDone => '完成';
+
+  @override
+  String get explore_selectExit => '退出多选  Esc';
+
+  @override
+  String get explore_selectHint => '点卡片勾选';
+
+  @override
+  String explore_selectedN(Object count) {
+    return '已选 $count 张';
+  }
+
+  @override
+  String get explore_sortNewest => '新的轮在上（点一下改为旧的在上）';
+
+  @override
+  String get explore_sortOldest => '旧的轮在上（点一下改为新的在上）';
+
+  @override
+  String explore_round(Object number) {
+    return '第 $number 轮';
+  }
+
+  @override
+  String explore_generatingShort(Object done, Object total) {
+    return '生成中 $done / $total';
+  }
+
+  @override
+  String explore_failedRetry(Object count) {
+    return '$count 张失败 · 重试';
+  }
+
+  @override
+  String get explore_pick => '挑几张去进化';
+
+  @override
+  String get explore_pickTip => '进入多选，本轮收藏的已经勾上';
+
+  @override
+  String get explore_filterEmpty => '这个筛选下还没有候选';
+
+  @override
+  String get explore_showAll => '显示全部';
+
+  @override
+  String explore_queued(Object number) {
+    return '排队 #$number';
+  }
+
+  @override
+  String explore_generatingN(Object number) {
+    return '生成中 #$number';
+  }
+
+  @override
+  String get explore_failed => '生成失败';
+
+  @override
+  String get explore_failedHover => '悬停查看原因';
+
+  @override
+  String get explore_noArtists => '没有抽到画师';
+
+  @override
+  String get explore_parentTip => '已经是进化线的父本';
+
+  @override
+  String get explore_favorite => '收藏';
+
+  @override
+  String get explore_favorited => '已收藏';
+
+  @override
+  String get explore_unfavorite => '取消收藏';
+
+  @override
+  String get explore_addToEvolution => '加入进化';
+
+  @override
+  String get explore_startEvolution => '开始进化';
+
+  @override
+  String get explore_saveBlock => '存为块';
+
+  @override
+  String get explore_applyToEditor => '套用到编辑区';
+
+  @override
+  String get explore_copyArtists => '复制画师串';
+
+  @override
+  String get explore_openLarge => '看大图';
+
+  @override
+  String get explore_group => '分组';
+
+  @override
+  String get explore_groups => '分组';
+
+  @override
+  String get explore_groupsHint => '按 1–9 快速归组';
+
+  @override
+  String get explore_newGroup => '新分组';
+
+  @override
+  String get explore_ungroup => '移出分组';
+
+  @override
+  String get explore_delete => '删除';
+
+  @override
+  String explore_deleteN(Object count) {
+    return '删除 $count 张';
+  }
+
+  @override
+  String get explore_deleteThis => '删除这张';
+
+  @override
+  String explore_deleted(Object count) {
+    return '已删除 $count 张';
+  }
+
+  @override
+  String get explore_inspectorEmpty => '点一张候选，这里会写出它抽到了哪些画师';
+
+  @override
+  String explore_childN(Object number) {
+    return '子代 #$number';
+  }
+
+  @override
+  String explore_genOp(Object gen, Object op) {
+    return '第 $gen 代 · $op';
+  }
+
+  @override
+  String get explore_drawn => '本张抽到';
+
+  @override
+  String get explore_drawEmpty => '这次没有抽中（池里有空项）';
+
+  @override
+  String get explore_origin => '怎么来的';
+
+  @override
+  String get explore_seed => '种子';
+
+  @override
+  String get explore_elapsed => '耗时';
+
+  @override
+  String get explore_params => '参数';
+
+  @override
+  String get explore_sampler => '采样器';
+
+  @override
+  String get explore_model => '模型';
+
+  @override
+  String explore_steps(Object count) {
+    return '$count 步';
+  }
+
+  @override
+  String get explore_fullPrompt => '完整提示词';
+
+  @override
+  String get explore_negative => '负面';
+
+  @override
+  String get explore_failReason => '失败原因';
+
+  @override
+  String get explore_retryFailed => '重试失败的候选';
+
+  @override
+  String get explore_waitHint => '生成好以后这里会显示它抽到的画师';
+
+  @override
+  String explore_mergedArtists(Object count) {
+    return '合在一起的画师 · $count';
+  }
+
+  @override
+  String get explore_multiHint => '存为块会把这些画师合成一个块；开始进化时每张都是一个父本。';
+
+  @override
+  String get explore_evoEmptyTitle => '还没有进化线';
+
+  @override
+  String get explore_evoEmptyBody => '在候选里挑几张喜欢的，点“开始进化”，让好的画师组合继续杂交出新组合。';
+
+  @override
+  String get explore_evoGoPick => '去候选里挑';
+
+  @override
+  String explore_gen(Object number) {
+    return '第 $number 代';
+  }
+
+  @override
+  String get explore_current => '当前';
+
+  @override
+  String explore_genFirst(Object picked, Object children) {
+    return '从候选里选了 $picked 张作为起点 · $children 张子代';
+  }
+
+  @override
+  String explore_genFrom(
+    Object parents,
+    Object children,
+    Object from,
+    Object picked,
+  ) {
+    return '$parents 个父本 → $children 张子代 · 由第 $from 代挑 $picked 张';
+  }
+
+  @override
+  String get explore_backcross => '第 1 代回交';
+
+  @override
+  String get explore_compare => '两两比较排序';
+
+  @override
+  String get explore_compareTip => '一次看两张父本，选更好的那张，偏好越高越常被选中';
+
+  @override
+  String explore_generateChildren(Object count) {
+    return '再生成 $count 张子代';
+  }
+
+  @override
+  String explore_children(Object count) {
+    return '子代 · $count';
+  }
+
+  @override
+  String explore_pickedN(Object count) {
+    return '已选 $count';
+  }
+
+  @override
+  String get explore_breedHint => '勾选喜欢的子代，培育下一代';
+
+  @override
+  String explore_breed(Object count, Object next) {
+    return '用选中的 $count 张培育第 $next 代';
+  }
+
+  @override
+  String get explore_noChildren => '还没有子代 · 点“再生成”出第一批';
+
+  @override
+  String explore_parentsByPref(Object count) {
+    return '父本 · 按偏好排序 · $count';
+  }
+
+  @override
+  String get explore_opMutation => '变异';
+
+  @override
+  String get explore_opCrossover => '交叉';
+
+  @override
+  String get explore_opInjection => '注入';
+
+  @override
+  String get explore_searchRuns => '搜索探索';
+
+  @override
+  String get explore_newRun => '新建探索';
+
+  @override
+  String get explore_newRunHint => '用当前提示词和参数开一个新的，名字可以之后改';
+
+  @override
+  String explore_runRunning(Object done, Object total) {
+    return '生成中 $done/$total';
+  }
+
+  @override
+  String explore_runPaused(Object done, Object total) {
+    return '已暂停 $done/$total';
+  }
+
+  @override
+  String explore_runFailed(Object count) {
+    return '$count 张失败';
+  }
+
+  @override
+  String get explore_noRunMatch => '没有匹配的探索';
+
+  @override
+  String get explore_runMenuHint => '自动命名：随机块名 + 日期 · 悬停一行点“⋯”改名或删除';
+
+  @override
+  String get explore_deleteRun => '删除探索';
+
+  @override
+  String explore_deleteRunTitle(Object name) {
+    return '删除“$name”？';
+  }
+
+  @override
+  String explore_deleteRunBody(Object count) {
+    return '$count 张候选和所有进化线会一起删掉，不能撤销。图库里的图不受影响。';
+  }
+
+  @override
+  String explore_deleteLineTitle(Object name) {
+    return '删除进化线“$name”？';
+  }
+
+  @override
+  String explore_deleteLineBody(Object count) {
+    return '它生成的 $count 张子代会一起删掉，不能撤销。候选不受影响。';
+  }
+
+  @override
+  String get explore_onboardingTitle => '用随机块批量试画风';
+
+  @override
+  String get explore_onboardingBody => '每张图从画师池里重新抽，挑出喜欢的组合，再让它们进化。';
+
+  @override
+  String get explore_step1 => '放一个随机块';
+
+  @override
+  String get explore_step1Body => '在提示词里插入块库里的随机块，比如画师池。';
+
+  @override
+  String get explore_step2 => '抽一批候选';
+
+  @override
+  String explore_step2Body(Object count) {
+    return '点左下角“抽 $count 张候选”，每张都会重新抽画师。';
+  }
+
+  @override
+  String get explore_step3 => '收藏、进化、存为块';
+
+  @override
+  String get explore_step3Body => '喜欢的收藏起来，拿去进化，满意的组合存成块。';
+
+  @override
+  String explore_detected(Object count) {
+    return '已检测到 $count 个';
+  }
+
+  @override
+  String get explore_noVariables => '还没有随机块';
+
+  @override
+  String get explore_openPrevious => '打开以前的探索';
+
+  @override
+  String explore_evoTitle(Object count) {
+    return '用 $count 张候选开始进化';
+  }
+
+  @override
+  String explore_evoJoinTitle(Object count, Object line, Object gen) {
+    return '把 $count 张加入“$line”第 $gen 代';
+  }
+
+  @override
+  String get explore_evoStep1 => '父本';
+
+  @override
+  String get explore_evoStep1Body => '每张候选的画师串是一个父本';
+
+  @override
+  String get explore_evoStep2 => '子代';
+
+  @override
+  String get explore_evoStep2Body => '交叉、变异、注入新画师';
+
+  @override
+  String get explore_evoStep3 => '挑选';
+
+  @override
+  String get explore_evoStep3Body => '勾选喜欢的，培育下一代';
+
+  @override
+  String get explore_evoNewLine => '新建进化线';
+
+  @override
+  String explore_evoJoin(Object line, Object gen) {
+    return '加入“$line”第 $gen 代';
+  }
+
+  @override
+  String get explore_lineName => '进化线名称';
+
+  @override
+  String explore_lineDefault(Object number) {
+    return '进化线 $number';
+  }
+
+  @override
+  String explore_lineGen(Object line, Object gen) {
+    return '$line · 第 $gen 代';
+  }
+
+  @override
+  String explore_evoParents(Object count) {
+    return '第 1 代父本 · $count';
+  }
+
+  @override
+  String explore_evoAddParents(Object count) {
+    return '加入的父本 · $count';
+  }
+
+  @override
+  String get explore_addCustom => '再加一段自定义画师串';
+
+  @override
+  String get explore_customHint =>
+      '比如 0.8::artist:ciloranko::, artist:rella（回车添加）';
+
+  @override
+  String get explore_targetBefore => '子代会替换提示词里';
+
+  @override
+  String get explore_targetAfter => '的位置，其他内容不变';
+
+  @override
+  String get explore_noTarget => '提示词里没有随机块，子代没地方替换——先在提示词里插入一个随机块。';
+
+  @override
+  String get explore_firstBatch => '第一批子代';
+
+  @override
+  String get explore_atLeast4 => '张（至少 4）';
+
+  @override
+  String get explore_createOnly => '只创建';
+
+  @override
+  String get explore_joinOnly => '只加入';
+
+  @override
+  String explore_createGenerate(Object count) {
+    return '创建并生成 $count 张';
+  }
+
+  @override
+  String get explore_saveBlockTitle => '存为提示词块';
+
+  @override
+  String get explore_untitled => '未命名';
+
+  @override
+  String explore_blockFromOne(Object number) {
+    return '来自候选 #$number';
+  }
+
+  @override
+  String explore_blockFromMany(Object count) {
+    return '来自 $count 张候选，已合并去重';
+  }
+
+  @override
+  String explore_blockNameMany(Object run, Object count) {
+    return '$run · 精选 $count';
+  }
+
+  @override
+  String get explore_blockContent => '内容';
+
+  @override
+  String get explore_blockArtists => '只要抽到的画师';
+
+  @override
+  String get explore_blockFull => '完整正向提示词';
+
+  @override
+  String get explore_blockFullSingle => '只有一张候选时可以存完整提示词';
+
+  @override
+  String get explore_blockRemoveHint => '点 × 去掉不要的画师';
+
+  @override
+  String explore_blockKept(Object kept, Object total) {
+    return '保留 $kept / $total';
+  }
+
+  @override
+  String get explore_blockName => '名称';
+
+  @override
+  String get explore_blockColor => '颜色';
+
+  @override
+  String get explore_blockFolder => '放到块库';
+
+  @override
+  String get explore_blockRoot => '块库（根目录）';
+
+  @override
+  String get explore_blockFooter => '存好后可以在块库里拖进提示词';
+
+  @override
+  String get explore_compareTitle => '两两比较 · 给父本排个序';
+
+  @override
+  String get explore_compareNote => '结果随时保存，可以中途关掉';
+
+  @override
+  String get explore_compareQuestion => '哪张更接近你想要的画风？';
+
+  @override
+  String explore_comparePairs(Object index, Object total) {
+    return '$index / $total 对';
+  }
+
+  @override
+  String get explore_leftBetter => '左边更好';
+
+  @override
+  String get explore_rightBetter => '右边更好';
+
+  @override
+  String get explore_neither => '两张都不行';
+
+  @override
+  String get explore_skip => '跳过';
+
+  @override
+  String get explore_keySpace => '空格';
+
+  @override
+  String get explore_ranking => '当前排名 · 实时';
+
+  @override
+  String get explore_rankingNote => '偏好越高，培育下一代时越常被选为父本。';
+
+  @override
+  String get explore_compareDone => '排好了';
+
+  @override
+  String get explore_compareDoneBody => '新的偏好已经保存，下次生成子代就会用上。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -32224,4 +33000,780 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get imageViewer_yesterday => '昨天';
+
+  @override
+  String get explore_back => '畫風探索';
+
+  @override
+  String get explore_close => '關閉';
+
+  @override
+  String get explore_cancel => '取消';
+
+  @override
+  String get explore_done => '完成';
+
+  @override
+  String get explore_more => '更多';
+
+  @override
+  String get explore_rename => '改名';
+
+  @override
+  String get explore_remove => '去掉';
+
+  @override
+  String get explore_copy => '複製';
+
+  @override
+  String get explore_undo => '復原';
+
+  @override
+  String get explore_expand => '展開';
+
+  @override
+  String get explore_expandAll => '展開全部';
+
+  @override
+  String get explore_collapse => '收起';
+
+  @override
+  String get explore_previous => '上一張';
+
+  @override
+  String get explore_next => '下一張';
+
+  @override
+  String explore_today(Object time) {
+    return '今天 $time';
+  }
+
+  @override
+  String explore_yesterday(Object time) {
+    return '昨天 $time';
+  }
+
+  @override
+  String explore_monthDay(Object month, Object day, Object time) {
+    return '$month月$day日 $time';
+  }
+
+  @override
+  String explore_fullDate(Object year, Object month, Object day) {
+    return '$year年$month月$day日';
+  }
+
+  @override
+  String get explore_sectionToday => '今天';
+
+  @override
+  String get explore_thisWeek => '本週';
+
+  @override
+  String get explore_earlier => '更早';
+
+  @override
+  String get explore_variables => '隨機變數';
+
+  @override
+  String get explore_variablesHint => '每張重新抽取';
+
+  @override
+  String get explore_variablesInfo =>
+      '提示詞裡的隨機塊。每張候選都會從池裡重新抽，抽到的畫師寫在候選下面；標“進化目標”的塊是進化時子代替換的位置。';
+
+  @override
+  String get explore_variablesEmpty => '提示詞裡還沒有隨機塊。插入塊庫裡的隨機塊（比如畫師池），每張圖都會重新抽。';
+
+  @override
+  String get explore_openBlockLibrary => '開啟塊庫';
+
+  @override
+  String get explore_variableMissing => '塊已刪除';
+
+  @override
+  String explore_poolSize(Object count) {
+    return '池 $count 項';
+  }
+
+  @override
+  String get explore_evolutionTarget => '進化目標';
+
+  @override
+  String explore_draw(Object count) {
+    return '抽 $count 張候選';
+  }
+
+  @override
+  String get explore_stopGenerating => '停止生成';
+
+  @override
+  String get explore_busy => '生成中';
+
+  @override
+  String explore_cooldown(Object seconds) {
+    return '冷卻 $seconds 秒';
+  }
+
+  @override
+  String get explore_insufficient => 'Anlas 不夠';
+
+  @override
+  String explore_count(Object count) {
+    return '$count 張';
+  }
+
+  @override
+  String explore_favoritesCount(Object count) {
+    return '收藏 $count';
+  }
+
+  @override
+  String explore_roundsCount(Object count) {
+    return '$count 輪';
+  }
+
+  @override
+  String explore_linesCount(Object count) {
+    return '$count 條進化線';
+  }
+
+  @override
+  String explore_progressRound(Object round, Object done, Object total) {
+    return '第 $round 輪 · $done / $total';
+  }
+
+  @override
+  String explore_progressChildren(
+    Object line,
+    Object gen,
+    Object done,
+    Object total,
+  ) {
+    return '$line 第 $gen 代 · $done / $total';
+  }
+
+  @override
+  String explore_paused(Object where) {
+    return '已暫停 · $where';
+  }
+
+  @override
+  String get explore_pause => '暫停';
+
+  @override
+  String get explore_resume => '繼續';
+
+  @override
+  String get explore_stop => '停止';
+
+  @override
+  String get explore_sizeSmall => '小卡片';
+
+  @override
+  String get explore_sizeLarge => '大卡片';
+
+  @override
+  String get explore_inspector => '檢查器';
+
+  @override
+  String get explore_hideInspector => '收起';
+
+  @override
+  String get explore_tabCandidates => '候選';
+
+  @override
+  String get explore_tabEvolution => '進化';
+
+  @override
+  String get explore_filterAll => '全部';
+
+  @override
+  String get explore_filterFavorites => '收藏';
+
+  @override
+  String get explore_filterUngrouped => '未分組';
+
+  @override
+  String get explore_addGroup => '分組';
+
+  @override
+  String get explore_groupName => '分組名稱';
+
+  @override
+  String get explore_deleteGroup => '刪除分組（成員回到未分組）';
+
+  @override
+  String get explore_newLine => '新進化線';
+
+  @override
+  String get explore_deleteLine => '刪除進化線';
+
+  @override
+  String get explore_compareShort => '兩兩比較';
+
+  @override
+  String get explore_evoHelp => '怎麼用';
+
+  @override
+  String get explore_evoHelpBody =>
+      '1. 在候選裡挑幾張喜歡的，開始進化，它們的畫師串就是第 1 代父本。\n2. 子代由父本交叉、變異、注入新畫師得到。\n3. 勾選喜歡的子代培育下一代；兩兩比較能調整父本的偏好。';
+
+  @override
+  String get explore_select => '多選';
+
+  @override
+  String get explore_selectAll => '全選';
+
+  @override
+  String get explore_selectDone => '完成';
+
+  @override
+  String get explore_selectExit => '退出多選  Esc';
+
+  @override
+  String get explore_selectHint => '點卡片勾選';
+
+  @override
+  String explore_selectedN(Object count) {
+    return '已選 $count 張';
+  }
+
+  @override
+  String get explore_sortNewest => '新的輪在上（點一下改為舊的在上）';
+
+  @override
+  String get explore_sortOldest => '舊的輪在上（點一下改為新的在上）';
+
+  @override
+  String explore_round(Object number) {
+    return '第 $number 輪';
+  }
+
+  @override
+  String explore_generatingShort(Object done, Object total) {
+    return '生成中 $done / $total';
+  }
+
+  @override
+  String explore_failedRetry(Object count) {
+    return '$count 張失敗 · 重試';
+  }
+
+  @override
+  String get explore_pick => '挑幾張去進化';
+
+  @override
+  String get explore_pickTip => '進入多選，本輪收藏的已經勾上';
+
+  @override
+  String get explore_filterEmpty => '這個篩選下還沒有候選';
+
+  @override
+  String get explore_showAll => '顯示全部';
+
+  @override
+  String explore_queued(Object number) {
+    return '排隊 #$number';
+  }
+
+  @override
+  String explore_generatingN(Object number) {
+    return '生成中 #$number';
+  }
+
+  @override
+  String get explore_failed => '生成失敗';
+
+  @override
+  String get explore_failedHover => '懸停檢視原因';
+
+  @override
+  String get explore_noArtists => '沒有抽到畫師';
+
+  @override
+  String get explore_parentTip => '已經是進化線的父本';
+
+  @override
+  String get explore_favorite => '收藏';
+
+  @override
+  String get explore_favorited => '已收藏';
+
+  @override
+  String get explore_unfavorite => '取消收藏';
+
+  @override
+  String get explore_addToEvolution => '加入進化';
+
+  @override
+  String get explore_startEvolution => '開始進化';
+
+  @override
+  String get explore_saveBlock => '存為塊';
+
+  @override
+  String get explore_applyToEditor => '套用到編輯區';
+
+  @override
+  String get explore_copyArtists => '複製畫師串';
+
+  @override
+  String get explore_openLarge => '看大圖';
+
+  @override
+  String get explore_group => '分組';
+
+  @override
+  String get explore_groups => '分組';
+
+  @override
+  String get explore_groupsHint => '按 1–9 快速歸組';
+
+  @override
+  String get explore_newGroup => '新分組';
+
+  @override
+  String get explore_ungroup => '移出分組';
+
+  @override
+  String get explore_delete => '刪除';
+
+  @override
+  String explore_deleteN(Object count) {
+    return '刪除 $count 張';
+  }
+
+  @override
+  String get explore_deleteThis => '刪除這張';
+
+  @override
+  String explore_deleted(Object count) {
+    return '已刪除 $count 張';
+  }
+
+  @override
+  String get explore_inspectorEmpty => '點一張候選，這裡會寫出它抽到了哪些畫師';
+
+  @override
+  String explore_childN(Object number) {
+    return '子代 #$number';
+  }
+
+  @override
+  String explore_genOp(Object gen, Object op) {
+    return '第 $gen 代 · $op';
+  }
+
+  @override
+  String get explore_drawn => '本張抽到';
+
+  @override
+  String get explore_drawEmpty => '這次沒有抽中（池裡有空項）';
+
+  @override
+  String get explore_origin => '怎麼來的';
+
+  @override
+  String get explore_seed => '種子';
+
+  @override
+  String get explore_elapsed => '耗時';
+
+  @override
+  String get explore_params => '參數';
+
+  @override
+  String get explore_sampler => '取樣器';
+
+  @override
+  String get explore_model => '模型';
+
+  @override
+  String explore_steps(Object count) {
+    return '$count 步';
+  }
+
+  @override
+  String get explore_fullPrompt => '完整提示詞';
+
+  @override
+  String get explore_negative => '負面';
+
+  @override
+  String get explore_failReason => '失敗原因';
+
+  @override
+  String get explore_retryFailed => '重試失敗的候選';
+
+  @override
+  String get explore_waitHint => '生成好以後這裡會顯示它抽到的畫師';
+
+  @override
+  String explore_mergedArtists(Object count) {
+    return '合在一起的畫師 · $count';
+  }
+
+  @override
+  String get explore_multiHint => '存為塊會把這些畫師合成一個塊；開始進化時每張都是一個父本。';
+
+  @override
+  String get explore_evoEmptyTitle => '還沒有進化線';
+
+  @override
+  String get explore_evoEmptyBody => '在候選裡挑幾張喜歡的，點“開始進化”，讓好的畫師組合繼續雜交出新組合。';
+
+  @override
+  String get explore_evoGoPick => '去候選裡挑';
+
+  @override
+  String explore_gen(Object number) {
+    return '第 $number 代';
+  }
+
+  @override
+  String get explore_current => '當前';
+
+  @override
+  String explore_genFirst(Object picked, Object children) {
+    return '從候選裡選了 $picked 張作為起點 · $children 張子代';
+  }
+
+  @override
+  String explore_genFrom(
+    Object parents,
+    Object children,
+    Object from,
+    Object picked,
+  ) {
+    return '$parents 個父本 → $children 張子代 · 由第 $from 代挑 $picked 張';
+  }
+
+  @override
+  String get explore_backcross => '第 1 代回交';
+
+  @override
+  String get explore_compare => '兩兩比較排序';
+
+  @override
+  String get explore_compareTip => '一次看兩張父本，選更好的那張，偏好越高越常被選中';
+
+  @override
+  String explore_generateChildren(Object count) {
+    return '再生成 $count 張子代';
+  }
+
+  @override
+  String explore_children(Object count) {
+    return '子代 · $count';
+  }
+
+  @override
+  String explore_pickedN(Object count) {
+    return '已選 $count';
+  }
+
+  @override
+  String get explore_breedHint => '勾選喜歡的子代，培育下一代';
+
+  @override
+  String explore_breed(Object count, Object next) {
+    return '用選中的 $count 張培育第 $next 代';
+  }
+
+  @override
+  String get explore_noChildren => '還沒有子代 · 點“再生成”出第一批';
+
+  @override
+  String explore_parentsByPref(Object count) {
+    return '父本 · 按偏好排序 · $count';
+  }
+
+  @override
+  String get explore_opMutation => '變異';
+
+  @override
+  String get explore_opCrossover => '交叉';
+
+  @override
+  String get explore_opInjection => '注入';
+
+  @override
+  String get explore_searchRuns => '搜尋探索';
+
+  @override
+  String get explore_newRun => '新增探索';
+
+  @override
+  String get explore_newRunHint => '用當前提示詞和參數開一個新的，名字可以之後改';
+
+  @override
+  String explore_runRunning(Object done, Object total) {
+    return '生成中 $done/$total';
+  }
+
+  @override
+  String explore_runPaused(Object done, Object total) {
+    return '已暫停 $done/$total';
+  }
+
+  @override
+  String explore_runFailed(Object count) {
+    return '$count 張失敗';
+  }
+
+  @override
+  String get explore_noRunMatch => '沒有匹配的探索';
+
+  @override
+  String get explore_runMenuHint => '自動命名：隨機塊名 + 日期 · 懸停一行點“⋯”改名或刪除';
+
+  @override
+  String get explore_deleteRun => '刪除探索';
+
+  @override
+  String explore_deleteRunTitle(Object name) {
+    return '刪除“$name”？';
+  }
+
+  @override
+  String explore_deleteRunBody(Object count) {
+    return '$count 張候選和所有進化線會一起刪掉，不能復原。圖庫裡的圖不受影響。';
+  }
+
+  @override
+  String explore_deleteLineTitle(Object name) {
+    return '刪除進化線“$name”？';
+  }
+
+  @override
+  String explore_deleteLineBody(Object count) {
+    return '它生成的 $count 張子代會一起刪掉，不能復原。候選不受影響。';
+  }
+
+  @override
+  String get explore_onboardingTitle => '用隨機塊批次試畫風';
+
+  @override
+  String get explore_onboardingBody => '每張圖從畫師池裡重新抽，挑出喜歡的組合，再讓它們進化。';
+
+  @override
+  String get explore_step1 => '放一個隨機塊';
+
+  @override
+  String get explore_step1Body => '在提示詞裡插入塊庫裡的隨機塊，比如畫師池。';
+
+  @override
+  String get explore_step2 => '抽一批候選';
+
+  @override
+  String explore_step2Body(Object count) {
+    return '點左下角“抽 $count 張候選”，每張都會重新抽畫師。';
+  }
+
+  @override
+  String get explore_step3 => '收藏、進化、存為塊';
+
+  @override
+  String get explore_step3Body => '喜歡的收藏起來，拿去進化，滿意的組合存成塊。';
+
+  @override
+  String explore_detected(Object count) {
+    return '已檢測到 $count 個';
+  }
+
+  @override
+  String get explore_noVariables => '還沒有隨機塊';
+
+  @override
+  String get explore_openPrevious => '開啟以前的探索';
+
+  @override
+  String explore_evoTitle(Object count) {
+    return '用 $count 張候選開始進化';
+  }
+
+  @override
+  String explore_evoJoinTitle(Object count, Object line, Object gen) {
+    return '把 $count 張加入“$line”第 $gen 代';
+  }
+
+  @override
+  String get explore_evoStep1 => '父本';
+
+  @override
+  String get explore_evoStep1Body => '每張候選的畫師串是一個父本';
+
+  @override
+  String get explore_evoStep2 => '子代';
+
+  @override
+  String get explore_evoStep2Body => '交叉、變異、注入新畫師';
+
+  @override
+  String get explore_evoStep3 => '挑選';
+
+  @override
+  String get explore_evoStep3Body => '勾選喜歡的，培育下一代';
+
+  @override
+  String get explore_evoNewLine => '新增進化線';
+
+  @override
+  String explore_evoJoin(Object line, Object gen) {
+    return '加入“$line”第 $gen 代';
+  }
+
+  @override
+  String get explore_lineName => '進化線名稱';
+
+  @override
+  String explore_lineDefault(Object number) {
+    return '進化線 $number';
+  }
+
+  @override
+  String explore_lineGen(Object line, Object gen) {
+    return '$line · 第 $gen 代';
+  }
+
+  @override
+  String explore_evoParents(Object count) {
+    return '第 1 代父本 · $count';
+  }
+
+  @override
+  String explore_evoAddParents(Object count) {
+    return '加入的父本 · $count';
+  }
+
+  @override
+  String get explore_addCustom => '再加一段自訂畫師串';
+
+  @override
+  String get explore_customHint =>
+      '比如 0.8::artist:ciloranko::, artist:rella（回車新增）';
+
+  @override
+  String get explore_targetBefore => '子代會替換提示詞裡';
+
+  @override
+  String get explore_targetAfter => '的位置，其他內容不變';
+
+  @override
+  String get explore_noTarget => '提示詞裡沒有隨機塊，子代沒地方替換——先在提示詞裡插入一個隨機塊。';
+
+  @override
+  String get explore_firstBatch => '第一批子代';
+
+  @override
+  String get explore_atLeast4 => '張（至少 4）';
+
+  @override
+  String get explore_createOnly => '只建立';
+
+  @override
+  String get explore_joinOnly => '只加入';
+
+  @override
+  String explore_createGenerate(Object count) {
+    return '建立並生成 $count 張';
+  }
+
+  @override
+  String get explore_saveBlockTitle => '存為提示詞塊';
+
+  @override
+  String get explore_untitled => '未命名';
+
+  @override
+  String explore_blockFromOne(Object number) {
+    return '來自候選 #$number';
+  }
+
+  @override
+  String explore_blockFromMany(Object count) {
+    return '來自 $count 張候選，已合併去重';
+  }
+
+  @override
+  String explore_blockNameMany(Object run, Object count) {
+    return '$run · 精選 $count';
+  }
+
+  @override
+  String get explore_blockContent => '內容';
+
+  @override
+  String get explore_blockArtists => '只要抽到的畫師';
+
+  @override
+  String get explore_blockFull => '完整正向提示詞';
+
+  @override
+  String get explore_blockFullSingle => '只有一張候選時可以存完整提示詞';
+
+  @override
+  String get explore_blockRemoveHint => '點 × 去掉不要的畫師';
+
+  @override
+  String explore_blockKept(Object kept, Object total) {
+    return '保留 $kept / $total';
+  }
+
+  @override
+  String get explore_blockName => '名稱';
+
+  @override
+  String get explore_blockColor => '顏色';
+
+  @override
+  String get explore_blockFolder => '放到塊庫';
+
+  @override
+  String get explore_blockRoot => '塊庫（根目錄）';
+
+  @override
+  String get explore_blockFooter => '存好後可以在塊庫裡拖進提示詞';
+
+  @override
+  String get explore_compareTitle => '兩兩比較 · 給父本排個序';
+
+  @override
+  String get explore_compareNote => '結果隨時儲存，可以中途關掉';
+
+  @override
+  String get explore_compareQuestion => '哪張更接近你想要的畫風？';
+
+  @override
+  String explore_comparePairs(Object index, Object total) {
+    return '$index / $total 對';
+  }
+
+  @override
+  String get explore_leftBetter => '左邊更好';
+
+  @override
+  String get explore_rightBetter => '右邊更好';
+
+  @override
+  String get explore_neither => '兩張都不行';
+
+  @override
+  String get explore_skip => '跳過';
+
+  @override
+  String get explore_keySpace => '空格';
+
+  @override
+  String get explore_ranking => '當前排名 · 即時';
+
+  @override
+  String get explore_rankingNote => '偏好越高，培育下一代時越常被選為父本。';
+
+  @override
+  String get explore_compareDone => '排好了';
+
+  @override
+  String get explore_compareDoneBody => '新的偏好已經儲存，下次生成子代就會用上。';
 }

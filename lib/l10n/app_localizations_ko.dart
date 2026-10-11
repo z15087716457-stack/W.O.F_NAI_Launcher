@@ -16381,4 +16381,785 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get imageViewer_yesterday => '어제';
+
+  @override
+  String get explore_back => '화풍 탐색';
+
+  @override
+  String get explore_close => '닫기';
+
+  @override
+  String get explore_cancel => '취소';
+
+  @override
+  String get explore_done => '완료';
+
+  @override
+  String get explore_more => '더 보기';
+
+  @override
+  String get explore_rename => '이름 바꾸기';
+
+  @override
+  String get explore_remove => '빼기';
+
+  @override
+  String get explore_copy => '복사';
+
+  @override
+  String get explore_undo => '실행 취소';
+
+  @override
+  String get explore_expand => '펼치기';
+
+  @override
+  String get explore_expandAll => '모두 보기';
+
+  @override
+  String get explore_collapse => '접기';
+
+  @override
+  String get explore_previous => '이전';
+
+  @override
+  String get explore_next => '다음';
+
+  @override
+  String explore_today(Object time) {
+    return '오늘 $time';
+  }
+
+  @override
+  String explore_yesterday(Object time) {
+    return '어제 $time';
+  }
+
+  @override
+  String explore_monthDay(Object month, Object day, Object time) {
+    return '$month월 $day일 $time';
+  }
+
+  @override
+  String explore_fullDate(Object year, Object month, Object day) {
+    return '$year년 $month월 $day일';
+  }
+
+  @override
+  String get explore_sectionToday => '오늘';
+
+  @override
+  String get explore_thisWeek => '이번 주';
+
+  @override
+  String get explore_earlier => '이전';
+
+  @override
+  String get explore_variables => '랜덤 변수';
+
+  @override
+  String get explore_variablesHint => '이미지마다 다시 뽑기';
+
+  @override
+  String get explore_variablesInfo =>
+      '프롬프트의 랜덤 블록입니다. 후보마다 풀에서 다시 뽑고 결과를 후보 아래에 표시합니다. \"진화 대상\" 블록은 자손이 바뀌는 위치입니다.';
+
+  @override
+  String get explore_variablesEmpty =>
+      '프롬프트에 랜덤 블록이 없습니다. 블록 라이브러리에서 (예: 작가 풀) 넣으면 이미지마다 다시 뽑습니다.';
+
+  @override
+  String get explore_openBlockLibrary => '블록 라이브러리 열기';
+
+  @override
+  String get explore_variableMissing => '블록 삭제됨';
+
+  @override
+  String explore_poolSize(Object count) {
+    return '풀 $count개';
+  }
+
+  @override
+  String get explore_evolutionTarget => '진화 대상';
+
+  @override
+  String explore_draw(Object count) {
+    return '후보 $count장 뽑기';
+  }
+
+  @override
+  String get explore_stopGenerating => '생성 중지';
+
+  @override
+  String get explore_busy => '생성 중';
+
+  @override
+  String explore_cooldown(Object seconds) {
+    return '쿨다운 $seconds초';
+  }
+
+  @override
+  String get explore_insufficient => 'Anlas 부족';
+
+  @override
+  String explore_count(Object count) {
+    return '$count장';
+  }
+
+  @override
+  String explore_favoritesCount(Object count) {
+    return '즐겨찾기 $count';
+  }
+
+  @override
+  String explore_roundsCount(Object count) {
+    return '$count라운드';
+  }
+
+  @override
+  String explore_linesCount(Object count) {
+    return '진화 라인 $count개';
+  }
+
+  @override
+  String explore_progressRound(Object round, Object done, Object total) {
+    return '$round라운드 · $done / $total';
+  }
+
+  @override
+  String explore_progressChildren(
+    Object line,
+    Object gen,
+    Object done,
+    Object total,
+  ) {
+    return '$line $gen세대 · $done / $total';
+  }
+
+  @override
+  String explore_paused(Object where) {
+    return '일시 정지 · $where';
+  }
+
+  @override
+  String get explore_pause => '일시 정지';
+
+  @override
+  String get explore_resume => '계속';
+
+  @override
+  String get explore_stop => '중지';
+
+  @override
+  String get explore_sizeSmall => '작은 카드';
+
+  @override
+  String get explore_sizeLarge => '큰 카드';
+
+  @override
+  String get explore_inspector => '인스펙터';
+
+  @override
+  String get explore_hideInspector => '숨기기';
+
+  @override
+  String get explore_tabCandidates => '후보';
+
+  @override
+  String get explore_tabEvolution => '진화';
+
+  @override
+  String get explore_filterAll => '전체';
+
+  @override
+  String get explore_filterFavorites => '즐겨찾기';
+
+  @override
+  String get explore_filterUngrouped => '그룹 없음';
+
+  @override
+  String get explore_addGroup => '그룹';
+
+  @override
+  String get explore_groupName => '그룹 이름';
+
+  @override
+  String get explore_deleteGroup => '그룹 삭제 (구성원은 그룹 없음으로)';
+
+  @override
+  String get explore_newLine => '새 진화 라인';
+
+  @override
+  String get explore_deleteLine => '진화 라인 삭제';
+
+  @override
+  String get explore_compareShort => '비교';
+
+  @override
+  String get explore_evoHelp => '사용법';
+
+  @override
+  String get explore_evoHelpBody =>
+      '1. 마음에 드는 후보를 골라 진화를 시작하면 작가 문자열이 1세대 부모가 됩니다.\n2. 자손은 교차, 변이, 새 작가 주입으로 만들어집니다.\n3. 마음에 드는 자손을 골라 다음 세대를 키웁니다. 둘씩 비교하면 부모 선호도를 조정합니다.';
+
+  @override
+  String get explore_select => '여러 개 선택';
+
+  @override
+  String get explore_selectAll => '모두 선택';
+
+  @override
+  String get explore_selectDone => '완료';
+
+  @override
+  String get explore_selectExit => '선택 종료  Esc';
+
+  @override
+  String get explore_selectHint => '카드를 눌러 선택';
+
+  @override
+  String explore_selectedN(Object count) {
+    return '$count장 선택됨';
+  }
+
+  @override
+  String get explore_sortNewest => '새 라운드가 위 (누르면 오래된 순)';
+
+  @override
+  String get explore_sortOldest => '오래된 라운드가 위 (누르면 새로운 순)';
+
+  @override
+  String explore_round(Object number) {
+    return '$number라운드';
+  }
+
+  @override
+  String explore_generatingShort(Object done, Object total) {
+    return '생성 중 $done / $total';
+  }
+
+  @override
+  String explore_failedRetry(Object count) {
+    return '$count장 실패 · 다시 시도';
+  }
+
+  @override
+  String get explore_pick => '진화할 이미지 고르기';
+
+  @override
+  String get explore_pickTip => '이 라운드의 즐겨찾기가 선택된 상태로 여러 개 선택을 시작합니다';
+
+  @override
+  String get explore_filterEmpty => '이 필터에 맞는 후보가 없습니다';
+
+  @override
+  String get explore_showAll => '모두 보기';
+
+  @override
+  String explore_queued(Object number) {
+    return '대기 #$number';
+  }
+
+  @override
+  String explore_generatingN(Object number) {
+    return '생성 중 #$number';
+  }
+
+  @override
+  String get explore_failed => '생성 실패';
+
+  @override
+  String get explore_failedHover => '마우스를 올려 이유 보기';
+
+  @override
+  String get explore_noArtists => '뽑힌 작가 없음';
+
+  @override
+  String get explore_parentTip => '진화 라인의 부모입니다';
+
+  @override
+  String get explore_favorite => '즐겨찾기';
+
+  @override
+  String get explore_favorited => '즐겨찾기됨';
+
+  @override
+  String get explore_unfavorite => '즐겨찾기 해제';
+
+  @override
+  String get explore_addToEvolution => '진화에 추가';
+
+  @override
+  String get explore_startEvolution => '진화 시작';
+
+  @override
+  String get explore_saveBlock => '블록으로 저장';
+
+  @override
+  String get explore_applyToEditor => '편집기에 적용';
+
+  @override
+  String get explore_copyArtists => '작가 문자열 복사';
+
+  @override
+  String get explore_openLarge => '크게 보기';
+
+  @override
+  String get explore_group => '그룹';
+
+  @override
+  String get explore_groups => '그룹';
+
+  @override
+  String get explore_groupsHint => '1–9로 빠르게 분류';
+
+  @override
+  String get explore_newGroup => '새 그룹';
+
+  @override
+  String get explore_ungroup => '그룹에서 빼기';
+
+  @override
+  String get explore_delete => '삭제';
+
+  @override
+  String explore_deleteN(Object count) {
+    return '$count장 삭제';
+  }
+
+  @override
+  String get explore_deleteThis => '이 이미지 삭제';
+
+  @override
+  String explore_deleted(Object count) {
+    return '$count장 삭제함';
+  }
+
+  @override
+  String get explore_inspectorEmpty => '후보를 누르면 뽑힌 작가가 여기에 표시됩니다';
+
+  @override
+  String explore_childN(Object number) {
+    return '자손 #$number';
+  }
+
+  @override
+  String explore_genOp(Object gen, Object op) {
+    return '$gen세대 · $op';
+  }
+
+  @override
+  String get explore_drawn => '이 이미지에서 뽑힌 것';
+
+  @override
+  String get explore_drawEmpty => '이번에는 빈 항목이 뽑혔습니다';
+
+  @override
+  String get explore_origin => '만들어진 방식';
+
+  @override
+  String get explore_seed => '시드';
+
+  @override
+  String get explore_elapsed => '소요 시간';
+
+  @override
+  String get explore_params => '설정';
+
+  @override
+  String get explore_sampler => '샘플러';
+
+  @override
+  String get explore_model => '모델';
+
+  @override
+  String explore_steps(Object count) {
+    return '$count스텝';
+  }
+
+  @override
+  String get explore_fullPrompt => '전체 프롬프트';
+
+  @override
+  String get explore_negative => '네거티브';
+
+  @override
+  String get explore_failReason => '실패 이유';
+
+  @override
+  String get explore_retryFailed => '실패한 후보 다시 시도';
+
+  @override
+  String get explore_waitHint => '생성되면 뽑힌 작가가 여기에 표시됩니다';
+
+  @override
+  String explore_mergedArtists(Object count) {
+    return '합친 작가 · $count';
+  }
+
+  @override
+  String get explore_multiHint =>
+      '블록으로 저장하면 이 작가들을 하나로 합칩니다. 진화에서는 이미지마다 부모가 됩니다.';
+
+  @override
+  String get explore_evoEmptyTitle => '아직 진화 라인이 없습니다';
+
+  @override
+  String get explore_evoEmptyBody =>
+      '마음에 드는 후보를 골라 \"진화 시작\"을 누르면 좋은 작가 조합에서 새 조합을 키웁니다.';
+
+  @override
+  String get explore_evoGoPick => '후보에서 고르기';
+
+  @override
+  String explore_gen(Object number) {
+    return '$number세대';
+  }
+
+  @override
+  String get explore_current => '현재';
+
+  @override
+  String explore_genFirst(Object picked, Object children) {
+    return '후보 $picked장에서 시작 · 자손 $children장';
+  }
+
+  @override
+  String explore_genFrom(
+    Object parents,
+    Object children,
+    Object from,
+    Object picked,
+  ) {
+    return '부모 $parents → 자손 $children · $from세대에서 $picked장';
+  }
+
+  @override
+  String get explore_backcross => '1세대 역교배';
+
+  @override
+  String get explore_compare => '둘씩 비교해 순위';
+
+  @override
+  String get explore_compareTip => '부모를 둘씩 보고 더 좋은 쪽을 고릅니다. 선호도가 높을수록 자주 선택됩니다';
+
+  @override
+  String explore_generateChildren(Object count) {
+    return '자손 $count장 생성';
+  }
+
+  @override
+  String explore_children(Object count) {
+    return '자손 · $count';
+  }
+
+  @override
+  String explore_pickedN(Object count) {
+    return '$count장 선택';
+  }
+
+  @override
+  String get explore_breedHint => '마음에 드는 자손을 골라 다음 세대로';
+
+  @override
+  String explore_breed(Object count, Object next) {
+    return '선택한 $count장으로 $next세대 키우기';
+  }
+
+  @override
+  String get explore_noChildren => '아직 자손이 없습니다 · \"생성\"으로 첫 배치 만들기';
+
+  @override
+  String explore_parentsByPref(Object count) {
+    return '부모 · 선호도순 · $count';
+  }
+
+  @override
+  String get explore_opMutation => '변이';
+
+  @override
+  String get explore_opCrossover => '교차';
+
+  @override
+  String get explore_opInjection => '주입';
+
+  @override
+  String get explore_searchRuns => '탐색 검색';
+
+  @override
+  String get explore_newRun => '새 탐색';
+
+  @override
+  String get explore_newRunHint => '현재 프롬프트와 설정으로 시작합니다. 이름은 나중에 바꿀 수 있습니다';
+
+  @override
+  String explore_runRunning(Object done, Object total) {
+    return '생성 중 $done/$total';
+  }
+
+  @override
+  String explore_runPaused(Object done, Object total) {
+    return '일시 정지 $done/$total';
+  }
+
+  @override
+  String explore_runFailed(Object count) {
+    return '$count장 실패';
+  }
+
+  @override
+  String get explore_noRunMatch => '일치하는 탐색이 없습니다';
+
+  @override
+  String get explore_runMenuHint => '자동 이름: 랜덤 블록 이름 + 날짜 · 행의 ⋯로 이름 변경·삭제';
+
+  @override
+  String get explore_deleteRun => '탐색 삭제';
+
+  @override
+  String explore_deleteRunTitle(Object name) {
+    return '\"$name\"을(를) 삭제할까요?';
+  }
+
+  @override
+  String explore_deleteRunBody(Object count) {
+    return '후보 $count장과 모든 진화 라인이 삭제되며 되돌릴 수 없습니다. 갤러리 이미지는 영향을 받지 않습니다.';
+  }
+
+  @override
+  String explore_deleteLineTitle(Object name) {
+    return '진화 라인 \"$name\"을(를) 삭제할까요?';
+  }
+
+  @override
+  String explore_deleteLineBody(Object count) {
+    return '이 라인의 자손 $count장도 삭제되며 되돌릴 수 없습니다. 후보는 영향을 받지 않습니다.';
+  }
+
+  @override
+  String get explore_onboardingTitle => '랜덤 블록으로 화풍을 한꺼번에 시험하기';
+
+  @override
+  String get explore_onboardingBody =>
+      '이미지마다 작가 풀에서 다시 뽑습니다. 마음에 드는 조합을 남겨 진화시키세요.';
+
+  @override
+  String get explore_step1 => '랜덤 블록 넣기';
+
+  @override
+  String get explore_step1Body => '라이브러리의 랜덤 블록(예: 작가 풀)을 프롬프트에 넣습니다.';
+
+  @override
+  String get explore_step2 => '후보 한 묶음 뽑기';
+
+  @override
+  String explore_step2Body(Object count) {
+    return '왼쪽 아래 \"후보 $count장 뽑기\"를 누르면 이미지마다 작가를 다시 뽑습니다.';
+  }
+
+  @override
+  String get explore_step3 => '즐겨찾기, 진화, 저장';
+
+  @override
+  String get explore_step3Body =>
+      '마음에 드는 것을 즐겨찾기하고 진화시킨 뒤, 만족한 조합을 블록으로 저장합니다.';
+
+  @override
+  String explore_detected(Object count) {
+    return '$count개 감지됨';
+  }
+
+  @override
+  String get explore_noVariables => '랜덤 블록 없음';
+
+  @override
+  String get explore_openPrevious => '이전 탐색 열기';
+
+  @override
+  String explore_evoTitle(Object count) {
+    return '후보 $count장으로 진화 시작';
+  }
+
+  @override
+  String explore_evoJoinTitle(Object count, Object line, Object gen) {
+    return '$count장을 \"$line\" $gen세대에 추가';
+  }
+
+  @override
+  String get explore_evoStep1 => '부모';
+
+  @override
+  String get explore_evoStep1Body => '후보마다 작가 문자열이 부모가 됩니다';
+
+  @override
+  String get explore_evoStep2 => '자손';
+
+  @override
+  String get explore_evoStep2Body => '교차, 변이, 새 작가 주입';
+
+  @override
+  String get explore_evoStep3 => '고르기';
+
+  @override
+  String get explore_evoStep3Body => '마음에 드는 자손으로 다음 세대';
+
+  @override
+  String get explore_evoNewLine => '새 진화 라인';
+
+  @override
+  String explore_evoJoin(Object line, Object gen) {
+    return '\"$line\" $gen세대에 추가';
+  }
+
+  @override
+  String get explore_lineName => '진화 라인 이름';
+
+  @override
+  String explore_lineDefault(Object number) {
+    return '진화 라인 $number';
+  }
+
+  @override
+  String explore_lineGen(Object line, Object gen) {
+    return '$line · $gen세대';
+  }
+
+  @override
+  String explore_evoParents(Object count) {
+    return '1세대 부모 · $count';
+  }
+
+  @override
+  String explore_evoAddParents(Object count) {
+    return '추가할 부모 · $count';
+  }
+
+  @override
+  String get explore_addCustom => '사용자 작가 문자열 추가';
+
+  @override
+  String get explore_customHint =>
+      '예: 0.8::artist:ciloranko::, artist:rella (Enter로 추가)';
+
+  @override
+  String get explore_targetBefore => '자손은 프롬프트의';
+
+  @override
+  String get explore_targetAfter => '위치를 바꾸고 나머지는 그대로 둡니다';
+
+  @override
+  String get explore_noTarget => '프롬프트에 랜덤 블록이 없어 자손을 바꿀 곳이 없습니다. 먼저 넣어 주세요.';
+
+  @override
+  String get explore_firstBatch => '첫 자손';
+
+  @override
+  String get explore_atLeast4 => '장 (최소 4)';
+
+  @override
+  String get explore_createOnly => '만들기만';
+
+  @override
+  String get explore_joinOnly => '추가만';
+
+  @override
+  String explore_createGenerate(Object count) {
+    return '만들고 $count장 생성';
+  }
+
+  @override
+  String get explore_saveBlockTitle => '프롬프트 블록으로 저장';
+
+  @override
+  String get explore_untitled => '제목 없음';
+
+  @override
+  String explore_blockFromOne(Object number) {
+    return '후보 #$number에서';
+  }
+
+  @override
+  String explore_blockFromMany(Object count) {
+    return '후보 $count장에서 합치고 중복 제거';
+  }
+
+  @override
+  String explore_blockNameMany(Object run, Object count) {
+    return '$run · 엄선 $count';
+  }
+
+  @override
+  String get explore_blockContent => '내용';
+
+  @override
+  String get explore_blockArtists => '뽑힌 작가만';
+
+  @override
+  String get explore_blockFull => '전체 포지티브';
+
+  @override
+  String get explore_blockFullSingle => '후보가 1장일 때만 사용할 수 있습니다';
+
+  @override
+  String get explore_blockRemoveHint => '×로 필요 없는 작가 빼기';
+
+  @override
+  String explore_blockKept(Object kept, Object total) {
+    return '$kept / $total 유지';
+  }
+
+  @override
+  String get explore_blockName => '이름';
+
+  @override
+  String get explore_blockColor => '색';
+
+  @override
+  String get explore_blockFolder => '저장 위치';
+
+  @override
+  String get explore_blockRoot => '블록 라이브러리 (루트)';
+
+  @override
+  String get explore_blockFooter => '저장 후 블록 라이브러리에서 프롬프트로 끌어올 수 있습니다';
+
+  @override
+  String get explore_compareTitle => '둘씩 비교 · 부모 순위 정하기';
+
+  @override
+  String get explore_compareNote => '결과는 바로 저장됩니다';
+
+  @override
+  String get explore_compareQuestion => '어느 쪽이 원하는 화풍에 더 가깝나요?';
+
+  @override
+  String explore_comparePairs(Object index, Object total) {
+    return '$index / $total쌍';
+  }
+
+  @override
+  String get explore_leftBetter => '왼쪽이 더 좋음';
+
+  @override
+  String get explore_rightBetter => '오른쪽이 더 좋음';
+
+  @override
+  String get explore_neither => '둘 다 아님';
+
+  @override
+  String get explore_skip => '건너뛰기';
+
+  @override
+  String get explore_keySpace => 'Space';
+
+  @override
+  String get explore_ranking => '현재 순위 · 실시간';
+
+  @override
+  String get explore_rankingNote => '선호도가 높을수록 다음 세대에서 부모로 자주 선택됩니다.';
+
+  @override
+  String get explore_compareDone => '순위 정리 완료';
+
+  @override
+  String get explore_compareDoneBody => '새 선호도가 저장되어 다음 자손 생성에 사용됩니다.';
 }

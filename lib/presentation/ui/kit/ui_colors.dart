@@ -44,6 +44,9 @@ class UiColors {
     required this.weightDownInk,
     required this.weightNeg,
     required this.weightNegInk,
+    required this.evo,
+    required this.evoBg,
+    required this.onEvo,
   });
 
   factory UiColors.of(BuildContext context) =>
@@ -91,6 +94,9 @@ class UiColors {
       weightDownInk: dark ? const Color(0xFF7CB8FF) : const Color(0xFF0057C2),
       weightNeg: dark ? const Color(0xFF3D1418) : const Color(0xFFFFE8EA),
       weightNegInk: dark ? const Color(0xFFFF7A80) : const Color(0xFFC80029),
+      evo: dark ? const Color(0xFF9E8CFC) : const Color(0xFF6E56CF),
+      evoBg: dark ? const Color(0xFF1D1830) : const Color(0xFFF3F0FF),
+      onEvo: dark ? const Color(0xFF140F2B) : Colors.white,
     );
   }
 
@@ -183,6 +189,11 @@ class UiColors {
   final Color weightDownInk;
   final Color weightNeg;
   final Color weightNegInk;
+
+  /// 进化（画风探索）：紫色主色、浅紫底、紫底上的字色。
+  final Color evo;
+  final Color evoBg;
+  final Color onEvo;
 
   /// 把 [color] 按 [t] 混到卡片底色上，等价于 CSS `color-mix(color t, card)`。
   Color onCard(Color color, double t) => Color.lerp(card, color, t)!;

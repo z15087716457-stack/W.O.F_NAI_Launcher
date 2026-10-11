@@ -16822,4 +16822,803 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get imageViewer_yesterday => 'yesterday';
+
+  @override
+  String get explore_back => 'Style explore';
+
+  @override
+  String get explore_close => 'Close';
+
+  @override
+  String get explore_cancel => 'Cancel';
+
+  @override
+  String get explore_done => 'Done';
+
+  @override
+  String get explore_more => 'More';
+
+  @override
+  String get explore_rename => 'Rename';
+
+  @override
+  String get explore_remove => 'Remove';
+
+  @override
+  String get explore_copy => 'Copy';
+
+  @override
+  String get explore_undo => 'Undo';
+
+  @override
+  String get explore_expand => 'Expand';
+
+  @override
+  String get explore_expandAll => 'Show all';
+
+  @override
+  String get explore_collapse => 'Collapse';
+
+  @override
+  String get explore_previous => 'Previous';
+
+  @override
+  String get explore_next => 'Next';
+
+  @override
+  String explore_today(Object time) {
+    return 'Today $time';
+  }
+
+  @override
+  String explore_yesterday(Object time) {
+    return 'Yesterday $time';
+  }
+
+  @override
+  String explore_monthDay(Object month, Object day, Object time) {
+    return '$month/$day $time';
+  }
+
+  @override
+  String explore_fullDate(Object year, Object month, Object day) {
+    return '$year/$month/$day';
+  }
+
+  @override
+  String get explore_sectionToday => 'Today';
+
+  @override
+  String get explore_thisWeek => 'This week';
+
+  @override
+  String get explore_earlier => 'Earlier';
+
+  @override
+  String get explore_variables => 'Random variables';
+
+  @override
+  String get explore_variablesHint => 'Re-drawn for every image';
+
+  @override
+  String get explore_variablesInfo =>
+      'Random blocks in your prompt. Each candidate draws again from the pool and shows what it got; the block marked as evolution target is where offspring swap in.';
+
+  @override
+  String get explore_variablesEmpty =>
+      'No random blocks in the prompt yet. Insert one from the block library (e.g. an artist pool) and every image draws again.';
+
+  @override
+  String get explore_openBlockLibrary => 'Open block library';
+
+  @override
+  String get explore_variableMissing => 'Block deleted';
+
+  @override
+  String explore_poolSize(Object count) {
+    return '$count in pool';
+  }
+
+  @override
+  String get explore_evolutionTarget => 'Evolution target';
+
+  @override
+  String explore_draw(Object count) {
+    return 'Draw $count candidates';
+  }
+
+  @override
+  String get explore_stopGenerating => 'Stop';
+
+  @override
+  String get explore_busy => 'Generating';
+
+  @override
+  String explore_cooldown(Object seconds) {
+    return 'Cooldown $seconds s';
+  }
+
+  @override
+  String get explore_insufficient => 'Not enough Anlas';
+
+  @override
+  String explore_count(Object count) {
+    return '$count images';
+  }
+
+  @override
+  String explore_favoritesCount(Object count) {
+    return '$count favorites';
+  }
+
+  @override
+  String explore_roundsCount(Object count) {
+    return '$count rounds';
+  }
+
+  @override
+  String explore_linesCount(Object count) {
+    return '$count lines';
+  }
+
+  @override
+  String explore_progressRound(Object round, Object done, Object total) {
+    return 'Round $round · $done / $total';
+  }
+
+  @override
+  String explore_progressChildren(
+    Object line,
+    Object gen,
+    Object done,
+    Object total,
+  ) {
+    return '$line G$gen · $done / $total';
+  }
+
+  @override
+  String explore_paused(Object where) {
+    return 'Paused · $where';
+  }
+
+  @override
+  String get explore_pause => 'Pause';
+
+  @override
+  String get explore_resume => 'Resume';
+
+  @override
+  String get explore_stop => 'Stop';
+
+  @override
+  String get explore_sizeSmall => 'Small cards';
+
+  @override
+  String get explore_sizeLarge => 'Large cards';
+
+  @override
+  String get explore_inspector => 'Inspector';
+
+  @override
+  String get explore_hideInspector => 'Hide';
+
+  @override
+  String get explore_tabCandidates => 'Candidates';
+
+  @override
+  String get explore_tabEvolution => 'Evolution';
+
+  @override
+  String get explore_filterAll => 'All';
+
+  @override
+  String get explore_filterFavorites => 'Favorites';
+
+  @override
+  String get explore_filterUngrouped => 'Ungrouped';
+
+  @override
+  String get explore_addGroup => 'Group';
+
+  @override
+  String get explore_groupName => 'Group name';
+
+  @override
+  String get explore_deleteGroup => 'Delete group (members become ungrouped)';
+
+  @override
+  String get explore_newLine => 'New line';
+
+  @override
+  String get explore_deleteLine => 'Delete line';
+
+  @override
+  String get explore_compareShort => 'Compare';
+
+  @override
+  String get explore_evoHelp => 'How it works';
+
+  @override
+  String get explore_evoHelpBody =>
+      '1. Pick candidates you like and start evolution — their artist strings become generation 1.\n2. Offspring come from crossover, mutation and injecting new artists.\n3. Tick the offspring you like to breed the next generation; pairwise comparison tunes parent preference.';
+
+  @override
+  String get explore_select => 'Select';
+
+  @override
+  String get explore_selectAll => 'Select all';
+
+  @override
+  String get explore_selectDone => 'Done';
+
+  @override
+  String get explore_selectExit => 'Exit selection  Esc';
+
+  @override
+  String get explore_selectHint => 'Click cards to select';
+
+  @override
+  String explore_selectedN(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String get explore_sortNewest =>
+      'Newest round first (click for oldest first)';
+
+  @override
+  String get explore_sortOldest =>
+      'Oldest round first (click for newest first)';
+
+  @override
+  String explore_round(Object number) {
+    return 'Round $number';
+  }
+
+  @override
+  String explore_generatingShort(Object done, Object total) {
+    return 'Generating $done / $total';
+  }
+
+  @override
+  String explore_failedRetry(Object count) {
+    return '$count failed · Retry';
+  }
+
+  @override
+  String get explore_pick => 'Pick for evolution';
+
+  @override
+  String get explore_pickTip =>
+      'Enter selection with this round\'s favorites ticked';
+
+  @override
+  String get explore_filterEmpty => 'No candidates match this filter';
+
+  @override
+  String get explore_showAll => 'Show all';
+
+  @override
+  String explore_queued(Object number) {
+    return 'Queued #$number';
+  }
+
+  @override
+  String explore_generatingN(Object number) {
+    return 'Generating #$number';
+  }
+
+  @override
+  String get explore_failed => 'Failed';
+
+  @override
+  String get explore_failedHover => 'Hover for the reason';
+
+  @override
+  String get explore_noArtists => 'No artists drawn';
+
+  @override
+  String get explore_parentTip => 'Already a parent in an evolution line';
+
+  @override
+  String get explore_favorite => 'Favorite';
+
+  @override
+  String get explore_favorited => 'Favorited';
+
+  @override
+  String get explore_unfavorite => 'Unfavorite';
+
+  @override
+  String get explore_addToEvolution => 'Add to evolution';
+
+  @override
+  String get explore_startEvolution => 'Start evolution';
+
+  @override
+  String get explore_saveBlock => 'Save as block';
+
+  @override
+  String get explore_applyToEditor => 'Apply to editor';
+
+  @override
+  String get explore_copyArtists => 'Copy artists';
+
+  @override
+  String get explore_openLarge => 'Open large';
+
+  @override
+  String get explore_group => 'Group';
+
+  @override
+  String get explore_groups => 'Groups';
+
+  @override
+  String get explore_groupsHint => 'Press 1–9 to group';
+
+  @override
+  String get explore_newGroup => 'New group';
+
+  @override
+  String get explore_ungroup => 'Ungroup';
+
+  @override
+  String get explore_delete => 'Delete';
+
+  @override
+  String explore_deleteN(Object count) {
+    return 'Delete $count';
+  }
+
+  @override
+  String get explore_deleteThis => 'Delete this image';
+
+  @override
+  String explore_deleted(Object count) {
+    return 'Deleted $count';
+  }
+
+  @override
+  String get explore_inspectorEmpty =>
+      'Click a candidate to see which artists it drew';
+
+  @override
+  String explore_childN(Object number) {
+    return 'Offspring #$number';
+  }
+
+  @override
+  String explore_genOp(Object gen, Object op) {
+    return 'G$gen · $op';
+  }
+
+  @override
+  String get explore_drawn => 'Drawn for this image';
+
+  @override
+  String get explore_drawEmpty =>
+      'Nothing drawn this time (the pool has empty entries)';
+
+  @override
+  String get explore_origin => 'How it was made';
+
+  @override
+  String get explore_seed => 'Seed';
+
+  @override
+  String get explore_elapsed => 'Time';
+
+  @override
+  String get explore_params => 'Params';
+
+  @override
+  String get explore_sampler => 'Sampler';
+
+  @override
+  String get explore_model => 'Model';
+
+  @override
+  String explore_steps(Object count) {
+    return '$count steps';
+  }
+
+  @override
+  String get explore_fullPrompt => 'Full prompt';
+
+  @override
+  String get explore_negative => 'Negative';
+
+  @override
+  String get explore_failReason => 'Reason';
+
+  @override
+  String get explore_retryFailed => 'Retry failed candidates';
+
+  @override
+  String get explore_waitHint => 'Artists show up here once it is generated';
+
+  @override
+  String explore_mergedArtists(Object count) {
+    return 'Combined artists · $count';
+  }
+
+  @override
+  String get explore_multiHint =>
+      'Save as block merges these artists into one block; in evolution each image becomes a parent.';
+
+  @override
+  String get explore_evoEmptyTitle => 'No evolution lines yet';
+
+  @override
+  String get explore_evoEmptyBody =>
+      'Pick a few candidates you like and press \"Start evolution\" to breed new artist mixes from the good ones.';
+
+  @override
+  String get explore_evoGoPick => 'Pick from candidates';
+
+  @override
+  String explore_gen(Object number) {
+    return 'G$number';
+  }
+
+  @override
+  String get explore_current => 'Current';
+
+  @override
+  String explore_genFirst(Object picked, Object children) {
+    return 'Started from $picked candidates · $children offspring';
+  }
+
+  @override
+  String explore_genFrom(
+    Object parents,
+    Object children,
+    Object from,
+    Object picked,
+  ) {
+    return '$parents parents → $children offspring · $picked picked from G$from';
+  }
+
+  @override
+  String get explore_backcross => 'G1 backcross';
+
+  @override
+  String get explore_compare => 'Rank by comparing';
+
+  @override
+  String get explore_compareTip =>
+      'See two parents at a time and pick the better one; higher preference means picked more often';
+
+  @override
+  String explore_generateChildren(Object count) {
+    return 'Generate $count offspring';
+  }
+
+  @override
+  String explore_children(Object count) {
+    return 'Offspring · $count';
+  }
+
+  @override
+  String explore_pickedN(Object count) {
+    return '$count picked';
+  }
+
+  @override
+  String get explore_breedHint =>
+      'Tick offspring you like to breed the next generation';
+
+  @override
+  String explore_breed(Object count, Object next) {
+    return 'Breed G$next from $count';
+  }
+
+  @override
+  String get explore_noChildren =>
+      'No offspring yet · press Generate for the first batch';
+
+  @override
+  String explore_parentsByPref(Object count) {
+    return 'Parents by preference · $count';
+  }
+
+  @override
+  String get explore_opMutation => 'Mutation';
+
+  @override
+  String get explore_opCrossover => 'Crossover';
+
+  @override
+  String get explore_opInjection => 'Injection';
+
+  @override
+  String get explore_searchRuns => 'Search explorations';
+
+  @override
+  String get explore_newRun => 'New exploration';
+
+  @override
+  String get explore_newRunHint =>
+      'Starts with the current prompt and settings; rename any time';
+
+  @override
+  String explore_runRunning(Object done, Object total) {
+    return 'Generating $done/$total';
+  }
+
+  @override
+  String explore_runPaused(Object done, Object total) {
+    return 'Paused $done/$total';
+  }
+
+  @override
+  String explore_runFailed(Object count) {
+    return '$count failed';
+  }
+
+  @override
+  String get explore_noRunMatch => 'No matching explorations';
+
+  @override
+  String get explore_runMenuHint =>
+      'Auto-named from random blocks + date · hover a row and use ⋯ to rename or delete';
+
+  @override
+  String get explore_deleteRun => 'Delete exploration';
+
+  @override
+  String explore_deleteRunTitle(Object name) {
+    return 'Delete \"$name\"?';
+  }
+
+  @override
+  String explore_deleteRunBody(Object count) {
+    return 'Its $count candidates and all evolution lines will be deleted. This cannot be undone. Gallery images are not affected.';
+  }
+
+  @override
+  String explore_deleteLineTitle(Object name) {
+    return 'Delete line \"$name\"?';
+  }
+
+  @override
+  String explore_deleteLineBody(Object count) {
+    return 'Its $count offspring will be deleted. This cannot be undone. Candidates are not affected.';
+  }
+
+  @override
+  String get explore_onboardingTitle => 'Try styles in bulk with random blocks';
+
+  @override
+  String get explore_onboardingBody =>
+      'Every image draws again from your artist pool — keep the mixes you like and let them evolve.';
+
+  @override
+  String get explore_step1 => 'Add a random block';
+
+  @override
+  String get explore_step1Body =>
+      'Insert a random block from the library into the prompt, e.g. an artist pool.';
+
+  @override
+  String get explore_step2 => 'Draw a batch';
+
+  @override
+  String explore_step2Body(Object count) {
+    return 'Press \"Draw $count candidates\" at the bottom left; each image draws new artists.';
+  }
+
+  @override
+  String get explore_step3 => 'Keep, evolve, save';
+
+  @override
+  String get explore_step3Body =>
+      'Favorite what you like, evolve it, and save the mixes you love as blocks.';
+
+  @override
+  String explore_detected(Object count) {
+    return '$count detected';
+  }
+
+  @override
+  String get explore_noVariables => 'No random blocks yet';
+
+  @override
+  String get explore_openPrevious => 'Open a previous exploration';
+
+  @override
+  String explore_evoTitle(Object count) {
+    return 'Start evolution with $count candidates';
+  }
+
+  @override
+  String explore_evoJoinTitle(Object count, Object line, Object gen) {
+    return 'Add $count to \"$line\" G$gen';
+  }
+
+  @override
+  String get explore_evoStep1 => 'Parents';
+
+  @override
+  String get explore_evoStep1Body =>
+      'Each candidate\'s artist string is a parent';
+
+  @override
+  String get explore_evoStep2 => 'Offspring';
+
+  @override
+  String get explore_evoStep2Body => 'Crossover, mutation, new artists';
+
+  @override
+  String get explore_evoStep3 => 'Pick';
+
+  @override
+  String get explore_evoStep3Body => 'Tick favorites to breed the next one';
+
+  @override
+  String get explore_evoNewLine => 'New line';
+
+  @override
+  String explore_evoJoin(Object line, Object gen) {
+    return 'Join \"$line\" G$gen';
+  }
+
+  @override
+  String get explore_lineName => 'Line name';
+
+  @override
+  String explore_lineDefault(Object number) {
+    return 'Line $number';
+  }
+
+  @override
+  String explore_lineGen(Object line, Object gen) {
+    return '$line · G$gen';
+  }
+
+  @override
+  String explore_evoParents(Object count) {
+    return 'Generation 1 parents · $count';
+  }
+
+  @override
+  String explore_evoAddParents(Object count) {
+    return 'Parents to add · $count';
+  }
+
+  @override
+  String get explore_addCustom => 'Add a custom artist string';
+
+  @override
+  String get explore_customHint =>
+      'e.g. 0.8::artist:ciloranko::, artist:rella (Enter to add)';
+
+  @override
+  String get explore_targetBefore => 'Offspring replace';
+
+  @override
+  String get explore_targetAfter => 'in the prompt; everything else stays';
+
+  @override
+  String get explore_noTarget =>
+      'There is no random block in the prompt for offspring to replace — insert one first.';
+
+  @override
+  String get explore_firstBatch => 'First batch';
+
+  @override
+  String get explore_atLeast4 => 'images (at least 4)';
+
+  @override
+  String get explore_createOnly => 'Create only';
+
+  @override
+  String get explore_joinOnly => 'Add only';
+
+  @override
+  String explore_createGenerate(Object count) {
+    return 'Create & generate $count';
+  }
+
+  @override
+  String get explore_saveBlockTitle => 'Save as prompt block';
+
+  @override
+  String get explore_untitled => 'Untitled';
+
+  @override
+  String explore_blockFromOne(Object number) {
+    return 'From candidate #$number';
+  }
+
+  @override
+  String explore_blockFromMany(Object count) {
+    return 'From $count candidates, merged and deduplicated';
+  }
+
+  @override
+  String explore_blockNameMany(Object run, Object count) {
+    return '$run · Picks $count';
+  }
+
+  @override
+  String get explore_blockContent => 'Content';
+
+  @override
+  String get explore_blockArtists => 'Drawn artists only';
+
+  @override
+  String get explore_blockFull => 'Full positive prompt';
+
+  @override
+  String get explore_blockFullSingle =>
+      'Full prompt is available for a single candidate';
+
+  @override
+  String get explore_blockRemoveHint => 'Click × to drop artists';
+
+  @override
+  String explore_blockKept(Object kept, Object total) {
+    return 'Keeping $kept / $total';
+  }
+
+  @override
+  String get explore_blockName => 'Name';
+
+  @override
+  String get explore_blockColor => 'Color';
+
+  @override
+  String get explore_blockFolder => 'Folder';
+
+  @override
+  String get explore_blockRoot => 'Block library (root)';
+
+  @override
+  String get explore_blockFooter =>
+      'Drag it into the prompt from the block library afterwards';
+
+  @override
+  String get explore_compareTitle => 'Pairwise · rank the parents';
+
+  @override
+  String get explore_compareNote => 'Saved as you go — close any time';
+
+  @override
+  String get explore_compareQuestion =>
+      'Which is closer to the style you want?';
+
+  @override
+  String explore_comparePairs(Object index, Object total) {
+    return 'Pair $index / $total';
+  }
+
+  @override
+  String get explore_leftBetter => 'Left is better';
+
+  @override
+  String get explore_rightBetter => 'Right is better';
+
+  @override
+  String get explore_neither => 'Neither';
+
+  @override
+  String get explore_skip => 'Skip';
+
+  @override
+  String get explore_keySpace => 'Space';
+
+  @override
+  String get explore_ranking => 'Live ranking';
+
+  @override
+  String get explore_rankingNote =>
+      'Higher preference means picked more often as a parent when breeding.';
+
+  @override
+  String get explore_compareDone => 'All ranked';
+
+  @override
+  String get explore_compareDoneBody =>
+      'New preferences are saved and used for the next offspring.';
 }

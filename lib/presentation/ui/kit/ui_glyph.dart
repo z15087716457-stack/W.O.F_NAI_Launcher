@@ -143,4 +143,23 @@ abstract final class UiGlyphs {
   static const minus = 'M5 12h14';
   static const drag = 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01';
   static const merge = 'M6 4v5a6 6 0 006 6h6M15 12l3 3-3 3M6 20v-3';
+
+  // 画风探索（.devin/mockups/style-explore/mock.html）
+  static const expand = 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5';
+  static const archive = 'M4 5h16v4H4zM5 9v10h14V9M10 13h4';
+  static const retry =
+      'M4 12a8 8 0 0114-5.3L20 9M20 4v5h-5M20 12a8 8 0 01-14 5.3L4 15M4 20v-5h5';
+  static const pause = 'M9 5v14M15 5v14';
+  static const stop = 'M6 6h12v12H6z';
+  static const play = 'M8 5l11 7-11 7z';
+  static const enter = 'M20 4v7a4 4 0 01-4 4H5M9 11l-4 4 4 4';
+  static const branch =
+      'M6 3v12M6 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM18 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM18 9c0 6-12 3-12 9';
+  static const arrowDown = 'M12 5v14M6 13l6 6 6-6';
+  static const skip = 'M5 5l8 7-8 7zM15 5v14';
+  static const link =
+      'M10 14a4 4 0 005.66 0l3-3a4 4 0 00-5.66-5.66l-1 1M14 10a4 4 0 00-5.66 0l-3 3a4 4 0 005.66 5.66l1-1';
+  static const landscape = 'M4 7h16v10H4z';
+  static const portrait = 'M7 4h10v16H7z';
+  static const square = 'M5 5h14v14H5z';
 }

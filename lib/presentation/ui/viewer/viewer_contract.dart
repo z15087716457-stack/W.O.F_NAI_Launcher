@@ -348,6 +348,7 @@ class ViewerViewData {
     this.undo,
     this.keys = ViewerKeys.defaults,
     this.zoomHintSeen = false,
+    this.backLabel,
   });
 
   final ViewerMode mode;
@@ -390,6 +391,9 @@ class ViewerViewData {
 
   /// 第一次放大时的操作提示看过没有（看过不再出）。
   final bool zoomHintSeen;
+
+  /// 顶栏返回按钮的文字；null 按 [mode] 写“本地画廊 / 生图”（画风探索传“画风探索”）。
+  final String? backLabel;
 
   ViewerItem? get current =>
       items.where((i) => i.key == currentKey).firstOrNull;

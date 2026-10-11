@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_page.dart';
+import 'package:nai_launcher/presentation/ui/explore/explore_fixture_editor.dart';
+import 'package:nai_launcher/presentation/ui/explore/explore_page.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_contract.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_fixture.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_labels.dart';
@@ -24,6 +26,7 @@ import 'package:nai_launcher/presentation/ui/statistics/statistics_page.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
 
 import 'blocks_preview.dart';
+import 'explore_preview.dart';
 import 'online_preview.dart';
 import 'refs_preview.dart';
 import 'viewer_preview.dart';
@@ -47,7 +50,7 @@ class _PreviewAppState extends State<_PreviewApp> {
   String? _lastAction;
 
   // 主导航
-  var _page = NavPage.localGallery;
+  var _page = NavPage.styleExplore;
   var _gen = _Gen.idle;
   var _tasks = false;
   var _pinned = false;
@@ -80,6 +83,9 @@ class _PreviewAppState extends State<_PreviewApp> {
     ..addListener(_rebuild)
     ..onClose = () => _log('关闭大图（真实应用回到本地画廊）');
 
+  // 画风探索
+  late final _explore = ExplorePreviewSim(log: _log)..addListener(_rebuild);
+
   void _rebuild() => setState(() {});
 
   @override
@@ -88,6 +94,7 @@ class _PreviewAppState extends State<_PreviewApp> {
     _refs.dispose();
     _blocks.dispose();
     _viewer.dispose();
+    _explore.dispose();
     super.dispose();
   }
 
@@ -294,6 +301,12 @@ class _PreviewAppState extends State<_PreviewApp> {
                       ViewerScene.values,
                       (s) => setState(() => _viewer.scene = s),
                     ),
+                    const Text('画风探索：'),
+                    _dropdown(
+                      _explore.scene,
+                      ExploreScene.values,
+                      (s) => setState(() => _explore.scene = s),
+                    ),
                     if (_lastAction != null)
                       Text(_lastAction!, style: const TextStyle(fontSize: 12)),
                   ],
@@ -307,6 +320,8 @@ class _PreviewAppState extends State<_PreviewApp> {
                   actions: _viewer.actions,
                 ),
               )
+            else if (_page == NavPage.styleExplore && _explore.fullscreen)
+              Expanded(child: _explorePage())
             else
               Expanded(
                 child: NavShell(
@@ -327,6 +342,7 @@ class _PreviewAppState extends State<_PreviewApp> {
                       actions: _blocks.actions,
                     ),
                     NavPage.generation => BlocksGenerationMock(log: _log),
+                    NavPage.styleExplore => _explorePage(),
                     NavPage.localGallery => ImageViewerPage(
                       data: _viewer.data,
                       actions: _viewer.actions,
@@ -347,6 +363,13 @@ extension on _PreviewAppState {
     _picker = false;
     _rebuild();
   }
+
+  Widget _explorePage() => StyleExplorePage(
+    data: _explore.data,
+    actions: _explore.actions,
+    editor: (context, parts) =>
+        exploreFixtureEditor(context, parts, v45: _explore.v45),
+  );
 
   Widget _refsPage() {
     _refs.kind = _page == NavPage.vibeLibrary

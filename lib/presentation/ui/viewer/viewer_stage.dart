@@ -165,9 +165,10 @@ class ViewerTopBar extends StatelessWidget {
                   color: ViewerInk.text,
                 ),
                 Text(
-                  gen
-                      ? l10n.imageViewer_backGeneration
-                      : l10n.imageViewer_backGallery,
+                  data.backLabel ??
+                      (gen
+                          ? l10n.imageViewer_backGeneration
+                          : l10n.imageViewer_backGallery),
                 ),
                 const Padding(
                   padding: EdgeInsets.only(left: 2),

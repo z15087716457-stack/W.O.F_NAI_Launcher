@@ -16350,4 +16350,783 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get imageViewer_yesterday => '昨日';
+
+  @override
+  String get explore_back => '画風探索';
+
+  @override
+  String get explore_close => '閉じる';
+
+  @override
+  String get explore_cancel => 'キャンセル';
+
+  @override
+  String get explore_done => '完了';
+
+  @override
+  String get explore_more => 'その他';
+
+  @override
+  String get explore_rename => '名前を変更';
+
+  @override
+  String get explore_remove => '外す';
+
+  @override
+  String get explore_copy => 'コピー';
+
+  @override
+  String get explore_undo => '元に戻す';
+
+  @override
+  String get explore_expand => '展開';
+
+  @override
+  String get explore_expandAll => 'すべて表示';
+
+  @override
+  String get explore_collapse => '折りたたむ';
+
+  @override
+  String get explore_previous => '前へ';
+
+  @override
+  String get explore_next => '次へ';
+
+  @override
+  String explore_today(Object time) {
+    return '今日 $time';
+  }
+
+  @override
+  String explore_yesterday(Object time) {
+    return '昨日 $time';
+  }
+
+  @override
+  String explore_monthDay(Object month, Object day, Object time) {
+    return '$month月$day日 $time';
+  }
+
+  @override
+  String explore_fullDate(Object year, Object month, Object day) {
+    return '$year年$month月$day日';
+  }
+
+  @override
+  String get explore_sectionToday => '今日';
+
+  @override
+  String get explore_thisWeek => '今週';
+
+  @override
+  String get explore_earlier => 'それ以前';
+
+  @override
+  String get explore_variables => 'ランダム変数';
+
+  @override
+  String get explore_variablesHint => '1 枚ごとに抽選';
+
+  @override
+  String get explore_variablesInfo =>
+      'プロンプト内のランダムブロック。候補ごとにプールから抽選し、結果を候補の下に表示します。「進化対象」のブロックは子世代が差し替わる位置です。';
+
+  @override
+  String get explore_variablesEmpty =>
+      'プロンプトにランダムブロックがありません。ブロックライブラリから（絵師プールなど）を挿入すると、毎回抽選されます。';
+
+  @override
+  String get explore_openBlockLibrary => 'ブロックライブラリを開く';
+
+  @override
+  String get explore_variableMissing => 'ブロック削除済み';
+
+  @override
+  String explore_poolSize(Object count) {
+    return 'プール $count 件';
+  }
+
+  @override
+  String get explore_evolutionTarget => '進化対象';
+
+  @override
+  String explore_draw(Object count) {
+    return '候補を $count 枚引く';
+  }
+
+  @override
+  String get explore_stopGenerating => '生成を停止';
+
+  @override
+  String get explore_busy => '生成中';
+
+  @override
+  String explore_cooldown(Object seconds) {
+    return 'クールダウン $seconds 秒';
+  }
+
+  @override
+  String get explore_insufficient => 'Anlas が足りません';
+
+  @override
+  String explore_count(Object count) {
+    return '$count 枚';
+  }
+
+  @override
+  String explore_favoritesCount(Object count) {
+    return 'お気に入り $count';
+  }
+
+  @override
+  String explore_roundsCount(Object count) {
+    return '$count ラウンド';
+  }
+
+  @override
+  String explore_linesCount(Object count) {
+    return '進化ライン $count';
+  }
+
+  @override
+  String explore_progressRound(Object round, Object done, Object total) {
+    return 'ラウンド $round · $done / $total';
+  }
+
+  @override
+  String explore_progressChildren(
+    Object line,
+    Object gen,
+    Object done,
+    Object total,
+  ) {
+    return '$line 第 $gen 世代 · $done / $total';
+  }
+
+  @override
+  String explore_paused(Object where) {
+    return '一時停止 · $where';
+  }
+
+  @override
+  String get explore_pause => '一時停止';
+
+  @override
+  String get explore_resume => '再開';
+
+  @override
+  String get explore_stop => '停止';
+
+  @override
+  String get explore_sizeSmall => '小さいカード';
+
+  @override
+  String get explore_sizeLarge => '大きいカード';
+
+  @override
+  String get explore_inspector => 'インスペクター';
+
+  @override
+  String get explore_hideInspector => '閉じる';
+
+  @override
+  String get explore_tabCandidates => '候補';
+
+  @override
+  String get explore_tabEvolution => '進化';
+
+  @override
+  String get explore_filterAll => 'すべて';
+
+  @override
+  String get explore_filterFavorites => 'お気に入り';
+
+  @override
+  String get explore_filterUngrouped => '未分類';
+
+  @override
+  String get explore_addGroup => 'グループ';
+
+  @override
+  String get explore_groupName => 'グループ名';
+
+  @override
+  String get explore_deleteGroup => 'グループを削除（メンバーは未分類へ）';
+
+  @override
+  String get explore_newLine => '新しい進化ライン';
+
+  @override
+  String get explore_deleteLine => '進化ラインを削除';
+
+  @override
+  String get explore_compareShort => '比較';
+
+  @override
+  String get explore_evoHelp => '使い方';
+
+  @override
+  String get explore_evoHelpBody =>
+      '1. 気に入った候補を選んで進化を開始すると、その絵師列が第 1 世代の親になります。\n2. 子は交叉・変異・新しい絵師の注入で作られます。\n3. 気に入った子を選んで次の世代を育てます。2 枚比較で親の優先度を調整できます。';
+
+  @override
+  String get explore_select => '複数選択';
+
+  @override
+  String get explore_selectAll => 'すべて選択';
+
+  @override
+  String get explore_selectDone => '完了';
+
+  @override
+  String get explore_selectExit => '選択を終了  Esc';
+
+  @override
+  String get explore_selectHint => 'カードをクリックで選択';
+
+  @override
+  String explore_selectedN(Object count) {
+    return '$count 枚選択中';
+  }
+
+  @override
+  String get explore_sortNewest => '新しいラウンドが上（クリックで古い順）';
+
+  @override
+  String get explore_sortOldest => '古いラウンドが上（クリックで新しい順）';
+
+  @override
+  String explore_round(Object number) {
+    return 'ラウンド $number';
+  }
+
+  @override
+  String explore_generatingShort(Object done, Object total) {
+    return '生成中 $done / $total';
+  }
+
+  @override
+  String explore_failedRetry(Object count) {
+    return '$count 枚失敗 · 再試行';
+  }
+
+  @override
+  String get explore_pick => '進化用に選ぶ';
+
+  @override
+  String get explore_pickTip => 'このラウンドのお気に入りを選択した状態で複数選択に入ります';
+
+  @override
+  String get explore_filterEmpty => 'このフィルターに一致する候補はありません';
+
+  @override
+  String get explore_showAll => 'すべて表示';
+
+  @override
+  String explore_queued(Object number) {
+    return '待機 #$number';
+  }
+
+  @override
+  String explore_generatingN(Object number) {
+    return '生成中 #$number';
+  }
+
+  @override
+  String get explore_failed => '生成失敗';
+
+  @override
+  String get explore_failedHover => 'ホバーで理由を表示';
+
+  @override
+  String get explore_noArtists => '絵師なし';
+
+  @override
+  String get explore_parentTip => '進化ラインの親です';
+
+  @override
+  String get explore_favorite => 'お気に入り';
+
+  @override
+  String get explore_favorited => 'お気に入り済み';
+
+  @override
+  String get explore_unfavorite => 'お気に入り解除';
+
+  @override
+  String get explore_addToEvolution => '進化に追加';
+
+  @override
+  String get explore_startEvolution => '進化を開始';
+
+  @override
+  String get explore_saveBlock => 'ブロックとして保存';
+
+  @override
+  String get explore_applyToEditor => 'エディターに適用';
+
+  @override
+  String get explore_copyArtists => '絵師列をコピー';
+
+  @override
+  String get explore_openLarge => '大きく表示';
+
+  @override
+  String get explore_group => 'グループ';
+
+  @override
+  String get explore_groups => 'グループ';
+
+  @override
+  String get explore_groupsHint => '1–9 キーで分類';
+
+  @override
+  String get explore_newGroup => '新しいグループ';
+
+  @override
+  String get explore_ungroup => 'グループから外す';
+
+  @override
+  String get explore_delete => '削除';
+
+  @override
+  String explore_deleteN(Object count) {
+    return '$count 枚を削除';
+  }
+
+  @override
+  String get explore_deleteThis => 'この画像を削除';
+
+  @override
+  String explore_deleted(Object count) {
+    return '$count 枚を削除しました';
+  }
+
+  @override
+  String get explore_inspectorEmpty => '候補をクリックすると、抽選された絵師がここに表示されます';
+
+  @override
+  String explore_childN(Object number) {
+    return '子 #$number';
+  }
+
+  @override
+  String explore_genOp(Object gen, Object op) {
+    return '第 $gen 世代 · $op';
+  }
+
+  @override
+  String get explore_drawn => 'この画像の抽選結果';
+
+  @override
+  String get explore_drawEmpty => '今回は空き枠が出ました';
+
+  @override
+  String get explore_origin => '生まれ方';
+
+  @override
+  String get explore_seed => 'シード';
+
+  @override
+  String get explore_elapsed => '所要時間';
+
+  @override
+  String get explore_params => 'パラメーター';
+
+  @override
+  String get explore_sampler => 'サンプラー';
+
+  @override
+  String get explore_model => 'モデル';
+
+  @override
+  String explore_steps(Object count) {
+    return '$count ステップ';
+  }
+
+  @override
+  String get explore_fullPrompt => '完全なプロンプト';
+
+  @override
+  String get explore_negative => 'ネガティブ';
+
+  @override
+  String get explore_failReason => '失敗の理由';
+
+  @override
+  String get explore_retryFailed => '失敗した候補を再試行';
+
+  @override
+  String get explore_waitHint => '生成されると抽選された絵師がここに表示されます';
+
+  @override
+  String explore_mergedArtists(Object count) {
+    return 'まとめた絵師 · $count';
+  }
+
+  @override
+  String get explore_multiHint =>
+      'ブロック保存ではこれらの絵師を 1 つにまとめます。進化では 1 枚ずつが親になります。';
+
+  @override
+  String get explore_evoEmptyTitle => '進化ラインはまだありません';
+
+  @override
+  String get explore_evoEmptyBody =>
+      '気に入った候補を選んで「進化を開始」を押すと、良い絵師の組み合わせから新しい組み合わせを育てます。';
+
+  @override
+  String get explore_evoGoPick => '候補から選ぶ';
+
+  @override
+  String explore_gen(Object number) {
+    return '第 $number 世代';
+  }
+
+  @override
+  String get explore_current => '現在';
+
+  @override
+  String explore_genFirst(Object picked, Object children) {
+    return '候補から $picked 枚を起点に · 子 $children 枚';
+  }
+
+  @override
+  String explore_genFrom(
+    Object parents,
+    Object children,
+    Object from,
+    Object picked,
+  ) {
+    return '親 $parents → 子 $children · 第 $from 世代から $picked 枚';
+  }
+
+  @override
+  String get explore_backcross => '第 1 世代と戻し交配';
+
+  @override
+  String get explore_compare => '2 枚比較で並べ替え';
+
+  @override
+  String get explore_compareTip => '親を 2 枚ずつ見て良い方を選びます。優先度が高いほど選ばれやすくなります';
+
+  @override
+  String explore_generateChildren(Object count) {
+    return '子を $count 枚生成';
+  }
+
+  @override
+  String explore_children(Object count) {
+    return '子 · $count';
+  }
+
+  @override
+  String explore_pickedN(Object count) {
+    return '$count 枚選択';
+  }
+
+  @override
+  String get explore_breedHint => '気に入った子を選んで次の世代へ';
+
+  @override
+  String explore_breed(Object count, Object next) {
+    return '選んだ $count 枚で第 $next 世代を育てる';
+  }
+
+  @override
+  String get explore_noChildren => 'まだ子はありません · 「生成」で最初のバッチを作成';
+
+  @override
+  String explore_parentsByPref(Object count) {
+    return '親 · 優先度順 · $count';
+  }
+
+  @override
+  String get explore_opMutation => '変異';
+
+  @override
+  String get explore_opCrossover => '交叉';
+
+  @override
+  String get explore_opInjection => '注入';
+
+  @override
+  String get explore_searchRuns => '探索を検索';
+
+  @override
+  String get explore_newRun => '新しい探索';
+
+  @override
+  String get explore_newRunHint => '現在のプロンプトと設定で開始。名前は後で変更できます';
+
+  @override
+  String explore_runRunning(Object done, Object total) {
+    return '生成中 $done/$total';
+  }
+
+  @override
+  String explore_runPaused(Object done, Object total) {
+    return '一時停止 $done/$total';
+  }
+
+  @override
+  String explore_runFailed(Object count) {
+    return '$count 枚失敗';
+  }
+
+  @override
+  String get explore_noRunMatch => '一致する探索はありません';
+
+  @override
+  String get explore_runMenuHint => '自動命名：ランダムブロック名 + 日付 · 行の「⋯」で名前変更・削除';
+
+  @override
+  String get explore_deleteRun => '探索を削除';
+
+  @override
+  String explore_deleteRunTitle(Object name) {
+    return '「$name」を削除しますか？';
+  }
+
+  @override
+  String explore_deleteRunBody(Object count) {
+    return '候補 $count 枚とすべての進化ラインが削除され、元に戻せません。ギャラリーの画像には影響しません。';
+  }
+
+  @override
+  String explore_deleteLineTitle(Object name) {
+    return '進化ライン「$name」を削除しますか？';
+  }
+
+  @override
+  String explore_deleteLineBody(Object count) {
+    return 'このラインの子 $count 枚も削除され、元に戻せません。候補には影響しません。';
+  }
+
+  @override
+  String get explore_onboardingTitle => 'ランダムブロックで画風をまとめて試す';
+
+  @override
+  String get explore_onboardingBody => '1 枚ごとに絵師プールから抽選。気に入った組み合わせを残して進化させます。';
+
+  @override
+  String get explore_step1 => 'ランダムブロックを入れる';
+
+  @override
+  String get explore_step1Body => 'ライブラリのランダムブロック（絵師プールなど）をプロンプトに挿入します。';
+
+  @override
+  String get explore_step2 => '候補をまとめて引く';
+
+  @override
+  String explore_step2Body(Object count) {
+    return '左下の「候補を $count 枚引く」を押すと、1 枚ずつ絵師を抽選します。';
+  }
+
+  @override
+  String get explore_step3 => 'お気に入り・進化・保存';
+
+  @override
+  String get explore_step3Body => '気に入ったものを保存して進化させ、満足した組み合わせをブロックにします。';
+
+  @override
+  String explore_detected(Object count) {
+    return '$count 個検出';
+  }
+
+  @override
+  String get explore_noVariables => 'ランダムブロックがありません';
+
+  @override
+  String get explore_openPrevious => '以前の探索を開く';
+
+  @override
+  String explore_evoTitle(Object count) {
+    return '$count 枚の候補で進化を開始';
+  }
+
+  @override
+  String explore_evoJoinTitle(Object count, Object line, Object gen) {
+    return '$count 枚を「$line」第 $gen 世代に追加';
+  }
+
+  @override
+  String get explore_evoStep1 => '親';
+
+  @override
+  String get explore_evoStep1Body => '各候補の絵師列が 1 つの親になります';
+
+  @override
+  String get explore_evoStep2 => '子';
+
+  @override
+  String get explore_evoStep2Body => '交叉・変異・新しい絵師の注入';
+
+  @override
+  String get explore_evoStep3 => '選ぶ';
+
+  @override
+  String get explore_evoStep3Body => '気に入った子で次の世代へ';
+
+  @override
+  String get explore_evoNewLine => '新しい進化ライン';
+
+  @override
+  String explore_evoJoin(Object line, Object gen) {
+    return '「$line」第 $gen 世代に追加';
+  }
+
+  @override
+  String get explore_lineName => '進化ライン名';
+
+  @override
+  String explore_lineDefault(Object number) {
+    return '進化ライン $number';
+  }
+
+  @override
+  String explore_lineGen(Object line, Object gen) {
+    return '$line · 第 $gen 世代';
+  }
+
+  @override
+  String explore_evoParents(Object count) {
+    return '第 1 世代の親 · $count';
+  }
+
+  @override
+  String explore_evoAddParents(Object count) {
+    return '追加する親 · $count';
+  }
+
+  @override
+  String get explore_addCustom => 'カスタム絵師列を追加';
+
+  @override
+  String get explore_customHint =>
+      '例：0.8::artist:ciloranko::, artist:rella（Enter で追加）';
+
+  @override
+  String get explore_targetBefore => '子はプロンプト内の';
+
+  @override
+  String get explore_targetAfter => 'の位置を差し替え、他はそのままです';
+
+  @override
+  String get explore_noTarget => 'プロンプトにランダムブロックがないため子を差し替えられません。先に挿入してください。';
+
+  @override
+  String get explore_firstBatch => '最初の子';
+
+  @override
+  String get explore_atLeast4 => '枚（4 枚以上）';
+
+  @override
+  String get explore_createOnly => '作成のみ';
+
+  @override
+  String get explore_joinOnly => '追加のみ';
+
+  @override
+  String explore_createGenerate(Object count) {
+    return '作成して $count 枚生成';
+  }
+
+  @override
+  String get explore_saveBlockTitle => 'プロンプトブロックとして保存';
+
+  @override
+  String get explore_untitled => '無題';
+
+  @override
+  String explore_blockFromOne(Object number) {
+    return '候補 #$number から';
+  }
+
+  @override
+  String explore_blockFromMany(Object count) {
+    return '$count 枚の候補から（重複なし）';
+  }
+
+  @override
+  String explore_blockNameMany(Object run, Object count) {
+    return '$run · 厳選 $count';
+  }
+
+  @override
+  String get explore_blockContent => '内容';
+
+  @override
+  String get explore_blockArtists => '抽選された絵師のみ';
+
+  @override
+  String get explore_blockFull => 'ポジティブ全体';
+
+  @override
+  String get explore_blockFullSingle => '候補が 1 枚のときだけ使えます';
+
+  @override
+  String get explore_blockRemoveHint => '× で不要な絵師を外す';
+
+  @override
+  String explore_blockKept(Object kept, Object total) {
+    return '$kept / $total を保持';
+  }
+
+  @override
+  String get explore_blockName => '名前';
+
+  @override
+  String get explore_blockColor => '色';
+
+  @override
+  String get explore_blockFolder => '保存先';
+
+  @override
+  String get explore_blockRoot => 'ブロックライブラリ（ルート）';
+
+  @override
+  String get explore_blockFooter => '保存後、ブロックライブラリからプロンプトにドラッグできます';
+
+  @override
+  String get explore_compareTitle => '2 枚比較 · 親を並べ替え';
+
+  @override
+  String get explore_compareNote => '結果はその都度保存されます';
+
+  @override
+  String get explore_compareQuestion => 'どちらが求める画風に近いですか？';
+
+  @override
+  String explore_comparePairs(Object index, Object total) {
+    return '$index / $total 組';
+  }
+
+  @override
+  String get explore_leftBetter => '左が良い';
+
+  @override
+  String get explore_rightBetter => '右が良い';
+
+  @override
+  String get explore_neither => 'どちらも違う';
+
+  @override
+  String get explore_skip => 'スキップ';
+
+  @override
+  String get explore_keySpace => 'Space';
+
+  @override
+  String get explore_ranking => '現在の順位 · リアルタイム';
+
+  @override
+  String get explore_rankingNote => '優先度が高いほど、次の世代で親に選ばれやすくなります。';
+
+  @override
+  String get explore_compareDone => '並べ替え完了';
+
+  @override
+  String get explore_compareDoneBody => '新しい優先度は保存され、次の子の生成に使われます。';
 }

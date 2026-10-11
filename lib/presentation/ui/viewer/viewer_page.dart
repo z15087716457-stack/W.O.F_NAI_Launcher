@@ -72,10 +72,19 @@ enum _Dialog { none, help, delete }
 /// 大图查看器：黑底舞台（顶栏 61 · 大图 · 胶片条 82）│ 信息栏 340。
 /// 页面宽 < 1152 时信息栏变抽屉；全屏时只剩大图和角标。
 class ImageViewerPage extends StatefulWidget {
-  const ImageViewerPage({super.key, required this.data, required this.actions});
+  const ImageViewerPage({
+    super.key,
+    required this.data,
+    required this.actions,
+    this.infoBuilder,
+  });
 
   final ViewerViewData data;
   final ViewerActions actions;
+
+  /// 换掉右侧信息栏（画风探索的大图用自己的“本张抽到”信息栏）；[drawer] 同 [ViewerInfoPanel.drawer]。
+  /// 在 [ViewerPageScope] 里面构建，可以拿到当前张和控制器。
+  final Widget Function(BuildContext context, bool drawer)? infoBuilder;
 
   static const infoWidth = 340.0;
   static const narrowWidth = 1152.0;
@@ -387,7 +396,11 @@ class _ImageViewerPageState extends State<ImageViewerPage>
           ),
         ],
       ),
-      child: const ViewerInfoPanel(drawer: true),
+      child: Builder(
+        builder: (context) =>
+            widget.infoBuilder?.call(context, true) ??
+            const ViewerInfoPanel(drawer: true),
+      ),
     ),
   );
 
@@ -428,7 +441,9 @@ class _ImageViewerPageState extends State<ImageViewerPage>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Expanded(child: ViewerStage()),
-            if (data.infoOpen) const ViewerInfoPanel(),
+            if (data.infoOpen)
+              widget.infoBuilder?.call(context, false) ??
+                  const ViewerInfoPanel(),
           ],
         );
       },
