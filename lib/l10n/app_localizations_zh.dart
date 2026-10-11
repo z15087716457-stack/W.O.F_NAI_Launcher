@@ -13781,6 +13781,1025 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get online_keyInfo => '收起信息栏';
+
+  @override
+  String get refs_vibeTitle => 'Vibe 库';
+
+  @override
+  String get refs_preciseTitle => '精准参考库';
+
+  @override
+  String get refs_collapseSidebar => '收起左栏';
+
+  @override
+  String get refs_expandSidebar => '展开左栏';
+
+  @override
+  String get refs_viewAll => '全部';
+
+  @override
+  String get refs_viewFavorites => '收藏';
+
+  @override
+  String get refs_viewRecent => '最近使用';
+
+  @override
+  String get refs_viewInGeneration => '在生图页';
+
+  @override
+  String get refs_categories => '分类';
+
+  @override
+  String get refs_newCategory => '新建分类';
+
+  @override
+  String get refs_newSubcategory => '新建子分类';
+
+  @override
+  String get refs_deleteCategory => '删除分类';
+
+  @override
+  String get refs_categoryNameHint => '分类名称';
+
+  @override
+  String get refs_noCategories => '还没有分类。导入时可以顺手建一个';
+
+  @override
+  String get refs_uncategorized => '未分类';
+
+  @override
+  String get refs_sources => '来源';
+
+  @override
+  String get refs_srcPng => 'PNG（内含 Vibe）';
+
+  @override
+  String get refs_srcVibeFile => 'Vibe 文件';
+
+  @override
+  String get refs_srcBundle => '组合包';
+
+  @override
+  String get refs_srcRaw => '待编码的图片';
+
+  @override
+  String get refs_srcImage => '图片';
+
+  @override
+  String get refs_open => '打开';
+
+  @override
+  String get refs_types => '参考类型';
+
+  @override
+  String refs_importTypeNoteAll(Object type) {
+    return '导入的图片默认按 $type 存。选中左边某个类型再导入，就按那个类型存。';
+  }
+
+  @override
+  String refs_importTypeNoteSelected(Object type) {
+    return '导入的图片默认按 $type 存。跟着左边选中的类型。';
+  }
+
+  @override
+  String get refs_preciseOnlyV45 => '只在 V4.5 可用';
+
+  @override
+  String refs_preciseCostNote(Object cost) {
+    return '每张 $cost Anlas；和 Vibe 不能同时生效';
+  }
+
+  @override
+  String get refs_searchVibe => '搜索名称、标签';
+
+  @override
+  String get refs_searchPrecise => '搜索名称';
+
+  @override
+  String get refs_sortLastUsed => '最近使用';
+
+  @override
+  String get refs_sortCreated => '加入时间';
+
+  @override
+  String get refs_sortUsed => '使用次数';
+
+  @override
+  String get refs_sortName => '名称';
+
+  @override
+  String get refs_sortAsc => '升序';
+
+  @override
+  String get refs_sortDesc => '降序';
+
+  @override
+  String get refs_sizeSmall => '小卡片';
+
+  @override
+  String get refs_sizeMedium => '中';
+
+  @override
+  String get refs_sizeLarge => '大';
+
+  @override
+  String get refs_currentModel => '当前模型';
+
+  @override
+  String get refs_usable => '可用';
+
+  @override
+  String get refs_unusable => '不能用';
+
+  @override
+  String get refs_multi => '多选';
+
+  @override
+  String get refs_multiDone => '完成多选';
+
+  @override
+  String get refs_import => '导入';
+
+  @override
+  String get refs_importFiles => '选择文件…';
+
+  @override
+  String get refs_importImages => '选择图片…';
+
+  @override
+  String get refs_importClipboard => '从剪贴板粘贴';
+
+  @override
+  String get refs_more => '更多';
+
+  @override
+  String get refs_exportAll => '导出全部…';
+
+  @override
+  String get refs_openLibraryFolder => '打开库文件夹';
+
+  @override
+  String get refs_rescan => '重新扫描文件夹';
+
+  @override
+  String get refs_reload => '重新载入';
+
+  @override
+  String get refs_hideInspector => '收起检查器';
+
+  @override
+  String get refs_showInspector => '展开检查器';
+
+  @override
+  String refs_bannerVibeLead(Object model) {
+    return '$model 不支持 Vibe 迁移。';
+  }
+
+  @override
+  String get refs_bannerVibeBody => '库里的 Vibe 照常整理、导出；切到 V4.5 或 V4 才能用于生成';
+
+  @override
+  String refs_bannerPreciseLead(Object model) {
+    return '$model 不支持精准参考。';
+  }
+
+  @override
+  String get refs_bannerPreciseBody => '库里的参考图照常整理；切到 V4.5 才能用于生成';
+
+  @override
+  String refs_switchTo(Object model) {
+    return '切到 $model';
+  }
+
+  @override
+  String get refs_quickAll => '全部';
+
+  @override
+  String get refs_quickFavorites => '收藏';
+
+  @override
+  String get refs_quickHasRaw => '有原图';
+
+  @override
+  String get refs_quickNeedsEncoding => '需要编码';
+
+  @override
+  String get refs_quickBundles => '组合包';
+
+  @override
+  String get refs_quickUnused => '没用过';
+
+  @override
+  String refs_countVibe(Object count, Object inGen) {
+    return '$count 个 · $inGen 个在生图页';
+  }
+
+  @override
+  String refs_countPrecise(Object count, Object inGen) {
+    return '$count 张 · $inGen 张在生图页';
+  }
+
+  @override
+  String get refs_noResults => '没有符合条件的条目';
+
+  @override
+  String refs_noResultsFor(Object query) {
+    return '没有找到“$query”';
+  }
+
+  @override
+  String get refs_clearFilters => '清除筛选';
+
+  @override
+  String get refs_addShort => '加入生图';
+
+  @override
+  String get refs_sendPrecise => '发送到精准参考';
+
+  @override
+  String get refs_openBundle => '打开组合包';
+
+  @override
+  String get refs_detail => '详情';
+
+  @override
+  String get refs_addToGeneration => '加入生图页';
+
+  @override
+  String get refs_replaceVibes => '替换生图页的 Vibe';
+
+  @override
+  String get refs_replacePrecise => '替换现有精准参考';
+
+  @override
+  String get refs_sendImg2Img => '发送到图生图';
+
+  @override
+  String get refs_saveAsVibe => '存进 Vibe 库';
+
+  @override
+  String get refs_favorite => '收藏';
+
+  @override
+  String get refs_unfavorite => '取消收藏';
+
+  @override
+  String get refs_replacePreview => '换预览图…';
+
+  @override
+  String get refs_exportEllipsis => '导出…';
+
+  @override
+  String get refs_showInFolder => '在文件夹中显示';
+
+  @override
+  String get refs_copyImage => '复制图片';
+
+  @override
+  String get refs_delete => '删除';
+
+  @override
+  String refs_selected(Object count) {
+    return '已选 $count';
+  }
+
+  @override
+  String get refs_moveTo => '移到';
+
+  @override
+  String get refs_export => '导出';
+
+  @override
+  String get refs_emptyVibeTitle => '把图片或 Vibe 文件拖到这里';
+
+  @override
+  String get refs_emptyPreciseTitle => '把参考图拖到这里';
+
+  @override
+  String get refs_emptyVibeDesc =>
+      '支持 PNG（内含 Vibe）、.naiv4vibe、.naiv4vibebundle 和普通图片。\n普通图片先存原图，第一次用在生图时才编码';
+
+  @override
+  String get refs_emptyPreciseDesc =>
+      '角色设定图、风格样张都行，一次可以拖很多张。\n存进来时记住类型、强度和保真度，发送时直接套用';
+
+  @override
+  String get refs_pickFiles => '选择文件';
+
+  @override
+  String get refs_pasteClipboard => '从剪贴板粘贴';
+
+  @override
+  String get refs_emptyFromResultVibe => '生图结果右键 → 存到 Vibe 库';
+
+  @override
+  String get refs_emptyFromResultPrecise => '生图结果右键 → 存到精准参考库';
+
+  @override
+  String get refs_emptyFromGallery => '本地图库也可以';
+
+  @override
+  String get refs_emptyHelpTitle => 'Vibe 和精准参考有什么区别？';
+
+  @override
+  String refs_emptyHelpBody(Object cost) {
+    return 'Vibe：借整体氛围和画风，可以叠很多张（V4 / V4.5，V5 没有）。精准参考：照着一张图的人物或画风来画，更准，每张 $cost Anlas（只在 V4.5）。两者不能同时生效。';
+  }
+
+  @override
+  String refs_dropTitle(Object count) {
+    return '松开导入 $count 个文件';
+  }
+
+  @override
+  String get refs_dropVibeDesc => '会先打开导入窗口确认，不会直接扣 Anlas';
+
+  @override
+  String get refs_dropPreciseDesc => '按左栏选中的类型存进精准参考库';
+
+  @override
+  String refs_dropVibePngs(Object count) {
+    return '$count 个 PNG 含 Vibe';
+  }
+
+  @override
+  String refs_dropVibeFiles(Object count) {
+    return '$count 个 Vibe 文件';
+  }
+
+  @override
+  String refs_dropBundles(Object count) {
+    return '$count 个组合包';
+  }
+
+  @override
+  String refs_dropImages(Object count) {
+    return '$count 张普通图片';
+  }
+
+  @override
+  String get refs_inGeneration => '在生图页';
+
+  @override
+  String get refs_tag => '标签';
+
+  @override
+  String get refs_strengthShort => '强度';
+
+  @override
+  String get refs_infoShort => '信息';
+
+  @override
+  String get refs_fidelityShort => '保真';
+
+  @override
+  String refs_encModelOff(Object model) {
+    return '$model 不可用';
+  }
+
+  @override
+  String refs_encModelOffDesc(Object model) {
+    return '$model 不支持 Vibe 迁移，切到 V4.5 / V4 才能用';
+  }
+
+  @override
+  String refs_encReady(Object model) {
+    return '已编码 · $model';
+  }
+
+  @override
+  String refs_encReadyShort(Object model) {
+    return '$model 已编码';
+  }
+
+  @override
+  String get refs_encReadyDesc => '当前模型直接能用，不再收编码费';
+
+  @override
+  String get refs_encOnUse => '用时编码';
+
+  @override
+  String refs_encOnUseDesc(Object cost) {
+    return '还没编码。第一次用在生图时编码，$cost Anlas';
+  }
+
+  @override
+  String get refs_encRe => '需重新编码';
+
+  @override
+  String refs_encReDesc(Object from, Object model, Object cost) {
+    return '编码是给 $from 的，当前是 $model。用时按原图重新编码，$cost Anlas';
+  }
+
+  @override
+  String refs_encUnusable(Object model) {
+    return '不能用于 $model';
+  }
+
+  @override
+  String refs_encUnusableDesc(Object from, Object model) {
+    return '只有 $from 的编码，没有原图，没法给 $model 重新编码';
+  }
+
+  @override
+  String get refs_trayVibe => '生图页的 Vibe';
+
+  @override
+  String get refs_trayPrecise => '生图页的精准参考';
+
+  @override
+  String refs_trayVibeCost(Object free, Object extra) {
+    return '超过 $free 个每个多 $extra Anlas';
+  }
+
+  @override
+  String refs_trayPreciseCost(Object cost, Object total) {
+    return '每张 $cost Anlas · 本次 +$total';
+  }
+
+  @override
+  String get refs_trayHint => '拖卡片到这里加入；Shift 拖入 = 替换全部。\n发送后不跳页，可以连续挑';
+
+  @override
+  String get refs_trayDropHere => '把卡片拖到这里加入生图页';
+
+  @override
+  String get refs_clear => '清空';
+
+  @override
+  String get refs_goGeneration => '去生图页';
+
+  @override
+  String refs_conflict(Object count) {
+    return '生图页还有 **$count 个 Vibe**。有精准参考时 Vibe 不会发送（官方不兼容）';
+  }
+
+  @override
+  String refs_conflictPaused(Object count) {
+    return '生图页的 **$count 个 Vibe** 已暂停，发送时只带精准参考';
+  }
+
+  @override
+  String get refs_pauseVibes => '暂停 Vibe';
+
+  @override
+  String get refs_resumeVibes => '恢复 Vibe';
+
+  @override
+  String get refs_inspector => '检查器';
+
+  @override
+  String refs_selectedN(Object count) {
+    return '已选 $count 个';
+  }
+
+  @override
+  String get refs_noSelectionVibe => '点一张卡片看它的参数和编码状态';
+
+  @override
+  String get refs_noSelectionPrecise => '点一张参考图看它的类型和参数';
+
+  @override
+  String get refs_rename => '改名';
+
+  @override
+  String get refs_replace => '替换';
+
+  @override
+  String get refs_replaceVibesTip => '替换生图页现有的全部 Vibe';
+
+  @override
+  String get refs_strength => '强度';
+
+  @override
+  String get refs_strengthDesc => '越高越像这张图的感觉';
+
+  @override
+  String get refs_infoExtracted => '信息提取';
+
+  @override
+  String refs_infoDesc(Object cost) {
+    return '越高带进来的细节越多。改它要按原图重新编码，$cost Anlas';
+  }
+
+  @override
+  String get refs_infoLocked => '这条只有编码数据、没有原图，信息提取改不了';
+
+  @override
+  String get refs_changedNote => '改动只用于这次发送';
+
+  @override
+  String get refs_saveDefault => '存为默认';
+
+  @override
+  String get refs_revert => '还原';
+
+  @override
+  String refs_encodeNow(Object model, Object cost) {
+    return '现在为 $model 编码 · $cost Anlas';
+  }
+
+  @override
+  String refs_bundleNote(Object count) {
+    return '组合包里的 $count 个 Vibe 各有自己的强度和信息提取，打开组合包可以单独调。';
+  }
+
+  @override
+  String refs_bundleOf(Object count) {
+    return '组合包 · $count 个';
+  }
+
+  @override
+  String get refs_organize => '整理';
+
+  @override
+  String get refs_category => '分类';
+
+  @override
+  String get refs_tags => '标签';
+
+  @override
+  String get refs_used => '用过';
+
+  @override
+  String get refs_neverUsed => '还没用过';
+
+  @override
+  String refs_usedTimes(Object count, Object last) {
+    return '$count 次 · 上次 $last';
+  }
+
+  @override
+  String get refs_added => '加入';
+
+  @override
+  String get refs_file => '文件';
+
+  @override
+  String get refs_original => '原图';
+
+  @override
+  String refs_plusAnlas(Object cost) {
+    return '+$cost Anlas';
+  }
+
+  @override
+  String get refs_alsoSaveVibe => '也存进 Vibe 库';
+
+  @override
+  String get refs_referenceWhat => '参考什么';
+
+  @override
+  String get refs_typeCharacter => '角色';
+
+  @override
+  String get refs_typeStyle => '风格';
+
+  @override
+  String get refs_typeBoth => '角色+风格';
+
+  @override
+  String get refs_typeCharacterDesc => '保留人物长相、发型和服装，画风跟提示词走';
+
+  @override
+  String get refs_typeStyleDesc => '只借画风、配色和笔触，不管画的是谁';
+
+  @override
+  String get refs_typeBothDesc => '人物和画风都参考';
+
+  @override
+  String get refs_preciseStrength => '参考强度';
+
+  @override
+  String get refs_preciseStrengthDesc => '越高越像参考图';
+
+  @override
+  String get refs_fidelity => '保真度';
+
+  @override
+  String get refs_fidelityDesc => '越高越贴原图细节，越低越自由';
+
+  @override
+  String get refs_preciseDefaultsNote => '这里改的是默认值，发送时直接带上；数字框可以填超过 0–1 的值';
+
+  @override
+  String get refs_showInFolderShort => '所在文件夹';
+
+  @override
+  String get refs_pickHint => '勾选卡片后在这里批量设置';
+
+  @override
+  String get refs_multiAddTitle => '一起加入生图页';
+
+  @override
+  String get refs_multiSendTitle => '一起发送到精准参考';
+
+  @override
+  String refs_multiFree(Object free) {
+    return '不超过 $free 个，不额外收费。';
+  }
+
+  @override
+  String refs_multiExtra(Object free, Object extra, Object total) {
+    return '超过 $free 个，每多一个 +$extra Anlas：这次每张图多 $total Anlas。';
+  }
+
+  @override
+  String refs_multiOverMax(Object max) {
+    return '超过 $max 个上限，多出的不会加入。';
+  }
+
+  @override
+  String refs_multiEncodes(Object count, Object names, Object cost) {
+    return '其中 $count 个需要编码（$names，每个 $cost Anlas，只收一次）。';
+  }
+
+  @override
+  String refs_multiAlready(Object count) {
+    return '$count 个已经在生图页，不会重复加入。';
+  }
+
+  @override
+  String refs_multiPreciseCost(Object cost, Object total) {
+    return '每张 $cost Anlas，发送后每张图共 $total Anlas。';
+  }
+
+  @override
+  String get refs_unify => '统一设置';
+
+  @override
+  String get refs_mixed => '混合';
+
+  @override
+  String refs_unifyVibeNote(Object count) {
+    return '拖动后 $count 个一起改，写回各自的默认值；信息提取不统一改（要重新编码）';
+  }
+
+  @override
+  String refs_unifyPreciseNote(Object count) {
+    return '点一下把 $count 张都改成这个类型';
+  }
+
+  @override
+  String get refs_moveToCategory => '移到分类';
+
+  @override
+  String get refs_addTag => '加标签';
+
+  @override
+  String get refs_packBundle => '打包成组合包';
+
+  @override
+  String get refs_close => '关闭';
+
+  @override
+  String get refs_cancel => '取消';
+
+  @override
+  String get refs_remove => '移除';
+
+  @override
+  String get refs_prev => '上一个';
+
+  @override
+  String get refs_next => '下一个';
+
+  @override
+  String get refs_switch => '切换';
+
+  @override
+  String get refs_dropReplacePreview => '把新图拖到这里 = 换掉预览图（不影响编码）';
+
+  @override
+  String refs_bundleOfVibes(Object count) {
+    return '组合包 · $count 个 Vibe';
+  }
+
+  @override
+  String refs_bundleAll(Object count) {
+    return '全部 $count 个';
+  }
+
+  @override
+  String refs_bundleOnlyChecked(Object count) {
+    return '只用勾选的 $count 个';
+  }
+
+  @override
+  String get refs_bundleScopeNote => '发送时按包里每个 Vibe 自己的强度和信息提取';
+
+  @override
+  String get refs_splitBundle => '拆成单独的 Vibe';
+
+  @override
+  String get refs_bundleNoteLong => '改了某一个的参数后，可以“保存到组合包”；不保存只影响这次发送。';
+
+  @override
+  String refs_bundleAllEncoded(Object count, Object model) {
+    return '包里 $count 个都已为 $model 编码';
+  }
+
+  @override
+  String get refs_saveToBundle => '保存到组合包';
+
+  @override
+  String get refs_cover => '封面';
+
+  @override
+  String get refs_setCover => '设为封面';
+
+  @override
+  String refs_exportTitle(Object count) {
+    return '导出 $count 个 Vibe';
+  }
+
+  @override
+  String get refs_exportListNote => '从库里多选后点“导出”进来；也能在这里移掉';
+
+  @override
+  String get refs_exportAs => '导出成';
+
+  @override
+  String get refs_fmtVibeFile => '单个 Vibe 文件';
+
+  @override
+  String get refs_fmtVibeFileDesc => '.naiv4vibe，每个一份。官网和其他客户端都能导入';
+
+  @override
+  String get refs_fmtBundle => '打包成组合包';
+
+  @override
+  String refs_fmtBundleDesc(Object count) {
+    return '.naiv4vibebundle，$count 个合成一个文件';
+  }
+
+  @override
+  String get refs_fmtPng => '嵌入到 PNG';
+
+  @override
+  String get refs_fmtPngDesc => '图片自带 Vibe，发给别人拖进来就能用。一次只能导出一个';
+
+  @override
+  String get refs_fmtEncoded => '编码文本';
+
+  @override
+  String get refs_fmtEncodedDesc => 'JSON / Base64，给脚本和高级用法';
+
+  @override
+  String get refs_options => '选项';
+
+  @override
+  String get refs_optThumbs => '带缩略图';
+
+  @override
+  String get refs_optThumbsDesc => '文件稍大，导入时能直接看到图';
+
+  @override
+  String get refs_optZip => '压缩成 ZIP';
+
+  @override
+  String refs_optZipDesc(Object count) {
+    return '$count 个文件放进一个压缩包';
+  }
+
+  @override
+  String get refs_saveTo => '保存到';
+
+  @override
+  String get refs_choose => '选择';
+
+  @override
+  String refs_exportSummary(Object count, Object ext) {
+    return '将生成 $count 个 $ext 文件';
+  }
+
+  @override
+  String refs_exportSummaryZip(Object count, Object ext) {
+    return '将生成 1 个 ZIP（内含 $count 个 $ext 文件）';
+  }
+
+  @override
+  String refs_deleteOne(Object name) {
+    return '删除“$name”？';
+  }
+
+  @override
+  String refs_deleteMany(Object count) {
+    return '删除 $count 个条目？';
+  }
+
+  @override
+  String get refs_deleteVibeDesc => '从 Vibe 库移除。生图页已经在用的不受影响。';
+
+  @override
+  String get refs_deletePreciseDesc => '从精准参考库移除。生图页已经在用的不受影响。';
+
+  @override
+  String refs_importTitle(Object count) {
+    return '导入 $count 个文件';
+  }
+
+  @override
+  String get refs_importSubtitle => '拖进来的、选的、粘贴的都走这一个窗口';
+
+  @override
+  String get refs_importMore => '再加文件';
+
+  @override
+  String get refs_importPutIn => '全部放进';
+
+  @override
+  String get refs_importAddTags => '加标签';
+
+  @override
+  String get refs_importTagsHint => '输入后回车';
+
+  @override
+  String get refs_importPlainImages => '普通图片';
+
+  @override
+  String get refs_importEncodeLater => '用到时再编码';
+
+  @override
+  String refs_importEncodeNow(Object cost) {
+    return '现在编码 · $cost Anlas/张';
+  }
+
+  @override
+  String get refs_importName => '名称';
+
+  @override
+  String get refs_importResult => '识别结果';
+
+  @override
+  String refs_recPng(Object model) {
+    return 'PNG 内含 Vibe · $model 编码';
+  }
+
+  @override
+  String refs_recVibeFile(Object model) {
+    return 'Vibe 文件 · $model 编码';
+  }
+
+  @override
+  String refs_recBundle(Object count) {
+    return '组合包 · $count 个 Vibe';
+  }
+
+  @override
+  String get refs_recImage => '普通图片 · 还没编码';
+
+  @override
+  String get refs_recImageDup => '普通图片 · 名称已存在';
+
+  @override
+  String get refs_recFree => '直接导入，免费';
+
+  @override
+  String refs_recReencode(Object model) {
+    return '用在 $model 时要重新编码（文件里没有原图就不行）';
+  }
+
+  @override
+  String refs_recBundleNote(Object count) {
+    return '整个导入 = 库里一张卡；拆开 = $count 张卡';
+  }
+
+  @override
+  String get refs_recEncodeLater => '先存原图，第一次用在生图时为当时的模型编码';
+
+  @override
+  String refs_recEncodeNow(Object cost) {
+    return '导入时就编码，每张 $cost Anlas';
+  }
+
+  @override
+  String get refs_bundleWhole => '整个导入';
+
+  @override
+  String refs_bundleSplit(Object count) {
+    return '拆成 $count 个';
+  }
+
+  @override
+  String get refs_bundlePick => '挑几个';
+
+  @override
+  String get refs_dupExists => '库里已有同名条目';
+
+  @override
+  String get refs_dupKeepBoth => '两个都留';
+
+  @override
+  String get refs_dupOverwrite => '覆盖';
+
+  @override
+  String get refs_dupSkip => '跳过';
+
+  @override
+  String refs_importSummary(Object files, Object cards) {
+    return '$files 个文件 → 库里多 $cards 张卡';
+  }
+
+  @override
+  String refs_importNow(Object cost) {
+    return ' · 现在扣 $cost Anlas';
+  }
+
+  @override
+  String refs_importLater(Object count, Object cost) {
+    return ' · $count 张普通图片第一次用在生图时各编码一次（每张 $cost Anlas）';
+  }
+
+  @override
+  String get refs_pickerVibeTitle => '从 Vibe 库添加';
+
+  @override
+  String get refs_pickerPreciseTitle => '从精准参考库添加';
+
+  @override
+  String get refs_openVibeLibrary => '打开 Vibe 库';
+
+  @override
+  String get refs_openPreciseLibrary => '打开精准参考库';
+
+  @override
+  String get refs_recentUsed => '最近用过';
+
+  @override
+  String get refs_inUse => '已在用';
+
+  @override
+  String refs_pickedN(Object count) {
+    return '已选 $count';
+  }
+
+  @override
+  String refs_pickerAfterVibe(Object count, Object max) {
+    return ' · 加入后 $count/$max';
+  }
+
+  @override
+  String refs_pickerAfterPrecise(Object count) {
+    return ' · 加入后 $count 张';
+  }
+
+  @override
+  String refs_pickerEncode(Object name, Object model, Object cost) {
+    return '“$name”要为 $model 编码 · $cost Anlas';
+  }
+
+  @override
+  String refs_pickerEncodeMore(Object count) {
+    return '另有 $count 个也要编码';
+  }
+
+  @override
+  String refs_pickerExtra(Object free, Object extra) {
+    return '超过 $free 个多 $extra Anlas';
+  }
+
+  @override
+  String refs_pickerPreciseCost(Object cost, Object total) {
+    return '每张 $cost Anlas · 共 $total Anlas';
+  }
+
+  @override
+  String get refs_replaceExisting => '替换现有';
+
+  @override
+  String refs_appendN(Object count) {
+    return '追加 $count 个';
+  }
+
+  @override
+  String get refs_timeNever => '没用过';
+
+  @override
+  String get refs_timeJustNow => '刚刚';
+
+  @override
+  String refs_timeMinutes(Object count) {
+    return '$count 分钟前';
+  }
+
+  @override
+  String refs_timeHours(Object count) {
+    return '$count 小时前';
+  }
+
+  @override
+  String get refs_timeYesterday => '昨天';
+
+  @override
+  String refs_timeDays(Object count) {
+    return '$count 天前';
+  }
+
+  @override
+  String refs_timeMonthDay(Object month, Object day) {
+    return '$month 月 $day 日';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -27560,4 +28579,1023 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get online_keyInfo => '收起資訊欄';
+
+  @override
+  String get refs_vibeTitle => 'Vibe 庫';
+
+  @override
+  String get refs_preciseTitle => '精準參考庫';
+
+  @override
+  String get refs_collapseSidebar => '收起左欄';
+
+  @override
+  String get refs_expandSidebar => '展開左欄';
+
+  @override
+  String get refs_viewAll => '全部';
+
+  @override
+  String get refs_viewFavorites => '收藏';
+
+  @override
+  String get refs_viewRecent => '最近使用';
+
+  @override
+  String get refs_viewInGeneration => '在生圖頁';
+
+  @override
+  String get refs_categories => '分類';
+
+  @override
+  String get refs_newCategory => '新增分類';
+
+  @override
+  String get refs_newSubcategory => '新增子分類';
+
+  @override
+  String get refs_deleteCategory => '刪除分類';
+
+  @override
+  String get refs_categoryNameHint => '分類名稱';
+
+  @override
+  String get refs_noCategories => '還沒有分類。匯入時可以順手建一個';
+
+  @override
+  String get refs_uncategorized => '未分類';
+
+  @override
+  String get refs_sources => '來源';
+
+  @override
+  String get refs_srcPng => 'PNG（內含 Vibe）';
+
+  @override
+  String get refs_srcVibeFile => 'Vibe 檔案';
+
+  @override
+  String get refs_srcBundle => '組合包';
+
+  @override
+  String get refs_srcRaw => '待編碼的圖片';
+
+  @override
+  String get refs_srcImage => '圖片';
+
+  @override
+  String get refs_open => '開啟';
+
+  @override
+  String get refs_types => '參考類型';
+
+  @override
+  String refs_importTypeNoteAll(Object type) {
+    return '匯入的圖片預設按 $type 存。選中左邊某個類型再匯入，就按那個類型存。';
+  }
+
+  @override
+  String refs_importTypeNoteSelected(Object type) {
+    return '匯入的圖片預設按 $type 存。跟著左邊選中的類型。';
+  }
+
+  @override
+  String get refs_preciseOnlyV45 => '只在 V4.5 可用';
+
+  @override
+  String refs_preciseCostNote(Object cost) {
+    return '每張 $cost Anlas；和 Vibe 不能同時生效';
+  }
+
+  @override
+  String get refs_searchVibe => '搜尋名稱、標籤';
+
+  @override
+  String get refs_searchPrecise => '搜尋名稱';
+
+  @override
+  String get refs_sortLastUsed => '最近使用';
+
+  @override
+  String get refs_sortCreated => '加入時間';
+
+  @override
+  String get refs_sortUsed => '使用次數';
+
+  @override
+  String get refs_sortName => '名稱';
+
+  @override
+  String get refs_sortAsc => '升序';
+
+  @override
+  String get refs_sortDesc => '降序';
+
+  @override
+  String get refs_sizeSmall => '小卡片';
+
+  @override
+  String get refs_sizeMedium => '中';
+
+  @override
+  String get refs_sizeLarge => '大';
+
+  @override
+  String get refs_currentModel => '當前模型';
+
+  @override
+  String get refs_usable => '可用';
+
+  @override
+  String get refs_unusable => '不能用';
+
+  @override
+  String get refs_multi => '多選';
+
+  @override
+  String get refs_multiDone => '完成多選';
+
+  @override
+  String get refs_import => '匯入';
+
+  @override
+  String get refs_importFiles => '選擇檔案…';
+
+  @override
+  String get refs_importImages => '選擇圖片…';
+
+  @override
+  String get refs_importClipboard => '從剪貼簿貼上';
+
+  @override
+  String get refs_more => '更多';
+
+  @override
+  String get refs_exportAll => '匯出全部…';
+
+  @override
+  String get refs_openLibraryFolder => '開啟庫資料夾';
+
+  @override
+  String get refs_rescan => '重新掃描資料夾';
+
+  @override
+  String get refs_reload => '重新載入';
+
+  @override
+  String get refs_hideInspector => '收起檢查器';
+
+  @override
+  String get refs_showInspector => '展開檢查器';
+
+  @override
+  String refs_bannerVibeLead(Object model) {
+    return '$model 不支援 Vibe 遷移。';
+  }
+
+  @override
+  String get refs_bannerVibeBody => '庫裡的 Vibe 照常整理、匯出；切到 V4.5 或 V4 才能用於生成';
+
+  @override
+  String refs_bannerPreciseLead(Object model) {
+    return '$model 不支援精準參考。';
+  }
+
+  @override
+  String get refs_bannerPreciseBody => '庫裡的參考圖照常整理；切到 V4.5 才能用於生成';
+
+  @override
+  String refs_switchTo(Object model) {
+    return '切到 $model';
+  }
+
+  @override
+  String get refs_quickAll => '全部';
+
+  @override
+  String get refs_quickFavorites => '收藏';
+
+  @override
+  String get refs_quickHasRaw => '有原圖';
+
+  @override
+  String get refs_quickNeedsEncoding => '需要編碼';
+
+  @override
+  String get refs_quickBundles => '組合包';
+
+  @override
+  String get refs_quickUnused => '沒用過';
+
+  @override
+  String refs_countVibe(Object count, Object inGen) {
+    return '$count 個 · $inGen 個在生圖頁';
+  }
+
+  @override
+  String refs_countPrecise(Object count, Object inGen) {
+    return '$count 張 · $inGen 張在生圖頁';
+  }
+
+  @override
+  String get refs_noResults => '沒有符合條件的條目';
+
+  @override
+  String refs_noResultsFor(Object query) {
+    return '沒有找到“$query”';
+  }
+
+  @override
+  String get refs_clearFilters => '清除篩選';
+
+  @override
+  String get refs_addShort => '加入生圖';
+
+  @override
+  String get refs_sendPrecise => '傳送到精準參考';
+
+  @override
+  String get refs_openBundle => '開啟組合包';
+
+  @override
+  String get refs_detail => '詳情';
+
+  @override
+  String get refs_addToGeneration => '加入生圖頁';
+
+  @override
+  String get refs_replaceVibes => '替換生圖頁的 Vibe';
+
+  @override
+  String get refs_replacePrecise => '替換現有精準參考';
+
+  @override
+  String get refs_sendImg2Img => '傳送到圖生圖';
+
+  @override
+  String get refs_saveAsVibe => '存進 Vibe 庫';
+
+  @override
+  String get refs_favorite => '收藏';
+
+  @override
+  String get refs_unfavorite => '取消收藏';
+
+  @override
+  String get refs_replacePreview => '換預覽圖…';
+
+  @override
+  String get refs_exportEllipsis => '匯出…';
+
+  @override
+  String get refs_showInFolder => '在資料夾中顯示';
+
+  @override
+  String get refs_copyImage => '複製圖片';
+
+  @override
+  String get refs_delete => '刪除';
+
+  @override
+  String refs_selected(Object count) {
+    return '已選 $count';
+  }
+
+  @override
+  String get refs_moveTo => '移到';
+
+  @override
+  String get refs_export => '匯出';
+
+  @override
+  String get refs_emptyVibeTitle => '把圖片或 Vibe 檔案拖到這裡';
+
+  @override
+  String get refs_emptyPreciseTitle => '把參考圖拖到這裡';
+
+  @override
+  String get refs_emptyVibeDesc =>
+      '支援 PNG（內含 Vibe）、.naiv4vibe、.naiv4vibebundle 和普通圖片。\n普通圖片先存原圖，第一次用在生圖時才編碼';
+
+  @override
+  String get refs_emptyPreciseDesc =>
+      '角色設定圖、風格樣張都行，一次可以拖很多張。\n存進來時記住類型、強度和保真度，傳送時直接套用';
+
+  @override
+  String get refs_pickFiles => '選擇檔案';
+
+  @override
+  String get refs_pasteClipboard => '從剪貼簿貼上';
+
+  @override
+  String get refs_emptyFromResultVibe => '生圖結果右鍵 → 存到 Vibe 庫';
+
+  @override
+  String get refs_emptyFromResultPrecise => '生圖結果右鍵 → 存到精準參考庫';
+
+  @override
+  String get refs_emptyFromGallery => '本地圖庫也可以';
+
+  @override
+  String get refs_emptyHelpTitle => 'Vibe 和精準參考有什麼區別？';
+
+  @override
+  String refs_emptyHelpBody(Object cost) {
+    return 'Vibe：借整體氛圍和畫風，可以疊很多張（V4 / V4.5，V5 沒有）。精準參考：照著一張圖的人物或畫風來畫，更準，每張 $cost Anlas（只在 V4.5）。兩者不能同時生效。';
+  }
+
+  @override
+  String refs_dropTitle(Object count) {
+    return '鬆開匯入 $count 個檔案';
+  }
+
+  @override
+  String get refs_dropVibeDesc => '會先開啟匯入視窗確認，不會直接扣 Anlas';
+
+  @override
+  String get refs_dropPreciseDesc => '按左欄選中的類型存進精準參考庫';
+
+  @override
+  String refs_dropVibePngs(Object count) {
+    return '$count 個 PNG 含 Vibe';
+  }
+
+  @override
+  String refs_dropVibeFiles(Object count) {
+    return '$count 個 Vibe 檔案';
+  }
+
+  @override
+  String refs_dropBundles(Object count) {
+    return '$count 個組合包';
+  }
+
+  @override
+  String refs_dropImages(Object count) {
+    return '$count 張普通圖片';
+  }
+
+  @override
+  String get refs_inGeneration => '在生圖頁';
+
+  @override
+  String get refs_tag => '標籤';
+
+  @override
+  String get refs_strengthShort => '強度';
+
+  @override
+  String get refs_infoShort => '資訊';
+
+  @override
+  String get refs_fidelityShort => '保真';
+
+  @override
+  String refs_encModelOff(Object model) {
+    return '$model 不可用';
+  }
+
+  @override
+  String refs_encModelOffDesc(Object model) {
+    return '$model 不支援 Vibe 遷移，切到 V4.5 / V4 才能用';
+  }
+
+  @override
+  String refs_encReady(Object model) {
+    return '已編碼 · $model';
+  }
+
+  @override
+  String refs_encReadyShort(Object model) {
+    return '$model 已編碼';
+  }
+
+  @override
+  String get refs_encReadyDesc => '當前模型直接能用，不再收編碼費';
+
+  @override
+  String get refs_encOnUse => '用時編碼';
+
+  @override
+  String refs_encOnUseDesc(Object cost) {
+    return '還沒編碼。第一次用在生圖時編碼，$cost Anlas';
+  }
+
+  @override
+  String get refs_encRe => '需重新編碼';
+
+  @override
+  String refs_encReDesc(Object from, Object model, Object cost) {
+    return '編碼是給 $from 的，當前是 $model。用時按原圖重新編碼，$cost Anlas';
+  }
+
+  @override
+  String refs_encUnusable(Object model) {
+    return '不能用於 $model';
+  }
+
+  @override
+  String refs_encUnusableDesc(Object from, Object model) {
+    return '只有 $from 的編碼，沒有原圖，沒法給 $model 重新編碼';
+  }
+
+  @override
+  String get refs_trayVibe => '生圖頁的 Vibe';
+
+  @override
+  String get refs_trayPrecise => '生圖頁的精準參考';
+
+  @override
+  String refs_trayVibeCost(Object free, Object extra) {
+    return '超過 $free 個每個多 $extra Anlas';
+  }
+
+  @override
+  String refs_trayPreciseCost(Object cost, Object total) {
+    return '每張 $cost Anlas · 本次 +$total';
+  }
+
+  @override
+  String get refs_trayHint => '拖卡片到這裡加入；Shift 拖入 = 替換全部。\n傳送後不跳頁，可以連續挑';
+
+  @override
+  String get refs_trayDropHere => '把卡片拖到這裡加入生圖頁';
+
+  @override
+  String get refs_clear => '清空';
+
+  @override
+  String get refs_goGeneration => '去生圖頁';
+
+  @override
+  String refs_conflict(Object count) {
+    return '生圖頁還有 **$count 個 Vibe**。有精準參考時 Vibe 不會發送（官方不相容）';
+  }
+
+  @override
+  String refs_conflictPaused(Object count) {
+    return '生圖頁的 **$count 個 Vibe** 已暫停，傳送時只帶精準參考';
+  }
+
+  @override
+  String get refs_pauseVibes => '暫停 Vibe';
+
+  @override
+  String get refs_resumeVibes => '恢復 Vibe';
+
+  @override
+  String get refs_inspector => '檢查器';
+
+  @override
+  String refs_selectedN(Object count) {
+    return '已選 $count 個';
+  }
+
+  @override
+  String get refs_noSelectionVibe => '點一張卡片看它的參數和編碼狀態';
+
+  @override
+  String get refs_noSelectionPrecise => '點一張參考圖看它的類型和參數';
+
+  @override
+  String get refs_rename => '改名';
+
+  @override
+  String get refs_replace => '替換';
+
+  @override
+  String get refs_replaceVibesTip => '替換生圖頁現有的全部 Vibe';
+
+  @override
+  String get refs_strength => '強度';
+
+  @override
+  String get refs_strengthDesc => '越高越像這張圖的感覺';
+
+  @override
+  String get refs_infoExtracted => '資訊提取';
+
+  @override
+  String refs_infoDesc(Object cost) {
+    return '越高帶進來的細節越多。改它要按原圖重新編碼，$cost Anlas';
+  }
+
+  @override
+  String get refs_infoLocked => '這條只有編碼資料、沒有原圖，資訊提取改不了';
+
+  @override
+  String get refs_changedNote => '改動只用於這次傳送';
+
+  @override
+  String get refs_saveDefault => '存為預設';
+
+  @override
+  String get refs_revert => '還原';
+
+  @override
+  String refs_encodeNow(Object model, Object cost) {
+    return '現在為 $model 編碼 · $cost Anlas';
+  }
+
+  @override
+  String refs_bundleNote(Object count) {
+    return '組合包裡的 $count 個 Vibe 各有自己的強度和資訊提取，開啟組合包可以單獨調。';
+  }
+
+  @override
+  String refs_bundleOf(Object count) {
+    return '組合包 · $count 個';
+  }
+
+  @override
+  String get refs_organize => '整理';
+
+  @override
+  String get refs_category => '分類';
+
+  @override
+  String get refs_tags => '標籤';
+
+  @override
+  String get refs_used => '用過';
+
+  @override
+  String get refs_neverUsed => '還沒用過';
+
+  @override
+  String refs_usedTimes(Object count, Object last) {
+    return '$count 次 · 上次 $last';
+  }
+
+  @override
+  String get refs_added => '加入';
+
+  @override
+  String get refs_file => '檔案';
+
+  @override
+  String get refs_original => '原圖';
+
+  @override
+  String refs_plusAnlas(Object cost) {
+    return '+$cost Anlas';
+  }
+
+  @override
+  String get refs_alsoSaveVibe => '也存進 Vibe 庫';
+
+  @override
+  String get refs_referenceWhat => '參考什麼';
+
+  @override
+  String get refs_typeCharacter => '角色';
+
+  @override
+  String get refs_typeStyle => '風格';
+
+  @override
+  String get refs_typeBoth => '角色+風格';
+
+  @override
+  String get refs_typeCharacterDesc => '保留人物長相、髮型和服裝，畫風跟提示詞走';
+
+  @override
+  String get refs_typeStyleDesc => '只借畫風、配色和筆觸，不管畫的是誰';
+
+  @override
+  String get refs_typeBothDesc => '人物和畫風都參考';
+
+  @override
+  String get refs_preciseStrength => '參考強度';
+
+  @override
+  String get refs_preciseStrengthDesc => '越高越像參考圖';
+
+  @override
+  String get refs_fidelity => '保真度';
+
+  @override
+  String get refs_fidelityDesc => '越高越貼原圖細節，越低越自由';
+
+  @override
+  String get refs_preciseDefaultsNote => '這裡改的是預設值，傳送時直接帶上；數字框可以填超過 0–1 的值';
+
+  @override
+  String get refs_showInFolderShort => '所在資料夾';
+
+  @override
+  String get refs_pickHint => '勾選卡片後在這裡批次設定';
+
+  @override
+  String get refs_multiAddTitle => '一起加入生圖頁';
+
+  @override
+  String get refs_multiSendTitle => '一起傳送到精準參考';
+
+  @override
+  String refs_multiFree(Object free) {
+    return '不超過 $free 個，不額外收費。';
+  }
+
+  @override
+  String refs_multiExtra(Object free, Object extra, Object total) {
+    return '超過 $free 個，每多一個 +$extra Anlas：這次每張圖多 $total Anlas。';
+  }
+
+  @override
+  String refs_multiOverMax(Object max) {
+    return '超過 $max 個上限，多出的不會加入。';
+  }
+
+  @override
+  String refs_multiEncodes(Object count, Object names, Object cost) {
+    return '其中 $count 個需要編碼（$names，每個 $cost Anlas，只收一次）。';
+  }
+
+  @override
+  String refs_multiAlready(Object count) {
+    return '$count 個已經在生圖頁，不會重複加入。';
+  }
+
+  @override
+  String refs_multiPreciseCost(Object cost, Object total) {
+    return '每張 $cost Anlas，傳送後每張圖共 $total Anlas。';
+  }
+
+  @override
+  String get refs_unify => '統一設定';
+
+  @override
+  String get refs_mixed => '混合';
+
+  @override
+  String refs_unifyVibeNote(Object count) {
+    return '拖動後 $count 個一起改，寫回各自的預設值；資訊提取不統一改（要重新編碼）';
+  }
+
+  @override
+  String refs_unifyPreciseNote(Object count) {
+    return '點一下把 $count 張都改成這個類型';
+  }
+
+  @override
+  String get refs_moveToCategory => '移到分類';
+
+  @override
+  String get refs_addTag => '加標籤';
+
+  @override
+  String get refs_packBundle => '打包成組合包';
+
+  @override
+  String get refs_close => '關閉';
+
+  @override
+  String get refs_cancel => '取消';
+
+  @override
+  String get refs_remove => '移除';
+
+  @override
+  String get refs_prev => '上一個';
+
+  @override
+  String get refs_next => '下一個';
+
+  @override
+  String get refs_switch => '切換';
+
+  @override
+  String get refs_dropReplacePreview => '把新圖拖到這裡 = 換掉預覽圖（不影響編碼）';
+
+  @override
+  String refs_bundleOfVibes(Object count) {
+    return '組合包 · $count 個 Vibe';
+  }
+
+  @override
+  String refs_bundleAll(Object count) {
+    return '全部 $count 個';
+  }
+
+  @override
+  String refs_bundleOnlyChecked(Object count) {
+    return '只用勾選的 $count 個';
+  }
+
+  @override
+  String get refs_bundleScopeNote => '傳送時按包裡每個 Vibe 自己的強度和資訊提取';
+
+  @override
+  String get refs_splitBundle => '拆成單獨的 Vibe';
+
+  @override
+  String get refs_bundleNoteLong => '改了某一個的參數後，可以“儲存到組合包”；不儲存隻影響這次傳送。';
+
+  @override
+  String refs_bundleAllEncoded(Object count, Object model) {
+    return '包裡 $count 個都已為 $model 編碼';
+  }
+
+  @override
+  String get refs_saveToBundle => '儲存到組合包';
+
+  @override
+  String get refs_cover => '封面';
+
+  @override
+  String get refs_setCover => '設為封面';
+
+  @override
+  String refs_exportTitle(Object count) {
+    return '匯出 $count 個 Vibe';
+  }
+
+  @override
+  String get refs_exportListNote => '從庫裡多選後點“匯出”進來；也能在這裡移掉';
+
+  @override
+  String get refs_exportAs => '匯出成';
+
+  @override
+  String get refs_fmtVibeFile => '單個 Vibe 檔案';
+
+  @override
+  String get refs_fmtVibeFileDesc => '.naiv4vibe，每個一份。官網和其他客戶端都能匯入';
+
+  @override
+  String get refs_fmtBundle => '打包成組合包';
+
+  @override
+  String refs_fmtBundleDesc(Object count) {
+    return '.naiv4vibebundle，$count 個合成一個檔案';
+  }
+
+  @override
+  String get refs_fmtPng => '嵌入到 PNG';
+
+  @override
+  String get refs_fmtPngDesc => '圖片自帶 Vibe，發給別人拖進來就能用。一次只能匯出一個';
+
+  @override
+  String get refs_fmtEncoded => '編碼文本';
+
+  @override
+  String get refs_fmtEncodedDesc => 'JSON / Base64，給指令碼和進階用法';
+
+  @override
+  String get refs_options => '選項';
+
+  @override
+  String get refs_optThumbs => '帶縮圖';
+
+  @override
+  String get refs_optThumbsDesc => '檔案稍大，匯入時能直接看到圖';
+
+  @override
+  String get refs_optZip => '壓縮成 ZIP';
+
+  @override
+  String refs_optZipDesc(Object count) {
+    return '$count 個檔案放進一個壓縮檔';
+  }
+
+  @override
+  String get refs_saveTo => '儲存到';
+
+  @override
+  String get refs_choose => '選擇';
+
+  @override
+  String refs_exportSummary(Object count, Object ext) {
+    return '將生成 $count 個 $ext 檔案';
+  }
+
+  @override
+  String refs_exportSummaryZip(Object count, Object ext) {
+    return '將生成 1 個 ZIP（內含 $count 個 $ext 檔案）';
+  }
+
+  @override
+  String refs_deleteOne(Object name) {
+    return '刪除“$name”？';
+  }
+
+  @override
+  String refs_deleteMany(Object count) {
+    return '刪除 $count 個條目？';
+  }
+
+  @override
+  String get refs_deleteVibeDesc => '從 Vibe 庫移除。生圖頁已經在用的不受影響。';
+
+  @override
+  String get refs_deletePreciseDesc => '從精準參考庫移除。生圖頁已經在用的不受影響。';
+
+  @override
+  String refs_importTitle(Object count) {
+    return '匯入 $count 個檔案';
+  }
+
+  @override
+  String get refs_importSubtitle => '拖進來的、選的、貼上的都走這一個視窗';
+
+  @override
+  String get refs_importMore => '再加檔案';
+
+  @override
+  String get refs_importPutIn => '全部放進';
+
+  @override
+  String get refs_importAddTags => '加標籤';
+
+  @override
+  String get refs_importTagsHint => '輸入後回車';
+
+  @override
+  String get refs_importPlainImages => '普通圖片';
+
+  @override
+  String get refs_importEncodeLater => '用到時再編碼';
+
+  @override
+  String refs_importEncodeNow(Object cost) {
+    return '現在編碼 · $cost Anlas/張';
+  }
+
+  @override
+  String get refs_importName => '名稱';
+
+  @override
+  String get refs_importResult => '識別結果';
+
+  @override
+  String refs_recPng(Object model) {
+    return 'PNG 內含 Vibe · $model 編碼';
+  }
+
+  @override
+  String refs_recVibeFile(Object model) {
+    return 'Vibe 檔案 · $model 編碼';
+  }
+
+  @override
+  String refs_recBundle(Object count) {
+    return '組合包 · $count 個 Vibe';
+  }
+
+  @override
+  String get refs_recImage => '普通圖片 · 還沒編碼';
+
+  @override
+  String get refs_recImageDup => '普通圖片 · 名稱已存在';
+
+  @override
+  String get refs_recFree => '直接匯入，免費';
+
+  @override
+  String refs_recReencode(Object model) {
+    return '用在 $model 時要重新編碼（檔案裡沒有原圖就不行）';
+  }
+
+  @override
+  String refs_recBundleNote(Object count) {
+    return '整個匯入 = 庫裡一張卡；拆開 = $count 張卡';
+  }
+
+  @override
+  String get refs_recEncodeLater => '先存原圖，第一次用在生圖時為當時的模型編碼';
+
+  @override
+  String refs_recEncodeNow(Object cost) {
+    return '匯入時就編碼，每張 $cost Anlas';
+  }
+
+  @override
+  String get refs_bundleWhole => '整個匯入';
+
+  @override
+  String refs_bundleSplit(Object count) {
+    return '拆成 $count 個';
+  }
+
+  @override
+  String get refs_bundlePick => '挑幾個';
+
+  @override
+  String get refs_dupExists => '庫裡已有同名條目';
+
+  @override
+  String get refs_dupKeepBoth => '兩個都留';
+
+  @override
+  String get refs_dupOverwrite => '覆蓋';
+
+  @override
+  String get refs_dupSkip => '跳過';
+
+  @override
+  String refs_importSummary(Object files, Object cards) {
+    return '$files 個檔案 → 庫裡多 $cards 張卡';
+  }
+
+  @override
+  String refs_importNow(Object cost) {
+    return ' · 現在扣 $cost Anlas';
+  }
+
+  @override
+  String refs_importLater(Object count, Object cost) {
+    return ' · $count 張普通圖片第一次用在生圖時各編碼一次（每張 $cost Anlas）';
+  }
+
+  @override
+  String get refs_pickerVibeTitle => '從 Vibe 庫新增';
+
+  @override
+  String get refs_pickerPreciseTitle => '從精準參考庫新增';
+
+  @override
+  String get refs_openVibeLibrary => '開啟 Vibe 庫';
+
+  @override
+  String get refs_openPreciseLibrary => '開啟精準參考庫';
+
+  @override
+  String get refs_recentUsed => '最近用過';
+
+  @override
+  String get refs_inUse => '已在用';
+
+  @override
+  String refs_pickedN(Object count) {
+    return '已選 $count';
+  }
+
+  @override
+  String refs_pickerAfterVibe(Object count, Object max) {
+    return ' · 加入後 $count/$max';
+  }
+
+  @override
+  String refs_pickerAfterPrecise(Object count) {
+    return ' · 加入後 $count 張';
+  }
+
+  @override
+  String refs_pickerEncode(Object name, Object model, Object cost) {
+    return '“$name”要為 $model 編碼 · $cost Anlas';
+  }
+
+  @override
+  String refs_pickerEncodeMore(Object count) {
+    return '另有 $count 個也要編碼';
+  }
+
+  @override
+  String refs_pickerExtra(Object free, Object extra) {
+    return '超過 $free 個多 $extra Anlas';
+  }
+
+  @override
+  String refs_pickerPreciseCost(Object cost, Object total) {
+    return '每張 $cost Anlas · 共 $total Anlas';
+  }
+
+  @override
+  String get refs_replaceExisting => '替換現有';
+
+  @override
+  String refs_appendN(Object count) {
+    return '追加 $count 個';
+  }
+
+  @override
+  String get refs_timeNever => '沒用過';
+
+  @override
+  String get refs_timeJustNow => '剛剛';
+
+  @override
+  String refs_timeMinutes(Object count) {
+    return '$count 分鐘前';
+  }
+
+  @override
+  String refs_timeHours(Object count) {
+    return '$count 小時前';
+  }
+
+  @override
+  String get refs_timeYesterday => '昨天';
+
+  @override
+  String refs_timeDays(Object count) {
+    return '$count 天前';
+  }
+
+  @override
+  String refs_timeMonthDay(Object month, Object day) {
+    return '$month 月 $day 日';
+  }
 }

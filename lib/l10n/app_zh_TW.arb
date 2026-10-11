@@ -8020,5 +8020,707 @@
   "online_close": "關閉",
   "online_keyImage": "這一組裡切圖",
   "online_keyWork": "上一個 / 下一個作品",
-  "online_keyInfo": "收起資訊欄"
+  "online_keyInfo": "收起資訊欄",
+  "refs_vibeTitle": "Vibe 庫",
+  "refs_preciseTitle": "精準參考庫",
+  "refs_collapseSidebar": "收起左欄",
+  "refs_expandSidebar": "展開左欄",
+  "refs_viewAll": "全部",
+  "refs_viewFavorites": "收藏",
+  "refs_viewRecent": "最近使用",
+  "refs_viewInGeneration": "在生圖頁",
+  "refs_categories": "分類",
+  "refs_newCategory": "新增分類",
+  "refs_newSubcategory": "新增子分類",
+  "refs_deleteCategory": "刪除分類",
+  "refs_categoryNameHint": "分類名稱",
+  "refs_noCategories": "還沒有分類。匯入時可以順手建一個",
+  "refs_uncategorized": "未分類",
+  "refs_sources": "來源",
+  "refs_srcPng": "PNG（內含 Vibe）",
+  "refs_srcVibeFile": "Vibe 檔案",
+  "refs_srcBundle": "組合包",
+  "refs_srcRaw": "待編碼的圖片",
+  "refs_srcImage": "圖片",
+  "refs_open": "開啟",
+  "refs_types": "參考類型",
+  "refs_importTypeNoteAll": "匯入的圖片預設按 {type} 存。選中左邊某個類型再匯入，就按那個類型存。",
+  "@refs_importTypeNoteAll": {
+    "placeholders": {
+      "type": {}
+    }
+  },
+  "refs_importTypeNoteSelected": "匯入的圖片預設按 {type} 存。跟著左邊選中的類型。",
+  "@refs_importTypeNoteSelected": {
+    "placeholders": {
+      "type": {}
+    }
+  },
+  "refs_preciseOnlyV45": "只在 V4.5 可用",
+  "refs_preciseCostNote": "每張 {cost} Anlas；和 Vibe 不能同時生效",
+  "@refs_preciseCostNote": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "refs_searchVibe": "搜尋名稱、標籤",
+  "refs_searchPrecise": "搜尋名稱",
+  "refs_sortLastUsed": "最近使用",
+  "refs_sortCreated": "加入時間",
+  "refs_sortUsed": "使用次數",
+  "refs_sortName": "名稱",
+  "refs_sortAsc": "升序",
+  "refs_sortDesc": "降序",
+  "refs_sizeSmall": "小卡片",
+  "refs_sizeMedium": "中",
+  "refs_sizeLarge": "大",
+  "refs_currentModel": "當前模型",
+  "refs_usable": "可用",
+  "refs_unusable": "不能用",
+  "refs_multi": "多選",
+  "refs_multiDone": "完成多選",
+  "refs_import": "匯入",
+  "refs_importFiles": "選擇檔案…",
+  "refs_importImages": "選擇圖片…",
+  "refs_importClipboard": "從剪貼簿貼上",
+  "refs_more": "更多",
+  "refs_exportAll": "匯出全部…",
+  "refs_openLibraryFolder": "開啟庫資料夾",
+  "refs_rescan": "重新掃描資料夾",
+  "refs_reload": "重新載入",
+  "refs_hideInspector": "收起檢查器",
+  "refs_showInspector": "展開檢查器",
+  "refs_bannerVibeLead": "{model} 不支援 Vibe 遷移。",
+  "@refs_bannerVibeLead": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_bannerVibeBody": "庫裡的 Vibe 照常整理、匯出；切到 V4.5 或 V4 才能用於生成",
+  "refs_bannerPreciseLead": "{model} 不支援精準參考。",
+  "@refs_bannerPreciseLead": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_bannerPreciseBody": "庫裡的參考圖照常整理；切到 V4.5 才能用於生成",
+  "refs_switchTo": "切到 {model}",
+  "@refs_switchTo": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_quickAll": "全部",
+  "refs_quickFavorites": "收藏",
+  "refs_quickHasRaw": "有原圖",
+  "refs_quickNeedsEncoding": "需要編碼",
+  "refs_quickBundles": "組合包",
+  "refs_quickUnused": "沒用過",
+  "refs_countVibe": "{count} 個 · {inGen} 個在生圖頁",
+  "@refs_countVibe": {
+    "placeholders": {
+      "count": {},
+      "inGen": {}
+    }
+  },
+  "refs_countPrecise": "{count} 張 · {inGen} 張在生圖頁",
+  "@refs_countPrecise": {
+    "placeholders": {
+      "count": {},
+      "inGen": {}
+    }
+  },
+  "refs_noResults": "沒有符合條件的條目",
+  "refs_noResultsFor": "沒有找到“{query}”",
+  "@refs_noResultsFor": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "refs_clearFilters": "清除篩選",
+  "refs_addShort": "加入生圖",
+  "refs_sendPrecise": "傳送到精準參考",
+  "refs_openBundle": "開啟組合包",
+  "refs_detail": "詳情",
+  "refs_addToGeneration": "加入生圖頁",
+  "refs_replaceVibes": "替換生圖頁的 Vibe",
+  "refs_replacePrecise": "替換現有精準參考",
+  "refs_sendImg2Img": "傳送到圖生圖",
+  "refs_saveAsVibe": "存進 Vibe 庫",
+  "refs_favorite": "收藏",
+  "refs_unfavorite": "取消收藏",
+  "refs_replacePreview": "換預覽圖…",
+  "refs_exportEllipsis": "匯出…",
+  "refs_showInFolder": "在資料夾中顯示",
+  "refs_copyImage": "複製圖片",
+  "refs_delete": "刪除",
+  "refs_selected": "已選 {count}",
+  "@refs_selected": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_moveTo": "移到",
+  "refs_export": "匯出",
+  "refs_emptyVibeTitle": "把圖片或 Vibe 檔案拖到這裡",
+  "refs_emptyPreciseTitle": "把參考圖拖到這裡",
+  "refs_emptyVibeDesc": "支援 PNG（內含 Vibe）、.naiv4vibe、.naiv4vibebundle 和普通圖片。\n普通圖片先存原圖，第一次用在生圖時才編碼",
+  "refs_emptyPreciseDesc": "角色設定圖、風格樣張都行，一次可以拖很多張。\n存進來時記住類型、強度和保真度，傳送時直接套用",
+  "refs_pickFiles": "選擇檔案",
+  "refs_pasteClipboard": "從剪貼簿貼上",
+  "refs_emptyFromResultVibe": "生圖結果右鍵 → 存到 Vibe 庫",
+  "refs_emptyFromResultPrecise": "生圖結果右鍵 → 存到精準參考庫",
+  "refs_emptyFromGallery": "本地圖庫也可以",
+  "refs_emptyHelpTitle": "Vibe 和精準參考有什麼區別？",
+  "refs_emptyHelpBody": "Vibe：借整體氛圍和畫風，可以疊很多張（V4 / V4.5，V5 沒有）。精準參考：照著一張圖的人物或畫風來畫，更準，每張 {cost} Anlas（只在 V4.5）。兩者不能同時生效。",
+  "@refs_emptyHelpBody": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "refs_dropTitle": "鬆開匯入 {count} 個檔案",
+  "@refs_dropTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_dropVibeDesc": "會先開啟匯入視窗確認，不會直接扣 Anlas",
+  "refs_dropPreciseDesc": "按左欄選中的類型存進精準參考庫",
+  "refs_dropVibePngs": "{count} 個 PNG 含 Vibe",
+  "@refs_dropVibePngs": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_dropVibeFiles": "{count} 個 Vibe 檔案",
+  "@refs_dropVibeFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_dropBundles": "{count} 個組合包",
+  "@refs_dropBundles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_dropImages": "{count} 張普通圖片",
+  "@refs_dropImages": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_inGeneration": "在生圖頁",
+  "refs_tag": "標籤",
+  "refs_strengthShort": "強度",
+  "refs_infoShort": "資訊",
+  "refs_fidelityShort": "保真",
+  "refs_encModelOff": "{model} 不可用",
+  "@refs_encModelOff": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_encModelOffDesc": "{model} 不支援 Vibe 遷移，切到 V4.5 / V4 才能用",
+  "@refs_encModelOffDesc": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_encReady": "已編碼 · {model}",
+  "@refs_encReady": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_encReadyShort": "{model} 已編碼",
+  "@refs_encReadyShort": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_encReadyDesc": "當前模型直接能用，不再收編碼費",
+  "refs_encOnUse": "用時編碼",
+  "refs_encOnUseDesc": "還沒編碼。第一次用在生圖時編碼，{cost} Anlas",
+  "@refs_encOnUseDesc": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "refs_encRe": "需重新編碼",
+  "refs_encReDesc": "編碼是給 {from} 的，當前是 {model}。用時按原圖重新編碼，{cost} Anlas",
+  "@refs_encReDesc": {
+    "placeholders": {
+      "from": {},
+      "model": {},
+      "cost": {}
+    }
+  },
+  "refs_encUnusable": "不能用於 {model}",
+  "@refs_encUnusable": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_encUnusableDesc": "只有 {from} 的編碼，沒有原圖，沒法給 {model} 重新編碼",
+  "@refs_encUnusableDesc": {
+    "placeholders": {
+      "from": {},
+      "model": {}
+    }
+  },
+  "refs_trayVibe": "生圖頁的 Vibe",
+  "refs_trayPrecise": "生圖頁的精準參考",
+  "refs_trayVibeCost": "超過 {free} 個每個多 {extra} Anlas",
+  "@refs_trayVibeCost": {
+    "placeholders": {
+      "free": {},
+      "extra": {}
+    }
+  },
+  "refs_trayPreciseCost": "每張 {cost} Anlas · 本次 +{total}",
+  "@refs_trayPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
+  "refs_trayHint": "拖卡片到這裡加入；Shift 拖入 = 替換全部。\n傳送後不跳頁，可以連續挑",
+  "refs_trayDropHere": "把卡片拖到這裡加入生圖頁",
+  "refs_clear": "清空",
+  "refs_goGeneration": "去生圖頁",
+  "refs_conflict": "生圖頁還有 **{count} 個 Vibe**。有精準參考時 Vibe 不會發送（官方不相容）",
+  "@refs_conflict": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_conflictPaused": "生圖頁的 **{count} 個 Vibe** 已暫停，傳送時只帶精準參考",
+  "@refs_conflictPaused": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_pauseVibes": "暫停 Vibe",
+  "refs_resumeVibes": "恢復 Vibe",
+  "refs_inspector": "檢查器",
+  "refs_selectedN": "已選 {count} 個",
+  "@refs_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_noSelectionVibe": "點一張卡片看它的參數和編碼狀態",
+  "refs_noSelectionPrecise": "點一張參考圖看它的類型和參數",
+  "refs_rename": "改名",
+  "refs_replace": "替換",
+  "refs_replaceVibesTip": "替換生圖頁現有的全部 Vibe",
+  "refs_strength": "強度",
+  "refs_strengthDesc": "越高越像這張圖的感覺",
+  "refs_infoExtracted": "資訊提取",
+  "refs_infoDesc": "越高帶進來的細節越多。改它要按原圖重新編碼，{cost} Anlas",
+  "@refs_infoDesc": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "refs_infoLocked": "這條只有編碼資料、沒有原圖，資訊提取改不了",
+  "refs_changedNote": "改動只用於這次傳送",
+  "refs_saveDefault": "存為預設",
+  "refs_revert": "還原",
+  "refs_encodeNow": "現在為 {model} 編碼 · {cost} Anlas",
+  "@refs_encodeNow": {
+    "placeholders": {
+      "model": {},
+      "cost": {}
+    }
+  },
+  "refs_bundleNote": "組合包裡的 {count} 個 Vibe 各有自己的強度和資訊提取，開啟組合包可以單獨調。",
+  "@refs_bundleNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_bundleOf": "組合包 · {count} 個",
+  "@refs_bundleOf": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_organize": "整理",
+  "refs_category": "分類",
+  "refs_tags": "標籤",
+  "refs_used": "用過",
+  "refs_neverUsed": "還沒用過",
+  "refs_usedTimes": "{count} 次 · 上次 {last}",
+  "@refs_usedTimes": {
+    "placeholders": {
+      "count": {},
+      "last": {}
+    }
+  },
+  "refs_added": "加入",
+  "refs_file": "檔案",
+  "refs_original": "原圖",
+  "refs_plusAnlas": "+{cost} Anlas",
+  "@refs_plusAnlas": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "refs_alsoSaveVibe": "也存進 Vibe 庫",
+  "refs_referenceWhat": "參考什麼",
+  "refs_typeCharacter": "角色",
+  "refs_typeStyle": "風格",
+  "refs_typeBoth": "角色+風格",
+  "refs_typeCharacterDesc": "保留人物長相、髮型和服裝，畫風跟提示詞走",
+  "refs_typeStyleDesc": "只借畫風、配色和筆觸，不管畫的是誰",
+  "refs_typeBothDesc": "人物和畫風都參考",
+  "refs_preciseStrength": "參考強度",
+  "refs_preciseStrengthDesc": "越高越像參考圖",
+  "refs_fidelity": "保真度",
+  "refs_fidelityDesc": "越高越貼原圖細節，越低越自由",
+  "refs_preciseDefaultsNote": "這裡改的是預設值，傳送時直接帶上；數字框可以填超過 0–1 的值",
+  "refs_showInFolderShort": "所在資料夾",
+  "refs_pickHint": "勾選卡片後在這裡批次設定",
+  "refs_multiAddTitle": "一起加入生圖頁",
+  "refs_multiSendTitle": "一起傳送到精準參考",
+  "refs_multiFree": "不超過 {free} 個，不額外收費。",
+  "@refs_multiFree": {
+    "placeholders": {
+      "free": {}
+    }
+  },
+  "refs_multiExtra": "超過 {free} 個，每多一個 +{extra} Anlas：這次每張圖多 {total} Anlas。",
+  "@refs_multiExtra": {
+    "placeholders": {
+      "free": {},
+      "extra": {},
+      "total": {}
+    }
+  },
+  "refs_multiOverMax": "超過 {max} 個上限，多出的不會加入。",
+  "@refs_multiOverMax": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "refs_multiEncodes": "其中 {count} 個需要編碼（{names}，每個 {cost} Anlas，只收一次）。",
+  "@refs_multiEncodes": {
+    "placeholders": {
+      "count": {},
+      "names": {},
+      "cost": {}
+    }
+  },
+  "refs_multiAlready": "{count} 個已經在生圖頁，不會重複加入。",
+  "@refs_multiAlready": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_multiPreciseCost": "每張 {cost} Anlas，傳送後每張圖共 {total} Anlas。",
+  "@refs_multiPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
+  "refs_unify": "統一設定",
+  "refs_mixed": "混合",
+  "refs_unifyVibeNote": "拖動後 {count} 個一起改，寫回各自的預設值；資訊提取不統一改（要重新編碼）",
+  "@refs_unifyVibeNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_unifyPreciseNote": "點一下把 {count} 張都改成這個類型",
+  "@refs_unifyPreciseNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_moveToCategory": "移到分類",
+  "refs_addTag": "加標籤",
+  "refs_packBundle": "打包成組合包",
+  "refs_close": "關閉",
+  "refs_cancel": "取消",
+  "refs_remove": "移除",
+  "refs_prev": "上一個",
+  "refs_next": "下一個",
+  "refs_switch": "切換",
+  "refs_dropReplacePreview": "把新圖拖到這裡 = 換掉預覽圖（不影響編碼）",
+  "refs_bundleOfVibes": "組合包 · {count} 個 Vibe",
+  "@refs_bundleOfVibes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_bundleAll": "全部 {count} 個",
+  "@refs_bundleAll": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_bundleOnlyChecked": "只用勾選的 {count} 個",
+  "@refs_bundleOnlyChecked": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_bundleScopeNote": "傳送時按包裡每個 Vibe 自己的強度和資訊提取",
+  "refs_splitBundle": "拆成單獨的 Vibe",
+  "refs_bundleNoteLong": "改了某一個的參數後，可以“儲存到組合包”；不儲存隻影響這次傳送。",
+  "refs_bundleAllEncoded": "包裡 {count} 個都已為 {model} 編碼",
+  "@refs_bundleAllEncoded": {
+    "placeholders": {
+      "count": {},
+      "model": {}
+    }
+  },
+  "refs_saveToBundle": "儲存到組合包",
+  "refs_cover": "封面",
+  "refs_setCover": "設為封面",
+  "refs_exportTitle": "匯出 {count} 個 Vibe",
+  "@refs_exportTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_exportListNote": "從庫裡多選後點“匯出”進來；也能在這裡移掉",
+  "refs_exportAs": "匯出成",
+  "refs_fmtVibeFile": "單個 Vibe 檔案",
+  "refs_fmtVibeFileDesc": ".naiv4vibe，每個一份。官網和其他客戶端都能匯入",
+  "refs_fmtBundle": "打包成組合包",
+  "refs_fmtBundleDesc": ".naiv4vibebundle，{count} 個合成一個檔案",
+  "@refs_fmtBundleDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_fmtPng": "嵌入到 PNG",
+  "refs_fmtPngDesc": "圖片自帶 Vibe，發給別人拖進來就能用。一次只能匯出一個",
+  "refs_fmtEncoded": "編碼文本",
+  "refs_fmtEncodedDesc": "JSON / Base64，給指令碼和進階用法",
+  "refs_options": "選項",
+  "refs_optThumbs": "帶縮圖",
+  "refs_optThumbsDesc": "檔案稍大，匯入時能直接看到圖",
+  "refs_optZip": "壓縮成 ZIP",
+  "refs_optZipDesc": "{count} 個檔案放進一個壓縮檔",
+  "@refs_optZipDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_saveTo": "儲存到",
+  "refs_choose": "選擇",
+  "refs_exportSummary": "將生成 {count} 個 {ext} 檔案",
+  "@refs_exportSummary": {
+    "placeholders": {
+      "count": {},
+      "ext": {}
+    }
+  },
+  "refs_exportSummaryZip": "將生成 1 個 ZIP（內含 {count} 個 {ext} 檔案）",
+  "@refs_exportSummaryZip": {
+    "placeholders": {
+      "count": {},
+      "ext": {}
+    }
+  },
+  "refs_deleteOne": "刪除“{name}”？",
+  "@refs_deleteOne": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "refs_deleteMany": "刪除 {count} 個條目？",
+  "@refs_deleteMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_deleteVibeDesc": "從 Vibe 庫移除。生圖頁已經在用的不受影響。",
+  "refs_deletePreciseDesc": "從精準參考庫移除。生圖頁已經在用的不受影響。",
+  "refs_importTitle": "匯入 {count} 個檔案",
+  "@refs_importTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_importSubtitle": "拖進來的、選的、貼上的都走這一個視窗",
+  "refs_importMore": "再加檔案",
+  "refs_importPutIn": "全部放進",
+  "refs_importAddTags": "加標籤",
+  "refs_importTagsHint": "輸入後回車",
+  "refs_importPlainImages": "普通圖片",
+  "refs_importEncodeLater": "用到時再編碼",
+  "refs_importEncodeNow": "現在編碼 · {cost} Anlas/張",
+  "@refs_importEncodeNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "refs_importName": "名稱",
+  "refs_importResult": "識別結果",
+  "refs_recPng": "PNG 內含 Vibe · {model} 編碼",
+  "@refs_recPng": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_recVibeFile": "Vibe 檔案 · {model} 編碼",
+  "@refs_recVibeFile": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_recBundle": "組合包 · {count} 個 Vibe",
+  "@refs_recBundle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_recImage": "普通圖片 · 還沒編碼",
+  "refs_recImageDup": "普通圖片 · 名稱已存在",
+  "refs_recFree": "直接匯入，免費",
+  "refs_recReencode": "用在 {model} 時要重新編碼（檔案裡沒有原圖就不行）",
+  "@refs_recReencode": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "refs_recBundleNote": "整個匯入 = 庫裡一張卡；拆開 = {count} 張卡",
+  "@refs_recBundleNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_recEncodeLater": "先存原圖，第一次用在生圖時為當時的模型編碼",
+  "refs_recEncodeNow": "匯入時就編碼，每張 {cost} Anlas",
+  "@refs_recEncodeNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "refs_bundleWhole": "整個匯入",
+  "refs_bundleSplit": "拆成 {count} 個",
+  "@refs_bundleSplit": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_bundlePick": "挑幾個",
+  "refs_dupExists": "庫裡已有同名條目",
+  "refs_dupKeepBoth": "兩個都留",
+  "refs_dupOverwrite": "覆蓋",
+  "refs_dupSkip": "跳過",
+  "refs_importSummary": "{files} 個檔案 → 庫裡多 {cards} 張卡",
+  "@refs_importSummary": {
+    "placeholders": {
+      "files": {},
+      "cards": {}
+    }
+  },
+  "refs_importNow": " · 現在扣 {cost} Anlas",
+  "@refs_importNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "refs_importLater": " · {count} 張普通圖片第一次用在生圖時各編碼一次（每張 {cost} Anlas）",
+  "@refs_importLater": {
+    "placeholders": {
+      "count": {},
+      "cost": {}
+    }
+  },
+  "refs_pickerVibeTitle": "從 Vibe 庫新增",
+  "refs_pickerPreciseTitle": "從精準參考庫新增",
+  "refs_openVibeLibrary": "開啟 Vibe 庫",
+  "refs_openPreciseLibrary": "開啟精準參考庫",
+  "refs_recentUsed": "最近用過",
+  "refs_inUse": "已在用",
+  "refs_pickedN": "已選 {count}",
+  "@refs_pickedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_pickerAfterVibe": " · 加入後 {count}/{max}",
+  "@refs_pickerAfterVibe": {
+    "placeholders": {
+      "count": {},
+      "max": {}
+    }
+  },
+  "refs_pickerAfterPrecise": " · 加入後 {count} 張",
+  "@refs_pickerAfterPrecise": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_pickerEncode": "“{name}”要為 {model} 編碼 · {cost} Anlas",
+  "@refs_pickerEncode": {
+    "placeholders": {
+      "name": {},
+      "model": {},
+      "cost": {}
+    }
+  },
+  "refs_pickerEncodeMore": "另有 {count} 個也要編碼",
+  "@refs_pickerEncodeMore": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_pickerExtra": "超過 {free} 個多 {extra} Anlas",
+  "@refs_pickerExtra": {
+    "placeholders": {
+      "free": {},
+      "extra": {}
+    }
+  },
+  "refs_pickerPreciseCost": "每張 {cost} Anlas · 共 {total} Anlas",
+  "@refs_pickerPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
+  "refs_replaceExisting": "替換現有",
+  "refs_appendN": "追加 {count} 個",
+  "@refs_appendN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_timeNever": "沒用過",
+  "refs_timeJustNow": "剛剛",
+  "refs_timeMinutes": "{count} 分鐘前",
+  "@refs_timeMinutes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_timeHours": "{count} 小時前",
+  "@refs_timeHours": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_timeYesterday": "昨天",
+  "refs_timeDays": "{count} 天前",
+  "@refs_timeDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "refs_timeMonthDay": "{month} 月 {day} 日",
+  "@refs_timeMonthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  }
 }

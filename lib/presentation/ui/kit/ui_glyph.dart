@@ -101,4 +101,28 @@ abstract final class UiGlyphs {
   static const move = 'M4 7h16M4 12h10M4 17h7M17 14l3 3-3 3';
   static const pencil = 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4';
   static const trash = 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3';
+
+  // Vibe / 精准参考库（.devin/mockups/refs/mock.html）
+  static const star =
+      'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z';
+  static const stack = 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5';
+  static const sort = 'M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4';
+  static const sizes = 'M4 4h6v6H4zM14 14h6v6h-6zM14 4h6v6h-6z';
+  static const upload = 'M12 16V5M7 10l5-5 5 5M5 19h14';
+  static const swap = 'M7 7h12l-3-3M17 17H5l3 3';
+  static const help =
+      'M12 21a9 9 0 100-18 9 9 0 000 18zM9.5 9a2.5 2.5 0 015 .5c0 1.5-2.5 2-2.5 3.5M12 17h.01';
+  static const clipboard = 'M9 4h6v3H9zM7 5H5v15h14V5h-2';
+  static const file = 'M6 3h8l4 4v14H6zM14 3v4h4';
+  static const code = 'M8 8l-4 4 4 4M16 8l4 4-4 4';
+  static const cover = 'M5 4h14v16H5zM9 9h6M9 13h4';
+  static const tag = 'M3 12V4h8l10 10-8 8zM7.5 8h.01';
+  static const inbox = 'M4 13l3-8h10l3 8v6H4zM4 13h5l1 2h4l1-2h5';
+  static const bolt = 'M13 3L5 14h6l-1 7 8-11h-6z';
+  static const palette =
+      'M12 3a9 9 0 000 18c1 0 1.6-.7 1.6-1.5 0-.4-.2-.8-.4-1-.3-.3-.4-.6-.4-1 0-.8.7-1.5 1.5-1.5H16a5 5 0 005-5c0-4.4-4-8-9-8zM7.5 12h.01M9.5 8h.01M14.5 8h.01M17 12h.01';
+  static const personStar =
+      'M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM3 20a6 6 0 0112 0M17 4l1.2 2.6L21 7l-2 2 .5 2.8L17 10.5 14.5 11.8 15 9l-2-2 2.8-.4z';
+  static const picture = 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01';
+  static const arrowLeft = 'M19 12H5M11 6l-6 6 6 6';
 }

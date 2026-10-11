@@ -14011,4 +14011,1027 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get online_keyInfo => '情報欄の表示切替';
+
+  @override
+  String get refs_vibeTitle => 'Vibe ライブラリ';
+
+  @override
+  String get refs_preciseTitle => '精密参照ライブラリ';
+
+  @override
+  String get refs_collapseSidebar => 'サイドバーを閉じる';
+
+  @override
+  String get refs_expandSidebar => 'サイドバーを開く';
+
+  @override
+  String get refs_viewAll => 'すべて';
+
+  @override
+  String get refs_viewFavorites => 'お気に入り';
+
+  @override
+  String get refs_viewRecent => '最近使用';
+
+  @override
+  String get refs_viewInGeneration => '生成ページで使用中';
+
+  @override
+  String get refs_categories => 'カテゴリ';
+
+  @override
+  String get refs_newCategory => '新規カテゴリ';
+
+  @override
+  String get refs_newSubcategory => 'サブカテゴリを作成';
+
+  @override
+  String get refs_deleteCategory => 'カテゴリを削除';
+
+  @override
+  String get refs_categoryNameHint => 'カテゴリ名';
+
+  @override
+  String get refs_noCategories => 'カテゴリはまだありません。インポート時に作成できます';
+
+  @override
+  String get refs_uncategorized => '未分類';
+
+  @override
+  String get refs_sources => 'ソース';
+
+  @override
+  String get refs_srcPng => 'PNG（Vibe 埋め込み）';
+
+  @override
+  String get refs_srcVibeFile => 'Vibe ファイル';
+
+  @override
+  String get refs_srcBundle => 'バンドル';
+
+  @override
+  String get refs_srcRaw => 'エンコード待ちの画像';
+
+  @override
+  String get refs_srcImage => '画像';
+
+  @override
+  String get refs_open => '開く';
+
+  @override
+  String get refs_types => '参照タイプ';
+
+  @override
+  String refs_importTypeNoteAll(Object type) {
+    return 'インポートした画像は既定で $type として保存されます。左でタイプを選んでからインポートするとそのタイプで保存されます。';
+  }
+
+  @override
+  String refs_importTypeNoteSelected(Object type) {
+    return 'インポートした画像は $type として保存されます（左で選んだタイプ）。';
+  }
+
+  @override
+  String get refs_preciseOnlyV45 => 'V4.5 のみ';
+
+  @override
+  String refs_preciseCostNote(Object cost) {
+    return '1 枚 $cost Anlas。Vibe とは同時に使えません';
+  }
+
+  @override
+  String get refs_searchVibe => '名前・タグを検索';
+
+  @override
+  String get refs_searchPrecise => '名前を検索';
+
+  @override
+  String get refs_sortLastUsed => '最近使用';
+
+  @override
+  String get refs_sortCreated => '追加日';
+
+  @override
+  String get refs_sortUsed => '使用回数';
+
+  @override
+  String get refs_sortName => '名前';
+
+  @override
+  String get refs_sortAsc => '昇順';
+
+  @override
+  String get refs_sortDesc => '降順';
+
+  @override
+  String get refs_sizeSmall => '小';
+
+  @override
+  String get refs_sizeMedium => '中';
+
+  @override
+  String get refs_sizeLarge => '大';
+
+  @override
+  String get refs_currentModel => '現在のモデル';
+
+  @override
+  String get refs_usable => '使用可';
+
+  @override
+  String get refs_unusable => '使用不可';
+
+  @override
+  String get refs_multi => '複数選択';
+
+  @override
+  String get refs_multiDone => '選択を終了';
+
+  @override
+  String get refs_import => 'インポート';
+
+  @override
+  String get refs_importFiles => 'ファイルを選択…';
+
+  @override
+  String get refs_importImages => '画像を選択…';
+
+  @override
+  String get refs_importClipboard => 'クリップボードから貼り付け';
+
+  @override
+  String get refs_more => 'その他';
+
+  @override
+  String get refs_exportAll => 'すべてエクスポート…';
+
+  @override
+  String get refs_openLibraryFolder => 'ライブラリフォルダを開く';
+
+  @override
+  String get refs_rescan => 'フォルダを再スキャン';
+
+  @override
+  String get refs_reload => '再読み込み';
+
+  @override
+  String get refs_hideInspector => 'インスペクターを閉じる';
+
+  @override
+  String get refs_showInspector => 'インスペクターを開く';
+
+  @override
+  String refs_bannerVibeLead(Object model) {
+    return '$model は Vibe 転送に対応していません。';
+  }
+
+  @override
+  String get refs_bannerVibeBody =>
+      'Vibe の整理・エクスポートはできます。生成に使うには V4.5 か V4 に切り替えてください';
+
+  @override
+  String refs_bannerPreciseLead(Object model) {
+    return '$model は精密参照に対応していません。';
+  }
+
+  @override
+  String get refs_bannerPreciseBody => '参照画像の整理はできます。生成に使うには V4.5 に切り替えてください';
+
+  @override
+  String refs_switchTo(Object model) {
+    return '$model に切り替え';
+  }
+
+  @override
+  String get refs_quickAll => 'すべて';
+
+  @override
+  String get refs_quickFavorites => 'お気に入り';
+
+  @override
+  String get refs_quickHasRaw => '元画像あり';
+
+  @override
+  String get refs_quickNeedsEncoding => '要エンコード';
+
+  @override
+  String get refs_quickBundles => 'バンドル';
+
+  @override
+  String get refs_quickUnused => '未使用';
+
+  @override
+  String refs_countVibe(Object count, Object inGen) {
+    return '$count 件 · 生成ページで $inGen 件';
+  }
+
+  @override
+  String refs_countPrecise(Object count, Object inGen) {
+    return '$count 枚 · 生成ページで $inGen 枚';
+  }
+
+  @override
+  String get refs_noResults => '条件に合う項目はありません';
+
+  @override
+  String refs_noResultsFor(Object query) {
+    return '「$query」は見つかりませんでした';
+  }
+
+  @override
+  String get refs_clearFilters => 'フィルターをクリア';
+
+  @override
+  String get refs_addShort => '生成に追加';
+
+  @override
+  String get refs_sendPrecise => '精密参照に送る';
+
+  @override
+  String get refs_openBundle => 'バンドルを開く';
+
+  @override
+  String get refs_detail => '詳細';
+
+  @override
+  String get refs_addToGeneration => '生成ページに追加';
+
+  @override
+  String get refs_replaceVibes => '生成ページの Vibe を置き換え';
+
+  @override
+  String get refs_replacePrecise => '現在の精密参照を置き換え';
+
+  @override
+  String get refs_sendImg2Img => '画像から画像へ送る';
+
+  @override
+  String get refs_saveAsVibe => 'Vibe ライブラリに保存';
+
+  @override
+  String get refs_favorite => 'お気に入り';
+
+  @override
+  String get refs_unfavorite => 'お気に入り解除';
+
+  @override
+  String get refs_replacePreview => 'プレビューを差し替え…';
+
+  @override
+  String get refs_exportEllipsis => 'エクスポート…';
+
+  @override
+  String get refs_showInFolder => 'フォルダで表示';
+
+  @override
+  String get refs_copyImage => '画像をコピー';
+
+  @override
+  String get refs_delete => '削除';
+
+  @override
+  String refs_selected(Object count) {
+    return '$count 件選択';
+  }
+
+  @override
+  String get refs_moveTo => '移動';
+
+  @override
+  String get refs_export => 'エクスポート';
+
+  @override
+  String get refs_emptyVibeTitle => '画像や Vibe ファイルをここにドロップ';
+
+  @override
+  String get refs_emptyPreciseTitle => '参照画像をここにドロップ';
+
+  @override
+  String get refs_emptyVibeDesc =>
+      'PNG（Vibe 埋め込み）、.naiv4vibe、.naiv4vibebundle、通常の画像に対応。\n通常の画像は元画像のまま保存し、初めて生成に使うときにエンコードします';
+
+  @override
+  String get refs_emptyPreciseDesc =>
+      'キャラ設定画や画風サンプルなど、まとめてドロップできます。\nタイプ・強度・忠実度を保存し、送るときにそのまま使います';
+
+  @override
+  String get refs_pickFiles => 'ファイルを選択';
+
+  @override
+  String get refs_pasteClipboard => '貼り付け';
+
+  @override
+  String get refs_emptyFromResultVibe => '生成結果を右クリック → Vibe ライブラリに保存';
+
+  @override
+  String get refs_emptyFromResultPrecise => '生成結果を右クリック → 精密参照ライブラリに保存';
+
+  @override
+  String get refs_emptyFromGallery => 'ローカルギャラリーからも可';
+
+  @override
+  String get refs_emptyHelpTitle => 'Vibe と精密参照の違い';
+
+  @override
+  String refs_emptyHelpBody(Object cost) {
+    return 'Vibe：全体の雰囲気や画風を借り、何枚も重ねられます（V4 / V4.5、V5 は非対応）。精密参照：1 枚の画像の人物や画風により忠実に描きます。1 枚 $cost Anlas（V4.5 のみ）。両者は同時に使えません。';
+  }
+
+  @override
+  String refs_dropTitle(Object count) {
+    return '離すと $count 件をインポート';
+  }
+
+  @override
+  String get refs_dropVibeDesc => 'まずインポート画面で確認します。すぐに Anlas は消費しません';
+
+  @override
+  String get refs_dropPreciseDesc => '左で選んだタイプで保存します';
+
+  @override
+  String refs_dropVibePngs(Object count) {
+    return 'Vibe 入り PNG $count 件';
+  }
+
+  @override
+  String refs_dropVibeFiles(Object count) {
+    return 'Vibe ファイル $count 件';
+  }
+
+  @override
+  String refs_dropBundles(Object count) {
+    return 'バンドル $count 件';
+  }
+
+  @override
+  String refs_dropImages(Object count) {
+    return '通常の画像 $count 枚';
+  }
+
+  @override
+  String get refs_inGeneration => '使用中';
+
+  @override
+  String get refs_tag => 'タグ';
+
+  @override
+  String get refs_strengthShort => '強度';
+
+  @override
+  String get refs_infoShort => '情報';
+
+  @override
+  String get refs_fidelityShort => '忠実';
+
+  @override
+  String refs_encModelOff(Object model) {
+    return '$model では使用不可';
+  }
+
+  @override
+  String refs_encModelOffDesc(Object model) {
+    return '$model は Vibe 転送非対応です。V4.5 / V4 に切り替えると使えます';
+  }
+
+  @override
+  String refs_encReady(Object model) {
+    return 'エンコード済み · $model';
+  }
+
+  @override
+  String refs_encReadyShort(Object model) {
+    return '$model エンコード済み';
+  }
+
+  @override
+  String get refs_encReadyDesc => '現在のモデルでそのまま使えます。エンコード料金はかかりません';
+
+  @override
+  String get refs_encOnUse => '使用時にエンコード';
+
+  @override
+  String refs_encOnUseDesc(Object cost) {
+    return 'まだエンコードしていません。初めて生成に使うときにエンコードします（$cost Anlas）';
+  }
+
+  @override
+  String get refs_encRe => '再エンコードが必要';
+
+  @override
+  String refs_encReDesc(Object from, Object model, Object cost) {
+    return '$from 用のエンコードです（現在は $model）。使用時に元画像から再エンコードします（$cost Anlas）';
+  }
+
+  @override
+  String refs_encUnusable(Object model) {
+    return '$model では使えません';
+  }
+
+  @override
+  String refs_encUnusableDesc(Object from, Object model) {
+    return '$from 用のエンコードのみで元画像がないため、$model 用に再エンコードできません';
+  }
+
+  @override
+  String get refs_trayVibe => '生成ページの Vibe';
+
+  @override
+  String get refs_trayPrecise => '生成ページの精密参照';
+
+  @override
+  String refs_trayVibeCost(Object free, Object extra) {
+    return '$free 件を超えると 1 件ごとに +$extra Anlas';
+  }
+
+  @override
+  String refs_trayPreciseCost(Object cost, Object total) {
+    return '1 枚 $cost Anlas · 今回 +$total';
+  }
+
+  @override
+  String get refs_trayHint =>
+      'カードをここにドラッグで追加、Shift でまとめて置き換え。\nページは移動しないので続けて選べます';
+
+  @override
+  String get refs_trayDropHere => 'カードをここにドロップして追加';
+
+  @override
+  String get refs_clear => 'クリア';
+
+  @override
+  String get refs_goGeneration => '生成ページへ';
+
+  @override
+  String refs_conflict(Object count) {
+    return '生成ページに **Vibe が $count 件** あります。精密参照があると Vibe は送信されません（公式非対応）';
+  }
+
+  @override
+  String refs_conflictPaused(Object count) {
+    return '生成ページの **Vibe $count 件** は一時停止中。精密参照のみ送信します';
+  }
+
+  @override
+  String get refs_pauseVibes => 'Vibe を一時停止';
+
+  @override
+  String get refs_resumeVibes => 'Vibe を再開';
+
+  @override
+  String get refs_inspector => 'インスペクター';
+
+  @override
+  String refs_selectedN(Object count) {
+    return '$count 件選択中';
+  }
+
+  @override
+  String get refs_noSelectionVibe => 'カードを選ぶとパラメータとエンコード状態を表示します';
+
+  @override
+  String get refs_noSelectionPrecise => '参照画像を選ぶとタイプとパラメータを表示します';
+
+  @override
+  String get refs_rename => '名前を変更';
+
+  @override
+  String get refs_replace => '置き換え';
+
+  @override
+  String get refs_replaceVibesTip => '生成ページの Vibe をすべて置き換え';
+
+  @override
+  String get refs_strength => '強度';
+
+  @override
+  String get refs_strengthDesc => '高いほどこの画像の雰囲気に近づきます';
+
+  @override
+  String get refs_infoExtracted => '情報抽出';
+
+  @override
+  String refs_infoDesc(Object cost) {
+    return '高いほど細部を多く取り込みます。変更すると元画像から再エンコードします（$cost Anlas）';
+  }
+
+  @override
+  String get refs_infoLocked => 'エンコードデータのみで元画像がないため、情報抽出は変更できません';
+
+  @override
+  String get refs_changedNote => '変更は今回の送信のみに使われます';
+
+  @override
+  String get refs_saveDefault => '既定値として保存';
+
+  @override
+  String get refs_revert => '元に戻す';
+
+  @override
+  String refs_encodeNow(Object model, Object cost) {
+    return '今すぐ $model 用にエンコード · $cost Anlas';
+  }
+
+  @override
+  String refs_bundleNote(Object count) {
+    return 'このバンドルの $count 件の Vibe はそれぞれ強度と情報抽出を持ちます。バンドルを開くと個別に調整できます。';
+  }
+
+  @override
+  String refs_bundleOf(Object count) {
+    return 'バンドル · $count 件';
+  }
+
+  @override
+  String get refs_organize => '整理';
+
+  @override
+  String get refs_category => 'カテゴリ';
+
+  @override
+  String get refs_tags => 'タグ';
+
+  @override
+  String get refs_used => '使用';
+
+  @override
+  String get refs_neverUsed => '未使用';
+
+  @override
+  String refs_usedTimes(Object count, Object last) {
+    return '$count 回 · 最後 $last';
+  }
+
+  @override
+  String get refs_added => '追加';
+
+  @override
+  String get refs_file => 'ファイル';
+
+  @override
+  String get refs_original => '元画像';
+
+  @override
+  String refs_plusAnlas(Object cost) {
+    return '+$cost Anlas';
+  }
+
+  @override
+  String get refs_alsoSaveVibe => 'Vibe にも保存';
+
+  @override
+  String get refs_referenceWhat => '参照するもの';
+
+  @override
+  String get refs_typeCharacter => 'キャラ';
+
+  @override
+  String get refs_typeStyle => '画風';
+
+  @override
+  String get refs_typeBoth => 'キャラ+画風';
+
+  @override
+  String get refs_typeCharacterDesc => '人物の顔・髪型・服装を保ち、画風はプロンプトに従います';
+
+  @override
+  String get refs_typeStyleDesc => '画風・配色・タッチのみを借ります（人物は問いません）';
+
+  @override
+  String get refs_typeBothDesc => '人物と画風の両方を参照します';
+
+  @override
+  String get refs_preciseStrength => '参照強度';
+
+  @override
+  String get refs_preciseStrengthDesc => '高いほど参照画像に近づきます';
+
+  @override
+  String get refs_fidelity => '忠実度';
+
+  @override
+  String get refs_fidelityDesc => '高いほど細部に忠実、低いほど自由になります';
+
+  @override
+  String get refs_preciseDefaultsNote =>
+      'ここで変えるのは既定値で、送信時にそのまま使われます。数値欄には 0–1 以外も入力できます';
+
+  @override
+  String get refs_showInFolderShort => 'フォルダを開く';
+
+  @override
+  String get refs_pickHint => 'カードにチェックを入れるとここでまとめて設定できます';
+
+  @override
+  String get refs_multiAddTitle => 'まとめて生成ページに追加';
+
+  @override
+  String get refs_multiSendTitle => 'まとめて精密参照に送る';
+
+  @override
+  String refs_multiFree(Object free) {
+    return '$free 件までは追加料金なし。';
+  }
+
+  @override
+  String refs_multiExtra(Object free, Object extra, Object total) {
+    return '$free 件を超えると 1 件ごとに +$extra Anlas：1 枚あたり $total Anlas 増えます。';
+  }
+
+  @override
+  String refs_multiOverMax(Object max) {
+    return '上限 $max 件を超えた分は追加されません。';
+  }
+
+  @override
+  String refs_multiEncodes(Object count, Object names, Object cost) {
+    return 'うち $count 件はエンコードが必要です（$names、1 件 $cost Anlas、初回のみ）。';
+  }
+
+  @override
+  String refs_multiAlready(Object count) {
+    return '$count 件は既に生成ページにあるため重複しません。';
+  }
+
+  @override
+  String refs_multiPreciseCost(Object cost, Object total) {
+    return '1 枚 $cost Anlas、合計で 1 枚あたり $total Anlas。';
+  }
+
+  @override
+  String get refs_unify => 'まとめて設定';
+
+  @override
+  String get refs_mixed => '混在';
+
+  @override
+  String refs_unifyVibeNote(Object count) {
+    return 'ドラッグすると $count 件の既定値をまとめて変更します。情報抽出は再エンコードが必要なため変更しません';
+  }
+
+  @override
+  String refs_unifyPreciseNote(Object count) {
+    return 'クリックで $count 枚すべてをこのタイプに';
+  }
+
+  @override
+  String get refs_moveToCategory => 'カテゴリへ移動';
+
+  @override
+  String get refs_addTag => 'タグを追加';
+
+  @override
+  String get refs_packBundle => 'バンドルにまとめる';
+
+  @override
+  String get refs_close => '閉じる';
+
+  @override
+  String get refs_cancel => 'キャンセル';
+
+  @override
+  String get refs_remove => '外す';
+
+  @override
+  String get refs_prev => '前へ';
+
+  @override
+  String get refs_next => '次へ';
+
+  @override
+  String get refs_switch => '切り替え';
+
+  @override
+  String get refs_dropReplacePreview => 'ここに画像をドロップするとプレビューを差し替え（エンコードは変わりません）';
+
+  @override
+  String refs_bundleOfVibes(Object count) {
+    return 'バンドル · Vibe $count 件';
+  }
+
+  @override
+  String refs_bundleAll(Object count) {
+    return '全 $count 件';
+  }
+
+  @override
+  String refs_bundleOnlyChecked(Object count) {
+    return 'チェックした $count 件のみ';
+  }
+
+  @override
+  String get refs_bundleScopeNote => '送信時は各 Vibe の強度と情報抽出を使います';
+
+  @override
+  String get refs_splitBundle => '個別の Vibe に分割';
+
+  @override
+  String get refs_bundleNoteLong =>
+      'パラメータを変えたら「バンドルに保存」で保存できます。保存しなければ今回の送信のみに影響します。';
+
+  @override
+  String refs_bundleAllEncoded(Object count, Object model) {
+    return '$count 件すべて $model 用にエンコード済み';
+  }
+
+  @override
+  String get refs_saveToBundle => 'バンドルに保存';
+
+  @override
+  String get refs_cover => 'カバー';
+
+  @override
+  String get refs_setCover => 'カバーに設定';
+
+  @override
+  String refs_exportTitle(Object count) {
+    return 'Vibe $count 件をエクスポート';
+  }
+
+  @override
+  String get refs_exportListNote => 'ライブラリで複数選択して「エクスポート」。ここで外すこともできます';
+
+  @override
+  String get refs_exportAs => 'エクスポート形式';
+
+  @override
+  String get refs_fmtVibeFile => '個別の Vibe ファイル';
+
+  @override
+  String get refs_fmtVibeFileDesc => '.naiv4vibe を 1 件ずつ。公式サイトや他クライアントでも読み込めます';
+
+  @override
+  String get refs_fmtBundle => 'バンドルにまとめる';
+
+  @override
+  String refs_fmtBundleDesc(Object count) {
+    return '.naiv4vibebundle、$count 件を 1 ファイルに';
+  }
+
+  @override
+  String get refs_fmtPng => 'PNG に埋め込み';
+
+  @override
+  String get refs_fmtPngDesc => '画像に Vibe を埋め込み、ドロップするだけで使えます。1 件ずつのみ';
+
+  @override
+  String get refs_fmtEncoded => 'エンコードテキスト';
+
+  @override
+  String get refs_fmtEncodedDesc => 'JSON / Base64。スクリプトや上級者向け';
+
+  @override
+  String get refs_options => 'オプション';
+
+  @override
+  String get refs_optThumbs => 'サムネイルを含める';
+
+  @override
+  String get refs_optThumbsDesc => 'ファイルが少し大きくなりますが、インポート時に画像が見えます';
+
+  @override
+  String get refs_optZip => 'ZIP に圧縮';
+
+  @override
+  String refs_optZipDesc(Object count) {
+    return '$count 個のファイルを 1 つにまとめます';
+  }
+
+  @override
+  String get refs_saveTo => '保存先';
+
+  @override
+  String get refs_choose => '選択';
+
+  @override
+  String refs_exportSummary(Object count, Object ext) {
+    return '$ext ファイルを $count 個作成します';
+  }
+
+  @override
+  String refs_exportSummaryZip(Object count, Object ext) {
+    return 'ZIP を 1 個作成（$ext ファイル $count 個）';
+  }
+
+  @override
+  String refs_deleteOne(Object name) {
+    return '「$name」を削除しますか？';
+  }
+
+  @override
+  String refs_deleteMany(Object count) {
+    return '$count 件を削除しますか？';
+  }
+
+  @override
+  String get refs_deleteVibeDesc => 'Vibe ライブラリから削除します。生成ページで使用中のものには影響しません。';
+
+  @override
+  String get refs_deletePreciseDesc => 'ライブラリから削除します。生成ページで使用中のものには影響しません。';
+
+  @override
+  String refs_importTitle(Object count) {
+    return '$count 件をインポート';
+  }
+
+  @override
+  String get refs_importSubtitle => 'ドロップ・選択・貼り付けはすべてこの画面で確認します';
+
+  @override
+  String get refs_importMore => 'ファイルを追加';
+
+  @override
+  String get refs_importPutIn => 'すべて入れる先';
+
+  @override
+  String get refs_importAddTags => 'タグを追加';
+
+  @override
+  String get refs_importTagsHint => '入力して Enter';
+
+  @override
+  String get refs_importPlainImages => '通常の画像';
+
+  @override
+  String get refs_importEncodeLater => '使用時にエンコード';
+
+  @override
+  String refs_importEncodeNow(Object cost) {
+    return '今すぐエンコード · 1 枚 $cost Anlas';
+  }
+
+  @override
+  String get refs_importName => '名前';
+
+  @override
+  String get refs_importResult => '判定結果';
+
+  @override
+  String refs_recPng(Object model) {
+    return 'Vibe 入り PNG · $model エンコード';
+  }
+
+  @override
+  String refs_recVibeFile(Object model) {
+    return 'Vibe ファイル · $model エンコード';
+  }
+
+  @override
+  String refs_recBundle(Object count) {
+    return 'バンドル · Vibe $count 件';
+  }
+
+  @override
+  String get refs_recImage => '通常の画像 · 未エンコード';
+
+  @override
+  String get refs_recImageDup => '通常の画像 · 同名あり';
+
+  @override
+  String get refs_recFree => 'そのままインポート（無料）';
+
+  @override
+  String refs_recReencode(Object model) {
+    return '$model で使うには再エンコードが必要（元画像がなければ不可）';
+  }
+
+  @override
+  String refs_recBundleNote(Object count) {
+    return 'まとめて = カード 1 枚、分割 = $count 枚';
+  }
+
+  @override
+  String get refs_recEncodeLater => '元画像を保存し、初めて生成に使うときにそのモデル用にエンコード';
+
+  @override
+  String refs_recEncodeNow(Object cost) {
+    return 'インポート時にエンコード（1 枚 $cost Anlas）';
+  }
+
+  @override
+  String get refs_bundleWhole => 'まとめて';
+
+  @override
+  String refs_bundleSplit(Object count) {
+    return '$count 件に分割';
+  }
+
+  @override
+  String get refs_bundlePick => '選んで';
+
+  @override
+  String get refs_dupExists => '同名の項目があります';
+
+  @override
+  String get refs_dupKeepBoth => '両方残す';
+
+  @override
+  String get refs_dupOverwrite => '上書き';
+
+  @override
+  String get refs_dupSkip => 'スキップ';
+
+  @override
+  String refs_importSummary(Object files, Object cards) {
+    return '$files 件 → カード $cards 枚追加';
+  }
+
+  @override
+  String refs_importNow(Object cost) {
+    return ' · 今 $cost Anlas 消費';
+  }
+
+  @override
+  String refs_importLater(Object count, Object cost) {
+    return ' · 通常の画像 $count 枚は初回使用時にエンコード（1 枚 $cost Anlas）';
+  }
+
+  @override
+  String get refs_pickerVibeTitle => 'Vibe ライブラリから追加';
+
+  @override
+  String get refs_pickerPreciseTitle => '精密参照ライブラリから追加';
+
+  @override
+  String get refs_openVibeLibrary => 'Vibe ライブラリを開く';
+
+  @override
+  String get refs_openPreciseLibrary => 'ライブラリを開く';
+
+  @override
+  String get refs_recentUsed => '最近使用';
+
+  @override
+  String get refs_inUse => '使用中';
+
+  @override
+  String refs_pickedN(Object count) {
+    return '$count 件選択';
+  }
+
+  @override
+  String refs_pickerAfterVibe(Object count, Object max) {
+    return ' · 追加後 $count/$max';
+  }
+
+  @override
+  String refs_pickerAfterPrecise(Object count) {
+    return ' · 追加後 $count 枚';
+  }
+
+  @override
+  String refs_pickerEncode(Object name, Object model, Object cost) {
+    return '「$name」は $model 用のエンコードが必要 · $cost Anlas';
+  }
+
+  @override
+  String refs_pickerEncodeMore(Object count) {
+    return 'ほか $count 件もエンコードが必要';
+  }
+
+  @override
+  String refs_pickerExtra(Object free, Object extra) {
+    return '$free 件を超えると +$extra Anlas';
+  }
+
+  @override
+  String refs_pickerPreciseCost(Object cost, Object total) {
+    return '1 枚 $cost Anlas · 合計 $total Anlas';
+  }
+
+  @override
+  String get refs_replaceExisting => '既存を置き換え';
+
+  @override
+  String refs_appendN(Object count) {
+    return '$count 件追加';
+  }
+
+  @override
+  String get refs_timeNever => '未使用';
+
+  @override
+  String get refs_timeJustNow => 'たった今';
+
+  @override
+  String refs_timeMinutes(Object count) {
+    return '$count 分前';
+  }
+
+  @override
+  String refs_timeHours(Object count) {
+    return '$count 時間前';
+  }
+
+  @override
+  String get refs_timeYesterday => '昨日';
+
+  @override
+  String refs_timeDays(Object count) {
+    return '$count 日前';
+  }
+
+  @override
+  String refs_timeMonthDay(Object month, Object day) {
+    return '$month月$day日';
+  }
 }

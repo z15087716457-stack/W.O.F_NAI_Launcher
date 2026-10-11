@@ -36,6 +36,8 @@ class UiColors {
     required this.subWarn,
     required this.fav,
     required this.warn,
+    required this.warnBg,
+    required this.star,
   });
 
   factory UiColors.of(BuildContext context) =>
@@ -75,6 +77,8 @@ class UiColors {
       subWarn: dark ? const Color(0xFFD9A441) : const Color(0xFF98691D),
       fav: dark ? const Color(0xFFFF6369) : const Color(0xFFE5484D),
       warn: dark ? const Color(0xFFF1A10D) : const Color(0xFFB86E00),
+      warnBg: dark ? const Color(0xFF2A2110) : const Color(0xFFFFF6E5),
+      star: dark ? const Color(0xFFFFB224) : const Color(0xFFF5A400),
     );
   }
 
@@ -153,6 +157,12 @@ class UiColors {
 
   /// 提醒（未登录等）的琥珀色文字。
   final Color warn;
+
+  /// 提醒横幅 / 提示框的浅琥珀底。
+  final Color warnBg;
+
+  /// 收藏星。
+  final Color star;
 
   /// 把 [color] 按 [t] 混到卡片底色上，等价于 CSS `color-mix(color t, card)`。
   Color onCard(Color color, double t) => Color.lerp(card, color, t)!;

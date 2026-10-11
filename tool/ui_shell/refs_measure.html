@@ -1,0 +1,47 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+// Vibe / 精准参考库原型的元素位置（给 refs_measure.py 出偏差表）。键名和 refs_prototype_capture_test.dart 一致。
+const view=location.hash.slice(1);
+const f=document.getElementById('f');
+const VB=['c03','c15','c14','c12','c11','c10','c13','c07','u1','c01','c17','c18','c16','c19','c08'];
+const PR=['c20','c02','c16','c12','c03','c19','c07','c11','c04','c05','c17','c08','c06','g18','c10'];
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,300));
+  const R=e=>{const b=e.getBoundingClientRect();return [b.left,b.top,b.width,b.height]};
+  const m={}; const put=(k,e)=>{if(e) m[k]=R(e)};
+  const q=s=>d.querySelector(s), qa=s=>[...d.querySelectorAll(s)];
+  const prec=view.includes('prec')||view==='pdetail';
+  const bg=['detail','pdetail','bundle','import','drop','export','picker'].includes(view);
+  if(!bg){
+    put('sidebar',q('.lnav'));
+    const items=qa('.lnav .ni2');
+    const byText=t=>items.find(e=>{const l=e.querySelector('.ell');return l&&l.textContent.trim().startsWith(t)});
+    const exact=t=>items.find(e=>{const l=e.querySelector('.ell');return l&&l.textContent.trim()===t});
+    [['view-all','全部'],['view-favorites','收藏'],['view-recent','最近使用'],['view-inGeneration','在生图页']].forEach(([k,t])=>put(k,byText(t)));
+    if(!prec){
+      [['cat-style','画风'],['cat-night','夜景'],['cat-impasto','厚涂'],['cat-light','光影'],['cat-tone','色调'],['cat-char','角色'],['cat-comp','构图'],['cat-uncategorized','未分类'],
+       ['src-png','PNG'],['src-vibeFile','Vibe 文件'],['src-bundle','组合包'],['src-rawImage','待编码']].forEach(([k,t])=>put(k,byText(t)));
+    } else {
+      [['type-character','角色'],['type-style','风格'],['type-both','角色+风格']].forEach(([k,t])=>put(k,exact(t)));
+    }
+    const tb=q('.lmain > .ltb'); if(tb){ put('toolbar',tb); put('search',tb.querySelector('.srch'));
+      put('sort',tb.querySelector('.dd')); put('card-size',tb.querySelector('.seg.sm'));
+      put('model',[...tb.children].find(e=>e.textContent.includes('当前模型')));
+      put('import',tb.querySelector('.btn.pri')); const ibs=tb.querySelectorAll(':scope > .ib'); put('more',ibs[0]); put('inspector-toggle',ibs[1]);
+      for(const b of tb.querySelectorAll('.btn')){ if(b.textContent.includes('完成多选')) put('multi-done',b); else if(b.textContent.includes('多选')) put('multi',b); }
+    }
+    put('banner',q('.banner')); put('filter-row',q('.lmain > .lfr')); put('tray',q('.tray'));
+    put('inspector',q('.insp')); put('selection-bar',q('.selbar'));
+    const ia=q('.insp .btn.pri.lg'); put('insp-add',ia);
+    const cards=qa('.lgrid .vc'); const keys=prec?PR:VB;
+    cards.forEach((c,i)=>{ if(i<keys.length) put('card-'+keys[i],c) });
+    const em=[...qa('.lmain > *')].find(e=>e.textContent.includes('拖到这里')); if(view.startsWith('empty')) put('empty',em&&em.querySelector('div'));
+  } else {
+    const pops=qa('.pop'); const p=pops[pops.length-1];
+    const name={detail:'detail',pdetail:'detail',bundle:'bundle',import:'import-dialog',export:'export',picker:'picker'}[view];
+    if(name) put(name,p);
+  }
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+f.src='/mockups/refs/mock.html#'+view;
+</script></body></html>

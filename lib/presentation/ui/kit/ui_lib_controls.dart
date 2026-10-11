@@ -109,7 +109,9 @@ class UiBtn extends StatelessWidget {
         );
       },
     );
-    return tooltip == null ? button : Tooltip(message: tooltip, child: button);
+    // 不可点（onTap 为 null）时整体 45% 不透明度。
+    final shown = onTap == null ? Opacity(opacity: .45, child: button) : button;
+    return tooltip == null ? shown : Tooltip(message: tooltip, child: shown);
   }
 }
 
@@ -310,12 +312,16 @@ class UiFilterChip extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 10),
     this.gap = 6,
     this.showCheck = false,
+    this.count,
   });
 
   final String label;
   final bool selected;
   final VoidCallback? onTap;
   final Widget? leading;
+
+  /// 文字后面的计数（Geist Mono 11，弱一级）。
+  final int? count;
   final EdgeInsets padding;
   final double gap;
 
@@ -357,6 +363,15 @@ class UiFilterChip extends StatelessWidget {
                   color: fg,
                 ),
               ),
+              if (count != null)
+                Text(
+                  '$count',
+                  style: UiText.mono(
+                    11,
+                    color: fg.withValues(alpha: .7),
+                    height: 1.2,
+                  ),
+                ),
             ],
           ),
         );
@@ -373,11 +388,15 @@ class UiDropChip extends StatelessWidget {
     this.onTap,
     this.glyph,
     this.prefix,
+    this.expand = false,
   });
 
   final String label;
   final VoidCallback? onTap;
   final String? glyph;
+
+  /// 撑满宽度：文字占满、箭头靠右（检查器里的分类下拉）。
+  final bool expand;
 
   /// 弱色前缀文字（例如“排序”）。
   final String? prefix;
@@ -395,13 +414,23 @@ class UiDropChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(7),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
           spacing: 6,
           children: [
             if (glyph != null) UiGlyph(glyph!, size: 14, color: c.muted),
             if (prefix != null)
               Text(prefix!, style: UiText.sans(12.5, color: c.muted)),
-            Text(label, maxLines: 1, style: UiText.sans(12.5, color: c.ink)),
+            if (expand)
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(12.5, color: c.ink),
+                ),
+              )
+            else
+              Text(label, maxLines: 1, style: UiText.sans(12.5, color: c.ink)),
             UiGlyph(UiGlyphs.chevronDown, size: 13, color: c.ink),
           ],
         ),
@@ -410,13 +439,25 @@ class UiDropChip extends StatelessWidget {
   }
 }
 
-enum UiMiniTone { plain, ok, warn, accent }
+enum UiMiniTone { plain, ok, warn, accent, error }
 
-/// 小标签：18 高、圆角 4、10.5 / w600。
+/// 小标签：18 高、圆角 4、10.5 / w600；可带一个 10px 图标（间距 3）。
 class UiMini extends StatelessWidget {
-  const UiMini(this.text, {super.key, this.tone = UiMiniTone.plain});
+  const UiMini(
+    this.text, {
+    super.key,
+    this.tone = UiMiniTone.plain,
+    this.glyph,
+    this.background,
+    this.foreground,
+  });
   final String text;
   final UiMiniTone tone;
+  final String? glyph;
+
+  /// 覆盖底色 / 字色（图片上的深色角标）。
+  final Color? background;
+  final Color? foreground;
 
   @override
   Widget build(BuildContext context) {
@@ -426,26 +467,38 @@ class UiMini extends StatelessWidget {
       UiMiniTone.ok => (c.ok.withValues(alpha: .11), c.ok),
       UiMiniTone.warn => (c.warn.withValues(alpha: .13), c.warn),
       UiMiniTone.accent => (c.accent.withValues(alpha: .11), c.accent),
+      UiMiniTone.error => (c.error.withValues(alpha: .10), c.error),
     };
+    final ink = foreground ?? fg;
+    final label = Text(
+      text,
+      maxLines: 1,
+      style: UiText.sans(
+        10.5,
+        weight: FontWeight.w600,
+        color: ink,
+        height: 1.2,
+      ),
+    );
     return Container(
       height: 18,
       padding: const EdgeInsets.symmetric(horizontal: 6),
       decoration: BoxDecoration(
-        color: bg,
+        color: background ?? bg,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Center(
         widthFactor: 1,
-        child: Text(
-          text,
-          maxLines: 1,
-          style: UiText.sans(
-            10.5,
-            weight: FontWeight.w600,
-            color: fg,
-            height: 1.2,
-          ),
-        ),
+        child: glyph == null
+            ? label
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 3,
+                children: [
+                  UiGlyph(glyph!, size: 10, strokeWidth: 2.4, color: ink),
+                  label,
+                ],
+              ),
       ),
     );
   }

@@ -25081,6 +25081,1728 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle info'**
   String get online_keyInfo;
+
+  /// No description provided for @refs_vibeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe Library'**
+  String get refs_vibeTitle;
+
+  /// No description provided for @refs_preciseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise Reference Library'**
+  String get refs_preciseTitle;
+
+  /// No description provided for @refs_collapseSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse sidebar'**
+  String get refs_collapseSidebar;
+
+  /// No description provided for @refs_expandSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand sidebar'**
+  String get refs_expandSidebar;
+
+  /// No description provided for @refs_viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get refs_viewAll;
+
+  /// No description provided for @refs_viewFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get refs_viewFavorites;
+
+  /// No description provided for @refs_viewRecent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently used'**
+  String get refs_viewRecent;
+
+  /// No description provided for @refs_viewInGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'In generation'**
+  String get refs_viewInGeneration;
+
+  /// No description provided for @refs_categories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get refs_categories;
+
+  /// No description provided for @refs_newCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get refs_newCategory;
+
+  /// No description provided for @refs_newSubcategory.
+  ///
+  /// In en, this message translates to:
+  /// **'New subcategory'**
+  String get refs_newSubcategory;
+
+  /// No description provided for @refs_deleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete category'**
+  String get refs_deleteCategory;
+
+  /// No description provided for @refs_categoryNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get refs_categoryNameHint;
+
+  /// No description provided for @refs_noCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet. You can create one while importing'**
+  String get refs_noCategories;
+
+  /// No description provided for @refs_uncategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get refs_uncategorized;
+
+  /// No description provided for @refs_sources.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get refs_sources;
+
+  /// No description provided for @refs_srcPng.
+  ///
+  /// In en, this message translates to:
+  /// **'PNG (with Vibe)'**
+  String get refs_srcPng;
+
+  /// No description provided for @refs_srcVibeFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe file'**
+  String get refs_srcVibeFile;
+
+  /// No description provided for @refs_srcBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle'**
+  String get refs_srcBundle;
+
+  /// No description provided for @refs_srcRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Images to encode'**
+  String get refs_srcRaw;
+
+  /// No description provided for @refs_srcImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get refs_srcImage;
+
+  /// No description provided for @refs_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get refs_open;
+
+  /// No description provided for @refs_types.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference types'**
+  String get refs_types;
+
+  /// No description provided for @refs_importTypeNoteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported images are saved as {type} by default. Select a type on the left first to save as that type.'**
+  String refs_importTypeNoteAll(Object type);
+
+  /// No description provided for @refs_importTypeNoteSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported images are saved as {type}, following the type selected on the left.'**
+  String refs_importTypeNoteSelected(Object type);
+
+  /// No description provided for @refs_preciseOnlyV45.
+  ///
+  /// In en, this message translates to:
+  /// **'V4.5 only'**
+  String get refs_preciseOnlyV45;
+
+  /// No description provided for @refs_preciseCostNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{cost} Anlas each; cannot be used together with Vibes'**
+  String refs_preciseCostNote(Object cost);
+
+  /// No description provided for @refs_searchVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Search names, tags'**
+  String get refs_searchVibe;
+
+  /// No description provided for @refs_searchPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Search names'**
+  String get refs_searchPrecise;
+
+  /// No description provided for @refs_sortLastUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last used'**
+  String get refs_sortLastUsed;
+
+  /// No description provided for @refs_sortCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Date added'**
+  String get refs_sortCreated;
+
+  /// No description provided for @refs_sortUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Times used'**
+  String get refs_sortUsed;
+
+  /// No description provided for @refs_sortName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get refs_sortName;
+
+  /// No description provided for @refs_sortAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get refs_sortAsc;
+
+  /// No description provided for @refs_sortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get refs_sortDesc;
+
+  /// No description provided for @refs_sizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small cards'**
+  String get refs_sizeSmall;
+
+  /// No description provided for @refs_sizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get refs_sizeMedium;
+
+  /// No description provided for @refs_sizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get refs_sizeLarge;
+
+  /// No description provided for @refs_currentModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get refs_currentModel;
+
+  /// No description provided for @refs_usable.
+  ///
+  /// In en, this message translates to:
+  /// **'Usable'**
+  String get refs_usable;
+
+  /// No description provided for @refs_unusable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get refs_unusable;
+
+  /// No description provided for @refs_multi.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get refs_multi;
+
+  /// No description provided for @refs_multiDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get refs_multiDone;
+
+  /// No description provided for @refs_import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get refs_import;
+
+  /// No description provided for @refs_importFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose files…'**
+  String get refs_importFiles;
+
+  /// No description provided for @refs_importImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose images…'**
+  String get refs_importImages;
+
+  /// No description provided for @refs_importClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste from clipboard'**
+  String get refs_importClipboard;
+
+  /// No description provided for @refs_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get refs_more;
+
+  /// No description provided for @refs_exportAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Export all…'**
+  String get refs_exportAll;
+
+  /// No description provided for @refs_openLibraryFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open library folder'**
+  String get refs_openLibraryFolder;
+
+  /// No description provided for @refs_rescan.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescan folder'**
+  String get refs_rescan;
+
+  /// No description provided for @refs_reload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get refs_reload;
+
+  /// No description provided for @refs_hideInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide inspector'**
+  String get refs_hideInspector;
+
+  /// No description provided for @refs_showInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Show inspector'**
+  String get refs_showInspector;
+
+  /// No description provided for @refs_bannerVibeLead.
+  ///
+  /// In en, this message translates to:
+  /// **'{model} does not support Vibe Transfer. '**
+  String refs_bannerVibeLead(Object model);
+
+  /// No description provided for @refs_bannerVibeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still organize and export Vibes; switch to V4.5 or V4 to generate with them'**
+  String get refs_bannerVibeBody;
+
+  /// No description provided for @refs_bannerPreciseLead.
+  ///
+  /// In en, this message translates to:
+  /// **'{model} does not support Precise Reference. '**
+  String refs_bannerPreciseLead(Object model);
+
+  /// No description provided for @refs_bannerPreciseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still organize references; switch to V4.5 to generate with them'**
+  String get refs_bannerPreciseBody;
+
+  /// No description provided for @refs_switchTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {model}'**
+  String refs_switchTo(Object model);
+
+  /// No description provided for @refs_quickAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get refs_quickAll;
+
+  /// No description provided for @refs_quickFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get refs_quickFavorites;
+
+  /// No description provided for @refs_quickHasRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Has original'**
+  String get refs_quickHasRaw;
+
+  /// No description provided for @refs_quickNeedsEncoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs encoding'**
+  String get refs_quickNeedsEncoding;
+
+  /// No description provided for @refs_quickBundles.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundles'**
+  String get refs_quickBundles;
+
+  /// No description provided for @refs_quickUnused.
+  ///
+  /// In en, this message translates to:
+  /// **'Never used'**
+  String get refs_quickUnused;
+
+  /// No description provided for @refs_countVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} · {inGen} in generation'**
+  String refs_countVibe(Object count, Object inGen);
+
+  /// No description provided for @refs_countPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} · {inGen} in generation'**
+  String refs_countPrecise(Object count, Object inGen);
+
+  /// No description provided for @refs_noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches these filters'**
+  String get refs_noResults;
+
+  /// No description provided for @refs_noResultsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found for “{query}”'**
+  String refs_noResultsFor(Object query);
+
+  /// No description provided for @refs_clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get refs_clearFilters;
+
+  /// No description provided for @refs_addShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get refs_addShort;
+
+  /// No description provided for @refs_sendPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to Precise Reference'**
+  String get refs_sendPrecise;
+
+  /// No description provided for @refs_openBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open bundle'**
+  String get refs_openBundle;
+
+  /// No description provided for @refs_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get refs_detail;
+
+  /// No description provided for @refs_addToGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to generation'**
+  String get refs_addToGeneration;
+
+  /// No description provided for @refs_replaceVibes.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace Vibes in generation'**
+  String get refs_replaceVibes;
+
+  /// No description provided for @refs_replacePrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace current reference'**
+  String get refs_replacePrecise;
+
+  /// No description provided for @refs_sendImg2Img.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to Image2Image'**
+  String get refs_sendImg2Img;
+
+  /// No description provided for @refs_saveAsVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Vibe Library'**
+  String get refs_saveAsVibe;
+
+  /// No description provided for @refs_favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get refs_favorite;
+
+  /// No description provided for @refs_unfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite'**
+  String get refs_unfavorite;
+
+  /// No description provided for @refs_replacePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace preview…'**
+  String get refs_replacePreview;
+
+  /// No description provided for @refs_exportEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Export…'**
+  String get refs_exportEllipsis;
+
+  /// No description provided for @refs_showInFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in folder'**
+  String get refs_showInFolder;
+
+  /// No description provided for @refs_copyImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy image'**
+  String get refs_copyImage;
+
+  /// No description provided for @refs_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get refs_delete;
+
+  /// No description provided for @refs_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String refs_selected(Object count);
+
+  /// No description provided for @refs_moveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to'**
+  String get refs_moveTo;
+
+  /// No description provided for @refs_export.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get refs_export;
+
+  /// No description provided for @refs_emptyVibeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop images or Vibe files here'**
+  String get refs_emptyVibeTitle;
+
+  /// No description provided for @refs_emptyPreciseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop reference images here'**
+  String get refs_emptyPreciseTitle;
+
+  /// No description provided for @refs_emptyVibeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports PNG (with Vibe), .naiv4vibe, .naiv4vibebundle and plain images.\nPlain images are stored as-is and encoded the first time you generate with them'**
+  String get refs_emptyVibeDesc;
+
+  /// No description provided for @refs_emptyPreciseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Character sheets or style samples, as many as you like.\nType, strength and fidelity are saved and applied when you send'**
+  String get refs_emptyPreciseDesc;
+
+  /// No description provided for @refs_pickFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose files'**
+  String get refs_pickFiles;
+
+  /// No description provided for @refs_pasteClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get refs_pasteClipboard;
+
+  /// No description provided for @refs_emptyFromResultVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click a result → Save to Vibe Library'**
+  String get refs_emptyFromResultVibe;
+
+  /// No description provided for @refs_emptyFromResultPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click a result → Save to Precise Reference Library'**
+  String get refs_emptyFromResultPrecise;
+
+  /// No description provided for @refs_emptyFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Works from the local gallery too'**
+  String get refs_emptyFromGallery;
+
+  /// No description provided for @refs_emptyHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe vs. Precise Reference'**
+  String get refs_emptyHelpTitle;
+
+  /// No description provided for @refs_emptyHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe borrows the overall mood and style and can be stacked (V4 / V4.5, not V5). Precise Reference follows one image’s character or style more closely, {cost} Anlas each (V4.5 only). The two cannot be used together.'**
+  String refs_emptyHelpBody(Object cost);
+
+  /// No description provided for @refs_dropTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Release to import {count} files'**
+  String refs_dropTitle(Object count);
+
+  /// No description provided for @refs_dropVibeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You will confirm in the import window first — no Anlas is spent yet'**
+  String get refs_dropVibeDesc;
+
+  /// No description provided for @refs_dropPreciseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved with the type selected on the left'**
+  String get refs_dropPreciseDesc;
+
+  /// No description provided for @refs_dropVibePngs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} PNG with Vibe'**
+  String refs_dropVibePngs(Object count);
+
+  /// No description provided for @refs_dropVibeFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Vibe files'**
+  String refs_dropVibeFiles(Object count);
+
+  /// No description provided for @refs_dropBundles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} bundles'**
+  String refs_dropBundles(Object count);
+
+  /// No description provided for @refs_dropImages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} plain images'**
+  String refs_dropImages(Object count);
+
+  /// No description provided for @refs_inGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'In use'**
+  String get refs_inGeneration;
+
+  /// No description provided for @refs_tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get refs_tag;
+
+  /// No description provided for @refs_strengthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Str'**
+  String get refs_strengthShort;
+
+  /// No description provided for @refs_infoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get refs_infoShort;
+
+  /// No description provided for @refs_fidelityShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fid'**
+  String get refs_fidelityShort;
+
+  /// No description provided for @refs_encModelOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Not on {model}'**
+  String refs_encModelOff(Object model);
+
+  /// No description provided for @refs_encModelOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{model} has no Vibe Transfer; switch to V4.5 / V4 to use it'**
+  String refs_encModelOffDesc(Object model);
+
+  /// No description provided for @refs_encReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoded · {model}'**
+  String refs_encReady(Object model);
+
+  /// No description provided for @refs_encReadyShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{model} encoded'**
+  String refs_encReadyShort(Object model);
+
+  /// No description provided for @refs_encReadyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for the current model, no encoding fee'**
+  String get refs_encReadyDesc;
+
+  /// No description provided for @refs_encOnUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Encodes on use'**
+  String get refs_encOnUse;
+
+  /// No description provided for @refs_encOnUseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Not encoded yet. Encoded the first time you generate with it, {cost} Anlas'**
+  String refs_encOnUseDesc(Object cost);
+
+  /// No description provided for @refs_encRe.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs re-encoding'**
+  String get refs_encRe;
+
+  /// No description provided for @refs_encReDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoded for {from}, current model is {model}. Re-encoded from the original on use, {cost} Anlas'**
+  String refs_encReDesc(Object from, Object model, Object cost);
+
+  /// No description provided for @refs_encUnusable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unusable on {model}'**
+  String refs_encUnusable(Object model);
+
+  /// No description provided for @refs_encUnusableDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a {from} encoding and no original, so it can’t be re-encoded for {model}'**
+  String refs_encUnusableDesc(Object from, Object model);
+
+  /// No description provided for @refs_trayVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibes in generation'**
+  String get refs_trayVibe;
+
+  /// No description provided for @refs_trayPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'References in generation'**
+  String get refs_trayPrecise;
+
+  /// No description provided for @refs_trayVibeCost.
+  ///
+  /// In en, this message translates to:
+  /// **'+{extra} Anlas each beyond {free}'**
+  String refs_trayVibeCost(Object free, Object extra);
+
+  /// No description provided for @refs_trayPreciseCost.
+  ///
+  /// In en, this message translates to:
+  /// **'{cost} Anlas each · +{total} now'**
+  String refs_trayPreciseCost(Object cost, Object total);
+
+  /// No description provided for @refs_trayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag cards here to add; hold Shift to replace all.\nYou stay on this page, so keep picking'**
+  String get refs_trayHint;
+
+  /// No description provided for @refs_trayDropHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop cards here to add them'**
+  String get refs_trayDropHere;
+
+  /// No description provided for @refs_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get refs_clear;
+
+  /// No description provided for @refs_goGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to generation'**
+  String get refs_goGeneration;
+
+  /// No description provided for @refs_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation still has **{count} Vibes**. Vibes aren’t sent while a precise reference is set (not compatible)'**
+  String refs_conflict(Object count);
+
+  /// No description provided for @refs_conflictPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'**{count} Vibes** in generation are paused; only the precise reference is sent'**
+  String refs_conflictPaused(Object count);
+
+  /// No description provided for @refs_pauseVibes.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause Vibes'**
+  String get refs_pauseVibes;
+
+  /// No description provided for @refs_resumeVibes.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Vibes'**
+  String get refs_resumeVibes;
+
+  /// No description provided for @refs_inspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspector'**
+  String get refs_inspector;
+
+  /// No description provided for @refs_selectedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String refs_selectedN(Object count);
+
+  /// No description provided for @refs_noSelectionVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a card to see its parameters and encoding'**
+  String get refs_noSelectionVibe;
+
+  /// No description provided for @refs_noSelectionPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a reference to see its type and parameters'**
+  String get refs_noSelectionPrecise;
+
+  /// No description provided for @refs_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get refs_rename;
+
+  /// No description provided for @refs_replace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get refs_replace;
+
+  /// No description provided for @refs_replaceVibesTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all Vibes currently in generation'**
+  String get refs_replaceVibesTip;
+
+  /// No description provided for @refs_strength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get refs_strength;
+
+  /// No description provided for @refs_strengthDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher feels more like this image'**
+  String get refs_strengthDesc;
+
+  /// No description provided for @refs_infoExtracted.
+  ///
+  /// In en, this message translates to:
+  /// **'Information extracted'**
+  String get refs_infoExtracted;
+
+  /// No description provided for @refs_infoDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher brings in more detail. Changing it re-encodes from the original, {cost} Anlas'**
+  String refs_infoDesc(Object cost);
+
+  /// No description provided for @refs_infoLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Only encoded data, no original — information extracted can’t be changed'**
+  String get refs_infoLocked;
+
+  /// No description provided for @refs_changedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply to this send only'**
+  String get refs_changedNote;
+
+  /// No description provided for @refs_saveDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as default'**
+  String get refs_saveDefault;
+
+  /// No description provided for @refs_revert.
+  ///
+  /// In en, this message translates to:
+  /// **'Revert'**
+  String get refs_revert;
+
+  /// No description provided for @refs_encodeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Encode for {model} now · {cost} Anlas'**
+  String refs_encodeNow(Object model, Object cost);
+
+  /// No description provided for @refs_bundleNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Each of the {count} Vibes in this bundle has its own strength and information extracted; open the bundle to adjust them.'**
+  String refs_bundleNote(Object count);
+
+  /// No description provided for @refs_bundleOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle · {count}'**
+  String refs_bundleOf(Object count);
+
+  /// No description provided for @refs_organize.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize'**
+  String get refs_organize;
+
+  /// No description provided for @refs_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get refs_category;
+
+  /// No description provided for @refs_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get refs_tags;
+
+  /// No description provided for @refs_used.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get refs_used;
+
+  /// No description provided for @refs_neverUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Never used'**
+  String get refs_neverUsed;
+
+  /// No description provided for @refs_usedTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} times · last {last}'**
+  String refs_usedTimes(Object count, Object last);
+
+  /// No description provided for @refs_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get refs_added;
+
+  /// No description provided for @refs_file.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get refs_file;
+
+  /// No description provided for @refs_original.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get refs_original;
+
+  /// No description provided for @refs_plusAnlas.
+  ///
+  /// In en, this message translates to:
+  /// **'+{cost} Anlas'**
+  String refs_plusAnlas(Object cost);
+
+  /// No description provided for @refs_alsoSaveVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Also save as Vibe'**
+  String get refs_alsoSaveVibe;
+
+  /// No description provided for @refs_referenceWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get refs_referenceWhat;
+
+  /// No description provided for @refs_typeCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Character'**
+  String get refs_typeCharacter;
+
+  /// No description provided for @refs_typeStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get refs_typeStyle;
+
+  /// No description provided for @refs_typeBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Char + style'**
+  String get refs_typeBoth;
+
+  /// No description provided for @refs_typeCharacterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps the character’s face, hair and outfit; style follows the prompt'**
+  String get refs_typeCharacterDesc;
+
+  /// No description provided for @refs_typeStyleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Borrows only style, palette and brushwork, not the subject'**
+  String get refs_typeStyleDesc;
+
+  /// No description provided for @refs_typeBothDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'References both the character and the style'**
+  String get refs_typeBothDesc;
+
+  /// No description provided for @refs_preciseStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference strength'**
+  String get refs_preciseStrength;
+
+  /// No description provided for @refs_preciseStrengthDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher looks more like the reference'**
+  String get refs_preciseStrengthDesc;
+
+  /// No description provided for @refs_fidelity.
+  ///
+  /// In en, this message translates to:
+  /// **'Fidelity'**
+  String get refs_fidelity;
+
+  /// No description provided for @refs_fidelityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher sticks to details, lower is freer'**
+  String get refs_fidelityDesc;
+
+  /// No description provided for @refs_preciseDefaultsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'These are the defaults used when sending; the number box accepts values beyond 0–1'**
+  String get refs_preciseDefaultsNote;
+
+  /// No description provided for @refs_showInFolderShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in folder'**
+  String get refs_showInFolderShort;
+
+  /// No description provided for @refs_pickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check cards to edit them together here'**
+  String get refs_pickHint;
+
+  /// No description provided for @refs_multiAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add together'**
+  String get refs_multiAddTitle;
+
+  /// No description provided for @refs_multiSendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send together'**
+  String get refs_multiSendTitle;
+
+  /// No description provided for @refs_multiFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {free} at no extra cost. '**
+  String refs_multiFree(Object free);
+
+  /// No description provided for @refs_multiExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Beyond {free}, +{extra} Anlas each: {total} Anlas more per image. '**
+  String refs_multiExtra(Object free, Object extra, Object total);
+
+  /// No description provided for @refs_multiOverMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Over the {max} limit; the extra ones won’t be added. '**
+  String refs_multiOverMax(Object max);
+
+  /// No description provided for @refs_multiEncodes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} need encoding ({names}, {cost} Anlas each, charged once). '**
+  String refs_multiEncodes(Object count, Object names, Object cost);
+
+  /// No description provided for @refs_multiAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} already in generation won’t be added twice.'**
+  String refs_multiAlready(Object count);
+
+  /// No description provided for @refs_multiPreciseCost.
+  ///
+  /// In en, this message translates to:
+  /// **'{cost} Anlas each, {total} Anlas per image in total.'**
+  String refs_multiPreciseCost(Object cost, Object total);
+
+  /// No description provided for @refs_unify.
+  ///
+  /// In en, this message translates to:
+  /// **'Set for all'**
+  String get refs_unify;
+
+  /// No description provided for @refs_mixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed'**
+  String get refs_mixed;
+
+  /// No description provided for @refs_unifyVibeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Dragging updates all {count} defaults; information extracted is left alone (needs re-encoding)'**
+  String refs_unifyVibeNote(Object count);
+
+  /// No description provided for @refs_unifyPreciseNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to set all {count} to this type'**
+  String refs_unifyPreciseNote(Object count);
+
+  /// No description provided for @refs_moveToCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to category'**
+  String get refs_moveToCategory;
+
+  /// No description provided for @refs_addTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tag'**
+  String get refs_addTag;
+
+  /// No description provided for @refs_packBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pack as bundle'**
+  String get refs_packBundle;
+
+  /// No description provided for @refs_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get refs_close;
+
+  /// No description provided for @refs_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get refs_cancel;
+
+  /// No description provided for @refs_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get refs_remove;
+
+  /// No description provided for @refs_prev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get refs_prev;
+
+  /// No description provided for @refs_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get refs_next;
+
+  /// No description provided for @refs_switch.
+  ///
+  /// In en, this message translates to:
+  /// **'switch'**
+  String get refs_switch;
+
+  /// No description provided for @refs_dropReplacePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop an image here to replace the preview (encoding unchanged)'**
+  String get refs_dropReplacePreview;
+
+  /// No description provided for @refs_bundleOfVibes.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle · {count} Vibes'**
+  String refs_bundleOfVibes(Object count);
+
+  /// No description provided for @refs_bundleAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String refs_bundleAll(Object count);
+
+  /// No description provided for @refs_bundleOnlyChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {count} checked'**
+  String refs_bundleOnlyChecked(Object count);
+
+  /// No description provided for @refs_bundleScopeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Each Vibe is sent with its own strength and information extracted'**
+  String get refs_bundleScopeNote;
+
+  /// No description provided for @refs_splitBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into Vibes'**
+  String get refs_splitBundle;
+
+  /// No description provided for @refs_bundleNoteLong.
+  ///
+  /// In en, this message translates to:
+  /// **'After changing a Vibe, “Save to bundle” keeps it; otherwise it only affects this send. '**
+  String get refs_bundleNoteLong;
+
+  /// No description provided for @refs_bundleAllEncoded.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} are encoded for {model}'**
+  String refs_bundleAllEncoded(Object count, Object model);
+
+  /// No description provided for @refs_saveToBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to bundle'**
+  String get refs_saveToBundle;
+
+  /// No description provided for @refs_cover.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get refs_cover;
+
+  /// No description provided for @refs_setCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as cover'**
+  String get refs_setCover;
+
+  /// No description provided for @refs_exportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export {count} Vibes'**
+  String refs_exportTitle(Object count);
+
+  /// No description provided for @refs_exportListNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Select several in the library and click Export; remove items here'**
+  String get refs_exportListNote;
+
+  /// No description provided for @refs_exportAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as'**
+  String get refs_exportAs;
+
+  /// No description provided for @refs_fmtVibeFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Single Vibe files'**
+  String get refs_fmtVibeFile;
+
+  /// No description provided for @refs_fmtVibeFileDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'.naiv4vibe, one per Vibe. Works on the site and other clients'**
+  String get refs_fmtVibeFileDesc;
+
+  /// No description provided for @refs_fmtBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'One bundle'**
+  String get refs_fmtBundle;
+
+  /// No description provided for @refs_fmtBundleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'.naiv4vibebundle, all {count} in one file'**
+  String refs_fmtBundleDesc(Object count);
+
+  /// No description provided for @refs_fmtPng.
+  ///
+  /// In en, this message translates to:
+  /// **'Embed in PNG'**
+  String get refs_fmtPng;
+
+  /// No description provided for @refs_fmtPngDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The image carries the Vibe — just drop it in. One at a time'**
+  String get refs_fmtPngDesc;
+
+  /// No description provided for @refs_fmtEncoded.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoded text'**
+  String get refs_fmtEncoded;
+
+  /// No description provided for @refs_fmtEncodedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON / Base64 for scripts and advanced use'**
+  String get refs_fmtEncodedDesc;
+
+  /// No description provided for @refs_options.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get refs_options;
+
+  /// No description provided for @refs_optThumbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Include thumbnails'**
+  String get refs_optThumbs;
+
+  /// No description provided for @refs_optThumbsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Slightly larger files, but previews show on import'**
+  String get refs_optThumbsDesc;
+
+  /// No description provided for @refs_optZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Compress to ZIP'**
+  String get refs_optZip;
+
+  /// No description provided for @refs_optZipDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Put {count} files in one archive'**
+  String refs_optZipDesc(Object count);
+
+  /// No description provided for @refs_saveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to'**
+  String get refs_saveTo;
+
+  /// No description provided for @refs_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get refs_choose;
+
+  /// No description provided for @refs_exportSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates {count} {ext} files'**
+  String refs_exportSummary(Object count, Object ext);
+
+  /// No description provided for @refs_exportSummaryZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Creates 1 ZIP ({count} {ext} files)'**
+  String refs_exportSummaryZip(Object count, Object ext);
+
+  /// No description provided for @refs_deleteOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String refs_deleteOne(Object name);
+
+  /// No description provided for @refs_deleteMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} items?'**
+  String refs_deleteMany(Object count);
+
+  /// No description provided for @refs_deleteVibeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes them from the Vibe Library. Vibes already in generation are not affected.'**
+  String get refs_deleteVibeDesc;
+
+  /// No description provided for @refs_deletePreciseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes them from the library. References already in generation are not affected.'**
+  String get refs_deletePreciseDesc;
+
+  /// No description provided for @refs_importTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count} files'**
+  String refs_importTitle(Object count);
+
+  /// No description provided for @refs_importSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped, chosen or pasted files all come here'**
+  String get refs_importSubtitle;
+
+  /// No description provided for @refs_importMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add files'**
+  String get refs_importMore;
+
+  /// No description provided for @refs_importPutIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Put all in'**
+  String get refs_importPutIn;
+
+  /// No description provided for @refs_importAddTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tags'**
+  String get refs_importAddTags;
+
+  /// No description provided for @refs_importTagsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type and press Enter'**
+  String get refs_importTagsHint;
+
+  /// No description provided for @refs_importPlainImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain images'**
+  String get refs_importPlainImages;
+
+  /// No description provided for @refs_importEncodeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Encode on use'**
+  String get refs_importEncodeLater;
+
+  /// No description provided for @refs_importEncodeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Encode now · {cost} Anlas each'**
+  String refs_importEncodeNow(Object cost);
+
+  /// No description provided for @refs_importName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get refs_importName;
+
+  /// No description provided for @refs_importResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected as'**
+  String get refs_importResult;
+
+  /// No description provided for @refs_recPng.
+  ///
+  /// In en, this message translates to:
+  /// **'PNG with Vibe · {model} encoding'**
+  String refs_recPng(Object model);
+
+  /// No description provided for @refs_recVibeFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe file · {model} encoding'**
+  String refs_recVibeFile(Object model);
+
+  /// No description provided for @refs_recBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle · {count} Vibes'**
+  String refs_recBundle(Object count);
+
+  /// No description provided for @refs_recImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain image · not encoded'**
+  String get refs_recImage;
+
+  /// No description provided for @refs_recImageDup.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain image · name exists'**
+  String get refs_recImageDup;
+
+  /// No description provided for @refs_recFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported as-is, free'**
+  String get refs_recFree;
+
+  /// No description provided for @refs_recReencode.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs re-encoding for {model} (not possible without the original)'**
+  String refs_recReencode(Object model);
+
+  /// No description provided for @refs_recBundleNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole = one card; split = {count} cards'**
+  String refs_recBundleNote(Object count);
+
+  /// No description provided for @refs_recEncodeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored as-is; encoded for the model in use the first time'**
+  String get refs_recEncodeLater;
+
+  /// No description provided for @refs_recEncodeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoded on import, {cost} Anlas each'**
+  String refs_recEncodeNow(Object cost);
+
+  /// No description provided for @refs_bundleWhole.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole'**
+  String get refs_bundleWhole;
+
+  /// No description provided for @refs_bundleSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into {count}'**
+  String refs_bundleSplit(Object count);
+
+  /// No description provided for @refs_bundlePick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick some'**
+  String get refs_bundlePick;
+
+  /// No description provided for @refs_dupExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Name already in library'**
+  String get refs_dupExists;
+
+  /// No description provided for @refs_dupKeepBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep both'**
+  String get refs_dupKeepBoth;
+
+  /// No description provided for @refs_dupOverwrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite'**
+  String get refs_dupOverwrite;
+
+  /// No description provided for @refs_dupSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get refs_dupSkip;
+
+  /// No description provided for @refs_importSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{files} files → {cards} new cards'**
+  String refs_importSummary(Object files, Object cards);
+
+  /// No description provided for @refs_importNow.
+  ///
+  /// In en, this message translates to:
+  /// **' · {cost} Anlas now'**
+  String refs_importNow(Object cost);
+
+  /// No description provided for @refs_importLater.
+  ///
+  /// In en, this message translates to:
+  /// **' · {count} plain images are encoded on first use ({cost} Anlas each)'**
+  String refs_importLater(Object count, Object cost);
+
+  /// No description provided for @refs_pickerVibeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from Vibe Library'**
+  String get refs_pickerVibeTitle;
+
+  /// No description provided for @refs_pickerPreciseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from Precise Reference Library'**
+  String get refs_pickerPreciseTitle;
+
+  /// No description provided for @refs_openVibeLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Vibe Library'**
+  String get refs_openVibeLibrary;
+
+  /// No description provided for @refs_openPreciseLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Open library'**
+  String get refs_openPreciseLibrary;
+
+  /// No description provided for @refs_recentUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently used'**
+  String get refs_recentUsed;
+
+  /// No description provided for @refs_inUse.
+  ///
+  /// In en, this message translates to:
+  /// **'In use'**
+  String get refs_inUse;
+
+  /// No description provided for @refs_pickedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String refs_pickedN(Object count);
+
+  /// No description provided for @refs_pickerAfterVibe.
+  ///
+  /// In en, this message translates to:
+  /// **' · {count}/{max} after adding'**
+  String refs_pickerAfterVibe(Object count, Object max);
+
+  /// No description provided for @refs_pickerAfterPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **' · {count} after adding'**
+  String refs_pickerAfterPrecise(Object count);
+
+  /// No description provided for @refs_pickerEncode.
+  ///
+  /// In en, this message translates to:
+  /// **'“{name}” needs encoding for {model} · {cost} Anlas'**
+  String refs_pickerEncode(Object name, Object model, Object cost);
+
+  /// No description provided for @refs_pickerEncodeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more need encoding'**
+  String refs_pickerEncodeMore(Object count);
+
+  /// No description provided for @refs_pickerExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'+{extra} Anlas each beyond {free}'**
+  String refs_pickerExtra(Object free, Object extra);
+
+  /// No description provided for @refs_pickerPreciseCost.
+  ///
+  /// In en, this message translates to:
+  /// **'{cost} Anlas each · {total} Anlas total'**
+  String refs_pickerPreciseCost(Object cost, Object total);
+
+  /// No description provided for @refs_replaceExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace existing'**
+  String get refs_replaceExisting;
+
+  /// No description provided for @refs_appendN.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count}'**
+  String refs_appendN(Object count);
+
+  /// No description provided for @refs_timeNever.
+  ///
+  /// In en, this message translates to:
+  /// **'never'**
+  String get refs_timeNever;
+
+  /// No description provided for @refs_timeJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get refs_timeJustNow;
+
+  /// No description provided for @refs_timeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min ago'**
+  String refs_timeMinutes(Object count);
+
+  /// No description provided for @refs_timeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h ago'**
+  String refs_timeHours(Object count);
+
+  /// No description provided for @refs_timeYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday'**
+  String get refs_timeYesterday;
+
+  /// No description provided for @refs_timeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String refs_timeDays(Object count);
+
+  /// No description provided for @refs_timeMonthDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}/{day}'**
+  String refs_timeMonthDay(Object month, Object day);
 }
 
 class _AppLocalizationsDelegate

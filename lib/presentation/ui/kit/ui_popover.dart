@@ -6,12 +6,18 @@ import 'package:flutter/services.dart';
 import 'ui_colors.dart';
 
 /// 弹层贴在哪：[point] 是全局坐标；[alignBottom] 为 true 时弹层底边对齐这一点（向上长）。
+/// [alignRight] 为 true 时弹层右边对齐这一点（向左长，工具栏右端的菜单）。
 /// 弹层整体夹在窗口内、四周留 4。
 @immutable
 class UiPopoverAnchor {
-  const UiPopoverAnchor(this.point, {this.alignBottom = false});
+  const UiPopoverAnchor(
+    this.point, {
+    this.alignBottom = false,
+    this.alignRight = false,
+  });
   final Offset point;
   final bool alignBottom;
+  final bool alignRight;
 
   /// 贴在 [context] 对应组件的右侧：[dx] 是离右边缘的距离，[dy] 是相对顶边（或底边）的偏移。
   static UiPopoverAnchor beside(
@@ -97,7 +103,11 @@ class _UiPopoverState extends State<UiPopover> {
                 ),
               ),
               CustomSingleChildLayout(
-                delegate: _ClampedLayout(point, anchor.alignBottom),
+                delegate: _ClampedLayout(
+                  point,
+                  anchor.alignBottom,
+                  anchor.alignRight,
+                ),
                 child: Focus(
                   autofocus: true,
                   onKeyEvent: (_, event) {
@@ -136,9 +146,10 @@ class _UiPopoverState extends State<UiPopover> {
 }
 
 class _ClampedLayout extends SingleChildLayoutDelegate {
-  const _ClampedLayout(this.point, this.alignBottom);
+  const _ClampedLayout(this.point, this.alignBottom, this.alignRight);
   final Offset point;
   final bool alignBottom;
+  final bool alignRight;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
@@ -149,15 +160,18 @@ class _ClampedLayout extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size child) {
     final top = alignBottom ? point.dy - child.height : point.dy;
+    final left = alignRight ? point.dx - child.width : point.dx;
     return Offset(
-      point.dx.clamp(4, math.max(4, size.width - child.width - 4)),
+      left.clamp(4, math.max(4, size.width - child.width - 4)),
       top.clamp(4, math.max(4, size.height - child.height - 4)),
     );
   }
 
   @override
   bool shouldRelayout(_ClampedLayout old) =>
-      old.point != point || old.alignBottom != alignBottom;
+      old.point != point ||
+      old.alignBottom != alignBottom ||
+      old.alignRight != alignRight;
 }
 
 /// 弹层外观：抬起底、1px 描边、圆角 12、外圈细线 + 三层投影。

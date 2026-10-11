@@ -1,6 +1,7 @@
 // 新界面预览：不接后端，用假数据驱动，能切状态 / 主题 / 语言。
 // 运行：flutter run -d windows -t tool/ui_shell/preview_main.dart
-// 主导航包着页面：切到“统计”显示统计页，“在线画廊”显示在线画廊（本地模拟器驱动），其他页显示占位。
+// 主导航包着页面：切到“统计”显示统计页，“在线画廊”显示在线画廊，“Vibe 库 / 精准参考库”显示参考库
+// （都由本地模拟器驱动），其他页显示占位。
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -11,11 +12,16 @@ import 'package:nai_launcher/presentation/ui/nav/nav_fixture.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_labels.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_shell.dart';
 import 'package:nai_launcher/presentation/ui/online/online_page.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_fixture.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_page.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_picker.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_contract.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_fixture.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_page.dart';
 
 import 'online_preview.dart';
+import 'refs_preview.dart';
 
 void main() => runApp(const _PreviewApp());
 
@@ -36,7 +42,7 @@ class _PreviewAppState extends State<_PreviewApp> {
   String? _lastAction;
 
   // 主导航
-  var _page = NavPage.onlineGallery;
+  var _page = NavPage.vibeLibrary;
   var _gen = _Gen.idle;
   var _tasks = false;
   var _pinned = false;
@@ -57,11 +63,16 @@ class _PreviewAppState extends State<_PreviewApp> {
   // 在线画廊
   late final _online = OnlinePreviewSim(log: _log)..addListener(_rebuild);
 
+  // Vibe / 精准参考库
+  late final _refs = RefsPreviewSim(log: _log)..addListener(_rebuild);
+  var _picker = false;
+
   void _rebuild() => setState(() {});
 
   @override
   void dispose() {
     _online.dispose();
+    _refs.dispose();
     super.dispose();
   }
 
@@ -245,6 +256,17 @@ class _PreviewAppState extends State<_PreviewApp> {
                       OnlineScene.values,
                       (s) => setState(() => _online.scene = s),
                     ),
+                    const Text('参考库：'),
+                    _dropdown(
+                      _refs.scene,
+                      RefsScene.values,
+                      (s) => setState(() => _refs.scene = s),
+                    ),
+                    _chip(
+                      '生图页选择器',
+                      _picker,
+                      (v) => setState(() => _picker = v),
+                    ),
                     if (_lastAction != null)
                       Text(_lastAction!, style: const TextStyle(fontSize: 12)),
                   ],
@@ -264,6 +286,7 @@ class _PreviewAppState extends State<_PreviewApp> {
                     data: _online.data,
                     actions: _online.actions,
                   ),
+                  NavPage.vibeLibrary || NavPage.preciseRef => _refsPage(),
                   _ => _Placeholder(page: _page),
                 },
               ),
@@ -271,6 +294,43 @@ class _PreviewAppState extends State<_PreviewApp> {
           ],
         ),
       ),
+    );
+  }
+}
+
+extension on _PreviewAppState {
+  void _closePicker() {
+    _picker = false;
+    _rebuild();
+  }
+
+  Widget _refsPage() {
+    _refs.kind = _page == NavPage.vibeLibrary
+        ? RefsKind.vibe
+        : RefsKind.precise;
+    final page = RefsLibraryPage(data: _refs.data, actions: _refs.actions);
+    if (!_picker) return page;
+    final vibe = _refs.kind == RefsKind.vibe;
+    return Stack(
+      children: [
+        page,
+        const Positioned.fill(child: ColoredBox(color: Color(0x33000000))),
+        Center(
+          child: RefsPicker(
+            data: vibe
+                ? RefsFixture.vibePicker(refsPreviewImage)
+                : RefsFixture.precisePicker(refsPreviewImage),
+            actions: RefsPickerActions(
+              onConfirm: (keys, {required replace}) {
+                _log('picker.onConfirm($keys, replace: $replace)');
+                _closePicker();
+              },
+              onClose: () => _closePicker(),
+              onOpenLibrary: () => _closePicker(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -14442,4 +14442,1050 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get online_keyInfo => 'Toggle info';
+
+  @override
+  String get refs_vibeTitle => 'Vibe Library';
+
+  @override
+  String get refs_preciseTitle => 'Precise Reference Library';
+
+  @override
+  String get refs_collapseSidebar => 'Collapse sidebar';
+
+  @override
+  String get refs_expandSidebar => 'Expand sidebar';
+
+  @override
+  String get refs_viewAll => 'All';
+
+  @override
+  String get refs_viewFavorites => 'Favorites';
+
+  @override
+  String get refs_viewRecent => 'Recently used';
+
+  @override
+  String get refs_viewInGeneration => 'In generation';
+
+  @override
+  String get refs_categories => 'Categories';
+
+  @override
+  String get refs_newCategory => 'New category';
+
+  @override
+  String get refs_newSubcategory => 'New subcategory';
+
+  @override
+  String get refs_deleteCategory => 'Delete category';
+
+  @override
+  String get refs_categoryNameHint => 'Category name';
+
+  @override
+  String get refs_noCategories =>
+      'No categories yet. You can create one while importing';
+
+  @override
+  String get refs_uncategorized => 'Uncategorized';
+
+  @override
+  String get refs_sources => 'Sources';
+
+  @override
+  String get refs_srcPng => 'PNG (with Vibe)';
+
+  @override
+  String get refs_srcVibeFile => 'Vibe file';
+
+  @override
+  String get refs_srcBundle => 'Bundle';
+
+  @override
+  String get refs_srcRaw => 'Images to encode';
+
+  @override
+  String get refs_srcImage => 'Image';
+
+  @override
+  String get refs_open => 'Open';
+
+  @override
+  String get refs_types => 'Reference types';
+
+  @override
+  String refs_importTypeNoteAll(Object type) {
+    return 'Imported images are saved as $type by default. Select a type on the left first to save as that type.';
+  }
+
+  @override
+  String refs_importTypeNoteSelected(Object type) {
+    return 'Imported images are saved as $type, following the type selected on the left.';
+  }
+
+  @override
+  String get refs_preciseOnlyV45 => 'V4.5 only';
+
+  @override
+  String refs_preciseCostNote(Object cost) {
+    return '$cost Anlas each; cannot be used together with Vibes';
+  }
+
+  @override
+  String get refs_searchVibe => 'Search names, tags';
+
+  @override
+  String get refs_searchPrecise => 'Search names';
+
+  @override
+  String get refs_sortLastUsed => 'Last used';
+
+  @override
+  String get refs_sortCreated => 'Date added';
+
+  @override
+  String get refs_sortUsed => 'Times used';
+
+  @override
+  String get refs_sortName => 'Name';
+
+  @override
+  String get refs_sortAsc => 'Ascending';
+
+  @override
+  String get refs_sortDesc => 'Descending';
+
+  @override
+  String get refs_sizeSmall => 'Small cards';
+
+  @override
+  String get refs_sizeMedium => 'M';
+
+  @override
+  String get refs_sizeLarge => 'L';
+
+  @override
+  String get refs_currentModel => 'Model';
+
+  @override
+  String get refs_usable => 'Usable';
+
+  @override
+  String get refs_unusable => 'Unavailable';
+
+  @override
+  String get refs_multi => 'Select';
+
+  @override
+  String get refs_multiDone => 'Done';
+
+  @override
+  String get refs_import => 'Import';
+
+  @override
+  String get refs_importFiles => 'Choose files…';
+
+  @override
+  String get refs_importImages => 'Choose images…';
+
+  @override
+  String get refs_importClipboard => 'Paste from clipboard';
+
+  @override
+  String get refs_more => 'More';
+
+  @override
+  String get refs_exportAll => 'Export all…';
+
+  @override
+  String get refs_openLibraryFolder => 'Open library folder';
+
+  @override
+  String get refs_rescan => 'Rescan folder';
+
+  @override
+  String get refs_reload => 'Reload';
+
+  @override
+  String get refs_hideInspector => 'Hide inspector';
+
+  @override
+  String get refs_showInspector => 'Show inspector';
+
+  @override
+  String refs_bannerVibeLead(Object model) {
+    return '$model does not support Vibe Transfer. ';
+  }
+
+  @override
+  String get refs_bannerVibeBody =>
+      'You can still organize and export Vibes; switch to V4.5 or V4 to generate with them';
+
+  @override
+  String refs_bannerPreciseLead(Object model) {
+    return '$model does not support Precise Reference. ';
+  }
+
+  @override
+  String get refs_bannerPreciseBody =>
+      'You can still organize references; switch to V4.5 to generate with them';
+
+  @override
+  String refs_switchTo(Object model) {
+    return 'Switch to $model';
+  }
+
+  @override
+  String get refs_quickAll => 'All';
+
+  @override
+  String get refs_quickFavorites => 'Favorites';
+
+  @override
+  String get refs_quickHasRaw => 'Has original';
+
+  @override
+  String get refs_quickNeedsEncoding => 'Needs encoding';
+
+  @override
+  String get refs_quickBundles => 'Bundles';
+
+  @override
+  String get refs_quickUnused => 'Never used';
+
+  @override
+  String refs_countVibe(Object count, Object inGen) {
+    return '$count · $inGen in generation';
+  }
+
+  @override
+  String refs_countPrecise(Object count, Object inGen) {
+    return '$count · $inGen in generation';
+  }
+
+  @override
+  String get refs_noResults => 'Nothing matches these filters';
+
+  @override
+  String refs_noResultsFor(Object query) {
+    return 'Nothing found for “$query”';
+  }
+
+  @override
+  String get refs_clearFilters => 'Clear filters';
+
+  @override
+  String get refs_addShort => 'Add';
+
+  @override
+  String get refs_sendPrecise => 'Send to Precise Reference';
+
+  @override
+  String get refs_openBundle => 'Open bundle';
+
+  @override
+  String get refs_detail => 'Details';
+
+  @override
+  String get refs_addToGeneration => 'Add to generation';
+
+  @override
+  String get refs_replaceVibes => 'Replace Vibes in generation';
+
+  @override
+  String get refs_replacePrecise => 'Replace current reference';
+
+  @override
+  String get refs_sendImg2Img => 'Send to Image2Image';
+
+  @override
+  String get refs_saveAsVibe => 'Save to Vibe Library';
+
+  @override
+  String get refs_favorite => 'Favorite';
+
+  @override
+  String get refs_unfavorite => 'Unfavorite';
+
+  @override
+  String get refs_replacePreview => 'Replace preview…';
+
+  @override
+  String get refs_exportEllipsis => 'Export…';
+
+  @override
+  String get refs_showInFolder => 'Show in folder';
+
+  @override
+  String get refs_copyImage => 'Copy image';
+
+  @override
+  String get refs_delete => 'Delete';
+
+  @override
+  String refs_selected(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String get refs_moveTo => 'Move to';
+
+  @override
+  String get refs_export => 'Export';
+
+  @override
+  String get refs_emptyVibeTitle => 'Drop images or Vibe files here';
+
+  @override
+  String get refs_emptyPreciseTitle => 'Drop reference images here';
+
+  @override
+  String get refs_emptyVibeDesc =>
+      'Supports PNG (with Vibe), .naiv4vibe, .naiv4vibebundle and plain images.\nPlain images are stored as-is and encoded the first time you generate with them';
+
+  @override
+  String get refs_emptyPreciseDesc =>
+      'Character sheets or style samples, as many as you like.\nType, strength and fidelity are saved and applied when you send';
+
+  @override
+  String get refs_pickFiles => 'Choose files';
+
+  @override
+  String get refs_pasteClipboard => 'Paste';
+
+  @override
+  String get refs_emptyFromResultVibe =>
+      'Right-click a result → Save to Vibe Library';
+
+  @override
+  String get refs_emptyFromResultPrecise =>
+      'Right-click a result → Save to Precise Reference Library';
+
+  @override
+  String get refs_emptyFromGallery => 'Works from the local gallery too';
+
+  @override
+  String get refs_emptyHelpTitle => 'Vibe vs. Precise Reference';
+
+  @override
+  String refs_emptyHelpBody(Object cost) {
+    return 'Vibe borrows the overall mood and style and can be stacked (V4 / V4.5, not V5). Precise Reference follows one image’s character or style more closely, $cost Anlas each (V4.5 only). The two cannot be used together.';
+  }
+
+  @override
+  String refs_dropTitle(Object count) {
+    return 'Release to import $count files';
+  }
+
+  @override
+  String get refs_dropVibeDesc =>
+      'You will confirm in the import window first — no Anlas is spent yet';
+
+  @override
+  String get refs_dropPreciseDesc => 'Saved with the type selected on the left';
+
+  @override
+  String refs_dropVibePngs(Object count) {
+    return '$count PNG with Vibe';
+  }
+
+  @override
+  String refs_dropVibeFiles(Object count) {
+    return '$count Vibe files';
+  }
+
+  @override
+  String refs_dropBundles(Object count) {
+    return '$count bundles';
+  }
+
+  @override
+  String refs_dropImages(Object count) {
+    return '$count plain images';
+  }
+
+  @override
+  String get refs_inGeneration => 'In use';
+
+  @override
+  String get refs_tag => 'Tag';
+
+  @override
+  String get refs_strengthShort => 'Str';
+
+  @override
+  String get refs_infoShort => 'Info';
+
+  @override
+  String get refs_fidelityShort => 'Fid';
+
+  @override
+  String refs_encModelOff(Object model) {
+    return 'Not on $model';
+  }
+
+  @override
+  String refs_encModelOffDesc(Object model) {
+    return '$model has no Vibe Transfer; switch to V4.5 / V4 to use it';
+  }
+
+  @override
+  String refs_encReady(Object model) {
+    return 'Encoded · $model';
+  }
+
+  @override
+  String refs_encReadyShort(Object model) {
+    return '$model encoded';
+  }
+
+  @override
+  String get refs_encReadyDesc =>
+      'Ready for the current model, no encoding fee';
+
+  @override
+  String get refs_encOnUse => 'Encodes on use';
+
+  @override
+  String refs_encOnUseDesc(Object cost) {
+    return 'Not encoded yet. Encoded the first time you generate with it, $cost Anlas';
+  }
+
+  @override
+  String get refs_encRe => 'Needs re-encoding';
+
+  @override
+  String refs_encReDesc(Object from, Object model, Object cost) {
+    return 'Encoded for $from, current model is $model. Re-encoded from the original on use, $cost Anlas';
+  }
+
+  @override
+  String refs_encUnusable(Object model) {
+    return 'Unusable on $model';
+  }
+
+  @override
+  String refs_encUnusableDesc(Object from, Object model) {
+    return 'Only a $from encoding and no original, so it can’t be re-encoded for $model';
+  }
+
+  @override
+  String get refs_trayVibe => 'Vibes in generation';
+
+  @override
+  String get refs_trayPrecise => 'References in generation';
+
+  @override
+  String refs_trayVibeCost(Object free, Object extra) {
+    return '+$extra Anlas each beyond $free';
+  }
+
+  @override
+  String refs_trayPreciseCost(Object cost, Object total) {
+    return '$cost Anlas each · +$total now';
+  }
+
+  @override
+  String get refs_trayHint =>
+      'Drag cards here to add; hold Shift to replace all.\nYou stay on this page, so keep picking';
+
+  @override
+  String get refs_trayDropHere => 'Drop cards here to add them';
+
+  @override
+  String get refs_clear => 'Clear';
+
+  @override
+  String get refs_goGeneration => 'Go to generation';
+
+  @override
+  String refs_conflict(Object count) {
+    return 'Generation still has **$count Vibes**. Vibes aren’t sent while a precise reference is set (not compatible)';
+  }
+
+  @override
+  String refs_conflictPaused(Object count) {
+    return '**$count Vibes** in generation are paused; only the precise reference is sent';
+  }
+
+  @override
+  String get refs_pauseVibes => 'Pause Vibes';
+
+  @override
+  String get refs_resumeVibes => 'Resume Vibes';
+
+  @override
+  String get refs_inspector => 'Inspector';
+
+  @override
+  String refs_selectedN(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String get refs_noSelectionVibe =>
+      'Select a card to see its parameters and encoding';
+
+  @override
+  String get refs_noSelectionPrecise =>
+      'Select a reference to see its type and parameters';
+
+  @override
+  String get refs_rename => 'Rename';
+
+  @override
+  String get refs_replace => 'Replace';
+
+  @override
+  String get refs_replaceVibesTip =>
+      'Replace all Vibes currently in generation';
+
+  @override
+  String get refs_strength => 'Strength';
+
+  @override
+  String get refs_strengthDesc => 'Higher feels more like this image';
+
+  @override
+  String get refs_infoExtracted => 'Information extracted';
+
+  @override
+  String refs_infoDesc(Object cost) {
+    return 'Higher brings in more detail. Changing it re-encodes from the original, $cost Anlas';
+  }
+
+  @override
+  String get refs_infoLocked =>
+      'Only encoded data, no original — information extracted can’t be changed';
+
+  @override
+  String get refs_changedNote => 'Changes apply to this send only';
+
+  @override
+  String get refs_saveDefault => 'Save as default';
+
+  @override
+  String get refs_revert => 'Revert';
+
+  @override
+  String refs_encodeNow(Object model, Object cost) {
+    return 'Encode for $model now · $cost Anlas';
+  }
+
+  @override
+  String refs_bundleNote(Object count) {
+    return 'Each of the $count Vibes in this bundle has its own strength and information extracted; open the bundle to adjust them.';
+  }
+
+  @override
+  String refs_bundleOf(Object count) {
+    return 'Bundle · $count';
+  }
+
+  @override
+  String get refs_organize => 'Organize';
+
+  @override
+  String get refs_category => 'Category';
+
+  @override
+  String get refs_tags => 'Tags';
+
+  @override
+  String get refs_used => 'Used';
+
+  @override
+  String get refs_neverUsed => 'Never used';
+
+  @override
+  String refs_usedTimes(Object count, Object last) {
+    return '$count times · last $last';
+  }
+
+  @override
+  String get refs_added => 'Added';
+
+  @override
+  String get refs_file => 'File';
+
+  @override
+  String get refs_original => 'Original';
+
+  @override
+  String refs_plusAnlas(Object cost) {
+    return '+$cost Anlas';
+  }
+
+  @override
+  String get refs_alsoSaveVibe => 'Also save as Vibe';
+
+  @override
+  String get refs_referenceWhat => 'Reference';
+
+  @override
+  String get refs_typeCharacter => 'Character';
+
+  @override
+  String get refs_typeStyle => 'Style';
+
+  @override
+  String get refs_typeBoth => 'Char + style';
+
+  @override
+  String get refs_typeCharacterDesc =>
+      'Keeps the character’s face, hair and outfit; style follows the prompt';
+
+  @override
+  String get refs_typeStyleDesc =>
+      'Borrows only style, palette and brushwork, not the subject';
+
+  @override
+  String get refs_typeBothDesc => 'References both the character and the style';
+
+  @override
+  String get refs_preciseStrength => 'Reference strength';
+
+  @override
+  String get refs_preciseStrengthDesc => 'Higher looks more like the reference';
+
+  @override
+  String get refs_fidelity => 'Fidelity';
+
+  @override
+  String get refs_fidelityDesc => 'Higher sticks to details, lower is freer';
+
+  @override
+  String get refs_preciseDefaultsNote =>
+      'These are the defaults used when sending; the number box accepts values beyond 0–1';
+
+  @override
+  String get refs_showInFolderShort => 'Show in folder';
+
+  @override
+  String get refs_pickHint => 'Check cards to edit them together here';
+
+  @override
+  String get refs_multiAddTitle => 'Add together';
+
+  @override
+  String get refs_multiSendTitle => 'Send together';
+
+  @override
+  String refs_multiFree(Object free) {
+    return 'Up to $free at no extra cost. ';
+  }
+
+  @override
+  String refs_multiExtra(Object free, Object extra, Object total) {
+    return 'Beyond $free, +$extra Anlas each: $total Anlas more per image. ';
+  }
+
+  @override
+  String refs_multiOverMax(Object max) {
+    return 'Over the $max limit; the extra ones won’t be added. ';
+  }
+
+  @override
+  String refs_multiEncodes(Object count, Object names, Object cost) {
+    return '$count need encoding ($names, $cost Anlas each, charged once). ';
+  }
+
+  @override
+  String refs_multiAlready(Object count) {
+    return '$count already in generation won’t be added twice.';
+  }
+
+  @override
+  String refs_multiPreciseCost(Object cost, Object total) {
+    return '$cost Anlas each, $total Anlas per image in total.';
+  }
+
+  @override
+  String get refs_unify => 'Set for all';
+
+  @override
+  String get refs_mixed => 'Mixed';
+
+  @override
+  String refs_unifyVibeNote(Object count) {
+    return 'Dragging updates all $count defaults; information extracted is left alone (needs re-encoding)';
+  }
+
+  @override
+  String refs_unifyPreciseNote(Object count) {
+    return 'Click to set all $count to this type';
+  }
+
+  @override
+  String get refs_moveToCategory => 'Move to category';
+
+  @override
+  String get refs_addTag => 'Add tag';
+
+  @override
+  String get refs_packBundle => 'Pack as bundle';
+
+  @override
+  String get refs_close => 'Close';
+
+  @override
+  String get refs_cancel => 'Cancel';
+
+  @override
+  String get refs_remove => 'Remove';
+
+  @override
+  String get refs_prev => 'Previous';
+
+  @override
+  String get refs_next => 'Next';
+
+  @override
+  String get refs_switch => 'switch';
+
+  @override
+  String get refs_dropReplacePreview =>
+      'Drop an image here to replace the preview (encoding unchanged)';
+
+  @override
+  String refs_bundleOfVibes(Object count) {
+    return 'Bundle · $count Vibes';
+  }
+
+  @override
+  String refs_bundleAll(Object count) {
+    return 'All $count';
+  }
+
+  @override
+  String refs_bundleOnlyChecked(Object count) {
+    return 'Only $count checked';
+  }
+
+  @override
+  String get refs_bundleScopeNote =>
+      'Each Vibe is sent with its own strength and information extracted';
+
+  @override
+  String get refs_splitBundle => 'Split into Vibes';
+
+  @override
+  String get refs_bundleNoteLong =>
+      'After changing a Vibe, “Save to bundle” keeps it; otherwise it only affects this send. ';
+
+  @override
+  String refs_bundleAllEncoded(Object count, Object model) {
+    return 'All $count are encoded for $model';
+  }
+
+  @override
+  String get refs_saveToBundle => 'Save to bundle';
+
+  @override
+  String get refs_cover => 'Cover';
+
+  @override
+  String get refs_setCover => 'Set as cover';
+
+  @override
+  String refs_exportTitle(Object count) {
+    return 'Export $count Vibes';
+  }
+
+  @override
+  String get refs_exportListNote =>
+      'Select several in the library and click Export; remove items here';
+
+  @override
+  String get refs_exportAs => 'Export as';
+
+  @override
+  String get refs_fmtVibeFile => 'Single Vibe files';
+
+  @override
+  String get refs_fmtVibeFileDesc =>
+      '.naiv4vibe, one per Vibe. Works on the site and other clients';
+
+  @override
+  String get refs_fmtBundle => 'One bundle';
+
+  @override
+  String refs_fmtBundleDesc(Object count) {
+    return '.naiv4vibebundle, all $count in one file';
+  }
+
+  @override
+  String get refs_fmtPng => 'Embed in PNG';
+
+  @override
+  String get refs_fmtPngDesc =>
+      'The image carries the Vibe — just drop it in. One at a time';
+
+  @override
+  String get refs_fmtEncoded => 'Encoded text';
+
+  @override
+  String get refs_fmtEncodedDesc =>
+      'JSON / Base64 for scripts and advanced use';
+
+  @override
+  String get refs_options => 'Options';
+
+  @override
+  String get refs_optThumbs => 'Include thumbnails';
+
+  @override
+  String get refs_optThumbsDesc =>
+      'Slightly larger files, but previews show on import';
+
+  @override
+  String get refs_optZip => 'Compress to ZIP';
+
+  @override
+  String refs_optZipDesc(Object count) {
+    return 'Put $count files in one archive';
+  }
+
+  @override
+  String get refs_saveTo => 'Save to';
+
+  @override
+  String get refs_choose => 'Choose';
+
+  @override
+  String refs_exportSummary(Object count, Object ext) {
+    return 'Creates $count $ext files';
+  }
+
+  @override
+  String refs_exportSummaryZip(Object count, Object ext) {
+    return 'Creates 1 ZIP ($count $ext files)';
+  }
+
+  @override
+  String refs_deleteOne(Object name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String refs_deleteMany(Object count) {
+    return 'Delete $count items?';
+  }
+
+  @override
+  String get refs_deleteVibeDesc =>
+      'Removes them from the Vibe Library. Vibes already in generation are not affected.';
+
+  @override
+  String get refs_deletePreciseDesc =>
+      'Removes them from the library. References already in generation are not affected.';
+
+  @override
+  String refs_importTitle(Object count) {
+    return 'Import $count files';
+  }
+
+  @override
+  String get refs_importSubtitle =>
+      'Dropped, chosen or pasted files all come here';
+
+  @override
+  String get refs_importMore => 'Add files';
+
+  @override
+  String get refs_importPutIn => 'Put all in';
+
+  @override
+  String get refs_importAddTags => 'Add tags';
+
+  @override
+  String get refs_importTagsHint => 'Type and press Enter';
+
+  @override
+  String get refs_importPlainImages => 'Plain images';
+
+  @override
+  String get refs_importEncodeLater => 'Encode on use';
+
+  @override
+  String refs_importEncodeNow(Object cost) {
+    return 'Encode now · $cost Anlas each';
+  }
+
+  @override
+  String get refs_importName => 'Name';
+
+  @override
+  String get refs_importResult => 'Detected as';
+
+  @override
+  String refs_recPng(Object model) {
+    return 'PNG with Vibe · $model encoding';
+  }
+
+  @override
+  String refs_recVibeFile(Object model) {
+    return 'Vibe file · $model encoding';
+  }
+
+  @override
+  String refs_recBundle(Object count) {
+    return 'Bundle · $count Vibes';
+  }
+
+  @override
+  String get refs_recImage => 'Plain image · not encoded';
+
+  @override
+  String get refs_recImageDup => 'Plain image · name exists';
+
+  @override
+  String get refs_recFree => 'Imported as-is, free';
+
+  @override
+  String refs_recReencode(Object model) {
+    return 'Needs re-encoding for $model (not possible without the original)';
+  }
+
+  @override
+  String refs_recBundleNote(Object count) {
+    return 'Whole = one card; split = $count cards';
+  }
+
+  @override
+  String get refs_recEncodeLater =>
+      'Stored as-is; encoded for the model in use the first time';
+
+  @override
+  String refs_recEncodeNow(Object cost) {
+    return 'Encoded on import, $cost Anlas each';
+  }
+
+  @override
+  String get refs_bundleWhole => 'Whole';
+
+  @override
+  String refs_bundleSplit(Object count) {
+    return 'Split into $count';
+  }
+
+  @override
+  String get refs_bundlePick => 'Pick some';
+
+  @override
+  String get refs_dupExists => 'Name already in library';
+
+  @override
+  String get refs_dupKeepBoth => 'Keep both';
+
+  @override
+  String get refs_dupOverwrite => 'Overwrite';
+
+  @override
+  String get refs_dupSkip => 'Skip';
+
+  @override
+  String refs_importSummary(Object files, Object cards) {
+    return '$files files → $cards new cards';
+  }
+
+  @override
+  String refs_importNow(Object cost) {
+    return ' · $cost Anlas now';
+  }
+
+  @override
+  String refs_importLater(Object count, Object cost) {
+    return ' · $count plain images are encoded on first use ($cost Anlas each)';
+  }
+
+  @override
+  String get refs_pickerVibeTitle => 'Add from Vibe Library';
+
+  @override
+  String get refs_pickerPreciseTitle => 'Add from Precise Reference Library';
+
+  @override
+  String get refs_openVibeLibrary => 'Open Vibe Library';
+
+  @override
+  String get refs_openPreciseLibrary => 'Open library';
+
+  @override
+  String get refs_recentUsed => 'Recently used';
+
+  @override
+  String get refs_inUse => 'In use';
+
+  @override
+  String refs_pickedN(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String refs_pickerAfterVibe(Object count, Object max) {
+    return ' · $count/$max after adding';
+  }
+
+  @override
+  String refs_pickerAfterPrecise(Object count) {
+    return ' · $count after adding';
+  }
+
+  @override
+  String refs_pickerEncode(Object name, Object model, Object cost) {
+    return '“$name” needs encoding for $model · $cost Anlas';
+  }
+
+  @override
+  String refs_pickerEncodeMore(Object count) {
+    return '$count more need encoding';
+  }
+
+  @override
+  String refs_pickerExtra(Object free, Object extra) {
+    return '+$extra Anlas each beyond $free';
+  }
+
+  @override
+  String refs_pickerPreciseCost(Object cost, Object total) {
+    return '$cost Anlas each · $total Anlas total';
+  }
+
+  @override
+  String get refs_replaceExisting => 'Replace existing';
+
+  @override
+  String refs_appendN(Object count) {
+    return 'Add $count';
+  }
+
+  @override
+  String get refs_timeNever => 'never';
+
+  @override
+  String get refs_timeJustNow => 'just now';
+
+  @override
+  String refs_timeMinutes(Object count) {
+    return '$count min ago';
+  }
+
+  @override
+  String refs_timeHours(Object count) {
+    return '$count h ago';
+  }
+
+  @override
+  String get refs_timeYesterday => 'yesterday';
+
+  @override
+  String refs_timeDays(Object count) {
+    return '$count days ago';
+  }
+
+  @override
+  String refs_timeMonthDay(Object month, Object day) {
+    return '$month/$day';
+  }
 }
