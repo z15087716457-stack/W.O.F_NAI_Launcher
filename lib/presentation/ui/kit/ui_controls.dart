@@ -115,10 +115,17 @@ class _SegmentState extends State<_Segment> {
   }
 }
 
-/// 小开关：28 × 16。
+/// 小开关：默认 28 × 16（库页用 30 × 18）。
 class UiSwitch extends StatelessWidget {
-  const UiSwitch({super.key, required this.value});
+  const UiSwitch({
+    super.key,
+    required this.value,
+    this.width = 28,
+    this.height = 16,
+  });
   final bool value;
+  final double width;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -127,23 +134,32 @@ class UiSwitch extends StatelessWidget {
     final duration = reduce ? Duration.zero : const Duration(milliseconds: 140);
     return AnimatedContainer(
       duration: duration,
-      width: 28,
-      height: 16,
+      width: width,
+      height: height,
       decoration: BoxDecoration(
         color: value ? c.accent : c.strong,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(height / 2),
       ),
       child: AnimatedAlign(
         duration: duration,
         curve: Curves.easeOut,
         alignment: value ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          width: 12,
-          height: 12,
+          width: height - 4,
+          height: height - 4,
           margin: const EdgeInsets.symmetric(horizontal: 2),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
+            boxShadow: height > 16
+                ? const [
+                    BoxShadow(
+                      color: Color(0x40000000),
+                      blurRadius: 2,
+                      offset: Offset(0, 1),
+                    ),
+                  ]
+                : null,
           ),
         ),
       ),

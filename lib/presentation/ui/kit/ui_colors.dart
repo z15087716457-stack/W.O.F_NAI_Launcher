@@ -34,6 +34,8 @@ class UiColors {
     required this.line,
     required this.avatar,
     required this.subWarn,
+    required this.fav,
+    required this.warn,
   });
 
   factory UiColors.of(BuildContext context) =>
@@ -71,6 +73,8 @@ class UiColors {
       line: s.outlineVariant,
       avatar: const Color(0xFF0160FB),
       subWarn: dark ? const Color(0xFFD9A441) : const Color(0xFF98691D),
+      fav: dark ? const Color(0xFFFF6369) : const Color(0xFFE5484D),
+      warn: dark ? const Color(0xFFF1A10D) : const Color(0xFFB86E00),
     );
   }
 
@@ -143,6 +147,12 @@ class UiColors {
 
   /// 订阅快到期 / 已过期的琥珀色。
   final Color subWarn;
+
+  /// 收藏心形。
+  final Color fav;
+
+  /// 提醒（未登录等）的琥珀色文字。
+  final Color warn;
 
   /// 把 [color] 按 [t] 混到卡片底色上，等价于 CSS `color-mix(color t, card)`。
   Color onCard(Color color, double t) => Color.lerp(card, color, t)!;

@@ -13379,4 +13379,636 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get navShell_ctrlHint => '押し続けるとページ番号を表示、数字キーで移動、離すと消えます';
+
+  @override
+  String get online_title => 'オンラインギャラリー';
+
+  @override
+  String get online_collapseSidebar => 'サイドバーを閉じる';
+
+  @override
+  String get online_expandSidebar => 'サイドバーを開く';
+
+  @override
+  String get online_sectionBrowse => '閲覧';
+
+  @override
+  String get online_modeSearch => '検索';
+
+  @override
+  String get online_modeMonthly => '月間ランキング';
+
+  @override
+  String get online_modePopular => '人気';
+
+  @override
+  String get online_modeMyFavorites => 'お気に入り';
+
+  @override
+  String get online_modeFavorites => 'お気に入り';
+
+  @override
+  String get online_noRanking => 'ランキングなし';
+
+  @override
+  String get online_noFavorites => 'お気に入り非対応';
+
+  @override
+  String get online_readOnly => '閲覧のみ';
+
+  @override
+  String get online_signedOut => '未ログイン';
+
+  @override
+  String get online_recentTitle => '最近の検索';
+
+  @override
+  String get online_recentClear => 'クリア';
+
+  @override
+  String get online_collections => 'コレクション';
+
+  @override
+  String get online_newCollection => '新規コレクション';
+
+  @override
+  String get online_all => 'すべて';
+
+  @override
+  String get online_ungrouped => '未分類';
+
+  @override
+  String get online_favAuthors => '保存した作者';
+
+  @override
+  String get online_blacklist => 'ブロックリスト';
+
+  @override
+  String online_blacklistCount(Object count) {
+    return '$count 件のタグを除外';
+  }
+
+  @override
+  String get online_srcSubAiTag => 'NAI 作品コミュニティ · Prompt 付き';
+
+  @override
+  String online_srcSubSignedIn(Object name) {
+    return 'ログイン中 · $name';
+  }
+
+  @override
+  String get online_srcSubSafebooru => '全年齢 · ログイン不要';
+
+  @override
+  String get online_srcSubKeyOk => 'API Key 設定済み';
+
+  @override
+  String get online_srcSubKeyInvalid => 'API Key が無効';
+
+  @override
+  String get online_srcSubKeyMissing => 'API Key 未設定';
+
+  @override
+  String get online_switchSource => 'ソースを切り替え';
+
+  @override
+  String get online_capPromptSearch => '作品 + Prompt 検索';
+
+  @override
+  String get online_capTagSearch => 'タグ検索';
+
+  @override
+  String get online_capMonthly => '月間ランキング';
+
+  @override
+  String get online_capRankings => '日 / 週 / 月ランキング';
+
+  @override
+  String get online_capLocalFav => 'ローカルお気に入り';
+
+  @override
+  String get online_capSiteFav => 'サイトのお気に入り';
+
+  @override
+  String get online_capReadOnlyFav => 'お気に入り（閲覧のみ）';
+
+  @override
+  String get online_capMultiMedia => '複数枚作品';
+
+  @override
+  String get online_capParams => '生成パラメータ';
+
+  @override
+  String get online_capRatings => 'レーティング';
+
+  @override
+  String get online_capSfwOnly => '全年齢のみ';
+
+  @override
+  String get online_acctNone => 'ログイン不要';
+
+  @override
+  String get online_acctSignedIn => 'ログイン中';
+
+  @override
+  String get online_acctKeyOk => 'Key 設定済み';
+
+  @override
+  String get online_acctKeyInvalid => 'Key が無効';
+
+  @override
+  String get online_acctKeyMissing => 'Key 未設定';
+
+  @override
+  String get online_sourceMemory => 'ソースごとに検索語とスクロール位置を記憶します';
+
+  @override
+  String get online_searchWorkHint => '作品・作者・タイトル・タグ・モデル';
+
+  @override
+  String get online_searchPromptHint => 'Prompt に含む…（::artist: 構文可）';
+
+  @override
+  String get online_searchTagHint => 'タグを追加（スペース区切り、- で除外）';
+
+  @override
+  String get online_searchFavHint => 'お気に入りを検索：タイトル・作者・タグ';
+
+  @override
+  String get online_fuzzy => 'あいまい検索';
+
+  @override
+  String get online_clearSearch => '検索をクリア';
+
+  @override
+  String get online_sizeSmall => '小（タイトルなし）';
+
+  @override
+  String get online_sizeMedium => '中';
+
+  @override
+  String get online_sizeLarge => '大';
+
+  @override
+  String get online_multiSelect => '複数選択';
+
+  @override
+  String get online_doneMultiSelect => '選択を終了';
+
+  @override
+  String get online_refresh => '更新';
+
+  @override
+  String get online_inspector => 'インスペクター';
+
+  @override
+  String get online_naiOnly => 'NAI 画像のみ';
+
+  @override
+  String get online_model => 'モデル';
+
+  @override
+  String get online_modelAll => 'すべて';
+
+  @override
+  String get online_timeAll => '全期間';
+
+  @override
+  String online_timeYear(Object year) {
+    return '$year 年';
+  }
+
+  @override
+  String get online_timeOlder => 'それ以前';
+
+  @override
+  String online_loaded(Object count, Object pages) {
+    return '$count 枚 · $pages ページ読込済み';
+  }
+
+  @override
+  String online_rankLoaded(Object count) {
+    return '1–$count 位 · $count 枚読込済み';
+  }
+
+  @override
+  String get online_jumpToPage => 'ページへ移動…';
+
+  @override
+  String get online_jumpGo => '移動';
+
+  @override
+  String get online_ratingLabel => 'レーティング';
+
+  @override
+  String get online_ratingG => '全年齢';
+
+  @override
+  String get online_ratingS => '軽度';
+
+  @override
+  String get online_ratingQ => '要注意';
+
+  @override
+  String get online_ratingE => '露骨';
+
+  @override
+  String get online_dateRange => '期間';
+
+  @override
+  String get online_clearDateRange => '期間指定なし';
+
+  @override
+  String get online_rankCurrent => 'リアルタイム月間';
+
+  @override
+  String get online_rankDay => '日間';
+
+  @override
+  String get online_rankWeek => '週間';
+
+  @override
+  String get online_rankMonth => '月間';
+
+  @override
+  String get online_today => '今日';
+
+  @override
+  String get online_previous => '前へ';
+
+  @override
+  String get online_next => '次へ';
+
+  @override
+  String get online_sort => '並び順';
+
+  @override
+  String get online_sortFavTime => '保存日時';
+
+  @override
+  String get online_favAll => 'すべてのお気に入り';
+
+  @override
+  String online_countImages(Object count) {
+    return '$count 枚';
+  }
+
+  @override
+  String online_authorSaved(Object count, Object date) {
+    return '$count 枚保存 · $date に作者を保存';
+  }
+
+  @override
+  String get online_authorAllWorks => 'AI TAG で全作品を見る';
+
+  @override
+  String get online_unfavAuthor => '作者の保存を解除';
+
+  @override
+  String get online_favAuthor => '作者を保存';
+
+  @override
+  String get online_dragHint => 'カードを左のコレクションへドラッグで移動。右クリック → 移動 / 解除';
+
+  @override
+  String get online_readOnlyNote => '閲覧のみ：Gelbooru のお気に入りはサイトで編集';
+
+  @override
+  String get online_returnPrev => '前の結果に戻る';
+
+  @override
+  String get online_send => '生成へ送る';
+
+  @override
+  String get online_sendTags => 'タグを生成へ送る';
+
+  @override
+  String get online_sendModes => '送り方を選ぶ';
+
+  @override
+  String get online_favorite => 'お気に入り';
+
+  @override
+  String get online_favorited => '保存済み';
+
+  @override
+  String get online_copyPrompt => 'Prompt をコピー';
+
+  @override
+  String get online_copyTags => 'タグをコピー';
+
+  @override
+  String get online_download => 'ダウンロード';
+
+  @override
+  String online_downloadAll(Object count) {
+    return '全 $count 枚をダウンロード';
+  }
+
+  @override
+  String get online_downloadCurrent => 'この 1 枚をダウンロード';
+
+  @override
+  String get online_more => 'その他';
+
+  @override
+  String get online_openInBrowser => 'サイトで開く';
+
+  @override
+  String get online_onlyAuthor => 'この作者だけ';
+
+  @override
+  String get online_moveTo => 'コレクションへ移動';
+
+  @override
+  String get online_unfavorite => 'お気に入り解除';
+
+  @override
+  String get online_rename => '名前を変更';
+
+  @override
+  String get online_deleteCollection => 'コレクションを削除';
+
+  @override
+  String get online_inspWork => '作品';
+
+  @override
+  String get online_inspPost => '投稿';
+
+  @override
+  String online_youSaved(Object count) {
+    return 'この作者を $count 枚保存';
+  }
+
+  @override
+  String get online_params => '生成パラメータ';
+
+  @override
+  String get online_pModel => 'モデル';
+
+  @override
+  String get online_pSize => 'サイズ';
+
+  @override
+  String get online_pSeed => 'シード';
+
+  @override
+  String get online_pSampler => 'サンプラー';
+
+  @override
+  String get online_pStepsCfg => 'ステップ · CFG';
+
+  @override
+  String get online_prompt => 'プロンプト';
+
+  @override
+  String get online_negative => 'ネガティブ';
+
+  @override
+  String get online_tags => 'タグ';
+
+  @override
+  String get online_tagsHint => 'クリックで検索に追加';
+
+  @override
+  String get online_tagArtist => '絵師';
+
+  @override
+  String get online_tagCopyright => '作品';
+
+  @override
+  String get online_tagCharacter => 'キャラクター';
+
+  @override
+  String get online_tagGeneral => '一般';
+
+  @override
+  String get online_tagMeta => 'メタ';
+
+  @override
+  String get online_copy => 'コピー';
+
+  @override
+  String get online_noSelection => 'カードをクリックすると Prompt とパラメータをここに表示';
+
+  @override
+  String online_detailError(Object error) {
+    return '詳細を読み込めませんでした：$error';
+  }
+
+  @override
+  String get online_retry => '再試行';
+
+  @override
+  String get online_noPrompt => 'この画像には Prompt がありません';
+
+  @override
+  String online_selCount(Object count) {
+    return '$count 枚選択中';
+  }
+
+  @override
+  String get online_selAll => 'すべて選択';
+
+  @override
+  String get online_selInvert => '選択を反転';
+
+  @override
+  String get online_favoriteTo => 'お気に入りに追加…';
+
+  @override
+  String get online_favoriteToTitle => '追加先';
+
+  @override
+  String get online_favoriteToSite => 'サイトのお気に入りへ';
+
+  @override
+  String online_downloadN(Object count) {
+    return 'ダウンロード · $count 枚';
+  }
+
+  @override
+  String get online_newCollectionAndFav => '新規コレクションに追加';
+
+  @override
+  String get online_collectionNameHint => 'コレクション名（Enter で確定）';
+
+  @override
+  String get online_exitMulti => '選択を終了';
+
+  @override
+  String get online_sendRemember => 'この選択を記憶';
+
+  @override
+  String get online_sendReplace => 'プロンプトを置換、キャラ枠をクリア';
+
+  @override
+  String online_sendReplaceDesc(Object count) {
+    return 'ポジ + ネガをこの画像のものに置換し、生成ページのキャラ枠 $count 個をクリア。以前のカードのボタンと同じ';
+  }
+
+  @override
+  String get online_sendReplaceDescNone =>
+      'ポジ + ネガをこの画像のものに置換し、キャラ枠をクリア。以前のカードのボタンと同じ';
+
+  @override
+  String get online_sendPromptOnly => 'プロンプトだけ置換、キャラ枠は残す';
+
+  @override
+  String get online_sendPromptOnlyDesc => '絵師タグと情景描写だけ借りたいときに';
+
+  @override
+  String get online_sendParams => 'プロンプト + 生成パラメータ';
+
+  @override
+  String get online_sendParamsDesc =>
+      'サイズ・シード・サンプラー・ステップ・CFG と画像内のキャラ枠も適用。ローカルギャラリーの「パラメータを再利用」と同じ';
+
+  @override
+  String get online_sendParamsUnavailable => 'この画像には生成パラメータがないため、プロンプトのみ送れます';
+
+  @override
+  String online_sendNote(Object count) {
+    return '生成ページの現在のポジ（$count 文字）は置き換わります';
+  }
+
+  @override
+  String get online_sendNoteEmpty => '生成ページのポジは空です';
+
+  @override
+  String get online_cancel => 'キャンセル';
+
+  @override
+  String get online_sendGo => '送って生成ページへ';
+
+  @override
+  String get online_blacklistDesc => '該当する作品は表示しません';
+
+  @override
+  String get online_blacklistAddHint => 'タグを追加（Enter で確定）';
+
+  @override
+  String online_blacklistSync(Object count) {
+    return 'Danbooru のブロックリストを同期 · $count 件';
+  }
+
+  @override
+  String get online_blacklistScope => '4 つのソースすべてに適用。AI TAG は作品タグで照合';
+
+  @override
+  String get online_blacklistEmpty => '除外タグはまだありません';
+
+  @override
+  String get online_removeTag => '削除';
+
+  @override
+  String online_appendError(Object page, Object reason) {
+    return '$page ページ目を読み込めませんでした：$reason';
+  }
+
+  @override
+  String get online_retryPage => 'このページを再試行';
+
+  @override
+  String online_end(Object count) {
+    return 'これで全部です · 計 $count 枚';
+  }
+
+  @override
+  String online_endBlocked(Object count, Object blocked) {
+    return 'これで全部です · 計 $count 枚 · $blocked 枚を除外';
+  }
+
+  @override
+  String online_emptyTitle(Object query) {
+    return '「$query」の作品は見つかりませんでした';
+  }
+
+  @override
+  String get online_emptyTitleNoQuery => '作品が見つかりませんでした';
+
+  @override
+  String get online_emptyHint => '条件をゆるめてみてください';
+
+  @override
+  String get online_sugNaiOff => '「NAI 画像のみ」を外す';
+
+  @override
+  String get online_sugClearPrompt => 'Prompt 条件をクリア';
+
+  @override
+  String get online_sugAllTime => '全期間にする';
+
+  @override
+  String get online_sugAllModels => 'モデルをすべてに';
+
+  @override
+  String get online_sugAllRatings => 'すべてのレーティング';
+
+  @override
+  String get online_sugNoDate => '期間指定を外す';
+
+  @override
+  String get online_favEmpty => 'まだお気に入りはありません';
+
+  @override
+  String get online_favEmptyHint => 'カードの ♡ で保存できます';
+
+  @override
+  String online_loadError(Object error) {
+    return '読み込めませんでした：$error';
+  }
+
+  @override
+  String get online_loginDbTitle => 'お気に入りを見るには Danbooru にログイン';
+
+  @override
+  String get online_loginDbDesc =>
+      'ユーザー名 + API Key でログインするとサイトと同期します。\nカードの ♡ もサイトに直接保存します';
+
+  @override
+  String get online_loginDb => 'Danbooru にログイン';
+
+  @override
+  String get online_loginGbTitle => 'お気に入りを見るには Gelbooru の API Key を設定';
+
+  @override
+  String get online_loginGbDesc => 'Gelbooru のお気に入りはここでは閲覧のみです';
+
+  @override
+  String get online_loginGb => 'API Key を設定';
+
+  @override
+  String get online_apiKeyHelp => 'API Key の取得方法';
+
+  @override
+  String get online_loginOther =>
+      'ログインしたくない場合：AI TAG のお気に入りは端末内に保存されアカウント不要。Gelbooru は閲覧のみ';
+
+  @override
+  String online_viewerPosition(
+    Object image,
+    Object images,
+    Object work,
+    Object works,
+  ) {
+    return '画像 $image / $images · 作品 $work / $works';
+  }
+
+  @override
+  String online_viewerWorkPosition(Object work, Object works) {
+    return '作品 $work / $works';
+  }
+
+  @override
+  String get online_close => '閉じる';
+
+  @override
+  String get online_keyImage => '画像を切り替え';
+
+  @override
+  String get online_keyWork => '前 / 次の作品';
+
+  @override
+  String get online_keyInfo => '情報欄の表示切替';
 }

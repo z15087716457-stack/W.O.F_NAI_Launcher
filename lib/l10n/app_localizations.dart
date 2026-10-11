@@ -23918,6 +23918,1169 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hold to show page numbers and press one to jump; release to hide'**
   String get navShell_ctrlHint;
+
+  /// No description provided for @online_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Gallery'**
+  String get online_title;
+
+  /// No description provided for @online_collapseSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse sidebar'**
+  String get online_collapseSidebar;
+
+  /// No description provided for @online_expandSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand sidebar'**
+  String get online_expandSidebar;
+
+  /// No description provided for @online_sectionBrowse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse'**
+  String get online_sectionBrowse;
+
+  /// No description provided for @online_modeSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get online_modeSearch;
+
+  /// No description provided for @online_modeMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get online_modeMonthly;
+
+  /// No description provided for @online_modePopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get online_modePopular;
+
+  /// No description provided for @online_modeMyFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'My favorites'**
+  String get online_modeMyFavorites;
+
+  /// No description provided for @online_modeFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get online_modeFavorites;
+
+  /// No description provided for @online_noRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'No ranking'**
+  String get online_noRanking;
+
+  /// No description provided for @online_noFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites'**
+  String get online_noFavorites;
+
+  /// No description provided for @online_readOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only'**
+  String get online_readOnly;
+
+  /// No description provided for @online_signedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out'**
+  String get online_signedOut;
+
+  /// No description provided for @online_recentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent searches'**
+  String get online_recentTitle;
+
+  /// No description provided for @online_recentClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get online_recentClear;
+
+  /// No description provided for @online_collections.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections'**
+  String get online_collections;
+
+  /// No description provided for @online_newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection'**
+  String get online_newCollection;
+
+  /// No description provided for @online_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get online_all;
+
+  /// No description provided for @online_ungrouped.
+  ///
+  /// In en, this message translates to:
+  /// **'Ungrouped'**
+  String get online_ungrouped;
+
+  /// No description provided for @online_favAuthors.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved artists'**
+  String get online_favAuthors;
+
+  /// No description provided for @online_blacklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocklist'**
+  String get online_blacklist;
+
+  /// No description provided for @online_blacklistCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tags blocked'**
+  String online_blacklistCount(Object count);
+
+  /// No description provided for @online_srcSubAiTag.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI community · full prompts'**
+  String get online_srcSubAiTag;
+
+  /// No description provided for @online_srcSubSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in · {name}'**
+  String online_srcSubSignedIn(Object name);
+
+  /// No description provided for @online_srcSubSafebooru.
+  ///
+  /// In en, this message translates to:
+  /// **'All ages · no sign-in'**
+  String get online_srcSubSafebooru;
+
+  /// No description provided for @online_srcSubKeyOk.
+  ///
+  /// In en, this message translates to:
+  /// **'API key set'**
+  String get online_srcSubKeyOk;
+
+  /// No description provided for @online_srcSubKeyInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'API key invalid'**
+  String get online_srcSubKeyInvalid;
+
+  /// No description provided for @online_srcSubKeyMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No API key'**
+  String get online_srcSubKeyMissing;
+
+  /// No description provided for @online_switchSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch source'**
+  String get online_switchSource;
+
+  /// No description provided for @online_capPromptSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Works + prompt search'**
+  String get online_capPromptSearch;
+
+  /// No description provided for @online_capTagSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag search'**
+  String get online_capTagSearch;
+
+  /// No description provided for @online_capMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly ranking'**
+  String get online_capMonthly;
+
+  /// No description provided for @online_capRankings.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily / weekly / monthly'**
+  String get online_capRankings;
+
+  /// No description provided for @online_capLocalFav.
+  ///
+  /// In en, this message translates to:
+  /// **'Local favorites'**
+  String get online_capLocalFav;
+
+  /// No description provided for @online_capSiteFav.
+  ///
+  /// In en, this message translates to:
+  /// **'Site favorites'**
+  String get online_capSiteFav;
+
+  /// No description provided for @online_capReadOnlyFav.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites (read-only)'**
+  String get online_capReadOnlyFav;
+
+  /// No description provided for @online_capMultiMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-image works'**
+  String get online_capMultiMedia;
+
+  /// No description provided for @online_capParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation parameters'**
+  String get online_capParams;
+
+  /// No description provided for @online_capRatings.
+  ///
+  /// In en, this message translates to:
+  /// **'Ratings'**
+  String get online_capRatings;
+
+  /// No description provided for @online_capSfwOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'All ages only'**
+  String get online_capSfwOnly;
+
+  /// No description provided for @online_acctNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No sign-in'**
+  String get online_acctNone;
+
+  /// No description provided for @online_acctSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in'**
+  String get online_acctSignedIn;
+
+  /// No description provided for @online_acctKeyOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Key set'**
+  String get online_acctKeyOk;
+
+  /// No description provided for @online_acctKeyInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Key invalid'**
+  String get online_acctKeyInvalid;
+
+  /// No description provided for @online_acctKeyMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No key'**
+  String get online_acctKeyMissing;
+
+  /// No description provided for @online_sourceMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Each source keeps its own search and scroll position'**
+  String get online_sourceMemory;
+
+  /// No description provided for @online_searchWorkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Works, artists, titles, tags or models'**
+  String get online_searchWorkHint;
+
+  /// No description provided for @online_searchPromptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt contains… (raw ::artist: syntax)'**
+  String get online_searchPromptHint;
+
+  /// No description provided for @online_searchTagHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tags, space-separated; prefix - to exclude'**
+  String get online_searchTagHint;
+
+  /// No description provided for @online_searchFavHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find in favorites: title, artist, tag'**
+  String get online_searchFavHint;
+
+  /// No description provided for @online_fuzzy.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuzzy'**
+  String get online_fuzzy;
+
+  /// No description provided for @online_clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get online_clearSearch;
+
+  /// No description provided for @online_sizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small cards (no captions)'**
+  String get online_sizeSmall;
+
+  /// No description provided for @online_sizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'M'**
+  String get online_sizeMedium;
+
+  /// No description provided for @online_sizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get online_sizeLarge;
+
+  /// No description provided for @online_multiSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get online_multiSelect;
+
+  /// No description provided for @online_doneMultiSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get online_doneMultiSelect;
+
+  /// No description provided for @online_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get online_refresh;
+
+  /// No description provided for @online_inspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspector'**
+  String get online_inspector;
+
+  /// No description provided for @online_naiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI images only'**
+  String get online_naiOnly;
+
+  /// No description provided for @online_model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get online_model;
+
+  /// No description provided for @online_modelAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get online_modelAll;
+
+  /// No description provided for @online_timeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get online_timeAll;
+
+  /// No description provided for @online_timeYear.
+  ///
+  /// In en, this message translates to:
+  /// **'{year}'**
+  String online_timeYear(Object year);
+
+  /// No description provided for @online_timeOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'Older archive'**
+  String get online_timeOlder;
+
+  /// No description provided for @online_loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} loaded · {pages} pages'**
+  String online_loaded(Object count, Object pages);
+
+  /// No description provided for @online_rankLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Top 1–{count} · {count} loaded'**
+  String online_rankLoaded(Object count);
+
+  /// No description provided for @online_jumpToPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to page…'**
+  String get online_jumpToPage;
+
+  /// No description provided for @online_jumpGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get online_jumpGo;
+
+  /// No description provided for @online_ratingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get online_ratingLabel;
+
+  /// No description provided for @online_ratingG.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get online_ratingG;
+
+  /// No description provided for @online_ratingS.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensitive'**
+  String get online_ratingS;
+
+  /// No description provided for @online_ratingQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Questionable'**
+  String get online_ratingQ;
+
+  /// No description provided for @online_ratingE.
+  ///
+  /// In en, this message translates to:
+  /// **'Explicit'**
+  String get online_ratingE;
+
+  /// No description provided for @online_dateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Date range'**
+  String get online_dateRange;
+
+  /// No description provided for @online_clearDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Any date'**
+  String get online_clearDateRange;
+
+  /// No description provided for @online_rankCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Live monthly'**
+  String get online_rankCurrent;
+
+  /// No description provided for @online_rankDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get online_rankDay;
+
+  /// No description provided for @online_rankWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get online_rankWeek;
+
+  /// No description provided for @online_rankMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get online_rankMonth;
+
+  /// No description provided for @online_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get online_today;
+
+  /// No description provided for @online_previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get online_previous;
+
+  /// No description provided for @online_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get online_next;
+
+  /// No description provided for @online_sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get online_sort;
+
+  /// No description provided for @online_sortFavTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date saved'**
+  String get online_sortFavTime;
+
+  /// No description provided for @online_favAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All favorites'**
+  String get online_favAll;
+
+  /// No description provided for @online_countImages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String online_countImages(Object count);
+
+  /// No description provided for @online_authorSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} saved · artist saved {date}'**
+  String online_authorSaved(Object count, Object date);
+
+  /// No description provided for @online_authorAllWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'All works on AI TAG'**
+  String get online_authorAllWorks;
+
+  /// No description provided for @online_unfavAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove artist'**
+  String get online_unfavAuthor;
+
+  /// No description provided for @online_favAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Save artist'**
+  String get online_favAuthor;
+
+  /// No description provided for @online_dragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag cards onto a collection to move them; right-click → Move / Unfavorite'**
+  String get online_dragHint;
+
+  /// No description provided for @online_readOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only: edit Gelbooru favorites on the site'**
+  String get online_readOnlyNote;
+
+  /// No description provided for @online_returnPrev.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to previous results'**
+  String get online_returnPrev;
+
+  /// No description provided for @online_send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to Generate'**
+  String get online_send;
+
+  /// No description provided for @online_sendTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Send tags to Generate'**
+  String get online_sendTags;
+
+  /// No description provided for @online_sendModes.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how to send'**
+  String get online_sendModes;
+
+  /// No description provided for @online_favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get online_favorite;
+
+  /// No description provided for @online_favorited.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorited'**
+  String get online_favorited;
+
+  /// No description provided for @online_copyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy prompt'**
+  String get online_copyPrompt;
+
+  /// No description provided for @online_copyTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy tags'**
+  String get online_copyTags;
+
+  /// No description provided for @online_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get online_download;
+
+  /// No description provided for @online_downloadAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Download all {count}'**
+  String online_downloadAll(Object count);
+
+  /// No description provided for @online_downloadCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Download this image'**
+  String get online_downloadCurrent;
+
+  /// No description provided for @online_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get online_more;
+
+  /// No description provided for @online_openInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on site'**
+  String get online_openInBrowser;
+
+  /// No description provided for @online_onlyAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this artist'**
+  String get online_onlyAuthor;
+
+  /// No description provided for @online_moveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to collection'**
+  String get online_moveTo;
+
+  /// No description provided for @online_unfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite'**
+  String get online_unfavorite;
+
+  /// No description provided for @online_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get online_rename;
+
+  /// No description provided for @online_deleteCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete collection'**
+  String get online_deleteCollection;
+
+  /// No description provided for @online_inspWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get online_inspWork;
+
+  /// No description provided for @online_inspPost.
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get online_inspPost;
+
+  /// No description provided for @online_youSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'You saved {count} of theirs'**
+  String online_youSaved(Object count);
+
+  /// No description provided for @online_params.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters'**
+  String get online_params;
+
+  /// No description provided for @online_pModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get online_pModel;
+
+  /// No description provided for @online_pSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get online_pSize;
+
+  /// No description provided for @online_pSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get online_pSeed;
+
+  /// No description provided for @online_pSampler.
+  ///
+  /// In en, this message translates to:
+  /// **'Sampler'**
+  String get online_pSampler;
+
+  /// No description provided for @online_pStepsCfg.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps · CFG'**
+  String get online_pStepsCfg;
+
+  /// No description provided for @online_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get online_prompt;
+
+  /// No description provided for @online_negative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative'**
+  String get online_negative;
+
+  /// No description provided for @online_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get online_tags;
+
+  /// No description provided for @online_tagsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to add to search'**
+  String get online_tagsHint;
+
+  /// No description provided for @online_tagArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist'**
+  String get online_tagArtist;
+
+  /// No description provided for @online_tagCopyright.
+  ///
+  /// In en, this message translates to:
+  /// **'Copyright'**
+  String get online_tagCopyright;
+
+  /// No description provided for @online_tagCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Character'**
+  String get online_tagCharacter;
+
+  /// No description provided for @online_tagGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get online_tagGeneral;
+
+  /// No description provided for @online_tagMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Meta'**
+  String get online_tagMeta;
+
+  /// No description provided for @online_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get online_copy;
+
+  /// No description provided for @online_noSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a card to see its prompt and parameters here'**
+  String get online_noSelection;
+
+  /// No description provided for @online_detailError.
+  ///
+  /// In en, this message translates to:
+  /// **'Details failed to load: {error}'**
+  String online_detailError(Object error);
+
+  /// No description provided for @online_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get online_retry;
+
+  /// No description provided for @online_noPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'This image has no prompt'**
+  String get online_noPrompt;
+
+  /// No description provided for @online_selCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String online_selCount(Object count);
+
+  /// No description provided for @online_selAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get online_selAll;
+
+  /// No description provided for @online_selInvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Invert'**
+  String get online_selInvert;
+
+  /// No description provided for @online_favoriteTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite to…'**
+  String get online_favoriteTo;
+
+  /// No description provided for @online_favoriteToTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite to'**
+  String get online_favoriteToTitle;
+
+  /// No description provided for @online_favoriteToSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite on site'**
+  String get online_favoriteToSite;
+
+  /// No description provided for @online_downloadN.
+  ///
+  /// In en, this message translates to:
+  /// **'Download · {count} images'**
+  String online_downloadN(Object count);
+
+  /// No description provided for @online_newCollectionAndFav.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection and favorite'**
+  String get online_newCollectionAndFav;
+
+  /// No description provided for @online_collectionNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection name, Enter to confirm'**
+  String get online_collectionNameHint;
+
+  /// No description provided for @online_exitMulti.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit selection'**
+  String get online_exitMulti;
+
+  /// No description provided for @online_sendRemember.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember this choice'**
+  String get online_sendRemember;
+
+  /// No description provided for @online_sendReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace prompt, clear characters'**
+  String get online_sendReplace;
+
+  /// No description provided for @online_sendReplaceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive + negative are replaced; the {count} character boxes on Generate are cleared. Same as the old card button'**
+  String online_sendReplaceDesc(Object count);
+
+  /// No description provided for @online_sendReplaceDescNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive + negative are replaced; character boxes on Generate are cleared. Same as the old card button'**
+  String get online_sendReplaceDescNone;
+
+  /// No description provided for @online_sendPromptOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace prompt only, keep characters'**
+  String get online_sendPromptOnly;
+
+  /// No description provided for @online_sendPromptOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'For borrowing the artist mix and scene description'**
+  String get online_sendPromptOnlyDesc;
+
+  /// No description provided for @online_sendParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt + parameters'**
+  String get online_sendParams;
+
+  /// No description provided for @online_sendParamsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Also applies size, seed, sampler, steps, CFG and the image\'s characters, same as Reuse parameters in the local gallery'**
+  String get online_sendParamsDesc;
+
+  /// No description provided for @online_sendParamsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No parameters in this image; only the prompt can be sent'**
+  String get online_sendParamsUnavailable;
+
+  /// No description provided for @online_sendNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The current positive prompt ({count} chars) will be replaced'**
+  String online_sendNote(Object count);
+
+  /// No description provided for @online_sendNoteEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The positive prompt on Generate is empty'**
+  String get online_sendNoteEmpty;
+
+  /// No description provided for @online_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get online_cancel;
+
+  /// No description provided for @online_sendGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Send and open Generate'**
+  String get online_sendGo;
+
+  /// No description provided for @online_blacklistDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching works are hidden'**
+  String get online_blacklistDesc;
+
+  /// No description provided for @online_blacklistAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a tag, Enter to confirm'**
+  String get online_blacklistAddHint;
+
+  /// No description provided for @online_blacklistSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Danbooru blocklist · {count}'**
+  String online_blacklistSync(Object count);
+
+  /// No description provided for @online_blacklistScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to all four sources; AI TAG matches work tags'**
+  String get online_blacklistScope;
+
+  /// No description provided for @online_blacklistEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocked tags yet'**
+  String get online_blacklistEmpty;
+
+  /// No description provided for @online_removeTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get online_removeTag;
+
+  /// No description provided for @online_appendError.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} failed to load: {reason}'**
+  String online_appendError(Object page, Object reason);
+
+  /// No description provided for @online_retryPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry this page'**
+  String get online_retryPage;
+
+  /// No description provided for @online_end.
+  ///
+  /// In en, this message translates to:
+  /// **'End of results · {count} total'**
+  String online_end(Object count);
+
+  /// No description provided for @online_endBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'End of results · {count} total · {blocked} blocked'**
+  String online_endBlocked(Object count, Object blocked);
+
+  /// No description provided for @online_emptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No works found for “{query}”'**
+  String online_emptyTitle(Object query);
+
+  /// No description provided for @online_emptyTitleNoQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'No works found'**
+  String get online_emptyTitleNoQuery;
+
+  /// No description provided for @online_emptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try loosening these filters'**
+  String get online_emptyHint;
+
+  /// No description provided for @online_sugNaiOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off “NAI images only”'**
+  String get online_sugNaiOff;
+
+  /// No description provided for @online_sugClearPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear prompt filter'**
+  String get online_sugClearPrompt;
+
+  /// No description provided for @online_sugAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Use all time'**
+  String get online_sugAllTime;
+
+  /// No description provided for @online_sugAllModels.
+  ///
+  /// In en, this message translates to:
+  /// **'All models'**
+  String get online_sugAllModels;
+
+  /// No description provided for @online_sugAllRatings.
+  ///
+  /// In en, this message translates to:
+  /// **'All ratings'**
+  String get online_sugAllRatings;
+
+  /// No description provided for @online_sugNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove date range'**
+  String get online_sugNoDate;
+
+  /// No description provided for @online_favEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing saved here yet'**
+  String get online_favEmpty;
+
+  /// No description provided for @online_favEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click ♡ on a card to save it'**
+  String get online_favEmptyHint;
+
+  /// No description provided for @online_loadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load: {error}'**
+  String online_loadError(Object error);
+
+  /// No description provided for @online_loginDbTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Danbooru to see your favorites'**
+  String get online_loginDbTitle;
+
+  /// No description provided for @online_loginDbDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with username + API key; favorites sync with the site.\nClicking ♡ on a card also saves to the site'**
+  String get online_loginDbDesc;
+
+  /// No description provided for @online_loginDb.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Danbooru'**
+  String get online_loginDb;
+
+  /// No description provided for @online_loginGbTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a Gelbooru API key to see favorites'**
+  String get online_loginGbTitle;
+
+  /// No description provided for @online_loginGbDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Gelbooru favorites are read-only here'**
+  String get online_loginGbDesc;
+
+  /// No description provided for @online_loginGb.
+  ///
+  /// In en, this message translates to:
+  /// **'Set API key'**
+  String get online_loginGb;
+
+  /// No description provided for @online_apiKeyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to get an API key'**
+  String get online_apiKeyHelp;
+
+  /// No description provided for @online_loginOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Rather not sign in? AI TAG favorites stay on this device with no account; Gelbooru favorites are read-only'**
+  String get online_loginOther;
+
+  /// No description provided for @online_viewerPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Image {image} / {images} · Work {work} / {works}'**
+  String online_viewerPosition(
+    Object image,
+    Object images,
+    Object work,
+    Object works,
+  );
+
+  /// No description provided for @online_viewerWorkPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Work {work} / {works}'**
+  String online_viewerWorkPosition(Object work, Object works);
+
+  /// No description provided for @online_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get online_close;
+
+  /// No description provided for @online_keyImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch image'**
+  String get online_keyImage;
+
+  /// No description provided for @online_keyWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous / next work'**
+  String get online_keyWork;
+
+  /// No description provided for @online_keyInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle info'**
+  String get online_keyInfo;
 }
 
 class _AppLocalizationsDelegate

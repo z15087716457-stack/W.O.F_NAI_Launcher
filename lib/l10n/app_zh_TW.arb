@@ -7709,5 +7709,316 @@
   "navShell_ctrlNumbers": "按住 Ctrl 顯示頁面編號",
   "navShell_reset": "恢復預設",
   "navShell_done": "完成",
-  "navShell_ctrlHint": "按住不放：顯示頁面編號，按數字直接跳轉；鬆開就消失"
+  "navShell_ctrlHint": "按住不放：顯示頁面編號，按數字直接跳轉；鬆開就消失",
+  "online_title": "線上畫廊",
+  "online_collapseSidebar": "收起左欄",
+  "online_expandSidebar": "展開左欄",
+  "online_sectionBrowse": "瀏覽",
+  "online_modeSearch": "搜尋",
+  "online_modeMonthly": "月榜",
+  "online_modePopular": "熱門",
+  "online_modeMyFavorites": "我的收藏",
+  "online_modeFavorites": "收藏",
+  "online_noRanking": "沒有排行",
+  "online_noFavorites": "不支援收藏",
+  "online_readOnly": "只讀",
+  "online_signedOut": "未登入",
+  "online_recentTitle": "最近搜尋",
+  "online_recentClear": "清除",
+  "online_collections": "子集",
+  "online_newCollection": "新增子集",
+  "online_all": "全部",
+  "online_ungrouped": "未分組",
+  "online_favAuthors": "收藏的作者",
+  "online_blacklist": "黑名單",
+  "online_blacklistCount": "遮蔽 {count} 個標籤",
+  "@online_blacklistCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_srcSubAiTag": "NAI 作品社群 · 帶完整 Prompt",
+  "online_srcSubSignedIn": "已登入 · {name}",
+  "@online_srcSubSignedIn": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "online_srcSubSafebooru": "全年齡 · 不用登入",
+  "online_srcSubKeyOk": "API Key 已配置",
+  "online_srcSubKeyInvalid": "API Key 無效",
+  "online_srcSubKeyMissing": "未配置 API Key",
+  "online_switchSource": "換來源",
+  "online_capPromptSearch": "搜尋作品 + Prompt",
+  "online_capTagSearch": "標籤搜尋",
+  "online_capMonthly": "月榜",
+  "online_capRankings": "日 / 周 / 月榜",
+  "online_capLocalFav": "本地收藏",
+  "online_capSiteFav": "網站收藏",
+  "online_capReadOnlyFav": "收藏（只讀）",
+  "online_capMultiMedia": "多圖作品",
+  "online_capParams": "生成參數",
+  "online_capRatings": "評級",
+  "online_capSfwOnly": "只有全年齡",
+  "online_acctNone": "不用登入",
+  "online_acctSignedIn": "已登入",
+  "online_acctKeyOk": "Key 已配置",
+  "online_acctKeyInvalid": "Key 無效",
+  "online_acctKeyMissing": "未配置 Key",
+  "online_sourceMemory": "每個來源記住自己的搜尋詞和滾動位置",
+  "online_searchWorkHint": "作品、作者、標題、標籤或模型",
+  "online_searchPromptHint": "Prompt 含有…（支援 ::artist: 原始語法）",
+  "online_searchTagHint": "加標籤，空格分隔，前面加 - 是排除",
+  "online_searchFavHint": "在收藏裡找：標題、作者、標籤",
+  "online_fuzzy": "模糊匹配",
+  "online_clearSearch": "清空搜尋",
+  "online_sizeSmall": "小卡片（不顯示標題）",
+  "online_sizeMedium": "中",
+  "online_sizeLarge": "大",
+  "online_multiSelect": "多選",
+  "online_doneMultiSelect": "完成多選",
+  "online_refresh": "重新整理",
+  "online_inspector": "檢查器",
+  "online_naiOnly": "僅 NAI 圖片",
+  "online_model": "模型",
+  "online_modelAll": "全部",
+  "online_timeAll": "全部時間",
+  "online_timeYear": "{year} 年",
+  "@online_timeYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
+  "online_timeOlder": "更早歸檔",
+  "online_loaded": "已載入 {count} 張 · {pages} 頁",
+  "@online_loaded": {
+    "placeholders": {
+      "count": {},
+      "pages": {}
+    }
+  },
+  "online_rankLoaded": "第 1–{count} 名 · 已載入 {count} 張",
+  "@online_rankLoaded": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_jumpToPage": "跳到頁…",
+  "online_jumpGo": "跳轉",
+  "online_ratingLabel": "評級",
+  "online_ratingG": "全年齡",
+  "online_ratingS": "輕微",
+  "online_ratingQ": "敏感",
+  "online_ratingE": "露骨",
+  "online_dateRange": "日期範圍",
+  "online_clearDateRange": "不限日期",
+  "online_rankCurrent": "即時月榜",
+  "online_rankDay": "日榜",
+  "online_rankWeek": "周榜",
+  "online_rankMonth": "月榜",
+  "online_today": "今天",
+  "online_previous": "上一個",
+  "online_next": "下一個",
+  "online_sort": "排序",
+  "online_sortFavTime": "收藏時間",
+  "online_favAll": "全部收藏",
+  "online_countImages": "{count} 張",
+  "@online_countImages": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_authorSaved": "收藏了 {count} 張 · 收藏作者於 {date}",
+  "@online_authorSaved": {
+    "placeholders": {
+      "count": {},
+      "date": {}
+    }
+  },
+  "online_authorAllWorks": "在 AI TAG 看 TA 的全部作品",
+  "online_unfavAuthor": "取消收藏作者",
+  "online_favAuthor": "收藏作者",
+  "online_dragHint": "把卡片拖到左邊的子集就是移動；右鍵 → 移到子集 / 取消收藏",
+  "online_readOnlyNote": "只讀：Gelbooru 收藏只能看，要在網站上改",
+  "online_returnPrev": "返回之前的結果",
+  "online_send": "傳送到生圖",
+  "online_sendTags": "傳送標籤到生圖",
+  "online_sendModes": "選擇傳送方式",
+  "online_favorite": "收藏",
+  "online_favorited": "已收藏",
+  "online_copyPrompt": "複製 Prompt",
+  "online_copyTags": "複製標籤",
+  "online_download": "下載",
+  "online_downloadAll": "下載全部 {count} 張",
+  "@online_downloadAll": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_downloadCurrent": "只下載這一張",
+  "online_more": "更多",
+  "online_openInBrowser": "在網站開啟",
+  "online_onlyAuthor": "只看 TA",
+  "online_moveTo": "移到子集",
+  "online_unfavorite": "取消收藏",
+  "online_rename": "重新命名",
+  "online_deleteCollection": "刪除子集",
+  "online_inspWork": "作品",
+  "online_inspPost": "帖子",
+  "online_youSaved": "你收藏了 TA {count} 張",
+  "@online_youSaved": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_params": "生成參數",
+  "online_pModel": "模型",
+  "online_pSize": "尺寸",
+  "online_pSeed": "種子",
+  "online_pSampler": "取樣器",
+  "online_pStepsCfg": "步數 · 引導",
+  "online_prompt": "提示詞",
+  "online_negative": "負面",
+  "online_tags": "標籤",
+  "online_tagsHint": "點一下加入搜尋",
+  "online_tagArtist": "畫師",
+  "online_tagCopyright": "作品",
+  "online_tagCharacter": "角色",
+  "online_tagGeneral": "一般",
+  "online_tagMeta": "元標籤",
+  "online_copy": "複製",
+  "online_noSelection": "單擊一張卡片，在這裡看 Prompt 和生成參數",
+  "online_detailError": "詳情沒加載出來：{error}",
+  "@online_detailError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "online_retry": "重試",
+  "online_noPrompt": "這張圖沒有 Prompt",
+  "online_selCount": "已選 {count} 張",
+  "@online_selCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_selAll": "全選",
+  "online_selInvert": "反選",
+  "online_favoriteTo": "收藏到…",
+  "online_favoriteToTitle": "收藏到",
+  "online_favoriteToSite": "收藏到網站",
+  "online_downloadN": "下載 · {count} 張圖",
+  "@online_downloadN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_newCollectionAndFav": "新增子集並收藏",
+  "online_collectionNameHint": "子集名稱，回車確認",
+  "online_exitMulti": "退出多選",
+  "online_sendRemember": "記住這次的選擇",
+  "online_sendReplace": "替換提示詞，清空角色框",
+  "online_sendReplaceDesc": "正向 + 負面換成這張圖的；生圖頁現有的 {count} 個角色框清空。和以前卡片上的傳送按鈕一樣",
+  "@online_sendReplaceDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_sendReplaceDescNone": "正向 + 負面換成這張圖的；生圖頁的角色框清空。和以前卡片上的傳送按鈕一樣",
+  "online_sendPromptOnly": "只替換提示詞，保留角色框",
+  "online_sendPromptOnlyDesc": "適合只想借畫師串和畫面描述",
+  "online_sendParams": "提示詞 + 生成參數",
+  "online_sendParamsDesc": "再套用尺寸、種子、取樣器、步數、引導和圖裡的角色框，和本地圖庫“複用參數”同一條鏈",
+  "online_sendParamsUnavailable": "這張圖沒有生成參數，只能傳送提示詞",
+  "online_sendNote": "生圖頁現在的正向有 {count} 字，會被替換",
+  "@online_sendNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_sendNoteEmpty": "生圖頁現在的正向是空的",
+  "online_cancel": "取消",
+  "online_sendGo": "傳送並去生圖頁",
+  "online_blacklistDesc": "命中的作品直接不顯示",
+  "online_blacklistAddHint": "加標籤，回車確認",
+  "online_blacklistSync": "同步 Danbooru 帳號黑名單 · {count} 個",
+  "@online_blacklistSync": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_blacklistScope": "對四個來源都生效；AI TAG 按作品標籤匹配",
+  "online_blacklistEmpty": "還沒有遮蔽的標籤",
+  "online_removeTag": "刪除",
+  "online_appendError": "第 {page} 頁沒加載出來：{reason}",
+  "@online_appendError": {
+    "placeholders": {
+      "page": {},
+      "reason": {}
+    }
+  },
+  "online_retryPage": "重試這一頁",
+  "online_end": "已經到底了 · 共 {count} 張",
+  "@online_end": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "online_endBlocked": "已經到底了 · 共 {count} 張 · 黑名單擋掉 {blocked} 張",
+  "@online_endBlocked": {
+    "placeholders": {
+      "count": {},
+      "blocked": {}
+    }
+  },
+  "online_emptyTitle": "沒有找到 “{query}” 的作品",
+  "@online_emptyTitle": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "online_emptyTitleNoQuery": "沒有找到作品",
+  "online_emptyHint": "試試放寬下面這些條件",
+  "online_sugNaiOff": "去掉“僅 NAI 圖片”",
+  "online_sugClearPrompt": "清空 Prompt 條件",
+  "online_sugAllTime": "換成全部時間",
+  "online_sugAllModels": "模型改成全部",
+  "online_sugAllRatings": "評級全選",
+  "online_sugNoDate": "去掉日期範圍",
+  "online_favEmpty": "這裡還沒有收藏",
+  "online_favEmptyHint": "在卡片上點 ♡ 就能收藏",
+  "online_loadError": "沒加載出來：{error}",
+  "@online_loadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "online_loginDbTitle": "登入 Danbooru 後才能看你的收藏",
+  "online_loginDbDesc": "用使用者名稱 + API Key 登入，收藏會和網站同步；\n在卡片上點 ♡ 也是直接收藏到網站",
+  "online_loginDb": "登入 Danbooru",
+  "online_loginGbTitle": "配置 Gelbooru API Key 後才能看收藏",
+  "online_loginGbDesc": "Gelbooru 收藏只能看，不能在這裡改",
+  "online_loginGb": "配置 API Key",
+  "online_apiKeyHelp": "去哪裡拿 API Key",
+  "online_loginOther": "不想登入？AI TAG 的收藏存在本機，不要帳號；Gelbooru 收藏只能看不能改",
+  "online_viewerPosition": "圖 {image} / {images} · 作品 {work} / {works}",
+  "@online_viewerPosition": {
+    "placeholders": {
+      "image": {},
+      "images": {},
+      "work": {},
+      "works": {}
+    }
+  },
+  "online_viewerWorkPosition": "作品 {work} / {works}",
+  "@online_viewerWorkPosition": {
+    "placeholders": {
+      "work": {},
+      "works": {}
+    }
+  },
+  "online_close": "關閉",
+  "online_keyImage": "這一組裡切圖",
+  "online_keyWork": "上一個 / 下一個作品",
+  "online_keyInfo": "收起資訊欄"
 }

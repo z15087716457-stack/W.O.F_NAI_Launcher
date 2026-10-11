@@ -64,6 +64,17 @@ class _UiPopoverState extends State<UiPopover> {
   }
 
   @override
+  void didUpdateWidget(covariant UiPopover oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 再次打开时提到最上层（多个浮层宿主、或大图查看器也在浮层里时，后打开的在上面）。
+    if (oldWidget.anchor == null && widget.anchor != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _portal.show();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return OverlayPortal(
       controller: _portal,

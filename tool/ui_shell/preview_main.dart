@@ -1,6 +1,6 @@
 // 新界面预览：不接后端，用假数据驱动，能切状态 / 主题 / 语言。
 // 运行：flutter run -d windows -t tool/ui_shell/preview_main.dart
-// 主导航包着页面：切到“统计”显示统计页，其他页显示占位。
+// 主导航包着页面：切到“统计”显示统计页，“在线画廊”显示在线画廊（本地模拟器驱动），其他页显示占位。
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,9 +10,12 @@ import 'package:nai_launcher/presentation/ui/nav/nav_contract.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_fixture.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_labels.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_shell.dart';
+import 'package:nai_launcher/presentation/ui/online/online_page.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_contract.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_fixture.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_page.dart';
+
+import 'online_preview.dart';
 
 void main() => runApp(const _PreviewApp());
 
@@ -33,7 +36,7 @@ class _PreviewAppState extends State<_PreviewApp> {
   String? _lastAction;
 
   // 主导航
-  var _page = NavPage.statistics;
+  var _page = NavPage.onlineGallery;
   var _gen = _Gen.idle;
   var _tasks = false;
   var _pinned = false;
@@ -50,6 +53,17 @@ class _PreviewAppState extends State<_PreviewApp> {
   var _range = StatsRange.all;
   var _naiOnly = false;
   var _refreshing = false;
+
+  // 在线画廊
+  late final _online = OnlinePreviewSim(log: _log)..addListener(_rebuild);
+
+  void _rebuild() => setState(() {});
+
+  @override
+  void dispose() {
+    _online.dispose();
+    super.dispose();
+  }
 
   void _log(String s) => setState(() => _lastAction = s);
 
@@ -225,6 +239,12 @@ class _PreviewAppState extends State<_PreviewApp> {
                       _Scene.values,
                       (s) => setState(() => _scene = s),
                     ),
+                    const Text('在线画廊：'),
+                    _dropdown(
+                      _online.scene,
+                      OnlineScene.values,
+                      (s) => setState(() => _online.scene = s),
+                    ),
                     if (_lastAction != null)
                       Text(_lastAction!, style: const TextStyle(fontSize: 12)),
                   ],
@@ -235,9 +255,17 @@ class _PreviewAppState extends State<_PreviewApp> {
               child: NavShell(
                 data: _nav,
                 actions: _navActions,
-                child: _page == NavPage.statistics
-                    ? StatisticsPage(data: _stats, actions: _statsActions)
-                    : _Placeholder(page: _page),
+                child: switch (_page) {
+                  NavPage.statistics => StatisticsPage(
+                    data: _stats,
+                    actions: _statsActions,
+                  ),
+                  NavPage.onlineGallery => OnlineGalleryPage(
+                    data: _online.data,
+                    actions: _online.actions,
+                  ),
+                  _ => _Placeholder(page: _page),
+                },
               ),
             ),
           ],

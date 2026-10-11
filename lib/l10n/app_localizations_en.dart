@@ -13801,4 +13801,645 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get navShell_ctrlHint =>
       'Hold to show page numbers and press one to jump; release to hide';
+
+  @override
+  String get online_title => 'Online Gallery';
+
+  @override
+  String get online_collapseSidebar => 'Collapse sidebar';
+
+  @override
+  String get online_expandSidebar => 'Expand sidebar';
+
+  @override
+  String get online_sectionBrowse => 'Browse';
+
+  @override
+  String get online_modeSearch => 'Search';
+
+  @override
+  String get online_modeMonthly => 'Monthly';
+
+  @override
+  String get online_modePopular => 'Popular';
+
+  @override
+  String get online_modeMyFavorites => 'My favorites';
+
+  @override
+  String get online_modeFavorites => 'Favorites';
+
+  @override
+  String get online_noRanking => 'No ranking';
+
+  @override
+  String get online_noFavorites => 'No favorites';
+
+  @override
+  String get online_readOnly => 'Read-only';
+
+  @override
+  String get online_signedOut => 'Signed out';
+
+  @override
+  String get online_recentTitle => 'Recent searches';
+
+  @override
+  String get online_recentClear => 'Clear';
+
+  @override
+  String get online_collections => 'Collections';
+
+  @override
+  String get online_newCollection => 'New collection';
+
+  @override
+  String get online_all => 'All';
+
+  @override
+  String get online_ungrouped => 'Ungrouped';
+
+  @override
+  String get online_favAuthors => 'Saved artists';
+
+  @override
+  String get online_blacklist => 'Blocklist';
+
+  @override
+  String online_blacklistCount(Object count) {
+    return '$count tags blocked';
+  }
+
+  @override
+  String get online_srcSubAiTag => 'NAI community · full prompts';
+
+  @override
+  String online_srcSubSignedIn(Object name) {
+    return 'Signed in · $name';
+  }
+
+  @override
+  String get online_srcSubSafebooru => 'All ages · no sign-in';
+
+  @override
+  String get online_srcSubKeyOk => 'API key set';
+
+  @override
+  String get online_srcSubKeyInvalid => 'API key invalid';
+
+  @override
+  String get online_srcSubKeyMissing => 'No API key';
+
+  @override
+  String get online_switchSource => 'Switch source';
+
+  @override
+  String get online_capPromptSearch => 'Works + prompt search';
+
+  @override
+  String get online_capTagSearch => 'Tag search';
+
+  @override
+  String get online_capMonthly => 'Monthly ranking';
+
+  @override
+  String get online_capRankings => 'Daily / weekly / monthly';
+
+  @override
+  String get online_capLocalFav => 'Local favorites';
+
+  @override
+  String get online_capSiteFav => 'Site favorites';
+
+  @override
+  String get online_capReadOnlyFav => 'Favorites (read-only)';
+
+  @override
+  String get online_capMultiMedia => 'Multi-image works';
+
+  @override
+  String get online_capParams => 'Generation parameters';
+
+  @override
+  String get online_capRatings => 'Ratings';
+
+  @override
+  String get online_capSfwOnly => 'All ages only';
+
+  @override
+  String get online_acctNone => 'No sign-in';
+
+  @override
+  String get online_acctSignedIn => 'Signed in';
+
+  @override
+  String get online_acctKeyOk => 'Key set';
+
+  @override
+  String get online_acctKeyInvalid => 'Key invalid';
+
+  @override
+  String get online_acctKeyMissing => 'No key';
+
+  @override
+  String get online_sourceMemory =>
+      'Each source keeps its own search and scroll position';
+
+  @override
+  String get online_searchWorkHint => 'Works, artists, titles, tags or models';
+
+  @override
+  String get online_searchPromptHint =>
+      'Prompt contains… (raw ::artist: syntax)';
+
+  @override
+  String get online_searchTagHint =>
+      'Add tags, space-separated; prefix - to exclude';
+
+  @override
+  String get online_searchFavHint => 'Find in favorites: title, artist, tag';
+
+  @override
+  String get online_fuzzy => 'Fuzzy';
+
+  @override
+  String get online_clearSearch => 'Clear search';
+
+  @override
+  String get online_sizeSmall => 'Small cards (no captions)';
+
+  @override
+  String get online_sizeMedium => 'M';
+
+  @override
+  String get online_sizeLarge => 'L';
+
+  @override
+  String get online_multiSelect => 'Select';
+
+  @override
+  String get online_doneMultiSelect => 'Done';
+
+  @override
+  String get online_refresh => 'Refresh';
+
+  @override
+  String get online_inspector => 'Inspector';
+
+  @override
+  String get online_naiOnly => 'NAI images only';
+
+  @override
+  String get online_model => 'Model';
+
+  @override
+  String get online_modelAll => 'All';
+
+  @override
+  String get online_timeAll => 'All time';
+
+  @override
+  String online_timeYear(Object year) {
+    return '$year';
+  }
+
+  @override
+  String get online_timeOlder => 'Older archive';
+
+  @override
+  String online_loaded(Object count, Object pages) {
+    return '$count loaded · $pages pages';
+  }
+
+  @override
+  String online_rankLoaded(Object count) {
+    return 'Top 1–$count · $count loaded';
+  }
+
+  @override
+  String get online_jumpToPage => 'Go to page…';
+
+  @override
+  String get online_jumpGo => 'Go';
+
+  @override
+  String get online_ratingLabel => 'Rating';
+
+  @override
+  String get online_ratingG => 'General';
+
+  @override
+  String get online_ratingS => 'Sensitive';
+
+  @override
+  String get online_ratingQ => 'Questionable';
+
+  @override
+  String get online_ratingE => 'Explicit';
+
+  @override
+  String get online_dateRange => 'Date range';
+
+  @override
+  String get online_clearDateRange => 'Any date';
+
+  @override
+  String get online_rankCurrent => 'Live monthly';
+
+  @override
+  String get online_rankDay => 'Daily';
+
+  @override
+  String get online_rankWeek => 'Weekly';
+
+  @override
+  String get online_rankMonth => 'Monthly';
+
+  @override
+  String get online_today => 'Today';
+
+  @override
+  String get online_previous => 'Previous';
+
+  @override
+  String get online_next => 'Next';
+
+  @override
+  String get online_sort => 'Sort';
+
+  @override
+  String get online_sortFavTime => 'Date saved';
+
+  @override
+  String get online_favAll => 'All favorites';
+
+  @override
+  String online_countImages(Object count) {
+    return '$count';
+  }
+
+  @override
+  String online_authorSaved(Object count, Object date) {
+    return '$count saved · artist saved $date';
+  }
+
+  @override
+  String get online_authorAllWorks => 'All works on AI TAG';
+
+  @override
+  String get online_unfavAuthor => 'Remove artist';
+
+  @override
+  String get online_favAuthor => 'Save artist';
+
+  @override
+  String get online_dragHint =>
+      'Drag cards onto a collection to move them; right-click → Move / Unfavorite';
+
+  @override
+  String get online_readOnlyNote =>
+      'Read-only: edit Gelbooru favorites on the site';
+
+  @override
+  String get online_returnPrev => 'Back to previous results';
+
+  @override
+  String get online_send => 'Send to Generate';
+
+  @override
+  String get online_sendTags => 'Send tags to Generate';
+
+  @override
+  String get online_sendModes => 'Choose how to send';
+
+  @override
+  String get online_favorite => 'Favorite';
+
+  @override
+  String get online_favorited => 'Favorited';
+
+  @override
+  String get online_copyPrompt => 'Copy prompt';
+
+  @override
+  String get online_copyTags => 'Copy tags';
+
+  @override
+  String get online_download => 'Download';
+
+  @override
+  String online_downloadAll(Object count) {
+    return 'Download all $count';
+  }
+
+  @override
+  String get online_downloadCurrent => 'Download this image';
+
+  @override
+  String get online_more => 'More';
+
+  @override
+  String get online_openInBrowser => 'Open on site';
+
+  @override
+  String get online_onlyAuthor => 'Only this artist';
+
+  @override
+  String get online_moveTo => 'Move to collection';
+
+  @override
+  String get online_unfavorite => 'Unfavorite';
+
+  @override
+  String get online_rename => 'Rename';
+
+  @override
+  String get online_deleteCollection => 'Delete collection';
+
+  @override
+  String get online_inspWork => 'Work';
+
+  @override
+  String get online_inspPost => 'Post';
+
+  @override
+  String online_youSaved(Object count) {
+    return 'You saved $count of theirs';
+  }
+
+  @override
+  String get online_params => 'Parameters';
+
+  @override
+  String get online_pModel => 'Model';
+
+  @override
+  String get online_pSize => 'Size';
+
+  @override
+  String get online_pSeed => 'Seed';
+
+  @override
+  String get online_pSampler => 'Sampler';
+
+  @override
+  String get online_pStepsCfg => 'Steps · CFG';
+
+  @override
+  String get online_prompt => 'Prompt';
+
+  @override
+  String get online_negative => 'Negative';
+
+  @override
+  String get online_tags => 'Tags';
+
+  @override
+  String get online_tagsHint => 'Click to add to search';
+
+  @override
+  String get online_tagArtist => 'Artist';
+
+  @override
+  String get online_tagCopyright => 'Copyright';
+
+  @override
+  String get online_tagCharacter => 'Character';
+
+  @override
+  String get online_tagGeneral => 'General';
+
+  @override
+  String get online_tagMeta => 'Meta';
+
+  @override
+  String get online_copy => 'Copy';
+
+  @override
+  String get online_noSelection =>
+      'Click a card to see its prompt and parameters here';
+
+  @override
+  String online_detailError(Object error) {
+    return 'Details failed to load: $error';
+  }
+
+  @override
+  String get online_retry => 'Retry';
+
+  @override
+  String get online_noPrompt => 'This image has no prompt';
+
+  @override
+  String online_selCount(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String get online_selAll => 'All';
+
+  @override
+  String get online_selInvert => 'Invert';
+
+  @override
+  String get online_favoriteTo => 'Favorite to…';
+
+  @override
+  String get online_favoriteToTitle => 'Favorite to';
+
+  @override
+  String get online_favoriteToSite => 'Favorite on site';
+
+  @override
+  String online_downloadN(Object count) {
+    return 'Download · $count images';
+  }
+
+  @override
+  String get online_newCollectionAndFav => 'New collection and favorite';
+
+  @override
+  String get online_collectionNameHint => 'Collection name, Enter to confirm';
+
+  @override
+  String get online_exitMulti => 'Exit selection';
+
+  @override
+  String get online_sendRemember => 'Remember this choice';
+
+  @override
+  String get online_sendReplace => 'Replace prompt, clear characters';
+
+  @override
+  String online_sendReplaceDesc(Object count) {
+    return 'Positive + negative are replaced; the $count character boxes on Generate are cleared. Same as the old card button';
+  }
+
+  @override
+  String get online_sendReplaceDescNone =>
+      'Positive + negative are replaced; character boxes on Generate are cleared. Same as the old card button';
+
+  @override
+  String get online_sendPromptOnly => 'Replace prompt only, keep characters';
+
+  @override
+  String get online_sendPromptOnlyDesc =>
+      'For borrowing the artist mix and scene description';
+
+  @override
+  String get online_sendParams => 'Prompt + parameters';
+
+  @override
+  String get online_sendParamsDesc =>
+      'Also applies size, seed, sampler, steps, CFG and the image\'s characters, same as Reuse parameters in the local gallery';
+
+  @override
+  String get online_sendParamsUnavailable =>
+      'No parameters in this image; only the prompt can be sent';
+
+  @override
+  String online_sendNote(Object count) {
+    return 'The current positive prompt ($count chars) will be replaced';
+  }
+
+  @override
+  String get online_sendNoteEmpty => 'The positive prompt on Generate is empty';
+
+  @override
+  String get online_cancel => 'Cancel';
+
+  @override
+  String get online_sendGo => 'Send and open Generate';
+
+  @override
+  String get online_blacklistDesc => 'Matching works are hidden';
+
+  @override
+  String get online_blacklistAddHint => 'Add a tag, Enter to confirm';
+
+  @override
+  String online_blacklistSync(Object count) {
+    return 'Sync Danbooru blocklist · $count';
+  }
+
+  @override
+  String get online_blacklistScope =>
+      'Applies to all four sources; AI TAG matches work tags';
+
+  @override
+  String get online_blacklistEmpty => 'No blocked tags yet';
+
+  @override
+  String get online_removeTag => 'Remove';
+
+  @override
+  String online_appendError(Object page, Object reason) {
+    return 'Page $page failed to load: $reason';
+  }
+
+  @override
+  String get online_retryPage => 'Retry this page';
+
+  @override
+  String online_end(Object count) {
+    return 'End of results · $count total';
+  }
+
+  @override
+  String online_endBlocked(Object count, Object blocked) {
+    return 'End of results · $count total · $blocked blocked';
+  }
+
+  @override
+  String online_emptyTitle(Object query) {
+    return 'No works found for “$query”';
+  }
+
+  @override
+  String get online_emptyTitleNoQuery => 'No works found';
+
+  @override
+  String get online_emptyHint => 'Try loosening these filters';
+
+  @override
+  String get online_sugNaiOff => 'Turn off “NAI images only”';
+
+  @override
+  String get online_sugClearPrompt => 'Clear prompt filter';
+
+  @override
+  String get online_sugAllTime => 'Use all time';
+
+  @override
+  String get online_sugAllModels => 'All models';
+
+  @override
+  String get online_sugAllRatings => 'All ratings';
+
+  @override
+  String get online_sugNoDate => 'Remove date range';
+
+  @override
+  String get online_favEmpty => 'Nothing saved here yet';
+
+  @override
+  String get online_favEmptyHint => 'Click ♡ on a card to save it';
+
+  @override
+  String online_loadError(Object error) {
+    return 'Failed to load: $error';
+  }
+
+  @override
+  String get online_loginDbTitle => 'Sign in to Danbooru to see your favorites';
+
+  @override
+  String get online_loginDbDesc =>
+      'Sign in with username + API key; favorites sync with the site.\nClicking ♡ on a card also saves to the site';
+
+  @override
+  String get online_loginDb => 'Sign in to Danbooru';
+
+  @override
+  String get online_loginGbTitle => 'Set a Gelbooru API key to see favorites';
+
+  @override
+  String get online_loginGbDesc => 'Gelbooru favorites are read-only here';
+
+  @override
+  String get online_loginGb => 'Set API key';
+
+  @override
+  String get online_apiKeyHelp => 'Where to get an API key';
+
+  @override
+  String get online_loginOther =>
+      'Rather not sign in? AI TAG favorites stay on this device with no account; Gelbooru favorites are read-only';
+
+  @override
+  String online_viewerPosition(
+    Object image,
+    Object images,
+    Object work,
+    Object works,
+  ) {
+    return 'Image $image / $images · Work $work / $works';
+  }
+
+  @override
+  String online_viewerWorkPosition(Object work, Object works) {
+    return 'Work $work / $works';
+  }
+
+  @override
+  String get online_close => 'Close';
+
+  @override
+  String get online_keyImage => 'Switch image';
+
+  @override
+  String get online_keyWork => 'Previous / next work';
+
+  @override
+  String get online_keyInfo => 'Toggle info';
 }

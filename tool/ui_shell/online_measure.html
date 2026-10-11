@@ -1,0 +1,71 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+// 在线画廊原型的元素位置（给 online_measure.py 出偏差表）。键名和 online_prototype_capture_test.dart 一致。
+const view=location.hash.slice(1);
+const f=document.getElementById('f');
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,300));
+  const R=e=>{const b=e.getBoundingClientRect();return [b.left,b.top,b.width,b.height]};
+  const m={}; const put=(k,e)=>{if(e) m[k]=R(e)};
+  const q=s=>d.querySelector(s), qa=s=>[...d.querySelectorAll(s)];
+  const text=(sel,t)=>qa(sel).find(e=>e.textContent.includes(t));
+  put('sidebar',q('.lnav')); put('source-card',q('.srcc')); put('blacklist',q('.lfoot'));
+  const modes=q('.lnav > .col'); if(modes) ['search','ranking','favorites'].forEach((n,i)=>put('mode-'+n,modes.children[i]));
+  const nav=q('.lnav'); if(nav){
+    const kids=[...nav.children]; let sec=null, ri=0;
+    for(const e of kids){
+      if(e.classList.contains('nsec')){ sec=e.textContent.trim(); continue; }
+      if(e.classList.contains('ni2') && sec && sec.startsWith('最近搜索')) put('recent-'+(ri++),e);
+    }
+    const cs=kids.filter(e=>e.classList.contains('ni2'));
+    const names=['*','','style','comp','color'];
+    let ci=0, ai=0; sec=null;
+    for(const e of kids){
+      if(e.classList.contains('nsec')){ sec=e.textContent.trim(); continue; }
+      if(!e.classList.contains('ni2')) continue;
+      if(sec&&sec.startsWith('子集')) put('collection-'+names[ci++],e);
+      if(sec&&sec.startsWith('收藏的作者')) put('author-'+(100+ai++),e);
+    }
+  }
+  const tb=q('.lmain > .ltb'); if(tb){ put('toolbar',tb); put('search',tb.querySelector('.sbox'));
+    put('card-size',tb.querySelector('.seg.sm')); put('rank-scale',tb.querySelector('.seg:not(.sm)'));
+    for(const b of tb.querySelectorAll('.btn')){ if(b.textContent.includes('完成多选')) put('multi-done',b); else if(b.textContent.includes('多选')) put('multi',b); }
+    put('refresh',tb.querySelector('.ib.bd')); put('inspector-toggle',tb.querySelector('.ib.on'));
+    const rd=[...tb.children].find(e=>e.textContent.includes('2026-10-05')); put('rank-date',rd);
+  }
+  const fr=q('.lmain > .lfr'); if(fr){
+    if(fr.style.height==='76px') put('author-header',fr); else put('filter-row',fr);
+    put('nai-only',[...fr.querySelectorAll('.fchip')].find(e=>e.textContent.includes('仅 NAI')));
+    put('model',fr.querySelector('.seg')); put('time-range',[...fr.querySelectorAll('.dd')].find(e=>e.textContent.includes('时间')&&!e.textContent.includes('排序')));
+    put('sort',[...fr.querySelectorAll('.dd')].find(e=>e.textContent.includes('排序')));
+    put('date-range',[...fr.querySelectorAll('.dd')].find(e=>e.textContent.includes('日期')));
+    put('loaded',fr.querySelector('.mono')); put('jump',fr.querySelector('.btn.gh'));
+    const rp=[...fr.children].find(e=>e.textContent.includes('实时月榜')); put('rank-periods',rp);
+    ['general','sensitive','questionable','explicit'].forEach((n,i)=>{const c=[...fr.querySelectorAll('.fchip')].filter(e=>e.querySelector('.rt'))[i]; put('rating-'+n,c)});
+  }
+  const booru=!!q('.lnav .slg.db');
+  for(const c of qa('.lgrid .oc')){ const img=c.querySelector('img'); if(!img) continue; const k=img.getAttribute('src').replace(/^.*\//,'').replace('.jpg',''); put('card-'+(booru?'db-':'')+k,c); }
+  put('drag-hint',text('.lmain > .row','把卡片拖到'));
+  const insp=q('.app > .insp'); if(insp){ put('inspector',insp); const b=insp.querySelector('.insb');
+    if(b){ const first=b.children[0]; if(first&&(first.classList.contains('col')&&first.querySelector('.pv')||first.classList.contains('pv'))) put('insp-preview',first);
+      put('insp-author',b.querySelector('.aurow'));
+      for(const s of b.querySelectorAll('.isec')){ const t=s.querySelector('.ist')?.textContent||''; if(t.startsWith('生成参数')) put('insp-params',s); else if(t.startsWith('提示词')) put('insp-prompt',s); else if(t.startsWith('标签')) put('insp-site-tags',s); }
+      const tg=b.querySelector('.col[style*="gap:10px"]'); if(tg&&tg.querySelector('.dtag')) put('insp-tags',tg);
+    }
+    put('insp-footer',insp.querySelector('.insf')); put('insp-send',insp.querySelector('.insf .btn.pri'));
+  }
+  for(const p of qa('.pop')){ const t=p.textContent;
+    if(t.includes('换来源')){ put('source-popover',p); ['aiTag','danbooru','safebooru','gelbooru'].forEach((n,i)=>put('source-'+n,p.querySelectorAll('.mrow')[i])); }
+    else if(t.includes('命中的作品')) put('blacklist-popover',p);
+    else if(t.includes('记住这次的选择')){ put('send-popover',p); ['replace','promptOnly','withParams'].forEach((n,i)=>put('send-'+n,p.querySelectorAll('.opt')[i])); }
+    else if(t.includes('收藏到')) put('favto-popover',p);
+  }
+  put('selection-bar',q('.selbar'));
+  put('login',text('.col','登录 Danbooru 后才能'));
+  const lb=q('.lb'); if(lb){ put('viewer',lb); put('viewer-position',lb.querySelector('.top .mono')); put('viewer-strip',lb.querySelector('.strip'));
+    put('viewer-info',lb.lastElementChild); }
+  for(const k of Object.keys(m)) if(k==='login'){ const e=text('.col[style*="width:520px"]','登录'); if(e) m[k]=R(e); }
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+f.src='/mockups/online/mock.html#'+view.replace(/^(.*?)(-dark)?$/,(a,b,c)=>b+(c||''));
+</script></body></html>

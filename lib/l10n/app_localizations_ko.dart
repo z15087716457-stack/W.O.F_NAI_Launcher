@@ -13403,4 +13403,637 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get navShell_ctrlHint => '누르고 있으면 페이지 번호 표시, 숫자로 바로 이동, 놓으면 사라집니다';
+
+  @override
+  String get online_title => '온라인 갤러리';
+
+  @override
+  String get online_collapseSidebar => '사이드바 접기';
+
+  @override
+  String get online_expandSidebar => '사이드바 펼치기';
+
+  @override
+  String get online_sectionBrowse => '탐색';
+
+  @override
+  String get online_modeSearch => '검색';
+
+  @override
+  String get online_modeMonthly => '월간 순위';
+
+  @override
+  String get online_modePopular => '인기';
+
+  @override
+  String get online_modeMyFavorites => '내 즐겨찾기';
+
+  @override
+  String get online_modeFavorites => '즐겨찾기';
+
+  @override
+  String get online_noRanking => '순위 없음';
+
+  @override
+  String get online_noFavorites => '즐겨찾기 미지원';
+
+  @override
+  String get online_readOnly => '읽기 전용';
+
+  @override
+  String get online_signedOut => '로그인 안 됨';
+
+  @override
+  String get online_recentTitle => '최근 검색';
+
+  @override
+  String get online_recentClear => '지우기';
+
+  @override
+  String get online_collections => '컬렉션';
+
+  @override
+  String get online_newCollection => '새 컬렉션';
+
+  @override
+  String get online_all => '전체';
+
+  @override
+  String get online_ungrouped => '미분류';
+
+  @override
+  String get online_favAuthors => '저장한 작가';
+
+  @override
+  String get online_blacklist => '차단 목록';
+
+  @override
+  String online_blacklistCount(Object count) {
+    return '태그 $count개 차단';
+  }
+
+  @override
+  String get online_srcSubAiTag => 'NAI 작품 커뮤니티 · 전체 Prompt';
+
+  @override
+  String online_srcSubSignedIn(Object name) {
+    return '로그인됨 · $name';
+  }
+
+  @override
+  String get online_srcSubSafebooru => '전연령 · 로그인 불필요';
+
+  @override
+  String get online_srcSubKeyOk => 'API Key 설정됨';
+
+  @override
+  String get online_srcSubKeyInvalid => 'API Key 무효';
+
+  @override
+  String get online_srcSubKeyMissing => 'API Key 미설정';
+
+  @override
+  String get online_switchSource => '소스 변경';
+
+  @override
+  String get online_capPromptSearch => '작품 + Prompt 검색';
+
+  @override
+  String get online_capTagSearch => '태그 검색';
+
+  @override
+  String get online_capMonthly => '월간 순위';
+
+  @override
+  String get online_capRankings => '일 / 주 / 월 순위';
+
+  @override
+  String get online_capLocalFav => '로컬 즐겨찾기';
+
+  @override
+  String get online_capSiteFav => '사이트 즐겨찾기';
+
+  @override
+  String get online_capReadOnlyFav => '즐겨찾기(읽기 전용)';
+
+  @override
+  String get online_capMultiMedia => '여러 장 작품';
+
+  @override
+  String get online_capParams => '생성 파라미터';
+
+  @override
+  String get online_capRatings => '등급';
+
+  @override
+  String get online_capSfwOnly => '전연령만';
+
+  @override
+  String get online_acctNone => '로그인 불필요';
+
+  @override
+  String get online_acctSignedIn => '로그인됨';
+
+  @override
+  String get online_acctKeyOk => 'Key 설정됨';
+
+  @override
+  String get online_acctKeyInvalid => 'Key 무효';
+
+  @override
+  String get online_acctKeyMissing => 'Key 미설정';
+
+  @override
+  String get online_sourceMemory => '소스마다 검색어와 스크롤 위치를 기억합니다';
+
+  @override
+  String get online_searchWorkHint => '작품, 작가, 제목, 태그 또는 모델';
+
+  @override
+  String get online_searchPromptHint => 'Prompt 포함…(::artist: 원문 문법 지원)';
+
+  @override
+  String get online_searchTagHint => '태그 추가, 공백 구분, 앞에 - 는 제외';
+
+  @override
+  String get online_searchFavHint => '즐겨찾기에서 찾기: 제목, 작가, 태그';
+
+  @override
+  String get online_fuzzy => '유사 검색';
+
+  @override
+  String get online_clearSearch => '검색 지우기';
+
+  @override
+  String get online_sizeSmall => '작게(제목 없음)';
+
+  @override
+  String get online_sizeMedium => '중';
+
+  @override
+  String get online_sizeLarge => '대';
+
+  @override
+  String get online_multiSelect => '다중 선택';
+
+  @override
+  String get online_doneMultiSelect => '선택 완료';
+
+  @override
+  String get online_refresh => '새로고침';
+
+  @override
+  String get online_inspector => '인스펙터';
+
+  @override
+  String get online_naiOnly => 'NAI 이미지만';
+
+  @override
+  String get online_model => '모델';
+
+  @override
+  String get online_modelAll => '전체';
+
+  @override
+  String get online_timeAll => '전체 기간';
+
+  @override
+  String online_timeYear(Object year) {
+    return '$year년';
+  }
+
+  @override
+  String get online_timeOlder => '이전 기록';
+
+  @override
+  String online_loaded(Object count, Object pages) {
+    return '$count장 · $pages페이지 불러옴';
+  }
+
+  @override
+  String online_rankLoaded(Object count) {
+    return '1–$count위 · $count장 불러옴';
+  }
+
+  @override
+  String get online_jumpToPage => '페이지 이동…';
+
+  @override
+  String get online_jumpGo => '이동';
+
+  @override
+  String get online_ratingLabel => '등급';
+
+  @override
+  String get online_ratingG => '전연령';
+
+  @override
+  String get online_ratingS => '경미';
+
+  @override
+  String get online_ratingQ => '민감';
+
+  @override
+  String get online_ratingE => '노골적';
+
+  @override
+  String get online_dateRange => '기간';
+
+  @override
+  String get online_clearDateRange => '기간 제한 없음';
+
+  @override
+  String get online_rankCurrent => '실시간 월간';
+
+  @override
+  String get online_rankDay => '일간';
+
+  @override
+  String get online_rankWeek => '주간';
+
+  @override
+  String get online_rankMonth => '월간';
+
+  @override
+  String get online_today => '오늘';
+
+  @override
+  String get online_previous => '이전';
+
+  @override
+  String get online_next => '다음';
+
+  @override
+  String get online_sort => '정렬';
+
+  @override
+  String get online_sortFavTime => '저장 시간';
+
+  @override
+  String get online_favAll => '모든 즐겨찾기';
+
+  @override
+  String online_countImages(Object count) {
+    return '$count장';
+  }
+
+  @override
+  String online_authorSaved(Object count, Object date) {
+    return '$count장 저장 · $date 작가 저장';
+  }
+
+  @override
+  String get online_authorAllWorks => 'AI TAG에서 모든 작품 보기';
+
+  @override
+  String get online_unfavAuthor => '작가 저장 해제';
+
+  @override
+  String get online_favAuthor => '작가 저장';
+
+  @override
+  String get online_dragHint => '카드를 왼쪽 컬렉션으로 끌면 이동; 우클릭 → 이동 / 해제';
+
+  @override
+  String get online_readOnlyNote => '읽기 전용: Gelbooru 즐겨찾기는 사이트에서 수정';
+
+  @override
+  String get online_returnPrev => '이전 결과로';
+
+  @override
+  String get online_send => '생성으로 보내기';
+
+  @override
+  String get online_sendTags => '태그를 생성으로 보내기';
+
+  @override
+  String get online_sendModes => '보내는 방식 선택';
+
+  @override
+  String get online_favorite => '즐겨찾기';
+
+  @override
+  String get online_favorited => '저장됨';
+
+  @override
+  String get online_copyPrompt => 'Prompt 복사';
+
+  @override
+  String get online_copyTags => '태그 복사';
+
+  @override
+  String get online_download => '다운로드';
+
+  @override
+  String online_downloadAll(Object count) {
+    return '$count장 모두 다운로드';
+  }
+
+  @override
+  String get online_downloadCurrent => '이 이미지만 다운로드';
+
+  @override
+  String get online_more => '더보기';
+
+  @override
+  String get online_openInBrowser => '사이트에서 열기';
+
+  @override
+  String get online_onlyAuthor => '이 작가만';
+
+  @override
+  String get online_moveTo => '컬렉션으로 이동';
+
+  @override
+  String get online_unfavorite => '즐겨찾기 해제';
+
+  @override
+  String get online_rename => '이름 변경';
+
+  @override
+  String get online_deleteCollection => '컬렉션 삭제';
+
+  @override
+  String get online_inspWork => '작품';
+
+  @override
+  String get online_inspPost => '게시물';
+
+  @override
+  String online_youSaved(Object count) {
+    return '이 작가 작품 $count장 저장';
+  }
+
+  @override
+  String get online_params => '생성 파라미터';
+
+  @override
+  String get online_pModel => '모델';
+
+  @override
+  String get online_pSize => '크기';
+
+  @override
+  String get online_pSeed => '시드';
+
+  @override
+  String get online_pSampler => '샘플러';
+
+  @override
+  String get online_pStepsCfg => '스텝 · CFG';
+
+  @override
+  String get online_prompt => '프롬프트';
+
+  @override
+  String get online_negative => '네거티브';
+
+  @override
+  String get online_tags => '태그';
+
+  @override
+  String get online_tagsHint => '클릭하면 검색에 추가';
+
+  @override
+  String get online_tagArtist => '작가';
+
+  @override
+  String get online_tagCopyright => '작품';
+
+  @override
+  String get online_tagCharacter => '캐릭터';
+
+  @override
+  String get online_tagGeneral => '일반';
+
+  @override
+  String get online_tagMeta => '메타';
+
+  @override
+  String get online_copy => '복사';
+
+  @override
+  String get online_noSelection => '카드를 클릭하면 여기에서 Prompt와 파라미터를 봅니다';
+
+  @override
+  String online_detailError(Object error) {
+    return '상세 정보를 불러오지 못했습니다: $error';
+  }
+
+  @override
+  String get online_retry => '다시 시도';
+
+  @override
+  String get online_noPrompt => '이 이미지에는 Prompt가 없습니다';
+
+  @override
+  String online_selCount(Object count) {
+    return '$count장 선택됨';
+  }
+
+  @override
+  String get online_selAll => '전체 선택';
+
+  @override
+  String get online_selInvert => '선택 반전';
+
+  @override
+  String get online_favoriteTo => '즐겨찾기에 추가…';
+
+  @override
+  String get online_favoriteToTitle => '추가 위치';
+
+  @override
+  String get online_favoriteToSite => '사이트 즐겨찾기에 추가';
+
+  @override
+  String online_downloadN(Object count) {
+    return '다운로드 · $count장';
+  }
+
+  @override
+  String get online_newCollectionAndFav => '새 컬렉션에 추가';
+
+  @override
+  String get online_collectionNameHint => '컬렉션 이름, Enter로 확인';
+
+  @override
+  String get online_exitMulti => '선택 종료';
+
+  @override
+  String get online_sendRemember => '이 선택 기억';
+
+  @override
+  String get online_sendReplace => '프롬프트 교체, 캐릭터 칸 비우기';
+
+  @override
+  String online_sendReplaceDesc(Object count) {
+    return '긍정 + 부정을 이 이미지 것으로 바꾸고 생성 페이지의 캐릭터 칸 $count개를 비웁니다. 예전 카드 버튼과 같습니다';
+  }
+
+  @override
+  String get online_sendReplaceDescNone =>
+      '긍정 + 부정을 이 이미지 것으로 바꾸고 캐릭터 칸을 비웁니다. 예전 카드 버튼과 같습니다';
+
+  @override
+  String get online_sendPromptOnly => '프롬프트만 교체, 캐릭터 칸 유지';
+
+  @override
+  String get online_sendPromptOnlyDesc => '작가 조합과 장면 묘사만 빌릴 때';
+
+  @override
+  String get online_sendParams => '프롬프트 + 생성 파라미터';
+
+  @override
+  String get online_sendParamsDesc =>
+      '크기, 시드, 샘플러, 스텝, CFG와 이미지의 캐릭터 칸도 적용. 로컬 갤러리 “파라미터 재사용”과 같습니다';
+
+  @override
+  String get online_sendParamsUnavailable =>
+      '이 이미지에는 생성 파라미터가 없어 프롬프트만 보낼 수 있습니다';
+
+  @override
+  String online_sendNote(Object count) {
+    return '생성 페이지의 현재 긍정 프롬프트($count자)가 교체됩니다';
+  }
+
+  @override
+  String get online_sendNoteEmpty => '생성 페이지의 긍정 프롬프트가 비어 있습니다';
+
+  @override
+  String get online_cancel => '취소';
+
+  @override
+  String get online_sendGo => '보내고 생성 페이지로';
+
+  @override
+  String get online_blacklistDesc => '해당 작품은 표시하지 않습니다';
+
+  @override
+  String get online_blacklistAddHint => '태그 추가, Enter로 확인';
+
+  @override
+  String online_blacklistSync(Object count) {
+    return 'Danbooru 차단 목록 동기화 · $count개';
+  }
+
+  @override
+  String get online_blacklistScope => '네 소스 모두에 적용; AI TAG는 작품 태그로 매칭';
+
+  @override
+  String get online_blacklistEmpty => '차단한 태그가 아직 없습니다';
+
+  @override
+  String get online_removeTag => '삭제';
+
+  @override
+  String online_appendError(Object page, Object reason) {
+    return '$page페이지를 불러오지 못했습니다: $reason';
+  }
+
+  @override
+  String get online_retryPage => '이 페이지 다시 시도';
+
+  @override
+  String online_end(Object count) {
+    return '마지막입니다 · 총 $count장';
+  }
+
+  @override
+  String online_endBlocked(Object count, Object blocked) {
+    return '마지막입니다 · 총 $count장 · $blocked장 차단됨';
+  }
+
+  @override
+  String online_emptyTitle(Object query) {
+    return '“$query” 작품을 찾지 못했습니다';
+  }
+
+  @override
+  String get online_emptyTitleNoQuery => '작품을 찾지 못했습니다';
+
+  @override
+  String get online_emptyHint => '아래 조건을 완화해 보세요';
+
+  @override
+  String get online_sugNaiOff => '“NAI 이미지만” 해제';
+
+  @override
+  String get online_sugClearPrompt => 'Prompt 조건 지우기';
+
+  @override
+  String get online_sugAllTime => '전체 기간으로';
+
+  @override
+  String get online_sugAllModels => '모든 모델';
+
+  @override
+  String get online_sugAllRatings => '모든 등급';
+
+  @override
+  String get online_sugNoDate => '기간 제한 해제';
+
+  @override
+  String get online_favEmpty => '아직 즐겨찾기가 없습니다';
+
+  @override
+  String get online_favEmptyHint => '카드의 ♡ 를 눌러 저장하세요';
+
+  @override
+  String online_loadError(Object error) {
+    return '불러오지 못했습니다: $error';
+  }
+
+  @override
+  String get online_loginDbTitle => 'Danbooru에 로그인해야 즐겨찾기를 볼 수 있습니다';
+
+  @override
+  String get online_loginDbDesc =>
+      '사용자 이름 + API Key로 로그인하면 사이트와 동기화됩니다.\n카드의 ♡ 도 사이트에 바로 저장됩니다';
+
+  @override
+  String get online_loginDb => 'Danbooru 로그인';
+
+  @override
+  String get online_loginGbTitle => 'Gelbooru API Key를 설정해야 즐겨찾기를 볼 수 있습니다';
+
+  @override
+  String get online_loginGbDesc => 'Gelbooru 즐겨찾기는 여기서 읽기만 가능합니다';
+
+  @override
+  String get online_loginGb => 'API Key 설정';
+
+  @override
+  String get online_apiKeyHelp => 'API Key 받는 곳';
+
+  @override
+  String get online_loginOther =>
+      '로그인하기 싫다면? AI TAG 즐겨찾기는 이 기기에 저장되어 계정이 필요 없고, Gelbooru 즐겨찾기는 읽기 전용입니다';
+
+  @override
+  String online_viewerPosition(
+    Object image,
+    Object images,
+    Object work,
+    Object works,
+  ) {
+    return '이미지 $image / $images · 작품 $work / $works';
+  }
+
+  @override
+  String online_viewerWorkPosition(Object work, Object works) {
+    return '작품 $work / $works';
+  }
+
+  @override
+  String get online_close => '닫기';
+
+  @override
+  String get online_keyImage => '이미지 전환';
+
+  @override
+  String get online_keyWork => '이전 / 다음 작품';
+
+  @override
+  String get online_keyInfo => '정보 패널 접기';
 }

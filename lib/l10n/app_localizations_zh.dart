@@ -13150,6 +13150,637 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get navShell_ctrlHint => '按住不放：显示页面编号，按数字直接跳转；松开就消失';
+
+  @override
+  String get online_title => '在线画廊';
+
+  @override
+  String get online_collapseSidebar => '收起左栏';
+
+  @override
+  String get online_expandSidebar => '展开左栏';
+
+  @override
+  String get online_sectionBrowse => '浏览';
+
+  @override
+  String get online_modeSearch => '搜索';
+
+  @override
+  String get online_modeMonthly => '月榜';
+
+  @override
+  String get online_modePopular => '热门';
+
+  @override
+  String get online_modeMyFavorites => '我的收藏';
+
+  @override
+  String get online_modeFavorites => '收藏';
+
+  @override
+  String get online_noRanking => '没有排行';
+
+  @override
+  String get online_noFavorites => '不支持收藏';
+
+  @override
+  String get online_readOnly => '只读';
+
+  @override
+  String get online_signedOut => '未登录';
+
+  @override
+  String get online_recentTitle => '最近搜索';
+
+  @override
+  String get online_recentClear => '清除';
+
+  @override
+  String get online_collections => '子集';
+
+  @override
+  String get online_newCollection => '新建子集';
+
+  @override
+  String get online_all => '全部';
+
+  @override
+  String get online_ungrouped => '未分组';
+
+  @override
+  String get online_favAuthors => '收藏的作者';
+
+  @override
+  String get online_blacklist => '黑名单';
+
+  @override
+  String online_blacklistCount(Object count) {
+    return '屏蔽 $count 个标签';
+  }
+
+  @override
+  String get online_srcSubAiTag => 'NAI 作品社区 · 带完整 Prompt';
+
+  @override
+  String online_srcSubSignedIn(Object name) {
+    return '已登录 · $name';
+  }
+
+  @override
+  String get online_srcSubSafebooru => '全年龄 · 不用登录';
+
+  @override
+  String get online_srcSubKeyOk => 'API Key 已配置';
+
+  @override
+  String get online_srcSubKeyInvalid => 'API Key 无效';
+
+  @override
+  String get online_srcSubKeyMissing => '未配置 API Key';
+
+  @override
+  String get online_switchSource => '换来源';
+
+  @override
+  String get online_capPromptSearch => '搜索作品 + Prompt';
+
+  @override
+  String get online_capTagSearch => '标签搜索';
+
+  @override
+  String get online_capMonthly => '月榜';
+
+  @override
+  String get online_capRankings => '日 / 周 / 月榜';
+
+  @override
+  String get online_capLocalFav => '本地收藏';
+
+  @override
+  String get online_capSiteFav => '网站收藏';
+
+  @override
+  String get online_capReadOnlyFav => '收藏（只读）';
+
+  @override
+  String get online_capMultiMedia => '多图作品';
+
+  @override
+  String get online_capParams => '生成参数';
+
+  @override
+  String get online_capRatings => '评级';
+
+  @override
+  String get online_capSfwOnly => '只有全年龄';
+
+  @override
+  String get online_acctNone => '不用登录';
+
+  @override
+  String get online_acctSignedIn => '已登录';
+
+  @override
+  String get online_acctKeyOk => 'Key 已配置';
+
+  @override
+  String get online_acctKeyInvalid => 'Key 无效';
+
+  @override
+  String get online_acctKeyMissing => '未配置 Key';
+
+  @override
+  String get online_sourceMemory => '每个来源记住自己的搜索词和滚动位置';
+
+  @override
+  String get online_searchWorkHint => '作品、作者、标题、标签或模型';
+
+  @override
+  String get online_searchPromptHint => 'Prompt 含有…（支持 ::artist: 原始语法）';
+
+  @override
+  String get online_searchTagHint => '加标签，空格分隔，前面加 - 是排除';
+
+  @override
+  String get online_searchFavHint => '在收藏里找：标题、作者、标签';
+
+  @override
+  String get online_fuzzy => '模糊匹配';
+
+  @override
+  String get online_clearSearch => '清空搜索';
+
+  @override
+  String get online_sizeSmall => '小卡片（不显示标题）';
+
+  @override
+  String get online_sizeMedium => '中';
+
+  @override
+  String get online_sizeLarge => '大';
+
+  @override
+  String get online_multiSelect => '多选';
+
+  @override
+  String get online_doneMultiSelect => '完成多选';
+
+  @override
+  String get online_refresh => '刷新';
+
+  @override
+  String get online_inspector => '检查器';
+
+  @override
+  String get online_naiOnly => '仅 NAI 图片';
+
+  @override
+  String get online_model => '模型';
+
+  @override
+  String get online_modelAll => '全部';
+
+  @override
+  String get online_timeAll => '全部时间';
+
+  @override
+  String online_timeYear(Object year) {
+    return '$year 年';
+  }
+
+  @override
+  String get online_timeOlder => '更早归档';
+
+  @override
+  String online_loaded(Object count, Object pages) {
+    return '已加载 $count 张 · $pages 页';
+  }
+
+  @override
+  String online_rankLoaded(Object count) {
+    return '第 1–$count 名 · 已加载 $count 张';
+  }
+
+  @override
+  String get online_jumpToPage => '跳到页…';
+
+  @override
+  String get online_jumpGo => '跳转';
+
+  @override
+  String get online_ratingLabel => '评级';
+
+  @override
+  String get online_ratingG => '全年龄';
+
+  @override
+  String get online_ratingS => '轻微';
+
+  @override
+  String get online_ratingQ => '敏感';
+
+  @override
+  String get online_ratingE => '露骨';
+
+  @override
+  String get online_dateRange => '日期范围';
+
+  @override
+  String get online_clearDateRange => '不限日期';
+
+  @override
+  String get online_rankCurrent => '实时月榜';
+
+  @override
+  String get online_rankDay => '日榜';
+
+  @override
+  String get online_rankWeek => '周榜';
+
+  @override
+  String get online_rankMonth => '月榜';
+
+  @override
+  String get online_today => '今天';
+
+  @override
+  String get online_previous => '上一个';
+
+  @override
+  String get online_next => '下一个';
+
+  @override
+  String get online_sort => '排序';
+
+  @override
+  String get online_sortFavTime => '收藏时间';
+
+  @override
+  String get online_favAll => '全部收藏';
+
+  @override
+  String online_countImages(Object count) {
+    return '$count 张';
+  }
+
+  @override
+  String online_authorSaved(Object count, Object date) {
+    return '收藏了 $count 张 · 收藏作者于 $date';
+  }
+
+  @override
+  String get online_authorAllWorks => '在 AI TAG 看 TA 的全部作品';
+
+  @override
+  String get online_unfavAuthor => '取消收藏作者';
+
+  @override
+  String get online_favAuthor => '收藏作者';
+
+  @override
+  String get online_dragHint => '把卡片拖到左边的子集就是移动；右键 → 移到子集 / 取消收藏';
+
+  @override
+  String get online_readOnlyNote => '只读：Gelbooru 收藏只能看，要在网站上改';
+
+  @override
+  String get online_returnPrev => '返回之前的结果';
+
+  @override
+  String get online_send => '发送到生图';
+
+  @override
+  String get online_sendTags => '发送标签到生图';
+
+  @override
+  String get online_sendModes => '选择发送方式';
+
+  @override
+  String get online_favorite => '收藏';
+
+  @override
+  String get online_favorited => '已收藏';
+
+  @override
+  String get online_copyPrompt => '复制 Prompt';
+
+  @override
+  String get online_copyTags => '复制标签';
+
+  @override
+  String get online_download => '下载';
+
+  @override
+  String online_downloadAll(Object count) {
+    return '下载全部 $count 张';
+  }
+
+  @override
+  String get online_downloadCurrent => '只下载这一张';
+
+  @override
+  String get online_more => '更多';
+
+  @override
+  String get online_openInBrowser => '在网站打开';
+
+  @override
+  String get online_onlyAuthor => '只看 TA';
+
+  @override
+  String get online_moveTo => '移到子集';
+
+  @override
+  String get online_unfavorite => '取消收藏';
+
+  @override
+  String get online_rename => '重命名';
+
+  @override
+  String get online_deleteCollection => '删除子集';
+
+  @override
+  String get online_inspWork => '作品';
+
+  @override
+  String get online_inspPost => '帖子';
+
+  @override
+  String online_youSaved(Object count) {
+    return '你收藏了 TA $count 张';
+  }
+
+  @override
+  String get online_params => '生成参数';
+
+  @override
+  String get online_pModel => '模型';
+
+  @override
+  String get online_pSize => '尺寸';
+
+  @override
+  String get online_pSeed => '种子';
+
+  @override
+  String get online_pSampler => '采样器';
+
+  @override
+  String get online_pStepsCfg => '步数 · 引导';
+
+  @override
+  String get online_prompt => '提示词';
+
+  @override
+  String get online_negative => '负面';
+
+  @override
+  String get online_tags => '标签';
+
+  @override
+  String get online_tagsHint => '点一下加入搜索';
+
+  @override
+  String get online_tagArtist => '画师';
+
+  @override
+  String get online_tagCopyright => '作品';
+
+  @override
+  String get online_tagCharacter => '角色';
+
+  @override
+  String get online_tagGeneral => '一般';
+
+  @override
+  String get online_tagMeta => '元标签';
+
+  @override
+  String get online_copy => '复制';
+
+  @override
+  String get online_noSelection => '单击一张卡片，在这里看 Prompt 和生成参数';
+
+  @override
+  String online_detailError(Object error) {
+    return '详情没加载出来：$error';
+  }
+
+  @override
+  String get online_retry => '重试';
+
+  @override
+  String get online_noPrompt => '这张图没有 Prompt';
+
+  @override
+  String online_selCount(Object count) {
+    return '已选 $count 张';
+  }
+
+  @override
+  String get online_selAll => '全选';
+
+  @override
+  String get online_selInvert => '反选';
+
+  @override
+  String get online_favoriteTo => '收藏到…';
+
+  @override
+  String get online_favoriteToTitle => '收藏到';
+
+  @override
+  String get online_favoriteToSite => '收藏到网站';
+
+  @override
+  String online_downloadN(Object count) {
+    return '下载 · $count 张图';
+  }
+
+  @override
+  String get online_newCollectionAndFav => '新建子集并收藏';
+
+  @override
+  String get online_collectionNameHint => '子集名称，回车确认';
+
+  @override
+  String get online_exitMulti => '退出多选';
+
+  @override
+  String get online_sendRemember => '记住这次的选择';
+
+  @override
+  String get online_sendReplace => '替换提示词，清空角色框';
+
+  @override
+  String online_sendReplaceDesc(Object count) {
+    return '正向 + 负面换成这张图的；生图页现有的 $count 个角色框清空。和以前卡片上的发送按钮一样';
+  }
+
+  @override
+  String get online_sendReplaceDescNone =>
+      '正向 + 负面换成这张图的；生图页的角色框清空。和以前卡片上的发送按钮一样';
+
+  @override
+  String get online_sendPromptOnly => '只替换提示词，保留角色框';
+
+  @override
+  String get online_sendPromptOnlyDesc => '适合只想借画师串和画面描述';
+
+  @override
+  String get online_sendParams => '提示词 + 生成参数';
+
+  @override
+  String get online_sendParamsDesc =>
+      '再套用尺寸、种子、采样器、步数、引导和图里的角色框，和本地图库“复用参数”同一条链';
+
+  @override
+  String get online_sendParamsUnavailable => '这张图没有生成参数，只能发送提示词';
+
+  @override
+  String online_sendNote(Object count) {
+    return '生图页现在的正向有 $count 字，会被替换';
+  }
+
+  @override
+  String get online_sendNoteEmpty => '生图页现在的正向是空的';
+
+  @override
+  String get online_cancel => '取消';
+
+  @override
+  String get online_sendGo => '发送并去生图页';
+
+  @override
+  String get online_blacklistDesc => '命中的作品直接不显示';
+
+  @override
+  String get online_blacklistAddHint => '加标签，回车确认';
+
+  @override
+  String online_blacklistSync(Object count) {
+    return '同步 Danbooru 账号黑名单 · $count 个';
+  }
+
+  @override
+  String get online_blacklistScope => '对四个来源都生效；AI TAG 按作品标签匹配';
+
+  @override
+  String get online_blacklistEmpty => '还没有屏蔽的标签';
+
+  @override
+  String get online_removeTag => '删除';
+
+  @override
+  String online_appendError(Object page, Object reason) {
+    return '第 $page 页没加载出来：$reason';
+  }
+
+  @override
+  String get online_retryPage => '重试这一页';
+
+  @override
+  String online_end(Object count) {
+    return '已经到底了 · 共 $count 张';
+  }
+
+  @override
+  String online_endBlocked(Object count, Object blocked) {
+    return '已经到底了 · 共 $count 张 · 黑名单挡掉 $blocked 张';
+  }
+
+  @override
+  String online_emptyTitle(Object query) {
+    return '没有找到 “$query” 的作品';
+  }
+
+  @override
+  String get online_emptyTitleNoQuery => '没有找到作品';
+
+  @override
+  String get online_emptyHint => '试试放宽下面这些条件';
+
+  @override
+  String get online_sugNaiOff => '去掉“仅 NAI 图片”';
+
+  @override
+  String get online_sugClearPrompt => '清空 Prompt 条件';
+
+  @override
+  String get online_sugAllTime => '换成全部时间';
+
+  @override
+  String get online_sugAllModels => '模型改成全部';
+
+  @override
+  String get online_sugAllRatings => '评级全选';
+
+  @override
+  String get online_sugNoDate => '去掉日期范围';
+
+  @override
+  String get online_favEmpty => '这里还没有收藏';
+
+  @override
+  String get online_favEmptyHint => '在卡片上点 ♡ 就能收藏';
+
+  @override
+  String online_loadError(Object error) {
+    return '没加载出来：$error';
+  }
+
+  @override
+  String get online_loginDbTitle => '登录 Danbooru 后才能看你的收藏';
+
+  @override
+  String get online_loginDbDesc =>
+      '用用户名 + API Key 登录，收藏会和网站同步；\n在卡片上点 ♡ 也是直接收藏到网站';
+
+  @override
+  String get online_loginDb => '登录 Danbooru';
+
+  @override
+  String get online_loginGbTitle => '配置 Gelbooru API Key 后才能看收藏';
+
+  @override
+  String get online_loginGbDesc => 'Gelbooru 收藏只能看，不能在这里改';
+
+  @override
+  String get online_loginGb => '配置 API Key';
+
+  @override
+  String get online_apiKeyHelp => '去哪里拿 API Key';
+
+  @override
+  String get online_loginOther => '不想登录？AI TAG 的收藏存在本机，不要账号；Gelbooru 收藏只能看不能改';
+
+  @override
+  String online_viewerPosition(
+    Object image,
+    Object images,
+    Object work,
+    Object works,
+  ) {
+    return '图 $image / $images · 作品 $work / $works';
+  }
+
+  @override
+  String online_viewerWorkPosition(Object work, Object works) {
+    return '作品 $work / $works';
+  }
+
+  @override
+  String get online_close => '关闭';
+
+  @override
+  String get online_keyImage => '这一组里切图';
+
+  @override
+  String get online_keyWork => '上一个 / 下一个作品';
+
+  @override
+  String get online_keyInfo => '收起信息栏';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -26298,4 +26929,635 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get navShell_ctrlHint => '按住不放：顯示頁面編號，按數字直接跳轉；鬆開就消失';
+
+  @override
+  String get online_title => '線上畫廊';
+
+  @override
+  String get online_collapseSidebar => '收起左欄';
+
+  @override
+  String get online_expandSidebar => '展開左欄';
+
+  @override
+  String get online_sectionBrowse => '瀏覽';
+
+  @override
+  String get online_modeSearch => '搜尋';
+
+  @override
+  String get online_modeMonthly => '月榜';
+
+  @override
+  String get online_modePopular => '熱門';
+
+  @override
+  String get online_modeMyFavorites => '我的收藏';
+
+  @override
+  String get online_modeFavorites => '收藏';
+
+  @override
+  String get online_noRanking => '沒有排行';
+
+  @override
+  String get online_noFavorites => '不支援收藏';
+
+  @override
+  String get online_readOnly => '只讀';
+
+  @override
+  String get online_signedOut => '未登入';
+
+  @override
+  String get online_recentTitle => '最近搜尋';
+
+  @override
+  String get online_recentClear => '清除';
+
+  @override
+  String get online_collections => '子集';
+
+  @override
+  String get online_newCollection => '新增子集';
+
+  @override
+  String get online_all => '全部';
+
+  @override
+  String get online_ungrouped => '未分組';
+
+  @override
+  String get online_favAuthors => '收藏的作者';
+
+  @override
+  String get online_blacklist => '黑名單';
+
+  @override
+  String online_blacklistCount(Object count) {
+    return '遮蔽 $count 個標籤';
+  }
+
+  @override
+  String get online_srcSubAiTag => 'NAI 作品社群 · 帶完整 Prompt';
+
+  @override
+  String online_srcSubSignedIn(Object name) {
+    return '已登入 · $name';
+  }
+
+  @override
+  String get online_srcSubSafebooru => '全年齡 · 不用登入';
+
+  @override
+  String get online_srcSubKeyOk => 'API Key 已配置';
+
+  @override
+  String get online_srcSubKeyInvalid => 'API Key 無效';
+
+  @override
+  String get online_srcSubKeyMissing => '未配置 API Key';
+
+  @override
+  String get online_switchSource => '換來源';
+
+  @override
+  String get online_capPromptSearch => '搜尋作品 + Prompt';
+
+  @override
+  String get online_capTagSearch => '標籤搜尋';
+
+  @override
+  String get online_capMonthly => '月榜';
+
+  @override
+  String get online_capRankings => '日 / 周 / 月榜';
+
+  @override
+  String get online_capLocalFav => '本地收藏';
+
+  @override
+  String get online_capSiteFav => '網站收藏';
+
+  @override
+  String get online_capReadOnlyFav => '收藏（只讀）';
+
+  @override
+  String get online_capMultiMedia => '多圖作品';
+
+  @override
+  String get online_capParams => '生成參數';
+
+  @override
+  String get online_capRatings => '評級';
+
+  @override
+  String get online_capSfwOnly => '只有全年齡';
+
+  @override
+  String get online_acctNone => '不用登入';
+
+  @override
+  String get online_acctSignedIn => '已登入';
+
+  @override
+  String get online_acctKeyOk => 'Key 已配置';
+
+  @override
+  String get online_acctKeyInvalid => 'Key 無效';
+
+  @override
+  String get online_acctKeyMissing => '未配置 Key';
+
+  @override
+  String get online_sourceMemory => '每個來源記住自己的搜尋詞和滾動位置';
+
+  @override
+  String get online_searchWorkHint => '作品、作者、標題、標籤或模型';
+
+  @override
+  String get online_searchPromptHint => 'Prompt 含有…（支援 ::artist: 原始語法）';
+
+  @override
+  String get online_searchTagHint => '加標籤，空格分隔，前面加 - 是排除';
+
+  @override
+  String get online_searchFavHint => '在收藏裡找：標題、作者、標籤';
+
+  @override
+  String get online_fuzzy => '模糊匹配';
+
+  @override
+  String get online_clearSearch => '清空搜尋';
+
+  @override
+  String get online_sizeSmall => '小卡片（不顯示標題）';
+
+  @override
+  String get online_sizeMedium => '中';
+
+  @override
+  String get online_sizeLarge => '大';
+
+  @override
+  String get online_multiSelect => '多選';
+
+  @override
+  String get online_doneMultiSelect => '完成多選';
+
+  @override
+  String get online_refresh => '重新整理';
+
+  @override
+  String get online_inspector => '檢查器';
+
+  @override
+  String get online_naiOnly => '僅 NAI 圖片';
+
+  @override
+  String get online_model => '模型';
+
+  @override
+  String get online_modelAll => '全部';
+
+  @override
+  String get online_timeAll => '全部時間';
+
+  @override
+  String online_timeYear(Object year) {
+    return '$year 年';
+  }
+
+  @override
+  String get online_timeOlder => '更早歸檔';
+
+  @override
+  String online_loaded(Object count, Object pages) {
+    return '已載入 $count 張 · $pages 頁';
+  }
+
+  @override
+  String online_rankLoaded(Object count) {
+    return '第 1–$count 名 · 已載入 $count 張';
+  }
+
+  @override
+  String get online_jumpToPage => '跳到頁…';
+
+  @override
+  String get online_jumpGo => '跳轉';
+
+  @override
+  String get online_ratingLabel => '評級';
+
+  @override
+  String get online_ratingG => '全年齡';
+
+  @override
+  String get online_ratingS => '輕微';
+
+  @override
+  String get online_ratingQ => '敏感';
+
+  @override
+  String get online_ratingE => '露骨';
+
+  @override
+  String get online_dateRange => '日期範圍';
+
+  @override
+  String get online_clearDateRange => '不限日期';
+
+  @override
+  String get online_rankCurrent => '即時月榜';
+
+  @override
+  String get online_rankDay => '日榜';
+
+  @override
+  String get online_rankWeek => '周榜';
+
+  @override
+  String get online_rankMonth => '月榜';
+
+  @override
+  String get online_today => '今天';
+
+  @override
+  String get online_previous => '上一個';
+
+  @override
+  String get online_next => '下一個';
+
+  @override
+  String get online_sort => '排序';
+
+  @override
+  String get online_sortFavTime => '收藏時間';
+
+  @override
+  String get online_favAll => '全部收藏';
+
+  @override
+  String online_countImages(Object count) {
+    return '$count 張';
+  }
+
+  @override
+  String online_authorSaved(Object count, Object date) {
+    return '收藏了 $count 張 · 收藏作者於 $date';
+  }
+
+  @override
+  String get online_authorAllWorks => '在 AI TAG 看 TA 的全部作品';
+
+  @override
+  String get online_unfavAuthor => '取消收藏作者';
+
+  @override
+  String get online_favAuthor => '收藏作者';
+
+  @override
+  String get online_dragHint => '把卡片拖到左邊的子集就是移動；右鍵 → 移到子集 / 取消收藏';
+
+  @override
+  String get online_readOnlyNote => '只讀：Gelbooru 收藏只能看，要在網站上改';
+
+  @override
+  String get online_returnPrev => '返回之前的結果';
+
+  @override
+  String get online_send => '傳送到生圖';
+
+  @override
+  String get online_sendTags => '傳送標籤到生圖';
+
+  @override
+  String get online_sendModes => '選擇傳送方式';
+
+  @override
+  String get online_favorite => '收藏';
+
+  @override
+  String get online_favorited => '已收藏';
+
+  @override
+  String get online_copyPrompt => '複製 Prompt';
+
+  @override
+  String get online_copyTags => '複製標籤';
+
+  @override
+  String get online_download => '下載';
+
+  @override
+  String online_downloadAll(Object count) {
+    return '下載全部 $count 張';
+  }
+
+  @override
+  String get online_downloadCurrent => '只下載這一張';
+
+  @override
+  String get online_more => '更多';
+
+  @override
+  String get online_openInBrowser => '在網站開啟';
+
+  @override
+  String get online_onlyAuthor => '只看 TA';
+
+  @override
+  String get online_moveTo => '移到子集';
+
+  @override
+  String get online_unfavorite => '取消收藏';
+
+  @override
+  String get online_rename => '重新命名';
+
+  @override
+  String get online_deleteCollection => '刪除子集';
+
+  @override
+  String get online_inspWork => '作品';
+
+  @override
+  String get online_inspPost => '帖子';
+
+  @override
+  String online_youSaved(Object count) {
+    return '你收藏了 TA $count 張';
+  }
+
+  @override
+  String get online_params => '生成參數';
+
+  @override
+  String get online_pModel => '模型';
+
+  @override
+  String get online_pSize => '尺寸';
+
+  @override
+  String get online_pSeed => '種子';
+
+  @override
+  String get online_pSampler => '取樣器';
+
+  @override
+  String get online_pStepsCfg => '步數 · 引導';
+
+  @override
+  String get online_prompt => '提示詞';
+
+  @override
+  String get online_negative => '負面';
+
+  @override
+  String get online_tags => '標籤';
+
+  @override
+  String get online_tagsHint => '點一下加入搜尋';
+
+  @override
+  String get online_tagArtist => '畫師';
+
+  @override
+  String get online_tagCopyright => '作品';
+
+  @override
+  String get online_tagCharacter => '角色';
+
+  @override
+  String get online_tagGeneral => '一般';
+
+  @override
+  String get online_tagMeta => '元標籤';
+
+  @override
+  String get online_copy => '複製';
+
+  @override
+  String get online_noSelection => '單擊一張卡片，在這裡看 Prompt 和生成參數';
+
+  @override
+  String online_detailError(Object error) {
+    return '詳情沒加載出來：$error';
+  }
+
+  @override
+  String get online_retry => '重試';
+
+  @override
+  String get online_noPrompt => '這張圖沒有 Prompt';
+
+  @override
+  String online_selCount(Object count) {
+    return '已選 $count 張';
+  }
+
+  @override
+  String get online_selAll => '全選';
+
+  @override
+  String get online_selInvert => '反選';
+
+  @override
+  String get online_favoriteTo => '收藏到…';
+
+  @override
+  String get online_favoriteToTitle => '收藏到';
+
+  @override
+  String get online_favoriteToSite => '收藏到網站';
+
+  @override
+  String online_downloadN(Object count) {
+    return '下載 · $count 張圖';
+  }
+
+  @override
+  String get online_newCollectionAndFav => '新增子集並收藏';
+
+  @override
+  String get online_collectionNameHint => '子集名稱，回車確認';
+
+  @override
+  String get online_exitMulti => '退出多選';
+
+  @override
+  String get online_sendRemember => '記住這次的選擇';
+
+  @override
+  String get online_sendReplace => '替換提示詞，清空角色框';
+
+  @override
+  String online_sendReplaceDesc(Object count) {
+    return '正向 + 負面換成這張圖的；生圖頁現有的 $count 個角色框清空。和以前卡片上的傳送按鈕一樣';
+  }
+
+  @override
+  String get online_sendReplaceDescNone =>
+      '正向 + 負面換成這張圖的；生圖頁的角色框清空。和以前卡片上的傳送按鈕一樣';
+
+  @override
+  String get online_sendPromptOnly => '只替換提示詞，保留角色框';
+
+  @override
+  String get online_sendPromptOnlyDesc => '適合只想借畫師串和畫面描述';
+
+  @override
+  String get online_sendParams => '提示詞 + 生成參數';
+
+  @override
+  String get online_sendParamsDesc =>
+      '再套用尺寸、種子、取樣器、步數、引導和圖裡的角色框，和本地圖庫“複用參數”同一條鏈';
+
+  @override
+  String get online_sendParamsUnavailable => '這張圖沒有生成參數，只能傳送提示詞';
+
+  @override
+  String online_sendNote(Object count) {
+    return '生圖頁現在的正向有 $count 字，會被替換';
+  }
+
+  @override
+  String get online_sendNoteEmpty => '生圖頁現在的正向是空的';
+
+  @override
+  String get online_cancel => '取消';
+
+  @override
+  String get online_sendGo => '傳送並去生圖頁';
+
+  @override
+  String get online_blacklistDesc => '命中的作品直接不顯示';
+
+  @override
+  String get online_blacklistAddHint => '加標籤，回車確認';
+
+  @override
+  String online_blacklistSync(Object count) {
+    return '同步 Danbooru 帳號黑名單 · $count 個';
+  }
+
+  @override
+  String get online_blacklistScope => '對四個來源都生效；AI TAG 按作品標籤匹配';
+
+  @override
+  String get online_blacklistEmpty => '還沒有遮蔽的標籤';
+
+  @override
+  String get online_removeTag => '刪除';
+
+  @override
+  String online_appendError(Object page, Object reason) {
+    return '第 $page 頁沒加載出來：$reason';
+  }
+
+  @override
+  String get online_retryPage => '重試這一頁';
+
+  @override
+  String online_end(Object count) {
+    return '已經到底了 · 共 $count 張';
+  }
+
+  @override
+  String online_endBlocked(Object count, Object blocked) {
+    return '已經到底了 · 共 $count 張 · 黑名單擋掉 $blocked 張';
+  }
+
+  @override
+  String online_emptyTitle(Object query) {
+    return '沒有找到 “$query” 的作品';
+  }
+
+  @override
+  String get online_emptyTitleNoQuery => '沒有找到作品';
+
+  @override
+  String get online_emptyHint => '試試放寬下面這些條件';
+
+  @override
+  String get online_sugNaiOff => '去掉“僅 NAI 圖片”';
+
+  @override
+  String get online_sugClearPrompt => '清空 Prompt 條件';
+
+  @override
+  String get online_sugAllTime => '換成全部時間';
+
+  @override
+  String get online_sugAllModels => '模型改成全部';
+
+  @override
+  String get online_sugAllRatings => '評級全選';
+
+  @override
+  String get online_sugNoDate => '去掉日期範圍';
+
+  @override
+  String get online_favEmpty => '這裡還沒有收藏';
+
+  @override
+  String get online_favEmptyHint => '在卡片上點 ♡ 就能收藏';
+
+  @override
+  String online_loadError(Object error) {
+    return '沒加載出來：$error';
+  }
+
+  @override
+  String get online_loginDbTitle => '登入 Danbooru 後才能看你的收藏';
+
+  @override
+  String get online_loginDbDesc =>
+      '用使用者名稱 + API Key 登入，收藏會和網站同步；\n在卡片上點 ♡ 也是直接收藏到網站';
+
+  @override
+  String get online_loginDb => '登入 Danbooru';
+
+  @override
+  String get online_loginGbTitle => '配置 Gelbooru API Key 後才能看收藏';
+
+  @override
+  String get online_loginGbDesc => 'Gelbooru 收藏只能看，不能在這裡改';
+
+  @override
+  String get online_loginGb => '配置 API Key';
+
+  @override
+  String get online_apiKeyHelp => '去哪裡拿 API Key';
+
+  @override
+  String get online_loginOther => '不想登入？AI TAG 的收藏存在本機，不要帳號；Gelbooru 收藏只能看不能改';
+
+  @override
+  String online_viewerPosition(
+    Object image,
+    Object images,
+    Object work,
+    Object works,
+  ) {
+    return '圖 $image / $images · 作品 $work / $works';
+  }
+
+  @override
+  String online_viewerWorkPosition(Object work, Object works) {
+    return '作品 $work / $works';
+  }
+
+  @override
+  String get online_close => '關閉';
+
+  @override
+  String get online_keyImage => '這一組裡切圖';
+
+  @override
+  String get online_keyWork => '上一個 / 下一個作品';
+
+  @override
+  String get online_keyInfo => '收起資訊欄';
 }
