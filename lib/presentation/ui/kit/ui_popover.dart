@@ -183,13 +183,18 @@ class UiPopoverSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
+    // 内容按圆角裁剪（底栏等自带底色的子组件不会在角上露出直角），描边画在内容上面。
     return Container(
       width: width,
-      padding: padding,
+      padding: padding + const EdgeInsets.all(1),
+      clipBehavior: Clip.antiAlias,
+      foregroundDecoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: c.line),
+      ),
       decoration: BoxDecoration(
         color: color ?? c.raised,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: c.line),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: c.dark ? .32 : .07),
