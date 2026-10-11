@@ -9161,5 +9161,213 @@
     }
   },
   "blocks_replaceSelection": "儲存後把選中的文字換成這個塊",
-  "blocks_quickHint": "更多設定（預覽圖、負面、參數）稍後在塊庫裡改"
+  "blocks_quickHint": "更多設定（預覽圖、負面、參數）稍後在塊庫裡改",
+  "imageViewer_backGallery": "本地畫廊",
+  "imageViewer_backGeneration": "生圖",
+  "imageViewer_scopeAll": "全部圖片",
+  "imageViewer_sortModified": "按修改時間",
+  "imageViewer_sortCreated": "按建立時間",
+  "imageViewer_sortFileName": "按檔名",
+  "imageViewer_sortFileSize": "按檔案大小",
+  "imageViewer_sortDimensions": "按尺寸",
+  "imageViewer_unsaved": "未儲存",
+  "imageViewer_saved": "已儲存",
+  "imageViewer_batch": "生成結果 · 本批 {count} 張",
+  "@imageViewer_batch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "imageViewer_zoomFit": "適應 · {percent}%",
+  "@imageViewer_zoomFit": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "imageViewer_zoomFitPending": "適應 · —",
+  "imageViewer_zoomFitShort": "適應",
+  "imageViewer_zoomIn": "放大",
+  "imageViewer_zoomOut": "縮小",
+  "imageViewer_actualSize": "原始大小",
+  "imageViewer_fullscreen": "全屏",
+  "imageViewer_exitFullscreen": "退出全屏",
+  "imageViewer_fullscreenHint": "滑鼠移到底部顯示膠片條，靜止 2 秒後控制元件自動隱藏",
+  "imageViewer_infoPanel": "資訊欄",
+  "imageViewer_infoShort": "資訊",
+  "imageViewer_hideInfo": "收起資訊欄",
+  "imageViewer_previous": "上一張",
+  "imageViewer_next": "下一張",
+  "imageViewer_loadingOriginal": "讀取原圖",
+  "imageViewer_loadingOriginalSize": "讀取原圖 · {size}",
+  "@imageViewer_loadingOriginalSize": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "imageViewer_missingTitle": "找不到這張圖",
+  "imageViewer_missingHint": "可能已經在資源管理器裡被移動、改名或刪除",
+  "imageViewer_openFolder": "開啟所在資料夾",
+  "imageViewer_nextImage": "下一張",
+  "imageViewer_hintPan": "拖動平移",
+  "imageViewer_hintWheel": "滾輪縮放",
+  "imageViewer_hintDouble": "雙擊 /",
+  "imageViewer_hintFit": "回到適應",
+  "imageViewer_hintActual": "原始大小",
+  "imageViewer_dragFrame": "拖框移動",
+  "imageViewer_movedToTrash": "已移到回收站",
+  "imageViewer_undo": "復原",
+  "imageViewer_details": "詳情",
+  "imageViewer_generationResult": "生成結果",
+  "imageViewer_favorite": "收藏",
+  "imageViewer_showInFolder": "在資料夾中顯示",
+  "imageViewer_deleteKey": "刪除  {key}",
+  "@imageViewer_deleteKey": {
+    "placeholders": {
+      "key": {}
+    }
+  },
+  "imageViewer_more": "更多",
+  "imageViewer_genIndex": "本次生成 · 第 {index} 張",
+  "@imageViewer_genIndex": {
+    "placeholders": {
+      "index": {}
+    }
+  },
+  "imageViewer_notSaved": "還沒儲存到圖庫",
+  "imageViewer_savedToGallery": "已儲存到圖庫",
+  "imageViewer_size": "尺寸",
+  "imageViewer_fileSize": "大小",
+  "imageViewer_modified": "修改時間",
+  "imageViewer_model": "模型",
+  "imageViewer_params": "生成參數",
+  "imageViewer_loadingMeta": "正在讀取後設資料…",
+  "imageViewer_seed": "種子",
+  "imageViewer_sampler": "取樣器",
+  "imageViewer_steps": "步數",
+  "imageViewer_guidance": "提示詞引導",
+  "imageViewer_noise": "噪聲 {value}",
+  "@imageViewer_noise": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "imageViewer_rescale": "重縮放 {value}",
+  "@imageViewer_rescale": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "imageViewer_precise": "精準參考 ×{count}",
+  "@imageViewer_precise": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "imageViewer_qualityTags": "品質詞",
+  "imageViewer_prompt": "提示詞",
+  "imageViewer_translate": "翻譯",
+  "imageViewer_showOriginal": "顯示原文",
+  "imageViewer_translateFailed": "翻譯失敗：{error}",
+  "@imageViewer_translateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "imageViewer_copy": "複製",
+  "imageViewer_copySeed": "複製種子",
+  "imageViewer_expandAll": "展開全部",
+  "imageViewer_expand": "展開",
+  "imageViewer_collapse": "收起",
+  "imageViewer_character": "角色 {index}",
+  "@imageViewer_character": {
+    "placeholders": {
+      "index": {}
+    }
+  },
+  "imageViewer_position": "位置 {cell}",
+  "@imageViewer_position": {
+    "placeholders": {
+      "cell": {}
+    }
+  },
+  "imageViewer_characterNegative": "角色負面 · ",
+  "imageViewer_negative": "負面",
+  "imageViewer_tagCount": "{count} 項",
+  "@imageViewer_tagCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "imageViewer_vibes": "Vibe 參考",
+  "imageViewer_vibeStrength": "強度 {value}",
+  "@imageViewer_vibeStrength": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "imageViewer_vibeInfo": "資訊 {value}",
+  "@imageViewer_vibeInfo": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "imageViewer_saveVibe": "存入 Vibe 庫",
+  "imageViewer_noMetaTitle": "沒有 NovelAI 生成資訊",
+  "imageViewer_noMetaBody": "這張圖不是 NAI 生成的，或者後設資料已經被去掉了（截圖、轉存、壓縮過的圖常見）。\n下面的圖生圖、風格遷移、精準參考、放大照樣能用。",
+  "imageViewer_reuse": "複用參數",
+  "imageViewer_reuseNoMeta": "這張圖沒有生成資訊",
+  "imageViewer_img2img": "圖生圖",
+  "imageViewer_styleTransfer": "風格遷移",
+  "imageViewer_preciseRef": "精準參考",
+  "imageViewer_saveRef": "存入參考庫",
+  "imageViewer_krita": "傳送到 Krita",
+  "imageViewer_kritaOff": "Krita 沒連線",
+  "imageViewer_upscale": "放大",
+  "imageViewer_copyImage": "複製圖片",
+  "imageViewer_saveBlock": "存為塊",
+  "imageViewer_save": "儲存到圖庫",
+  "imageViewer_copyPath": "複製檔案路徑",
+  "imageViewer_copyAllPrompts": "複製全部提示詞（含角色）",
+  "imageViewer_saveBlockEllipsis": "存為塊…",
+  "imageViewer_addToCollection": "加入收藏集",
+  "imageViewer_moveTo": "移動到…",
+  "imageViewer_copyTo": "複製到…",
+  "imageViewer_moveToTrash": "移到回收站",
+  "imageViewer_collections": "收藏集",
+  "imageViewer_newCollection": "新增收藏集…",
+  "imageViewer_helpTitle": "大圖快速鍵",
+  "imageViewer_helpHint": "可以在設定 → 快速鍵裡改",
+  "imageViewer_helpClose": "再按一次關閉",
+  "imageViewer_helpBrowse": "瀏覽",
+  "imageViewer_helpZoom": "縮放",
+  "imageViewer_helpActions": "操作",
+  "imageViewer_helpPrevNext": "上一張 / 下一張",
+  "imageViewer_helpFirstLast": "第一張 / 最後一張",
+  "imageViewer_helpInfo": "顯示 / 收起資訊欄",
+  "imageViewer_helpClose2": "關閉",
+  "imageViewer_helpZoomInOut": "放大 / 縮小",
+  "imageViewer_helpActual": "原始大小 100%",
+  "imageViewer_helpWheel": "以滑鼠處為中心縮放",
+  "imageViewer_helpDouble": "適應 ↔ 放大",
+  "imageViewer_keyWheel": "滾輪",
+  "imageViewer_keyDouble": "雙擊",
+  "imageViewer_helpCopyPrompt": "複製提示詞",
+  "imageViewer_helpUndo": "復原刪除",
+  "imageViewer_protectedTitle": "這張圖受保護，移到回收站？",
+  "imageViewer_protectedBody": "移到回收站後可以在回收站裡還原。",
+  "imageViewer_cancel": "取消",
+  "imageViewer_justNow": "剛剛",
+  "imageViewer_minutesAgo": "{count} 分鐘前",
+  "@imageViewer_minutesAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "imageViewer_hoursAgo": "{count} 小時前",
+  "@imageViewer_hoursAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "imageViewer_yesterday": "昨天"
 }

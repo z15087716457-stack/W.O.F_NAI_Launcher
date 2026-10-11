@@ -15964,4 +15964,421 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get blocks_quickHint => '미리보기, 부정, 설정은 나중에 라이브러리에서';
+
+  @override
+  String get imageViewer_backGallery => '로컬 갤러리';
+
+  @override
+  String get imageViewer_backGeneration => '생성';
+
+  @override
+  String get imageViewer_scopeAll => '모든 이미지';
+
+  @override
+  String get imageViewer_sortModified => '수정한 날짜순';
+
+  @override
+  String get imageViewer_sortCreated => '만든 날짜순';
+
+  @override
+  String get imageViewer_sortFileName => '파일 이름순';
+
+  @override
+  String get imageViewer_sortFileSize => '파일 크기순';
+
+  @override
+  String get imageViewer_sortDimensions => '크기순';
+
+  @override
+  String get imageViewer_unsaved => '저장 안 됨';
+
+  @override
+  String get imageViewer_saved => '저장됨';
+
+  @override
+  String imageViewer_batch(Object count) {
+    return '생성 결과 · 이번 $count장';
+  }
+
+  @override
+  String imageViewer_zoomFit(Object percent) {
+    return '맞춤 · $percent%';
+  }
+
+  @override
+  String get imageViewer_zoomFitPending => '맞춤 · —';
+
+  @override
+  String get imageViewer_zoomFitShort => '맞춤';
+
+  @override
+  String get imageViewer_zoomIn => '확대';
+
+  @override
+  String get imageViewer_zoomOut => '축소';
+
+  @override
+  String get imageViewer_actualSize => '원본 크기';
+
+  @override
+  String get imageViewer_fullscreen => '전체 화면';
+
+  @override
+  String get imageViewer_exitFullscreen => '전체 화면 종료';
+
+  @override
+  String get imageViewer_fullscreenHint => '아래로 이동하면 필름 스트립 · 2초 뒤 컨트롤 숨김';
+
+  @override
+  String get imageViewer_infoPanel => '정보 패널';
+
+  @override
+  String get imageViewer_infoShort => '정보';
+
+  @override
+  String get imageViewer_hideInfo => '정보 닫기';
+
+  @override
+  String get imageViewer_previous => '이전';
+
+  @override
+  String get imageViewer_next => '다음';
+
+  @override
+  String get imageViewer_loadingOriginal => '원본 불러오는 중';
+
+  @override
+  String imageViewer_loadingOriginalSize(Object size) {
+    return '원본 불러오는 중 · $size';
+  }
+
+  @override
+  String get imageViewer_missingTitle => '이미지를 찾을 수 없음';
+
+  @override
+  String get imageViewer_missingHint => '탐색기에서 이동, 이름 변경 또는 삭제되었을 수 있습니다';
+
+  @override
+  String get imageViewer_openFolder => '폴더 열기';
+
+  @override
+  String get imageViewer_nextImage => '다음 이미지';
+
+  @override
+  String get imageViewer_hintPan => '드래그해 이동';
+
+  @override
+  String get imageViewer_hintWheel => '휠로 확대/축소';
+
+  @override
+  String get imageViewer_hintDouble => '더블클릭 /';
+
+  @override
+  String get imageViewer_hintFit => '맞춤으로';
+
+  @override
+  String get imageViewer_hintActual => '원본 크기';
+
+  @override
+  String get imageViewer_dragFrame => '틀을 드래그';
+
+  @override
+  String get imageViewer_movedToTrash => '휴지통으로 이동함';
+
+  @override
+  String get imageViewer_undo => '실행 취소';
+
+  @override
+  String get imageViewer_details => '세부 정보';
+
+  @override
+  String get imageViewer_generationResult => '생성 결과';
+
+  @override
+  String get imageViewer_favorite => '즐겨찾기';
+
+  @override
+  String get imageViewer_showInFolder => '폴더에서 보기';
+
+  @override
+  String imageViewer_deleteKey(Object key) {
+    return '삭제  $key';
+  }
+
+  @override
+  String get imageViewer_more => '더 보기';
+
+  @override
+  String imageViewer_genIndex(Object index) {
+    return '이번 생성 · $index번째';
+  }
+
+  @override
+  String get imageViewer_notSaved => '갤러리에 저장 안 됨';
+
+  @override
+  String get imageViewer_savedToGallery => '갤러리에 저장됨';
+
+  @override
+  String get imageViewer_size => '크기';
+
+  @override
+  String get imageViewer_fileSize => '파일 크기';
+
+  @override
+  String get imageViewer_modified => '수정한 날짜';
+
+  @override
+  String get imageViewer_model => '모델';
+
+  @override
+  String get imageViewer_params => '생성 설정';
+
+  @override
+  String get imageViewer_loadingMeta => '메타데이터 읽는 중…';
+
+  @override
+  String get imageViewer_seed => '시드';
+
+  @override
+  String get imageViewer_sampler => '샘플러';
+
+  @override
+  String get imageViewer_steps => '스텝';
+
+  @override
+  String get imageViewer_guidance => '프롬프트 가이던스';
+
+  @override
+  String imageViewer_noise(Object value) {
+    return '노이즈 $value';
+  }
+
+  @override
+  String imageViewer_rescale(Object value) {
+    return '리스케일 $value';
+  }
+
+  @override
+  String imageViewer_precise(Object count) {
+    return '정밀 참조 ×$count';
+  }
+
+  @override
+  String get imageViewer_qualityTags => '품질 태그';
+
+  @override
+  String get imageViewer_prompt => '프롬프트';
+
+  @override
+  String get imageViewer_translate => '번역';
+
+  @override
+  String get imageViewer_showOriginal => '원문 보기';
+
+  @override
+  String imageViewer_translateFailed(Object error) {
+    return '번역 실패: $error';
+  }
+
+  @override
+  String get imageViewer_copy => '복사';
+
+  @override
+  String get imageViewer_copySeed => '시드 복사';
+
+  @override
+  String get imageViewer_expandAll => '모두 보기';
+
+  @override
+  String get imageViewer_expand => '펼치기';
+
+  @override
+  String get imageViewer_collapse => '접기';
+
+  @override
+  String imageViewer_character(Object index) {
+    return '캐릭터 $index';
+  }
+
+  @override
+  String imageViewer_position(Object cell) {
+    return '위치 $cell';
+  }
+
+  @override
+  String get imageViewer_characterNegative => '캐릭터 부정 · ';
+
+  @override
+  String get imageViewer_negative => '부정';
+
+  @override
+  String imageViewer_tagCount(Object count) {
+    return '$count개';
+  }
+
+  @override
+  String get imageViewer_vibes => 'Vibe 참조';
+
+  @override
+  String imageViewer_vibeStrength(Object value) {
+    return '강도 $value';
+  }
+
+  @override
+  String imageViewer_vibeInfo(Object value) {
+    return '정보 $value';
+  }
+
+  @override
+  String get imageViewer_saveVibe => 'Vibe 라이브러리에 저장';
+
+  @override
+  String get imageViewer_noMetaTitle => 'NovelAI 생성 정보 없음';
+
+  @override
+  String get imageViewer_noMetaBody =>
+      'NAI로 생성한 이미지가 아니거나 메타데이터가 제거되었습니다(스크린샷, 다시 저장, 압축한 이미지에 흔함).\n아래의 이미지 투 이미지, 스타일 전송, 정밀 참조, 업스케일은 사용할 수 있습니다.';
+
+  @override
+  String get imageViewer_reuse => '설정 재사용';
+
+  @override
+  String get imageViewer_reuseNoMeta => '생성 정보 없음';
+
+  @override
+  String get imageViewer_img2img => '이미지 투 이미지';
+
+  @override
+  String get imageViewer_styleTransfer => '스타일 전송';
+
+  @override
+  String get imageViewer_preciseRef => '정밀 참조';
+
+  @override
+  String get imageViewer_saveRef => '참조로 저장';
+
+  @override
+  String get imageViewer_krita => 'Krita로 보내기';
+
+  @override
+  String get imageViewer_kritaOff => 'Krita가 연결되지 않음';
+
+  @override
+  String get imageViewer_upscale => '업스케일';
+
+  @override
+  String get imageViewer_copyImage => '이미지 복사';
+
+  @override
+  String get imageViewer_saveBlock => '블록으로 저장';
+
+  @override
+  String get imageViewer_save => '갤러리에 저장';
+
+  @override
+  String get imageViewer_copyPath => '파일 경로 복사';
+
+  @override
+  String get imageViewer_copyAllPrompts => '모든 프롬프트 복사(캐릭터 포함)';
+
+  @override
+  String get imageViewer_saveBlockEllipsis => '블록으로 저장…';
+
+  @override
+  String get imageViewer_addToCollection => '컬렉션에 추가';
+
+  @override
+  String get imageViewer_moveTo => '이동…';
+
+  @override
+  String get imageViewer_copyTo => '복사…';
+
+  @override
+  String get imageViewer_moveToTrash => '휴지통으로 이동';
+
+  @override
+  String get imageViewer_collections => '컬렉션';
+
+  @override
+  String get imageViewer_newCollection => '새 컬렉션…';
+
+  @override
+  String get imageViewer_helpTitle => '뷰어 단축키';
+
+  @override
+  String get imageViewer_helpHint => '설정 → 단축키에서 바꿀 수 있습니다';
+
+  @override
+  String get imageViewer_helpClose => '한 번 더 누르면 닫기';
+
+  @override
+  String get imageViewer_helpBrowse => '보기';
+
+  @override
+  String get imageViewer_helpZoom => '확대/축소';
+
+  @override
+  String get imageViewer_helpActions => '작업';
+
+  @override
+  String get imageViewer_helpPrevNext => '이전 / 다음';
+
+  @override
+  String get imageViewer_helpFirstLast => '처음 / 마지막';
+
+  @override
+  String get imageViewer_helpInfo => '정보 표시 / 숨기기';
+
+  @override
+  String get imageViewer_helpClose2 => '닫기';
+
+  @override
+  String get imageViewer_helpZoomInOut => '확대 / 축소';
+
+  @override
+  String get imageViewer_helpActual => '원본 크기 100%';
+
+  @override
+  String get imageViewer_helpWheel => '포인터 위치 기준 확대/축소';
+
+  @override
+  String get imageViewer_helpDouble => '맞춤 ↔ 확대';
+
+  @override
+  String get imageViewer_keyWheel => '휠';
+
+  @override
+  String get imageViewer_keyDouble => '더블클릭';
+
+  @override
+  String get imageViewer_helpCopyPrompt => '프롬프트 복사';
+
+  @override
+  String get imageViewer_helpUndo => '삭제 취소';
+
+  @override
+  String get imageViewer_protectedTitle => '보호된 이미지입니다. 휴지통으로 이동할까요?';
+
+  @override
+  String get imageViewer_protectedBody => '휴지통에서 복원할 수 있습니다.';
+
+  @override
+  String get imageViewer_cancel => '취소';
+
+  @override
+  String get imageViewer_justNow => '방금';
+
+  @override
+  String imageViewer_minutesAgo(Object count) {
+    return '$count분 전';
+  }
+
+  @override
+  String imageViewer_hoursAgo(Object count) {
+    return '$count시간 전';
+  }
+
+  @override
+  String get imageViewer_yesterday => '어제';
 }

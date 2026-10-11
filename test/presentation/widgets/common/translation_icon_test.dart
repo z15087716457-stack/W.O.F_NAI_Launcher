@@ -114,7 +114,11 @@ void main() {
             final icon = tester.getRect(find.byType(TranslationIcon));
             final slot = tester.getRect(find.byType(TagTranslationIndicator));
             expect(slot.center.dy, closeTo(text.center.dy, .5));
-            expect(icon.center.dy, closeTo(slot.center.dy + 1.5 * scale, .5));
+            // 光学偏移随标题字号等比：14 号 1.5，28 号 3。
+            expect(
+              icon.center.dy,
+              closeTo(slot.center.dy + 1.5 * size / 14 * scale, .5),
+            );
             await tester.runAsync(() async {
               final render =
                   boundary.currentContext!.findRenderObject()!

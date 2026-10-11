@@ -15933,4 +15933,421 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get blocks_quickHint => 'プレビュー・ネガ・パラメーターは後でライブラリで設定';
+
+  @override
+  String get imageViewer_backGallery => 'ローカルギャラリー';
+
+  @override
+  String get imageViewer_backGeneration => '生成';
+
+  @override
+  String get imageViewer_scopeAll => 'すべての画像';
+
+  @override
+  String get imageViewer_sortModified => '更新日時順';
+
+  @override
+  String get imageViewer_sortCreated => '作成日時順';
+
+  @override
+  String get imageViewer_sortFileName => 'ファイル名順';
+
+  @override
+  String get imageViewer_sortFileSize => 'ファイルサイズ順';
+
+  @override
+  String get imageViewer_sortDimensions => 'サイズ順';
+
+  @override
+  String get imageViewer_unsaved => '未保存';
+
+  @override
+  String get imageViewer_saved => '保存済み';
+
+  @override
+  String imageViewer_batch(Object count) {
+    return '生成結果 · 今回 $count 枚';
+  }
+
+  @override
+  String imageViewer_zoomFit(Object percent) {
+    return 'フィット · $percent%';
+  }
+
+  @override
+  String get imageViewer_zoomFitPending => 'フィット · —';
+
+  @override
+  String get imageViewer_zoomFitShort => 'フィット';
+
+  @override
+  String get imageViewer_zoomIn => '拡大';
+
+  @override
+  String get imageViewer_zoomOut => '縮小';
+
+  @override
+  String get imageViewer_actualSize => '原寸';
+
+  @override
+  String get imageViewer_fullscreen => '全画面';
+
+  @override
+  String get imageViewer_exitFullscreen => '全画面を終了';
+
+  @override
+  String get imageViewer_fullscreenHint => '下端にマウスでフィルムストリップ · 2 秒静止で非表示';
+
+  @override
+  String get imageViewer_infoPanel => '情報パネル';
+
+  @override
+  String get imageViewer_infoShort => '情報';
+
+  @override
+  String get imageViewer_hideInfo => '情報を閉じる';
+
+  @override
+  String get imageViewer_previous => '前へ';
+
+  @override
+  String get imageViewer_next => '次へ';
+
+  @override
+  String get imageViewer_loadingOriginal => '元画像を読み込み中';
+
+  @override
+  String imageViewer_loadingOriginalSize(Object size) {
+    return '元画像を読み込み中 · $size';
+  }
+
+  @override
+  String get imageViewer_missingTitle => 'この画像が見つかりません';
+
+  @override
+  String get imageViewer_missingHint => 'エクスプローラーで移動・名前変更・削除された可能性があります';
+
+  @override
+  String get imageViewer_openFolder => 'フォルダーを開く';
+
+  @override
+  String get imageViewer_nextImage => '次の画像';
+
+  @override
+  String get imageViewer_hintPan => 'ドラッグで移動';
+
+  @override
+  String get imageViewer_hintWheel => 'ホイールでズーム';
+
+  @override
+  String get imageViewer_hintDouble => 'ダブルクリック /';
+
+  @override
+  String get imageViewer_hintFit => 'フィットに戻す';
+
+  @override
+  String get imageViewer_hintActual => '原寸';
+
+  @override
+  String get imageViewer_dragFrame => '枠をドラッグ';
+
+  @override
+  String get imageViewer_movedToTrash => 'ごみ箱に移動しました';
+
+  @override
+  String get imageViewer_undo => '元に戻す';
+
+  @override
+  String get imageViewer_details => '詳細';
+
+  @override
+  String get imageViewer_generationResult => '生成結果';
+
+  @override
+  String get imageViewer_favorite => 'お気に入り';
+
+  @override
+  String get imageViewer_showInFolder => 'フォルダーに表示';
+
+  @override
+  String imageViewer_deleteKey(Object key) {
+    return '削除  $key';
+  }
+
+  @override
+  String get imageViewer_more => 'その他';
+
+  @override
+  String imageViewer_genIndex(Object index) {
+    return '今回の生成 · $index 枚目';
+  }
+
+  @override
+  String get imageViewer_notSaved => 'ギャラリー未保存';
+
+  @override
+  String get imageViewer_savedToGallery => 'ギャラリーに保存済み';
+
+  @override
+  String get imageViewer_size => 'サイズ';
+
+  @override
+  String get imageViewer_fileSize => '容量';
+
+  @override
+  String get imageViewer_modified => '更新日時';
+
+  @override
+  String get imageViewer_model => 'モデル';
+
+  @override
+  String get imageViewer_params => '生成パラメーター';
+
+  @override
+  String get imageViewer_loadingMeta => 'メタデータを読み込み中…';
+
+  @override
+  String get imageViewer_seed => 'シード';
+
+  @override
+  String get imageViewer_sampler => 'サンプラー';
+
+  @override
+  String get imageViewer_steps => 'ステップ';
+
+  @override
+  String get imageViewer_guidance => 'ガイダンス';
+
+  @override
+  String imageViewer_noise(Object value) {
+    return 'ノイズ $value';
+  }
+
+  @override
+  String imageViewer_rescale(Object value) {
+    return 'リスケール $value';
+  }
+
+  @override
+  String imageViewer_precise(Object count) {
+    return '精密参照 ×$count';
+  }
+
+  @override
+  String get imageViewer_qualityTags => '品質タグ';
+
+  @override
+  String get imageViewer_prompt => 'プロンプト';
+
+  @override
+  String get imageViewer_translate => '翻訳';
+
+  @override
+  String get imageViewer_showOriginal => '原文を表示';
+
+  @override
+  String imageViewer_translateFailed(Object error) {
+    return '翻訳に失敗しました：$error';
+  }
+
+  @override
+  String get imageViewer_copy => 'コピー';
+
+  @override
+  String get imageViewer_copySeed => 'シードをコピー';
+
+  @override
+  String get imageViewer_expandAll => 'すべて表示';
+
+  @override
+  String get imageViewer_expand => '展開';
+
+  @override
+  String get imageViewer_collapse => '折りたたむ';
+
+  @override
+  String imageViewer_character(Object index) {
+    return 'キャラクター $index';
+  }
+
+  @override
+  String imageViewer_position(Object cell) {
+    return '位置 $cell';
+  }
+
+  @override
+  String get imageViewer_characterNegative => 'キャラ ネガティブ · ';
+
+  @override
+  String get imageViewer_negative => 'ネガティブ';
+
+  @override
+  String imageViewer_tagCount(Object count) {
+    return '$count 項目';
+  }
+
+  @override
+  String get imageViewer_vibes => 'Vibe 参照';
+
+  @override
+  String imageViewer_vibeStrength(Object value) {
+    return '強度 $value';
+  }
+
+  @override
+  String imageViewer_vibeInfo(Object value) {
+    return '情報 $value';
+  }
+
+  @override
+  String get imageViewer_saveVibe => 'Vibe ライブラリに保存';
+
+  @override
+  String get imageViewer_noMetaTitle => 'NovelAI の生成情報がありません';
+
+  @override
+  String get imageViewer_noMetaBody =>
+      'NAI で生成された画像ではないか、メタデータが削除されています（スクリーンショット・再保存・圧縮画像によくあります）。\n下の画像から画像・スタイル転送・精密参照・拡大は使えます。';
+
+  @override
+  String get imageViewer_reuse => 'パラメーターを再利用';
+
+  @override
+  String get imageViewer_reuseNoMeta => '生成情報なし';
+
+  @override
+  String get imageViewer_img2img => '画像から画像';
+
+  @override
+  String get imageViewer_styleTransfer => 'スタイル転送';
+
+  @override
+  String get imageViewer_preciseRef => '精密参照';
+
+  @override
+  String get imageViewer_saveRef => '参照に保存';
+
+  @override
+  String get imageViewer_krita => 'Krita に送る';
+
+  @override
+  String get imageViewer_kritaOff => 'Krita に接続していません';
+
+  @override
+  String get imageViewer_upscale => '拡大';
+
+  @override
+  String get imageViewer_copyImage => '画像をコピー';
+
+  @override
+  String get imageViewer_saveBlock => 'ブロックに保存';
+
+  @override
+  String get imageViewer_save => 'ギャラリーに保存';
+
+  @override
+  String get imageViewer_copyPath => 'ファイルパスをコピー';
+
+  @override
+  String get imageViewer_copyAllPrompts => 'すべてのプロンプトをコピー（キャラ含む）';
+
+  @override
+  String get imageViewer_saveBlockEllipsis => 'ブロックに保存…';
+
+  @override
+  String get imageViewer_addToCollection => 'コレクションに追加';
+
+  @override
+  String get imageViewer_moveTo => '移動…';
+
+  @override
+  String get imageViewer_copyTo => 'コピー先…';
+
+  @override
+  String get imageViewer_moveToTrash => 'ごみ箱に移動';
+
+  @override
+  String get imageViewer_collections => 'コレクション';
+
+  @override
+  String get imageViewer_newCollection => '新しいコレクション…';
+
+  @override
+  String get imageViewer_helpTitle => 'ビューアーのショートカット';
+
+  @override
+  String get imageViewer_helpHint => '設定 → ショートカットで変更できます';
+
+  @override
+  String get imageViewer_helpClose => 'もう一度押すと閉じる';
+
+  @override
+  String get imageViewer_helpBrowse => '閲覧';
+
+  @override
+  String get imageViewer_helpZoom => 'ズーム';
+
+  @override
+  String get imageViewer_helpActions => '操作';
+
+  @override
+  String get imageViewer_helpPrevNext => '前へ / 次へ';
+
+  @override
+  String get imageViewer_helpFirstLast => '最初 / 最後';
+
+  @override
+  String get imageViewer_helpInfo => '情報の表示 / 非表示';
+
+  @override
+  String get imageViewer_helpClose2 => '閉じる';
+
+  @override
+  String get imageViewer_helpZoomInOut => '拡大 / 縮小';
+
+  @override
+  String get imageViewer_helpActual => '原寸 100%';
+
+  @override
+  String get imageViewer_helpWheel => 'カーソル位置を中心にズーム';
+
+  @override
+  String get imageViewer_helpDouble => 'フィット ↔ 拡大';
+
+  @override
+  String get imageViewer_keyWheel => 'ホイール';
+
+  @override
+  String get imageViewer_keyDouble => 'ダブルクリック';
+
+  @override
+  String get imageViewer_helpCopyPrompt => 'プロンプトをコピー';
+
+  @override
+  String get imageViewer_helpUndo => '削除を元に戻す';
+
+  @override
+  String get imageViewer_protectedTitle => 'この画像は保護されています。ごみ箱に移動しますか？';
+
+  @override
+  String get imageViewer_protectedBody => 'ごみ箱から元に戻せます。';
+
+  @override
+  String get imageViewer_cancel => 'キャンセル';
+
+  @override
+  String get imageViewer_justNow => 'たった今';
+
+  @override
+  String imageViewer_minutesAgo(Object count) {
+    return '$count 分前';
+  }
+
+  @override
+  String imageViewer_hoursAgo(Object count) {
+    return '$count 時間前';
+  }
+
+  @override
+  String get imageViewer_yesterday => '昨日';
 }

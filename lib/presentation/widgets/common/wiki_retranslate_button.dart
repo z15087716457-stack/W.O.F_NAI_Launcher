@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/wiki/auto_tag_translation_controller.dart';
 import 'translation_icon.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../autocomplete/tag_candidate_title.dart';
 
 String wikiTranslatingLabel(BuildContext context) =>
     context.l10n.wiki_translating;
@@ -123,7 +124,13 @@ class TagTranslationIndicator extends ConsumerWidget {
                   : controller.retranslateName(surface: surface, tag: tag)
             : null,
         icon: Transform.translate(
-          offset: Offset(0, MediaQuery.textScalerOf(context).scale(1.5)),
+          // 14 号字下墨迹中心比行框中心低 1.5，按标题字号等比放大（28 号约 3）。
+          offset: Offset(
+            0,
+            MediaQuery.textScalerOf(
+              context,
+            ).scale(1.5 * (TagTitleTextSize.of(context) ?? 14) / 14),
+          ),
           child: TranslationIcon(
             size: size,
             busy: activity.phase == TagTranslationPhase.translating,

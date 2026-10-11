@@ -15696,6 +15696,423 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get blocks_quickHint => '更多设置（预览图、负面、参数）稍后在块库里改';
+
+  @override
+  String get imageViewer_backGallery => '本地画廊';
+
+  @override
+  String get imageViewer_backGeneration => '生图';
+
+  @override
+  String get imageViewer_scopeAll => '全部图片';
+
+  @override
+  String get imageViewer_sortModified => '按修改时间';
+
+  @override
+  String get imageViewer_sortCreated => '按创建时间';
+
+  @override
+  String get imageViewer_sortFileName => '按文件名';
+
+  @override
+  String get imageViewer_sortFileSize => '按文件大小';
+
+  @override
+  String get imageViewer_sortDimensions => '按尺寸';
+
+  @override
+  String get imageViewer_unsaved => '未保存';
+
+  @override
+  String get imageViewer_saved => '已保存';
+
+  @override
+  String imageViewer_batch(Object count) {
+    return '生成结果 · 本批 $count 张';
+  }
+
+  @override
+  String imageViewer_zoomFit(Object percent) {
+    return '适应 · $percent%';
+  }
+
+  @override
+  String get imageViewer_zoomFitPending => '适应 · —';
+
+  @override
+  String get imageViewer_zoomFitShort => '适应';
+
+  @override
+  String get imageViewer_zoomIn => '放大';
+
+  @override
+  String get imageViewer_zoomOut => '缩小';
+
+  @override
+  String get imageViewer_actualSize => '原始大小';
+
+  @override
+  String get imageViewer_fullscreen => '全屏';
+
+  @override
+  String get imageViewer_exitFullscreen => '退出全屏';
+
+  @override
+  String get imageViewer_fullscreenHint => '鼠标移到底部显示胶片条，静止 2 秒后控件自动隐藏';
+
+  @override
+  String get imageViewer_infoPanel => '信息栏';
+
+  @override
+  String get imageViewer_infoShort => '信息';
+
+  @override
+  String get imageViewer_hideInfo => '收起信息栏';
+
+  @override
+  String get imageViewer_previous => '上一张';
+
+  @override
+  String get imageViewer_next => '下一张';
+
+  @override
+  String get imageViewer_loadingOriginal => '读取原图';
+
+  @override
+  String imageViewer_loadingOriginalSize(Object size) {
+    return '读取原图 · $size';
+  }
+
+  @override
+  String get imageViewer_missingTitle => '找不到这张图';
+
+  @override
+  String get imageViewer_missingHint => '可能已经在资源管理器里被移动、改名或删除';
+
+  @override
+  String get imageViewer_openFolder => '打开所在文件夹';
+
+  @override
+  String get imageViewer_nextImage => '下一张';
+
+  @override
+  String get imageViewer_hintPan => '拖动平移';
+
+  @override
+  String get imageViewer_hintWheel => '滚轮缩放';
+
+  @override
+  String get imageViewer_hintDouble => '双击 /';
+
+  @override
+  String get imageViewer_hintFit => '回到适应';
+
+  @override
+  String get imageViewer_hintActual => '原始大小';
+
+  @override
+  String get imageViewer_dragFrame => '拖框移动';
+
+  @override
+  String get imageViewer_movedToTrash => '已移到回收站';
+
+  @override
+  String get imageViewer_undo => '撤销';
+
+  @override
+  String get imageViewer_details => '详情';
+
+  @override
+  String get imageViewer_generationResult => '生成结果';
+
+  @override
+  String get imageViewer_favorite => '收藏';
+
+  @override
+  String get imageViewer_showInFolder => '在文件夹中显示';
+
+  @override
+  String imageViewer_deleteKey(Object key) {
+    return '删除  $key';
+  }
+
+  @override
+  String get imageViewer_more => '更多';
+
+  @override
+  String imageViewer_genIndex(Object index) {
+    return '本次生成 · 第 $index 张';
+  }
+
+  @override
+  String get imageViewer_notSaved => '还没保存到图库';
+
+  @override
+  String get imageViewer_savedToGallery => '已保存到图库';
+
+  @override
+  String get imageViewer_size => '尺寸';
+
+  @override
+  String get imageViewer_fileSize => '大小';
+
+  @override
+  String get imageViewer_modified => '修改时间';
+
+  @override
+  String get imageViewer_model => '模型';
+
+  @override
+  String get imageViewer_params => '生成参数';
+
+  @override
+  String get imageViewer_loadingMeta => '正在读取元数据…';
+
+  @override
+  String get imageViewer_seed => '种子';
+
+  @override
+  String get imageViewer_sampler => '采样器';
+
+  @override
+  String get imageViewer_steps => '步数';
+
+  @override
+  String get imageViewer_guidance => '提示词引导';
+
+  @override
+  String imageViewer_noise(Object value) {
+    return '噪声 $value';
+  }
+
+  @override
+  String imageViewer_rescale(Object value) {
+    return '重缩放 $value';
+  }
+
+  @override
+  String imageViewer_precise(Object count) {
+    return '精准参考 ×$count';
+  }
+
+  @override
+  String get imageViewer_qualityTags => '质量词';
+
+  @override
+  String get imageViewer_prompt => '提示词';
+
+  @override
+  String get imageViewer_translate => '翻译';
+
+  @override
+  String get imageViewer_showOriginal => '显示原文';
+
+  @override
+  String imageViewer_translateFailed(Object error) {
+    return '翻译失败：$error';
+  }
+
+  @override
+  String get imageViewer_copy => '复制';
+
+  @override
+  String get imageViewer_copySeed => '复制种子';
+
+  @override
+  String get imageViewer_expandAll => '展开全部';
+
+  @override
+  String get imageViewer_expand => '展开';
+
+  @override
+  String get imageViewer_collapse => '收起';
+
+  @override
+  String imageViewer_character(Object index) {
+    return '角色 $index';
+  }
+
+  @override
+  String imageViewer_position(Object cell) {
+    return '位置 $cell';
+  }
+
+  @override
+  String get imageViewer_characterNegative => '角色负面 · ';
+
+  @override
+  String get imageViewer_negative => '负面';
+
+  @override
+  String imageViewer_tagCount(Object count) {
+    return '$count 项';
+  }
+
+  @override
+  String get imageViewer_vibes => 'Vibe 参考';
+
+  @override
+  String imageViewer_vibeStrength(Object value) {
+    return '强度 $value';
+  }
+
+  @override
+  String imageViewer_vibeInfo(Object value) {
+    return '信息 $value';
+  }
+
+  @override
+  String get imageViewer_saveVibe => '存入 Vibe 库';
+
+  @override
+  String get imageViewer_noMetaTitle => '没有 NovelAI 生成信息';
+
+  @override
+  String get imageViewer_noMetaBody =>
+      '这张图不是 NAI 生成的，或者元数据已经被去掉了（截图、转存、压缩过的图常见）。\n下面的图生图、风格迁移、精准参考、放大照样能用。';
+
+  @override
+  String get imageViewer_reuse => '复用参数';
+
+  @override
+  String get imageViewer_reuseNoMeta => '这张图没有生成信息';
+
+  @override
+  String get imageViewer_img2img => '图生图';
+
+  @override
+  String get imageViewer_styleTransfer => '风格迁移';
+
+  @override
+  String get imageViewer_preciseRef => '精准参考';
+
+  @override
+  String get imageViewer_saveRef => '存入参考库';
+
+  @override
+  String get imageViewer_krita => '发送到 Krita';
+
+  @override
+  String get imageViewer_kritaOff => 'Krita 没连接';
+
+  @override
+  String get imageViewer_upscale => '放大';
+
+  @override
+  String get imageViewer_copyImage => '复制图片';
+
+  @override
+  String get imageViewer_saveBlock => '存为块';
+
+  @override
+  String get imageViewer_save => '保存到图库';
+
+  @override
+  String get imageViewer_copyPath => '复制文件路径';
+
+  @override
+  String get imageViewer_copyAllPrompts => '复制全部提示词（含角色）';
+
+  @override
+  String get imageViewer_saveBlockEllipsis => '存为块…';
+
+  @override
+  String get imageViewer_addToCollection => '加入收藏集';
+
+  @override
+  String get imageViewer_moveTo => '移动到…';
+
+  @override
+  String get imageViewer_copyTo => '复制到…';
+
+  @override
+  String get imageViewer_moveToTrash => '移到回收站';
+
+  @override
+  String get imageViewer_collections => '收藏集';
+
+  @override
+  String get imageViewer_newCollection => '新建收藏集…';
+
+  @override
+  String get imageViewer_helpTitle => '大图快捷键';
+
+  @override
+  String get imageViewer_helpHint => '可以在设置 → 快捷键里改';
+
+  @override
+  String get imageViewer_helpClose => '再按一次关闭';
+
+  @override
+  String get imageViewer_helpBrowse => '浏览';
+
+  @override
+  String get imageViewer_helpZoom => '缩放';
+
+  @override
+  String get imageViewer_helpActions => '操作';
+
+  @override
+  String get imageViewer_helpPrevNext => '上一张 / 下一张';
+
+  @override
+  String get imageViewer_helpFirstLast => '第一张 / 最后一张';
+
+  @override
+  String get imageViewer_helpInfo => '显示 / 收起信息栏';
+
+  @override
+  String get imageViewer_helpClose2 => '关闭';
+
+  @override
+  String get imageViewer_helpZoomInOut => '放大 / 缩小';
+
+  @override
+  String get imageViewer_helpActual => '原始大小 100%';
+
+  @override
+  String get imageViewer_helpWheel => '以鼠标处为中心缩放';
+
+  @override
+  String get imageViewer_helpDouble => '适应 ↔ 放大';
+
+  @override
+  String get imageViewer_keyWheel => '滚轮';
+
+  @override
+  String get imageViewer_keyDouble => '双击';
+
+  @override
+  String get imageViewer_helpCopyPrompt => '复制提示词';
+
+  @override
+  String get imageViewer_helpUndo => '撤销删除';
+
+  @override
+  String get imageViewer_protectedTitle => '这张图受保护，移到回收站？';
+
+  @override
+  String get imageViewer_protectedBody => '移到回收站后可以在回收站里还原。';
+
+  @override
+  String get imageViewer_cancel => '取消';
+
+  @override
+  String get imageViewer_justNow => '刚刚';
+
+  @override
+  String imageViewer_minutesAgo(Object count) {
+    return '$count 分钟前';
+  }
+
+  @override
+  String imageViewer_hoursAgo(Object count) {
+    return '$count 小时前';
+  }
+
+  @override
+  String get imageViewer_yesterday => '昨天';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -31390,4 +31807,421 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get blocks_quickHint => '更多設定（預覽圖、負面、參數）稍後在塊庫裡改';
+
+  @override
+  String get imageViewer_backGallery => '本地畫廊';
+
+  @override
+  String get imageViewer_backGeneration => '生圖';
+
+  @override
+  String get imageViewer_scopeAll => '全部圖片';
+
+  @override
+  String get imageViewer_sortModified => '按修改時間';
+
+  @override
+  String get imageViewer_sortCreated => '按建立時間';
+
+  @override
+  String get imageViewer_sortFileName => '按檔名';
+
+  @override
+  String get imageViewer_sortFileSize => '按檔案大小';
+
+  @override
+  String get imageViewer_sortDimensions => '按尺寸';
+
+  @override
+  String get imageViewer_unsaved => '未儲存';
+
+  @override
+  String get imageViewer_saved => '已儲存';
+
+  @override
+  String imageViewer_batch(Object count) {
+    return '生成結果 · 本批 $count 張';
+  }
+
+  @override
+  String imageViewer_zoomFit(Object percent) {
+    return '適應 · $percent%';
+  }
+
+  @override
+  String get imageViewer_zoomFitPending => '適應 · —';
+
+  @override
+  String get imageViewer_zoomFitShort => '適應';
+
+  @override
+  String get imageViewer_zoomIn => '放大';
+
+  @override
+  String get imageViewer_zoomOut => '縮小';
+
+  @override
+  String get imageViewer_actualSize => '原始大小';
+
+  @override
+  String get imageViewer_fullscreen => '全屏';
+
+  @override
+  String get imageViewer_exitFullscreen => '退出全屏';
+
+  @override
+  String get imageViewer_fullscreenHint => '滑鼠移到底部顯示膠片條，靜止 2 秒後控制元件自動隱藏';
+
+  @override
+  String get imageViewer_infoPanel => '資訊欄';
+
+  @override
+  String get imageViewer_infoShort => '資訊';
+
+  @override
+  String get imageViewer_hideInfo => '收起資訊欄';
+
+  @override
+  String get imageViewer_previous => '上一張';
+
+  @override
+  String get imageViewer_next => '下一張';
+
+  @override
+  String get imageViewer_loadingOriginal => '讀取原圖';
+
+  @override
+  String imageViewer_loadingOriginalSize(Object size) {
+    return '讀取原圖 · $size';
+  }
+
+  @override
+  String get imageViewer_missingTitle => '找不到這張圖';
+
+  @override
+  String get imageViewer_missingHint => '可能已經在資源管理器裡被移動、改名或刪除';
+
+  @override
+  String get imageViewer_openFolder => '開啟所在資料夾';
+
+  @override
+  String get imageViewer_nextImage => '下一張';
+
+  @override
+  String get imageViewer_hintPan => '拖動平移';
+
+  @override
+  String get imageViewer_hintWheel => '滾輪縮放';
+
+  @override
+  String get imageViewer_hintDouble => '雙擊 /';
+
+  @override
+  String get imageViewer_hintFit => '回到適應';
+
+  @override
+  String get imageViewer_hintActual => '原始大小';
+
+  @override
+  String get imageViewer_dragFrame => '拖框移動';
+
+  @override
+  String get imageViewer_movedToTrash => '已移到回收站';
+
+  @override
+  String get imageViewer_undo => '復原';
+
+  @override
+  String get imageViewer_details => '詳情';
+
+  @override
+  String get imageViewer_generationResult => '生成結果';
+
+  @override
+  String get imageViewer_favorite => '收藏';
+
+  @override
+  String get imageViewer_showInFolder => '在資料夾中顯示';
+
+  @override
+  String imageViewer_deleteKey(Object key) {
+    return '刪除  $key';
+  }
+
+  @override
+  String get imageViewer_more => '更多';
+
+  @override
+  String imageViewer_genIndex(Object index) {
+    return '本次生成 · 第 $index 張';
+  }
+
+  @override
+  String get imageViewer_notSaved => '還沒儲存到圖庫';
+
+  @override
+  String get imageViewer_savedToGallery => '已儲存到圖庫';
+
+  @override
+  String get imageViewer_size => '尺寸';
+
+  @override
+  String get imageViewer_fileSize => '大小';
+
+  @override
+  String get imageViewer_modified => '修改時間';
+
+  @override
+  String get imageViewer_model => '模型';
+
+  @override
+  String get imageViewer_params => '生成參數';
+
+  @override
+  String get imageViewer_loadingMeta => '正在讀取後設資料…';
+
+  @override
+  String get imageViewer_seed => '種子';
+
+  @override
+  String get imageViewer_sampler => '取樣器';
+
+  @override
+  String get imageViewer_steps => '步數';
+
+  @override
+  String get imageViewer_guidance => '提示詞引導';
+
+  @override
+  String imageViewer_noise(Object value) {
+    return '噪聲 $value';
+  }
+
+  @override
+  String imageViewer_rescale(Object value) {
+    return '重縮放 $value';
+  }
+
+  @override
+  String imageViewer_precise(Object count) {
+    return '精準參考 ×$count';
+  }
+
+  @override
+  String get imageViewer_qualityTags => '品質詞';
+
+  @override
+  String get imageViewer_prompt => '提示詞';
+
+  @override
+  String get imageViewer_translate => '翻譯';
+
+  @override
+  String get imageViewer_showOriginal => '顯示原文';
+
+  @override
+  String imageViewer_translateFailed(Object error) {
+    return '翻譯失敗：$error';
+  }
+
+  @override
+  String get imageViewer_copy => '複製';
+
+  @override
+  String get imageViewer_copySeed => '複製種子';
+
+  @override
+  String get imageViewer_expandAll => '展開全部';
+
+  @override
+  String get imageViewer_expand => '展開';
+
+  @override
+  String get imageViewer_collapse => '收起';
+
+  @override
+  String imageViewer_character(Object index) {
+    return '角色 $index';
+  }
+
+  @override
+  String imageViewer_position(Object cell) {
+    return '位置 $cell';
+  }
+
+  @override
+  String get imageViewer_characterNegative => '角色負面 · ';
+
+  @override
+  String get imageViewer_negative => '負面';
+
+  @override
+  String imageViewer_tagCount(Object count) {
+    return '$count 項';
+  }
+
+  @override
+  String get imageViewer_vibes => 'Vibe 參考';
+
+  @override
+  String imageViewer_vibeStrength(Object value) {
+    return '強度 $value';
+  }
+
+  @override
+  String imageViewer_vibeInfo(Object value) {
+    return '資訊 $value';
+  }
+
+  @override
+  String get imageViewer_saveVibe => '存入 Vibe 庫';
+
+  @override
+  String get imageViewer_noMetaTitle => '沒有 NovelAI 生成資訊';
+
+  @override
+  String get imageViewer_noMetaBody =>
+      '這張圖不是 NAI 生成的，或者後設資料已經被去掉了（截圖、轉存、壓縮過的圖常見）。\n下面的圖生圖、風格遷移、精準參考、放大照樣能用。';
+
+  @override
+  String get imageViewer_reuse => '複用參數';
+
+  @override
+  String get imageViewer_reuseNoMeta => '這張圖沒有生成資訊';
+
+  @override
+  String get imageViewer_img2img => '圖生圖';
+
+  @override
+  String get imageViewer_styleTransfer => '風格遷移';
+
+  @override
+  String get imageViewer_preciseRef => '精準參考';
+
+  @override
+  String get imageViewer_saveRef => '存入參考庫';
+
+  @override
+  String get imageViewer_krita => '傳送到 Krita';
+
+  @override
+  String get imageViewer_kritaOff => 'Krita 沒連線';
+
+  @override
+  String get imageViewer_upscale => '放大';
+
+  @override
+  String get imageViewer_copyImage => '複製圖片';
+
+  @override
+  String get imageViewer_saveBlock => '存為塊';
+
+  @override
+  String get imageViewer_save => '儲存到圖庫';
+
+  @override
+  String get imageViewer_copyPath => '複製檔案路徑';
+
+  @override
+  String get imageViewer_copyAllPrompts => '複製全部提示詞（含角色）';
+
+  @override
+  String get imageViewer_saveBlockEllipsis => '存為塊…';
+
+  @override
+  String get imageViewer_addToCollection => '加入收藏集';
+
+  @override
+  String get imageViewer_moveTo => '移動到…';
+
+  @override
+  String get imageViewer_copyTo => '複製到…';
+
+  @override
+  String get imageViewer_moveToTrash => '移到回收站';
+
+  @override
+  String get imageViewer_collections => '收藏集';
+
+  @override
+  String get imageViewer_newCollection => '新增收藏集…';
+
+  @override
+  String get imageViewer_helpTitle => '大圖快速鍵';
+
+  @override
+  String get imageViewer_helpHint => '可以在設定 → 快速鍵裡改';
+
+  @override
+  String get imageViewer_helpClose => '再按一次關閉';
+
+  @override
+  String get imageViewer_helpBrowse => '瀏覽';
+
+  @override
+  String get imageViewer_helpZoom => '縮放';
+
+  @override
+  String get imageViewer_helpActions => '操作';
+
+  @override
+  String get imageViewer_helpPrevNext => '上一張 / 下一張';
+
+  @override
+  String get imageViewer_helpFirstLast => '第一張 / 最後一張';
+
+  @override
+  String get imageViewer_helpInfo => '顯示 / 收起資訊欄';
+
+  @override
+  String get imageViewer_helpClose2 => '關閉';
+
+  @override
+  String get imageViewer_helpZoomInOut => '放大 / 縮小';
+
+  @override
+  String get imageViewer_helpActual => '原始大小 100%';
+
+  @override
+  String get imageViewer_helpWheel => '以滑鼠處為中心縮放';
+
+  @override
+  String get imageViewer_helpDouble => '適應 ↔ 放大';
+
+  @override
+  String get imageViewer_keyWheel => '滾輪';
+
+  @override
+  String get imageViewer_keyDouble => '雙擊';
+
+  @override
+  String get imageViewer_helpCopyPrompt => '複製提示詞';
+
+  @override
+  String get imageViewer_helpUndo => '復原刪除';
+
+  @override
+  String get imageViewer_protectedTitle => '這張圖受保護，移到回收站？';
+
+  @override
+  String get imageViewer_protectedBody => '移到回收站後可以在回收站裡還原。';
+
+  @override
+  String get imageViewer_cancel => '取消';
+
+  @override
+  String get imageViewer_justNow => '剛剛';
+
+  @override
+  String imageViewer_minutesAgo(Object count) {
+    return '$count 分鐘前';
+  }
+
+  @override
+  String imageViewer_hoursAgo(Object count) {
+    return '$count 小時前';
+  }
+
+  @override
+  String get imageViewer_yesterday => '昨天';
 }

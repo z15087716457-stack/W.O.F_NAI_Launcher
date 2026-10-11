@@ -1,8 +1,8 @@
 // 新界面预览：不接后端，用假数据驱动，能切状态 / 主题 / 语言。
 // 运行：flutter run -d windows -t tool/ui_shell/preview_main.dart
 // 主导航包着页面：切到“统计”显示统计页，“在线画廊”显示在线画廊，“Vibe 库 / 精准参考库”显示参考库，
-// “块库”显示块库管理页，“生图”显示块库侧栏 + 带药丸的提示词（点药丸开实例卡）
-// （都由本地模拟器驱动），其他页显示占位。
+// “块库”显示块库管理页，“生图”显示块库侧栏 + 带药丸的提示词（点药丸开实例卡），
+// “本地画廊”显示大图查看器（全屏时藏起主导航）（都由本地模拟器驱动），其他页显示占位。
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -21,10 +21,12 @@ import 'package:nai_launcher/presentation/ui/refs/refs_picker.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_contract.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_fixture.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_page.dart';
+import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
 
 import 'blocks_preview.dart';
 import 'online_preview.dart';
 import 'refs_preview.dart';
+import 'viewer_preview.dart';
 
 void main() => runApp(const _PreviewApp());
 
@@ -45,7 +47,7 @@ class _PreviewAppState extends State<_PreviewApp> {
   String? _lastAction;
 
   // 主导航
-  var _page = NavPage.promptBlocks;
+  var _page = NavPage.localGallery;
   var _gen = _Gen.idle;
   var _tasks = false;
   var _pinned = false;
@@ -73,6 +75,11 @@ class _PreviewAppState extends State<_PreviewApp> {
   // 块系统
   late final _blocks = BlocksPreviewSim(log: _log)..addListener(_rebuild);
 
+  // 本地画廊大图
+  late final _viewer = ViewerPreviewSim(log: _log)
+    ..addListener(_rebuild)
+    ..onClose = () => _log('关闭大图（真实应用回到本地画廊）');
+
   void _rebuild() => setState(() {});
 
   @override
@@ -80,6 +87,7 @@ class _PreviewAppState extends State<_PreviewApp> {
     _online.dispose();
     _refs.dispose();
     _blocks.dispose();
+    _viewer.dispose();
     super.dispose();
   }
 
@@ -280,35 +288,53 @@ class _PreviewAppState extends State<_PreviewApp> {
                       BlocksScene.values,
                       (s) => setState(() => _blocks.scene = s),
                     ),
+                    const Text('大图：'),
+                    _dropdown(
+                      _viewer.scene,
+                      ViewerScene.values,
+                      (s) => setState(() => _viewer.scene = s),
+                    ),
                     if (_lastAction != null)
                       Text(_lastAction!, style: const TextStyle(fontSize: 12)),
                   ],
                 ),
               ),
             ),
-            Expanded(
-              child: NavShell(
-                data: _nav,
-                actions: _navActions,
-                child: switch (_page) {
-                  NavPage.statistics => StatisticsPage(
-                    data: _stats,
-                    actions: _statsActions,
-                  ),
-                  NavPage.onlineGallery => OnlineGalleryPage(
-                    data: _online.data,
-                    actions: _online.actions,
-                  ),
-                  NavPage.vibeLibrary || NavPage.preciseRef => _refsPage(),
-                  NavPage.promptBlocks => BlocksLibraryPage(
-                    data: _blocks.data,
-                    actions: _blocks.actions,
-                  ),
-                  NavPage.generation => BlocksGenerationMock(log: _log),
-                  _ => _Placeholder(page: _page),
-                },
+            if (_page == NavPage.localGallery && _viewer.fullscreen)
+              Expanded(
+                child: ImageViewerPage(
+                  data: _viewer.data,
+                  actions: _viewer.actions,
+                ),
+              )
+            else
+              Expanded(
+                child: NavShell(
+                  data: _nav,
+                  actions: _navActions,
+                  child: switch (_page) {
+                    NavPage.statistics => StatisticsPage(
+                      data: _stats,
+                      actions: _statsActions,
+                    ),
+                    NavPage.onlineGallery => OnlineGalleryPage(
+                      data: _online.data,
+                      actions: _online.actions,
+                    ),
+                    NavPage.vibeLibrary || NavPage.preciseRef => _refsPage(),
+                    NavPage.promptBlocks => BlocksLibraryPage(
+                      data: _blocks.data,
+                      actions: _blocks.actions,
+                    ),
+                    NavPage.generation => BlocksGenerationMock(log: _log),
+                    NavPage.localGallery => ImageViewerPage(
+                      data: _viewer.data,
+                      actions: _viewer.actions,
+                    ),
+                    _ => _Placeholder(page: _page),
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),

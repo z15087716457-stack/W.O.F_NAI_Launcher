@@ -28465,6 +28465,774 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preview, negative and settings can be set later in the library'**
   String get blocks_quickHint;
+
+  /// No description provided for @imageViewer_backGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Local gallery'**
+  String get imageViewer_backGallery;
+
+  /// No description provided for @imageViewer_backGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get imageViewer_backGeneration;
+
+  /// No description provided for @imageViewer_scopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All images'**
+  String get imageViewer_scopeAll;
+
+  /// No description provided for @imageViewer_sortModified.
+  ///
+  /// In en, this message translates to:
+  /// **'by date modified'**
+  String get imageViewer_sortModified;
+
+  /// No description provided for @imageViewer_sortCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'by date created'**
+  String get imageViewer_sortCreated;
+
+  /// No description provided for @imageViewer_sortFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'by file name'**
+  String get imageViewer_sortFileName;
+
+  /// No description provided for @imageViewer_sortFileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'by file size'**
+  String get imageViewer_sortFileSize;
+
+  /// No description provided for @imageViewer_sortDimensions.
+  ///
+  /// In en, this message translates to:
+  /// **'by dimensions'**
+  String get imageViewer_sortDimensions;
+
+  /// No description provided for @imageViewer_unsaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved'**
+  String get imageViewer_unsaved;
+
+  /// No description provided for @imageViewer_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get imageViewer_saved;
+
+  /// No description provided for @imageViewer_batch.
+  ///
+  /// In en, this message translates to:
+  /// **'Results · {count} in this batch'**
+  String imageViewer_batch(Object count);
+
+  /// No description provided for @imageViewer_zoomFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit · {percent}%'**
+  String imageViewer_zoomFit(Object percent);
+
+  /// No description provided for @imageViewer_zoomFitPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit · —'**
+  String get imageViewer_zoomFitPending;
+
+  /// No description provided for @imageViewer_zoomFitShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit'**
+  String get imageViewer_zoomFitShort;
+
+  /// No description provided for @imageViewer_zoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get imageViewer_zoomIn;
+
+  /// No description provided for @imageViewer_zoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get imageViewer_zoomOut;
+
+  /// No description provided for @imageViewer_actualSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual size'**
+  String get imageViewer_actualSize;
+
+  /// No description provided for @imageViewer_fullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen'**
+  String get imageViewer_fullscreen;
+
+  /// No description provided for @imageViewer_exitFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get imageViewer_exitFullscreen;
+
+  /// No description provided for @imageViewer_fullscreenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to the bottom for the filmstrip · controls hide after 2 s'**
+  String get imageViewer_fullscreenHint;
+
+  /// No description provided for @imageViewer_infoPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Info panel'**
+  String get imageViewer_infoPanel;
+
+  /// No description provided for @imageViewer_infoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get imageViewer_infoShort;
+
+  /// No description provided for @imageViewer_hideInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide info'**
+  String get imageViewer_hideInfo;
+
+  /// No description provided for @imageViewer_previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get imageViewer_previous;
+
+  /// No description provided for @imageViewer_next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get imageViewer_next;
+
+  /// No description provided for @imageViewer_loadingOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading original'**
+  String get imageViewer_loadingOriginal;
+
+  /// No description provided for @imageViewer_loadingOriginalSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading original · {size}'**
+  String imageViewer_loadingOriginalSize(Object size);
+
+  /// No description provided for @imageViewer_missingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t find this image'**
+  String get imageViewer_missingTitle;
+
+  /// No description provided for @imageViewer_missingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been moved, renamed or deleted in Explorer'**
+  String get imageViewer_missingHint;
+
+  /// No description provided for @imageViewer_openFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open folder'**
+  String get imageViewer_openFolder;
+
+  /// No description provided for @imageViewer_nextImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next image'**
+  String get imageViewer_nextImage;
+
+  /// No description provided for @imageViewer_hintPan.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to pan'**
+  String get imageViewer_hintPan;
+
+  /// No description provided for @imageViewer_hintWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to zoom'**
+  String get imageViewer_hintWheel;
+
+  /// No description provided for @imageViewer_hintDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-click /'**
+  String get imageViewer_hintDouble;
+
+  /// No description provided for @imageViewer_hintFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit to window'**
+  String get imageViewer_hintFit;
+
+  /// No description provided for @imageViewer_hintActual.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual size'**
+  String get imageViewer_hintActual;
+
+  /// No description provided for @imageViewer_dragFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the frame'**
+  String get imageViewer_dragFrame;
+
+  /// No description provided for @imageViewer_movedToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to Recycle Bin'**
+  String get imageViewer_movedToTrash;
+
+  /// No description provided for @imageViewer_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get imageViewer_undo;
+
+  /// No description provided for @imageViewer_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get imageViewer_details;
+
+  /// No description provided for @imageViewer_generationResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get imageViewer_generationResult;
+
+  /// No description provided for @imageViewer_favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get imageViewer_favorite;
+
+  /// No description provided for @imageViewer_showInFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in folder'**
+  String get imageViewer_showInFolder;
+
+  /// No description provided for @imageViewer_deleteKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete  {key}'**
+  String imageViewer_deleteKey(Object key);
+
+  /// No description provided for @imageViewer_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get imageViewer_more;
+
+  /// No description provided for @imageViewer_genIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'This batch · #{index}'**
+  String imageViewer_genIndex(Object index);
+
+  /// No description provided for @imageViewer_notSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved to gallery'**
+  String get imageViewer_notSaved;
+
+  /// No description provided for @imageViewer_savedToGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to gallery'**
+  String get imageViewer_savedToGallery;
+
+  /// No description provided for @imageViewer_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get imageViewer_size;
+
+  /// No description provided for @imageViewer_fileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'File size'**
+  String get imageViewer_fileSize;
+
+  /// No description provided for @imageViewer_modified.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified'**
+  String get imageViewer_modified;
+
+  /// No description provided for @imageViewer_model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get imageViewer_model;
+
+  /// No description provided for @imageViewer_params.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters'**
+  String get imageViewer_params;
+
+  /// No description provided for @imageViewer_loadingMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading metadata…'**
+  String get imageViewer_loadingMeta;
+
+  /// No description provided for @imageViewer_seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get imageViewer_seed;
+
+  /// No description provided for @imageViewer_sampler.
+  ///
+  /// In en, this message translates to:
+  /// **'Sampler'**
+  String get imageViewer_sampler;
+
+  /// No description provided for @imageViewer_steps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get imageViewer_steps;
+
+  /// No description provided for @imageViewer_guidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance'**
+  String get imageViewer_guidance;
+
+  /// No description provided for @imageViewer_noise.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise {value}'**
+  String imageViewer_noise(Object value);
+
+  /// No description provided for @imageViewer_rescale.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescale {value}'**
+  String imageViewer_rescale(Object value);
+
+  /// No description provided for @imageViewer_precise.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise ref ×{count}'**
+  String imageViewer_precise(Object count);
+
+  /// No description provided for @imageViewer_qualityTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality tags'**
+  String get imageViewer_qualityTags;
+
+  /// No description provided for @imageViewer_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get imageViewer_prompt;
+
+  /// No description provided for @imageViewer_translate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get imageViewer_translate;
+
+  /// No description provided for @imageViewer_showOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original'**
+  String get imageViewer_showOriginal;
+
+  /// No description provided for @imageViewer_translateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation failed: {error}'**
+  String imageViewer_translateFailed(Object error);
+
+  /// No description provided for @imageViewer_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get imageViewer_copy;
+
+  /// No description provided for @imageViewer_copySeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy seed'**
+  String get imageViewer_copySeed;
+
+  /// No description provided for @imageViewer_expandAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get imageViewer_expandAll;
+
+  /// No description provided for @imageViewer_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get imageViewer_expand;
+
+  /// No description provided for @imageViewer_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get imageViewer_collapse;
+
+  /// No description provided for @imageViewer_character.
+  ///
+  /// In en, this message translates to:
+  /// **'Character {index}'**
+  String imageViewer_character(Object index);
+
+  /// No description provided for @imageViewer_position.
+  ///
+  /// In en, this message translates to:
+  /// **'Position {cell}'**
+  String imageViewer_position(Object cell);
+
+  /// No description provided for @imageViewer_characterNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Character negative · '**
+  String get imageViewer_characterNegative;
+
+  /// No description provided for @imageViewer_negative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative'**
+  String get imageViewer_negative;
+
+  /// No description provided for @imageViewer_tagCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tags'**
+  String imageViewer_tagCount(Object count);
+
+  /// No description provided for @imageViewer_vibes.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe references'**
+  String get imageViewer_vibes;
+
+  /// No description provided for @imageViewer_vibeStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength {value}'**
+  String imageViewer_vibeStrength(Object value);
+
+  /// No description provided for @imageViewer_vibeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Info {value}'**
+  String imageViewer_vibeInfo(Object value);
+
+  /// No description provided for @imageViewer_saveVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Vibe library'**
+  String get imageViewer_saveVibe;
+
+  /// No description provided for @imageViewer_noMetaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No NovelAI generation info'**
+  String get imageViewer_noMetaTitle;
+
+  /// No description provided for @imageViewer_noMetaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This image wasn\'t made with NAI, or its metadata was stripped (common for screenshots, re-saved or compressed images).\nImage to image, style transfer, precise reference and upscale below still work.'**
+  String get imageViewer_noMetaBody;
+
+  /// No description provided for @imageViewer_reuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse parameters'**
+  String get imageViewer_reuse;
+
+  /// No description provided for @imageViewer_reuseNoMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'No generation info'**
+  String get imageViewer_reuseNoMeta;
+
+  /// No description provided for @imageViewer_img2img.
+  ///
+  /// In en, this message translates to:
+  /// **'Img2img'**
+  String get imageViewer_img2img;
+
+  /// No description provided for @imageViewer_styleTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Style transfer'**
+  String get imageViewer_styleTransfer;
+
+  /// No description provided for @imageViewer_preciseRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise ref'**
+  String get imageViewer_preciseRef;
+
+  /// No description provided for @imageViewer_saveRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as ref'**
+  String get imageViewer_saveRef;
+
+  /// No description provided for @imageViewer_krita.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to Krita'**
+  String get imageViewer_krita;
+
+  /// No description provided for @imageViewer_kritaOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Krita is not connected'**
+  String get imageViewer_kritaOff;
+
+  /// No description provided for @imageViewer_upscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale'**
+  String get imageViewer_upscale;
+
+  /// No description provided for @imageViewer_copyImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy image'**
+  String get imageViewer_copyImage;
+
+  /// No description provided for @imageViewer_saveBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block'**
+  String get imageViewer_saveBlock;
+
+  /// No description provided for @imageViewer_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to gallery'**
+  String get imageViewer_save;
+
+  /// No description provided for @imageViewer_copyPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy file path'**
+  String get imageViewer_copyPath;
+
+  /// No description provided for @imageViewer_copyAllPrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all prompts (with characters)'**
+  String get imageViewer_copyAllPrompts;
+
+  /// No description provided for @imageViewer_saveBlockEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block…'**
+  String get imageViewer_saveBlockEllipsis;
+
+  /// No description provided for @imageViewer_addToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to collection'**
+  String get imageViewer_addToCollection;
+
+  /// No description provided for @imageViewer_moveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to…'**
+  String get imageViewer_moveTo;
+
+  /// No description provided for @imageViewer_copyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to…'**
+  String get imageViewer_copyTo;
+
+  /// No description provided for @imageViewer_moveToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Recycle Bin'**
+  String get imageViewer_moveToTrash;
+
+  /// No description provided for @imageViewer_collections.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections'**
+  String get imageViewer_collections;
+
+  /// No description provided for @imageViewer_newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection…'**
+  String get imageViewer_newCollection;
+
+  /// No description provided for @imageViewer_helpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewer shortcuts'**
+  String get imageViewer_helpTitle;
+
+  /// No description provided for @imageViewer_helpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Change them in Settings → Shortcuts'**
+  String get imageViewer_helpHint;
+
+  /// No description provided for @imageViewer_helpClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Press again to close'**
+  String get imageViewer_helpClose;
+
+  /// No description provided for @imageViewer_helpBrowse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse'**
+  String get imageViewer_helpBrowse;
+
+  /// No description provided for @imageViewer_helpZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom'**
+  String get imageViewer_helpZoom;
+
+  /// No description provided for @imageViewer_helpActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get imageViewer_helpActions;
+
+  /// No description provided for @imageViewer_helpPrevNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous / next'**
+  String get imageViewer_helpPrevNext;
+
+  /// No description provided for @imageViewer_helpFirstLast.
+  ///
+  /// In en, this message translates to:
+  /// **'First / last'**
+  String get imageViewer_helpFirstLast;
+
+  /// No description provided for @imageViewer_helpInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Show / hide info'**
+  String get imageViewer_helpInfo;
+
+  /// No description provided for @imageViewer_helpClose2.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get imageViewer_helpClose2;
+
+  /// No description provided for @imageViewer_helpZoomInOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in / out'**
+  String get imageViewer_helpZoomInOut;
+
+  /// No description provided for @imageViewer_helpActual.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual size 100%'**
+  String get imageViewer_helpActual;
+
+  /// No description provided for @imageViewer_helpWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom around the pointer'**
+  String get imageViewer_helpWheel;
+
+  /// No description provided for @imageViewer_helpDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit ↔ zoom'**
+  String get imageViewer_helpDouble;
+
+  /// No description provided for @imageViewer_keyWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheel'**
+  String get imageViewer_keyWheel;
+
+  /// No description provided for @imageViewer_keyDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-click'**
+  String get imageViewer_keyDouble;
+
+  /// No description provided for @imageViewer_helpCopyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy prompt'**
+  String get imageViewer_helpCopyPrompt;
+
+  /// No description provided for @imageViewer_helpUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo delete'**
+  String get imageViewer_helpUndo;
+
+  /// No description provided for @imageViewer_protectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This image is protected. Move to Recycle Bin?'**
+  String get imageViewer_protectedTitle;
+
+  /// No description provided for @imageViewer_protectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can restore it from the Recycle Bin.'**
+  String get imageViewer_protectedBody;
+
+  /// No description provided for @imageViewer_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get imageViewer_cancel;
+
+  /// No description provided for @imageViewer_justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get imageViewer_justNow;
+
+  /// No description provided for @imageViewer_minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min ago'**
+  String imageViewer_minutesAgo(Object count);
+
+  /// No description provided for @imageViewer_hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h ago'**
+  String imageViewer_hoursAgo(Object count);
+
+  /// No description provided for @imageViewer_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday'**
+  String get imageViewer_yesterday;
 }
 
 class _AppLocalizationsDelegate

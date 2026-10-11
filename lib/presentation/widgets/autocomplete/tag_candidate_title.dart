@@ -117,7 +117,26 @@ class TagCandidateTitle extends StatelessWidget {
           height,
         ),
       ],
-      if (trailing != null) _aligned(trailing!, trailingExtent, height),
+      if (trailing != null)
+        _aligned(
+          TagTitleTextSize(size: _textStyle.fontSize, child: trailing!),
+          trailingExtent,
+          height,
+        ),
     ],
   );
+}
+
+/// 标题字号，给行尾图标做光学居中：小写字母的墨迹中心比行框中心低，偏移量随字号变化。
+class TagTitleTextSize extends InheritedWidget {
+  const TagTitleTextSize({super.key, required this.size, required super.child});
+
+  final double? size;
+
+  /// 不在 [TagCandidateTitle] 里时为 null。
+  static double? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<TagTitleTextSize>()?.size;
+
+  @override
+  bool updateShouldNotify(TagTitleTextSize oldWidget) => size != oldWidget.size;
 }

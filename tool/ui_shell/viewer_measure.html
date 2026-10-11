@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+// 大图查看器原型的元素位置（给 viewer_measure.py 出偏差表）。键名和 viewer_prototype_capture_test.dart 一致。
+// 坐标减掉 48 主导航，和 Flutter（页面不含主导航）同一原点。全屏场景原型没有主导航，不减。
+const view=location.hash.slice(1);
+const f=document.getElementById('f');
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,400));
+  const ox=view==='full'?0:48;
+  const R=e=>{const b=e.getBoundingClientRect();return [b.left-ox,b.top,b.width,b.height]};
+  const m={}; const put=(k,e)=>{if(e) m[k]=R(e)};
+  const q=s=>d.querySelector(s), qa=s=>[...d.querySelectorAll(s)];
+  put('topbar',q('.stg-top')); put('back',q('.stg-top .dbtn.bd')); put('zoom',q('.stg-top .dseg'));
+  const dibs=qa('.stg-top .dib'); if(dibs.length>=3){put('actual',dibs[0]); put('fullscreen',dibs[dibs.length-2]); put('info-toggle',dibs[dibs.length-1]);}
+  put('arrow-next',q('.arw.r')); put('arrow-prev',q('.arw.l'));
+  put('filmstrip',q('.film')); put('film-current',q('.film .th.on'));
+  put('image',q('.view>img.main'));
+  const insh=q('.insh'); if(insh){ put('info',insh.parentElement); put('info-header',insh); }
+  put('footer',q('.insf')); put('primary',q('.insf .btn.pri'));
+  const tiles=qa('.g3 .tile'); if(tiles[0]) put('tile-0',tiles[0]); if(tiles[5]) put('tile-5',tiles[5]);
+  const cells=qa('.pgrid>div'); if(cells[0]) put('param-0',cells[0]);
+  const pt=qa('.ptxt'); if(pt[0]) put('prompt-box',pt[0]);
+  put('toast',q('.toast'));
+  put('empty',q('.empty'));
+  const pops=qa('.pop'); if(pops.length){ put('pop-0',pops[0]); if(pops[1]) put('pop-1',pops[1]); }
+  const gl=qa('.glass'); gl.forEach((g,i)=>put('glass-'+i,g));
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+f.src='/mockups/viewer/mock.html#'+view;
+</script></body></html>

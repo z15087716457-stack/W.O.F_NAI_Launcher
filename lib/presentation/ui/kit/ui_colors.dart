@@ -38,6 +38,12 @@ class UiColors {
     required this.warn,
     required this.warnBg,
     required this.star,
+    required this.weightUp,
+    required this.weightUpInk,
+    required this.weightDown,
+    required this.weightDownInk,
+    required this.weightNeg,
+    required this.weightNegInk,
   });
 
   factory UiColors.of(BuildContext context) =>
@@ -79,6 +85,12 @@ class UiColors {
       warn: dark ? const Color(0xFFF1A10D) : const Color(0xFFB86E00),
       warnBg: dark ? const Color(0xFF2A2110) : const Color(0xFFFFF6E5),
       star: dark ? const Color(0xFFFFB224) : const Color(0xFFF5A400),
+      weightUp: dark ? const Color(0xFF3A2A10) : const Color(0xFFFFF1DC),
+      weightUpInk: dark ? const Color(0xFFFFB547) : const Color(0xFFA85B00),
+      weightDown: dark ? const Color(0xFF10264A) : const Color(0xFFE6F0FF),
+      weightDownInk: dark ? const Color(0xFF7CB8FF) : const Color(0xFF0057C2),
+      weightNeg: dark ? const Color(0xFF3D1418) : const Color(0xFFFFE8EA),
+      weightNegInk: dark ? const Color(0xFFFF7A80) : const Color(0xFFC80029),
     );
   }
 
@@ -163,6 +175,14 @@ class UiColors {
 
   /// 收藏星。
   final Color star;
+
+  /// 提示词权重高亮（大图信息栏）：权重大于 1 暖色、小于 1 冷色、负数红色；底色 + 权重数字色。
+  final Color weightUp;
+  final Color weightUpInk;
+  final Color weightDown;
+  final Color weightDownInk;
+  final Color weightNeg;
+  final Color weightNegInk;
 
   /// 把 [color] 按 [t] 混到卡片底色上，等价于 CSS `color-mix(color t, card)`。
   Color onCard(Color color, double t) => Color.lerp(card, color, t)!;

@@ -16401,4 +16401,425 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get blocks_quickHint =>
       'Preview, negative and settings can be set later in the library';
+
+  @override
+  String get imageViewer_backGallery => 'Local gallery';
+
+  @override
+  String get imageViewer_backGeneration => 'Generate';
+
+  @override
+  String get imageViewer_scopeAll => 'All images';
+
+  @override
+  String get imageViewer_sortModified => 'by date modified';
+
+  @override
+  String get imageViewer_sortCreated => 'by date created';
+
+  @override
+  String get imageViewer_sortFileName => 'by file name';
+
+  @override
+  String get imageViewer_sortFileSize => 'by file size';
+
+  @override
+  String get imageViewer_sortDimensions => 'by dimensions';
+
+  @override
+  String get imageViewer_unsaved => 'Unsaved';
+
+  @override
+  String get imageViewer_saved => 'Saved';
+
+  @override
+  String imageViewer_batch(Object count) {
+    return 'Results · $count in this batch';
+  }
+
+  @override
+  String imageViewer_zoomFit(Object percent) {
+    return 'Fit · $percent%';
+  }
+
+  @override
+  String get imageViewer_zoomFitPending => 'Fit · —';
+
+  @override
+  String get imageViewer_zoomFitShort => 'Fit';
+
+  @override
+  String get imageViewer_zoomIn => 'Zoom in';
+
+  @override
+  String get imageViewer_zoomOut => 'Zoom out';
+
+  @override
+  String get imageViewer_actualSize => 'Actual size';
+
+  @override
+  String get imageViewer_fullscreen => 'Full screen';
+
+  @override
+  String get imageViewer_exitFullscreen => 'Exit full screen';
+
+  @override
+  String get imageViewer_fullscreenHint =>
+      'Move to the bottom for the filmstrip · controls hide after 2 s';
+
+  @override
+  String get imageViewer_infoPanel => 'Info panel';
+
+  @override
+  String get imageViewer_infoShort => 'Info';
+
+  @override
+  String get imageViewer_hideInfo => 'Hide info';
+
+  @override
+  String get imageViewer_previous => 'Previous';
+
+  @override
+  String get imageViewer_next => 'Next';
+
+  @override
+  String get imageViewer_loadingOriginal => 'Loading original';
+
+  @override
+  String imageViewer_loadingOriginalSize(Object size) {
+    return 'Loading original · $size';
+  }
+
+  @override
+  String get imageViewer_missingTitle => 'Can\'t find this image';
+
+  @override
+  String get imageViewer_missingHint =>
+      'It may have been moved, renamed or deleted in Explorer';
+
+  @override
+  String get imageViewer_openFolder => 'Open folder';
+
+  @override
+  String get imageViewer_nextImage => 'Next image';
+
+  @override
+  String get imageViewer_hintPan => 'Drag to pan';
+
+  @override
+  String get imageViewer_hintWheel => 'Scroll to zoom';
+
+  @override
+  String get imageViewer_hintDouble => 'Double-click /';
+
+  @override
+  String get imageViewer_hintFit => 'Fit to window';
+
+  @override
+  String get imageViewer_hintActual => 'Actual size';
+
+  @override
+  String get imageViewer_dragFrame => 'Drag the frame';
+
+  @override
+  String get imageViewer_movedToTrash => 'Moved to Recycle Bin';
+
+  @override
+  String get imageViewer_undo => 'Undo';
+
+  @override
+  String get imageViewer_details => 'Details';
+
+  @override
+  String get imageViewer_generationResult => 'Result';
+
+  @override
+  String get imageViewer_favorite => 'Favorite';
+
+  @override
+  String get imageViewer_showInFolder => 'Show in folder';
+
+  @override
+  String imageViewer_deleteKey(Object key) {
+    return 'Delete  $key';
+  }
+
+  @override
+  String get imageViewer_more => 'More';
+
+  @override
+  String imageViewer_genIndex(Object index) {
+    return 'This batch · #$index';
+  }
+
+  @override
+  String get imageViewer_notSaved => 'Not saved to gallery';
+
+  @override
+  String get imageViewer_savedToGallery => 'Saved to gallery';
+
+  @override
+  String get imageViewer_size => 'Size';
+
+  @override
+  String get imageViewer_fileSize => 'File size';
+
+  @override
+  String get imageViewer_modified => 'Modified';
+
+  @override
+  String get imageViewer_model => 'Model';
+
+  @override
+  String get imageViewer_params => 'Parameters';
+
+  @override
+  String get imageViewer_loadingMeta => 'Reading metadata…';
+
+  @override
+  String get imageViewer_seed => 'Seed';
+
+  @override
+  String get imageViewer_sampler => 'Sampler';
+
+  @override
+  String get imageViewer_steps => 'Steps';
+
+  @override
+  String get imageViewer_guidance => 'Guidance';
+
+  @override
+  String imageViewer_noise(Object value) {
+    return 'Noise $value';
+  }
+
+  @override
+  String imageViewer_rescale(Object value) {
+    return 'Rescale $value';
+  }
+
+  @override
+  String imageViewer_precise(Object count) {
+    return 'Precise ref ×$count';
+  }
+
+  @override
+  String get imageViewer_qualityTags => 'Quality tags';
+
+  @override
+  String get imageViewer_prompt => 'Prompt';
+
+  @override
+  String get imageViewer_translate => 'Translate';
+
+  @override
+  String get imageViewer_showOriginal => 'Show original';
+
+  @override
+  String imageViewer_translateFailed(Object error) {
+    return 'Translation failed: $error';
+  }
+
+  @override
+  String get imageViewer_copy => 'Copy';
+
+  @override
+  String get imageViewer_copySeed => 'Copy seed';
+
+  @override
+  String get imageViewer_expandAll => 'Show all';
+
+  @override
+  String get imageViewer_expand => 'Expand';
+
+  @override
+  String get imageViewer_collapse => 'Collapse';
+
+  @override
+  String imageViewer_character(Object index) {
+    return 'Character $index';
+  }
+
+  @override
+  String imageViewer_position(Object cell) {
+    return 'Position $cell';
+  }
+
+  @override
+  String get imageViewer_characterNegative => 'Character negative · ';
+
+  @override
+  String get imageViewer_negative => 'Negative';
+
+  @override
+  String imageViewer_tagCount(Object count) {
+    return '$count tags';
+  }
+
+  @override
+  String get imageViewer_vibes => 'Vibe references';
+
+  @override
+  String imageViewer_vibeStrength(Object value) {
+    return 'Strength $value';
+  }
+
+  @override
+  String imageViewer_vibeInfo(Object value) {
+    return 'Info $value';
+  }
+
+  @override
+  String get imageViewer_saveVibe => 'Save to Vibe library';
+
+  @override
+  String get imageViewer_noMetaTitle => 'No NovelAI generation info';
+
+  @override
+  String get imageViewer_noMetaBody =>
+      'This image wasn\'t made with NAI, or its metadata was stripped (common for screenshots, re-saved or compressed images).\nImage to image, style transfer, precise reference and upscale below still work.';
+
+  @override
+  String get imageViewer_reuse => 'Reuse parameters';
+
+  @override
+  String get imageViewer_reuseNoMeta => 'No generation info';
+
+  @override
+  String get imageViewer_img2img => 'Img2img';
+
+  @override
+  String get imageViewer_styleTransfer => 'Style transfer';
+
+  @override
+  String get imageViewer_preciseRef => 'Precise ref';
+
+  @override
+  String get imageViewer_saveRef => 'Save as ref';
+
+  @override
+  String get imageViewer_krita => 'Send to Krita';
+
+  @override
+  String get imageViewer_kritaOff => 'Krita is not connected';
+
+  @override
+  String get imageViewer_upscale => 'Upscale';
+
+  @override
+  String get imageViewer_copyImage => 'Copy image';
+
+  @override
+  String get imageViewer_saveBlock => 'Save as block';
+
+  @override
+  String get imageViewer_save => 'Save to gallery';
+
+  @override
+  String get imageViewer_copyPath => 'Copy file path';
+
+  @override
+  String get imageViewer_copyAllPrompts => 'Copy all prompts (with characters)';
+
+  @override
+  String get imageViewer_saveBlockEllipsis => 'Save as block…';
+
+  @override
+  String get imageViewer_addToCollection => 'Add to collection';
+
+  @override
+  String get imageViewer_moveTo => 'Move to…';
+
+  @override
+  String get imageViewer_copyTo => 'Copy to…';
+
+  @override
+  String get imageViewer_moveToTrash => 'Move to Recycle Bin';
+
+  @override
+  String get imageViewer_collections => 'Collections';
+
+  @override
+  String get imageViewer_newCollection => 'New collection…';
+
+  @override
+  String get imageViewer_helpTitle => 'Viewer shortcuts';
+
+  @override
+  String get imageViewer_helpHint => 'Change them in Settings → Shortcuts';
+
+  @override
+  String get imageViewer_helpClose => 'Press again to close';
+
+  @override
+  String get imageViewer_helpBrowse => 'Browse';
+
+  @override
+  String get imageViewer_helpZoom => 'Zoom';
+
+  @override
+  String get imageViewer_helpActions => 'Actions';
+
+  @override
+  String get imageViewer_helpPrevNext => 'Previous / next';
+
+  @override
+  String get imageViewer_helpFirstLast => 'First / last';
+
+  @override
+  String get imageViewer_helpInfo => 'Show / hide info';
+
+  @override
+  String get imageViewer_helpClose2 => 'Close';
+
+  @override
+  String get imageViewer_helpZoomInOut => 'Zoom in / out';
+
+  @override
+  String get imageViewer_helpActual => 'Actual size 100%';
+
+  @override
+  String get imageViewer_helpWheel => 'Zoom around the pointer';
+
+  @override
+  String get imageViewer_helpDouble => 'Fit ↔ zoom';
+
+  @override
+  String get imageViewer_keyWheel => 'Wheel';
+
+  @override
+  String get imageViewer_keyDouble => 'Double-click';
+
+  @override
+  String get imageViewer_helpCopyPrompt => 'Copy prompt';
+
+  @override
+  String get imageViewer_helpUndo => 'Undo delete';
+
+  @override
+  String get imageViewer_protectedTitle =>
+      'This image is protected. Move to Recycle Bin?';
+
+  @override
+  String get imageViewer_protectedBody =>
+      'You can restore it from the Recycle Bin.';
+
+  @override
+  String get imageViewer_cancel => 'Cancel';
+
+  @override
+  String get imageViewer_justNow => 'just now';
+
+  @override
+  String imageViewer_minutesAgo(Object count) {
+    return '$count min ago';
+  }
+
+  @override
+  String imageViewer_hoursAgo(Object count) {
+    return '$count h ago';
+  }
+
+  @override
+  String get imageViewer_yesterday => 'yesterday';
 }
