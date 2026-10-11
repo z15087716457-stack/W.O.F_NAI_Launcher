@@ -125,4 +125,22 @@ abstract final class UiGlyphs {
       'M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM3 20a6 6 0 0112 0M17 4l1.2 2.6L21 7l-2 2 .5 2.8L17 10.5 14.5 11.8 15 9l-2-2 2.8-.4z';
   static const picture = 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01';
   static const arrowLeft = 'M19 12H5M11 6l-6 6 6 6';
+
+  // 块系统（.devin/mockups/blocks/mock.html）
+  static const dice =
+      'M5 4h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1zM9 9h.01M15 15h.01M15 9h.01M9 15h.01M12 12h.01';
+  static const seq = 'M4 12h12M12 7l5 5-5 5M20 6v12';
+  static const fixed = 'M5 12h14';
+  static const unlock = 'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 016.8-1.2';
+  static const evo =
+      'M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9M9.5 7h5M9.5 17h5';
+  static const eyeOff =
+      'M3 3l18 18M10.6 5.1A10 10 0 0112 5c6.5 0 10 7 10 7a17 17 0 01-3.2 4.2M6.6 6.6A17 17 0 002 12s3.5 7 10 7a9.6 9.6 0 005.4-1.6M9.9 9.9a3 3 0 004.2 4.2';
+  static const folderPlus = 'M3 6h6l2 2h10v11H3zM12 11v5M9.5 13.5h5';
+  static const list = 'M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01';
+  static const box = 'M4 4h16v16H4zM8 12l3 3 5-6';
+  static const keyboard = 'M3 6h18v12H3zM7 10h.01M11 10h.01M15 10h.01M7 14h10';
+  static const minus = 'M5 12h14';
+  static const drag = 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01';
+  static const merge = 'M6 4v5a6 6 0 006 6h6M15 12l3 3-3 3M6 20v-3';
 }

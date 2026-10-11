@@ -15034,4 +15034,903 @@ class AppLocalizationsJa extends AppLocalizations {
   String refs_timeMonthDay(Object month, Object day) {
     return '$month月$day日';
   }
+
+  @override
+  String get blocks_title => 'ブロックライブラリ';
+
+  @override
+  String get blocks_translationMark => '訳';
+
+  @override
+  String get blocks_add => '追加';
+
+  @override
+  String get blocks_cancel => 'キャンセル';
+
+  @override
+  String get blocks_close => '閉じる';
+
+  @override
+  String get blocks_delete => '削除';
+
+  @override
+  String get blocks_done => '完了';
+
+  @override
+  String get blocks_save => '保存';
+
+  @override
+  String get blocks_saveEnter => '保存 ⏎';
+
+  @override
+  String get blocks_more => 'その他';
+
+  @override
+  String get blocks_back => '戻る';
+
+  @override
+  String get blocks_rename => '名前を変更';
+
+  @override
+  String get blocks_edit => '編集';
+
+  @override
+  String get blocks_copy => 'コピー';
+
+  @override
+  String get blocks_export => 'エクスポート';
+
+  @override
+  String get blocks_apply => '適用';
+
+  @override
+  String get blocks_off => 'オフ';
+
+  @override
+  String get blocks_to => '〜';
+
+  @override
+  String blocks_items(Object count) {
+    return '$count 項目';
+  }
+
+  @override
+  String get blocks_itemUnit => '項目';
+
+  @override
+  String blocks_usedTimes(Object count) {
+    return '$count 回使用';
+  }
+
+  @override
+  String blocks_nBlocks(Object count) {
+    return '$count 個';
+  }
+
+  @override
+  String get blocks_untitled => '無題';
+
+  @override
+  String get blocks_favorite => 'お気に入り';
+
+  @override
+  String get blocks_unfavorite => 'お気に入り解除';
+
+  @override
+  String get blocks_favorites => 'お気に入り';
+
+  @override
+  String get blocks_recent => '最近使用';
+
+  @override
+  String get blocks_uncategorized => '未分類';
+
+  @override
+  String get blocks_positive => 'ポジティブ';
+
+  @override
+  String get blocks_negative => 'ネガティブ';
+
+  @override
+  String blocks_positiveN(Object count) {
+    return 'ポジ $count';
+  }
+
+  @override
+  String blocks_negativeN(Object count) {
+    return 'ネガ $count';
+  }
+
+  @override
+  String get blocks_content => '内容';
+
+  @override
+  String get blocks_name => '名前';
+
+  @override
+  String get blocks_folder => 'フォルダー';
+
+  @override
+  String get blocks_folders => 'フォルダー';
+
+  @override
+  String get blocks_tags => 'タグ';
+
+  @override
+  String get blocks_tag => 'タグ';
+
+  @override
+  String get blocks_icon => 'アイコン';
+
+  @override
+  String get blocks_color => '色';
+
+  @override
+  String get blocks_look => '外観';
+
+  @override
+  String get blocks_appearance => '外観';
+
+  @override
+  String get blocks_thumb => 'プレビュー';
+
+  @override
+  String get blocks_preview => 'プレビュー';
+
+  @override
+  String get blocks_params => '付属パラメーター';
+
+  @override
+  String get blocks_classify => '分類';
+
+  @override
+  String get blocks_lookClassic => 'クラシック';
+
+  @override
+  String get blocks_lookStripes => 'ストライプ';
+
+  @override
+  String get blocks_lookDots => 'ドット';
+
+  @override
+  String get blocks_lookSolid => 'ソリッド';
+
+  @override
+  String get blocks_lookGradient => 'グラデーション';
+
+  @override
+  String get blocks_lookTranslation => '翻訳';
+
+  @override
+  String get blocks_hasParams => 'パラメーター付き';
+
+  @override
+  String get blocks_hasNegative => 'ネガ含む';
+
+  @override
+  String get blocks_hintClick => 'クリックで挿入';
+
+  @override
+  String get blocks_hintDrag => 'ドラッグで配置';
+
+  @override
+  String get blocks_hintRightClick => '右クリックでその他';
+
+  @override
+  String get blocks_searchHint => 'ブロックを検索…';
+
+  @override
+  String get blocks_filterAll => 'すべて';
+
+  @override
+  String blocks_allN(Object count) {
+    return 'すべて $count';
+  }
+
+  @override
+  String get blocks_searchResults => '検索結果';
+
+  @override
+  String get blocks_noResults => '一致するブロックはありません';
+
+  @override
+  String get blocks_noFavorites => 'お気に入りはまだありません。ブロックを右クリック → お気に入り。';
+
+  @override
+  String get blocks_dockEmpty =>
+      'ブロックライブラリは空です。よく使うプロンプトをブロックとして保存すると、クリックひとつで挿入できます。';
+
+  @override
+  String get blocks_dockHint => 'クリックでカーソル位置に挿入 · プロンプトへドラッグで配置';
+
+  @override
+  String get blocks_openLibrary => 'ブロックライブラリで開く';
+
+  @override
+  String get blocks_newBlock => '新規ブロック';
+
+  @override
+  String get blocks_newBlockTip => '新規ブロック（Ctrl+N）';
+
+  @override
+  String get blocks_insertAtCursor => 'カーソル位置に挿入';
+
+  @override
+  String get blocks_addToPalette => 'パレットに追加';
+
+  @override
+  String get blocks_showInLibrary => 'ライブラリで表示';
+
+  @override
+  String get blocks_missing => 'ブロックは削除済み';
+
+  @override
+  String get blocks_modeFixed => '固定';
+
+  @override
+  String get blocks_modeSequential => '順番';
+
+  @override
+  String get blocks_modeRandom => 'ランダム';
+
+  @override
+  String blocks_summaryRandom(Object range, Object pool) {
+    return 'ランダム · 毎回 $range 項目 · プール $pool 項目';
+  }
+
+  @override
+  String blocks_summarySequential(Object range) {
+    return '順番 · 毎回 $range 項目 · 1 枚ごとに進む';
+  }
+
+  @override
+  String get blocks_drawnThisTime => '今回の抽選';
+
+  @override
+  String get blocks_lock => 'ロック';
+
+  @override
+  String get blocks_unlock => 'ロック解除';
+
+  @override
+  String get blocks_lockTip => 'この結果を固定し、生成時に再抽選しない';
+
+  @override
+  String get blocks_unlockTip => '解除すると生成時に再抽選します';
+
+  @override
+  String get blocks_reroll => '再抽選';
+
+  @override
+  String get blocks_rerollLocked => 'ロック中。再抽選するには解除してください';
+
+  @override
+  String blocks_skipped(Object percent) {
+    return '今回は出現なし（出現率 $percent）';
+  }
+
+  @override
+  String blocks_sendPrefix(Object text) {
+    return '送信：$text';
+  }
+
+  @override
+  String blocks_seqPosition(Object index, Object total) {
+    return '$index / $total 項目';
+  }
+
+  @override
+  String get blocks_seqLocked => 'ロック中、自動で進みません';
+
+  @override
+  String get blocks_prevItem => '前の項目';
+
+  @override
+  String get blocks_nextItem => '次の項目';
+
+  @override
+  String blocks_prevValue(Object value) {
+    return '前 $value';
+  }
+
+  @override
+  String blocks_nextValue(Object value) {
+    return '次 $value';
+  }
+
+  @override
+  String get blocks_paramsTitle => 'このブロックには生成パラメーターがあります';
+
+  @override
+  String get blocks_drawMode => '抽選方式';
+
+  @override
+  String blocks_fixedExplain(Object count) {
+    return '固定：毎回 $count 項目すべてをそのまま入れます。順番かランダムにすると、ここで数と重みを設定できます。';
+  }
+
+  @override
+  String get blocks_ruleCount => '数';
+
+  @override
+  String get blocks_ruleWeight => '重み';
+
+  @override
+  String get blocks_ruleShow => '出現';
+
+  @override
+  String get blocks_ruleEach => '毎回';
+
+  @override
+  String get blocks_ruleItemUnit => '項目';
+
+  @override
+  String get blocks_ruleWrap => '最後まで行ったら最初から';
+
+  @override
+  String get blocks_adjust => '調整';
+
+  @override
+  String get blocks_appliesTo => '適用先';
+
+  @override
+  String get blocks_disable => '無効化';
+
+  @override
+  String get blocks_enable => '有効化';
+
+  @override
+  String get blocks_editBlock => 'ブロック編集';
+
+  @override
+  String get blocks_removeInstanceTip => 'プロンプトから削除';
+
+  @override
+  String get blocks_removeInstance => 'プロンプトから削除';
+
+  @override
+  String get blocks_copySend => '送信テキストをコピー';
+
+  @override
+  String get blocks_evolutionOn => '遺伝ブロックにする';
+
+  @override
+  String get blocks_evolutionOff => '遺伝を解除';
+
+  @override
+  String get blocks_rulesTitle => '抽選ルール';
+
+  @override
+  String get blocks_rulesHint => '完了を押すと反映';
+
+  @override
+  String get blocks_rulesDirty => '変更あり · 完了で反映';
+
+  @override
+  String get blocks_modeFixedDesc => '毎回すべてをそのまま';
+
+  @override
+  String get blocks_modeSequentialDesc => '順に回し、1 枚ごとに進む';
+
+  @override
+  String get blocks_modeRandomDesc => '毎回プールからランダムに抽選';
+
+  @override
+  String get blocks_drawEach => '毎回';
+
+  @override
+  String get blocks_takeEach => '毎回';
+
+  @override
+  String blocks_poolSize(Object count) {
+    return 'プール $count 項目';
+  }
+
+  @override
+  String get blocks_outputOrder => '出力順';
+
+  @override
+  String get blocks_orderDrawn => '抽選順';
+
+  @override
+  String get blocks_orderOriginal => '元の順序';
+
+  @override
+  String get blocks_seqExplain => '1 枚ごとに 1 つ進み、ロックすると現在の項目で止まります。';
+
+  @override
+  String get blocks_randomWeight => 'ランダム重み';
+
+  @override
+  String get blocks_randomWeightHint => '各項目に 0.8::…:: の重みを付けます';
+
+  @override
+  String get blocks_weightMin => '最小';
+
+  @override
+  String get blocks_weightAverage => '最頻';
+
+  @override
+  String get blocks_weightMax => '最大';
+
+  @override
+  String get blocks_distribution => '分布';
+
+  @override
+  String get blocks_distFocused => '集中';
+
+  @override
+  String get blocks_distBalanced => '均衡';
+
+  @override
+  String get blocks_distSpread => '分散';
+
+  @override
+  String get blocks_distCustom => 'カスタム';
+
+  @override
+  String get blocks_advanced => '詳細';
+
+  @override
+  String get blocks_leftDispersion => '左側の分散';
+
+  @override
+  String get blocks_rightDispersion => '右側の分散';
+
+  @override
+  String get blocks_softBalance => 'ソフトバランス';
+
+  @override
+  String get blocks_softBalanceHint => '複数項目の平均を最頻値に寄せる';
+
+  @override
+  String get blocks_softBalanceStrength => '強さ';
+
+  @override
+  String get blocks_probability => '出現率';
+
+  @override
+  String get blocks_probabilityHint => '100% 未満だと、ブロック全体が出ないことがあります';
+
+  @override
+  String get blocks_previewHint => 'このルールで 4 回抽選';
+
+  @override
+  String get blocks_resample => 'もう一度';
+
+  @override
+  String get blocks_sampleSkipped => '（出現なし）';
+
+  @override
+  String get blocks_resetDefault => 'デフォルトに戻す';
+
+  @override
+  String get blocks_discard => '変更を破棄';
+
+  @override
+  String get blocks_allBlocks => 'すべてのブロック';
+
+  @override
+  String get blocks_collections => 'コレクション';
+
+  @override
+  String get blocks_newCollection => '新規コレクション';
+
+  @override
+  String get blocks_collectionName => 'コレクション名';
+
+  @override
+  String get blocks_noCollections => 'ここのコレクションへカードをドラッグ。1 つのブロックを複数に入れられます。';
+
+  @override
+  String get blocks_deleteCollection => 'コレクションを削除';
+
+  @override
+  String get blocks_newFolder => '新規フォルダー';
+
+  @override
+  String get blocks_newSubfolder => 'サブフォルダーを作成';
+
+  @override
+  String get blocks_folderName => 'フォルダー名';
+
+  @override
+  String get blocks_deleteFolder => 'フォルダーを削除…';
+
+  @override
+  String get blocks_moveUp => '上へ';
+
+  @override
+  String get blocks_moveDown => '下へ';
+
+  @override
+  String get blocks_moveToTop => '最上位へ移動';
+
+  @override
+  String get blocks_tagName => 'タグ名';
+
+  @override
+  String get blocks_tagColor => '色を変更';
+
+  @override
+  String get blocks_deleteTag => 'タグを削除';
+
+  @override
+  String get blocks_collapseSidebar => 'サイドバーを閉じる';
+
+  @override
+  String get blocks_expandSidebar => 'サイドバーを開く';
+
+  @override
+  String get blocks_importExport => 'インポート / エクスポート';
+
+  @override
+  String get blocks_importTxt => 'TXT をインポート…';
+
+  @override
+  String get blocks_importFolder => 'フォルダーをインポート…';
+
+  @override
+  String get blocks_importCuration => '整理してインポート…';
+
+  @override
+  String get blocks_exportBackup => 'ライブラリをバックアップ';
+
+  @override
+  String get blocks_importBackup => 'バックアップから復元…';
+
+  @override
+  String blocks_dropMoveTo(Object name) {
+    return '「$name」へ移動';
+  }
+
+  @override
+  String blocks_dropCopyTo(Object name) {
+    return '「$name」へコピー';
+  }
+
+  @override
+  String blocks_dropAddTo(Object name) {
+    return '「$name」に追加';
+  }
+
+  @override
+  String get blocks_searchLibrary => 'タイトル・内容・タグを検索';
+
+  @override
+  String get blocks_sortCustom => 'カスタム順';
+
+  @override
+  String get blocks_sortUpdated => '最近の変更';
+
+  @override
+  String get blocks_sortTitle => '名前';
+
+  @override
+  String get blocks_sortColor => '色';
+
+  @override
+  String get blocks_sortIcon => 'アイコン';
+
+  @override
+  String get blocks_sortAsc => '昇順';
+
+  @override
+  String get blocks_sortDesc => '降順';
+
+  @override
+  String get blocks_viewGrid => 'グリッド';
+
+  @override
+  String get blocks_viewList => 'リスト';
+
+  @override
+  String get blocks_multiSelect => '複数選択';
+
+  @override
+  String get blocks_multiDone => '選択を終了';
+
+  @override
+  String get blocks_hideInspector => '詳細を隠す';
+
+  @override
+  String get blocks_showInspector => '詳細を表示';
+
+  @override
+  String get blocks_quickImage => 'プレビューあり';
+
+  @override
+  String get blocks_quickNegative => 'ネガ含む';
+
+  @override
+  String get blocks_quickParams => 'パラメーター付き';
+
+  @override
+  String get blocks_cardSize => 'カードサイズ';
+
+  @override
+  String get blocks_noMatch => '条件に合うブロックはありません';
+
+  @override
+  String get blocks_noMatchBody => '別のキーワードを試すか、クイックフィルターを解除してください。';
+
+  @override
+  String get blocks_clearFilters => 'フィルターを解除';
+
+  @override
+  String get blocks_insert => '挿入';
+
+  @override
+  String get blocks_insertToPrompt => 'プロンプトに挿入';
+
+  @override
+  String get blocks_miniNegative => 'ネガ';
+
+  @override
+  String get blocks_miniParams => 'パラメ';
+
+  @override
+  String get blocks_colName => '名前';
+
+  @override
+  String get blocks_colItems => '項目数';
+
+  @override
+  String get blocks_colFolder => 'フォルダー';
+
+  @override
+  String get blocks_colUsed => '使用';
+
+  @override
+  String get blocks_colModified => '変更';
+
+  @override
+  String blocks_selectedN(Object count) {
+    return '$count 件選択';
+  }
+
+  @override
+  String blocks_selectedBlocksN(Object count) {
+    return '$count 個のブロックを選択';
+  }
+
+  @override
+  String get blocks_moveTo => '移動…';
+
+  @override
+  String get blocks_noTags => 'タグはまだありません';
+
+  @override
+  String get blocks_emptyTitle => 'ブロックライブラリは空です';
+
+  @override
+  String get blocks_emptyBody =>
+      '画師プール、キャラクター、衣装、品質タグなど、よく使うプロンプトをブロックとして保存しましょう。挿入後は固定・順番・ランダムで使えます。';
+
+  @override
+  String get blocks_duplicate => '複製';
+
+  @override
+  String get blocks_copyContent => '内容をコピー';
+
+  @override
+  String get blocks_applyParams => '付属パラメーターを適用';
+
+  @override
+  String get blocks_exportTxt => 'TXT にエクスポート';
+
+  @override
+  String get blocks_removeFromCollection => 'コレクションから外す';
+
+  @override
+  String blocks_deleteOne(Object name) {
+    return '「$name」を削除しますか？';
+  }
+
+  @override
+  String blocks_deleteMany(Object count) {
+    return '$count 個のブロックを削除しますか？';
+  }
+
+  @override
+  String get blocks_deleteBody =>
+      'プロンプトに挿入済みのインスタンスは「ブロックは削除済み」と表示されます。元に戻せます。';
+
+  @override
+  String get blocks_details => '詳細';
+
+  @override
+  String get blocks_noSelection => 'カードをクリックで詳細。ダブルクリックで編集、Enter でプロンプトに挿入。';
+
+  @override
+  String get blocks_changeThumb => '変更 / 調整';
+
+  @override
+  String get blocks_reading => '翻訳（読み）';
+
+  @override
+  String get blocks_needsReview => '要確認';
+
+  @override
+  String get blocks_applyToCurrent => '現在に適用';
+
+  @override
+  String get blocks_noParams => 'なし。挿入しても現在のパラメーターは変わりません。';
+
+  @override
+  String get blocks_paramModel => 'モデル';
+
+  @override
+  String get blocks_paramSteps => 'ステップ';
+
+  @override
+  String get blocks_paramGuidance => 'ガイダンス';
+
+  @override
+  String get blocks_paramRescale => 'リスケール';
+
+  @override
+  String get blocks_paramSampler => 'サンプラー';
+
+  @override
+  String get blocks_paramNoise => 'ノイズ';
+
+  @override
+  String blocks_steps(Object count) {
+    return '$count ステップ';
+  }
+
+  @override
+  String blocks_guidance(Object value) {
+    return 'ガイダンス $value';
+  }
+
+  @override
+  String blocks_rescale(Object value) {
+    return 'リスケール $value';
+  }
+
+  @override
+  String get blocks_newTagInEdit => '新規タグ…';
+
+  @override
+  String blocks_modifiedAt(Object time) {
+    return '$time に変更';
+  }
+
+  @override
+  String blocks_createdAt(Object date) {
+    return '$date に作成';
+  }
+
+  @override
+  String blocks_sourceFile(Object path) {
+    return 'ソースファイル $path';
+  }
+
+  @override
+  String get blocks_sourceSynced => 'ファイルと一致';
+
+  @override
+  String get blocks_sourceChanged => 'ファイルが変更済み';
+
+  @override
+  String get blocks_sourceMissing => 'ファイルが見つかりません';
+
+  @override
+  String blocks_importedAt(Object date) {
+    return '$date にインポート';
+  }
+
+  @override
+  String get blocks_total => '合計';
+
+  @override
+  String blocks_totalItems(Object count) {
+    return '$count 項目';
+  }
+
+  @override
+  String get blocks_from => '出所';
+
+  @override
+  String get blocks_batch => '一括操作';
+
+  @override
+  String get blocks_insertInOrder => '順にプロンプトへ挿入';
+
+  @override
+  String get blocks_mergeNew => '新しいブロックに統合…';
+
+  @override
+  String get blocks_batchStyle => '色 / 外観をまとめて変更';
+
+  @override
+  String blocks_dragHint(Object count) {
+    return 'この $count 枚のカードを左のフォルダーやコレクションにドラッグし、離すときに移動かコピーを選べます。';
+  }
+
+  @override
+  String get blocks_editBlockTitle => 'ブロックを編集';
+
+  @override
+  String get blocks_editHint =>
+      '保存後、プロンプト内の固定インスタンスはすぐ更新され、ランダム / 順番は次の抽選から新しい内容を使います';
+
+  @override
+  String get blocks_newBlockHint => '保存後、生成ページのサイドバーからワンクリックで挿入できます';
+
+  @override
+  String get blocks_addThumb => 'プレビューを追加';
+
+  @override
+  String get blocks_changeImage => '画像を変更';
+
+  @override
+  String get blocks_clearThumb => 'プレビューを削除';
+
+  @override
+  String get blocks_cropHint => 'ドラッグ / ホイールで拡大';
+
+  @override
+  String get blocks_namePlaceholder => '空欄なら最初の項目';
+
+  @override
+  String get blocks_plainText => 'テキスト';
+
+  @override
+  String get blocks_plainTextHint => '入力どおりに保存し、項目に分けません';
+
+  @override
+  String get blocks_atomHint => '入力して Enter かカンマで追加。貼り付けると自動で分割';
+
+  @override
+  String get blocks_existingTags => '既存のタグ';
+
+  @override
+  String get blocks_newTag => '新しいタグ';
+
+  @override
+  String get blocks_paramsNotAuto => '挿入時は自動適用しない';
+
+  @override
+  String get blocks_noParamsShort => 'なし';
+
+  @override
+  String get blocks_editParams => 'パラメーターを編集';
+
+  @override
+  String get blocks_captureParams => '現在の値を読む';
+
+  @override
+  String get blocks_keepCurrent => '現在の値のまま';
+
+  @override
+  String get blocks_clearParams => 'パラメーターをクリア';
+
+  @override
+  String get blocks_deleteBlock => 'ブロックを削除';
+
+  @override
+  String get blocks_deleteConfirmInline => 'このブロックを削除しますか？';
+
+  @override
+  String get blocks_saveShortcut => 'Ctrl+Enter で保存';
+
+  @override
+  String get blocks_saveAsBlock => 'ブロックとして保存';
+
+  @override
+  String get blocks_lookup => '用語を調べる';
+
+  @override
+  String blocks_splitDone(Object count) {
+    return '$count 項目 · カンマで分割済み';
+  }
+
+  @override
+  String get blocks_replaceSelection => '保存後、選択したテキストをこのブロックに置き換える';
+
+  @override
+  String get blocks_quickHint => 'プレビュー・ネガ・パラメーターは後でライブラリで設定';
 }

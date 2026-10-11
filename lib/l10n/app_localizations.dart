@@ -26803,6 +26803,1668 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{month}/{day}'**
   String refs_timeMonthDay(Object month, Object day);
+
+  /// No description provided for @blocks_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Block library'**
+  String get blocks_title;
+
+  /// No description provided for @blocks_translationMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Tr'**
+  String get blocks_translationMark;
+
+  /// No description provided for @blocks_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get blocks_add;
+
+  /// No description provided for @blocks_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get blocks_cancel;
+
+  /// No description provided for @blocks_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get blocks_close;
+
+  /// No description provided for @blocks_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get blocks_delete;
+
+  /// No description provided for @blocks_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get blocks_done;
+
+  /// No description provided for @blocks_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get blocks_save;
+
+  /// No description provided for @blocks_saveEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Save ⏎'**
+  String get blocks_saveEnter;
+
+  /// No description provided for @blocks_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get blocks_more;
+
+  /// No description provided for @blocks_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get blocks_back;
+
+  /// No description provided for @blocks_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get blocks_rename;
+
+  /// No description provided for @blocks_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get blocks_edit;
+
+  /// No description provided for @blocks_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get blocks_copy;
+
+  /// No description provided for @blocks_export.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get blocks_export;
+
+  /// No description provided for @blocks_apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get blocks_apply;
+
+  /// No description provided for @blocks_off.
+  ///
+  /// In en, this message translates to:
+  /// **'off'**
+  String get blocks_off;
+
+  /// No description provided for @blocks_to.
+  ///
+  /// In en, this message translates to:
+  /// **'to'**
+  String get blocks_to;
+
+  /// No description provided for @blocks_items.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String blocks_items(Object count);
+
+  /// No description provided for @blocks_itemUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get blocks_itemUnit;
+
+  /// No description provided for @blocks_usedTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Used {count}×'**
+  String blocks_usedTimes(Object count);
+
+  /// No description provided for @blocks_nBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String blocks_nBlocks(Object count);
+
+  /// No description provided for @blocks_untitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get blocks_untitled;
+
+  /// No description provided for @blocks_favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get blocks_favorite;
+
+  /// No description provided for @blocks_unfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite'**
+  String get blocks_unfavorite;
+
+  /// No description provided for @blocks_favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get blocks_favorites;
+
+  /// No description provided for @blocks_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently used'**
+  String get blocks_recent;
+
+  /// No description provided for @blocks_uncategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get blocks_uncategorized;
+
+  /// No description provided for @blocks_positive.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive'**
+  String get blocks_positive;
+
+  /// No description provided for @blocks_negative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative'**
+  String get blocks_negative;
+
+  /// No description provided for @blocks_positiveN.
+  ///
+  /// In en, this message translates to:
+  /// **'Positive {count}'**
+  String blocks_positiveN(Object count);
+
+  /// No description provided for @blocks_negativeN.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative {count}'**
+  String blocks_negativeN(Object count);
+
+  /// No description provided for @blocks_content.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get blocks_content;
+
+  /// No description provided for @blocks_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get blocks_name;
+
+  /// No description provided for @blocks_folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder'**
+  String get blocks_folder;
+
+  /// No description provided for @blocks_folders.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders'**
+  String get blocks_folders;
+
+  /// No description provided for @blocks_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get blocks_tags;
+
+  /// No description provided for @blocks_tag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get blocks_tag;
+
+  /// No description provided for @blocks_icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get blocks_icon;
+
+  /// No description provided for @blocks_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get blocks_color;
+
+  /// No description provided for @blocks_look.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get blocks_look;
+
+  /// No description provided for @blocks_appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get blocks_appearance;
+
+  /// No description provided for @blocks_thumb.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get blocks_thumb;
+
+  /// No description provided for @blocks_preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get blocks_preview;
+
+  /// No description provided for @blocks_params.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached settings'**
+  String get blocks_params;
+
+  /// No description provided for @blocks_classify.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize'**
+  String get blocks_classify;
+
+  /// No description provided for @blocks_lookClassic.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get blocks_lookClassic;
+
+  /// No description provided for @blocks_lookStripes.
+  ///
+  /// In en, this message translates to:
+  /// **'Stripes'**
+  String get blocks_lookStripes;
+
+  /// No description provided for @blocks_lookDots.
+  ///
+  /// In en, this message translates to:
+  /// **'Dots'**
+  String get blocks_lookDots;
+
+  /// No description provided for @blocks_lookSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid'**
+  String get blocks_lookSolid;
+
+  /// No description provided for @blocks_lookGradient.
+  ///
+  /// In en, this message translates to:
+  /// **'Gradient'**
+  String get blocks_lookGradient;
+
+  /// No description provided for @blocks_lookTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get blocks_lookTranslation;
+
+  /// No description provided for @blocks_hasParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Has settings'**
+  String get blocks_hasParams;
+
+  /// No description provided for @blocks_hasNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Has negative'**
+  String get blocks_hasNegative;
+
+  /// No description provided for @blocks_hintClick.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to insert'**
+  String get blocks_hintClick;
+
+  /// No description provided for @blocks_hintDrag.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to place'**
+  String get blocks_hintDrag;
+
+  /// No description provided for @blocks_hintRightClick.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click for more'**
+  String get blocks_hintRightClick;
+
+  /// No description provided for @blocks_searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search blocks…'**
+  String get blocks_searchHint;
+
+  /// No description provided for @blocks_filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get blocks_filterAll;
+
+  /// No description provided for @blocks_allN.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String blocks_allN(Object count);
+
+  /// No description provided for @blocks_searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get blocks_searchResults;
+
+  /// No description provided for @blocks_noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching blocks'**
+  String get blocks_noResults;
+
+  /// No description provided for @blocks_noFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorites yet. Right-click a block → Favorite.'**
+  String get blocks_noFavorites;
+
+  /// No description provided for @blocks_dockEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your block library is empty. Save a prompt snippet you use often as a block, then insert it with one click.'**
+  String get blocks_dockEmpty;
+
+  /// No description provided for @blocks_dockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to insert at cursor · drag into the prompt to place'**
+  String get blocks_dockHint;
+
+  /// No description provided for @blocks_openLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in block library'**
+  String get blocks_openLibrary;
+
+  /// No description provided for @blocks_newBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'New block'**
+  String get blocks_newBlock;
+
+  /// No description provided for @blocks_newBlockTip.
+  ///
+  /// In en, this message translates to:
+  /// **'New block (Ctrl+N)'**
+  String get blocks_newBlockTip;
+
+  /// No description provided for @blocks_insertAtCursor.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert at cursor'**
+  String get blocks_insertAtCursor;
+
+  /// No description provided for @blocks_addToPalette.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to palette'**
+  String get blocks_addToPalette;
+
+  /// No description provided for @blocks_showInLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in library'**
+  String get blocks_showInLibrary;
+
+  /// No description provided for @blocks_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Block deleted'**
+  String get blocks_missing;
+
+  /// No description provided for @blocks_modeFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get blocks_modeFixed;
+
+  /// No description provided for @blocks_modeSequential.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential'**
+  String get blocks_modeSequential;
+
+  /// No description provided for @blocks_modeRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'Random'**
+  String get blocks_modeRandom;
+
+  /// No description provided for @blocks_summaryRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'Random · {range} per roll · {pool} in pool'**
+  String blocks_summaryRandom(Object range, Object pool);
+
+  /// No description provided for @blocks_summarySequential.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential · {range} per roll · steps forward each image'**
+  String blocks_summarySequential(Object range);
+
+  /// No description provided for @blocks_drawnThisTime.
+  ///
+  /// In en, this message translates to:
+  /// **'This roll'**
+  String get blocks_drawnThisTime;
+
+  /// No description provided for @blocks_lock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get blocks_lock;
+
+  /// No description provided for @blocks_unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get blocks_unlock;
+
+  /// No description provided for @blocks_lockTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this result; no reroll when generating'**
+  String get blocks_lockTip;
+
+  /// No description provided for @blocks_unlockTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock to reroll when generating'**
+  String get blocks_unlockTip;
+
+  /// No description provided for @blocks_reroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reroll'**
+  String get blocks_reroll;
+
+  /// No description provided for @blocks_rerollLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked — unlock to reroll'**
+  String get blocks_rerollLocked;
+
+  /// No description provided for @blocks_skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped this time (chance {percent})'**
+  String blocks_skipped(Object percent);
+
+  /// No description provided for @blocks_sendPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends: {text}'**
+  String blocks_sendPrefix(Object text);
+
+  /// No description provided for @blocks_seqPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Item {index} / {total}'**
+  String blocks_seqPosition(Object index, Object total);
+
+  /// No description provided for @blocks_seqLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked; won’t advance'**
+  String get blocks_seqLocked;
+
+  /// No description provided for @blocks_prevItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get blocks_prevItem;
+
+  /// No description provided for @blocks_nextItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get blocks_nextItem;
+
+  /// No description provided for @blocks_prevValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Prev {value}'**
+  String blocks_prevValue(Object value);
+
+  /// No description provided for @blocks_nextValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Next {value}'**
+  String blocks_nextValue(Object value);
+
+  /// No description provided for @blocks_paramsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This block carries generation settings'**
+  String get blocks_paramsTitle;
+
+  /// No description provided for @blocks_drawMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw mode'**
+  String get blocks_drawMode;
+
+  /// No description provided for @blocks_fixedExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed: all {count} items go in as-is every time. Switch to Sequential or Random to set counts and weights here.'**
+  String blocks_fixedExplain(Object count);
+
+  /// No description provided for @blocks_ruleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Count'**
+  String get blocks_ruleCount;
+
+  /// No description provided for @blocks_ruleWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get blocks_ruleWeight;
+
+  /// No description provided for @blocks_ruleShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Chance'**
+  String get blocks_ruleShow;
+
+  /// No description provided for @blocks_ruleEach.
+  ///
+  /// In en, this message translates to:
+  /// **'Each'**
+  String get blocks_ruleEach;
+
+  /// No description provided for @blocks_ruleItemUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get blocks_ruleItemUnit;
+
+  /// No description provided for @blocks_ruleWrap.
+  ///
+  /// In en, this message translates to:
+  /// **'Wraps around'**
+  String get blocks_ruleWrap;
+
+  /// No description provided for @blocks_adjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get blocks_adjust;
+
+  /// No description provided for @blocks_appliesTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to'**
+  String get blocks_appliesTo;
+
+  /// No description provided for @blocks_disable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get blocks_disable;
+
+  /// No description provided for @blocks_enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get blocks_enable;
+
+  /// No description provided for @blocks_editBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit block'**
+  String get blocks_editBlock;
+
+  /// No description provided for @blocks_removeInstanceTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from prompt'**
+  String get blocks_removeInstanceTip;
+
+  /// No description provided for @blocks_removeInstance.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from prompt'**
+  String get blocks_removeInstance;
+
+  /// No description provided for @blocks_copySend.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy sent text'**
+  String get blocks_copySend;
+
+  /// No description provided for @blocks_evolutionOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as evolution target'**
+  String get blocks_evolutionOn;
+
+  /// No description provided for @blocks_evolutionOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmark evolution'**
+  String get blocks_evolutionOff;
+
+  /// No description provided for @blocks_rulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw rules'**
+  String get blocks_rulesTitle;
+
+  /// No description provided for @blocks_rulesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies when you click Done'**
+  String get blocks_rulesHint;
+
+  /// No description provided for @blocks_rulesDirty.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed · applies on Done'**
+  String get blocks_rulesDirty;
+
+  /// No description provided for @blocks_modeFixedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything goes in as-is'**
+  String get blocks_modeFixedDesc;
+
+  /// No description provided for @blocks_modeSequentialDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycles in order, one step per image'**
+  String get blocks_modeSequentialDesc;
+
+  /// No description provided for @blocks_modeRandomDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Draws a few at random each time'**
+  String get blocks_modeRandomDesc;
+
+  /// No description provided for @blocks_drawEach.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get blocks_drawEach;
+
+  /// No description provided for @blocks_takeEach.
+  ///
+  /// In en, this message translates to:
+  /// **'Take'**
+  String get blocks_takeEach;
+
+  /// No description provided for @blocks_poolSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in pool'**
+  String blocks_poolSize(Object count);
+
+  /// No description provided for @blocks_outputOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Output order'**
+  String get blocks_outputOrder;
+
+  /// No description provided for @blocks_orderDrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'As drawn'**
+  String get blocks_orderDrawn;
+
+  /// No description provided for @blocks_orderOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original order'**
+  String get blocks_orderOriginal;
+
+  /// No description provided for @blocks_seqExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Advances one step per image; locking holds the current item.'**
+  String get blocks_seqExplain;
+
+  /// No description provided for @blocks_randomWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Random weight'**
+  String get blocks_randomWeight;
+
+  /// No description provided for @blocks_randomWeightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Wraps each item like 0.8::…::'**
+  String get blocks_randomWeightHint;
+
+  /// No description provided for @blocks_weightMin.
+  ///
+  /// In en, this message translates to:
+  /// **'Min'**
+  String get blocks_weightMin;
+
+  /// No description provided for @blocks_weightAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Most likely'**
+  String get blocks_weightAverage;
+
+  /// No description provided for @blocks_weightMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max'**
+  String get blocks_weightMax;
+
+  /// No description provided for @blocks_distribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread'**
+  String get blocks_distribution;
+
+  /// No description provided for @blocks_distFocused.
+  ///
+  /// In en, this message translates to:
+  /// **'Focused'**
+  String get blocks_distFocused;
+
+  /// No description provided for @blocks_distBalanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get blocks_distBalanced;
+
+  /// No description provided for @blocks_distSpread.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide'**
+  String get blocks_distSpread;
+
+  /// No description provided for @blocks_distCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get blocks_distCustom;
+
+  /// No description provided for @blocks_advanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get blocks_advanced;
+
+  /// No description provided for @blocks_leftDispersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Left spread'**
+  String get blocks_leftDispersion;
+
+  /// No description provided for @blocks_rightDispersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Right spread'**
+  String get blocks_rightDispersion;
+
+  /// No description provided for @blocks_softBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft balance'**
+  String get blocks_softBalance;
+
+  /// No description provided for @blocks_softBalanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pulls the average back toward the most likely value'**
+  String get blocks_softBalanceHint;
+
+  /// No description provided for @blocks_softBalanceStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get blocks_softBalanceStrength;
+
+  /// No description provided for @blocks_probability.
+  ///
+  /// In en, this message translates to:
+  /// **'Chance to appear'**
+  String get blocks_probability;
+
+  /// No description provided for @blocks_probabilityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Below 100%, the whole block sometimes sits out'**
+  String get blocks_probabilityHint;
+
+  /// No description provided for @blocks_previewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'4 rolls with these rules'**
+  String get blocks_previewHint;
+
+  /// No description provided for @blocks_resample.
+  ///
+  /// In en, this message translates to:
+  /// **'Roll again'**
+  String get blocks_resample;
+
+  /// No description provided for @blocks_sampleSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'(skipped)'**
+  String get blocks_sampleSkipped;
+
+  /// No description provided for @blocks_resetDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get blocks_resetDefault;
+
+  /// No description provided for @blocks_discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get blocks_discard;
+
+  /// No description provided for @blocks_allBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'All blocks'**
+  String get blocks_allBlocks;
+
+  /// No description provided for @blocks_collections.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections'**
+  String get blocks_collections;
+
+  /// No description provided for @blocks_newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection'**
+  String get blocks_newCollection;
+
+  /// No description provided for @blocks_collectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection name'**
+  String get blocks_collectionName;
+
+  /// No description provided for @blocks_noCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag cards onto a collection here; a block can be in several.'**
+  String get blocks_noCollections;
+
+  /// No description provided for @blocks_deleteCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete collection'**
+  String get blocks_deleteCollection;
+
+  /// No description provided for @blocks_newFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'New folder'**
+  String get blocks_newFolder;
+
+  /// No description provided for @blocks_newSubfolder.
+  ///
+  /// In en, this message translates to:
+  /// **'New subfolder'**
+  String get blocks_newSubfolder;
+
+  /// No description provided for @blocks_folderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name'**
+  String get blocks_folderName;
+
+  /// No description provided for @blocks_deleteFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete folder…'**
+  String get blocks_deleteFolder;
+
+  /// No description provided for @blocks_moveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get blocks_moveUp;
+
+  /// No description provided for @blocks_moveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get blocks_moveDown;
+
+  /// No description provided for @blocks_moveToTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to top level'**
+  String get blocks_moveToTop;
+
+  /// No description provided for @blocks_tagName.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag name'**
+  String get blocks_tagName;
+
+  /// No description provided for @blocks_tagColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Change color'**
+  String get blocks_tagColor;
+
+  /// No description provided for @blocks_deleteTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete tag'**
+  String get blocks_deleteTag;
+
+  /// No description provided for @blocks_collapseSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse sidebar'**
+  String get blocks_collapseSidebar;
+
+  /// No description provided for @blocks_expandSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand sidebar'**
+  String get blocks_expandSidebar;
+
+  /// No description provided for @blocks_importExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import / Export'**
+  String get blocks_importExport;
+
+  /// No description provided for @blocks_importTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Import TXT…'**
+  String get blocks_importTxt;
+
+  /// No description provided for @blocks_importFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Import folder…'**
+  String get blocks_importFolder;
+
+  /// No description provided for @blocks_importCuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Curated import…'**
+  String get blocks_importCuration;
+
+  /// No description provided for @blocks_exportBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Export library backup'**
+  String get blocks_exportBackup;
+
+  /// No description provided for @blocks_importBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Import library backup…'**
+  String get blocks_importBackup;
+
+  /// No description provided for @blocks_dropMoveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to “{name}”'**
+  String blocks_dropMoveTo(Object name);
+
+  /// No description provided for @blocks_dropCopyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to “{name}”'**
+  String blocks_dropCopyTo(Object name);
+
+  /// No description provided for @blocks_dropAddTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to “{name}”'**
+  String blocks_dropAddTo(Object name);
+
+  /// No description provided for @blocks_searchLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Search titles, content or tags'**
+  String get blocks_searchLibrary;
+
+  /// No description provided for @blocks_sortCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom order'**
+  String get blocks_sortCustom;
+
+  /// No description provided for @blocks_sortUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently modified'**
+  String get blocks_sortUpdated;
+
+  /// No description provided for @blocks_sortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get blocks_sortTitle;
+
+  /// No description provided for @blocks_sortColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get blocks_sortColor;
+
+  /// No description provided for @blocks_sortIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get blocks_sortIcon;
+
+  /// No description provided for @blocks_sortAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get blocks_sortAsc;
+
+  /// No description provided for @blocks_sortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get blocks_sortDesc;
+
+  /// No description provided for @blocks_viewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get blocks_viewGrid;
+
+  /// No description provided for @blocks_viewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get blocks_viewList;
+
+  /// No description provided for @blocks_multiSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get blocks_multiSelect;
+
+  /// No description provided for @blocks_multiDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done selecting'**
+  String get blocks_multiDone;
+
+  /// No description provided for @blocks_hideInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide details'**
+  String get blocks_hideInspector;
+
+  /// No description provided for @blocks_showInspector.
+  ///
+  /// In en, this message translates to:
+  /// **'Show details'**
+  String get blocks_showInspector;
+
+  /// No description provided for @blocks_quickImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Has preview'**
+  String get blocks_quickImage;
+
+  /// No description provided for @blocks_quickNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Has negative'**
+  String get blocks_quickNegative;
+
+  /// No description provided for @blocks_quickParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Has settings'**
+  String get blocks_quickParams;
+
+  /// No description provided for @blocks_cardSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Card size'**
+  String get blocks_cardSize;
+
+  /// No description provided for @blocks_noMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No blocks match'**
+  String get blocks_noMatch;
+
+  /// No description provided for @blocks_noMatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another keyword or clear the quick filters.'**
+  String get blocks_noMatchBody;
+
+  /// No description provided for @blocks_clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get blocks_clearFilters;
+
+  /// No description provided for @blocks_insert.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert'**
+  String get blocks_insert;
+
+  /// No description provided for @blocks_insertToPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert into prompt'**
+  String get blocks_insertToPrompt;
+
+  /// No description provided for @blocks_miniNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Neg'**
+  String get blocks_miniNegative;
+
+  /// No description provided for @blocks_miniParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get blocks_miniParams;
+
+  /// No description provided for @blocks_colName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get blocks_colName;
+
+  /// No description provided for @blocks_colItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items'**
+  String get blocks_colItems;
+
+  /// No description provided for @blocks_colFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder'**
+  String get blocks_colFolder;
+
+  /// No description provided for @blocks_colUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get blocks_colUsed;
+
+  /// No description provided for @blocks_colModified.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified'**
+  String get blocks_colModified;
+
+  /// No description provided for @blocks_selectedN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String blocks_selectedN(Object count);
+
+  /// No description provided for @blocks_selectedBlocksN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} blocks selected'**
+  String blocks_selectedBlocksN(Object count);
+
+  /// No description provided for @blocks_moveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to…'**
+  String get blocks_moveTo;
+
+  /// No description provided for @blocks_noTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags yet'**
+  String get blocks_noTags;
+
+  /// No description provided for @blocks_emptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your block library is empty'**
+  String get blocks_emptyTitle;
+
+  /// No description provided for @blocks_emptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save prompt snippets you reuse — artist pools, characters, outfits, quality tags — as blocks. Once inserted they can stay fixed, cycle in order or draw at random.'**
+  String get blocks_emptyBody;
+
+  /// No description provided for @blocks_duplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get blocks_duplicate;
+
+  /// No description provided for @blocks_copyContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy content'**
+  String get blocks_copyContent;
+
+  /// No description provided for @blocks_applyParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply attached settings'**
+  String get blocks_applyParams;
+
+  /// No description provided for @blocks_exportTxt.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as TXT'**
+  String get blocks_exportTxt;
+
+  /// No description provided for @blocks_removeFromCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from collection'**
+  String get blocks_removeFromCollection;
+
+  /// No description provided for @blocks_deleteOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String blocks_deleteOne(Object name);
+
+  /// No description provided for @blocks_deleteMany.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} blocks?'**
+  String blocks_deleteMany(Object count);
+
+  /// No description provided for @blocks_deleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Instances already in prompts will show as “Block deleted”. You can undo this.'**
+  String get blocks_deleteBody;
+
+  /// No description provided for @blocks_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get blocks_details;
+
+  /// No description provided for @blocks_noSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a card to see details. Double-click to edit; Enter inserts it into the prompt.'**
+  String get blocks_noSelection;
+
+  /// No description provided for @blocks_changeThumb.
+  ///
+  /// In en, this message translates to:
+  /// **'Change / adjust'**
+  String get blocks_changeThumb;
+
+  /// No description provided for @blocks_reading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading translation'**
+  String get blocks_reading;
+
+  /// No description provided for @blocks_needsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs review'**
+  String get blocks_needsReview;
+
+  /// No description provided for @blocks_applyToCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply now'**
+  String get blocks_applyToCurrent;
+
+  /// No description provided for @blocks_noParams.
+  ///
+  /// In en, this message translates to:
+  /// **'None. Inserting won’t change current settings.'**
+  String get blocks_noParams;
+
+  /// No description provided for @blocks_paramModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get blocks_paramModel;
+
+  /// No description provided for @blocks_paramSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get blocks_paramSteps;
+
+  /// No description provided for @blocks_paramGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance'**
+  String get blocks_paramGuidance;
+
+  /// No description provided for @blocks_paramRescale.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescale'**
+  String get blocks_paramRescale;
+
+  /// No description provided for @blocks_paramSampler.
+  ///
+  /// In en, this message translates to:
+  /// **'Sampler'**
+  String get blocks_paramSampler;
+
+  /// No description provided for @blocks_paramNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise'**
+  String get blocks_paramNoise;
+
+  /// No description provided for @blocks_steps.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps'**
+  String blocks_steps(Object count);
+
+  /// No description provided for @blocks_guidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance {value}'**
+  String blocks_guidance(Object value);
+
+  /// No description provided for @blocks_rescale.
+  ///
+  /// In en, this message translates to:
+  /// **'rescale {value}'**
+  String blocks_rescale(Object value);
+
+  /// No description provided for @blocks_newTagInEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'New tag…'**
+  String get blocks_newTagInEdit;
+
+  /// No description provided for @blocks_modifiedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified {time}'**
+  String blocks_modifiedAt(Object time);
+
+  /// No description provided for @blocks_createdAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {date}'**
+  String blocks_createdAt(Object date);
+
+  /// No description provided for @blocks_sourceFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Source file {path}'**
+  String blocks_sourceFile(Object path);
+
+  /// No description provided for @blocks_sourceSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'matches file'**
+  String get blocks_sourceSynced;
+
+  /// No description provided for @blocks_sourceChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'file changed'**
+  String get blocks_sourceChanged;
+
+  /// No description provided for @blocks_sourceMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'file missing'**
+  String get blocks_sourceMissing;
+
+  /// No description provided for @blocks_importedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {date}'**
+  String blocks_importedAt(Object date);
+
+  /// No description provided for @blocks_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get blocks_total;
+
+  /// No description provided for @blocks_totalItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String blocks_totalItems(Object count);
+
+  /// No description provided for @blocks_from.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get blocks_from;
+
+  /// No description provided for @blocks_batch.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch actions'**
+  String get blocks_batch;
+
+  /// No description provided for @blocks_insertInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert into prompt in order'**
+  String get blocks_insertInOrder;
+
+  /// No description provided for @blocks_mergeNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge into a new block…'**
+  String get blocks_mergeNew;
+
+  /// No description provided for @blocks_batchStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set color / style for all'**
+  String get blocks_batchStyle;
+
+  /// No description provided for @blocks_dragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also drag these {count} cards onto a folder or collection on the left and choose move or copy when you drop.'**
+  String blocks_dragHint(Object count);
+
+  /// No description provided for @blocks_editBlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit block'**
+  String get blocks_editBlockTitle;
+
+  /// No description provided for @blocks_editHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After saving, fixed instances in prompts update at once; random and sequential use the new content on the next roll'**
+  String get blocks_editHint;
+
+  /// No description provided for @blocks_newBlockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Once saved, insert it from the generation sidebar with one click'**
+  String get blocks_newBlockHint;
+
+  /// No description provided for @blocks_addThumb.
+  ///
+  /// In en, this message translates to:
+  /// **'Add preview'**
+  String get blocks_addThumb;
+
+  /// No description provided for @blocks_changeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get blocks_changeImage;
+
+  /// No description provided for @blocks_clearThumb.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove preview'**
+  String get blocks_clearThumb;
+
+  /// No description provided for @blocks_cropHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag · scroll to zoom'**
+  String get blocks_cropHint;
+
+  /// No description provided for @blocks_namePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaults to the first item'**
+  String get blocks_namePlaceholder;
+
+  /// No description provided for @blocks_plainText.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain text'**
+  String get blocks_plainText;
+
+  /// No description provided for @blocks_plainTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved exactly as typed, not split into items'**
+  String get blocks_plainTextHint;
+
+  /// No description provided for @blocks_atomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type and press Enter or comma to add; pasted text is split automatically'**
+  String get blocks_atomHint;
+
+  /// No description provided for @blocks_existingTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing tags'**
+  String get blocks_existingTags;
+
+  /// No description provided for @blocks_newTag.
+  ///
+  /// In en, this message translates to:
+  /// **'New tag'**
+  String get blocks_newTag;
+
+  /// No description provided for @blocks_paramsNotAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Not applied on insert'**
+  String get blocks_paramsNotAuto;
+
+  /// No description provided for @blocks_noParamsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get blocks_noParamsShort;
+
+  /// No description provided for @blocks_editParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit settings'**
+  String get blocks_editParams;
+
+  /// No description provided for @blocks_captureParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Use current'**
+  String get blocks_captureParams;
+
+  /// No description provided for @blocks_keepCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep current'**
+  String get blocks_keepCurrent;
+
+  /// No description provided for @blocks_clearParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear settings'**
+  String get blocks_clearParams;
+
+  /// No description provided for @blocks_deleteBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete block'**
+  String get blocks_deleteBlock;
+
+  /// No description provided for @blocks_deleteConfirmInline.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this block?'**
+  String get blocks_deleteConfirmInline;
+
+  /// No description provided for @blocks_saveShortcut.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl+Enter to save'**
+  String get blocks_saveShortcut;
+
+  /// No description provided for @blocks_saveAsBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block'**
+  String get blocks_saveAsBlock;
+
+  /// No description provided for @blocks_lookup.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up'**
+  String get blocks_lookup;
+
+  /// No description provided for @blocks_splitDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items · split at commas'**
+  String blocks_splitDone(Object count);
+
+  /// No description provided for @blocks_replaceSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace the selected text with this block'**
+  String get blocks_replaceSelection;
+
+  /// No description provided for @blocks_quickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview, negative and settings can be set later in the library'**
+  String get blocks_quickHint;
 }
 
 class _AppLocalizationsDelegate

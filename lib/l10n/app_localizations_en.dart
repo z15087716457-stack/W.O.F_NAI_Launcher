@@ -15488,4 +15488,917 @@ class AppLocalizationsEn extends AppLocalizations {
   String refs_timeMonthDay(Object month, Object day) {
     return '$month/$day';
   }
+
+  @override
+  String get blocks_title => 'Block library';
+
+  @override
+  String get blocks_translationMark => 'Tr';
+
+  @override
+  String get blocks_add => 'Add';
+
+  @override
+  String get blocks_cancel => 'Cancel';
+
+  @override
+  String get blocks_close => 'Close';
+
+  @override
+  String get blocks_delete => 'Delete';
+
+  @override
+  String get blocks_done => 'Done';
+
+  @override
+  String get blocks_save => 'Save';
+
+  @override
+  String get blocks_saveEnter => 'Save ⏎';
+
+  @override
+  String get blocks_more => 'More';
+
+  @override
+  String get blocks_back => 'Back';
+
+  @override
+  String get blocks_rename => 'Rename';
+
+  @override
+  String get blocks_edit => 'Edit';
+
+  @override
+  String get blocks_copy => 'Copy';
+
+  @override
+  String get blocks_export => 'Export';
+
+  @override
+  String get blocks_apply => 'Apply';
+
+  @override
+  String get blocks_off => 'off';
+
+  @override
+  String get blocks_to => 'to';
+
+  @override
+  String blocks_items(Object count) {
+    return '$count items';
+  }
+
+  @override
+  String get blocks_itemUnit => 'items';
+
+  @override
+  String blocks_usedTimes(Object count) {
+    return 'Used $count×';
+  }
+
+  @override
+  String blocks_nBlocks(Object count) {
+    return '$count';
+  }
+
+  @override
+  String get blocks_untitled => 'Untitled';
+
+  @override
+  String get blocks_favorite => 'Favorite';
+
+  @override
+  String get blocks_unfavorite => 'Unfavorite';
+
+  @override
+  String get blocks_favorites => 'Favorites';
+
+  @override
+  String get blocks_recent => 'Recently used';
+
+  @override
+  String get blocks_uncategorized => 'Uncategorized';
+
+  @override
+  String get blocks_positive => 'Positive';
+
+  @override
+  String get blocks_negative => 'Negative';
+
+  @override
+  String blocks_positiveN(Object count) {
+    return 'Positive $count';
+  }
+
+  @override
+  String blocks_negativeN(Object count) {
+    return 'Negative $count';
+  }
+
+  @override
+  String get blocks_content => 'Content';
+
+  @override
+  String get blocks_name => 'Name';
+
+  @override
+  String get blocks_folder => 'Folder';
+
+  @override
+  String get blocks_folders => 'Folders';
+
+  @override
+  String get blocks_tags => 'Tags';
+
+  @override
+  String get blocks_tag => 'Tag';
+
+  @override
+  String get blocks_icon => 'Icon';
+
+  @override
+  String get blocks_color => 'Color';
+
+  @override
+  String get blocks_look => 'Style';
+
+  @override
+  String get blocks_appearance => 'Appearance';
+
+  @override
+  String get blocks_thumb => 'Preview';
+
+  @override
+  String get blocks_preview => 'Preview';
+
+  @override
+  String get blocks_params => 'Attached settings';
+
+  @override
+  String get blocks_classify => 'Organize';
+
+  @override
+  String get blocks_lookClassic => 'Classic';
+
+  @override
+  String get blocks_lookStripes => 'Stripes';
+
+  @override
+  String get blocks_lookDots => 'Dots';
+
+  @override
+  String get blocks_lookSolid => 'Solid';
+
+  @override
+  String get blocks_lookGradient => 'Gradient';
+
+  @override
+  String get blocks_lookTranslation => 'Translation';
+
+  @override
+  String get blocks_hasParams => 'Has settings';
+
+  @override
+  String get blocks_hasNegative => 'Has negative';
+
+  @override
+  String get blocks_hintClick => 'Click to insert';
+
+  @override
+  String get blocks_hintDrag => 'Drag to place';
+
+  @override
+  String get blocks_hintRightClick => 'Right-click for more';
+
+  @override
+  String get blocks_searchHint => 'Search blocks…';
+
+  @override
+  String get blocks_filterAll => 'All';
+
+  @override
+  String blocks_allN(Object count) {
+    return 'All $count';
+  }
+
+  @override
+  String get blocks_searchResults => 'Results';
+
+  @override
+  String get blocks_noResults => 'No matching blocks';
+
+  @override
+  String get blocks_noFavorites =>
+      'No favorites yet. Right-click a block → Favorite.';
+
+  @override
+  String get blocks_dockEmpty =>
+      'Your block library is empty. Save a prompt snippet you use often as a block, then insert it with one click.';
+
+  @override
+  String get blocks_dockHint =>
+      'Click to insert at cursor · drag into the prompt to place';
+
+  @override
+  String get blocks_openLibrary => 'Open in block library';
+
+  @override
+  String get blocks_newBlock => 'New block';
+
+  @override
+  String get blocks_newBlockTip => 'New block (Ctrl+N)';
+
+  @override
+  String get blocks_insertAtCursor => 'Insert at cursor';
+
+  @override
+  String get blocks_addToPalette => 'Add to palette';
+
+  @override
+  String get blocks_showInLibrary => 'Show in library';
+
+  @override
+  String get blocks_missing => 'Block deleted';
+
+  @override
+  String get blocks_modeFixed => 'Fixed';
+
+  @override
+  String get blocks_modeSequential => 'Sequential';
+
+  @override
+  String get blocks_modeRandom => 'Random';
+
+  @override
+  String blocks_summaryRandom(Object range, Object pool) {
+    return 'Random · $range per roll · $pool in pool';
+  }
+
+  @override
+  String blocks_summarySequential(Object range) {
+    return 'Sequential · $range per roll · steps forward each image';
+  }
+
+  @override
+  String get blocks_drawnThisTime => 'This roll';
+
+  @override
+  String get blocks_lock => 'Lock';
+
+  @override
+  String get blocks_unlock => 'Unlock';
+
+  @override
+  String get blocks_lockTip => 'Keep this result; no reroll when generating';
+
+  @override
+  String get blocks_unlockTip => 'Unlock to reroll when generating';
+
+  @override
+  String get blocks_reroll => 'Reroll';
+
+  @override
+  String get blocks_rerollLocked => 'Locked — unlock to reroll';
+
+  @override
+  String blocks_skipped(Object percent) {
+    return 'Skipped this time (chance $percent)';
+  }
+
+  @override
+  String blocks_sendPrefix(Object text) {
+    return 'Sends: $text';
+  }
+
+  @override
+  String blocks_seqPosition(Object index, Object total) {
+    return 'Item $index / $total';
+  }
+
+  @override
+  String get blocks_seqLocked => 'Locked; won’t advance';
+
+  @override
+  String get blocks_prevItem => 'Previous';
+
+  @override
+  String get blocks_nextItem => 'Next';
+
+  @override
+  String blocks_prevValue(Object value) {
+    return 'Prev $value';
+  }
+
+  @override
+  String blocks_nextValue(Object value) {
+    return 'Next $value';
+  }
+
+  @override
+  String get blocks_paramsTitle => 'This block carries generation settings';
+
+  @override
+  String get blocks_drawMode => 'Draw mode';
+
+  @override
+  String blocks_fixedExplain(Object count) {
+    return 'Fixed: all $count items go in as-is every time. Switch to Sequential or Random to set counts and weights here.';
+  }
+
+  @override
+  String get blocks_ruleCount => 'Count';
+
+  @override
+  String get blocks_ruleWeight => 'Weight';
+
+  @override
+  String get blocks_ruleShow => 'Chance';
+
+  @override
+  String get blocks_ruleEach => 'Each';
+
+  @override
+  String get blocks_ruleItemUnit => 'items';
+
+  @override
+  String get blocks_ruleWrap => 'Wraps around';
+
+  @override
+  String get blocks_adjust => 'Adjust';
+
+  @override
+  String get blocks_appliesTo => 'Applies to';
+
+  @override
+  String get blocks_disable => 'Disable';
+
+  @override
+  String get blocks_enable => 'Enable';
+
+  @override
+  String get blocks_editBlock => 'Edit block';
+
+  @override
+  String get blocks_removeInstanceTip => 'Remove from prompt';
+
+  @override
+  String get blocks_removeInstance => 'Remove from prompt';
+
+  @override
+  String get blocks_copySend => 'Copy sent text';
+
+  @override
+  String get blocks_evolutionOn => 'Mark as evolution target';
+
+  @override
+  String get blocks_evolutionOff => 'Unmark evolution';
+
+  @override
+  String get blocks_rulesTitle => 'Draw rules';
+
+  @override
+  String get blocks_rulesHint => 'Applies when you click Done';
+
+  @override
+  String get blocks_rulesDirty => 'Changed · applies on Done';
+
+  @override
+  String get blocks_modeFixedDesc => 'Everything goes in as-is';
+
+  @override
+  String get blocks_modeSequentialDesc => 'Cycles in order, one step per image';
+
+  @override
+  String get blocks_modeRandomDesc => 'Draws a few at random each time';
+
+  @override
+  String get blocks_drawEach => 'Draw';
+
+  @override
+  String get blocks_takeEach => 'Take';
+
+  @override
+  String blocks_poolSize(Object count) {
+    return '$count in pool';
+  }
+
+  @override
+  String get blocks_outputOrder => 'Output order';
+
+  @override
+  String get blocks_orderDrawn => 'As drawn';
+
+  @override
+  String get blocks_orderOriginal => 'Original order';
+
+  @override
+  String get blocks_seqExplain =>
+      'Advances one step per image; locking holds the current item.';
+
+  @override
+  String get blocks_randomWeight => 'Random weight';
+
+  @override
+  String get blocks_randomWeightHint => 'Wraps each item like 0.8::…::';
+
+  @override
+  String get blocks_weightMin => 'Min';
+
+  @override
+  String get blocks_weightAverage => 'Most likely';
+
+  @override
+  String get blocks_weightMax => 'Max';
+
+  @override
+  String get blocks_distribution => 'Spread';
+
+  @override
+  String get blocks_distFocused => 'Focused';
+
+  @override
+  String get blocks_distBalanced => 'Balanced';
+
+  @override
+  String get blocks_distSpread => 'Wide';
+
+  @override
+  String get blocks_distCustom => 'Custom';
+
+  @override
+  String get blocks_advanced => 'Advanced';
+
+  @override
+  String get blocks_leftDispersion => 'Left spread';
+
+  @override
+  String get blocks_rightDispersion => 'Right spread';
+
+  @override
+  String get blocks_softBalance => 'Soft balance';
+
+  @override
+  String get blocks_softBalanceHint =>
+      'Pulls the average back toward the most likely value';
+
+  @override
+  String get blocks_softBalanceStrength => 'Strength';
+
+  @override
+  String get blocks_probability => 'Chance to appear';
+
+  @override
+  String get blocks_probabilityHint =>
+      'Below 100%, the whole block sometimes sits out';
+
+  @override
+  String get blocks_previewHint => '4 rolls with these rules';
+
+  @override
+  String get blocks_resample => 'Roll again';
+
+  @override
+  String get blocks_sampleSkipped => '(skipped)';
+
+  @override
+  String get blocks_resetDefault => 'Reset to default';
+
+  @override
+  String get blocks_discard => 'Discard';
+
+  @override
+  String get blocks_allBlocks => 'All blocks';
+
+  @override
+  String get blocks_collections => 'Collections';
+
+  @override
+  String get blocks_newCollection => 'New collection';
+
+  @override
+  String get blocks_collectionName => 'Collection name';
+
+  @override
+  String get blocks_noCollections =>
+      'Drag cards onto a collection here; a block can be in several.';
+
+  @override
+  String get blocks_deleteCollection => 'Delete collection';
+
+  @override
+  String get blocks_newFolder => 'New folder';
+
+  @override
+  String get blocks_newSubfolder => 'New subfolder';
+
+  @override
+  String get blocks_folderName => 'Folder name';
+
+  @override
+  String get blocks_deleteFolder => 'Delete folder…';
+
+  @override
+  String get blocks_moveUp => 'Move up';
+
+  @override
+  String get blocks_moveDown => 'Move down';
+
+  @override
+  String get blocks_moveToTop => 'Move to top level';
+
+  @override
+  String get blocks_tagName => 'Tag name';
+
+  @override
+  String get blocks_tagColor => 'Change color';
+
+  @override
+  String get blocks_deleteTag => 'Delete tag';
+
+  @override
+  String get blocks_collapseSidebar => 'Collapse sidebar';
+
+  @override
+  String get blocks_expandSidebar => 'Expand sidebar';
+
+  @override
+  String get blocks_importExport => 'Import / Export';
+
+  @override
+  String get blocks_importTxt => 'Import TXT…';
+
+  @override
+  String get blocks_importFolder => 'Import folder…';
+
+  @override
+  String get blocks_importCuration => 'Curated import…';
+
+  @override
+  String get blocks_exportBackup => 'Export library backup';
+
+  @override
+  String get blocks_importBackup => 'Import library backup…';
+
+  @override
+  String blocks_dropMoveTo(Object name) {
+    return 'Move to “$name”';
+  }
+
+  @override
+  String blocks_dropCopyTo(Object name) {
+    return 'Copy to “$name”';
+  }
+
+  @override
+  String blocks_dropAddTo(Object name) {
+    return 'Add to “$name”';
+  }
+
+  @override
+  String get blocks_searchLibrary => 'Search titles, content or tags';
+
+  @override
+  String get blocks_sortCustom => 'Custom order';
+
+  @override
+  String get blocks_sortUpdated => 'Recently modified';
+
+  @override
+  String get blocks_sortTitle => 'Name';
+
+  @override
+  String get blocks_sortColor => 'Color';
+
+  @override
+  String get blocks_sortIcon => 'Icon';
+
+  @override
+  String get blocks_sortAsc => 'Ascending';
+
+  @override
+  String get blocks_sortDesc => 'Descending';
+
+  @override
+  String get blocks_viewGrid => 'Grid';
+
+  @override
+  String get blocks_viewList => 'List';
+
+  @override
+  String get blocks_multiSelect => 'Select';
+
+  @override
+  String get blocks_multiDone => 'Done selecting';
+
+  @override
+  String get blocks_hideInspector => 'Hide details';
+
+  @override
+  String get blocks_showInspector => 'Show details';
+
+  @override
+  String get blocks_quickImage => 'Has preview';
+
+  @override
+  String get blocks_quickNegative => 'Has negative';
+
+  @override
+  String get blocks_quickParams => 'Has settings';
+
+  @override
+  String get blocks_cardSize => 'Card size';
+
+  @override
+  String get blocks_noMatch => 'No blocks match';
+
+  @override
+  String get blocks_noMatchBody =>
+      'Try another keyword or clear the quick filters.';
+
+  @override
+  String get blocks_clearFilters => 'Clear filters';
+
+  @override
+  String get blocks_insert => 'Insert';
+
+  @override
+  String get blocks_insertToPrompt => 'Insert into prompt';
+
+  @override
+  String get blocks_miniNegative => 'Neg';
+
+  @override
+  String get blocks_miniParams => 'Settings';
+
+  @override
+  String get blocks_colName => 'Name';
+
+  @override
+  String get blocks_colItems => 'Items';
+
+  @override
+  String get blocks_colFolder => 'Folder';
+
+  @override
+  String get blocks_colUsed => 'Used';
+
+  @override
+  String get blocks_colModified => 'Modified';
+
+  @override
+  String blocks_selectedN(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String blocks_selectedBlocksN(Object count) {
+    return '$count blocks selected';
+  }
+
+  @override
+  String get blocks_moveTo => 'Move to…';
+
+  @override
+  String get blocks_noTags => 'No tags yet';
+
+  @override
+  String get blocks_emptyTitle => 'Your block library is empty';
+
+  @override
+  String get blocks_emptyBody =>
+      'Save prompt snippets you reuse — artist pools, characters, outfits, quality tags — as blocks. Once inserted they can stay fixed, cycle in order or draw at random.';
+
+  @override
+  String get blocks_duplicate => 'Duplicate';
+
+  @override
+  String get blocks_copyContent => 'Copy content';
+
+  @override
+  String get blocks_applyParams => 'Apply attached settings';
+
+  @override
+  String get blocks_exportTxt => 'Export as TXT';
+
+  @override
+  String get blocks_removeFromCollection => 'Remove from collection';
+
+  @override
+  String blocks_deleteOne(Object name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String blocks_deleteMany(Object count) {
+    return 'Delete $count blocks?';
+  }
+
+  @override
+  String get blocks_deleteBody =>
+      'Instances already in prompts will show as “Block deleted”. You can undo this.';
+
+  @override
+  String get blocks_details => 'Details';
+
+  @override
+  String get blocks_noSelection =>
+      'Click a card to see details. Double-click to edit; Enter inserts it into the prompt.';
+
+  @override
+  String get blocks_changeThumb => 'Change / adjust';
+
+  @override
+  String get blocks_reading => 'Reading translation';
+
+  @override
+  String get blocks_needsReview => 'Needs review';
+
+  @override
+  String get blocks_applyToCurrent => 'Apply now';
+
+  @override
+  String get blocks_noParams =>
+      'None. Inserting won’t change current settings.';
+
+  @override
+  String get blocks_paramModel => 'Model';
+
+  @override
+  String get blocks_paramSteps => 'Steps';
+
+  @override
+  String get blocks_paramGuidance => 'Guidance';
+
+  @override
+  String get blocks_paramRescale => 'Rescale';
+
+  @override
+  String get blocks_paramSampler => 'Sampler';
+
+  @override
+  String get blocks_paramNoise => 'Noise';
+
+  @override
+  String blocks_steps(Object count) {
+    return '$count steps';
+  }
+
+  @override
+  String blocks_guidance(Object value) {
+    return 'Guidance $value';
+  }
+
+  @override
+  String blocks_rescale(Object value) {
+    return 'rescale $value';
+  }
+
+  @override
+  String get blocks_newTagInEdit => 'New tag…';
+
+  @override
+  String blocks_modifiedAt(Object time) {
+    return 'Modified $time';
+  }
+
+  @override
+  String blocks_createdAt(Object date) {
+    return 'Created $date';
+  }
+
+  @override
+  String blocks_sourceFile(Object path) {
+    return 'Source file $path';
+  }
+
+  @override
+  String get blocks_sourceSynced => 'matches file';
+
+  @override
+  String get blocks_sourceChanged => 'file changed';
+
+  @override
+  String get blocks_sourceMissing => 'file missing';
+
+  @override
+  String blocks_importedAt(Object date) {
+    return 'Imported $date';
+  }
+
+  @override
+  String get blocks_total => 'Total';
+
+  @override
+  String blocks_totalItems(Object count) {
+    return '$count items';
+  }
+
+  @override
+  String get blocks_from => 'From';
+
+  @override
+  String get blocks_batch => 'Batch actions';
+
+  @override
+  String get blocks_insertInOrder => 'Insert into prompt in order';
+
+  @override
+  String get blocks_mergeNew => 'Merge into a new block…';
+
+  @override
+  String get blocks_batchStyle => 'Set color / style for all';
+
+  @override
+  String blocks_dragHint(Object count) {
+    return 'You can also drag these $count cards onto a folder or collection on the left and choose move or copy when you drop.';
+  }
+
+  @override
+  String get blocks_editBlockTitle => 'Edit block';
+
+  @override
+  String get blocks_editHint =>
+      'After saving, fixed instances in prompts update at once; random and sequential use the new content on the next roll';
+
+  @override
+  String get blocks_newBlockHint =>
+      'Once saved, insert it from the generation sidebar with one click';
+
+  @override
+  String get blocks_addThumb => 'Add preview';
+
+  @override
+  String get blocks_changeImage => 'Change';
+
+  @override
+  String get blocks_clearThumb => 'Remove preview';
+
+  @override
+  String get blocks_cropHint => 'Drag · scroll to zoom';
+
+  @override
+  String get blocks_namePlaceholder => 'Defaults to the first item';
+
+  @override
+  String get blocks_plainText => 'Plain text';
+
+  @override
+  String get blocks_plainTextHint =>
+      'Saved exactly as typed, not split into items';
+
+  @override
+  String get blocks_atomHint =>
+      'Type and press Enter or comma to add; pasted text is split automatically';
+
+  @override
+  String get blocks_existingTags => 'Existing tags';
+
+  @override
+  String get blocks_newTag => 'New tag';
+
+  @override
+  String get blocks_paramsNotAuto => 'Not applied on insert';
+
+  @override
+  String get blocks_noParamsShort => 'None';
+
+  @override
+  String get blocks_editParams => 'Edit settings';
+
+  @override
+  String get blocks_captureParams => 'Use current';
+
+  @override
+  String get blocks_keepCurrent => 'Keep current';
+
+  @override
+  String get blocks_clearParams => 'Clear settings';
+
+  @override
+  String get blocks_deleteBlock => 'Delete block';
+
+  @override
+  String get blocks_deleteConfirmInline => 'Delete this block?';
+
+  @override
+  String get blocks_saveShortcut => 'Ctrl+Enter to save';
+
+  @override
+  String get blocks_saveAsBlock => 'Save as block';
+
+  @override
+  String get blocks_lookup => 'Look up';
+
+  @override
+  String blocks_splitDone(Object count) {
+    return '$count items · split at commas';
+  }
+
+  @override
+  String get blocks_replaceSelection =>
+      'Replace the selected text with this block';
+
+  @override
+  String get blocks_quickHint =>
+      'Preview, negative and settings can be set later in the library';
 }

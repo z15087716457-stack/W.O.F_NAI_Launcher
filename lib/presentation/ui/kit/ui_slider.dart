@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -160,7 +162,11 @@ class UiNumBox extends StatefulWidget {
     this.changed = false,
     this.placeholder,
     this.max = 1,
+    this.min = 0,
+    this.decimals = 2,
+    this.suffix,
     this.compact = false,
+    this.large = false,
   });
 
   final double value;
@@ -173,8 +179,20 @@ class UiNumBox extends StatefulWidget {
   /// 输入上限（精准参考可以填超过 1 的值）。
   final double max;
 
+  /// 输入下限（随机权重可以是负数）。
+  final double min;
+
+  /// 显示和取整的小数位（数量这类整数传 0）。
+  final int decimals;
+
+  /// 数字后面的弱色单位（“%”）。
+  final String? suffix;
+
   /// 组合包网格：24 高、最小宽 44、11.5 号字。
   final bool compact;
+
+  /// 块系统规则面板（原型 `.num`）：30 高、最小宽 46、13 号字。
+  final bool large;
 
   @override
   State<UiNumBox> createState() => _UiNumBoxState();
@@ -201,7 +219,7 @@ class _UiNumBoxState extends State<UiNumBox> {
 
   void _start() {
     final text = widget.placeholder == null
-        ? widget.value.toStringAsFixed(2)
+        ? widget.value.toStringAsFixed(widget.decimals)
         : '';
     setState(
       () => _edit = TextEditingController(text: text)
@@ -217,8 +235,9 @@ class _UiNumBoxState extends State<UiNumBox> {
     setState(() => _edit = null);
     WidgetsBinding.instance.addPostFrameCallback((_) => e.dispose());
     if (v != null) {
+      final k = math.pow(10, widget.decimals);
       widget.onSubmitted?.call(
-        (v.clamp(0, widget.max) * 100).roundToDouble() / 100,
+        (v.clamp(widget.min, widget.max) * k).roundToDouble() / k,
       );
     }
   }
@@ -230,15 +249,17 @@ class _UiNumBoxState extends State<UiNumBox> {
         ? c.faint
         : (widget.changed ? c.accent : c.ink);
     final style = UiText.mono(
-      widget.compact ? 11.5 : 12.5,
+      widget.large ? 13 : (widget.compact ? 11.5 : 12.5),
       weight: FontWeight.w500,
       color: ink,
       height: 1.2,
     );
     final box = Container(
-      height: widget.compact ? 24 : 28,
-      constraints: BoxConstraints(minWidth: widget.compact ? 44 : 54),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: widget.large ? 30 : (widget.compact ? 24 : 28),
+      constraints: BoxConstraints(
+        minWidth: widget.large ? 46 : (widget.compact ? 44 : 54),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: widget.large ? 6 : 8),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: c.control,
@@ -271,15 +292,28 @@ class _UiNumBoxState extends State<UiNumBox> {
                     decimal: true,
                   ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                    FilteringTextInputFormatter.allow(
+                      RegExp(widget.min < 0 ? r'[0-9.\-]' : r'[0-9.]'),
+                    ),
                   ],
                   decoration: uiBareDecoration(),
                   onSubmitted: (_) => _focus.unfocus(),
                 ),
               ),
             )
-          : Text(
-              widget.placeholder ?? widget.value.toStringAsFixed(2),
+          : Text.rich(
+              TextSpan(
+                text:
+                    widget.placeholder ??
+                    widget.value.toStringAsFixed(widget.decimals),
+                children: [
+                  if (widget.suffix != null && widget.placeholder == null)
+                    TextSpan(
+                      text: widget.suffix,
+                      style: style.copyWith(color: c.faint, fontSize: 11),
+                    ),
+                ],
+              ),
               maxLines: 1,
               style: style,
             ),

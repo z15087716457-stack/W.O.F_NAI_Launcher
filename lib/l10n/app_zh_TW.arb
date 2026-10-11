@@ -8722,5 +8722,444 @@
       "month": {},
       "day": {}
     }
-  }
+  },
+  "blocks_title": "塊庫",
+  "blocks_translationMark": "譯",
+  "blocks_add": "新增",
+  "blocks_cancel": "取消",
+  "blocks_close": "關閉",
+  "blocks_delete": "刪除",
+  "blocks_done": "完成",
+  "blocks_save": "儲存",
+  "blocks_saveEnter": "儲存 ⏎",
+  "blocks_more": "更多",
+  "blocks_back": "返回",
+  "blocks_rename": "重新命名",
+  "blocks_edit": "編輯",
+  "blocks_copy": "複製",
+  "blocks_export": "匯出",
+  "blocks_apply": "應用",
+  "blocks_off": "關",
+  "blocks_to": "到",
+  "blocks_items": "{count} 項",
+  "@blocks_items": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_itemUnit": "項",
+  "blocks_usedTimes": "用過 {count} 次",
+  "@blocks_usedTimes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_nBlocks": "{count} 個",
+  "@blocks_nBlocks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_untitled": "未命名",
+  "blocks_favorite": "收藏",
+  "blocks_unfavorite": "取消收藏",
+  "blocks_favorites": "收藏",
+  "blocks_recent": "最近使用",
+  "blocks_uncategorized": "未分類",
+  "blocks_positive": "正面",
+  "blocks_negative": "負面",
+  "blocks_positiveN": "正面 {count}",
+  "@blocks_positiveN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_negativeN": "負面 {count}",
+  "@blocks_negativeN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_content": "內容",
+  "blocks_name": "名稱",
+  "blocks_folder": "資料夾",
+  "blocks_folders": "資料夾",
+  "blocks_tags": "標籤",
+  "blocks_tag": "標籤",
+  "blocks_icon": "圖示",
+  "blocks_color": "顏色",
+  "blocks_look": "外觀",
+  "blocks_appearance": "外觀",
+  "blocks_thumb": "預覽圖",
+  "blocks_preview": "預覽",
+  "blocks_params": "附帶參數",
+  "blocks_classify": "歸類",
+  "blocks_lookClassic": "經典",
+  "blocks_lookStripes": "細條紋",
+  "blocks_lookDots": "圓點",
+  "blocks_lookSolid": "實心",
+  "blocks_lookGradient": "漸變",
+  "blocks_lookTranslation": "翻譯",
+  "blocks_hasParams": "附帶參數",
+  "blocks_hasNegative": "含負面",
+  "blocks_hintClick": "點選插入",
+  "blocks_hintDrag": "拖到位置",
+  "blocks_hintRightClick": "右鍵更多",
+  "blocks_searchHint": "搜尋塊…",
+  "blocks_filterAll": "全部",
+  "blocks_allN": "全部 {count}",
+  "@blocks_allN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_searchResults": "搜尋結果",
+  "blocks_noResults": "沒有找到匹配的塊",
+  "blocks_noFavorites": "還沒有收藏的塊。在塊上右鍵 → 收藏。",
+  "blocks_dockEmpty": "塊庫還是空的。把常用的一串提示詞存成塊，點一下就能插進來。",
+  "blocks_dockHint": "點選插到游標處 · 拖進提示詞放到指定位置",
+  "blocks_openLibrary": "在塊庫中開啟",
+  "blocks_newBlock": "新增塊",
+  "blocks_newBlockTip": "新增塊（Ctrl+N）",
+  "blocks_insertAtCursor": "插到游標處",
+  "blocks_addToPalette": "放進積木",
+  "blocks_showInLibrary": "在塊庫中檢視",
+  "blocks_missing": "塊已刪除",
+  "blocks_modeFixed": "固定",
+  "blocks_modeSequential": "順序",
+  "blocks_modeRandom": "隨機",
+  "blocks_summaryRandom": "隨機抽取 · 每次 {range} 項 · 池裡 {pool} 項",
+  "@blocks_summaryRandom": {
+    "placeholders": {
+      "range": {},
+      "pool": {}
+    }
+  },
+  "blocks_summarySequential": "順序 · 每次 {range} 項 · 生成一張往後走一步",
+  "@blocks_summarySequential": {
+    "placeholders": {
+      "range": {}
+    }
+  },
+  "blocks_drawnThisTime": "本次抽到",
+  "blocks_lock": "鎖定",
+  "blocks_unlock": "解鎖",
+  "blocks_lockTip": "凍結這次的結果，生成時不再重抽",
+  "blocks_unlockTip": "解鎖後生成時會重新抽取",
+  "blocks_reroll": "重抽",
+  "blocks_rerollLocked": "已鎖定，先解鎖才能重抽",
+  "blocks_skipped": "這次沒出場（出現機率 {percent}）",
+  "@blocks_skipped": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "blocks_sendPrefix": "傳送：{text}",
+  "@blocks_sendPrefix": {
+    "placeholders": {
+      "text": {}
+    }
+  },
+  "blocks_seqPosition": "第 {index} / {total} 項",
+  "@blocks_seqPosition": {
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
+  "blocks_seqLocked": "已鎖定，不會自動前進",
+  "blocks_prevItem": "上一項",
+  "blocks_nextItem": "下一項",
+  "blocks_prevValue": "上一項 {value}",
+  "@blocks_prevValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "blocks_nextValue": "下一項 {value}",
+  "@blocks_nextValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "blocks_paramsTitle": "這個塊帶了生圖參數",
+  "blocks_drawMode": "抽取方式",
+  "blocks_fixedExplain": "固定：每次都原樣放入全部 {count} 項。切到順序或隨機後，在這裡設數量和權重。",
+  "@blocks_fixedExplain": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_ruleCount": "數量",
+  "blocks_ruleWeight": "權重",
+  "blocks_ruleShow": "出現",
+  "blocks_ruleEach": "每次",
+  "blocks_ruleItemUnit": "項",
+  "blocks_ruleWrap": "走完從頭開始",
+  "blocks_adjust": "調整",
+  "blocks_appliesTo": "作用於",
+  "blocks_disable": "停用",
+  "blocks_enable": "啟用",
+  "blocks_editBlock": "改塊",
+  "blocks_removeInstanceTip": "從提示詞裡移除",
+  "blocks_removeInstance": "從提示詞裡移除",
+  "blocks_copySend": "複製傳送文本",
+  "blocks_evolutionOn": "設為遺傳塊",
+  "blocks_evolutionOff": "取消遺傳",
+  "blocks_rulesTitle": "抽取規則",
+  "blocks_rulesHint": "點完成後生效",
+  "blocks_rulesDirty": "有改動 · 點完成後生效",
+  "blocks_modeFixedDesc": "每次原樣放入全部內容",
+  "blocks_modeSequentialDesc": "按順序輪流，生成一張走一步",
+  "blocks_modeRandomDesc": "每次從池裡隨機抽幾項",
+  "blocks_drawEach": "每次抽",
+  "blocks_takeEach": "每次取",
+  "blocks_poolSize": "池裡共 {count} 項",
+  "@blocks_poolSize": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_outputOrder": "輸出順序",
+  "blocks_orderDrawn": "按抽中順序",
+  "blocks_orderOriginal": "按原順序",
+  "blocks_seqExplain": "生成一張往後走一步；鎖定後停在當前項。",
+  "blocks_randomWeight": "隨機權重",
+  "blocks_randomWeightHint": "給每項套上 0.8::…:: 這樣的權重",
+  "blocks_weightMin": "最小",
+  "blocks_weightAverage": "最常見",
+  "blocks_weightMax": "最大",
+  "blocks_distribution": "分佈",
+  "blocks_distFocused": "集中",
+  "blocks_distBalanced": "均衡",
+  "blocks_distSpread": "發散",
+  "blocks_distCustom": "自訂",
+  "blocks_advanced": "進階",
+  "blocks_leftDispersion": "左側離散",
+  "blocks_rightDispersion": "右側離散",
+  "blocks_softBalance": "軟平衡",
+  "blocks_softBalanceHint": "多項時把平均權重拉回最常見值",
+  "blocks_softBalanceStrength": "平衡強度",
+  "blocks_probability": "出現機率",
+  "blocks_probabilityHint": "低於 100% 時，有時整個塊不出場",
+  "blocks_previewHint": "按當前規則抽 4 次",
+  "blocks_resample": "再抽",
+  "blocks_sampleSkipped": "（這次沒出場）",
+  "blocks_resetDefault": "恢復預設",
+  "blocks_discard": "取消改動",
+  "blocks_allBlocks": "全部塊",
+  "blocks_collections": "收藏集",
+  "blocks_newCollection": "新增收藏集",
+  "blocks_collectionName": "收藏集名稱",
+  "blocks_noCollections": "把卡片拖到這裡的收藏集，一個塊可以進多個收藏集。",
+  "blocks_deleteCollection": "刪除收藏集",
+  "blocks_newFolder": "新增資料夾",
+  "blocks_newSubfolder": "新增子資料夾",
+  "blocks_folderName": "資料夾名稱",
+  "blocks_deleteFolder": "刪除資料夾…",
+  "blocks_moveUp": "上移",
+  "blocks_moveDown": "下移",
+  "blocks_moveToTop": "移到頂層",
+  "blocks_tagName": "標籤名",
+  "blocks_tagColor": "改顏色",
+  "blocks_deleteTag": "刪除標籤",
+  "blocks_collapseSidebar": "收起左欄",
+  "blocks_expandSidebar": "展開左欄",
+  "blocks_importExport": "匯入 / 匯出",
+  "blocks_importTxt": "匯入 TXT…",
+  "blocks_importFolder": "匯入資料夾…",
+  "blocks_importCuration": "整理匯入…",
+  "blocks_exportBackup": "匯出整庫備份",
+  "blocks_importBackup": "匯入整庫備份…",
+  "blocks_dropMoveTo": "移到「{name}」",
+  "@blocks_dropMoveTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "blocks_dropCopyTo": "複製到「{name}」",
+  "@blocks_dropCopyTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "blocks_dropAddTo": "加入「{name}」",
+  "@blocks_dropAddTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "blocks_searchLibrary": "搜尋標題、內容或標籤",
+  "blocks_sortCustom": "自訂順序",
+  "blocks_sortUpdated": "最近修改",
+  "blocks_sortTitle": "名稱",
+  "blocks_sortColor": "顏色",
+  "blocks_sortIcon": "圖示",
+  "blocks_sortAsc": "升序",
+  "blocks_sortDesc": "降序",
+  "blocks_viewGrid": "網格",
+  "blocks_viewList": "列表",
+  "blocks_multiSelect": "多選",
+  "blocks_multiDone": "完成多選",
+  "blocks_hideInspector": "收起詳情",
+  "blocks_showInspector": "展開詳情",
+  "blocks_quickImage": "有預覽圖",
+  "blocks_quickNegative": "含負面",
+  "blocks_quickParams": "附帶參數",
+  "blocks_cardSize": "卡片大小",
+  "blocks_noMatch": "沒有符合條件的塊",
+  "blocks_noMatchBody": "換個關鍵詞，或者清除快速篩選。",
+  "blocks_clearFilters": "清除篩選",
+  "blocks_insert": "插入",
+  "blocks_insertToPrompt": "插入到提示詞",
+  "blocks_miniNegative": "負面",
+  "blocks_miniParams": "參數",
+  "blocks_colName": "名稱",
+  "blocks_colItems": "項數",
+  "blocks_colFolder": "資料夾",
+  "blocks_colUsed": "使用",
+  "blocks_colModified": "修改",
+  "blocks_selectedN": "已選 {count} 個",
+  "@blocks_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_selectedBlocksN": "已選 {count} 個塊",
+  "@blocks_selectedBlocksN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_moveTo": "移到…",
+  "blocks_noTags": "還沒有標籤",
+  "blocks_emptyTitle": "塊庫還是空的",
+  "blocks_emptyBody": "把常用的一串提示詞存成塊：畫師池、角色、服裝、品質詞……插進提示詞後可以固定、按順序輪流或隨機抽取。",
+  "blocks_duplicate": "複製一份",
+  "blocks_copyContent": "複製內容",
+  "blocks_applyParams": "應用附帶參數",
+  "blocks_exportTxt": "匯出為 TXT",
+  "blocks_removeFromCollection": "移出收藏集",
+  "blocks_deleteOne": "刪除「{name}」？",
+  "@blocks_deleteOne": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "blocks_deleteMany": "刪除 {count} 個塊？",
+  "@blocks_deleteMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_deleteBody": "提示詞裡已經插入的實例會顯示為“塊已刪除”，可以復原。",
+  "blocks_details": "詳情",
+  "blocks_noSelection": "點一張卡片檢視詳情。雙擊直接編輯，Enter 插入到提示詞。",
+  "blocks_changeThumb": "更換 / 調整",
+  "blocks_reading": "翻譯閱讀",
+  "blocks_needsReview": "需複核",
+  "blocks_applyToCurrent": "應用到當前",
+  "blocks_noParams": "沒有。插入時不會改動當前參數。",
+  "blocks_paramModel": "模型",
+  "blocks_paramSteps": "步數",
+  "blocks_paramGuidance": "引導",
+  "blocks_paramRescale": "重縮放",
+  "blocks_paramSampler": "取樣器",
+  "blocks_paramNoise": "噪聲",
+  "blocks_steps": "{count} 步",
+  "@blocks_steps": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_guidance": "引導 {value}",
+  "@blocks_guidance": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "blocks_rescale": "重縮放 {value}",
+  "@blocks_rescale": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "blocks_newTagInEdit": "新標籤…",
+  "blocks_modifiedAt": "修改於 {time}",
+  "@blocks_modifiedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "blocks_createdAt": "創建於 {date}",
+  "@blocks_createdAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "blocks_sourceFile": "來源檔案 {path}",
+  "@blocks_sourceFile": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "blocks_sourceSynced": "與檔案一致",
+  "blocks_sourceChanged": "檔案已改動",
+  "blocks_sourceMissing": "檔案已不在",
+  "blocks_importedAt": "匯入於 {date}",
+  "@blocks_importedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "blocks_total": "合計",
+  "blocks_totalItems": "{count} 項內容",
+  "@blocks_totalItems": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_from": "來自",
+  "blocks_batch": "批次操作",
+  "blocks_insertInOrder": "依次插入到提示詞",
+  "blocks_mergeNew": "合併成一個新塊…",
+  "blocks_batchStyle": "統一改顏色 / 外觀",
+  "blocks_dragHint": "也可以直接把這 {count} 張卡拖到左邊的資料夾或收藏集，鬆開時選擇移動還是複製。",
+  "@blocks_dragHint": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_editBlockTitle": "編輯塊",
+  "blocks_editHint": "儲存後，提示詞裡固定模式的實例立即更新；隨機 / 順序在下次抽取時用新內容",
+  "blocks_newBlockHint": "塊存進塊庫後，可以從生圖頁側欄點一下插入",
+  "blocks_addThumb": "新增預覽圖",
+  "blocks_changeImage": "換圖",
+  "blocks_clearThumb": "清除預覽圖",
+  "blocks_cropHint": "拖動 / 滾輪縮放",
+  "blocks_namePlaceholder": "不填就用第一項",
+  "blocks_plainText": "純文本",
+  "blocks_plainTextHint": "原樣儲存這段文字，不拆成項",
+  "blocks_atomHint": "輸入後按 Enter 或逗號成為一項；貼上一段會自動拆分",
+  "blocks_existingTags": "已有標籤",
+  "blocks_newTag": "新標籤",
+  "blocks_paramsNotAuto": "插入時不自動應用",
+  "blocks_noParamsShort": "沒有",
+  "blocks_editParams": "編輯參數",
+  "blocks_captureParams": "從當前讀取",
+  "blocks_keepCurrent": "不改當前值",
+  "blocks_clearParams": "清除參數",
+  "blocks_deleteBlock": "刪除塊",
+  "blocks_deleteConfirmInline": "確定刪除這個塊？",
+  "blocks_saveShortcut": "Ctrl+Enter 儲存",
+  "blocks_saveAsBlock": "存為塊",
+  "blocks_lookup": "查詞條",
+  "blocks_splitDone": "{count} 項 · 已按逗號拆好",
+  "@blocks_splitDone": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "blocks_replaceSelection": "儲存後把選中的文字換成這個塊",
+  "blocks_quickHint": "更多設定（預覽圖、負面、參數）稍後在塊庫裡改"
 }

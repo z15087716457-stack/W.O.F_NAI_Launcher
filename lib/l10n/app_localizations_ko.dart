@@ -15063,4 +15063,905 @@ class AppLocalizationsKo extends AppLocalizations {
   String refs_timeMonthDay(Object month, Object day) {
     return '$month월 $day일';
   }
+
+  @override
+  String get blocks_title => '블록 라이브러리';
+
+  @override
+  String get blocks_translationMark => '번';
+
+  @override
+  String get blocks_add => '추가';
+
+  @override
+  String get blocks_cancel => '취소';
+
+  @override
+  String get blocks_close => '닫기';
+
+  @override
+  String get blocks_delete => '삭제';
+
+  @override
+  String get blocks_done => '완료';
+
+  @override
+  String get blocks_save => '저장';
+
+  @override
+  String get blocks_saveEnter => '저장 ⏎';
+
+  @override
+  String get blocks_more => '더 보기';
+
+  @override
+  String get blocks_back => '뒤로';
+
+  @override
+  String get blocks_rename => '이름 바꾸기';
+
+  @override
+  String get blocks_edit => '편집';
+
+  @override
+  String get blocks_copy => '복사';
+
+  @override
+  String get blocks_export => '내보내기';
+
+  @override
+  String get blocks_apply => '적용';
+
+  @override
+  String get blocks_off => '끔';
+
+  @override
+  String get blocks_to => '~';
+
+  @override
+  String blocks_items(Object count) {
+    return '$count개 항목';
+  }
+
+  @override
+  String get blocks_itemUnit => '개';
+
+  @override
+  String blocks_usedTimes(Object count) {
+    return '$count회 사용';
+  }
+
+  @override
+  String blocks_nBlocks(Object count) {
+    return '$count개';
+  }
+
+  @override
+  String get blocks_untitled => '제목 없음';
+
+  @override
+  String get blocks_favorite => '즐겨찾기';
+
+  @override
+  String get blocks_unfavorite => '즐겨찾기 해제';
+
+  @override
+  String get blocks_favorites => '즐겨찾기';
+
+  @override
+  String get blocks_recent => '최근 사용';
+
+  @override
+  String get blocks_uncategorized => '미분류';
+
+  @override
+  String get blocks_positive => '긍정';
+
+  @override
+  String get blocks_negative => '부정';
+
+  @override
+  String blocks_positiveN(Object count) {
+    return '긍정 $count';
+  }
+
+  @override
+  String blocks_negativeN(Object count) {
+    return '부정 $count';
+  }
+
+  @override
+  String get blocks_content => '내용';
+
+  @override
+  String get blocks_name => '이름';
+
+  @override
+  String get blocks_folder => '폴더';
+
+  @override
+  String get blocks_folders => '폴더';
+
+  @override
+  String get blocks_tags => '태그';
+
+  @override
+  String get blocks_tag => '태그';
+
+  @override
+  String get blocks_icon => '아이콘';
+
+  @override
+  String get blocks_color => '색상';
+
+  @override
+  String get blocks_look => '스타일';
+
+  @override
+  String get blocks_appearance => '모양';
+
+  @override
+  String get blocks_thumb => '미리보기';
+
+  @override
+  String get blocks_preview => '미리보기';
+
+  @override
+  String get blocks_params => '첨부 설정';
+
+  @override
+  String get blocks_classify => '분류';
+
+  @override
+  String get blocks_lookClassic => '클래식';
+
+  @override
+  String get blocks_lookStripes => '줄무늬';
+
+  @override
+  String get blocks_lookDots => '도트';
+
+  @override
+  String get blocks_lookSolid => '단색';
+
+  @override
+  String get blocks_lookGradient => '그라데이션';
+
+  @override
+  String get blocks_lookTranslation => '번역';
+
+  @override
+  String get blocks_hasParams => '설정 포함';
+
+  @override
+  String get blocks_hasNegative => '부정 포함';
+
+  @override
+  String get blocks_hintClick => '클릭해 삽입';
+
+  @override
+  String get blocks_hintDrag => '드래그해 배치';
+
+  @override
+  String get blocks_hintRightClick => '우클릭으로 더 보기';
+
+  @override
+  String get blocks_searchHint => '블록 검색…';
+
+  @override
+  String get blocks_filterAll => '전체';
+
+  @override
+  String blocks_allN(Object count) {
+    return '전체 $count';
+  }
+
+  @override
+  String get blocks_searchResults => '검색 결과';
+
+  @override
+  String get blocks_noResults => '일치하는 블록이 없습니다';
+
+  @override
+  String get blocks_noFavorites => '아직 즐겨찾기가 없습니다. 블록을 우클릭 → 즐겨찾기.';
+
+  @override
+  String get blocks_dockEmpty =>
+      '블록 라이브러리가 비어 있습니다. 자주 쓰는 프롬프트를 블록으로 저장하면 클릭 한 번으로 넣을 수 있습니다.';
+
+  @override
+  String get blocks_dockHint => '클릭하면 커서 위치에 삽입 · 프롬프트로 드래그해 배치';
+
+  @override
+  String get blocks_openLibrary => '블록 라이브러리에서 열기';
+
+  @override
+  String get blocks_newBlock => '새 블록';
+
+  @override
+  String get blocks_newBlockTip => '새 블록 (Ctrl+N)';
+
+  @override
+  String get blocks_insertAtCursor => '커서 위치에 삽입';
+
+  @override
+  String get blocks_addToPalette => '팔레트에 추가';
+
+  @override
+  String get blocks_showInLibrary => '라이브러리에서 보기';
+
+  @override
+  String get blocks_missing => '삭제된 블록';
+
+  @override
+  String get blocks_modeFixed => '고정';
+
+  @override
+  String get blocks_modeSequential => '순서';
+
+  @override
+  String get blocks_modeRandom => '무작위';
+
+  @override
+  String blocks_summaryRandom(Object range, Object pool) {
+    return '무작위 · 매번 $range개 · 풀 $pool개';
+  }
+
+  @override
+  String blocks_summarySequential(Object range) {
+    return '순서 · 매번 $range개 · 한 장마다 한 칸씩';
+  }
+
+  @override
+  String get blocks_drawnThisTime => '이번 결과';
+
+  @override
+  String get blocks_lock => '잠금';
+
+  @override
+  String get blocks_unlock => '잠금 해제';
+
+  @override
+  String get blocks_lockTip => '이 결과를 고정하고 생성 시 다시 뽑지 않음';
+
+  @override
+  String get blocks_unlockTip => '해제하면 생성 시 다시 뽑습니다';
+
+  @override
+  String get blocks_reroll => '다시 뽑기';
+
+  @override
+  String get blocks_rerollLocked => '잠김 — 다시 뽑으려면 잠금 해제';
+
+  @override
+  String blocks_skipped(Object percent) {
+    return '이번엔 등장 안 함 (확률 $percent)';
+  }
+
+  @override
+  String blocks_sendPrefix(Object text) {
+    return '전송: $text';
+  }
+
+  @override
+  String blocks_seqPosition(Object index, Object total) {
+    return '$index / $total번째';
+  }
+
+  @override
+  String get blocks_seqLocked => '잠김, 자동으로 넘어가지 않음';
+
+  @override
+  String get blocks_prevItem => '이전 항목';
+
+  @override
+  String get blocks_nextItem => '다음 항목';
+
+  @override
+  String blocks_prevValue(Object value) {
+    return '이전 $value';
+  }
+
+  @override
+  String blocks_nextValue(Object value) {
+    return '다음 $value';
+  }
+
+  @override
+  String get blocks_paramsTitle => '이 블록에는 생성 설정이 있습니다';
+
+  @override
+  String get blocks_drawMode => '뽑기 방식';
+
+  @override
+  String blocks_fixedExplain(Object count) {
+    return '고정: 매번 $count개 항목을 그대로 넣습니다. 순서나 무작위로 바꾸면 여기서 개수와 가중치를 설정합니다.';
+  }
+
+  @override
+  String get blocks_ruleCount => '개수';
+
+  @override
+  String get blocks_ruleWeight => '가중치';
+
+  @override
+  String get blocks_ruleShow => '확률';
+
+  @override
+  String get blocks_ruleEach => '매번';
+
+  @override
+  String get blocks_ruleItemUnit => '개';
+
+  @override
+  String get blocks_ruleWrap => '끝나면 처음부터';
+
+  @override
+  String get blocks_adjust => '조정';
+
+  @override
+  String get blocks_appliesTo => '적용 대상';
+
+  @override
+  String get blocks_disable => '비활성화';
+
+  @override
+  String get blocks_enable => '활성화';
+
+  @override
+  String get blocks_editBlock => '블록 편집';
+
+  @override
+  String get blocks_removeInstanceTip => '프롬프트에서 제거';
+
+  @override
+  String get blocks_removeInstance => '프롬프트에서 제거';
+
+  @override
+  String get blocks_copySend => '전송 텍스트 복사';
+
+  @override
+  String get blocks_evolutionOn => '유전 블록으로 지정';
+
+  @override
+  String get blocks_evolutionOff => '유전 해제';
+
+  @override
+  String get blocks_rulesTitle => '뽑기 규칙';
+
+  @override
+  String get blocks_rulesHint => '완료를 누르면 적용';
+
+  @override
+  String get blocks_rulesDirty => '변경됨 · 완료 시 적용';
+
+  @override
+  String get blocks_modeFixedDesc => '매번 전체를 그대로';
+
+  @override
+  String get blocks_modeSequentialDesc => '순서대로, 한 장마다 한 칸';
+
+  @override
+  String get blocks_modeRandomDesc => '매번 풀에서 무작위로 몇 개';
+
+  @override
+  String get blocks_drawEach => '매번';
+
+  @override
+  String get blocks_takeEach => '매번';
+
+  @override
+  String blocks_poolSize(Object count) {
+    return '풀 $count개';
+  }
+
+  @override
+  String get blocks_outputOrder => '출력 순서';
+
+  @override
+  String get blocks_orderDrawn => '뽑힌 순서';
+
+  @override
+  String get blocks_orderOriginal => '원래 순서';
+
+  @override
+  String get blocks_seqExplain => '한 장마다 한 칸 이동, 잠그면 현재 항목에 머뭅니다.';
+
+  @override
+  String get blocks_randomWeight => '무작위 가중치';
+
+  @override
+  String get blocks_randomWeightHint => '각 항목에 0.8::…:: 가중치 적용';
+
+  @override
+  String get blocks_weightMin => '최소';
+
+  @override
+  String get blocks_weightAverage => '최빈';
+
+  @override
+  String get blocks_weightMax => '최대';
+
+  @override
+  String get blocks_distribution => '분포';
+
+  @override
+  String get blocks_distFocused => '집중';
+
+  @override
+  String get blocks_distBalanced => '균형';
+
+  @override
+  String get blocks_distSpread => '분산';
+
+  @override
+  String get blocks_distCustom => '사용자 지정';
+
+  @override
+  String get blocks_advanced => '고급';
+
+  @override
+  String get blocks_leftDispersion => '왼쪽 분산';
+
+  @override
+  String get blocks_rightDispersion => '오른쪽 분산';
+
+  @override
+  String get blocks_softBalance => '소프트 밸런스';
+
+  @override
+  String get blocks_softBalanceHint => '여러 항목의 평균을 최빈값으로 당김';
+
+  @override
+  String get blocks_softBalanceStrength => '강도';
+
+  @override
+  String get blocks_probability => '등장 확률';
+
+  @override
+  String get blocks_probabilityHint => '100% 미만이면 블록 전체가 빠질 때가 있습니다';
+
+  @override
+  String get blocks_previewHint => '이 규칙으로 4번 뽑기';
+
+  @override
+  String get blocks_resample => '다시';
+
+  @override
+  String get blocks_sampleSkipped => '(등장 안 함)';
+
+  @override
+  String get blocks_resetDefault => '기본값으로';
+
+  @override
+  String get blocks_discard => '변경 취소';
+
+  @override
+  String get blocks_allBlocks => '모든 블록';
+
+  @override
+  String get blocks_collections => '컬렉션';
+
+  @override
+  String get blocks_newCollection => '새 컬렉션';
+
+  @override
+  String get blocks_collectionName => '컬렉션 이름';
+
+  @override
+  String get blocks_noCollections =>
+      '카드를 여기 컬렉션으로 드래그하세요. 한 블록이 여러 컬렉션에 들어갈 수 있습니다.';
+
+  @override
+  String get blocks_deleteCollection => '컬렉션 삭제';
+
+  @override
+  String get blocks_newFolder => '새 폴더';
+
+  @override
+  String get blocks_newSubfolder => '하위 폴더 만들기';
+
+  @override
+  String get blocks_folderName => '폴더 이름';
+
+  @override
+  String get blocks_deleteFolder => '폴더 삭제…';
+
+  @override
+  String get blocks_moveUp => '위로';
+
+  @override
+  String get blocks_moveDown => '아래로';
+
+  @override
+  String get blocks_moveToTop => '최상위로 이동';
+
+  @override
+  String get blocks_tagName => '태그 이름';
+
+  @override
+  String get blocks_tagColor => '색 바꾸기';
+
+  @override
+  String get blocks_deleteTag => '태그 삭제';
+
+  @override
+  String get blocks_collapseSidebar => '사이드바 접기';
+
+  @override
+  String get blocks_expandSidebar => '사이드바 펼치기';
+
+  @override
+  String get blocks_importExport => '가져오기 / 내보내기';
+
+  @override
+  String get blocks_importTxt => 'TXT 가져오기…';
+
+  @override
+  String get blocks_importFolder => '폴더 가져오기…';
+
+  @override
+  String get blocks_importCuration => '정리해서 가져오기…';
+
+  @override
+  String get blocks_exportBackup => '라이브러리 백업 내보내기';
+
+  @override
+  String get blocks_importBackup => '라이브러리 백업 가져오기…';
+
+  @override
+  String blocks_dropMoveTo(Object name) {
+    return '“$name”(으)로 이동';
+  }
+
+  @override
+  String blocks_dropCopyTo(Object name) {
+    return '“$name”(으)로 복사';
+  }
+
+  @override
+  String blocks_dropAddTo(Object name) {
+    return '“$name”에 추가';
+  }
+
+  @override
+  String get blocks_searchLibrary => '제목, 내용, 태그 검색';
+
+  @override
+  String get blocks_sortCustom => '사용자 순서';
+
+  @override
+  String get blocks_sortUpdated => '최근 수정';
+
+  @override
+  String get blocks_sortTitle => '이름';
+
+  @override
+  String get blocks_sortColor => '색상';
+
+  @override
+  String get blocks_sortIcon => '아이콘';
+
+  @override
+  String get blocks_sortAsc => '오름차순';
+
+  @override
+  String get blocks_sortDesc => '내림차순';
+
+  @override
+  String get blocks_viewGrid => '그리드';
+
+  @override
+  String get blocks_viewList => '목록';
+
+  @override
+  String get blocks_multiSelect => '여러 개 선택';
+
+  @override
+  String get blocks_multiDone => '선택 완료';
+
+  @override
+  String get blocks_hideInspector => '세부 정보 숨기기';
+
+  @override
+  String get blocks_showInspector => '세부 정보 표시';
+
+  @override
+  String get blocks_quickImage => '미리보기 있음';
+
+  @override
+  String get blocks_quickNegative => '부정 포함';
+
+  @override
+  String get blocks_quickParams => '설정 포함';
+
+  @override
+  String get blocks_cardSize => '카드 크기';
+
+  @override
+  String get blocks_noMatch => '조건에 맞는 블록이 없습니다';
+
+  @override
+  String get blocks_noMatchBody => '다른 키워드를 쓰거나 빠른 필터를 지우세요.';
+
+  @override
+  String get blocks_clearFilters => '필터 지우기';
+
+  @override
+  String get blocks_insert => '삽입';
+
+  @override
+  String get blocks_insertToPrompt => '프롬프트에 삽입';
+
+  @override
+  String get blocks_miniNegative => '부정';
+
+  @override
+  String get blocks_miniParams => '설정';
+
+  @override
+  String get blocks_colName => '이름';
+
+  @override
+  String get blocks_colItems => '항목';
+
+  @override
+  String get blocks_colFolder => '폴더';
+
+  @override
+  String get blocks_colUsed => '사용';
+
+  @override
+  String get blocks_colModified => '수정';
+
+  @override
+  String blocks_selectedN(Object count) {
+    return '$count개 선택';
+  }
+
+  @override
+  String blocks_selectedBlocksN(Object count) {
+    return '블록 $count개 선택';
+  }
+
+  @override
+  String get blocks_moveTo => '이동…';
+
+  @override
+  String get blocks_noTags => '아직 태그가 없습니다';
+
+  @override
+  String get blocks_emptyTitle => '블록 라이브러리가 비어 있습니다';
+
+  @override
+  String get blocks_emptyBody =>
+      '화가 풀, 캐릭터, 의상, 품질 태그처럼 자주 쓰는 프롬프트를 블록으로 저장하세요. 넣은 뒤 고정, 순서, 무작위로 쓸 수 있습니다.';
+
+  @override
+  String get blocks_duplicate => '복제';
+
+  @override
+  String get blocks_copyContent => '내용 복사';
+
+  @override
+  String get blocks_applyParams => '첨부 설정 적용';
+
+  @override
+  String get blocks_exportTxt => 'TXT로 내보내기';
+
+  @override
+  String get blocks_removeFromCollection => '컬렉션에서 빼기';
+
+  @override
+  String blocks_deleteOne(Object name) {
+    return '“$name”을(를) 삭제할까요?';
+  }
+
+  @override
+  String blocks_deleteMany(Object count) {
+    return '블록 $count개를 삭제할까요?';
+  }
+
+  @override
+  String get blocks_deleteBody =>
+      '프롬프트에 이미 넣은 인스턴스는 “삭제된 블록”으로 표시됩니다. 실행 취소할 수 있습니다.';
+
+  @override
+  String get blocks_details => '세부 정보';
+
+  @override
+  String get blocks_noSelection =>
+      '카드를 클릭해 세부 정보 보기. 더블클릭으로 편집, Enter로 프롬프트에 삽입.';
+
+  @override
+  String get blocks_changeThumb => '변경 / 조정';
+
+  @override
+  String get blocks_reading => '번역 읽기';
+
+  @override
+  String get blocks_needsReview => '검토 필요';
+
+  @override
+  String get blocks_applyToCurrent => '지금 적용';
+
+  @override
+  String get blocks_noParams => '없음. 넣어도 현재 설정은 바뀌지 않습니다.';
+
+  @override
+  String get blocks_paramModel => '모델';
+
+  @override
+  String get blocks_paramSteps => '스텝';
+
+  @override
+  String get blocks_paramGuidance => '가이던스';
+
+  @override
+  String get blocks_paramRescale => '리스케일';
+
+  @override
+  String get blocks_paramSampler => '샘플러';
+
+  @override
+  String get blocks_paramNoise => '노이즈';
+
+  @override
+  String blocks_steps(Object count) {
+    return '$count 스텝';
+  }
+
+  @override
+  String blocks_guidance(Object value) {
+    return '가이던스 $value';
+  }
+
+  @override
+  String blocks_rescale(Object value) {
+    return '리스케일 $value';
+  }
+
+  @override
+  String get blocks_newTagInEdit => '새 태그…';
+
+  @override
+  String blocks_modifiedAt(Object time) {
+    return '$time 수정';
+  }
+
+  @override
+  String blocks_createdAt(Object date) {
+    return '$date 생성';
+  }
+
+  @override
+  String blocks_sourceFile(Object path) {
+    return '원본 파일 $path';
+  }
+
+  @override
+  String get blocks_sourceSynced => '파일과 일치';
+
+  @override
+  String get blocks_sourceChanged => '파일이 변경됨';
+
+  @override
+  String get blocks_sourceMissing => '파일 없음';
+
+  @override
+  String blocks_importedAt(Object date) {
+    return '$date 가져옴';
+  }
+
+  @override
+  String get blocks_total => '합계';
+
+  @override
+  String blocks_totalItems(Object count) {
+    return '항목 $count개';
+  }
+
+  @override
+  String get blocks_from => '출처';
+
+  @override
+  String get blocks_batch => '일괄 작업';
+
+  @override
+  String get blocks_insertInOrder => '프롬프트에 순서대로 삽입';
+
+  @override
+  String get blocks_mergeNew => '새 블록으로 합치기…';
+
+  @override
+  String get blocks_batchStyle => '색 / 스타일 일괄 변경';
+
+  @override
+  String blocks_dragHint(Object count) {
+    return '이 카드 $count장을 왼쪽 폴더나 컬렉션으로 드래그하고, 놓을 때 이동 또는 복사를 고를 수도 있습니다.';
+  }
+
+  @override
+  String get blocks_editBlockTitle => '블록 편집';
+
+  @override
+  String get blocks_editHint =>
+      '저장하면 프롬프트의 고정 인스턴스는 바로 바뀌고, 무작위 / 순서는 다음 뽑기부터 새 내용을 씁니다';
+
+  @override
+  String get blocks_newBlockHint => '저장 후 생성 페이지 사이드바에서 클릭 한 번으로 넣을 수 있습니다';
+
+  @override
+  String get blocks_addThumb => '미리보기 추가';
+
+  @override
+  String get blocks_changeImage => '이미지 변경';
+
+  @override
+  String get blocks_clearThumb => '미리보기 삭제';
+
+  @override
+  String get blocks_cropHint => '드래그 / 휠로 확대';
+
+  @override
+  String get blocks_namePlaceholder => '비우면 첫 항목 사용';
+
+  @override
+  String get blocks_plainText => '일반 텍스트';
+
+  @override
+  String get blocks_plainTextHint => '입력한 그대로 저장하고 항목으로 나누지 않습니다';
+
+  @override
+  String get blocks_atomHint => '입력 후 Enter나 쉼표로 추가, 붙여넣으면 자동으로 나눕니다';
+
+  @override
+  String get blocks_existingTags => '기존 태그';
+
+  @override
+  String get blocks_newTag => '새 태그';
+
+  @override
+  String get blocks_paramsNotAuto => '삽입 시 자동 적용 안 함';
+
+  @override
+  String get blocks_noParamsShort => '없음';
+
+  @override
+  String get blocks_editParams => '설정 편집';
+
+  @override
+  String get blocks_captureParams => '현재 값 가져오기';
+
+  @override
+  String get blocks_keepCurrent => '현재 값 유지';
+
+  @override
+  String get blocks_clearParams => '설정 지우기';
+
+  @override
+  String get blocks_deleteBlock => '블록 삭제';
+
+  @override
+  String get blocks_deleteConfirmInline => '이 블록을 삭제할까요?';
+
+  @override
+  String get blocks_saveShortcut => 'Ctrl+Enter로 저장';
+
+  @override
+  String get blocks_saveAsBlock => '블록으로 저장';
+
+  @override
+  String get blocks_lookup => '용어 찾기';
+
+  @override
+  String blocks_splitDone(Object count) {
+    return '$count개 · 쉼표로 나눔';
+  }
+
+  @override
+  String get blocks_replaceSelection => '저장 후 선택한 텍스트를 이 블록으로 바꾸기';
+
+  @override
+  String get blocks_quickHint => '미리보기, 부정, 설정은 나중에 라이브러리에서';
 }

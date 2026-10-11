@@ -14800,6 +14800,902 @@ class AppLocalizationsZh extends AppLocalizations {
   String refs_timeMonthDay(Object month, Object day) {
     return '$month 月 $day 日';
   }
+
+  @override
+  String get blocks_title => '块库';
+
+  @override
+  String get blocks_translationMark => '译';
+
+  @override
+  String get blocks_add => '添加';
+
+  @override
+  String get blocks_cancel => '取消';
+
+  @override
+  String get blocks_close => '关闭';
+
+  @override
+  String get blocks_delete => '删除';
+
+  @override
+  String get blocks_done => '完成';
+
+  @override
+  String get blocks_save => '保存';
+
+  @override
+  String get blocks_saveEnter => '保存 ⏎';
+
+  @override
+  String get blocks_more => '更多';
+
+  @override
+  String get blocks_back => '返回';
+
+  @override
+  String get blocks_rename => '重命名';
+
+  @override
+  String get blocks_edit => '编辑';
+
+  @override
+  String get blocks_copy => '复制';
+
+  @override
+  String get blocks_export => '导出';
+
+  @override
+  String get blocks_apply => '应用';
+
+  @override
+  String get blocks_off => '关';
+
+  @override
+  String get blocks_to => '到';
+
+  @override
+  String blocks_items(Object count) {
+    return '$count 项';
+  }
+
+  @override
+  String get blocks_itemUnit => '项';
+
+  @override
+  String blocks_usedTimes(Object count) {
+    return '用过 $count 次';
+  }
+
+  @override
+  String blocks_nBlocks(Object count) {
+    return '$count 个';
+  }
+
+  @override
+  String get blocks_untitled => '未命名';
+
+  @override
+  String get blocks_favorite => '收藏';
+
+  @override
+  String get blocks_unfavorite => '取消收藏';
+
+  @override
+  String get blocks_favorites => '收藏';
+
+  @override
+  String get blocks_recent => '最近使用';
+
+  @override
+  String get blocks_uncategorized => '未分类';
+
+  @override
+  String get blocks_positive => '正面';
+
+  @override
+  String get blocks_negative => '负面';
+
+  @override
+  String blocks_positiveN(Object count) {
+    return '正面 $count';
+  }
+
+  @override
+  String blocks_negativeN(Object count) {
+    return '负面 $count';
+  }
+
+  @override
+  String get blocks_content => '内容';
+
+  @override
+  String get blocks_name => '名称';
+
+  @override
+  String get blocks_folder => '文件夹';
+
+  @override
+  String get blocks_folders => '文件夹';
+
+  @override
+  String get blocks_tags => '标签';
+
+  @override
+  String get blocks_tag => '标签';
+
+  @override
+  String get blocks_icon => '图标';
+
+  @override
+  String get blocks_color => '颜色';
+
+  @override
+  String get blocks_look => '外观';
+
+  @override
+  String get blocks_appearance => '外观';
+
+  @override
+  String get blocks_thumb => '预览图';
+
+  @override
+  String get blocks_preview => '预览';
+
+  @override
+  String get blocks_params => '附带参数';
+
+  @override
+  String get blocks_classify => '归类';
+
+  @override
+  String get blocks_lookClassic => '经典';
+
+  @override
+  String get blocks_lookStripes => '细条纹';
+
+  @override
+  String get blocks_lookDots => '圆点';
+
+  @override
+  String get blocks_lookSolid => '实心';
+
+  @override
+  String get blocks_lookGradient => '渐变';
+
+  @override
+  String get blocks_lookTranslation => '翻译';
+
+  @override
+  String get blocks_hasParams => '附带参数';
+
+  @override
+  String get blocks_hasNegative => '含负面';
+
+  @override
+  String get blocks_hintClick => '点击插入';
+
+  @override
+  String get blocks_hintDrag => '拖到位置';
+
+  @override
+  String get blocks_hintRightClick => '右键更多';
+
+  @override
+  String get blocks_searchHint => '搜索块…';
+
+  @override
+  String get blocks_filterAll => '全部';
+
+  @override
+  String blocks_allN(Object count) {
+    return '全部 $count';
+  }
+
+  @override
+  String get blocks_searchResults => '搜索结果';
+
+  @override
+  String get blocks_noResults => '没有找到匹配的块';
+
+  @override
+  String get blocks_noFavorites => '还没有收藏的块。在块上右键 → 收藏。';
+
+  @override
+  String get blocks_dockEmpty => '块库还是空的。把常用的一串提示词存成块，点一下就能插进来。';
+
+  @override
+  String get blocks_dockHint => '点击插到光标处 · 拖进提示词放到指定位置';
+
+  @override
+  String get blocks_openLibrary => '在块库中打开';
+
+  @override
+  String get blocks_newBlock => '新建块';
+
+  @override
+  String get blocks_newBlockTip => '新建块（Ctrl+N）';
+
+  @override
+  String get blocks_insertAtCursor => '插到光标处';
+
+  @override
+  String get blocks_addToPalette => '放进积木';
+
+  @override
+  String get blocks_showInLibrary => '在块库中查看';
+
+  @override
+  String get blocks_missing => '块已删除';
+
+  @override
+  String get blocks_modeFixed => '固定';
+
+  @override
+  String get blocks_modeSequential => '顺序';
+
+  @override
+  String get blocks_modeRandom => '随机';
+
+  @override
+  String blocks_summaryRandom(Object range, Object pool) {
+    return '随机抽取 · 每次 $range 项 · 池里 $pool 项';
+  }
+
+  @override
+  String blocks_summarySequential(Object range) {
+    return '顺序 · 每次 $range 项 · 生成一张往后走一步';
+  }
+
+  @override
+  String get blocks_drawnThisTime => '本次抽到';
+
+  @override
+  String get blocks_lock => '锁定';
+
+  @override
+  String get blocks_unlock => '解锁';
+
+  @override
+  String get blocks_lockTip => '冻结这次的结果，生成时不再重抽';
+
+  @override
+  String get blocks_unlockTip => '解锁后生成时会重新抽取';
+
+  @override
+  String get blocks_reroll => '重抽';
+
+  @override
+  String get blocks_rerollLocked => '已锁定，先解锁才能重抽';
+
+  @override
+  String blocks_skipped(Object percent) {
+    return '这次没出场（出现概率 $percent）';
+  }
+
+  @override
+  String blocks_sendPrefix(Object text) {
+    return '发送：$text';
+  }
+
+  @override
+  String blocks_seqPosition(Object index, Object total) {
+    return '第 $index / $total 项';
+  }
+
+  @override
+  String get blocks_seqLocked => '已锁定，不会自动前进';
+
+  @override
+  String get blocks_prevItem => '上一项';
+
+  @override
+  String get blocks_nextItem => '下一项';
+
+  @override
+  String blocks_prevValue(Object value) {
+    return '上一项 $value';
+  }
+
+  @override
+  String blocks_nextValue(Object value) {
+    return '下一项 $value';
+  }
+
+  @override
+  String get blocks_paramsTitle => '这个块带了生图参数';
+
+  @override
+  String get blocks_drawMode => '抽取方式';
+
+  @override
+  String blocks_fixedExplain(Object count) {
+    return '固定：每次都原样放入全部 $count 项。切到顺序或随机后，在这里设数量和权重。';
+  }
+
+  @override
+  String get blocks_ruleCount => '数量';
+
+  @override
+  String get blocks_ruleWeight => '权重';
+
+  @override
+  String get blocks_ruleShow => '出现';
+
+  @override
+  String get blocks_ruleEach => '每次';
+
+  @override
+  String get blocks_ruleItemUnit => '项';
+
+  @override
+  String get blocks_ruleWrap => '走完从头开始';
+
+  @override
+  String get blocks_adjust => '调整';
+
+  @override
+  String get blocks_appliesTo => '作用于';
+
+  @override
+  String get blocks_disable => '停用';
+
+  @override
+  String get blocks_enable => '启用';
+
+  @override
+  String get blocks_editBlock => '改块';
+
+  @override
+  String get blocks_removeInstanceTip => '从提示词里移除';
+
+  @override
+  String get blocks_removeInstance => '从提示词里移除';
+
+  @override
+  String get blocks_copySend => '复制发送文本';
+
+  @override
+  String get blocks_evolutionOn => '设为遗传块';
+
+  @override
+  String get blocks_evolutionOff => '取消遗传';
+
+  @override
+  String get blocks_rulesTitle => '抽取规则';
+
+  @override
+  String get blocks_rulesHint => '点完成后生效';
+
+  @override
+  String get blocks_rulesDirty => '有改动 · 点完成后生效';
+
+  @override
+  String get blocks_modeFixedDesc => '每次原样放入全部内容';
+
+  @override
+  String get blocks_modeSequentialDesc => '按顺序轮流，生成一张走一步';
+
+  @override
+  String get blocks_modeRandomDesc => '每次从池里随机抽几项';
+
+  @override
+  String get blocks_drawEach => '每次抽';
+
+  @override
+  String get blocks_takeEach => '每次取';
+
+  @override
+  String blocks_poolSize(Object count) {
+    return '池里共 $count 项';
+  }
+
+  @override
+  String get blocks_outputOrder => '输出顺序';
+
+  @override
+  String get blocks_orderDrawn => '按抽中顺序';
+
+  @override
+  String get blocks_orderOriginal => '按原顺序';
+
+  @override
+  String get blocks_seqExplain => '生成一张往后走一步；锁定后停在当前项。';
+
+  @override
+  String get blocks_randomWeight => '随机权重';
+
+  @override
+  String get blocks_randomWeightHint => '给每项套上 0.8::…:: 这样的权重';
+
+  @override
+  String get blocks_weightMin => '最小';
+
+  @override
+  String get blocks_weightAverage => '最常见';
+
+  @override
+  String get blocks_weightMax => '最大';
+
+  @override
+  String get blocks_distribution => '分布';
+
+  @override
+  String get blocks_distFocused => '集中';
+
+  @override
+  String get blocks_distBalanced => '均衡';
+
+  @override
+  String get blocks_distSpread => '发散';
+
+  @override
+  String get blocks_distCustom => '自定义';
+
+  @override
+  String get blocks_advanced => '高级';
+
+  @override
+  String get blocks_leftDispersion => '左侧离散';
+
+  @override
+  String get blocks_rightDispersion => '右侧离散';
+
+  @override
+  String get blocks_softBalance => '软平衡';
+
+  @override
+  String get blocks_softBalanceHint => '多项时把平均权重拉回最常见值';
+
+  @override
+  String get blocks_softBalanceStrength => '平衡强度';
+
+  @override
+  String get blocks_probability => '出现概率';
+
+  @override
+  String get blocks_probabilityHint => '低于 100% 时，有时整个块不出场';
+
+  @override
+  String get blocks_previewHint => '按当前规则抽 4 次';
+
+  @override
+  String get blocks_resample => '再抽';
+
+  @override
+  String get blocks_sampleSkipped => '（这次没出场）';
+
+  @override
+  String get blocks_resetDefault => '恢复默认';
+
+  @override
+  String get blocks_discard => '取消改动';
+
+  @override
+  String get blocks_allBlocks => '全部块';
+
+  @override
+  String get blocks_collections => '收藏集';
+
+  @override
+  String get blocks_newCollection => '新建收藏集';
+
+  @override
+  String get blocks_collectionName => '收藏集名称';
+
+  @override
+  String get blocks_noCollections => '把卡片拖到这里的收藏集，一个块可以进多个收藏集。';
+
+  @override
+  String get blocks_deleteCollection => '删除收藏集';
+
+  @override
+  String get blocks_newFolder => '新建文件夹';
+
+  @override
+  String get blocks_newSubfolder => '新建子文件夹';
+
+  @override
+  String get blocks_folderName => '文件夹名称';
+
+  @override
+  String get blocks_deleteFolder => '删除文件夹…';
+
+  @override
+  String get blocks_moveUp => '上移';
+
+  @override
+  String get blocks_moveDown => '下移';
+
+  @override
+  String get blocks_moveToTop => '移到顶层';
+
+  @override
+  String get blocks_tagName => '标签名';
+
+  @override
+  String get blocks_tagColor => '改颜色';
+
+  @override
+  String get blocks_deleteTag => '删除标签';
+
+  @override
+  String get blocks_collapseSidebar => '收起左栏';
+
+  @override
+  String get blocks_expandSidebar => '展开左栏';
+
+  @override
+  String get blocks_importExport => '导入 / 导出';
+
+  @override
+  String get blocks_importTxt => '导入 TXT…';
+
+  @override
+  String get blocks_importFolder => '导入文件夹…';
+
+  @override
+  String get blocks_importCuration => '整理导入…';
+
+  @override
+  String get blocks_exportBackup => '导出整库备份';
+
+  @override
+  String get blocks_importBackup => '导入整库备份…';
+
+  @override
+  String blocks_dropMoveTo(Object name) {
+    return '移到「$name」';
+  }
+
+  @override
+  String blocks_dropCopyTo(Object name) {
+    return '复制到「$name」';
+  }
+
+  @override
+  String blocks_dropAddTo(Object name) {
+    return '加入「$name」';
+  }
+
+  @override
+  String get blocks_searchLibrary => '搜索标题、内容或标签';
+
+  @override
+  String get blocks_sortCustom => '自定义顺序';
+
+  @override
+  String get blocks_sortUpdated => '最近修改';
+
+  @override
+  String get blocks_sortTitle => '名称';
+
+  @override
+  String get blocks_sortColor => '颜色';
+
+  @override
+  String get blocks_sortIcon => '图标';
+
+  @override
+  String get blocks_sortAsc => '升序';
+
+  @override
+  String get blocks_sortDesc => '降序';
+
+  @override
+  String get blocks_viewGrid => '网格';
+
+  @override
+  String get blocks_viewList => '列表';
+
+  @override
+  String get blocks_multiSelect => '多选';
+
+  @override
+  String get blocks_multiDone => '完成多选';
+
+  @override
+  String get blocks_hideInspector => '收起详情';
+
+  @override
+  String get blocks_showInspector => '展开详情';
+
+  @override
+  String get blocks_quickImage => '有预览图';
+
+  @override
+  String get blocks_quickNegative => '含负面';
+
+  @override
+  String get blocks_quickParams => '附带参数';
+
+  @override
+  String get blocks_cardSize => '卡片大小';
+
+  @override
+  String get blocks_noMatch => '没有符合条件的块';
+
+  @override
+  String get blocks_noMatchBody => '换个关键词，或者清除快速筛选。';
+
+  @override
+  String get blocks_clearFilters => '清除筛选';
+
+  @override
+  String get blocks_insert => '插入';
+
+  @override
+  String get blocks_insertToPrompt => '插入到提示词';
+
+  @override
+  String get blocks_miniNegative => '负面';
+
+  @override
+  String get blocks_miniParams => '参数';
+
+  @override
+  String get blocks_colName => '名称';
+
+  @override
+  String get blocks_colItems => '项数';
+
+  @override
+  String get blocks_colFolder => '文件夹';
+
+  @override
+  String get blocks_colUsed => '使用';
+
+  @override
+  String get blocks_colModified => '修改';
+
+  @override
+  String blocks_selectedN(Object count) {
+    return '已选 $count 个';
+  }
+
+  @override
+  String blocks_selectedBlocksN(Object count) {
+    return '已选 $count 个块';
+  }
+
+  @override
+  String get blocks_moveTo => '移到…';
+
+  @override
+  String get blocks_noTags => '还没有标签';
+
+  @override
+  String get blocks_emptyTitle => '块库还是空的';
+
+  @override
+  String get blocks_emptyBody =>
+      '把常用的一串提示词存成块：画师池、角色、服装、质量词……插进提示词后可以固定、按顺序轮流或随机抽取。';
+
+  @override
+  String get blocks_duplicate => '复制一份';
+
+  @override
+  String get blocks_copyContent => '复制内容';
+
+  @override
+  String get blocks_applyParams => '应用附带参数';
+
+  @override
+  String get blocks_exportTxt => '导出为 TXT';
+
+  @override
+  String get blocks_removeFromCollection => '移出收藏集';
+
+  @override
+  String blocks_deleteOne(Object name) {
+    return '删除「$name」？';
+  }
+
+  @override
+  String blocks_deleteMany(Object count) {
+    return '删除 $count 个块？';
+  }
+
+  @override
+  String get blocks_deleteBody => '提示词里已经插入的实例会显示为“块已删除”，可以撤销。';
+
+  @override
+  String get blocks_details => '详情';
+
+  @override
+  String get blocks_noSelection => '点一张卡片查看详情。双击直接编辑，Enter 插入到提示词。';
+
+  @override
+  String get blocks_changeThumb => '更换 / 调整';
+
+  @override
+  String get blocks_reading => '翻译阅读';
+
+  @override
+  String get blocks_needsReview => '需复核';
+
+  @override
+  String get blocks_applyToCurrent => '应用到当前';
+
+  @override
+  String get blocks_noParams => '没有。插入时不会改动当前参数。';
+
+  @override
+  String get blocks_paramModel => '模型';
+
+  @override
+  String get blocks_paramSteps => '步数';
+
+  @override
+  String get blocks_paramGuidance => '引导';
+
+  @override
+  String get blocks_paramRescale => '重缩放';
+
+  @override
+  String get blocks_paramSampler => '采样器';
+
+  @override
+  String get blocks_paramNoise => '噪声';
+
+  @override
+  String blocks_steps(Object count) {
+    return '$count 步';
+  }
+
+  @override
+  String blocks_guidance(Object value) {
+    return '引导 $value';
+  }
+
+  @override
+  String blocks_rescale(Object value) {
+    return '重缩放 $value';
+  }
+
+  @override
+  String get blocks_newTagInEdit => '新标签…';
+
+  @override
+  String blocks_modifiedAt(Object time) {
+    return '修改于 $time';
+  }
+
+  @override
+  String blocks_createdAt(Object date) {
+    return '创建于 $date';
+  }
+
+  @override
+  String blocks_sourceFile(Object path) {
+    return '来源文件 $path';
+  }
+
+  @override
+  String get blocks_sourceSynced => '与文件一致';
+
+  @override
+  String get blocks_sourceChanged => '文件已改动';
+
+  @override
+  String get blocks_sourceMissing => '文件已不在';
+
+  @override
+  String blocks_importedAt(Object date) {
+    return '导入于 $date';
+  }
+
+  @override
+  String get blocks_total => '合计';
+
+  @override
+  String blocks_totalItems(Object count) {
+    return '$count 项内容';
+  }
+
+  @override
+  String get blocks_from => '来自';
+
+  @override
+  String get blocks_batch => '批量操作';
+
+  @override
+  String get blocks_insertInOrder => '依次插入到提示词';
+
+  @override
+  String get blocks_mergeNew => '合并成一个新块…';
+
+  @override
+  String get blocks_batchStyle => '统一改颜色 / 外观';
+
+  @override
+  String blocks_dragHint(Object count) {
+    return '也可以直接把这 $count 张卡拖到左边的文件夹或收藏集，松开时选择移动还是复制。';
+  }
+
+  @override
+  String get blocks_editBlockTitle => '编辑块';
+
+  @override
+  String get blocks_editHint => '保存后，提示词里固定模式的实例立即更新；随机 / 顺序在下次抽取时用新内容';
+
+  @override
+  String get blocks_newBlockHint => '块存进块库后，可以从生图页侧栏点一下插入';
+
+  @override
+  String get blocks_addThumb => '添加预览图';
+
+  @override
+  String get blocks_changeImage => '换图';
+
+  @override
+  String get blocks_clearThumb => '清除预览图';
+
+  @override
+  String get blocks_cropHint => '拖动 / 滚轮缩放';
+
+  @override
+  String get blocks_namePlaceholder => '不填就用第一项';
+
+  @override
+  String get blocks_plainText => '纯文本';
+
+  @override
+  String get blocks_plainTextHint => '原样保存这段文字，不拆成项';
+
+  @override
+  String get blocks_atomHint => '输入后按 Enter 或逗号成为一项；粘贴一段会自动拆分';
+
+  @override
+  String get blocks_existingTags => '已有标签';
+
+  @override
+  String get blocks_newTag => '新标签';
+
+  @override
+  String get blocks_paramsNotAuto => '插入时不自动应用';
+
+  @override
+  String get blocks_noParamsShort => '没有';
+
+  @override
+  String get blocks_editParams => '编辑参数';
+
+  @override
+  String get blocks_captureParams => '从当前读取';
+
+  @override
+  String get blocks_keepCurrent => '不改当前值';
+
+  @override
+  String get blocks_clearParams => '清除参数';
+
+  @override
+  String get blocks_deleteBlock => '删除块';
+
+  @override
+  String get blocks_deleteConfirmInline => '确定删除这个块？';
+
+  @override
+  String get blocks_saveShortcut => 'Ctrl+Enter 保存';
+
+  @override
+  String get blocks_saveAsBlock => '存为块';
+
+  @override
+  String get blocks_lookup => '查词条';
+
+  @override
+  String blocks_splitDone(Object count) {
+    return '$count 项 · 已按逗号拆好';
+  }
+
+  @override
+  String get blocks_replaceSelection => '保存后把选中的文字换成这个块';
+
+  @override
+  String get blocks_quickHint => '更多设置（预览图、负面、参数）稍后在块库里改';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -29598,4 +30494,900 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String refs_timeMonthDay(Object month, Object day) {
     return '$month 月 $day 日';
   }
+
+  @override
+  String get blocks_title => '塊庫';
+
+  @override
+  String get blocks_translationMark => '譯';
+
+  @override
+  String get blocks_add => '新增';
+
+  @override
+  String get blocks_cancel => '取消';
+
+  @override
+  String get blocks_close => '關閉';
+
+  @override
+  String get blocks_delete => '刪除';
+
+  @override
+  String get blocks_done => '完成';
+
+  @override
+  String get blocks_save => '儲存';
+
+  @override
+  String get blocks_saveEnter => '儲存 ⏎';
+
+  @override
+  String get blocks_more => '更多';
+
+  @override
+  String get blocks_back => '返回';
+
+  @override
+  String get blocks_rename => '重新命名';
+
+  @override
+  String get blocks_edit => '編輯';
+
+  @override
+  String get blocks_copy => '複製';
+
+  @override
+  String get blocks_export => '匯出';
+
+  @override
+  String get blocks_apply => '應用';
+
+  @override
+  String get blocks_off => '關';
+
+  @override
+  String get blocks_to => '到';
+
+  @override
+  String blocks_items(Object count) {
+    return '$count 項';
+  }
+
+  @override
+  String get blocks_itemUnit => '項';
+
+  @override
+  String blocks_usedTimes(Object count) {
+    return '用過 $count 次';
+  }
+
+  @override
+  String blocks_nBlocks(Object count) {
+    return '$count 個';
+  }
+
+  @override
+  String get blocks_untitled => '未命名';
+
+  @override
+  String get blocks_favorite => '收藏';
+
+  @override
+  String get blocks_unfavorite => '取消收藏';
+
+  @override
+  String get blocks_favorites => '收藏';
+
+  @override
+  String get blocks_recent => '最近使用';
+
+  @override
+  String get blocks_uncategorized => '未分類';
+
+  @override
+  String get blocks_positive => '正面';
+
+  @override
+  String get blocks_negative => '負面';
+
+  @override
+  String blocks_positiveN(Object count) {
+    return '正面 $count';
+  }
+
+  @override
+  String blocks_negativeN(Object count) {
+    return '負面 $count';
+  }
+
+  @override
+  String get blocks_content => '內容';
+
+  @override
+  String get blocks_name => '名稱';
+
+  @override
+  String get blocks_folder => '資料夾';
+
+  @override
+  String get blocks_folders => '資料夾';
+
+  @override
+  String get blocks_tags => '標籤';
+
+  @override
+  String get blocks_tag => '標籤';
+
+  @override
+  String get blocks_icon => '圖示';
+
+  @override
+  String get blocks_color => '顏色';
+
+  @override
+  String get blocks_look => '外觀';
+
+  @override
+  String get blocks_appearance => '外觀';
+
+  @override
+  String get blocks_thumb => '預覽圖';
+
+  @override
+  String get blocks_preview => '預覽';
+
+  @override
+  String get blocks_params => '附帶參數';
+
+  @override
+  String get blocks_classify => '歸類';
+
+  @override
+  String get blocks_lookClassic => '經典';
+
+  @override
+  String get blocks_lookStripes => '細條紋';
+
+  @override
+  String get blocks_lookDots => '圓點';
+
+  @override
+  String get blocks_lookSolid => '實心';
+
+  @override
+  String get blocks_lookGradient => '漸變';
+
+  @override
+  String get blocks_lookTranslation => '翻譯';
+
+  @override
+  String get blocks_hasParams => '附帶參數';
+
+  @override
+  String get blocks_hasNegative => '含負面';
+
+  @override
+  String get blocks_hintClick => '點選插入';
+
+  @override
+  String get blocks_hintDrag => '拖到位置';
+
+  @override
+  String get blocks_hintRightClick => '右鍵更多';
+
+  @override
+  String get blocks_searchHint => '搜尋塊…';
+
+  @override
+  String get blocks_filterAll => '全部';
+
+  @override
+  String blocks_allN(Object count) {
+    return '全部 $count';
+  }
+
+  @override
+  String get blocks_searchResults => '搜尋結果';
+
+  @override
+  String get blocks_noResults => '沒有找到匹配的塊';
+
+  @override
+  String get blocks_noFavorites => '還沒有收藏的塊。在塊上右鍵 → 收藏。';
+
+  @override
+  String get blocks_dockEmpty => '塊庫還是空的。把常用的一串提示詞存成塊，點一下就能插進來。';
+
+  @override
+  String get blocks_dockHint => '點選插到游標處 · 拖進提示詞放到指定位置';
+
+  @override
+  String get blocks_openLibrary => '在塊庫中開啟';
+
+  @override
+  String get blocks_newBlock => '新增塊';
+
+  @override
+  String get blocks_newBlockTip => '新增塊（Ctrl+N）';
+
+  @override
+  String get blocks_insertAtCursor => '插到游標處';
+
+  @override
+  String get blocks_addToPalette => '放進積木';
+
+  @override
+  String get blocks_showInLibrary => '在塊庫中檢視';
+
+  @override
+  String get blocks_missing => '塊已刪除';
+
+  @override
+  String get blocks_modeFixed => '固定';
+
+  @override
+  String get blocks_modeSequential => '順序';
+
+  @override
+  String get blocks_modeRandom => '隨機';
+
+  @override
+  String blocks_summaryRandom(Object range, Object pool) {
+    return '隨機抽取 · 每次 $range 項 · 池裡 $pool 項';
+  }
+
+  @override
+  String blocks_summarySequential(Object range) {
+    return '順序 · 每次 $range 項 · 生成一張往後走一步';
+  }
+
+  @override
+  String get blocks_drawnThisTime => '本次抽到';
+
+  @override
+  String get blocks_lock => '鎖定';
+
+  @override
+  String get blocks_unlock => '解鎖';
+
+  @override
+  String get blocks_lockTip => '凍結這次的結果，生成時不再重抽';
+
+  @override
+  String get blocks_unlockTip => '解鎖後生成時會重新抽取';
+
+  @override
+  String get blocks_reroll => '重抽';
+
+  @override
+  String get blocks_rerollLocked => '已鎖定，先解鎖才能重抽';
+
+  @override
+  String blocks_skipped(Object percent) {
+    return '這次沒出場（出現機率 $percent）';
+  }
+
+  @override
+  String blocks_sendPrefix(Object text) {
+    return '傳送：$text';
+  }
+
+  @override
+  String blocks_seqPosition(Object index, Object total) {
+    return '第 $index / $total 項';
+  }
+
+  @override
+  String get blocks_seqLocked => '已鎖定，不會自動前進';
+
+  @override
+  String get blocks_prevItem => '上一項';
+
+  @override
+  String get blocks_nextItem => '下一項';
+
+  @override
+  String blocks_prevValue(Object value) {
+    return '上一項 $value';
+  }
+
+  @override
+  String blocks_nextValue(Object value) {
+    return '下一項 $value';
+  }
+
+  @override
+  String get blocks_paramsTitle => '這個塊帶了生圖參數';
+
+  @override
+  String get blocks_drawMode => '抽取方式';
+
+  @override
+  String blocks_fixedExplain(Object count) {
+    return '固定：每次都原樣放入全部 $count 項。切到順序或隨機後，在這裡設數量和權重。';
+  }
+
+  @override
+  String get blocks_ruleCount => '數量';
+
+  @override
+  String get blocks_ruleWeight => '權重';
+
+  @override
+  String get blocks_ruleShow => '出現';
+
+  @override
+  String get blocks_ruleEach => '每次';
+
+  @override
+  String get blocks_ruleItemUnit => '項';
+
+  @override
+  String get blocks_ruleWrap => '走完從頭開始';
+
+  @override
+  String get blocks_adjust => '調整';
+
+  @override
+  String get blocks_appliesTo => '作用於';
+
+  @override
+  String get blocks_disable => '停用';
+
+  @override
+  String get blocks_enable => '啟用';
+
+  @override
+  String get blocks_editBlock => '改塊';
+
+  @override
+  String get blocks_removeInstanceTip => '從提示詞裡移除';
+
+  @override
+  String get blocks_removeInstance => '從提示詞裡移除';
+
+  @override
+  String get blocks_copySend => '複製傳送文本';
+
+  @override
+  String get blocks_evolutionOn => '設為遺傳塊';
+
+  @override
+  String get blocks_evolutionOff => '取消遺傳';
+
+  @override
+  String get blocks_rulesTitle => '抽取規則';
+
+  @override
+  String get blocks_rulesHint => '點完成後生效';
+
+  @override
+  String get blocks_rulesDirty => '有改動 · 點完成後生效';
+
+  @override
+  String get blocks_modeFixedDesc => '每次原樣放入全部內容';
+
+  @override
+  String get blocks_modeSequentialDesc => '按順序輪流，生成一張走一步';
+
+  @override
+  String get blocks_modeRandomDesc => '每次從池裡隨機抽幾項';
+
+  @override
+  String get blocks_drawEach => '每次抽';
+
+  @override
+  String get blocks_takeEach => '每次取';
+
+  @override
+  String blocks_poolSize(Object count) {
+    return '池裡共 $count 項';
+  }
+
+  @override
+  String get blocks_outputOrder => '輸出順序';
+
+  @override
+  String get blocks_orderDrawn => '按抽中順序';
+
+  @override
+  String get blocks_orderOriginal => '按原順序';
+
+  @override
+  String get blocks_seqExplain => '生成一張往後走一步；鎖定後停在當前項。';
+
+  @override
+  String get blocks_randomWeight => '隨機權重';
+
+  @override
+  String get blocks_randomWeightHint => '給每項套上 0.8::…:: 這樣的權重';
+
+  @override
+  String get blocks_weightMin => '最小';
+
+  @override
+  String get blocks_weightAverage => '最常見';
+
+  @override
+  String get blocks_weightMax => '最大';
+
+  @override
+  String get blocks_distribution => '分佈';
+
+  @override
+  String get blocks_distFocused => '集中';
+
+  @override
+  String get blocks_distBalanced => '均衡';
+
+  @override
+  String get blocks_distSpread => '發散';
+
+  @override
+  String get blocks_distCustom => '自訂';
+
+  @override
+  String get blocks_advanced => '進階';
+
+  @override
+  String get blocks_leftDispersion => '左側離散';
+
+  @override
+  String get blocks_rightDispersion => '右側離散';
+
+  @override
+  String get blocks_softBalance => '軟平衡';
+
+  @override
+  String get blocks_softBalanceHint => '多項時把平均權重拉回最常見值';
+
+  @override
+  String get blocks_softBalanceStrength => '平衡強度';
+
+  @override
+  String get blocks_probability => '出現機率';
+
+  @override
+  String get blocks_probabilityHint => '低於 100% 時，有時整個塊不出場';
+
+  @override
+  String get blocks_previewHint => '按當前規則抽 4 次';
+
+  @override
+  String get blocks_resample => '再抽';
+
+  @override
+  String get blocks_sampleSkipped => '（這次沒出場）';
+
+  @override
+  String get blocks_resetDefault => '恢復預設';
+
+  @override
+  String get blocks_discard => '取消改動';
+
+  @override
+  String get blocks_allBlocks => '全部塊';
+
+  @override
+  String get blocks_collections => '收藏集';
+
+  @override
+  String get blocks_newCollection => '新增收藏集';
+
+  @override
+  String get blocks_collectionName => '收藏集名稱';
+
+  @override
+  String get blocks_noCollections => '把卡片拖到這裡的收藏集，一個塊可以進多個收藏集。';
+
+  @override
+  String get blocks_deleteCollection => '刪除收藏集';
+
+  @override
+  String get blocks_newFolder => '新增資料夾';
+
+  @override
+  String get blocks_newSubfolder => '新增子資料夾';
+
+  @override
+  String get blocks_folderName => '資料夾名稱';
+
+  @override
+  String get blocks_deleteFolder => '刪除資料夾…';
+
+  @override
+  String get blocks_moveUp => '上移';
+
+  @override
+  String get blocks_moveDown => '下移';
+
+  @override
+  String get blocks_moveToTop => '移到頂層';
+
+  @override
+  String get blocks_tagName => '標籤名';
+
+  @override
+  String get blocks_tagColor => '改顏色';
+
+  @override
+  String get blocks_deleteTag => '刪除標籤';
+
+  @override
+  String get blocks_collapseSidebar => '收起左欄';
+
+  @override
+  String get blocks_expandSidebar => '展開左欄';
+
+  @override
+  String get blocks_importExport => '匯入 / 匯出';
+
+  @override
+  String get blocks_importTxt => '匯入 TXT…';
+
+  @override
+  String get blocks_importFolder => '匯入資料夾…';
+
+  @override
+  String get blocks_importCuration => '整理匯入…';
+
+  @override
+  String get blocks_exportBackup => '匯出整庫備份';
+
+  @override
+  String get blocks_importBackup => '匯入整庫備份…';
+
+  @override
+  String blocks_dropMoveTo(Object name) {
+    return '移到「$name」';
+  }
+
+  @override
+  String blocks_dropCopyTo(Object name) {
+    return '複製到「$name」';
+  }
+
+  @override
+  String blocks_dropAddTo(Object name) {
+    return '加入「$name」';
+  }
+
+  @override
+  String get blocks_searchLibrary => '搜尋標題、內容或標籤';
+
+  @override
+  String get blocks_sortCustom => '自訂順序';
+
+  @override
+  String get blocks_sortUpdated => '最近修改';
+
+  @override
+  String get blocks_sortTitle => '名稱';
+
+  @override
+  String get blocks_sortColor => '顏色';
+
+  @override
+  String get blocks_sortIcon => '圖示';
+
+  @override
+  String get blocks_sortAsc => '升序';
+
+  @override
+  String get blocks_sortDesc => '降序';
+
+  @override
+  String get blocks_viewGrid => '網格';
+
+  @override
+  String get blocks_viewList => '列表';
+
+  @override
+  String get blocks_multiSelect => '多選';
+
+  @override
+  String get blocks_multiDone => '完成多選';
+
+  @override
+  String get blocks_hideInspector => '收起詳情';
+
+  @override
+  String get blocks_showInspector => '展開詳情';
+
+  @override
+  String get blocks_quickImage => '有預覽圖';
+
+  @override
+  String get blocks_quickNegative => '含負面';
+
+  @override
+  String get blocks_quickParams => '附帶參數';
+
+  @override
+  String get blocks_cardSize => '卡片大小';
+
+  @override
+  String get blocks_noMatch => '沒有符合條件的塊';
+
+  @override
+  String get blocks_noMatchBody => '換個關鍵詞，或者清除快速篩選。';
+
+  @override
+  String get blocks_clearFilters => '清除篩選';
+
+  @override
+  String get blocks_insert => '插入';
+
+  @override
+  String get blocks_insertToPrompt => '插入到提示詞';
+
+  @override
+  String get blocks_miniNegative => '負面';
+
+  @override
+  String get blocks_miniParams => '參數';
+
+  @override
+  String get blocks_colName => '名稱';
+
+  @override
+  String get blocks_colItems => '項數';
+
+  @override
+  String get blocks_colFolder => '資料夾';
+
+  @override
+  String get blocks_colUsed => '使用';
+
+  @override
+  String get blocks_colModified => '修改';
+
+  @override
+  String blocks_selectedN(Object count) {
+    return '已選 $count 個';
+  }
+
+  @override
+  String blocks_selectedBlocksN(Object count) {
+    return '已選 $count 個塊';
+  }
+
+  @override
+  String get blocks_moveTo => '移到…';
+
+  @override
+  String get blocks_noTags => '還沒有標籤';
+
+  @override
+  String get blocks_emptyTitle => '塊庫還是空的';
+
+  @override
+  String get blocks_emptyBody =>
+      '把常用的一串提示詞存成塊：畫師池、角色、服裝、品質詞……插進提示詞後可以固定、按順序輪流或隨機抽取。';
+
+  @override
+  String get blocks_duplicate => '複製一份';
+
+  @override
+  String get blocks_copyContent => '複製內容';
+
+  @override
+  String get blocks_applyParams => '應用附帶參數';
+
+  @override
+  String get blocks_exportTxt => '匯出為 TXT';
+
+  @override
+  String get blocks_removeFromCollection => '移出收藏集';
+
+  @override
+  String blocks_deleteOne(Object name) {
+    return '刪除「$name」？';
+  }
+
+  @override
+  String blocks_deleteMany(Object count) {
+    return '刪除 $count 個塊？';
+  }
+
+  @override
+  String get blocks_deleteBody => '提示詞裡已經插入的實例會顯示為“塊已刪除”，可以復原。';
+
+  @override
+  String get blocks_details => '詳情';
+
+  @override
+  String get blocks_noSelection => '點一張卡片檢視詳情。雙擊直接編輯，Enter 插入到提示詞。';
+
+  @override
+  String get blocks_changeThumb => '更換 / 調整';
+
+  @override
+  String get blocks_reading => '翻譯閱讀';
+
+  @override
+  String get blocks_needsReview => '需複核';
+
+  @override
+  String get blocks_applyToCurrent => '應用到當前';
+
+  @override
+  String get blocks_noParams => '沒有。插入時不會改動當前參數。';
+
+  @override
+  String get blocks_paramModel => '模型';
+
+  @override
+  String get blocks_paramSteps => '步數';
+
+  @override
+  String get blocks_paramGuidance => '引導';
+
+  @override
+  String get blocks_paramRescale => '重縮放';
+
+  @override
+  String get blocks_paramSampler => '取樣器';
+
+  @override
+  String get blocks_paramNoise => '噪聲';
+
+  @override
+  String blocks_steps(Object count) {
+    return '$count 步';
+  }
+
+  @override
+  String blocks_guidance(Object value) {
+    return '引導 $value';
+  }
+
+  @override
+  String blocks_rescale(Object value) {
+    return '重縮放 $value';
+  }
+
+  @override
+  String get blocks_newTagInEdit => '新標籤…';
+
+  @override
+  String blocks_modifiedAt(Object time) {
+    return '修改於 $time';
+  }
+
+  @override
+  String blocks_createdAt(Object date) {
+    return '創建於 $date';
+  }
+
+  @override
+  String blocks_sourceFile(Object path) {
+    return '來源檔案 $path';
+  }
+
+  @override
+  String get blocks_sourceSynced => '與檔案一致';
+
+  @override
+  String get blocks_sourceChanged => '檔案已改動';
+
+  @override
+  String get blocks_sourceMissing => '檔案已不在';
+
+  @override
+  String blocks_importedAt(Object date) {
+    return '匯入於 $date';
+  }
+
+  @override
+  String get blocks_total => '合計';
+
+  @override
+  String blocks_totalItems(Object count) {
+    return '$count 項內容';
+  }
+
+  @override
+  String get blocks_from => '來自';
+
+  @override
+  String get blocks_batch => '批次操作';
+
+  @override
+  String get blocks_insertInOrder => '依次插入到提示詞';
+
+  @override
+  String get blocks_mergeNew => '合併成一個新塊…';
+
+  @override
+  String get blocks_batchStyle => '統一改顏色 / 外觀';
+
+  @override
+  String blocks_dragHint(Object count) {
+    return '也可以直接把這 $count 張卡拖到左邊的資料夾或收藏集，鬆開時選擇移動還是複製。';
+  }
+
+  @override
+  String get blocks_editBlockTitle => '編輯塊';
+
+  @override
+  String get blocks_editHint => '儲存後，提示詞裡固定模式的實例立即更新；隨機 / 順序在下次抽取時用新內容';
+
+  @override
+  String get blocks_newBlockHint => '塊存進塊庫後，可以從生圖頁側欄點一下插入';
+
+  @override
+  String get blocks_addThumb => '新增預覽圖';
+
+  @override
+  String get blocks_changeImage => '換圖';
+
+  @override
+  String get blocks_clearThumb => '清除預覽圖';
+
+  @override
+  String get blocks_cropHint => '拖動 / 滾輪縮放';
+
+  @override
+  String get blocks_namePlaceholder => '不填就用第一項';
+
+  @override
+  String get blocks_plainText => '純文本';
+
+  @override
+  String get blocks_plainTextHint => '原樣儲存這段文字，不拆成項';
+
+  @override
+  String get blocks_atomHint => '輸入後按 Enter 或逗號成為一項；貼上一段會自動拆分';
+
+  @override
+  String get blocks_existingTags => '已有標籤';
+
+  @override
+  String get blocks_newTag => '新標籤';
+
+  @override
+  String get blocks_paramsNotAuto => '插入時不自動應用';
+
+  @override
+  String get blocks_noParamsShort => '沒有';
+
+  @override
+  String get blocks_editParams => '編輯參數';
+
+  @override
+  String get blocks_captureParams => '從當前讀取';
+
+  @override
+  String get blocks_keepCurrent => '不改當前值';
+
+  @override
+  String get blocks_clearParams => '清除參數';
+
+  @override
+  String get blocks_deleteBlock => '刪除塊';
+
+  @override
+  String get blocks_deleteConfirmInline => '確定刪除這個塊？';
+
+  @override
+  String get blocks_saveShortcut => 'Ctrl+Enter 儲存';
+
+  @override
+  String get blocks_saveAsBlock => '存為塊';
+
+  @override
+  String get blocks_lookup => '查詞條';
+
+  @override
+  String blocks_splitDone(Object count) {
+    return '$count 項 · 已按逗號拆好';
+  }
+
+  @override
+  String get blocks_replaceSelection => '儲存後把選中的文字換成這個塊';
+
+  @override
+  String get blocks_quickHint => '更多設定（預覽圖、負面、參數）稍後在塊庫裡改';
 }
