@@ -160,8 +160,10 @@ class _ClampedLayout extends SingleChildLayoutDelegate {
       old.point != point || old.alignBottom != alignBottom;
 }
 
-/// 弹层外观：抬起底、1px 描边、圆角 12、两层投影。
-/// 投影按 CSS `0 18px 48px` / `0 2px 6px` 换算（Flutter 的 blurRadius ≈ CSS 模糊 × 0.85）。
+/// 弹层外观：抬起底、1px 描边、圆角 12、外圈细线 + 三层投影。
+/// 原型只有 `0 18px 48px` 一层大散影，压在图片上只剩一团灰雾、边缘发飘；
+/// 这里改成：外圈 1px 半透明黑线（图片上也能看出边）、贴边影和中距影撑出利落的下沿，
+/// 远影只保留一点抬起感。Flutter 的 blurRadius ≈ CSS 模糊 × 0.85。
 class UiPopoverSurface extends StatelessWidget {
   const UiPopoverSurface({
     super.key,
@@ -190,14 +192,23 @@ class UiPopoverSurface extends StatelessWidget {
         border: Border.all(color: c.line),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: c.dark ? .5 : .14),
+            color: Colors.black.withValues(alpha: c.dark ? .32 : .07),
             blurRadius: 40,
             offset: const Offset(0, 18),
           ),
-          const BoxShadow(
-            color: Color(0x0F000000),
-            blurRadius: 4.5,
-            offset: Offset(0, 2),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: c.dark ? .36 : .12),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: c.dark ? .4 : .14),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: c.dark ? .5 : .08),
+            spreadRadius: 1,
           ),
         ],
       ),
