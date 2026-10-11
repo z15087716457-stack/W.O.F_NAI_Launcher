@@ -39,6 +39,7 @@ import '../../providers/local_gallery_focus_provider.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../providers/selection_mode_provider.dart';
 import '../../router/app_router.dart';
+import '../../router/gallery_navigation_request.dart';
 import '../../services/image_workflow_launcher.dart';
 import '../../utils/asset_protection_guard.dart';
 import '../../utils/gallery_extra_root_add_flow.dart';
@@ -76,17 +77,21 @@ import '../../widgets/shortcuts/shortcut_aware_widget.dart';
 
 /// 本地画廊屏幕：侧栏 / 连续时间线 / 右侧详情三栏。
 class LocalGalleryScreen extends StatelessWidget {
-  const LocalGalleryScreen({super.key});
+  const LocalGalleryScreen({super.key, this.navigationRequest});
+
+  final GalleryNavigationRequest? navigationRequest;
 
   @override
-  Widget build(BuildContext context) => const PrototypeTypographyScope(
+  Widget build(BuildContext context) => PrototypeTypographyScope(
     family: 'Geist',
-    child: _LocalGalleryContents(),
+    child: _LocalGalleryContents(navigationRequest: navigationRequest),
   );
 }
 
 class _LocalGalleryContents extends ConsumerStatefulWidget {
-  const _LocalGalleryContents();
+  const _LocalGalleryContents({this.navigationRequest});
+
+  final GalleryNavigationRequest? navigationRequest;
 
   @override
   ConsumerState<_LocalGalleryContents> createState() =>
@@ -105,6 +110,8 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   bool _showCategoryPanel = true;
   bool _inspectorVisible = true;
   AppLifecycleListener? _lifecycleListener;
+  bool _galleryReady = false;
+  GalleryNavigationRequest? _handledNavigationRequest;
 
   // 防抖计时器，防止频繁触发刷新
   Timer? _refreshDebounceTimer;
@@ -133,7 +140,12 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _restoreGalleryPreferences();
       await _initializeGallery();
-      await _showFirstTimeTip();
+      if (!mounted) return;
+      _galleryReady = true;
+      await _applyNavigationRequest();
+      if (mounted && widget.navigationRequest?.addFolder != true) {
+        await _showFirstTimeTip();
+      }
     });
 
     _lifecycleListener = AppLifecycleListener(
@@ -152,6 +164,37 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         });
       },
     );
+  }
+
+  @override
+  void didUpdateWidget(_LocalGalleryContents oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_galleryReady &&
+        !identical(oldWidget.navigationRequest, widget.navigationRequest)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_applyNavigationRequest());
+      });
+    }
+  }
+
+  Future<void> _applyNavigationRequest() async {
+    final request = widget.navigationRequest;
+    if (request == null || identical(request, _handledNavigationRequest)) {
+      return;
+    }
+    _handledNavigationRequest = request;
+    final criteria = request.criteria;
+    if (criteria != null) {
+      ref.read(galleryCategoryNotifierProvider.notifier).selectCategory(null);
+      await ref
+          .read(localGalleryNotifierProvider.notifier)
+          .applyExternalFilter(criteria);
+    }
+    if (mounted &&
+        identical(request, widget.navigationRequest) &&
+        request.addFolder) {
+      await _importFolder();
+    }
   }
 
   @override
@@ -2046,7 +2089,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     final result = await showDateRangePickerDialog(
       context,
       initialStart: state.filterCriteria.dateStart,
-      initialEnd: state.filterCriteria.dateEnd,
+      initialEnd: state.filterCriteria.displayDateEnd,
     );
     if (result == null || !mounted) return;
     final date = result.start ?? result.end;

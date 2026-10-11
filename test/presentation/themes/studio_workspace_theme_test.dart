@@ -13,8 +13,6 @@ import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layou
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_category_provider.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/vibe_library_screen.dart';
-import 'package:nai_launcher/presentation/screens/statistics/statistics_screen.dart';
-import 'package:nai_launcher/presentation/screens/statistics/statistics_state.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -131,11 +129,6 @@ class _VibeCategories extends VibeLibraryCategoryNotifier {
   VibeLibraryCategoryState build() => const VibeLibraryCategoryState();
 }
 
-class _Stats extends StatisticsNotifier {
-  @override
-  StatisticsData build() => const StatisticsData(isLoading: false);
-}
-
 class _Online extends OnlineGalleryNotifier {
   @override
   OnlineGalleryState build() => const OnlineGalleryState();
@@ -195,7 +188,6 @@ void main() {
       ('vibe-wide', const VibeLibraryScreen()),
       ('online', const OnlineGalleryScreen()),
       ('precise', const PreciseRefLibraryScreen()),
-      ('statistics', const StatisticsScreen()),
       ('blocks', const PromptBlockLibraryScreen()),
       (
         'appearance',
@@ -245,7 +237,6 @@ void main() {
               vibeLibraryCategoryNotifierProvider.overrideWith(
                 _VibeCategories.new,
               ),
-              statisticsNotifierProvider.overrideWith(_Stats.new),
               localStorageServiceProvider.overrideWithValue(storage),
               shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
               autocompleteServicesProvider.overrideWithValue(

@@ -124,6 +124,24 @@ class GalleryDataSource extends EnhancedBaseDataSource
     _queryCache.clear();
   }
 
+  Future<String> getStatisticsSignature() => execute(
+    'getStatisticsSignature',
+    (db) => db.transaction((txn) async {
+      final rows = await txn.query(
+        _galleryMetaTable,
+        where: 'key IN (?, ?)',
+        whereArgs: ['statistics_instance', 'statistics_revision'],
+      );
+      final values = {for (final row in rows) row['key']: row['value']};
+      if (values['statistics_instance'] == null ||
+          values['statistics_revision'] == null) {
+        throw StateError('Statistics revision is unavailable');
+      }
+      final schema = await txn.rawQuery('PRAGMA schema_version');
+      return 'dashboard_v2:${values['statistics_instance']}:${values['statistics_revision']}:${schema.first.values.single}';
+    }),
+  );
+
   /// 获取缓存统计
   Map<String, dynamic> getCacheStatistics() => {
     'imageCache': _imageCache.statistics,
@@ -1145,79 +1163,74 @@ class GalleryDataSource extends EnhancedBaseDataSource
       final batch = metadataList.sublist(i, end);
       final batchIndex = i ~/ batchSize;
 
-      await executeTransaction(
-        'batchUpsertMetadata#batch$batchIndex',
-        (txn) async {
-          final ftsUpdates = <int, String>{};
+      await executeTransaction('batchUpsertMetadata#batch$batchIndex', (
+        txn,
+      ) async {
+        final ftsUpdates = <int, String>{};
 
-          // REPLACE 会整行覆盖，先按 image_id 批量取旧 is_nsfw，
-          // 避免冲掉导入器写入的分级（与单条 upsertMetadata 同口径）。
-          final existingNsfw = <int, int>{};
-          if (batch.isNotEmpty) {
-            final batchImageIds = batch.map((entry) => entry.key).toList();
-            final placeholders = List.filled(
-              batchImageIds.length,
-              '?',
-            ).join(',');
-            try {
-              final oldRows = await txn.rawQuery(
-                'SELECT image_id, is_nsfw FROM $_metadataTable '
-                'WHERE image_id IN ($placeholders)',
-                batchImageIds,
-              );
-              for (final row in oldRows) {
-                final imageId = (row['image_id'] as num?)?.toInt();
-                if (imageId == null) continue;
-                existingNsfw[imageId] = (row['is_nsfw'] as num?)?.toInt() ?? 0;
-              }
-            } catch (_) {
-              // 旧库迁移缺失该列时忽略，保持默认 0
+        // REPLACE 会整行覆盖，先按 image_id 批量取旧 is_nsfw，
+        // 避免冲掉导入器写入的分级（与单条 upsertMetadata 同口径）。
+        final existingNsfw = <int, int>{};
+        if (batch.isNotEmpty) {
+          final batchImageIds = batch.map((entry) => entry.key).toList();
+          final placeholders = List.filled(batchImageIds.length, '?').join(',');
+          try {
+            final oldRows = await txn.rawQuery(
+              'SELECT image_id, is_nsfw FROM $_metadataTable '
+              'WHERE image_id IN ($placeholders)',
+              batchImageIds,
+            );
+            for (final row in oldRows) {
+              final imageId = (row['image_id'] as num?)?.toInt();
+              if (imageId == null) continue;
+              existingNsfw[imageId] = (row['is_nsfw'] as num?)?.toInt() ?? 0;
             }
+          } catch (_) {
+            // 旧库迁移缺失该列时忽略，保持默认 0
           }
+        }
 
-          for (final entry in batch) {
-            final imageId = entry.key;
-            final metadata = entry.value;
-            final fullPromptText = _buildFullPromptText(metadata);
-            final positivePromptText = _buildSearchablePromptText(metadata);
+        for (final entry in batch) {
+          final imageId = entry.key;
+          final metadata = entry.value;
+          final fullPromptText = _buildFullPromptText(metadata);
+          final positivePromptText = _buildSearchablePromptText(metadata);
 
-            await txn.insert(_metadataTable, {
-              'image_id': imageId,
-              'prompt': metadata.prompt,
-              'negative_prompt': metadata.negativePrompt,
-              'seed': metadata.seed,
-              'sampler': metadata.sampler,
-              'steps': metadata.steps,
-              'cfg_scale': metadata.scale,
-              'width': metadata.width,
-              'height': metadata.height,
-              'model': metadata.model,
-              'smea': metadata.smea == true ? 1 : 0,
-              'smea_dyn': metadata.smeaDyn == true ? 1 : 0,
-              'noise_schedule': metadata.noiseSchedule,
-              'cfg_rescale': metadata.cfgRescale,
-              'uc_preset': metadata.ucPreset,
-              'quality_toggle': metadata.qualityToggle == true ? 1 : 0,
-              'is_img2img': metadata.isImg2Img ? 1 : 0,
-              'strength': metadata.strength,
-              'noise': metadata.noise,
-              'software': metadata.software,
-              'source': metadata.source,
-              'version': metadata.version,
-              'raw_json': metadata.rawJson,
-              'has_metadata': metadata.hasData ? 1 : 0,
-              'is_nsfw': existingNsfw[imageId] ?? 0,
-              'full_prompt_text': fullPromptText,
-              'positive_prompt_text': positivePromptText,
-            }, conflictAlgorithm: ConflictAlgorithm.replace);
+          await txn.insert(_metadataTable, {
+            'image_id': imageId,
+            'prompt': metadata.prompt,
+            'negative_prompt': metadata.negativePrompt,
+            'seed': metadata.seed,
+            'sampler': metadata.sampler,
+            'steps': metadata.steps,
+            'cfg_scale': metadata.scale,
+            'width': metadata.width,
+            'height': metadata.height,
+            'model': metadata.model,
+            'smea': metadata.smea == true ? 1 : 0,
+            'smea_dyn': metadata.smeaDyn == true ? 1 : 0,
+            'noise_schedule': metadata.noiseSchedule,
+            'cfg_rescale': metadata.cfgRescale,
+            'uc_preset': metadata.ucPreset,
+            'quality_toggle': metadata.qualityToggle == true ? 1 : 0,
+            'is_img2img': metadata.isImg2Img ? 1 : 0,
+            'strength': metadata.strength,
+            'noise': metadata.noise,
+            'software': metadata.software,
+            'source': metadata.source,
+            'version': metadata.version,
+            'raw_json': metadata.rawJson,
+            'has_metadata': metadata.hasData ? 1 : 0,
+            'is_nsfw': existingNsfw[imageId] ?? 0,
+            'full_prompt_text': fullPromptText,
+            'positive_prompt_text': positivePromptText,
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-            ftsUpdates[imageId] = positivePromptText;
-          }
+          ftsUpdates[imageId] = positivePromptText;
+        }
 
-          await _batchUpdateFtsIndex(txn, ftsUpdates);
-        },
-        timeout: const Duration(seconds: 60),
-      );
+        await _batchUpdateFtsIndex(txn, ftsUpdates);
+      }, timeout: const Duration(seconds: 60));
 
       if (end < metadataList.length) {
         await Future.delayed(const Duration(milliseconds: 10));
@@ -1909,14 +1922,12 @@ class GalleryDataSource extends EnhancedBaseDataSource
       return cached.cast<int>();
     }
 
-    return _trackQuery(
-      'searchByDelimitedTextSegments',
-      () async {
-        try {
-          // 文件名/路径 + 正向可搜索文本（positive_prompt_text 已含
-          // 主/角色正向提示词与 model/sampler/software/source/version，
-          // 负面提示词不参与匹配）。
-          const searchableTextExpression = '''
+    return _trackQuery('searchByDelimitedTextSegments', () async {
+      try {
+        // 文件名/路径 + 正向可搜索文本（positive_prompt_text 已含
+        // 主/角色正向提示词与 model/sampler/software/source/version，
+        // 负面提示词不参与匹配）。
+        const searchableTextExpression = '''
             LOWER(
               COALESCE(i.file_name, '') || ' ' ||
               COALESCE(i.file_path, '') || ' ' ||
@@ -1924,35 +1935,35 @@ class GalleryDataSource extends EnhancedBaseDataSource
             )
           ''';
 
-          final segmentConditions = <String>[];
-          final args = <String>[];
+        final segmentConditions = <String>[];
+        final args = <String>[];
 
-          for (final segment in searchSegments) {
-            final variants = _buildDelimitedSearchVariants(segment);
-            final variantConditions = <String>[];
+        for (final segment in searchSegments) {
+          final variants = _buildDelimitedSearchVariants(segment);
+          final variantConditions = <String>[];
 
-            for (final variant in variants) {
-              final pattern = '%${_escapeLikePattern(variant)}%';
-              variantConditions.add(
-                "$searchableTextExpression LIKE ? ESCAPE '\\'",
-              );
-              args.add(pattern);
-            }
-
-            segmentConditions.add('(${variantConditions.join(' OR ')})');
+          for (final variant in variants) {
+            final pattern = '%${_escapeLikePattern(variant)}%';
+            variantConditions.add(
+              "$searchableTextExpression LIKE ? ESCAPE '\\'",
+            );
+            args.add(pattern);
           }
 
-          final whereClause = segmentConditions.join(' AND ');
+          segmentConditions.add('(${variantConditions.join(' OR ')})');
+        }
 
-          final results = await execute(
-            'searchByDelimitedTextSegments',
-            (db) async {
-              final dbResults = <Map<String, Object?>>[];
+        final whereClause = segmentConditions.join(' AND ');
 
-              if (candidatePathList == null) {
-                dbResults.addAll(
-                  await db.rawQuery(
-                    '''
+        final results = await execute(
+          'searchByDelimitedTextSegments',
+          (db) async {
+            final dbResults = <Map<String, Object?>>[];
+
+            if (candidatePathList == null) {
+              dbResults.addAll(
+                await db.rawQuery(
+                  '''
                     SELECT i.id, i.modified_at
                     FROM $_imagesTable i
                     LEFT JOIN $_metadataTable m ON m.image_id = i.id
@@ -1960,26 +1971,26 @@ class GalleryDataSource extends EnhancedBaseDataSource
                     ORDER BY i.modified_at DESC
                     LIMIT ?
                     ''',
-                    [...args, limit],
-                  ),
-                );
-              } else {
-                const pathChunkSize = 800;
-                for (
-                  var i = 0;
-                  i < candidatePathList.length;
-                  i += pathChunkSize
-                ) {
-                  final end = min(i + pathChunkSize, candidatePathList.length);
-                  final pathChunk = candidatePathList.sublist(i, end);
-                  final pathPlaceholders = List.filled(
-                    pathChunk.length,
-                    '?',
-                  ).join(',');
+                  [...args, limit],
+                ),
+              );
+            } else {
+              const pathChunkSize = 800;
+              for (
+                var i = 0;
+                i < candidatePathList.length;
+                i += pathChunkSize
+              ) {
+                final end = min(i + pathChunkSize, candidatePathList.length);
+                final pathChunk = candidatePathList.sublist(i, end);
+                final pathPlaceholders = List.filled(
+                  pathChunk.length,
+                  '?',
+                ).join(',');
 
-                  dbResults.addAll(
-                    await db.rawQuery(
-                      '''
+                dbResults.addAll(
+                  await db.rawQuery(
+                    '''
                       SELECT i.id, i.modified_at
                       FROM $_imagesTable i
                       LEFT JOIN $_metadataTable m ON m.image_id = i.id
@@ -1988,41 +1999,39 @@ class GalleryDataSource extends EnhancedBaseDataSource
                         AND $whereClause
                       ORDER BY i.modified_at DESC
                       ''',
-                      [...pathChunk, ...args],
-                    ),
-                  );
-                }
+                    [...pathChunk, ...args],
+                  ),
+                );
               }
+            }
 
-              dbResults.sort((a, b) {
-                final aModified = (a['modified_at'] as num?)?.toInt() ?? 0;
-                final bModified = (b['modified_at'] as num?)?.toInt() ?? 0;
-                return bModified.compareTo(aModified);
-              });
+            dbResults.sort((a, b) {
+              final aModified = (a['modified_at'] as num?)?.toInt() ?? 0;
+              final bModified = (b['modified_at'] as num?)?.toInt() ?? 0;
+              return bModified.compareTo(aModified);
+            });
 
-              return dbResults
-                  .take(limit)
-                  .map((row) => (row['id'] as num).toInt())
-                  .toList();
-            },
-            timeout: const Duration(seconds: 10),
-            maxRetries: 3,
-          );
+            return dbResults
+                .take(limit)
+                .map((row) => (row['id'] as num).toInt())
+                .toList();
+          },
+          timeout: const Duration(seconds: 10),
+          maxRetries: 3,
+        );
 
-          _queryCache.put(cacheKey, results);
-          return results;
-        } catch (e, stack) {
-          AppLogger.e(
-            'Failed to search by delimited text segments: ${searchSegments.join(",")}',
-            e,
-            stack,
-            'GalleryDS',
-          );
-          return [];
-        }
-      },
-      details: 'segments="${searchSegments.join(",")}"',
-    );
+        _queryCache.put(cacheKey, results);
+        return results;
+      } catch (e, stack) {
+        AppLogger.e(
+          'Failed to search by delimited text segments: ${searchSegments.join(",")}',
+          e,
+          stack,
+          'GalleryDS',
+        );
+        return [];
+      }
+    }, details: 'segments="${searchSegments.join(",")}"');
   }
 
   String _normalizeDelimitedSearchSegment(String value) {

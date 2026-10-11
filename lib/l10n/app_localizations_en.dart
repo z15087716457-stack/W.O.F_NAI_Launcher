@@ -3307,81 +3307,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statistics_title => 'Statistics';
 
   @override
-  String get statistics_noData => 'No statistics available';
-
-  @override
-  String get statistics_noTagData => 'No tag data';
-
-  @override
-  String get statistics_generateFirst => 'Generate some images first';
-
-  @override
-  String get statistics_totalImages => 'Total Images';
-
-  @override
-  String get statistics_totalSize => 'Total Size';
-
-  @override
-  String get statistics_favorites => 'Favorites';
-
-  @override
-  String get statistics_samplerDistribution => 'Sampler Distribution';
-
-  @override
-  String get statistics_additionalStats => 'Additional Statistics';
-
-  @override
-  String get statistics_averageFileSize => 'Average File Size';
-
-  @override
-  String get statistics_withMetadata => 'Images with Metadata';
-
-  @override
-  String get statistics_justNow => 'Just now';
-
-  @override
-  String statistics_minutesAgo(Object count) {
-    return '$count minutes ago';
-  }
-
-  @override
-  String statistics_hoursAgo(Object count) {
-    return '$count hours ago';
-  }
-
-  @override
-  String statistics_daysAgo(Object count) {
-    return '$count days ago';
-  }
-
-  @override
-  String get statistics_anlasCost => 'Anlas Cost';
-
-  @override
-  String get statistics_totalAnlasCost => 'Total Cost';
-
-  @override
-  String get statistics_avgDailyCost => 'Daily Average';
-
-  @override
-  String get statistics_noAnlasData => 'No Anlas consumption data';
-
-  @override
-  String get statistics_peakActivity => 'Peak Activity';
-
-  @override
-  String get statistics_timeMorning => 'Morning';
-
-  @override
-  String get statistics_timeAfternoon => 'Afternoon';
-
-  @override
-  String get statistics_timeEvening => 'Evening';
-
-  @override
-  String get statistics_timeNight => 'Night';
-
-  @override
   String get localGallery_group_today => 'Today';
 
   @override
@@ -3807,68 +3732,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get statistics_chartAspectRatio => 'Aspect Ratio Distribution';
-
-  @override
-  String get statistics_chartActivityHeatmap => 'Activity Heatmap';
-
-  @override
-  String get statistics_chartHourlyDistribution => 'Hourly Distribution';
-
-  @override
-  String get statistics_chartWeekdayDistribution => 'Weekday Distribution';
-
-  @override
-  String get statistics_aspectSquare => 'Square';
-
-  @override
-  String get statistics_aspectLandscape => 'Landscape';
-
-  @override
-  String get statistics_aspectPortrait => 'Portrait';
-
-  @override
-  String get statistics_aspectOther => 'Other';
-
-  @override
-  String get statistics_refresh => 'Refresh';
-
-  @override
-  String get statistics_retry => 'Retry';
-
-  @override
-  String statistics_error(Object error) {
-    return 'Error: $error';
-  }
-
-  @override
-  String get statistics_mostActiveDay => 'Most Active Day';
-
-  @override
-  String get statistics_leastActiveDay => 'Least Active Day';
-
-  @override
-  String get statistics_sunday => 'Sun';
-
-  @override
-  String get statistics_monday => 'Mon';
-
-  @override
-  String get statistics_tuesday => 'Tue';
-
-  @override
-  String get statistics_wednesday => 'Wed';
-
-  @override
-  String get statistics_thursday => 'Thu';
-
-  @override
-  String get statistics_friday => 'Fri';
-
-  @override
-  String get statistics_saturday => 'Sat';
-
-  @override
   String get autocomplete_categoryCharacter => 'Character';
 
   @override
@@ -4035,20 +3898,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetToDefault => 'Reset to Default';
-
-  @override
-  String get statistics_heatmapLess => 'Less';
-
-  @override
-  String get statistics_heatmapMore => 'More';
-
-  @override
-  String statistics_heatmapActivities(Object count) {
-    return '$count activities';
-  }
-
-  @override
-  String get statistics_heatmapNoActivity => 'No activity';
 
   @override
   String get metadataImport_title => 'Select Parameters to Import';

@@ -3178,81 +3178,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get statistics_title => '统计仪表盘';
 
   @override
-  String get statistics_noData => '暂无统计数据';
-
-  @override
-  String get statistics_noTagData => '暂无标签数据';
-
-  @override
-  String get statistics_generateFirst => '先生成一些图片吧';
-
-  @override
-  String get statistics_totalImages => '总图片数';
-
-  @override
-  String get statistics_totalSize => '总大小';
-
-  @override
-  String get statistics_favorites => '收藏';
-
-  @override
-  String get statistics_samplerDistribution => '采样器分布';
-
-  @override
-  String get statistics_additionalStats => '其他统计';
-
-  @override
-  String get statistics_averageFileSize => '平均文件大小';
-
-  @override
-  String get statistics_withMetadata => '有元数据的图片';
-
-  @override
-  String get statistics_justNow => '刚刚';
-
-  @override
-  String statistics_minutesAgo(Object count) {
-    return '$count 分钟前';
-  }
-
-  @override
-  String statistics_hoursAgo(Object count) {
-    return '$count 小时前';
-  }
-
-  @override
-  String statistics_daysAgo(Object count) {
-    return '$count 天前';
-  }
-
-  @override
-  String get statistics_anlasCost => '点数消耗';
-
-  @override
-  String get statistics_totalAnlasCost => '总消耗';
-
-  @override
-  String get statistics_avgDailyCost => '日均消耗';
-
-  @override
-  String get statistics_noAnlasData => '暂无点数消耗数据';
-
-  @override
-  String get statistics_peakActivity => '活跃高峰';
-
-  @override
-  String get statistics_timeMorning => '上午';
-
-  @override
-  String get statistics_timeAfternoon => '下午';
-
-  @override
-  String get statistics_timeEvening => '傍晚';
-
-  @override
-  String get statistics_timeNight => '深夜';
-
-  @override
   String get localGallery_group_today => '今天';
 
   @override
@@ -3654,68 +3579,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get statistics_chartAspectRatio => '宽高比分布';
-
-  @override
-  String get statistics_chartActivityHeatmap => '活动热力图';
-
-  @override
-  String get statistics_chartHourlyDistribution => '小时分布';
-
-  @override
-  String get statistics_chartWeekdayDistribution => '星期分布';
-
-  @override
-  String get statistics_aspectSquare => '方形';
-
-  @override
-  String get statistics_aspectLandscape => '横屏';
-
-  @override
-  String get statistics_aspectPortrait => '竖屏';
-
-  @override
-  String get statistics_aspectOther => '其他';
-
-  @override
-  String get statistics_refresh => '刷新';
-
-  @override
-  String get statistics_retry => '重试';
-
-  @override
-  String statistics_error(Object error) {
-    return '错误: $error';
-  }
-
-  @override
-  String get statistics_mostActiveDay => '最活跃日';
-
-  @override
-  String get statistics_leastActiveDay => '最不活跃日';
-
-  @override
-  String get statistics_sunday => '周日';
-
-  @override
-  String get statistics_monday => '周一';
-
-  @override
-  String get statistics_tuesday => '周二';
-
-  @override
-  String get statistics_wednesday => '周三';
-
-  @override
-  String get statistics_thursday => '周四';
-
-  @override
-  String get statistics_friday => '周五';
-
-  @override
-  String get statistics_saturday => '周六';
-
-  @override
   String get autocomplete_categoryCharacter => '角色';
 
   @override
@@ -3879,20 +3742,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resetToDefault => '重置为默认';
-
-  @override
-  String get statistics_heatmapLess => '少';
-
-  @override
-  String get statistics_heatmapMore => '多';
-
-  @override
-  String statistics_heatmapActivities(Object count) {
-    return '$count 次活动';
-  }
-
-  @override
-  String get statistics_heatmapNoActivity => '无活动';
 
   @override
   String get metadataImport_title => '选择要套用的参数';
@@ -16282,81 +16131,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get statistics_title => '統計儀表盤';
 
   @override
-  String get statistics_noData => '暫無統計資料';
-
-  @override
-  String get statistics_noTagData => '暫無標籤資料';
-
-  @override
-  String get statistics_generateFirst => '先生成一些圖片吧';
-
-  @override
-  String get statistics_totalImages => '總圖片數';
-
-  @override
-  String get statistics_totalSize => '總大小';
-
-  @override
-  String get statistics_favorites => '收藏';
-
-  @override
-  String get statistics_samplerDistribution => '取樣器分佈';
-
-  @override
-  String get statistics_additionalStats => '其他統計';
-
-  @override
-  String get statistics_averageFileSize => '平均檔案大小';
-
-  @override
-  String get statistics_withMetadata => '有後設資料的圖片';
-
-  @override
-  String get statistics_justNow => '剛剛';
-
-  @override
-  String statistics_minutesAgo(Object count) {
-    return '$count 分鐘前';
-  }
-
-  @override
-  String statistics_hoursAgo(Object count) {
-    return '$count 小時前';
-  }
-
-  @override
-  String statistics_daysAgo(Object count) {
-    return '$count 天前';
-  }
-
-  @override
-  String get statistics_anlasCost => '點數消耗';
-
-  @override
-  String get statistics_totalAnlasCost => '總消耗';
-
-  @override
-  String get statistics_avgDailyCost => '日均消耗';
-
-  @override
-  String get statistics_noAnlasData => '暫無點數消耗資料';
-
-  @override
-  String get statistics_peakActivity => '活躍高峰';
-
-  @override
-  String get statistics_timeMorning => '上午';
-
-  @override
-  String get statistics_timeAfternoon => '下午';
-
-  @override
-  String get statistics_timeEvening => '傍晚';
-
-  @override
-  String get statistics_timeNight => '深夜';
-
-  @override
   String get localGallery_group_today => '今天';
 
   @override
@@ -16758,68 +16532,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get statistics_chartAspectRatio => '寬高比分佈';
-
-  @override
-  String get statistics_chartActivityHeatmap => '活動熱力圖';
-
-  @override
-  String get statistics_chartHourlyDistribution => '小時分佈';
-
-  @override
-  String get statistics_chartWeekdayDistribution => '星期分佈';
-
-  @override
-  String get statistics_aspectSquare => '方形';
-
-  @override
-  String get statistics_aspectLandscape => '橫屏';
-
-  @override
-  String get statistics_aspectPortrait => '豎屏';
-
-  @override
-  String get statistics_aspectOther => '其他';
-
-  @override
-  String get statistics_refresh => '重新整理';
-
-  @override
-  String get statistics_retry => '重試';
-
-  @override
-  String statistics_error(Object error) {
-    return '錯誤: $error';
-  }
-
-  @override
-  String get statistics_mostActiveDay => '最活躍日';
-
-  @override
-  String get statistics_leastActiveDay => '最不活躍日';
-
-  @override
-  String get statistics_sunday => '週日';
-
-  @override
-  String get statistics_monday => '週一';
-
-  @override
-  String get statistics_tuesday => '週二';
-
-  @override
-  String get statistics_wednesday => '週三';
-
-  @override
-  String get statistics_thursday => '週四';
-
-  @override
-  String get statistics_friday => '週五';
-
-  @override
-  String get statistics_saturday => '週六';
-
-  @override
   String get autocomplete_categoryCharacter => '角色';
 
   @override
@@ -16983,20 +16695,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get resetToDefault => '重設為預設';
-
-  @override
-  String get statistics_heatmapLess => '少';
-
-  @override
-  String get statistics_heatmapMore => '多';
-
-  @override
-  String statistics_heatmapActivities(Object count) {
-    return '$count 次活動';
-  }
-
-  @override
-  String get statistics_heatmapNoActivity => '無活動';
 
   @override
   String get metadataImport_title => '選擇要套用的參數';

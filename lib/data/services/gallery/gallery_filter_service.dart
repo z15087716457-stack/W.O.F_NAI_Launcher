@@ -19,6 +19,9 @@ class FilterCriteria {
   final String searchQuery;
   final DateTime? dateStart;
   final DateTime? dateEnd;
+  final bool indexedDate;
+  final bool dateEndExclusive;
+  final bool? hasMetadata;
   final bool showFavoritesOnly;
   final List<String> selectedTags;
 
@@ -66,6 +69,9 @@ class FilterCriteria {
     this.searchQuery = '',
     this.dateStart,
     this.dateEnd,
+    this.indexedDate = false,
+    this.dateEndExclusive = false,
+    this.hasMetadata,
     this.showFavoritesOnly = false,
     this.selectedTags = const [],
     this.filterModels = const [],
@@ -94,6 +100,10 @@ class FilterCriteria {
     String? searchQuery,
     DateTime? dateStart,
     DateTime? dateEnd,
+    bool? indexedDate,
+    bool? dateEndExclusive,
+    bool? hasMetadata,
+    bool clearHasMetadata = false,
     bool? showFavoritesOnly,
     List<String>? selectedTags,
     List<String>? filterModels,
@@ -141,6 +151,9 @@ class FilterCriteria {
       searchQuery: searchQuery ?? this.searchQuery,
       dateStart: clearDateStart ? null : (dateStart ?? this.dateStart),
       dateEnd: clearDateEnd ? null : (dateEnd ?? this.dateEnd),
+      indexedDate: indexedDate ?? this.indexedDate,
+      dateEndExclusive: dateEndExclusive ?? this.dateEndExclusive,
+      hasMetadata: clearHasMetadata ? null : (hasMetadata ?? this.hasMetadata),
       showFavoritesOnly: showFavoritesOnly ?? this.showFavoritesOnly,
       selectedTags: selectedTags ?? this.selectedTags,
       filterModels: clearFilterModels
@@ -186,6 +199,13 @@ class FilterCriteria {
     );
   }
 
+  DateTime? get displayDateEnd {
+    final end = dateEnd;
+    return end != null && dateEndExclusive
+        ? DateTime(end.year, end.month, end.day - 1)
+        : end;
+  }
+
   bool get hasFilters =>
       searchQuery.isNotEmpty ||
       dateStart != null ||
@@ -207,6 +227,7 @@ class FilterCriteria {
       maxHeight != null ||
       minFileSize != null ||
       maxFileSize != null ||
+      hasMetadata != null ||
       metadataStatuses.isNotEmpty ||
       categoryId != null ||
       categoryFolderPath != null ||
@@ -239,6 +260,7 @@ class FilterCriteria {
       maxHeight != null ||
       minFileSize != null ||
       maxFileSize != null ||
+      hasMetadata != null ||
       metadataStatuses.isNotEmpty;
 
   bool get hasMetadataFilters =>
@@ -259,6 +281,7 @@ class FilterCriteria {
       maxHeight != null ||
       minFileSize != null ||
       maxFileSize != null ||
+      hasMetadata != null ||
       metadataStatuses.isNotEmpty;
 
   /// 生成缓存键
@@ -267,6 +290,9 @@ class FilterCriteria {
       'q:${searchQuery.toLowerCase().trim()}',
       if (dateStart != null) 'ds:${dateStart!.millisecondsSinceEpoch}',
       if (dateEnd != null) 'de:${dateEnd!.millisecondsSinceEpoch}',
+      if (indexedDate) 'indexedDate:1',
+      if (dateEndExclusive) 'exclusiveEnd:1',
+      if (hasMetadata != null) 'hasMetadata:$hasMetadata',
       if (showFavoritesOnly) 'fav:1',
       if (selectedTags.isNotEmpty) 'tags:${selectedTags.join(",")}',
       if (filterModels.isNotEmpty) 'models:${filterModels.join(",")}',
@@ -461,6 +487,7 @@ class GalleryFilterService {
           cancelToken,
         );
       } else if (criteria.hasMetadataFilters ||
+          criteria.indexedDate ||
           criteria.naiOnly ||
           criteria.hasAdvancedFilters) {
         // 元数据过滤（model/sampler/resolution/方向/steps/cfg/NSFW）、
@@ -520,7 +547,12 @@ class GalleryFilterService {
         favoritesOnly: criteria.showFavoritesOnly,
         dateStart: criteria.dateStart,
         // dateEnd 与本地过滤路径（_filterByDateRange）保持一致：end 当天含入
-        dateEnd: criteria.dateEnd?.add(const Duration(days: 1)),
+        dateEnd: criteria.dateEndExclusive
+            ? criteria.dateEnd
+            : criteria.dateEnd?.add(const Duration(days: 1)),
+        dateEndExclusive: criteria.dateEndExclusive,
+        indexedDate: criteria.indexedDate,
+        hasMetadata: criteria.hasMetadata,
         minWidth: criteria.minWidth,
         minHeight: criteria.minHeight,
         maxWidth: criteria.maxWidth,
@@ -560,6 +592,7 @@ class GalleryFilterService {
       // 只返回存在于 allFiles 中的文件
       return allFiles.where((file) => validPaths.contains(file.path)).toList();
     } catch (e) {
+      if (criteria.indexedDate || criteria.hasMetadata != null) rethrow;
       AppLogger.w('Search failed: $e', 'GalleryFilterService');
       // 回退到本地过滤
       return _applyLocalFilters(allFiles, criteria, cancelToken);
@@ -760,8 +793,9 @@ class GalleryFilterService {
       // （标签 chip 语义 = 画面内容，UC 常驻词不该带出无关图）。
       final imageIds = pathToIdMap.values.whereType<int>().toList();
       final tagsMap = await _dataSource.getTagsByImageIds(imageIds);
-      final promptTextsMap = await _dataSource
-          .getPositivePromptTextsByImageIds(imageIds);
+      final promptTextsMap = await _dataSource.getPositivePromptTextsByImageIds(
+        imageIds,
+      );
 
       return files.where((file) {
         if (cancelToken.isCancelled) return false;

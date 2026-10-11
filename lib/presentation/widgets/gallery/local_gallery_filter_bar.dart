@@ -80,12 +80,12 @@ class LocalGalleryFilterBar extends ConsumerWidget {
       ),
       _DateRangeChip(
         start: criteria.dateStart,
-        end: criteria.dateEnd,
+        end: criteria.displayDateEnd,
         onPick: () async {
           final result = await showDateRangePickerDialog(
             context,
             initialStart: criteria.dateStart,
-            initialEnd: criteria.dateEnd,
+            initialEnd: criteria.displayDateEnd,
           );
           if (result == null) return;
           await notifier.setDateRange(result.start, result.end);

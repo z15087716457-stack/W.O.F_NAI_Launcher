@@ -22,12 +22,9 @@ import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/secure_storage_service.dart';
 import 'package:nai_launcher/core/utils/file_explorer_utils.dart';
 import 'package:nai_launcher/core/utils/nai_resolution_adapter.dart';
-import 'package:nai_launcher/data/models/gallery/gallery_statistics.dart';
-import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
-import 'package:nai_launcher/data/services/statistics_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
@@ -39,7 +36,6 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assista
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/provider_adapters/prompt_assistant_adapter.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_api_client.dart';
-import 'package:nai_launcher/presentation/screens/statistics/widgets/dashboard/aspect_ratio_card.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_export_dialog.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_export_dialog_advanced.dart';
 import 'package:nai_launcher/presentation/utils/dropped_file_reader.dart';
@@ -752,59 +748,6 @@ void main() {
       } finally {
         secondContainer.dispose();
       }
-    });
-  });
-
-  group('Statistics dashboard', () {
-    test('ignores non-positive image dimensions in resolution statistics', () {
-      final service = StatisticsService();
-      final modifiedAt = DateTime(2026);
-
-      final stats = service.calculateStatistics([
-        LocalImageRecord(
-          path: 'zero.png',
-          size: 1024,
-          modifiedAt: modifiedAt,
-          metadata: const NaiImageMetadata(width: 0, height: 0),
-        ),
-        LocalImageRecord(
-          path: 'valid.png',
-          size: 1024,
-          modifiedAt: modifiedAt,
-          metadata: const NaiImageMetadata(width: 1024, height: 1024),
-        ),
-      ]);
-
-      expect(stats.resolutionDistribution.map((r) => r.label), ['1024x1024']);
-    });
-
-    testWidgets('aspect ratio card skips invalid cached resolutions', (
-      tester,
-    ) async {
-      final stats = GalleryStatistics(
-        totalImages: 2,
-        totalSizeBytes: 2048,
-        averageFileSizeBytes: 1024,
-        resolutionDistribution: const [
-          ResolutionStatistics(label: '0x0', count: 1),
-          ResolutionStatistics(label: '1024x1024', count: 1),
-        ],
-        calculatedAt: DateTime(2026),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(body: AspectRatioCard(stats: stats)),
-        ),
-      );
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-      expect(find.text('宽高比分布'), findsOneWidget);
-      expect(find.text('1:1'), findsOneWidget);
     });
   });
 

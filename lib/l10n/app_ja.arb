@@ -1489,44 +1489,6 @@
   "comparison_zoomHint": "ピンチまたはスクロールして個別にズームします",
   "comparison_loadError": "画像のロードに失敗しました",
   "statistics_title": "統計",
-  "statistics_noData": "利用可能な統計はありません",
-  "statistics_noTagData": "タグデータがありません",
-  "statistics_generateFirst": "最初にいくつかの画像を生成します",
-  "statistics_totalImages": "合計画像数",
-  "statistics_totalSize": "合計サイズ",
-  "statistics_favorites": "お気に入り",
-  "statistics_samplerDistribution": "サンプラー分布",
-  "statistics_additionalStats": "追加の統計",
-  "statistics_averageFileSize": "平均ファイルサイズ",
-  "statistics_withMetadata": "メタデータ付きの画像",
-  "statistics_justNow": "たった今",
-  "statistics_minutesAgo": "{count} 分前",
-  "@statistics_minutesAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_hoursAgo": "{count} 時間前",
-  "@statistics_hoursAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_daysAgo": "{count} 日前",
-  "@statistics_daysAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_anlasCost": "Anlas コスト",
-  "statistics_totalAnlasCost": "総コスト",
-  "statistics_avgDailyCost": "1 日の平均",
-  "statistics_noAnlasData": "Anlas 消費データがありません",
-  "statistics_peakActivity": "ピークアクティビティ",
-  "statistics_timeMorning": "朝",
-  "statistics_timeAfternoon": "午後",
-  "statistics_timeEvening": "夕方",
-  "statistics_timeNight": "夜",
   "localGallery_group_today": "今日",
   "localGallery_group_yesterday": "昨日",
   "localGallery_groupImageCount": "{formatted} 枚",
@@ -1838,31 +1800,6 @@
       }
     }
   },
-  "statistics_chartAspectRatio": "アスペクト比の分布",
-  "statistics_chartActivityHeatmap": "アクティビティ ヒートマップ",
-  "statistics_chartHourlyDistribution": "時間別分布",
-  "statistics_chartWeekdayDistribution": "曜日別分布",
-  "statistics_aspectSquare": "スクエア",
-  "statistics_aspectLandscape": "横長",
-  "statistics_aspectPortrait": "縦長",
-  "statistics_aspectOther": "その他",
-  "statistics_refresh": "更新",
-  "statistics_retry": "再試行",
-  "statistics_error": "エラー: {error}",
-  "@statistics_error": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "statistics_mostActiveDay": "最もアクティブな日",
-  "statistics_leastActiveDay": "最も活動的でない日",
-  "statistics_sunday": "日",
-  "statistics_monday": "月",
-  "statistics_tuesday": "火",
-  "statistics_wednesday": "水",
-  "statistics_thursday": "木",
-  "statistics_friday": "金",
-  "statistics_saturday": "土",
   "autocomplete_categoryCharacter": "キャラクター",
   "autocomplete_categoryCopyright": "著作権",
   "autocomplete_categoryArtist": "アーティスト",
@@ -1920,15 +1857,6 @@
   "settings_notificationSelectSound": "サウンドの選択",
   "settings_notificationResetSound": "デフォルトにリセット",
   "resetToDefault": "デフォルトにリセット",
-  "statistics_heatmapLess": "少ない",
-  "statistics_heatmapMore": "多い",
-  "statistics_heatmapActivities": "{count} アクティビティ",
-  "@statistics_heatmapActivities": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_heatmapNoActivity": "アクティビティはありません",
   "metadataImport_title": "インポートするパラメータを選択してください",
   "metadataImport_promptsSection": "プロンプト",
   "metadataImport_generationSection": "生成パラメータ",

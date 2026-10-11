@@ -3235,81 +3235,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get statistics_title => '統計';
 
   @override
-  String get statistics_noData => '利用可能な統計はありません';
-
-  @override
-  String get statistics_noTagData => 'タグデータがありません';
-
-  @override
-  String get statistics_generateFirst => '最初にいくつかの画像を生成します';
-
-  @override
-  String get statistics_totalImages => '合計画像数';
-
-  @override
-  String get statistics_totalSize => '合計サイズ';
-
-  @override
-  String get statistics_favorites => 'お気に入り';
-
-  @override
-  String get statistics_samplerDistribution => 'サンプラー分布';
-
-  @override
-  String get statistics_additionalStats => '追加の統計';
-
-  @override
-  String get statistics_averageFileSize => '平均ファイルサイズ';
-
-  @override
-  String get statistics_withMetadata => 'メタデータ付きの画像';
-
-  @override
-  String get statistics_justNow => 'たった今';
-
-  @override
-  String statistics_minutesAgo(Object count) {
-    return '$count 分前';
-  }
-
-  @override
-  String statistics_hoursAgo(Object count) {
-    return '$count 時間前';
-  }
-
-  @override
-  String statistics_daysAgo(Object count) {
-    return '$count 日前';
-  }
-
-  @override
-  String get statistics_anlasCost => 'Anlas コスト';
-
-  @override
-  String get statistics_totalAnlasCost => '総コスト';
-
-  @override
-  String get statistics_avgDailyCost => '1 日の平均';
-
-  @override
-  String get statistics_noAnlasData => 'Anlas 消費データがありません';
-
-  @override
-  String get statistics_peakActivity => 'ピークアクティビティ';
-
-  @override
-  String get statistics_timeMorning => '朝';
-
-  @override
-  String get statistics_timeAfternoon => '午後';
-
-  @override
-  String get statistics_timeEvening => '夕方';
-
-  @override
-  String get statistics_timeNight => '夜';
-
-  @override
   String get localGallery_group_today => '今日';
 
   @override
@@ -3712,68 +3637,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get statistics_chartAspectRatio => 'アスペクト比の分布';
-
-  @override
-  String get statistics_chartActivityHeatmap => 'アクティビティ ヒートマップ';
-
-  @override
-  String get statistics_chartHourlyDistribution => '時間別分布';
-
-  @override
-  String get statistics_chartWeekdayDistribution => '曜日別分布';
-
-  @override
-  String get statistics_aspectSquare => 'スクエア';
-
-  @override
-  String get statistics_aspectLandscape => '横長';
-
-  @override
-  String get statistics_aspectPortrait => '縦長';
-
-  @override
-  String get statistics_aspectOther => 'その他';
-
-  @override
-  String get statistics_refresh => '更新';
-
-  @override
-  String get statistics_retry => '再試行';
-
-  @override
-  String statistics_error(Object error) {
-    return 'エラー: $error';
-  }
-
-  @override
-  String get statistics_mostActiveDay => '最もアクティブな日';
-
-  @override
-  String get statistics_leastActiveDay => '最も活動的でない日';
-
-  @override
-  String get statistics_sunday => '日';
-
-  @override
-  String get statistics_monday => '月';
-
-  @override
-  String get statistics_tuesday => '火';
-
-  @override
-  String get statistics_wednesday => '水';
-
-  @override
-  String get statistics_thursday => '木';
-
-  @override
-  String get statistics_friday => '金';
-
-  @override
-  String get statistics_saturday => '土';
-
-  @override
   String get autocomplete_categoryCharacter => 'キャラクター';
 
   @override
@@ -3938,20 +3801,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resetToDefault => 'デフォルトにリセット';
-
-  @override
-  String get statistics_heatmapLess => '少ない';
-
-  @override
-  String get statistics_heatmapMore => '多い';
-
-  @override
-  String statistics_heatmapActivities(Object count) {
-    return '$count アクティビティ';
-  }
-
-  @override
-  String get statistics_heatmapNoActivity => 'アクティビティはありません';
 
   @override
   String get metadataImport_title => 'インポートするパラメータを選択してください';

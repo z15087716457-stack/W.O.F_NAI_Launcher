@@ -12,6 +12,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
@@ -35,9 +37,6 @@ import 'package:nai_launcher/presentation/providers/vibe_library_selection_provi
 import 'package:nai_launcher/presentation/screens/online_gallery/online_gallery_screen.dart';
 import 'package:nai_launcher/presentation/screens/precise_ref_library/precise_ref_library_screen.dart';
 import 'package:nai_launcher/presentation/screens/prompt_block_library/prompt_block_library_screen.dart';
-import 'package:nai_launcher/presentation/screens/statistics/statistics_screen.dart';
-import 'package:nai_launcher/presentation/screens/statistics/statistics_state.dart';
-import 'package:nai_launcher/presentation/screens/statistics/widgets/dashboard/animated_refresh_button.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_sidebar.dart';
 import 'package:nai_launcher/presentation/screens/vibe_library/vibe_library_screen.dart';
@@ -47,6 +46,11 @@ import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_ba
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 
 import '../../helpers/studio_capture_fonts.dart';
+
+class _Shortcuts extends ShortcutConfigNotifier {
+  @override
+  Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
+}
 
 class _Gallery extends OnlineGalleryNotifier {
   @override
@@ -106,14 +110,6 @@ class _References extends PreciseRefLibraryNotifier {
   Future<void> initialize() async {}
 }
 
-class _Statistics extends StatisticsNotifier {
-  var refreshes = 0;
-  @override
-  StatisticsData build() => const StatisticsData(isLoading: false);
-  @override
-  Future<void> refresh() async => refreshes++;
-}
-
 class _Tags extends UnifiedTagRepository {
   _Tags()
     : super(
@@ -157,7 +153,6 @@ const _pages = <String, Widget>{
       directory: WikiDirectory(roots: [], groups: {}),
     ),
   ),
-  'statistics': StatisticsScreen(),
 };
 
 void main() {
@@ -216,6 +211,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
           onlineGalleryNotifierProvider.overrideWith(_Gallery.new),
           onlineFavoritesNotifierProvider.overrideWith((_) => _Favorites()),
           danbooruAuthProvider.overrideWith(_Danbooru.new),
@@ -224,7 +220,6 @@ void main() {
           vibeLibraryNotifierProvider.overrideWith(_Vibes.new),
           vibeLibraryCategoryNotifierProvider.overrideWith(_Categories.new),
           preciseRefLibraryNotifierProvider.overrideWith(_References.new),
-          statisticsNotifierProvider.overrideWith(_Statistics.new),
           unifiedTagRepositoryProvider.overrideWith((_) => _Tags()),
           tagWikiRepositoryProvider.overrideWith((_) => _Wiki()),
           autoTagTranslationProvider.overrideWith((_) => _Translation()),
@@ -324,109 +319,77 @@ void main() {
   }
 
   for (final page in ['blocks', 'vibes', 'wiki']) {
-    testWidgets(
-      '$page sidebar gaps drag and create button opens its dialog',
-      (tester) async {
-        await pumpPage(tester, page);
-        final sidebarSurface = find.byType(WindowHeaderDragSurface).first;
-        final rect = tester.getRect(sidebarSurface);
-        await mouseDrag(tester, rect.topLeft + Offset(rect.width * .55, 30));
-        expect(calls, contains('startDragging'));
-        calls.clear();
-        final create = find
-            .descendant(
-              of: sidebarSurface,
-              matching: page == 'vibes'
-                  ? find.byType(FilledButton)
-                  : find.byType(IconButton),
-            )
-            .first;
-        await tester.tap(create);
-        await tester.pumpAndSettle();
-        expect(find.byType(Dialog), findsOneWidget);
-        expect(calls, isNot(contains('startDragging')));
-        // A modal's blank surface must not reach the header underneath.
-        await mouseDrag(tester, rect.topLeft + const Offset(3, 30));
-        expect(calls, isNot(contains('startDragging')));
-        expect(tester.takeException(), isNull);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.windows),
-    );
-  }
-
-  testWidgets(
-    'block header stays draggable with the right detail panel open',
-    (tester) async {
-      await pumpPage(tester, 'blocks');
-      await tester.tap(find.byKey(const Key('prompt-block-detail-collapsed')));
+    testWidgets('$page sidebar gaps drag and create button opens its dialog', (
+      tester,
+    ) async {
+      await pumpPage(tester, page);
+      final sidebarSurface = find.byType(WindowHeaderDragSurface).first;
+      final rect = tester.getRect(sidebarSurface);
+      await mouseDrag(tester, rect.topLeft + Offset(rect.width * .55, 30));
+      expect(calls, contains('startDragging'));
+      calls.clear();
+      final create = find
+          .descendant(
+            of: sidebarSurface,
+            matching: page == 'vibes'
+                ? find.byType(FilledButton)
+                : find.byType(IconButton),
+          )
+          .first;
+      await tester.tap(create);
       await tester.pumpAndSettle();
-      expect(
-        tester.widget<WindowHeader>(find.byType(WindowHeader)).enabled,
-        isFalse,
-      );
-      await checkHeader(tester);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.windows),
-  );
-
-  for (final page in ['online', 'vibes']) {
-    testWidgets(
-      '$page selection header gaps still drag',
-      (tester) async {
-        await pumpPage(tester, page);
-        final container = ProviderScope.containerOf(
-          tester.element(find.byType(WindowHeader)),
-        );
-        if (page == 'vibes') {
-          container.read(vibeLibrarySelectionNotifierProvider.notifier).enter();
-        } else {
-          container
-              .read(onlineGallerySelectionNotifierProvider.notifier)
-              .enter();
-        }
-        await tester.pumpAndSettle();
-        expect(find.byType(BulkActionBar), findsOneWidget);
-        await checkHeader(tester);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.windows),
-    );
-  }
-
-  testWidgets(
-    'statistics refresh button works independently of the drag area',
-    (tester) async {
-      await pumpPage(tester, 'statistics');
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(StatisticsScreen)),
-      );
-      await tester.tap(find.byType(AnimatedRefreshButton));
-      await tester.pumpAndSettle();
-      expect(
-        (container.read(statisticsNotifierProvider.notifier) as _Statistics)
-            .refreshes,
-        1,
-      );
+      expect(find.byType(Dialog), findsOneWidget);
       expect(calls, isNot(contains('startDragging')));
-    },
-
-    variant: TargetPlatformVariant.only(TargetPlatform.windows),
-  );
-
-  testWidgets(
-    'Wiki directory sheet header does not drag the window',
-    (tester) async {
-      await pumpPage(tester, 'wiki', width: 900);
-      await tester.tap(find.byKey(const Key('wiki-directory-button')));
-      await tester.pumpAndSettle();
-      final sidebar = find.byType(WikiSidebar);
-      expect(tester.widget<WikiSidebar>(sidebar).allowWindowDrag, isFalse);
-      final header = tester.getRect(
-        find.byKey(const Key('wiki-directory-header')),
-      );
-      await mouseDrag(tester, header.topLeft + const Offset(3, 30));
+      // A modal's blank surface must not reach the header underneath.
+      await mouseDrag(tester, rect.topLeft + const Offset(3, 30));
       expect(calls, isNot(contains('startDragging')));
       expect(tester.takeException(), isNull);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.windows),
-  );
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+  }
+
+  testWidgets('block header stays draggable with the right detail panel open', (
+    tester,
+  ) async {
+    await pumpPage(tester, 'blocks');
+    await tester.tap(find.byKey(const Key('prompt-block-detail-collapsed')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<WindowHeader>(find.byType(WindowHeader)).enabled,
+      isFalse,
+    );
+    await checkHeader(tester);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+  for (final page in ['online', 'vibes']) {
+    testWidgets('$page selection header gaps still drag', (tester) async {
+      await pumpPage(tester, page);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(WindowHeader)),
+      );
+      if (page == 'vibes') {
+        container.read(vibeLibrarySelectionNotifierProvider.notifier).enter();
+      } else {
+        container.read(onlineGallerySelectionNotifierProvider.notifier).enter();
+      }
+      await tester.pumpAndSettle();
+      expect(find.byType(BulkActionBar), findsOneWidget);
+      await checkHeader(tester);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+  }
+
+  testWidgets('Wiki directory sheet header does not drag the window', (
+    tester,
+  ) async {
+    await pumpPage(tester, 'wiki', width: 900);
+    await tester.tap(find.byKey(const Key('wiki-directory-button')));
+    await tester.pumpAndSettle();
+    final sidebar = find.byType(WikiSidebar);
+    expect(tester.widget<WikiSidebar>(sidebar).allowWindowDrag, isFalse);
+    final header = tester.getRect(
+      find.byKey(const Key('wiki-directory-header')),
+    );
+    await mouseDrag(tester, header.topLeft + const Offset(3, 30));
+    expect(calls, isNot(contains('startDragging')));
+    expect(tester.takeException(), isNull);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 }

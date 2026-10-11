@@ -74,6 +74,7 @@ void main() {
       final pngPath = p.join(tempDir.path, 'imported.png');
       final pngBytes = _buildBasePngBytes();
       await File(pngPath).writeAsBytes(pngBytes);
+      await File(pngPath).setLastModified(DateTime(2026, 10, 11, 12));
       final stat = await File(pngPath).stat();
 
       // JSONL 导入：size/mtime 与实际文件一致（签名匹配 → 扫描 skip）

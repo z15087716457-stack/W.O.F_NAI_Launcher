@@ -2,38 +2,34 @@ part of 'gallery_data_source.dart';
 
 extension GalleryDataSourceStatistics on GalleryDataSource {
   /// Loads only aggregate values required by the statistics dashboard.
-  Future<GalleryDashboardSnapshot> getDashboardStatistics() {
+  Future<GalleryDashboardSnapshot> getDashboardStatistics({
+    DateTime? dateStart,
+    DateTime? dateEnd,
+    bool naiOnly = false,
+  }) {
+    final scoped = _statisticsWhere(
+      dateStart: dateStart,
+      dateEnd: dateEnd,
+      naiOnly: naiOnly,
+    );
+    final history = _statisticsWhere(naiOnly: naiOnly);
     return _trackQuery('getDashboardStatistics', () async {
       return execute(
         'getDashboardStatistics',
         (db) => db.transaction((txn) async {
+          final libraryRows = await txn.rawQuery(
+            'SELECT COUNT(*) AS total FROM ${GalleryDataSource._imagesTable} WHERE is_deleted = 0',
+          );
           final baseRows = await txn.rawQuery('''
-            SELECT
-              COUNT(*) AS total_images,
+            SELECT COUNT(*) AS total_images,
               COALESCE(SUM(i.file_size), 0) AS total_size,
-              (
-                SELECT COUNT(*)
-                FROM ${GalleryDataSource._favoritesTable} f
-                INNER JOIN ${GalleryDataSource._imagesTable} fi
-                  ON fi.id = f.image_id
-                WHERE fi.is_deleted = 0
-              ) AS favorite_count,
-              (
-                SELECT COUNT(DISTINCT it.image_id)
-                FROM ${GalleryDataSource._imageTagsTable} it
-                INNER JOIN ${GalleryDataSource._imagesTable} ti
-                  ON ti.id = it.image_id
-                WHERE ti.is_deleted = 0
-              ) AS tagged_image_count,
-              (
-                SELECT COUNT(*)
-                FROM ${GalleryDataSource._metadataTable} mm
-                INNER JOIN ${GalleryDataSource._imagesTable} mi
-                  ON mi.id = mm.image_id
-                WHERE mi.is_deleted = 0 AND mm.has_metadata = 1
-              ) AS images_with_metadata
+              COALESCE(SUM(f.image_id IS NOT NULL), 0) AS favorite_count,
+              COALESCE(SUM(EXISTS(SELECT 1 FROM ${GalleryDataSource._imageTagsTable} it WHERE it.image_id = i.id)), 0) AS tagged_image_count,
+              COALESCE(SUM(COALESCE(m.has_metadata, 0) = 1), 0) AS images_with_metadata
             FROM ${GalleryDataSource._imagesTable} i
-            WHERE i.is_deleted = 0
+            LEFT JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+            LEFT JOIN ${GalleryDataSource._favoritesTable} f ON f.image_id = i.id
+            WHERE $scoped
           ''');
 
           final resolutionRows = await txn.rawQuery('''
@@ -44,7 +40,7 @@ extension GalleryDataSourceStatistics on GalleryDataSource {
             FROM ${GalleryDataSource._imagesTable} i
             LEFT JOIN ${GalleryDataSource._metadataTable} m
               ON m.image_id = i.id
-            WHERE i.is_deleted = 0
+            WHERE $scoped
               AND COALESCE(NULLIF(m.width, 0), NULLIF(i.width, 0)) > 0
               AND COALESCE(NULLIF(m.height, 0), NULLIF(i.height, 0)) > 0
             GROUP BY 1, 2
@@ -56,7 +52,7 @@ extension GalleryDataSourceStatistics on GalleryDataSource {
             FROM ${GalleryDataSource._metadataTable} m
             INNER JOIN ${GalleryDataSource._imagesTable} i
               ON i.id = m.image_id
-            WHERE i.is_deleted = 0
+            WHERE $scoped
               AND m.model IS NOT NULL
               AND m.model != ''
             GROUP BY m.model
@@ -68,7 +64,8 @@ extension GalleryDataSourceStatistics on GalleryDataSource {
             FROM ${GalleryDataSource._metadataTable} m
             INNER JOIN ${GalleryDataSource._imagesTable} i
               ON i.id = m.image_id
-            WHERE i.is_deleted = 0
+            WHERE $scoped
+              AND m.has_metadata = 1
               AND m.sampler IS NOT NULL
               AND m.sampler != ''
             GROUP BY m.sampler
@@ -91,9 +88,11 @@ extension GalleryDataSourceStatistics on GalleryDataSource {
                 WHEN file_size < 10485760 THEN 3
                 ELSE 4
               END AS sort_order,
-              COUNT(*) AS item_count
-            FROM ${GalleryDataSource._imagesTable}
-            WHERE is_deleted = 0
+              COUNT(*) AS item_count,
+              COALESCE(SUM(file_size), 0) AS total_bytes
+            FROM ${GalleryDataSource._imagesTable} i
+            LEFT JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+            WHERE $scoped
             GROUP BY label, sort_order
             ORDER BY sort_order
           ''');
@@ -105,77 +104,77 @@ extension GalleryDataSourceStatistics on GalleryDataSource {
               ON it.tag_id = t.id
             INNER JOIN ${GalleryDataSource._imagesTable} i
               ON i.id = it.image_id
-            WHERE i.is_deleted = 0
+            LEFT JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+            WHERE $scoped
             GROUP BY t.id, t.name
             ORDER BY item_count DESC
             LIMIT 20
           ''');
 
           final dailyRows = await txn.rawQuery('''
-            SELECT
-              CASE
-                WHEN date_ymd IS NOT NULL AND date_ymd > 0 THEN date_ymd
-                ELSE CAST(
-                  strftime(
-                    '%Y%m%d',
-                    modified_at / 1000.0,
-                    'unixepoch',
-                    'localtime'
-                  ) AS INTEGER
-                )
-              END AS bucket,
-              COUNT(*) AS item_count
-            FROM ${GalleryDataSource._imagesTable}
-            WHERE is_deleted = 0
-            GROUP BY bucket
-            ORDER BY bucket
+            SELECT $_galleryStatisticsDate AS bucket, COUNT(*) AS item_count
+            FROM ${GalleryDataSource._imagesTable} i
+            LEFT JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+            WHERE $history GROUP BY bucket ORDER BY bucket
           ''');
-
-          final hourlyRows = await txn.rawQuery('''
-            SELECT
-              CAST(
-                strftime(
-                  '%H',
-                  modified_at / 1000.0,
-                  'unixepoch',
-                  'localtime'
-                ) AS INTEGER
-              ) AS bucket,
-              COUNT(*) AS item_count
-            FROM ${GalleryDataSource._imagesTable}
-            WHERE is_deleted = 0
-            GROUP BY bucket
-            ORDER BY bucket
+          final dailyModelRows = await txn.rawQuery('''
+            SELECT $_galleryStatisticsDate AS bucket, m.model AS label, COUNT(*) AS item_count
+            FROM ${GalleryDataSource._imagesTable} i
+            INNER JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+            WHERE $history AND m.model IS NOT NULL AND m.model != ''
+            GROUP BY bucket, m.model ORDER BY bucket, item_count DESC, m.model
           ''');
-
-          final weekdayRows = await txn.rawQuery('''
-            SELECT
-              CAST(
-                strftime(
-                  '%w',
-                  modified_at / 1000.0,
-                  'unixepoch',
-                  'localtime'
-                ) AS INTEGER
-              ) AS bucket,
-              COUNT(*) AS item_count
-            FROM ${GalleryDataSource._imagesTable}
-            WHERE is_deleted = 0
-            GROUP BY bucket
-            ORDER BY bucket
+          final monthlyRows = await txn.rawQuery('''
+            SELECT CAST(($_galleryStatisticsDate) / 100 AS INTEGER) * 100 + 1 AS bucket,
+              COALESCE(SUM(i.file_size), 0) AS item_count
+            FROM ${GalleryDataSource._imagesTable} i
+            LEFT JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+            WHERE $history GROUP BY bucket ORDER BY bucket
           ''');
-
+          final weekHourRows = await txn.rawQuery('''
+            SELECT CAST(strftime('%w', i.modified_at / 1000.0, 'unixepoch', 'localtime') AS INTEGER) AS weekday,
+              CAST(strftime('%H', i.modified_at / 1000.0, 'unixepoch', 'localtime') AS INTEGER) AS hour,
+              COUNT(*) AS item_count
+            FROM ${GalleryDataSource._imagesTable} i
+            LEFT JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+            WHERE $scoped GROUP BY weekday, hour ORDER BY weekday, hour
+          ''');
+          Future<List<Map<String, Object?>>> parameters(String column) =>
+              txn.rawQuery('''
+            SELECT m.$column AS label, COUNT(*) AS item_count
+            FROM ${GalleryDataSource._imagesTable} i
+            INNER JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+            WHERE $scoped AND m.has_metadata = 1 AND m.$column IS NOT NULL AND m.$column != ''
+            GROUP BY m.$column ORDER BY item_count DESC, m.$column
+          ''');
+          final stepRows = await parameters('steps');
+          final cfgRows = await parameters('cfg_scale');
+          final noiseRows = await parameters('noise_schedule');
           final base = baseRows.first;
+          final hourlyCounts = <int, int>{};
           final weekdayCounts = <int, int>{};
-          for (final row in weekdayRows) {
-            final sqliteWeekday = _statisticsInt(row['bucket']);
-            final dartWeekday = sqliteWeekday == 0
+          final weekHourCounts = <int, int>{};
+          for (final row in weekHourRows) {
+            final sqliteWeekday = _statisticsInt(row['weekday']);
+            final weekday = sqliteWeekday == 0
                 ? DateTime.sunday
                 : sqliteWeekday;
-            weekdayCounts[dartWeekday] = _statisticsInt(row['item_count']);
+            final hour = _statisticsInt(row['hour']);
+            final count = _statisticsInt(row['item_count']);
+            weekHourCounts[(weekday - 1) * 24 + hour] = count;
+            weekdayCounts[weekday] = (weekdayCounts[weekday] ?? 0) + count;
+            hourlyCounts[hour] = (hourlyCounts[hour] ?? 0) + count;
+          }
+          final dailyModelCounts = <int, Map<String, int>>{};
+          for (final row in dailyModelRows) {
+            (dailyModelCounts[_statisticsInt(row['bucket'])] ??=
+                {})[row['label'] as String] = _statisticsInt(
+              row['item_count'],
+            );
           }
 
           return GalleryDashboardSnapshot(
+            libraryTotal: _statisticsInt(libraryRows.first['total']),
             totalImages: _statisticsInt(base['total_images']),
             totalSizeBytes: _statisticsInt(base['total_size']),
             favoriteCount: _statisticsInt(base['favorite_count']),
@@ -191,8 +190,26 @@ extension GalleryDataSourceStatistics on GalleryDataSource {
             sizeCounts: _statisticsStringCounts(sizeRows),
             tagCounts: _statisticsStringCounts(tagRows),
             dailyCounts: _statisticsIntCounts(dailyRows),
-            hourlyCounts: _statisticsIntCounts(hourlyRows),
+            hourlyCounts: hourlyCounts,
             weekdayCounts: weekdayCounts,
+            weekHourCounts: weekHourCounts,
+            sizeBytesCounts: {
+              for (final row in sizeRows)
+                row['label'] as String: _statisticsInt(row['total_bytes']),
+            },
+            stepCounts: {
+              for (final row in stepRows)
+                _statisticsInt(row['label']): _statisticsInt(row['item_count']),
+            },
+            cfgCounts: {
+              for (final row in cfgRows)
+                (row['label'] as num).toDouble(): _statisticsInt(
+                  row['item_count'],
+                ),
+            },
+            noiseScheduleCounts: _statisticsStringCounts(noiseRows),
+            dailyModelCounts: dailyModelCounts,
+            monthlyBytes: _statisticsIntCounts(monthlyRows),
           );
         }),
         timeout: const Duration(seconds: 30),
@@ -200,7 +217,54 @@ extension GalleryDataSourceStatistics on GalleryDataSource {
       );
     });
   }
+
+  Future<List<Map<String, Object?>>> getStatisticsArtistPrompts({
+    DateTime? dateStart,
+    DateTime? dateEnd,
+    bool naiOnly = false,
+    int afterId = 0,
+    int limit = 512,
+  }) {
+    final scope = _statisticsWhere(
+      dateStart: dateStart,
+      dateEnd: dateEnd,
+      naiOnly: naiOnly,
+    );
+    return execute(
+      'getStatisticsArtistPrompts',
+      (db) => db.rawQuery(
+        '''
+      SELECT i.id, m.prompt
+      FROM ${GalleryDataSource._imagesTable} i
+      INNER JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id
+      WHERE $scope AND m.has_metadata = 1 AND i.id > ?
+        AND m.prompt LIKE '%artist:%'
+      ORDER BY i.id LIMIT ?
+    ''',
+        [afterId, limit],
+      ),
+    );
+  }
 }
+
+const _galleryStatisticsDate =
+    "CASE WHEN i.date_ymd > 0 THEN i.date_ymd ELSE CAST(strftime('%Y%m%d', i.modified_at / 1000.0, 'unixepoch', 'localtime') AS INTEGER) END";
+
+int _statisticsDateValue(DateTime date) =>
+    date.year * 10000 + date.month * 100 + date.day;
+
+String _statisticsWhere({
+  DateTime? dateStart,
+  DateTime? dateEnd,
+  bool naiOnly = false,
+}) => [
+  'i.is_deleted = 0',
+  if (naiOnly) '(${GalleryDataSource._naiOnlyCondition})',
+  if (dateStart != null)
+    '($_galleryStatisticsDate) >= ${_statisticsDateValue(dateStart)}',
+  if (dateEnd != null)
+    '($_galleryStatisticsDate) < ${_statisticsDateValue(dateEnd)}',
+].join(' AND ');
 
 int _statisticsInt(Object? value) => (value as num?)?.toInt() ?? 0;
 

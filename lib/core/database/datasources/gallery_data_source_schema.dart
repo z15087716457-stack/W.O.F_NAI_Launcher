@@ -34,10 +34,44 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       // 迁移：positive_prompt_text 列 + 正向化 FTS 重建（一次性，
       // gallery_meta 记完成标记）
       await _migratePositiveOnlySearchText(db);
+      await _createStatisticsRevision(db);
 
       AppLogger.i('Gallery tables initialized', 'GalleryDS');
     });
   }
+
+  Future<void> _createStatisticsRevision(Database db) => db.transaction((
+    txn,
+  ) async {
+    await txn.execute(
+      'CREATE TABLE IF NOT EXISTS ${GalleryDataSource._galleryMetaTable} (key TEXT PRIMARY KEY, value TEXT)',
+    );
+    await txn.insert(GalleryDataSource._galleryMetaTable, {
+      'key': 'statistics_instance',
+      'value': const Uuid().v4(),
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    await txn.insert(GalleryDataSource._galleryMetaTable, {
+      'key': 'statistics_revision',
+      'value': '0',
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    for (final table in [
+      GalleryDataSource._imagesTable,
+      GalleryDataSource._metadataTable,
+      GalleryDataSource._favoritesTable,
+      GalleryDataSource._tagsTable,
+      GalleryDataSource._imageTagsTable,
+    ]) {
+      for (final operation in ['INSERT', 'UPDATE', 'DELETE']) {
+        await txn.execute('''
+          CREATE TRIGGER IF NOT EXISTS statistics_${table}_${operation.toLowerCase()}
+          AFTER $operation ON $table BEGIN
+            UPDATE ${GalleryDataSource._galleryMetaTable}
+            SET value = CAST(value AS INTEGER) + 1 WHERE key = 'statistics_revision';
+          END
+        ''');
+      }
+    }
+  });
 
   /// 迁移：回填历史元数据行的 model 列（按版本一次性）。
   ///
@@ -295,11 +329,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
           if (parsed == null || !parsed.hasCharacters) continue;
           batch.update(
             GalleryDataSource._metadataTable,
-            {
-              'positive_prompt_text': source._buildSearchablePromptText(
-                parsed,
-              ),
-            },
+            {'positive_prompt_text': source._buildSearchablePromptText(parsed)},
             where: 'image_id = ?',
             whereArgs: [(row['image_id'] as num).toInt()],
           );
@@ -311,9 +341,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       }
 
       // 4. 整体重建 FTS 为正向口径
-      await db.execute(
-        'DELETE FROM ${GalleryDataSource._ftsIndexTable}',
-      );
+      await db.execute('DELETE FROM ${GalleryDataSource._ftsIndexTable}');
       await db.execute('''
         INSERT INTO ${GalleryDataSource._ftsIndexTable} (image_id, prompt_text)
         SELECT image_id, positive_prompt_text
@@ -328,7 +356,7 @@ mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
       (this as GalleryDataSource)._markDataChanged();
       AppLogger.i(
         '[Migration] positive_prompt_text backfilled and FTS rebuilt '
-        '($charPatched char-caption rows reparsed)',
+            '($charPatched char-caption rows reparsed)',
         'GalleryDS',
       );
     } catch (e, stack) {

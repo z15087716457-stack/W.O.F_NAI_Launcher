@@ -1467,44 +1467,6 @@
   "comparison_zoomHint": "捏合或滚动可独立缩放",
   "comparison_loadError": "加载图片失败",
   "statistics_title": "统计仪表盘",
-  "statistics_noData": "暂无统计数据",
-  "statistics_noTagData": "暂无标签数据",
-  "statistics_generateFirst": "先生成一些图片吧",
-  "statistics_totalImages": "总图片数",
-  "statistics_totalSize": "总大小",
-  "statistics_favorites": "收藏",
-  "statistics_samplerDistribution": "采样器分布",
-  "statistics_additionalStats": "其他统计",
-  "statistics_averageFileSize": "平均文件大小",
-  "statistics_withMetadata": "有元数据的图片",
-  "statistics_justNow": "刚刚",
-  "statistics_minutesAgo": "{count} 分钟前",
-  "@statistics_minutesAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_hoursAgo": "{count} 小时前",
-  "@statistics_hoursAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_daysAgo": "{count} 天前",
-  "@statistics_daysAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_anlasCost": "点数消耗",
-  "statistics_totalAnlasCost": "总消耗",
-  "statistics_avgDailyCost": "日均消耗",
-  "statistics_noAnlasData": "暂无点数消耗数据",
-  "statistics_peakActivity": "活跃高峰",
-  "statistics_timeMorning": "上午",
-  "statistics_timeAfternoon": "下午",
-  "statistics_timeEvening": "傍晚",
-  "statistics_timeNight": "深夜",
   "layer_duplicate": "复制图层",
   "layer_delete": "删除图层",
   "layer_merge": "合并图层",
@@ -1824,31 +1786,6 @@
       }
     }
   },
-  "statistics_chartAspectRatio": "宽高比分布",
-  "statistics_chartActivityHeatmap": "活动热力图",
-  "statistics_chartHourlyDistribution": "小时分布",
-  "statistics_chartWeekdayDistribution": "星期分布",
-  "statistics_aspectSquare": "方形",
-  "statistics_aspectLandscape": "横屏",
-  "statistics_aspectPortrait": "竖屏",
-  "statistics_aspectOther": "其他",
-  "statistics_refresh": "刷新",
-  "statistics_retry": "重试",
-  "statistics_error": "错误: {error}",
-  "@statistics_error": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "statistics_mostActiveDay": "最活跃日",
-  "statistics_leastActiveDay": "最不活跃日",
-  "statistics_sunday": "周日",
-  "statistics_monday": "周一",
-  "statistics_tuesday": "周二",
-  "statistics_wednesday": "周三",
-  "statistics_thursday": "周四",
-  "statistics_friday": "周五",
-  "statistics_saturday": "周六",
   "autocomplete_categoryCharacter": "角色",
   "autocomplete_categoryCopyright": "版权",
   "autocomplete_categoryArtist": "艺术家",
@@ -1912,15 +1849,6 @@
   "settings_notificationSelectSound": "选择音效",
   "settings_notificationResetSound": "恢复默认",
   "resetToDefault": "重置为默认",
-  "statistics_heatmapLess": "少",
-  "statistics_heatmapMore": "多",
-  "statistics_heatmapActivities": "{count} 次活动",
-  "@statistics_heatmapActivities": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_heatmapNoActivity": "无活动",
   "metadataImport_title": "选择要套用的参数",
   "metadataImport_promptsSection": "提示词",
   "metadataImport_generationSection": "生成参数",

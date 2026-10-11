@@ -7,6 +7,10 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
+import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
+import 'package:nai_launcher/presentation/router/gallery_navigation_request.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -363,6 +367,104 @@ void main() {
       debugDisableShadows = disableShadows;
     },
   );
+
+  testWidgets(
+    'statistics navigation survives preference restoration and retained gallery updates',
+    (tester) async {
+      final criteria = FilterCriteria(
+        naiOnly: false,
+        indexedDate: true,
+        dateEndExclusive: true,
+        dateStart: DateTime(2026, 10, 5),
+        dateEnd: DateTime(2026, 10, 12),
+        filterMinSteps: 28,
+        filterMaxSteps: 28,
+      );
+      final navigation = ValueNotifier<GalleryNavigationRequest?>(
+        GalleryNavigationRequest(criteria: criteria),
+      );
+      addTearDown(navigation.dispose);
+      final container = await _pumpScreen(
+        tester,
+        records: records,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: false,
+        size: const Size(1600, 1000),
+        navigation: navigation,
+      );
+      expect(
+        container.read(localGalleryNotifierProvider).filterCriteria,
+        criteria,
+      );
+      final next = criteria.copyWith(filterMinSteps: 20, filterMaxSteps: 20);
+      navigation.value = GalleryNavigationRequest(criteria: next);
+      await _settle(tester);
+      expect(container.read(localGalleryNotifierProvider).filterCriteria, next);
+      await container
+          .read(localGalleryNotifierProvider.notifier)
+          .clearAllFilters();
+      expect(
+        container.read(localGalleryNotifierProvider).hasSessionFilters,
+        isFalse,
+      );
+      navigation.value = null;
+      await _settle(tester, rounds: 2);
+      expect(
+        container.read(localGalleryNotifierProvider).hasSessionFilters,
+        isFalse,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+  );
+
+  testWidgets(
+    'statistics navigation opens existing folder flow once per request without native IO',
+    (tester) async {
+      final picker = _CancelledFolderPicker();
+      FilePicker.platform = picker;
+      final navigation = ValueNotifier<GalleryNavigationRequest?>(
+        GalleryNavigationRequest(addFolder: true),
+      );
+      addTearDown(navigation.dispose);
+      final container = await _pumpScreen(
+        tester,
+        records: records,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: false,
+        size: const Size(1600, 1000),
+        navigation: navigation,
+      );
+      expect(picker.calls, 1);
+      container.read(localGalleryFocusNotifierProvider.notifier).clear();
+      await _settle(tester, rounds: 2);
+      expect(picker.calls, 1);
+      navigation.value = GalleryNavigationRequest(addFolder: true);
+      await _settle(tester);
+      expect(picker.calls, 2);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+  );
+}
+
+class _CancelledFolderPicker extends FilePicker {
+  var calls = 0;
+  @override
+  Future<String?> getDirectoryPath({
+    String? dialogTitle,
+    bool lockParentWindow = false,
+    String? initialDirectory,
+  }) async {
+    calls++;
+    return null;
+  }
 }
 
 final _captureKey = GlobalKey();
@@ -382,6 +484,7 @@ Future<ProviderContainer> _pumpScreen(
   required bool dark,
   required Size size,
   Future<PillDocument> Function(PillDocument, String)? translator,
+  ValueNotifier<GalleryNavigationRequest?>? navigation,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
@@ -423,7 +526,13 @@ Future<ProviderContainer> _pumpScreen(
           key: _captureKey,
           child: WindowChromeScope(child: _CaptionStub(child: child!)),
         ),
-        home: const LocalGalleryScreen(),
+        home: navigation == null
+            ? const LocalGalleryScreen()
+            : ValueListenableBuilder<GalleryNavigationRequest?>(
+                valueListenable: navigation,
+                builder: (context, request, _) =>
+                    LocalGalleryScreen(navigationRequest: request),
+              ),
       ),
     ),
   );

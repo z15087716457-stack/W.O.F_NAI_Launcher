@@ -18,7 +18,8 @@ import '../screens/online_gallery/online_gallery_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/slideshow_screen.dart';
 import '../screens/image_comparison_screen.dart';
-import '../screens/statistics/statistics_screen.dart';
+import '../wiring/statistics_wiring.dart';
+import 'gallery_navigation_request.dart';
 import '../screens/style_explore/style_explore_screen.dart';
 import '../screens/precise_ref_library/precise_ref_library_screen.dart';
 import '../screens/prompt_block_library/prompt_block_library_screen.dart';
@@ -192,8 +193,13 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.localGallery,
                 name: 'localGallery',
-                builder: (context, state) =>
-                    const WindowChromePage(child: LocalGalleryScreen()),
+                builder: (context, state) => WindowChromePage(
+                  child: LocalGalleryScreen(
+                    navigationRequest: state.extra is GalleryNavigationRequest
+                        ? state.extra as GalleryNavigationRequest
+                        : null,
+                  ),
+                ),
                 routes: [
                   // 幻灯片子路由
                   GoRoute(
@@ -284,7 +290,7 @@ GoRouter appRouter(Ref ref) {
                 path: AppRoutes.statistics,
                 name: 'statistics',
                 builder: (context, state) =>
-                    const WindowChromePage(child: StatisticsScreen()),
+                    const WindowChromePage(child: StatisticsWiring()),
               ),
             ],
           ),

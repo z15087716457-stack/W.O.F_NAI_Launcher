@@ -832,13 +832,20 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
   Future<void> setDateRange(DateTime? start, DateTime? end) async {
     final criteria = state.filterCriteria;
-    if (criteria.dateStart == start && criteria.dateEnd == end) return;
+    if (criteria.dateStart == start &&
+        criteria.dateEnd == end &&
+        !criteria.indexedDate &&
+        !criteria.dateEndExclusive) {
+      return;
+    }
 
     _setState(
       state.copyWith(
         filterCriteria: criteria.copyWith(
           dateStart: start,
           dateEnd: end,
+          indexedDate: false,
+          dateEndExclusive: false,
           // copyWith 的默认语义是非 null 才覆盖，清空必须显式传 clear 标记
           clearDateStart: start == null,
           clearDateEnd: end == null,
@@ -1000,6 +1007,11 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       ),
     );
 
+    await _applyFilters();
+  }
+
+  Future<void> applyExternalFilter(FilterCriteria criteria) async {
+    _setState(state.copyWith(filterCriteria: criteria));
     await _applyFilters();
   }
 

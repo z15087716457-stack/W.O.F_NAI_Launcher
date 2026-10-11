@@ -3233,81 +3233,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get statistics_title => '통계';
 
   @override
-  String get statistics_noData => '통계가 없습니다';
-
-  @override
-  String get statistics_noTagData => '태그 데이터가 없습니다';
-
-  @override
-  String get statistics_generateFirst => '먼저 이미지를 생성해 보세요';
-
-  @override
-  String get statistics_totalImages => '전체 이미지';
-
-  @override
-  String get statistics_totalSize => '전체 크기';
-
-  @override
-  String get statistics_favorites => '즐겨찾기';
-
-  @override
-  String get statistics_samplerDistribution => '샘플러 분포';
-
-  @override
-  String get statistics_additionalStats => '추가 통계';
-
-  @override
-  String get statistics_averageFileSize => '평균 파일 크기';
-
-  @override
-  String get statistics_withMetadata => '메타데이터가 있는 이미지';
-
-  @override
-  String get statistics_justNow => '방금';
-
-  @override
-  String statistics_minutesAgo(Object count) {
-    return '$count분 전';
-  }
-
-  @override
-  String statistics_hoursAgo(Object count) {
-    return '$count시간 전';
-  }
-
-  @override
-  String statistics_daysAgo(Object count) {
-    return '$count일 전';
-  }
-
-  @override
-  String get statistics_anlasCost => 'Anlas 소비';
-
-  @override
-  String get statistics_totalAnlasCost => '총 소비';
-
-  @override
-  String get statistics_avgDailyCost => '일평균';
-
-  @override
-  String get statistics_noAnlasData => 'Anlas 소비 데이터가 없습니다';
-
-  @override
-  String get statistics_peakActivity => '활동 피크';
-
-  @override
-  String get statistics_timeMorning => '오전';
-
-  @override
-  String get statistics_timeAfternoon => '오후';
-
-  @override
-  String get statistics_timeEvening => '저녁';
-
-  @override
-  String get statistics_timeNight => '밤';
-
-  @override
   String get localGallery_group_today => '오늘';
 
   @override
@@ -3710,68 +3635,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get statistics_chartAspectRatio => '가로세로 비율 분포';
-
-  @override
-  String get statistics_chartActivityHeatmap => '활동 히트맵';
-
-  @override
-  String get statistics_chartHourlyDistribution => '시간대별 분포';
-
-  @override
-  String get statistics_chartWeekdayDistribution => '요일별 분포';
-
-  @override
-  String get statistics_aspectSquare => '정사각형';
-
-  @override
-  String get statistics_aspectLandscape => '가로';
-
-  @override
-  String get statistics_aspectPortrait => '세로';
-
-  @override
-  String get statistics_aspectOther => '기타';
-
-  @override
-  String get statistics_refresh => '새로 고침';
-
-  @override
-  String get statistics_retry => '다시 시도';
-
-  @override
-  String statistics_error(Object error) {
-    return '오류: $error';
-  }
-
-  @override
-  String get statistics_mostActiveDay => '가장 활발한 요일';
-
-  @override
-  String get statistics_leastActiveDay => '가장 한산한 요일';
-
-  @override
-  String get statistics_sunday => '일';
-
-  @override
-  String get statistics_monday => '월';
-
-  @override
-  String get statistics_tuesday => '화';
-
-  @override
-  String get statistics_wednesday => '수';
-
-  @override
-  String get statistics_thursday => '목';
-
-  @override
-  String get statistics_friday => '금';
-
-  @override
-  String get statistics_saturday => '토';
-
-  @override
   String get autocomplete_categoryCharacter => '캐릭터';
 
   @override
@@ -3936,20 +3799,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get resetToDefault => '기본값으로 초기화';
-
-  @override
-  String get statistics_heatmapLess => '적음';
-
-  @override
-  String get statistics_heatmapMore => '많음';
-
-  @override
-  String statistics_heatmapActivities(Object count) {
-    return '활동 $count회';
-  }
-
-  @override
-  String get statistics_heatmapNoActivity => '활동 없음';
 
   @override
   String get metadataImport_title => '가져올 매개변수 선택';

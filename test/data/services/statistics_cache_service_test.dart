@@ -1,11 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
-import 'package:nai_launcher/data/models/gallery/daily_trend_statistics.dart';
-import 'package:nai_launcher/data/models/gallery/gallery_statistics.dart';
 import 'package:nai_launcher/data/services/statistics_cache_service.dart';
+
+import '../../presentation/wiring/statistics_fakes.dart';
 
 void main() {
   late Directory hiveDirectory;
@@ -29,28 +30,70 @@ void main() {
     }
   });
 
-  test('round-trips dashboard activity distributions', () async {
-    final calculatedAt = DateTime(2026, 7, 31, 12);
-    final statistics = GalleryStatistics(
-      totalImages: 3,
-      totalSizeBytes: 6 * 1024 * 1024,
-      averageFileSizeBytes: 2 * 1024 * 1024,
-      dailyTrends: [
-        DailyTrendStatistics(date: DateTime(2026, 7, 31), count: 3),
-      ],
-      hourlyDistribution: const {10: 1, 20: 2},
-      weekdayDistribution: const {DateTime.friday: 3},
-      calculatedAt: calculatedAt,
-    );
-    final service = StatisticsCacheService();
+  test(
+    'new cache round-trips every aggregate and isolates filter combinations',
+    () async {
+      final repository = FakeStatisticsRepository();
+      final calculatedAt = DateTime(2026, 10, 11, 12);
+      final cached = StatisticsDashboardCache(
+        snapshot: repository.dashboard,
+        artists: repository.artists,
+        signature: 'test:1',
+        calculatedAt: calculatedAt,
+      );
+      final service = StatisticsCacheService();
+      await service.saveDashboardCache('all:false', cached);
+      await service.saveDashboardCache('days7:true', cached);
+      final restored = service.getDashboardCache('all:false')!;
+      expect(restored.snapshot.toJson(), repository.dashboard.toJson());
+      expect(restored.artists!.toJson(), repository.artists.toJson());
+      expect(restored.signature, 'test:1');
+      expect(restored.calculatedAt, calculatedAt);
+      await service.clearDashboardCache('days7:true');
+      expect(service.getDashboardCache('days7:true'), isNull);
+      expect(service.getDashboardCache('all:false'), isNotNull);
+    },
+  );
 
-    await service.saveCache(statistics, statistics.totalImages);
-    final restored = service.getCache();
+  test(
+    'corrupt new cache is ignored without destroying other entries',
+    () async {
+      await Hive.box(
+        StorageKeys.statisticsCacheBox,
+      ).put('dashboard_v2:all:false', '{bad json');
+      expect(StatisticsCacheService().getDashboardCache('all:false'), isNull);
+    },
+  );
 
-    expect(restored, isNotNull);
-    expect(restored!.hourlyDistribution, {10: 1, 20: 2});
-    expect(restored.weekdayDistribution, {DateTime.friday: 3});
-    expect(restored.dailyTrends.single.count, 3);
-    expect(service.isCacheValid(3), isTrue);
+  test('settings cleanup clears new and legacy cache entries', () async {
+    final box = Hive.box(StorageKeys.statisticsCacheBox);
+    await box.putAll({
+      'dashboard_v2:all:false': '{}',
+      'dashboard_v2:days7:true': '{}',
+      StorageKeys.statisticsCacheData: '{}',
+      StorageKeys.statisticsCacheMetadata: '{}',
+      'unrelated': 1,
+    });
+    await StatisticsCacheService().clearCache();
+    expect(box.keys.toList(), ['unrelated']);
   });
+
+  test(
+    'generation count update remains compatible with legacy metadata',
+    () async {
+      final metadata = StatisticsCacheMetadata(
+        imageCount: 10,
+        cachedAt: DateTime(2026, 10, 11),
+        galleryPath: 'fake gallery',
+      );
+      await Hive.box(
+        StorageKeys.statisticsCacheBox,
+      ).put(StorageKeys.statisticsCacheMetadata, jsonEncode(metadata.toJson()));
+      final service = StatisticsCacheService();
+      await service.incrementImageCount(2);
+      expect(service.getCacheMetadata()!.imageCount, 12);
+      expect(service.getCacheMetadata()!.cachedAt, metadata.cachedAt);
+      expect(service.getCacheMetadata()!.galleryPath, metadata.galleryPath);
+    },
+  );
 }

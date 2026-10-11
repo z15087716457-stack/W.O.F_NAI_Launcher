@@ -1489,44 +1489,6 @@
   "comparison_zoomHint": "손가락을 오므리거나 스크롤해 각각 확대/축소",
   "comparison_loadError": "이미지를 불러오지 못했습니다",
   "statistics_title": "통계",
-  "statistics_noData": "통계가 없습니다",
-  "statistics_noTagData": "태그 데이터가 없습니다",
-  "statistics_generateFirst": "먼저 이미지를 생성해 보세요",
-  "statistics_totalImages": "전체 이미지",
-  "statistics_totalSize": "전체 크기",
-  "statistics_favorites": "즐겨찾기",
-  "statistics_samplerDistribution": "샘플러 분포",
-  "statistics_additionalStats": "추가 통계",
-  "statistics_averageFileSize": "평균 파일 크기",
-  "statistics_withMetadata": "메타데이터가 있는 이미지",
-  "statistics_justNow": "방금",
-  "statistics_minutesAgo": "{count}분 전",
-  "@statistics_minutesAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_hoursAgo": "{count}시간 전",
-  "@statistics_hoursAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_daysAgo": "{count}일 전",
-  "@statistics_daysAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_anlasCost": "Anlas 소비",
-  "statistics_totalAnlasCost": "총 소비",
-  "statistics_avgDailyCost": "일평균",
-  "statistics_noAnlasData": "Anlas 소비 데이터가 없습니다",
-  "statistics_peakActivity": "활동 피크",
-  "statistics_timeMorning": "오전",
-  "statistics_timeAfternoon": "오후",
-  "statistics_timeEvening": "저녁",
-  "statistics_timeNight": "밤",
   "localGallery_group_today": "오늘",
   "localGallery_group_yesterday": "어제",
   "localGallery_groupImageCount": "{formatted}장",
@@ -1838,31 +1800,6 @@
       }
     }
   },
-  "statistics_chartAspectRatio": "가로세로 비율 분포",
-  "statistics_chartActivityHeatmap": "활동 히트맵",
-  "statistics_chartHourlyDistribution": "시간대별 분포",
-  "statistics_chartWeekdayDistribution": "요일별 분포",
-  "statistics_aspectSquare": "정사각형",
-  "statistics_aspectLandscape": "가로",
-  "statistics_aspectPortrait": "세로",
-  "statistics_aspectOther": "기타",
-  "statistics_refresh": "새로 고침",
-  "statistics_retry": "다시 시도",
-  "statistics_error": "오류: {error}",
-  "@statistics_error": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "statistics_mostActiveDay": "가장 활발한 요일",
-  "statistics_leastActiveDay": "가장 한산한 요일",
-  "statistics_sunday": "일",
-  "statistics_monday": "월",
-  "statistics_tuesday": "화",
-  "statistics_wednesday": "수",
-  "statistics_thursday": "목",
-  "statistics_friday": "금",
-  "statistics_saturday": "토",
   "autocomplete_categoryCharacter": "캐릭터",
   "autocomplete_categoryCopyright": "저작권",
   "autocomplete_categoryArtist": "작가",
@@ -1920,15 +1857,6 @@
   "settings_notificationSelectSound": "효과음 선택",
   "settings_notificationResetSound": "기본값으로 초기화",
   "resetToDefault": "기본값으로 초기화",
-  "statistics_heatmapLess": "적음",
-  "statistics_heatmapMore": "많음",
-  "statistics_heatmapActivities": "활동 {count}회",
-  "@statistics_heatmapActivities": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_heatmapNoActivity": "활동 없음",
   "metadataImport_title": "가져올 매개변수 선택",
   "metadataImport_promptsSection": "프롬프트",
   "metadataImport_generationSection": "생성 매개변수",

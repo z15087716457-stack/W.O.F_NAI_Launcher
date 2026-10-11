@@ -1489,44 +1489,6 @@
   "comparison_zoomHint": "Pinch or scroll to zoom independently",
   "comparison_loadError": "Failed to load image",
   "statistics_title": "Statistics",
-  "statistics_noData": "No statistics available",
-  "statistics_noTagData": "No tag data",
-  "statistics_generateFirst": "Generate some images first",
-  "statistics_totalImages": "Total Images",
-  "statistics_totalSize": "Total Size",
-  "statistics_favorites": "Favorites",
-  "statistics_samplerDistribution": "Sampler Distribution",
-  "statistics_additionalStats": "Additional Statistics",
-  "statistics_averageFileSize": "Average File Size",
-  "statistics_withMetadata": "Images with Metadata",
-  "statistics_justNow": "Just now",
-  "statistics_minutesAgo": "{count} minutes ago",
-  "@statistics_minutesAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_hoursAgo": "{count} hours ago",
-  "@statistics_hoursAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_daysAgo": "{count} days ago",
-  "@statistics_daysAgo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_anlasCost": "Anlas Cost",
-  "statistics_totalAnlasCost": "Total Cost",
-  "statistics_avgDailyCost": "Daily Average",
-  "statistics_noAnlasData": "No Anlas consumption data",
-  "statistics_peakActivity": "Peak Activity",
-  "statistics_timeMorning": "Morning",
-  "statistics_timeAfternoon": "Afternoon",
-  "statistics_timeEvening": "Evening",
-  "statistics_timeNight": "Night",
   "localGallery_group_today": "Today",
   "localGallery_group_yesterday": "Yesterday",
   "localGallery_groupImageCount": "{count, plural, =1{{formatted} image} other{{formatted} images}}",
@@ -1838,31 +1800,6 @@
       }
     }
   },
-  "statistics_chartAspectRatio": "Aspect Ratio Distribution",
-  "statistics_chartActivityHeatmap": "Activity Heatmap",
-  "statistics_chartHourlyDistribution": "Hourly Distribution",
-  "statistics_chartWeekdayDistribution": "Weekday Distribution",
-  "statistics_aspectSquare": "Square",
-  "statistics_aspectLandscape": "Landscape",
-  "statistics_aspectPortrait": "Portrait",
-  "statistics_aspectOther": "Other",
-  "statistics_refresh": "Refresh",
-  "statistics_retry": "Retry",
-  "statistics_error": "Error: {error}",
-  "@statistics_error": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "statistics_mostActiveDay": "Most Active Day",
-  "statistics_leastActiveDay": "Least Active Day",
-  "statistics_sunday": "Sun",
-  "statistics_monday": "Mon",
-  "statistics_tuesday": "Tue",
-  "statistics_wednesday": "Wed",
-  "statistics_thursday": "Thu",
-  "statistics_friday": "Fri",
-  "statistics_saturday": "Sat",
   "autocomplete_categoryCharacter": "Character",
   "autocomplete_categoryCopyright": "Copyright",
   "autocomplete_categoryArtist": "Artist",
@@ -1926,15 +1863,6 @@
   "settings_notificationSelectSound": "Select Sound",
   "settings_notificationResetSound": "Reset to Default",
   "resetToDefault": "Reset to Default",
-  "statistics_heatmapLess": "Less",
-  "statistics_heatmapMore": "More",
-  "statistics_heatmapActivities": "{count} activities",
-  "@statistics_heatmapActivities": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "statistics_heatmapNoActivity": "No activity",
   "metadataImport_title": "Select Parameters to Import",
   "metadataImport_promptsSection": "Prompts",
   "metadataImport_generationSection": "Generation Parameters",
