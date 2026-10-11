@@ -7615,5 +7615,99 @@
   "stats_emptyGenerate": "去生圖",
   "stats_emptyAddFolder": "新增圖庫資料夾",
   "stats_errorTitle": "統計沒有算出來",
-  "stats_errorRetry": "重試"
+  "stats_errorRetry": "重試",
+  "navShell_page_generation": "生圖",
+  "navShell_page_styleExplore": "畫風探索",
+  "navShell_page_localGallery": "本地畫廊",
+  "navShell_page_onlineGallery": "線上畫廊",
+  "navShell_page_promptBlocks": "提示詞塊",
+  "navShell_page_vibeLibrary": "Vibe 庫",
+  "navShell_page_preciseRef": "精準參考庫",
+  "navShell_page_tagWiki": "標籤百科",
+  "navShell_page_statistics": "統計",
+  "navShell_page_settings": "設定",
+  "navShell_group_create": "創作",
+  "navShell_group_gallery": "圖庫",
+  "navShell_group_assets": "素材",
+  "navShell_group_tools": "工具",
+  "navShell_expand": "展開導航",
+  "navShell_collapse": "收起",
+  "navShell_pin": "釘住展開",
+  "navShell_genRunning": "生成中",
+  "navShell_genRunningCount": "生成中 · 第 {current} / {total} 張",
+  "@navShell_genRunningCount": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "navShell_genPercent": "{percent}% · 流式預覽",
+  "@navShell_genPercent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "navShell_genBack": "點一下回到生圖頁",
+  "navShell_genDone": "已完成 {count} 張，點一下檢視",
+  "@navShell_genDone": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "navShell_genFailed": "生成失敗",
+  "navShell_tasksTitle": "後臺任務",
+  "navShell_tasksRunning": "{count} 個進行中",
+  "@navShell_tasksRunning": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "navShell_tasksFooter": "全部結束 10 秒後這個圖示自動消失",
+  "navShell_task_localUpscale": "本地放大",
+  "navShell_task_cloudUpscale": "雲端放大",
+  "navShell_task_bulkDelete": "移到回收站",
+  "navShell_task_bulkExport": "批次匯出",
+  "navShell_task_bulkMetadata": "批次編輯後設資料",
+  "navShell_task_bulkAddToCollection": "加入收藏集",
+  "navShell_task_bulkRemoveFromCollection": "移出收藏集",
+  "navShell_task_bulkFavorite": "批次收藏",
+  "navShell_taskImages": "{title} {count} 張",
+  "@navShell_taskImages": {
+    "placeholders": {
+      "title": {},
+      "count": {}
+    }
+  },
+  "navShell_taskJustDone": "剛剛完成",
+  "navShell_taskView": "檢視",
+  "navShell_taskCancel": "取消",
+  "navShell_taskCancelling": "正在取消",
+  "navShell_taskUndo": "復原",
+  "navShell_account": "帳號",
+  "navShell_accountTitle": "登入與帳號",
+  "navShell_accountCurrent": "當前",
+  "navShell_accountToken": "API Token 登入",
+  "navShell_accountCredentials": "電子郵件密碼登入",
+  "navShell_accountNotSignedIn": "未登入",
+  "navShell_accountChoose": "選一個帳號繼續",
+  "navShell_subExpires": "訂閱 {date} 到期 · 還剩 {days} 天",
+  "@navShell_subExpires": {
+    "placeholders": {
+      "date": {},
+      "days": {}
+    }
+  },
+  "navShell_subExpired": "訂閱已過期",
+  "navShell_anlas": "Anlas 餘額",
+  "navShell_switchAccount": "切換帳號",
+  "navShell_addAccount": "新增帳號",
+  "navShell_manageAccounts": "管理帳號",
+  "navShell_logout": "登出",
+  "navShell_customize": "自訂導航欄",
+  "navShell_customizeMenu": "自訂導航欄…",
+  "navShell_customizeNote": "右鍵導航欄開啟。隱藏的頁面仍然可以用快速鍵開啟；生圖不能隱藏",
+  "navShell_ctrlNumbers": "按住 Ctrl 顯示頁面編號",
+  "navShell_reset": "恢復預設",
+  "navShell_done": "完成",
+  "navShell_ctrlHint": "按住不放：顯示頁面編號，按數字直接跳轉；鬆開就消失"
 }

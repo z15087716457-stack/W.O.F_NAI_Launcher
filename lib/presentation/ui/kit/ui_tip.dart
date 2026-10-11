@@ -13,6 +13,7 @@ class UiTip {
     required this.child,
     this.width,
     this.targetAnchor = Alignment.topLeft,
+    this.bare = false,
   });
 
   /// 相对 [targetAnchor] 的偏移。
@@ -23,6 +24,9 @@ class UiTip {
   final Alignment followerAnchor;
   final Widget child;
   final double? width;
+
+  /// true：[child] 自带外观（比如主导航的带尖角气泡），不再套 [UiTipBubble]。
+  final bool bare;
 }
 
 /// 富内容悬停提示的宿主。提示画在应用浮层里，不会被相邻卡片盖住，也不挡鼠标。
@@ -68,7 +72,9 @@ class _UiTipHostState extends State<UiTipHost> {
             followerAnchor: tip.followerAnchor,
             offset: tip.anchor,
             child: IgnorePointer(
-              child: UiTipBubble(width: tip.width, child: tip.child),
+              child: tip.bare
+                  ? tip.child
+                  : UiTipBubble(width: tip.width, child: tip.child),
             ),
           ),
         );

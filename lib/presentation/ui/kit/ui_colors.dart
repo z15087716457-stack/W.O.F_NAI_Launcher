@@ -29,6 +29,11 @@ class UiColors {
     required this.selectedSegment,
     required this.tipBg,
     required this.tipInk,
+    required this.panel,
+    required this.raised,
+    required this.line,
+    required this.avatar,
+    required this.subWarn,
   });
 
   factory UiColors.of(BuildContext context) =>
@@ -61,6 +66,11 @@ class UiColors {
       selectedSegment: dark ? const Color(0xFF333333) : s.surfaceContainer,
       tipBg: dark ? const Color(0xFFECECEC) : const Color(0xFF1F1F1F),
       tipInk: dark ? const Color(0xFF171717) : const Color(0xFFF2F2F2),
+      panel: s.surfaceContainerLow,
+      raised: s.surfaceContainer,
+      line: s.outlineVariant,
+      avatar: const Color(0xFF0160FB),
+      subWarn: dark ? const Color(0xFFD9A441) : const Color(0xFF98691D),
     );
   }
 
@@ -118,6 +128,21 @@ class UiColors {
   /// 悬停提示浮层。
   final Color tipBg;
   final Color tipInk;
+
+  /// 面板底（账号弹窗等大浮层）。
+  final Color panel;
+
+  /// 抬起的浮层底（后台任务、自定义面板、菜单）。
+  final Color raised;
+
+  /// 主题描边（主导航、浮层用 Geist 原值；统计页卡片用 [border]）。
+  final Color line;
+
+  /// 首字头像底色（W.O.F 品牌蓝，所有账号同色）。
+  final Color avatar;
+
+  /// 订阅快到期 / 已过期的琥珀色。
+  final Color subWarn;
 
   /// 把 [color] 按 [t] 混到卡片底色上，等价于 CSS `color-mix(color t, card)`。
   Color onCard(Color color, double t) => Color.lerp(card, color, t)!;

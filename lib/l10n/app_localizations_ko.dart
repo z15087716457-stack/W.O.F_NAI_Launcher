@@ -13207,4 +13207,200 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get stats_errorRetry => '다시 시도';
+
+  @override
+  String get navShell_page_generation => '생성';
+
+  @override
+  String get navShell_page_styleExplore => '화풍 탐색';
+
+  @override
+  String get navShell_page_localGallery => '로컬 갤러리';
+
+  @override
+  String get navShell_page_onlineGallery => '온라인 갤러리';
+
+  @override
+  String get navShell_page_promptBlocks => '프롬프트 블록';
+
+  @override
+  String get navShell_page_vibeLibrary => 'Vibe 라이브러리';
+
+  @override
+  String get navShell_page_preciseRef => '정밀 참조 라이브러리';
+
+  @override
+  String get navShell_page_tagWiki => '태그 백과';
+
+  @override
+  String get navShell_page_statistics => '통계';
+
+  @override
+  String get navShell_page_settings => '설정';
+
+  @override
+  String get navShell_group_create => '창작';
+
+  @override
+  String get navShell_group_gallery => '갤러리';
+
+  @override
+  String get navShell_group_assets => '소재';
+
+  @override
+  String get navShell_group_tools => '도구';
+
+  @override
+  String get navShell_expand => '내비게이션 펼치기';
+
+  @override
+  String get navShell_collapse => '접기';
+
+  @override
+  String get navShell_pin => '펼친 상태 고정';
+
+  @override
+  String get navShell_genRunning => '생성 중';
+
+  @override
+  String navShell_genRunningCount(Object current, Object total) {
+    return '생성 중 · $current / $total장';
+  }
+
+  @override
+  String navShell_genPercent(Object percent) {
+    return '$percent% · 실시간 미리보기';
+  }
+
+  @override
+  String get navShell_genBack => '클릭하면 생성 페이지로 돌아갑니다';
+
+  @override
+  String navShell_genDone(Object count) {
+    return '$count장 완료, 클릭하여 보기';
+  }
+
+  @override
+  String get navShell_genFailed => '생성 실패';
+
+  @override
+  String get navShell_tasksTitle => '백그라운드 작업';
+
+  @override
+  String navShell_tasksRunning(Object count) {
+    return '$count개 진행 중';
+  }
+
+  @override
+  String get navShell_tasksFooter => '모두 끝나면 10초 후 이 아이콘이 사라집니다';
+
+  @override
+  String get navShell_task_localUpscale => '로컬 업스케일';
+
+  @override
+  String get navShell_task_cloudUpscale => '클라우드 업스케일';
+
+  @override
+  String get navShell_task_bulkDelete => '휴지통으로 이동';
+
+  @override
+  String get navShell_task_bulkExport => '일괄 내보내기';
+
+  @override
+  String get navShell_task_bulkMetadata => '메타데이터 일괄 편집';
+
+  @override
+  String get navShell_task_bulkAddToCollection => '컬렉션에 추가';
+
+  @override
+  String get navShell_task_bulkRemoveFromCollection => '컬렉션에서 제거';
+
+  @override
+  String get navShell_task_bulkFavorite => '일괄 즐겨찾기';
+
+  @override
+  String navShell_taskImages(Object title, Object count) {
+    return '$title $count장';
+  }
+
+  @override
+  String get navShell_taskJustDone => '방금 완료';
+
+  @override
+  String get navShell_taskView => '보기';
+
+  @override
+  String get navShell_taskCancel => '취소';
+
+  @override
+  String get navShell_taskCancelling => '취소 중';
+
+  @override
+  String get navShell_taskUndo => '실행 취소';
+
+  @override
+  String get navShell_account => '계정';
+
+  @override
+  String get navShell_accountTitle => '로그인 및 계정';
+
+  @override
+  String get navShell_accountCurrent => '현재';
+
+  @override
+  String get navShell_accountToken => 'API 토큰 로그인';
+
+  @override
+  String get navShell_accountCredentials => '이메일 로그인';
+
+  @override
+  String get navShell_accountNotSignedIn => '로그인 안 됨';
+
+  @override
+  String get navShell_accountChoose => '계속할 계정을 선택하세요';
+
+  @override
+  String navShell_subExpires(Object date, Object days) {
+    return '구독 $date 만료 · $days일 남음';
+  }
+
+  @override
+  String get navShell_subExpired => '구독 만료됨';
+
+  @override
+  String get navShell_anlas => 'Anlas 잔액';
+
+  @override
+  String get navShell_switchAccount => '계정 전환';
+
+  @override
+  String get navShell_addAccount => '계정 추가';
+
+  @override
+  String get navShell_manageAccounts => '계정 관리';
+
+  @override
+  String get navShell_logout => '로그아웃';
+
+  @override
+  String get navShell_customize => '내비게이션 사용자 지정';
+
+  @override
+  String get navShell_customizeMenu => '내비게이션 사용자 지정…';
+
+  @override
+  String get navShell_customizeNote =>
+      '내비게이션 바를 우클릭하면 열립니다. 숨긴 페이지도 단축키로 열 수 있습니다. 생성은 숨길 수 없습니다';
+
+  @override
+  String get navShell_ctrlNumbers => 'Ctrl을 누르고 있으면 페이지 번호 표시';
+
+  @override
+  String get navShell_reset => '기본값 복원';
+
+  @override
+  String get navShell_done => '완료';
+
+  @override
+  String get navShell_ctrlHint => '누르고 있으면 페이지 번호 표시, 숫자로 바로 이동, 놓으면 사라집니다';
 }

@@ -13183,4 +13183,200 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stats_errorRetry => '再試行';
+
+  @override
+  String get navShell_page_generation => '生成';
+
+  @override
+  String get navShell_page_styleExplore => '画風探索';
+
+  @override
+  String get navShell_page_localGallery => 'ローカルギャラリー';
+
+  @override
+  String get navShell_page_onlineGallery => 'オンラインギャラリー';
+
+  @override
+  String get navShell_page_promptBlocks => 'プロンプトブロック';
+
+  @override
+  String get navShell_page_vibeLibrary => 'Vibe ライブラリ';
+
+  @override
+  String get navShell_page_preciseRef => '精密参照ライブラリ';
+
+  @override
+  String get navShell_page_tagWiki => 'タグ百科';
+
+  @override
+  String get navShell_page_statistics => '統計';
+
+  @override
+  String get navShell_page_settings => '設定';
+
+  @override
+  String get navShell_group_create => '制作';
+
+  @override
+  String get navShell_group_gallery => 'ギャラリー';
+
+  @override
+  String get navShell_group_assets => '素材';
+
+  @override
+  String get navShell_group_tools => 'ツール';
+
+  @override
+  String get navShell_expand => 'ナビを展開';
+
+  @override
+  String get navShell_collapse => '折りたたむ';
+
+  @override
+  String get navShell_pin => '展開を固定';
+
+  @override
+  String get navShell_genRunning => '生成中';
+
+  @override
+  String navShell_genRunningCount(Object current, Object total) {
+    return '生成中 · $current / $total 枚目';
+  }
+
+  @override
+  String navShell_genPercent(Object percent) {
+    return '$percent% · ライブプレビュー';
+  }
+
+  @override
+  String get navShell_genBack => 'クリックで生成ページへ戻る';
+
+  @override
+  String navShell_genDone(Object count) {
+    return '$count 枚完了、クリックで表示';
+  }
+
+  @override
+  String get navShell_genFailed => '生成に失敗しました';
+
+  @override
+  String get navShell_tasksTitle => 'バックグラウンドタスク';
+
+  @override
+  String navShell_tasksRunning(Object count) {
+    return '$count 件実行中';
+  }
+
+  @override
+  String get navShell_tasksFooter => 'すべて終わると 10 秒後にこのアイコンは消えます';
+
+  @override
+  String get navShell_task_localUpscale => 'ローカル拡大';
+
+  @override
+  String get navShell_task_cloudUpscale => 'クラウド拡大';
+
+  @override
+  String get navShell_task_bulkDelete => 'ゴミ箱へ移動';
+
+  @override
+  String get navShell_task_bulkExport => '一括エクスポート';
+
+  @override
+  String get navShell_task_bulkMetadata => 'メタデータ一括編集';
+
+  @override
+  String get navShell_task_bulkAddToCollection => 'コレクションに追加';
+
+  @override
+  String get navShell_task_bulkRemoveFromCollection => 'コレクションから削除';
+
+  @override
+  String get navShell_task_bulkFavorite => '一括お気に入り';
+
+  @override
+  String navShell_taskImages(Object title, Object count) {
+    return '$title $count 枚';
+  }
+
+  @override
+  String get navShell_taskJustDone => '完了しました';
+
+  @override
+  String get navShell_taskView => '表示';
+
+  @override
+  String get navShell_taskCancel => 'キャンセル';
+
+  @override
+  String get navShell_taskCancelling => 'キャンセル中';
+
+  @override
+  String get navShell_taskUndo => '元に戻す';
+
+  @override
+  String get navShell_account => 'アカウント';
+
+  @override
+  String get navShell_accountTitle => 'ログインとアカウント';
+
+  @override
+  String get navShell_accountCurrent => '現在';
+
+  @override
+  String get navShell_accountToken => 'API トークンでログイン';
+
+  @override
+  String get navShell_accountCredentials => 'メールでログイン';
+
+  @override
+  String get navShell_accountNotSignedIn => '未ログイン';
+
+  @override
+  String get navShell_accountChoose => 'アカウントを選んで続行';
+
+  @override
+  String navShell_subExpires(Object date, Object days) {
+    return 'サブスクは $date に終了 · 残り $days 日';
+  }
+
+  @override
+  String get navShell_subExpired => 'サブスクの期限切れ';
+
+  @override
+  String get navShell_anlas => 'Anlas 残高';
+
+  @override
+  String get navShell_switchAccount => 'アカウント切替';
+
+  @override
+  String get navShell_addAccount => 'アカウントを追加';
+
+  @override
+  String get navShell_manageAccounts => 'アカウント管理';
+
+  @override
+  String get navShell_logout => 'ログアウト';
+
+  @override
+  String get navShell_customize => 'ナビをカスタマイズ';
+
+  @override
+  String get navShell_customizeMenu => 'ナビをカスタマイズ…';
+
+  @override
+  String get navShell_customizeNote =>
+      'ナビバーを右クリックで開きます。非表示のページもショートカットで開けます。生成は非表示にできません';
+
+  @override
+  String get navShell_ctrlNumbers => 'Ctrl 長押しでページ番号を表示';
+
+  @override
+  String get navShell_reset => '初期設定に戻す';
+
+  @override
+  String get navShell_done => '完了';
+
+  @override
+  String get navShell_ctrlHint => '押し続けるとページ番号を表示、数字キーで移動、離すと消えます';
 }

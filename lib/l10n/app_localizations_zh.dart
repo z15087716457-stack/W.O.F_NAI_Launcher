@@ -12955,6 +12955,201 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get stats_errorRetry => '重试';
+
+  @override
+  String get navShell_page_generation => '生图';
+
+  @override
+  String get navShell_page_styleExplore => '画风探索';
+
+  @override
+  String get navShell_page_localGallery => '本地画廊';
+
+  @override
+  String get navShell_page_onlineGallery => '在线画廊';
+
+  @override
+  String get navShell_page_promptBlocks => '提示词块';
+
+  @override
+  String get navShell_page_vibeLibrary => 'Vibe 库';
+
+  @override
+  String get navShell_page_preciseRef => '精准参考库';
+
+  @override
+  String get navShell_page_tagWiki => '标签百科';
+
+  @override
+  String get navShell_page_statistics => '统计';
+
+  @override
+  String get navShell_page_settings => '设置';
+
+  @override
+  String get navShell_group_create => '创作';
+
+  @override
+  String get navShell_group_gallery => '图库';
+
+  @override
+  String get navShell_group_assets => '素材';
+
+  @override
+  String get navShell_group_tools => '工具';
+
+  @override
+  String get navShell_expand => '展开导航';
+
+  @override
+  String get navShell_collapse => '收起';
+
+  @override
+  String get navShell_pin => '钉住展开';
+
+  @override
+  String get navShell_genRunning => '生成中';
+
+  @override
+  String navShell_genRunningCount(Object current, Object total) {
+    return '生成中 · 第 $current / $total 张';
+  }
+
+  @override
+  String navShell_genPercent(Object percent) {
+    return '$percent% · 流式预览';
+  }
+
+  @override
+  String get navShell_genBack => '点一下回到生图页';
+
+  @override
+  String navShell_genDone(Object count) {
+    return '已完成 $count 张，点一下查看';
+  }
+
+  @override
+  String get navShell_genFailed => '生成失败';
+
+  @override
+  String get navShell_tasksTitle => '后台任务';
+
+  @override
+  String navShell_tasksRunning(Object count) {
+    return '$count 个进行中';
+  }
+
+  @override
+  String get navShell_tasksFooter => '全部结束 10 秒后这个图标自动消失';
+
+  @override
+  String get navShell_task_localUpscale => '本地放大';
+
+  @override
+  String get navShell_task_cloudUpscale => '云端放大';
+
+  @override
+  String get navShell_task_bulkDelete => '移到回收站';
+
+  @override
+  String get navShell_task_bulkExport => '批量导出';
+
+  @override
+  String get navShell_task_bulkMetadata => '批量编辑元数据';
+
+  @override
+  String get navShell_task_bulkAddToCollection => '加入收藏集';
+
+  @override
+  String get navShell_task_bulkRemoveFromCollection => '移出收藏集';
+
+  @override
+  String get navShell_task_bulkFavorite => '批量收藏';
+
+  @override
+  String navShell_taskImages(Object title, Object count) {
+    return '$title $count 张';
+  }
+
+  @override
+  String get navShell_taskJustDone => '刚刚完成';
+
+  @override
+  String get navShell_taskView => '查看';
+
+  @override
+  String get navShell_taskCancel => '取消';
+
+  @override
+  String get navShell_taskCancelling => '正在取消';
+
+  @override
+  String get navShell_taskUndo => '撤销';
+
+  @override
+  String get navShell_account => '账号';
+
+  @override
+  String get navShell_accountTitle => '登录与账号';
+
+  @override
+  String get navShell_accountCurrent => '当前';
+
+  @override
+  String get navShell_accountToken => 'API Token 登录';
+
+  @override
+  String get navShell_accountCredentials => '邮箱密码登录';
+
+  @override
+  String get navShell_accountNotSignedIn => '未登录';
+
+  @override
+  String get navShell_accountChoose => '选一个账号继续';
+
+  @override
+  String navShell_subExpires(Object date, Object days) {
+    return '订阅 $date 到期 · 还剩 $days 天';
+  }
+
+  @override
+  String get navShell_subExpired => '订阅已过期';
+
+  @override
+  String get navShell_anlas => 'Anlas 余额';
+
+  @override
+  String get navShell_switchAccount => '切换账号';
+
+  @override
+  String get navShell_addAccount => '添加账号';
+
+  @override
+  String get navShell_manageAccounts => '管理账号';
+
+  @override
+  String get navShell_logout => '退出登录';
+
+  @override
+  String get navShell_customize => '自定义导航栏';
+
+  @override
+  String get navShell_customizeMenu => '自定义导航栏…';
+
+  @override
+  String get navShell_customizeNote => '右键导航栏打开。隐藏的页面仍然可以用快捷键打开；生图不能隐藏';
+
+  @override
+  String get navShell_ctrlNumbers => '按住 Ctrl 显示页面编号';
+
+  @override
+  String get navShell_reset => '恢复默认';
+
+  @override
+  String get navShell_done => '完成';
+
+  @override
+  String get navShell_ctrlHint => '按住不放：显示页面编号，按数字直接跳转；松开就消失';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -25908,4 +26103,199 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get stats_errorRetry => '重試';
+
+  @override
+  String get navShell_page_generation => '生圖';
+
+  @override
+  String get navShell_page_styleExplore => '畫風探索';
+
+  @override
+  String get navShell_page_localGallery => '本地畫廊';
+
+  @override
+  String get navShell_page_onlineGallery => '線上畫廊';
+
+  @override
+  String get navShell_page_promptBlocks => '提示詞塊';
+
+  @override
+  String get navShell_page_vibeLibrary => 'Vibe 庫';
+
+  @override
+  String get navShell_page_preciseRef => '精準參考庫';
+
+  @override
+  String get navShell_page_tagWiki => '標籤百科';
+
+  @override
+  String get navShell_page_statistics => '統計';
+
+  @override
+  String get navShell_page_settings => '設定';
+
+  @override
+  String get navShell_group_create => '創作';
+
+  @override
+  String get navShell_group_gallery => '圖庫';
+
+  @override
+  String get navShell_group_assets => '素材';
+
+  @override
+  String get navShell_group_tools => '工具';
+
+  @override
+  String get navShell_expand => '展開導航';
+
+  @override
+  String get navShell_collapse => '收起';
+
+  @override
+  String get navShell_pin => '釘住展開';
+
+  @override
+  String get navShell_genRunning => '生成中';
+
+  @override
+  String navShell_genRunningCount(Object current, Object total) {
+    return '生成中 · 第 $current / $total 張';
+  }
+
+  @override
+  String navShell_genPercent(Object percent) {
+    return '$percent% · 流式預覽';
+  }
+
+  @override
+  String get navShell_genBack => '點一下回到生圖頁';
+
+  @override
+  String navShell_genDone(Object count) {
+    return '已完成 $count 張，點一下檢視';
+  }
+
+  @override
+  String get navShell_genFailed => '生成失敗';
+
+  @override
+  String get navShell_tasksTitle => '後臺任務';
+
+  @override
+  String navShell_tasksRunning(Object count) {
+    return '$count 個進行中';
+  }
+
+  @override
+  String get navShell_tasksFooter => '全部結束 10 秒後這個圖示自動消失';
+
+  @override
+  String get navShell_task_localUpscale => '本地放大';
+
+  @override
+  String get navShell_task_cloudUpscale => '雲端放大';
+
+  @override
+  String get navShell_task_bulkDelete => '移到回收站';
+
+  @override
+  String get navShell_task_bulkExport => '批次匯出';
+
+  @override
+  String get navShell_task_bulkMetadata => '批次編輯後設資料';
+
+  @override
+  String get navShell_task_bulkAddToCollection => '加入收藏集';
+
+  @override
+  String get navShell_task_bulkRemoveFromCollection => '移出收藏集';
+
+  @override
+  String get navShell_task_bulkFavorite => '批次收藏';
+
+  @override
+  String navShell_taskImages(Object title, Object count) {
+    return '$title $count 張';
+  }
+
+  @override
+  String get navShell_taskJustDone => '剛剛完成';
+
+  @override
+  String get navShell_taskView => '檢視';
+
+  @override
+  String get navShell_taskCancel => '取消';
+
+  @override
+  String get navShell_taskCancelling => '正在取消';
+
+  @override
+  String get navShell_taskUndo => '復原';
+
+  @override
+  String get navShell_account => '帳號';
+
+  @override
+  String get navShell_accountTitle => '登入與帳號';
+
+  @override
+  String get navShell_accountCurrent => '當前';
+
+  @override
+  String get navShell_accountToken => 'API Token 登入';
+
+  @override
+  String get navShell_accountCredentials => '電子郵件密碼登入';
+
+  @override
+  String get navShell_accountNotSignedIn => '未登入';
+
+  @override
+  String get navShell_accountChoose => '選一個帳號繼續';
+
+  @override
+  String navShell_subExpires(Object date, Object days) {
+    return '訂閱 $date 到期 · 還剩 $days 天';
+  }
+
+  @override
+  String get navShell_subExpired => '訂閱已過期';
+
+  @override
+  String get navShell_anlas => 'Anlas 餘額';
+
+  @override
+  String get navShell_switchAccount => '切換帳號';
+
+  @override
+  String get navShell_addAccount => '新增帳號';
+
+  @override
+  String get navShell_manageAccounts => '管理帳號';
+
+  @override
+  String get navShell_logout => '登出';
+
+  @override
+  String get navShell_customize => '自訂導航欄';
+
+  @override
+  String get navShell_customizeMenu => '自訂導航欄…';
+
+  @override
+  String get navShell_customizeNote => '右鍵導航欄開啟。隱藏的頁面仍然可以用快速鍵開啟；生圖不能隱藏';
+
+  @override
+  String get navShell_ctrlNumbers => '按住 Ctrl 顯示頁面編號';
+
+  @override
+  String get navShell_reset => '恢復預設';
+
+  @override
+  String get navShell_done => '完成';
+
+  @override
+  String get navShell_ctrlHint => '按住不放：顯示頁面編號，按數字直接跳轉；鬆開就消失';
 }

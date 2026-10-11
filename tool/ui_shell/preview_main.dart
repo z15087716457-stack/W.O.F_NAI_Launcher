@@ -1,10 +1,15 @@
-// 新界面预览：不接后端，用假数据驱动，能切状态 / 主题 / 语言 / 时间范围。
+// 新界面预览：不接后端，用假数据驱动，能切状态 / 主题 / 语言。
 // 运行：flutter run -d windows -t tool/ui_shell/preview_main.dart
+// 主导航包着页面：切到“统计”显示统计页，其他页显示占位。
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
+import 'package:nai_launcher/presentation/ui/nav/nav_contract.dart';
+import 'package:nai_launcher/presentation/ui/nav/nav_fixture.dart';
+import 'package:nai_launcher/presentation/ui/nav/nav_labels.dart';
+import 'package:nai_launcher/presentation/ui/nav/nav_shell.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_contract.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_fixture.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_page.dart';
@@ -12,6 +17,8 @@ import 'package:nai_launcher/presentation/ui/statistics/statistics_page.dart';
 void main() => runApp(const _PreviewApp());
 
 enum _Scene { ready, loading, empty, error, updating, failed, artistsPending }
+
+enum _Gen { idle, running, done, failed }
 
 class _PreviewApp extends StatefulWidget {
   const _PreviewApp();
@@ -21,15 +28,99 @@ class _PreviewApp extends StatefulWidget {
 }
 
 class _PreviewAppState extends State<_PreviewApp> {
-  var _scene = _Scene.ready;
   var _dark = false;
   var _locale = const Locale('zh');
+  String? _lastAction;
+
+  // 主导航
+  var _page = NavPage.statistics;
+  var _gen = _Gen.idle;
+  var _tasks = false;
+  var _pinned = false;
+  var _hidden = <NavPage>{};
+  var _ctrlNumbers = true;
+  var _ctrlHintSeen = false;
+  var _update = false;
+  var _signedIn = true;
+  final _cancelling = <String>{};
+  final _undone = <String>{};
+
+  // 统计页
+  var _scene = _Scene.ready;
   var _range = StatsRange.all;
   var _naiOnly = false;
   var _refreshing = false;
-  String? _lastAction;
 
-  StatsViewData get _data => StatsFixture.view(
+  void _log(String s) => setState(() => _lastAction = s);
+
+  NavViewData get _nav {
+    final base = NavFixture.view(
+      current: _page,
+      pinned: _pinned,
+      hidden: _hidden,
+      ctrlHintSeen: _ctrlHintSeen,
+      updateAvailable: _update,
+      account: _signedIn ? null : const NavAccountData(),
+      generation: switch (_gen) {
+        _Gen.idle => const NavGeneration.idle(),
+        _Gen.running => NavFixture.running,
+        _Gen.done => const NavGeneration(
+          state: NavGenerationState.done,
+          total: 4,
+        ),
+        _Gen.failed => const NavGeneration(
+          state: NavGenerationState.failed,
+          error: 'Anlas 不足，需要 20，剩余 12',
+        ),
+      },
+      tasks: _tasks
+          ? [
+              for (final t in NavFixture.tasks)
+                if (!_undone.contains(t.id))
+                  _cancelling.contains(t.id)
+                      ? NavTask(
+                          id: t.id,
+                          kind: t.kind,
+                          fraction: t.fraction,
+                          phase: t.phase,
+                          action: NavTaskAction.cancelling,
+                        )
+                      : t,
+            ]
+          : const [],
+    );
+    return NavViewData(
+      current: base.current,
+      shortcuts: base.shortcuts,
+      hidden: base.hidden,
+      ctrlNumbers: _ctrlNumbers,
+      ctrlHintSeen: base.ctrlHintSeen,
+      pinned: base.pinned,
+      updateAvailable: base.updateAvailable,
+      account: base.account,
+      generation: base.generation,
+      tasks: base.tasks,
+    );
+  }
+
+  NavActions get _navActions => NavActions(
+    onOpenPage: (p) => setState(() {
+      _page = p;
+      if (p == NavPage.generation && _gen != _Gen.running) _gen = _Gen.idle;
+    }),
+    onPinnedChanged: (v) => setState(() => _pinned = v),
+    onHiddenChanged: (v) => setState(() => _hidden = v),
+    onCtrlNumbersChanged: (v) => setState(() => _ctrlNumbers = v),
+    onCtrlHintSeen: () => setState(() => _ctrlHintSeen = true),
+    onSwitchAccount: (id) => _log('onSwitchAccount($id)'),
+    onAddAccount: () => _log('onAddAccount'),
+    onManageAccounts: () => _log('onManageAccounts'),
+    onLogout: () => setState(() => _signedIn = false),
+    onCancelTask: (id) => setState(() => _cancelling.add(id)),
+    onUndoTask: (id) => setState(() => _undone.add(id)),
+  );
+
+  StatsViewData get _stats => StatsFixture.view(
     range: _range,
     naiOnly: _naiOnly,
     loading: _scene == _Scene.loading,
@@ -43,9 +134,7 @@ class _PreviewAppState extends State<_PreviewApp> {
         : StatsSyncState.idle,
   );
 
-  void _log(String s) => setState(() => _lastAction = s);
-
-  StatsActions get _actions => StatsActions(
+  StatsActions get _statsActions => StatsActions(
     onRangeChanged: (r) => setState(() => _range = r),
     onNaiOnlyChanged: (v) => setState(() => _naiOnly = v),
     onRefresh: () {
@@ -58,6 +147,25 @@ class _PreviewAppState extends State<_PreviewApp> {
     onGoGenerate: () => _log('onGoGenerate'),
     onAddGalleryFolder: () => _log('onAddGalleryFolder'),
   );
+
+  Widget _dropdown<T>(T value, List<T> values, ValueChanged<T> onChanged) =>
+      DropdownButton<T>(
+        value: value,
+        isDense: true,
+        items: [
+          for (final v in values)
+            DropdownMenuItem(value: v, child: Text(v is Enum ? v.name : '$v')),
+        ],
+        onChanged: (v) => onChanged(v as T),
+      );
+
+  Widget _chip(String label, bool value, ValueChanged<bool> onChanged) =>
+      FilterChip(
+        label: Text(label),
+        selected: value,
+        visualDensity: VisualDensity.compact,
+        onSelected: onChanged,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -77,29 +185,45 @@ class _PreviewAppState extends State<_PreviewApp> {
                   vertical: 6,
                 ),
                 child: Wrap(
-                  spacing: 12,
+                  spacing: 10,
+                  runSpacing: 4,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    DropdownButton<_Scene>(
-                      value: _scene,
-                      items: [
-                        for (final s in _Scene.values)
-                          DropdownMenuItem(value: s, child: Text(s.name)),
-                      ],
-                      onChanged: (s) => setState(() => _scene = s!),
+                    _dropdown(
+                      _locale,
+                      AppLocalizations.supportedLocales,
+                      (l) => setState(() => _locale = l),
                     ),
-                    DropdownButton<Locale>(
-                      value: _locale,
-                      items: [
-                        for (final l in AppLocalizations.supportedLocales)
-                          DropdownMenuItem(value: l, child: Text('$l')),
-                      ],
-                      onChanged: (l) => setState(() => _locale = l!),
+                    _chip('dark', _dark, (v) => setState(() => _dark = v)),
+                    const Text('导航：'),
+                    _dropdown(
+                      _gen,
+                      _Gen.values,
+                      (g) => setState(() => _gen = g),
                     ),
-                    FilterChip(
-                      label: const Text('dark'),
-                      selected: _dark,
-                      onSelected: (v) => setState(() => _dark = v),
+                    _chip('后台任务', _tasks, (v) {
+                      setState(() {
+                        _tasks = v;
+                        _cancelling.clear();
+                        _undone.clear();
+                      });
+                    }),
+                    _chip('更新', _update, (v) => setState(() => _update = v)),
+                    _chip(
+                      '已登录',
+                      _signedIn,
+                      (v) => setState(() => _signedIn = v),
+                    ),
+                    _chip(
+                      'Ctrl 说明未看',
+                      !_ctrlHintSeen,
+                      (v) => setState(() => _ctrlHintSeen = !v),
+                    ),
+                    const Text('统计：'),
+                    _dropdown(
+                      _scene,
+                      _Scene.values,
+                      (s) => setState(() => _scene = s),
                     ),
                     if (_lastAction != null)
                       Text(_lastAction!, style: const TextStyle(fontSize: 12)),
@@ -108,7 +232,39 @@ class _PreviewAppState extends State<_PreviewApp> {
               ),
             ),
             Expanded(
-              child: StatisticsPage(data: _data, actions: _actions),
+              child: NavShell(
+                data: _nav,
+                actions: _navActions,
+                child: _page == NavPage.statistics
+                    ? StatisticsPage(data: _stats, actions: _statsActions)
+                    : _Placeholder(page: _page),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Placeholder extends StatelessWidget {
+  const _Placeholder({required this.page});
+  final NavPage page;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ColoredBox(
+      color: scheme.surfaceContainerLow,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(page.icon, size: 40, color: scheme.outline),
+            const SizedBox(height: 12),
+            Text(
+              page.label(context),
+              style: TextStyle(fontSize: 16, color: scheme.onSurfaceVariant),
             ),
           ],
         ),

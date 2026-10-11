@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+const view=location.hash.slice(1);
+const f=document.getElementById('f');
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,300));
+  const R=e=>{const b=e.getBoundingClientRect();return [b.left,b.top,b.width,b.height]};
+  const m={};
+  const pages=['generation','styleExplore','localGallery','onlineGallery','promptBlocks','vibeLibrary','preciseRef','tagWiki','statistics'];
+  const av=d.querySelector('.rail>.av'); if(av) m.av=R(av);
+  const nvs=[...d.querySelectorAll('.rail>.nv')];
+  const hidden=view.startsWith('custom')?['tagWiki','statistics']:[];
+  const vis=pages.filter(p=>!hidden.includes(p));
+  nvs.forEach((e,i)=>{let n; if(i<vis.length) n=vis[i]; else { const rest=nvs.length-i; n=rest===1?'settings':rest===2?'toggle':'tasks'; } m['nv-'+n]=R(e)});
+  d.querySelectorAll('.rail>.gsep').forEach((e,i)=>m['gsep-'+(i+1)]=R(e));
+  const xp=d.querySelector('.xp'); if(xp){ m.xp=R(xp); m.xh=R(d.querySelector('.xh'));
+    d.querySelectorAll('.xp .gh').forEach((e,i)=>m['gh-'+i]=R(e));
+    const nx=[...d.querySelectorAll('.xp .nx')]; nx.forEach((e,i)=>{const n=i<9?pages[i]:['pin','collapse','settings'][i-9]; m['nx-'+n]=R(e)}); }
+  const tip=d.querySelector('.tip')||d.querySelector('.tipc'); if(tip) m.tip=R(tip);
+  for(const p of d.querySelectorAll('.pop')){
+    const t=p.textContent;
+    if(t.includes('后台任务')){ m.tasks=R(p); const tr=[...p.querySelectorAll('.tr')]; ['gen','upscale','export','trash'].forEach((n,i)=>tr[i]&&(m['tr-'+n]=R(tr[i]))); }
+    else if(t.includes('登录与账号')){ m.acct=R(p); [...p.children].forEach((e,i)=>m['acct-c'+i]=R(e)); for(const r of p.querySelectorAll('.row')) if(r.textContent.startsWith('Anlas')) m.anlas=R(r); for(const b of p.querySelectorAll('.btn')) if(b.textContent.includes('添加')) m.add=R(b); }
+    else if(t.includes('自定义导航栏')){ m.custom=R(p); const cr=[...p.querySelectorAll('.cr')]; cr.forEach((e,i)=>{ m[i<9?'cr-'+pages[i]:'custom-ctrl']=R(e)}); }
+    else if(t.includes('按住不放')) m.hint=R(p);
+  }
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+f.src='/mockups/nav/mock.html#'+view;
+</script></body></html>

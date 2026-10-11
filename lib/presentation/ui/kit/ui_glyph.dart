@@ -47,4 +47,17 @@ abstract final class UiGlyphs {
       'M12 3c1 4 5 5 5 10a5 5 0 01-10 0c0-3 2-4 2-7 1.5 1 2.5 2 3-3z';
   static const disk = 'M4 7h16v10H4zM8 12h.01M12 12h5';
   static const alert = 'M12 4l9 16H3zM12 10v4M12 17v.01';
+
+  // 主导航（.devin/mockups/nav/mock.html）
+  static const doubleRight = 'M6 6l6 6-6 6M13 6l6 6-6 6';
+  static const doubleLeft = 'M18 6l-6 6 6 6M11 6l-6 6 6 6';
+  static const chevronRight = 'M9 6l6 6-6 6';
+  static const check = 'M5 12.5l4.5 4.5L19 7';
+  static const pin = 'M9 4h6l-1 6 3 3H7l3-3zM12 13v7';
+  static const lock = 'M6 11h12v9H6zM9 11V8a3 3 0 016 0v3';
+  static const plus = 'M12 5v14M5 12h14';
+  static const logout = 'M10 5H5v14h5M14 8l4 4-4 4M18 12H9';
+  static const download = 'M12 4v11M7 10l5 5 5-5M5 19h14';
+  static const close = 'M6 6l12 12M18 6L6 18';
+  static const user = 'M12 12a4 4 0 100-8 4 4 0 000 8zM5 20a7 7 0 0114 0';
 }

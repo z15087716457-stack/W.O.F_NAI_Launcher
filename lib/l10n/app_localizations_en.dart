@@ -13603,4 +13603,202 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stats_errorRetry => 'Retry';
+
+  @override
+  String get navShell_page_generation => 'Generate';
+
+  @override
+  String get navShell_page_styleExplore => 'Style Explore';
+
+  @override
+  String get navShell_page_localGallery => 'Local Gallery';
+
+  @override
+  String get navShell_page_onlineGallery => 'Online Gallery';
+
+  @override
+  String get navShell_page_promptBlocks => 'Prompt Blocks';
+
+  @override
+  String get navShell_page_vibeLibrary => 'Vibe Library';
+
+  @override
+  String get navShell_page_preciseRef => 'Precise References';
+
+  @override
+  String get navShell_page_tagWiki => 'Tag Wiki';
+
+  @override
+  String get navShell_page_statistics => 'Statistics';
+
+  @override
+  String get navShell_page_settings => 'Settings';
+
+  @override
+  String get navShell_group_create => 'Create';
+
+  @override
+  String get navShell_group_gallery => 'Gallery';
+
+  @override
+  String get navShell_group_assets => 'Assets';
+
+  @override
+  String get navShell_group_tools => 'Tools';
+
+  @override
+  String get navShell_expand => 'Expand navigation';
+
+  @override
+  String get navShell_collapse => 'Collapse';
+
+  @override
+  String get navShell_pin => 'Keep expanded';
+
+  @override
+  String get navShell_genRunning => 'Generating';
+
+  @override
+  String navShell_genRunningCount(Object current, Object total) {
+    return 'Generating · $current of $total';
+  }
+
+  @override
+  String navShell_genPercent(Object percent) {
+    return '$percent% · live preview';
+  }
+
+  @override
+  String get navShell_genBack => 'Click to return to Generate';
+
+  @override
+  String navShell_genDone(Object count) {
+    return '$count done · click to view';
+  }
+
+  @override
+  String get navShell_genFailed => 'Generation failed';
+
+  @override
+  String get navShell_tasksTitle => 'Background tasks';
+
+  @override
+  String navShell_tasksRunning(Object count) {
+    return '$count running';
+  }
+
+  @override
+  String get navShell_tasksFooter =>
+      'This icon goes away 10 seconds after everything finishes';
+
+  @override
+  String get navShell_task_localUpscale => 'Local upscale';
+
+  @override
+  String get navShell_task_cloudUpscale => 'Cloud upscale';
+
+  @override
+  String get navShell_task_bulkDelete => 'Move to trash';
+
+  @override
+  String get navShell_task_bulkExport => 'Bulk export';
+
+  @override
+  String get navShell_task_bulkMetadata => 'Bulk metadata edit';
+
+  @override
+  String get navShell_task_bulkAddToCollection => 'Add to collection';
+
+  @override
+  String get navShell_task_bulkRemoveFromCollection => 'Remove from collection';
+
+  @override
+  String get navShell_task_bulkFavorite => 'Bulk favorite';
+
+  @override
+  String navShell_taskImages(Object title, Object count) {
+    return '$title · $count images';
+  }
+
+  @override
+  String get navShell_taskJustDone => 'Just finished';
+
+  @override
+  String get navShell_taskView => 'View';
+
+  @override
+  String get navShell_taskCancel => 'Cancel';
+
+  @override
+  String get navShell_taskCancelling => 'Cancelling';
+
+  @override
+  String get navShell_taskUndo => 'Undo';
+
+  @override
+  String get navShell_account => 'Account';
+
+  @override
+  String get navShell_accountTitle => 'Sign-in & accounts';
+
+  @override
+  String get navShell_accountCurrent => 'Current';
+
+  @override
+  String get navShell_accountToken => 'API token sign-in';
+
+  @override
+  String get navShell_accountCredentials => 'Email sign-in';
+
+  @override
+  String get navShell_accountNotSignedIn => 'Not signed in';
+
+  @override
+  String get navShell_accountChoose => 'Choose an account to continue';
+
+  @override
+  String navShell_subExpires(Object date, Object days) {
+    return 'Subscription ends $date · $days days left';
+  }
+
+  @override
+  String get navShell_subExpired => 'Subscription expired';
+
+  @override
+  String get navShell_anlas => 'Anlas balance';
+
+  @override
+  String get navShell_switchAccount => 'Switch account';
+
+  @override
+  String get navShell_addAccount => 'Add account';
+
+  @override
+  String get navShell_manageAccounts => 'Manage accounts';
+
+  @override
+  String get navShell_logout => 'Sign out';
+
+  @override
+  String get navShell_customize => 'Customize navigation';
+
+  @override
+  String get navShell_customizeMenu => 'Customize navigation…';
+
+  @override
+  String get navShell_customizeNote =>
+      'Right-click the navigation bar to open this. Hidden pages still open with their shortcuts. Generate can’t be hidden.';
+
+  @override
+  String get navShell_ctrlNumbers => 'Hold Ctrl to show page numbers';
+
+  @override
+  String get navShell_reset => 'Reset';
+
+  @override
+  String get navShell_done => 'Done';
+
+  @override
+  String get navShell_ctrlHint =>
+      'Hold to show page numbers and press one to jump; release to hide';
 }

@@ -23552,6 +23552,372 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get stats_errorRetry;
+
+  /// No description provided for @navShell_page_generation.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get navShell_page_generation;
+
+  /// No description provided for @navShell_page_styleExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Style Explore'**
+  String get navShell_page_styleExplore;
+
+  /// No description provided for @navShell_page_localGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Local Gallery'**
+  String get navShell_page_localGallery;
+
+  /// No description provided for @navShell_page_onlineGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Gallery'**
+  String get navShell_page_onlineGallery;
+
+  /// No description provided for @navShell_page_promptBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt Blocks'**
+  String get navShell_page_promptBlocks;
+
+  /// No description provided for @navShell_page_vibeLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe Library'**
+  String get navShell_page_vibeLibrary;
+
+  /// No description provided for @navShell_page_preciseRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise References'**
+  String get navShell_page_preciseRef;
+
+  /// No description provided for @navShell_page_tagWiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Wiki'**
+  String get navShell_page_tagWiki;
+
+  /// No description provided for @navShell_page_statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get navShell_page_statistics;
+
+  /// No description provided for @navShell_page_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navShell_page_settings;
+
+  /// No description provided for @navShell_group_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get navShell_group_create;
+
+  /// No description provided for @navShell_group_gallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get navShell_group_gallery;
+
+  /// No description provided for @navShell_group_assets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get navShell_group_assets;
+
+  /// No description provided for @navShell_group_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get navShell_group_tools;
+
+  /// No description provided for @navShell_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand navigation'**
+  String get navShell_expand;
+
+  /// No description provided for @navShell_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get navShell_collapse;
+
+  /// No description provided for @navShell_pin.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep expanded'**
+  String get navShell_pin;
+
+  /// No description provided for @navShell_genRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating'**
+  String get navShell_genRunning;
+
+  /// No description provided for @navShell_genRunningCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating · {current} of {total}'**
+  String navShell_genRunningCount(Object current, Object total);
+
+  /// No description provided for @navShell_genPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% · live preview'**
+  String navShell_genPercent(Object percent);
+
+  /// No description provided for @navShell_genBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to return to Generate'**
+  String get navShell_genBack;
+
+  /// No description provided for @navShell_genDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} done · click to view'**
+  String navShell_genDone(Object count);
+
+  /// No description provided for @navShell_genFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed'**
+  String get navShell_genFailed;
+
+  /// No description provided for @navShell_tasksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Background tasks'**
+  String get navShell_tasksTitle;
+
+  /// No description provided for @navShell_tasksRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} running'**
+  String navShell_tasksRunning(Object count);
+
+  /// No description provided for @navShell_tasksFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'This icon goes away 10 seconds after everything finishes'**
+  String get navShell_tasksFooter;
+
+  /// No description provided for @navShell_task_localUpscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Local upscale'**
+  String get navShell_task_localUpscale;
+
+  /// No description provided for @navShell_task_cloudUpscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud upscale'**
+  String get navShell_task_cloudUpscale;
+
+  /// No description provided for @navShell_task_bulkDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to trash'**
+  String get navShell_task_bulkDelete;
+
+  /// No description provided for @navShell_task_bulkExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk export'**
+  String get navShell_task_bulkExport;
+
+  /// No description provided for @navShell_task_bulkMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk metadata edit'**
+  String get navShell_task_bulkMetadata;
+
+  /// No description provided for @navShell_task_bulkAddToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to collection'**
+  String get navShell_task_bulkAddToCollection;
+
+  /// No description provided for @navShell_task_bulkRemoveFromCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from collection'**
+  String get navShell_task_bulkRemoveFromCollection;
+
+  /// No description provided for @navShell_task_bulkFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk favorite'**
+  String get navShell_task_bulkFavorite;
+
+  /// No description provided for @navShell_taskImages.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} · {count} images'**
+  String navShell_taskImages(Object title, Object count);
+
+  /// No description provided for @navShell_taskJustDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Just finished'**
+  String get navShell_taskJustDone;
+
+  /// No description provided for @navShell_taskView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get navShell_taskView;
+
+  /// No description provided for @navShell_taskCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get navShell_taskCancel;
+
+  /// No description provided for @navShell_taskCancelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling'**
+  String get navShell_taskCancelling;
+
+  /// No description provided for @navShell_taskUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get navShell_taskUndo;
+
+  /// No description provided for @navShell_account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get navShell_account;
+
+  /// No description provided for @navShell_accountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in & accounts'**
+  String get navShell_accountTitle;
+
+  /// No description provided for @navShell_accountCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get navShell_accountCurrent;
+
+  /// No description provided for @navShell_accountToken.
+  ///
+  /// In en, this message translates to:
+  /// **'API token sign-in'**
+  String get navShell_accountToken;
+
+  /// No description provided for @navShell_accountCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Email sign-in'**
+  String get navShell_accountCredentials;
+
+  /// No description provided for @navShell_accountNotSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get navShell_accountNotSignedIn;
+
+  /// No description provided for @navShell_accountChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an account to continue'**
+  String get navShell_accountChoose;
+
+  /// No description provided for @navShell_subExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription ends {date} · {days} days left'**
+  String navShell_subExpires(Object date, Object days);
+
+  /// No description provided for @navShell_subExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription expired'**
+  String get navShell_subExpired;
+
+  /// No description provided for @navShell_anlas.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas balance'**
+  String get navShell_anlas;
+
+  /// No description provided for @navShell_switchAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch account'**
+  String get navShell_switchAccount;
+
+  /// No description provided for @navShell_addAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add account'**
+  String get navShell_addAccount;
+
+  /// No description provided for @navShell_manageAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage accounts'**
+  String get navShell_manageAccounts;
+
+  /// No description provided for @navShell_logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get navShell_logout;
+
+  /// No description provided for @navShell_customize.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize navigation'**
+  String get navShell_customize;
+
+  /// No description provided for @navShell_customizeMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize navigation…'**
+  String get navShell_customizeMenu;
+
+  /// No description provided for @navShell_customizeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Right-click the navigation bar to open this. Hidden pages still open with their shortcuts. Generate can’t be hidden.'**
+  String get navShell_customizeNote;
+
+  /// No description provided for @navShell_ctrlNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold Ctrl to show page numbers'**
+  String get navShell_ctrlNumbers;
+
+  /// No description provided for @navShell_reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get navShell_reset;
+
+  /// No description provided for @navShell_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get navShell_done;
+
+  /// No description provided for @navShell_ctrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to show page numbers and press one to jump; release to hide'**
+  String get navShell_ctrlHint;
 }
 
 class _AppLocalizationsDelegate
