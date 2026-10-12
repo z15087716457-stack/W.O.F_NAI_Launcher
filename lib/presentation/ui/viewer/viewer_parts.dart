@@ -4,9 +4,9 @@ import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_text.dart';
 
-/// 舞台（大图区）不跟主题，始终黑底；控件颜色都是白色透明度（原型的 #1c1c1c、#2c2c2c 这类灰换算过来）。
+/// 舞台（大图区）不跟主题，始终近黑底（原型 #0b0b0b）；控件颜色都是白色透明度（原型的 #1c1c1c、#2c2c2c 这类灰换算过来）。
 abstract final class ViewerInk {
-  static const stage = Colors.black;
+  static const stage = Color(0xFF0B0B0B);
   static const text = Color(0xE6FFFFFF);
   static const strong = Colors.white;
   static const dim = Color(0xB8FFFFFF);

@@ -454,12 +454,13 @@ class _ViewState extends State<_View> {
                     ),
                     if (item.missing)
                       Positioned.fill(child: _Missing(item: item)),
-                    if (showChrome && canPrev)
+                    // 放大到能拖动时收起左右箭头（同原型）：箭头压在图上还会和拖动抢手势，翻页用方向键。
+                    if (showChrome && canPrev && !z.pannable)
                       _Arrow(
                         left: true,
                         onTap: () => ctrl.run(ViewerCommand.previous),
                       ),
-                    if (showChrome && canNext)
+                    if (showChrome && canNext && !z.pannable)
                       _Arrow(
                         left: false,
                         onTap: () => ctrl.run(ViewerCommand.next),
@@ -708,9 +709,11 @@ class _Arrow extends StatelessWidget {
               width: 44,
               height: 44,
               alignment: Alignment.center,
+              // 深色半透明底 + 细白边：压在黑底和亮图上都看得见（原型只有 8% 白底，压在亮图上会消失）。
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: hover ? .18 : .08),
+                color: Colors.black.withValues(alpha: hover ? .55 : .32),
                 shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withValues(alpha: .14)),
               ),
               child: UiGlyph(
                 left ? UiGlyphs.chevronLeft : UiGlyphs.chevronRight,

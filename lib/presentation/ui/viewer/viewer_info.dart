@@ -144,6 +144,7 @@ class _Header extends StatelessWidget {
                   key: const Key('viewer-info-more'),
                   glyph: UiGlyphs.more,
                   glyphSize: 17,
+                  tone: ctrl.moreOpen ? UiIconBoxTone.on : UiIconBoxTone.plain,
                   tooltip: l10n.imageViewer_more,
                   onTap: () => ctrl.openMore(_below(bctx, context)),
                 ),
@@ -1001,15 +1002,16 @@ class _Footer extends StatelessWidget {
           const UiGlyph(UiGlyphs.spark, size: 15),
           Text(l10n.imageViewer_reuse),
           if (status == ViewerMetaStatus.none)
-            Flexible(
+            Expanded(
               child: Text(
                 '· ${l10n.imageViewer_reuseNoMeta}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: UiText.sans(11, color: c.onBrand.withValues(alpha: .85)),
               ),
-            ),
-          const Spacer(),
+            )
+          else
+            const Spacer(),
           if (meta) _BrandKey(viewerKeyLabels(reuseKeys).join(' ')),
         ],
       );

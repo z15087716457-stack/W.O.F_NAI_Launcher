@@ -31,6 +31,9 @@ abstract class ViewerController {
   void requestDelete();
 
   void openMore(UiPopoverAnchor anchor);
+
+  /// “更多”菜单（含收藏集子菜单）开着：按钮显示按下态。
+  bool get moreOpen;
   void openCollections(UiPopoverAnchor anchor);
   void openZoomMenu(UiPopoverAnchor anchor);
   void closePopover();
@@ -244,6 +247,9 @@ class _ImageViewerPageState extends State<ImageViewerPage>
     _pop = _Pop.more;
     _anchor = anchor;
   });
+
+  @override
+  bool get moreOpen => _pop == _Pop.more;
 
   @override
   void openCollections(UiPopoverAnchor anchor) => setState(() {

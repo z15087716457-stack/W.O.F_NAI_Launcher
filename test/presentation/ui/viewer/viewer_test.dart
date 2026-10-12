@@ -217,8 +217,11 @@ void main() {
     await key(t, LogicalKeyboardKey.equal);
     expect(zoomLabel(t), '125%');
     expect(find.byKey(const Key('viewer-minimap')), findsOneWidget);
+    // 能拖动时收起左右箭头，回到适应再出来。
+    expect(find.byKey(const Key('viewer-next')), findsNothing);
     await key(t, LogicalKeyboardKey.digit0);
     expect(zoomLabel(t), startsWith('适应'));
+    expect(find.byKey(const Key('viewer-next')), findsOneWidget);
     await tapKey(t, 'viewer-zoom-menu');
     await tapKey(t, 'viewer-zoom-400');
     expect(zoomLabel(t), '400%');
