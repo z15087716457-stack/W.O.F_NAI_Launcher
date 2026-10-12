@@ -32129,6 +32129,1596 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Image to image'**
   String get gen_opImg2Img;
+
+  /// No description provided for @tools_free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get tools_free;
+
+  /// No description provided for @tools_localFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Local · free'**
+  String get tools_localFree;
+
+  /// No description provided for @tools_anlasN.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Anlas'**
+  String tools_anlasN(Object count);
+
+  /// No description provided for @tools_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get tools_cancel;
+
+  /// No description provided for @tools_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get tools_close;
+
+  /// No description provided for @tools_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tools_done;
+
+  /// No description provided for @tools_reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get tools_reset;
+
+  /// No description provided for @tools_apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get tools_apply;
+
+  /// No description provided for @tools_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get tools_retry;
+
+  /// No description provided for @tools_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get tools_optional;
+
+  /// No description provided for @tools_justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get tools_justNow;
+
+  /// No description provided for @tools_minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min ago'**
+  String tools_minutesAgo(Object count);
+
+  /// No description provided for @tools_hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h ago'**
+  String tools_hoursAgo(Object count);
+
+  /// No description provided for @tools_monthDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}/{day}'**
+  String tools_monthDay(Object month, Object day);
+
+  /// No description provided for @tools_useAsInit.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as img2img base'**
+  String get tools_useAsInit;
+
+  /// No description provided for @tools_upscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale'**
+  String get tools_upscale;
+
+  /// No description provided for @tools_enhance.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhance'**
+  String get tools_enhance;
+
+  /// No description provided for @tools_strength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get tools_strength;
+
+  /// No description provided for @tools_noise.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise'**
+  String get tools_noise;
+
+  /// No description provided for @tools_tipEnhance.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraws this image with the current prompt to add detail; can upscale too'**
+  String get tools_tipEnhance;
+
+  /// No description provided for @tools_tipVariations.
+  ///
+  /// In en, this message translates to:
+  /// **'Generates 4 similar images from this one\'s settings, without touching your prompt'**
+  String get tools_tipVariations;
+
+  /// No description provided for @tools_tipUpscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscales with your saved settings; the result appears as a new image'**
+  String get tools_tipUpscale;
+
+  /// No description provided for @tools_tipUpscaleRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscaling — click to cancel'**
+  String get tools_tipUpscaleRunning;
+
+  /// No description provided for @tools_tipUpscaleSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose local or cloud, method, model and scale'**
+  String get tools_tipUpscaleSettings;
+
+  /// No description provided for @tools_tipSetInit.
+  ///
+  /// In en, this message translates to:
+  /// **'Puts this image into img2img as the base for the next generation'**
+  String get tools_tipSetInit;
+
+  /// No description provided for @tools_tipEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint, select and adjust colors; replaces the img2img base when done'**
+  String get tools_tipEdit;
+
+  /// No description provided for @tools_tipInpaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask the area to redraw; the rest stays as is'**
+  String get tools_tipInpaint;
+
+  /// No description provided for @tools_tipDirector.
+  ///
+  /// In en, this message translates to:
+  /// **'Background removal, line art, colorize, emotion fix and more'**
+  String get tools_tipDirector;
+
+  /// No description provided for @tools_upscaleRunHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The result joins the history and is selected unless you moved on'**
+  String get tools_upscaleRunHint;
+
+  /// No description provided for @tools_enhanceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Redraws this image with the current prompt to add detail; can upscale too'**
+  String get tools_enhanceSub;
+
+  /// No description provided for @tools_enhanceScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale'**
+  String get tools_enhanceScale;
+
+  /// No description provided for @tools_enhanceLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local upscale'**
+  String get tools_enhanceLocal;
+
+  /// No description provided for @tools_enhanceLocalRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get tools_enhanceLocalRow;
+
+  /// No description provided for @tools_enhanceOutLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} → local {factor}'**
+  String tools_enhanceOutLocal(Object size, Object factor);
+
+  /// No description provided for @tools_enhanceMagnitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get tools_enhanceMagnitude;
+
+  /// No description provided for @tools_magLight.
+  ///
+  /// In en, this message translates to:
+  /// **'subtle'**
+  String get tools_magLight;
+
+  /// No description provided for @tools_magMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'medium'**
+  String get tools_magMedium;
+
+  /// No description provided for @tools_magStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'strong'**
+  String get tools_magStrong;
+
+  /// No description provided for @tools_enhanceValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength {strength} · Noise {noise}'**
+  String tools_enhanceValues(Object strength, Object noise);
+
+  /// No description provided for @tools_enhanceCustomTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get tools_enhanceCustomTag;
+
+  /// No description provided for @tools_enhanceCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom strength and noise'**
+  String get tools_enhanceCustom;
+
+  /// No description provided for @tools_enhanceCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher strength changes more; noise adds detail but can get messy'**
+  String get tools_enhanceCustomHint;
+
+  /// No description provided for @tools_localHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Each image is upscaled locally after generation, no extra Anlas'**
+  String get tools_localHint;
+
+  /// No description provided for @tools_localNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No local upscale model selected'**
+  String get tools_localNotSet;
+
+  /// No description provided for @tools_upscaleSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale settings'**
+  String get tools_upscaleSettings;
+
+  /// No description provided for @tools_enhanceFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Current prompt · {model} · {steps} steps'**
+  String tools_enhanceFooter(Object model, Object steps);
+
+  /// No description provided for @tools_enhanceRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhance'**
+  String get tools_enhanceRun;
+
+  /// No description provided for @tools_enhanceRunLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhance + local upscale'**
+  String get tools_enhanceRunLocal;
+
+  /// No description provided for @tools_upscaleSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The upscaled image appears as a new image; the original and img2img base stay untouched'**
+  String get tools_upscaleSub;
+
+  /// No description provided for @tools_upscaleMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get tools_upscaleMethod;
+
+  /// No description provided for @tools_upscaleModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get tools_upscaleModel;
+
+  /// No description provided for @tools_upscaleManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage models'**
+  String get tools_upscaleManage;
+
+  /// No description provided for @tools_upscaleScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Scale'**
+  String get tools_upscaleScale;
+
+  /// No description provided for @tools_upscaleAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get tools_upscaleAdvanced;
+
+  /// No description provided for @tools_upscaleFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings are remembered; the toolbar Upscale button uses them'**
+  String get tools_upscaleFooter;
+
+  /// No description provided for @tools_modelMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'not installed'**
+  String get tools_modelMissing;
+
+  /// No description provided for @tools_modelDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'downloading'**
+  String get tools_modelDownloading;
+
+  /// No description provided for @tools_modelNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get tools_modelNone;
+
+  /// No description provided for @tools_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit image'**
+  String get tools_edit;
+
+  /// No description provided for @tools_editSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces the img2img base when done'**
+  String get tools_editSub;
+
+  /// No description provided for @tools_inpaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Inpaint'**
+  String get tools_inpaint;
+
+  /// No description provided for @tools_inpaintSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the masked area is redrawn'**
+  String get tools_inpaintSub;
+
+  /// No description provided for @tools_backEsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Back (Esc)'**
+  String get tools_backEsc;
+
+  /// No description provided for @tools_panel.
+  ///
+  /// In en, this message translates to:
+  /// **'Panel'**
+  String get tools_panel;
+
+  /// No description provided for @tools_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get tools_undo;
+
+  /// No description provided for @tools_redo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get tools_redo;
+
+  /// No description provided for @tools_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PNG'**
+  String get tools_download;
+
+  /// No description provided for @tools_zoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get tools_zoomIn;
+
+  /// No description provided for @tools_zoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get tools_zoomOut;
+
+  /// No description provided for @tools_zoomFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit to window'**
+  String get tools_zoomFit;
+
+  /// No description provided for @tools_applyMask.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply mask'**
+  String get tools_applyMask;
+
+  /// No description provided for @tools_applyMaskSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Generate; you start it'**
+  String get tools_applyMaskSub;
+
+  /// No description provided for @tools_applyGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply and generate'**
+  String get tools_applyGenerate;
+
+  /// No description provided for @tools_applyGenerateSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Generate and start inpainting now'**
+  String get tools_applyGenerateSub;
+
+  /// No description provided for @tools_discardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get tools_discardTitle;
+
+  /// No description provided for @tools_discardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Strokes, masks and layer changes that were not applied will be lost.'**
+  String get tools_discardBody;
+
+  /// No description provided for @tools_discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get tools_discard;
+
+  /// No description provided for @tools_keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get tools_keepEditing;
+
+  /// No description provided for @tools_toolBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Brush'**
+  String get tools_toolBrush;
+
+  /// No description provided for @tools_toolEraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Eraser'**
+  String get tools_toolEraser;
+
+  /// No description provided for @tools_toolFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill'**
+  String get tools_toolFill;
+
+  /// No description provided for @tools_toolBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur'**
+  String get tools_toolBlur;
+
+  /// No description provided for @tools_toolStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Clone stamp'**
+  String get tools_toolStamp;
+
+  /// No description provided for @tools_toolSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Rectangle select'**
+  String get tools_toolSelect;
+
+  /// No description provided for @tools_toolLasso.
+  ///
+  /// In en, this message translates to:
+  /// **'Lasso'**
+  String get tools_toolLasso;
+
+  /// No description provided for @tools_toolPicker.
+  ///
+  /// In en, this message translates to:
+  /// **'Eyedropper'**
+  String get tools_toolPicker;
+
+  /// No description provided for @tools_toolMaskBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask brush'**
+  String get tools_toolMaskBrush;
+
+  /// No description provided for @tools_toolMaskEraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase mask'**
+  String get tools_toolMaskEraser;
+
+  /// No description provided for @tools_toolFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus area'**
+  String get tools_toolFocus;
+
+  /// No description provided for @tools_clearMask.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear mask'**
+  String get tools_clearMask;
+
+  /// No description provided for @tools_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand edges'**
+  String get tools_expand;
+
+  /// No description provided for @tools_adjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust colors'**
+  String get tools_adjust;
+
+  /// No description provided for @tools_resize.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas size'**
+  String get tools_resize;
+
+  /// No description provided for @tools_size.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get tools_size;
+
+  /// No description provided for @tools_opacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Opacity'**
+  String get tools_opacity;
+
+  /// No description provided for @tools_intensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get tools_intensity;
+
+  /// No description provided for @tools_tolerance.
+  ///
+  /// In en, this message translates to:
+  /// **'Tolerance'**
+  String get tools_tolerance;
+
+  /// No description provided for @tools_tip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tip'**
+  String get tools_tip;
+
+  /// No description provided for @tools_tipHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get tools_tipHard;
+
+  /// No description provided for @tools_tipSoft.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft'**
+  String get tools_tipSoft;
+
+  /// No description provided for @tools_tipSquare.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get tools_tipSquare;
+
+  /// No description provided for @tools_pressure.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure'**
+  String get tools_pressure;
+
+  /// No description provided for @tools_squareBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Square brush'**
+  String get tools_squareBrush;
+
+  /// No description provided for @tools_hintStamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt-click to sample, then paint elsewhere'**
+  String get tools_hintStamp;
+
+  /// No description provided for @tools_hintSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to select; Alt+L copies to a new layer, Delete clears it'**
+  String get tools_hintSelect;
+
+  /// No description provided for @tools_hintPicker.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to pick a color; hold Alt while painting to pick temporarily'**
+  String get tools_hintPicker;
+
+  /// No description provided for @tools_hintMaskFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to fill a similar-colored area with mask'**
+  String get tools_hintMaskFill;
+
+  /// No description provided for @tools_focusContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Min context'**
+  String get tools_focusContext;
+
+  /// No description provided for @tools_hintFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Box the part to refine; the model only sees the box and a margin, so small faces and hands come out sharper'**
+  String get tools_hintFocus;
+
+  /// No description provided for @tools_clearFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear focus'**
+  String get tools_clearFocus;
+
+  /// No description provided for @tools_edgeTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Top'**
+  String get tools_edgeTop;
+
+  /// No description provided for @tools_edgeBottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom'**
+  String get tools_edgeBottom;
+
+  /// No description provided for @tools_edgeLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get tools_edgeLeft;
+
+  /// No description provided for @tools_edgeRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get tools_edgeRight;
+
+  /// No description provided for @tools_hintExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'You can also drag the canvas edges; {step} px steps'**
+  String tools_hintExpand(Object step);
+
+  /// No description provided for @tools_maskLook.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask look'**
+  String get tools_maskLook;
+
+  /// No description provided for @tools_maskBorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Outline'**
+  String get tools_maskBorder;
+
+  /// No description provided for @tools_patternSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid'**
+  String get tools_patternSolid;
+
+  /// No description provided for @tools_patternLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get tools_patternLines;
+
+  /// No description provided for @tools_patternCrosshatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Crosshatch'**
+  String get tools_patternCrosshatch;
+
+  /// No description provided for @tools_patternGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get tools_patternGrid;
+
+  /// No description provided for @tools_patternDots.
+  ///
+  /// In en, this message translates to:
+  /// **'Dots'**
+  String get tools_patternDots;
+
+  /// No description provided for @tools_patternChecker.
+  ///
+  /// In en, this message translates to:
+  /// **'Checker'**
+  String get tools_patternChecker;
+
+  /// No description provided for @tools_patternHearts.
+  ///
+  /// In en, this message translates to:
+  /// **'Hearts'**
+  String get tools_patternHearts;
+
+  /// No description provided for @tools_colorPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Foreground'**
+  String get tools_colorPrimary;
+
+  /// No description provided for @tools_colorSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get tools_colorSecondary;
+
+  /// No description provided for @tools_moreColors.
+  ///
+  /// In en, this message translates to:
+  /// **'More colors…'**
+  String get tools_moreColors;
+
+  /// No description provided for @tools_statusHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Space to pan · Wheel to zoom · Ctrl+0 fit · 1 actual size'**
+  String get tools_statusHint;
+
+  /// No description provided for @tools_statusGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask snaps to an 8 px grid'**
+  String get tools_statusGrid;
+
+  /// No description provided for @tools_statusMask.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask'**
+  String get tools_statusMask;
+
+  /// No description provided for @tools_inpaintSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Inpaint settings'**
+  String get tools_inpaintSettings;
+
+  /// No description provided for @tools_inpaintStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get tools_inpaintStrength;
+
+  /// No description provided for @tools_inpaintStrengthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower stays closer to the original'**
+  String get tools_inpaintStrengthHint;
+
+  /// No description provided for @tools_mask.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask'**
+  String get tools_mask;
+
+  /// No description provided for @tools_maskCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'of the image · {count} areas'**
+  String tools_maskCoverage(Object count);
+
+  /// No description provided for @tools_focusNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set (whole image)'**
+  String get tools_focusNone;
+
+  /// No description provided for @tools_focusContextShort.
+  ///
+  /// In en, this message translates to:
+  /// **'· context {value}'**
+  String tools_focusContextShort(Object value);
+
+  /// No description provided for @tools_output.
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get tools_output;
+
+  /// No description provided for @tools_expandTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Expanded'**
+  String get tools_expandTag;
+
+  /// No description provided for @tools_layers.
+  ///
+  /// In en, this message translates to:
+  /// **'Layers'**
+  String get tools_layers;
+
+  /// No description provided for @tools_addLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add layer'**
+  String get tools_addLayer;
+
+  /// No description provided for @tools_add3dLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add 3D layer'**
+  String get tools_add3dLayer;
+
+  /// No description provided for @tools_layerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Alt+L copies the selection to a new layer'**
+  String get tools_layerHint;
+
+  /// No description provided for @tools_hideLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide layer'**
+  String get tools_hideLayer;
+
+  /// No description provided for @tools_showLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show layer'**
+  String get tools_showLayer;
+
+  /// No description provided for @tools_layerUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get tools_layerUp;
+
+  /// No description provided for @tools_layerDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get tools_layerDown;
+
+  /// No description provided for @tools_layerDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get tools_layerDuplicate;
+
+  /// No description provided for @tools_layerMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge down'**
+  String get tools_layerMerge;
+
+  /// No description provided for @tools_layerDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete layer'**
+  String get tools_layerDelete;
+
+  /// No description provided for @tools_currentLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Current layer'**
+  String get tools_currentLayer;
+
+  /// No description provided for @tools_hue.
+  ///
+  /// In en, this message translates to:
+  /// **'Hue'**
+  String get tools_hue;
+
+  /// No description provided for @tools_saturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturation'**
+  String get tools_saturation;
+
+  /// No description provided for @tools_brightness.
+  ///
+  /// In en, this message translates to:
+  /// **'Brightness'**
+  String get tools_brightness;
+
+  /// No description provided for @tools_canvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas'**
+  String get tools_canvas;
+
+  /// No description provided for @tools_resizeCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Resize'**
+  String get tools_resizeCanvas;
+
+  /// No description provided for @tools_inpaintNote.
+  ///
+  /// In en, this message translates to:
+  /// **'After applying you return to Generate with Inpaint selected; or use “Apply and generate” in the top-right menu'**
+  String get tools_inpaintNote;
+
+  /// No description provided for @tools_director.
+  ///
+  /// In en, this message translates to:
+  /// **'Director tools'**
+  String get tools_director;
+
+  /// No description provided for @tools_backGen.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get tools_backGen;
+
+  /// No description provided for @tools_dtGroupClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean up'**
+  String get tools_dtGroupClean;
+
+  /// No description provided for @tools_dtGroupLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get tools_dtGroupLine;
+
+  /// No description provided for @tools_dtGroupColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color & expression'**
+  String get tools_dtGroupColor;
+
+  /// No description provided for @tools_dtGroupPixel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pixel'**
+  String get tools_dtGroupPixel;
+
+  /// No description provided for @tools_dtRemoveBg.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove background'**
+  String get tools_dtRemoveBg;
+
+  /// No description provided for @tools_dtRemoveBgDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Cuts out the subject: transparent, background and composite'**
+  String get tools_dtRemoveBgDesc;
+
+  /// No description provided for @tools_dtDeclutter.
+  ///
+  /// In en, this message translates to:
+  /// **'Declutter'**
+  String get tools_dtDeclutter;
+
+  /// No description provided for @tools_dtDeclutterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes stray lines and noise'**
+  String get tools_dtDeclutterDesc;
+
+  /// No description provided for @tools_dtLineArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Line art'**
+  String get tools_dtLineArt;
+
+  /// No description provided for @tools_dtLineArtDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Extracts clean black-and-white line art'**
+  String get tools_dtLineArtDesc;
+
+  /// No description provided for @tools_dtSketch.
+  ///
+  /// In en, this message translates to:
+  /// **'Sketch'**
+  String get tools_dtSketch;
+
+  /// No description provided for @tools_dtSketchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns it into a pencil sketch'**
+  String get tools_dtSketchDesc;
+
+  /// No description provided for @tools_dtColorize.
+  ///
+  /// In en, this message translates to:
+  /// **'Colorize'**
+  String get tools_dtColorize;
+
+  /// No description provided for @tools_dtColorizeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors line art or sketches; prompt optional'**
+  String get tools_dtColorizeDesc;
+
+  /// No description provided for @tools_dtEmotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotion fix'**
+  String get tools_dtEmotion;
+
+  /// No description provided for @tools_dtEmotionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes the expression, adjustable strength'**
+  String get tools_dtEmotionDesc;
+
+  /// No description provided for @tools_dtPixelSnap.
+  ///
+  /// In en, this message translates to:
+  /// **'Pixel snap'**
+  String get tools_dtPixelSnap;
+
+  /// No description provided for @tools_dtPixelSnapDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Snaps to a pixel grid and reduces the palette; runs locally'**
+  String get tools_dtPixelSnapDesc;
+
+  /// No description provided for @tools_dtOpusNote.
+  ///
+  /// In en, this message translates to:
+  /// **'With Opus these are free up to 1 MP; background removal always costs Anlas'**
+  String get tools_dtOpusNote;
+
+  /// No description provided for @tools_input.
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get tools_input;
+
+  /// No description provided for @tools_compareSide.
+  ///
+  /// In en, this message translates to:
+  /// **'Side by side'**
+  String get tools_compareSide;
+
+  /// No description provided for @tools_compareWipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Wipe'**
+  String get tools_compareWipe;
+
+  /// No description provided for @tools_compareResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result only'**
+  String get tools_compareResult;
+
+  /// No description provided for @tools_fit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit'**
+  String get tools_fit;
+
+  /// No description provided for @tools_actualSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual size 100%'**
+  String get tools_actualSize;
+
+  /// No description provided for @tools_original.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get tools_original;
+
+  /// No description provided for @tools_emptyRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Run to start'**
+  String get tools_emptyRun;
+
+  /// No description provided for @tools_emptyEmotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an expression, then Run'**
+  String get tools_emptyEmotion;
+
+  /// No description provided for @tools_emptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The result appears here next to the original'**
+  String get tools_emptyBody;
+
+  /// No description provided for @tools_running.
+  ///
+  /// In en, this message translates to:
+  /// **'Running {tool}…'**
+  String tools_running(Object tool);
+
+  /// No description provided for @tools_runningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Usually a few seconds; results also go to the Generate history'**
+  String get tools_runningBody;
+
+  /// No description provided for @tools_runFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Run failed'**
+  String get tools_runFailed;
+
+  /// No description provided for @tools_noInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an image first'**
+  String get tools_noInput;
+
+  /// No description provided for @tools_noInputBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag one in, paste with Ctrl+V, or pick from the Generate history'**
+  String get tools_noInputBody;
+
+  /// No description provided for @tools_noResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No result yet'**
+  String get tools_noResult;
+
+  /// No description provided for @tools_continue.
+  ///
+  /// In en, this message translates to:
+  /// **'Process further'**
+  String get tools_continue;
+
+  /// No description provided for @tools_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get tools_copy;
+
+  /// No description provided for @tools_saveGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to gallery'**
+  String get tools_saveGallery;
+
+  /// No description provided for @tools_queue.
+  ///
+  /// In en, this message translates to:
+  /// **'Input queue'**
+  String get tools_queue;
+
+  /// No description provided for @tools_queueCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String tools_queueCount(Object count);
+
+  /// No description provided for @tools_queueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus: import files or pick from history; you can also drag in or paste'**
+  String get tools_queueHint;
+
+  /// No description provided for @tools_importFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Import files'**
+  String get tools_importFiles;
+
+  /// No description provided for @tools_fromHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'From Generate history'**
+  String get tools_fromHistory;
+
+  /// No description provided for @tools_paste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get tools_paste;
+
+  /// No description provided for @tools_removeInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from queue'**
+  String get tools_removeInput;
+
+  /// No description provided for @tools_dtOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get tools_dtOptions;
+
+  /// No description provided for @tools_dtNoOptionsBg.
+  ///
+  /// In en, this message translates to:
+  /// **'Background removal has no options. You get transparent, background and composite images; switch between them under the result.'**
+  String get tools_dtNoOptionsBg;
+
+  /// No description provided for @tools_dtNoOptionsDeclutter.
+  ///
+  /// In en, this message translates to:
+  /// **'Declutter has no options. For line art, use Line art.'**
+  String get tools_dtNoOptionsDeclutter;
+
+  /// No description provided for @tools_dtNoOptionsLineArt.
+  ///
+  /// In en, this message translates to:
+  /// **'Line art has no options. To color it, use Process further, then Colorize.'**
+  String get tools_dtNoOptionsLineArt;
+
+  /// No description provided for @tools_dtNoOptionsSketch.
+  ///
+  /// In en, this message translates to:
+  /// **'Sketch has no options. For cleaner lines use Line art; to color, use Process further, then Colorize.'**
+  String get tools_dtNoOptionsSketch;
+
+  /// No description provided for @tools_dtEmotionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expression'**
+  String get tools_dtEmotionLabel;
+
+  /// No description provided for @tools_dtEmotionMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more'**
+  String tools_dtEmotionMore(Object count);
+
+  /// No description provided for @tools_dtEmotionLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get tools_dtEmotionLess;
+
+  /// No description provided for @tools_dtStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get tools_dtStrength;
+
+  /// No description provided for @tools_defry0.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get tools_defry0;
+
+  /// No description provided for @tools_defry1.
+  ///
+  /// In en, this message translates to:
+  /// **'Slightly'**
+  String get tools_defry1;
+
+  /// No description provided for @tools_defry2.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak'**
+  String get tools_defry2;
+
+  /// No description provided for @tools_defry3.
+  ///
+  /// In en, this message translates to:
+  /// **'Weaker'**
+  String get tools_defry3;
+
+  /// No description provided for @tools_defry4.
+  ///
+  /// In en, this message translates to:
+  /// **'Very weak'**
+  String get tools_defry4;
+
+  /// No description provided for @tools_defry5.
+  ///
+  /// In en, this message translates to:
+  /// **'Weakest'**
+  String get tools_defry5;
+
+  /// No description provided for @tools_dtEmotionStrengthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Weaker stays closer to the original expression'**
+  String get tools_dtEmotionStrengthHint;
+
+  /// No description provided for @tools_dtColorizeStrengthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Weaker stays closer to the original lines'**
+  String get tools_dtColorizeStrengthHint;
+
+  /// No description provided for @tools_dtPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra prompt'**
+  String get tools_dtPrompt;
+
+  /// No description provided for @tools_dtPromptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'English tags, comma separated'**
+  String get tools_dtPromptHint;
+
+  /// No description provided for @tools_dtEmotionPromptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Picking an expression fills in common tags; you can edit them'**
+  String get tools_dtEmotionPromptHint;
+
+  /// No description provided for @tools_dtColorizePromptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the colors, e.g. blue dress, silver hair'**
+  String get tools_dtColorizePromptHint;
+
+  /// No description provided for @tools_dtPalette.
+  ///
+  /// In en, this message translates to:
+  /// **'Palette'**
+  String get tools_dtPalette;
+
+  /// No description provided for @tools_dtPaletteOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get tools_dtPaletteOff;
+
+  /// No description provided for @tools_dtPaletteAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get tools_dtPaletteAuto;
+
+  /// No description provided for @tools_dtPaletteCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get tools_dtPaletteCustom;
+
+  /// No description provided for @tools_dtColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors'**
+  String get tools_dtColors;
+
+  /// No description provided for @tools_dtAvoidRefine.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid over-refining'**
+  String get tools_dtAvoidRefine;
+
+  /// No description provided for @tools_dtAvoidRefineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps the coarse grid when finer grids barely help'**
+  String get tools_dtAvoidRefineHint;
+
+  /// No description provided for @tools_dtPixelUpscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale to original size'**
+  String get tools_dtPixelUpscale;
+
+  /// No description provided for @tools_dtPixelUpscaleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When off, outputs one pixel per cell'**
+  String get tools_dtPixelUpscaleHint;
+
+  /// No description provided for @tools_runTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Run {tool}'**
+  String tools_runTool(Object tool);
+
+  /// No description provided for @tools_runHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Run · processes the current input'**
+  String get tools_runHint;
+
+  /// No description provided for @tools_runNeedInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an input below first'**
+  String get tools_runNeedInput;
+
+  /// No description provided for @tools_results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get tools_results;
+
+  /// No description provided for @tools_resultsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Results you run will be listed here'**
+  String get tools_resultsEmpty;
+
+  /// No description provided for @tools_resultsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a result to view it again; results also go to the Generate history — save keepers to the gallery'**
+  String get tools_resultsHint;
+
+  /// No description provided for @tools_reuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse settings'**
+  String get tools_reuse;
+
+  /// No description provided for @tools_emoNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get tools_emoNeutral;
+
+  /// No description provided for @tools_emoHappy.
+  ///
+  /// In en, this message translates to:
+  /// **'Happy'**
+  String get tools_emoHappy;
+
+  /// No description provided for @tools_emoSad.
+  ///
+  /// In en, this message translates to:
+  /// **'Sad'**
+  String get tools_emoSad;
+
+  /// No description provided for @tools_emoAngry.
+  ///
+  /// In en, this message translates to:
+  /// **'Angry'**
+  String get tools_emoAngry;
+
+  /// No description provided for @tools_emoScared.
+  ///
+  /// In en, this message translates to:
+  /// **'Scared'**
+  String get tools_emoScared;
+
+  /// No description provided for @tools_emoSurprised.
+  ///
+  /// In en, this message translates to:
+  /// **'Surprised'**
+  String get tools_emoSurprised;
+
+  /// No description provided for @tools_emoTired.
+  ///
+  /// In en, this message translates to:
+  /// **'Tired'**
+  String get tools_emoTired;
+
+  /// No description provided for @tools_emoExcited.
+  ///
+  /// In en, this message translates to:
+  /// **'Excited'**
+  String get tools_emoExcited;
+
+  /// No description provided for @tools_emoNervous.
+  ///
+  /// In en, this message translates to:
+  /// **'Nervous'**
+  String get tools_emoNervous;
+
+  /// No description provided for @tools_emoThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get tools_emoThinking;
+
+  /// No description provided for @tools_emoConfused.
+  ///
+  /// In en, this message translates to:
+  /// **'Confused'**
+  String get tools_emoConfused;
+
+  /// No description provided for @tools_emoShy.
+  ///
+  /// In en, this message translates to:
+  /// **'Shy'**
+  String get tools_emoShy;
+
+  /// No description provided for @tools_emoDisgusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Disgusted'**
+  String get tools_emoDisgusted;
+
+  /// No description provided for @tools_emoSmug.
+  ///
+  /// In en, this message translates to:
+  /// **'Smug'**
+  String get tools_emoSmug;
+
+  /// No description provided for @tools_emoBored.
+  ///
+  /// In en, this message translates to:
+  /// **'Bored'**
+  String get tools_emoBored;
+
+  /// No description provided for @tools_emoLaughing.
+  ///
+  /// In en, this message translates to:
+  /// **'Laughing'**
+  String get tools_emoLaughing;
+
+  /// No description provided for @tools_emoIrritated.
+  ///
+  /// In en, this message translates to:
+  /// **'Irritated'**
+  String get tools_emoIrritated;
+
+  /// No description provided for @tools_emoAroused.
+  ///
+  /// In en, this message translates to:
+  /// **'Aroused'**
+  String get tools_emoAroused;
+
+  /// No description provided for @tools_emoEmbarrassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Embarrassed'**
+  String get tools_emoEmbarrassed;
+
+  /// No description provided for @tools_emoWorried.
+  ///
+  /// In en, this message translates to:
+  /// **'Worried'**
+  String get tools_emoWorried;
+
+  /// No description provided for @tools_emoLove.
+  ///
+  /// In en, this message translates to:
+  /// **'Love'**
+  String get tools_emoLove;
+
+  /// No description provided for @tools_emoDetermined.
+  ///
+  /// In en, this message translates to:
+  /// **'Determined'**
+  String get tools_emoDetermined;
+
+  /// No description provided for @tools_emoHurt.
+  ///
+  /// In en, this message translates to:
+  /// **'Hurt'**
+  String get tools_emoHurt;
+
+  /// No description provided for @tools_emoPlayful.
+  ///
+  /// In en, this message translates to:
+  /// **'Playful'**
+  String get tools_emoPlayful;
 }
 
 class _AppLocalizationsDelegate

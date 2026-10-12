@@ -17725,6 +17725,830 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gen_opImg2Img => '图生图';
+
+  @override
+  String get tools_free => '免费';
+
+  @override
+  String get tools_localFree => '本机 · 免费';
+
+  @override
+  String tools_anlasN(Object count) {
+    return '$count Anlas';
+  }
+
+  @override
+  String get tools_cancel => '取消';
+
+  @override
+  String get tools_close => '关闭';
+
+  @override
+  String get tools_done => '完成';
+
+  @override
+  String get tools_reset => '重置';
+
+  @override
+  String get tools_apply => '应用';
+
+  @override
+  String get tools_retry => '重试';
+
+  @override
+  String get tools_optional => '可选';
+
+  @override
+  String get tools_justNow => '刚刚';
+
+  @override
+  String tools_minutesAgo(Object count) {
+    return '$count 分钟前';
+  }
+
+  @override
+  String tools_hoursAgo(Object count) {
+    return '$count 小时前';
+  }
+
+  @override
+  String tools_monthDay(Object month, Object day) {
+    return '$month 月 $day 日';
+  }
+
+  @override
+  String get tools_useAsInit => '用作图生图底图';
+
+  @override
+  String get tools_upscale => '放大';
+
+  @override
+  String get tools_enhance => '增强';
+
+  @override
+  String get tools_strength => '强度';
+
+  @override
+  String get tools_noise => '噪声';
+
+  @override
+  String get tools_tipEnhance => '用当前提示词把这张图重画一遍，补细节；可以顺便放大';
+
+  @override
+  String get tools_tipVariations => '用这张图的参数直接再出 4 张相近的图，不改你的提示词和设置';
+
+  @override
+  String get tools_tipUpscale => '按记住的放大设置直接放大；结果作为新图出现在画布上';
+
+  @override
+  String get tools_tipUpscaleRunning => '正在放大，点一下取消';
+
+  @override
+  String get tools_tipUpscaleSettings => '换本机 / 云端、方法、模型和倍数';
+
+  @override
+  String get tools_tipSetInit => '把这张图放进图生图，作为下一次生成的底图';
+
+  @override
+  String get tools_tipEdit => '用画笔、选区、调色修改这张图，完成后替换图生图底图';
+
+  @override
+  String get tools_tipInpaint => '画蒙版圈出要重画的地方，其余保持原图';
+
+  @override
+  String get tools_tipDirector => '背景移除、线稿、上色、表情修复等后期工具';
+
+  @override
+  String get tools_upscaleRunHint => '完成后新图加入历史；没有切到别的图就自动选中它';
+
+  @override
+  String get tools_enhanceSub => '用当前提示词把这张图重画一遍，补细节；可以顺便放大';
+
+  @override
+  String get tools_enhanceScale => '放大';
+
+  @override
+  String get tools_enhanceLocal => '本地放大';
+
+  @override
+  String get tools_enhanceLocalRow => '本地';
+
+  @override
+  String tools_enhanceOutLocal(Object size, Object factor) {
+    return '$size → 本机 $factor';
+  }
+
+  @override
+  String get tools_enhanceMagnitude => '幅度';
+
+  @override
+  String get tools_magLight => '轻微';
+
+  @override
+  String get tools_magMedium => '适中';
+
+  @override
+  String get tools_magStrong => '强烈';
+
+  @override
+  String tools_enhanceValues(Object strength, Object noise) {
+    return '强度 $strength · 噪声 $noise';
+  }
+
+  @override
+  String get tools_enhanceCustomTag => '自定义';
+
+  @override
+  String get tools_enhanceCustom => '自定义强度和噪声';
+
+  @override
+  String get tools_enhanceCustomHint => '强度越高改得越多；噪声加细节但容易变脏';
+
+  @override
+  String get tools_localHint => '每张生成完成后自动在本机放大，不另外花 Anlas';
+
+  @override
+  String get tools_localNotSet => '还没选本机放大模型';
+
+  @override
+  String get tools_upscaleSettings => '放大设置';
+
+  @override
+  String tools_enhanceFooter(Object model, Object steps) {
+    return '用当前提示词 · $model · $steps 步';
+  }
+
+  @override
+  String get tools_enhanceRun => '增强';
+
+  @override
+  String get tools_enhanceRunLocal => '增强并本地放大';
+
+  @override
+  String get tools_upscaleSub => '放大结果作为新图出现在画布上，不动原图和图生图底图';
+
+  @override
+  String get tools_upscaleMethod => '方法';
+
+  @override
+  String get tools_upscaleModel => '模型';
+
+  @override
+  String get tools_upscaleManage => '管理模型';
+
+  @override
+  String get tools_upscaleScale => '倍数';
+
+  @override
+  String get tools_upscaleAdvanced => '高级设置';
+
+  @override
+  String get tools_upscaleFooter => '设置会记住；工具条上的“放大”直接按这套设置跑';
+
+  @override
+  String get tools_modelMissing => '未安装';
+
+  @override
+  String get tools_modelDownloading => '下载中';
+
+  @override
+  String get tools_modelNone => '未选择';
+
+  @override
+  String get tools_edit => '编辑图像';
+
+  @override
+  String get tools_editSub => '编辑后会替换图生图底图';
+
+  @override
+  String get tools_inpaint => '局部重绘';
+
+  @override
+  String get tools_inpaintSub => '只重画蒙版里的地方，其余保持原图';
+
+  @override
+  String get tools_backEsc => '返回（Esc）';
+
+  @override
+  String get tools_panel => '面板';
+
+  @override
+  String get tools_undo => '撤销';
+
+  @override
+  String get tools_redo => '重做';
+
+  @override
+  String get tools_download => '下载 PNG';
+
+  @override
+  String get tools_zoomIn => '放大';
+
+  @override
+  String get tools_zoomOut => '缩小';
+
+  @override
+  String get tools_zoomFit => '适应窗口';
+
+  @override
+  String get tools_applyMask => '应用蒙版';
+
+  @override
+  String get tools_applyMaskSub => '回到生图页，自己按生成';
+
+  @override
+  String get tools_applyGenerate => '应用并生成';
+
+  @override
+  String get tools_applyGenerateSub => '回到生图页并立刻开始重绘';
+
+  @override
+  String get tools_discardTitle => '放弃这次修改？';
+
+  @override
+  String get tools_discardBody => '还没应用的笔画、蒙版和图层改动都会丢掉。';
+
+  @override
+  String get tools_discard => '放弃';
+
+  @override
+  String get tools_keepEditing => '继续编辑';
+
+  @override
+  String get tools_toolBrush => '画笔';
+
+  @override
+  String get tools_toolEraser => '橡皮';
+
+  @override
+  String get tools_toolFill => '填充';
+
+  @override
+  String get tools_toolBlur => '模糊';
+
+  @override
+  String get tools_toolStamp => '仿制图章';
+
+  @override
+  String get tools_toolSelect => '矩形选区';
+
+  @override
+  String get tools_toolLasso => '套索';
+
+  @override
+  String get tools_toolPicker => '吸管';
+
+  @override
+  String get tools_toolMaskBrush => '画蒙版';
+
+  @override
+  String get tools_toolMaskEraser => '擦蒙版';
+
+  @override
+  String get tools_toolFocus => '聚焦区域';
+
+  @override
+  String get tools_clearMask => '清空蒙版';
+
+  @override
+  String get tools_expand => '扩展边缘';
+
+  @override
+  String get tools_adjust => '调整颜色';
+
+  @override
+  String get tools_resize => '画布尺寸';
+
+  @override
+  String get tools_size => '大小';
+
+  @override
+  String get tools_opacity => '不透明';
+
+  @override
+  String get tools_intensity => '强度';
+
+  @override
+  String get tools_tolerance => '容差';
+
+  @override
+  String get tools_tip => '笔尖';
+
+  @override
+  String get tools_tipHard => '硬';
+
+  @override
+  String get tools_tipSoft => '软';
+
+  @override
+  String get tools_tipSquare => '方';
+
+  @override
+  String get tools_pressure => '压感';
+
+  @override
+  String get tools_squareBrush => '方形笔刷';
+
+  @override
+  String get tools_hintStamp => 'Alt + 点击取样，再在别处涂抹';
+
+  @override
+  String get tools_hintSelect => '拖出选区；Alt+L 复制成新图层，Delete 清除选区内容';
+
+  @override
+  String get tools_hintPicker => '点画面取色；用画笔时按住 Alt 也能临时取色';
+
+  @override
+  String get tools_hintMaskFill => '点一下把相近颜色的一片填成蒙版';
+
+  @override
+  String get tools_focusContext => '最小上下文';
+
+  @override
+  String get tools_hintFocus => '框出要精修的地方，模型只看框内和四周一圈，小脸、手更清楚';
+
+  @override
+  String get tools_clearFocus => '清除聚焦';
+
+  @override
+  String get tools_edgeTop => '上';
+
+  @override
+  String get tools_edgeBottom => '下';
+
+  @override
+  String get tools_edgeLeft => '左';
+
+  @override
+  String get tools_edgeRight => '右';
+
+  @override
+  String tools_hintExpand(Object step) {
+    return '拖画布四边也可以；每次 $step 像素';
+  }
+
+  @override
+  String get tools_maskLook => '蒙版外观';
+
+  @override
+  String get tools_maskBorder => '描边';
+
+  @override
+  String get tools_patternSolid => '纯色';
+
+  @override
+  String get tools_patternLines => '斜线';
+
+  @override
+  String get tools_patternCrosshatch => '交叉线';
+
+  @override
+  String get tools_patternGrid => '网格';
+
+  @override
+  String get tools_patternDots => '圆点';
+
+  @override
+  String get tools_patternChecker => '棋盘格';
+
+  @override
+  String get tools_patternHearts => '爱心';
+
+  @override
+  String get tools_colorPrimary => '前景色';
+
+  @override
+  String get tools_colorSecondary => '背景色';
+
+  @override
+  String get tools_moreColors => '更多颜色…';
+
+  @override
+  String get tools_statusHint => '空格拖动 · 滚轮缩放 · Ctrl+0 适应窗口 · 1 原始大小';
+
+  @override
+  String get tools_statusGrid => '蒙版按 8 像素网格对齐';
+
+  @override
+  String get tools_statusMask => '蒙版';
+
+  @override
+  String get tools_inpaintSettings => '重绘设置';
+
+  @override
+  String get tools_inpaintStrength => '重绘强度';
+
+  @override
+  String get tools_inpaintStrengthHint => '越低越贴近原图';
+
+  @override
+  String get tools_mask => '蒙版';
+
+  @override
+  String tools_maskCoverage(Object count) {
+    return '的画面 · $count 块';
+  }
+
+  @override
+  String get tools_focusNone => '未设置（整张图）';
+
+  @override
+  String tools_focusContextShort(Object value) {
+    return '· 上下文 $value';
+  }
+
+  @override
+  String get tools_output => '输出';
+
+  @override
+  String get tools_expandTag => '扩展';
+
+  @override
+  String get tools_layers => '图层';
+
+  @override
+  String get tools_addLayer => '加图层';
+
+  @override
+  String get tools_add3dLayer => '加 3D 图层';
+
+  @override
+  String get tools_layerHint => 'Alt+L 把选区复制成新图层';
+
+  @override
+  String get tools_hideLayer => '隐藏图层';
+
+  @override
+  String get tools_showLayer => '显示图层';
+
+  @override
+  String get tools_layerUp => '上移';
+
+  @override
+  String get tools_layerDown => '下移';
+
+  @override
+  String get tools_layerDuplicate => '复制图层';
+
+  @override
+  String get tools_layerMerge => '向下合并';
+
+  @override
+  String get tools_layerDelete => '删除图层';
+
+  @override
+  String get tools_currentLayer => '当前图层';
+
+  @override
+  String get tools_hue => '色相';
+
+  @override
+  String get tools_saturation => '饱和度';
+
+  @override
+  String get tools_brightness => '亮度';
+
+  @override
+  String get tools_canvas => '画布';
+
+  @override
+  String get tools_resizeCanvas => '更改尺寸';
+
+  @override
+  String get tools_inpaintNote => '应用后回到生图页，侧栏切到“局部重绘”；也可以用右上角菜单“应用并生成”直接开跑';
+
+  @override
+  String get tools_director => '导演工具';
+
+  @override
+  String get tools_backGen => '生图';
+
+  @override
+  String get tools_dtGroupClean => '清理';
+
+  @override
+  String get tools_dtGroupLine => '线条';
+
+  @override
+  String get tools_dtGroupColor => '上色与表情';
+
+  @override
+  String get tools_dtGroupPixel => '像素';
+
+  @override
+  String get tools_dtRemoveBg => '背景移除';
+
+  @override
+  String get tools_dtRemoveBgDesc => '抠出人物，得到透明底、原背景、合成三张';
+
+  @override
+  String get tools_dtDeclutter => '杂线清理';
+
+  @override
+  String get tools_dtDeclutterDesc => '去掉多余的线和噪点，画面更干净';
+
+  @override
+  String get tools_dtLineArt => '线稿提取';
+
+  @override
+  String get tools_dtLineArtDesc => '提取干净的黑白线稿';
+
+  @override
+  String get tools_dtSketch => '草图化';
+
+  @override
+  String get tools_dtSketchDesc => '变成铅笔草图的感觉';
+
+  @override
+  String get tools_dtColorize => '上色';
+
+  @override
+  String get tools_dtColorizeDesc => '给线稿或草图上色，可写提示词';
+
+  @override
+  String get tools_dtEmotion => '表情修复';
+
+  @override
+  String get tools_dtEmotionDesc => '换表情，可调强度';
+
+  @override
+  String get tools_dtPixelSnap => '像素对齐';
+
+  @override
+  String get tools_dtPixelSnapDesc => '对齐像素网格、压缩调色板；本机处理';
+
+  @override
+  String get tools_dtOpusNote => 'Opus 订阅 1 MP 以内这几项不花 Anlas；背景移除始终计费';
+
+  @override
+  String get tools_input => '输入';
+
+  @override
+  String get tools_compareSide => '并排';
+
+  @override
+  String get tools_compareWipe => '滑动对比';
+
+  @override
+  String get tools_compareResult => '只看结果';
+
+  @override
+  String get tools_fit => '适应';
+
+  @override
+  String get tools_actualSize => '原始大小 100%';
+
+  @override
+  String get tools_original => '原图';
+
+  @override
+  String get tools_emptyRun => '按“运行”开始';
+
+  @override
+  String get tools_emptyEmotion => '选好表情后按“运行”';
+
+  @override
+  String get tools_emptyBody => '结果会出现在这里，和原图并排对比';
+
+  @override
+  String tools_running(Object tool) {
+    return '正在运行$tool…';
+  }
+
+  @override
+  String get tools_runningBody => '一般几秒就好；结果也会进生图页的历史';
+
+  @override
+  String get tools_runFailed => '运行失败';
+
+  @override
+  String get tools_noInput => '先放一张图进来';
+
+  @override
+  String get tools_noInputBody => '拖进来、Ctrl+V 粘贴，或者从生图历史里选';
+
+  @override
+  String get tools_noResult => '还没有结果';
+
+  @override
+  String get tools_continue => '继续处理';
+
+  @override
+  String get tools_copy => '复制';
+
+  @override
+  String get tools_saveGallery => '存到图库';
+
+  @override
+  String get tools_queue => '输入队列';
+
+  @override
+  String tools_queueCount(Object count) {
+    return '$count 张';
+  }
+
+  @override
+  String get tools_queueHint => '加号：导入文件 / 从生图历史选；也可以拖进来、Ctrl+V 粘贴';
+
+  @override
+  String get tools_importFiles => '导入文件';
+
+  @override
+  String get tools_fromHistory => '从生图历史选';
+
+  @override
+  String get tools_paste => '粘贴';
+
+  @override
+  String get tools_removeInput => '移出队列';
+
+  @override
+  String get tools_dtOptions => '选项';
+
+  @override
+  String get tools_dtNoOptionsBg => '背景移除没有可调的选项。会得到透明底、原背景、合成三张，在结果下面切换。';
+
+  @override
+  String get tools_dtNoOptionsDeclutter => '杂线清理没有可调的选项。想要线稿用“线稿提取”。';
+
+  @override
+  String get tools_dtNoOptionsLineArt => '线稿提取没有可调的选项。想要上色，把结果“继续处理”再选“上色”。';
+
+  @override
+  String get tools_dtNoOptionsSketch =>
+      '草图化没有可调的选项。想要更干净的线条用“线稿提取”，想要上色把结果“继续处理”再选“上色”。';
+
+  @override
+  String get tools_dtEmotionLabel => '表情';
+
+  @override
+  String tools_dtEmotionMore(Object count) {
+    return '更多 $count 个';
+  }
+
+  @override
+  String get tools_dtEmotionLess => '收起';
+
+  @override
+  String get tools_dtStrength => '强度';
+
+  @override
+  String get tools_defry0 => '正常';
+
+  @override
+  String get tools_defry1 => '稍弱';
+
+  @override
+  String get tools_defry2 => '弱';
+
+  @override
+  String get tools_defry3 => '更弱';
+
+  @override
+  String get tools_defry4 => '很弱';
+
+  @override
+  String get tools_defry5 => '最弱';
+
+  @override
+  String get tools_dtEmotionStrengthHint => '越弱越接近原图的表情';
+
+  @override
+  String get tools_dtColorizeStrengthHint => '越弱越接近原图的线条';
+
+  @override
+  String get tools_dtPrompt => '补充提示词';
+
+  @override
+  String get tools_dtPromptHint => '英文标签，用逗号分开';
+
+  @override
+  String get tools_dtEmotionPromptHint => '选表情时会自动带上常用标签，可以改';
+
+  @override
+  String get tools_dtColorizePromptHint => '描述想要的配色，例如 blue dress, silver hair';
+
+  @override
+  String get tools_dtPalette => '调色板';
+
+  @override
+  String get tools_dtPaletteOff => '关闭';
+
+  @override
+  String get tools_dtPaletteAuto => '自动';
+
+  @override
+  String get tools_dtPaletteCustom => '自定义';
+
+  @override
+  String get tools_dtColors => '颜色数';
+
+  @override
+  String get tools_dtAvoidRefine => '避免过度细化';
+
+  @override
+  String get tools_dtAvoidRefineHint => '网格细节变化大时保持粗网格';
+
+  @override
+  String get tools_dtPixelUpscale => '放大回原尺寸';
+
+  @override
+  String get tools_dtPixelUpscaleHint => '关掉时输出每格一个像素的小图';
+
+  @override
+  String tools_runTool(Object tool) {
+    return '运行$tool';
+  }
+
+  @override
+  String get tools_runHint => '运行 · 处理当前输入';
+
+  @override
+  String get tools_runNeedInput => '先在下面放一张输入';
+
+  @override
+  String get tools_results => '结果';
+
+  @override
+  String get tools_resultsEmpty => '跑过的结果会列在这里';
+
+  @override
+  String get tools_resultsHint => '点一条结果再看；结果也会进生图页的历史，要长期留的先存到图库';
+
+  @override
+  String get tools_reuse => '沿用设置';
+
+  @override
+  String get tools_emoNeutral => '平静';
+
+  @override
+  String get tools_emoHappy => '开心';
+
+  @override
+  String get tools_emoSad => '难过';
+
+  @override
+  String get tools_emoAngry => '生气';
+
+  @override
+  String get tools_emoScared => '害怕';
+
+  @override
+  String get tools_emoSurprised => '惊讶';
+
+  @override
+  String get tools_emoTired => '疲惫';
+
+  @override
+  String get tools_emoExcited => '兴奋';
+
+  @override
+  String get tools_emoNervous => '紧张';
+
+  @override
+  String get tools_emoThinking => '思考';
+
+  @override
+  String get tools_emoConfused => '困惑';
+
+  @override
+  String get tools_emoShy => '害羞';
+
+  @override
+  String get tools_emoDisgusted => '嫌弃';
+
+  @override
+  String get tools_emoSmug => '得意';
+
+  @override
+  String get tools_emoBored => '无聊';
+
+  @override
+  String get tools_emoLaughing => '大笑';
+
+  @override
+  String get tools_emoIrritated => '烦躁';
+
+  @override
+  String get tools_emoAroused => '动情';
+
+  @override
+  String get tools_emoEmbarrassed => '尴尬';
+
+  @override
+  String get tools_emoWorried => '担心';
+
+  @override
+  String get tools_emoLove => '爱慕';
+
+  @override
+  String get tools_emoDetermined => '坚定';
+
+  @override
+  String get tools_emoHurt => '受伤';
+
+  @override
+  String get tools_emoPlayful => '俏皮';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -35448,4 +36272,828 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_opImg2Img => '圖生圖';
+
+  @override
+  String get tools_free => '免費';
+
+  @override
+  String get tools_localFree => '本機 · 免費';
+
+  @override
+  String tools_anlasN(Object count) {
+    return '$count Anlas';
+  }
+
+  @override
+  String get tools_cancel => '取消';
+
+  @override
+  String get tools_close => '關閉';
+
+  @override
+  String get tools_done => '完成';
+
+  @override
+  String get tools_reset => '重設';
+
+  @override
+  String get tools_apply => '應用';
+
+  @override
+  String get tools_retry => '重試';
+
+  @override
+  String get tools_optional => '可選';
+
+  @override
+  String get tools_justNow => '剛剛';
+
+  @override
+  String tools_minutesAgo(Object count) {
+    return '$count 分鐘前';
+  }
+
+  @override
+  String tools_hoursAgo(Object count) {
+    return '$count 小時前';
+  }
+
+  @override
+  String tools_monthDay(Object month, Object day) {
+    return '$month 月 $day 日';
+  }
+
+  @override
+  String get tools_useAsInit => '用作圖生圖底圖';
+
+  @override
+  String get tools_upscale => '放大';
+
+  @override
+  String get tools_enhance => '增強';
+
+  @override
+  String get tools_strength => '強度';
+
+  @override
+  String get tools_noise => '噪聲';
+
+  @override
+  String get tools_tipEnhance => '用當前提示詞把這張圖重畫一遍，補細節；可以順便放大';
+
+  @override
+  String get tools_tipVariations => '用這張圖的參數直接再出 4 張相近的圖，不改你的提示詞和設定';
+
+  @override
+  String get tools_tipUpscale => '按記住的放大設定直接放大；結果作為新圖出現在畫布上';
+
+  @override
+  String get tools_tipUpscaleRunning => '正在放大，點一下取消';
+
+  @override
+  String get tools_tipUpscaleSettings => '換本機 / 雲端、方法、模型和倍數';
+
+  @override
+  String get tools_tipSetInit => '把這張圖放進圖生圖，作為下一次生成的底圖';
+
+  @override
+  String get tools_tipEdit => '用畫筆、選區、調色修改這張圖，完成後替換圖生圖底圖';
+
+  @override
+  String get tools_tipInpaint => '畫遮罩圈出要重畫的地方，其餘保持原圖';
+
+  @override
+  String get tools_tipDirector => '背景移除、線稿、上色、表情修復等後期工具';
+
+  @override
+  String get tools_upscaleRunHint => '完成後新圖加入歷史；沒有切到別的圖就自動選中它';
+
+  @override
+  String get tools_enhanceSub => '用當前提示詞把這張圖重畫一遍，補細節；可以順便放大';
+
+  @override
+  String get tools_enhanceScale => '放大';
+
+  @override
+  String get tools_enhanceLocal => '本地放大';
+
+  @override
+  String get tools_enhanceLocalRow => '本地';
+
+  @override
+  String tools_enhanceOutLocal(Object size, Object factor) {
+    return '$size → 本機 $factor';
+  }
+
+  @override
+  String get tools_enhanceMagnitude => '幅度';
+
+  @override
+  String get tools_magLight => '輕微';
+
+  @override
+  String get tools_magMedium => '適中';
+
+  @override
+  String get tools_magStrong => '強烈';
+
+  @override
+  String tools_enhanceValues(Object strength, Object noise) {
+    return '強度 $strength · 噪聲 $noise';
+  }
+
+  @override
+  String get tools_enhanceCustomTag => '自訂';
+
+  @override
+  String get tools_enhanceCustom => '自訂強度和噪聲';
+
+  @override
+  String get tools_enhanceCustomHint => '強度越高改得越多；噪聲加細節但容易變髒';
+
+  @override
+  String get tools_localHint => '每張生成完成後自動在本機放大，不另外花 Anlas';
+
+  @override
+  String get tools_localNotSet => '還沒選本機放大模型';
+
+  @override
+  String get tools_upscaleSettings => '放大設定';
+
+  @override
+  String tools_enhanceFooter(Object model, Object steps) {
+    return '用當前提示詞 · $model · $steps 步';
+  }
+
+  @override
+  String get tools_enhanceRun => '增強';
+
+  @override
+  String get tools_enhanceRunLocal => '增強並本地放大';
+
+  @override
+  String get tools_upscaleSub => '放大結果作為新圖出現在畫布上，不動原圖和圖生圖底圖';
+
+  @override
+  String get tools_upscaleMethod => '方法';
+
+  @override
+  String get tools_upscaleModel => '模型';
+
+  @override
+  String get tools_upscaleManage => '管理模型';
+
+  @override
+  String get tools_upscaleScale => '倍數';
+
+  @override
+  String get tools_upscaleAdvanced => '進階設定';
+
+  @override
+  String get tools_upscaleFooter => '設定會記住；工具條上的“放大”直接按這套設定跑';
+
+  @override
+  String get tools_modelMissing => '未安裝';
+
+  @override
+  String get tools_modelDownloading => '下載中';
+
+  @override
+  String get tools_modelNone => '未選擇';
+
+  @override
+  String get tools_edit => '編輯影像';
+
+  @override
+  String get tools_editSub => '編輯後會替換圖生圖底圖';
+
+  @override
+  String get tools_inpaint => '局部重繪';
+
+  @override
+  String get tools_inpaintSub => '只重畫遮罩裡的地方，其餘保持原圖';
+
+  @override
+  String get tools_backEsc => '返回（Esc）';
+
+  @override
+  String get tools_panel => '面板';
+
+  @override
+  String get tools_undo => '復原';
+
+  @override
+  String get tools_redo => '重做';
+
+  @override
+  String get tools_download => '下載 PNG';
+
+  @override
+  String get tools_zoomIn => '放大';
+
+  @override
+  String get tools_zoomOut => '縮小';
+
+  @override
+  String get tools_zoomFit => '適應視窗';
+
+  @override
+  String get tools_applyMask => '應用遮罩';
+
+  @override
+  String get tools_applyMaskSub => '回到生圖頁，自己按生成';
+
+  @override
+  String get tools_applyGenerate => '應用並生成';
+
+  @override
+  String get tools_applyGenerateSub => '回到生圖頁並立刻開始重繪';
+
+  @override
+  String get tools_discardTitle => '放棄這次修改？';
+
+  @override
+  String get tools_discardBody => '還沒應用的筆畫、遮罩和圖層改動都會丟掉。';
+
+  @override
+  String get tools_discard => '放棄';
+
+  @override
+  String get tools_keepEditing => '繼續編輯';
+
+  @override
+  String get tools_toolBrush => '畫筆';
+
+  @override
+  String get tools_toolEraser => '橡皮';
+
+  @override
+  String get tools_toolFill => '填充';
+
+  @override
+  String get tools_toolBlur => '模糊';
+
+  @override
+  String get tools_toolStamp => '仿製圖章';
+
+  @override
+  String get tools_toolSelect => '矩形選區';
+
+  @override
+  String get tools_toolLasso => '套索';
+
+  @override
+  String get tools_toolPicker => '吸管';
+
+  @override
+  String get tools_toolMaskBrush => '畫遮罩';
+
+  @override
+  String get tools_toolMaskEraser => '擦遮罩';
+
+  @override
+  String get tools_toolFocus => '聚焦區域';
+
+  @override
+  String get tools_clearMask => '清空濛版';
+
+  @override
+  String get tools_expand => '擴展邊緣';
+
+  @override
+  String get tools_adjust => '調整顏色';
+
+  @override
+  String get tools_resize => '畫布尺寸';
+
+  @override
+  String get tools_size => '大小';
+
+  @override
+  String get tools_opacity => '不透明';
+
+  @override
+  String get tools_intensity => '強度';
+
+  @override
+  String get tools_tolerance => '容差';
+
+  @override
+  String get tools_tip => '筆尖';
+
+  @override
+  String get tools_tipHard => '硬';
+
+  @override
+  String get tools_tipSoft => '軟';
+
+  @override
+  String get tools_tipSquare => '方';
+
+  @override
+  String get tools_pressure => '壓感';
+
+  @override
+  String get tools_squareBrush => '方形筆刷';
+
+  @override
+  String get tools_hintStamp => 'Alt + 點選取樣，再在別處塗抹';
+
+  @override
+  String get tools_hintSelect => '拖出選區；Alt+L 複製成新圖層，Delete 清除選區內容';
+
+  @override
+  String get tools_hintPicker => '點畫面取色；用畫筆時按住 Alt 也能臨時取色';
+
+  @override
+  String get tools_hintMaskFill => '點一下把相近顏色的一片填成遮罩';
+
+  @override
+  String get tools_focusContext => '最小上下文';
+
+  @override
+  String get tools_hintFocus => '框出要精修的地方，模型只看框內和四周一圈，小臉、手更清楚';
+
+  @override
+  String get tools_clearFocus => '清除聚焦';
+
+  @override
+  String get tools_edgeTop => '上';
+
+  @override
+  String get tools_edgeBottom => '下';
+
+  @override
+  String get tools_edgeLeft => '左';
+
+  @override
+  String get tools_edgeRight => '右';
+
+  @override
+  String tools_hintExpand(Object step) {
+    return '拖畫布四邊也可以；每次 $step 像素';
+  }
+
+  @override
+  String get tools_maskLook => '遮罩外觀';
+
+  @override
+  String get tools_maskBorder => '描邊';
+
+  @override
+  String get tools_patternSolid => '純色';
+
+  @override
+  String get tools_patternLines => '斜線';
+
+  @override
+  String get tools_patternCrosshatch => '交叉線';
+
+  @override
+  String get tools_patternGrid => '網格';
+
+  @override
+  String get tools_patternDots => '圓點';
+
+  @override
+  String get tools_patternChecker => '棋盤格';
+
+  @override
+  String get tools_patternHearts => '愛心';
+
+  @override
+  String get tools_colorPrimary => '前景色';
+
+  @override
+  String get tools_colorSecondary => '背景色';
+
+  @override
+  String get tools_moreColors => '更多顏色…';
+
+  @override
+  String get tools_statusHint => '空格拖動 · 滾輪縮放 · Ctrl+0 適應視窗 · 1 原始大小';
+
+  @override
+  String get tools_statusGrid => '遮罩按 8 像素網格對齊';
+
+  @override
+  String get tools_statusMask => '遮罩';
+
+  @override
+  String get tools_inpaintSettings => '重繪設定';
+
+  @override
+  String get tools_inpaintStrength => '重繪強度';
+
+  @override
+  String get tools_inpaintStrengthHint => '越低越貼近原圖';
+
+  @override
+  String get tools_mask => '遮罩';
+
+  @override
+  String tools_maskCoverage(Object count) {
+    return '的畫面 · $count 塊';
+  }
+
+  @override
+  String get tools_focusNone => '未設定（整張圖）';
+
+  @override
+  String tools_focusContextShort(Object value) {
+    return '· 上下文 $value';
+  }
+
+  @override
+  String get tools_output => '輸出';
+
+  @override
+  String get tools_expandTag => '擴展';
+
+  @override
+  String get tools_layers => '圖層';
+
+  @override
+  String get tools_addLayer => '加圖層';
+
+  @override
+  String get tools_add3dLayer => '加 3D 圖層';
+
+  @override
+  String get tools_layerHint => 'Alt+L 把選區複製成新圖層';
+
+  @override
+  String get tools_hideLayer => '隱藏圖層';
+
+  @override
+  String get tools_showLayer => '顯示圖層';
+
+  @override
+  String get tools_layerUp => '上移';
+
+  @override
+  String get tools_layerDown => '下移';
+
+  @override
+  String get tools_layerDuplicate => '複製圖層';
+
+  @override
+  String get tools_layerMerge => '向下合併';
+
+  @override
+  String get tools_layerDelete => '刪除圖層';
+
+  @override
+  String get tools_currentLayer => '當前圖層';
+
+  @override
+  String get tools_hue => '色相';
+
+  @override
+  String get tools_saturation => '飽和度';
+
+  @override
+  String get tools_brightness => '亮度';
+
+  @override
+  String get tools_canvas => '畫布';
+
+  @override
+  String get tools_resizeCanvas => '更改尺寸';
+
+  @override
+  String get tools_inpaintNote => '應用後回到生圖頁，側欄切到“局部重繪”；也可以用右上角選單“應用並生成”直接開跑';
+
+  @override
+  String get tools_director => '導演工具';
+
+  @override
+  String get tools_backGen => '生圖';
+
+  @override
+  String get tools_dtGroupClean => '清理';
+
+  @override
+  String get tools_dtGroupLine => '線條';
+
+  @override
+  String get tools_dtGroupColor => '上色與表情';
+
+  @override
+  String get tools_dtGroupPixel => '像素';
+
+  @override
+  String get tools_dtRemoveBg => '背景移除';
+
+  @override
+  String get tools_dtRemoveBgDesc => '摳出人物，得到透明底、原背景、合成三張';
+
+  @override
+  String get tools_dtDeclutter => '雜線清理';
+
+  @override
+  String get tools_dtDeclutterDesc => '去掉多餘的線和噪點，畫面更乾淨';
+
+  @override
+  String get tools_dtLineArt => '線稿提取';
+
+  @override
+  String get tools_dtLineArtDesc => '提取乾淨的黑白線稿';
+
+  @override
+  String get tools_dtSketch => '草圖化';
+
+  @override
+  String get tools_dtSketchDesc => '變成鉛筆草圖的感覺';
+
+  @override
+  String get tools_dtColorize => '上色';
+
+  @override
+  String get tools_dtColorizeDesc => '給線稿或草圖上色，可寫提示詞';
+
+  @override
+  String get tools_dtEmotion => '表情修復';
+
+  @override
+  String get tools_dtEmotionDesc => '換表情，可調強度';
+
+  @override
+  String get tools_dtPixelSnap => '像素對齊';
+
+  @override
+  String get tools_dtPixelSnapDesc => '對齊像素網格、壓縮調色盤；本機處理';
+
+  @override
+  String get tools_dtOpusNote => 'Opus 訂閱 1 MP 以內這幾項不花 Anlas；背景移除始終計費';
+
+  @override
+  String get tools_input => '輸入';
+
+  @override
+  String get tools_compareSide => '並排';
+
+  @override
+  String get tools_compareWipe => '滑動對比';
+
+  @override
+  String get tools_compareResult => '只看結果';
+
+  @override
+  String get tools_fit => '適應';
+
+  @override
+  String get tools_actualSize => '原始大小 100%';
+
+  @override
+  String get tools_original => '原圖';
+
+  @override
+  String get tools_emptyRun => '按“執行”開始';
+
+  @override
+  String get tools_emptyEmotion => '選好表情後按“執行”';
+
+  @override
+  String get tools_emptyBody => '結果會出現在這裡，和原圖並排對比';
+
+  @override
+  String tools_running(Object tool) {
+    return '正在執行$tool…';
+  }
+
+  @override
+  String get tools_runningBody => '一般幾秒就好；結果也會進生圖頁的歷史';
+
+  @override
+  String get tools_runFailed => '執行失敗';
+
+  @override
+  String get tools_noInput => '先放一張圖進來';
+
+  @override
+  String get tools_noInputBody => '拖進來、Ctrl+V 貼上，或者從生圖歷史裡選';
+
+  @override
+  String get tools_noResult => '還沒有結果';
+
+  @override
+  String get tools_continue => '繼續處理';
+
+  @override
+  String get tools_copy => '複製';
+
+  @override
+  String get tools_saveGallery => '存到圖庫';
+
+  @override
+  String get tools_queue => '輸入佇列';
+
+  @override
+  String tools_queueCount(Object count) {
+    return '$count 張';
+  }
+
+  @override
+  String get tools_queueHint => '加號：匯入檔案 / 從生圖歷史選；也可以拖進來、Ctrl+V 貼上';
+
+  @override
+  String get tools_importFiles => '匯入檔案';
+
+  @override
+  String get tools_fromHistory => '從生圖歷史選';
+
+  @override
+  String get tools_paste => '貼上';
+
+  @override
+  String get tools_removeInput => '移出佇列';
+
+  @override
+  String get tools_dtOptions => '選項';
+
+  @override
+  String get tools_dtNoOptionsBg => '背景移除沒有可調的選項。會得到透明底、原背景、合成三張，在結果下面切換。';
+
+  @override
+  String get tools_dtNoOptionsDeclutter => '雜線清理沒有可調的選項。想要線稿用“線稿提取”。';
+
+  @override
+  String get tools_dtNoOptionsLineArt => '線稿提取沒有可調的選項。想要上色，把結果“繼續處理”再選“上色”。';
+
+  @override
+  String get tools_dtNoOptionsSketch =>
+      '草圖化沒有可調的選項。想要更乾淨的線條用“線稿提取”，想要上色把結果“繼續處理”再選“上色”。';
+
+  @override
+  String get tools_dtEmotionLabel => '表情';
+
+  @override
+  String tools_dtEmotionMore(Object count) {
+    return '更多 $count 個';
+  }
+
+  @override
+  String get tools_dtEmotionLess => '收起';
+
+  @override
+  String get tools_dtStrength => '強度';
+
+  @override
+  String get tools_defry0 => '正常';
+
+  @override
+  String get tools_defry1 => '稍弱';
+
+  @override
+  String get tools_defry2 => '弱';
+
+  @override
+  String get tools_defry3 => '更弱';
+
+  @override
+  String get tools_defry4 => '很弱';
+
+  @override
+  String get tools_defry5 => '最弱';
+
+  @override
+  String get tools_dtEmotionStrengthHint => '越弱越接近原圖的表情';
+
+  @override
+  String get tools_dtColorizeStrengthHint => '越弱越接近原圖的線條';
+
+  @override
+  String get tools_dtPrompt => '補充提示詞';
+
+  @override
+  String get tools_dtPromptHint => '英文標籤，用逗號分開';
+
+  @override
+  String get tools_dtEmotionPromptHint => '選表情時會自動帶上常用標籤，可以改';
+
+  @override
+  String get tools_dtColorizePromptHint => '描述想要的配色，例如 blue dress, silver hair';
+
+  @override
+  String get tools_dtPalette => '調色盤';
+
+  @override
+  String get tools_dtPaletteOff => '關閉';
+
+  @override
+  String get tools_dtPaletteAuto => '自動';
+
+  @override
+  String get tools_dtPaletteCustom => '自訂';
+
+  @override
+  String get tools_dtColors => '顏色數';
+
+  @override
+  String get tools_dtAvoidRefine => '避免過度細化';
+
+  @override
+  String get tools_dtAvoidRefineHint => '網格細節變化大時保持粗網格';
+
+  @override
+  String get tools_dtPixelUpscale => '放大回原尺寸';
+
+  @override
+  String get tools_dtPixelUpscaleHint => '關掉時輸出每格一個像素的小圖';
+
+  @override
+  String tools_runTool(Object tool) {
+    return '執行$tool';
+  }
+
+  @override
+  String get tools_runHint => '執行 · 處理當前輸入';
+
+  @override
+  String get tools_runNeedInput => '先在下面放一張輸入';
+
+  @override
+  String get tools_results => '結果';
+
+  @override
+  String get tools_resultsEmpty => '跑過的結果會列在這裡';
+
+  @override
+  String get tools_resultsHint => '點一條結果再看；結果也會進生圖頁的歷史，要長期留的先存到圖庫';
+
+  @override
+  String get tools_reuse => '沿用設定';
+
+  @override
+  String get tools_emoNeutral => '平靜';
+
+  @override
+  String get tools_emoHappy => '開心';
+
+  @override
+  String get tools_emoSad => '難過';
+
+  @override
+  String get tools_emoAngry => '生氣';
+
+  @override
+  String get tools_emoScared => '害怕';
+
+  @override
+  String get tools_emoSurprised => '驚訝';
+
+  @override
+  String get tools_emoTired => '疲憊';
+
+  @override
+  String get tools_emoExcited => '興奮';
+
+  @override
+  String get tools_emoNervous => '緊張';
+
+  @override
+  String get tools_emoThinking => '思考';
+
+  @override
+  String get tools_emoConfused => '困惑';
+
+  @override
+  String get tools_emoShy => '害羞';
+
+  @override
+  String get tools_emoDisgusted => '嫌棄';
+
+  @override
+  String get tools_emoSmug => '得意';
+
+  @override
+  String get tools_emoBored => '無聊';
+
+  @override
+  String get tools_emoLaughing => '大笑';
+
+  @override
+  String get tools_emoIrritated => '煩躁';
+
+  @override
+  String get tools_emoAroused => '動情';
+
+  @override
+  String get tools_emoEmbarrassed => '尷尬';
+
+  @override
+  String get tools_emoWorried => '擔心';
+
+  @override
+  String get tools_emoLove => '愛慕';
+
+  @override
+  String get tools_emoDetermined => '堅定';
+
+  @override
+  String get tools_emoHurt => '受傷';
+
+  @override
+  String get tools_emoPlayful => '俏皮';
 }

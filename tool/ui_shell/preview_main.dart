@@ -2,7 +2,8 @@
 // 运行：flutter run -d windows -t tool/ui_shell/preview_main.dart
 // 主导航包着页面：切到“统计”显示统计页，“在线画廊”显示在线画廊，“Vibe 库 / 精准参考库”显示参考库，
 // “块库”显示块库管理页，“生图”显示块库侧栏 + 带药丸的提示词（点药丸开实例卡），
-// “本地画廊”显示大图查看器（全屏时藏起主导航）（都由本地模拟器驱动），其他页显示占位。
+// “本地画廊”显示大图查看器（全屏时藏起主导航）；生图页工具条的增强 / 放大 / 编辑 / 局部重绘 / 导演工具
+// 由画布工具模拟器接管（都由本地模拟器驱动），其他页显示占位。
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -25,6 +26,10 @@ import 'package:nai_launcher/presentation/ui/refs/refs_picker.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_contract.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_fixture.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_page.dart';
+import 'package:nai_launcher/presentation/ui/tools/tools_director.dart';
+import 'package:nai_launcher/presentation/ui/tools/tools_contract.dart';
+import 'package:nai_launcher/presentation/ui/tools/tools_editor.dart';
+import 'package:nai_launcher/presentation/ui/tools/tools_fixture.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
 
 import 'blocks_preview.dart';
@@ -32,6 +37,7 @@ import 'explore_preview.dart';
 import 'gen_preview.dart';
 import 'online_preview.dart';
 import 'refs_preview.dart';
+import 'tools_preview.dart';
 import 'viewer_preview.dart';
 
 void main() => runApp(const _PreviewApp());
@@ -90,7 +96,9 @@ class _PreviewAppState extends State<_PreviewApp> {
   late final _explore = ExplorePreviewSim(log: _log)..addListener(_rebuild);
 
   // 生图页
-  late final _genSim = GenPreviewSim(log: _log)..addListener(_rebuild);
+  // 生图页 + 画布工具（工具条面板、编辑器、导演工具）
+  late final _tools = ToolsPreviewSim(log: _log)..addListener(_rebuild);
+  late final _genSim = _tools.gen..addListener(_rebuild);
 
   void _rebuild() => setState(() {});
 
@@ -101,7 +109,7 @@ class _PreviewAppState extends State<_PreviewApp> {
     _blocks.dispose();
     _viewer.dispose();
     _explore.dispose();
-    _genSim.dispose();
+    _tools.dispose();
     super.dispose();
   }
 
@@ -314,6 +322,15 @@ class _PreviewAppState extends State<_PreviewApp> {
                       GenScene.values,
                       (s) => setState(() => _genSim.scene = s),
                     ),
+                    const Text('画布工具：'),
+                    _dropdown(
+                      _tools.scene,
+                      ToolsScene.values,
+                      (s) => setState(() {
+                        _page = NavPage.generation;
+                        _tools.scene = s;
+                      }),
+                    ),
                     const Text('画风探索：'),
                     _dropdown(
                       _explore.scene,
@@ -331,6 +348,14 @@ class _PreviewAppState extends State<_PreviewApp> {
                 child: ImageViewerPage(
                   data: _viewer.data,
                   actions: _viewer.actions,
+                ),
+              )
+            else if (_page == NavPage.generation &&
+                _tools.view == ToolsView.director)
+              Expanded(
+                child: ToolsDirectorPage(
+                  data: _tools.director,
+                  actions: _tools.directorActions,
                 ),
               )
             else if (_page == NavPage.styleExplore && _explore.fullscreen)
@@ -354,6 +379,14 @@ class _PreviewAppState extends State<_PreviewApp> {
                       data: _blocks.data,
                       actions: _blocks.actions,
                     ),
+                    NavPage.generation when _tools.view == ToolsView.editor =>
+                      ToolsEditorPage(
+                        data: _tools.editor,
+                        actions: _tools.editorActions,
+                        slots: const ToolsEditorSlots(
+                          canvas: ToolsFixtureStage.builder,
+                        ),
+                      ),
                     NavPage.generation =>
                       _genSim.scene == GenScene.blocksDemo
                           ? BlocksGenerationMock(log: _log)
@@ -363,6 +396,7 @@ class _PreviewAppState extends State<_PreviewApp> {
                               slots: GenSlots(
                                 editor: _genSim.editor,
                                 dock: _genSim.dock(),
+                                toolSheet: _tools.sheet(),
                               ),
                             ),
                     NavPage.styleExplore => _explorePage(),

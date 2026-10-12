@@ -1,0 +1,68 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+// 画布工具原型的元素位置（给 tools_measure.py 出偏差表）。键名和 tools_prototype_capture_test.dart 一致。
+// 生图页、编辑器减掉 48 主导航；导演工具整窗不减。
+const view=location.hash.slice(1);
+const f=document.getElementById('f');
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,500));
+  const ox=view.startsWith('dt')?0:48;
+  const R=e=>{const b=e.getBoundingClientRect();return [b.left-ox,b.top,b.width,b.height]};
+  const U=(a,b)=>{const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();const l=Math.min(x.left,y.left),t=Math.min(x.top,y.top);return [l-ox,t,Math.max(x.right,y.right)-l,Math.max(x.bottom,y.bottom)-t]};
+  const m={}; const put=(k,e)=>{if(e) m[k]=R(e)};
+  const q=s=>d.querySelector(s), qa=s=>[...d.querySelectorAll(s)];
+  if(q('.cv')){
+    const bar=q('.cv .glass[style*="z-index:15"]'); put('bar-top',bar);
+    const tbs=bar?[...bar.querySelectorAll('.tb')]:[]; put('tb-enhance',tbs[0]);
+    const sh=q('.cv .sheet');
+    if(sh){
+      put(view.startsWith('upscale')?'usheet':'sheet',sh);
+      put('sheet-head',q('.sheet .sh-h')); put('sheet-foot',q('.sheet .sh-f')); put('sheet-close',q('.sh-h .ib'));
+      const fr=qa('.sheet .sh-b > .frow');
+      if(view.startsWith('enhance')){
+        put('e-scale',fr[0]&&fr[0].querySelector('.seg')); put('e-out',fr[0]&&fr[0].querySelector('.mono'));
+        if(view.includes('local')){ put('e-local',q('.sheet .opt.on')); }
+        else{ put('e-mag',fr[1]&&fr[1].querySelector('.seg')); put('e-values',fr[1]&&fr[1].querySelector('.mono'));
+          put('e-switch',q('.sh-b > .row[style*="68px"]')); put('e-custom',q('.sh-b > div[style*="68px"]:not(.row)')); }
+        put('e-run',q('.sh-f .btn.pri')); put('e-cancel',q('.sh-f .btn.ghost'));
+      } else {
+        put('u-backends',q('.sh-b > .row')); const op=qa('.sheet .opt'); put('u-local',op[0]); put('u-cloud',op[1]);
+        put('u-method',fr[0]&&fr[0].querySelector('.seg')); put('u-model',fr[1]&&fr[1].querySelector('.chip'));
+        put('u-manage',fr[1]&&fr[1].querySelector('.btn.ghost'));
+        if(fr[2]) m['u-scale']=U(fr[2].querySelector('.sl'),fr[2].querySelector('.num'));
+        put('u-out',fr[2]&&fr[2].querySelector('.mono')); put('u-run',q('.sh-f .btn.pri'));
+      }
+    }
+    put('strip',q('.cv .glass[style*="width:340px"]')); put('tip',q('.cv .tip'));
+  }
+  if(q('.ed')){
+    put('ed-top',q('.ed-top')); put('ed-title',q('.ed-top .col')); put('ed-zoom',q('.ed-top > .row'));
+    const pri=qa('.ed-top .btn.pri'); put('ed-apply',pri.length>1?pri[0].parentElement:pri[0]);
+    put('ed-cancel',q('.ed-top .btn.ghost'));
+    put('ed-opt',q('.ed-opt')); put('ed-rail',q('.ed-rail')); put('ed-work',q('.work'));
+    put('ed-img',q('.work > div[style*="box-shadow"]')); put('ed-side',q('.ed-side')); put('ed-stat',q('.ed-stat'));
+    const ps=qa('.ed-side > .ps'), inp=!!q('.ed-side .ps h4')&&q('.ed-side .ps h4').textContent.startsWith('重绘');
+    if(inp){put('ed-iset',ps[0]); put('ed-layers',ps[1]); put('ed-note',ps[2]);}
+    else{put('ed-layers',ps[0]); put('ed-adjust',ps[1]); put('ed-canvas',ps[2]);}
+    const tools=qa('.ed-rail .tool'); put('tool-0',tools[0]); put('tool-1',tools[1]); if(inp) put('tool-focus',tools[3]);
+    const sl=q('.ed-opt .sl'); if(sl&&!view.includes('focus')){const n=sl.nextElementSibling; if(n&&n.classList.contains('num')) m['opt-size']=U(sl,n);}
+    put('opt-tip',q('.ed-opt .seg')); put('mask-look',q('.ed-opt .row.s12.m'));
+    put('apply-menu',q('.app > .sheet'));
+    const ly=qa('.ly'); if(inp){put('layer-mask',ly[0]);} else {put('layer-0',ly[0]);} put('layer-base',ly[1]);
+    if(view.includes('expand')) put('expand-out',q('.ed-opt .mono.s12.m'));
+  }
+  if(q('.dt')){
+    put('dt-top',q('.dt-top')); put('dt-tools',q('.dt-tools')); put('dt-stage',q('.stage')); put('dt-bar',q('.st-bar'));
+    put('dt-seg',q('.st-bar .seg')); put('dt-area',q('.st-area')); put('dt-acts',q('.st-act')); put('dt-queue',q('.queue'));
+    put('dt-side',q('.dt-side')); const ps=qa('.dt-side .ps'); put('dt-head',ps[0]); put('dt-run',q('.run')); put('dt-results',ps[ps.length-1]);
+    const tl=qa('.dtool'); [0,3,5,6].forEach(i=>put('dt-tool-'+i,tl[i]));
+    const emo=q('.emo'); if(emo) put('dt-emo',emo.closest('.ps'));
+    put('dt-defry',q('.dt-side .seg')); put('dt-prompt',q('.txt'));
+    put('dt-run-0',q('.hrun')); put('dt-q-0',q('.qi')); put('dt-q-add',q('.qadd')); put('dt-init',q('.st-act .btn.pri'));
+    const pn=qa('.st-area .pane');
+    if(view.includes('wipe')) put('dt-wipe',pn[0]); else {put('dt-orig',pn[0]); put('dt-res',pn[1]);}
+  }
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+f.src='/mockups/tools/mock.html#'+view;
+</script></body></html>

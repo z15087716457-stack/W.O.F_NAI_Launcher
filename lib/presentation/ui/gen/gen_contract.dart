@@ -731,6 +731,7 @@ class GenFocusInfo {
     this.seed,
     this.pinned = false,
     this.variationsCost,
+    this.enhanceCost,
     this.canUseAsInput = true,
   });
 
@@ -745,6 +746,9 @@ class GenFocusInfo {
   /// “变体”要的 Anlas（null = 免费或不显示）。
   final int? variationsCost;
 
+  /// “增强”按当前增强设置要的 Anlas（悬停提示里写；null = 不显示价格）。
+  final int? enhanceCost;
+
   /// 能不能拿去增强 / 变体 / 放大 / 设为图生图（`canUseAsGenerationInput`，失败快照不行）。
   final bool canUseAsInput;
 }
@@ -758,13 +762,22 @@ class GenUpscale {
     this.available = true,
     this.options = const [],
     this.selected,
+    this.progress,
+    this.status,
   });
 
-  /// 云端放大的 Anlas；null = 本地放大（显示“0”）。
+  /// 云端放大的 Anlas；null = 本地放大（价格块写“免费”）。
   final int? cost;
 
   /// 正在放大：主按钮变“停止”。
   final bool running;
+
+  /// 放大进度 0–1（本地放大有阶段百分比时给）：主按钮换成进度圈 + 百分比，
+  /// 工具条下面出一条进度（[status] + 百分比 + 取消）。null = 只转圈。
+  final double? progress;
+
+  /// 进度条上的一句状态，例如“本机放大 · 推理中”（阶段：准备 / 编码 / 推理 / 解码）。
+  final String? status;
 
   /// 方案能用（本地模型装好了 / 云端价格算得出）。
   final bool available;
@@ -817,6 +830,7 @@ class GenCanvasData {
     this.positioning = false,
     this.generateShortcut = 'Ctrl+Enter',
     this.locked = false,
+    this.sheet,
   });
 
   /// 焦点组（历史栏点了哪一批 / 刚生成的那一批）；null = 画布上什么都没有。
@@ -844,7 +858,14 @@ class GenCanvasData {
 
   /// 生成中：增强 / 变体 / 放大 / 局部重绘这些会再发请求的按钮不可点。
   final bool locked;
+
+  /// 从工具条落下的面板开着哪个（对应按钮显示选中，箭头指着它）；面板本身由
+  /// [GenSlots.toolSheet] 给（画布工具的 `ToolsEnhanceSheet` / `ToolsUpscaleSheet`）。
+  final GenToolSheet? sheet;
 }
+
+/// 工具条落下的面板：增强（点“增强”）/ 放大设置（点放大旁的小箭头）。
+enum GenToolSheet { enhance, upscale }
 
 // ───────────────────────── 历史 ─────────────────────────
 
@@ -1026,12 +1047,17 @@ class GenSlots {
     this.dock,
     this.drop,
     this.historyDrag,
+    this.toolSheet,
   });
 
   final GenEditorBuilder editor;
 
   /// null = 用界面自带的舞台（只摆焦点组）。
   final GenCanvasBuilder? canvas;
+
+  /// [GenCanvasData.sheet] 非 null 时，摆在顶部工具条下面、水平居中的面板
+  /// （画布工具的增强面板 / 放大设置）。
+  final Widget? toolSheet;
 
   /// 块库侧栏（`BlocksDockWiring`），[GenLayout.dockOpen] 时显示。
   final Widget? dock;
@@ -1138,6 +1164,7 @@ class GenActions {
     required this.onFavorite,
     required this.onSendTo,
     required this.onReveal,
+    this.onUpscaleSettings,
   });
 
   /// 每个回调只把名字和参数交给 [log]（测试、预览用）。
@@ -1361,6 +1388,10 @@ class GenActions {
   /// 放大（放大中再点 = 取消）。
   final ValueChanged<String> onUpscale;
   final ValueChanged<String> onUpscaleOption;
+
+  /// 点放大旁的小箭头：开 / 关放大设置面板（[GenToolSheet.upscale]）。
+  /// null = 老做法，箭头弹方案菜单（[GenUpscale.options]）。
+  final VoidCallback? onUpscaleSettings;
   final ValueChanged<String> onSetInit;
   final ValueChanged<String> onEditImage;
   final ValueChanged<String> onInpaint;

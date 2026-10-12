@@ -14,17 +14,35 @@ import '../kit/ui_lib_controls.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
+import '../kit/ui_tip.dart';
 import 'gen_contract.dart';
 import 'gen_format.dart';
 import 'gen_page.dart';
 import 'gen_parts.dart';
 
 /// 画布：底纹 │ 图（自带舞台或接线方的画布引擎）│ 三条浮动工具条 / 空态 / 失败卡 / 定位板。
-class GenCanvas extends StatelessWidget {
+class GenCanvas extends StatefulWidget {
   const GenCanvas({super.key});
 
   /// 舞台留白（原型：图距顶 50、距底 70，左右至少 40）。
   static const pad = EdgeInsets.fromLTRB(40, 50, 40, 70);
+
+  /// 落下面板 / 放大进度条的顶边：工具条（顶 10、高 38）下面再空 12。
+  static const sheetTop = 60.0;
+
+  @override
+  State<GenCanvas> createState() => _GenCanvasState();
+
+  static Widget _tile(
+    BuildContext context,
+    GenTile tile, {
+    bool focused = false,
+  }) => GenCanvasTile(tile: tile, focused: focused);
+}
+
+class _GenCanvasState extends State<GenCanvas> {
+  final _enhanceLink = LayerLink();
+  final _upscaleLink = LayerLink();
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +51,9 @@ class GenCanvas extends StatelessWidget {
     final c = context.ui;
     final info = cv.info;
     final empty = cv.focus == null;
+    final bar = info != null && !empty;
+    final sheet = bar ? cv.sheet : null;
+    final strip = bar && cv.upscale.running && cv.upscale.progress != null;
     return ClipRect(
       key: const Key('gen-canvas'),
       child: Stack(
@@ -43,19 +64,59 @@ class GenCanvas extends StatelessWidget {
             const GenPositionBoard()
           else ...[
             if (scope.slots.canvas case final b?)
-              b(context, _tile)
+              b(context, GenCanvas._tile)
             else if (!empty)
               const _Stage(),
             if (empty && cv.error == null) const _Empty(),
-            if (info != null && !empty) ...[
-              const Positioned(
+            if (bar) ...[
+              Positioned(
                 top: 10,
                 left: 0,
                 right: 0,
-                child: Center(child: _TopBar()),
+                child: Center(
+                  child: _TopBar(
+                    enhanceLink: _enhanceLink,
+                    upscaleLink: _upscaleLink,
+                  ),
+                ),
               ),
               const Positioned(left: 16, bottom: 14, child: _InfoBar()),
               const Positioned(right: 16, bottom: 14, child: _ActionBar()),
+            ],
+            if (strip && sheet == null)
+              const Positioned(
+                top: GenCanvas.sheetTop,
+                left: 16,
+                right: 16,
+                child: Center(child: _UpscaleStrip()),
+              ),
+            if (sheet != null && scope.slots.toolSheet != null) ...[
+              Positioned(
+                top: GenCanvas.sheetTop,
+                left: 16,
+                right: 16,
+                bottom: 16,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: scope.slots.toolSheet,
+                ),
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                child: CompositedTransformFollower(
+                  link: sheet == GenToolSheet.enhance
+                      ? _enhanceLink
+                      : _upscaleLink,
+                  showWhenUnlinked: false,
+                  targetAnchor: Alignment.bottomCenter,
+                  followerAnchor: Alignment.topCenter,
+                  offset: const Offset(0, 9),
+                  child: const IgnorePointer(
+                    child: GenSheetCaret(key: Key('gen-sheet-caret')),
+                  ),
+                ),
+              ),
             ],
             if (cv.error case final e?)
               Positioned(
@@ -69,12 +130,6 @@ class GenCanvas extends StatelessWidget {
       ),
     );
   }
-
-  static Widget _tile(
-    BuildContext context,
-    GenTile tile, {
-    bool focused = false,
-  }) => GenCanvasTile(tile: tile, focused: focused);
 }
 
 /// 画布底纹：稀疏像素刻度（原型 `bg()`：200 方一格，正文色 10%）。
@@ -471,7 +526,11 @@ class _Empty extends StatelessWidget {
 
 /// 顶部工具条（原型 top `.float`）：增强 / 变体 / 放大（价格 + 方案箭头）‖ 设为图生图 / 编辑 / 局部重绘 / 发到画布工具。
 class _TopBar extends StatelessWidget {
-  const _TopBar();
+  const _TopBar({required this.enhanceLink, required this.upscaleLink});
+
+  /// 落下面板的尖角跟着这两个按钮。
+  final LayerLink enhanceLink;
+  final LayerLink upscaleLink;
 
   @override
   Widget build(BuildContext context) {
@@ -485,110 +544,349 @@ class _TopBar extends StatelessWidget {
     final input = info.canUseAsInput;
     final busy = cv.locked || !input;
     final up = cv.upscale;
-    Widget nai(String n, {double size = 17}) =>
-        GenNaiIcon(n, size: size, color: c.ink);
+    final settings = a.onUpscaleSettings;
+    Widget nai(String n, {double size = 17, Color? color}) =>
+        GenNaiIcon(n, size: size, color: color ?? c.ink);
+    Widget tip(String title, String body, [Widget? price]) =>
+        GenBarTipContent(title: title, body: body, price: price);
+    Widget cost(int? v) => v == null
+        ? Text(l.tools_free, style: UiTipStyle.number(context))
+        : GenAnlas('$v', size: 12, iconSize: 11, color: c.tipInk);
+    final ring = up.running && up.progress != null;
     return GenFloat(
       key: const Key('gen-bar-top'),
       children: [
-        GenFloatButton(
-          key: const Key('gen-enhance'),
-          tooltip: l.gen_enhance,
-          onTap: busy ? null : () => a.onEnhance(id),
-          child: nai('enhance'),
+        CompositedTransformTarget(
+          link: enhanceLink,
+          child: GenFloatButton(
+            key: const Key('gen-enhance'),
+            selected: cv.sheet == GenToolSheet.enhance,
+            richTip: tip(
+              l.gen_enhance,
+              l.tools_tipEnhance,
+              info.enhanceCost == null ? null : cost(info.enhanceCost),
+            ),
+            onTap: busy ? null : () => a.onEnhance(id),
+            child: nai(
+              'enhance',
+              color: cv.sheet == GenToolSheet.enhance ? c.accent : null,
+            ),
+          ),
         ),
         GenFloatButton(
           key: const Key('gen-variations'),
-          tooltip: info.variationsCost == null
-              ? l.gen_variations
-              : l.gen_variationsCost(info.variationsCost!),
+          richTip: tip(
+            l.gen_variations,
+            l.tools_tipVariations,
+            info.variationsCost == null ? null : cost(info.variationsCost),
+          ),
+          width: info.variationsCost == null ? 32 : null,
+          padding: info.variationsCost == null
+              ? null
+              : const EdgeInsets.symmetric(horizontal: 4),
           onTap: busy ? null : () => a.onVariations(id),
-          child: nai('variations'),
+          child: info.variationsCost == null
+              ? nai('variations')
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 5,
+                  children: [
+                    nai('variations'),
+                    Container(
+                      key: const Key('gen-variations-cost'),
+                      height: 22,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: c.control.withValues(alpha: .9),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: GenAnlas('${info.variationsCost}', iconSize: 10),
+                    ),
+                  ],
+                ),
         ),
         GenFloatButton(
           key: const Key('gen-upscale'),
           width: null,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          tooltip: up.running ? l.gen_upscaleStop : l.gen_upscale,
+          padding: EdgeInsets.only(left: 4, right: ring ? 6 : 4),
+          selected: ring || cv.sheet == GenToolSheet.upscale,
+          richTip: up.running
+              ? tip(l.gen_upscaleStop, l.tools_tipUpscaleRunning)
+              : tip(l.gen_upscale, l.tools_tipUpscale, cost(up.cost)),
           onTap: up.running || (!busy && up.available)
               ? () => a.onUpscale(id)
               : null,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 5,
-            children: [
-              if (up.running)
-                UiGlyph(UiGlyphs.stop, size: 14, filled: true, color: c.ink)
-              else
-                nai('upscale'),
-              Container(
-                height: 22,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: c.control.withValues(alpha: .9),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: up.running
-                    ? const SizedBox(
-                        width: 22,
-                        child: Center(child: UiSpinner(size: 12)),
+          child: ring
+              ? Row(
+                  key: const Key('gen-upscale-ring'),
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  children: [
+                    CustomPaint(
+                      size: const Size.square(18),
+                      painter: GenProgressRing(up.progress!, c.accent),
+                    ),
+                    Text(
+                      '${(up.progress! * 100).round()}%',
+                      style: UiText.mono(
+                        12,
+                        weight: FontWeight.w600,
+                        color: c.accent,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 5,
+                  children: [
+                    if (up.running)
+                      UiGlyph(
+                        UiGlyphs.stop,
+                        size: 14,
+                        filled: true,
+                        color: c.ink,
                       )
-                    : GenAnlas('${up.cost ?? 0}', iconSize: 10),
+                    else
+                      nai('upscale'),
+                    Container(
+                      height: 22,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: c.control.withValues(alpha: .9),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: up.running
+                          ? const SizedBox(
+                              width: 22,
+                              child: Center(child: UiSpinner(size: 12)),
+                            )
+                          : up.cost == null
+                          ? Text(
+                              l.tools_free,
+                              style: UiText.sans(
+                                12,
+                                weight: FontWeight.w700,
+                                color: c.ink,
+                                height: 1,
+                              ),
+                            )
+                          : GenAnlas('${up.cost}', iconSize: 10),
+                    ),
+                  ],
+                ),
+        ),
+        if (!ring)
+          Builder(
+            builder: (ctx) => CompositedTransformTarget(
+              link: upscaleLink,
+              child: GenFloatButton(
+                key: const Key('gen-upscale-menu'),
+                width: 22,
+                richTip: settings == null
+                    ? null
+                    : tip(l.gen_upscaleOptions, l.tools_tipUpscaleSettings),
+                tooltip: l.gen_upscaleOptions,
+                active: scope.controller.popoverTag == #upscale,
+                selected: cv.sheet == GenToolSheet.upscale,
+                onTap:
+                    settings ??
+                    (up.options.isEmpty
+                        ? null
+                        : () => scope.controller.openMenu(
+                            genBelow(ctx, dy: 8),
+                            [
+                              for (final o in up.options)
+                                UiMenuItem(
+                                  label: o.label,
+                                  trailing: o.detail,
+                                  checked: o.id == up.selected,
+                                  onTap: () => a.onUpscaleOption(o.id),
+                                ),
+                            ],
+                            tag: #upscale,
+                            width: 240,
+                          )),
+                child: UiGlyph(
+                  UiGlyphs.chevronDown,
+                  size: 13,
+                  color: cv.sheet == GenToolSheet.upscale ? c.accent : c.ink,
+                ),
               ),
-            ],
+            ),
           ),
-        ),
-        Builder(
-          builder: (ctx) => GenFloatButton(
-            key: const Key('gen-upscale-menu'),
-            width: 22,
-            tooltip: l.gen_upscaleOptions,
-            active: scope.controller.popoverTag == #upscale,
-            onTap: up.options.isEmpty
-                ? null
-                : () => scope.controller.openMenu(
-                    genBelow(ctx, dy: 8),
-                    [
-                      for (final o in up.options)
-                        UiMenuItem(
-                          label: o.label,
-                          trailing: o.detail,
-                          checked: o.id == up.selected,
-                          onTap: () => a.onUpscaleOption(o.id),
-                        ),
-                    ],
-                    tag: #upscale,
-                    width: 240,
-                  ),
-            child: UiGlyph(UiGlyphs.chevronDown, size: 13, color: c.ink),
-          ),
-        ),
         const GenFloatDivider(),
         GenFloatButton(
           key: const Key('gen-set-init'),
-          tooltip: l.gen_setInit,
+          richTip: tip(l.gen_setInit, l.tools_tipSetInit),
           onTap: input ? () => a.onSetInit(id) : null,
           child: nai('set-init'),
         ),
         GenFloatButton(
           key: const Key('gen-edit'),
-          tooltip: l.gen_editImage,
+          richTip: tip(l.gen_editImage, l.tools_tipEdit),
           onTap: input ? () => a.onEditImage(id) : null,
           child: nai('edit'),
         ),
         GenFloatButton(
           key: const Key('gen-inpaint'),
-          tooltip: l.gen_inpaint,
+          richTip: tip(l.gen_inpaint, l.tools_tipInpaint),
           onTap: busy ? null : () => a.onInpaint(id),
           child: nai('inpaint'),
         ),
         GenFloatButton(
           key: const Key('gen-send-tools'),
-          tooltip: l.gen_sendToTools,
+          richTip: tip(l.gen_sendToTools, l.tools_tipDirector),
           onTap: input ? () => a.onSendToTools(id) : null,
           child: nai('send-tools', size: 16),
         ),
       ],
+    );
+  }
+}
+
+/// 放大进度圈（原型 `uprun`）：强调色 25% 底圈 + 进度弧，中间一个小停止方块。
+class GenProgressRing extends CustomPainter {
+  const GenProgressRing(this.value, this.color);
+  final double value;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final k = size.width / 20;
+    final center = size.center(Offset.zero);
+    final p = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4 * k
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, 8 * k, p..color = color.withValues(alpha: .25));
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: 8 * k),
+      -math.pi / 2,
+      math.pi * 2 * value.clamp(0.0, 1.0),
+      false,
+      p..color = color,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: center, width: 5.6 * k, height: 5.6 * k),
+        Radius.circular(k),
+      ),
+      Paint()..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(GenProgressRing old) =>
+      old.value != value || old.color != color;
+}
+
+/// 放大进行中（原型 `upscaleRunStrip`）：工具条下面一条毛玻璃进度——状态 + 百分比 + 取消，
+/// 进度条，一句结果去向。
+class _UpscaleStrip extends StatelessWidget {
+  const _UpscaleStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final scope = GenScope.of(context);
+    final up = scope.data.canvas.upscale;
+    final l = context.l10n;
+    final v = up.progress!.clamp(0.0, 1.0);
+    return Container(
+      key: const Key('gen-upscale-strip'),
+      width: 340,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        color: c.raised.withValues(alpha: .9),
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(color: c.line.withValues(alpha: .8)),
+        boxShadow: [
+          BoxShadow(
+            color: GenFormat.shadow(c),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    text: up.status ?? l.gen_upscale,
+                    children: [
+                      TextSpan(
+                        text: '   ${(v * 100).round()}%',
+                        style: UiText.mono(12, color: c.muted),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(12, weight: FontWeight.w600, color: c.ink),
+                ),
+              ),
+              UiBtn(
+                key: const Key('gen-upscale-cancel'),
+                size: UiBtnSize.small,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                onTap: () =>
+                    scope.actions.onUpscale(scope.data.canvas.info!.tileId),
+                children: [Text(l.tools_cancel)],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 4,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: c.control,
+              borderRadius: BorderRadius.circular(2),
+            ),
+            alignment: Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: v,
+              heightFactor: 1,
+              child: ColoredBox(color: c.accent),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(l.tools_upscaleRunHint, style: UiText.sans(11, color: c.faint)),
+        ],
+      ),
+    );
+  }
+}
+
+/// 落下面板上方的小尖角：12 方旋转 45°，左上两条边描边，盖住面板顶边。
+class GenSheetCaret extends StatelessWidget {
+  const GenSheetCaret({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    return Transform.rotate(
+      angle: math.pi / 4,
+      child: Container(
+        width: 12,
+        height: 12,
+        decoration: BoxDecoration(
+          color: c.raised,
+          border: Border(
+            left: BorderSide(color: c.line),
+            top: BorderSide(color: c.line),
+          ),
+        ),
+      ),
     );
   }
 }

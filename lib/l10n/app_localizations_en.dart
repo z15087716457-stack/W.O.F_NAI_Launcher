@@ -18474,4 +18474,867 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gen_opImg2Img => 'Image to image';
+
+  @override
+  String get tools_free => 'Free';
+
+  @override
+  String get tools_localFree => 'Local · free';
+
+  @override
+  String tools_anlasN(Object count) {
+    return '$count Anlas';
+  }
+
+  @override
+  String get tools_cancel => 'Cancel';
+
+  @override
+  String get tools_close => 'Close';
+
+  @override
+  String get tools_done => 'Done';
+
+  @override
+  String get tools_reset => 'Reset';
+
+  @override
+  String get tools_apply => 'Apply';
+
+  @override
+  String get tools_retry => 'Retry';
+
+  @override
+  String get tools_optional => 'optional';
+
+  @override
+  String get tools_justNow => 'just now';
+
+  @override
+  String tools_minutesAgo(Object count) {
+    return '$count min ago';
+  }
+
+  @override
+  String tools_hoursAgo(Object count) {
+    return '$count h ago';
+  }
+
+  @override
+  String tools_monthDay(Object month, Object day) {
+    return '$month/$day';
+  }
+
+  @override
+  String get tools_useAsInit => 'Use as img2img base';
+
+  @override
+  String get tools_upscale => 'Upscale';
+
+  @override
+  String get tools_enhance => 'Enhance';
+
+  @override
+  String get tools_strength => 'Strength';
+
+  @override
+  String get tools_noise => 'Noise';
+
+  @override
+  String get tools_tipEnhance =>
+      'Redraws this image with the current prompt to add detail; can upscale too';
+
+  @override
+  String get tools_tipVariations =>
+      'Generates 4 similar images from this one\'s settings, without touching your prompt';
+
+  @override
+  String get tools_tipUpscale =>
+      'Upscales with your saved settings; the result appears as a new image';
+
+  @override
+  String get tools_tipUpscaleRunning => 'Upscaling — click to cancel';
+
+  @override
+  String get tools_tipUpscaleSettings =>
+      'Choose local or cloud, method, model and scale';
+
+  @override
+  String get tools_tipSetInit =>
+      'Puts this image into img2img as the base for the next generation';
+
+  @override
+  String get tools_tipEdit =>
+      'Paint, select and adjust colors; replaces the img2img base when done';
+
+  @override
+  String get tools_tipInpaint =>
+      'Mask the area to redraw; the rest stays as is';
+
+  @override
+  String get tools_tipDirector =>
+      'Background removal, line art, colorize, emotion fix and more';
+
+  @override
+  String get tools_upscaleRunHint =>
+      'The result joins the history and is selected unless you moved on';
+
+  @override
+  String get tools_enhanceSub =>
+      'Redraws this image with the current prompt to add detail; can upscale too';
+
+  @override
+  String get tools_enhanceScale => 'Upscale';
+
+  @override
+  String get tools_enhanceLocal => 'Local upscale';
+
+  @override
+  String get tools_enhanceLocalRow => 'Local';
+
+  @override
+  String tools_enhanceOutLocal(Object size, Object factor) {
+    return '$size → local $factor';
+  }
+
+  @override
+  String get tools_enhanceMagnitude => 'Amount';
+
+  @override
+  String get tools_magLight => 'subtle';
+
+  @override
+  String get tools_magMedium => 'medium';
+
+  @override
+  String get tools_magStrong => 'strong';
+
+  @override
+  String tools_enhanceValues(Object strength, Object noise) {
+    return 'Strength $strength · Noise $noise';
+  }
+
+  @override
+  String get tools_enhanceCustomTag => 'Custom';
+
+  @override
+  String get tools_enhanceCustom => 'Custom strength and noise';
+
+  @override
+  String get tools_enhanceCustomHint =>
+      'Higher strength changes more; noise adds detail but can get messy';
+
+  @override
+  String get tools_localHint =>
+      'Each image is upscaled locally after generation, no extra Anlas';
+
+  @override
+  String get tools_localNotSet => 'No local upscale model selected';
+
+  @override
+  String get tools_upscaleSettings => 'Upscale settings';
+
+  @override
+  String tools_enhanceFooter(Object model, Object steps) {
+    return 'Current prompt · $model · $steps steps';
+  }
+
+  @override
+  String get tools_enhanceRun => 'Enhance';
+
+  @override
+  String get tools_enhanceRunLocal => 'Enhance + local upscale';
+
+  @override
+  String get tools_upscaleSub =>
+      'The upscaled image appears as a new image; the original and img2img base stay untouched';
+
+  @override
+  String get tools_upscaleMethod => 'Method';
+
+  @override
+  String get tools_upscaleModel => 'Model';
+
+  @override
+  String get tools_upscaleManage => 'Manage models';
+
+  @override
+  String get tools_upscaleScale => 'Scale';
+
+  @override
+  String get tools_upscaleAdvanced => 'Advanced';
+
+  @override
+  String get tools_upscaleFooter =>
+      'Settings are remembered; the toolbar Upscale button uses them';
+
+  @override
+  String get tools_modelMissing => 'not installed';
+
+  @override
+  String get tools_modelDownloading => 'downloading';
+
+  @override
+  String get tools_modelNone => 'None';
+
+  @override
+  String get tools_edit => 'Edit image';
+
+  @override
+  String get tools_editSub => 'Replaces the img2img base when done';
+
+  @override
+  String get tools_inpaint => 'Inpaint';
+
+  @override
+  String get tools_inpaintSub => 'Only the masked area is redrawn';
+
+  @override
+  String get tools_backEsc => 'Back (Esc)';
+
+  @override
+  String get tools_panel => 'Panel';
+
+  @override
+  String get tools_undo => 'Undo';
+
+  @override
+  String get tools_redo => 'Redo';
+
+  @override
+  String get tools_download => 'Download PNG';
+
+  @override
+  String get tools_zoomIn => 'Zoom in';
+
+  @override
+  String get tools_zoomOut => 'Zoom out';
+
+  @override
+  String get tools_zoomFit => 'Fit to window';
+
+  @override
+  String get tools_applyMask => 'Apply mask';
+
+  @override
+  String get tools_applyMaskSub => 'Back to Generate; you start it';
+
+  @override
+  String get tools_applyGenerate => 'Apply and generate';
+
+  @override
+  String get tools_applyGenerateSub =>
+      'Back to Generate and start inpainting now';
+
+  @override
+  String get tools_discardTitle => 'Discard changes?';
+
+  @override
+  String get tools_discardBody =>
+      'Strokes, masks and layer changes that were not applied will be lost.';
+
+  @override
+  String get tools_discard => 'Discard';
+
+  @override
+  String get tools_keepEditing => 'Keep editing';
+
+  @override
+  String get tools_toolBrush => 'Brush';
+
+  @override
+  String get tools_toolEraser => 'Eraser';
+
+  @override
+  String get tools_toolFill => 'Fill';
+
+  @override
+  String get tools_toolBlur => 'Blur';
+
+  @override
+  String get tools_toolStamp => 'Clone stamp';
+
+  @override
+  String get tools_toolSelect => 'Rectangle select';
+
+  @override
+  String get tools_toolLasso => 'Lasso';
+
+  @override
+  String get tools_toolPicker => 'Eyedropper';
+
+  @override
+  String get tools_toolMaskBrush => 'Mask brush';
+
+  @override
+  String get tools_toolMaskEraser => 'Erase mask';
+
+  @override
+  String get tools_toolFocus => 'Focus area';
+
+  @override
+  String get tools_clearMask => 'Clear mask';
+
+  @override
+  String get tools_expand => 'Expand edges';
+
+  @override
+  String get tools_adjust => 'Adjust colors';
+
+  @override
+  String get tools_resize => 'Canvas size';
+
+  @override
+  String get tools_size => 'Size';
+
+  @override
+  String get tools_opacity => 'Opacity';
+
+  @override
+  String get tools_intensity => 'Strength';
+
+  @override
+  String get tools_tolerance => 'Tolerance';
+
+  @override
+  String get tools_tip => 'Tip';
+
+  @override
+  String get tools_tipHard => 'Hard';
+
+  @override
+  String get tools_tipSoft => 'Soft';
+
+  @override
+  String get tools_tipSquare => 'Square';
+
+  @override
+  String get tools_pressure => 'Pressure';
+
+  @override
+  String get tools_squareBrush => 'Square brush';
+
+  @override
+  String get tools_hintStamp => 'Alt-click to sample, then paint elsewhere';
+
+  @override
+  String get tools_hintSelect =>
+      'Drag to select; Alt+L copies to a new layer, Delete clears it';
+
+  @override
+  String get tools_hintPicker =>
+      'Click to pick a color; hold Alt while painting to pick temporarily';
+
+  @override
+  String get tools_hintMaskFill =>
+      'Click to fill a similar-colored area with mask';
+
+  @override
+  String get tools_focusContext => 'Min context';
+
+  @override
+  String get tools_hintFocus =>
+      'Box the part to refine; the model only sees the box and a margin, so small faces and hands come out sharper';
+
+  @override
+  String get tools_clearFocus => 'Clear focus';
+
+  @override
+  String get tools_edgeTop => 'Top';
+
+  @override
+  String get tools_edgeBottom => 'Bottom';
+
+  @override
+  String get tools_edgeLeft => 'Left';
+
+  @override
+  String get tools_edgeRight => 'Right';
+
+  @override
+  String tools_hintExpand(Object step) {
+    return 'You can also drag the canvas edges; $step px steps';
+  }
+
+  @override
+  String get tools_maskLook => 'Mask look';
+
+  @override
+  String get tools_maskBorder => 'Outline';
+
+  @override
+  String get tools_patternSolid => 'Solid';
+
+  @override
+  String get tools_patternLines => 'Lines';
+
+  @override
+  String get tools_patternCrosshatch => 'Crosshatch';
+
+  @override
+  String get tools_patternGrid => 'Grid';
+
+  @override
+  String get tools_patternDots => 'Dots';
+
+  @override
+  String get tools_patternChecker => 'Checker';
+
+  @override
+  String get tools_patternHearts => 'Hearts';
+
+  @override
+  String get tools_colorPrimary => 'Foreground';
+
+  @override
+  String get tools_colorSecondary => 'Background';
+
+  @override
+  String get tools_moreColors => 'More colors…';
+
+  @override
+  String get tools_statusHint =>
+      'Space to pan · Wheel to zoom · Ctrl+0 fit · 1 actual size';
+
+  @override
+  String get tools_statusGrid => 'Mask snaps to an 8 px grid';
+
+  @override
+  String get tools_statusMask => 'Mask';
+
+  @override
+  String get tools_inpaintSettings => 'Inpaint settings';
+
+  @override
+  String get tools_inpaintStrength => 'Strength';
+
+  @override
+  String get tools_inpaintStrengthHint => 'Lower stays closer to the original';
+
+  @override
+  String get tools_mask => 'Mask';
+
+  @override
+  String tools_maskCoverage(Object count) {
+    return 'of the image · $count areas';
+  }
+
+  @override
+  String get tools_focusNone => 'Not set (whole image)';
+
+  @override
+  String tools_focusContextShort(Object value) {
+    return '· context $value';
+  }
+
+  @override
+  String get tools_output => 'Output';
+
+  @override
+  String get tools_expandTag => 'Expanded';
+
+  @override
+  String get tools_layers => 'Layers';
+
+  @override
+  String get tools_addLayer => 'Add layer';
+
+  @override
+  String get tools_add3dLayer => 'Add 3D layer';
+
+  @override
+  String get tools_layerHint => 'Alt+L copies the selection to a new layer';
+
+  @override
+  String get tools_hideLayer => 'Hide layer';
+
+  @override
+  String get tools_showLayer => 'Show layer';
+
+  @override
+  String get tools_layerUp => 'Move up';
+
+  @override
+  String get tools_layerDown => 'Move down';
+
+  @override
+  String get tools_layerDuplicate => 'Duplicate';
+
+  @override
+  String get tools_layerMerge => 'Merge down';
+
+  @override
+  String get tools_layerDelete => 'Delete layer';
+
+  @override
+  String get tools_currentLayer => 'Current layer';
+
+  @override
+  String get tools_hue => 'Hue';
+
+  @override
+  String get tools_saturation => 'Saturation';
+
+  @override
+  String get tools_brightness => 'Brightness';
+
+  @override
+  String get tools_canvas => 'Canvas';
+
+  @override
+  String get tools_resizeCanvas => 'Resize';
+
+  @override
+  String get tools_inpaintNote =>
+      'After applying you return to Generate with Inpaint selected; or use “Apply and generate” in the top-right menu';
+
+  @override
+  String get tools_director => 'Director tools';
+
+  @override
+  String get tools_backGen => 'Generate';
+
+  @override
+  String get tools_dtGroupClean => 'Clean up';
+
+  @override
+  String get tools_dtGroupLine => 'Lines';
+
+  @override
+  String get tools_dtGroupColor => 'Color & expression';
+
+  @override
+  String get tools_dtGroupPixel => 'Pixel';
+
+  @override
+  String get tools_dtRemoveBg => 'Remove background';
+
+  @override
+  String get tools_dtRemoveBgDesc =>
+      'Cuts out the subject: transparent, background and composite';
+
+  @override
+  String get tools_dtDeclutter => 'Declutter';
+
+  @override
+  String get tools_dtDeclutterDesc => 'Removes stray lines and noise';
+
+  @override
+  String get tools_dtLineArt => 'Line art';
+
+  @override
+  String get tools_dtLineArtDesc => 'Extracts clean black-and-white line art';
+
+  @override
+  String get tools_dtSketch => 'Sketch';
+
+  @override
+  String get tools_dtSketchDesc => 'Turns it into a pencil sketch';
+
+  @override
+  String get tools_dtColorize => 'Colorize';
+
+  @override
+  String get tools_dtColorizeDesc =>
+      'Colors line art or sketches; prompt optional';
+
+  @override
+  String get tools_dtEmotion => 'Emotion fix';
+
+  @override
+  String get tools_dtEmotionDesc =>
+      'Changes the expression, adjustable strength';
+
+  @override
+  String get tools_dtPixelSnap => 'Pixel snap';
+
+  @override
+  String get tools_dtPixelSnapDesc =>
+      'Snaps to a pixel grid and reduces the palette; runs locally';
+
+  @override
+  String get tools_dtOpusNote =>
+      'With Opus these are free up to 1 MP; background removal always costs Anlas';
+
+  @override
+  String get tools_input => 'Input';
+
+  @override
+  String get tools_compareSide => 'Side by side';
+
+  @override
+  String get tools_compareWipe => 'Wipe';
+
+  @override
+  String get tools_compareResult => 'Result only';
+
+  @override
+  String get tools_fit => 'Fit';
+
+  @override
+  String get tools_actualSize => 'Actual size 100%';
+
+  @override
+  String get tools_original => 'Original';
+
+  @override
+  String get tools_emptyRun => 'Press Run to start';
+
+  @override
+  String get tools_emptyEmotion => 'Pick an expression, then Run';
+
+  @override
+  String get tools_emptyBody => 'The result appears here next to the original';
+
+  @override
+  String tools_running(Object tool) {
+    return 'Running $tool…';
+  }
+
+  @override
+  String get tools_runningBody =>
+      'Usually a few seconds; results also go to the Generate history';
+
+  @override
+  String get tools_runFailed => 'Run failed';
+
+  @override
+  String get tools_noInput => 'Add an image first';
+
+  @override
+  String get tools_noInputBody =>
+      'Drag one in, paste with Ctrl+V, or pick from the Generate history';
+
+  @override
+  String get tools_noResult => 'No result yet';
+
+  @override
+  String get tools_continue => 'Process further';
+
+  @override
+  String get tools_copy => 'Copy';
+
+  @override
+  String get tools_saveGallery => 'Save to gallery';
+
+  @override
+  String get tools_queue => 'Input queue';
+
+  @override
+  String tools_queueCount(Object count) {
+    return '$count';
+  }
+
+  @override
+  String get tools_queueHint =>
+      'Plus: import files or pick from history; you can also drag in or paste';
+
+  @override
+  String get tools_importFiles => 'Import files';
+
+  @override
+  String get tools_fromHistory => 'From Generate history';
+
+  @override
+  String get tools_paste => 'Paste';
+
+  @override
+  String get tools_removeInput => 'Remove from queue';
+
+  @override
+  String get tools_dtOptions => 'Options';
+
+  @override
+  String get tools_dtNoOptionsBg =>
+      'Background removal has no options. You get transparent, background and composite images; switch between them under the result.';
+
+  @override
+  String get tools_dtNoOptionsDeclutter =>
+      'Declutter has no options. For line art, use Line art.';
+
+  @override
+  String get tools_dtNoOptionsLineArt =>
+      'Line art has no options. To color it, use Process further, then Colorize.';
+
+  @override
+  String get tools_dtNoOptionsSketch =>
+      'Sketch has no options. For cleaner lines use Line art; to color, use Process further, then Colorize.';
+
+  @override
+  String get tools_dtEmotionLabel => 'Expression';
+
+  @override
+  String tools_dtEmotionMore(Object count) {
+    return '$count more';
+  }
+
+  @override
+  String get tools_dtEmotionLess => 'Show less';
+
+  @override
+  String get tools_dtStrength => 'Strength';
+
+  @override
+  String get tools_defry0 => 'Normal';
+
+  @override
+  String get tools_defry1 => 'Slightly';
+
+  @override
+  String get tools_defry2 => 'Weak';
+
+  @override
+  String get tools_defry3 => 'Weaker';
+
+  @override
+  String get tools_defry4 => 'Very weak';
+
+  @override
+  String get tools_defry5 => 'Weakest';
+
+  @override
+  String get tools_dtEmotionStrengthHint =>
+      'Weaker stays closer to the original expression';
+
+  @override
+  String get tools_dtColorizeStrengthHint =>
+      'Weaker stays closer to the original lines';
+
+  @override
+  String get tools_dtPrompt => 'Extra prompt';
+
+  @override
+  String get tools_dtPromptHint => 'English tags, comma separated';
+
+  @override
+  String get tools_dtEmotionPromptHint =>
+      'Picking an expression fills in common tags; you can edit them';
+
+  @override
+  String get tools_dtColorizePromptHint =>
+      'Describe the colors, e.g. blue dress, silver hair';
+
+  @override
+  String get tools_dtPalette => 'Palette';
+
+  @override
+  String get tools_dtPaletteOff => 'Off';
+
+  @override
+  String get tools_dtPaletteAuto => 'Auto';
+
+  @override
+  String get tools_dtPaletteCustom => 'Custom';
+
+  @override
+  String get tools_dtColors => 'Colors';
+
+  @override
+  String get tools_dtAvoidRefine => 'Avoid over-refining';
+
+  @override
+  String get tools_dtAvoidRefineHint =>
+      'Keeps the coarse grid when finer grids barely help';
+
+  @override
+  String get tools_dtPixelUpscale => 'Upscale to original size';
+
+  @override
+  String get tools_dtPixelUpscaleHint => 'When off, outputs one pixel per cell';
+
+  @override
+  String tools_runTool(Object tool) {
+    return 'Run $tool';
+  }
+
+  @override
+  String get tools_runHint => 'Run · processes the current input';
+
+  @override
+  String get tools_runNeedInput => 'Add an input below first';
+
+  @override
+  String get tools_results => 'Results';
+
+  @override
+  String get tools_resultsEmpty => 'Results you run will be listed here';
+
+  @override
+  String get tools_resultsHint =>
+      'Click a result to view it again; results also go to the Generate history — save keepers to the gallery';
+
+  @override
+  String get tools_reuse => 'Reuse settings';
+
+  @override
+  String get tools_emoNeutral => 'Neutral';
+
+  @override
+  String get tools_emoHappy => 'Happy';
+
+  @override
+  String get tools_emoSad => 'Sad';
+
+  @override
+  String get tools_emoAngry => 'Angry';
+
+  @override
+  String get tools_emoScared => 'Scared';
+
+  @override
+  String get tools_emoSurprised => 'Surprised';
+
+  @override
+  String get tools_emoTired => 'Tired';
+
+  @override
+  String get tools_emoExcited => 'Excited';
+
+  @override
+  String get tools_emoNervous => 'Nervous';
+
+  @override
+  String get tools_emoThinking => 'Thinking';
+
+  @override
+  String get tools_emoConfused => 'Confused';
+
+  @override
+  String get tools_emoShy => 'Shy';
+
+  @override
+  String get tools_emoDisgusted => 'Disgusted';
+
+  @override
+  String get tools_emoSmug => 'Smug';
+
+  @override
+  String get tools_emoBored => 'Bored';
+
+  @override
+  String get tools_emoLaughing => 'Laughing';
+
+  @override
+  String get tools_emoIrritated => 'Irritated';
+
+  @override
+  String get tools_emoAroused => 'Aroused';
+
+  @override
+  String get tools_emoEmbarrassed => 'Embarrassed';
+
+  @override
+  String get tools_emoWorried => 'Worried';
+
+  @override
+  String get tools_emoLove => 'Love';
+
+  @override
+  String get tools_emoDetermined => 'Determined';
+
+  @override
+  String get tools_emoHurt => 'Hurt';
+
+  @override
+  String get tools_emoPlayful => 'Playful';
 }

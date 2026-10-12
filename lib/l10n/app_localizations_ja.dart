@@ -17965,4 +17965,831 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get gen_opImg2Img => 'img2img';
+
+  @override
+  String get tools_free => '無料';
+
+  @override
+  String get tools_localFree => 'ローカル · 無料';
+
+  @override
+  String tools_anlasN(Object count) {
+    return '$count Anlas';
+  }
+
+  @override
+  String get tools_cancel => 'キャンセル';
+
+  @override
+  String get tools_close => '閉じる';
+
+  @override
+  String get tools_done => '完了';
+
+  @override
+  String get tools_reset => 'リセット';
+
+  @override
+  String get tools_apply => '適用';
+
+  @override
+  String get tools_retry => '再試行';
+
+  @override
+  String get tools_optional => '任意';
+
+  @override
+  String get tools_justNow => 'たった今';
+
+  @override
+  String tools_minutesAgo(Object count) {
+    return '$count 分前';
+  }
+
+  @override
+  String tools_hoursAgo(Object count) {
+    return '$count 時間前';
+  }
+
+  @override
+  String tools_monthDay(Object month, Object day) {
+    return '$month月$day日';
+  }
+
+  @override
+  String get tools_useAsInit => 'img2img のベースにする';
+
+  @override
+  String get tools_upscale => 'アップスケール';
+
+  @override
+  String get tools_enhance => 'エンハンス';
+
+  @override
+  String get tools_strength => '強度';
+
+  @override
+  String get tools_noise => 'ノイズ';
+
+  @override
+  String get tools_tipEnhance => '現在のプロンプトでこの画像を描き直して細部を足します。拡大も可能';
+
+  @override
+  String get tools_tipVariations => 'この画像の設定で似た画像を 4 枚生成します。プロンプトと設定は変わりません';
+
+  @override
+  String get tools_tipUpscale => '保存した設定でアップスケール。結果は新しい画像として表示されます';
+
+  @override
+  String get tools_tipUpscaleRunning => 'アップスケール中。クリックでキャンセル';
+
+  @override
+  String get tools_tipUpscaleSettings => 'ローカル / クラウド、方式、モデル、倍率を選ぶ';
+
+  @override
+  String get tools_tipSetInit => 'この画像を img2img に入れて次の生成のベースにします';
+
+  @override
+  String get tools_tipEdit => 'ブラシ・選択・色調整で編集し、完了後 img2img のベースを置き換えます';
+
+  @override
+  String get tools_tipInpaint => '描き直す範囲をマスクで指定。それ以外はそのまま';
+
+  @override
+  String get tools_tipDirector => '背景除去・線画・着色・表情修正などの仕上げツール';
+
+  @override
+  String get tools_upscaleRunHint => '完了した画像は履歴に追加され、他を選んでいなければ自動で選択されます';
+
+  @override
+  String get tools_enhanceSub => '現在のプロンプトで描き直して細部を足します。拡大も可能';
+
+  @override
+  String get tools_enhanceScale => '拡大';
+
+  @override
+  String get tools_enhanceLocal => 'ローカル拡大';
+
+  @override
+  String get tools_enhanceLocalRow => 'ローカル';
+
+  @override
+  String tools_enhanceOutLocal(Object size, Object factor) {
+    return '$size → ローカル $factor';
+  }
+
+  @override
+  String get tools_enhanceMagnitude => '強さ';
+
+  @override
+  String get tools_magLight => '弱';
+
+  @override
+  String get tools_magMedium => '中';
+
+  @override
+  String get tools_magStrong => '強';
+
+  @override
+  String tools_enhanceValues(Object strength, Object noise) {
+    return '強度 $strength · ノイズ $noise';
+  }
+
+  @override
+  String get tools_enhanceCustomTag => 'カスタム';
+
+  @override
+  String get tools_enhanceCustom => '強度とノイズを指定';
+
+  @override
+  String get tools_enhanceCustomHint => '強度が高いほど大きく変わり、ノイズは細部を足しますが荒れやすくなります';
+
+  @override
+  String get tools_localHint => '生成後に各画像をローカルで拡大します。追加の Anlas は不要';
+
+  @override
+  String get tools_localNotSet => 'ローカル拡大モデル未選択';
+
+  @override
+  String get tools_upscaleSettings => 'アップスケール設定';
+
+  @override
+  String tools_enhanceFooter(Object model, Object steps) {
+    return '現在のプロンプト · $model · $steps ステップ';
+  }
+
+  @override
+  String get tools_enhanceRun => 'エンハンス';
+
+  @override
+  String get tools_enhanceRunLocal => 'エンハンス + ローカル拡大';
+
+  @override
+  String get tools_upscaleSub => '拡大結果は新しい画像として表示され、元画像と img2img のベースは変わりません';
+
+  @override
+  String get tools_upscaleMethod => '方式';
+
+  @override
+  String get tools_upscaleModel => 'モデル';
+
+  @override
+  String get tools_upscaleManage => 'モデル管理';
+
+  @override
+  String get tools_upscaleScale => '倍率';
+
+  @override
+  String get tools_upscaleAdvanced => '詳細設定';
+
+  @override
+  String get tools_upscaleFooter => '設定は保存され、ツールバーの「アップスケール」はこの設定で実行します';
+
+  @override
+  String get tools_modelMissing => '未インストール';
+
+  @override
+  String get tools_modelDownloading => 'ダウンロード中';
+
+  @override
+  String get tools_modelNone => '未選択';
+
+  @override
+  String get tools_edit => '画像を編集';
+
+  @override
+  String get tools_editSub => '完了すると img2img のベースを置き換えます';
+
+  @override
+  String get tools_inpaint => 'インペイント';
+
+  @override
+  String get tools_inpaintSub => 'マスクした部分だけ描き直します';
+
+  @override
+  String get tools_backEsc => '戻る（Esc）';
+
+  @override
+  String get tools_panel => 'パネル';
+
+  @override
+  String get tools_undo => '元に戻す';
+
+  @override
+  String get tools_redo => 'やり直す';
+
+  @override
+  String get tools_download => 'PNG をダウンロード';
+
+  @override
+  String get tools_zoomIn => 'ズームイン';
+
+  @override
+  String get tools_zoomOut => 'ズームアウト';
+
+  @override
+  String get tools_zoomFit => 'ウィンドウに合わせる';
+
+  @override
+  String get tools_applyMask => 'マスクを適用';
+
+  @override
+  String get tools_applyMaskSub => '生成ページに戻り、自分で生成';
+
+  @override
+  String get tools_applyGenerate => '適用して生成';
+
+  @override
+  String get tools_applyGenerateSub => '生成ページに戻ってすぐ描き直し開始';
+
+  @override
+  String get tools_discardTitle => '変更を破棄しますか？';
+
+  @override
+  String get tools_discardBody => '適用していないストローク・マスク・レイヤーの変更は失われます。';
+
+  @override
+  String get tools_discard => '破棄';
+
+  @override
+  String get tools_keepEditing => '編集を続ける';
+
+  @override
+  String get tools_toolBrush => 'ブラシ';
+
+  @override
+  String get tools_toolEraser => '消しゴム';
+
+  @override
+  String get tools_toolFill => '塗りつぶし';
+
+  @override
+  String get tools_toolBlur => 'ぼかし';
+
+  @override
+  String get tools_toolStamp => 'コピースタンプ';
+
+  @override
+  String get tools_toolSelect => '矩形選択';
+
+  @override
+  String get tools_toolLasso => '投げ縄';
+
+  @override
+  String get tools_toolPicker => 'スポイト';
+
+  @override
+  String get tools_toolMaskBrush => 'マスクを描く';
+
+  @override
+  String get tools_toolMaskEraser => 'マスクを消す';
+
+  @override
+  String get tools_toolFocus => 'フォーカス範囲';
+
+  @override
+  String get tools_clearMask => 'マスクをクリア';
+
+  @override
+  String get tools_expand => '端を拡張';
+
+  @override
+  String get tools_adjust => '色調整';
+
+  @override
+  String get tools_resize => 'キャンバスサイズ';
+
+  @override
+  String get tools_size => 'サイズ';
+
+  @override
+  String get tools_opacity => '不透明度';
+
+  @override
+  String get tools_intensity => '強さ';
+
+  @override
+  String get tools_tolerance => '許容値';
+
+  @override
+  String get tools_tip => '先端';
+
+  @override
+  String get tools_tipHard => '硬';
+
+  @override
+  String get tools_tipSoft => '軟';
+
+  @override
+  String get tools_tipSquare => '角';
+
+  @override
+  String get tools_pressure => '筆圧';
+
+  @override
+  String get tools_squareBrush => '四角ブラシ';
+
+  @override
+  String get tools_hintStamp => 'Alt + クリックで取得し、別の場所に塗ります';
+
+  @override
+  String get tools_hintSelect => 'ドラッグで選択。Alt+L で新規レイヤーにコピー、Delete で消去';
+
+  @override
+  String get tools_hintPicker => 'クリックで色を取得。ブラシ中も Alt で一時的に取得できます';
+
+  @override
+  String get tools_hintMaskFill => 'クリックで似た色の範囲をマスクで塗ります';
+
+  @override
+  String get tools_focusContext => '最小コンテキスト';
+
+  @override
+  String get tools_hintFocus => '仕上げたい部分を囲むと、モデルは枠内と周囲だけを見るので小さな顔や手がきれいになります';
+
+  @override
+  String get tools_clearFocus => 'フォーカス解除';
+
+  @override
+  String get tools_edgeTop => '上';
+
+  @override
+  String get tools_edgeBottom => '下';
+
+  @override
+  String get tools_edgeLeft => '左';
+
+  @override
+  String get tools_edgeRight => '右';
+
+  @override
+  String tools_hintExpand(Object step) {
+    return 'キャンバスの端をドラッグしても可。$step px 単位';
+  }
+
+  @override
+  String get tools_maskLook => 'マスク表示';
+
+  @override
+  String get tools_maskBorder => '輪郭線';
+
+  @override
+  String get tools_patternSolid => '単色';
+
+  @override
+  String get tools_patternLines => '斜線';
+
+  @override
+  String get tools_patternCrosshatch => 'クロスハッチ';
+
+  @override
+  String get tools_patternGrid => 'グリッド';
+
+  @override
+  String get tools_patternDots => 'ドット';
+
+  @override
+  String get tools_patternChecker => '市松';
+
+  @override
+  String get tools_patternHearts => 'ハート';
+
+  @override
+  String get tools_colorPrimary => '描画色';
+
+  @override
+  String get tools_colorSecondary => '背景色';
+
+  @override
+  String get tools_moreColors => 'その他の色…';
+
+  @override
+  String get tools_statusHint => 'スペースで移動 · ホイールでズーム · Ctrl+0 全体 · 1 実寸';
+
+  @override
+  String get tools_statusGrid => 'マスクは 8 px グリッドに揃います';
+
+  @override
+  String get tools_statusMask => 'マスク';
+
+  @override
+  String get tools_inpaintSettings => 'インペイント設定';
+
+  @override
+  String get tools_inpaintStrength => '強度';
+
+  @override
+  String get tools_inpaintStrengthHint => '低いほど元画像に近くなります';
+
+  @override
+  String get tools_mask => 'マスク';
+
+  @override
+  String tools_maskCoverage(Object count) {
+    return 'の範囲 · $count か所';
+  }
+
+  @override
+  String get tools_focusNone => '未設定（画像全体）';
+
+  @override
+  String tools_focusContextShort(Object value) {
+    return '· コンテキスト $value';
+  }
+
+  @override
+  String get tools_output => '出力';
+
+  @override
+  String get tools_expandTag => '拡張';
+
+  @override
+  String get tools_layers => 'レイヤー';
+
+  @override
+  String get tools_addLayer => 'レイヤーを追加';
+
+  @override
+  String get tools_add3dLayer => '3D レイヤーを追加';
+
+  @override
+  String get tools_layerHint => 'Alt+L で選択範囲を新規レイヤーにコピー';
+
+  @override
+  String get tools_hideLayer => 'レイヤーを隠す';
+
+  @override
+  String get tools_showLayer => 'レイヤーを表示';
+
+  @override
+  String get tools_layerUp => '上へ';
+
+  @override
+  String get tools_layerDown => '下へ';
+
+  @override
+  String get tools_layerDuplicate => '複製';
+
+  @override
+  String get tools_layerMerge => '下と結合';
+
+  @override
+  String get tools_layerDelete => 'レイヤーを削除';
+
+  @override
+  String get tools_currentLayer => '現在のレイヤー';
+
+  @override
+  String get tools_hue => '色相';
+
+  @override
+  String get tools_saturation => '彩度';
+
+  @override
+  String get tools_brightness => '明るさ';
+
+  @override
+  String get tools_canvas => 'キャンバス';
+
+  @override
+  String get tools_resizeCanvas => 'サイズ変更';
+
+  @override
+  String get tools_inpaintNote =>
+      '適用すると生成ページに戻り「インペイント」に切り替わります。右上メニューの「適用して生成」ですぐ実行もできます';
+
+  @override
+  String get tools_director => 'ディレクターツール';
+
+  @override
+  String get tools_backGen => '生成';
+
+  @override
+  String get tools_dtGroupClean => 'クリーンアップ';
+
+  @override
+  String get tools_dtGroupLine => '線';
+
+  @override
+  String get tools_dtGroupColor => '着色と表情';
+
+  @override
+  String get tools_dtGroupPixel => 'ピクセル';
+
+  @override
+  String get tools_dtRemoveBg => '背景除去';
+
+  @override
+  String get tools_dtRemoveBgDesc => '人物を切り抜き、透過・背景・合成の 3 枚を出力';
+
+  @override
+  String get tools_dtDeclutter => '線の整理';
+
+  @override
+  String get tools_dtDeclutterDesc => '余分な線やノイズを取り除きます';
+
+  @override
+  String get tools_dtLineArt => '線画抽出';
+
+  @override
+  String get tools_dtLineArtDesc => 'きれいな白黒の線画を抽出';
+
+  @override
+  String get tools_dtSketch => 'スケッチ化';
+
+  @override
+  String get tools_dtSketchDesc => '鉛筆スケッチ風にします';
+
+  @override
+  String get tools_dtColorize => '着色';
+
+  @override
+  String get tools_dtColorizeDesc => '線画やスケッチに着色。プロンプト指定可';
+
+  @override
+  String get tools_dtEmotion => '表情修正';
+
+  @override
+  String get tools_dtEmotionDesc => '表情を変更。強さ調整可';
+
+  @override
+  String get tools_dtPixelSnap => 'ピクセル整列';
+
+  @override
+  String get tools_dtPixelSnapDesc => 'ピクセルグリッドに揃えて減色。ローカル処理';
+
+  @override
+  String get tools_dtOpusNote => 'Opus なら 1 MP 以内は無料。背景除去は常に Anlas がかかります';
+
+  @override
+  String get tools_input => '入力';
+
+  @override
+  String get tools_compareSide => '並べる';
+
+  @override
+  String get tools_compareWipe => 'スライド比較';
+
+  @override
+  String get tools_compareResult => '結果のみ';
+
+  @override
+  String get tools_fit => '全体';
+
+  @override
+  String get tools_actualSize => '実寸 100%';
+
+  @override
+  String get tools_original => '元画像';
+
+  @override
+  String get tools_emptyRun => '「実行」で開始';
+
+  @override
+  String get tools_emptyEmotion => '表情を選んで「実行」';
+
+  @override
+  String get tools_emptyBody => '結果はここに元画像と並べて表示されます';
+
+  @override
+  String tools_running(Object tool) {
+    return '$toolを実行中…';
+  }
+
+  @override
+  String get tools_runningBody => '通常は数秒です。結果は生成ページの履歴にも入ります';
+
+  @override
+  String get tools_runFailed => '実行に失敗しました';
+
+  @override
+  String get tools_noInput => 'まず画像を追加してください';
+
+  @override
+  String get tools_noInputBody => 'ドラッグ、Ctrl+V で貼り付け、または生成履歴から選択';
+
+  @override
+  String get tools_noResult => 'まだ結果はありません';
+
+  @override
+  String get tools_continue => 'さらに処理';
+
+  @override
+  String get tools_copy => 'コピー';
+
+  @override
+  String get tools_saveGallery => 'ギャラリーに保存';
+
+  @override
+  String get tools_queue => '入力キュー';
+
+  @override
+  String tools_queueCount(Object count) {
+    return '$count 枚';
+  }
+
+  @override
+  String get tools_queueHint => '＋：ファイル読込 / 生成履歴から選択。ドラッグや Ctrl+V も可';
+
+  @override
+  String get tools_importFiles => 'ファイルを読み込む';
+
+  @override
+  String get tools_fromHistory => '生成履歴から選ぶ';
+
+  @override
+  String get tools_paste => '貼り付け';
+
+  @override
+  String get tools_removeInput => 'キューから外す';
+
+  @override
+  String get tools_dtOptions => 'オプション';
+
+  @override
+  String get tools_dtNoOptionsBg =>
+      '背景除去に調整項目はありません。透過・背景・合成の 3 枚が出力され、結果の下で切り替えられます。';
+
+  @override
+  String get tools_dtNoOptionsDeclutter => '線の整理に調整項目はありません。線画が欲しいときは「線画抽出」を。';
+
+  @override
+  String get tools_dtNoOptionsLineArt =>
+      '線画抽出に調整項目はありません。着色するなら結果を「さらに処理」して「着色」へ。';
+
+  @override
+  String get tools_dtNoOptionsSketch =>
+      'スケッチ化に調整項目はありません。きれいな線なら「線画抽出」、着色なら「さらに処理」して「着色」へ。';
+
+  @override
+  String get tools_dtEmotionLabel => '表情';
+
+  @override
+  String tools_dtEmotionMore(Object count) {
+    return 'さらに $count 個';
+  }
+
+  @override
+  String get tools_dtEmotionLess => '閉じる';
+
+  @override
+  String get tools_dtStrength => '強さ';
+
+  @override
+  String get tools_defry0 => '標準';
+
+  @override
+  String get tools_defry1 => 'やや弱';
+
+  @override
+  String get tools_defry2 => '弱';
+
+  @override
+  String get tools_defry3 => 'より弱';
+
+  @override
+  String get tools_defry4 => 'かなり弱';
+
+  @override
+  String get tools_defry5 => '最弱';
+
+  @override
+  String get tools_dtEmotionStrengthHint => '弱いほど元の表情に近くなります';
+
+  @override
+  String get tools_dtColorizeStrengthHint => '弱いほど元の線に近くなります';
+
+  @override
+  String get tools_dtPrompt => '追加プロンプト';
+
+  @override
+  String get tools_dtPromptHint => '英語タグをカンマ区切りで';
+
+  @override
+  String get tools_dtEmotionPromptHint => '表情を選ぶとよく使うタグが入ります。編集できます';
+
+  @override
+  String get tools_dtColorizePromptHint => '配色を記述（例：blue dress, silver hair）';
+
+  @override
+  String get tools_dtPalette => 'パレット';
+
+  @override
+  String get tools_dtPaletteOff => 'オフ';
+
+  @override
+  String get tools_dtPaletteAuto => '自動';
+
+  @override
+  String get tools_dtPaletteCustom => 'カスタム';
+
+  @override
+  String get tools_dtColors => '色数';
+
+  @override
+  String get tools_dtAvoidRefine => '細分化しすぎない';
+
+  @override
+  String get tools_dtAvoidRefineHint => '細かいグリッドの効果が小さいときは粗いグリッドのまま';
+
+  @override
+  String get tools_dtPixelUpscale => '元のサイズに拡大';
+
+  @override
+  String get tools_dtPixelUpscaleHint => 'オフでは 1 マス 1 ピクセルの小さな画像を出力';
+
+  @override
+  String tools_runTool(Object tool) {
+    return '$toolを実行';
+  }
+
+  @override
+  String get tools_runHint => '実行 · 現在の入力を処理';
+
+  @override
+  String get tools_runNeedInput => '下に入力を追加してください';
+
+  @override
+  String get tools_results => '結果';
+
+  @override
+  String get tools_resultsEmpty => '実行した結果がここに並びます';
+
+  @override
+  String get tools_resultsHint => '結果をクリックで再表示。生成履歴にも入ります。残したいものはギャラリーへ';
+
+  @override
+  String get tools_reuse => '設定を使う';
+
+  @override
+  String get tools_emoNeutral => '平常';
+
+  @override
+  String get tools_emoHappy => '嬉しい';
+
+  @override
+  String get tools_emoSad => '悲しい';
+
+  @override
+  String get tools_emoAngry => '怒り';
+
+  @override
+  String get tools_emoScared => '怖い';
+
+  @override
+  String get tools_emoSurprised => '驚き';
+
+  @override
+  String get tools_emoTired => '疲れ';
+
+  @override
+  String get tools_emoExcited => 'ワクワク';
+
+  @override
+  String get tools_emoNervous => '緊張';
+
+  @override
+  String get tools_emoThinking => '考え中';
+
+  @override
+  String get tools_emoConfused => '困惑';
+
+  @override
+  String get tools_emoShy => '照れ';
+
+  @override
+  String get tools_emoDisgusted => '嫌悪';
+
+  @override
+  String get tools_emoSmug => 'ドヤ顔';
+
+  @override
+  String get tools_emoBored => '退屈';
+
+  @override
+  String get tools_emoLaughing => '大笑い';
+
+  @override
+  String get tools_emoIrritated => 'イライラ';
+
+  @override
+  String get tools_emoAroused => '興奮';
+
+  @override
+  String get tools_emoEmbarrassed => '恥ずかしい';
+
+  @override
+  String get tools_emoWorried => '心配';
+
+  @override
+  String get tools_emoLove => '恋';
+
+  @override
+  String get tools_emoDetermined => '決意';
+
+  @override
+  String get tools_emoHurt => '傷心';
+
+  @override
+  String get tools_emoPlayful => 'いたずら';
 }

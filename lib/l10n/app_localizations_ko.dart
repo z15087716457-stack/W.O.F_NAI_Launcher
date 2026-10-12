@@ -17998,4 +17998,836 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gen_opImg2Img => '이미지 투 이미지';
+
+  @override
+  String get tools_free => '무료';
+
+  @override
+  String get tools_localFree => '로컬 · 무료';
+
+  @override
+  String tools_anlasN(Object count) {
+    return '$count Anlas';
+  }
+
+  @override
+  String get tools_cancel => '취소';
+
+  @override
+  String get tools_close => '닫기';
+
+  @override
+  String get tools_done => '완료';
+
+  @override
+  String get tools_reset => '초기화';
+
+  @override
+  String get tools_apply => '적용';
+
+  @override
+  String get tools_retry => '다시 시도';
+
+  @override
+  String get tools_optional => '선택';
+
+  @override
+  String get tools_justNow => '방금';
+
+  @override
+  String tools_minutesAgo(Object count) {
+    return '$count분 전';
+  }
+
+  @override
+  String tools_hoursAgo(Object count) {
+    return '$count시간 전';
+  }
+
+  @override
+  String tools_monthDay(Object month, Object day) {
+    return '$month월 $day일';
+  }
+
+  @override
+  String get tools_useAsInit => 'img2img 원본으로 사용';
+
+  @override
+  String get tools_upscale => '업스케일';
+
+  @override
+  String get tools_enhance => '향상';
+
+  @override
+  String get tools_strength => '강도';
+
+  @override
+  String get tools_noise => '노이즈';
+
+  @override
+  String get tools_tipEnhance => '현재 프롬프트로 이 이미지를 다시 그려 디테일을 더합니다. 확대도 가능';
+
+  @override
+  String get tools_tipVariations =>
+      '이 이미지 설정으로 비슷한 이미지 4장을 만듭니다. 프롬프트와 설정은 그대로';
+
+  @override
+  String get tools_tipUpscale => '저장된 설정으로 업스케일합니다. 결과는 새 이미지로 표시됩니다';
+
+  @override
+  String get tools_tipUpscaleRunning => '업스케일 중 — 클릭하면 취소';
+
+  @override
+  String get tools_tipUpscaleSettings => '로컬 / 클라우드, 방식, 모델, 배율 선택';
+
+  @override
+  String get tools_tipSetInit => '이 이미지를 img2img에 넣어 다음 생성의 원본으로 씁니다';
+
+  @override
+  String get tools_tipEdit => '브러시·선택·색 보정으로 편집하고 완료하면 img2img 원본을 교체합니다';
+
+  @override
+  String get tools_tipInpaint => '다시 그릴 영역을 마스크로 지정합니다. 나머지는 그대로';
+
+  @override
+  String get tools_tipDirector => '배경 제거, 선화, 채색, 표정 수정 등 후처리 도구';
+
+  @override
+  String get tools_upscaleRunHint => '완료되면 기록에 추가되고 다른 이미지를 보고 있지 않으면 자동 선택됩니다';
+
+  @override
+  String get tools_enhanceSub => '현재 프롬프트로 다시 그려 디테일을 더합니다. 확대도 가능';
+
+  @override
+  String get tools_enhanceScale => '확대';
+
+  @override
+  String get tools_enhanceLocal => '로컬 확대';
+
+  @override
+  String get tools_enhanceLocalRow => '로컬';
+
+  @override
+  String tools_enhanceOutLocal(Object size, Object factor) {
+    return '$size → 로컬 $factor';
+  }
+
+  @override
+  String get tools_enhanceMagnitude => '정도';
+
+  @override
+  String get tools_magLight => '약';
+
+  @override
+  String get tools_magMedium => '중';
+
+  @override
+  String get tools_magStrong => '강';
+
+  @override
+  String tools_enhanceValues(Object strength, Object noise) {
+    return '강도 $strength · 노이즈 $noise';
+  }
+
+  @override
+  String get tools_enhanceCustomTag => '사용자 지정';
+
+  @override
+  String get tools_enhanceCustom => '강도와 노이즈 직접 지정';
+
+  @override
+  String get tools_enhanceCustomHint =>
+      '강도가 높을수록 많이 바뀌고, 노이즈는 디테일을 더하지만 지저분해지기 쉽습니다';
+
+  @override
+  String get tools_localHint => '생성 후 각 이미지를 로컬에서 확대합니다. 추가 Anlas 없음';
+
+  @override
+  String get tools_localNotSet => '로컬 확대 모델 미선택';
+
+  @override
+  String get tools_upscaleSettings => '업스케일 설정';
+
+  @override
+  String tools_enhanceFooter(Object model, Object steps) {
+    return '현재 프롬프트 · $model · $steps스텝';
+  }
+
+  @override
+  String get tools_enhanceRun => '향상';
+
+  @override
+  String get tools_enhanceRunLocal => '향상 + 로컬 확대';
+
+  @override
+  String get tools_upscaleSub => '확대 결과는 새 이미지로 표시되며 원본과 img2img 원본은 그대로입니다';
+
+  @override
+  String get tools_upscaleMethod => '방식';
+
+  @override
+  String get tools_upscaleModel => '모델';
+
+  @override
+  String get tools_upscaleManage => '모델 관리';
+
+  @override
+  String get tools_upscaleScale => '배율';
+
+  @override
+  String get tools_upscaleAdvanced => '고급 설정';
+
+  @override
+  String get tools_upscaleFooter => '설정은 저장되며 툴바의 업스케일 버튼이 이 설정을 씁니다';
+
+  @override
+  String get tools_modelMissing => '미설치';
+
+  @override
+  String get tools_modelDownloading => '다운로드 중';
+
+  @override
+  String get tools_modelNone => '선택 안 함';
+
+  @override
+  String get tools_edit => '이미지 편집';
+
+  @override
+  String get tools_editSub => '완료하면 img2img 원본을 교체합니다';
+
+  @override
+  String get tools_inpaint => '인페인트';
+
+  @override
+  String get tools_inpaintSub => '마스크한 부분만 다시 그립니다';
+
+  @override
+  String get tools_backEsc => '뒤로 (Esc)';
+
+  @override
+  String get tools_panel => '패널';
+
+  @override
+  String get tools_undo => '실행 취소';
+
+  @override
+  String get tools_redo => '다시 실행';
+
+  @override
+  String get tools_download => 'PNG 다운로드';
+
+  @override
+  String get tools_zoomIn => '확대';
+
+  @override
+  String get tools_zoomOut => '축소';
+
+  @override
+  String get tools_zoomFit => '창에 맞추기';
+
+  @override
+  String get tools_applyMask => '마스크 적용';
+
+  @override
+  String get tools_applyMaskSub => '생성 페이지로 돌아가 직접 생성';
+
+  @override
+  String get tools_applyGenerate => '적용 후 생성';
+
+  @override
+  String get tools_applyGenerateSub => '생성 페이지로 돌아가 바로 인페인트 시작';
+
+  @override
+  String get tools_discardTitle => '변경 사항을 버릴까요?';
+
+  @override
+  String get tools_discardBody => '적용하지 않은 획, 마스크, 레이어 변경이 사라집니다.';
+
+  @override
+  String get tools_discard => '버리기';
+
+  @override
+  String get tools_keepEditing => '계속 편집';
+
+  @override
+  String get tools_toolBrush => '브러시';
+
+  @override
+  String get tools_toolEraser => '지우개';
+
+  @override
+  String get tools_toolFill => '채우기';
+
+  @override
+  String get tools_toolBlur => '흐림';
+
+  @override
+  String get tools_toolStamp => '복제 도장';
+
+  @override
+  String get tools_toolSelect => '사각형 선택';
+
+  @override
+  String get tools_toolLasso => '올가미';
+
+  @override
+  String get tools_toolPicker => '스포이트';
+
+  @override
+  String get tools_toolMaskBrush => '마스크 그리기';
+
+  @override
+  String get tools_toolMaskEraser => '마스크 지우기';
+
+  @override
+  String get tools_toolFocus => '집중 영역';
+
+  @override
+  String get tools_clearMask => '마스크 지우기';
+
+  @override
+  String get tools_expand => '가장자리 확장';
+
+  @override
+  String get tools_adjust => '색 보정';
+
+  @override
+  String get tools_resize => '캔버스 크기';
+
+  @override
+  String get tools_size => '크기';
+
+  @override
+  String get tools_opacity => '불투명도';
+
+  @override
+  String get tools_intensity => '강도';
+
+  @override
+  String get tools_tolerance => '허용치';
+
+  @override
+  String get tools_tip => '팁';
+
+  @override
+  String get tools_tipHard => '단단';
+
+  @override
+  String get tools_tipSoft => '부드';
+
+  @override
+  String get tools_tipSquare => '사각';
+
+  @override
+  String get tools_pressure => '필압';
+
+  @override
+  String get tools_squareBrush => '사각 브러시';
+
+  @override
+  String get tools_hintStamp => 'Alt + 클릭으로 샘플링한 뒤 다른 곳에 칠합니다';
+
+  @override
+  String get tools_hintSelect => '드래그로 선택. Alt+L 새 레이어로 복사, Delete 지우기';
+
+  @override
+  String get tools_hintPicker => '클릭해서 색을 고릅니다. 브러시 중에도 Alt로 임시 선택';
+
+  @override
+  String get tools_hintMaskFill => '클릭하면 비슷한 색 영역을 마스크로 채웁니다';
+
+  @override
+  String get tools_focusContext => '최소 컨텍스트';
+
+  @override
+  String get tools_hintFocus =>
+      '다듬을 부분을 지정하면 모델이 그 영역과 주변만 보므로 작은 얼굴과 손이 더 선명해집니다';
+
+  @override
+  String get tools_clearFocus => '집중 해제';
+
+  @override
+  String get tools_edgeTop => '위';
+
+  @override
+  String get tools_edgeBottom => '아래';
+
+  @override
+  String get tools_edgeLeft => '왼쪽';
+
+  @override
+  String get tools_edgeRight => '오른쪽';
+
+  @override
+  String tools_hintExpand(Object step) {
+    return '캔버스 가장자리를 끌어도 됩니다. ${step}px 단위';
+  }
+
+  @override
+  String get tools_maskLook => '마스크 표시';
+
+  @override
+  String get tools_maskBorder => '윤곽선';
+
+  @override
+  String get tools_patternSolid => '단색';
+
+  @override
+  String get tools_patternLines => '사선';
+
+  @override
+  String get tools_patternCrosshatch => '교차선';
+
+  @override
+  String get tools_patternGrid => '격자';
+
+  @override
+  String get tools_patternDots => '점';
+
+  @override
+  String get tools_patternChecker => '체커';
+
+  @override
+  String get tools_patternHearts => '하트';
+
+  @override
+  String get tools_colorPrimary => '전경색';
+
+  @override
+  String get tools_colorSecondary => '배경색';
+
+  @override
+  String get tools_moreColors => '더 많은 색…';
+
+  @override
+  String get tools_statusHint => '스페이스 이동 · 휠 확대 · Ctrl+0 맞춤 · 1 원본 크기';
+
+  @override
+  String get tools_statusGrid => '마스크가 8px 격자에 맞춰집니다';
+
+  @override
+  String get tools_statusMask => '마스크';
+
+  @override
+  String get tools_inpaintSettings => '인페인트 설정';
+
+  @override
+  String get tools_inpaintStrength => '강도';
+
+  @override
+  String get tools_inpaintStrengthHint => '낮을수록 원본에 가깝습니다';
+
+  @override
+  String get tools_mask => '마스크';
+
+  @override
+  String tools_maskCoverage(Object count) {
+    return '영역 · $count곳';
+  }
+
+  @override
+  String get tools_focusNone => '미설정 (전체 이미지)';
+
+  @override
+  String tools_focusContextShort(Object value) {
+    return '· 컨텍스트 $value';
+  }
+
+  @override
+  String get tools_output => '출력';
+
+  @override
+  String get tools_expandTag => '확장';
+
+  @override
+  String get tools_layers => '레이어';
+
+  @override
+  String get tools_addLayer => '레이어 추가';
+
+  @override
+  String get tools_add3dLayer => '3D 레이어 추가';
+
+  @override
+  String get tools_layerHint => 'Alt+L 선택 영역을 새 레이어로 복사';
+
+  @override
+  String get tools_hideLayer => '레이어 숨기기';
+
+  @override
+  String get tools_showLayer => '레이어 표시';
+
+  @override
+  String get tools_layerUp => '위로';
+
+  @override
+  String get tools_layerDown => '아래로';
+
+  @override
+  String get tools_layerDuplicate => '복제';
+
+  @override
+  String get tools_layerMerge => '아래와 병합';
+
+  @override
+  String get tools_layerDelete => '레이어 삭제';
+
+  @override
+  String get tools_currentLayer => '현재 레이어';
+
+  @override
+  String get tools_hue => '색조';
+
+  @override
+  String get tools_saturation => '채도';
+
+  @override
+  String get tools_brightness => '밝기';
+
+  @override
+  String get tools_canvas => '캔버스';
+
+  @override
+  String get tools_resizeCanvas => '크기 변경';
+
+  @override
+  String get tools_inpaintNote =>
+      '적용하면 생성 페이지로 돌아가 인페인트로 전환됩니다. 오른쪽 위 메뉴의 “적용 후 생성”으로 바로 실행할 수도 있습니다';
+
+  @override
+  String get tools_director => '디렉터 도구';
+
+  @override
+  String get tools_backGen => '생성';
+
+  @override
+  String get tools_dtGroupClean => '정리';
+
+  @override
+  String get tools_dtGroupLine => '선';
+
+  @override
+  String get tools_dtGroupColor => '채색과 표정';
+
+  @override
+  String get tools_dtGroupPixel => '픽셀';
+
+  @override
+  String get tools_dtRemoveBg => '배경 제거';
+
+  @override
+  String get tools_dtRemoveBgDesc => '인물을 잘라내 투명 배경·배경·합성 3장을 만듭니다';
+
+  @override
+  String get tools_dtDeclutter => '잡선 정리';
+
+  @override
+  String get tools_dtDeclutterDesc => '불필요한 선과 노이즈를 지웁니다';
+
+  @override
+  String get tools_dtLineArt => '선화 추출';
+
+  @override
+  String get tools_dtLineArtDesc => '깔끔한 흑백 선화를 추출';
+
+  @override
+  String get tools_dtSketch => '스케치화';
+
+  @override
+  String get tools_dtSketchDesc => '연필 스케치 느낌으로 바꿉니다';
+
+  @override
+  String get tools_dtColorize => '채색';
+
+  @override
+  String get tools_dtColorizeDesc => '선화나 스케치에 채색. 프롬프트 선택';
+
+  @override
+  String get tools_dtEmotion => '표정 수정';
+
+  @override
+  String get tools_dtEmotionDesc => '표정을 바꿉니다. 강도 조절 가능';
+
+  @override
+  String get tools_dtPixelSnap => '픽셀 정렬';
+
+  @override
+  String get tools_dtPixelSnapDesc => '픽셀 격자에 맞추고 팔레트를 줄입니다. 로컬 처리';
+
+  @override
+  String get tools_dtOpusNote => 'Opus는 1MP 이하 무료이며 배경 제거는 항상 Anlas가 듭니다';
+
+  @override
+  String get tools_input => '입력';
+
+  @override
+  String get tools_compareSide => '나란히';
+
+  @override
+  String get tools_compareWipe => '슬라이드 비교';
+
+  @override
+  String get tools_compareResult => '결과만';
+
+  @override
+  String get tools_fit => '맞춤';
+
+  @override
+  String get tools_actualSize => '원본 크기 100%';
+
+  @override
+  String get tools_original => '원본';
+
+  @override
+  String get tools_emptyRun => '“실행”을 눌러 시작';
+
+  @override
+  String get tools_emptyEmotion => '표정을 고른 뒤 “실행”';
+
+  @override
+  String get tools_emptyBody => '결과가 여기에 원본과 나란히 표시됩니다';
+
+  @override
+  String tools_running(Object tool) {
+    return '$tool 실행 중…';
+  }
+
+  @override
+  String get tools_runningBody => '보통 몇 초면 끝나며 결과는 생성 페이지 기록에도 들어갑니다';
+
+  @override
+  String get tools_runFailed => '실행 실패';
+
+  @override
+  String get tools_noInput => '먼저 이미지를 추가하세요';
+
+  @override
+  String get tools_noInputBody => '끌어 놓거나 Ctrl+V로 붙여넣거나 생성 기록에서 고르세요';
+
+  @override
+  String get tools_noResult => '아직 결과가 없습니다';
+
+  @override
+  String get tools_continue => '계속 처리';
+
+  @override
+  String get tools_copy => '복사';
+
+  @override
+  String get tools_saveGallery => '갤러리에 저장';
+
+  @override
+  String get tools_queue => '입력 대기열';
+
+  @override
+  String tools_queueCount(Object count) {
+    return '$count장';
+  }
+
+  @override
+  String get tools_queueHint => '＋: 파일 가져오기 / 생성 기록에서 선택. 끌어 놓기나 Ctrl+V도 가능';
+
+  @override
+  String get tools_importFiles => '파일 가져오기';
+
+  @override
+  String get tools_fromHistory => '생성 기록에서 선택';
+
+  @override
+  String get tools_paste => '붙여넣기';
+
+  @override
+  String get tools_removeInput => '대기열에서 제거';
+
+  @override
+  String get tools_dtOptions => '옵션';
+
+  @override
+  String get tools_dtNoOptionsBg =>
+      '배경 제거는 조절할 옵션이 없습니다. 투명 배경·배경·합성 3장이 나오며 결과 아래에서 전환합니다.';
+
+  @override
+  String get tools_dtNoOptionsDeclutter => '잡선 정리는 옵션이 없습니다. 선화는 “선화 추출”을 쓰세요.';
+
+  @override
+  String get tools_dtNoOptionsLineArt =>
+      '선화 추출은 옵션이 없습니다. 채색하려면 결과를 “계속 처리”한 뒤 “채색”을 고르세요.';
+
+  @override
+  String get tools_dtNoOptionsSketch =>
+      '스케치화는 옵션이 없습니다. 깔끔한 선은 “선화 추출”, 채색은 “계속 처리” 후 “채색”을 쓰세요.';
+
+  @override
+  String get tools_dtEmotionLabel => '표정';
+
+  @override
+  String tools_dtEmotionMore(Object count) {
+    return '$count개 더';
+  }
+
+  @override
+  String get tools_dtEmotionLess => '접기';
+
+  @override
+  String get tools_dtStrength => '강도';
+
+  @override
+  String get tools_defry0 => '보통';
+
+  @override
+  String get tools_defry1 => '약간 약';
+
+  @override
+  String get tools_defry2 => '약';
+
+  @override
+  String get tools_defry3 => '더 약';
+
+  @override
+  String get tools_defry4 => '매우 약';
+
+  @override
+  String get tools_defry5 => '최약';
+
+  @override
+  String get tools_dtEmotionStrengthHint => '약할수록 원래 표정에 가깝습니다';
+
+  @override
+  String get tools_dtColorizeStrengthHint => '약할수록 원래 선에 가깝습니다';
+
+  @override
+  String get tools_dtPrompt => '추가 프롬프트';
+
+  @override
+  String get tools_dtPromptHint => '영어 태그를 쉼표로 구분';
+
+  @override
+  String get tools_dtEmotionPromptHint => '표정을 고르면 자주 쓰는 태그가 들어갑니다. 수정 가능';
+
+  @override
+  String get tools_dtColorizePromptHint =>
+      '원하는 색을 적으세요. 예: blue dress, silver hair';
+
+  @override
+  String get tools_dtPalette => '팔레트';
+
+  @override
+  String get tools_dtPaletteOff => '끔';
+
+  @override
+  String get tools_dtPaletteAuto => '자동';
+
+  @override
+  String get tools_dtPaletteCustom => '사용자 지정';
+
+  @override
+  String get tools_dtColors => '색 수';
+
+  @override
+  String get tools_dtAvoidRefine => '과도한 세분화 방지';
+
+  @override
+  String get tools_dtAvoidRefineHint => '세밀한 격자의 효과가 작으면 거친 격자 유지';
+
+  @override
+  String get tools_dtPixelUpscale => '원래 크기로 확대';
+
+  @override
+  String get tools_dtPixelUpscaleHint => '끄면 칸마다 1픽셀인 작은 이미지를 출력';
+
+  @override
+  String tools_runTool(Object tool) {
+    return '$tool 실행';
+  }
+
+  @override
+  String get tools_runHint => '실행 · 현재 입력 처리';
+
+  @override
+  String get tools_runNeedInput => '아래에 입력을 먼저 추가하세요';
+
+  @override
+  String get tools_results => '결과';
+
+  @override
+  String get tools_resultsEmpty => '실행한 결과가 여기에 표시됩니다';
+
+  @override
+  String get tools_resultsHint =>
+      '결과를 눌러 다시 봅니다. 생성 기록에도 들어가니 남길 것은 갤러리에 저장하세요';
+
+  @override
+  String get tools_reuse => '설정 재사용';
+
+  @override
+  String get tools_emoNeutral => '평온';
+
+  @override
+  String get tools_emoHappy => '행복';
+
+  @override
+  String get tools_emoSad => '슬픔';
+
+  @override
+  String get tools_emoAngry => '화남';
+
+  @override
+  String get tools_emoScared => '두려움';
+
+  @override
+  String get tools_emoSurprised => '놀람';
+
+  @override
+  String get tools_emoTired => '피곤';
+
+  @override
+  String get tools_emoExcited => '신남';
+
+  @override
+  String get tools_emoNervous => '긴장';
+
+  @override
+  String get tools_emoThinking => '생각';
+
+  @override
+  String get tools_emoConfused => '혼란';
+
+  @override
+  String get tools_emoShy => '수줍음';
+
+  @override
+  String get tools_emoDisgusted => '혐오';
+
+  @override
+  String get tools_emoSmug => '의기양양';
+
+  @override
+  String get tools_emoBored => '지루함';
+
+  @override
+  String get tools_emoLaughing => '폭소';
+
+  @override
+  String get tools_emoIrritated => '짜증';
+
+  @override
+  String get tools_emoAroused => '흥분';
+
+  @override
+  String get tools_emoEmbarrassed => '당황';
+
+  @override
+  String get tools_emoWorried => '걱정';
+
+  @override
+  String get tools_emoLove => '사랑';
+
+  @override
+  String get tools_emoDetermined => '결연';
+
+  @override
+  String get tools_emoHurt => '상처';
+
+  @override
+  String get tools_emoPlayful => '장난';
 }

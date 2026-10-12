@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -8,6 +10,7 @@ import '../kit/ui_lib_controls.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_slider.dart';
 import '../kit/ui_text.dart';
+import '../kit/ui_tip.dart';
 import 'gen_contract.dart';
 import 'gen_format.dart';
 
@@ -513,6 +516,8 @@ class GenFloatButton extends StatelessWidget {
     this.width = 32,
     this.padding,
     this.active = false,
+    this.selected = false,
+    this.richTip,
   });
 
   final Widget child;
@@ -521,6 +526,12 @@ class GenFloatButton extends StatelessWidget {
   final double? width;
   final EdgeInsets? padding;
   final bool active;
+
+  /// 从这个按钮落下的面板开着（原型 `.tb.on`）：强调色 14% 底。
+  final bool selected;
+
+  /// 富内容悬停提示（名字 + 一句说明 + 价格），代替 [tooltip]，落在按钮正下方。
+  final Widget? richTip;
 
   @override
   Widget build(BuildContext context) {
@@ -533,13 +544,16 @@ class GenFloatButton extends StatelessWidget {
         padding: padding,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active || hover ? c.control : null,
+          color: selected
+              ? c.accent.withValues(alpha: .14)
+              : (active || hover ? c.control : null),
           borderRadius: BorderRadius.circular(6),
         ),
         child: child,
       ),
     );
     final shown = onTap == null ? Opacity(opacity: .35, child: b) : b;
+    if (richTip != null) return GenHoverTip(tip: richTip!, child: shown);
     return tooltip == null
         ? shown
         : Tooltip(
@@ -548,6 +562,102 @@ class GenFloatButton extends StatelessWidget {
             child: shown,
           );
   }
+}
+
+/// 悬停 300ms 后在组件正下方（间距 [gap]）显示富内容提示；移开立即收起。
+class GenHoverTip extends StatefulWidget {
+  const GenHoverTip({
+    super.key,
+    required this.tip,
+    required this.child,
+    this.width = 250,
+    this.gap = 14,
+  });
+
+  final Widget tip;
+  final Widget child;
+  final double width;
+  final double gap;
+
+  @override
+  State<GenHoverTip> createState() => _GenHoverTipState();
+}
+
+class _GenHoverTipState extends State<GenHoverTip> {
+  var _show = false;
+  Timer? _wait;
+
+  @override
+  void dispose() {
+    _wait?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    onEnter: (_) {
+      _wait?.cancel();
+      _wait = Timer(const Duration(milliseconds: 300), () {
+        if (mounted) setState(() => _show = true);
+      });
+    },
+    onExit: (_) {
+      _wait?.cancel();
+      if (_show) setState(() => _show = false);
+    },
+    child: Listener(
+      onPointerDown: (_) {
+        _wait?.cancel();
+        if (_show) setState(() => _show = false);
+      },
+      child: UiTipHost(
+        tip: _show
+            ? UiTip(
+                targetAnchor: Alignment.bottomCenter,
+                followerAnchor: Alignment.topCenter,
+                anchor: Offset(0, widget.gap),
+                width: widget.width,
+                child: widget.tip,
+              )
+            : null,
+        child: widget.child,
+      ),
+    ),
+  );
+}
+
+/// 工具条悬停提示的内容（原型 `varTip`）：名字（加粗）+ 价格靠右，下面一句说明。
+class GenBarTipContent extends StatelessWidget {
+  const GenBarTipContent({
+    super.key,
+    required this.title,
+    required this.body,
+    this.price,
+  });
+
+  final String title;
+  final String body;
+
+  /// 价格块（Anlas 数字 + 图标 / “免费”）；null = 不显示。
+  final Widget? price;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    key: const Key('gen-bar-tip'),
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Row(
+        spacing: 6,
+        children: [
+          Expanded(child: Text(title, style: UiTipStyle.strong(context))),
+          ?price,
+        ],
+      ),
+      const SizedBox(height: 3),
+      Text(body, style: UiTipStyle.secondary(context)),
+    ],
+  );
 }
 
 /// 浮动工具条分隔（原型 `.fdiv`）：1 × 20、左右 4。

@@ -36,12 +36,33 @@ ImageProvider genPreviewImage(String key) => _images.putIfAbsent(key, () {
 
 const _pool = ['g03', 'g07', 'g18', 'g33', 'g46', 'g50', 'h0', 'h1', 'h2'];
 
+/// 画布工具的模拟器（tools_preview.dart）接管工具条上的这几个按钮，并往画布数据里加面板 / 放大进度。
+class GenToolsHooks {
+  const GenToolsHooks({
+    required this.onEnhance,
+    required this.onUpscale,
+    required this.onUpscaleSettings,
+    required this.onEditImage,
+    required this.onInpaint,
+    required this.onSendToTools,
+    required this.decorate,
+  });
+  final ValueChanged<String> onEnhance;
+  final ValueChanged<String> onUpscale;
+  final VoidCallback onUpscaleSettings;
+  final ValueChanged<String> onEditImage;
+  final ValueChanged<String> onInpaint;
+  final ValueChanged<String> onSendToTools;
+  final GenViewData Function(GenViewData data) decorate;
+}
+
 class GenPreviewSim extends ChangeNotifier {
-  GenPreviewSim({required this.log}) {
+  GenPreviewSim({required this.log, this.tools}) {
     _load();
   }
 
   final ValueChanged<String> log;
+  final GenToolsHooks? tools;
   var _scene = GenScene.v5;
   late GenViewData _d;
   final _cleared = <String>{};
@@ -58,7 +79,10 @@ class GenPreviewSim extends ChangeNotifier {
     notifyListeners();
   }
 
-  GenViewData get data => _d.copyWith(layout: _layout);
+  GenViewData get data {
+    final d = _d.copyWith(layout: _layout);
+    return tools?.decorate(d) ?? d;
+  }
 
   void _load() {
     const f = genPreviewImage;
@@ -773,9 +797,10 @@ class GenPreviewSim extends ChangeNotifier {
           'onStop',
         );
       },
-      onEnhance: base.onEnhance,
+      onEnhance: tools?.onEnhance ?? base.onEnhance,
       onVariations: base.onVariations,
-      onUpscale: base.onUpscale,
+      onUpscale: tools?.onUpscale ?? base.onUpscale,
+      onUpscaleSettings: tools?.onUpscaleSettings,
       onUpscaleOption: (id) => _set(
         _d.copyWith(
           canvas: _canvas(
@@ -789,9 +814,9 @@ class GenPreviewSim extends ChangeNotifier {
         'onUpscaleOption($id)',
       ),
       onSetInit: base.onSetInit,
-      onEditImage: base.onEditImage,
-      onInpaint: base.onInpaint,
-      onSendToTools: base.onSendToTools,
+      onEditImage: tools?.onEditImage ?? base.onEditImage,
+      onInpaint: tools?.onInpaint ?? base.onInpaint,
+      onSendToTools: tools?.onSendToTools ?? base.onSendToTools,
       onUseSeed: (id) => _set(
         _d.copyWith(
           params: _params(seed: _d.canvas.info?.seed, seedPinned: true),
