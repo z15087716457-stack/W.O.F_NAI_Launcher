@@ -17129,4 +17129,840 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get explore_compareDoneBody => '新しい優先度は保存され、次の子の生成に使われます。';
+
+  @override
+  String get gen_cancel => 'キャンセル';
+
+  @override
+  String get gen_close => '閉じる';
+
+  @override
+  String get gen_done => '完了';
+
+  @override
+  String get gen_more => 'その他';
+
+  @override
+  String get gen_delete => '削除';
+
+  @override
+  String get gen_remove => '外す';
+
+  @override
+  String get gen_rename => '名前を変更';
+
+  @override
+  String get gen_add => '追加';
+
+  @override
+  String get gen_clear => 'クリア';
+
+  @override
+  String get gen_clearAll => 'すべてクリア';
+
+  @override
+  String get gen_clearConfirm => 'クリア';
+
+  @override
+  String get gen_removeConfirm => '外す';
+
+  @override
+  String get gen_expand => '展開';
+
+  @override
+  String get gen_collapse => '折りたたむ';
+
+  @override
+  String get gen_copied => 'コピーしました';
+
+  @override
+  String get gen_random => 'ランダム';
+
+  @override
+  String get gen_auto => '自動';
+
+  @override
+  String get gen_pin => 'ヘッダーに固定';
+
+  @override
+  String get gen_unpin => 'ヘッダーから外す';
+
+  @override
+  String get gen_yesterday => '昨日';
+
+  @override
+  String gen_monthDay(Object month, Object day) {
+    return '$month月$day日';
+  }
+
+  @override
+  String get gen_params => '生成設定';
+
+  @override
+  String get gen_generating => '生成中';
+
+  @override
+  String get gen_modelsNew => '新しいモデル';
+
+  @override
+  String get gen_modelsLegacy => '旧モデル';
+
+  @override
+  String get gen_modeTip => 'クリックで Anime / Furry を切り替え';
+
+  @override
+  String gen_anlasTip(Object value) {
+    return 'Anlas 残高 $value';
+  }
+
+  @override
+  String get gen_positive => 'プロンプト';
+
+  @override
+  String get gen_basePrompt => 'ベースプロンプト';
+
+  @override
+  String get gen_negative => '除外';
+
+  @override
+  String get gen_finalPositive => '送信される最終プロンプト';
+
+  @override
+  String get gen_finalNegative => '送信される最終除外内容';
+
+  @override
+  String get gen_toolDock => 'ブロックライブラリパネル';
+
+  @override
+  String get gen_toolPalette => 'ブロックパレット';
+
+  @override
+  String get gen_toolTranslate => '翻訳';
+
+  @override
+  String get gen_toolsMenu => 'ツールと設定';
+
+  @override
+  String get gen_toolsPinned => 'ヘッダーのツール';
+
+  @override
+  String get gen_toolsSettings => 'プロンプト設定';
+
+  @override
+  String get gen_fullscreen => '全画面で編集';
+
+  @override
+  String get gen_autoFormat => '自動整形';
+
+  @override
+  String get gen_autoFormatSub => 'フォーカスが外れたらカンマと空白を整える';
+
+  @override
+  String get gen_highlight => '強調ハイライト';
+
+  @override
+  String get gen_highlightSub => '重みに応じて色付け';
+
+  @override
+  String get gen_sdConvert => 'SD 構文を自動変換';
+
+  @override
+  String get gen_sdConvertSub => '(tag:1.2) を貼り付けると NAI の重みに変換';
+
+  @override
+  String get gen_related => '共起タグの提案';
+
+  @override
+  String get gen_relatedSub => '一緒に使われやすいタグを提案';
+
+  @override
+  String get gen_translating => '翻訳中…';
+
+  @override
+  String get gen_translateNeedsModel => '翻訳モデル未設定。クリックして設定';
+
+  @override
+  String get gen_translateRestore => '原文を表示';
+
+  @override
+  String gen_translateWith(Object route) {
+    return '翻訳（$route）';
+  }
+
+  @override
+  String get gen_translateNew => '追加分を翻訳';
+
+  @override
+  String get gen_translateShowOriginal => 'すべて原文に戻す';
+
+  @override
+  String get gen_translateShowTranslated => 'すべて訳文を表示';
+
+  @override
+  String get gen_translateSettings => '翻訳モデル設定';
+
+  @override
+  String get gen_qualityPreset => '品質タグ';
+
+  @override
+  String get gen_ucPreset => '除外プリセット';
+
+  @override
+  String get gen_presetNone => 'なし';
+
+  @override
+  String get gen_transparentOn => '透明背景：オン';
+
+  @override
+  String get gen_transparentOff => '透明背景：オフ';
+
+  @override
+  String get gen_characters => 'キャラクター';
+
+  @override
+  String get gen_charactersTip => 'キャラクターごとに別のプロンプトを書けます。特徴が混ざりません。';
+
+  @override
+  String get gen_charactersEmpty => 'キャラクターがいません。右上の + で追加できます。';
+
+  @override
+  String gen_charactersFull(Object max) {
+    return '最大 $max 人まで';
+  }
+
+  @override
+  String get gen_addCharacter => 'キャラクターを追加';
+
+  @override
+  String gen_addAs(Object gender) {
+    return '$genderキャラクターを追加';
+  }
+
+  @override
+  String get gen_clearCharacters => 'すべてのキャラクターを削除';
+
+  @override
+  String get gen_clearCharactersTitle => 'すべてのキャラクターを削除しますか？';
+
+  @override
+  String gen_clearCharactersBody(Object count) {
+    return '$count 人のキャラクターとプロンプトが削除されます。';
+  }
+
+  @override
+  String gen_characterN(Object n) {
+    return 'キャラクター $n';
+  }
+
+  @override
+  String get gen_genderFemale => '女性';
+
+  @override
+  String get gen_genderMale => '男性';
+
+  @override
+  String get gen_genderOther => 'その他';
+
+  @override
+  String get gen_position => '位置';
+
+  @override
+  String get gen_positionAi => 'AI 任せ';
+
+  @override
+  String get gen_positionCustom => 'カスタム';
+
+  @override
+  String get gen_positionBoard => 'キャラクター配置';
+
+  @override
+  String get gen_positionAiTip => '位置は AI が決めます';
+
+  @override
+  String gen_positionAt(Object at) {
+    return '位置 $at（クリックで調整）';
+  }
+
+  @override
+  String get gen_positionUnset => '未配置（クリックで配置）';
+
+  @override
+  String get gen_positionAiHint => '位置は AI が決めています';
+
+  @override
+  String get gen_positionGridHint => 'キャラクターをマスにドラッグ。中心に吸着します';
+
+  @override
+  String get gen_positionFreeHint => 'キャラクターを好きな位置へドラッグ';
+
+  @override
+  String get gen_positionAiOverlay => '現在は AI 任せです。\nカスタムに切り替えると手動で配置できます。';
+
+  @override
+  String get gen_positionToCustom => 'カスタムに切り替え';
+
+  @override
+  String get gen_positionUnplaced => '未配置';
+
+  @override
+  String get gen_renameTip => 'ダブルクリックで名前を変更';
+
+  @override
+  String get gen_moveUp => '上へ';
+
+  @override
+  String get gen_moveDown => '下へ';
+
+  @override
+  String get gen_characterDisable => 'このキャラクターを使わない';
+
+  @override
+  String get gen_characterEnable => 'このキャラクターを使う';
+
+  @override
+  String get gen_charPositive => 'プロンプト';
+
+  @override
+  String get gen_charNegative => '除外';
+
+  @override
+  String get gen_saveAsBlock => 'ブロックとして保存';
+
+  @override
+  String get gen_refs => '参照画像';
+
+  @override
+  String get gen_img2img => 'img2img';
+
+  @override
+  String get gen_img2imgDesc => '元画像からバリエーションを生成';
+
+  @override
+  String gen_img2imgSummary(Object strength, Object noise) {
+    return '強度 $strength · ノイズ $noise';
+  }
+
+  @override
+  String get gen_img2imgDrop => '画像をドロップ、または';
+
+  @override
+  String get gen_upload => 'アップロード';
+
+  @override
+  String get gen_replace => '差し替え';
+
+  @override
+  String get gen_edit => '編集';
+
+  @override
+  String get gen_inpaint => 'インペイント';
+
+  @override
+  String get gen_placeOnCanvas => 'キャンバスに表示';
+
+  @override
+  String get gen_fromPreciseLibrary => '精密参照ライブラリから';
+
+  @override
+  String get gen_sketch => 'スケッチ';
+
+  @override
+  String get gen_strength => '強度';
+
+  @override
+  String get gen_strengthTip => '高いほど元画像から離れます（既定 0.7）';
+
+  @override
+  String get gen_noise => 'ノイズ';
+
+  @override
+  String get gen_noiseTip => 'ノイズでディテールを変化させます（既定 0）';
+
+  @override
+  String get gen_inpaintStrength => 'インペイント強度';
+
+  @override
+  String get gen_inpaintReady => 'マスク作成済み。塗った部分だけを再生成します。';
+
+  @override
+  String get gen_refPause => '今回は送信しない';
+
+  @override
+  String get gen_refResume => '送信を再開';
+
+  @override
+  String get gen_refPaused => '一時停止中（今回は送信しません）';
+
+  @override
+  String get gen_vibe => 'Vibe Transfer';
+
+  @override
+  String get gen_vibeDesc => '画像を変えて雰囲気を保つ';
+
+  @override
+  String get gen_vibeSkipped => '精密参照があるため今回は送信されません';
+
+  @override
+  String get gen_vibeConflict => '精密参照があるとき Vibe は送信されません。';
+
+  @override
+  String get gen_vibeDrop => '画像や .naiv4vibe をドロップ、または';
+
+  @override
+  String get gen_addVibe => 'Vibe を追加';
+
+  @override
+  String get gen_addFromFile => 'ファイルから';
+
+  @override
+  String get gen_addFromVibeLibrary => 'Vibe ライブラリから';
+
+  @override
+  String get gen_addFromPreciseLibrary => '精密参照ライブラリから';
+
+  @override
+  String gen_vibeFull(Object max) {
+    return '最大 $max 個';
+  }
+
+  @override
+  String get gen_saveToLibrary => 'ライブラリに保存';
+
+  @override
+  String get gen_normalize => '正規化';
+
+  @override
+  String get gen_normalizeTip => 'Vibe 強度を合計で正規化';
+
+  @override
+  String gen_vibeExtraCost(Object free, Object each, Object total) {
+    return '$free 個を超えると 1 個ごとに +$each Anlas · 今回 +$total';
+  }
+
+  @override
+  String get gen_recent => '最近';
+
+  @override
+  String get gen_encoded => 'エンコード済み';
+
+  @override
+  String get gen_encoding => 'エンコード中';
+
+  @override
+  String get gen_encode => 'エンコード';
+
+  @override
+  String gen_encodeTip(Object cost) {
+    return 'エンコードは 1 回 $cost Anlas。以後は再利用できます';
+  }
+
+  @override
+  String get gen_vibeStrength => '強度';
+
+  @override
+  String get gen_vibeInfo => '情報抽出';
+
+  @override
+  String get gen_vibeInfoReencode => 'エンコード済みの Vibe は再エンコードが必要です';
+
+  @override
+  String get gen_precise => '精密参照';
+
+  @override
+  String get gen_preciseDesc => '生成をキャラや画風の参照に固定';
+
+  @override
+  String get gen_preciseDrop => 'キャラや画風の参照画像をドロップ、または';
+
+  @override
+  String get gen_preciseCharacter => 'キャラ';
+
+  @override
+  String get gen_preciseStyle => '画風';
+
+  @override
+  String get gen_preciseBoth => '両方';
+
+  @override
+  String get gen_fidelity => '忠実度';
+
+  @override
+  String gen_preciseCost(Object each, Object total) {
+    return '1 枚 $each Anlas · 今回 +$total';
+  }
+
+  @override
+  String get gen_preciseConflict => '精密参照があるとき Vibe は送信されません。';
+
+  @override
+  String get gen_pauseVibes => 'Vibe を一時停止';
+
+  @override
+  String get gen_savePrecise => '精密参照ライブラリに保存';
+
+  @override
+  String get gen_addPrecise => '精密参照を追加';
+
+  @override
+  String get gen_image => '画像';
+
+  @override
+  String get gen_sizeNormal => '標準';
+
+  @override
+  String get gen_sizeLarge => '大';
+
+  @override
+  String get gen_sizeWallpaper => '壁紙';
+
+  @override
+  String get gen_sizeSmall => '小';
+
+  @override
+  String get gen_sizeCustom => 'カスタム';
+
+  @override
+  String get gen_portrait => '縦';
+
+  @override
+  String get gen_landscape => '横';
+
+  @override
+  String get gen_square => '正方形';
+
+  @override
+  String get gen_width => '幅（64 単位）';
+
+  @override
+  String get gen_height => '高さ（64 単位）';
+
+  @override
+  String get gen_swapSize => '幅と高さを入れ替え';
+
+  @override
+  String get gen_count => '枚数';
+
+  @override
+  String get gen_countTip => '1 回のリクエストの枚数（1–4）';
+
+  @override
+  String get gen_repeat => '繰り返し';
+
+  @override
+  String get gen_repeatTip => '連続で送るリクエスト数';
+
+  @override
+  String gen_repeatTotal(Object times, Object total) {
+    return '$times 回、計 $total 枚（ホイールでも調整可）';
+  }
+
+  @override
+  String get gen_steps => 'ステップ';
+
+  @override
+  String get gen_guidance => 'ガイダンス';
+
+  @override
+  String get gen_guidanceTip => '高いほどプロンプトに忠実。高すぎると硬くなります（既定 5）';
+
+  @override
+  String get gen_cfgRescale => 'ガイダンス再調整';
+
+  @override
+  String get gen_cfgRescaleTip => '高ガイダンスの彩度過多を抑えます（既定 0）';
+
+  @override
+  String get gen_seed => 'シード';
+
+  @override
+  String get gen_seedPinned => 'シード · 固定';
+
+  @override
+  String get gen_seedPinTip => 'クリックでこのシードを固定';
+
+  @override
+  String get gen_seedUnpinTip => 'クリックでランダムに戻す';
+
+  @override
+  String get gen_seedRandomize => 'ランダムに戻す';
+
+  @override
+  String get gen_sampler => 'サンプラー';
+
+  @override
+  String get gen_samplerRecommended => 'おすすめ';
+
+  @override
+  String get gen_samplerOther => 'その他';
+
+  @override
+  String get gen_noiseSchedule => 'ノイズスケジュール';
+
+  @override
+  String get gen_varietyTip => '序盤のガイダンスを省き構図に変化を出します';
+
+  @override
+  String get gen_decrispTip => '高ガイダンス時のシャープすぎを軽減';
+
+  @override
+  String get gen_smeaAutoTip => 'サイズに応じて SMEA を自動で切り替え';
+
+  @override
+  String get gen_paramsTitle => '生成設定';
+
+  @override
+  String get gen_paramsOpen => 'すべての設定を表示';
+
+  @override
+  String get gen_paramsClose => '設定を閉じる';
+
+  @override
+  String get gen_stop => '生成を停止';
+
+  @override
+  String gen_cooldown(Object seconds) {
+    return 'クールダウン $seconds 秒';
+  }
+
+  @override
+  String get gen_insufficient => 'Anlas が足りません';
+
+  @override
+  String get gen_free => '今回は無料（Opus 枠内）';
+
+  @override
+  String get gen_emptyTitle => 'プロンプトを書いて最初の 1 枚を';
+
+  @override
+  String get gen_emptyPress => '';
+
+  @override
+  String get gen_emptyOr => 'を押すか左下の生成ボタンで開始';
+
+  @override
+  String get gen_tileFailed => 'この 1 枚は失敗しました';
+
+  @override
+  String get gen_enhance => 'エンハンス';
+
+  @override
+  String get gen_variations => 'バリエーション';
+
+  @override
+  String gen_variationsCost(Object cost) {
+    return 'バリエーション（$cost Anlas）';
+  }
+
+  @override
+  String get gen_upscale => 'アップスケール';
+
+  @override
+  String get gen_upscaleStop => 'アップスケールを停止';
+
+  @override
+  String get gen_upscaleOptions => 'アップスケール方式';
+
+  @override
+  String get gen_setInit => 'img2img の元画像にする';
+
+  @override
+  String get gen_editImage => '画像を編集';
+
+  @override
+  String get gen_sendToTools => 'キャンバスツールへ送る';
+
+  @override
+  String get gen_display => 'キャンバス表示';
+
+  @override
+  String get gen_backdrop => '透過画像の下地';
+
+  @override
+  String get gen_backdropSub => '透過ピクセルの下にだけ表示し、画像には保存しません';
+
+  @override
+  String get gen_bdChecker => '市松（テーマ連動）';
+
+  @override
+  String get gen_bdCheckerLight => '明るい市松';
+
+  @override
+  String get gen_bdCheckerDark => '暗い市松';
+
+  @override
+  String get gen_bdNone => 'なし';
+
+  @override
+  String get gen_bdBlack => '黒';
+
+  @override
+  String get gen_bdWhite => '白';
+
+  @override
+  String get gen_bdGray => 'グレー';
+
+  @override
+  String get gen_bdRed => '赤';
+
+  @override
+  String get gen_bdGreen => '緑';
+
+  @override
+  String get gen_bdBlue => '青';
+
+  @override
+  String get gen_bdCustom => 'カスタム';
+
+  @override
+  String get gen_zoomToFill => '拡大して埋める';
+
+  @override
+  String get gen_zoomToFillSub => '小さい画像も拡大して表示';
+
+  @override
+  String get gen_useSeed => 'このシードを使う（固定）';
+
+  @override
+  String get gen_copySeed => 'シードをコピー';
+
+  @override
+  String get gen_pinImage => 'キャンバスに固定';
+
+  @override
+  String get gen_unpinImage => '固定を解除';
+
+  @override
+  String get gen_copyImage => '画像をコピー';
+
+  @override
+  String get gen_saveImage => 'ギャラリーに保存';
+
+  @override
+  String get gen_openViewer => '大きく表示';
+
+  @override
+  String get gen_retry => '再試行';
+
+  @override
+  String get gen_copyDetail => '詳細をコピー';
+
+  @override
+  String get gen_history => '履歴';
+
+  @override
+  String get gen_historyEmpty => 'まだ生成していません';
+
+  @override
+  String get gen_historyEmptySub => '生成した画像がバッチごとに並びます';
+
+  @override
+  String gen_batchCount(Object count) {
+    return '$count 枚';
+  }
+
+  @override
+  String gen_batchPending(Object count) {
+    return '残り $count 枚';
+  }
+
+  @override
+  String get gen_pinnedTip => 'キャンバスに固定した画像（クリックで移動）';
+
+  @override
+  String get gen_select => '複数選択';
+
+  @override
+  String get gen_selectDone => '選択を終了';
+
+  @override
+  String gen_selectedCount(Object count) {
+    return '$count 枚選択中';
+  }
+
+  @override
+  String get gen_pack => 'zip にまとめる';
+
+  @override
+  String get gen_saveSelected => '選択した画像を保存';
+
+  @override
+  String get gen_removeSelected => '履歴から外す';
+
+  @override
+  String get gen_autoSaveOn => 'ギャラリーへ自動保存：オン';
+
+  @override
+  String get gen_autoSaveOff => 'ギャラリーへ自動保存：オフ';
+
+  @override
+  String get gen_scrollLock => 'スクロールを固定（新しい画像で先頭に戻らない）';
+
+  @override
+  String get gen_scrollUnlock => 'スクロール固定を解除';
+
+  @override
+  String get gen_saveAll => 'すべてギャラリーに保存';
+
+  @override
+  String get gen_clearHistory => '履歴をクリア';
+
+  @override
+  String get gen_clearHistoryTitle => 'このセッションの履歴をクリアしますか？';
+
+  @override
+  String get gen_clearHistoryBody => 'ここから外すだけで、ギャラリーに保存済みのファイルは残ります。';
+
+  @override
+  String get gen_deleteImagesTitle => '履歴から外しますか？';
+
+  @override
+  String gen_deleteImagesBody(Object count) {
+    return '$count 枚をここから外します。保存済みのファイルは残ります。';
+  }
+
+  @override
+  String gen_saveBatch(Object count) {
+    return 'このバッチを保存（$count 枚）';
+  }
+
+  @override
+  String gen_removeBatch(Object count) {
+    return 'このバッチを外す（$count 枚）';
+  }
+
+  @override
+  String get gen_removeImage => '履歴から外す';
+
+  @override
+  String get gen_favorite => 'お気に入り';
+
+  @override
+  String get gen_unfavorite => 'お気に入り解除';
+
+  @override
+  String get gen_sendImg2Img => 'img2img に送る';
+
+  @override
+  String get gen_sendVibe => 'Vibe Transfer に追加';
+
+  @override
+  String get gen_sendPrecise => '精密参照に追加';
+
+  @override
+  String get gen_reveal => 'エクスプローラーで表示';
+
+  @override
+  String get gen_opUpscale => 'アップスケール済み';
+
+  @override
+  String get gen_opEnhance => 'エンハンス済み';
+
+  @override
+  String get gen_opVariation => 'バリエーション';
+
+  @override
+  String get gen_opInpaint => 'インペイント済み';
+
+  @override
+  String get gen_opImg2Img => 'img2img';
 }

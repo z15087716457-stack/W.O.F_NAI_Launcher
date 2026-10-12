@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1120px;border:0"></iframe><pre id="out"></pre>
+<script>
+// 生图页原型的元素位置（给 gen_measure.py 出偏差表）。键名和 gen_prototype_capture_test.dart 一致。
+// 坐标减掉 48 主导航，和 Flutter（页面不含主导航）同一原点。
+const view=location.hash.slice(1);
+const f=document.getElementById('f');
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,500));
+  const R=e=>{const b=e.getBoundingClientRect();return [b.left-48,b.top,b.width,b.height]};
+  const m={}; const put=(k,e)=>{if(e) m[k]=R(e)};
+  const q=s=>d.querySelector(s), qa=s=>[...d.querySelectorAll(s)];
+  put('left',q('.left')); put('header',q('.lh')); put('model',q('.lh .cap .inv'));
+  const caps=qa('.lh .cap'); put('quota',caps[1]);
+  put('prompt',q('.left .scroll>.card')); put('tab-on',q('.card .ph .tab.on')); put('tab-neg',q('.card .ph .tab:not(.on)'));
+  const mods=qa('.left .scroll>.mod');
+  put('chars',mods[0]);
+  const hr=q('.left .scroll>.mod .hr');
+  if(hr){const mb=mods[0].getBoundingClientRect(),hb=hr.getBoundingClientRect(); m['char-0']=[hb.left-48,hb.top,hb.width,mb.bottom-1-hb.top];}
+  put('refs',q('.left .scroll>.mod.clip'));
+  const rows=qa('.refrow'); put('ref-img2img',rows[0]); put('ref-vibe',rows[1]); put('ref-precise',rows[2]);
+  put('image',mods[mods.length-1]);
+  put('size-group',q('.irow .dd')); put('orientation',q('.irow .oseg'));
+  const inp=qa('.irow .inp'); put('width',inp[0]); put('height',inp[1]);
+  put('count',q('.nseg')); put('repeat',q('.st2'));
+  put('params',q('.left>.sum')); const sc=qa('.sum .sc'); ['p-steps','p-scale','p-seed','p-sampler'].forEach((k,i)=>put(k,sc[i]));
+  put('p-toggle',q('.sum .ib'));
+  put('gbar',q('.gbar')); put('gbtn',q('.gbtn')); put('cost',q('.cost'));
+  put('canvas',q('.canvas')); put('cimg',q('.cimg'));
+  const fl=qa('.canvas .float'); put('bar-top',fl[0]); put('bar-info',fl[1]); put('bar-actions',fl[2]);
+  put('history',q('.right')); put('h-header',q('.hh')); put('h-footer',q('.hfoot'));
+  qa('.ta').forEach((e,i)=>put('batch-'+i,e));
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+f.src='/mockups/generation/mock.html#'+view;
+</script></body></html>

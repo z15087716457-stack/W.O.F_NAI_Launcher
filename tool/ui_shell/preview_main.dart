@@ -11,6 +11,8 @@ import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_page.dart';
 import 'package:nai_launcher/presentation/ui/explore/explore_fixture_editor.dart';
 import 'package:nai_launcher/presentation/ui/explore/explore_page.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_contract.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_fixture.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_labels.dart';
@@ -27,6 +29,7 @@ import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
 
 import 'blocks_preview.dart';
 import 'explore_preview.dart';
+import 'gen_preview.dart';
 import 'online_preview.dart';
 import 'refs_preview.dart';
 import 'viewer_preview.dart';
@@ -50,7 +53,7 @@ class _PreviewAppState extends State<_PreviewApp> {
   String? _lastAction;
 
   // 主导航
-  var _page = NavPage.styleExplore;
+  var _page = NavPage.generation;
   var _gen = _Gen.idle;
   var _tasks = false;
   var _pinned = false;
@@ -86,6 +89,9 @@ class _PreviewAppState extends State<_PreviewApp> {
   // 画风探索
   late final _explore = ExplorePreviewSim(log: _log)..addListener(_rebuild);
 
+  // 生图页
+  late final _genSim = GenPreviewSim(log: _log)..addListener(_rebuild);
+
   void _rebuild() => setState(() {});
 
   @override
@@ -95,6 +101,7 @@ class _PreviewAppState extends State<_PreviewApp> {
     _blocks.dispose();
     _viewer.dispose();
     _explore.dispose();
+    _genSim.dispose();
     super.dispose();
   }
 
@@ -301,6 +308,12 @@ class _PreviewAppState extends State<_PreviewApp> {
                       ViewerScene.values,
                       (s) => setState(() => _viewer.scene = s),
                     ),
+                    const Text('生图：'),
+                    _dropdown(
+                      _genSim.scene,
+                      GenScene.values,
+                      (s) => setState(() => _genSim.scene = s),
+                    ),
                     const Text('画风探索：'),
                     _dropdown(
                       _explore.scene,
@@ -341,7 +354,17 @@ class _PreviewAppState extends State<_PreviewApp> {
                       data: _blocks.data,
                       actions: _blocks.actions,
                     ),
-                    NavPage.generation => BlocksGenerationMock(log: _log),
+                    NavPage.generation =>
+                      _genSim.scene == GenScene.blocksDemo
+                          ? BlocksGenerationMock(log: _log)
+                          : GenerationPage(
+                              data: _genSim.data,
+                              actions: _genSim.actions,
+                              slots: GenSlots(
+                                editor: _genSim.editor,
+                                dock: _genSim.dock(),
+                              ),
+                            ),
                     NavPage.styleExplore => _explorePage(),
                     NavPage.localGallery => ImageViewerPage(
                       data: _viewer.data,

@@ -30545,6 +30545,1590 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New preferences are saved and used for the next offspring.'**
   String get explore_compareDoneBody;
+
+  /// No description provided for @gen_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get gen_cancel;
+
+  /// No description provided for @gen_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get gen_close;
+
+  /// No description provided for @gen_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get gen_done;
+
+  /// No description provided for @gen_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get gen_more;
+
+  /// No description provided for @gen_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get gen_delete;
+
+  /// No description provided for @gen_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get gen_remove;
+
+  /// No description provided for @gen_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get gen_rename;
+
+  /// No description provided for @gen_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get gen_add;
+
+  /// No description provided for @gen_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get gen_clear;
+
+  /// No description provided for @gen_clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get gen_clearAll;
+
+  /// No description provided for @gen_clearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get gen_clearConfirm;
+
+  /// No description provided for @gen_removeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get gen_removeConfirm;
+
+  /// No description provided for @gen_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get gen_expand;
+
+  /// No description provided for @gen_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get gen_collapse;
+
+  /// No description provided for @gen_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get gen_copied;
+
+  /// No description provided for @gen_random.
+  ///
+  /// In en, this message translates to:
+  /// **'Random'**
+  String get gen_random;
+
+  /// No description provided for @gen_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get gen_auto;
+
+  /// No description provided for @gen_pin.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin to header'**
+  String get gen_pin;
+
+  /// No description provided for @gen_unpin.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin from header'**
+  String get gen_unpin;
+
+  /// No description provided for @gen_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get gen_yesterday;
+
+  /// No description provided for @gen_monthDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{month}/{day}'**
+  String gen_monthDay(Object month, Object day);
+
+  /// No description provided for @gen_params.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation settings'**
+  String get gen_params;
+
+  /// No description provided for @gen_generating.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating'**
+  String get gen_generating;
+
+  /// No description provided for @gen_modelsNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Current models'**
+  String get gen_modelsNew;
+
+  /// No description provided for @gen_modelsLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy models'**
+  String get gen_modelsLegacy;
+
+  /// No description provided for @gen_modeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to switch Anime / Furry'**
+  String get gen_modeTip;
+
+  /// No description provided for @gen_anlasTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas balance {value}'**
+  String gen_anlasTip(Object value);
+
+  /// No description provided for @gen_positive.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get gen_positive;
+
+  /// No description provided for @gen_basePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Base prompt'**
+  String get gen_basePrompt;
+
+  /// No description provided for @gen_negative.
+  ///
+  /// In en, this message translates to:
+  /// **'Undesired'**
+  String get gen_negative;
+
+  /// No description provided for @gen_finalPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Final prompt sent'**
+  String get gen_finalPositive;
+
+  /// No description provided for @gen_finalNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Final undesired content sent'**
+  String get gen_finalNegative;
+
+  /// No description provided for @gen_toolDock.
+  ///
+  /// In en, this message translates to:
+  /// **'Block library panel'**
+  String get gen_toolDock;
+
+  /// No description provided for @gen_toolPalette.
+  ///
+  /// In en, this message translates to:
+  /// **'Block palette'**
+  String get gen_toolPalette;
+
+  /// No description provided for @gen_toolTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get gen_toolTranslate;
+
+  /// No description provided for @gen_toolsMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools & switches'**
+  String get gen_toolsMenu;
+
+  /// No description provided for @gen_toolsPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Header tools'**
+  String get gen_toolsPinned;
+
+  /// No description provided for @gen_toolsSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt settings'**
+  String get gen_toolsSettings;
+
+  /// No description provided for @gen_fullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit fullscreen'**
+  String get gen_fullscreen;
+
+  /// No description provided for @gen_autoFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto format'**
+  String get gen_autoFormat;
+
+  /// No description provided for @gen_autoFormatSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tidy commas and spaces when you leave the editor'**
+  String get gen_autoFormatSub;
+
+  /// No description provided for @gen_highlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlight emphasis'**
+  String get gen_highlight;
+
+  /// No description provided for @gen_highlightSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Colour fragments by weight'**
+  String get gen_highlightSub;
+
+  /// No description provided for @gen_sdConvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert SD syntax'**
+  String get gen_sdConvert;
+
+  /// No description provided for @gen_sdConvertSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn pasted (tag:1.2) into NAI weights'**
+  String get gen_sdConvertSub;
+
+  /// No description provided for @gen_related.
+  ///
+  /// In en, this message translates to:
+  /// **'Related tags'**
+  String get gen_related;
+
+  /// No description provided for @gen_relatedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest tags that often appear together'**
+  String get gen_relatedSub;
+
+  /// No description provided for @gen_translating.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating…'**
+  String get gen_translating;
+
+  /// No description provided for @gen_translateNeedsModel.
+  ///
+  /// In en, this message translates to:
+  /// **'No translation model yet — click to set one up'**
+  String get gen_translateNeedsModel;
+
+  /// No description provided for @gen_translateRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original'**
+  String get gen_translateRestore;
+
+  /// No description provided for @gen_translateWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate ({route})'**
+  String gen_translateWith(Object route);
+
+  /// No description provided for @gen_translateNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate new text'**
+  String get gen_translateNew;
+
+  /// No description provided for @gen_translateShowOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all original'**
+  String get gen_translateShowOriginal;
+
+  /// No description provided for @gen_translateShowTranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all translations'**
+  String get gen_translateShowTranslated;
+
+  /// No description provided for @gen_translateSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation model'**
+  String get gen_translateSettings;
+
+  /// No description provided for @gen_qualityPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Quality tags'**
+  String get gen_qualityPreset;
+
+  /// No description provided for @gen_ucPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'UC preset'**
+  String get gen_ucPreset;
+
+  /// No description provided for @gen_presetNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get gen_presetNone;
+
+  /// No description provided for @gen_transparentOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent background: on'**
+  String get gen_transparentOn;
+
+  /// No description provided for @gen_transparentOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent background: off'**
+  String get gen_transparentOff;
+
+  /// No description provided for @gen_characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters'**
+  String get gen_characters;
+
+  /// No description provided for @gen_charactersTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a separate prompt for each character so traits do not bleed between them.'**
+  String get gen_charactersTip;
+
+  /// No description provided for @gen_charactersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No characters yet. Click + to add one and give each its own prompt.'**
+  String get gen_charactersEmpty;
+
+  /// No description provided for @gen_charactersFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} characters'**
+  String gen_charactersFull(Object max);
+
+  /// No description provided for @gen_addCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Add character'**
+  String get gen_addCharacter;
+
+  /// No description provided for @gen_addAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {gender} character'**
+  String gen_addAs(Object gender);
+
+  /// No description provided for @gen_clearCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove all characters'**
+  String get gen_clearCharacters;
+
+  /// No description provided for @gen_clearCharactersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove all characters?'**
+  String get gen_clearCharactersTitle;
+
+  /// No description provided for @gen_clearCharactersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} characters and their prompts will be removed.'**
+  String gen_clearCharactersBody(Object count);
+
+  /// No description provided for @gen_characterN.
+  ///
+  /// In en, this message translates to:
+  /// **'Character {n}'**
+  String gen_characterN(Object n);
+
+  /// No description provided for @gen_genderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'female'**
+  String get gen_genderFemale;
+
+  /// No description provided for @gen_genderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'male'**
+  String get gen_genderMale;
+
+  /// No description provided for @gen_genderOther.
+  ///
+  /// In en, this message translates to:
+  /// **'other'**
+  String get gen_genderOther;
+
+  /// No description provided for @gen_position.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get gen_position;
+
+  /// No description provided for @gen_positionAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI choice'**
+  String get gen_positionAi;
+
+  /// No description provided for @gen_positionCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get gen_positionCustom;
+
+  /// No description provided for @gen_positionBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Character positions'**
+  String get gen_positionBoard;
+
+  /// No description provided for @gen_positionAiTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Position chosen by AI'**
+  String get gen_positionAiTip;
+
+  /// No description provided for @gen_positionAt.
+  ///
+  /// In en, this message translates to:
+  /// **'At {at} — click to adjust'**
+  String gen_positionAt(Object at);
+
+  /// No description provided for @gen_positionUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Not placed yet — click to place'**
+  String get gen_positionUnset;
+
+  /// No description provided for @gen_positionAiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Positions are chosen by AI'**
+  String get gen_positionAiHint;
+
+  /// No description provided for @gen_positionGridHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag characters onto the grid; they snap to the cell centre'**
+  String get gen_positionGridHint;
+
+  /// No description provided for @gen_positionFreeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag characters anywhere on the image'**
+  String get gen_positionFreeHint;
+
+  /// No description provided for @gen_positionAiOverlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Positions are set to AI choice.\nSwitch to custom to place them yourself.'**
+  String get gen_positionAiOverlay;
+
+  /// No description provided for @gen_positionToCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to custom'**
+  String get gen_positionToCustom;
+
+  /// No description provided for @gen_positionUnplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not placed'**
+  String get gen_positionUnplaced;
+
+  /// No description provided for @gen_renameTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-click to rename'**
+  String get gen_renameTip;
+
+  /// No description provided for @gen_moveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get gen_moveUp;
+
+  /// No description provided for @gen_moveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get gen_moveDown;
+
+  /// No description provided for @gen_characterDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this character'**
+  String get gen_characterDisable;
+
+  /// No description provided for @gen_characterEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this character'**
+  String get gen_characterEnable;
+
+  /// No description provided for @gen_charPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get gen_charPositive;
+
+  /// No description provided for @gen_charNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Undesired'**
+  String get gen_charNegative;
+
+  /// No description provided for @gen_saveAsBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block'**
+  String get gen_saveAsBlock;
+
+  /// No description provided for @gen_refs.
+  ///
+  /// In en, this message translates to:
+  /// **'References'**
+  String get gen_refs;
+
+  /// No description provided for @gen_img2img.
+  ///
+  /// In en, this message translates to:
+  /// **'Image to image'**
+  String get gen_img2img;
+
+  /// No description provided for @gen_img2imgDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate variations of an image'**
+  String get gen_img2imgDesc;
+
+  /// No description provided for @gen_img2imgSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength {strength} · Noise {noise}'**
+  String gen_img2imgSummary(Object strength, Object noise);
+
+  /// No description provided for @gen_img2imgDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop an image here, or'**
+  String get gen_img2imgDrop;
+
+  /// No description provided for @gen_upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get gen_upload;
+
+  /// No description provided for @gen_replace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get gen_replace;
+
+  /// No description provided for @gen_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get gen_edit;
+
+  /// No description provided for @gen_inpaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Inpaint'**
+  String get gen_inpaint;
+
+  /// No description provided for @gen_placeOnCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Show on canvas'**
+  String get gen_placeOnCanvas;
+
+  /// No description provided for @gen_fromPreciseLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'From reference library'**
+  String get gen_fromPreciseLibrary;
+
+  /// No description provided for @gen_sketch.
+  ///
+  /// In en, this message translates to:
+  /// **'Sketch'**
+  String get gen_sketch;
+
+  /// No description provided for @gen_strength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get gen_strength;
+
+  /// No description provided for @gen_strengthTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher drifts further from the original (default 0.7)'**
+  String get gen_strengthTip;
+
+  /// No description provided for @gen_noise.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise'**
+  String get gen_noise;
+
+  /// No description provided for @gen_noiseTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds noise for more detail variation (default 0)'**
+  String get gen_noiseTip;
+
+  /// No description provided for @gen_inpaintStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Inpaint strength'**
+  String get gen_inpaintStrength;
+
+  /// No description provided for @gen_inpaintReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Mask ready — only the painted area will be regenerated.'**
+  String get gen_inpaintReady;
+
+  /// No description provided for @gen_refPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause for now'**
+  String get gen_refPause;
+
+  /// No description provided for @gen_refResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get gen_refResume;
+
+  /// No description provided for @gen_refPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused — not sent this time'**
+  String get gen_refPaused;
+
+  /// No description provided for @gen_vibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe transfer'**
+  String get gen_vibe;
+
+  /// No description provided for @gen_vibeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the image, keep the look'**
+  String get gen_vibeDesc;
+
+  /// No description provided for @gen_vibeSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped — a precise reference is active'**
+  String get gen_vibeSkipped;
+
+  /// No description provided for @gen_vibeConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibes are not sent while a precise reference is active.'**
+  String get gen_vibeConflict;
+
+  /// No description provided for @gen_vibeDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop images or .naiv4vibe files, or'**
+  String get gen_vibeDrop;
+
+  /// No description provided for @gen_addVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Add vibe'**
+  String get gen_addVibe;
+
+  /// No description provided for @gen_addFromFile.
+  ///
+  /// In en, this message translates to:
+  /// **'From file'**
+  String get gen_addFromFile;
+
+  /// No description provided for @gen_addFromVibeLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'From vibe library'**
+  String get gen_addFromVibeLibrary;
+
+  /// No description provided for @gen_addFromPreciseLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'From reference library'**
+  String get gen_addFromPreciseLibrary;
+
+  /// No description provided for @gen_vibeFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max}'**
+  String gen_vibeFull(Object max);
+
+  /// No description provided for @gen_saveToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to library'**
+  String get gen_saveToLibrary;
+
+  /// No description provided for @gen_normalize.
+  ///
+  /// In en, this message translates to:
+  /// **'Normalize'**
+  String get gen_normalize;
+
+  /// No description provided for @gen_normalizeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Normalize vibe strengths by their total'**
+  String get gen_normalizeTip;
+
+  /// No description provided for @gen_vibeExtraCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Each vibe beyond {free} costs +{each} Anlas · +{total} this time'**
+  String gen_vibeExtraCost(Object free, Object each, Object total);
+
+  /// No description provided for @gen_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get gen_recent;
+
+  /// No description provided for @gen_encoded.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoded'**
+  String get gen_encoded;
+
+  /// No description provided for @gen_encoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding'**
+  String get gen_encoding;
+
+  /// No description provided for @gen_encode.
+  ///
+  /// In en, this message translates to:
+  /// **'Encode'**
+  String get gen_encode;
+
+  /// No description provided for @gen_encodeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding costs {cost} Anlas once, then it can be reused'**
+  String gen_encodeTip(Object cost);
+
+  /// No description provided for @gen_vibeStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get gen_vibeStrength;
+
+  /// No description provided for @gen_vibeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get gen_vibeInfo;
+
+  /// No description provided for @gen_vibeInfoReencode.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing info extraction re-encodes this vibe'**
+  String get gen_vibeInfoReencode;
+
+  /// No description provided for @gen_precise.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise reference'**
+  String get gen_precise;
+
+  /// No description provided for @gen_preciseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Anchor the result to a character or style'**
+  String get gen_preciseDesc;
+
+  /// No description provided for @gen_preciseDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop a character or style reference, or'**
+  String get gen_preciseDrop;
+
+  /// No description provided for @gen_preciseCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Character'**
+  String get gen_preciseCharacter;
+
+  /// No description provided for @gen_preciseStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get gen_preciseStyle;
+
+  /// No description provided for @gen_preciseBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get gen_preciseBoth;
+
+  /// No description provided for @gen_fidelity.
+  ///
+  /// In en, this message translates to:
+  /// **'Fidelity'**
+  String get gen_fidelity;
+
+  /// No description provided for @gen_preciseCost.
+  ///
+  /// In en, this message translates to:
+  /// **'{each} Anlas each · +{total} this time'**
+  String gen_preciseCost(Object each, Object total);
+
+  /// No description provided for @gen_preciseConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'While a precise reference is active, vibes are not sent.'**
+  String get gen_preciseConflict;
+
+  /// No description provided for @gen_pauseVibes.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause vibes'**
+  String get gen_pauseVibes;
+
+  /// No description provided for @gen_savePrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to reference library'**
+  String get gen_savePrecise;
+
+  /// No description provided for @gen_addPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Add precise reference'**
+  String get gen_addPrecise;
+
+  /// No description provided for @gen_image.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get gen_image;
+
+  /// No description provided for @gen_sizeNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get gen_sizeNormal;
+
+  /// No description provided for @gen_sizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get gen_sizeLarge;
+
+  /// No description provided for @gen_sizeWallpaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallpaper'**
+  String get gen_sizeWallpaper;
+
+  /// No description provided for @gen_sizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get gen_sizeSmall;
+
+  /// No description provided for @gen_sizeCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get gen_sizeCustom;
+
+  /// No description provided for @gen_portrait.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait'**
+  String get gen_portrait;
+
+  /// No description provided for @gen_landscape.
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape'**
+  String get gen_landscape;
+
+  /// No description provided for @gen_square.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get gen_square;
+
+  /// No description provided for @gen_width.
+  ///
+  /// In en, this message translates to:
+  /// **'Width (rounded to 64)'**
+  String get gen_width;
+
+  /// No description provided for @gen_height.
+  ///
+  /// In en, this message translates to:
+  /// **'Height (rounded to 64)'**
+  String get gen_height;
+
+  /// No description provided for @gen_swapSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap width and height'**
+  String get gen_swapSize;
+
+  /// No description provided for @gen_count.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get gen_count;
+
+  /// No description provided for @gen_countTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Images per request (1–4)'**
+  String get gen_countTip;
+
+  /// No description provided for @gen_repeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get gen_repeat;
+
+  /// No description provided for @gen_repeatTip.
+  ///
+  /// In en, this message translates to:
+  /// **'How many requests to send in a row'**
+  String get gen_repeatTip;
+
+  /// No description provided for @gen_repeatTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{times} requests, {total} images (scroll to adjust)'**
+  String gen_repeatTotal(Object times, Object total);
+
+  /// No description provided for @gen_steps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get gen_steps;
+
+  /// No description provided for @gen_guidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance'**
+  String get gen_guidance;
+
+  /// No description provided for @gen_guidanceTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher follows the prompt more closely; too high looks harsh (default 5)'**
+  String get gen_guidanceTip;
+
+  /// No description provided for @gen_cfgRescale.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidance rescale'**
+  String get gen_cfgRescale;
+
+  /// No description provided for @gen_cfgRescaleTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tames oversaturation from high guidance (default 0)'**
+  String get gen_cfgRescaleTip;
+
+  /// No description provided for @gen_seed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed'**
+  String get gen_seed;
+
+  /// No description provided for @gen_seedPinned.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed · fixed'**
+  String get gen_seedPinned;
+
+  /// No description provided for @gen_seedPinTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to keep this seed'**
+  String get gen_seedPinTip;
+
+  /// No description provided for @gen_seedUnpinTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to go back to random'**
+  String get gen_seedUnpinTip;
+
+  /// No description provided for @gen_seedRandomize.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to random'**
+  String get gen_seedRandomize;
+
+  /// No description provided for @gen_sampler.
+  ///
+  /// In en, this message translates to:
+  /// **'Sampler'**
+  String get gen_sampler;
+
+  /// No description provided for @gen_samplerRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get gen_samplerRecommended;
+
+  /// No description provided for @gen_samplerOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get gen_samplerOther;
+
+  /// No description provided for @gen_noiseSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise schedule'**
+  String get gen_noiseSchedule;
+
+  /// No description provided for @gen_varietyTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip guidance in early steps for more varied compositions'**
+  String get gen_varietyTip;
+
+  /// No description provided for @gen_decrispTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduces over-sharpening at high guidance'**
+  String get gen_decrispTip;
+
+  /// No description provided for @gen_smeaAutoTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn SMEA on automatically by image size'**
+  String get gen_smeaAutoTip;
+
+  /// No description provided for @gen_paramsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation settings'**
+  String get gen_paramsTitle;
+
+  /// No description provided for @gen_paramsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all settings'**
+  String get gen_paramsOpen;
+
+  /// No description provided for @gen_paramsClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide settings'**
+  String get gen_paramsClose;
+
+  /// No description provided for @gen_stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get gen_stop;
+
+  /// No description provided for @gen_cooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooling down {seconds}s'**
+  String gen_cooldown(Object seconds);
+
+  /// No description provided for @gen_insufficient.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough Anlas'**
+  String get gen_insufficient;
+
+  /// No description provided for @gen_free.
+  ///
+  /// In en, this message translates to:
+  /// **'Free this time (within Opus allowance)'**
+  String get gen_free;
+
+  /// No description provided for @gen_emptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a prompt and make your first image'**
+  String get gen_emptyTitle;
+
+  /// No description provided for @gen_emptyPress.
+  ///
+  /// In en, this message translates to:
+  /// **'Press'**
+  String get gen_emptyPress;
+
+  /// No description provided for @gen_emptyOr.
+  ///
+  /// In en, this message translates to:
+  /// **'or click Generate at the bottom left'**
+  String get gen_emptyOr;
+
+  /// No description provided for @gen_tileFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This one failed'**
+  String get gen_tileFailed;
+
+  /// No description provided for @gen_enhance.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhance'**
+  String get gen_enhance;
+
+  /// No description provided for @gen_variations.
+  ///
+  /// In en, this message translates to:
+  /// **'Variations'**
+  String get gen_variations;
+
+  /// No description provided for @gen_variationsCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Variations ({cost} Anlas)'**
+  String gen_variationsCost(Object cost);
+
+  /// No description provided for @gen_upscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale'**
+  String get gen_upscale;
+
+  /// No description provided for @gen_upscaleStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop upscaling'**
+  String get gen_upscaleStop;
+
+  /// No description provided for @gen_upscaleOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale options'**
+  String get gen_upscaleOptions;
+
+  /// No description provided for @gen_setInit.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as img2img source'**
+  String get gen_setInit;
+
+  /// No description provided for @gen_editImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit image'**
+  String get gen_editImage;
+
+  /// No description provided for @gen_sendToTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to canvas tools'**
+  String get gen_sendToTools;
+
+  /// No description provided for @gen_display.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas display'**
+  String get gen_display;
+
+  /// No description provided for @gen_backdrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent backdrop'**
+  String get gen_backdrop;
+
+  /// No description provided for @gen_backdropSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown under transparent pixels only; never saved into the image'**
+  String get gen_backdropSub;
+
+  /// No description provided for @gen_bdChecker.
+  ///
+  /// In en, this message translates to:
+  /// **'Checker (theme)'**
+  String get gen_bdChecker;
+
+  /// No description provided for @gen_bdCheckerLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light checker'**
+  String get gen_bdCheckerLight;
+
+  /// No description provided for @gen_bdCheckerDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark checker'**
+  String get gen_bdCheckerDark;
+
+  /// No description provided for @gen_bdNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get gen_bdNone;
+
+  /// No description provided for @gen_bdBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Black'**
+  String get gen_bdBlack;
+
+  /// No description provided for @gen_bdWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'White'**
+  String get gen_bdWhite;
+
+  /// No description provided for @gen_bdGray.
+  ///
+  /// In en, this message translates to:
+  /// **'Gray'**
+  String get gen_bdGray;
+
+  /// No description provided for @gen_bdRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get gen_bdRed;
+
+  /// No description provided for @gen_bdGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get gen_bdGreen;
+
+  /// No description provided for @gen_bdBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get gen_bdBlue;
+
+  /// No description provided for @gen_bdCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get gen_bdCustom;
+
+  /// No description provided for @gen_zoomToFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom to fill'**
+  String get gen_zoomToFill;
+
+  /// No description provided for @gen_zoomToFillSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Scale small images up to fill the canvas'**
+  String get gen_zoomToFillSub;
+
+  /// No description provided for @gen_useSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this seed (and keep it)'**
+  String get gen_useSeed;
+
+  /// No description provided for @gen_copySeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy seed'**
+  String get gen_copySeed;
+
+  /// No description provided for @gen_pinImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin to canvas'**
+  String get gen_pinImage;
+
+  /// No description provided for @gen_unpinImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin'**
+  String get gen_unpinImage;
+
+  /// No description provided for @gen_copyImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy image'**
+  String get gen_copyImage;
+
+  /// No description provided for @gen_saveImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to gallery'**
+  String get gen_saveImage;
+
+  /// No description provided for @gen_openViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Open viewer'**
+  String get gen_openViewer;
+
+  /// No description provided for @gen_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get gen_retry;
+
+  /// No description provided for @gen_copyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy details'**
+  String get gen_copyDetail;
+
+  /// No description provided for @gen_history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get gen_history;
+
+  /// No description provided for @gen_historyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing generated yet'**
+  String get gen_historyEmpty;
+
+  /// No description provided for @gen_historyEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your images will appear here batch by batch'**
+  String get gen_historyEmptySub;
+
+  /// No description provided for @gen_batchCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images'**
+  String gen_batchCount(Object count);
+
+  /// No description provided for @gen_batchPending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to go'**
+  String gen_batchPending(Object count);
+
+  /// No description provided for @gen_pinnedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned images — click to jump to them'**
+  String get gen_pinnedTip;
+
+  /// No description provided for @gen_select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get gen_select;
+
+  /// No description provided for @gen_selectDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done selecting'**
+  String get gen_selectDone;
+
+  /// No description provided for @gen_selectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String gen_selectedCount(Object count);
+
+  /// No description provided for @gen_pack.
+  ///
+  /// In en, this message translates to:
+  /// **'Pack as zip'**
+  String get gen_pack;
+
+  /// No description provided for @gen_saveSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Save selected'**
+  String get gen_saveSelected;
+
+  /// No description provided for @gen_removeSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from history'**
+  String get gen_removeSelected;
+
+  /// No description provided for @gen_autoSaveOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-save to gallery: on'**
+  String get gen_autoSaveOn;
+
+  /// No description provided for @gen_autoSaveOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-save to gallery: off'**
+  String get gen_autoSaveOff;
+
+  /// No description provided for @gen_scrollLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock scroll (stay put when new images arrive)'**
+  String get gen_scrollLock;
+
+  /// No description provided for @gen_scrollUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock scroll'**
+  String get gen_scrollUnlock;
+
+  /// No description provided for @gen_saveAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Save all to gallery'**
+  String get gen_saveAll;
+
+  /// No description provided for @gen_clearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history'**
+  String get gen_clearHistory;
+
+  /// No description provided for @gen_clearHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear this session’s history?'**
+  String get gen_clearHistoryTitle;
+
+  /// No description provided for @gen_clearHistoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Images are only removed from this list; files already saved to the gallery stay.'**
+  String get gen_clearHistoryBody;
+
+  /// No description provided for @gen_deleteImagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from history?'**
+  String get gen_deleteImagesTitle;
+
+  /// No description provided for @gen_deleteImagesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images will be removed from this list; saved files stay in the gallery.'**
+  String gen_deleteImagesBody(Object count);
+
+  /// No description provided for @gen_saveBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Save batch ({count})'**
+  String gen_saveBatch(Object count);
+
+  /// No description provided for @gen_removeBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove batch ({count})'**
+  String gen_removeBatch(Object count);
+
+  /// No description provided for @gen_removeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from history'**
+  String get gen_removeImage;
+
+  /// No description provided for @gen_favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get gen_favorite;
+
+  /// No description provided for @gen_unfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfavorite'**
+  String get gen_unfavorite;
+
+  /// No description provided for @gen_sendImg2Img.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to img2img'**
+  String get gen_sendImg2Img;
+
+  /// No description provided for @gen_sendVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to vibe transfer'**
+  String get gen_sendVibe;
+
+  /// No description provided for @gen_sendPrecise.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as precise reference'**
+  String get gen_sendPrecise;
+
+  /// No description provided for @gen_reveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in Explorer'**
+  String get gen_reveal;
+
+  /// No description provided for @gen_opUpscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscaled'**
+  String get gen_opUpscale;
+
+  /// No description provided for @gen_opEnhance.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhanced'**
+  String get gen_opEnhance;
+
+  /// No description provided for @gen_opVariation.
+  ///
+  /// In en, this message translates to:
+  /// **'Variation'**
+  String get gen_opVariation;
+
+  /// No description provided for @gen_opInpaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Inpainted'**
+  String get gen_opInpaint;
+
+  /// No description provided for @gen_opImg2Img.
+  ///
+  /// In en, this message translates to:
+  /// **'Image to image'**
+  String get gen_opImg2Img;
 }
 
 class _AppLocalizationsDelegate

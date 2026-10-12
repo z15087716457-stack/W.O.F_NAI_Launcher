@@ -1,0 +1,186 @@
+// 生图页基准截图（中文浅色 / 深色）：用固定假数据锁定视觉。界面变了这里会失败。
+// 只有界面方确认新样子后才更新基准：
+//   flutter test --update-goldens test/presentation/ui/gen/gen_golden_test.dart
+// 基准在 Windows + 内置真实字体下生成，其他系统跳过。
+import 'dart:io';
+
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_fixture_editor.dart';
+
+import '../../../helpers/studio_capture_fonts.dart';
+import 'gen_test_harness.dart';
+
+void main() {
+  setUpAll(loadStudioCaptureFonts);
+  final skip = !Platform.isWindows;
+
+  Future<void> expandRefs(WidgetTester t) async {
+    for (final k in ['img2img', 'vibe', 'precise']) {
+      await tapKey(t, 'gen-ref-$k-row');
+    }
+    await t.drag(
+      find.byKey(const Key('gen-left-scroll')),
+      const Offset(0, -340),
+    );
+    await t.pumpAndSettle();
+  }
+
+  final positioning = GenFixture.characters();
+  final dockSlots = GenSlots(
+    editor: GenFixtureEditor.builder,
+    dock: Container(
+      color: const Color(0x11000000),
+      alignment: Alignment.center,
+      child: const Text('BlocksDock'),
+    ),
+  );
+
+  // (文件名, 数据, 窗口宽, 窗口高, 也拍深色, 槽位, 交互)
+  final scenes =
+      <
+        (
+          String,
+          GenViewData,
+          double,
+          double,
+          bool,
+          GenSlots?,
+          Future<void> Function(WidgetTester)?,
+        )
+      >[
+        ('main', GenFixture.view(), 1600, 1120, true, null, null),
+        ('v45', GenFixture.view(v45: true), 1600, 1120, true, null, null),
+        ('v3', GenFixture.v3(), 1600, 1120, false, null, null),
+        ('generating', GenFixture.generating(), 1600, 1120, true, null, null),
+        ('failed', GenFixture.failed(), 1600, 1120, false, null, null),
+        ('empty', GenFixture.empty(), 1600, 1120, true, null, null),
+        ('refs', GenFixture.refsFull(), 1600, 1120, true, null, expandRefs),
+        ('characters', GenFixture.characters(), 1600, 1120, false, null, null),
+        (
+          'positioning',
+          positioning.copyWith(
+            canvas: GenCanvasData(
+              focus: positioning.canvas.focus,
+              info: positioning.canvas.info,
+              positioning: true,
+            ),
+          ),
+          1600,
+          1120,
+          true,
+          null,
+          null,
+        ),
+        (
+          'drawer',
+          GenFixture.view(v45: true),
+          1600,
+          1120,
+          true,
+          null,
+          (t) async => tapKey(t, 'gen-params-toggle'),
+        ),
+        (
+          'model-menu',
+          GenFixture.view(),
+          1600,
+          1120,
+          false,
+          null,
+          (t) async => tapKey(t, 'gen-model'),
+        ),
+        (
+          'tools-menu',
+          GenFixture.view(),
+          1600,
+          1120,
+          true,
+          null,
+          (t) async => tapKey(t, 'gen-tool-menu'),
+        ),
+        (
+          'display',
+          GenFixture.view(),
+          1600,
+          1120,
+          false,
+          null,
+          (t) async => tapKey(t, 'gen-display'),
+        ),
+        (
+          'history-select',
+          GenFixture.view(),
+          1600,
+          1120,
+          false,
+          null,
+          (t) async {
+            await tapKey(t, 'gen-history-select');
+            await tapKey(t, 'gen-batch-tile-b2');
+            await tapKey(t, 'gen-batch-tile-b3');
+          },
+        ),
+        (
+          'history-menu',
+          GenFixture.view(),
+          1600,
+          1120,
+          false,
+          null,
+          (t) async {
+            await t.tap(
+              find.byKey(const Key('gen-batch-tile-b2')),
+              buttons: kSecondaryButton,
+            );
+            await t.pumpAndSettle();
+          },
+        ),
+        ('narrow', GenFixture.view(v45: true), 1100, 760, false, null, null),
+        (
+          'collapsed-dock',
+          GenFixture.view(
+            layout: const GenLayout(
+              leftOpen: false,
+              historyOpen: false,
+              dockOpen: true,
+            ),
+          ),
+          1600,
+          1120,
+          false,
+          dockSlots,
+          null,
+        ),
+      ];
+
+  for (final (name, data, window, height, both, slots, interact) in scenes) {
+    for (final dark in both ? [false, true] : [false]) {
+      final file = '$name${dark ? '-dark' : ''}';
+      testWidgets(file, skip: skip, (t) async {
+        debugDisableShadows = false;
+        await pumpGen(
+          t,
+          data: data,
+          window: window,
+          height: height,
+          dark: dark,
+          slots: slots,
+        );
+        if (interact != null) {
+          await interact(t);
+          await t.pumpAndSettle();
+        }
+        await expectLater(
+          find.byKey(const Key('gen-capture')),
+          matchesGoldenFile('goldens/$file.png'),
+        );
+        await t.pumpWidget(const SizedBox());
+        debugDisableShadows = true;
+      });
+    }
+  }
+}

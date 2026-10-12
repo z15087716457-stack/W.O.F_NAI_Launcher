@@ -17621,4 +17621,857 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get explore_compareDoneBody =>
       'New preferences are saved and used for the next offspring.';
+
+  @override
+  String get gen_cancel => 'Cancel';
+
+  @override
+  String get gen_close => 'Close';
+
+  @override
+  String get gen_done => 'Done';
+
+  @override
+  String get gen_more => 'More';
+
+  @override
+  String get gen_delete => 'Delete';
+
+  @override
+  String get gen_remove => 'Remove';
+
+  @override
+  String get gen_rename => 'Rename';
+
+  @override
+  String get gen_add => 'Add';
+
+  @override
+  String get gen_clear => 'Clear';
+
+  @override
+  String get gen_clearAll => 'Clear all';
+
+  @override
+  String get gen_clearConfirm => 'Clear';
+
+  @override
+  String get gen_removeConfirm => 'Remove';
+
+  @override
+  String get gen_expand => 'Expand';
+
+  @override
+  String get gen_collapse => 'Collapse';
+
+  @override
+  String get gen_copied => 'Copied';
+
+  @override
+  String get gen_random => 'Random';
+
+  @override
+  String get gen_auto => 'Auto';
+
+  @override
+  String get gen_pin => 'Pin to header';
+
+  @override
+  String get gen_unpin => 'Unpin from header';
+
+  @override
+  String get gen_yesterday => 'Yesterday';
+
+  @override
+  String gen_monthDay(Object month, Object day) {
+    return '$month/$day';
+  }
+
+  @override
+  String get gen_params => 'Generation settings';
+
+  @override
+  String get gen_generating => 'Generating';
+
+  @override
+  String get gen_modelsNew => 'Current models';
+
+  @override
+  String get gen_modelsLegacy => 'Legacy models';
+
+  @override
+  String get gen_modeTip => 'Click to switch Anime / Furry';
+
+  @override
+  String gen_anlasTip(Object value) {
+    return 'Anlas balance $value';
+  }
+
+  @override
+  String get gen_positive => 'Prompt';
+
+  @override
+  String get gen_basePrompt => 'Base prompt';
+
+  @override
+  String get gen_negative => 'Undesired';
+
+  @override
+  String get gen_finalPositive => 'Final prompt sent';
+
+  @override
+  String get gen_finalNegative => 'Final undesired content sent';
+
+  @override
+  String get gen_toolDock => 'Block library panel';
+
+  @override
+  String get gen_toolPalette => 'Block palette';
+
+  @override
+  String get gen_toolTranslate => 'Translate';
+
+  @override
+  String get gen_toolsMenu => 'Tools & switches';
+
+  @override
+  String get gen_toolsPinned => 'Header tools';
+
+  @override
+  String get gen_toolsSettings => 'Prompt settings';
+
+  @override
+  String get gen_fullscreen => 'Edit fullscreen';
+
+  @override
+  String get gen_autoFormat => 'Auto format';
+
+  @override
+  String get gen_autoFormatSub =>
+      'Tidy commas and spaces when you leave the editor';
+
+  @override
+  String get gen_highlight => 'Highlight emphasis';
+
+  @override
+  String get gen_highlightSub => 'Colour fragments by weight';
+
+  @override
+  String get gen_sdConvert => 'Convert SD syntax';
+
+  @override
+  String get gen_sdConvertSub => 'Turn pasted (tag:1.2) into NAI weights';
+
+  @override
+  String get gen_related => 'Related tags';
+
+  @override
+  String get gen_relatedSub => 'Suggest tags that often appear together';
+
+  @override
+  String get gen_translating => 'Translating…';
+
+  @override
+  String get gen_translateNeedsModel =>
+      'No translation model yet — click to set one up';
+
+  @override
+  String get gen_translateRestore => 'Show original';
+
+  @override
+  String gen_translateWith(Object route) {
+    return 'Translate ($route)';
+  }
+
+  @override
+  String get gen_translateNew => 'Translate new text';
+
+  @override
+  String get gen_translateShowOriginal => 'Show all original';
+
+  @override
+  String get gen_translateShowTranslated => 'Show all translations';
+
+  @override
+  String get gen_translateSettings => 'Translation model';
+
+  @override
+  String get gen_qualityPreset => 'Quality tags';
+
+  @override
+  String get gen_ucPreset => 'UC preset';
+
+  @override
+  String get gen_presetNone => 'None';
+
+  @override
+  String get gen_transparentOn => 'Transparent background: on';
+
+  @override
+  String get gen_transparentOff => 'Transparent background: off';
+
+  @override
+  String get gen_characters => 'Characters';
+
+  @override
+  String get gen_charactersTip =>
+      'Write a separate prompt for each character so traits do not bleed between them.';
+
+  @override
+  String get gen_charactersEmpty =>
+      'No characters yet. Click + to add one and give each its own prompt.';
+
+  @override
+  String gen_charactersFull(Object max) {
+    return 'Up to $max characters';
+  }
+
+  @override
+  String get gen_addCharacter => 'Add character';
+
+  @override
+  String gen_addAs(Object gender) {
+    return 'Add $gender character';
+  }
+
+  @override
+  String get gen_clearCharacters => 'Remove all characters';
+
+  @override
+  String get gen_clearCharactersTitle => 'Remove all characters?';
+
+  @override
+  String gen_clearCharactersBody(Object count) {
+    return 'All $count characters and their prompts will be removed.';
+  }
+
+  @override
+  String gen_characterN(Object n) {
+    return 'Character $n';
+  }
+
+  @override
+  String get gen_genderFemale => 'female';
+
+  @override
+  String get gen_genderMale => 'male';
+
+  @override
+  String get gen_genderOther => 'other';
+
+  @override
+  String get gen_position => 'Position';
+
+  @override
+  String get gen_positionAi => 'AI choice';
+
+  @override
+  String get gen_positionCustom => 'Custom';
+
+  @override
+  String get gen_positionBoard => 'Character positions';
+
+  @override
+  String get gen_positionAiTip => 'Position chosen by AI';
+
+  @override
+  String gen_positionAt(Object at) {
+    return 'At $at — click to adjust';
+  }
+
+  @override
+  String get gen_positionUnset => 'Not placed yet — click to place';
+
+  @override
+  String get gen_positionAiHint => 'Positions are chosen by AI';
+
+  @override
+  String get gen_positionGridHint =>
+      'Drag characters onto the grid; they snap to the cell centre';
+
+  @override
+  String get gen_positionFreeHint => 'Drag characters anywhere on the image';
+
+  @override
+  String get gen_positionAiOverlay =>
+      'Positions are set to AI choice.\nSwitch to custom to place them yourself.';
+
+  @override
+  String get gen_positionToCustom => 'Switch to custom';
+
+  @override
+  String get gen_positionUnplaced => 'Not placed';
+
+  @override
+  String get gen_renameTip => 'Double-click to rename';
+
+  @override
+  String get gen_moveUp => 'Move up';
+
+  @override
+  String get gen_moveDown => 'Move down';
+
+  @override
+  String get gen_characterDisable => 'Skip this character';
+
+  @override
+  String get gen_characterEnable => 'Use this character';
+
+  @override
+  String get gen_charPositive => 'Prompt';
+
+  @override
+  String get gen_charNegative => 'Undesired';
+
+  @override
+  String get gen_saveAsBlock => 'Save as block';
+
+  @override
+  String get gen_refs => 'References';
+
+  @override
+  String get gen_img2img => 'Image to image';
+
+  @override
+  String get gen_img2imgDesc => 'Generate variations of an image';
+
+  @override
+  String gen_img2imgSummary(Object strength, Object noise) {
+    return 'Strength $strength · Noise $noise';
+  }
+
+  @override
+  String get gen_img2imgDrop => 'Drop an image here, or';
+
+  @override
+  String get gen_upload => 'Upload';
+
+  @override
+  String get gen_replace => 'Replace';
+
+  @override
+  String get gen_edit => 'Edit';
+
+  @override
+  String get gen_inpaint => 'Inpaint';
+
+  @override
+  String get gen_placeOnCanvas => 'Show on canvas';
+
+  @override
+  String get gen_fromPreciseLibrary => 'From reference library';
+
+  @override
+  String get gen_sketch => 'Sketch';
+
+  @override
+  String get gen_strength => 'Strength';
+
+  @override
+  String get gen_strengthTip =>
+      'Higher drifts further from the original (default 0.7)';
+
+  @override
+  String get gen_noise => 'Noise';
+
+  @override
+  String get gen_noiseTip => 'Adds noise for more detail variation (default 0)';
+
+  @override
+  String get gen_inpaintStrength => 'Inpaint strength';
+
+  @override
+  String get gen_inpaintReady =>
+      'Mask ready — only the painted area will be regenerated.';
+
+  @override
+  String get gen_refPause => 'Pause for now';
+
+  @override
+  String get gen_refResume => 'Resume';
+
+  @override
+  String get gen_refPaused => 'Paused — not sent this time';
+
+  @override
+  String get gen_vibe => 'Vibe transfer';
+
+  @override
+  String get gen_vibeDesc => 'Change the image, keep the look';
+
+  @override
+  String get gen_vibeSkipped => 'Skipped — a precise reference is active';
+
+  @override
+  String get gen_vibeConflict =>
+      'Vibes are not sent while a precise reference is active.';
+
+  @override
+  String get gen_vibeDrop => 'Drop images or .naiv4vibe files, or';
+
+  @override
+  String get gen_addVibe => 'Add vibe';
+
+  @override
+  String get gen_addFromFile => 'From file';
+
+  @override
+  String get gen_addFromVibeLibrary => 'From vibe library';
+
+  @override
+  String get gen_addFromPreciseLibrary => 'From reference library';
+
+  @override
+  String gen_vibeFull(Object max) {
+    return 'Up to $max';
+  }
+
+  @override
+  String get gen_saveToLibrary => 'Save to library';
+
+  @override
+  String get gen_normalize => 'Normalize';
+
+  @override
+  String get gen_normalizeTip => 'Normalize vibe strengths by their total';
+
+  @override
+  String gen_vibeExtraCost(Object free, Object each, Object total) {
+    return 'Each vibe beyond $free costs +$each Anlas · +$total this time';
+  }
+
+  @override
+  String get gen_recent => 'Recent';
+
+  @override
+  String get gen_encoded => 'Encoded';
+
+  @override
+  String get gen_encoding => 'Encoding';
+
+  @override
+  String get gen_encode => 'Encode';
+
+  @override
+  String gen_encodeTip(Object cost) {
+    return 'Encoding costs $cost Anlas once, then it can be reused';
+  }
+
+  @override
+  String get gen_vibeStrength => 'Strength';
+
+  @override
+  String get gen_vibeInfo => 'Info';
+
+  @override
+  String get gen_vibeInfoReencode =>
+      'Changing info extraction re-encodes this vibe';
+
+  @override
+  String get gen_precise => 'Precise reference';
+
+  @override
+  String get gen_preciseDesc => 'Anchor the result to a character or style';
+
+  @override
+  String get gen_preciseDrop => 'Drop a character or style reference, or';
+
+  @override
+  String get gen_preciseCharacter => 'Character';
+
+  @override
+  String get gen_preciseStyle => 'Style';
+
+  @override
+  String get gen_preciseBoth => 'Both';
+
+  @override
+  String get gen_fidelity => 'Fidelity';
+
+  @override
+  String gen_preciseCost(Object each, Object total) {
+    return '$each Anlas each · +$total this time';
+  }
+
+  @override
+  String get gen_preciseConflict =>
+      'While a precise reference is active, vibes are not sent.';
+
+  @override
+  String get gen_pauseVibes => 'Pause vibes';
+
+  @override
+  String get gen_savePrecise => 'Save to reference library';
+
+  @override
+  String get gen_addPrecise => 'Add precise reference';
+
+  @override
+  String get gen_image => 'Image';
+
+  @override
+  String get gen_sizeNormal => 'Normal';
+
+  @override
+  String get gen_sizeLarge => 'Large';
+
+  @override
+  String get gen_sizeWallpaper => 'Wallpaper';
+
+  @override
+  String get gen_sizeSmall => 'Small';
+
+  @override
+  String get gen_sizeCustom => 'Custom';
+
+  @override
+  String get gen_portrait => 'Portrait';
+
+  @override
+  String get gen_landscape => 'Landscape';
+
+  @override
+  String get gen_square => 'Square';
+
+  @override
+  String get gen_width => 'Width (rounded to 64)';
+
+  @override
+  String get gen_height => 'Height (rounded to 64)';
+
+  @override
+  String get gen_swapSize => 'Swap width and height';
+
+  @override
+  String get gen_count => 'Images';
+
+  @override
+  String get gen_countTip => 'Images per request (1–4)';
+
+  @override
+  String get gen_repeat => 'Repeat';
+
+  @override
+  String get gen_repeatTip => 'How many requests to send in a row';
+
+  @override
+  String gen_repeatTotal(Object times, Object total) {
+    return '$times requests, $total images (scroll to adjust)';
+  }
+
+  @override
+  String get gen_steps => 'Steps';
+
+  @override
+  String get gen_guidance => 'Guidance';
+
+  @override
+  String get gen_guidanceTip =>
+      'Higher follows the prompt more closely; too high looks harsh (default 5)';
+
+  @override
+  String get gen_cfgRescale => 'Guidance rescale';
+
+  @override
+  String get gen_cfgRescaleTip =>
+      'Tames oversaturation from high guidance (default 0)';
+
+  @override
+  String get gen_seed => 'Seed';
+
+  @override
+  String get gen_seedPinned => 'Seed · fixed';
+
+  @override
+  String get gen_seedPinTip => 'Click to keep this seed';
+
+  @override
+  String get gen_seedUnpinTip => 'Click to go back to random';
+
+  @override
+  String get gen_seedRandomize => 'Back to random';
+
+  @override
+  String get gen_sampler => 'Sampler';
+
+  @override
+  String get gen_samplerRecommended => 'Recommended';
+
+  @override
+  String get gen_samplerOther => 'Other';
+
+  @override
+  String get gen_noiseSchedule => 'Noise schedule';
+
+  @override
+  String get gen_varietyTip =>
+      'Skip guidance in early steps for more varied compositions';
+
+  @override
+  String get gen_decrispTip => 'Reduces over-sharpening at high guidance';
+
+  @override
+  String get gen_smeaAutoTip => 'Turn SMEA on automatically by image size';
+
+  @override
+  String get gen_paramsTitle => 'Generation settings';
+
+  @override
+  String get gen_paramsOpen => 'Show all settings';
+
+  @override
+  String get gen_paramsClose => 'Hide settings';
+
+  @override
+  String get gen_stop => 'Stop';
+
+  @override
+  String gen_cooldown(Object seconds) {
+    return 'Cooling down ${seconds}s';
+  }
+
+  @override
+  String get gen_insufficient => 'Not enough Anlas';
+
+  @override
+  String get gen_free => 'Free this time (within Opus allowance)';
+
+  @override
+  String get gen_emptyTitle => 'Write a prompt and make your first image';
+
+  @override
+  String get gen_emptyPress => 'Press';
+
+  @override
+  String get gen_emptyOr => 'or click Generate at the bottom left';
+
+  @override
+  String get gen_tileFailed => 'This one failed';
+
+  @override
+  String get gen_enhance => 'Enhance';
+
+  @override
+  String get gen_variations => 'Variations';
+
+  @override
+  String gen_variationsCost(Object cost) {
+    return 'Variations ($cost Anlas)';
+  }
+
+  @override
+  String get gen_upscale => 'Upscale';
+
+  @override
+  String get gen_upscaleStop => 'Stop upscaling';
+
+  @override
+  String get gen_upscaleOptions => 'Upscale options';
+
+  @override
+  String get gen_setInit => 'Use as img2img source';
+
+  @override
+  String get gen_editImage => 'Edit image';
+
+  @override
+  String get gen_sendToTools => 'Send to canvas tools';
+
+  @override
+  String get gen_display => 'Canvas display';
+
+  @override
+  String get gen_backdrop => 'Transparent backdrop';
+
+  @override
+  String get gen_backdropSub =>
+      'Shown under transparent pixels only; never saved into the image';
+
+  @override
+  String get gen_bdChecker => 'Checker (theme)';
+
+  @override
+  String get gen_bdCheckerLight => 'Light checker';
+
+  @override
+  String get gen_bdCheckerDark => 'Dark checker';
+
+  @override
+  String get gen_bdNone => 'None';
+
+  @override
+  String get gen_bdBlack => 'Black';
+
+  @override
+  String get gen_bdWhite => 'White';
+
+  @override
+  String get gen_bdGray => 'Gray';
+
+  @override
+  String get gen_bdRed => 'Red';
+
+  @override
+  String get gen_bdGreen => 'Green';
+
+  @override
+  String get gen_bdBlue => 'Blue';
+
+  @override
+  String get gen_bdCustom => 'Custom';
+
+  @override
+  String get gen_zoomToFill => 'Zoom to fill';
+
+  @override
+  String get gen_zoomToFillSub => 'Scale small images up to fill the canvas';
+
+  @override
+  String get gen_useSeed => 'Use this seed (and keep it)';
+
+  @override
+  String get gen_copySeed => 'Copy seed';
+
+  @override
+  String get gen_pinImage => 'Pin to canvas';
+
+  @override
+  String get gen_unpinImage => 'Unpin';
+
+  @override
+  String get gen_copyImage => 'Copy image';
+
+  @override
+  String get gen_saveImage => 'Save to gallery';
+
+  @override
+  String get gen_openViewer => 'Open viewer';
+
+  @override
+  String get gen_retry => 'Retry';
+
+  @override
+  String get gen_copyDetail => 'Copy details';
+
+  @override
+  String get gen_history => 'History';
+
+  @override
+  String get gen_historyEmpty => 'Nothing generated yet';
+
+  @override
+  String get gen_historyEmptySub =>
+      'Your images will appear here batch by batch';
+
+  @override
+  String gen_batchCount(Object count) {
+    return '$count images';
+  }
+
+  @override
+  String gen_batchPending(Object count) {
+    return '$count to go';
+  }
+
+  @override
+  String get gen_pinnedTip => 'Pinned images — click to jump to them';
+
+  @override
+  String get gen_select => 'Select';
+
+  @override
+  String get gen_selectDone => 'Done selecting';
+
+  @override
+  String gen_selectedCount(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String get gen_pack => 'Pack as zip';
+
+  @override
+  String get gen_saveSelected => 'Save selected';
+
+  @override
+  String get gen_removeSelected => 'Remove from history';
+
+  @override
+  String get gen_autoSaveOn => 'Auto-save to gallery: on';
+
+  @override
+  String get gen_autoSaveOff => 'Auto-save to gallery: off';
+
+  @override
+  String get gen_scrollLock => 'Lock scroll (stay put when new images arrive)';
+
+  @override
+  String get gen_scrollUnlock => 'Unlock scroll';
+
+  @override
+  String get gen_saveAll => 'Save all to gallery';
+
+  @override
+  String get gen_clearHistory => 'Clear history';
+
+  @override
+  String get gen_clearHistoryTitle => 'Clear this session’s history?';
+
+  @override
+  String get gen_clearHistoryBody =>
+      'Images are only removed from this list; files already saved to the gallery stay.';
+
+  @override
+  String get gen_deleteImagesTitle => 'Remove from history?';
+
+  @override
+  String gen_deleteImagesBody(Object count) {
+    return '$count images will be removed from this list; saved files stay in the gallery.';
+  }
+
+  @override
+  String gen_saveBatch(Object count) {
+    return 'Save batch ($count)';
+  }
+
+  @override
+  String gen_removeBatch(Object count) {
+    return 'Remove batch ($count)';
+  }
+
+  @override
+  String get gen_removeImage => 'Remove from history';
+
+  @override
+  String get gen_favorite => 'Favorite';
+
+  @override
+  String get gen_unfavorite => 'Unfavorite';
+
+  @override
+  String get gen_sendImg2Img => 'Send to img2img';
+
+  @override
+  String get gen_sendVibe => 'Add to vibe transfer';
+
+  @override
+  String get gen_sendPrecise => 'Add as precise reference';
+
+  @override
+  String get gen_reveal => 'Show in Explorer';
+
+  @override
+  String get gen_opUpscale => 'Upscaled';
+
+  @override
+  String get gen_opEnhance => 'Enhanced';
+
+  @override
+  String get gen_opVariation => 'Variation';
+
+  @override
+  String get gen_opInpaint => 'Inpainted';
+
+  @override
+  String get gen_opImg2Img => 'Image to image';
 }

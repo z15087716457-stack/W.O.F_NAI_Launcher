@@ -16889,6 +16889,842 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get explore_compareDoneBody => '新的偏好已经保存，下次生成子代就会用上。';
+
+  @override
+  String get gen_cancel => '取消';
+
+  @override
+  String get gen_close => '关闭';
+
+  @override
+  String get gen_done => '完成';
+
+  @override
+  String get gen_more => '更多';
+
+  @override
+  String get gen_delete => '删除';
+
+  @override
+  String get gen_remove => '移除';
+
+  @override
+  String get gen_rename => '改名';
+
+  @override
+  String get gen_add => '添加';
+
+  @override
+  String get gen_clear => '清空';
+
+  @override
+  String get gen_clearAll => '全部清空';
+
+  @override
+  String get gen_clearConfirm => '清空';
+
+  @override
+  String get gen_removeConfirm => '移除';
+
+  @override
+  String get gen_expand => '展开';
+
+  @override
+  String get gen_collapse => '收起';
+
+  @override
+  String get gen_copied => '已复制';
+
+  @override
+  String get gen_random => '随机';
+
+  @override
+  String get gen_auto => '自动';
+
+  @override
+  String get gen_pin => '钉在头部';
+
+  @override
+  String get gen_unpin => '从头部取下';
+
+  @override
+  String get gen_yesterday => '昨天';
+
+  @override
+  String gen_monthDay(Object month, Object day) {
+    return '$month月$day日';
+  }
+
+  @override
+  String get gen_params => '生成参数';
+
+  @override
+  String get gen_generating => '生成中';
+
+  @override
+  String get gen_modelsNew => '新模型';
+
+  @override
+  String get gen_modelsLegacy => '旧模型';
+
+  @override
+  String get gen_modeTip => '点一下切换 Anime / Furry';
+
+  @override
+  String gen_anlasTip(Object value) {
+    return 'Anlas 余额 $value';
+  }
+
+  @override
+  String get gen_positive => '正面';
+
+  @override
+  String get gen_basePrompt => '基础提示词';
+
+  @override
+  String get gen_negative => '负面';
+
+  @override
+  String get gen_finalPositive => '最终发送的正面';
+
+  @override
+  String get gen_finalNegative => '最终发送的负面';
+
+  @override
+  String get gen_toolDock => '块库侧栏';
+
+  @override
+  String get gen_toolPalette => '积木板';
+
+  @override
+  String get gen_toolTranslate => '翻译';
+
+  @override
+  String get gen_toolsMenu => '模块与开关';
+
+  @override
+  String get gen_toolsPinned => '钉在头部的工具';
+
+  @override
+  String get gen_toolsSettings => '提示词设置';
+
+  @override
+  String get gen_fullscreen => '全屏编辑';
+
+  @override
+  String get gen_autoFormat => '自动格式化';
+
+  @override
+  String get gen_autoFormatSub => '失焦时整理逗号和空格';
+
+  @override
+  String get gen_highlight => '强调高亮';
+
+  @override
+  String get gen_highlightSub => '按权重给片段上色';
+
+  @override
+  String get gen_sdConvert => 'SD 语法自动转换';
+
+  @override
+  String get gen_sdConvertSub => '粘贴 (tag:1.2) 时转成 NAI 权重';
+
+  @override
+  String get gen_related => '共现推荐';
+
+  @override
+  String get gen_relatedSub => '补全时推荐常一起出现的标签';
+
+  @override
+  String get gen_translating => '正在翻译…';
+
+  @override
+  String get gen_translateNeedsModel => '还没配翻译模型，点一下去设置';
+
+  @override
+  String get gen_translateRestore => '显示原文';
+
+  @override
+  String gen_translateWith(Object route) {
+    return '翻译（$route）';
+  }
+
+  @override
+  String get gen_translateNew => '翻译新增内容';
+
+  @override
+  String get gen_translateShowOriginal => '全部显示原文';
+
+  @override
+  String get gen_translateShowTranslated => '全部显示译文';
+
+  @override
+  String get gen_translateSettings => '翻译模型设置';
+
+  @override
+  String get gen_qualityPreset => '质量词预设';
+
+  @override
+  String get gen_ucPreset => '负面预设';
+
+  @override
+  String get gen_presetNone => '无';
+
+  @override
+  String get gen_transparentOn => '透明背景：开';
+
+  @override
+  String get gen_transparentOff => '透明背景：关';
+
+  @override
+  String get gen_characters => '角色提示词';
+
+  @override
+  String get gen_charactersTip => '给画面里每个角色单独写提示词，不会互相串。';
+
+  @override
+  String get gen_charactersEmpty => '还没有角色。点右上角 + 添加，每个角色单独写提示词。';
+
+  @override
+  String gen_charactersFull(Object max) {
+    return '最多 $max 个角色';
+  }
+
+  @override
+  String get gen_addCharacter => '添加角色';
+
+  @override
+  String gen_addAs(Object gender) {
+    return '添加$gender角色';
+  }
+
+  @override
+  String get gen_clearCharacters => '清空全部角色';
+
+  @override
+  String get gen_clearCharactersTitle => '清空全部角色？';
+
+  @override
+  String gen_clearCharactersBody(Object count) {
+    return '$count 个角色和它们的提示词都会删掉。';
+  }
+
+  @override
+  String gen_characterN(Object n) {
+    return '角色 $n';
+  }
+
+  @override
+  String get gen_genderFemale => '女性';
+
+  @override
+  String get gen_genderMale => '男性';
+
+  @override
+  String get gen_genderOther => '其他';
+
+  @override
+  String get gen_position => '定位';
+
+  @override
+  String get gen_positionAi => 'AI 选择';
+
+  @override
+  String get gen_positionCustom => '自定义';
+
+  @override
+  String get gen_positionBoard => '角色位置';
+
+  @override
+  String get gen_positionAiTip => '位置由 AI 决定';
+
+  @override
+  String gen_positionAt(Object at) {
+    return '位置 $at，点一下调整';
+  }
+
+  @override
+  String get gen_positionUnset => '还没放位置，点一下摆放';
+
+  @override
+  String get gen_positionAiHint => '现在由 AI 决定位置';
+
+  @override
+  String get gen_positionGridHint => '拖角色到格子里，松手吸附到格子中心';
+
+  @override
+  String get gen_positionFreeHint => '拖角色到画面里任意位置';
+
+  @override
+  String get gen_positionAiOverlay => '现在是 AI 选择位置。\n切到自定义才能手动摆放。';
+
+  @override
+  String get gen_positionToCustom => '切到自定义';
+
+  @override
+  String get gen_positionUnplaced => '还没放';
+
+  @override
+  String get gen_renameTip => '双击改名';
+
+  @override
+  String get gen_moveUp => '上移';
+
+  @override
+  String get gen_moveDown => '下移';
+
+  @override
+  String get gen_characterDisable => '这次不用这个角色';
+
+  @override
+  String get gen_characterEnable => '用这个角色';
+
+  @override
+  String get gen_charPositive => '正面';
+
+  @override
+  String get gen_charNegative => '负面';
+
+  @override
+  String get gen_saveAsBlock => '存为块';
+
+  @override
+  String get gen_refs => '参考图';
+
+  @override
+  String get gen_img2img => '图生图';
+
+  @override
+  String get gen_img2imgDesc => '基于原图生成变体';
+
+  @override
+  String gen_img2imgSummary(Object strength, Object noise) {
+    return '强度 $strength · 噪声 $noise';
+  }
+
+  @override
+  String get gen_img2imgDrop => '拖一张图进来，或者';
+
+  @override
+  String get gen_upload => '上传';
+
+  @override
+  String get gen_replace => '更换';
+
+  @override
+  String get gen_edit => '编辑';
+
+  @override
+  String get gen_inpaint => '局部重绘';
+
+  @override
+  String get gen_placeOnCanvas => '放到画布';
+
+  @override
+  String get gen_fromPreciseLibrary => '从精准参考库';
+
+  @override
+  String get gen_sketch => '画草图';
+
+  @override
+  String get gen_strength => '强度';
+
+  @override
+  String get gen_strengthTip => '越高越不像原图（默认 0.7）';
+
+  @override
+  String get gen_noise => '噪声';
+
+  @override
+  String get gen_noiseTip => '加噪让细节更多变化（默认 0）';
+
+  @override
+  String get gen_inpaintStrength => '重绘强度';
+
+  @override
+  String get gen_inpaintReady => '蒙版已画好，生成时只重绘涂过的区域。';
+
+  @override
+  String get gen_refPause => '这次不发送';
+
+  @override
+  String get gen_refResume => '恢复发送';
+
+  @override
+  String get gen_refPaused => '已暂停，这次不发送';
+
+  @override
+  String get gen_vibe => '风格迁移';
+
+  @override
+  String get gen_vibeDesc => '改变图像，保留视觉风格';
+
+  @override
+  String get gen_vibeSkipped => '有精准参考，这次不会发送';
+
+  @override
+  String get gen_vibeConflict => '生图页有精准参考时，风格迁移不会发送。';
+
+  @override
+  String get gen_vibeDrop => '拖图片或 .naiv4vibe 进来，或者';
+
+  @override
+  String get gen_addVibe => '添加 Vibe';
+
+  @override
+  String get gen_addFromFile => '从文件添加';
+
+  @override
+  String get gen_addFromVibeLibrary => '从 Vibe 库添加';
+
+  @override
+  String get gen_addFromPreciseLibrary => '从精准参考库添加';
+
+  @override
+  String gen_vibeFull(Object max) {
+    return '最多 $max 个';
+  }
+
+  @override
+  String get gen_saveToLibrary => '存入库';
+
+  @override
+  String get gen_normalize => '标准化';
+
+  @override
+  String get gen_normalizeTip => '按总和标准化各 Vibe 的强度';
+
+  @override
+  String gen_vibeExtraCost(Object free, Object each, Object total) {
+    return '超过 $free 个后每个 +$each Anlas · 本次 +$total';
+  }
+
+  @override
+  String get gen_recent => '最近';
+
+  @override
+  String get gen_encoded => '已编码';
+
+  @override
+  String get gen_encoding => '编码中';
+
+  @override
+  String get gen_encode => '编码';
+
+  @override
+  String gen_encodeTip(Object cost) {
+    return '编码一次 $cost Anlas，编码后可重复使用';
+  }
+
+  @override
+  String get gen_vibeStrength => '强度';
+
+  @override
+  String get gen_vibeInfo => '信息提取';
+
+  @override
+  String get gen_vibeInfoReencode => '已编码的 Vibe 改信息提取要重新编码';
+
+  @override
+  String get gen_precise => '精准参考';
+
+  @override
+  String get gen_preciseDesc => '将生成绑定到角色或风格参考';
+
+  @override
+  String get gen_preciseDrop => '拖角色或风格参考图进来，或者';
+
+  @override
+  String get gen_preciseCharacter => '角色';
+
+  @override
+  String get gen_preciseStyle => '风格';
+
+  @override
+  String get gen_preciseBoth => '角色 + 风格';
+
+  @override
+  String get gen_fidelity => '保真度';
+
+  @override
+  String gen_preciseCost(Object each, Object total) {
+    return '每张 $each Anlas · 本次 +$total';
+  }
+
+  @override
+  String get gen_preciseConflict => '有精准参考时，风格迁移这次不会发送。';
+
+  @override
+  String get gen_pauseVibes => '暂停 Vibe';
+
+  @override
+  String get gen_savePrecise => '存入精准参考库';
+
+  @override
+  String get gen_addPrecise => '添加精准参考';
+
+  @override
+  String get gen_image => '图像';
+
+  @override
+  String get gen_sizeNormal => '常规';
+
+  @override
+  String get gen_sizeLarge => '大图';
+
+  @override
+  String get gen_sizeWallpaper => '壁纸';
+
+  @override
+  String get gen_sizeSmall => '小图';
+
+  @override
+  String get gen_sizeCustom => '自定义';
+
+  @override
+  String get gen_portrait => '竖图';
+
+  @override
+  String get gen_landscape => '横图';
+
+  @override
+  String get gen_square => '方图';
+
+  @override
+  String get gen_width => '宽（按 64 取整）';
+
+  @override
+  String get gen_height => '高（按 64 取整）';
+
+  @override
+  String get gen_swapSize => '交换宽高';
+
+  @override
+  String get gen_count => '张数';
+
+  @override
+  String get gen_countTip => '一次请求出几张（1–4）';
+
+  @override
+  String get gen_repeat => '重复';
+
+  @override
+  String get gen_repeatTip => '连续发几次请求';
+
+  @override
+  String gen_repeatTotal(Object times, Object total) {
+    return '重复 $times 次，共 $total 张（滚轮也能调）';
+  }
+
+  @override
+  String get gen_steps => '步数';
+
+  @override
+  String get gen_guidance => '引导';
+
+  @override
+  String get gen_guidanceTip => '越高越贴提示词，太高会发硬（默认 5）';
+
+  @override
+  String get gen_cfgRescale => '引导重缩放';
+
+  @override
+  String get gen_cfgRescaleTip => '压住高引导带来的过饱和（默认 0）';
+
+  @override
+  String get gen_seed => '种子';
+
+  @override
+  String get gen_seedPinned => '种子 · 固定';
+
+  @override
+  String get gen_seedPinTip => '点一下固定这个种子';
+
+  @override
+  String get gen_seedUnpinTip => '点一下改回随机';
+
+  @override
+  String get gen_seedRandomize => '改回随机';
+
+  @override
+  String get gen_sampler => '采样器';
+
+  @override
+  String get gen_samplerRecommended => '推荐';
+
+  @override
+  String get gen_samplerOther => '其他';
+
+  @override
+  String get gen_noiseSchedule => '噪声调度';
+
+  @override
+  String get gen_varietyTip => '前几步跳过引导，构图更多样';
+
+  @override
+  String get gen_decrispTip => '减轻高引导下的过度锐利';
+
+  @override
+  String get gen_smeaAutoTip => '按尺寸自动决定是否开 SMEA';
+
+  @override
+  String get gen_paramsTitle => '生成参数';
+
+  @override
+  String get gen_paramsOpen => '展开全部参数';
+
+  @override
+  String get gen_paramsClose => '收起参数';
+
+  @override
+  String get gen_stop => '停止生成';
+
+  @override
+  String gen_cooldown(Object seconds) {
+    return '冷却中 $seconds 秒';
+  }
+
+  @override
+  String get gen_insufficient => 'Anlas 不够';
+
+  @override
+  String get gen_free => '这次免费（Opus 额度内）';
+
+  @override
+  String get gen_emptyTitle => '写好提示词，开始第一张';
+
+  @override
+  String get gen_emptyPress => '按';
+
+  @override
+  String get gen_emptyOr => '或点左下角的生成';
+
+  @override
+  String get gen_tileFailed => '这张没出来';
+
+  @override
+  String get gen_enhance => '增强';
+
+  @override
+  String get gen_variations => '变体';
+
+  @override
+  String gen_variationsCost(Object cost) {
+    return '变体（$cost Anlas）';
+  }
+
+  @override
+  String get gen_upscale => '放大';
+
+  @override
+  String get gen_upscaleStop => '停止放大';
+
+  @override
+  String get gen_upscaleOptions => '放大方案';
+
+  @override
+  String get gen_setInit => '设为图生图原图';
+
+  @override
+  String get gen_editImage => '编辑图片';
+
+  @override
+  String get gen_sendToTools => '发到画布工具';
+
+  @override
+  String get gen_display => '画布显示';
+
+  @override
+  String get gen_backdrop => '透明图垫底';
+
+  @override
+  String get gen_backdropSub => '只垫在透明像素下面，不会存进图片';
+
+  @override
+  String get gen_bdChecker => '棋盘格（跟随主题）';
+
+  @override
+  String get gen_bdCheckerLight => '浅棋盘格';
+
+  @override
+  String get gen_bdCheckerDark => '深棋盘格';
+
+  @override
+  String get gen_bdNone => '不垫';
+
+  @override
+  String get gen_bdBlack => '黑';
+
+  @override
+  String get gen_bdWhite => '白';
+
+  @override
+  String get gen_bdGray => '灰';
+
+  @override
+  String get gen_bdRed => '红';
+
+  @override
+  String get gen_bdGreen => '绿';
+
+  @override
+  String get gen_bdBlue => '蓝';
+
+  @override
+  String get gen_bdCustom => '自定义';
+
+  @override
+  String get gen_zoomToFill => '放大填满';
+
+  @override
+  String get gen_zoomToFillSub => '比画布小的图也放大到撑满';
+
+  @override
+  String get gen_useSeed => '用这个种子（并固定）';
+
+  @override
+  String get gen_copySeed => '复制种子';
+
+  @override
+  String get gen_pinImage => '钉在画布上';
+
+  @override
+  String get gen_unpinImage => '取消钉住';
+
+  @override
+  String get gen_copyImage => '复制图片';
+
+  @override
+  String get gen_saveImage => '保存到图库';
+
+  @override
+  String get gen_openViewer => '打开大图';
+
+  @override
+  String get gen_retry => '重试';
+
+  @override
+  String get gen_copyDetail => '复制详情';
+
+  @override
+  String get gen_history => '历史记录';
+
+  @override
+  String get gen_historyEmpty => '这次还没有生成';
+
+  @override
+  String get gen_historyEmptySub => '生成的图会按批次排在这里';
+
+  @override
+  String gen_batchCount(Object count) {
+    return '$count 张';
+  }
+
+  @override
+  String gen_batchPending(Object count) {
+    return '还剩 $count 张';
+  }
+
+  @override
+  String get gen_pinnedTip => '钉在画布上的图，点一下飞过去';
+
+  @override
+  String get gen_select => '多选';
+
+  @override
+  String get gen_selectDone => '完成多选';
+
+  @override
+  String gen_selectedCount(Object count) {
+    return '已选 $count 张';
+  }
+
+  @override
+  String get gen_pack => '打包成 zip';
+
+  @override
+  String get gen_saveSelected => '保存选中的图';
+
+  @override
+  String get gen_removeSelected => '从历史移除';
+
+  @override
+  String get gen_autoSaveOn => '自动保存到图库：开';
+
+  @override
+  String get gen_autoSaveOff => '自动保存到图库：关';
+
+  @override
+  String get gen_scrollLock => '锁定滚动（新图来了不跳到顶部）';
+
+  @override
+  String get gen_scrollUnlock => '解除锁定滚动';
+
+  @override
+  String get gen_saveAll => '全部保存到图库';
+
+  @override
+  String get gen_clearHistory => '清空历史';
+
+  @override
+  String get gen_clearHistoryTitle => '清空这次的历史？';
+
+  @override
+  String get gen_clearHistoryBody => '只从这里移除，已经保存到图库的文件不受影响。';
+
+  @override
+  String get gen_deleteImagesTitle => '从历史移除？';
+
+  @override
+  String gen_deleteImagesBody(Object count) {
+    return '$count 张图会从这里移除，已经保存到图库的文件不受影响。';
+  }
+
+  @override
+  String gen_saveBatch(Object count) {
+    return '保存这批（$count 张）';
+  }
+
+  @override
+  String gen_removeBatch(Object count) {
+    return '移除这批（$count 张）';
+  }
+
+  @override
+  String get gen_removeImage => '从历史移除';
+
+  @override
+  String get gen_favorite => '收藏';
+
+  @override
+  String get gen_unfavorite => '取消收藏';
+
+  @override
+  String get gen_sendImg2Img => '发送到图生图';
+
+  @override
+  String get gen_sendVibe => '加入风格迁移';
+
+  @override
+  String get gen_sendPrecise => '加入精准参考';
+
+  @override
+  String get gen_reveal => '在资源管理器中显示';
+
+  @override
+  String get gen_opUpscale => '放大过';
+
+  @override
+  String get gen_opEnhance => '增强过';
+
+  @override
+  String get gen_opVariation => '变体';
+
+  @override
+  String get gen_opInpaint => '局部重绘';
+
+  @override
+  String get gen_opImg2Img => '图生图';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -33776,4 +34612,840 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get explore_compareDoneBody => '新的偏好已經儲存，下次生成子代就會用上。';
+
+  @override
+  String get gen_cancel => '取消';
+
+  @override
+  String get gen_close => '關閉';
+
+  @override
+  String get gen_done => '完成';
+
+  @override
+  String get gen_more => '更多';
+
+  @override
+  String get gen_delete => '刪除';
+
+  @override
+  String get gen_remove => '移除';
+
+  @override
+  String get gen_rename => '改名';
+
+  @override
+  String get gen_add => '新增';
+
+  @override
+  String get gen_clear => '清空';
+
+  @override
+  String get gen_clearAll => '全部清空';
+
+  @override
+  String get gen_clearConfirm => '清空';
+
+  @override
+  String get gen_removeConfirm => '移除';
+
+  @override
+  String get gen_expand => '展開';
+
+  @override
+  String get gen_collapse => '收起';
+
+  @override
+  String get gen_copied => '已複製';
+
+  @override
+  String get gen_random => '隨機';
+
+  @override
+  String get gen_auto => '自動';
+
+  @override
+  String get gen_pin => '釘在頭部';
+
+  @override
+  String get gen_unpin => '從頭部取下';
+
+  @override
+  String get gen_yesterday => '昨天';
+
+  @override
+  String gen_monthDay(Object month, Object day) {
+    return '$month月$day日';
+  }
+
+  @override
+  String get gen_params => '生成參數';
+
+  @override
+  String get gen_generating => '生成中';
+
+  @override
+  String get gen_modelsNew => '新模型';
+
+  @override
+  String get gen_modelsLegacy => '舊模型';
+
+  @override
+  String get gen_modeTip => '點一下切換 Anime / Furry';
+
+  @override
+  String gen_anlasTip(Object value) {
+    return 'Anlas 餘額 $value';
+  }
+
+  @override
+  String get gen_positive => '正面';
+
+  @override
+  String get gen_basePrompt => '基礎提示詞';
+
+  @override
+  String get gen_negative => '負面';
+
+  @override
+  String get gen_finalPositive => '最終傳送的正面';
+
+  @override
+  String get gen_finalNegative => '最終傳送的負面';
+
+  @override
+  String get gen_toolDock => '塊庫側欄';
+
+  @override
+  String get gen_toolPalette => '積木板';
+
+  @override
+  String get gen_toolTranslate => '翻譯';
+
+  @override
+  String get gen_toolsMenu => '模組與開關';
+
+  @override
+  String get gen_toolsPinned => '釘在頭部的工具';
+
+  @override
+  String get gen_toolsSettings => '提示詞設定';
+
+  @override
+  String get gen_fullscreen => '全屏編輯';
+
+  @override
+  String get gen_autoFormat => '自動格式化';
+
+  @override
+  String get gen_autoFormatSub => '失焦時整理逗號和空格';
+
+  @override
+  String get gen_highlight => '強調高亮';
+
+  @override
+  String get gen_highlightSub => '按權重給片段上色';
+
+  @override
+  String get gen_sdConvert => 'SD 語法自動轉換';
+
+  @override
+  String get gen_sdConvertSub => '貼上 (tag:1.2) 時轉成 NAI 權重';
+
+  @override
+  String get gen_related => '共現推薦';
+
+  @override
+  String get gen_relatedSub => '補全時推薦常一起出現的標籤';
+
+  @override
+  String get gen_translating => '正在翻譯…';
+
+  @override
+  String get gen_translateNeedsModel => '還沒配翻譯模型，點一下去設定';
+
+  @override
+  String get gen_translateRestore => '顯示原文';
+
+  @override
+  String gen_translateWith(Object route) {
+    return '翻譯（$route）';
+  }
+
+  @override
+  String get gen_translateNew => '翻譯新增內容';
+
+  @override
+  String get gen_translateShowOriginal => '全部顯示原文';
+
+  @override
+  String get gen_translateShowTranslated => '全部顯示譯文';
+
+  @override
+  String get gen_translateSettings => '翻譯模型設定';
+
+  @override
+  String get gen_qualityPreset => '品質詞預設';
+
+  @override
+  String get gen_ucPreset => '負面預設';
+
+  @override
+  String get gen_presetNone => '無';
+
+  @override
+  String get gen_transparentOn => '透明背景：開';
+
+  @override
+  String get gen_transparentOff => '透明背景：關';
+
+  @override
+  String get gen_characters => '角色提示詞';
+
+  @override
+  String get gen_charactersTip => '給畫面裡每個角色單獨寫提示詞，不會互相串。';
+
+  @override
+  String get gen_charactersEmpty => '還沒有角色。點右上角 + 新增，每個角色單獨寫提示詞。';
+
+  @override
+  String gen_charactersFull(Object max) {
+    return '最多 $max 個角色';
+  }
+
+  @override
+  String get gen_addCharacter => '新增角色';
+
+  @override
+  String gen_addAs(Object gender) {
+    return '新增$gender角色';
+  }
+
+  @override
+  String get gen_clearCharacters => '清空全部角色';
+
+  @override
+  String get gen_clearCharactersTitle => '清空全部角色？';
+
+  @override
+  String gen_clearCharactersBody(Object count) {
+    return '$count 個角色和它們的提示詞都會刪掉。';
+  }
+
+  @override
+  String gen_characterN(Object n) {
+    return '角色 $n';
+  }
+
+  @override
+  String get gen_genderFemale => '女性';
+
+  @override
+  String get gen_genderMale => '男性';
+
+  @override
+  String get gen_genderOther => '其他';
+
+  @override
+  String get gen_position => '定位';
+
+  @override
+  String get gen_positionAi => 'AI 選擇';
+
+  @override
+  String get gen_positionCustom => '自訂';
+
+  @override
+  String get gen_positionBoard => '角色位置';
+
+  @override
+  String get gen_positionAiTip => '位置由 AI 決定';
+
+  @override
+  String gen_positionAt(Object at) {
+    return '位置 $at，點一下調整';
+  }
+
+  @override
+  String get gen_positionUnset => '還沒放位置，點一下襬放';
+
+  @override
+  String get gen_positionAiHint => '現在由 AI 決定位置';
+
+  @override
+  String get gen_positionGridHint => '拖角色到格子裡，鬆手吸附到格子中心';
+
+  @override
+  String get gen_positionFreeHint => '拖角色到畫面裡任意位置';
+
+  @override
+  String get gen_positionAiOverlay => '現在是 AI 選擇位置。\n切到自訂才能手動擺放。';
+
+  @override
+  String get gen_positionToCustom => '切到自訂';
+
+  @override
+  String get gen_positionUnplaced => '還沒放';
+
+  @override
+  String get gen_renameTip => '雙擊改名';
+
+  @override
+  String get gen_moveUp => '上移';
+
+  @override
+  String get gen_moveDown => '下移';
+
+  @override
+  String get gen_characterDisable => '這次不用這個角色';
+
+  @override
+  String get gen_characterEnable => '用這個角色';
+
+  @override
+  String get gen_charPositive => '正面';
+
+  @override
+  String get gen_charNegative => '負面';
+
+  @override
+  String get gen_saveAsBlock => '存為塊';
+
+  @override
+  String get gen_refs => '參考圖';
+
+  @override
+  String get gen_img2img => '圖生圖';
+
+  @override
+  String get gen_img2imgDesc => '基於原圖生成變體';
+
+  @override
+  String gen_img2imgSummary(Object strength, Object noise) {
+    return '強度 $strength · 噪聲 $noise';
+  }
+
+  @override
+  String get gen_img2imgDrop => '拖一張圖進來，或者';
+
+  @override
+  String get gen_upload => '上傳';
+
+  @override
+  String get gen_replace => '更換';
+
+  @override
+  String get gen_edit => '編輯';
+
+  @override
+  String get gen_inpaint => '局部重繪';
+
+  @override
+  String get gen_placeOnCanvas => '放到畫布';
+
+  @override
+  String get gen_fromPreciseLibrary => '從精準參考庫';
+
+  @override
+  String get gen_sketch => '畫草圖';
+
+  @override
+  String get gen_strength => '強度';
+
+  @override
+  String get gen_strengthTip => '越高越不像原圖（預設 0.7）';
+
+  @override
+  String get gen_noise => '噪聲';
+
+  @override
+  String get gen_noiseTip => '加噪讓細節更多變化（預設 0）';
+
+  @override
+  String get gen_inpaintStrength => '重繪強度';
+
+  @override
+  String get gen_inpaintReady => '遮罩已畫好，生成時只重繪塗過的區域。';
+
+  @override
+  String get gen_refPause => '這次不傳送';
+
+  @override
+  String get gen_refResume => '恢復傳送';
+
+  @override
+  String get gen_refPaused => '已暫停，這次不傳送';
+
+  @override
+  String get gen_vibe => '風格遷移';
+
+  @override
+  String get gen_vibeDesc => '改變影像，保留視覺風格';
+
+  @override
+  String get gen_vibeSkipped => '有精準參考，這次不會發送';
+
+  @override
+  String get gen_vibeConflict => '生圖頁有精準參考時，風格遷移不會發送。';
+
+  @override
+  String get gen_vibeDrop => '拖圖片或 .naiv4vibe 進來，或者';
+
+  @override
+  String get gen_addVibe => '新增 Vibe';
+
+  @override
+  String get gen_addFromFile => '從檔案新增';
+
+  @override
+  String get gen_addFromVibeLibrary => '從 Vibe 庫新增';
+
+  @override
+  String get gen_addFromPreciseLibrary => '從精準參考庫新增';
+
+  @override
+  String gen_vibeFull(Object max) {
+    return '最多 $max 個';
+  }
+
+  @override
+  String get gen_saveToLibrary => '存入庫';
+
+  @override
+  String get gen_normalize => '標準化';
+
+  @override
+  String get gen_normalizeTip => '按總和標準化各 Vibe 的強度';
+
+  @override
+  String gen_vibeExtraCost(Object free, Object each, Object total) {
+    return '超過 $free 個後每個 +$each Anlas · 本次 +$total';
+  }
+
+  @override
+  String get gen_recent => '最近';
+
+  @override
+  String get gen_encoded => '已編碼';
+
+  @override
+  String get gen_encoding => '編碼中';
+
+  @override
+  String get gen_encode => '編碼';
+
+  @override
+  String gen_encodeTip(Object cost) {
+    return '編碼一次 $cost Anlas，編碼後可重複使用';
+  }
+
+  @override
+  String get gen_vibeStrength => '強度';
+
+  @override
+  String get gen_vibeInfo => '資訊提取';
+
+  @override
+  String get gen_vibeInfoReencode => '已編碼的 Vibe 改資訊提取要重新編碼';
+
+  @override
+  String get gen_precise => '精準參考';
+
+  @override
+  String get gen_preciseDesc => '將生成繫結到角色或風格參考';
+
+  @override
+  String get gen_preciseDrop => '拖角色或風格參考圖進來，或者';
+
+  @override
+  String get gen_preciseCharacter => '角色';
+
+  @override
+  String get gen_preciseStyle => '風格';
+
+  @override
+  String get gen_preciseBoth => '角色 + 風格';
+
+  @override
+  String get gen_fidelity => '保真度';
+
+  @override
+  String gen_preciseCost(Object each, Object total) {
+    return '每張 $each Anlas · 本次 +$total';
+  }
+
+  @override
+  String get gen_preciseConflict => '有精準參考時，風格遷移這次不會發送。';
+
+  @override
+  String get gen_pauseVibes => '暫停 Vibe';
+
+  @override
+  String get gen_savePrecise => '存入精準參考庫';
+
+  @override
+  String get gen_addPrecise => '新增精準參考';
+
+  @override
+  String get gen_image => '影像';
+
+  @override
+  String get gen_sizeNormal => '常規';
+
+  @override
+  String get gen_sizeLarge => '大圖';
+
+  @override
+  String get gen_sizeWallpaper => '桌布';
+
+  @override
+  String get gen_sizeSmall => '小圖';
+
+  @override
+  String get gen_sizeCustom => '自訂';
+
+  @override
+  String get gen_portrait => '豎圖';
+
+  @override
+  String get gen_landscape => '橫圖';
+
+  @override
+  String get gen_square => '方圖';
+
+  @override
+  String get gen_width => '寬（按 64 取整）';
+
+  @override
+  String get gen_height => '高（按 64 取整）';
+
+  @override
+  String get gen_swapSize => '交換寬高';
+
+  @override
+  String get gen_count => '張數';
+
+  @override
+  String get gen_countTip => '一次請求出幾張（1–4）';
+
+  @override
+  String get gen_repeat => '重複';
+
+  @override
+  String get gen_repeatTip => '連續發幾次請求';
+
+  @override
+  String gen_repeatTotal(Object times, Object total) {
+    return '重複 $times 次，共 $total 張（滾輪也能調）';
+  }
+
+  @override
+  String get gen_steps => '步數';
+
+  @override
+  String get gen_guidance => '引導';
+
+  @override
+  String get gen_guidanceTip => '越高越貼提示詞，太高會發硬（預設 5）';
+
+  @override
+  String get gen_cfgRescale => '引導重縮放';
+
+  @override
+  String get gen_cfgRescaleTip => '壓住高引導帶來的過飽和（預設 0）';
+
+  @override
+  String get gen_seed => '種子';
+
+  @override
+  String get gen_seedPinned => '種子 · 固定';
+
+  @override
+  String get gen_seedPinTip => '點一下固定這個種子';
+
+  @override
+  String get gen_seedUnpinTip => '點一下改回隨機';
+
+  @override
+  String get gen_seedRandomize => '改回隨機';
+
+  @override
+  String get gen_sampler => '取樣器';
+
+  @override
+  String get gen_samplerRecommended => '推薦';
+
+  @override
+  String get gen_samplerOther => '其他';
+
+  @override
+  String get gen_noiseSchedule => '噪聲排程';
+
+  @override
+  String get gen_varietyTip => '前幾步跳過引導，構圖更多樣';
+
+  @override
+  String get gen_decrispTip => '減輕高引導下的過度銳利';
+
+  @override
+  String get gen_smeaAutoTip => '按尺寸自動決定是否開 SMEA';
+
+  @override
+  String get gen_paramsTitle => '生成參數';
+
+  @override
+  String get gen_paramsOpen => '展開全部參數';
+
+  @override
+  String get gen_paramsClose => '收起參數';
+
+  @override
+  String get gen_stop => '停止生成';
+
+  @override
+  String gen_cooldown(Object seconds) {
+    return '冷卻中 $seconds 秒';
+  }
+
+  @override
+  String get gen_insufficient => 'Anlas 不夠';
+
+  @override
+  String get gen_free => '這次免費（Opus 額度內）';
+
+  @override
+  String get gen_emptyTitle => '寫好提示詞，開始第一張';
+
+  @override
+  String get gen_emptyPress => '按';
+
+  @override
+  String get gen_emptyOr => '或點左下角的生成';
+
+  @override
+  String get gen_tileFailed => '這張沒出來';
+
+  @override
+  String get gen_enhance => '增強';
+
+  @override
+  String get gen_variations => '變體';
+
+  @override
+  String gen_variationsCost(Object cost) {
+    return '變體（$cost Anlas）';
+  }
+
+  @override
+  String get gen_upscale => '放大';
+
+  @override
+  String get gen_upscaleStop => '停止放大';
+
+  @override
+  String get gen_upscaleOptions => '放大方案';
+
+  @override
+  String get gen_setInit => '設為圖生圖原圖';
+
+  @override
+  String get gen_editImage => '編輯圖片';
+
+  @override
+  String get gen_sendToTools => '發到畫布工具';
+
+  @override
+  String get gen_display => '畫布顯示';
+
+  @override
+  String get gen_backdrop => '透明圖墊底';
+
+  @override
+  String get gen_backdropSub => '只墊在透明像素下面，不會存進圖片';
+
+  @override
+  String get gen_bdChecker => '棋盤格（跟隨主題）';
+
+  @override
+  String get gen_bdCheckerLight => '淺棋盤格';
+
+  @override
+  String get gen_bdCheckerDark => '深棋盤格';
+
+  @override
+  String get gen_bdNone => '不墊';
+
+  @override
+  String get gen_bdBlack => '黑';
+
+  @override
+  String get gen_bdWhite => '白';
+
+  @override
+  String get gen_bdGray => '灰';
+
+  @override
+  String get gen_bdRed => '紅';
+
+  @override
+  String get gen_bdGreen => '綠';
+
+  @override
+  String get gen_bdBlue => '藍';
+
+  @override
+  String get gen_bdCustom => '自訂';
+
+  @override
+  String get gen_zoomToFill => '放大填滿';
+
+  @override
+  String get gen_zoomToFillSub => '比畫布小的圖也放大到撐滿';
+
+  @override
+  String get gen_useSeed => '用這個種子（並固定）';
+
+  @override
+  String get gen_copySeed => '複製種子';
+
+  @override
+  String get gen_pinImage => '釘在畫布上';
+
+  @override
+  String get gen_unpinImage => '取消釘住';
+
+  @override
+  String get gen_copyImage => '複製圖片';
+
+  @override
+  String get gen_saveImage => '儲存到圖庫';
+
+  @override
+  String get gen_openViewer => '開啟大圖';
+
+  @override
+  String get gen_retry => '重試';
+
+  @override
+  String get gen_copyDetail => '複製詳情';
+
+  @override
+  String get gen_history => '歷史記錄';
+
+  @override
+  String get gen_historyEmpty => '這次還沒有生成';
+
+  @override
+  String get gen_historyEmptySub => '生成的圖會按批次排在這裡';
+
+  @override
+  String gen_batchCount(Object count) {
+    return '$count 張';
+  }
+
+  @override
+  String gen_batchPending(Object count) {
+    return '還剩 $count 張';
+  }
+
+  @override
+  String get gen_pinnedTip => '釘在畫布上的圖，點一下飛過去';
+
+  @override
+  String get gen_select => '多選';
+
+  @override
+  String get gen_selectDone => '完成多選';
+
+  @override
+  String gen_selectedCount(Object count) {
+    return '已選 $count 張';
+  }
+
+  @override
+  String get gen_pack => '打包成 zip';
+
+  @override
+  String get gen_saveSelected => '儲存選中的圖';
+
+  @override
+  String get gen_removeSelected => '從歷史移除';
+
+  @override
+  String get gen_autoSaveOn => '自動儲存到圖庫：開';
+
+  @override
+  String get gen_autoSaveOff => '自動儲存到圖庫：關';
+
+  @override
+  String get gen_scrollLock => '鎖定滾動（新圖來了不跳到頂部）';
+
+  @override
+  String get gen_scrollUnlock => '解除鎖定滾動';
+
+  @override
+  String get gen_saveAll => '全部儲存到圖庫';
+
+  @override
+  String get gen_clearHistory => '清空歷史';
+
+  @override
+  String get gen_clearHistoryTitle => '清空這次的歷史？';
+
+  @override
+  String get gen_clearHistoryBody => '只從這裡移除，已經儲存到圖庫的檔案不受影響。';
+
+  @override
+  String get gen_deleteImagesTitle => '從歷史移除？';
+
+  @override
+  String gen_deleteImagesBody(Object count) {
+    return '$count 張圖會從這裡移除，已經儲存到圖庫的檔案不受影響。';
+  }
+
+  @override
+  String gen_saveBatch(Object count) {
+    return '儲存這批（$count 張）';
+  }
+
+  @override
+  String gen_removeBatch(Object count) {
+    return '移除這批（$count 張）';
+  }
+
+  @override
+  String get gen_removeImage => '從歷史移除';
+
+  @override
+  String get gen_favorite => '收藏';
+
+  @override
+  String get gen_unfavorite => '取消收藏';
+
+  @override
+  String get gen_sendImg2Img => '傳送到圖生圖';
+
+  @override
+  String get gen_sendVibe => '加入風格遷移';
+
+  @override
+  String get gen_sendPrecise => '加入精準參考';
+
+  @override
+  String get gen_reveal => '在資源管理器中顯示';
+
+  @override
+  String get gen_opUpscale => '放大過';
+
+  @override
+  String get gen_opEnhance => '增強過';
+
+  @override
+  String get gen_opVariation => '變體';
+
+  @override
+  String get gen_opInpaint => '局部重繪';
+
+  @override
+  String get gen_opImg2Img => '圖生圖';
 }

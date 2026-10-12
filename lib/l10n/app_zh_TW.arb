@@ -9891,5 +9891,385 @@
   "explore_ranking": "當前排名 · 即時",
   "explore_rankingNote": "偏好越高，培育下一代時越常被選為父本。",
   "explore_compareDone": "排好了",
-  "explore_compareDoneBody": "新的偏好已經儲存，下次生成子代就會用上。"
+  "explore_compareDoneBody": "新的偏好已經儲存，下次生成子代就會用上。",
+  "gen_cancel": "取消",
+  "gen_close": "關閉",
+  "gen_done": "完成",
+  "gen_more": "更多",
+  "gen_delete": "刪除",
+  "gen_remove": "移除",
+  "gen_rename": "改名",
+  "gen_add": "新增",
+  "gen_clear": "清空",
+  "gen_clearAll": "全部清空",
+  "gen_clearConfirm": "清空",
+  "gen_removeConfirm": "移除",
+  "gen_expand": "展開",
+  "gen_collapse": "收起",
+  "gen_copied": "已複製",
+  "gen_random": "隨機",
+  "gen_auto": "自動",
+  "gen_pin": "釘在頭部",
+  "gen_unpin": "從頭部取下",
+  "gen_yesterday": "昨天",
+  "gen_monthDay": "{month}月{day}日",
+  "@gen_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
+  "gen_params": "生成參數",
+  "gen_generating": "生成中",
+  "gen_modelsNew": "新模型",
+  "gen_modelsLegacy": "舊模型",
+  "gen_modeTip": "點一下切換 Anime / Furry",
+  "gen_anlasTip": "Anlas 餘額 {value}",
+  "@gen_anlasTip": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "gen_positive": "正面",
+  "gen_basePrompt": "基礎提示詞",
+  "gen_negative": "負面",
+  "gen_finalPositive": "最終傳送的正面",
+  "gen_finalNegative": "最終傳送的負面",
+  "gen_toolDock": "塊庫側欄",
+  "gen_toolPalette": "積木板",
+  "gen_toolTranslate": "翻譯",
+  "gen_toolsMenu": "模組與開關",
+  "gen_toolsPinned": "釘在頭部的工具",
+  "gen_toolsSettings": "提示詞設定",
+  "gen_fullscreen": "全屏編輯",
+  "gen_autoFormat": "自動格式化",
+  "gen_autoFormatSub": "失焦時整理逗號和空格",
+  "gen_highlight": "強調高亮",
+  "gen_highlightSub": "按權重給片段上色",
+  "gen_sdConvert": "SD 語法自動轉換",
+  "gen_sdConvertSub": "貼上 (tag:1.2) 時轉成 NAI 權重",
+  "gen_related": "共現推薦",
+  "gen_relatedSub": "補全時推薦常一起出現的標籤",
+  "gen_translating": "正在翻譯…",
+  "gen_translateNeedsModel": "還沒配翻譯模型，點一下去設定",
+  "gen_translateRestore": "顯示原文",
+  "gen_translateWith": "翻譯（{route}）",
+  "@gen_translateWith": {
+    "placeholders": {
+      "route": {}
+    }
+  },
+  "gen_translateNew": "翻譯新增內容",
+  "gen_translateShowOriginal": "全部顯示原文",
+  "gen_translateShowTranslated": "全部顯示譯文",
+  "gen_translateSettings": "翻譯模型設定",
+  "gen_qualityPreset": "品質詞預設",
+  "gen_ucPreset": "負面預設",
+  "gen_presetNone": "無",
+  "gen_transparentOn": "透明背景：開",
+  "gen_transparentOff": "透明背景：關",
+  "gen_characters": "角色提示詞",
+  "gen_charactersTip": "給畫面裡每個角色單獨寫提示詞，不會互相串。",
+  "gen_charactersEmpty": "還沒有角色。點右上角 + 新增，每個角色單獨寫提示詞。",
+  "gen_charactersFull": "最多 {max} 個角色",
+  "@gen_charactersFull": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "gen_addCharacter": "新增角色",
+  "gen_addAs": "新增{gender}角色",
+  "@gen_addAs": {
+    "placeholders": {
+      "gender": {}
+    }
+  },
+  "gen_clearCharacters": "清空全部角色",
+  "gen_clearCharactersTitle": "清空全部角色？",
+  "gen_clearCharactersBody": "{count} 個角色和它們的提示詞都會刪掉。",
+  "@gen_clearCharactersBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "gen_characterN": "角色 {n}",
+  "@gen_characterN": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "gen_genderFemale": "女性",
+  "gen_genderMale": "男性",
+  "gen_genderOther": "其他",
+  "gen_position": "定位",
+  "gen_positionAi": "AI 選擇",
+  "gen_positionCustom": "自訂",
+  "gen_positionBoard": "角色位置",
+  "gen_positionAiTip": "位置由 AI 決定",
+  "gen_positionAt": "位置 {at}，點一下調整",
+  "@gen_positionAt": {
+    "placeholders": {
+      "at": {}
+    }
+  },
+  "gen_positionUnset": "還沒放位置，點一下襬放",
+  "gen_positionAiHint": "現在由 AI 決定位置",
+  "gen_positionGridHint": "拖角色到格子裡，鬆手吸附到格子中心",
+  "gen_positionFreeHint": "拖角色到畫面裡任意位置",
+  "gen_positionAiOverlay": "現在是 AI 選擇位置。\n切到自訂才能手動擺放。",
+  "gen_positionToCustom": "切到自訂",
+  "gen_positionUnplaced": "還沒放",
+  "gen_renameTip": "雙擊改名",
+  "gen_moveUp": "上移",
+  "gen_moveDown": "下移",
+  "gen_characterDisable": "這次不用這個角色",
+  "gen_characterEnable": "用這個角色",
+  "gen_charPositive": "正面",
+  "gen_charNegative": "負面",
+  "gen_saveAsBlock": "存為塊",
+  "gen_refs": "參考圖",
+  "gen_img2img": "圖生圖",
+  "gen_img2imgDesc": "基於原圖生成變體",
+  "gen_img2imgSummary": "強度 {strength} · 噪聲 {noise}",
+  "@gen_img2imgSummary": {
+    "placeholders": {
+      "strength": {},
+      "noise": {}
+    }
+  },
+  "gen_img2imgDrop": "拖一張圖進來，或者",
+  "gen_upload": "上傳",
+  "gen_replace": "更換",
+  "gen_edit": "編輯",
+  "gen_inpaint": "局部重繪",
+  "gen_placeOnCanvas": "放到畫布",
+  "gen_fromPreciseLibrary": "從精準參考庫",
+  "gen_sketch": "畫草圖",
+  "gen_strength": "強度",
+  "gen_strengthTip": "越高越不像原圖（預設 0.7）",
+  "gen_noise": "噪聲",
+  "gen_noiseTip": "加噪讓細節更多變化（預設 0）",
+  "gen_inpaintStrength": "重繪強度",
+  "gen_inpaintReady": "遮罩已畫好，生成時只重繪塗過的區域。",
+  "gen_refPause": "這次不傳送",
+  "gen_refResume": "恢復傳送",
+  "gen_refPaused": "已暫停，這次不傳送",
+  "gen_vibe": "風格遷移",
+  "gen_vibeDesc": "改變影像，保留視覺風格",
+  "gen_vibeSkipped": "有精準參考，這次不會發送",
+  "gen_vibeConflict": "生圖頁有精準參考時，風格遷移不會發送。",
+  "gen_vibeDrop": "拖圖片或 .naiv4vibe 進來，或者",
+  "gen_addVibe": "新增 Vibe",
+  "gen_addFromFile": "從檔案新增",
+  "gen_addFromVibeLibrary": "從 Vibe 庫新增",
+  "gen_addFromPreciseLibrary": "從精準參考庫新增",
+  "gen_vibeFull": "最多 {max} 個",
+  "@gen_vibeFull": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "gen_saveToLibrary": "存入庫",
+  "gen_normalize": "標準化",
+  "gen_normalizeTip": "按總和標準化各 Vibe 的強度",
+  "gen_vibeExtraCost": "超過 {free} 個後每個 +{each} Anlas · 本次 +{total}",
+  "@gen_vibeExtraCost": {
+    "placeholders": {
+      "free": {},
+      "each": {},
+      "total": {}
+    }
+  },
+  "gen_recent": "最近",
+  "gen_encoded": "已編碼",
+  "gen_encoding": "編碼中",
+  "gen_encode": "編碼",
+  "gen_encodeTip": "編碼一次 {cost} Anlas，編碼後可重複使用",
+  "@gen_encodeTip": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "gen_vibeStrength": "強度",
+  "gen_vibeInfo": "資訊提取",
+  "gen_vibeInfoReencode": "已編碼的 Vibe 改資訊提取要重新編碼",
+  "gen_precise": "精準參考",
+  "gen_preciseDesc": "將生成繫結到角色或風格參考",
+  "gen_preciseDrop": "拖角色或風格參考圖進來，或者",
+  "gen_preciseCharacter": "角色",
+  "gen_preciseStyle": "風格",
+  "gen_preciseBoth": "角色 + 風格",
+  "gen_fidelity": "保真度",
+  "gen_preciseCost": "每張 {each} Anlas · 本次 +{total}",
+  "@gen_preciseCost": {
+    "placeholders": {
+      "each": {},
+      "total": {}
+    }
+  },
+  "gen_preciseConflict": "有精準參考時，風格遷移這次不會發送。",
+  "gen_pauseVibes": "暫停 Vibe",
+  "gen_savePrecise": "存入精準參考庫",
+  "gen_addPrecise": "新增精準參考",
+  "gen_image": "影像",
+  "gen_sizeNormal": "常規",
+  "gen_sizeLarge": "大圖",
+  "gen_sizeWallpaper": "桌布",
+  "gen_sizeSmall": "小圖",
+  "gen_sizeCustom": "自訂",
+  "gen_portrait": "豎圖",
+  "gen_landscape": "橫圖",
+  "gen_square": "方圖",
+  "gen_width": "寬（按 64 取整）",
+  "gen_height": "高（按 64 取整）",
+  "gen_swapSize": "交換寬高",
+  "gen_count": "張數",
+  "gen_countTip": "一次請求出幾張（1–4）",
+  "gen_repeat": "重複",
+  "gen_repeatTip": "連續發幾次請求",
+  "gen_repeatTotal": "重複 {times} 次，共 {total} 張（滾輪也能調）",
+  "@gen_repeatTotal": {
+    "placeholders": {
+      "times": {},
+      "total": {}
+    }
+  },
+  "gen_steps": "步數",
+  "gen_guidance": "引導",
+  "gen_guidanceTip": "越高越貼提示詞，太高會發硬（預設 5）",
+  "gen_cfgRescale": "引導重縮放",
+  "gen_cfgRescaleTip": "壓住高引導帶來的過飽和（預設 0）",
+  "gen_seed": "種子",
+  "gen_seedPinned": "種子 · 固定",
+  "gen_seedPinTip": "點一下固定這個種子",
+  "gen_seedUnpinTip": "點一下改回隨機",
+  "gen_seedRandomize": "改回隨機",
+  "gen_sampler": "取樣器",
+  "gen_samplerRecommended": "推薦",
+  "gen_samplerOther": "其他",
+  "gen_noiseSchedule": "噪聲排程",
+  "gen_varietyTip": "前幾步跳過引導，構圖更多樣",
+  "gen_decrispTip": "減輕高引導下的過度銳利",
+  "gen_smeaAutoTip": "按尺寸自動決定是否開 SMEA",
+  "gen_paramsTitle": "生成參數",
+  "gen_paramsOpen": "展開全部參數",
+  "gen_paramsClose": "收起參數",
+  "gen_stop": "停止生成",
+  "gen_cooldown": "冷卻中 {seconds} 秒",
+  "@gen_cooldown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "gen_insufficient": "Anlas 不夠",
+  "gen_free": "這次免費（Opus 額度內）",
+  "gen_emptyTitle": "寫好提示詞，開始第一張",
+  "gen_emptyPress": "按",
+  "gen_emptyOr": "或點左下角的生成",
+  "gen_tileFailed": "這張沒出來",
+  "gen_enhance": "增強",
+  "gen_variations": "變體",
+  "gen_variationsCost": "變體（{cost} Anlas）",
+  "@gen_variationsCost": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "gen_upscale": "放大",
+  "gen_upscaleStop": "停止放大",
+  "gen_upscaleOptions": "放大方案",
+  "gen_setInit": "設為圖生圖原圖",
+  "gen_editImage": "編輯圖片",
+  "gen_sendToTools": "發到畫布工具",
+  "gen_display": "畫布顯示",
+  "gen_backdrop": "透明圖墊底",
+  "gen_backdropSub": "只墊在透明像素下面，不會存進圖片",
+  "gen_bdChecker": "棋盤格（跟隨主題）",
+  "gen_bdCheckerLight": "淺棋盤格",
+  "gen_bdCheckerDark": "深棋盤格",
+  "gen_bdNone": "不墊",
+  "gen_bdBlack": "黑",
+  "gen_bdWhite": "白",
+  "gen_bdGray": "灰",
+  "gen_bdRed": "紅",
+  "gen_bdGreen": "綠",
+  "gen_bdBlue": "藍",
+  "gen_bdCustom": "自訂",
+  "gen_zoomToFill": "放大填滿",
+  "gen_zoomToFillSub": "比畫布小的圖也放大到撐滿",
+  "gen_useSeed": "用這個種子（並固定）",
+  "gen_copySeed": "複製種子",
+  "gen_pinImage": "釘在畫布上",
+  "gen_unpinImage": "取消釘住",
+  "gen_copyImage": "複製圖片",
+  "gen_saveImage": "儲存到圖庫",
+  "gen_openViewer": "開啟大圖",
+  "gen_retry": "重試",
+  "gen_copyDetail": "複製詳情",
+  "gen_history": "歷史記錄",
+  "gen_historyEmpty": "這次還沒有生成",
+  "gen_historyEmptySub": "生成的圖會按批次排在這裡",
+  "gen_batchCount": "{count} 張",
+  "@gen_batchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "gen_batchPending": "還剩 {count} 張",
+  "@gen_batchPending": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "gen_pinnedTip": "釘在畫布上的圖，點一下飛過去",
+  "gen_select": "多選",
+  "gen_selectDone": "完成多選",
+  "gen_selectedCount": "已選 {count} 張",
+  "@gen_selectedCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "gen_pack": "打包成 zip",
+  "gen_saveSelected": "儲存選中的圖",
+  "gen_removeSelected": "從歷史移除",
+  "gen_autoSaveOn": "自動儲存到圖庫：開",
+  "gen_autoSaveOff": "自動儲存到圖庫：關",
+  "gen_scrollLock": "鎖定滾動（新圖來了不跳到頂部）",
+  "gen_scrollUnlock": "解除鎖定滾動",
+  "gen_saveAll": "全部儲存到圖庫",
+  "gen_clearHistory": "清空歷史",
+  "gen_clearHistoryTitle": "清空這次的歷史？",
+  "gen_clearHistoryBody": "只從這裡移除，已經儲存到圖庫的檔案不受影響。",
+  "gen_deleteImagesTitle": "從歷史移除？",
+  "gen_deleteImagesBody": "{count} 張圖會從這裡移除，已經儲存到圖庫的檔案不受影響。",
+  "@gen_deleteImagesBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "gen_saveBatch": "儲存這批（{count} 張）",
+  "@gen_saveBatch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "gen_removeBatch": "移除這批（{count} 張）",
+  "@gen_removeBatch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "gen_removeImage": "從歷史移除",
+  "gen_favorite": "收藏",
+  "gen_unfavorite": "取消收藏",
+  "gen_sendImg2Img": "傳送到圖生圖",
+  "gen_sendVibe": "加入風格遷移",
+  "gen_sendPrecise": "加入精準參考",
+  "gen_reveal": "在資源管理器中顯示",
+  "gen_opUpscale": "放大過",
+  "gen_opEnhance": "增強過",
+  "gen_opVariation": "變體",
+  "gen_opInpaint": "局部重繪",
+  "gen_opImg2Img": "圖生圖"
 }

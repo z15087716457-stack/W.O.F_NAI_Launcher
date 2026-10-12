@@ -17162,4 +17162,840 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get explore_compareDoneBody => '새 선호도가 저장되어 다음 자손 생성에 사용됩니다.';
+
+  @override
+  String get gen_cancel => '취소';
+
+  @override
+  String get gen_close => '닫기';
+
+  @override
+  String get gen_done => '완료';
+
+  @override
+  String get gen_more => '더 보기';
+
+  @override
+  String get gen_delete => '삭제';
+
+  @override
+  String get gen_remove => '제거';
+
+  @override
+  String get gen_rename => '이름 바꾸기';
+
+  @override
+  String get gen_add => '추가';
+
+  @override
+  String get gen_clear => '지우기';
+
+  @override
+  String get gen_clearAll => '모두 지우기';
+
+  @override
+  String get gen_clearConfirm => '지우기';
+
+  @override
+  String get gen_removeConfirm => '제거';
+
+  @override
+  String get gen_expand => '펼치기';
+
+  @override
+  String get gen_collapse => '접기';
+
+  @override
+  String get gen_copied => '복사됨';
+
+  @override
+  String get gen_random => '랜덤';
+
+  @override
+  String get gen_auto => '자동';
+
+  @override
+  String get gen_pin => '헤더에 고정';
+
+  @override
+  String get gen_unpin => '헤더에서 해제';
+
+  @override
+  String get gen_yesterday => '어제';
+
+  @override
+  String gen_monthDay(Object month, Object day) {
+    return '$month월 $day일';
+  }
+
+  @override
+  String get gen_params => '생성 설정';
+
+  @override
+  String get gen_generating => '생성 중';
+
+  @override
+  String get gen_modelsNew => '최신 모델';
+
+  @override
+  String get gen_modelsLegacy => '이전 모델';
+
+  @override
+  String get gen_modeTip => '클릭하여 Anime / Furry 전환';
+
+  @override
+  String gen_anlasTip(Object value) {
+    return 'Anlas 잔액 $value';
+  }
+
+  @override
+  String get gen_positive => '프롬프트';
+
+  @override
+  String get gen_basePrompt => '기본 프롬프트';
+
+  @override
+  String get gen_negative => '제외';
+
+  @override
+  String get gen_finalPositive => '최종 전송 프롬프트';
+
+  @override
+  String get gen_finalNegative => '최종 전송 제외 내용';
+
+  @override
+  String get gen_toolDock => '블록 라이브러리 패널';
+
+  @override
+  String get gen_toolPalette => '블록 팔레트';
+
+  @override
+  String get gen_toolTranslate => '번역';
+
+  @override
+  String get gen_toolsMenu => '도구와 설정';
+
+  @override
+  String get gen_toolsPinned => '헤더 도구';
+
+  @override
+  String get gen_toolsSettings => '프롬프트 설정';
+
+  @override
+  String get gen_fullscreen => '전체 화면 편집';
+
+  @override
+  String get gen_autoFormat => '자동 서식';
+
+  @override
+  String get gen_autoFormatSub => '편집기를 벗어나면 쉼표와 공백 정리';
+
+  @override
+  String get gen_highlight => '강조 하이라이트';
+
+  @override
+  String get gen_highlightSub => '가중치에 따라 색 표시';
+
+  @override
+  String get gen_sdConvert => 'SD 문법 자동 변환';
+
+  @override
+  String get gen_sdConvertSub => '(tag:1.2) 붙여넣기를 NAI 가중치로 변환';
+
+  @override
+  String get gen_related => '연관 태그 추천';
+
+  @override
+  String get gen_relatedSub => '자주 함께 쓰는 태그 추천';
+
+  @override
+  String get gen_translating => '번역 중…';
+
+  @override
+  String get gen_translateNeedsModel => '번역 모델이 없습니다. 클릭하여 설정';
+
+  @override
+  String get gen_translateRestore => '원문 보기';
+
+  @override
+  String gen_translateWith(Object route) {
+    return '번역 ($route)';
+  }
+
+  @override
+  String get gen_translateNew => '새 내용 번역';
+
+  @override
+  String get gen_translateShowOriginal => '모두 원문 보기';
+
+  @override
+  String get gen_translateShowTranslated => '모두 번역문 보기';
+
+  @override
+  String get gen_translateSettings => '번역 모델 설정';
+
+  @override
+  String get gen_qualityPreset => '품질 태그';
+
+  @override
+  String get gen_ucPreset => '제외 프리셋';
+
+  @override
+  String get gen_presetNone => '없음';
+
+  @override
+  String get gen_transparentOn => '투명 배경: 켜짐';
+
+  @override
+  String get gen_transparentOff => '투명 배경: 꺼짐';
+
+  @override
+  String get gen_characters => '캐릭터';
+
+  @override
+  String get gen_charactersTip => '캐릭터마다 프롬프트를 따로 써서 특징이 섞이지 않게 합니다.';
+
+  @override
+  String get gen_charactersEmpty => '캐릭터가 없습니다. 오른쪽 위 + 로 추가하세요.';
+
+  @override
+  String gen_charactersFull(Object max) {
+    return '최대 $max명';
+  }
+
+  @override
+  String get gen_addCharacter => '캐릭터 추가';
+
+  @override
+  String gen_addAs(Object gender) {
+    return '$gender 캐릭터 추가';
+  }
+
+  @override
+  String get gen_clearCharacters => '모든 캐릭터 삭제';
+
+  @override
+  String get gen_clearCharactersTitle => '모든 캐릭터를 삭제할까요?';
+
+  @override
+  String gen_clearCharactersBody(Object count) {
+    return '캐릭터 $count명과 프롬프트가 모두 삭제됩니다.';
+  }
+
+  @override
+  String gen_characterN(Object n) {
+    return '캐릭터 $n';
+  }
+
+  @override
+  String get gen_genderFemale => '여성';
+
+  @override
+  String get gen_genderMale => '남성';
+
+  @override
+  String get gen_genderOther => '기타';
+
+  @override
+  String get gen_position => '위치';
+
+  @override
+  String get gen_positionAi => 'AI 선택';
+
+  @override
+  String get gen_positionCustom => '직접 지정';
+
+  @override
+  String get gen_positionBoard => '캐릭터 위치';
+
+  @override
+  String get gen_positionAiTip => 'AI가 위치를 정합니다';
+
+  @override
+  String gen_positionAt(Object at) {
+    return '위치 $at — 클릭하여 조정';
+  }
+
+  @override
+  String get gen_positionUnset => '아직 배치 안 됨 — 클릭하여 배치';
+
+  @override
+  String get gen_positionAiHint => '위치를 AI가 정하고 있습니다';
+
+  @override
+  String get gen_positionGridHint => '캐릭터를 칸으로 끌면 칸 중앙에 맞춰집니다';
+
+  @override
+  String get gen_positionFreeHint => '캐릭터를 원하는 위치로 끌어 놓으세요';
+
+  @override
+  String get gen_positionAiOverlay => '지금은 AI 선택입니다.\n직접 지정으로 바꾸면 배치할 수 있습니다.';
+
+  @override
+  String get gen_positionToCustom => '직접 지정으로 전환';
+
+  @override
+  String get gen_positionUnplaced => '미배치';
+
+  @override
+  String get gen_renameTip => '더블클릭하여 이름 바꾸기';
+
+  @override
+  String get gen_moveUp => '위로';
+
+  @override
+  String get gen_moveDown => '아래로';
+
+  @override
+  String get gen_characterDisable => '이 캐릭터 제외';
+
+  @override
+  String get gen_characterEnable => '이 캐릭터 사용';
+
+  @override
+  String get gen_charPositive => '프롬프트';
+
+  @override
+  String get gen_charNegative => '제외';
+
+  @override
+  String get gen_saveAsBlock => '블록으로 저장';
+
+  @override
+  String get gen_refs => '참조 이미지';
+
+  @override
+  String get gen_img2img => '이미지 투 이미지';
+
+  @override
+  String get gen_img2imgDesc => '원본 이미지로 변형 생성';
+
+  @override
+  String gen_img2imgSummary(Object strength, Object noise) {
+    return '강도 $strength · 노이즈 $noise';
+  }
+
+  @override
+  String get gen_img2imgDrop => '이미지를 끌어 놓거나';
+
+  @override
+  String get gen_upload => '업로드';
+
+  @override
+  String get gen_replace => '교체';
+
+  @override
+  String get gen_edit => '편집';
+
+  @override
+  String get gen_inpaint => '인페인트';
+
+  @override
+  String get gen_placeOnCanvas => '캔버스에 표시';
+
+  @override
+  String get gen_fromPreciseLibrary => '정밀 참조 라이브러리에서';
+
+  @override
+  String get gen_sketch => '스케치';
+
+  @override
+  String get gen_strength => '강도';
+
+  @override
+  String get gen_strengthTip => '높을수록 원본과 달라집니다 (기본 0.7)';
+
+  @override
+  String get gen_noise => '노이즈';
+
+  @override
+  String get gen_noiseTip => '노이즈로 디테일 변화를 줍니다 (기본 0)';
+
+  @override
+  String get gen_inpaintStrength => '인페인트 강도';
+
+  @override
+  String get gen_inpaintReady => '마스크 준비 완료 — 칠한 영역만 다시 생성합니다.';
+
+  @override
+  String get gen_refPause => '이번엔 보내지 않기';
+
+  @override
+  String get gen_refResume => '다시 보내기';
+
+  @override
+  String get gen_refPaused => '일시 중지 — 이번엔 보내지 않음';
+
+  @override
+  String get gen_vibe => '바이브 트랜스퍼';
+
+  @override
+  String get gen_vibeDesc => '이미지는 바꾸고 분위기는 유지';
+
+  @override
+  String get gen_vibeSkipped => '정밀 참조가 있어 이번엔 보내지 않음';
+
+  @override
+  String get gen_vibeConflict => '정밀 참조가 있으면 바이브는 보내지 않습니다.';
+
+  @override
+  String get gen_vibeDrop => '이미지나 .naiv4vibe 를 끌어 놓거나';
+
+  @override
+  String get gen_addVibe => '바이브 추가';
+
+  @override
+  String get gen_addFromFile => '파일에서';
+
+  @override
+  String get gen_addFromVibeLibrary => '바이브 라이브러리에서';
+
+  @override
+  String get gen_addFromPreciseLibrary => '정밀 참조 라이브러리에서';
+
+  @override
+  String gen_vibeFull(Object max) {
+    return '최대 $max개';
+  }
+
+  @override
+  String get gen_saveToLibrary => '라이브러리에 저장';
+
+  @override
+  String get gen_normalize => '정규화';
+
+  @override
+  String get gen_normalizeTip => '바이브 강도를 합계 기준으로 정규화';
+
+  @override
+  String gen_vibeExtraCost(Object free, Object each, Object total) {
+    return '$free개 초과 시 개당 +$each Anlas · 이번 +$total';
+  }
+
+  @override
+  String get gen_recent => '최근';
+
+  @override
+  String get gen_encoded => '인코딩됨';
+
+  @override
+  String get gen_encoding => '인코딩 중';
+
+  @override
+  String get gen_encode => '인코딩';
+
+  @override
+  String gen_encodeTip(Object cost) {
+    return '인코딩 1회 $cost Anlas, 이후 재사용 가능';
+  }
+
+  @override
+  String get gen_vibeStrength => '강도';
+
+  @override
+  String get gen_vibeInfo => '정보 추출';
+
+  @override
+  String get gen_vibeInfoReencode => '인코딩된 바이브는 다시 인코딩해야 합니다';
+
+  @override
+  String get gen_precise => '정밀 참조';
+
+  @override
+  String get gen_preciseDesc => '캐릭터나 화풍 참조에 고정';
+
+  @override
+  String get gen_preciseDrop => '캐릭터나 화풍 참조 이미지를 끌어 놓거나';
+
+  @override
+  String get gen_preciseCharacter => '캐릭터';
+
+  @override
+  String get gen_preciseStyle => '화풍';
+
+  @override
+  String get gen_preciseBoth => '둘 다';
+
+  @override
+  String get gen_fidelity => '충실도';
+
+  @override
+  String gen_preciseCost(Object each, Object total) {
+    return '장당 $each Anlas · 이번 +$total';
+  }
+
+  @override
+  String get gen_preciseConflict => '정밀 참조가 있으면 바이브는 보내지 않습니다.';
+
+  @override
+  String get gen_pauseVibes => '바이브 일시 중지';
+
+  @override
+  String get gen_savePrecise => '정밀 참조 라이브러리에 저장';
+
+  @override
+  String get gen_addPrecise => '정밀 참조 추가';
+
+  @override
+  String get gen_image => '이미지';
+
+  @override
+  String get gen_sizeNormal => '일반';
+
+  @override
+  String get gen_sizeLarge => '크게';
+
+  @override
+  String get gen_sizeWallpaper => '배경화면';
+
+  @override
+  String get gen_sizeSmall => '작게';
+
+  @override
+  String get gen_sizeCustom => '직접 입력';
+
+  @override
+  String get gen_portrait => '세로';
+
+  @override
+  String get gen_landscape => '가로';
+
+  @override
+  String get gen_square => '정사각형';
+
+  @override
+  String get gen_width => '너비 (64 단위)';
+
+  @override
+  String get gen_height => '높이 (64 단위)';
+
+  @override
+  String get gen_swapSize => '너비와 높이 바꾸기';
+
+  @override
+  String get gen_count => '장수';
+
+  @override
+  String get gen_countTip => '요청 1회당 장수 (1–4)';
+
+  @override
+  String get gen_repeat => '반복';
+
+  @override
+  String get gen_repeatTip => '연속으로 보낼 요청 수';
+
+  @override
+  String gen_repeatTotal(Object times, Object total) {
+    return '$times회, 총 $total장 (휠로도 조절)';
+  }
+
+  @override
+  String get gen_steps => '스텝';
+
+  @override
+  String get gen_guidance => '가이던스';
+
+  @override
+  String get gen_guidanceTip => '높을수록 프롬프트를 따르지만 너무 높으면 딱딱해집니다 (기본 5)';
+
+  @override
+  String get gen_cfgRescale => '가이던스 리스케일';
+
+  @override
+  String get gen_cfgRescaleTip => '높은 가이던스의 과포화를 줄입니다 (기본 0)';
+
+  @override
+  String get gen_seed => '시드';
+
+  @override
+  String get gen_seedPinned => '시드 · 고정';
+
+  @override
+  String get gen_seedPinTip => '클릭하여 이 시드 고정';
+
+  @override
+  String get gen_seedUnpinTip => '클릭하여 랜덤으로 되돌리기';
+
+  @override
+  String get gen_seedRandomize => '랜덤으로';
+
+  @override
+  String get gen_sampler => '샘플러';
+
+  @override
+  String get gen_samplerRecommended => '추천';
+
+  @override
+  String get gen_samplerOther => '기타';
+
+  @override
+  String get gen_noiseSchedule => '노이즈 스케줄';
+
+  @override
+  String get gen_varietyTip => '초반 가이던스를 건너뛰어 구도를 다양하게';
+
+  @override
+  String get gen_decrispTip => '높은 가이던스의 과도한 선명함 완화';
+
+  @override
+  String get gen_smeaAutoTip => '크기에 따라 SMEA 자동 사용';
+
+  @override
+  String get gen_paramsTitle => '생성 설정';
+
+  @override
+  String get gen_paramsOpen => '모든 설정 보기';
+
+  @override
+  String get gen_paramsClose => '설정 닫기';
+
+  @override
+  String get gen_stop => '생성 중지';
+
+  @override
+  String gen_cooldown(Object seconds) {
+    return '쿨다운 $seconds초';
+  }
+
+  @override
+  String get gen_insufficient => 'Anlas 부족';
+
+  @override
+  String get gen_free => '이번엔 무료 (Opus 한도 내)';
+
+  @override
+  String get gen_emptyTitle => '프롬프트를 쓰고 첫 이미지를 만드세요';
+
+  @override
+  String get gen_emptyPress => '';
+
+  @override
+  String get gen_emptyOr => '키를 누르거나 왼쪽 아래 생성을 클릭';
+
+  @override
+  String get gen_tileFailed => '이 이미지는 실패했습니다';
+
+  @override
+  String get gen_enhance => '향상';
+
+  @override
+  String get gen_variations => '변형';
+
+  @override
+  String gen_variationsCost(Object cost) {
+    return '변형 ($cost Anlas)';
+  }
+
+  @override
+  String get gen_upscale => '업스케일';
+
+  @override
+  String get gen_upscaleStop => '업스케일 중지';
+
+  @override
+  String get gen_upscaleOptions => '업스케일 방식';
+
+  @override
+  String get gen_setInit => 'img2img 원본으로 사용';
+
+  @override
+  String get gen_editImage => '이미지 편집';
+
+  @override
+  String get gen_sendToTools => '캔버스 도구로 보내기';
+
+  @override
+  String get gen_display => '캔버스 표시';
+
+  @override
+  String get gen_backdrop => '투명 이미지 바탕';
+
+  @override
+  String get gen_backdropSub => '투명 픽셀 아래에만 표시하며 이미지에 저장하지 않습니다';
+
+  @override
+  String get gen_bdChecker => '체크 (테마)';
+
+  @override
+  String get gen_bdCheckerLight => '밝은 체크';
+
+  @override
+  String get gen_bdCheckerDark => '어두운 체크';
+
+  @override
+  String get gen_bdNone => '없음';
+
+  @override
+  String get gen_bdBlack => '검정';
+
+  @override
+  String get gen_bdWhite => '흰색';
+
+  @override
+  String get gen_bdGray => '회색';
+
+  @override
+  String get gen_bdRed => '빨강';
+
+  @override
+  String get gen_bdGreen => '초록';
+
+  @override
+  String get gen_bdBlue => '파랑';
+
+  @override
+  String get gen_bdCustom => '직접 지정';
+
+  @override
+  String get gen_zoomToFill => '채우도록 확대';
+
+  @override
+  String get gen_zoomToFillSub => '작은 이미지도 캔버스에 맞게 확대';
+
+  @override
+  String get gen_useSeed => '이 시드 사용 (고정)';
+
+  @override
+  String get gen_copySeed => '시드 복사';
+
+  @override
+  String get gen_pinImage => '캔버스에 고정';
+
+  @override
+  String get gen_unpinImage => '고정 해제';
+
+  @override
+  String get gen_copyImage => '이미지 복사';
+
+  @override
+  String get gen_saveImage => '갤러리에 저장';
+
+  @override
+  String get gen_openViewer => '크게 보기';
+
+  @override
+  String get gen_retry => '다시 시도';
+
+  @override
+  String get gen_copyDetail => '자세히 복사';
+
+  @override
+  String get gen_history => '기록';
+
+  @override
+  String get gen_historyEmpty => '아직 생성한 이미지가 없습니다';
+
+  @override
+  String get gen_historyEmptySub => '생성한 이미지가 묶음별로 표시됩니다';
+
+  @override
+  String gen_batchCount(Object count) {
+    return '$count장';
+  }
+
+  @override
+  String gen_batchPending(Object count) {
+    return '$count장 남음';
+  }
+
+  @override
+  String get gen_pinnedTip => '고정한 이미지 — 클릭하여 이동';
+
+  @override
+  String get gen_select => '여러 개 선택';
+
+  @override
+  String get gen_selectDone => '선택 완료';
+
+  @override
+  String gen_selectedCount(Object count) {
+    return '$count장 선택됨';
+  }
+
+  @override
+  String get gen_pack => 'zip으로 묶기';
+
+  @override
+  String get gen_saveSelected => '선택한 이미지 저장';
+
+  @override
+  String get gen_removeSelected => '기록에서 제거';
+
+  @override
+  String get gen_autoSaveOn => '갤러리 자동 저장: 켜짐';
+
+  @override
+  String get gen_autoSaveOff => '갤러리 자동 저장: 꺼짐';
+
+  @override
+  String get gen_scrollLock => '스크롤 고정 (새 이미지가 와도 그대로)';
+
+  @override
+  String get gen_scrollUnlock => '스크롤 고정 해제';
+
+  @override
+  String get gen_saveAll => '모두 갤러리에 저장';
+
+  @override
+  String get gen_clearHistory => '기록 지우기';
+
+  @override
+  String get gen_clearHistoryTitle => '이번 기록을 지울까요?';
+
+  @override
+  String get gen_clearHistoryBody => '목록에서만 제거하며 갤러리에 저장된 파일은 그대로입니다.';
+
+  @override
+  String get gen_deleteImagesTitle => '기록에서 제거할까요?';
+
+  @override
+  String gen_deleteImagesBody(Object count) {
+    return '$count장을 목록에서 제거합니다. 저장된 파일은 그대로입니다.';
+  }
+
+  @override
+  String gen_saveBatch(Object count) {
+    return '이 묶음 저장 ($count장)';
+  }
+
+  @override
+  String gen_removeBatch(Object count) {
+    return '이 묶음 제거 ($count장)';
+  }
+
+  @override
+  String get gen_removeImage => '기록에서 제거';
+
+  @override
+  String get gen_favorite => '즐겨찾기';
+
+  @override
+  String get gen_unfavorite => '즐겨찾기 해제';
+
+  @override
+  String get gen_sendImg2Img => 'img2img로 보내기';
+
+  @override
+  String get gen_sendVibe => '바이브 트랜스퍼에 추가';
+
+  @override
+  String get gen_sendPrecise => '정밀 참조로 추가';
+
+  @override
+  String get gen_reveal => '탐색기에서 보기';
+
+  @override
+  String get gen_opUpscale => '업스케일됨';
+
+  @override
+  String get gen_opEnhance => '향상됨';
+
+  @override
+  String get gen_opVariation => '변형';
+
+  @override
+  String get gen_opInpaint => '인페인트됨';
+
+  @override
+  String get gen_opImg2Img => '이미지 투 이미지';
 }
