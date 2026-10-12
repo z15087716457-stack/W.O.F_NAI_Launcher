@@ -1,0 +1,90 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+// 块系统原型的元素位置（给 blocks_measure.py 出偏差表）。键名和 blocks_prototype_capture_test.dart 一致。
+// 管理页减掉 48 主导航；浮层 / 侧栏 / 弹窗按各自根元素的左上角算（Flutter 那边同样换算）。键名带 ~ 的只比尺寸。
+const view=location.hash.slice(1);
+const HASH={lib:'a-lib',sel:'a-sel',dock:'a',card:'card',seq:'seq',fixed:'fixed',rules:'rules',edit:'edit',quick:'quick'};
+const f=document.getElementById('f');
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,500));
+  const q=s=>d.querySelector(s), qa=s=>[...d.querySelectorAll(s)];
+  let ox=0, oy=0;
+  const R=e=>{const b=e.getBoundingClientRect();return [b.left-ox,b.top-oy,b.width,b.height]};
+  const m={}; const put=(k,e)=>{if(e) m[k]=R(e)};
+  const root=e=>{const b=e.getBoundingClientRect(); ox=b.left; oy=b.top; m['@root']=[b.left,b.top,b.width,b.height];};
+  if(view==='lib'||view==='sel'){
+    ox=48;
+    put('nav',q('.lnav')); put('nav-all',q('.lnav .ni2'));
+    put('toolbar',q('.ltb')); put('search',q('.ltb .srch')); put('create',q('.ltb .btn.pri'));
+    put('multi',qa('.ltb .btn').find(b=>!b.classList.contains('gh')&&!b.classList.contains('pri')));
+    put('sort',q('.ltb .btn.gh')); put('view',q('.ltb .seg'));
+    put('filter',q('.lfr')); put('quick-all',q('.lfr .fchip.on')); put('quick-image',qa('.lfr .fchip')[1]);
+    put('grid',q('.lgrid'));
+    const keys=['y99','pk','cy','bl','d3','fj','aq','sy','ak','pf'];
+    const cards=qa('.lgrid .bc'); keys.forEach((k,i)=>put('card-'+k,cards[i]));
+    put('cover-y99',cards[0]&&cards[0].querySelector('.cov'));
+    put('title-y99',cards[0]&&cards[0].querySelector('.bct'));
+    put('meta-y99',cards[0]&&cards[0].querySelector('.bcm'));
+    put('fav-pk',cards[1]&&cards[1].querySelector('.fav'));
+    put('hoverbar',q('.hovbar'));
+    put('insp',q('.insp'));
+    if(view==='lib'){
+      put('insp-thumb',q('.insb>div:first-child .btn')); put('insp-insert',q('.insp .btn.pri'));
+      put('insp-params',q('.insp .box.kv')&&q('.insp .box.kv').parentElement); put('insp-colors',q('.insp .cdots'));
+      put('insp-atoms',q('.insp .box .atoms')&&q('.insp .box .atoms').parentElement);
+      put('insp-meta',q('.insb>.s11.f'));
+    } else {
+      put('selbar',q('.selbar')); put('check-y99',q('.ckb'));
+    }
+  } else if(view==='dock'){
+    root(q('.dock'));
+    put('dock',q('.dock'));
+    const ib=qa('.dh .ib'); put('dock-create',ib[0]); put('dock-library',ib[1]); put('dock-close',ib[2]);
+    put('dock-search',q('.dock .srch'));
+    put('dock-favorites',q('.dock .dsec'));
+    put('~hover',q('#hvc'));
+  } else if(view==='card'||view==='seq'||view==='fixed'){
+    root(q('.pop.ic'));
+    put('card',q('.pop.ic')); put('card-more',q('.ich .ib'));
+    put('card-roll',q('.rollbox')); put('card-rules',q('.rule:not([style*="height:auto"])'));
+    put('card-modes',q('.ics .seg')); put('card-footer',q('.icf'));
+    if(view==='card'){
+      put('card-lock',q('.rollbox .btn.gh')); put('card-reroll',q('.rollbox .btn:not(.gh)'));
+      put('card-side',q('.icf .seg'));
+    }
+    const fb=qa('.icf .btn.gh'); put('card-toggle',fb[0]); put('card-edit',fb[1]); put('card-remove',fb[2]);
+    if(view==='seq'){ const st=qa('.stepb'); put('step-prev',st[0]); put('step-next',st[1]); put('card-lock',q('.icf .btn:not(.gh)')); }
+    if(view==='fixed'){ put('card-apply',q('.rule .btn.pri')); put('card-thumb',q('.pop.ic>div:first-child')); put('card-params',q('.rule[style*="height:auto"]')); }
+  } else if(view==='rules'){
+    root(q('.pop.rl'));
+    put('rules',q('.pop.rl')); put('rules-back',q('.pop.rl .ib'));
+    const mc=qa('.mcard'); put('mode-fixed',mc[0]); put('mode-sequential',mc[1]); put('mode-random',mc[2]);
+    const rs=qa('.rsec');
+    const n0=rs[0]?[...rs[0].querySelectorAll('.num')]:[]; put('rules-min',n0[0]); put('rules-max',n0[1]);
+    put('rules-order',rs[0]&&rs[0].querySelector('.seg'));
+    put('rules-weight',q('.sw'));
+    const n1=rs[1]?[...rs[1].querySelectorAll('.num')]:[]; put('rules-wmin',n1[0]); put('rules-wavg',n1[1]); put('rules-wmax',n1[2]);
+    put('rules-range',rs[1]&&rs[1].querySelector('.rng'));
+    put('rules-prob',rs[2]&&rs[2].querySelector('.num'));
+    put('rules-resample',rs[3]&&rs[3].querySelector('.btn'));
+    put('rules-sample',q('.sample'));
+    const ft=q('.pop.rl>.row:last-child'); if(ft){ put('rules-reset',ft.querySelector('span')); const b=[...ft.querySelectorAll('.btn')]; put('rules-cancel',b[0]); put('rules-done',b[1]); }
+  } else if(view==='edit'){
+    const md=q('.pop[style*="width:1000px"]'); root(md);
+    put('edit',md); put('edit-close',md.querySelector('.ib'));
+    put('edit-title',md.querySelector('.tin.foc')); put('edit-folder',[...md.querySelectorAll('.tin')][1]);
+    put('edit-atoms',md.querySelector('.aed')); put('edit-colors',md.querySelector('.cdots')); put('edit-icons',md.querySelector('.icg'));
+    put('edit-looks',md.querySelector('.apg')); put('edit-delete',md.querySelector('.btn.dan'));
+    const lg=[...md.querySelectorAll('.btn.lg')]; put('edit-cancel',lg[0]); put('edit-save',lg[1]);
+    put('edit-crop',md.querySelector('div[style*="height:210px"]'));
+  } else if(view==='quick'){
+    root(q('#pop'));
+    put('quick',q('#pop')); put('~toolbar',q('#qtb'));
+    put('quick-title',q('#pop .tin.foc')); put('quick-replace',q('#pop .sw')&&q('#pop .sw').parentElement);
+    put('quick-colors',q('#pop .cdots'));
+    const ft=q('#pop>.row:last-child'); if(ft){ const b=[...ft.querySelectorAll('.btn')]; put('quick-cancel',b[0]); put('quick-save',b[1]); }
+  }
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+f.src='/mockups/blocks/mock.html#'+(HASH[view]||view);
+</script></body></html>

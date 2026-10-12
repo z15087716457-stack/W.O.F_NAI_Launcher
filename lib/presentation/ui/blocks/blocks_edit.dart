@@ -628,12 +628,14 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
                     Padding(
                       padding: const EdgeInsets.all(4),
                       child: BlockColorDots(
+                        key: const Key('block-edit-colors'),
                         selected: _d.color,
                         size: 20,
                         onChanged: (col) => _set(_d.copyWith(color: col)),
                       ),
                     ),
                     BlockIconGrid(
+                      key: const Key('block-edit-icons'),
                       selected: _d.icon,
                       color: _d.color,
                       onChanged: (k) => _set(
@@ -649,6 +651,7 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
                     builder: (context, box) {
                       final cw = (box.maxWidth - 12) / 3;
                       return Wrap(
+                        key: const Key('block-edit-looks'),
                         spacing: 6,
                         runSpacing: 6,
                         children: [

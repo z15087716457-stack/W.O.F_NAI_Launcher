@@ -235,6 +235,7 @@ class _BlockQuickSaveState extends State<BlockQuickSave> {
                     Padding(
                       padding: const EdgeInsets.all(3),
                       child: BlockColorDots(
+                        key: const Key('block-quick-colors'),
                         selected: _color,
                         size: 15,
                         onChanged: (v) => setState(() => _color = v),

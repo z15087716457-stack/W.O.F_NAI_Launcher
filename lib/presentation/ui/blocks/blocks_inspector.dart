@@ -370,6 +370,7 @@ class _SingleState extends State<_Single> {
                 : null,
             [
               BlockBox(
+                key: const Key('blocks-insp-atoms'),
                 child: BlockAtoms(atoms, mono: true, fontSize: 11, max: 60),
               ),
             ],
@@ -429,6 +430,7 @@ class _SingleState extends State<_Single> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               child: BlockColorDots(
+                key: const Key('blocks-insp-colors'),
                 selected: b.color,
                 ringGap: c.panel,
                 onChanged: (col) => a.onUpdate(b.id, BlockPatch(color: col)),

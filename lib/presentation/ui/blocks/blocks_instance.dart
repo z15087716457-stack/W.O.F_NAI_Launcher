@@ -152,6 +152,7 @@ class _CardState extends State<_Card> {
 
     final Widget head = b.thumb != null
         ? SizedBox(
+            key: const Key('block-card-thumb'),
             height: 120,
             child: Stack(
               fit: StackFit.expand,
@@ -314,6 +315,7 @@ class _CardState extends State<_Card> {
                       BlockLabel(l10n.blocks_drawMode),
                       const Spacer(),
                       BlockSeg<BlockMode>(
+                        key: const Key('block-card-modes'),
                         values: BlockMode.values,
                         selected: s.mode,
                         keyOf: (m) => Key('block-card-mode-${m.name}'),
@@ -334,6 +336,7 @@ class _CardState extends State<_Card> {
               ),
             ),
             Container(
+              key: const Key('block-card-footer'),
               padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
               decoration: BoxDecoration(
                 color: c.panel,
@@ -348,6 +351,7 @@ class _CardState extends State<_Card> {
                       style: UiText.sans(12, color: c.muted),
                     ),
                     BlockSeg<BlockScopeSide>(
+                      key: const Key('block-card-side'),
                       mini: true,
                       values: const [
                         BlockScopeSide.positive,
@@ -436,6 +440,7 @@ class _CardState extends State<_Card> {
     final c = context.ui;
     final col = d.block.color;
     return Container(
+      key: const Key('block-card-roll'),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Color.alphaBlend(col.withValues(alpha: .06), c.raised),
@@ -557,13 +562,13 @@ class _CardState extends State<_Card> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     spacing: 3,
                     children: [
-                      UiGlyph(UiGlyphs.lock, size: 12, color: c.muted),
+                      UiGlyph(UiGlyphs.lock, size: 12, color: c.warn),
                       Flexible(
                         child: Text(
                           l10n.blocks_seqLocked,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: UiText.sans(11, color: c.muted),
+                          style: UiText.sans(11, color: c.warn),
                         ),
                       ),
                     ],
@@ -635,6 +640,7 @@ class _CardState extends State<_Card> {
     final l10n = context.l10n;
     final p = d.block.params!;
     return Container(
+      key: const Key('block-card-params'),
       padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
       decoration: BoxDecoration(
         color: Color.alphaBlend(c.accent.withValues(alpha: .06), c.control),
@@ -716,6 +722,7 @@ class _Progress extends StatelessWidget {
     return SizedBox(
       height: 6,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 2,
         children: [
           for (var i = 0; i < total; i++)
@@ -1063,6 +1070,7 @@ class _RulesPanelState extends State<_RulesPanel> {
                           children: [
                             Text(l10n.blocks_outputOrder, style: m12),
                             BlockSeg<BlockOrder>(
+                              key: const Key('block-rules-order'),
                               values: BlockOrder.values,
                               selected: s.order,
                               keyOf: (o) => Key('block-rules-order-${o.name}'),
@@ -1297,6 +1305,7 @@ class _RulesPanelState extends State<_RulesPanel> {
                         ],
                       ),
                       Container(
+                        key: const Key('block-rules-sample'),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 8,

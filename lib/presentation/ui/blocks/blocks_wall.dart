@@ -551,6 +551,7 @@ class _CardState extends State<_Card> {
     );
 
     final cover = SizedBox(
+      key: Key('blocks-cover-${b.id}'),
       height: widget.coverH,
       child: Stack(
         fit: StackFit.expand,
@@ -561,6 +562,7 @@ class _CardState extends State<_Card> {
               right: 7,
               top: 7,
               child: Container(
+                key: Key('blocks-fav-${b.id}'),
                 width: 24,
                 height: 24,
                 alignment: Alignment.center,
@@ -706,6 +708,7 @@ class _CardState extends State<_Card> {
               spacing: 3,
               children: [
                 Row(
+                  key: Key('blocks-title-${b.id}'),
                   spacing: 6,
                   children: [
                     UiBlockIcon(b.icon, size: 14, color: b.color),
@@ -724,6 +727,7 @@ class _CardState extends State<_Card> {
                   ],
                 ),
                 Row(
+                  key: Key('blocks-meta-${b.id}'),
                   spacing: 6,
                   children: [
                     Expanded(
