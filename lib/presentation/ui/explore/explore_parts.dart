@@ -218,8 +218,7 @@ class ExploreSect extends StatelessWidget {
     return Row(
       spacing: 6,
       children: [
-        Flexible(child: text),
-        const Spacer(),
+        Expanded(child: text),
         trailing!,
       ],
     );

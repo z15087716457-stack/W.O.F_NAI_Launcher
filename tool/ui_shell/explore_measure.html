@@ -1,0 +1,83 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+// 画风探索原型的元素位置（给 explore_measure.py 出偏差表）。键名和 explore_prototype_capture_test.dart 一致。
+// 坐标减掉 48 主导航，和 Flutter（页面不含主导航）同一原点；大图按自己的根元素左上角算。
+const view=location.hash.slice(1);
+const HASH={main:'a',gen:'a-gen',sel:'a-sel',evo:'a-evo',runs:'a-runs',empty:'a-empty',detail:'a-detail',ab:'a-ab',family:'a-family',adopt:'a-adopt'};
+const f=document.getElementById('f');
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,500));
+  const q=s=>d.querySelector(s), qa=s=>[...d.querySelectorAll(s)];
+  let ox=48, oy=0;
+  const R=e=>{const b=e.getBoundingClientRect();return [b.left-ox,b.top-oy,b.width,b.height]};
+  const m={}; const put=(k,e)=>{if(e) m[k]=R(e)};
+  const root=e=>{const b=e.getBoundingClientRect(); ox=b.left; oy=b.top; m['@root']=[b.left,b.top,b.width,b.height];};
+  if(view==='detail'){
+    const r=q('.scrim+div'); root(r);
+    put('detail',r); const info=[...r.children].find(x=>x.style.width==='380px'); put('detail-info',info);
+    const acts=info?[...info.querySelectorAll('.acts .act')]:[];
+    ['favorite','evolution','block','apply'].forEach((k,i)=>put('detail-'+k,acts[i]));
+    put('detail-delete',info&&[...info.querySelectorAll('.btn')].pop());
+  } else {
+    const overlay=['runs','ab','family','adopt'].includes(view);
+    if(!overlay){
+    put('editor',q('.ed')); put('vars',qa('.ed .mod')[1]); put('genbar',q('.gbar'));
+    put('header',q('.sh')); put('run-button',q('.runbtn')); put('progress',q('.prog'));
+    put('inspector-toggle',q('.sh .ib.on'));
+    const sz=qa('.sh .seg2>div'); put('size-small',sz[0]); put('size-large',sz[1]);
+    const tabs=qa('.bigtab'); put('tab-candidates',tabs[0]); put('tab-evolution',tabs[1]);
+    const chips=qa('.trow .chip');
+    if(view==='evo'){
+      put('line-l1',chips[0]); put('line-l2',chips[1]); put('new-line',q('.trow .chip.add')); put('evo-help',q('.trow .btn.ghost2'));
+      put('evo',q('.stage>.body')); const gens=qa('.gen'); put('gen-3',gens[0]); put('gen-2',gens[1]); put('gen-1',gens[2]);
+      put('compare',q('.genh .btn:not(.evo)')); put('generate-children',q('.genh .btn.evo'));
+      put('breed',qa('.gen .btn.evo')[1]); const pp=qa('.gen .pp'); put('parent-p3-1',pp[0]); put('parent-p3-5',pp[4]);
+      const kids=qa('.gen .grid .cd'); put('kid-k3-1',kids[0]); put('kid-k3-2',kids[1]); put('kid-k3-12',kids[11]);
+      put('kid-check-k3-2',kids[1]&&kids[1].querySelector('.ckb'));
+    } else if(view!=='empty'){
+      put('filter-all',chips[0]); put('filter-favorites',chips[1]); put('filter-ungrouped',chips[2]);
+      put('filter-g1',chips[3]); put('filter-g2',chips[4]); put('add-group',q('.trow .chip.add'));
+      put('select',q('.trow .btn:not(.ghost2)')); put('sort',q('.trow .ib')); put('select-all',q('.trow .btn.ghost2'));
+      const rh=qa('.rh'); put('round-r3',rh[0]); put('round-r2',rh[1]);
+      const cds=qa('.body .grid .cd'); [27,28,29,30,38,17].forEach(n=>put('card-c'+n,cds[n>=27?n-27:12+n-17]));
+      put('heart-c27',cds[0]&&cds[0].querySelector('.hrt'));
+      put('pick-r3',rh[0]&&rh[0].querySelector('.btn'));
+    }
+    if(view==='sel'){ put('selection-bar',q('.selbar')); put('check-c27',q('.body .grid .cd .ckb')); put('inspector-multi',q('.insp')); }
+    else if(view!=='empty'&&view!=='evo'){
+      put('inspector',q('.insp')); put('inspector-image',q('.iim'));
+      put('copy-artists',q('.ibody .sect .row'));
+      const acts=qa('.ibody .acts .act'); ['favorite','evolution','block','apply'].forEach((k,i)=>put('act-'+k,acts[i]));
+      put('inspector-delete',q('.ibody .btn.dan')); put('inspector-prompt-toggle',q('.ibody .btn.ghost2:not(.dan)'));
+    }
+    }
+    if(view==='runs'){
+      const p=q('.pop'); put('run-menu',p); put('run-search',p.querySelector('.tin')); put('new-run',p.querySelector('.ritem'));
+      const it=[...p.querySelectorAll('.ritem')]; put('run-run1',it[1]); put('run-run2',it[2]); put('run-run5',it[5]);
+    }
+    if(view==='empty'){
+      const st=q('.stage>div:last-child'); put('onboarding-steps',st&&[...st.children][2]);
+      const b=qa('.stage .btn.lg'); put('onboarding-runs',b[1]);
+    }
+    if(view==='ab'){
+      const md=q('.modal'); put('compare-dialog',md);
+      const lg=[...md.querySelectorAll('.btn.lg')]; put('compare-left',lg[0]); put('compare-right',lg[1]);
+      const bt=[...md.querySelectorAll('.btn:not(.lg)')]; put('compare-neither',bt[0]); put('compare-skip',bt[1]);
+      const pp=[...md.querySelectorAll('.pp')]; put('rank-p3-1',pp[0]);
+      const ims=[...md.querySelectorAll('div[style*="height:610px"]')]; put('compare-left-image',ims[0]); put('compare-right-image',ims[1]);
+    }
+    if(view==='family'){
+      const md=q('.modal'); put('evolution-dialog',md); put('evo-name',md.querySelector('.tin'));
+      const pr=[...md.querySelectorAll('.prow')]; put('evo-parent-c27',pr[0]); put('evo-parent-c33',pr[3]); put('evo-add-custom',pr[4]);
+      const lg=[...md.querySelectorAll('.mft .btn.lg')]; put('evo-create',lg[0]); put('evo-create-generate',lg[1]);
+    }
+    if(view==='adopt'){
+      const md=q('.modal'); put('block-dialog',md); put('block-name',md.querySelector('.tin')); put('block-folder',md.querySelector('.dd'));
+      const sg=[...md.querySelectorAll('.seg2>div')]; put('block-full',sg[1]);
+      const lg=[...md.querySelectorAll('.mft .btn.lg')]; put('block-cancel',lg[0]); put('block-save',lg[1]);
+    }
+  }
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+f.src='/mockups/style-explore/mock.html#'+(HASH[view]||view);
+</script></body></html>

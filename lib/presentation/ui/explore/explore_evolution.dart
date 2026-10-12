@@ -669,28 +669,37 @@ class _OldGenState extends State<_OldGen> {
               spacing: 10,
               children: [
                 ExploreGenTag(l.explore_gen(g.number), current: false),
-                Flexible(
-                  child: Text(
-                    _summary(context, g),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: UiText.sans(12, color: c.muted),
-                  ),
-                ),
-                if (!_open)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 3,
+                Expanded(
+                  child: Row(
+                    spacing: 10,
                     children: [
-                      for (final x in thumbs)
-                        SizedBox(
-                          width: 22,
-                          height: 32,
-                          child: ExploreImage(x.thumb ?? x.image, radius: 3),
+                      Flexible(
+                        child: Text(
+                          _summary(context, g),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: UiText.sans(12, color: c.muted),
+                        ),
+                      ),
+                      if (!_open)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 3,
+                          children: [
+                            for (final x in thumbs)
+                              SizedBox(
+                                width: 22,
+                                height: 32,
+                                child: ExploreImage(
+                                  x.thumb ?? x.image,
+                                  radius: 3,
+                                ),
+                              ),
+                          ],
                         ),
                     ],
                   ),
-                const Spacer(),
+                ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   spacing: 4,

@@ -51,12 +51,16 @@ class _Header extends StatelessWidget {
     required this.onClose,
     this.color,
     this.trailing = const [],
+    this.note,
   });
   final String glyph;
   final String title;
   final VoidCallback onClose;
   final Color? color;
   final List<Widget> trailing;
+
+  /// 靠右、紧挨关闭按钮的说明文字。
+  final String? note;
 
   @override
   Widget build(BuildContext context) {
@@ -67,16 +71,27 @@ class _Header extends StatelessWidget {
         spacing: 10,
         children: [
           UiGlyph(glyph, size: 20, color: color ?? c.ink),
-          Flexible(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: UiText.sans(17, weight: FontWeight.w700, color: c.ink),
+          Expanded(
+            child: Row(
+              spacing: 10,
+              children: [
+                Flexible(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: UiText.sans(
+                      17,
+                      weight: FontWeight.w700,
+                      color: c.ink,
+                    ),
+                  ),
+                ),
+                ...trailing,
+              ],
             ),
           ),
-          ...trailing,
-          const Spacer(),
+          if (note != null) Text(note!, style: UiText.sans(12, color: c.muted)),
           UiIconBox(
             key: const Key('explore-dialog-close'),
             glyph: UiGlyphs.close,
@@ -1213,7 +1228,11 @@ class _ExploreCompareDialogState extends State<ExploreCompareDialog> {
               UiBtn(
                 key: const Key('explore-compare-neither'),
                 onTap: () => _answer(ExploreCompareResult.neither),
-                children: [Text(l.explore_neither), const UiKeycap('↓')],
+                children: [
+                  const UiGlyph(UiGlyphs.arrowDown, size: 14),
+                  Text(l.explore_neither),
+                  const UiKeycap('↓'),
+                ],
               ),
               UiBtn(
                 key: const Key('explore-compare-skip'),
@@ -1258,15 +1277,11 @@ class _ExploreCompareDialogState extends State<ExploreCompareDialog> {
               color: c.evo,
               title: l.explore_compareTitle,
               onClose: widget.onClose,
+              note: l.explore_compareNote,
               trailing: [
                 ExplorePill(
                   l.explore_lineGen(line.name, gen.number),
                   tone: ExplorePillTone.evo,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  l.explore_compareNote,
-                  style: UiText.sans(12, color: c.muted),
                 ),
               ],
             ),
@@ -1333,7 +1348,7 @@ class _ExploreCompareDialogState extends State<ExploreCompareDialog> {
                                 ],
                               ),
                             ),
-                          const Spacer(),
+                          const SizedBox(height: 2),
                           Text(
                             l.explore_rankingNote,
                             style: UiText.sans(11, color: c.faint, height: 1.6),
