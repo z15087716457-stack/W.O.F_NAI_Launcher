@@ -83,8 +83,9 @@ class _SizeRow extends StatelessWidget {
       builder: (context, box) {
         // 窄栏（左栏 < 400）下拉缩到 80，宽高框缩到 52。
         final tight = box.maxWidth < 350;
+        final compact = box.maxWidth < 330;
         return Row(
-          spacing: 8,
+          spacing: compact ? 4 : 8,
           children: [
             Builder(
               builder: (ctx) => UiPressable(
@@ -144,7 +145,7 @@ class _SizeRow extends StatelessWidget {
                 GenOrientation.square,
               ],
               selected: o,
-              itemWidth: 34,
+              itemWidth: compact ? 24 : 34,
               keyOf: (v) => Key('gen-orientation-${v.name}'),
               tooltipOf: (v) => GenFormat.orientationLabel(context, v),
               onChanged: setOrientation,
