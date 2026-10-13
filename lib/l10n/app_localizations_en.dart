@@ -15200,7 +15200,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gen_vibeInfoReencode =>
-      'Changing info extraction re-encodes this vibe';
+      'Changing info extraction requires re-encoding this Vibe';
 
   @override
   String get gen_precise => 'Precise reference';

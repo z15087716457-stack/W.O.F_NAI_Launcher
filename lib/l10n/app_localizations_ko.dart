@@ -14802,7 +14802,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gen_vibeInfo => '정보 추출';
 
   @override
-  String get gen_vibeInfoReencode => '인코딩된 바이브는 다시 인코딩해야 합니다';
+  String get gen_vibeInfoReencode => '정보 추출 값을 바꾸면 바이브를 다시 인코딩해야 합니다';
 
   @override
   String get gen_precise => '정밀 참조';

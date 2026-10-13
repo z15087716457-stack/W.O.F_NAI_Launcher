@@ -8226,7 +8226,7 @@
   },
   "gen_vibeStrength": "Strength",
   "gen_vibeInfo": "Info",
-  "gen_vibeInfoReencode": "Changing info extraction re-encodes this vibe",
+  "gen_vibeInfoReencode": "Changing info extraction requires re-encoding this Vibe",
   "gen_precise": "Precise reference",
   "gen_preciseDesc": "Anchor the result to a character or style",
   "gen_preciseDrop": "Drop a character or style reference, or",

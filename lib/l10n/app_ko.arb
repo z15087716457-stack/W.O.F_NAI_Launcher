@@ -8226,7 +8226,7 @@
   },
   "gen_vibeStrength": "강도",
   "gen_vibeInfo": "정보 추출",
-  "gen_vibeInfoReencode": "인코딩된 바이브는 다시 인코딩해야 합니다",
+  "gen_vibeInfoReencode": "정보 추출 값을 바꾸면 바이브를 다시 인코딩해야 합니다",
   "gen_precise": "정밀 참조",
   "gen_preciseDesc": "캐릭터나 화풍 참조에 고정",
   "gen_preciseDrop": "캐릭터나 화풍 참조 이미지를 끌어 놓거나",

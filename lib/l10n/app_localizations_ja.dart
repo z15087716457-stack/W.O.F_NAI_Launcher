@@ -14770,7 +14770,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gen_vibeInfo => '情報抽出';
 
   @override
-  String get gen_vibeInfoReencode => 'エンコード済みの Vibe は再エンコードが必要です';
+  String get gen_vibeInfoReencode => '情報抽出を変更すると、Vibe の再エンコードが必要です';
 
   @override
   String get gen_precise => '精密参照';

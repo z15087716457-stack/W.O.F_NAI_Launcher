@@ -26414,7 +26414,7 @@ abstract class AppLocalizations {
   /// No description provided for @gen_vibeInfoReencode.
   ///
   /// In en, this message translates to:
-  /// **'Changing info extraction re-encodes this vibe'**
+  /// **'Changing info extraction requires re-encoding this Vibe'**
   String get gen_vibeInfoReencode;
 
   /// No description provided for @gen_precise.

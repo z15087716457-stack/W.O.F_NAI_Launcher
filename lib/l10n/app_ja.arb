@@ -8226,7 +8226,7 @@
   },
   "gen_vibeStrength": "強度",
   "gen_vibeInfo": "情報抽出",
-  "gen_vibeInfoReencode": "エンコード済みの Vibe は再エンコードが必要です",
+  "gen_vibeInfoReencode": "情報抽出を変更すると、Vibe の再エンコードが必要です",
   "gen_precise": "精密参照",
   "gen_preciseDesc": "生成をキャラや画風の参照に固定",
   "gen_preciseDrop": "キャラや画風の参照画像をドロップ、または",
