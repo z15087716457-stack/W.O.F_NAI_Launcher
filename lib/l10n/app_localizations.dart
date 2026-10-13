@@ -23752,7 +23752,7 @@ abstract class AppLocalizations {
   /// No description provided for @imageViewer_details.
   ///
   /// In en, this message translates to:
-  /// **'Details'**
+  /// **'Info'**
   String get imageViewer_details;
 
   /// No description provided for @imageViewer_generationResult.

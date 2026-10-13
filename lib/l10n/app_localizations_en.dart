@@ -13663,7 +13663,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get imageViewer_undo => 'Undo';
 
   @override
-  String get imageViewer_details => 'Details';
+  String get imageViewer_details => 'Info';
 
   @override
   String get imageViewer_generationResult => 'Result';

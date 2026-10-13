@@ -13295,7 +13295,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get imageViewer_undo => '실행 취소';
 
   @override
-  String get imageViewer_details => '세부 정보';
+  String get imageViewer_details => '정보';
 
   @override
   String get imageViewer_generationResult => '생성 결과';
