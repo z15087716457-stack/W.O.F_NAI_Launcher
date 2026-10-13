@@ -1036,79 +1036,172 @@ class _ResultActions extends StatelessWidget {
           onTap: ok ? onTap : null,
           children: [icon, Text(label)],
         );
-    return Container(
-      key: const Key('tools-director-actions'),
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      child: Row(
-        spacing: 8,
-        children: [
-          if (run == null)
-            Expanded(
-              child: Text(
-                l.tools_noResult,
-                style: UiText.sans(12, color: c.faint),
-              ),
-            )
-          else ...[
-            ToolsChip(
-              mono: true,
-              children: [Text(ToolsFormat.size(run.width, run.height))],
-            ),
-            if (run.images.length > 1 &&
-                run.variants.length == run.images.length)
-              ToolsSeg<int>(
-                key: const Key('tools-variants'),
-                height: 28,
-                values: [for (var i = 0; i < run.images.length; i++) i],
-                selected: d.variant,
-                keyOf: (i) => Key('tools-variant-$i'),
-                onChanged: a.onVariant,
-                label: (context, i, on) => Text(run.variants[i]),
-              ),
-            Expanded(
-              child: Text(
-                '${ToolsFormat.toolName(l, run.tool)} · '
-                '${ToolsFormat.ago(l, run.time, now)} · '
-                '${run.cost == null || run.cost == 0 ? l.tools_free : l.tools_anlasN(run.cost!)}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: UiText.sans(12, color: c.faint),
-              ),
-            ),
-          ],
-          btn(
-            'continue',
-            UiGlyph(ToolsGlyphs.rotate, size: 14, color: c.ink),
-            l.tools_continue,
-            a.onContinue,
+    final leading = <Widget>[
+      if (run == null)
+        Expanded(
+          child: Text(l.tools_noResult, style: UiText.sans(12, color: c.faint)),
+        )
+      else ...[
+        ToolsChip(
+          mono: true,
+          children: [Text(ToolsFormat.size(run.width, run.height))],
+        ),
+        if (run.images.length > 1 && run.variants.length == run.images.length)
+          ToolsSeg<int>(
+            key: const Key('tools-variants'),
+            height: 28,
+            values: [for (var i = 0; i < run.images.length; i++) i],
+            selected: d.variant,
+            keyOf: (i) => Key('tools-variant-$i'),
+            onChanged: a.onVariant,
+            label: (context, i, on) => Text(run.variants[i]),
           ),
-          btn(
-            'copy',
-            GenNaiIcon('copy', size: 14, color: c.ink),
-            l.tools_copy,
-            a.onCopy,
+        Expanded(
+          child: Text(
+            '${ToolsFormat.toolName(l, run.tool)} · '
+            '${ToolsFormat.ago(l, run.time, now)} · '
+            '${run.cost == null || run.cost == 0 ? l.tools_free : l.tools_anlasN(run.cost!)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: UiText.sans(12, color: c.faint),
           ),
-          btn(
-            'save',
-            GenNaiIcon('save', size: 14, color: c.ink),
-            l.tools_saveGallery,
-            a.onSave,
-          ),
-          btn(
-            'upscale',
-            GenNaiIcon('upscale', size: 14, color: c.ink),
-            l.tools_upscale,
-            a.onUpscale,
-          ),
-          ToolsButton(
-            key: const Key('tools-act-init'),
-            tone: ToolsButtonTone.primary,
-            onTap: ok ? a.onUseAsInit : null,
-            children: [Text(l.tools_useAsInit)],
-          ),
-        ],
+        ),
+      ],
+    ];
+    final controls = <Widget>[
+      btn(
+        'continue',
+        UiGlyph(ToolsGlyphs.rotate, size: 14, color: c.ink),
+        l.tools_continue,
+        a.onContinue,
       ),
+      btn(
+        'copy',
+        GenNaiIcon('copy', size: 14, color: c.ink),
+        l.tools_copy,
+        a.onCopy,
+      ),
+      btn(
+        'save',
+        GenNaiIcon('save', size: 14, color: c.ink),
+        l.tools_saveGallery,
+        a.onSave,
+      ),
+      btn(
+        'upscale',
+        GenNaiIcon('upscale', size: 14, color: c.ink),
+        l.tools_upscale,
+        a.onUpscale,
+      ),
+      ToolsButton(
+        key: const Key('tools-act-init'),
+        tone: ToolsButtonTone.primary,
+        onTap: ok ? a.onUseAsInit : null,
+        children: [Text(l.tools_useAsInit)],
+      ),
+    ];
+    final variants =
+        run != null &&
+        run.images.length > 1 &&
+        run.variants.length == run.images.length;
+    double textWidth(String text, TextStyle style) {
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        locale: Localizations.localeOf(context),
+      )..layout();
+      final width = painter.width;
+      painter.dispose();
+      return width;
+    }
+
+    final small = UiText.sans(12.5, weight: FontWeight.w500);
+    final fixed =
+        [
+          l.tools_continue,
+          l.tools_copy,
+          l.tools_saveGallery,
+          l.tools_upscale,
+        ].fold<double>(0, (n, label) => n + textWidth(label, small) + 43) +
+        textWidth(l.tools_useAsInit, UiText.sans(13, weight: FontWeight.w600)) +
+        30;
+    final sizeWidth = run == null
+        ? 0.0
+        : textWidth(ToolsFormat.size(run.width, run.height), UiText.mono(11)) +
+              24;
+    final variantWidth = variants
+        ? run.variants.fold<double>(
+            4,
+            (n, label) => n + textWidth(label, UiText.sans(13)) + 24,
+          )
+        : 0.0;
+    final minimum =
+        fixed +
+        sizeWidth +
+        variantWidth +
+        8 *
+            (controls.length +
+                (run == null
+                    ? 1
+                    : variants
+                    ? 3
+                    : 2) -
+                1);
+    final summary = run == null
+        ? l.tools_noResult
+        : '${ToolsFormat.toolName(l, run.tool)} · '
+              '${ToolsFormat.ago(l, run.time, now)} · '
+              '${run.cost == null || run.cost == 0 ? l.tools_free : l.tools_anlasN(run.cost!)}';
+    return LayoutBuilder(
+      builder: (context, box) {
+        final wrap = box.maxWidth - 28 < minimum;
+        return Container(
+          key: const Key('tools-director-actions'),
+          height: wrap ? null : 56,
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: wrap ? 8 : 0),
+          child: wrap
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  children: [
+                    if (run != null)
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          ToolsChip(
+                            mono: true,
+                            children: [
+                              Text(ToolsFormat.size(run.width, run.height)),
+                            ],
+                          ),
+                          if (variants)
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: ToolsSeg<int>(
+                                key: const Key('tools-variants'),
+                                height: 28,
+                                values: [
+                                  for (var i = 0; i < run.images.length; i++) i,
+                                ],
+                                selected: d.variant,
+                                keyOf: (i) => Key('tools-variant-$i'),
+                                onChanged: a.onVariant,
+                                label: (context, i, on) =>
+                                    Text(run.variants[i]),
+                              ),
+                            ),
+                        ],
+                      ),
+                    Text(summary, style: UiText.sans(12, color: c.faint)),
+                    Wrap(spacing: 8, runSpacing: 4, children: controls),
+                  ],
+                )
+              : Row(spacing: 8, children: [...leading, ...controls]),
+        );
+      },
     );
   }
 }
