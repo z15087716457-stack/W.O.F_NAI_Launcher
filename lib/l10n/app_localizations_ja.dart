@@ -10742,7 +10742,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get online_searchFavHint => 'お気に入りを検索：タイトル・作者・タグ';
 
   @override
-  String get online_fuzzy => 'あいまい検索';
+  String get online_fuzzy => 'あいまい';
 
   @override
   String get online_clearSearch => '検索をクリア';

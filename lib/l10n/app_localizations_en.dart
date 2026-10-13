@@ -11292,7 +11292,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get online_deleteCollection => 'Delete collection';
 
   @override
-  String get online_inspWork => 'Work';
+  String get online_inspWork => 'Art';
 
   @override
   String get online_inspPost => 'Post';

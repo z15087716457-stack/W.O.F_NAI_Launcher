@@ -531,7 +531,7 @@ class _OnlineSearchBoxState extends State<OnlineSearchBox> {
             key: const Key('online-search-work'),
           ),
         ),
-        keys,
+        if (width >= 180) keys,
       ];
     } else if (s.promptQuery) {
       inner = [
@@ -575,7 +575,7 @@ class _OnlineSearchBoxState extends State<OnlineSearchBox> {
               ),
             ),
           ),
-        keys,
+        if (width >= 180) keys,
       ];
     } else {
       inner = [
@@ -625,7 +625,7 @@ class _OnlineSearchBoxState extends State<OnlineSearchBox> {
               ],
             ),
           ),
-        keys,
+        if (width >= 180) keys,
       ];
     }
 
@@ -781,7 +781,17 @@ class _OnlineFilterRowState extends State<OnlineFilterRow> {
               height: 46,
               child: Padding(
                 padding: const EdgeInsets.only(left: 18, right: 16),
-                child: Row(spacing: 8, children: _children(context)),
+                child: LayoutBuilder(
+                  builder: (context, box) => SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: box.maxWidth),
+                      child: IntrinsicWidth(
+                        child: Row(spacing: 8, children: _children(context)),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
     );

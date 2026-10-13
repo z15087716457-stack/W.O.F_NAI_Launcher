@@ -1073,10 +1073,19 @@ class _Footer extends StatelessWidget {
                           size: 14,
                           filled: w.favorited,
                         ),
-                        Text(
-                          w.favorited
-                              ? l10n.online_favorited
-                              : l10n.online_favorite,
+                        Flexible(
+                          child: Tooltip(
+                            message: w.favorited
+                                ? l10n.online_favorited
+                                : l10n.online_favorite,
+                            child: Text(
+                              w.favorited
+                                  ? l10n.online_favorited
+                                  : l10n.online_favorite,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -1133,7 +1142,16 @@ class _Footer extends StatelessWidget {
                             : () => a.onDownload([w.key], all: true),
                         children: [
                           const UiGlyph(UiGlyphs.download, size: 14),
-                          Text(l10n.online_download),
+                          Flexible(
+                            child: Tooltip(
+                              message: l10n.online_download,
+                              child: Text(
+                                l10n.online_download,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
                           if (w.mediaCount > 1)
                             const UiGlyph(UiGlyphs.chevronDown, size: 12),
                         ],

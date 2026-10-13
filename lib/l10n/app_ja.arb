@@ -5904,7 +5904,7 @@
   "online_searchPromptHint": "Prompt に含む…（::artist: 構文可）",
   "online_searchTagHint": "タグを追加（スペース区切り、- で除外）",
   "online_searchFavHint": "お気に入りを検索：タイトル・作者・タグ",
-  "online_fuzzy": "あいまい検索",
+  "online_fuzzy": "あいまい",
   "online_clearSearch": "検索をクリア",
   "online_sizeSmall": "小（タイトルなし）",
   "online_sizeMedium": "中",

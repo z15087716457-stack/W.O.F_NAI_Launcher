@@ -19637,7 +19637,7 @@ abstract class AppLocalizations {
   /// No description provided for @online_inspWork.
   ///
   /// In en, this message translates to:
-  /// **'Work'**
+  /// **'Art'**
   String get online_inspWork;
 
   /// No description provided for @online_inspPost.
