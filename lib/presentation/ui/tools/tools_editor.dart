@@ -311,55 +311,182 @@ class _TopBar extends StatelessWidget {
     final a = scope.actions;
     final l = context.l10n;
     final chrome = WindowChromeScope.activeOf(context);
-    return WindowHeader(
-      key: const Key('tools-editor-top'),
-      minimumInlineWidth: 0,
-      inlineDragWidth: 12,
-      dragBackground: true,
-      decoration: BoxDecoration(
-        color: c.bg,
-        border: Border(bottom: BorderSide(color: c.line)),
-      ),
-      child: Container(
-        height: ToolsEditorPage.topHeight - 1,
-        padding: EdgeInsets.only(left: 10, right: chrome ? 0 : 12),
-        child: Row(
-          spacing: 8,
-          children: [
-            ToolsIb(
-              key: const Key('tools-editor-back'),
-              glyph: ToolsGlyphs.back,
-              glyphSize: 18,
-              tooltip: l.tools_backEsc,
-              onTap: onLeave,
+    return LayoutBuilder(
+      builder: (context, box) {
+        final compact = box.maxWidth < 900;
+        return WindowHeader(
+          key: const Key('tools-editor-top'),
+          minimumInlineWidth: compact ? 900 : 0,
+          inlineDragWidth: 12,
+          dragBackground: true,
+          decoration: BoxDecoration(
+            color: c.bg,
+            border: Border(bottom: BorderSide(color: c.line)),
+          ),
+          child: Container(
+            height: compact ? null : ToolsEditorPage.topHeight - 1,
+            padding: EdgeInsets.only(
+              left: 10,
+              right: compact
+                  ? 10
+                  : chrome
+                  ? 0
+                  : 12,
             ),
-            Expanded(
-              child: Column(
-                key: const Key('tools-editor-title'),
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    d.inpainting ? l.tools_inpaint : l.tools_edit,
-                    maxLines: 1,
-                    style: UiText.sans(
-                      14.5,
-                      weight: FontWeight.w600,
-                      color: c.ink,
-                      height: 1.25,
-                    ),
+            child: compact
+                ? _CompactTopBar(onLeave: onLeave)
+                : Row(
+                    spacing: 8,
+                    children: [
+                      ToolsIb(
+                        key: const Key('tools-editor-back'),
+                        glyph: ToolsGlyphs.back,
+                        glyphSize: 18,
+                        tooltip: l.tools_backEsc,
+                        onTap: onLeave,
+                      ),
+                      Expanded(
+                        child: Column(
+                          key: const Key('tools-editor-title'),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              d.inpainting ? l.tools_inpaint : l.tools_edit,
+                              maxLines: 1,
+                              style: UiText.sans(
+                                14.5,
+                                weight: FontWeight.w600,
+                                color: c.ink,
+                                height: 1.25,
+                              ),
+                            ),
+                            Text(
+                              '${d.inpainting ? l.tools_inpaintSub : l.tools_editSub} · '
+                              '${ToolsFormat.size(d.width, d.height)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: UiText.sans(
+                                11,
+                                color: c.faint,
+                                height: 1.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (scope.narrow)
+                        ToolsIb(
+                          key: const Key('tools-editor-side-toggle'),
+                          glyph: ToolsGlyphs.panel,
+                          on: scope.controller.sideOpen,
+                          tooltip: l.tools_panel,
+                          onTap: () => scope.controller.setSide(
+                            !scope.controller.sideOpen,
+                          ),
+                        ),
+                      const _Zoom(),
+                      const ToolsVDiv(),
+                      ToolsIb(
+                        key: const Key('tools-editor-undo'),
+                        glyph: ToolsGlyphs.undo,
+                        tooltip: l.tools_undo,
+                        onTap: d.canUndo ? a.onUndo : null,
+                      ),
+                      ToolsIb(
+                        key: const Key('tools-editor-redo'),
+                        glyph: ToolsGlyphs.redo,
+                        tooltip: l.tools_redo,
+                        onTap: d.canRedo ? a.onRedo : null,
+                      ),
+                      ToolsIb(
+                        key: const Key('tools-editor-download'),
+                        glyph: ToolsGlyphs.download,
+                        tooltip: l.tools_download,
+                        onTap: a.onDownload,
+                      ),
+                      const ToolsVDiv(),
+                      ToolsButton(
+                        key: const Key('tools-editor-cancel'),
+                        tone: ToolsButtonTone.ghost,
+                        onTap: onLeave,
+                        children: [Text(l.tools_cancel)],
+                      ),
+                      if (d.inpainting)
+                        const _ApplySplit()
+                      else
+                        ToolsButton(
+                          key: const Key('tools-editor-apply'),
+                          tone: ToolsButtonTone.primary,
+                          onTap: a.onApply,
+                          children: [Text(l.tools_useAsInit)],
+                        ),
+                    ],
                   ),
-                  Text(
-                    '${d.inpainting ? l.tools_inpaintSub : l.tools_editSub} · '
-                    '${ToolsFormat.size(d.width, d.height)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: UiText.sans(11, color: c.faint, height: 1.25),
-                  ),
-                ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Keep every action reachable when the caption reserve leaves too little room.
+class _CompactTopBar extends StatelessWidget {
+  const _CompactTopBar({required this.onLeave});
+  final VoidCallback onLeave;
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = ToolsEditorScope.of(context);
+    final d = scope.data;
+    final a = scope.actions;
+    final l = context.l10n;
+    final c = context.ui;
+    final title = d.inpainting ? l.tools_inpaint : l.tools_edit;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              ToolsIb(
+                key: const Key('tools-editor-back'),
+                glyph: ToolsGlyphs.back,
+                glyphSize: 18,
+                tooltip: l.tools_backEsc,
+                onTap: onLeave,
               ),
-            ),
-            if (scope.narrow)
+              Expanded(
+                child: Tooltip(
+                  message: title,
+                  child: Column(
+                    key: const Key('tools-editor-title'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(
+                          14.5,
+                          weight: FontWeight.w600,
+                          color: c.ink,
+                          height: 1.25,
+                        ),
+                      ),
+                      Text(
+                        ToolsFormat.size(d.width, d.height),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(11, color: c.faint, height: 1.25),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               ToolsIb(
                 key: const Key('tools-editor-side-toggle'),
                 glyph: ToolsGlyphs.panel,
@@ -368,44 +495,51 @@ class _TopBar extends StatelessWidget {
                 onTap: () =>
                     scope.controller.setSide(!scope.controller.sideOpen),
               ),
-            const _Zoom(),
-            const ToolsVDiv(),
-            ToolsIb(
-              key: const Key('tools-editor-undo'),
-              glyph: ToolsGlyphs.undo,
-              tooltip: l.tools_undo,
-              onTap: d.canUndo ? a.onUndo : null,
-            ),
-            ToolsIb(
-              key: const Key('tools-editor-redo'),
-              glyph: ToolsGlyphs.redo,
-              tooltip: l.tools_redo,
-              onTap: d.canRedo ? a.onRedo : null,
-            ),
-            ToolsIb(
-              key: const Key('tools-editor-download'),
-              glyph: ToolsGlyphs.download,
-              tooltip: l.tools_download,
-              onTap: a.onDownload,
-            ),
-            const ToolsVDiv(),
-            ToolsButton(
-              key: const Key('tools-editor-cancel'),
-              tone: ToolsButtonTone.ghost,
-              onTap: onLeave,
-              children: [Text(l.tools_cancel)],
-            ),
-            if (d.inpainting)
-              const _ApplySplit()
-            else
-              ToolsButton(
-                key: const Key('tools-editor-apply'),
-                tone: ToolsButtonTone.primary,
-                onTap: a.onApply,
-                children: [Text(l.tools_useAsInit)],
+              if (d.inpainting)
+                const _ApplySplit()
+              else
+                ToolsButton(
+                  key: const Key('tools-editor-apply'),
+                  tone: ToolsButtonTone.primary,
+                  onTap: a.onApply,
+                  children: [Text(l.tools_useAsInit)],
+                ),
+            ],
+          ),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            alignment: WrapAlignment.end,
+            children: [
+              const _Zoom(),
+              ToolsIb(
+                key: const Key('tools-editor-undo'),
+                glyph: ToolsGlyphs.undo,
+                tooltip: l.tools_undo,
+                onTap: d.canUndo ? a.onUndo : null,
               ),
-          ],
-        ),
+              ToolsIb(
+                key: const Key('tools-editor-redo'),
+                glyph: ToolsGlyphs.redo,
+                tooltip: l.tools_redo,
+                onTap: d.canRedo ? a.onRedo : null,
+              ),
+              ToolsIb(
+                key: const Key('tools-editor-download'),
+                glyph: ToolsGlyphs.download,
+                tooltip: l.tools_download,
+                onTap: a.onDownload,
+              ),
+              ToolsButton(
+                key: const Key('tools-editor-cancel'),
+                tone: ToolsButtonTone.ghost,
+                onTap: onLeave,
+                children: [Text(l.tools_cancel)],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
