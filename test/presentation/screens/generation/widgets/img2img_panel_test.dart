@@ -257,12 +257,17 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
       expect(find.byType(EditorCanvas), findsOneWidget);
       final editor = tester.widget<ImageEditorScreen>(
-        find.byType(ImageEditorScreen),
+        find.byWidgetPredicate((widget) => widget is ImageEditorScreen),
       );
       expect(editor.mode, ImageEditorMode.edit);
       expect(editor.initialImage, orderedEquals(_testImageBytes));
       expect(
-        (tester.state(find.byType(ImageEditorScreen)) as dynamic)
+        (tester.state(
+                  find.byWidgetPredicate(
+                    (widget) => widget is ImageEditorScreen,
+                  ),
+                )
+                as dynamic)
             .debugCanvasSize,
         const Size(8, 8),
       );

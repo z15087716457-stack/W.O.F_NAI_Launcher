@@ -8,6 +8,7 @@ import '../../../data/services/local_upscale_model_manager.dart';
 import '../../../data/services/advanced_upscale_component_manager.dart';
 import '../../../data/services/local_upscale_service.dart';
 import '../image_generation_provider.dart';
+import '../auth_provider.dart';
 import '../image_save_settings_provider.dart';
 import '../proxy_settings_provider.dart';
 import 'image_workflow_controller.dart';
@@ -341,11 +342,26 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
       },
     );
     final cancellation = LocalUpscaleCancellation();
+    var accountChanged = false;
+    final accountSubscription = ref.exists(authNotifierProvider)
+        ? ref.listen(
+            authNotifierProvider.select(
+              (value) => (value.accountId, value.status),
+            ),
+            (previous, next) {
+              if (previous != next) {
+                accountChanged = true;
+                cancellation.cancel();
+              }
+            },
+          )
+        : null;
     _cancellation = cancellation;
     state = const LocalUpscaleTaskState(running: true);
     controller.setToolRunning(true);
     bool canApply() =>
         !_disposed &&
+        !accountChanged &&
         !cancellation.isCancelled &&
         (image != null ||
             (!sourceChanged &&
@@ -439,6 +455,7 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
         );
       }
     } finally {
+      accountSubscription?.close();
       sourceSubscription.close();
       selectionSubscription.close();
       focusSubscription.close();

@@ -3,6 +3,12 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../../core/utils/comfyui_prompt_parser.dart';
 import '../../../data/models/character/character_prompt.dart';
 import 'comfyui_import_dialog.dart';
+import '../common/app_toast.dart';
+import '../../../core/utils/localization_extension.dart';
+
+typedef ComfyuiImportCommit =
+    Future<void> Function(String prompt, List<CharacterPrompt> characters);
+typedef ComfyuiImportBegin = ComfyuiImportCommit Function();
 
 /// ComfyUI 导入包装器
 ///
@@ -23,6 +29,7 @@ class ComfyuiImportWrapper extends StatefulWidget {
   /// [characters] 角色列表，用于替换角色配置
   final void Function(String globalPrompt, List<CharacterPrompt> characters)?
   onImport;
+  final ComfyuiImportBegin? beginImport;
 
   const ComfyuiImportWrapper({
     super.key,
@@ -30,6 +37,7 @@ class ComfyuiImportWrapper extends StatefulWidget {
     required this.controller,
     this.enabled = true,
     this.onImport,
+    this.beginImport,
   });
 
   @override
@@ -90,23 +98,42 @@ class _ComfyuiImportWrapperState extends State<ComfyuiImportWrapper> {
     _isProcessing = true;
 
     try {
+      final controller = widget.controller;
+      final before = controller.text;
+      final commit = widget.beginImport?.call();
       final result = await ComfyuiImportDialog.show(
         context: context,
         parseResult: parseResult,
       );
 
-      if (result != null && mounted) {
+      if (result != null &&
+          mounted &&
+          identical(controller, widget.controller) &&
+          controller.text == before) {
         // 转换为 NAI 角色列表
         final characters = ComfyuiPromptParser.toNaiCharacters(
           result.parseResult,
           usePosition: result.usePosition,
         );
 
-        // 触发回调
-        widget.onImport?.call(result.parseResult.globalPrompt, characters);
+        if (commit != null) {
+          await commit(result.parseResult.globalPrompt, characters);
+        } else {
+          // 触发回调
+          widget.onImport?.call(result.parseResult.globalPrompt, characters);
 
-        // 更新输入框内容为全局提示词
-        widget.controller.text = result.parseResult.globalPrompt;
+          // 更新输入框内容为全局提示词
+          widget.controller.text = result.parseResult.globalPrompt;
+        }
+      }
+    } catch (error) {
+      if (mounted) {
+        AppToast.error(
+          context,
+          error is StateError
+              ? error.message.toString()
+              : context.l10n.common_error,
+        );
       }
     } finally {
       _isProcessing = false;

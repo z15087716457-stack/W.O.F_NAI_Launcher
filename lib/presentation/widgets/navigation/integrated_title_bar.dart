@@ -89,15 +89,29 @@ class _WindowChromeConfiguration extends InheritedWidget {
 /// The inherited scope stays above the router so popup content can still use
 /// the same caption geometry when it needs to reserve space.
 class WindowChromePage extends StatelessWidget {
-  const WindowChromePage({super.key, required this.child});
+  const WindowChromePage({
+    super.key,
+    required this.child,
+    this.hidden = false,
+    this.captionTheme,
+  });
   final Widget child;
+  final bool hidden;
+  final ThemeData? captionTheme;
 
   @override
   Widget build(BuildContext context) {
     final configuration = context
         .dependOnInheritedWidgetOfExactType<_WindowChromeConfiguration>();
-    if (configuration == null) return child;
+    if (configuration == null || hidden) return child;
     final shell = configuration.shell;
+    final caption = _TitleBar(
+      height: shell.immersive
+          ? IntegratedTitleBarShell.barHeight
+          : shell.captionHeight,
+      immersive: shell.immersive,
+      onToggleTheme: shell.onToggleTheme,
+    );
     return Stack(
       children: [
         Positioned.fill(child: child),
@@ -112,13 +126,9 @@ class WindowChromePage extends StatelessWidget {
         Positioned(
           top: 0,
           right: 0,
-          child: _TitleBar(
-            height: shell.immersive
-                ? IntegratedTitleBarShell.barHeight
-                : shell.captionHeight,
-            immersive: shell.immersive,
-            onToggleTheme: shell.onToggleTheme,
-          ),
+          child: captionTheme == null
+              ? caption
+              : Theme(data: captionTheme!, child: caption),
         ),
       ],
     );

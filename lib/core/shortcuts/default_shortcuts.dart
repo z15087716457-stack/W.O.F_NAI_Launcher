@@ -106,6 +106,12 @@ class DefaultShortcuts {
     ShortcutIds.togglePromptMode: 'ctrl+m',
     ShortcutIds.openTagLibrary: 'ctrl+t',
     ShortcutIds.upscaleImage: 'ctrl+u',
+    ShortcutIds.saveImage: 'ctrl+s',
+    ShortcutIds.copyImage: 'ctrl+shift+c',
+    ShortcutIds.fullscreenPreview: 'f11',
+    ShortcutIds.openParamsPanel: 'alt+p',
+    ShortcutIds.openHistoryPanel: 'alt+h',
+    ShortcutIds.reuseParams: 'ctrl+r',
     ShortcutIds.generationPrevImage: 'arrowleft',
     ShortcutIds.generationNextImage: 'arrowright',
 
@@ -179,6 +185,11 @@ class DefaultShortcuts {
       case ShortcutIds.openTagLibrary:
       case ShortcutIds.upscaleImage:
       case ShortcutIds.fullscreenPreview:
+      case ShortcutIds.saveImage:
+      case ShortcutIds.copyImage:
+      case ShortcutIds.openParamsPanel:
+      case ShortcutIds.openHistoryPanel:
+      case ShortcutIds.reuseParams:
       case ShortcutIds.generationPrevImage:
       case ShortcutIds.generationNextImage:
         return ShortcutContext.generation;

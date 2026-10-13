@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import '../../wiring/generation_backend_test.dart' show SwitchingAuth;
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,6 +61,7 @@ void main() {
   });
   for (final scenario in [
     'direct',
+    'account-restored',
     'new-draft-source',
     'selection-back',
     'cancel',
@@ -77,6 +80,7 @@ void main() {
       });
       final container = ProviderContainer(
         overrides: [
+          authNotifierProvider.overrideWith(SwitchingAuth.new),
           localStorageServiceProvider.overrideWithValue(_Storage()),
           generationParamsNotifierProvider.overrideWith(_Params.new),
           imageGenerationNotifierProvider.overrideWith(_Generation.new),
@@ -88,11 +92,18 @@ void main() {
       addTearDown(container.dispose);
       final draft = container.read(generationParamsNotifierProvider);
       final image = GeneratedImage.create(_png(48, 32), width: 48, height: 32);
+      container.read(authNotifierProvider);
       final task = container.read(cloudUpscaleTaskProvider.notifier);
       final work = task.start(image: image);
       final duplicate = task.start(image: image);
       expect(container.read(cloudUpscaleTaskProvider).running, isTrue);
       expect(container.read(generationParamsNotifierProvider), same(draft));
+      if (scenario == 'account-restored') {
+        final auth =
+            container.read(authNotifierProvider.notifier) as SwitchingAuth;
+        auth.changeAccount();
+        auth.changeAccount('account-a');
+      }
       if (scenario == 'selection-back') {
         final selection = container.read(
           generationPreviewSelectionProvider.notifier,
@@ -123,7 +134,7 @@ void main() {
         isFalse,
       );
       final state = container.read(imageGenerationNotifierProvider);
-      if (scenario == 'cancel') {
+      if ((scenario == 'cancel' || scenario == 'account-restored')) {
         expect(token!.isCancelled, isTrue);
         expect(state.history, isEmpty);
       } else {

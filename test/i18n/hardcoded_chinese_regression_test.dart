@@ -30,9 +30,11 @@ void main() {
     final files = [
       'lib/presentation/widgets/image_editor/widgets/panels/layer_thumbnail_tray.dart',
       'lib/presentation/widgets/image_editor/widgets/panels/editor_quick_settings.dart',
-      'lib/presentation/widgets/image_editor/image_editor_screen_layout.dart',
+      'lib/presentation/widgets/image_editor/image_editor_session_models.dart',
       'lib/presentation/widgets/image_editor/widgets/toolbar/editor_overlay_toolbar.dart',
-      'lib/presentation/screens/director_tools/director_tools_screen.dart',
+      'lib/presentation/wiring/tools_director_wiring.dart',
+      'lib/presentation/wiring/tools_editor_wiring.dart',
+      'lib/presentation/wiring/tools_generation_wiring.dart',
       'lib/presentation/screens/generation/widgets/image_operation_badge.dart',
       'lib/presentation/screens/generation/widgets/generation_tool_panel.dart',
       'lib/presentation/screens/generation/widgets/generation_sidebar_style.dart',

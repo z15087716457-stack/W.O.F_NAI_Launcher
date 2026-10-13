@@ -119,7 +119,7 @@ Widget referenceShell(
     ),
   ),
 );
-void main() {
+void prepareGenerationDropTestPlatform() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final drag = MockMessageChannelContext()
     ..registerMockMethodCallHandler('DropManager', (_) async => null)
@@ -130,6 +130,10 @@ void main() {
         const MethodChannel('dev.irondash.engine_context'),
         (_) async => 1,
       );
+}
+
+void main() {
+  prepareGenerationDropTestPlatform();
   setUpAll(loadStudioCaptureFonts);
   testWidgets('switching models removes whole rows and their dividers', (
     tester,

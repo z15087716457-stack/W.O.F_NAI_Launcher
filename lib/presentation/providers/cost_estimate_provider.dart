@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/services/anlas_calculator.dart';
 import '../../core/utils/max_enhance_utils.dart';
 import '../../data/models/image/image_params.dart';
+import '../../data/models/user/user_subscription.dart';
 import 'image_generation_provider.dart';
 import 'generation/image_workflow_controller.dart';
 import 'subscription_provider.dart';
@@ -72,6 +73,15 @@ int _calculateEstimatedCost(
   final subscription = ref.watch(
     subscriptionNotifierProvider.select((state) => state.subscription),
   );
+  return generationRequestCost(params, workflow, subscription, batchSize);
+}
+
+int generationRequestCost(
+  ImageParams params,
+  ImageWorkflowState workflow,
+  UserSubscription? subscription,
+  int batchSize,
+) {
   final subscriptionTier = subscription?.isOpus == true
       ? AnlasCalculator.opusTier
       : 0;

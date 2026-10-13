@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/api_constants.dart';
@@ -161,7 +160,6 @@ final promptTokenUsageProvider =
       );
     });
 
-@visibleForTesting
 PromptTokenCountPayload buildPromptTokenCountPayload({
   required PromptTokenCountTarget target,
   required String prompt,

@@ -119,24 +119,30 @@ class AgentBridgeIndicator extends ConsumerWidget {
             overlayColor: Colors.transparent,
             splashFactory: NoSplash.splashFactory,
           ),
-          onPressed: () => _openPanel(context, ref),
+          onPressed: () => openPanel(context, ref),
         ),
       ),
     );
   }
 
-  Future<void> _openPanel(BuildContext context, WidgetRef ref) async {
+  static Future<void> openPanel(
+    BuildContext context,
+    WidgetRef ref, {
+    Rect? anchorRect,
+  }) async {
     final box = context.findRenderObject()! as RenderBox;
     final overlay =
         Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-    final anchor = box.localToGlobal(Offset.zero, ancestor: overlay);
+    final anchor = anchorRect == null
+        ? box.localToGlobal(Offset.zero, ancestor: overlay)
+        : anchorRect.topLeft - overlay.localToGlobal(Offset.zero);
     await showMenu<void>(
       context: context,
       position: RelativeRect.fromRect(
         Rect.fromLTWH(
           anchor.dx,
-          anchor.dy + box.size.height + 3,
-          box.size.width,
+          anchor.dy + (anchorRect?.height ?? box.size.height) + 3,
+          anchorRect?.width ?? box.size.width,
           0,
         ),
         Offset.zero & overlay.size,

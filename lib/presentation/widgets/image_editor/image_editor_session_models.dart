@@ -1,6 +1,6 @@
 part of 'image_editor_screen.dart';
 
-extension _ImageEditorScreenLayout on _ImageEditorScreenState {
+extension _ImageEditorSessionModels on _ImageEditorScreenState {
   Model3dEditorState? get _activeModelEditor =>
       _modelEditorKeys[_state.layerManager.activeLayerId]?.currentState;
 
@@ -13,7 +13,7 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
     builder: (context, _) {
       final layer = _state.layerManager.activeLayer;
       if (layer?.hasModel3d != true) {
-        return _buildRasterDesktopLayout(mediaSize);
+        return _buildToolsEditorLayout();
       }
       final active = layer!;
       return Model3dEditorScreen(
@@ -42,108 +42,6 @@ extension _ImageEditorScreenLayout on _ImageEditorScreenState {
       );
     },
   );
-
-  Widget _buildRasterDesktopLayout(Size mediaSize) => Scaffold(
-    body: Stack(
-      children: [
-        Positioned.fill(child: _buildCanvasArea()),
-        Positioned(
-          top: mediaSize.width < 560 ? 66 : 10,
-          left: 10,
-          child: _isInpaintMode
-              ? InpaintToolSettings(state: _state)
-              : EditToolSettings(
-                  state: _state,
-                  maxWidth: (mediaSize.width - 20).clamp(280, 620),
-                ),
-        ),
-        Positioned(top: 10, right: 10, child: _buildTopRightActions(mediaSize)),
-        Positioned(
-          left: 10,
-          right: 10,
-          bottom: 10,
-          child: Center(child: _buildFloatingToolbar(mediaSize)),
-        ),
-        if (_showLayerPanel)
-          Positioned(right: 10, bottom: 60, child: _buildLayerTrayOverlay()),
-        if (_showHsv && !_isInpaintMode) ...[
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => _updateLayoutState(() => _showHsv = false),
-            ),
-          ),
-          Positioned(
-            left: (mediaSize.width / 2 - 130).clamp(10, mediaSize.width - 270),
-            bottom: 70,
-            child: EditHsvPanel(
-              state: _state,
-              onClose: () => _updateLayoutState(() => _showHsv = false),
-            ),
-          ),
-        ],
-      ],
-    ),
-  );
-  Widget _buildTopRightActions(Size mediaSize) {
-    final l = context.l10n;
-    return InpaintPanel(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          EditButton(
-            glyph: 'download',
-            tooltip: l.common_download,
-            onPressed: _downloadCanvasImage,
-          ),
-          SizedBox(
-            height: 44,
-            child: FilledButton(
-              onPressed: _canExportAndClose ? _exportAndClose : null,
-              style: FilledButton.styleFrom(
-                shape: const RoundedRectangleBorder(),
-                minimumSize: const Size(120, 44),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-              ),
-              child: Text(
-                l.editor_saveAndExit,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ),
-          ),
-          EditButton(
-            glyph: 'close',
-            tooltip: l.common_close,
-            onPressed: _confirmExit,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFloatingToolbar(Size mediaSize) {
-    if (_isInpaintMode) {
-      return InpaintToolbar(
-        state: _state,
-        width: (mediaSize.width * .74).clamp(
-          288,
-          (mediaSize.width - 20).clamp(288, 1100),
-        ),
-        onClear: _resetInpaintMask,
-        onShiftEdges: _showShiftEdgesDialog,
-      );
-    }
-    return EditImageToolbar(
-      state: _state,
-      width: (mediaSize.width - 20).clamp(270, 830),
-      onHsv: () {
-        _state.editSelection.commit();
-        _updateLayoutState(() => _showHsv = !_showHsv);
-      },
-      onClear: _state.clearActiveLayerWithHistory,
-      onResize: _changeCanvasSize,
-    );
-  }
 
   Widget _buildLayerTrayOverlay() => EditorLayerTray(
     state: _state,

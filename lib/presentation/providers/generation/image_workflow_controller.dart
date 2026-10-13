@@ -5,6 +5,7 @@ import '../../../core/utils/inpaint_focus_region.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/model_spec.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/utils/app_logger.dart';
@@ -17,6 +18,64 @@ import 'generation_params_notifier.dart';
 enum ImageWorkflowMode { base, inpaint, enhance, upscale }
 
 enum UpscaleBackend { local, comfyui, novelai }
+
+List<double> canvasEnhanceFactors(String model, int width, int height) {
+  if ((width == 832 && height == 1216) || (width == 1216 && height == 832)) {
+    return const [1.0, 1.5];
+  }
+  final step = ModelSpecs.of(model).isV5 ? 32 : 64;
+  return [1.0, 1.5, 2.0]
+      .where(
+        (factor) =>
+            width * height * factor * factor <= MaxEnhanceMath.maxArea &&
+            (width * factor) % step == 0 &&
+            (height * factor) % step == 0,
+      )
+      .toList();
+}
+
+ImageParams canvasEnhanceRequest(
+  ImageParams draft,
+  EnhanceWorkflowSettings settings,
+  Uint8List source,
+  int width,
+  int height,
+) {
+  if (settings.localUpscale) {
+    return draft.copyWith(enhanceWorkflow: false, upscaledEnhance: false);
+  }
+  final model = ImageModels.resolveBaseModel(draft.model);
+  final max =
+      settings.maxUpscale && MaxEnhanceMath.isEligible(model, width, height);
+  final factors = canvasEnhanceFactors(model, width, height);
+  final factor = factors.contains(settings.upscaleFactor)
+      ? settings.upscaleFactor
+      : 1.0;
+  const magnitudes = [
+    (0.2, 0.0),
+    (0.4, 0.0),
+    (0.5, 0.0),
+    (0.6, 0.0),
+    (0.7, 0.1),
+  ];
+  final strengthNoise = settings.showIndividualSettings
+      ? (settings.strength, settings.noise)
+      : magnitudes[(settings.magnitude.clamp(0, 1) * 4).round()];
+  return draft.copyWith(
+    model: model,
+    sourceImage: source,
+    maskImage: null,
+    inpaintFocusRegion: null,
+    action: ImageGenerationAction.img2img,
+    isOutpaint: false,
+    enhanceWorkflow: true,
+    upscaledEnhance: max,
+    width: max ? width : (width * factor).round(),
+    height: max ? height : (height * factor).round(),
+    strength: strengthNoise.$1,
+    noise: strengthNoise.$2,
+  );
+}
 
 enum ComfyUpscaleModule { regular, seedvr2, rtx }
 
@@ -455,10 +514,26 @@ final imageWorkflowControllerProvider =
 /// Request/cost projection. Reading it never writes into the user's draft.
 final generationRequestParamsProvider = Provider<ImageParams>((ref) {
   final params = ref.watch(generationParamsNotifierProvider);
-  ref.watch(imageWorkflowControllerProvider);
-  return ref
+  final workflow = ref.watch(imageWorkflowControllerProvider);
+  final enabled = ref.watch(generationImg2ImgEnabledProvider);
+  final request = ref
       .read(imageWorkflowControllerProvider.notifier)
       .paramsForGeneration(params);
+  if (enabled ||
+      workflow.isEnhance && !workflow.enhance.localUpscale ||
+      workflow.isUpscale) {
+    return request;
+  }
+  return request.copyWith(
+    model: ImageModels.resolveBaseModel(request.model),
+    action: ImageGenerationAction.generate,
+    sourceImage: null,
+    maskImage: null,
+    inpaintFocusRegion: null,
+    isOutpaint: false,
+    enhanceWorkflow: false,
+    upscaledEnhance: false,
+  );
 });
 
 /// The sidebar continues to show its own workflow while a canvas tool is open.
@@ -466,6 +541,38 @@ final draftImageWorkflowProvider = Provider<ImageWorkflowState>((ref) {
   ref.watch(imageWorkflowControllerProvider);
   return ref.read(imageWorkflowControllerProvider.notifier).draftWorkflow;
 });
+
+final generationImg2ImgEnabledProvider =
+    NotifierProvider<GenerationImg2ImgEnabled, bool>(
+      GenerationImg2ImgEnabled.new,
+    );
+
+class GenerationImg2ImgEnabled extends Notifier<bool> {
+  Future<void> _pending = Future.value();
+  @override
+  bool build() =>
+      ref
+          .read(localStorageServiceProvider)
+          .getSetting<bool>(
+            StorageKeys.generationImg2ImgEnabled,
+            defaultValue: true,
+          ) ??
+      true;
+  void set(bool value) {
+    if (state == value) return;
+    state = value;
+    final storage = ref.read(localStorageServiceProvider);
+    _pending = _pending.then((_) => _persist(storage, value));
+  }
+
+  Future<void> _persist(LocalStorageService storage, bool value) async {
+    try {
+      await storage.setSetting(StorageKeys.generationImg2ImgEnabled, value);
+    } catch (_) {
+      AppLogger.w('Could not persist image input preference', 'ImageWorkflow');
+    }
+  }
+}
 
 class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   int _sourceImageRequestId = 0;
@@ -484,35 +591,13 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     }
     final source = state.temporaryEnhanceSource;
     if (source == null) return draft;
-    final model = ImageModels.resolveBaseModel(draft.model);
     final width = state.enhanceUsesGenerationSize
         ? draft.width
         : state.sourceWidth ?? draft.width;
     final height = state.enhanceUsesGenerationSize
         ? draft.height
         : state.sourceHeight ?? draft.height;
-    final maxEnabled =
-        state.enhance.maxUpscale &&
-        MaxEnhanceMath.isEligible(model, width, height);
-    final factor = availableEnhanceFactors.contains(state.enhance.upscaleFactor)
-        ? state.enhance.upscaleFactor
-        : 1.0;
-    final resolved = state.enhance.showIndividualSettings
-        ? (state.enhance.strength, state.enhance.noise)
-        : _resolveMagnitude(state.enhance.magnitude);
-    return draft.copyWith(
-      model: model,
-      sourceImage: source,
-      maskImage: null,
-      action: ImageGenerationAction.img2img,
-      isOutpaint: false,
-      enhanceWorkflow: true,
-      upscaledEnhance: maxEnabled,
-      width: maxEnabled ? width : (width * factor).round(),
-      height: maxEnabled ? height : (height * factor).round(),
-      strength: resolved.$1,
-      noise: resolved.$2,
-    );
+    return canvasEnhanceRequest(draft, state.enhance, source, width, height);
   }
 
   /// A toolbar operation owns a temporary source. Reopening another tool keeps
@@ -1055,6 +1140,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       );
     }
 
+    ref.read(generationImg2ImgEnabledProvider.notifier).set(true);
     _paramsNotifier.setSourceImage(effectiveBytes);
     _paramsNotifier.updateIsOutpaint(false);
 
@@ -1349,6 +1435,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     if (_params.sourceImage == null && !hasReplacementSource) {
       return;
     }
+    ref.read(generationImg2ImgEnabledProvider.notifier).set(true);
 
     if (state.mode == ImageWorkflowMode.enhance ||
         state.mode == ImageWorkflowMode.upscale) {
@@ -1588,18 +1675,11 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     final height = state.enhanceUsesGenerationSize
         ? _params.height
         : state.sourceHeight ?? _params.height;
-    if ((width == 832 && height == 1216) || (width == 1216 && height == 832)) {
-      return const [1.0, 1.5];
-    }
-    final step = _params.isV5Model ? 32 : 64;
-    return [1.0, 1.5, 2.0]
-        .where(
-          (factor) =>
-              width * height * factor * factor <= MaxEnhanceMath.maxArea &&
-              (width * factor) % step == 0 &&
-              (height * factor) % step == 0,
-        )
-        .toList();
+    return canvasEnhanceFactors(
+      ImageModels.resolveBaseModel(_params.model),
+      width,
+      height,
+    );
   }
 
   void updateEnhanceIndividualSettings({double? strength, double? noise}) {

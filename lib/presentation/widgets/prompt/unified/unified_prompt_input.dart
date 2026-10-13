@@ -78,6 +78,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
   /// [characters] 角色列表，用于替换角色配置
   final void Function(String globalPrompt, List<CharacterPrompt> characters)?
   onComfyuiImport;
+  final ComfyuiImportBegin? beginComfyuiImport;
 
   const UnifiedPromptInput({
     super.key,
@@ -94,6 +95,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
     this.expands = false,
     this.fitContent = false,
     this.onComfyuiImport,
+    this.beginComfyuiImport,
   });
 
   @override
@@ -794,11 +796,13 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     Widget result = _buildTextField();
 
     // 如果启用 ComfyUI 导入，包装 ComfyuiImportWrapper
-    if (widget.config.enableComfyuiImport && widget.onComfyuiImport != null) {
+    if (widget.config.enableComfyuiImport &&
+        (widget.onComfyuiImport != null || widget.beginComfyuiImport != null)) {
       result = ComfyuiImportWrapper(
         controller: _effectiveController,
         enabled: !widget.config.readOnly,
         onImport: widget.onComfyuiImport,
+        beginImport: widget.beginComfyuiImport,
         child: result,
       );
     }

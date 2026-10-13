@@ -2400,41 +2400,11 @@ abstract class AppLocalizations {
   /// **'Director Tools'**
   String get img2img_directorTools;
 
-  /// No description provided for @img2img_directorPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Prompt (Optional)'**
-  String get img2img_directorPrompt;
-
-  /// No description provided for @img2img_directorRunning.
-  ///
-  /// In en, this message translates to:
-  /// **'Processing...'**
-  String get img2img_directorRunning;
-
-  /// No description provided for @img2img_directorResult.
-  ///
-  /// In en, this message translates to:
-  /// **'Result'**
-  String get img2img_directorResult;
-
   /// No description provided for @img2img_directorApplied.
   ///
   /// In en, this message translates to:
   /// **'Applied the Director Tool result as the new source image'**
   String get img2img_directorApplied;
-
-  /// No description provided for @img2img_directorDefry.
-  ///
-  /// In en, this message translates to:
-  /// **'Defry'**
-  String get img2img_directorDefry;
-
-  /// No description provided for @img2img_directorApplyAsSource.
-  ///
-  /// In en, this message translates to:
-  /// **'Use as Source'**
-  String get img2img_directorApplyAsSource;
 
   /// No description provided for @img2img_variationsStarted.
   ///
@@ -2711,12 +2681,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Blur'**
   String get editor_toolBlur;
-
-  /// No description provided for @editor_back.
-  ///
-  /// In en, this message translates to:
-  /// **'Back'**
-  String get editor_back;
 
   /// No description provided for @editor_layers.
   ///
@@ -15296,72 +15260,6 @@ abstract class AppLocalizations {
   /// **'Pixel Snap'**
   String get img2img_pixelSnap;
 
-  /// No description provided for @img2img_directorAddToQueue.
-  ///
-  /// In en, this message translates to:
-  /// **'Use result as next input'**
-  String get img2img_directorAddToQueue;
-
-  /// No description provided for @img2img_transform.
-  ///
-  /// In en, this message translates to:
-  /// **'Transform'**
-  String get img2img_transform;
-
-  /// No description provided for @img2img_palette.
-  ///
-  /// In en, this message translates to:
-  /// **'Palettize'**
-  String get img2img_palette;
-
-  /// No description provided for @img2img_paletteOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Off'**
-  String get img2img_paletteOff;
-
-  /// No description provided for @img2img_paletteAuto.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto'**
-  String get img2img_paletteAuto;
-
-  /// No description provided for @img2img_paletteCustom.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom'**
-  String get img2img_paletteCustom;
-
-  /// No description provided for @img2img_avoidOverRefining.
-  ///
-  /// In en, this message translates to:
-  /// **'Avoid Over-Refining'**
-  String get img2img_avoidOverRefining;
-
-  /// No description provided for @img2img_keepGridHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Preserve the detected pixel grid.'**
-  String get img2img_keepGridHint;
-
-  /// No description provided for @img2img_refineGridHint.
-  ///
-  /// In en, this message translates to:
-  /// **'A finer pixel size may be used when it matches the image better.'**
-  String get img2img_refineGridHint;
-
-  /// No description provided for @img2img_pixelUpscaleHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enlarge the result with crisp, nearest-neighbor pixels.'**
-  String get img2img_pixelUpscaleHint;
-
-  /// No description provided for @img2img_pixelNativeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep the result at its snapped pixel size.'**
-  String get img2img_pixelNativeHint;
-
   /// No description provided for @img2img_masked.
   ///
   /// In en, this message translates to:
@@ -15379,90 +15277,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Blend'**
   String get img2img_blend;
-
-  /// No description provided for @img2img_emotionHappy.
-  ///
-  /// In en, this message translates to:
-  /// **'Happy'**
-  String get img2img_emotionHappy;
-
-  /// No description provided for @img2img_emotionLaugh.
-  ///
-  /// In en, this message translates to:
-  /// **'Laughing'**
-  String get img2img_emotionLaugh;
-
-  /// No description provided for @img2img_emotionSad.
-  ///
-  /// In en, this message translates to:
-  /// **'Sad'**
-  String get img2img_emotionSad;
-
-  /// No description provided for @img2img_emotionAngry.
-  ///
-  /// In en, this message translates to:
-  /// **'Angry'**
-  String get img2img_emotionAngry;
-
-  /// No description provided for @img2img_emotionSurprised.
-  ///
-  /// In en, this message translates to:
-  /// **'Surprised'**
-  String get img2img_emotionSurprised;
-
-  /// No description provided for @img2img_emotionShy.
-  ///
-  /// In en, this message translates to:
-  /// **'Shy'**
-  String get img2img_emotionShy;
-
-  /// No description provided for @img2img_emotionExcited.
-  ///
-  /// In en, this message translates to:
-  /// **'Excited'**
-  String get img2img_emotionExcited;
-
-  /// No description provided for @img2img_emotionDisgusted.
-  ///
-  /// In en, this message translates to:
-  /// **'Disgusted'**
-  String get img2img_emotionDisgusted;
-
-  /// No description provided for @img2img_emotionSmug.
-  ///
-  /// In en, this message translates to:
-  /// **'Smug'**
-  String get img2img_emotionSmug;
-
-  /// No description provided for @img2img_emotionWorried.
-  ///
-  /// In en, this message translates to:
-  /// **'Worried'**
-  String get img2img_emotionWorried;
-
-  /// No description provided for @img2img_emotionLove.
-  ///
-  /// In en, this message translates to:
-  /// **'Loving'**
-  String get img2img_emotionLove;
-
-  /// No description provided for @img2img_emotionPlayful.
-  ///
-  /// In en, this message translates to:
-  /// **'Playful'**
-  String get img2img_emotionPlayful;
-
-  /// No description provided for @img2img_emotionTired.
-  ///
-  /// In en, this message translates to:
-  /// **'Tired'**
-  String get img2img_emotionTired;
-
-  /// No description provided for @img2img_emotionNeutral.
-  ///
-  /// In en, this message translates to:
-  /// **'Neutral'**
-  String get img2img_emotionNeutral;
 
   /// No description provided for @img2img_enhanceAction.
   ///
@@ -20975,120 +20789,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Model Pose'**
   String get model3d_toolPose;
-
-  /// No description provided for @img2img_directorEmotionHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Anime only. Start with a neutral emotion image.'**
-  String get img2img_directorEmotionHint;
-
-  /// No description provided for @img2img_emotionStrengthNormal.
-  ///
-  /// In en, this message translates to:
-  /// **'Normal'**
-  String get img2img_emotionStrengthNormal;
-
-  /// No description provided for @img2img_emotionStrengthSlightlyWeak.
-  ///
-  /// In en, this message translates to:
-  /// **'Slightly Weak'**
-  String get img2img_emotionStrengthSlightlyWeak;
-
-  /// No description provided for @img2img_emotionStrengthWeak.
-  ///
-  /// In en, this message translates to:
-  /// **'Weak'**
-  String get img2img_emotionStrengthWeak;
-
-  /// No description provided for @img2img_emotionStrengthWeaker.
-  ///
-  /// In en, this message translates to:
-  /// **'Even Weaker'**
-  String get img2img_emotionStrengthWeaker;
-
-  /// No description provided for @img2img_emotionStrengthVeryWeak.
-  ///
-  /// In en, this message translates to:
-  /// **'Very Weak'**
-  String get img2img_emotionStrengthVeryWeak;
-
-  /// No description provided for @img2img_emotionStrengthWeakest.
-  ///
-  /// In en, this message translates to:
-  /// **'Weakest'**
-  String get img2img_emotionStrengthWeakest;
-
-  /// No description provided for @img2img_directorWeaken.
-  ///
-  /// In en, this message translates to:
-  /// **'Weaken emotion'**
-  String get img2img_directorWeaken;
-
-  /// No description provided for @img2img_directorStrengthen.
-  ///
-  /// In en, this message translates to:
-  /// **'Strengthen emotion'**
-  String get img2img_directorStrengthen;
-
-  /// No description provided for @img2img_emotionScared.
-  ///
-  /// In en, this message translates to:
-  /// **'Scared'**
-  String get img2img_emotionScared;
-
-  /// No description provided for @img2img_emotionNervous.
-  ///
-  /// In en, this message translates to:
-  /// **'Nervous'**
-  String get img2img_emotionNervous;
-
-  /// No description provided for @img2img_emotionThinking.
-  ///
-  /// In en, this message translates to:
-  /// **'Thinking'**
-  String get img2img_emotionThinking;
-
-  /// No description provided for @img2img_emotionConfused.
-  ///
-  /// In en, this message translates to:
-  /// **'Confused'**
-  String get img2img_emotionConfused;
-
-  /// No description provided for @img2img_emotionBored.
-  ///
-  /// In en, this message translates to:
-  /// **'Bored'**
-  String get img2img_emotionBored;
-
-  /// No description provided for @img2img_emotionIrritated.
-  ///
-  /// In en, this message translates to:
-  /// **'Irritated'**
-  String get img2img_emotionIrritated;
-
-  /// No description provided for @img2img_emotionAroused.
-  ///
-  /// In en, this message translates to:
-  /// **'Aroused'**
-  String get img2img_emotionAroused;
-
-  /// No description provided for @img2img_emotionEmbarrassed.
-  ///
-  /// In en, this message translates to:
-  /// **'Embarrassed'**
-  String get img2img_emotionEmbarrassed;
-
-  /// No description provided for @img2img_emotionDetermined.
-  ///
-  /// In en, this message translates to:
-  /// **'Determined'**
-  String get img2img_emotionDetermined;
-
-  /// No description provided for @img2img_emotionHurt.
-  ///
-  /// In en, this message translates to:
-  /// **'Hurt'**
-  String get img2img_emotionHurt;
 
   /// No description provided for @localUpscale_local.
   ///

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../helpers/studio_capture_fonts.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_screen.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/core/editor_state.dart';
@@ -94,6 +95,7 @@ Future<void> drain(WidgetTester tester) async {
 }
 
 void main() {
+  setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
   Future<(EditorState, Observer, List<FakeScene>, Future<ImageEditorResult?>)>
   open(
@@ -151,10 +153,6 @@ void main() {
     await tester.tap(find.text('open'));
     await drain(tester);
     final dynamic state = key.currentState;
-    if (mode == ImageEditorMode.inpaint) {
-      await tester.tap(find.byKey(const Key('inpaint_layers')));
-      await drain(tester);
-    }
     return (state.debugEditorState as EditorState, observer, scenes, result);
   }
 
@@ -164,7 +162,13 @@ void main() {
       final (state, observer, scenes, _) = await open(tester);
       final count = state.layerManager.layerCount;
       final routeCount = observer.pushes;
-      await tester.tap(find.byKey(const Key('inpaint_add_3d')));
+      await tester.tap(
+        find.byKey(
+          find.byKey(const Key('tools-layer-add3d')).evaluate().isNotEmpty
+              ? const Key('tools-layer-add3d')
+              : const Key('inpaint_add_3d'),
+        ),
+      );
       await drain(tester);
       expect(observer.pushes, routeCount);
       expect(find.byType(ImageEditorScreen), findsOneWidget);
@@ -201,19 +205,41 @@ void main() {
     (tester) async {
       final (state, observer, scenes, _) = await open(tester);
       final base = state.layerManager.activeLayer!;
-      await tester.tap(find.byKey(const Key('inpaint_add_3d')));
+      await tester.tap(
+        find.byKey(
+          find.byKey(const Key('tools-layer-add3d')).evaluate().isNotEmpty
+              ? const Key('tools-layer-add3d')
+              : const Key('inpaint_add_3d'),
+        ),
+      );
       await drain(tester);
       final model = state.layerManager.activeLayer!;
       scenes.single.change();
       await tester.pump();
-      await tester.tap(find.byKey(Key('inpaint_layer_thumb_${base.id}')));
+      await tester.tap(
+        find.byKey(
+          Key(
+            find.byKey(Key('tools-layer-${base.id}')).evaluate().isNotEmpty
+                ? 'tools-layer-${base.id}'
+                : 'inpaint_layer_thumb_${base.id}',
+          ),
+        ),
+      );
       await drain(tester);
       expect(state.layerManager.activeLayerId, base.id);
       expect(find.byType(Model3dEditorScreen), findsNothing);
       expect(model.model3d!.sceneState['revision'], 1);
       expect(model.hasBaseImage, true);
       expect(observer.pushes, 2);
-      await tester.tap(find.byKey(Key('inpaint_layer_thumb_${model.id}')));
+      await tester.tap(
+        find.byKey(
+          Key(
+            find.byKey(Key('tools-layer-${model.id}')).evaluate().isNotEmpty
+                ? 'tools-layer-${model.id}'
+                : 'inpaint_layer_thumb_${model.id}',
+          ),
+        ),
+      );
       await drain(tester);
       expect(find.byType(Model3dEditorScreen), findsOneWidget);
       final restore = scenes.last.commands.singleWhere(
@@ -222,7 +248,15 @@ void main() {
       expect((restore['sceneState'] as Map)['revision'], 1);
       scenes.last.change();
       await tester.pump();
-      await tester.tap(find.byKey(Key('inpaint_layer_thumb_${base.id}')));
+      await tester.tap(
+        find.byKey(
+          Key(
+            find.byKey(Key('tools-layer-${base.id}')).evaluate().isNotEmpty
+                ? 'tools-layer-${base.id}'
+                : 'inpaint_layer_thumb_${base.id}',
+          ),
+        ),
+      );
       await drain(tester);
       expect(model.model3d!.sceneState['revision'], 2);
       expect(observer.pushes, 2);
@@ -235,7 +269,13 @@ void main() {
     'save closes the whole image editor and exports the base plus model pixels',
     (tester) async {
       final (_, observer, scenes, result) = await open(tester);
-      await tester.tap(find.byKey(const Key('inpaint_add_3d')));
+      await tester.tap(
+        find.byKey(
+          find.byKey(const Key('tools-layer-add3d')).evaluate().isNotEmpty
+              ? const Key('tools-layer-add3d')
+              : const Key('inpaint_add_3d'),
+        ),
+      );
       await drain(tester);
       scenes.single.change();
       await tester.pump();
@@ -264,12 +304,24 @@ void main() {
   ) async {
     final (state, observer, scenes, _) = await open(tester);
     final base = state.layerManager.activeLayer!;
-    await tester.tap(find.byKey(const Key('inpaint_add_3d')));
+    await tester.tap(
+      find.byKey(
+        find.byKey(const Key('tools-layer-add3d')).evaluate().isNotEmpty
+            ? const Key('tools-layer-add3d')
+            : const Key('inpaint_add_3d'),
+      ),
+    );
     await drain(tester);
     final first = state.layerManager.activeLayer!;
     scenes.last.change();
     await tester.pump();
-    await tester.tap(find.byKey(const Key('inpaint_add_3d')));
+    await tester.tap(
+      find.byKey(
+        find.byKey(const Key('tools-layer-add3d')).evaluate().isNotEmpty
+            ? const Key('tools-layer-add3d')
+            : const Key('inpaint_add_3d'),
+      ),
+    );
     await drain(tester);
     final second = state.layerManager.activeLayer!;
     expect(first.model3d!.sceneState['revision'], 1);
@@ -324,13 +376,27 @@ void main() {
     (tester) async {
       final (state, observer, scenes, _) = await open(tester);
       final base = state.layerManager.activeLayer!;
-      await tester.tap(find.byKey(const Key('inpaint_add_3d')));
+      await tester.tap(
+        find.byKey(
+          find.byKey(const Key('tools-layer-add3d')).evaluate().isNotEmpty
+              ? const Key('tools-layer-add3d')
+              : const Key('inpaint_add_3d'),
+        ),
+      );
       await drain(tester);
       final model = state.layerManager.activeLayer!;
       scenes.last.change();
       scenes.last.failRender = true;
       await tester.pump();
-      await tester.tap(find.byKey(Key('inpaint_layer_thumb_${base.id}')));
+      await tester.tap(
+        find.byKey(
+          Key(
+            find.byKey(Key('tools-layer-${base.id}')).evaluate().isNotEmpty
+                ? 'tools-layer-${base.id}'
+                : 'inpaint_layer_thumb_${base.id}',
+          ),
+        ),
+      );
       await drain(tester);
       expect(state.layerManager.activeLayerId, model.id);
       expect(model.hasBaseImage, false);
@@ -338,7 +404,15 @@ void main() {
       expect(find.byType(Model3dEditorScreen), findsOneWidget);
       expect(observer.pushes, 2);
       scenes.last.failRender = false;
-      await tester.tap(find.byKey(Key('inpaint_layer_thumb_${base.id}')));
+      await tester.tap(
+        find.byKey(
+          Key(
+            find.byKey(Key('tools-layer-${base.id}')).evaluate().isNotEmpty
+                ? 'tools-layer-${base.id}'
+                : 'inpaint_layer_thumb_${base.id}',
+          ),
+        ),
+      );
       await drain(tester);
       expect(state.layerManager.activeLayerId, base.id);
       expect(model.model3d!.sceneState['revision'], 1);
@@ -357,20 +431,51 @@ void main() {
     );
     final mask = state.layerManager.activeLayer!;
     expect(mask.inpaintMask, true);
-    await tester.tap(find.byKey(const Key('inpaint_add_3d')));
+    await tester.tap(
+      find.byKey(
+        find.byKey(const Key('tools-layer-add3d')).evaluate().isNotEmpty
+            ? const Key('tools-layer-add3d')
+            : const Key('inpaint_add_3d'),
+      ),
+    );
     await drain(tester);
     final model = state.layerManager.activeLayer!;
     expect(model.hasModel3d, true);
     expect(observer.pushes, 2);
     expect(find.byType(EditorLayerTray), findsOneWidget);
-    await tester.tap(find.byKey(Key('inpaint_layer_thumb_${mask.id}')));
+    await tester.tap(
+      find.byKey(
+        Key(
+          find.byKey(Key('tools-layer-${mask.id}')).evaluate().isNotEmpty
+              ? 'tools-layer-${mask.id}'
+              : 'inpaint_layer_thumb_${mask.id}',
+        ),
+      ),
+    );
     await drain(tester);
     expect(state.layerManager.activeLayerId, mask.id);
-    if (find.byKey(Key('inpaint_layer_thumb_${model.id}')).evaluate().isEmpty) {
+    if (find
+        .byKey(
+          Key(
+            find.byKey(Key('tools-layer-${model.id}')).evaluate().isNotEmpty
+                ? 'tools-layer-${model.id}'
+                : 'inpaint_layer_thumb_${model.id}',
+          ),
+        )
+        .evaluate()
+        .isEmpty) {
       await tester.tap(find.byKey(const Key('inpaint_layers')));
       await drain(tester);
     }
-    await tester.tap(find.byKey(Key('inpaint_layer_thumb_${model.id}')));
+    await tester.tap(
+      find.byKey(
+        Key(
+          find.byKey(Key('tools-layer-${model.id}')).evaluate().isNotEmpty
+              ? 'tools-layer-${model.id}'
+              : 'inpaint_layer_thumb_${model.id}',
+        ),
+      ),
+    );
     await drain(tester);
     expect(state.layerManager.activeLayerId, model.id);
     expect(scenes.length, 2);

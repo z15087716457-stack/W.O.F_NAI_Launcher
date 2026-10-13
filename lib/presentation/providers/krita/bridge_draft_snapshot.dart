@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/krita/bridge_draft_guard.dart';
 import '../../../core/services/anlas_calculator.dart';
+import '../../../core/utils/pill_document_editor.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/prompt_block/pill_document.dart';
 import '../../../data/models/user/user_subscription.dart';
 import '../auth_provider.dart';
 import '../character_prompt_provider.dart';
 import '../image_generation_provider.dart';
+import '../generation/image_workflow_controller.dart';
 import '../pill_workspace_provider.dart';
 import '../subscription_provider.dart';
 import '../quality_preset_provider.dart';
@@ -58,14 +60,26 @@ BridgeDraftSnapshot readBridgeDraft(
   // An unopened lane has no document yet. Reads must not initialize or rewrite it.
   PillWorkspaceState lane(String scope, String fallback) {
     final provider = pillWorkspaceProvider(scope);
-    if (!ref.exists(provider) &&
-        ref.read(pillWorkspaceStorageProvider).tryLoadSync(scope) == null) {
-      return PillWorkspaceState(
-        document: PillDocument(text: fallback, instances: const {}),
-        projection: fallback,
-      );
-    }
-    return read(provider);
+    if (ref.exists(provider)) return read(provider);
+    final document =
+        ref.read(pillWorkspaceStorageProvider).tryLoadSync(scope) ??
+        PillDocument(text: fallback, instances: const {});
+    final library = document.instances.isEmpty
+        ? null
+        : read(promptBlockLibraryNotifierProvider).valueOrNull;
+    return PillWorkspaceState(
+      document: document,
+      projection: PillDocumentEditor.project(document, (instance) {
+        if (instance.translation case final translation?) {
+          return translation.source;
+        }
+        if (instance.settings.hasRoll) return instance.currentRoll;
+        final block = library?.blockById(instance.blockId);
+        return instance.useNegativeContent
+            ? block?.negativeContent
+            : block?.content;
+      }),
+    );
   }
 
   final main = lane(PillScopes.main, p.prompt);
@@ -99,6 +113,7 @@ BridgeDraftSnapshot readBridgeDraft(
       // Includes reference images and other read-only generation parameters.
       // Structural Freezed hash avoids serializing image bytes on every edit.
       p.copyWith(advancedOptionsExpanded: false).hashCode,
+      read(generationImg2ImgEnabledProvider),
       read(autoFormatPromptSettingsProvider),
       read(sdSyntaxAutoConvertSettingsProvider),
       if (includeEpoch) ref.read(_bridgeDraftEpochProvider),

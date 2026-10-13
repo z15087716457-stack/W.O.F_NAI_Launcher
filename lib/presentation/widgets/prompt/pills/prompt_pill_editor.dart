@@ -17,6 +17,7 @@ import '../../../utils/prompt_block_bundle_insertion.dart';
 import '../blocks/prompt_block_colors.dart';
 import '../blocks/prompt_block_drag_data.dart';
 import '../blocks/prompt_block_icons.dart';
+import '../comfyui_import_wrapper.dart';
 import '../unified/unified_prompt_config.dart';
 import '../unified/unified_prompt_input.dart';
 import 'pill_instance_card.dart';
@@ -49,6 +50,7 @@ class PromptPillEditor extends ConsumerStatefulWidget {
     this.allowEvolutionToggle = false,
     this.onChanged,
     this.onComfyuiImport,
+    this.beginComfyuiImport,
   });
 
   final UnifiedPromptConfig config;
@@ -78,6 +80,7 @@ class PromptPillEditor extends ConsumerStatefulWidget {
   final ValueChanged<String>? onChanged;
   final void Function(String globalPrompt, List<CharacterPrompt> characters)?
   onComfyuiImport;
+  final ComfyuiImportBegin? beginComfyuiImport;
 
   @override
   ConsumerState<PromptPillEditor> createState() => _PromptPillEditorState();
@@ -273,6 +276,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
               onComfyuiImport: widget.onComfyuiImport == null
                   ? null
                   : _handleComfyuiImport,
+              beginComfyuiImport: widget.beginComfyuiImport,
               maxLines: widget.maxLines ?? (widget.compact ? 2 : null),
               minLines: widget.minLines ?? (widget.compact ? 1 : 2),
               expands: false,

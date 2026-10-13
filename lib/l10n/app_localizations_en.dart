@@ -1278,23 +1278,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_directorTools => 'Director Tools';
 
   @override
-  String get img2img_directorPrompt => 'Prompt (Optional)';
-
-  @override
-  String get img2img_directorRunning => 'Processing...';
-
-  @override
-  String get img2img_directorResult => 'Result';
-
-  @override
   String get img2img_directorApplied =>
       'Applied the Director Tool result as the new source image';
-
-  @override
-  String get img2img_directorDefry => 'Defry';
-
-  @override
-  String get img2img_directorApplyAsSource => 'Use as Source';
 
   @override
   String get img2img_variationsStarted => 'Generating variations...';
@@ -1437,9 +1422,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editor_toolBlur => 'Blur';
-
-  @override
-  String get editor_back => 'Back';
 
   @override
   String get editor_layers => 'Layers';
@@ -8816,42 +8798,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_pixelSnap => 'Pixel Snap';
 
   @override
-  String get img2img_directorAddToQueue => 'Use result as next input';
-
-  @override
-  String get img2img_transform => 'Transform';
-
-  @override
-  String get img2img_palette => 'Palettize';
-
-  @override
-  String get img2img_paletteOff => 'Off';
-
-  @override
-  String get img2img_paletteAuto => 'Auto';
-
-  @override
-  String get img2img_paletteCustom => 'Custom';
-
-  @override
-  String get img2img_avoidOverRefining => 'Avoid Over-Refining';
-
-  @override
-  String get img2img_keepGridHint => 'Preserve the detected pixel grid.';
-
-  @override
-  String get img2img_refineGridHint =>
-      'A finer pixel size may be used when it matches the image better.';
-
-  @override
-  String get img2img_pixelUpscaleHint =>
-      'Enlarge the result with crisp, nearest-neighbor pixels.';
-
-  @override
-  String get img2img_pixelNativeHint =>
-      'Keep the result at its snapped pixel size.';
-
-  @override
   String get img2img_masked => 'Masked';
 
   @override
@@ -8859,48 +8805,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get img2img_blend => 'Blend';
-
-  @override
-  String get img2img_emotionHappy => 'Happy';
-
-  @override
-  String get img2img_emotionLaugh => 'Laughing';
-
-  @override
-  String get img2img_emotionSad => 'Sad';
-
-  @override
-  String get img2img_emotionAngry => 'Angry';
-
-  @override
-  String get img2img_emotionSurprised => 'Surprised';
-
-  @override
-  String get img2img_emotionShy => 'Shy';
-
-  @override
-  String get img2img_emotionExcited => 'Excited';
-
-  @override
-  String get img2img_emotionDisgusted => 'Disgusted';
-
-  @override
-  String get img2img_emotionSmug => 'Smug';
-
-  @override
-  String get img2img_emotionWorried => 'Worried';
-
-  @override
-  String get img2img_emotionLove => 'Loving';
-
-  @override
-  String get img2img_emotionPlayful => 'Playful';
-
-  @override
-  String get img2img_emotionTired => 'Tired';
-
-  @override
-  String get img2img_emotionNeutral => 'Neutral';
 
   @override
   String get img2img_enhanceAction => 'Enhance!';
@@ -12067,64 +11971,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get model3d_toolPose => 'Model Pose';
-
-  @override
-  String get img2img_directorEmotionHint =>
-      'Anime only. Start with a neutral emotion image.';
-
-  @override
-  String get img2img_emotionStrengthNormal => 'Normal';
-
-  @override
-  String get img2img_emotionStrengthSlightlyWeak => 'Slightly Weak';
-
-  @override
-  String get img2img_emotionStrengthWeak => 'Weak';
-
-  @override
-  String get img2img_emotionStrengthWeaker => 'Even Weaker';
-
-  @override
-  String get img2img_emotionStrengthVeryWeak => 'Very Weak';
-
-  @override
-  String get img2img_emotionStrengthWeakest => 'Weakest';
-
-  @override
-  String get img2img_directorWeaken => 'Weaken emotion';
-
-  @override
-  String get img2img_directorStrengthen => 'Strengthen emotion';
-
-  @override
-  String get img2img_emotionScared => 'Scared';
-
-  @override
-  String get img2img_emotionNervous => 'Nervous';
-
-  @override
-  String get img2img_emotionThinking => 'Thinking';
-
-  @override
-  String get img2img_emotionConfused => 'Confused';
-
-  @override
-  String get img2img_emotionBored => 'Bored';
-
-  @override
-  String get img2img_emotionIrritated => 'Irritated';
-
-  @override
-  String get img2img_emotionAroused => 'Aroused';
-
-  @override
-  String get img2img_emotionEmbarrassed => 'Embarrassed';
-
-  @override
-  String get img2img_emotionDetermined => 'Determined';
-
-  @override
-  String get img2img_emotionHurt => 'Hurt';
 
   @override
   String get localUpscale_local => 'Local';

@@ -35,6 +35,7 @@ import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/statistics_cache_service.dart';
 import '../../data/services/alias_resolver_service.dart';
 import 'character_prompt_provider.dart';
+import 'auth_provider.dart';
 import 'image_save_settings_provider.dart';
 import 'local_gallery_provider.dart';
 import 'pill_roll_coordinator.dart';
@@ -63,6 +64,32 @@ export 'generation/metadata_preload_notifier.dart';
 export 'generation/retry_policy_notifier.dart';
 
 part 'image_generation_provider.g.dart';
+
+class GenerationRetryRequest {
+  const GenerationRetryRequest({
+    required this.params,
+    required this.count,
+    required this.workflow,
+    required this.accountId,
+    this.operation,
+    this.original,
+  });
+  final ImageParams params;
+  final int count;
+  final ImageWorkflowState workflow;
+  final String? accountId;
+  final ImageOperation? operation;
+  final GeneratedImage? original;
+  GenerationRetryRequest withParams(ImageParams value) =>
+      GenerationRetryRequest(
+        params: value,
+        count: count,
+        workflow: workflow,
+        accountId: accountId,
+        operation: operation,
+        original: original,
+      );
+}
 
 class _RememberedStreamPreview {
   const _RememberedStreamPreview({
@@ -107,6 +134,19 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   int _activeGenerationRunId = 0;
   ImageOperation? _activeImageOperation;
   UpscaleWorkflowSettings? _activeLocalEnhance;
+  GenerationRetryRequest? _lastRequest;
+  GenerationRetryRequest? get lastRequest => _lastRequest;
+
+  Future<void> retry(GenerationRetryRequest request) => _withPostBillingRefresh(
+    () => _generate(
+      request.params,
+      imagesPerRequestOverride: request.count,
+      operation: request.operation,
+      variationOriginal: request.original,
+      workflowOverride: request.workflow,
+      preserveSnapshot: true,
+    ),
+  );
   List<GeneratedImage> _pendingLocalEnhanceImages = [];
   final Map<String, _RememberedStreamPreview> _streamPreviewsForSnapshots =
       <String, _RememberedStreamPreview>{};
@@ -827,6 +867,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     int? imagesPerRequestOverride,
     ImageOperation? operation,
     GeneratedImage? variationOriginal,
+    ImageWorkflowState? workflowOverride,
+    bool preserveSnapshot = false,
   }) async {
     // 同步在途门禁：已有生成进行中时直接丢弃本次调用。
     // 必须先于冷却扣减与 _startGenerationRun——重入若走到 run 创建，
@@ -858,8 +900,14 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ];
 
     _activeImageOperation = operation;
-    if (operation == null && ref.exists(imageWorkflowControllerProvider)) {
-      final workflow = ref.read(imageWorkflowControllerProvider);
+    final requestWorkflow =
+        workflowOverride ??
+        (ref.exists(imageWorkflowControllerProvider)
+            ? ref.read(imageWorkflowControllerProvider)
+            : null) ??
+        const ImageWorkflowState();
+    if (operation == null) {
+      final workflow = requestWorkflow;
       if (workflow.isEnhance && workflow.enhance.localUpscale) {
         _activeLocalEnhance = workflow.upscale;
       }
@@ -873,6 +921,16 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         imagesPerRequestOverride ?? ref.read(imagesPerRequestProvider) ?? 1;
     final batchSize = configuredBatchSize.clamp(1, 4).toInt();
     final totalImages = batchCount * batchSize;
+    _lastRequest = GenerationRetryRequest(
+      params: effectiveParams,
+      count: batchSize,
+      workflow: requestWorkflow,
+      accountId: ref.exists(authNotifierProvider)
+          ? ref.read(authNotifierProvider).accountId
+          : null,
+      operation: operation,
+      original: variationOriginal,
+    );
     state = state.copyWith(
       generationRunId: generationRunId,
       currentImages: withOriginal([]),
@@ -914,15 +972,18 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final preparedParams = await _prepareGenerationParams(
       effectiveParams,
       generationRunId,
-      preserveSnapshot: operation == ImageOperation.variations,
+      preserveSnapshot:
+          preserveSnapshot || operation == ImageOperation.variations,
     );
     if (preparedParams == null || _shouldAbortGenerationRun(generationRunId)) {
       return;
     }
+    _lastRequest = _lastRequest!.withParams(preparedParams);
 
     // 如果只生成 1 张，直接生成；随机种子在进入请求前实体化，便于失败快照保留真实 seed。
     if (batchCount == 1 && batchSize == 1) {
       final materializedParams = _materializeRandomSeed(preparedParams);
+      _lastRequest = _lastRequest!.withParams(materializedParams);
       await _emitBatchEvent(
         onBatchEvent,
         GenerationBatchEvent(
@@ -959,7 +1020,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       );
       // P2.5：入队后即刻重 roll 随机块实例——本张用入队前的投影，
       // UI 随即显示下一张的内容（roll 时机 4）。
-      if (operation != ImageOperation.variations) {
+      if (!preserveSnapshot && operation != ImageOperation.variations) {
         ref.read(pillRollCoordinatorProvider).rollAllLanesAndSync();
       }
       await singleFuture;
@@ -1196,7 +1257,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
       // P2.5 逐张重抽：本批已结束（成功或失败），重 roll 随机块实例并把
       // 新投影重跑提示词管线，下一批生效；429 重试（continue）不消耗 roll。
-      if (batch + 1 < batchCount) {
+      if (!preserveSnapshot && batch + 1 < batchCount) {
         final rolled = ref
             .read(pillRollCoordinatorProvider)
             .rollAllLanesAndSync();
@@ -2080,7 +2141,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             );
             await Future.delayed(_concurrencyRetryInterval);
             if (_shouldAbortGenerationRun(generationRunId)) return;
-            return _generateSingle(
+            return await _generateSingle(
               params,
               current,
               total,
@@ -2403,7 +2464,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   /// 取消当前请求并停止后续生成。
   void cancel() {
     final generationRunId = _activeGenerationRunId;
-    final apiService = ref.read(naiImageGenerationApiServiceProvider);
+    final apiService = ref.exists(naiImageGenerationApiServiceProvider)
+        ? ref.read(naiImageGenerationApiServiceProvider)
+        : null;
 
     final pendingImages = _pendingLocalEnhanceImages;
     _pendingLocalEnhanceImages = [];
@@ -2419,7 +2482,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     if (_activeLocalEnhance != null && ref.exists(localUpscaleTaskProvider)) {
       ref.read(localUpscaleTaskProvider.notifier).cancel();
     }
-    apiService.cancelGeneration();
+    apiService?.cancelGeneration();
 
     state = state.copyWith(
       status: GenerationStatus.cancelled,

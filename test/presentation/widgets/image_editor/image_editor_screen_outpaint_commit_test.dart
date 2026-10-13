@@ -7,11 +7,14 @@ import 'package:nai_launcher/core/utils/inpaint_outpaint_utils.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/canvas/editor_canvas.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_screen.dart';
+import 'package:nai_launcher/presentation/ui/tools/tools_editor.dart';
+import '../../../helpers/studio_capture_fonts.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadStudioCaptureFonts);
 
-  testWidgets('desktop Save and Close is disabled during outpaint commit', (
+  testWidgets('desktop apply cannot export or close during outpaint commit', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
@@ -33,14 +36,25 @@ void main() {
     );
     await tester.pump();
 
-    final saveButton = find.ancestor(
-      of: find.text('保存并退出'),
-      matching: find.byType(FilledButton),
+    await _pumpUntil(
+      tester,
+      () => find.byType(ToolsEditorPage).evaluate().isNotEmpty,
     );
-    expect(saveButton, findsOneWidget);
-    expect(tester.widget<FilledButton>(saveButton).onPressed, isNull);
-
+    final state = tester.state(find.byType(ImageEditorScreen)) as dynamic;
+    expect(state.debugOutpaintCommitPending, isTrue);
+    final before = List<String>.from(state.debugLayerNames);
+    await tester.tap(find.byKey(const Key('tools-editor-apply-main')));
     await tester.pump();
+    expect(find.byType(ToolsEditorPage), findsOneWidget);
+    expect(state.debugOutpaintCommitPending, isTrue);
+    expect(state.debugLayerNames, before);
+    await tester.runAsync(() async {
+      await state.debugExportAndClose();
+    });
+    await tester.pump();
+    expect(find.byType(ToolsEditorPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });

@@ -13,7 +13,8 @@ import 'package:nai_launcher/presentation/widgets/image_editor/core/history_mana
 import 'package:nai_launcher/presentation/widgets/image_editor/canvas/editor_canvas.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/image_editor_screen.dart';
 import 'package:nai_launcher/presentation/widgets/image_editor/tools/brush_tool.dart';
-import 'package:nai_launcher/presentation/widgets/image_editor/widgets/panels/inpaint_controls.dart';
+import 'package:nai_launcher/presentation/ui/tools/tools_contract.dart';
+import 'package:nai_launcher/presentation/ui/tools/tools_editor.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 void main() {
@@ -70,7 +71,7 @@ void main() {
       final screen = tester.state(find.byType(ImageEditorScreen)) as dynamic;
       final EditorState state = screen.debugEditorState;
       state.setBrushSize(32);
-      await tester.tap(find.byKey(const Key('inpaint_square_brush')));
+      await tester.tap(find.byKey(const Key('tools-opt-square')));
       await tester.pump();
       final origin = tester.getTopLeft(find.byType(EditorCanvas));
       Offset point(Offset p) =>
@@ -142,9 +143,17 @@ void main() {
         InpaintMaskUtils.decodeBinaryMask(restored!)!.mask.every((v) => v == 1),
         isTrue,
       );
+      await _wait(tester, () => !screen.debugToolsMaskMeasurementPending);
+      final measured = tester
+          .widget<ToolsEditorPage>(find.byType(ToolsEditorPage))
+          .data
+          .inpaint;
+      expect(measured.coverage, 1);
+      expect(measured.regions, 1);
       state.undo();
       await tester.pump();
       expect(state.layerManager.activeLayer!.hasBaseImage, isFalse);
+      await _wait(tester, () => !screen.debugToolsMaskMeasurementPending);
       await tester.pumpWidget(const SizedBox());
       await tester.pump();
     },
@@ -168,6 +177,13 @@ void main() {
     expect(mask.mask[128 * 256 + 128], 1);
     expect(mask.mask[31 * 256 + 31], 0);
     expect(mask.mask[224 * 256 + 224], 0);
+    await _wait(tester, () => !screen.debugToolsMaskMeasurementPending);
+    final empty = tester
+        .widget<ToolsEditorPage>(find.byType(ToolsEditorPage))
+        .data
+        .inpaint;
+    expect(empty.coverage, 0);
+    expect(empty.regions, 0);
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
   });
@@ -191,13 +207,23 @@ void main() {
           final boundary = GlobalKey();
           await tester.pumpWidget(_app(locale, brightness, boundary: boundary));
           await _ready(tester);
-          expect(find.byType(InpaintToolSettings), findsOneWidget);
-          expect(find.byType(InpaintToolbar), findsOneWidget);
+          expect(find.byKey(const Key('tools-editor-options')), findsOneWidget);
+          expect(find.byKey(const Key('tools-editor-rail')), findsOneWidget);
+          expect(
+            tester
+                .widget<ToolsEditorPage>(find.byType(ToolsEditorPage))
+                .data
+                .mode,
+            ToolsEditorMode.inpaint,
+          );
           expect(find.byIcon(Icons.more_horiz), findsNothing);
           expect(find.byIcon(Icons.more_vert), findsNothing);
           expect(find.byIcon(Icons.compress), findsNothing);
           expect(find.byKey(const Key('outpaint_edge_right')), findsOneWidget);
-          expect(tester.getSize(find.byType(EditorCanvas)), size);
+          expect(
+            tester.getRect(find.byType(EditorCanvas)),
+            tester.getRect(find.byKey(const Key('tools-editor-work'))),
+          );
           expect(tester.takeException(), isNull);
           if (Platform.environment['CAPTURE_INPAINT_UI'] == '1') {
             await tester.runAsync(() async {
@@ -222,32 +248,25 @@ void main() {
           state.setToolById('inpaint_focus');
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 250));
-          expect(find.byType(TextFormField), findsOneWidget);
-          await tester.tap(find.byKey(const Key('inpaint_palette')));
+          expect(find.byKey(const Key('tools-opt-context')), findsOneWidget);
+          await tester.tap(find.byKey(const Key('tools-tool-brush')));
           await tester.pump();
-          expect(find.byType(InpaintMaskAppearance), findsOneWidget);
           for (final pattern in MaskDisplayPattern.values) {
-            await tester.tap(
-              find.byWidgetPredicate(
-                (widget) =>
-                    widget is InpaintButton &&
-                    widget.glyph == 'pattern_${pattern.name}',
-              ),
+            await tester.ensureVisible(
+              find.byKey(const Key('tools-mask-pattern')),
             );
+            await tester.tap(find.byKey(const Key('tools-mask-pattern')));
+            await tester.pump();
+            await tester.tap(find.byKey(Key('tools-pattern-${pattern.name}')));
             await tester.pump();
             expect(state.maskDisplayPattern, pattern);
           }
-          await tester.tap(
-            find.byWidgetPredicate(
-              (widget) =>
-                  widget is Container &&
-                  widget.decoration is BoxDecoration &&
-                  (widget.decoration as BoxDecoration).color ==
-                      const Color(0xFFBBC53E),
-            ),
-          );
+          await tester.ensureVisible(find.byKey(const Key('tools-mask-color')));
+          await tester.tap(find.byKey(const Key('tools-mask-color')));
           await tester.pump();
-          expect(state.maskDisplayColor, const Color(0xFFBBC53E));
+          await tester.tap(find.byKey(const Key('tools-mask-color-1')));
+          await tester.pump();
+          expect(state.maskDisplayColor, const Color(0xFF3DD68C));
           expect(tester.takeException(), isNull);
           if (Platform.environment['CAPTURE_INPAINT_UI'] == '1') {
             await _capture(
@@ -256,12 +275,12 @@ void main() {
               '${locale.toLanguageTag()}-${brightness.name}-${size.width.round()}-appearance',
             );
           }
-          await tester.tapAt(Offset(25, size.height / 2));
-          await tester.pump();
-          expect(find.byType(InpaintMaskAppearance), findsNothing);
-          await tester.tap(find.byKey(const Key('inpaint_layers')));
-          await tester.pump();
-          expect(find.byKey(const Key('inpaint_add_3d')), findsOneWidget);
+          expect(find.byKey(const Key('tools-mask-color-1')), findsNothing);
+          if (size.width < ToolsEditorPage.narrowWidth) {
+            await tester.tap(find.byKey(const Key('tools-editor-side-toggle')));
+            await tester.pump();
+          }
+          expect(find.byKey(const Key('tools-layer-add3d')), findsOneWidget);
           expect(tester.takeException(), isNull);
           if (Platform.environment['CAPTURE_INPAINT_UI'] == '1') {
             await _capture(
@@ -300,9 +319,16 @@ Uint8List _png() {
 }
 
 Future<void> _ready(WidgetTester tester) async {
-  await _wait(tester, () => find.byType(InpaintToolbar).evaluate().isNotEmpty);
+  await _wait(
+    tester,
+    () =>
+        find.byType(EditorCanvas).evaluate().isNotEmpty &&
+        find.byType(ToolsEditorPage).evaluate().isNotEmpty,
+  );
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 100));
+  final dynamic state = tester.state(find.byType(ImageEditorScreen));
+  await _wait(tester, () => !state.debugToolsMaskMeasurementPending);
 }
 
 Future<void> _wait(WidgetTester tester, bool Function() ready) async {
@@ -313,7 +339,9 @@ Future<void> _wait(WidgetTester tester, bool Function() ready) async {
     await tester.pump(const Duration(milliseconds: 30));
     if (ready()) return;
   }
-  fail('Editor did not finish asynchronous work');
+  fail(
+    'Editor did not finish asynchronous work: canvas=${find.byType(EditorCanvas).evaluate().length}, page=${find.byType(ToolsEditorPage).evaluate().length}, editor=${find.byType(ImageEditorScreen).evaluate().length}',
+  );
 }
 
 Future<void> _capture(

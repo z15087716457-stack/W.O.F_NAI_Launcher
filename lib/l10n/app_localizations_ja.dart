@@ -1254,22 +1254,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_directorTools => 'ディレクターツール';
 
   @override
-  String get img2img_directorPrompt => 'プロンプト（任意）';
-
-  @override
-  String get img2img_directorRunning => '処理中...';
-
-  @override
-  String get img2img_directorResult => '結果';
-
-  @override
   String get img2img_directorApplied => 'ディレクターツールの結果を新しいソース イメージとして適用しました';
-
-  @override
-  String get img2img_directorDefry => 'デフライ';
-
-  @override
-  String get img2img_directorApplyAsSource => 'ソースとして使用';
 
   @override
   String get img2img_variationsStarted => 'バリエーションを生成しています...';
@@ -1411,9 +1396,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get editor_toolBlur => 'ぼかし';
-
-  @override
-  String get editor_back => '戻る';
 
   @override
   String get editor_layers => 'レイヤー';
@@ -8595,39 +8577,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_pixelSnap => 'ピクセルスナップ';
 
   @override
-  String get img2img_directorAddToQueue => '結果を入力キューに追加';
-
-  @override
-  String get img2img_transform => '変換';
-
-  @override
-  String get img2img_palette => 'パレット化';
-
-  @override
-  String get img2img_paletteOff => 'オフ';
-
-  @override
-  String get img2img_paletteAuto => '自動';
-
-  @override
-  String get img2img_paletteCustom => 'カスタム';
-
-  @override
-  String get img2img_avoidOverRefining => '過剰な細分化を抑制';
-
-  @override
-  String get img2img_keepGridHint => '検出されたピクセル格子を維持します。';
-
-  @override
-  String get img2img_refineGridHint => '画像に合う場合は、より細かいピクセルサイズを使います。';
-
-  @override
-  String get img2img_pixelUpscaleHint => 'ニアレストネイバーでピクセルを鮮明に拡大します。';
-
-  @override
-  String get img2img_pixelNativeHint => 'スナップ後のピクセルサイズを維持します。';
-
-  @override
   String get img2img_masked => '背景透過';
 
   @override
@@ -8635,48 +8584,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get img2img_blend => '合成結果';
-
-  @override
-  String get img2img_emotionHappy => '喜び';
-
-  @override
-  String get img2img_emotionLaugh => '笑い';
-
-  @override
-  String get img2img_emotionSad => '悲しみ';
-
-  @override
-  String get img2img_emotionAngry => '怒り';
-
-  @override
-  String get img2img_emotionSurprised => '驚き';
-
-  @override
-  String get img2img_emotionShy => '照れ';
-
-  @override
-  String get img2img_emotionExcited => '興奮';
-
-  @override
-  String get img2img_emotionDisgusted => '嫌悪';
-
-  @override
-  String get img2img_emotionSmug => '得意顔';
-
-  @override
-  String get img2img_emotionWorried => '心配';
-
-  @override
-  String get img2img_emotionLove => '愛情';
-
-  @override
-  String get img2img_emotionPlayful => 'お茶目';
-
-  @override
-  String get img2img_emotionTired => '疲れ';
-
-  @override
-  String get img2img_emotionNeutral => '無表情';
 
   @override
   String get img2img_enhanceAction => '強化！';
@@ -11694,63 +11601,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get model3d_toolPose => 'モデルポーズ';
-
-  @override
-  String get img2img_directorEmotionHint => 'アニメ画像専用。表情がニュートラルな画像から始めてください。';
-
-  @override
-  String get img2img_emotionStrengthNormal => '通常';
-
-  @override
-  String get img2img_emotionStrengthSlightlyWeak => 'やや弱い';
-
-  @override
-  String get img2img_emotionStrengthWeak => '弱い';
-
-  @override
-  String get img2img_emotionStrengthWeaker => 'さらに弱い';
-
-  @override
-  String get img2img_emotionStrengthVeryWeak => 'とても弱い';
-
-  @override
-  String get img2img_emotionStrengthWeakest => '最も弱い';
-
-  @override
-  String get img2img_directorWeaken => '表情を弱める';
-
-  @override
-  String get img2img_directorStrengthen => '表情を強める';
-
-  @override
-  String get img2img_emotionScared => '怖がる';
-
-  @override
-  String get img2img_emotionNervous => '緊張';
-
-  @override
-  String get img2img_emotionThinking => '考え中';
-
-  @override
-  String get img2img_emotionConfused => '困惑';
-
-  @override
-  String get img2img_emotionBored => '退屈';
-
-  @override
-  String get img2img_emotionIrritated => 'いら立ち';
-
-  @override
-  String get img2img_emotionAroused => '性的興奮';
-
-  @override
-  String get img2img_emotionEmbarrassed => '恥ずかしい';
-
-  @override
-  String get img2img_emotionDetermined => '決意';
-
-  @override
-  String get img2img_emotionHurt => '傷ついた';
 
   @override
   String get localUpscale_local => 'ローカル';

@@ -11,7 +11,9 @@ import '../../data/services/image_metadata_service.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
-import '../screens/director_tools/director_tools_screen.dart';
+import '../wiring/tools_director_wiring.dart';
+import '../wiring/generation_backend.dart';
+import '../utils/asset_protection_guard.dart';
 import '../utils/official_image_variations.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/image_editor/image_editor_screen.dart';
@@ -36,7 +38,16 @@ class ImageWorkflowLauncher {
     WidgetRef ref,
     Uint8List imageBytes, {
     required ImageEditorMode mode,
+    Future<void> Function(void Function())? writeDraft,
   }) async {
+    Future<void> apply(void Function() write) async {
+      if (writeDraft == null) {
+        write();
+      } else {
+        await writeDraft(write);
+      }
+    }
+
     final workflowNotifier = ref.read(imageWorkflowControllerProvider.notifier);
 
     final params = ref.read(generationParamsNotifierProvider);
@@ -96,16 +107,20 @@ class ImageWorkflowLauncher {
 
     if (mode == ImageEditorMode.edit) {
       if (result.hasImageChanges && result.modifiedImage != null) {
-        workflowNotifier.closeTemporaryTool();
-        workflowNotifier.enterBaseMode(clearMask: true);
-        workflowNotifier.replaceSourceImage(
-          result.modifiedImage!,
-          sourceWidth: result.outputWidth,
-          sourceHeight: result.outputHeight,
-          autoAdapt: !result.compressionApplied,
-        );
-        workflowNotifier.setPanelExpanded(true);
-        AppToast.success(context, context.l10n.img2img_editApplied);
+        await apply(() {
+          workflowNotifier.closeTemporaryTool();
+          workflowNotifier.enterBaseMode(clearMask: true);
+          workflowNotifier.replaceSourceImage(
+            result.modifiedImage!,
+            sourceWidth: result.outputWidth,
+            sourceHeight: result.outputHeight,
+            autoAdapt: !result.compressionApplied,
+          );
+          workflowNotifier.setPanelExpanded(true);
+        });
+        if (context.mounted) {
+          AppToast.success(context, context.l10n.img2img_editApplied);
+        }
       }
       return;
     }
@@ -115,28 +130,49 @@ class ImageWorkflowLauncher {
             InpaintMaskUtils.hasMaskedPixels(result.maskImage!)
         ? result.maskImage
         : null;
-    workflowNotifier.closeTemporaryTool();
-    if (!identical(
-      ref.read(generationParamsNotifierProvider).sourceImage,
-      imageBytes,
-    )) {
-      workflowNotifier.replaceSourceImage(imageBytes);
+    await apply(() {
+      workflowNotifier.closeTemporaryTool();
+      if (!identical(
+        ref.read(generationParamsNotifierProvider).sourceImage,
+        imageBytes,
+      )) {
+        workflowNotifier.replaceSourceImage(imageBytes);
+      }
+      workflowNotifier.applyInpaintEditorResult(
+        sourceImage: result.hasOutpaintChanges
+            ? result.outpaintSourceImage
+            : result.inpaintSourceImage,
+        sourceWidth: result.hasOutpaintChanges
+            ? result.outpaintSourceWidth
+            : result.inpaintSourceWidth,
+        sourceHeight: result.hasOutpaintChanges
+            ? result.outpaintSourceHeight
+            : result.inpaintSourceHeight,
+        maskImage: effectiveMask,
+        focusRegion: result.inpaintFocusRegion,
+        sourceIsOutpaint: result.hasOutpaintChanges,
+        useExactSourceDimensions: result.compressionApplied,
+      );
+      if (result.inpaintStrength != null) {
+        ref
+            .read(generationParamsNotifierProvider.notifier)
+            .updateInpaintStrength(result.inpaintStrength!);
+      }
+    });
+    if (!context.mounted) return;
+    if (result.generateAfterApply) {
+      await ref
+          .read(generationBackendProvider)
+          .generate(
+            confirm: (cost) => AssetProtectionGuard.confirmHighAnlasCost(
+              context: context,
+              ref: ref,
+              cost: cost,
+            ),
+            alive: () => context.mounted,
+          );
+      if (!context.mounted) return;
     }
-    workflowNotifier.applyInpaintEditorResult(
-      sourceImage: result.hasOutpaintChanges
-          ? result.outpaintSourceImage
-          : result.inpaintSourceImage,
-      sourceWidth: result.hasOutpaintChanges
-          ? result.outpaintSourceWidth
-          : result.inpaintSourceWidth,
-      sourceHeight: result.hasOutpaintChanges
-          ? result.outpaintSourceHeight
-          : result.inpaintSourceHeight,
-      maskImage: effectiveMask,
-      focusRegion: result.inpaintFocusRegion,
-      sourceIsOutpaint: result.hasOutpaintChanges,
-      useExactSourceDimensions: result.compressionApplied,
-    );
     if (effectiveMask != null) {
       AppToast.success(context, context.l10n.img2img_inpaintMaskReady);
     } else if (result.maskImage != null) {
@@ -170,19 +206,31 @@ class ImageWorkflowLauncher {
   static Future<void> openDirectorTools(
     BuildContext context,
     WidgetRef ref,
-    Uint8List imageBytes,
-  ) async {
-    final result = await DirectorToolsScreen.show(
+    Uint8List imageBytes, {
+    Future<void> Function(void Function())? writeDraft,
+  }) async {
+    final result = await ToolsDirectorWiring.show(
       context,
       sourceImage: imageBytes,
+      writeDraft: writeDraft,
     );
     if (result != null && context.mounted) {
       final workflowNotifier = ref.read(
         imageWorkflowControllerProvider.notifier,
       );
-      workflowNotifier.replaceSourceImage(result);
-      workflowNotifier.setPanelExpanded(true);
-      AppToast.success(context, context.l10n.img2img_directorApplied);
+      void apply() {
+        workflowNotifier.replaceSourceImage(result);
+        workflowNotifier.setPanelExpanded(true);
+      }
+
+      if (writeDraft == null) {
+        apply();
+      } else {
+        await writeDraft(apply);
+      }
+      if (context.mounted) {
+        AppToast.success(context, context.l10n.img2img_directorApplied);
+      }
     }
   }
 
@@ -191,6 +239,7 @@ class ImageWorkflowLauncher {
     WidgetRef ref,
     Uint8List imageBytes, {
     GeneratedImage? sourceImage,
+    Future<void> Function()? beforeSubmit,
   }) async {
     if (_variationsLaunching || !context.mounted) {
       return;
@@ -234,6 +283,8 @@ class ImageWorkflowLauncher {
         height: height,
         metadata: metadata,
       );
+      await beforeSubmit?.call();
+      if (!context.mounted || _isVariationLaunchBlocked(context, ref)) return;
       final original = GeneratedImage.create(
         imageBytes,
         width: width,

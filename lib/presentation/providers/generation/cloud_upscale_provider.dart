@@ -7,6 +7,7 @@ import '../../../core/services/desktop_app_shutdown_service.dart';
 import '../../../data/datasources/remote/nai_image_enhancement_api_service.dart';
 import '../../../data/models/image/image_operation.dart';
 import '../image_generation_provider.dart';
+import '../auth_provider.dart';
 import '../image_save_settings_provider.dart';
 import '../subscription_provider.dart';
 import '../../screens/generation/widgets/canvas/canvas_feed_layout.dart';
@@ -85,11 +86,26 @@ class CloudUpscaleTask extends Notifier<CloudUpscaleState> {
       if (a != b) selectionChanged = true;
     });
     final token = CancelToken();
+    var accountChanged = false;
+    final accountSubscription = ref.exists(authNotifierProvider)
+        ? ref.listen(
+            authNotifierProvider.select(
+              (value) => (value.accountId, value.status),
+            ),
+            (previous, next) {
+              if (previous != next) {
+                accountChanged = true;
+                token.cancel();
+              }
+            },
+          )
+        : null;
     _cancellation = token;
     state = const CloudUpscaleState(running: true);
     controller.setToolRunning(true);
     bool canApply() =>
         !_disposed &&
+        !accountChanged &&
         !token.isCancelled &&
         !ref.read(imageGenerationNotifierProvider).isGenerating &&
         (image != null ||
@@ -152,10 +168,13 @@ class CloudUpscaleTask extends Notifier<CloudUpscaleState> {
         state = CloudUpscaleState(error: token.isCancelled ? null : '$error');
       }
     } finally {
+      accountSubscription?.close();
       selectionSub.close();
       focusSub.close();
       _cancellation = null;
-      if (!_disposed && ref.exists(subscriptionNotifierProvider)) {
+      if (!_disposed &&
+          !accountChanged &&
+          ref.exists(subscriptionNotifierProvider)) {
         ref
             .read(subscriptionNotifierProvider.notifier)
             .schedulePostBillingRefresh();

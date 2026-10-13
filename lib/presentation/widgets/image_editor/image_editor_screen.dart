@@ -14,22 +14,30 @@ import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../../core/utils/inpaint_focus_region.dart';
 import '../../../core/utils/inpaint_outpaint_utils.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../data/models/image/image_params.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../utils/dropped_file_reader.dart';
 import '../../utils/internal_drag_protocol.dart';
 import '../../providers/image_generation_provider.dart';
+import '../../providers/cost_estimate_provider.dart';
+import '../../providers/subscription_provider.dart';
+import '../../providers/generation/image_workflow_controller.dart';
+import '../../ui/tools/tools_contract.dart';
+import '../../ui/tools/tools_editor.dart';
+import '../../wiring/tools_editor_layer_actions.dart';
+import '../navigation/integrated_title_bar.dart';
+import 'tools/fill_tool.dart';
+import 'tools/blur_tool.dart';
+import 'widgets/panels/edit_color_picker.dart';
 import '../../widgets/common/app_toast.dart';
 import 'core/editor_state.dart';
 import 'core/edit_image_actions.dart';
-import 'widgets/panels/edit_image_controls.dart';
 import 'widgets/panels/edit_hsv_panel.dart';
 import 'widgets/panels/edit_resize_dialog.dart';
 import 'core/history_manager.dart';
 import 'layers/layer.dart';
 import 'canvas/editor_canvas.dart';
 import 'widgets/panels/layer_thumbnail_tray.dart';
-import 'widgets/panels/shift_edges_dialog.dart';
-import 'widgets/panels/inpaint_controls.dart';
 import 'widgets/outpaint_edge_drag_overlay.dart';
 import '../model3d_editor/model3d_editor_screen.dart';
 import '../model3d_editor/model3d_bridge.dart';
@@ -39,8 +47,9 @@ import 'canvas/layer_painter.dart';
 import 'export/image_exporter_new.dart';
 
 part 'image_editor_screen_compression.dart';
-part 'image_editor_screen_layout.dart';
+part 'image_editor_session_models.dart';
 part 'image_editor_screen_types.dart';
+part '../../wiring/tools_editor_wiring.dart';
 
 /// 图像编辑器主界面
 class ImageEditorScreen extends StatefulWidget {
@@ -114,7 +123,7 @@ class ImageEditorScreen extends StatefulWidget {
     return Navigator.push<ImageEditorResult>(
       context,
       MaterialPageRoute(
-        builder: (context) => ImageEditorScreen(
+        builder: (context) => ToolsEditorWiring(
           initialImage: initialImage,
           initialSize: initialSize,
           existingMask: existingMask,
@@ -132,6 +141,22 @@ class ImageEditorScreen extends StatefulWidget {
 }
 
 class _ImageEditorScreenState extends State<ImageEditorScreen> {
+  bool _toolsExpanding = false;
+  bool _toolsApplying = false;
+  bool _toolsDisposing = false;
+  Future<void>? _toolsAdjustPending;
+  Future<void>? _toolsMaskPending;
+  ToolsAdjust _toolsAdjust = const ToolsAdjust();
+  int _toolsAdjustTicket = 0;
+  int _toolsMaskTicket = 0;
+  int _toolsEditRevision = 0;
+  int _toolsAdjustSourceRevision = -1;
+  int _toolsPreviewRevision = -1;
+  double? _toolsStrength;
+  double _toolsMaskCoverage = 0;
+  int _toolsMaskRegions = 0;
+  String? _toolsAdjustLayer;
+  ui.Image? _toolsOriginal, _toolsPreview;
   static const bool _useVirtualOutpaint = true;
   static const int _maxImportedImageBytes = 50 * 1024 * 1024;
 
@@ -140,8 +165,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   EditorCompressionTarget? _compressionTarget;
   bool _isInitialized = false;
   bool _didStartInitialization = false;
-  bool _showLayerPanel = true;
-  bool _showHsv = false;
   bool _isOutpaintCommitPending = false;
   String? _sourceLayerId;
   Uint8List? _outpaintSourceImage;
@@ -316,6 +339,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   EditorState get debugEditorState => _state;
 
   @visibleForTesting
+  bool get debugToolsMaskMeasurementPending => _toolsMaskPending != null;
+
+  @visibleForTesting
   Future<Uint8List> debugExportMask() =>
       _exportInpaintLayerMaskAtCompressionTarget(
         _virtualOutpaintFrame?.outpaintMaskRects ?? const [],
@@ -355,8 +381,11 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   void initState() {
     super.initState();
     _state = EditorState(inpaint: _isInpaintMode);
+    _state.historyManager.addListener(() {
+      _toolsEditRevision++;
+      if (mounted) unawaited(_toolsMeasureMask());
+    });
     _isOutpaintCommitPending = widget.initialOutpaintCommitPending;
-    _showLayerPanel = widget.initialShowLayerPanel;
   }
 
   @override
@@ -387,6 +416,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
     _initializeCompressionPlan();
 
+    if (!mounted) return;
+
     setState(() {
       _isInitialized = true;
     });
@@ -403,6 +434,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         widget.existingFocusRegion?.context.toDouble() ?? 96,
       );
     }
+
+    unawaited(_toolsMeasureMask());
 
     // 适应视口
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -590,6 +623,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
   @override
   void dispose() {
+    _toolsDisposing = true;
+    _toolsMaskTicket++;
+    _toolsResetAdjust();
     _state.dispose();
     super.dispose();
   }
@@ -606,7 +642,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
     return _buildDroppedImageLayerRegion(
       LayoutBuilder(
         builder: (context, constraints) {
-          return _buildDesktopLayout(constraints.biggest);
+          return _buildToolsEditorLayout();
         },
       ),
     );
@@ -627,29 +663,6 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         _state,
       );
     }
-  }
-
-  Future<void> _showShiftEdgesDialog() async {
-    if (!_isInpaintMode) return;
-    final source = await _prepareInpaintSourceAtCompressionTarget();
-    if (!mounted) return;
-    final result = await ShiftEdgesDialog.show(
-      context,
-      sourceWidth: _state.canvasSize.width.round(),
-      sourceHeight: _state.canvasSize.height.round(),
-      previewImage: source,
-    );
-    if (result == null || !mounted) return;
-    await _applyOutpaintFrameDelta(
-      OutpaintFrameDelta(
-        left: result.requestedEdges.left,
-        top: result.requestedEdges.top,
-        right: result.requestedEdges.right,
-        bottom: result.requestedEdges.bottom,
-      ),
-      horizontalSnapTarget: result.horizontalSnapTarget,
-      verticalSnapTarget: result.verticalSnapTarget,
-    );
   }
 
   Future<void> _confirmExit() async {
@@ -696,11 +709,13 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   /// 导出并关闭
-  Future<void> _exportAndClose() async {
+  Future<void> _exportAndClose({bool generate = false}) async {
     if (!mounted) return;
     if (!_canExportAndClose) return;
     if (!await _flushActiveModelLayer() || !mounted) return;
     if (!_isInpaintMode) _state.editSelection.commit();
+
+    final editRevision = _toolsEditRevision;
 
     bool loadingDialogShown = false;
 
@@ -763,6 +778,11 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
           ? await _prepareInpaintSourceAtCompressionTarget()
           : null;
 
+      if (!mounted) return;
+      if (editRevision != _toolsEditRevision) {
+        throw StateError(context.l10n.editor_sourceChanged);
+      }
+
       if (mounted && loadingDialogShown) {
         Navigator.of(context, rootNavigator: true).pop();
         loadingDialogShown = false;
@@ -771,6 +791,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       if (mounted) {
         Navigator.of(context).pop(
           ImageEditorResult(
+            generateAfterApply: generate && _isInpaintMode,
+            inpaintStrength: _isInpaintMode ? _toolsStrength : null,
             modifiedImage: modifiedImage,
             maskImage: maskImage,
             inpaintFocusRegion: _state.inpaintFocusRegion == null

@@ -12,7 +12,8 @@ import '../providers/auth_provider.dart' show authNotifierProvider, AuthStatus;
 import '../providers/guest_session_provider.dart';
 import '../providers/update_provider.dart';
 import '../screens/auth/login_screen.dart';
-import '../screens/generation/generation_screen.dart';
+import '../wiring/generation_wiring.dart';
+import '../wiring/generation_viewer_wiring.dart';
 import '../screens/local_gallery/local_gallery_screen.dart';
 import '../screens/online_gallery/online_gallery_screen.dart';
 import '../screens/settings/settings_screen.dart';
@@ -172,7 +173,7 @@ GoRouter appRouter(Ref ref) {
                 name: 'home',
                 pageBuilder: (context, state) => _buildFadePage(
                   state: state,
-                  child: const GenerationScreen(),
+                  child: const GenerationRoute(),
                 ),
               ),
               GoRoute(
@@ -180,8 +181,19 @@ GoRouter appRouter(Ref ref) {
                 name: 'generation',
                 pageBuilder: (context, state) => _buildFadePage(
                   state: state,
-                  child: const GenerationScreen(),
+                  child: const GenerationRoute(),
                 ),
+                routes: [
+                  GoRoute(
+                    path: 'viewer',
+                    builder: (context, state) =>
+                        state.extra is GenerationViewerRequest
+                        ? GenerationViewerWiring(
+                            request: state.extra as GenerationViewerRequest,
+                          )
+                        : const WindowChromePage(child: GenerationRoute()),
+                  ),
+                ],
               ),
             ],
           ),
@@ -468,6 +480,10 @@ class _MainShellState extends ConsumerState<MainShell> {
       child: dropEnabledContent,
     );
 
+    if (currentIndex == AppBranch.generation.index &&
+        ref.watch(generationViewerWindowProvider).fullscreen) {
+      return shortcutEnabledContent;
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         // 桌面端：使用侧边导航

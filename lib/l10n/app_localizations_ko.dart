@@ -1252,22 +1252,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_directorTools => '디렉터 도구';
 
   @override
-  String get img2img_directorPrompt => '프롬프트 (선택 사항)';
-
-  @override
-  String get img2img_directorRunning => '처리하는 중...';
-
-  @override
-  String get img2img_directorResult => '결과';
-
-  @override
   String get img2img_directorApplied => '디렉터 도구 결과를 새 원본 이미지로 설정했습니다';
-
-  @override
-  String get img2img_directorDefry => 'Defry';
-
-  @override
-  String get img2img_directorApplyAsSource => '원본으로 사용';
 
   @override
   String get img2img_variationsStarted => '베리에이션을 생성하는 중...';
@@ -1409,9 +1394,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editor_toolBlur => '흐림';
-
-  @override
-  String get editor_back => '뒤로';
 
   @override
   String get editor_layers => '레이어';
@@ -8601,39 +8583,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_pixelSnap => '픽셀 스냅';
 
   @override
-  String get img2img_directorAddToQueue => '결과를 다음 입력으로 사용';
-
-  @override
-  String get img2img_transform => '변환';
-
-  @override
-  String get img2img_palette => '팔레트화';
-
-  @override
-  String get img2img_paletteOff => '끄기';
-
-  @override
-  String get img2img_paletteAuto => '자동';
-
-  @override
-  String get img2img_paletteCustom => '사용자 지정';
-
-  @override
-  String get img2img_avoidOverRefining => '과도한 세분화 방지';
-
-  @override
-  String get img2img_keepGridHint => '감지된 픽셀 격자를 유지합니다.';
-
-  @override
-  String get img2img_refineGridHint => '이미지에 더 잘 맞으면 더 작은 픽셀 크기를 사용할 수 있습니다.';
-
-  @override
-  String get img2img_pixelUpscaleHint => '선명한 최근접 픽셀로 결과를 확대합니다.';
-
-  @override
-  String get img2img_pixelNativeHint => '맞춘 픽셀 크기 그대로 결과를 유지합니다.';
-
-  @override
   String get img2img_masked => '누끼';
 
   @override
@@ -8641,48 +8590,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get img2img_blend => '혼합';
-
-  @override
-  String get img2img_emotionHappy => '기쁨';
-
-  @override
-  String get img2img_emotionLaugh => '웃음';
-
-  @override
-  String get img2img_emotionSad => '슬픔';
-
-  @override
-  String get img2img_emotionAngry => '분노';
-
-  @override
-  String get img2img_emotionSurprised => '놀람';
-
-  @override
-  String get img2img_emotionShy => '수줍음';
-
-  @override
-  String get img2img_emotionExcited => '신남';
-
-  @override
-  String get img2img_emotionDisgusted => '혐오';
-
-  @override
-  String get img2img_emotionSmug => '의기양양';
-
-  @override
-  String get img2img_emotionWorried => '걱정';
-
-  @override
-  String get img2img_emotionLove => '애정';
-
-  @override
-  String get img2img_emotionPlayful => '장난스러움';
-
-  @override
-  String get img2img_emotionTired => '피곤함';
-
-  @override
-  String get img2img_emotionNeutral => '평온';
 
   @override
   String get img2img_enhanceAction => '향상!';
@@ -11714,64 +11621,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get model3d_toolPose => '모델 포즈';
-
-  @override
-  String get img2img_directorEmotionHint =>
-      '애니메이션 이미지 전용입니다. 중립적인 표정의 이미지로 시작하세요.';
-
-  @override
-  String get img2img_emotionStrengthNormal => '보통';
-
-  @override
-  String get img2img_emotionStrengthSlightlyWeak => '약간 약함';
-
-  @override
-  String get img2img_emotionStrengthWeak => '약함';
-
-  @override
-  String get img2img_emotionStrengthWeaker => '더 약함';
-
-  @override
-  String get img2img_emotionStrengthVeryWeak => '매우 약함';
-
-  @override
-  String get img2img_emotionStrengthWeakest => '가장 약함';
-
-  @override
-  String get img2img_directorWeaken => '표정 약하게';
-
-  @override
-  String get img2img_directorStrengthen => '표정 강하게';
-
-  @override
-  String get img2img_emotionScared => '두려움';
-
-  @override
-  String get img2img_emotionNervous => '긴장';
-
-  @override
-  String get img2img_emotionThinking => '생각 중';
-
-  @override
-  String get img2img_emotionConfused => '혼란';
-
-  @override
-  String get img2img_emotionBored => '지루함';
-
-  @override
-  String get img2img_emotionIrritated => '짜증';
-
-  @override
-  String get img2img_emotionAroused => '성적 흥분';
-
-  @override
-  String get img2img_emotionEmbarrassed => '당황';
-
-  @override
-  String get img2img_emotionDetermined => '결의';
-
-  @override
-  String get img2img_emotionHurt => '상처받음';
 
   @override
   String get localUpscale_local => '로컬';

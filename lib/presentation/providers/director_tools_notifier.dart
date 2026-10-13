@@ -66,6 +66,7 @@ class DirectorResultRun {
     required this.defry,
     required this.emotion,
     required this.pixelOptions,
+    this.cost,
   });
   final DirectorSource source;
   final DirectorToolType tool;
@@ -74,6 +75,7 @@ class DirectorResultRun {
   final int defry;
   final String emotion;
   final PixelSnapOptions pixelOptions;
+  final int? cost;
 }
 
 class DirectorToolsState {
@@ -171,10 +173,15 @@ final directorToolsNotifierProvider =
 /// Every request snapshots its input and settings. Returned images never acquire
 /// the unrelated prompt currently typed in the generation sidebar.
 class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
+  bool _disposed = false;
   final _toolSettings =
       <DirectorToolType, ({int defry, String prompt, String emotion})>{};
   @override
-  DirectorToolsState build() => const DirectorToolsState();
+  DirectorToolsState build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
+    return const DirectorToolsState();
+  }
 
   Future<void> init(Uint8List sourceImage, {String? initialPrompt}) async {
     if (state.isRunning) return;
@@ -306,7 +313,7 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
     );
   }
 
-  Future<void> runTool() async {
+  Future<void> runTool({bool Function()? canApply, int? quotedCost}) async {
     if (!state.canRun) return;
     final request = state;
     final source = request.source!;
@@ -334,6 +341,7 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
               defry: request.defry,
             );
       }
+      if (_disposed || canApply?.call() == false) return;
       final images = ref
           .read(imageGenerationNotifierProvider.notifier)
           .registerToolResults(
@@ -352,6 +360,7 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
         defry: request.defry,
         emotion: request.emotion,
         pixelOptions: request.pixelOptions,
+        cost: quotedCost,
       );
       state = state.copyWith(
         runs: [run, ...state.runs].take(50).toList(),
@@ -360,9 +369,16 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
         isRunning: false,
       );
     } catch (error) {
-      state = state.copyWith(error: error.toString(), isRunning: false);
+      if (!_disposed && canApply?.call() != false) {
+        state = state.copyWith(error: error.toString(), isRunning: false);
+      }
     } finally {
-      if (tool != DirectorToolType.pixelSnap &&
+      if (!_disposed && state.isRunning) {
+        state = state.copyWith(isRunning: false);
+      }
+      if (!_disposed &&
+          canApply?.call() != false &&
+          tool != DirectorToolType.pixelSnap &&
           ref.exists(subscriptionNotifierProvider)) {
         ref
             .read(subscriptionNotifierProvider.notifier)
@@ -380,5 +396,9 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
     if (!state.isRunning) {
       state = state.copyWith(clearResult: true, clearError: true);
     }
+  }
+
+  void clearError() {
+    if (!state.isRunning) state = state.copyWith(clearError: true);
   }
 }

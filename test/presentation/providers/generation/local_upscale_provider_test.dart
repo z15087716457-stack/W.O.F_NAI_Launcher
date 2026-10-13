@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import '../../wiring/generation_backend_test.dart' show SwitchingAuth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -66,6 +68,7 @@ void main() {
     'success',
     'plain',
     'direct',
+    'account-restored',
     'seedvr2',
     'new-source',
     'new-selection',
@@ -94,6 +97,7 @@ void main() {
       });
       final container = ProviderContainer(
         overrides: [
+          authNotifierProvider.overrideWith(SwitchingAuth.new),
           localStorageServiceProvider.overrideWith((ref) => storage),
           generationParamsNotifierProvider.overrideWith(_Params.new),
           imageGenerationNotifierProvider.overrideWith(_Generation.new),
@@ -132,6 +136,7 @@ void main() {
       if (scenario != 'direct') {
         controller.openTemporaryTool(source, ImageWorkflowMode.upscale);
       }
+      container.read(authNotifierProvider);
       final task = container.read(localUpscaleTaskProvider.notifier);
       if (scenario == 'success') {
         container
@@ -153,6 +158,12 @@ void main() {
         container
             .read(generationPreviewSelectionProvider.notifier)
             .select('manually-selected');
+      }
+      if (scenario == 'account-restored') {
+        final auth =
+            container.read(authNotifierProvider.notifier) as SwitchingAuth;
+        auth.changeAccount();
+        auth.changeAccount('account-a');
       }
       if (scenario == 'selection-back') {
         container
@@ -212,7 +223,7 @@ void main() {
       }
       if (scenario == 'new-source' ||
           scenario == 'source-back' ||
-          scenario == 'cancel' ||
+          (scenario == 'cancel' || scenario == 'account-restored') ||
           scenario == 'shutdown') {
         expect(state.history, isEmpty);
       } else {

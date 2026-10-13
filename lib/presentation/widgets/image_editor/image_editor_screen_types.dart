@@ -4,6 +4,9 @@ enum ImageEditorMode { edit, inpaint }
 
 /// 图像编辑器返回结果
 class ImageEditorResult {
+  final bool generateAfterApply;
+  final double? inpaintStrength;
+
   /// 修改后的图像（涂鸦合并）
   final Uint8List? modifiedImage;
 
@@ -46,6 +49,8 @@ class ImageEditorResult {
   final bool compressionApplied;
 
   const ImageEditorResult({
+    this.generateAfterApply = false,
+    this.inpaintStrength,
     this.modifiedImage,
     this.maskImage,
     this.inpaintFocusRegion,

@@ -26,6 +26,18 @@ import 'prompt_block_drag_data.dart';
 class PromptBlockPaletteButton extends ConsumerStatefulWidget {
   const PromptBlockPaletteButton({super.key});
 
+  static Future<void> showAt(BuildContext context, Rect anchor) =>
+      showDialog<void>(
+        context: context,
+        barrierColor: Colors.transparent,
+        builder: (context) => _PromptBlockPaletteOverlay(
+          anchor: null,
+          anchorRect: anchor,
+          progress: const AlwaysStoppedAnimation(1),
+          onClose: () => Navigator.of(context).pop(),
+        ),
+      );
+
   @override
   ConsumerState<PromptBlockPaletteButton> createState() =>
       _PromptBlockPaletteButtonState();
@@ -196,8 +208,10 @@ class _PromptBlockPaletteOverlay extends StatefulWidget {
     required this.anchor,
     required this.progress,
     required this.onClose,
+    this.anchorRect,
   });
 
+  final Rect? anchorRect;
   final RenderBox? anchor;
   final Animation<double> progress;
   final VoidCallback onClose;
@@ -230,6 +244,8 @@ class _PromptBlockPaletteOverlayState
   Offset _initialOffset() {
     final anchor = widget.anchor;
     final screen = MediaQuery.sizeOf(context);
+    final rect = widget.anchorRect;
+    if (rect != null) return _clamp(Offset(rect.left, rect.bottom + 8), screen);
     if (anchor == null || !anchor.attached) {
       return Offset(screen.width - _windowWidth - 24, 120);
     }

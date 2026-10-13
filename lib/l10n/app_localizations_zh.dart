@@ -1232,22 +1232,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_directorTools => '导演工具';
 
   @override
-  String get img2img_directorPrompt => '提示词（可选）';
-
-  @override
-  String get img2img_directorRunning => '正在处理...';
-
-  @override
-  String get img2img_directorResult => '处理结果';
-
-  @override
   String get img2img_directorApplied => '已将导演工具结果设为新的源图';
-
-  @override
-  String get img2img_directorDefry => 'Defry';
-
-  @override
-  String get img2img_directorApplyAsSource => '设为源图';
 
   @override
   String get img2img_variationsStarted => '正在生成变体...';
@@ -1387,9 +1372,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_toolBlur => '模糊';
-
-  @override
-  String get editor_back => '返回';
 
   @override
   String get editor_layers => '图层';
@@ -8440,39 +8422,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_pixelSnap => '像素对齐';
 
   @override
-  String get img2img_directorAddToQueue => '将结果加入输入队列';
-
-  @override
-  String get img2img_transform => '转换';
-
-  @override
-  String get img2img_palette => '调色板';
-
-  @override
-  String get img2img_paletteOff => '关闭';
-
-  @override
-  String get img2img_paletteAuto => '自动';
-
-  @override
-  String get img2img_paletteCustom => '自定义';
-
-  @override
-  String get img2img_avoidOverRefining => '避免过度细化';
-
-  @override
-  String get img2img_keepGridHint => '保留检测到的像素网格。';
-
-  @override
-  String get img2img_refineGridHint => '更细的像素尺寸更合适时，允许细化网格。';
-
-  @override
-  String get img2img_pixelUpscaleHint => '使用邻近像素放大，保持清晰的像素边缘。';
-
-  @override
-  String get img2img_pixelNativeHint => '保留对齐后的原生像素尺寸。';
-
-  @override
   String get img2img_masked => '透明抠图';
 
   @override
@@ -8480,48 +8429,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get img2img_blend => '混合结果';
-
-  @override
-  String get img2img_emotionHappy => '开心';
-
-  @override
-  String get img2img_emotionLaugh => '大笑';
-
-  @override
-  String get img2img_emotionSad => '伤心';
-
-  @override
-  String get img2img_emotionAngry => '生气';
-
-  @override
-  String get img2img_emotionSurprised => '惊讶';
-
-  @override
-  String get img2img_emotionShy => '害羞';
-
-  @override
-  String get img2img_emotionExcited => '兴奋';
-
-  @override
-  String get img2img_emotionDisgusted => '嫌弃';
-
-  @override
-  String get img2img_emotionSmug => '得意';
-
-  @override
-  String get img2img_emotionWorried => '担忧';
-
-  @override
-  String get img2img_emotionLove => '爱慕';
-
-  @override
-  String get img2img_emotionPlayful => '俏皮';
-
-  @override
-  String get img2img_emotionTired => '疲惫';
-
-  @override
-  String get img2img_emotionNeutral => '平静';
 
   @override
   String get img2img_enhanceAction => '增强！';
@@ -11483,63 +11390,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get model3d_toolPose => '模型姿势';
-
-  @override
-  String get img2img_directorEmotionHint => '仅适用于动漫图像，请从表情中性的图像开始。';
-
-  @override
-  String get img2img_emotionStrengthNormal => '正常';
-
-  @override
-  String get img2img_emotionStrengthSlightlyWeak => '稍弱';
-
-  @override
-  String get img2img_emotionStrengthWeak => '弱';
-
-  @override
-  String get img2img_emotionStrengthWeaker => '更弱';
-
-  @override
-  String get img2img_emotionStrengthVeryWeak => '很弱';
-
-  @override
-  String get img2img_emotionStrengthWeakest => '最弱';
-
-  @override
-  String get img2img_directorWeaken => '减弱表情';
-
-  @override
-  String get img2img_directorStrengthen => '增强表情';
-
-  @override
-  String get img2img_emotionScared => '害怕';
-
-  @override
-  String get img2img_emotionNervous => '紧张';
-
-  @override
-  String get img2img_emotionThinking => '思考';
-
-  @override
-  String get img2img_emotionConfused => '困惑';
-
-  @override
-  String get img2img_emotionBored => '无聊';
-
-  @override
-  String get img2img_emotionIrritated => '恼火';
-
-  @override
-  String get img2img_emotionAroused => '情欲';
-
-  @override
-  String get img2img_emotionEmbarrassed => '尴尬';
-
-  @override
-  String get img2img_emotionDetermined => '坚定';
-
-  @override
-  String get img2img_emotionHurt => '受伤';
 
   @override
   String get localUpscale_local => '本地';
@@ -19779,22 +19629,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_directorTools => '導演工具';
 
   @override
-  String get img2img_directorPrompt => '提示詞（可選）';
-
-  @override
-  String get img2img_directorRunning => '正在處理...';
-
-  @override
-  String get img2img_directorResult => '處理結果';
-
-  @override
   String get img2img_directorApplied => '已將導演工具結果設為新的來源圖';
-
-  @override
-  String get img2img_directorDefry => 'Defry';
-
-  @override
-  String get img2img_directorApplyAsSource => '設為來源圖';
 
   @override
   String get img2img_variationsStarted => '正在生成變體...';
@@ -19934,9 +19769,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editor_toolBlur => '模糊';
-
-  @override
-  String get editor_back => '返回';
 
   @override
   String get editor_layers => '圖層';
@@ -26987,39 +26819,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_pixelSnap => '像素對齊';
 
   @override
-  String get img2img_directorAddToQueue => '將結果加入輸入佇列';
-
-  @override
-  String get img2img_transform => '轉換';
-
-  @override
-  String get img2img_palette => '調色盤';
-
-  @override
-  String get img2img_paletteOff => '關閉';
-
-  @override
-  String get img2img_paletteAuto => '自動';
-
-  @override
-  String get img2img_paletteCustom => '自訂';
-
-  @override
-  String get img2img_avoidOverRefining => '避免過度細化';
-
-  @override
-  String get img2img_keepGridHint => '保留檢測到的像素網格。';
-
-  @override
-  String get img2img_refineGridHint => '更細的像素尺寸更合適時，允許細化網格。';
-
-  @override
-  String get img2img_pixelUpscaleHint => '使用鄰近像素放大，保持清晰的像素邊緣。';
-
-  @override
-  String get img2img_pixelNativeHint => '保留對齊後的原生像素尺寸。';
-
-  @override
   String get img2img_masked => '透明摳圖';
 
   @override
@@ -27027,48 +26826,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get img2img_blend => '混合結果';
-
-  @override
-  String get img2img_emotionHappy => '開心';
-
-  @override
-  String get img2img_emotionLaugh => '大笑';
-
-  @override
-  String get img2img_emotionSad => '傷心';
-
-  @override
-  String get img2img_emotionAngry => '生氣';
-
-  @override
-  String get img2img_emotionSurprised => '驚訝';
-
-  @override
-  String get img2img_emotionShy => '害羞';
-
-  @override
-  String get img2img_emotionExcited => '興奮';
-
-  @override
-  String get img2img_emotionDisgusted => '嫌棄';
-
-  @override
-  String get img2img_emotionSmug => '得意';
-
-  @override
-  String get img2img_emotionWorried => '擔憂';
-
-  @override
-  String get img2img_emotionLove => '愛慕';
-
-  @override
-  String get img2img_emotionPlayful => '俏皮';
-
-  @override
-  String get img2img_emotionTired => '疲憊';
-
-  @override
-  String get img2img_emotionNeutral => '平靜';
 
   @override
   String get img2img_enhanceAction => '增強！';
@@ -30030,63 +29787,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get model3d_toolPose => '模型姿勢';
-
-  @override
-  String get img2img_directorEmotionHint => '僅適用於動漫影像，請從表情中性的影像開始。';
-
-  @override
-  String get img2img_emotionStrengthNormal => '正常';
-
-  @override
-  String get img2img_emotionStrengthSlightlyWeak => '稍弱';
-
-  @override
-  String get img2img_emotionStrengthWeak => '弱';
-
-  @override
-  String get img2img_emotionStrengthWeaker => '更弱';
-
-  @override
-  String get img2img_emotionStrengthVeryWeak => '很弱';
-
-  @override
-  String get img2img_emotionStrengthWeakest => '最弱';
-
-  @override
-  String get img2img_directorWeaken => '減弱表情';
-
-  @override
-  String get img2img_directorStrengthen => '增強表情';
-
-  @override
-  String get img2img_emotionScared => '害怕';
-
-  @override
-  String get img2img_emotionNervous => '緊張';
-
-  @override
-  String get img2img_emotionThinking => '思考';
-
-  @override
-  String get img2img_emotionConfused => '困惑';
-
-  @override
-  String get img2img_emotionBored => '無聊';
-
-  @override
-  String get img2img_emotionIrritated => '惱火';
-
-  @override
-  String get img2img_emotionAroused => '情慾';
-
-  @override
-  String get img2img_emotionEmbarrassed => '尷尬';
-
-  @override
-  String get img2img_emotionDetermined => '堅定';
-
-  @override
-  String get img2img_emotionHurt => '受傷';
 
   @override
   String get localUpscale_local => '本地';
