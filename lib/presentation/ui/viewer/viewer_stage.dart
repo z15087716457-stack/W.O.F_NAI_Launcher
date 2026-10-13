@@ -531,52 +531,73 @@ class _Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Stack(
-      key: const Key('viewer-loading'),
-      fit: StackFit.expand,
-      children: [
-        if (item.thumb != null)
-          ImageFiltered(
-            imageFilter: const ColorFilter.mode(
-              Color(0x40000000),
-              BlendMode.srcATop,
-            ),
-            child: ImageFiltered(
-              imageFilter: _blur,
-              child: Image(
-                image: item.thumb!,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-              ),
-            ),
-          ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 16,
-          child: Center(
-            child: ViewerGlass(
-              height: 32,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  const _WhiteSpinner(),
-                  Text(
-                    item.sizeBytes == null
-                        ? l10n.imageViewer_loadingOriginal
-                        : l10n.imageViewer_loadingOriginalSize(
-                            viewerBytes(item.sizeBytes!),
-                          ),
-                    style: UiText.sans(12, color: const Color(0xFFCCCCCC)),
+    final message = item.sizeBytes == null
+        ? l10n.imageViewer_loadingOriginal
+        : l10n.imageViewer_loadingOriginalSize(viewerBytes(item.sizeBytes!));
+    return LayoutBuilder(
+      builder: (context, box) {
+        final compact = box.maxWidth < 120;
+        return Stack(
+          key: const Key('viewer-loading'),
+          fit: StackFit.expand,
+          children: [
+            if (item.thumb != null)
+              ImageFiltered(
+                imageFilter: const ColorFilter.mode(
+                  Color(0x40000000),
+                  BlendMode.srcATop,
+                ),
+                child: ImageFiltered(
+                  imageFilter: _blur,
+                  child: Image(
+                    image: item.thumb!,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
                   ),
-                ],
+                ),
+              ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: box.maxHeight < 64 ? (box.maxHeight - 32) / 2 : 16,
+              child: Center(
+                child: Tooltip(
+                  message: message,
+                  child: Semantics(
+                    label: compact ? message : null,
+                    liveRegion: true,
+                    child: ViewerGlass(
+                      height: 32,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: compact ? 2 : 12,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 8,
+                        children: [
+                          const _WhiteSpinner(),
+                          if (!compact)
+                            Flexible(
+                              child: Text(
+                                message,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: UiText.sans(
+                                  12,
+                                  color: const Color(0xFFCCCCCC),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
