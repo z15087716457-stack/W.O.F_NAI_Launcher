@@ -1,3 +1,4 @@
+import '../../helpers/fetch_test_server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -31,7 +32,7 @@ void main() {
         },
       );
       final requests = <Map<String, dynamic>>[];
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final serving = server.listen((request) async {
         requests.add(
           jsonDecode(await utf8.decoder.bind(request).join())

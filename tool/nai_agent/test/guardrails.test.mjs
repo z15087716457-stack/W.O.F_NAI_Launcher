@@ -1,3 +1,4 @@
+import { listenFetchTestServer } from './fixture-http.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -13,7 +14,7 @@ async function setup(handler, config = {}) {
     requests.push(JSON.parse(Buffer.concat(chunks)));
     await handler(req, res);
   });
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  await listenFetchTestServer(server);
   await mkdir('.runs', { recursive: true });
   const root = await mkdtemp('.runs/guards-');
   const created = await createStudioSession({

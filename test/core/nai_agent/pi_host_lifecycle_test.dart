@@ -1,3 +1,4 @@
+import '../../helpers/fetch_test_server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -15,7 +16,7 @@ void main() {
   Future<void> Function(int, HttpRequest)? beforeReply;
   setUp(() async {
     root = await Directory.systemTemp.createTemp('nai-lifecycle-');
-    server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    server = await bindFetchTestServer();
     bodies.clear();
     beforeReply = null;
     serving = server.listen((request) async {

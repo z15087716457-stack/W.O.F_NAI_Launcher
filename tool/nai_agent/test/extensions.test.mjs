@@ -1,3 +1,4 @@
+import { listenFetchTestServer } from './fixture-http.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, writeFile, readFile } from 'node:fs/promises';
@@ -48,7 +49,7 @@ test('external Pi lifecycle, dialogs, command and tool run through the actual SD
     res.end('data: '+JSON.stringify({id:'test',object:'chat.completion.chunk',model:'test',
       choices:[{index:0,delta,finish_reason:requests.length===1?'tool_calls':'stop'}]})+'\n\ndata: [DONE]\n\n');
   });
-  await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
+  await listenFetchTestServer(server);
   const file = join(dirs.root, 'dialogs.ts');
   await writeFile(file, `import { Type } from 'typebox'; import { writeFile } from 'node:fs/promises';
     import { join } from 'node:path';

@@ -1,3 +1,4 @@
+import '../../../helpers/fetch_test_server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -1233,7 +1234,7 @@ void main() {
     () async {
       final requests = <Map<String, dynamic>>[],
           events = <Map<String, dynamic>>[];
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       Map<String, dynamic> call(
         int turn,
         String name,
@@ -1884,7 +1885,7 @@ void main() {
       String? folder, leaf;
       final original = await image.readAsBytes();
       final history = container.read(imageGenerationNotifierProvider);
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final serving = server.listen((request) async {
         final body =
             jsonDecode(await utf8.decoder.bind(request).join())

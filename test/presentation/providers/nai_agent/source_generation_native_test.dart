@@ -1,3 +1,4 @@
+import '../../../helpers/fetch_test_server.dart';
 import 'dart:async';
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_model_provider.dart';
@@ -567,7 +568,7 @@ void main() {
       await File('${root.path}/input.png').writeAsBytes(
         Uint8List.fromList(img.encodePng(img.Image(width: 256, height: 384))),
       );
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final modelRequests = <Map<String, dynamic>>[];
       var quoteId = '', outputPath = '';
       Map<String, dynamic> call(

@@ -1,3 +1,4 @@
+import { listenFetchTestServer } from './fixture-http.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises';
@@ -24,7 +25,7 @@ async function fixture(code, options = {}) {
       choices: [{ index: 0, delta: {}, finish_reason: requests.length === 1 ? 'tool_calls' : 'stop' }] }) + '\n\n');
     res.end('data: [DONE]\n\n');
   });
-  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  await listenFetchTestServer(server);
   const input = {
     cwd: join(root, 'workspace'), agentDir: join(root, 'agent'), systemPrompt: 'NAI Agent.',
     config: { providerId: 'synthetic', modelId: 'synthetic', tools: true,
@@ -224,7 +225,7 @@ test('shutdown cancels an official MCP OAuth login stalled during local metadata
     res.writeHead(401, {'www-authenticate':'Bearer resource_metadata="'+base+'/.well-known/oauth-protected-resource"'});
     res.end();
   });
-  await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
+  await listenFetchTestServer(server);
   const base = 'http://127.0.0.1:'+server.address().port;
   const f = await fixture('', {session:{mcp:{mcpServers:{oauth:{url:base+'/mcp',
     oauth:{clientId:'synthetic-client',authServerMetadataUrl:base+'/metadata'}}}}}});
@@ -277,7 +278,7 @@ test('official Streamable HTTP uses private headers and exposes a server only on
       :{content:[{type:'text',text:'http-secret'}],structuredContent:{ok:true}};
     res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({jsonrpc:'2.0',id:m.id,result}));
   });
-  await new Promise(r=>server.listen(0,'127.0.0.1',r));
+  await listenFetchTestServer(server);
   const f=await fixture(`text(await tools.mcp__http__echo({}));`,{session:{mcp:{mcpServers:{http:{
     url:'http://127.0.0.1:'+server.address().port+'/mcp',headers:{Authorization:'Bearer http-secret'},
   }}}}});

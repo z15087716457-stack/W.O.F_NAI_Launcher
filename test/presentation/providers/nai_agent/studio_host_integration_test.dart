@@ -1,3 +1,4 @@
+import '../../../helpers/fetch_test_server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -106,7 +107,7 @@ void main() {
     'official Pi invokes public settings, block organization and exploration bindings',
     () async {
       final requests = <Map<String, dynamic>>[];
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final serving = server.listen((request) async {
         final body =
             jsonDecode(await utf8.decoder.bind(request).join())
@@ -311,7 +312,7 @@ void main() {
     'real Dart → Node/Pi → streamed HTTP → draft, native references and actual image lookup/read',
     () async {
       final requests = <Map<String, dynamic>>[];
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final serving = server.listen((request) async {
         final body =
             jsonDecode(await utf8.decoder.bind(request).join())
@@ -494,7 +495,7 @@ void main() {
         maskImage: source,
         sourceIsOutpaint: false,
       );
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final serving = server.listen((request) async {
         final body =
             jsonDecode(await utf8.decoder.bind(request).join())
@@ -588,8 +589,14 @@ void main() {
           container.read(imageWorkflowControllerProvider),
           before,
         );
-        await client.prompt('保存并读取测试配置。').timeout(const Duration(seconds: 30));
-        expect(requests, hasLength(6));
+        final completed = await client
+            .prompt('保存并读取测试配置。')
+            .timeout(const Duration(seconds: 30));
+        expect(
+          requests,
+          hasLength(6),
+          reason: 'Completed Pi state: ${piStateSummary(completed)}',
+        );
         final names = (requests.first['tools'] as List)
             .map((t) => t['function']['name'])
             .cast<String>()
@@ -652,7 +659,7 @@ void main() {
     () async {
       final requests = <Map<String, dynamic>>[];
       String? id, blockVersion;
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final serving = server.listen((request) async {
         final body =
             jsonDecode(await utf8.decoder.bind(request).join())
@@ -807,7 +814,7 @@ void main() {
       await container.read(promptBlockLibraryNotifierProvider.future);
       final requests = <Map<String, dynamic>>[];
       String? quoteId;
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final serving = server.listen((request) async {
         final body =
             jsonDecode(await utf8.decoder.bind(request).join())
@@ -897,6 +904,11 @@ void main() {
         ) {
           await Future<void>.delayed(const Duration(milliseconds: 10));
         }
+        expect(
+          broker.forChat('generation-chat'),
+          hasLength(1),
+          reason: 'Pi approval state: ${piStateSummary(await client.state())}',
+        );
         final approval = broker.forChat('generation-chat').single;
         expect(approval.owner.workspaceId, 'synthetic-domain');
         expect(requests, hasLength(2));
@@ -924,6 +936,19 @@ void main() {
     },
   );
 }
+
+String piStateSummary(Map<String, dynamic> state) => jsonEncode({
+  'streaming': state['streaming'],
+  'assistant': (state['messages'] as List?)
+      ?.where((message) => message['role'] == 'assistant')
+      .map(
+        (message) => {
+          'stopReason': message['stopReason'],
+          'errorMessage': message['errorMessage'],
+        },
+      )
+      .toList(),
+});
 
 Map<String, dynamic> tool(
   String id,

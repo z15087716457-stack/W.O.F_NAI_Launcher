@@ -1,3 +1,4 @@
+import '../../../helpers/fetch_test_server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -46,7 +47,7 @@ void main() {
     () async {
       final root = await Directory.systemTemp.createTemp('nai-question-host-');
       final broker = NaiAgentQuestions();
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       final requests = <Map>[];
       final asked = Completer<void>();
       broker.addListener(() {

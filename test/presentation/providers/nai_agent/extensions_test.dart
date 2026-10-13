@@ -1,3 +1,4 @@
+import '../../../helpers/fetch_test_server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -146,7 +147,7 @@ void main() {
     'real host startup dialog does not delay ready; Stop retires pending prompt before any model request',
     () async {
       final broker = NaiAgentQuestions();
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final server = await bindFetchTestServer();
       var requests = 0;
       final serving = server.listen((request) async {
         await utf8.decoder.bind(request).join();

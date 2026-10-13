@@ -1,3 +1,4 @@
+import { listenFetchTestServer } from './fixture-http.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -19,7 +20,7 @@ async function fixture({ mode = 'readonly', tool = 'write', params = { path: 'ta
     res.writeHead(200, { 'content-type': 'text/event-stream' });
     res.end('data: ' + JSON.stringify({ id: 'test', object: 'chat.completion.chunk', model: 'test', choices: [{ index: 0, delta, finish_reason: requests.length === 1 ? 'tool_calls' : 'stop' }] }) + '\n\ndata: [DONE]\n\n');
   });
-  await new Promise(done => server.listen(0, '127.0.0.1', done));
+  await listenFetchTestServer(server);
   const created = await createStudioSession({
     cwd: join(root, 'workspace'), agentDir: join(root, 'agent'), systemPrompt: 'Synthetic permission test.',
     config: { providerId: 'permissions', modelId: 'test', protocol: 'openaiChatCompletions', baseUrl: 'http://127.0.0.1:' + server.address().port, tools: true,

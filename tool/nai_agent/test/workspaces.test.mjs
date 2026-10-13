@@ -1,3 +1,4 @@
+import { listenFetchTestServer } from './fixture-http.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile } from 'node:fs/promises';
@@ -18,7 +19,7 @@ async function fixture() {
       model: 'test', choices: [{ index: 0, delta: { role: 'assistant', content: '完成' }, finish_reason: 'stop' }] })
       + '\n\ndata: [DONE]\n\n');
   });
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  await listenFetchTestServer(server);
   const options = {
     cwd: join(root, 'workspace'), agentDir: join(root, 'workspace', '.agent'),
     sessionDirectory: join(root, 'workspace', 'sessions'),

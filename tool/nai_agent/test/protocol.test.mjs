@@ -1,3 +1,4 @@
+import { listenFetchTestServer } from './fixture-http.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -18,7 +19,7 @@ export async function httpFixture(protocol, handler) {
     else respond(protocol, response, requests.length === 1);
     response.end();
   });
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  await listenFetchTestServer(server);
   return {
     requests, baseUrl: 'http://127.0.0.1:' + server.address().port,
     close: async () => { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); },
