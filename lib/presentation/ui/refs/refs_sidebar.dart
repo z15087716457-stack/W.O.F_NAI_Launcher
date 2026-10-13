@@ -65,15 +65,26 @@ class RefsSidebar extends StatelessWidget {
                     size: 18,
                     color: c.accent,
                   ),
-                  Text(
-                    vibe ? l10n.refs_vibeTitle : l10n.refs_preciseTitle,
-                    style: UiText.sans(
-                      14,
-                      weight: FontWeight.w700,
-                      color: c.ink,
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Tooltip(
+                        message: vibe
+                            ? l10n.refs_vibeTitle
+                            : l10n.refs_preciseTitle,
+                        child: Text(
+                          vibe ? l10n.refs_vibeTitle : l10n.refs_preciseTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: UiText.sans(
+                            14,
+                            weight: FontWeight.w700,
+                            color: c.ink,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   UiIconBox(
                     glyph: UiGlyphs.doubleLeft,
                     tooltip: l10n.refs_collapseSidebar,

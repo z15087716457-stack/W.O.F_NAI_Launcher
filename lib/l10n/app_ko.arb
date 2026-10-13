@@ -6279,7 +6279,7 @@
   "refs_addToGeneration": "생성 페이지에 추가",
   "refs_replaceVibes": "생성 페이지의 Vibe 교체",
   "refs_replacePrecise": "현재 정밀 참조 교체",
-  "refs_sendImg2Img": "이미지 투 이미지로 보내기",
+  "refs_sendImg2Img": "img2img로 보내기",
   "refs_saveAsVibe": "Vibe 라이브러리에 저장",
   "refs_favorite": "즐겨찾기",
   "refs_unfavorite": "즐겨찾기 해제",

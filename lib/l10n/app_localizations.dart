@@ -20596,7 +20596,7 @@ abstract class AppLocalizations {
   /// No description provided for @refs_sendImg2Img.
   ///
   /// In en, this message translates to:
-  /// **'Send to Image2Image'**
+  /// **'Send to img2img'**
   String get refs_sendImg2Img;
 
   /// No description provided for @refs_saveAsVibe.
@@ -21190,7 +21190,7 @@ abstract class AppLocalizations {
   /// No description provided for @refs_showInFolderShort.
   ///
   /// In en, this message translates to:
-  /// **'Show in folder'**
+  /// **'Open folder'**
   String get refs_showInFolderShort;
 
   /// No description provided for @refs_pickHint.

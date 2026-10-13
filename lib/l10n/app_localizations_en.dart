@@ -11831,7 +11831,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refs_replacePrecise => 'Replace current reference';
 
   @override
-  String get refs_sendImg2Img => 'Send to Image2Image';
+  String get refs_sendImg2Img => 'Send to img2img';
 
   @override
   String get refs_saveAsVibe => 'Save to Vibe Library';
@@ -12194,7 +12194,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'These are the defaults used when sending; the number box accepts values beyond 0–1';
 
   @override
-  String get refs_showInFolderShort => 'Show in folder';
+  String get refs_showInFolderShort => 'Open folder';
 
   @override
   String get refs_pickHint => 'Check cards to edit them together here';

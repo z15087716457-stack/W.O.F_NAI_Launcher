@@ -11470,7 +11470,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get refs_replacePrecise => '現在の精密参照を置き換え';
 
   @override
-  String get refs_sendImg2Img => '画像から画像へ送る';
+  String get refs_sendImg2Img => 'img2img に送る';
 
   @override
   String get refs_saveAsVibe => 'Vibe ライブラリに保存';
@@ -11823,7 +11823,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'ここで変えるのは既定値で、送信時にそのまま使われます。数値欄には 0–1 以外も入力できます';
 
   @override
-  String get refs_showInFolderShort => 'フォルダを開く';
+  String get refs_showInFolderShort => 'フォルダへ';
 
   @override
   String get refs_pickHint => 'カードにチェックを入れるとここでまとめて設定できます';

@@ -11494,7 +11494,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get refs_replacePrecise => '현재 정밀 참조 교체';
 
   @override
-  String get refs_sendImg2Img => '이미지 투 이미지로 보내기';
+  String get refs_sendImg2Img => 'img2img로 보내기';
 
   @override
   String get refs_saveAsVibe => 'Vibe 라이브러리에 저장';
