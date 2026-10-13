@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Optional native widget captures; generated files stay outside the repository.
@@ -32,4 +33,32 @@ Future<void> captureUiuxRegion(
     picture.dispose();
     original.dispose();
   });
+}
+
+/// Explain real overflow failures without suppressing the framework exception.
+String uiuxOverflowDetails(WidgetTester tester) {
+  final result = <String>[];
+  for (final element in find.byType(Row).evaluate()) {
+    final row = element.renderObject;
+    if (row is! RenderFlex || !row.hasSize) continue;
+    final widths = <String>[];
+    var overflow = false;
+    for (
+      var child = row.firstChild;
+      child != null;
+      child = (child.parentData! as FlexParentData).nextSibling
+    ) {
+      if (!child.hasSize) continue;
+      final offset = (child.parentData! as FlexParentData).offset;
+      widths.add('${child.runtimeType} ${child.size} at $offset');
+      if (offset.dx + child.size.width > row.size.width + .1) overflow = true;
+    }
+    if (overflow) {
+      result.add(
+        '${element.debugGetCreatorChain(24)} width=${row.size.width} '
+        'children=${widths.join("; ")}',
+      );
+    }
+  }
+  return result.join('\n');
 }

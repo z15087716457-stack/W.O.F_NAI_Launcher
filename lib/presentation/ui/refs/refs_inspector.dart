@@ -414,7 +414,16 @@ class RefsVibeBody extends StatelessWidget {
               onTap: usable ? () => ctrl.add([e.key]) : null,
               children: [
                 const UiGlyph(UiGlyphs.plus, size: 15, strokeWidth: 2.4),
-                Text(l10n.refs_addToGeneration),
+                Flexible(
+                  child: Tooltip(
+                    message: l10n.refs_addToGeneration,
+                    child: Text(
+                      l10n.refs_addToGeneration,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
                 Opacity(
                   opacity: .75,
                   child: Text(

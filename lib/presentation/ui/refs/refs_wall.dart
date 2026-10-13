@@ -10,6 +10,7 @@ import '../kit/ui_glyph.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../kit/ui_keycap.dart';
 import '../kit/ui_lib_controls.dart';
+import '../kit/ui_scrollable_row.dart';
 import '../kit/ui_lib_nav.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
@@ -662,8 +663,8 @@ class RefsSelectionBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: UiScrollableRow(
+        shrinkWrap: true,
         spacing: 4,
         children: [
           Padding(

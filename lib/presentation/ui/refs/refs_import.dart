@@ -8,6 +8,7 @@ import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
+import '../kit/ui_scrollable_row.dart';
 import 'refs_contract.dart';
 import 'refs_dialogs.dart';
 import 'refs_page.dart';
@@ -113,7 +114,7 @@ class _RefsImportDialogState extends State<RefsImportDialog> {
         color: c.panel,
         border: Border(bottom: BorderSide(color: c.line)),
       ),
-      child: Row(
+      child: UiScrollableRow(
         spacing: 16,
         children: [
           Row(

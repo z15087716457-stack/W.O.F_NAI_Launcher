@@ -6462,7 +6462,7 @@
   "refs_changedNote": "変更は今回の送信のみに使われます",
   "refs_saveDefault": "既定値として保存",
   "refs_revert": "元に戻す",
-  "refs_encodeNow": "今すぐ {model} 用にエンコード · {cost} Anlas",
+  "refs_encodeNow": "{model} 用にエンコード · {cost} Anlas",
   "@refs_encodeNow": {
     "placeholders": {
       "model": {},

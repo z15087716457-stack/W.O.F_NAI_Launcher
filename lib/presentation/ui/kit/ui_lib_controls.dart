@@ -481,6 +481,7 @@ class UiMini extends StatelessWidget {
     final label = Text(
       text,
       maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: UiText.sans(
         10.5,
         weight: FontWeight.w600,
@@ -504,7 +505,9 @@ class UiMini extends StatelessWidget {
                 spacing: 3,
                 children: [
                   UiGlyph(glyph!, size: 10, strokeWidth: 2.4, color: ink),
-                  label,
+                  Flexible(
+                    child: Tooltip(message: text, child: label),
+                  ),
                 ],
               ),
       ),

@@ -11735,7 +11735,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String refs_encodeNow(Object model, Object cost) {
-    return '今すぐ $model 用にエンコード · $cost Anlas';
+    return '$model 用にエンコード · $cost Anlas';
   }
 
   @override

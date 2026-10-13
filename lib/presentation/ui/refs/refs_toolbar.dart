@@ -10,6 +10,7 @@ import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_keycap.dart';
 import '../kit/ui_lib_controls.dart';
+import '../kit/ui_scrollable_row.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
@@ -627,7 +628,7 @@ class RefsFilterRow extends StatelessWidget {
       key: const Key('refs-filter-row'),
       height: 46,
       padding: const EdgeInsets.only(left: 18, right: 16),
-      child: Row(
+      child: UiScrollableRow(
         spacing: 8,
         children: [
           chip(RefsQuick.all, l10n.refs_quickAll, n.all),
