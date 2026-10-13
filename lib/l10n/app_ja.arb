@@ -7140,7 +7140,7 @@
   "blocks_quickImage": "プレビューあり",
   "blocks_quickNegative": "ネガ含む",
   "blocks_quickParams": "パラメーター付き",
-  "blocks_cardSize": "カードサイズ",
+  "blocks_cardSize": "カード幅",
   "blocks_noMatch": "条件に合うブロックはありません",
   "blocks_noMatchBody": "別のキーワードを試すか、クイックフィルターを解除してください。",
   "blocks_clearFilters": "フィルターを解除",

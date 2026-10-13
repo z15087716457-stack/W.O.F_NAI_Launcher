@@ -12853,7 +12853,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get blocks_quickParams => 'パラメーター付き';
 
   @override
-  String get blocks_cardSize => 'カードサイズ';
+  String get blocks_cardSize => 'カード幅';
 
   @override
   String get blocks_noMatch => '条件に合うブロックはありません';
