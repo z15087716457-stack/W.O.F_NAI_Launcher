@@ -7550,7 +7550,7 @@
   "explore_thisWeek": "This week",
   "explore_earlier": "Earlier",
   "explore_variables": "Random variables",
-  "explore_variablesHint": "Re-drawn for every image",
+  "explore_variablesHint": "Re-roll per image",
   "explore_variablesInfo": "Random blocks in your prompt. Each candidate draws again from the pool and shows what it got; the block marked as evolution target is where offspring swap in.",
   "explore_variablesEmpty": "No random blocks in the prompt yet. Insert one from the block library (e.g. an artist pool) and every image draws again.",
   "explore_openBlockLibrary": "Open block library",

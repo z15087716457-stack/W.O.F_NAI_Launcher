@@ -617,45 +617,47 @@ class _ImageModule extends StatelessWidget {
           const ExploreModuleHeader(children: [Text('图像')]),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-            child: Row(
-              spacing: 6,
-              children: [
-                Container(
-                  width: 80,
-                  height: 32,
-                  padding: const EdgeInsets.only(left: 10, right: 8),
-                  decoration: BoxDecoration(
-                    color: c.control,
-                    borderRadius: BorderRadius.circular(5),
+            child: LayoutBuilder(
+              builder: (context, box) => Row(
+                spacing: box.maxWidth < 330 ? 4 : 6,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 32,
+                    padding: const EdgeInsets.only(left: 10, right: 8),
+                    decoration: BoxDecoration(
+                      color: c.control,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Row(
+                      children: [
+                        Text('常规', style: UiText.sans(13, color: c.ink)),
+                        const Spacer(),
+                        UiGlyph(UiGlyphs.chevronDown, size: 14, color: c.muted),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Text('常规', style: UiText.sans(13, color: c.ink)),
-                      const Spacer(),
-                      UiGlyph(UiGlyphs.chevronDown, size: 14, color: c.muted),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: c.control,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      spacing: 2,
+                      children: [
+                        seg(UiGlyphs.landscape, false),
+                        seg(UiGlyphs.portrait, true),
+                        seg(UiGlyphs.square, false),
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: c.control,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    spacing: 2,
-                    children: [
-                      seg(UiGlyphs.landscape, false),
-                      seg(UiGlyphs.portrait, true),
-                      seg(UiGlyphs.square, false),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                inp('832'),
-                Text('×', style: UiText.sans(13, color: c.muted)),
-                inp('1216'),
-              ],
+                  const Spacer(),
+                  inp('832'),
+                  Text('×', style: UiText.sans(13, color: c.muted)),
+                  inp('1216'),
+                ],
+              ),
             ),
           ),
         ],

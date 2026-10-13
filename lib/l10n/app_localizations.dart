@@ -24418,7 +24418,7 @@ abstract class AppLocalizations {
   /// No description provided for @explore_variablesHint.
   ///
   /// In en, this message translates to:
-  /// **'Re-drawn for every image'**
+  /// **'Re-roll per image'**
   String get explore_variablesHint;
 
   /// No description provided for @explore_variablesInfo.

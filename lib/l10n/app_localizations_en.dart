@@ -14033,7 +14033,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get explore_variables => 'Random variables';
 
   @override
-  String get explore_variablesHint => 'Re-drawn for every image';
+  String get explore_variablesHint => 'Re-roll per image';
 
   @override
   String get explore_variablesInfo =>
